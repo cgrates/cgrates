@@ -60,10 +60,18 @@ func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*utils.CgrCdrOut
 			return err
 		}
 	}
-	if cdrs, err := apier.CdrDb.GetStoredCdrs(attrs.CgrIds, attrs.MediationRunIds, attrs.TORs, attrs.CdrHosts, attrs.CdrSources, attrs.ReqTypes, attrs.Directions,
-		attrs.Tenants, attrs.Categories, attrs.Accounts, attrs.Subjects, attrs.DestinationPrefixes, attrs.RatedAccounts, attrs.RatedSubjects,
-		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.SkipErrors, attrs.SkipRated, false, &attrs.Paginator); err != nil {
+	var costStart, costEnd *float64
+	if attrs.SkipRated {
+		costEnd = utils.Float64Pointer(0.0)
+	} else if attrs.SkipErrors {
+		costEnd = utils.Float64Pointer(-1.0)
+	}
+	if cdrs, err := apier.CdrDb.GetStoredCdrs(attrs.CgrIds, nil, attrs.MediationRunIds, nil, attrs.TORs, nil, attrs.CdrHosts, nil, attrs.CdrSources, nil, attrs.ReqTypes, nil, attrs.Directions, nil,
+		attrs.Tenants, nil, attrs.Categories, nil, attrs.Accounts, nil, attrs.Subjects, nil, attrs.DestinationPrefixes, nil, attrs.RatedAccounts, nil, attrs.RatedSubjects, nil, nil, nil, nil, nil,
+		&attrs.OrderIdStart, &attrs.OrderIdEnd, nil, nil, &tStart, &tEnd, nil, nil, nil, nil, costStart, costEnd, false, nil); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if len(cdrs) == 0 {
+		*reply = make([]*utils.CgrCdrOut, 0)
 	} else {
 		for _, cdr := range cdrs {
 			*reply = append(*reply, cdr.AsCgrCdrOut())

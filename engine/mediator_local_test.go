@@ -57,7 +57,7 @@ var storDbType = flag.String("stordb_type", utils.MYSQL, "The type of the storDb
 var startDelay = flag.Int("delay_start", 300, "Number of miliseconds to it for rater to start and cache")
 var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator_test1.cfg")
 
-func TestInitRatingDb(t *testing.T) {
+func TestMediInitRatingDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -76,7 +76,7 @@ func TestInitRatingDb(t *testing.T) {
 }
 
 // Empty tables before using them
-func TestInitStorDb(t *testing.T) {
+func TestMediInitStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -103,7 +103,7 @@ func TestInitStorDb(t *testing.T) {
 }
 
 // Finds cgr-engine executable and starts it with default configuration
-func TestStartEngine(t *testing.T) {
+func TestMediStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -123,7 +123,7 @@ func TestStartEngine(t *testing.T) {
 }
 
 // Connect rpc client
-func TestRpcConn(t *testing.T) {
+func TestMediRpcConn(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -135,7 +135,7 @@ func TestRpcConn(t *testing.T) {
 	}
 }
 
-func TestPostCdrs(t *testing.T) {
+func TestMediPostCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -157,12 +157,14 @@ func TestPostCdrs(t *testing.T) {
 		}
 	}
 	time.Sleep(100 * time.Millisecond) // Give time for CDRs to reach database
-	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false, false, nil); err != nil {
+	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 6 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
-	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, false, false, nil); err != nil {
+	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), false, nil); err != nil {
 		t.Error(err)
 	} else if len(nonErrorCdrs) != 0 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(nonErrorCdrs)))
@@ -170,7 +172,7 @@ func TestPostCdrs(t *testing.T) {
 }
 
 // Directly inject CDRs into storDb
-func TestInjectCdrs(t *testing.T) {
+func TestMediInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -185,12 +187,14 @@ func TestInjectCdrs(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false, false, nil); err != nil {
+	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 8 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
-	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true, false, nil); err != nil {
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), false, nil); err != nil {
 		t.Error(err)
 	} else if len(nonRatedCdrs) != 2 { // Just two of them should be non-rated
 		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
@@ -198,7 +202,7 @@ func TestInjectCdrs(t *testing.T) {
 }
 
 // Test here LoadTariffPlanFromFolder
-func TestLoadTariffPlanFromFolder(t *testing.T) {
+func TestMediLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -212,7 +216,7 @@ func TestLoadTariffPlanFromFolder(t *testing.T) {
 	}
 }
 
-func TestRateCdrs(t *testing.T) {
+func TestMediRateCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -222,14 +226,16 @@ func TestRateCdrs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true, false, nil); err != nil {
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), false, nil); err != nil {
 		t.Error(err)
-	} else if len(nonRatedCdrs) != 0 { // All CDRs should be rated
+	} else if len(nonRatedCdrs) != 2 { // All CDRs should be rated
 		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
 	}
-	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true, false, nil); err != nil {
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), utils.Float64Pointer(0), false, nil); err != nil {
 		t.Error(err)
-	} else if len(errRatedCdrs) != 8 { // The first 2 with errors should be still there before rerating
+	} else if len(errRatedCdrs) != 2 { // The first 2 with errors should be still there before rerating
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
 	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{RerateErrors: true}, &reply); err != nil {
@@ -237,9 +243,10 @@ func TestRateCdrs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true, false, nil); err != nil {
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), utils.Float64Pointer(0), false, nil); err != nil {
 		t.Error(err)
-	} else if len(errRatedCdrs) != 4 {
+	} else if len(errRatedCdrs) != 2 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
 }
@@ -281,7 +288,7 @@ func TestMediatePseudoprepaid(t *testing.T) {
 */
 
 // Simply kill the engine after we are done with tests within this file
-func TestStopEngine(t *testing.T) {
+func TestMediStopEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}

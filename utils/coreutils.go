@@ -327,3 +327,11 @@ func StringPointer(str string) *string {
 func IntPointer(i int) *int {
 	return &i
 }
+
+func Int64Pointer(i int64) *int64 {
+	return &i
+}
+
+func Float64Pointer(f float64) *float64 {
+	return &f
+}

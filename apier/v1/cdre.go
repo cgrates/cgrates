@@ -185,9 +185,15 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.MaskLength != nil {
 		maskLen = *attr.MaskLength
 	}
-	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunIds, attr.TORs, attr.CdrHosts, attr.CdrSources, attr.ReqTypes, attr.Directions,
-		attr.Tenants, attr.Categories, attr.Accounts, attr.Subjects, attr.DestinationPrefixes, attr.RatedAccounts, attr.RatedSubjects, attr.OrderIdStart, attr.OrderIdEnd,
-		tStart, tEnd, attr.SkipErrors, attr.SkipRated, false, nil)
+	var costStart, costEnd *float64
+	if attr.SkipRated {
+		costEnd = utils.Float64Pointer(0.0)
+	} else if attr.SkipErrors {
+		costEnd = utils.Float64Pointer(-1.0)
+	}
+	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, nil, attr.MediationRunIds, nil, attr.TORs, nil, attr.CdrHosts, nil, attr.CdrSources, nil, attr.ReqTypes, nil, attr.Directions, nil,
+		attr.Tenants, nil, attr.Categories, nil, attr.Accounts, nil, attr.Subjects, nil, attr.DestinationPrefixes, nil, attr.RatedAccounts, nil, attr.RatedSubjects, nil, nil, nil, nil, nil, &attr.OrderIdStart, &attr.OrderIdEnd,
+		nil, nil, &tStart, &tEnd, nil, nil, nil, nil, costStart, costEnd, false, nil)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {

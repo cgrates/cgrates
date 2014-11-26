@@ -114,8 +114,11 @@ type CdrStorage interface {
 	Storage
 	SetCdr(*utils.StoredCdr) error
 	SetRatedCdr(*utils.StoredCdr, string) error
-	GetStoredCdrs([]string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string,
-		int64, int64, time.Time, time.Time, bool, bool, bool, *utils.Paginator) ([]*utils.StoredCdr, error)
+	GetStoredCdrs(cgrIds, notCgrIds, runIds, notRunIds, tors, notTors, cdrHosts, notCdrHosts, cdrSources, notCdrSources, reqTypes, notReqTypes, directions, notDirections,
+		tenants, notTenants, categories, notCategories, accounts, notAccounts, subjects, notSubjects, destContains, notDestContains, ratedAccounts, notRatedAccounts, ratedSubjects, notRatedSubjects []string,
+		costs []float64, notCosts []float64, extraFields map[string]string, notExtraFields map[string]string,
+		orderIdStart, orderIdEnd *int64, sTimeStart, sTimeEnd, aTimeStart, aTimeEnd *time.Time, usageStart, usageEnd, ratedUsageStart, ratedUsageEnd, costStart, costEnd *float64, ignoreDerived bool,
+		pagination *utils.Paginator) ([]*utils.StoredCdr, error)
 	RemStoredCdrs([]string) error
 }
 

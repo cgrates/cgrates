@@ -742,8 +742,11 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
-	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool, pagination *utils.Paginator) ([]*utils.StoredCdr, error) {
+func (self *SQLStorage) GetStoredCdrs(cgrIds, notCgrIds, runIds, notRunIds, tors, notTors, cdrHosts, notCdrHosts, cdrSources, notCdrSources, reqTypes, notReqTypes, directions, notDirections,
+	tenants, notTenants, categories, notCategories, accounts, notAccounts, subjects, notSubjects, destContains, notDestContains, ratedAccounts, notRatedAccounts, ratedSubjects, notRatedSubjects []string,
+	costs []float64, notCosts []float64, extraFields map[string]string, notExtraFields map[string]string,
+	orderIdStart, orderIdEnd *int64, sTimeStart, sTimeEnd, aTimeStart, aTimeEnd *time.Time, usageStart, usageEnd, ratedUsageStart, ratedUsageEnd, costStart, costEnd *float64, ignoreDerived bool,
+	pagination *utils.Paginator) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
 	// Select string
 	var selectStr string
@@ -762,72 +765,185 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 	// Join string
 	joinStr := fmt.Sprintf("LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid AND %s.runid=%s.runid", utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY,
 		utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS)
-	// Start building query
 	q := self.db.Table(utils.TBL_CDRS_PRIMARY).Select(selectStr).Joins(joinStr)
 	// Where section
 	for _, tblName := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_COST_DETAILS, utils.TBL_RATED_CDRS} {
-		q = q.Where(fmt.Sprintf("(%s.deleted_at IS NULL OR %s.deleted_at <= '0001-01-02')", tblName, tblName)) // Do not consider soft deletes
+		q = q.Where(fmt.Sprintf("(%s.deleted_at IS NULL OR %s.deleted_at <= '0001-01-02')", tblName, tblName)) // Soft deletes
 	}
 	// Add filters, use in to replace the high number of ORs
 	if len(cgrIds) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".cgrid in (?)", cgrIds)
 	}
+	if len(notCgrIds) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".cgrid not in (?)", notCgrIds)
+	}
 	if len(runIds) != 0 {
 		q = q.Where(utils.TBL_RATED_CDRS+".runid in (?)", runIds)
+	}
+	if len(notRunIds) != 0 {
+		q = q.Where(utils.TBL_RATED_CDRS+".runid not in (?)", notRunIds)
 	}
 	if len(tors) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".tor in (?)", tors)
 	}
+	if len(notTors) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".tor not in (?)", notTors)
+	}
 	if len(cdrHosts) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".cdrhost in (?)", cdrHosts)
+	}
+	if len(notCdrHosts) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".cdrhost not in (?)", notCdrHosts)
 	}
 	if len(cdrSources) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".cdrsource in (?)", cdrSources)
 	}
+	if len(notCdrSources) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".cdrsource not in (?)", notCdrSources)
+	}
 	if len(reqTypes) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".reqtype in (?)", reqTypes)
+	}
+	if len(notReqTypes) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".reqtype not in (?)", notReqTypes)
 	}
 	if len(directions) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".direction in (?)", directions)
 	}
+	if len(notDirections) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".direction not in (?)", notDirections)
+	}
 	if len(tenants) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".tenant in (?)", tenants)
+	}
+	if len(notTenants) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".tenant not in (?)", notTenants)
 	}
 	if len(categories) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".category in (?)", categories)
 	}
+	if len(notCategories) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".category not in (?)", notCategories)
+	}
 	if len(accounts) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".account in (?)", accounts)
+	}
+	if len(notAccounts) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".account not in (?)", notAccounts)
 	}
 	if len(subjects) != 0 {
 		q = q.Where(utils.TBL_CDRS_PRIMARY+".subject in (?)", subjects)
 	}
+	if len(notSubjects) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".subject not in (?)", notSubjects)
+	}
+	if len(destContains) != 0 { // A bit ugly but still more readable than scopes provided by gorm
+		qIds := bytes.NewBufferString("(")
+		for idx, destPrefix := range destContains {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" %s.destination LIKE '%%%s%%'", utils.TBL_CDRS_PRIMARY, destPrefix))
+		}
+		qIds.WriteString(" )")
+		q = q.Where(qIds.String())
+	}
+	if len(notDestContains) != 0 { // A bit ugly but still more readable than scopes provided by gorm
+		qIds := bytes.NewBufferString("(")
+		for idx, destPrefix := range notDestContains {
+			if idx != 0 {
+				qIds.WriteString(" AND")
+			}
+			qIds.WriteString(fmt.Sprintf(" %s.destination not LIKE '%%%s%%'", utils.TBL_CDRS_PRIMARY, destPrefix))
+		}
+		qIds.WriteString(" )")
+		q = q.Where(qIds.String())
+	}
 	if len(ratedAccounts) != 0 {
 		q = q.Where(utils.TBL_COST_DETAILS+".account in (?)", ratedAccounts)
+	}
+	if len(notRatedAccounts) != 0 {
+		q = q.Where(utils.TBL_COST_DETAILS+".account not in (?)", notRatedAccounts)
 	}
 	if len(ratedSubjects) != 0 {
 		q = q.Where(utils.TBL_COST_DETAILS+".subject in (?)", ratedSubjects)
 	}
-	if orderIdStart != 0 {
-		q = q.Where(utils.TBL_CDRS_PRIMARY+".id >= ?", orderIdStart)
+	if len(notRatedSubjects) != 0 {
+		q = q.Where(utils.TBL_COST_DETAILS+".subject not in (?)", notRatedSubjects)
 	}
-	if orderIdEnd != 0 {
-		q = q.Where(utils.TBL_CDRS_PRIMARY+".id < ?", orderIdEnd)
+	if len(costs) != 0 {
+		q = q.Where(utils.TBL_COST_DETAILS+".cost in (?)", costs)
 	}
-	if !timeStart.IsZero() {
-		q = q.Where(utils.TBL_CDRS_PRIMARY+".answer_time >= ?", timeStart)
+	if len(notCosts) != 0 {
+		q = q.Where(utils.TBL_COST_DETAILS+".cost not in (?)", notCosts)
 	}
-	if !timeEnd.IsZero() {
-		q = q.Where(utils.TBL_CDRS_PRIMARY+".answer_time < ?", timeEnd)
-	}
-	if ignoreRated { // ToDo: replace here with specific cost query
-		if ignoreErr {
-			q = q.Where(utils.TBL_RATED_CDRS + ".cost IS NULL")
-		} else {
-			q = q.Where(fmt.Sprintf("(%s.cost=-1 OR %s.cost IS NULL)", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS))
+	if len(extraFields) != 0 { // Extra fields searches, implemented as contains in extra field
+		qIds := bytes.NewBufferString("(")
+		needOr := false
+		for field, value := range extraFields {
+			if needOr {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(` %s.extra_fields LIKE '%%"%s":"%s"%%'`, utils.TBL_CDRS_EXTRA, field, value))
+			needOr = true
 		}
-	} else if ignoreErr {
-		q = q.Where(utils.TBL_RATED_CDRS+".cost <> ?", -1)
+		qIds.WriteString(" )")
+		q = q.Where(qIds.String())
+	}
+	if len(notExtraFields) != 0 { // Extra fields searches, implemented as contains in extra field
+		qIds := bytes.NewBufferString("(")
+		needAnd := false
+		for field, value := range notExtraFields {
+			if needAnd {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(` %s.extra_fields LIKE '%%"%s":"%s"%%'`, utils.TBL_CDRS_EXTRA, field, value))
+			needAnd = true
+		}
+		qIds.WriteString(" )")
+		q = q.Where(qIds.String())
+	}
+	if orderIdStart != nil && *orderIdStart != 0 { // Keep backwards compatible by testing 0 value
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".id >= ?", *orderIdStart)
+	}
+	if orderIdEnd != nil && *orderIdEnd != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".id < ?", *orderIdEnd)
+	}
+	if sTimeStart != nil {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".setup_time >= ?", sTimeStart)
+	}
+	if sTimeEnd != nil {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".setup_time < ?", sTimeEnd)
+	}
+	if aTimeStart != nil && !aTimeStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".answer_time >= ?", aTimeStart)
+	}
+	if aTimeEnd != nil && !aTimeEnd.IsZero() {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".answer_time < ?", aTimeEnd)
+	}
+	if usageStart != nil {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".usage >= ?", usageStart)
+	}
+	if usageEnd != nil {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".usage < ?", usageEnd)
+	}
+	if ratedUsageStart != nil {
+		q = q.Where(utils.TBL_RATED_CDRS+".usage >= ?", ratedUsageStart)
+	}
+	if ratedUsageEnd != nil {
+		q = q.Where(utils.TBL_RATED_CDRS+".usage < ?", ratedUsageEnd)
+	}
+	if costStart != nil {
+		q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *costStart)
+		if costEnd != nil {
+			q = q.Where(utils.TBL_RATED_CDRS+".cost < ?", *costEnd)
+		}
+	} else if costEnd != nil { // In case of both nil, we do not need to add any filter
+		if *costEnd == -1.0 { // Non-rated CDRs
+			q = q.Where(utils.TBL_RATED_CDRS + ".cost IS NULL") // Need to include it otherwise all CDRs will be returned
+		} else { // Above limited CDRs, since costStart is empty, make sure we query also NULL cost
+			q = q.Where(fmt.Sprintf("( %s.cost IS NULL OR %s.cost < %f )", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, *costEnd))
+		}
 	}
 	if ignoreDerived {
 		q = q.Where(utils.TBL_RATED_CDRS+".runid = ?", utils.DEFAULT_RUNID)
@@ -835,17 +951,6 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 	if pagination != nil {
 		offset, limit := pagination.GetLimits()
 		q = q.Offset(offset).Limit(limit)
-	}
-	if len(destPrefixes) != 0 { // A bit ugly but still more readable than scopes provided by gorm
-		qIds := bytes.NewBufferString("(")
-		for idx, destPrefix := range destPrefixes {
-			if idx != 0 {
-				qIds.WriteString(" OR")
-			}
-			qIds.WriteString(fmt.Sprintf(" %s.destination LIKE '%s%%'", utils.TBL_CDRS_PRIMARY, destPrefix))
-		}
-		qIds.WriteString(" )")
-		q = q.Where(qIds.String())
 	}
 	// Execute query
 	rows, err := q.Rows()

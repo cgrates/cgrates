@@ -10,30 +10,30 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine, 
  [global]
  # ratingdb_type = redis 			# Rating subsystem database: <redis>.
  # ratingdb_host = 127.0.0.1 		# Rating subsystem database host address.
- # ratingdb_port = 6379 				# Rating subsystem port to reach the database.
+ # ratingdb_port = 6379 			# Rating subsystem port to reach the database.
  # ratingdb_name = 10 				# Rating subsystem database name to connect to.
- # ratingdb_user =		 			# Rating subsystem username to use when connecting to database.
- # ratingdb_passwd =					# Rating subsystem password to use when connecting to database.
+ # ratingdb_user =					# Rating subsystem username to use when connecting to database.
+ # ratingdb_passwd =				# Rating subsystem password to use when connecting to database.
  # accountdb_type = redis 			# Accounting subsystem database: <redis>.
  # accountdb_host = 127.0.0.1 		# Accounting subsystem database host address.
  # accountdb_port = 6379 			# Accounting subsystem port to reach the database.
  # accountdb_name = 11				# Accounting subsystem database name to connect to.
- # accountdb_user =		 			# Accounting subsystem username to use when connecting to database.
+ # accountdb_user =					# Accounting subsystem username to use when connecting to database.
  # accountdb_passwd =				# Accounting subsystem password to use when connecting to database.
  # stordb_type = mysql				# Stor database type to use: <mysql>
  # stordb_host = 127.0.0.1 			# The host to connect to. Values that start with / are for UNIX domain sockets.
  # stordb_port = 3306				# The port to reach the logdb.
  # stordb_name = cgrates 			# The name of the log database to connect to.
- # stordb_user = cgrates	 			# Username to use when connecting to stordb.
+ # stordb_user = cgrates			# Username to use when connecting to stordb.
  # stordb_passwd = CGRateS.org		# Password to use when connecting to stordb.
- # dbdata_encoding = msgpack			# The encoding used to store object data in strings: <msgpack|json>
+ # dbdata_encoding = msgpack		# The encoding used to store object data in strings: <msgpack|json>
  # rpc_json_listen = 127.0.0.1:2012	# RPC JSON listening address
  # rpc_gob_listen = 127.0.0.1:2013	# RPC GOB listening address
  # http_listen = 127.0.0.1:2080		# HTTP listening address
  # default_reqtype = rated			# Default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>.
  # default_category = call			# Default Type of Record to consider when missing from requests.
  # default_tenant = cgrates.org		# Default Tenant to consider when missing from requests.
- # default_subject = cgrates			# Default rating Subject to consider when missing from requests.
+ # default_subject = cgrates		# Default rating Subject to consider when missing from requests.
  # rounding_decimals = 10			# System level precision for floats
  # http_skip_tls_veify = false		# If enabled Http Client will accept any TLS certificate
  # xmlcfg_path = 					# Path towards additional config defined in xml file
@@ -53,53 +53,53 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine, 
  # extra_fields = 				# Extra fields to store in CDRs for non-generic CDRs
  # mediator = 					# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
  # cdrstats =					# Address where to reach the cdrstats service: <internal|x.y.z.y:1234>
- # store_disable = false			# When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+ # store_disable = false		# When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
 
  [cdre]
  # cdr_format = csv							# Exported CDRs format <csv>
  # data_usage_multiply_factor = 0.0			# Multiply data usage before export (eg: convert from KBytes to Bytes)
  # cost_multiply_factor = 0.0				# Multiply cost before export (0.0 to disable), eg: add VAT
  # cost_rounding_decimals = -1				# Rounding decimals for Cost values. -1 to disable rounding
- # cost_shift_digits = 0						# Shift digits in the cost on export (eg: convert from EUR to cents)
- # mask_destination_id =						# Destination id containing called addresses to be masked on export
+ # cost_shift_digits = 0					# Shift digits in the cost on export (eg: convert from EUR to cents)
+ # mask_destination_id =					# Destination id containing called addresses to be masked on export
  # mask_length = 0							# Length of the destination suffix to be masked
  # export_dir = /var/log/cgrates/cdre		# Path where the exported CDRs will be placed
  # export_template = cgrid,mediation_runid,tor,accid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,usage,cost
 											# Exported fields template  <""|fld1,fld2|*xml:instance_name>
  [cdrc]
- # enabled = false							# Enable CDR client functionality
- # cdrs = internal							# Address where to reach CDR server. <internal|127.0.0.1:2080>
+ # enabled = false								# Enable CDR client functionality
+ # cdrs = internal								# Address where to reach CDR server. <internal|127.0.0.1:2080>
  # run_delay = 0								# Sleep interval in seconds between consecutive runs, 0 to use automation via inotify
- # cdr_type = csv							# CDR file format <csv|freeswitch_csv>.
+ # cdr_type = csv								# CDR file format <csv|freeswitch_csv>.
  # csv_separator = ,							# Separator used in case of csv files. One character only supported and needs to be right after equal sign
- # cdr_in_dir = /var/log/cgrates/cdrc/in 	# Absolute path towards the directory where the CDRs are stored.
+ # cdr_in_dir = /var/log/cgrates/cdrc/in 		# Absolute path towards the directory where the CDRs are stored.
  # cdr_out_dir =	/var/log/cgrates/cdrc/out	# Absolute path towards the directory where processed CDRs will be moved.
- # cdr_source_id = csv	 					# Free form field, tag identifying the source of the CDRs within CGRS database.
- # tor_field = 2 							# TypeOfRecord field identifier. Use index number in case of .csv cdrs.
- # accid_field = 3							# Accounting id field identifier. Use index number in case of .csv cdrs.
+ # cdr_source_id = csv	 						# Free form field, tag identifying the source of the CDRs within CGRS database.
+ # tor_field = 2 								# TypeOfRecord field identifier. Use index number in case of .csv cdrs.
+ # accid_field = 3								# Accounting id field identifier. Use index number in case of .csv cdrs.
  # reqtype_field = 4							# Request type field identifier. Use index number in case of .csv cdrs.
- # direction_field = 5						# Direction field identifier. Use index numbers in case of .csv cdrs.
- # tenant_field = 6							# Tenant field identifier. Use index numbers in case of .csv cdrs.
- # category_field = 7						# Type of Record field identifier. Use index numbers in case of .csv cdrs.
+ # direction_field = 5							# Direction field identifier. Use index numbers in case of .csv cdrs.
+ # tenant_field = 6								# Tenant field identifier. Use index numbers in case of .csv cdrs.
+ # category_field = 7							# Type of Record field identifier. Use index numbers in case of .csv cdrs.
  # account_field = 8							# Account field identifier. Use index numbers in case of .csv cdrs.
  # subject_field = 9							# Subject field identifier. Use index numbers in case of .csv CDRs.
- # destination_field = 10					# Destination field identifier. Use index numbers in case of .csv cdrs.
+ # destination_field = 10						# Destination field identifier. Use index numbers in case of .csv cdrs.
  # setup_time_field = 11						# Setup time field identifier. Use index numbers in case of .csv cdrs.
- # answer_time_field = 12					# Answer time field identifier. Use index numbers in case of .csv cdrs.
- # usage_field = 13							# Usage field identifier. Use index numbers in case of .csv cdrs.
- # extra_fields = 							# Extra fields identifiers. For .csv, format: <label_extrafield_1>:<index_extrafield_1>[...,<label_extrafield_n>:<index_extrafield_n>] 
+ # answer_time_field = 12						# Answer time field identifier. Use index numbers in case of .csv cdrs.
+ # usage_field = 13								# Usage field identifier. Use index numbers in case of .csv cdrs.
+ # extra_fields = 								# Extra fields identifiers. For .csv, format: <label_extrafield_1>:<index_extrafield_1>[...,<label_extrafield_n>:<index_extrafield_n>] 
 
  [mediator]
- # enabled = false				# Starts Mediator service: <true|false>.
- # reconnects = 3				# Number of reconnects to rater/cdrs before giving up.
- # rater = internal				# Address where to reach the Rater: <internal|x.y.z.y:1234>
- # cdrstats = internal			# Address where to reach the cdrstats service: <internal|x.y.z.y:1234>
- # store_disable = false			# When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario 
+ # enabled = false								# Starts Mediator service: <true|false>.
+ # reconnects = 3								# Number of reconnects to rater/cdrs before giving up.
+ # rater = internal								# Address where to reach the Rater: <internal|x.y.z.y:1234>
+ # cdrstats = internal							# Address where to reach the cdrstats service: <internal|x.y.z.y:1234>
+ # store_disable = false						# When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario 
 
 
  [cdrstats]
  # enabled = false					# Starts the cdrstats service: <true|false>
- # queue_length = 50					# Number of items in the stats buffer
+ # queue_length = 50				# Number of items in the stats buffer
  # time_window = 1h					# Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
  # metrics = ASR, ACD, ACC			# Stat metric ids to build
  # setup_interval =					# Filter on CDR SetupTime
@@ -109,14 +109,14 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine, 
  # req_types = 						# Filter on CDR ReqType fields
  # directions =						# Filter on CDR Direction fields
  # tenants = 						# Filter on CDR Tenant fields
- # categories = 						# Filter on CDR	Category fields
+ # categories = 					# Filter on CDR	Category fields
  # accounts =						# Filter on CDR Account fields
  # subjects = 						# Filter on CDR Subject fields
  # destination_prefixes =			# Filter on CDR Destination prefixes
- # usage_interval = 					# Filter on CDR Usage 
+ # usage_interval = 				# Filter on CDR Usage 
  # mediation_run_ids =				# Filter on CDR MediationRunId fields
  # rated_accounts =					# Filter on CDR RatedAccount fields
- # rated_subjects = 					# Filter on CDR RatedSubject fields
+ # rated_subjects = 				# Filter on CDR RatedSubject fields
  # cost_intervals =					# Filter on CDR Cost
 
  [session_manager]
@@ -133,10 +133,10 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine, 
  # server = 127.0.0.1:8021		# Adress where to connect to FreeSWITCH socket.
  # passwd = ClueCon				# FreeSWITCH socket password.
  # reconnects = 5				# Number of attempts on connect failure.
- # min_dur_low_balance = 5s      # Threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
- # low_balance_ann_file =    	# File to be played when low balance is reached for prepaid calls
- # empty_balance_context =       # If defined, prepaid calls will be transfered to this context on empty balance 
- # empty_balance_ann_file =  	# File to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
+ # min_dur_low_balance = 5s		# Threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+ # low_balance_ann_file =		# File to be played when low balance is reached for prepaid calls
+ # empty_balance_context =		# If defined, prepaid calls will be transfered to this context on empty balance 
+ # empty_balance_ann_file =		# File to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
  # cdr_extra_fields = 			# Extra fields to store in CDRs in case of processing them
 
  [opensips]
@@ -147,16 +147,16 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine, 
 
  [derived_charging]
  # run_ids = 					# Identifiers of additional sessions control.
- # run_filters =					# List of cdr field filters for each run.
- # reqtype_fields = 				# Name of request type fields to be used during additional sessions control <""|*default|field_name>.
+ # run_filters =				# List of cdr field filters for each run.
+ # reqtype_fields = 			# Name of request type fields to be used during additional sessions control <""|*default|field_name>.
  # direction_fields = 			# Name of direction fields to be used during additional sessions control <""|*default|field_name>.
  # tenant_fields = 				# Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
  # category_fields = 			# Name of tor fields to be used during additional sessions control <""|*default|field_name>.
- # account_fields = 				# Name of account fields to be used during additional sessions control <""|*default|field_name>.
- # subject_fields = 				# Name of fields to be used during additional sessions control <""|*default|field_name>.
- # destination_fields = 			# Name of destination fields to be used during additional sessions control <""|*default|field_name>.
+ # account_fields = 			# Name of account fields to be used during additional sessions control <""|*default|field_name>.
+ # subject_fields = 			# Name of fields to be used during additional sessions control <""|*default|field_name>.
+ # destination_fields = 		# Name of destination fields to be used during additional sessions control <""|*default|field_name>.
  # setup_time_fields = 			# Name of setup_time fields to be used during additional sessions control <""|*default|field_name>.
- # answer_time_fields = 			# Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
+ # answer_time_fields = 		# Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
  # usage_fields = 				# Name of usage fields to be used during additional sessions control <""|*default|field_name>.
  # combined_chargers = true		# Combine accounts specific derived_chargers with server configured ones <true|false>. 
 
@@ -172,5 +172,5 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine, 
  [mailer]
  # server = localhost								# The server to use when sending emails out
  # auth_user = cgrates								# Authenticate to email server using this user
- # auth_passwd = CGRateS.org							# Authenticate to email server with this password
+ # auth_passwd = CGRateS.org						# Authenticate to email server with this password
  # from_address = cgr-mailer@localhost.localdomain	# From address used when sending emails out

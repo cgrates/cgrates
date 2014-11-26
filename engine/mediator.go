@@ -185,9 +185,20 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 	return nil
 }
 
-func (self *Mediator) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string, orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
-	cdrs, err := self.cdrDb.GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects,
-		orderIdStart, orderIdEnd, timeStart, timeEnd, !rerateErrors, !rerateRated, true, nil)
+func (self *Mediator) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
+	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
+	var costStart, costEnd *float64
+	if rerateErrors {
+		costStart = utils.Float64Pointer(-1.0)
+		if !rerateRated {
+			costEnd = utils.Float64Pointer(0.0)
+		}
+	} else if rerateRated {
+		costStart = utils.Float64Pointer(0.0)
+	}
+	cdrs, err := self.cdrDb.GetStoredCdrs(cgrIds, nil, runIds, nil, tors, nil, cdrHosts, nil, cdrSources, nil, reqTypes, nil, directions, nil,
+		tenants, nil, categories, nil, accounts, nil, subjects, nil, destPrefixes, nil, ratedAccounts, nil, ratedSubjects, nil,
+		nil, nil, nil, nil, &orderIdStart, &orderIdEnd, nil, nil, &timeStart, &timeEnd, nil, nil, nil, nil, costStart, costEnd, true, nil)
 	if err != nil {
 		return err
 	}
