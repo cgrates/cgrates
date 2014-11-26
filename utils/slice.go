@@ -61,7 +61,6 @@ func (a InterfaceStrings) Less(i, j int) bool { return a[i].(string) < a[j].(str
 // Binary string search in slice
 // returns true if found and the index
 func GetSliceInterfaceIndex(ss []interface{}, s interface{}) (int, bool) {
-	sort.Sort(InterfaceStrings(ss))
 	if i := sort.Search(len(ss), func(i int) bool { return ss[i].(string) >= s.(string) }); i < len(ss) && ss[i] == s {
 		return i, true
 	}

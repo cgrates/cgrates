@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/json"
+	"sort"
 	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -92,6 +93,7 @@ func CleanStalePrefixes(destIds []string) {
 	for prefix, idIDs := range prefixMap {
 		dIDs := idIDs.Value().([]interface{})
 		changed := false
+		sort.Sort(utils.InterfaceStrings(dIDs))
 		for _, searchedDID := range destIds {
 			if i, found := utils.GetSliceInterfaceIndex(dIDs, searchedDID); found {
 				if len(dIDs) == 1 {
