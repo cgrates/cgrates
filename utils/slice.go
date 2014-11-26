@@ -52,10 +52,18 @@ func SliceMemberHasPrefix(ss []string, prfx string) bool {
 	return false
 }
 
-func ConvertInterfaceSliceToStringMap(is []interface{}) (result map[string]int) {
-	result = make(map[string]int)
-	for index, i := range is {
-		result[i.(string)] = index
+type InterfaceStrings []interface{}
+
+func (a InterfaceStrings) Len() int           { return len(a) }
+func (a InterfaceStrings) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a InterfaceStrings) Less(i, j int) bool { return a[i].(string) < a[j].(string) }
+
+// Binary string search in slice
+// returns true if found and the index
+func GetSliceInterfaceIndex(ss []interface{}, s interface{}) (int, bool) {
+	sort.Sort(InterfaceStrings(ss))
+	if i := sort.Search(len(ss), func(i int) bool { return ss[i].(string) >= s.(string) }); i < len(ss) && ss[i] == s {
+		return i, true
 	}
-	return result
+	return len(ss), false
 }

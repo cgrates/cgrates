@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"path"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -793,11 +792,9 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
 		}
 	}
-	log.Print("Cache Rating")
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
 		return err
 	}
-	log.Print("Cache Accounting")
 	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
 		return err
 	}
