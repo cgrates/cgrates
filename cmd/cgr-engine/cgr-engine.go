@@ -22,8 +22,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
+	"runtime"
 	//"runtime"
 	"strconv"
 	"time"
@@ -302,7 +304,22 @@ func writePid() {
 	}
 }
 
-func main() {
+func start() {
+	defer func() {
+		if r := recover(); r != nil {
+			engine.Logger.Crit(fmt.Sprintf("CRITICAL ERROR: %v", r))
+			var stack [8192]byte
+			runtime.Stack(stack[:], false)
+			if tmpFile, err := ioutil.TempFile(os.TempDir(), "cgr_coredump"); err != nil {
+				engine.Logger.Crit(fmt.Sprintf("Cannot create coredump file: %v", err))
+				engine.Logger.Crit(string(stack[:]))
+			} else {
+				tmpFile.Write(stack[:])
+				tmpFile.Close()
+				engine.Logger.Crit(fmt.Sprintf("Core dumped: %s", tmpFile.Name()))
+			}
+		}
+	}()
 	flag.Parse()
 	if *version {
 		fmt.Println("CGRateS " + utils.VERSION)
@@ -511,4 +528,13 @@ func main() {
 		}
 	}
 	engine.Logger.Info("Stopped all components. CGRateS shutdown!")
+}
+
+func main() {
+	defer func() {
+		if e := recover(); e != nil {
+			fmt.Fprintf(os.Stderr, "PANIC: %v\n", e)
+		}
+	}()
+	start()
 }

@@ -52,9 +52,10 @@ func SliceMemberHasPrefix(ss []string, prfx string) bool {
 	return false
 }
 
-func ConvertInterfaceSliceToStringSlice(is []interface{}) (result []string) {
-	for _, i := range is {
-		result = append(result, i.(string))
+func ConvertInterfaceSliceToStringMap(is []interface{}) (result map[string]int) {
+	result = make(map[string]int)
+	for index, i := range is {
+		result[i.(string)] = index
 	}
 	return result
 }

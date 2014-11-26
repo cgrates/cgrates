@@ -91,14 +91,15 @@ func CleanStalePrefixes(destIds []string) {
 	}
 	for prefix, idIDs := range prefixMap {
 		dIDs := idIDs.Value().([]interface{})
+		strdIDs := utils.ConvertInterfaceSliceToStringMap(dIDs)
 		changed := false
 		for _, searchedDID := range destIds {
-			if i, found := utils.GetSliceMemberIndex(utils.ConvertInterfaceSliceToStringSlice(dIDs), searchedDID); found {
+			if i, found := strdIDs[searchedDID]; found {
 				if len(dIDs) == 1 {
 					// remove de prefix from cache
 					cache2go.RemKey(DESTINATION_PREFIX + prefix)
 				} else {
-					// delte the testination from list and put the new list in chache
+					// delete the destination from list and put the new list in chache
 					dIDs[i], dIDs = dIDs[len(dIDs)-1], dIDs[:len(dIDs)-1]
 					changed = true
 				}
