@@ -127,8 +127,8 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		} else {
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
-					destIds := x.([]interface{})
-					for _, idId := range destIds {
+					destIds := x.(map[interface{}]struct{})
+					for idId, _ := range destIds {
 						dId := idId.(string)
 						if _, ok := rpl.DestinationRates[dId]; ok {
 							rps = rpl.RateIntervalList(dId)

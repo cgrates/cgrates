@@ -126,17 +126,18 @@ func TestNonCachedDestWrongPrefix(t *testing.T) {
 }
 
 func TestCleanStalePrefixes(t *testing.T) {
-	cache2go.Cache(DESTINATION_PREFIX+"1", []interface{}{"D1", "D2"})
-	cache2go.Cache(DESTINATION_PREFIX+"2", []interface{}{"D1"})
-	cache2go.Cache(DESTINATION_PREFIX+"3", []interface{}{"D2"})
+	x := struct{}{}
+	cache2go.Cache(DESTINATION_PREFIX+"1", map[interface{}]struct{}{"D1": x, "D2": x})
+	cache2go.Cache(DESTINATION_PREFIX+"2", map[interface{}]struct{}{"D1": x})
+	cache2go.Cache(DESTINATION_PREFIX+"3", map[interface{}]struct{}{"D2": x})
 	CleanStalePrefixes([]string{"D1"})
-	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "1"); err != nil || len(r.([]interface{})) != 1 {
+	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "1"); err != nil || len(r.(map[interface{}]struct{})) != 1 {
 		t.Error("Error cleaning stale destination ids", r)
 	}
 	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "2"); err == nil {
 		t.Error("Error removing stale prefix: ", r)
 	}
-	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "3"); err != nil || len(r.([]interface{})) != 1 {
+	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "3"); err != nil || len(r.(map[interface{}]struct{})) != 1 {
 		t.Error("Error performing stale cleaning: ", r)
 	}
 }

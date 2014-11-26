@@ -20,11 +20,9 @@ package engine
 
 import (
 	"encoding/json"
-	"sort"
 	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/history"
 )
@@ -76,11 +74,8 @@ func (d *Destination) GetHistoryRecord() history.Record {
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
 	if cached, err := cache2go.GetCached(DESTINATION_PREFIX + prefix); err == nil {
-		for _, cachedDstId := range cached.([]interface{}) {
-			if destId == cachedDstId {
-				return true
-			}
-		}
+		_, found := cached.(map[interface{}]struct{})[destId]
+		return found
 	}
 	return false
 }
@@ -91,17 +86,16 @@ func CleanStalePrefixes(destIds []string) {
 		return
 	}
 	for prefix, idIDs := range prefixMap {
-		dIDs := idIDs.Value().([]interface{})
+		dIDs := idIDs.Value().(map[interface{}]struct{})
 		changed := false
-		sort.Sort(utils.InterfaceStrings(dIDs))
 		for _, searchedDID := range destIds {
-			if i, found := utils.GetSliceInterfaceIndex(dIDs, searchedDID); found {
+			if _, found := dIDs[searchedDID]; found {
 				if len(dIDs) == 1 {
 					// remove de prefix from cache
 					cache2go.RemKey(DESTINATION_PREFIX + prefix)
 				} else {
 					// delete the destination from list and put the new list in chache
-					dIDs[i], dIDs = dIDs[len(dIDs)-1], dIDs[:len(dIDs)-1]
+					delete(dIDs, searchedDID)
 					changed = true
 				}
 			}

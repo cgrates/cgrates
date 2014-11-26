@@ -37,21 +37,15 @@ func (cs cacheDoubleStore) Put(key string, value interface{}) {
 }
 
 func (cs cacheDoubleStore) Append(key string, value interface{}) {
-	var elements []interface{}
-	v, err := cs.Get(key)
-	if err == nil {
-		elements = v.([]interface{})
+	var elements map[interface{}]struct{}
+	if v, err := cs.Get(key); err == nil {
+		elements = v.(map[interface{}]struct{})
+	} else {
+		elements = make(map[interface{}]struct{})
 	}
 	// check if the val is already present
-	found := false
-	for _, v := range elements {
-		if value == v {
-			found = true
-			break
-		}
-	}
-	if !found {
-		elements = append(elements, value)
+	if _, found := elements[value]; !found {
+		elements[value] = struct{}{}
 	}
 	cache.Put(key, elements)
 }
