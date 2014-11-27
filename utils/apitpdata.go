@@ -687,37 +687,37 @@ type AttrExpFileCdrs struct {
 }
 
 func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
-	var aTimeStart, aTimeEnd time.Time
-	var err error
+	cdrFltr := &CdrsFilter{
+		CgrIds:        self.CgrIds,
+		RunIds:        self.MediationRunIds,
+		Tors:          self.TORs,
+		CdrHosts:      self.CdrHosts,
+		CdrSources:    self.CdrSources,
+		ReqTypes:      self.ReqTypes,
+		Directions:    self.Directions,
+		Tenants:       self.Tenants,
+		Categories:    self.Categories,
+		Accounts:      self.Accounts,
+		Subjects:      self.Subjects,
+		DestPrefixes:  self.DestinationPrefixes,
+		RatedAccounts: self.RatedAccounts,
+		RatedSubjects: self.RatedSubjects,
+		OrderIdStart:  self.OrderIdStart,
+		OrderIdEnd:    self.OrderIdEnd,
+	}
 	if len(self.TimeStart) != 0 {
-		if aTimeStart, err = ParseTimeDetectLayout(self.TimeStart); err != nil {
+		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart); err != nil {
 			return nil, err
+		} else {
+			cdrFltr.AnswerTimeStart = &answerTimeStart
 		}
 	}
 	if len(self.TimeEnd) != 0 {
-		if aTimeEnd, err = ParseTimeDetectLayout(self.TimeEnd); err != nil {
+		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd); err != nil {
 			return nil, err
+		} else {
+			cdrFltr.AnswerTimeEnd = &answerTimeEnd
 		}
-	}
-	cdrFltr := &CdrsFilter{
-		CgrIds:          self.CgrIds,
-		RunIds:          self.MediationRunIds,
-		Tors:            self.TORs,
-		CdrHosts:        self.CdrHosts,
-		CdrSources:      self.CdrSources,
-		ReqTypes:        self.ReqTypes,
-		Directions:      self.Directions,
-		Tenants:         self.Tenants,
-		Categories:      self.Categories,
-		Accounts:        self.Accounts,
-		Subjects:        self.Subjects,
-		DestPrefixes:    self.DestinationPrefixes,
-		RatedAccounts:   self.RatedAccounts,
-		RatedSubjects:   self.RatedSubjects,
-		OrderIdStart:    self.OrderIdStart,
-		OrderIdEnd:      self.OrderIdEnd,
-		AnswerTimeStart: &aTimeStart,
-		AnswerTimeEnd:   &aTimeEnd,
 	}
 	if self.SkipRated {
 		cdrFltr.CostEnd = Float64Pointer(0.0)
@@ -761,37 +761,37 @@ type AttrGetCdrs struct {
 }
 
 func (self *AttrGetCdrs) AsCdrsFilter() (*CdrsFilter, error) {
-	var aTimeStart, aTimeEnd time.Time
-	var err error
+	cdrFltr := &CdrsFilter{
+		CgrIds:        self.CgrIds,
+		RunIds:        self.MediationRunIds,
+		Tors:          self.TORs,
+		CdrHosts:      self.CdrHosts,
+		CdrSources:    self.CdrSources,
+		ReqTypes:      self.ReqTypes,
+		Directions:    self.Directions,
+		Tenants:       self.Tenants,
+		Categories:    self.Categories,
+		Accounts:      self.Accounts,
+		Subjects:      self.Subjects,
+		DestPrefixes:  self.DestinationPrefixes,
+		RatedAccounts: self.RatedAccounts,
+		RatedSubjects: self.RatedSubjects,
+		OrderIdStart:  self.OrderIdStart,
+		OrderIdEnd:    self.OrderIdEnd,
+	}
 	if len(self.TimeStart) != 0 {
-		if aTimeStart, err = ParseTimeDetectLayout(self.TimeStart); err != nil {
+		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart); err != nil {
 			return nil, err
+		} else {
+			cdrFltr.AnswerTimeStart = &answerTimeStart
 		}
 	}
 	if len(self.TimeEnd) != 0 {
-		if aTimeEnd, err = ParseTimeDetectLayout(self.TimeEnd); err != nil {
+		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd); err != nil {
 			return nil, err
+		} else {
+			cdrFltr.AnswerTimeEnd = &answerTimeEnd
 		}
-	}
-	cdrFltr := &CdrsFilter{
-		CgrIds:          self.CgrIds,
-		RunIds:          self.MediationRunIds,
-		Tors:            self.TORs,
-		CdrHosts:        self.CdrHosts,
-		CdrSources:      self.CdrSources,
-		ReqTypes:        self.ReqTypes,
-		Directions:      self.Directions,
-		Tenants:         self.Tenants,
-		Categories:      self.Categories,
-		Accounts:        self.Accounts,
-		Subjects:        self.Subjects,
-		DestPrefixes:    self.DestinationPrefixes,
-		RatedAccounts:   self.RatedAccounts,
-		RatedSubjects:   self.RatedSubjects,
-		OrderIdStart:    self.OrderIdStart,
-		OrderIdEnd:      self.OrderIdEnd,
-		AnswerTimeStart: &aTimeStart,
-		AnswerTimeEnd:   &aTimeEnd,
 	}
 	if self.SkipRated {
 		cdrFltr.CostEnd = Float64Pointer(0.0)
@@ -922,4 +922,131 @@ type CdrsFilter struct {
 	IgnoreDerived    bool              // Do not consider derived CDRs but original one
 	PaginatorOffset  int               // Start retrieving from this offset
 	PaginatorLimit   int               // Limit the number of items retrieved
+}
+
+// Used in Rpc calls
+type RpcCdrsFilter struct {
+	CgrIds           []string          // If provided, it will filter based on the cgrids present in list
+	NotCgrIds        []string          // Filter specific CgrIds out
+	RunIds           []string          // If provided, it will filter on mediation runid
+	NotRunIds        []string          // Filter specific runIds out
+	Tors             []string          // If provided, filter on TypeOfRecord
+	NotTors          []string          // Filter specific TORs out
+	CdrHosts         []string          // If provided, it will filter cdrhost
+	NotCdrHosts      []string          // Filter out specific cdr hosts
+	CdrSources       []string          // If provided, it will filter cdrsource
+	NotCdrSources    []string          // Filter out specific CDR sources
+	ReqTypes         []string          // If provided, it will fiter reqtype
+	NotReqTypes      []string          // Filter out specific request types
+	Directions       []string          // If provided, it will fiter direction
+	NotDirections    []string          // Filter out specific directions
+	Tenants          []string          // If provided, it will filter tenant
+	NotTenants       []string          // If provided, it will filter tenant
+	Categories       []string          // If provided, it will filter çategory
+	NotCategories    []string          // Filter out specific categories
+	Accounts         []string          // If provided, it will filter account
+	NotAccounts      []string          // Filter out specific Accounts
+	Subjects         []string          // If provided, it will filter the rating subject
+	NotSubjects      []string          // Filter out specific subjects
+	DestPrefixes     []string          // If provided, it will filter on destination prefix
+	NotDestPrefixes  []string          // Filter out specific destination prefixes
+	RatedAccounts    []string          // If provided, it will filter ratedaccount
+	NotRatedAccounts []string          // Filter out specific RatedAccounts
+	RatedSubjects    []string          // If provided, it will filter the ratedsubject
+	NotRatedSubjects []string          // Filter out specific RatedSubjects
+	Costs            []float64         // Query based on costs specified
+	NotCosts         []float64         // Filter out specific costs out from result
+	ExtraFields      map[string]string // Query based on extra fields content
+	NotExtraFields   map[string]string // Filter out based on extra fields content
+	OrderIdStart     int64             // Export from this order identifier
+	OrderIdEnd       int64             // Export smaller than this order identifier
+	SetupTimeStart   string            // Start of interval, bigger or equal than configured
+	SetupTimeEnd     string            // End interval, smaller than setupTime
+	AnswerTimeStart  string            // Start of interval, bigger or equal than configured
+	AnswerTimeEnd    string            // End interval, smaller than answerTime
+	UsageStart       *float64          // Start of the usage interval (>=)
+	UsageEnd         *float64          // End of the usage interval (<)
+	RatedUsageStart  *float64          // Start of the ratedUsage interval (>=)
+	RatedUsageEnd    *float64          // End of the ratedUsage interval (<)
+	CostStart        *float64          // Start of the cost interval (>=)
+	CostEnd          *float64          // End of the usage interval (<)
+	IgnoreDerived    bool              // Do not consider derived CDRs but original one
+	Paginator                          // Add pagination
+}
+
+func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
+	cdrFltr := &CdrsFilter{
+		CgrIds:           self.CgrIds,
+		NotCgrIds:        self.NotCgrIds,
+		RunIds:           self.RunIds,
+		NotRunIds:        self.NotRunIds,
+		Tors:             self.Tors,
+		NotTors:          self.NotTors,
+		CdrHosts:         self.CdrHosts,
+		NotCdrHosts:      self.NotCdrHosts,
+		CdrSources:       self.CdrSources,
+		NotCdrSources:    self.NotCdrSources,
+		ReqTypes:         self.ReqTypes,
+		NotReqTypes:      self.NotReqTypes,
+		Directions:       self.Directions,
+		NotDirections:    self.NotDirections,
+		Tenants:          self.Tenants,
+		NotTenants:       self.NotTenants,
+		Categories:       self.Categories,
+		NotCategories:    self.NotCategories,
+		Accounts:         self.Accounts,
+		NotAccounts:      self.NotAccounts,
+		Subjects:         self.Subjects,
+		NotSubjects:      self.NotSubjects,
+		DestPrefixes:     self.DestPrefixes,
+		NotDestPrefixes:  self.NotDestPrefixes,
+		RatedAccounts:    self.RatedAccounts,
+		NotRatedAccounts: self.NotRatedAccounts,
+		RatedSubjects:    self.RatedSubjects,
+		NotRatedSubjects: self.NotRatedSubjects,
+		Costs:            self.Costs,
+		NotCosts:         self.NotCosts,
+		ExtraFields:      self.ExtraFields,
+		NotExtraFields:   self.NotExtraFields,
+		OrderIdStart:     self.OrderIdStart,
+		OrderIdEnd:       self.OrderIdEnd,
+		UsageStart:       self.UsageStart,
+		UsageEnd:         self.UsageEnd,
+		RatedUsageStart:  self.RatedUsageStart,
+		RatedUsageEnd:    self.RatedUsageEnd,
+		CostStart:        self.CostStart,
+		CostEnd:          self.CostEnd,
+		IgnoreDerived:    self.IgnoreDerived,
+		PaginatorOffset:  self.Paginator.Page,
+		PaginatorLimit:   self.Paginator.ItemsPerPage,
+	}
+	if len(self.SetupTimeStart) != 0 {
+		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart); err != nil {
+			return nil, err
+		} else {
+			cdrFltr.SetupTimeStart = &sTimeStart
+		}
+	}
+	if len(self.SetupTimeEnd) != 0 {
+		if sTimeEnd, err := ParseTimeDetectLayout(self.SetupTimeEnd); err != nil {
+			return nil, err
+		} else {
+			cdrFltr.SetupTimeEnd = &sTimeEnd
+		}
+	}
+	if len(self.AnswerTimeStart) != 0 {
+		if aTimeStart, err := ParseTimeDetectLayout(self.AnswerTimeStart); err != nil {
+			return nil, err
+		} else {
+			cdrFltr.AnswerTimeStart = &aTimeStart
+		}
+	}
+	if len(self.AnswerTimeEnd) != 0 {
+		if aTimeEnd, err := ParseTimeDetectLayout(self.AnswerTimeEnd); err != nil {
+			return nil, err
+		} else {
+			cdrFltr.AnswerTimeEnd = &aTimeEnd
+		}
+	}
+	return cdrFltr, nil
 }
