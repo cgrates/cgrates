@@ -30,7 +30,7 @@ func (apier *ApierV2) GetCdrs(attrs utils.RpcCdrsFilter, reply *[]*utils.CgrCdrO
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	if cdrs, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
+	if cdrs, _, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(cdrs) == 0 {
 		*reply = make([]*utils.CgrCdrOut, 0)

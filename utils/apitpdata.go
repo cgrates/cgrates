@@ -922,6 +922,7 @@ type CdrsFilter struct {
 	IgnoreDerived    bool              // Do not consider derived CDRs but original one
 	PaginatorOffset  int               // Start retrieving from this offset
 	PaginatorLimit   int               // Limit the number of items retrieved
+	Count            bool              // If true count the items instead of returning data
 }
 
 // Used in Rpc calls

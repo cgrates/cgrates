@@ -178,7 +178,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	cdrs, err := self.CdrDb.GetStoredCdrs(cdrsFltr)
+	cdrs, _, err := self.CdrDb.GetStoredCdrs(cdrsFltr)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {

@@ -742,7 +742,7 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.StoredCdr, error) {
+func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.StoredCdr, int64, error) {
 	var cdrs []*utils.StoredCdr
 	// Select string
 	var selectStr string
@@ -950,10 +950,17 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 	if qryFltr.PaginatorLimit != 0 {
 		q = q.Limit(qryFltr.PaginatorLimit)
 	}
+	if qryFltr.Count {
+		var cnt int64
+		if err := q.Count(&cnt).Error; err != nil {
+			return nil, 0, err
+		}
+		return nil, 0, nil
+	}
 	// Execute query
 	rows, err := q.Rows()
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	for rows.Next() {
 		var cgrid, tor, accid, cdrhost, cdrsrc, reqtype, direction, tenant, category, account, subject, destination, runid, ratedAccount, ratedSubject sql.NullString
@@ -964,11 +971,11 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 		var extraFieldsMp map[string]string
 		if err := rows.Scan(&cgrid, &orderid, &tor, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination, &setupTime, &answerTime, &usage,
 			&extraFields, &runid, &ratedAccount, &ratedSubject, &cost); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		if len(extraFields) != 0 {
 			if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
-				return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid.String, runid.String, err.Error())
+				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid.String, runid.String, err.Error())
 			}
 		}
 		usageDur, _ := time.ParseDuration(strconv.FormatFloat(usage.Float64, 'f', -1, 64) + "s")
@@ -984,7 +991,7 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 		}
 		cdrs = append(cdrs, storCdr)
 	}
-	return cdrs, nil
+	return cdrs, 0, nil
 }
 
 // Remove CDR data out of all CDR tables based on their cgrid

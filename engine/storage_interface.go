@@ -114,7 +114,7 @@ type CdrStorage interface {
 	Storage
 	SetCdr(*utils.StoredCdr) error
 	SetRatedCdr(*utils.StoredCdr, string) error
-	GetStoredCdrs(*utils.CdrsFilter) ([]*utils.StoredCdr, error)
+	GetStoredCdrs(*utils.CdrsFilter) ([]*utils.StoredCdr, int64, error)
 	RemStoredCdrs([]string) error
 }
 
