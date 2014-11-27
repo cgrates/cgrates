@@ -20,7 +20,6 @@ package v1
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -48,27 +47,11 @@ func (apier *ApierV1) GetCallCostLog(attrs AttrGetCallCost, reply *engine.CallCo
 
 // Retrieves CDRs based on the filters
 func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*utils.CgrCdrOut) error {
-	var tStart, tEnd time.Time
-	var err error
-	if len(attrs.TimeStart) != 0 {
-		if tStart, err = utils.ParseTimeDetectLayout(attrs.TimeStart); err != nil {
-			return err
-		}
+	cdrsFltr, err := attrs.AsCdrsFilter()
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	if len(attrs.TimeEnd) != 0 {
-		if tEnd, err = utils.ParseTimeDetectLayout(attrs.TimeEnd); err != nil {
-			return err
-		}
-	}
-	var costStart, costEnd *float64
-	if attrs.SkipRated {
-		costEnd = utils.Float64Pointer(0.0)
-	} else if attrs.SkipErrors {
-		costEnd = utils.Float64Pointer(-1.0)
-	}
-	if cdrs, err := apier.CdrDb.GetStoredCdrs(attrs.CgrIds, nil, attrs.MediationRunIds, nil, attrs.TORs, nil, attrs.CdrHosts, nil, attrs.CdrSources, nil, attrs.ReqTypes, nil, attrs.Directions, nil,
-		attrs.Tenants, nil, attrs.Categories, nil, attrs.Accounts, nil, attrs.Subjects, nil, attrs.DestinationPrefixes, nil, attrs.RatedAccounts, nil, attrs.RatedSubjects, nil, nil, nil, nil, nil,
-		&attrs.OrderIdStart, &attrs.OrderIdEnd, nil, nil, &tStart, &tEnd, nil, nil, nil, nil, costStart, costEnd, false, nil); err != nil {
+	if cdrs, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(cdrs) == 0 {
 		*reply = make([]*utils.CgrCdrOut, 0)

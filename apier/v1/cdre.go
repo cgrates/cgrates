@@ -92,18 +92,7 @@ func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 
 // Export Cdrs to file
 func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
-	var tStart, tEnd time.Time
 	var err error
-	if len(attr.TimeStart) != 0 {
-		if tStart, err = utils.ParseTimeDetectLayout(attr.TimeStart); err != nil {
-			return err
-		}
-	}
-	if len(attr.TimeEnd) != 0 {
-		if tEnd, err = utils.ParseTimeDetectLayout(attr.TimeEnd); err != nil {
-			return err
-		}
-	}
 	exportTemplate := self.Config.CdreDefaultInstance
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // XML Template defined, can be field names or xml reference
 		if strings.HasPrefix(*attr.ExportTemplate, utils.XML_PROFILE_PREFIX) {
@@ -185,15 +174,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.MaskLength != nil {
 		maskLen = *attr.MaskLength
 	}
-	var costStart, costEnd *float64
-	if attr.SkipRated {
-		costEnd = utils.Float64Pointer(0.0)
-	} else if attr.SkipErrors {
-		costEnd = utils.Float64Pointer(-1.0)
+	cdrsFltr, err := attr.AsCdrsFilter()
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, nil, attr.MediationRunIds, nil, attr.TORs, nil, attr.CdrHosts, nil, attr.CdrSources, nil, attr.ReqTypes, nil, attr.Directions, nil,
-		attr.Tenants, nil, attr.Categories, nil, attr.Accounts, nil, attr.Subjects, nil, attr.DestinationPrefixes, nil, attr.RatedAccounts, nil, attr.RatedSubjects, nil, nil, nil, nil, nil, &attr.OrderIdStart, &attr.OrderIdEnd,
-		nil, nil, &tStart, &tEnd, nil, nil, nil, nil, costStart, costEnd, false, nil)
+	cdrs, err := self.CdrDb.GetStoredCdrs(cdrsFltr)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {

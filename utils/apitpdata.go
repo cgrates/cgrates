@@ -686,6 +686,47 @@ type AttrExpFileCdrs struct {
 	SuppressCgrIds          bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 }
 
+func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
+	var aTimeStart, aTimeEnd time.Time
+	var err error
+	if len(self.TimeStart) != 0 {
+		if aTimeStart, err = ParseTimeDetectLayout(self.TimeStart); err != nil {
+			return nil, err
+		}
+	}
+	if len(self.TimeEnd) != 0 {
+		if aTimeEnd, err = ParseTimeDetectLayout(self.TimeEnd); err != nil {
+			return nil, err
+		}
+	}
+	cdrFltr := &CdrsFilter{
+		CgrIds:          self.CgrIds,
+		RunIds:          self.MediationRunIds,
+		Tors:            self.TORs,
+		CdrHosts:        self.CdrHosts,
+		CdrSources:      self.CdrSources,
+		ReqTypes:        self.ReqTypes,
+		Directions:      self.Directions,
+		Tenants:         self.Tenants,
+		Categories:      self.Categories,
+		Accounts:        self.Accounts,
+		Subjects:        self.Subjects,
+		DestPrefixes:    self.DestinationPrefixes,
+		RatedAccounts:   self.RatedAccounts,
+		RatedSubjects:   self.RatedSubjects,
+		OrderIdStart:    self.OrderIdStart,
+		OrderIdEnd:      self.OrderIdEnd,
+		AnswerTimeStart: &aTimeStart,
+		AnswerTimeEnd:   &aTimeEnd,
+	}
+	if self.SkipRated {
+		cdrFltr.CostEnd = Float64Pointer(0.0)
+	} else if self.SkipErrors {
+		cdrFltr.CostEnd = Float64Pointer(-1.0)
+	}
+	return cdrFltr, nil
+}
+
 type ExportedFileCdrs struct {
 	ExportedFilePath          string            // Full path to the newly generated export file
 	TotalRecords              int               // Number of CDRs to be exported
@@ -717,6 +758,47 @@ type AttrGetCdrs struct {
 	SkipErrors          bool     // Do not export errored CDRs
 	SkipRated           bool     // Do not export rated CDRs
 	Paginator
+}
+
+func (self *AttrGetCdrs) AsCdrsFilter() (*CdrsFilter, error) {
+	var aTimeStart, aTimeEnd time.Time
+	var err error
+	if len(self.TimeStart) != 0 {
+		if aTimeStart, err = ParseTimeDetectLayout(self.TimeStart); err != nil {
+			return nil, err
+		}
+	}
+	if len(self.TimeEnd) != 0 {
+		if aTimeEnd, err = ParseTimeDetectLayout(self.TimeEnd); err != nil {
+			return nil, err
+		}
+	}
+	cdrFltr := &CdrsFilter{
+		CgrIds:          self.CgrIds,
+		RunIds:          self.MediationRunIds,
+		Tors:            self.TORs,
+		CdrHosts:        self.CdrHosts,
+		CdrSources:      self.CdrSources,
+		ReqTypes:        self.ReqTypes,
+		Directions:      self.Directions,
+		Tenants:         self.Tenants,
+		Categories:      self.Categories,
+		Accounts:        self.Accounts,
+		Subjects:        self.Subjects,
+		DestPrefixes:    self.DestinationPrefixes,
+		RatedAccounts:   self.RatedAccounts,
+		RatedSubjects:   self.RatedSubjects,
+		OrderIdStart:    self.OrderIdStart,
+		OrderIdEnd:      self.OrderIdEnd,
+		AnswerTimeStart: &aTimeStart,
+		AnswerTimeEnd:   &aTimeEnd,
+	}
+	if self.SkipRated {
+		cdrFltr.CostEnd = Float64Pointer(0.0)
+	} else if self.SkipErrors {
+		cdrFltr.CostEnd = Float64Pointer(-1.0)
+	}
+	return cdrFltr, nil
 }
 
 type AttrRemCdrs struct {
@@ -789,4 +871,55 @@ type ExportedTPStats struct {
 	ExportPath    string   // Full path to the newly generated export file
 	ExportedFiles []string // List of exported files
 	Compressed    bool
+}
+
+// Filter used in engine.GetStoredCdrs
+type CdrsFilter struct {
+	CgrIds           []string          // If provided, it will filter based on the cgrids present in list
+	NotCgrIds        []string          // Filter specific CgrIds out
+	RunIds           []string          // If provided, it will filter on mediation runid
+	NotRunIds        []string          // Filter specific runIds out
+	Tors             []string          // If provided, filter on TypeOfRecord
+	NotTors          []string          // Filter specific TORs out
+	CdrHosts         []string          // If provided, it will filter cdrhost
+	NotCdrHosts      []string          // Filter out specific cdr hosts
+	CdrSources       []string          // If provided, it will filter cdrsource
+	NotCdrSources    []string          // Filter out specific CDR sources
+	ReqTypes         []string          // If provided, it will fiter reqtype
+	NotReqTypes      []string          // Filter out specific request types
+	Directions       []string          // If provided, it will fiter direction
+	NotDirections    []string          // Filter out specific directions
+	Tenants          []string          // If provided, it will filter tenant
+	NotTenants       []string          // If provided, it will filter tenant
+	Categories       []string          // If provided, it will filter çategory
+	NotCategories    []string          // Filter out specific categories
+	Accounts         []string          // If provided, it will filter account
+	NotAccounts      []string          // Filter out specific Accounts
+	Subjects         []string          // If provided, it will filter the rating subject
+	NotSubjects      []string          // Filter out specific subjects
+	DestPrefixes     []string          // If provided, it will filter on destination prefix
+	NotDestPrefixes  []string          // Filter out specific destination prefixes
+	RatedAccounts    []string          // If provided, it will filter ratedaccount
+	NotRatedAccounts []string          // Filter out specific RatedAccounts
+	RatedSubjects    []string          // If provided, it will filter the ratedsubject
+	NotRatedSubjects []string          // Filter out specific RatedSubjects
+	Costs            []float64         // Query based on costs specified
+	NotCosts         []float64         // Filter out specific costs out from result
+	ExtraFields      map[string]string // Query based on extra fields content
+	NotExtraFields   map[string]string // Filter out based on extra fields content
+	OrderIdStart     int64             // Export from this order identifier
+	OrderIdEnd       int64             // Export smaller than this order identifier
+	SetupTimeStart   *time.Time        // Start of interval, bigger or equal than configured
+	SetupTimeEnd     *time.Time        // End interval, smaller than setupTime
+	AnswerTimeStart  *time.Time        // Start of interval, bigger or equal than configured
+	AnswerTimeEnd    *time.Time        // End interval, smaller than answerTime
+	UsageStart       *float64          // Start of the usage interval (>=)
+	UsageEnd         *float64          // End of the usage interval (<)
+	RatedUsageStart  *float64          // Start of the ratedUsage interval (>=)
+	RatedUsageEnd    *float64          // End of the ratedUsage interval (<)
+	CostStart        *float64          // Start of the cost interval (>=)
+	CostEnd          *float64          // End of the usage interval (<)
+	IgnoreDerived    bool              // Do not consider derived CDRs but original one
+	PaginatorOffset  int               // Start retrieving from this offset
+	PaginatorLimit   int               // Limit the number of items retrieved
 }

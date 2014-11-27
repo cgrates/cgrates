@@ -196,9 +196,9 @@ func (self *Mediator) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTy
 	} else if rerateRated {
 		costStart = utils.Float64Pointer(0.0)
 	}
-	cdrs, err := self.cdrDb.GetStoredCdrs(cgrIds, nil, runIds, nil, tors, nil, cdrHosts, nil, cdrSources, nil, reqTypes, nil, directions, nil,
-		tenants, nil, categories, nil, accounts, nil, subjects, nil, destPrefixes, nil, ratedAccounts, nil, ratedSubjects, nil,
-		nil, nil, nil, nil, &orderIdStart, &orderIdEnd, nil, nil, &timeStart, &timeEnd, nil, nil, nil, nil, costStart, costEnd, true, nil)
+	cdrs, err := self.cdrDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: cgrIds, RunIds: runIds, Tors: tors, CdrHosts: cdrHosts, CdrSources: cdrSources, ReqTypes: reqTypes, Directions: directions,
+		Tenants: tenants, Categories: categories, Accounts: accounts, Subjects: subjects, DestPrefixes: destPrefixes, RatedAccounts: ratedAccounts, RatedSubjects: ratedSubjects,
+		OrderIdStart: orderIdStart, OrderIdEnd: orderIdEnd, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, CostStart: costStart, CostEnd: costEnd, IgnoreDerived: true})
 	if err != nil {
 		return err
 	}

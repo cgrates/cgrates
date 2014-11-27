@@ -157,14 +157,12 @@ func TestMediPostCdrs(t *testing.T) {
 		}
 	}
 	time.Sleep(100 * time.Millisecond) // Give time for CDRs to reach database
-	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := cdrStor.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 6 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
-	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), false, nil); err != nil {
+	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostEnd: utils.Float64Pointer(-1.0)}); err != nil {
 		t.Error(err)
 	} else if len(nonErrorCdrs) != 0 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(nonErrorCdrs)))
@@ -187,14 +185,12 @@ func TestMediInjectCdrs(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := cdrStor.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 8 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
-	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), false, nil); err != nil {
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostEnd: utils.Float64Pointer(-1.0)}); err != nil {
 		t.Error(err)
 	} else if len(nonRatedCdrs) != 2 { // Just two of them should be non-rated
 		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
@@ -226,14 +222,12 @@ func TestMediRateCdrs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), false, nil); err != nil {
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostEnd: utils.Float64Pointer(-1.0)}); err != nil {
 		t.Error(err)
 	} else if len(nonRatedCdrs) != 2 { // All CDRs should be rated
 		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
 	}
-	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), utils.Float64Pointer(0), false, nil); err != nil {
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostStart: utils.Float64Pointer(-1.0), CostEnd: utils.Float64Pointer(0)}); err != nil {
 		t.Error(err)
 	} else if len(errRatedCdrs) != 2 { // The first 2 with errors should be still there before rerating
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
@@ -243,8 +237,7 @@ func TestMediRateCdrs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(-1.0), utils.Float64Pointer(0), false, nil); err != nil {
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostStart: utils.Float64Pointer(-1.0), CostEnd: utils.Float64Pointer(0)}); err != nil {
 		t.Error(err)
 	} else if len(errRatedCdrs) != 2 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))

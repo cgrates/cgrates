@@ -562,210 +562,160 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 	}
 	var timeStart, timeEnd time.Time
 	// All CDRs, no filter
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cgrids
-	if storedCdrs, err := psqlDb.GetStoredCdrs([]string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cgrids plus reqType
-	if storedCdrs, err := psqlDb.GetStoredCdrs([]string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"prepaid"}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{"prepaid"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on runId
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, []string{utils.DEFAULT_RUNID},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{RunIds: []string{utils.DEFAULT_RUNID}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on TOR
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, []string{utils.SMS},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple TOR
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, []string{utils.SMS, utils.VOICE},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS, utils.VOICE}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cdrHost
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, []string{"192.168.1.2"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.2"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple cdrHost
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, []string{"192.168.1.1", "192.168.1.2"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.1", "192.168.1.2"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cdrSource
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, []string{"UNKNOWN"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CdrSources: []string{"UNKNOWN"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple cdrSource
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, []string{"UNKNOWN", "UNKNOWN2"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CdrSources: []string{"UNKNOWN", "UNKNOWN2"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on reqType
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"prepaid"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{"prepaid"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple reqType
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"prepaid", "pseudoprepaid"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{"prepaid", "pseudoprepaid"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on direction
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"*out"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Directions: []string{"*out"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on tenant
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"itsyscom.com"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple tenants
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"itsyscom.com", "cgrates.org"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com", "cgrates.org"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on category
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"premium_call"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
-	// Filter on multiple category
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"premium_call", "call"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	// Filter on multiple categories
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call", "call"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on account
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1002"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1002"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple account
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1001", "1002"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1001", "1002"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on subject
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1000"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple subject
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1000", "1002"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000", "1002"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on destPrefix
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		[]string{"+498651"}, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"+498651"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple destPrefixes
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		[]string{"1001", "+498651"}, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"1001", "+498651"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 4 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ratedAccount
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, []string{"8001"}, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{RatedAccounts: []string{"8001"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ratedSubject
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, []string{"91001"}, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{RatedSubjects: []string{"91001"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreRated
 	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, utils.Float64Pointer(0.0), false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CostEnd: utils.Float64Pointer(0.0)}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -780,47 +730,39 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 		}
 	}
 	// Filter on orderIdStart
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		&orderIdStart, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on orderIdStart and orderIdEnd
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		&orderIdStart, utils.Int64Pointer(orderIdEnd+1), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart, OrderIdEnd: orderIdEnd}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 5 {
+	} else if len(storedCdrs) != 4 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on timeStart
 	timeStart = time.Date(2013, 11, 8, 8, 0, 0, 0, time.UTC)
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, &timeStart, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on timeStart and timeEnd
 	timeEnd = time.Date(2013, 12, 1, 8, 0, 0, 0, time.UTC)
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, &timeStart, &timeEnd, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Combined filter
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"rated"},
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, &timeStart, &timeEnd, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{"rated"}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreDerived
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, &timeStart, &timeEnd, nil, nil, nil, nil, nil, nil, true, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, IgnoreDerived: true}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 { // ToDo: Recheck this value
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -835,8 +777,7 @@ func TestPSQLRemStoredCdrs(t *testing.T) {
 	if err := psqlDb.RemStoredCdrs([]string{cgrIdB1}); err != nil {
 		t.Error(err.Error())
 	}
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 7 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -857,8 +798,7 @@ func TestPSQLRemStoredCdrs(t *testing.T) {
 		cgrIdB2, cgrIdB3}); err != nil {
 		t.Error(err.Error())
 	}
-	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
-		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, false, nil); err != nil {
+	if storedCdrs, err := psqlDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
