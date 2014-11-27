@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Copyright (C) 2012-2014 ITsysCOM
 
 This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by

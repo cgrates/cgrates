@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Copyright (C) 2012-2014 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,12 +20,13 @@ package cdre
 
 import (
 	"bytes"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"math"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var hdrCfgFlds = []*config.XmlCfgCdrField{
