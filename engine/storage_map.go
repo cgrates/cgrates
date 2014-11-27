@@ -58,7 +58,7 @@ func (ms *MapStorage) GetKeysForPrefix(string) ([]string, error) {
 
 func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) error {
 	cache2go.BeginTransaction()
-	if dKeys == nil {
+	if dKeys == nil || (float64(cache2go.CountEntries(DESTINATION_PREFIX))*DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		cache2go.RemPrefixKey(DESTINATION_PREFIX)
 	} else {
 		CleanStalePrefixes(dKeys)

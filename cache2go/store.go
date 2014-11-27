@@ -16,7 +16,7 @@ type cacheStore interface {
 	GetAge(string) (time.Duration, error)
 	Delete(string)
 	DeletePrefix(string)
-	CountEntriesForPrefix(string) int64
+	CountEntriesForPrefix(string) int
 	GetAllForPrefix(string) (map[string]timestampedValue, error)
 	GetKeysForPrefix(string) []string
 }
@@ -37,21 +37,15 @@ func (cs cacheDoubleStore) Put(key string, value interface{}) {
 }
 
 func (cs cacheDoubleStore) Append(key string, value interface{}) {
-	var elements []interface{}
-	v, err := cs.Get(key)
-	if err == nil {
-		elements = v.([]interface{})
+	var elements map[interface{}]struct{} // using map for faster check if element is present
+	if v, err := cs.Get(key); err == nil {
+		elements = v.(map[interface{}]struct{})
+	} else {
+		elements = make(map[interface{}]struct{})
 	}
 	// check if the val is already present
-	found := false
-	for _, v := range elements {
-		if value == v {
-			found = true
-			break
-		}
-	}
-	if !found {
-		elements = append(elements, value)
+	if _, found := elements[value]; !found {
+		elements[value] = struct{}{}
 	}
 	cache.Put(key, elements)
 }
@@ -87,9 +81,9 @@ func (cs cacheDoubleStore) DeletePrefix(prefix string) {
 	delete(cs, prefix)
 }
 
-func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int64 {
+func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
 	if _, ok := cs[prefix]; ok {
-		return int64(len(cs[prefix]))
+		return len(cs[prefix])
 	}
 	return 0
 }
@@ -116,13 +110,13 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 // faster to access
 type cacheSimpleStore struct {
 	cache    map[string]timestampedValue
-	counters map[string]int64
+	counters map[string]int
 }
 
 func newSimpleStore() cacheSimpleStore {
 	return cacheSimpleStore{
 		cache:    make(map[string]timestampedValue),
-		counters: make(map[string]int64),
+		counters: make(map[string]int),
 	}
 }
 
@@ -135,22 +129,17 @@ func (cs cacheSimpleStore) Put(key string, value interface{}) {
 }
 
 func (cs cacheSimpleStore) Append(key string, value interface{}) {
-	var elements []interface{}
-	if ti, exists := cs.cache[key]; exists {
-		elements = ti.value.([]interface{})
+	var elements map[interface{}]struct{}
+	if v, err := cs.Get(key); err == nil {
+		elements = v.(map[interface{}]struct{})
+	} else {
+		elements = make(map[interface{}]struct{})
 	}
 	// check if the val is already present
-	found := false
-	for _, v := range elements {
-		if value == v {
-			found = true
-			break
-		}
+	if _, found := elements[value]; !found {
+		elements[value] = struct{}{}
 	}
-	if !found {
-		elements = append(elements, value)
-	}
-	cs.Put(key, elements)
+	cache.Put(key, elements)
 }
 
 func (cs cacheSimpleStore) Get(key string) (interface{}, error) {
@@ -209,7 +198,7 @@ func (cs cacheSimpleStore) descount(key string) {
 	}
 }
 
-func (cs cacheSimpleStore) CountEntriesForPrefix(prefix string) int64 {
+func (cs cacheSimpleStore) CountEntriesForPrefix(prefix string) int {
 	if _, ok := cs.counters[prefix]; ok {
 		return cs.counters[prefix]
 	}

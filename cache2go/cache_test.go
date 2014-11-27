@@ -89,7 +89,7 @@ func TestCachePush(t *testing.T) {
 	CachePush("ccc_t1", "1")
 	CachePush("ccc_t1", "2")
 	v, err := GetCached("ccc_t1")
-	if err != nil || len(v.([]interface{})) != 2 {
+	if err != nil || len(v.(map[interface{}]struct{})) != 2 {
 		t.Error("Error in cache push: ", v)
 	}
 }

@@ -624,14 +624,14 @@ type AttrCacheStats struct { // Add in the future filters here maybe so we avoid
 }
 
 type CacheStats struct {
-	Destinations    int64
-	RatingPlans     int64
-	RatingProfiles  int64
-	Actions         int64
-	SharedGroups    int64
-	RatingAliases   int64
-	AccountAliases  int64
-	DerivedChargers int64
+	Destinations    int
+	RatingPlans     int
+	RatingProfiles  int
+	Actions         int
+	SharedGroups    int
+	RatingAliases   int
+	AccountAliases  int
+	DerivedChargers int
 }
 
 type AttrCachedItemAge struct {

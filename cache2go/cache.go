@@ -158,7 +158,7 @@ func Flush() {
 	}
 }
 
-func CountEntries(prefix string) (result int64) {
+func CountEntries(prefix string) (result int) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.CountEntriesForPrefix(prefix)

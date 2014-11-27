@@ -32,16 +32,6 @@ func IsSliceMember(ss []string, s string) bool {
 	return false
 }
 
-// Binary string search in slice
-// returns true if found and the index
-func GetSliceMemberIndex(ss []string, s string) (int, bool) {
-	sort.Strings(ss)
-	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
-		return i, true
-	}
-	return len(ss), false
-}
-
 //Iterates over slice members and returns true if one starts with prefix
 func SliceMemberHasPrefix(ss []string, prfx string) bool {
 	for _, mbr := range ss {
@@ -50,12 +40,4 @@ func SliceMemberHasPrefix(ss []string, prfx string) bool {
 		}
 	}
 	return false
-}
-
-func ConvertInterfaceSliceToStringMap(is []interface{}) (result map[string]int) {
-	result = make(map[string]int)
-	for index, i := range is {
-		result[i.(string)] = index
-	}
-	return result
 }

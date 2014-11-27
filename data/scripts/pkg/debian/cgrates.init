@@ -23,6 +23,7 @@ GROUP=cgrates
 ENGINE_OPTS=""
 RUNDIR=/var/run/$NAME
 PIDFILE=$RUNDIR/cgr-engine.pid
+COREDUMP=$RUNDIR/cgr-coredump.log
 SCRIPTNAME=/etc/init.d/$NAME
 DEFAULTS=/etc/default/$NAME
 ENABLE=false
@@ -62,7 +63,8 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+    echo "Started at:" `date`>>$COREDUMP
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null 2>>$COREDUMP \
                 || return 1
         start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile --exec $DAEMON --chuid $USER:$GROUP --background -- \
                 $ENGINE_OPTS \
