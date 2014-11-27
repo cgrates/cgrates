@@ -41,3 +41,17 @@ func (apier *ApierV2) GetCdrs(attrs utils.RpcCdrsFilter, reply *[]*utils.CgrCdrO
 	}
 	return nil
 }
+
+func (apier *ApierV2) CountCdrs(attrs utils.RpcCdrsFilter, reply *int64) error {
+	cdrsFltr, err := attrs.AsCdrsFilter()
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	cdrsFltr.Count = true
+	if _, count, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = count
+	}
+	return nil
+}
