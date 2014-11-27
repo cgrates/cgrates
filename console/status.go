@@ -50,7 +50,7 @@ func (self *CmdStatus) RpcParams() interface{} {
 }
 
 func (self *CmdStatus) RpcResult() interface{} {
-	var s string
+	var s map[string]interface{}
 	return &s
 }
 
