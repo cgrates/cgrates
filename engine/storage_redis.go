@@ -73,7 +73,8 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 
 func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) (err error) {
 	cache2go.BeginTransaction()
-	if dKeys == nil {
+	if dKeys == nil || (float64(cache2go.CountEntries(DESTINATION_PREFIX))*0.5 < float64(len(dKeys))) {
+		// if need to load more than a half of exiting keys load them all
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
 			cache2go.RollbackTransaction()

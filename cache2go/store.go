@@ -16,7 +16,7 @@ type cacheStore interface {
 	GetAge(string) (time.Duration, error)
 	Delete(string)
 	DeletePrefix(string)
-	CountEntriesForPrefix(string) int64
+	CountEntriesForPrefix(string) int
 	GetAllForPrefix(string) (map[string]timestampedValue, error)
 	GetKeysForPrefix(string) []string
 }
@@ -37,7 +37,7 @@ func (cs cacheDoubleStore) Put(key string, value interface{}) {
 }
 
 func (cs cacheDoubleStore) Append(key string, value interface{}) {
-	var elements map[interface{}]struct{}
+	var elements map[interface{}]struct{} // using map for faster check if element is present
 	if v, err := cs.Get(key); err == nil {
 		elements = v.(map[interface{}]struct{})
 	} else {
@@ -81,9 +81,9 @@ func (cs cacheDoubleStore) DeletePrefix(prefix string) {
 	delete(cs, prefix)
 }
 
-func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int64 {
+func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
 	if _, ok := cs[prefix]; ok {
-		return int64(len(cs[prefix]))
+		return len(cs[prefix])
 	}
 	return 0
 }
@@ -110,13 +110,13 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 // faster to access
 type cacheSimpleStore struct {
 	cache    map[string]timestampedValue
-	counters map[string]int64
+	counters map[string]int
 }
 
 func newSimpleStore() cacheSimpleStore {
 	return cacheSimpleStore{
 		cache:    make(map[string]timestampedValue),
-		counters: make(map[string]int64),
+		counters: make(map[string]int),
 	}
 }
 
@@ -198,7 +198,7 @@ func (cs cacheSimpleStore) descount(key string) {
 	}
 }
 
-func (cs cacheSimpleStore) CountEntriesForPrefix(prefix string) int64 {
+func (cs cacheSimpleStore) CountEntriesForPrefix(prefix string) int {
 	if _, ok := cs.counters[prefix]; ok {
 		return cs.counters[prefix]
 	}
