@@ -567,6 +567,14 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Count ALL
+	if storedCdrs, count, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{Count: true}); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 0 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	} else if count != 8 {
+		t.Error("Unexpected count of StoredCdrs returned: ", count)
+	}
 	// Filter on cgrids
 	if storedCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}}); err != nil {
@@ -574,12 +582,26 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Count on CGRIDS
+	if _, count, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, Count: true}); err != nil {
+		t.Error(err.Error())
+	} else if count != 2 {
+		t.Error("Unexpected count of StoredCdrs returned: ", count)
+	}
 	// Filter on cgrids plus reqType
 	if storedCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{"prepaid"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Count on multiple filter
+	if _, count, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{"prepaid"}, Count: true}); err != nil {
+		t.Error(err.Error())
+	} else if count != 1 {
+		t.Error("Unexpected count of StoredCdrs returned: ", count)
 	}
 	// Filter on runId
 	if storedCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{RunIds: []string{utils.DEFAULT_RUNID}}); err != nil {

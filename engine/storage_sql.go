@@ -955,7 +955,7 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 		if err := q.Count(&cnt).Error; err != nil {
 			return nil, 0, err
 		}
-		return nil, 0, nil
+		return nil, cnt, nil
 	}
 	// Execute query
 	rows, err := q.Rows()
