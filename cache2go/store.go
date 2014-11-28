@@ -43,10 +43,7 @@ func (cs cacheDoubleStore) Append(key string, value interface{}) {
 	} else {
 		elements = make(map[interface{}]struct{})
 	}
-	// check if the val is already present
-	if _, found := elements[value]; !found {
-		elements[value] = struct{}{}
-	}
+	elements[value] = struct{}{}
 	cache.Put(key, elements)
 }
 
@@ -82,8 +79,8 @@ func (cs cacheDoubleStore) DeletePrefix(prefix string) {
 }
 
 func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
-	if _, ok := cs[prefix]; ok {
-		return len(cs[prefix])
+	if m, ok := cs[prefix]; ok {
+		return len(m)
 	}
 	return 0
 }
@@ -135,10 +132,7 @@ func (cs cacheSimpleStore) Append(key string, value interface{}) {
 	} else {
 		elements = make(map[interface{}]struct{})
 	}
-	// check if the val is already present
-	if _, found := elements[value]; !found {
-		elements[value] = struct{}{}
-	}
+	elements[value] = struct{}{}
 	cache.Put(key, elements)
 }
 
