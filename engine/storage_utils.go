@@ -41,7 +41,6 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler str
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
-		db = d.(RatingStorage)
 	/*
 		// Add here as soon as interface implemented
 		case utils.MONGO:
@@ -54,7 +53,7 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler str
 	if err != nil {
 		return nil, err
 	}
-	return db, nil
+	return d.(RatingStorage), nil
 }
 
 func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler string) (db AccountingStorage, err error) {
@@ -71,7 +70,6 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
-		db = d.(AccountingStorage)
 	/*
 		case utils.MONGO:
 			d, err = NewMongoStorage(host, port, name, user, pass)
@@ -83,7 +81,7 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 	if err != nil {
 		return nil, err
 	}
-	return db, nil
+	return d.(AccountingStorage), nil
 }
 
 func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int) (db LogStorage, err error) {
@@ -120,39 +118,31 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int) (db LoadStorage, err error) {
 	var d Storage
 	switch db_type {
-	/*
-		case utils.POSTGRES:
-			d, err = NewPostgresStorage(host, port, name, user, pass)
-			db = d.(LoadStorage)
-	*/
+	case utils.POSTGRES:
+		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
-		db = d.(LoadStorage)
 	default:
 		err = errors.New("unknown db")
 	}
 	if err != nil {
 		return nil, err
 	}
-	return db, nil
+	return d.(LoadStorage), nil
 }
 
 func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn int) (db CdrStorage, err error) {
 	var d Storage
 	switch db_type {
-	/*
-		case utils.POSTGRES:
-			d, err = NewPostgresStorage(host, port, name, user, pass)
-			db = d.(CdrStorage)
-	*/
+	case utils.POSTGRES:
+		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
-		db = d.(CdrStorage)
 	default:
 		err = errors.New("unknown db")
 	}
 	if err != nil {
 		return nil, err
 	}
-	return db, nil
+	return d.(CdrStorage), nil
 }

@@ -4,7 +4,6 @@ go test -i github.com/cgrates/cgrates/engine
 go test -i github.com/cgrates/cgrates/sessionmanager
 go test -i github.com/cgrates/cgrates/config
 go test -i github.com/cgrates/cgrates/cmd/cgr-engine
-go test -i github.com/cgrates/fsock
 go test -i github.com/cgrates/cgrates/cache2go
 go test -i github.com/cgrates/cgrates/cdrc
 go test -i github.com/cgrates/cgrates/utils
@@ -25,8 +24,6 @@ go test github.com/cgrates/cgrates/cdrc
 cdrcs=$?
 go test github.com/cgrates/cgrates/utils
 ut=$?
-go test github.com/cgrates/fsock
-fs=$?
 go test github.com/cgrates/cgrates/history
 hs=$?
 go test github.com/cgrates/cgrates/cache2go
@@ -34,5 +31,5 @@ c2g=$?
 go test github.com/cgrates/cgrates/cdre
 cdre=$?
 
-exit $en && $gt && $sm && $cfg && $bl && $cr && $cdrc && $fs && $ut && $hs && $c2g && $cdre
+exit $en && $gt && $sm && $cfg && $bl && $cr && $cdrc && $ut && $hs && $c2g && $cdre
 
