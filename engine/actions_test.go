@@ -409,6 +409,23 @@ func TestActionTimingLogFunction(t *testing.T) {
 	}
 }
 
+func TestActionTimingFunctionNotAvailable(t *testing.T) {
+	a := &Action{
+		ActionType:  "VALID_FUNCTION_TYPE",
+		BalanceType: "test",
+		Balance:     &Balance{Value: 1.1},
+	}
+	at := &ActionTiming{
+		AccountIds: []string{"one", "two", "three"},
+		Timing:     &RateInterval{},
+		actions:    []*Action{a},
+	}
+	err := at.Execute()
+	if at.Timing != nil {
+		t.Errorf("Faild to detect wrong function type: %v", err)
+	}
+}
+
 func TestActionTimingPriotityListSortByWeight(t *testing.T) {
 	at1 := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
