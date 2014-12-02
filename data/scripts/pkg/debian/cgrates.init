@@ -20,10 +20,10 @@ NAME=cgrates
 DAEMON=/usr/bin/cgr-engine
 USER=cgrates
 GROUP=cgrates
-ENGINE_OPTS=""
+DAEMON_OPTS=""
 RUNDIR=/var/run/$NAME
 PIDFILE=$RUNDIR/cgr-engine.pid
-COREDUMP=$RUNDIR/cgr-coredump.log
+STACKTRACE=$RUNDIR/$NAME.strace
 SCRIPTNAME=/etc/init.d/$NAME
 DEFAULTS=/etc/default/$NAME
 ENABLE=false
@@ -50,7 +50,8 @@ fi
 # Install the run folder
 if [ ! -d $RUNDIR ]; then
   mkdir $RUNDIR
-  chown $USER:$GROUP $RUNDIR
+  touch $STACKTRACE
+  chown -R $USER:$GROUP $RUNDIR
 fi
 
 
@@ -63,12 +64,14 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-    echo "Started at:" `date`>>$COREDUMP
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null 2>>$COREDUMP \
+    echo "\n"
+    echo "### Started at:" `date`>>$STACKTRACE
+    echo "\n"
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test\
                 || return 1
-        start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile --exec $DAEMON --chuid $USER:$GROUP --background -- \
-                $ENGINE_OPTS \
-                || return 2
+ 	start-stop-daemon --start --quiet --chuid $USER:$GROUP --make-pidfile --pidfile $PIDFILE --background\
+		--startas /bin/bash -- -c "exec $DAEMON $DAEMON_OPTS >> $STACKTRACE 2>&1" \
+		|| return 2
 }
 
 #

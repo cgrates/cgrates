@@ -502,7 +502,6 @@ func main() {
 	// Start the servers
 	go serveRpc(rpcWait)
 	go serveHttp(httpWait)
-
 	<-exitChan
 
 	if *pidFile != "" {

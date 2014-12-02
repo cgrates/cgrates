@@ -251,6 +251,8 @@ func (at *ActionTiming) Execute() (err error) {
 		}
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
+			// do not allow the action timing to be rescheduled
+			at.Timing = nil
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
