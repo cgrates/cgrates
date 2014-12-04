@@ -363,7 +363,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 				}
 			}
 		} else { // BALANCE
-			for _, b := range ub.BalanceMap[at.BalanceType+at.Direction] {
+			for _, b := range ub.BalanceMap[at.BalanceType+at.BalanceDirection] {
 				if !b.dirty { // do not check clean balances
 					continue
 				}
@@ -447,7 +447,7 @@ func (ub *Account) initCounters() {
 		}
 		for _, a := range acs {
 			if a.Balance != nil {
-				direction := at.Direction
+				direction := at.BalanceDirection
 				if direction == "" {
 					direction = OUTBOUND
 				}

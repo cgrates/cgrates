@@ -513,10 +513,10 @@ func TestActionTimingsRemoveMember(t *testing.T) {
 
 func TestActionTriggerMatchNil(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:      OUTBOUND,
-		BalanceType:    CREDIT,
-		ThresholdType:  TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
+		BalanceDirection: OUTBOUND,
+		BalanceType:      CREDIT,
+		ThresholdType:    TRIGGER_MAX_BALANCE,
+		ThresholdValue:   2,
 	}
 	var a *Action
 	if !at.Match(a) {
@@ -526,10 +526,10 @@ func TestActionTriggerMatchNil(t *testing.T) {
 
 func TestActionTriggerMatchAllBlank(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:      OUTBOUND,
-		BalanceType:    CREDIT,
-		ThresholdType:  TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
+		BalanceDirection: OUTBOUND,
+		BalanceType:      CREDIT,
+		ThresholdType:    TRIGGER_MAX_BALANCE,
+		ThresholdValue:   2,
 	}
 	a := &Action{}
 	if !at.Match(a) {
@@ -539,10 +539,10 @@ func TestActionTriggerMatchAllBlank(t *testing.T) {
 
 func TestActionTriggerMatchMinuteBucketBlank(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:      OUTBOUND,
-		BalanceType:    CREDIT,
-		ThresholdType:  TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
+		BalanceDirection: OUTBOUND,
+		BalanceType:      CREDIT,
+		ThresholdType:    TRIGGER_MAX_BALANCE,
+		ThresholdValue:   2,
 	}
 	a := &Action{Direction: OUTBOUND, BalanceType: CREDIT}
 	if !at.Match(a) {
@@ -552,10 +552,10 @@ func TestActionTriggerMatchMinuteBucketBlank(t *testing.T) {
 
 func TestActionTriggerMatchMinuteBucketFull(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:      OUTBOUND,
-		BalanceType:    CREDIT,
-		ThresholdType:  TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
+		BalanceDirection: OUTBOUND,
+		BalanceType:      CREDIT,
+		ThresholdType:    TRIGGER_MAX_BALANCE,
+		ThresholdValue:   2,
 	}
 	a := &Action{ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`, TRIGGER_MAX_BALANCE, 2)}
 	if !at.Match(a) {
@@ -565,10 +565,10 @@ func TestActionTriggerMatchMinuteBucketFull(t *testing.T) {
 
 func TestActionTriggerMatchAllFull(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:      OUTBOUND,
-		BalanceType:    CREDIT,
-		ThresholdType:  TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
+		BalanceDirection: OUTBOUND,
+		BalanceType:      CREDIT,
+		ThresholdType:    TRIGGER_MAX_BALANCE,
+		ThresholdValue:   2,
 	}
 	a := &Action{Direction: OUTBOUND, BalanceType: CREDIT, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`, TRIGGER_MAX_BALANCE, 2)}
 	if !at.Match(a) {
@@ -578,10 +578,10 @@ func TestActionTriggerMatchAllFull(t *testing.T) {
 
 func TestActionTriggerMatchSomeFalse(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:      OUTBOUND,
-		BalanceType:    CREDIT,
-		ThresholdType:  TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
+		BalanceDirection: OUTBOUND,
+		BalanceType:      CREDIT,
+		ThresholdType:    TRIGGER_MAX_BALANCE,
+		ThresholdValue:   2,
 	}
 	a := &Action{Direction: INBOUND, BalanceType: CREDIT, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`, TRIGGER_MAX_BALANCE, 2)}
 	if at.Match(a) {
@@ -591,10 +591,10 @@ func TestActionTriggerMatchSomeFalse(t *testing.T) {
 
 func TestActionTriggerMatcBalanceFalse(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:      OUTBOUND,
-		BalanceType:    CREDIT,
-		ThresholdType:  TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
+		BalanceDirection: OUTBOUND,
+		BalanceType:      CREDIT,
+		ThresholdType:    TRIGGER_MAX_BALANCE,
+		ThresholdValue:   2,
 	}
 	a := &Action{Direction: OUTBOUND, BalanceType: CREDIT, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`, TRIGGER_MAX_BALANCE, 3.0)}
 	if at.Match(a) {
@@ -604,10 +604,10 @@ func TestActionTriggerMatcBalanceFalse(t *testing.T) {
 
 func TestActionTriggerMatcAllFalse(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:      OUTBOUND,
-		BalanceType:    CREDIT,
-		ThresholdType:  TRIGGER_MAX_BALANCE,
-		ThresholdValue: 2,
+		BalanceDirection: OUTBOUND,
+		BalanceType:      CREDIT,
+		ThresholdType:    TRIGGER_MAX_BALANCE,
+		ThresholdValue:   2,
 	}
 	a := &Action{Direction: INBOUND, BalanceType: MINUTES, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`, TRIGGER_MAX_COUNTER, 3)}
 	if at.Match(a) {
@@ -617,11 +617,11 @@ func TestActionTriggerMatcAllFalse(t *testing.T) {
 
 func TestActionTriggerMatchAll(t *testing.T) {
 	at := &ActionTrigger{
-		Direction:            OUTBOUND,
+		BalanceDirection:     OUTBOUND,
 		BalanceType:          CREDIT,
 		ThresholdType:        TRIGGER_MAX_BALANCE,
 		ThresholdValue:       2,
-		DestinationId:        "NAT",
+		BalanceDestinationId: "NAT",
 		BalanceWeight:        1.0,
 		BalanceRatingSubject: "test1",
 		BalanceSharedGroup:   "test2",
@@ -750,7 +750,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}}
 	topupResetAction(ub, nil, a)
@@ -770,7 +770,7 @@ func TestActionTopupResetMinutes(t *testing.T) {
 			CREDIT + OUTBOUND:  BalanceChain{&Balance{Value: 100}},
 			MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: 5, Weight: 20, DestinationId: "NAT"}}
 	topupResetAction(ub, nil, a)
@@ -789,7 +789,7 @@ func TestActionTopupCredit(t *testing.T) {
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}}
 	topupAction(ub, nil, a)
@@ -826,7 +826,7 @@ func TestActionDebitCredit(t *testing.T) {
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}}
 	debitAction(ub, nil, a)
@@ -926,7 +926,7 @@ func TestActionResetCounterCREDIT(t *testing.T) {
 		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}, &UnitsCounter{BalanceType: SMS, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceType: CREDIT, Direction: OUTBOUND}
 	resetCounterAction(ub, nil, a)
@@ -941,13 +941,13 @@ func TestActionResetCounterCREDIT(t *testing.T) {
 
 func TestActionTriggerLogging(t *testing.T) {
 	at := &ActionTrigger{
-		Id:             "some_uuid",
-		BalanceType:    CREDIT,
-		Direction:      OUTBOUND,
-		ThresholdValue: 100.0,
-		DestinationId:  "NAT",
-		Weight:         10.0,
-		ActionsId:      "TEST_ACTIONS",
+		Id:                   "some_uuid",
+		BalanceType:          CREDIT,
+		BalanceDirection:     OUTBOUND,
+		ThresholdValue:       100.0,
+		BalanceDestinationId: "NAT",
+		Weight:               10.0,
+		ActionsId:            "TEST_ACTIONS",
 	}
 	as, err := accountingStorage.GetActions(at.ActionsId, false)
 	if err != nil {

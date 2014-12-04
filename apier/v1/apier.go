@@ -565,11 +565,12 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 type AttrAddActionTrigger struct {
 	Tenant               string
 	Account              string
-	Direction            string
-	BalanceType          string
 	ThresholdType        string
 	ThresholdValue       float64
-	DestinationId        string
+	BalanceId            string
+	BalanceType          string
+	BalanceDirection     string
+	BalanceDestinationId string
 	BalanceRatingSubject string //ToDo
 	BalanceWeight        float64
 	BalanceExpiryTime    string
@@ -579,8 +580,8 @@ type AttrAddActionTrigger struct {
 }
 
 func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
-	if attr.Direction == "" {
-		attr.Direction = engine.OUTBOUND
+	if attr.BalanceDirection == "" {
+		attr.BalanceDirection = engine.OUTBOUND
 	}
 	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime)
 	if err != nil {
@@ -588,11 +589,12 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	}
 	at := &engine.ActionTrigger{
 		Id:                    utils.GenUUID(),
-		BalanceType:           attr.BalanceType,
-		Direction:             attr.Direction,
 		ThresholdType:         attr.ThresholdType,
 		ThresholdValue:        attr.ThresholdValue,
-		DestinationId:         attr.DestinationId,
+		BalanceId:             attr.BalanceId,
+		BalanceType:           attr.BalanceType,
+		BalanceDirection:      attr.BalanceDirection,
+		BalanceDestinationId:  attr.BalanceDestinationId,
 		BalanceWeight:         attr.BalanceWeight,
 		BalanceExpirationDate: balExpiryTime,
 		Weight:                attr.Weight,
@@ -600,7 +602,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		Executed:              false,
 	}
 
-	tag := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
+	tag := utils.AccountKey(attr.Tenant, attr.Account, attr.BalanceDirection)
 	_, err = engine.AccLock.Guard(tag, func() (float64, error) {
 		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {

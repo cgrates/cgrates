@@ -95,8 +95,29 @@ func TestBalanceClone(t *testing.T) {
 	}
 }
 
+func TestBalanceMatchActionTriggerId(t *testing.T) {
+	at := &ActionTrigger{BalanceId: "test"}
+	b := &Balance{Id: "test"}
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.Id = "test1"
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.Id = ""
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.Id = "test"
+	at.BalanceId = ""
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+}
+
 func TestBalanceMatchActionTriggerDestination(t *testing.T) {
-	at := &ActionTrigger{DestinationId: "test"}
+	at := &ActionTrigger{BalanceDestinationId: "test"}
 	b := &Balance{DestinationId: "test"}
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
@@ -110,7 +131,7 @@ func TestBalanceMatchActionTriggerDestination(t *testing.T) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 	b.DestinationId = "test"
-	at.DestinationId = ""
+	at.BalanceDestinationId = ""
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}

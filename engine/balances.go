@@ -28,7 +28,8 @@ import (
 
 // Can hold different units as seconds or monetary
 type Balance struct {
-	Uuid           string
+	Uuid           string //system wide unique
+	Id             string // account wide unique
 	Value          float64
 	ExpirationDate time.Time
 	Weight         float64
@@ -42,6 +43,9 @@ type Balance struct {
 }
 
 func (b *Balance) Equal(o *Balance) bool {
+	if b.Id != "" || o.Id != "" {
+		return b.Id == o.Id
+	}
 	if b.DestinationId == "" {
 		b.DestinationId = utils.ANY
 	}
@@ -82,9 +86,12 @@ func (b *Balance) MatchDestination(destinationId string) bool {
 }
 
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
+	if at.BalanceId != "" {
+		return b.Id == at.BalanceId
+	}
 	matchesDestination := true
-	if at.DestinationId != "" {
-		matchesDestination = (at.DestinationId == b.DestinationId)
+	if at.BalanceDestinationId != "" {
+		matchesDestination = (at.BalanceDestinationId == b.DestinationId)
 	}
 	matchesExpirationDate := true
 	if !at.BalanceExpirationDate.IsZero() {

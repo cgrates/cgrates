@@ -29,19 +29,20 @@ import (
 
 type ActionTrigger struct {
 	Id            string // uniquely identify the trigger
-	BalanceType   string
-	Direction     string
 	ThresholdType string //*min_counter, *max_counter, *min_balance, *max_balance
 	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_acc, *max_acc
 	ThresholdValue        float64
 	Recurrent             bool          // reset eexcuted flag each run
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
-	DestinationId         string        // filter for balance
-	BalanceWeight         float64       // filter for balance
-	BalanceExpirationDate time.Time     // filter for balance
-	BalanceRatingSubject  string        // filter for balance
-	BalanceCategory       string        // filter for balance
-	BalanceSharedGroup    string        // filter for balance
+	BalanceId             string
+	BalanceType           string
+	BalanceDirection      string
+	BalanceDestinationId  string    // filter for balance
+	BalanceWeight         float64   // filter for balance
+	BalanceExpirationDate time.Time // filter for balance
+	BalanceRatingSubject  string    // filter for balance
+	BalanceCategory       string    // filter for balance
+	BalanceSharedGroup    string    // filter for balance
 	Weight                float64
 	ActionsId             string
 	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
@@ -101,7 +102,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		return true
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
-	direction := a.Direction == "" || at.Direction == a.Direction
+	direction := a.Direction == "" || at.BalanceDirection == a.Direction
 	thresholdType, thresholdValue, destinationId, weight, ratingSubject, category, sharedGroup := true, true, true, true, true, true, true
 	if a.ExtraParameters != "" {
 		t := struct {
@@ -116,7 +117,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
 		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
 		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
-		destinationId = t.DestinationId == "" || at.DestinationId == t.DestinationId
+		destinationId = t.DestinationId == "" || at.BalanceDestinationId == t.DestinationId
 		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
 		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
 		category = t.BalanceCategory == "" || at.BalanceCategory == t.BalanceCategory
