@@ -40,7 +40,7 @@ const (
 
 func init() {
 	var err error
-	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateSxb")
+	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
 	if err != nil {
 		Logger = new(utils.StdLogger)
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
