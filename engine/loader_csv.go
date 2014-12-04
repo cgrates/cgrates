@@ -688,6 +688,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			ExtraParameters:  record[ACTSCSVIDX_EXTRA_PARAMS],
 			Balance: &Balance{
 				Uuid:          utils.GenUUID(),
+				Id:            record[ACTSCSVIDX_BALANCE_TAG],
 				Value:         units,
 				Weight:        balanceWeight,
 				DestinationId: record[ACTSCSVIDX_DESTINATION_TAG],

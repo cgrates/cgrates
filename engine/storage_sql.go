@@ -506,6 +506,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 				Tpid:            tpid,
 				Tag:             acId,
 				Action:          ac.Identifier,
+				BalanceTag:      ac.BalanceTag,
 				BalanceType:     ac.BalanceType,
 				Direction:       ac.Direction,
 				Units:           ac.Units,
@@ -613,7 +614,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 				ThresholdValue:        at.ThresholdValue,
 				Recurrent:             at.Recurrent,
 				MinSleep:              int64(at.MinSleep),
-				BalanceId:             at.BalanceId,
+				BalanceTag:            at.BalanceTag,
 				BalanceType:           at.BalanceType,
 				BalanceDirection:      at.BalanceDirection,
 				BalanceDestinationTag: at.BalanceDestinationId,
@@ -1396,6 +1397,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 	for _, tpAc := range tpActions {
 		a := &utils.TPAction{
 			Identifier:      tpAc.Action,
+			BalanceTag:      tpAc.BalanceTag,
 			BalanceType:     tpAc.BalanceType,
 			Direction:       tpAc.Direction,
 			Units:           tpAc.Units,
@@ -1425,7 +1427,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 			ThresholdValue:        tpAt.ThresholdValue,
 			Recurrent:             tpAt.Recurrent,
 			MinSleep:              time.Duration(tpAt.MinSleep),
-			BalanceId:             tpAt.BalanceId,
+			BalanceTag:            tpAt.BalanceTag,
 			BalanceType:           tpAt.BalanceType,
 			BalanceDirection:      tpAt.BalanceDirection,
 			BalanceDestinationId:  tpAt.BalanceDestinationTag,

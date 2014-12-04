@@ -61,7 +61,7 @@ const (
 	RATE_PROFILES_NRCOLS         = 7
 	SHARED_GROUPS_NRCOLS         = 4
 	LCRS_NRCOLS                  = 9
-	ACTIONS_NRCOLS               = 13
+	ACTIONS_NRCOLS               = 14
 	ACTION_PLANS_NRCOLS          = 4
 	ACTION_TRIGGERS_NRCOLS       = 17
 	ACCOUNT_ACTIONS_NRCOLS       = 5

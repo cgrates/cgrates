@@ -443,6 +443,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 			ExtraParameters:  apiAct.ExtraParameters,
 			Balance: &engine.Balance{
 				Uuid:          utils.GenUUID(),
+				Id:            apiAct.BalanceTag,
 				Value:         apiAct.Units,
 				Weight:        apiAct.BalanceWeight,
 				DestinationId: apiAct.DestinationId,

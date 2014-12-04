@@ -44,9 +44,9 @@ func TestAcntActsLoadCsv(t *testing.T) {
 	ratingProfiles := ``
 	sharedGroups := ``
 	lcrs := ``
-	actions := `TOPUP10_AC,*topup_reset,,*voice,*out,,*any,,,*unlimited,10,10,10
-DISABLE_ACNT,*disable_account,,,,,,,,,,,10
-ENABLE_ACNT,*enable_account,,,,,,,,,,,10`
+	actions := `TOPUP10_AC,*topup_reset,,,*voice,*out,,*any,,,*unlimited,10,10,10
+DISABLE_ACNT,*disable_account,,,,,,,,,,,,10
+ENABLE_ACNT,*enable_account,,,,,,,,,,,,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,1,*out,TOPUP10_AT,`

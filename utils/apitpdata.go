@@ -315,6 +315,7 @@ func (self *TPActions) AsExportSlice() [][]string {
 
 type TPAction struct {
 	Identifier      string  // Identifier mapped in the code
+	BalanceTag      string  // Balance identification string (account scope)
 	BalanceType     string  // Type of balance the action will operate on
 	Direction       string  // Balance direction
 	Units           float64 // Number of units to add/deduct
@@ -515,13 +516,13 @@ type TPActionTriggers struct {
 	ActionTriggers   []*TPActionTrigger // Set of triggers grouped in this profile
 }
 
-// TPid,Tag[0],ThresholdType[1],ThresholdValue[2],Recurrent[3],MinSleep[4],BalanceId[5],BalanceType[6],BalanceDirection[7],BalanceCategory[8],BalanceDestinationTag[9],
+// TPid,Tag[0],ThresholdType[1],ThresholdValue[2],Recurrent[3],MinSleep[4],BalanceTag[5],BalanceType[6],BalanceDirection[7],BalanceCategory[8],BalanceDestinationTag[9],
 // BalanceRatingSubject[10],BalanceSharedGroup[11],BalanceExpiryTime[12],BalanceWeight[13],StatsMinQueuedItems[14],ActionsTag[15],Weight[16]
 func (self *TPActionTriggers) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.ActionTriggers))
 	for idx, at := range self.ActionTriggers {
 		retSlice[idx] = []string{self.ActionTriggersId, at.ThresholdType, strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64), strconv.FormatBool(at.Recurrent), strconv.FormatFloat(at.MinSleep.Seconds(), 'f', -1, 64),
-			at.BalanceId, at.BalanceType, at.BalanceDirection, at.BalanceCategory, at.BalanceDestinationId, at.BalanceRatingSubject, at.BalanceSharedGroup, at.BalanceExpirationDate,
+			at.BalanceTag, at.BalanceType, at.BalanceDirection, at.BalanceCategory, at.BalanceDestinationId, at.BalanceRatingSubject, at.BalanceSharedGroup, at.BalanceExpirationDate,
 			strconv.FormatFloat(at.BalanceWeight, 'f', -1, 64), strconv.Itoa(at.MinQueuedItems), at.ActionsId, strconv.FormatFloat(at.Weight, 'f', -1, 64)}
 	}
 	return retSlice
@@ -532,7 +533,7 @@ type TPActionTrigger struct {
 	ThresholdValue        float64       // Threshold
 	Recurrent             bool          // reset executed flag each run
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
-	BalanceId             string        // The id of the balance in the account
+	BalanceTag            string        // The id of the balance in the account
 	BalanceType           string        // Type of balance this trigger monitors
 	BalanceDirection      string        // Traffic direction
 	BalanceDestinationId  string        // filter for balance

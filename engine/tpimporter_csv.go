@@ -540,7 +540,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			ThresholdValue:        threshold,
 			Recurrent:             recurrent,
 			MinSleep:              minSleep,
-			BalanceId:             balanceId,
+			BalanceTag:            balanceId,
 			BalanceType:           balanceType,
 			BalanceDirection:      direction,
 			BalanceDestinationId:  destinationTag,
