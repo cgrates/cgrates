@@ -54,11 +54,8 @@ func TestTutLclResetDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if db, err := engine.NewMySQLStorage(tutCfg.StorDBHost, tutCfg.StorDBPort, tutCfg.StorDBName, tutCfg.StorDBUser, tutCfg.StorDBPass,
-		tutCfg.StorDBMaxOpenConns, tutCfg.StorDBMaxIdleConns); err != nil {
-		t.Error(err)
-	} else if errFlush := db.Flush(); errFlush != nil {
-		t.Error(err)
+	if err := engine.InitCdrDb(tutCfg); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -66,20 +63,8 @@ func TestTutLclResetDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	ratingDb, err := engine.ConfigureRatingStorage(tutCfg.RatingDBType, tutCfg.RatingDBHost, tutCfg.RatingDBPort, tutCfg.RatingDBName,
-		tutCfg.RatingDBUser, tutCfg.RatingDBPass, tutCfg.DBDataEncoding)
-	if err != nil {
+	if err := engine.InitDataDb(tutCfg); err != nil {
 		t.Fatal(err)
-	}
-	accountDb, err := engine.ConfigureAccountingStorage(tutCfg.AccountDBType, tutCfg.AccountDBHost, tutCfg.AccountDBPort, tutCfg.AccountDBName,
-		tutCfg.AccountDBUser, tutCfg.AccountDBPass, tutCfg.DBDataEncoding)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, db := range []engine.Storage{ratingDb, accountDb} {
-		if err := db.Flush(); err != nil {
-			t.Fatal(err)
-		}
 	}
 }
 

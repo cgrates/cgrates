@@ -46,20 +46,8 @@ func TestCDRStatsLclInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	ratingDb, err := engine.ConfigureRatingStorage(cdrstCfg.RatingDBType, cdrstCfg.RatingDBHost, cdrstCfg.RatingDBPort, cdrstCfg.RatingDBName,
-		cdrstCfg.RatingDBUser, cdrstCfg.RatingDBPass, cdrstCfg.DBDataEncoding)
-	if err != nil {
-		t.Fatal("Cannot connect to dataDb", err)
-	}
-	accountDb, err := engine.ConfigureAccountingStorage(cdrstCfg.AccountDBType, cdrstCfg.AccountDBHost, cdrstCfg.AccountDBPort, cdrstCfg.AccountDBName,
-		cdrstCfg.AccountDBUser, cdrstCfg.AccountDBPass, cdrstCfg.DBDataEncoding)
-	if err != nil {
-		t.Fatal("Cannot connect to dataDb", err)
-	}
-	for _, db := range []engine.Storage{ratingDb, accountDb} {
-		if err := db.Flush(); err != nil {
-			t.Fatal("Cannot reset dataDb", err)
-		}
+	if err := engine.InitDataDb(cdrstCfg); err != nil {
+		t.Fatal(err)
 	}
 }
 
