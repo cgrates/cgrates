@@ -86,6 +86,7 @@ func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 type AttrAddBalance struct {
 	Tenant        string
 	Account       string
+	BalanceTag    string
 	BalanceType   string
 	Direction     string
 	Value         float64
@@ -106,10 +107,10 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
-		ub := &engine.Account{
+		account := &engine.Account{
 			Id: tag,
 		}
-		if err := self.AccountDb.SetAccount(ub); err != nil {
+		if err := self.AccountDb.SetAccount(account); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -134,6 +135,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			BalanceType: attr.BalanceType,
 			Direction:   attr.Direction,
 			Balance: &engine.Balance{
+				Id:             attr.BalanceTag,
 				Value:          attr.Value,
 				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,

@@ -775,7 +775,7 @@ func TestAccountdebitBalance(t *testing.T) {
 	}
 	newMb := &Balance{Weight: 20, DestinationId: "NEW"}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: newMb}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 3 || ub.BalanceMap[MINUTES+OUTBOUND][2] != newMb {
 		t.Error("Error adding minute bucket!", len(ub.BalanceMap[MINUTES+OUTBOUND]), ub.BalanceMap[MINUTES+OUTBOUND])
 	}
@@ -790,7 +790,7 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 	}
 	newMb := &Balance{Value: -10, Weight: 20, DestinationId: "NAT"}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: newMb}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 || ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 25 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -802,7 +802,7 @@ func TestAccountAddMinuteNil(t *testing.T) {
 		AllowNegative: true,
 		BalanceMap:    map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 	}
-	ub.debitBalanceAction(nil)
+	ub.debitBalanceAction(nil, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -814,17 +814,17 @@ func TestAccountAddMinutBucketEmpty(t *testing.T) {
 	mb3 := &Balance{Value: -10, DestinationId: "OTHER"}
 	ub := &Account{}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: mb1}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 1 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[MINUTES+OUTBOUND])
 	}
 	a = &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: mb2}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 1 || ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[MINUTES+OUTBOUND])
 	}
 	a = &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: mb3}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[MINUTES+OUTBOUND])
 	}

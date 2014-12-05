@@ -629,7 +629,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 		t.Errorf("Debit from share and normal error: %+v, %v", cc, err)
 	}
 
-	if balanceMap[0].Value != 10 || balanceMap[1].Value != 7.5 {
+	if balanceMap[0].Value != 10 || balanceMap[1].Value != 27.5 {
 		t.Errorf("Error debiting from right balance: %v %v", balanceMap[0].Value, balanceMap[1].Value)
 	}
 }
