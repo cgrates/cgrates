@@ -47,7 +47,7 @@ func (self *CmdAddTriggeredAction) RpcMethod() string {
 
 func (self *CmdAddTriggeredAction) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &v1.AttrAddActionTrigger{Direction: "*out"}
+		self.rpcParams = &v1.AttrAddActionTrigger{BalanceDirection: "*out"}
 	}
 	return self.rpcParams
 }

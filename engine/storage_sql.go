@@ -506,6 +506,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 				Tpid:            tpid,
 				Tag:             acId,
 				Action:          ac.Identifier,
+				BalanceTag:      ac.BalanceTag,
 				BalanceType:     ac.BalanceType,
 				Direction:       ac.Direction,
 				Units:           ac.Units,
@@ -607,24 +608,25 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 		}
 		for _, at := range aTriggers {
 			saved := tx.Save(TpActionTrigger{
-				Tpid:                 tpid,
-				Tag:                  atId,
-				BalanceType:          at.BalanceType,
-				Direction:            at.Direction,
-				ThresholdType:        at.ThresholdType,
-				ThresholdValue:       at.ThresholdValue,
-				Recurrent:            at.Recurrent,
-				MinSleep:             int64(at.MinSleep),
-				DestinationTag:       at.DestinationId,
-				BalanceWeight:        at.BalanceWeight,
-				BalanceExpiryTime:    at.BalanceExpirationDate,
-				BalanceRatingSubject: at.BalanceRatingSubject,
-				BalanceCategory:      at.BalanceCategory,
-				BalanceSharedGroup:   at.BalanceSharedGroup,
-				MinQueuedItems:       at.MinQueuedItems,
-				ActionsTag:           at.ActionsId,
-				Weight:               at.Weight,
-				CreatedAt:            time.Now(),
+				Tpid:                  tpid,
+				Tag:                   atId,
+				ThresholdType:         at.ThresholdType,
+				ThresholdValue:        at.ThresholdValue,
+				Recurrent:             at.Recurrent,
+				MinSleep:              int64(at.MinSleep),
+				BalanceTag:            at.BalanceTag,
+				BalanceType:           at.BalanceType,
+				BalanceDirection:      at.BalanceDirection,
+				BalanceDestinationTag: at.BalanceDestinationId,
+				BalanceWeight:         at.BalanceWeight,
+				BalanceExpiryTime:     at.BalanceExpirationDate,
+				BalanceRatingSubject:  at.BalanceRatingSubject,
+				BalanceCategory:       at.BalanceCategory,
+				BalanceSharedGroup:    at.BalanceSharedGroup,
+				MinQueuedItems:        at.MinQueuedItems,
+				ActionsTag:            at.ActionsId,
+				Weight:                at.Weight,
+				CreatedAt:             time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -1395,6 +1397,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 	for _, tpAc := range tpActions {
 		a := &utils.TPAction{
 			Identifier:      tpAc.Action,
+			BalanceTag:      tpAc.BalanceTag,
 			BalanceType:     tpAc.BalanceType,
 			Direction:       tpAc.Direction,
 			Units:           tpAc.Units,
@@ -1420,13 +1423,14 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 	}
 	for _, tpAt := range tpActionTriggers {
 		at := &utils.TPActionTrigger{
-			BalanceType:           tpAt.BalanceType,
-			Direction:             tpAt.Direction,
 			ThresholdType:         tpAt.ThresholdType,
 			ThresholdValue:        tpAt.ThresholdValue,
 			Recurrent:             tpAt.Recurrent,
 			MinSleep:              time.Duration(tpAt.MinSleep),
-			DestinationId:         tpAt.DestinationTag,
+			BalanceTag:            tpAt.BalanceTag,
+			BalanceType:           tpAt.BalanceType,
+			BalanceDirection:      tpAt.BalanceDirection,
+			BalanceDestinationId:  tpAt.BalanceDestinationTag,
 			BalanceWeight:         tpAt.BalanceWeight,
 			BalanceExpirationDate: tpAt.BalanceExpiryTime,
 			BalanceRatingSubject:  tpAt.BalanceRatingSubject,

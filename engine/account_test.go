@@ -775,7 +775,7 @@ func TestAccountdebitBalance(t *testing.T) {
 	}
 	newMb := &Balance{Weight: 20, DestinationId: "NEW"}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: newMb}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 3 || ub.BalanceMap[MINUTES+OUTBOUND][2] != newMb {
 		t.Error("Error adding minute bucket!", len(ub.BalanceMap[MINUTES+OUTBOUND]), ub.BalanceMap[MINUTES+OUTBOUND])
 	}
@@ -790,7 +790,7 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 	}
 	newMb := &Balance{Value: -10, Weight: 20, DestinationId: "NAT"}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: newMb}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 || ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 25 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -802,7 +802,7 @@ func TestAccountAddMinuteNil(t *testing.T) {
 		AllowNegative: true,
 		BalanceMap:    map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 	}
-	ub.debitBalanceAction(nil)
+	ub.debitBalanceAction(nil, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -814,17 +814,17 @@ func TestAccountAddMinutBucketEmpty(t *testing.T) {
 	mb3 := &Balance{Value: -10, DestinationId: "OTHER"}
 	ub := &Account{}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: mb1}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 1 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[MINUTES+OUTBOUND])
 	}
 	a = &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: mb2}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 1 || ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[MINUTES+OUTBOUND])
 	}
 	a = &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: mb3}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[MINUTES+OUTBOUND])
 	}
@@ -835,7 +835,7 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceType: CREDIT, Balance: &Balance{Value: 1}})
 	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 110 || ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 {
@@ -859,7 +859,7 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 100, ThresholdType: TRIGGER_MIN_COUNTER, ActionsId: "TEST_ACTIONS"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 100, ThresholdType: TRIGGER_MIN_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceType: CREDIT, Balance: &Balance{Value: 1}})
 	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 110 || ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 {
@@ -872,7 +872,7 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, BalanceDirection: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 	ub.countUnits(&Action{BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 1}})
 	if len(ub.BalanceMap[CREDIT+OUTBOUND]) != 1 || ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 10 {

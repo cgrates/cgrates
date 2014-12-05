@@ -266,14 +266,14 @@ func TestMySQLSetGetTPActionTriggers(t *testing.T) {
 		return
 	}
 	atrg := &utils.TPActionTrigger{
-		BalanceType:    "*monetary",
-		Direction:      "*out",
-		ThresholdType:  "*min_balance",
-		ThresholdValue: 2.0,
-		Recurrent:      true,
-		DestinationId:  "*any",
-		Weight:         10.0,
-		ActionsId:      "LOG_BALANCE",
+		BalanceType:          "*monetary",
+		BalanceDirection:     "*out",
+		ThresholdType:        "*min_balance",
+		ThresholdValue:       2.0,
+		Recurrent:            true,
+		BalanceDestinationId: "*any",
+		Weight:               10.0,
+		ActionsId:            "LOG_BALANCE",
 	}
 	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
 	if err := mysqlDb.SetTPActionTriggers(TEST_SQL+"1", mpAtrgs); err != nil {

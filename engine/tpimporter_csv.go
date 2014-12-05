@@ -493,7 +493,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		tag, balanceType, direction, thresholdType, destinationTag, balanceExpirationDate, balanceRatingSubject, balanceCategory, balanceSharedGroup, actionsTag := record[ATRIGCSVIDX_TAG], record[ATRIGCSVIDX_BAL_TYPE],
+		tag, balanceId, balanceType, direction, thresholdType, destinationTag, balanceExpirationDate, balanceRatingSubject, balanceCategory, balanceSharedGroup, actionsTag := record[ATRIGCSVIDX_TAG], record[ATRIGCSVIDX_BAL_TAG], record[ATRIGCSVIDX_BAL_TYPE],
 			record[ATRIGCSVIDX_BAL_DIRECTION], record[ATRIGCSVIDX_THRESHOLD_TYPE], record[ATRIGCSVIDX_BAL_DESTINATION_TAG], record[ATRIGCSVIDX_BAL_EXPIRY_TIME], record[ATRIGCSVIDX_BAL_RATING_SUBJECT],
 			record[ATRIGCSVIDX_BAL_CATEGORY], record[ATRIGCSVIDX_BAL_SHARED_GROUP], record[ATRIGCSVIDX_ACTIONS_TAG]
 		threshold, err := strconv.ParseFloat(record[ATRIGCSVIDX_THRESHOLD_VALUE], 64)
@@ -536,13 +536,14 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			atrs[tag] = make([]*utils.TPActionTrigger, 0)
 		}
 		atrs[tag] = append(atrs[tag], &utils.TPActionTrigger{
-			BalanceType:           balanceType,
-			Direction:             direction,
 			ThresholdType:         thresholdType,
 			ThresholdValue:        threshold,
 			Recurrent:             recurrent,
 			MinSleep:              minSleep,
-			DestinationId:         destinationTag,
+			BalanceTag:            balanceId,
+			BalanceType:           balanceType,
+			BalanceDirection:      direction,
+			BalanceDestinationId:  destinationTag,
 			BalanceWeight:         balanceWeight,
 			BalanceExpirationDate: balanceExpirationDate,
 			BalanceRatingSubject:  balanceRatingSubject,

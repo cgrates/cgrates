@@ -126,6 +126,7 @@ CREATE TABLE tp_actions (
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
   action VARCHAR(24) NOT NULL,
+  balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
   direction VARCHAR(8) NOT NULL,
   units NUMERIC(20,4) NOT NULL,
@@ -138,7 +139,7 @@ CREATE TABLE tp_actions (
   extra_parameters VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, tag, action, balance_type, direction, expiry_time, destination_tag, shared_group, balance_weight, weight)
+  UNIQUE (tpid, tag, action, balance_tag, balance_type, direction, expiry_time, destination_tag, shared_group, balance_weight, weight)
 );
 
 --
@@ -166,6 +167,7 @@ CREATE TABLE tp_action_triggers (
   id SERIAL PRIMARY KEY,
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
+  balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
   direction VARCHAR(8) NOT NULL,
   threshold_type char(12) NOT NULL,
@@ -182,7 +184,7 @@ CREATE TABLE tp_action_triggers (
   actions_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, tag, balance_type, direction, threshold_type, threshold_value, destination_tag, actions_tag)
+  UNIQUE (tpid, tag, balance_tag, balance_type, direction, threshold_type, threshold_value, destination_tag, actions_tag)
 );
 
 --

@@ -177,9 +177,8 @@ func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err erro
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
-	ub.BalanceMap[a.BalanceType+a.Direction] = BalanceChain{}
 	genericMakeNegative(a)
-	return genericDebit(ub, a)
+	return genericDebit(ub, a, true)
 }
 
 func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
@@ -187,7 +186,7 @@ func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
 		return errors.New("Nil user balance")
 	}
 	genericMakeNegative(a)
-	return genericDebit(ub, a)
+	return genericDebit(ub, a, false)
 }
 
 func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
@@ -197,15 +196,14 @@ func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err erro
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
-	ub.BalanceMap[a.BalanceType+a.Direction] = BalanceChain{}
-	return genericDebit(ub, a)
+	return genericDebit(ub, a, true)
 }
 
 func debitAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
-	return genericDebit(ub, a)
+	return genericDebit(ub, a, false)
 }
 
 func resetCounterAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
@@ -236,14 +234,14 @@ func genericMakeNegative(a *Action) {
 	}
 }
 
-func genericDebit(ub *Account, a *Action) (err error) {
+func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	ub.debitBalanceAction(a)
+	ub.debitBalanceAction(a, reset)
 	return
 }
 

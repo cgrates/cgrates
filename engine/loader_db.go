@@ -570,6 +570,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 				ExpirationString: tpact.ExpiryTime,
 				Balance: &Balance{
 					Uuid:          utils.GenUUID(),
+					Id:            tpact.BalanceTag,
 					Value:         tpact.Units,
 					Weight:        tpact.BalanceWeight,
 					RatingSubject: tpact.RatingSubject,
@@ -631,13 +632,14 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 			balance_expiration_date, _ := utils.ParseTimeDetectLayout(apiAtr.BalanceExpirationDate)
 			atrs[idx] = &ActionTrigger{
 				Id:                    utils.GenUUID(),
-				BalanceType:           apiAtr.BalanceType,
-				Direction:             apiAtr.Direction,
 				ThresholdType:         apiAtr.ThresholdType,
 				ThresholdValue:        apiAtr.ThresholdValue,
 				Recurrent:             apiAtr.Recurrent,
 				MinSleep:              apiAtr.MinSleep,
-				DestinationId:         apiAtr.DestinationId,
+				BalanceId:             apiAtr.BalanceTag,
+				BalanceType:           apiAtr.BalanceType,
+				BalanceDirection:      apiAtr.BalanceDirection,
+				BalanceDestinationId:  apiAtr.BalanceDestinationId,
 				BalanceWeight:         apiAtr.BalanceWeight,
 				BalanceExpirationDate: balance_expiration_date,
 				BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
@@ -782,14 +784,21 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			for key, atrsLst := range apiAtrsMap {
 				atrs := make([]*ActionTrigger, len(atrsLst))
 				for idx, apiAtr := range atrsLst {
+					expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
 					atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-						BalanceType:    apiAtr.BalanceType,
-						Direction:      apiAtr.Direction,
-						ThresholdType:  apiAtr.ThresholdType,
-						ThresholdValue: apiAtr.ThresholdValue,
-						DestinationId:  apiAtr.DestinationId,
-						Weight:         apiAtr.Weight,
-						ActionsId:      apiAtr.ActionsId,
+						ThresholdType:         apiAtr.ThresholdType,
+						ThresholdValue:        apiAtr.ThresholdValue,
+						BalanceId:             apiAtr.BalanceTag,
+						BalanceType:           apiAtr.BalanceType,
+						BalanceDirection:      apiAtr.BalanceDirection,
+						BalanceDestinationId:  apiAtr.BalanceDestinationId,
+						BalanceWeight:         apiAtr.BalanceWeight,
+						BalanceExpirationDate: expTime,
+						BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
+						BalanceCategory:       apiAtr.BalanceCategory,
+						BalanceSharedGroup:    apiAtr.BalanceSharedGroup,
+						Weight:                apiAtr.Weight,
+						ActionsId:             apiAtr.ActionsId,
 					}
 				}
 				atrsMap[key] = atrs

@@ -688,6 +688,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			ExtraParameters:  record[ACTSCSVIDX_EXTRA_PARAMS],
 			Balance: &Balance{
 				Uuid:          utils.GenUUID(),
+				Id:            record[ACTSCSVIDX_BALANCE_TAG],
 				Value:         units,
 				Weight:        balanceWeight,
 				DestinationId: record[ACTSCSVIDX_DESTINATION_TAG],
@@ -796,13 +797,14 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 
 		at := &ActionTrigger{
 			Id:                    utils.GenUUID(),
-			BalanceType:           record[ATRIGCSVIDX_BAL_TYPE],
-			Direction:             record[ATRIGCSVIDX_BAL_DIRECTION],
 			ThresholdType:         record[ATRIGCSVIDX_THRESHOLD_TYPE],
 			ThresholdValue:        value,
 			Recurrent:             recurrent,
 			MinSleep:              minSleep,
-			DestinationId:         record[ATRIGCSVIDX_BAL_DESTINATION_TAG],
+			BalanceId:             record[ATRIGCSVIDX_BAL_TAG],
+			BalanceType:           record[ATRIGCSVIDX_BAL_TYPE],
+			BalanceDirection:      record[ATRIGCSVIDX_BAL_DIRECTION],
+			BalanceDestinationId:  record[ATRIGCSVIDX_BAL_DESTINATION_TAG],
 			BalanceWeight:         balanceWeight,
 			BalanceExpirationDate: balanceExp,
 			BalanceRatingSubject:  record[ATRIGCSVIDX_BAL_RATING_SUBJECT],

@@ -129,6 +129,7 @@ type TpAction struct {
 	Tpid            string
 	Tag             string
 	Action          string
+	BalanceTag      string
 	BalanceType     string
 	Direction       string
 	Units           float64
@@ -154,25 +155,26 @@ type TpActionPlan struct {
 }
 
 type TpActionTrigger struct {
-	Id                   int64
-	Tpid                 string
-	Tag                  string
-	BalanceType          string
-	Direction            string
-	ThresholdType        string
-	ThresholdValue       float64
-	Recurrent            bool
-	MinSleep             int64
-	DestinationTag       string
-	BalanceWeight        float64
-	BalanceExpiryTime    string
-	BalanceRatingSubject string
-	BalanceCategory      string
-	BalanceSharedGroup   string
-	MinQueuedItems       int
-	ActionsTag           string
-	Weight               float64
-	CreatedAt            time.Time
+	Id                    int64
+	Tpid                  string
+	Tag                   string
+	ThresholdType         string
+	ThresholdValue        float64
+	Recurrent             bool
+	MinSleep              int64
+	BalanceTag            string
+	BalanceType           string
+	BalanceDirection      string
+	BalanceDestinationTag string
+	BalanceWeight         float64
+	BalanceExpiryTime     string
+	BalanceRatingSubject  string
+	BalanceCategory       string
+	BalanceSharedGroup    string
+	MinQueuedItems        int
+	ActionsTag            string
+	Weight                float64
+	CreatedAt             time.Time
 }
 
 type TpAccountAction struct {

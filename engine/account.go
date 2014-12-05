@@ -99,7 +99,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
-func (ub *Account) debitBalanceAction(a *Action) error {
+func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	if a == nil {
 		return errors.New("nil minute action!")
 	}
@@ -117,6 +117,9 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 			continue // just to be safe (cleaned expired balances above)
 		}
 		if b.Equal(a.Balance) {
+			if reset {
+				b.Value = 0
+			}
 			b.SubstractAmount(a.Balance.Value)
 			found = true
 			break
@@ -363,7 +366,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 				}
 			}
 		} else { // BALANCE
-			for _, b := range ub.BalanceMap[at.BalanceType+at.Direction] {
+			for _, b := range ub.BalanceMap[at.BalanceType+at.BalanceDirection] {
 				if !b.dirty { // do not check clean balances
 					continue
 				}
@@ -447,7 +450,7 @@ func (ub *Account) initCounters() {
 		}
 		for _, a := range acs {
 			if a.Balance != nil {
-				direction := at.Direction
+				direction := at.BalanceDirection
 				if direction == "" {
 					direction = OUTBOUND
 				}

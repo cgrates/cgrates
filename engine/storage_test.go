@@ -209,13 +209,13 @@ func GetUB() *Account {
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
-		Id:             "some_uuid",
-		BalanceType:    CREDIT,
-		Direction:      OUTBOUND,
-		ThresholdValue: 100.0,
-		DestinationId:  "NAT",
-		Weight:         10.0,
-		ActionsId:      "Commando",
+		Id:                   "some_uuid",
+		BalanceType:          CREDIT,
+		BalanceDirection:     OUTBOUND,
+		ThresholdValue:       100.0,
+		BalanceDestinationId: "NAT",
+		Weight:               10.0,
+		ActionsId:            "Commando",
 	}
 	var zeroTime time.Time
 	zeroTime = zeroTime.UTC() // for deep equal to find location

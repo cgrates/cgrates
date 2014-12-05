@@ -86,6 +86,7 @@ func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 type AttrAddBalance struct {
 	Tenant        string
 	Account       string
+	BalanceTag    string
 	BalanceType   string
 	Direction     string
 	Value         float64
@@ -106,10 +107,10 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
-		ub := &engine.Account{
+		account := &engine.Account{
 			Id: tag,
 		}
-		if err := self.AccountDb.SetAccount(ub); err != nil {
+		if err := self.AccountDb.SetAccount(account); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -134,6 +135,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			BalanceType: attr.BalanceType,
 			Direction:   attr.Direction,
 			Balance: &engine.Balance{
+				Id:             attr.BalanceTag,
 				Value:          attr.Value,
 				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
@@ -443,6 +445,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 			ExtraParameters:  apiAct.ExtraParameters,
 			Balance: &engine.Balance{
 				Uuid:          utils.GenUUID(),
+				Id:            apiAct.BalanceTag,
 				Value:         apiAct.Units,
 				Weight:        apiAct.BalanceWeight,
 				DestinationId: apiAct.DestinationId,
@@ -565,11 +568,12 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 type AttrAddActionTrigger struct {
 	Tenant               string
 	Account              string
-	Direction            string
-	BalanceType          string
 	ThresholdType        string
 	ThresholdValue       float64
-	DestinationId        string
+	BalanceId            string
+	BalanceType          string
+	BalanceDirection     string
+	BalanceDestinationId string
 	BalanceRatingSubject string //ToDo
 	BalanceWeight        float64
 	BalanceExpiryTime    string
@@ -579,8 +583,8 @@ type AttrAddActionTrigger struct {
 }
 
 func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
-	if attr.Direction == "" {
-		attr.Direction = engine.OUTBOUND
+	if attr.BalanceDirection == "" {
+		attr.BalanceDirection = engine.OUTBOUND
 	}
 	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime)
 	if err != nil {
@@ -588,11 +592,12 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	}
 	at := &engine.ActionTrigger{
 		Id:                    utils.GenUUID(),
-		BalanceType:           attr.BalanceType,
-		Direction:             attr.Direction,
 		ThresholdType:         attr.ThresholdType,
 		ThresholdValue:        attr.ThresholdValue,
-		DestinationId:         attr.DestinationId,
+		BalanceId:             attr.BalanceId,
+		BalanceType:           attr.BalanceType,
+		BalanceDirection:      attr.BalanceDirection,
+		BalanceDestinationId:  attr.BalanceDestinationId,
 		BalanceWeight:         attr.BalanceWeight,
 		BalanceExpirationDate: balExpiryTime,
 		Weight:                attr.Weight,
@@ -600,7 +605,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		Executed:              false,
 	}
 
-	tag := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
+	tag := utils.AccountKey(attr.Tenant, attr.Account, attr.BalanceDirection)
 	_, err = engine.AccLock.Guard(tag, func() (float64, error) {
 		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {
