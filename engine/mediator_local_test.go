@@ -70,7 +70,7 @@ func TestMediInitRatingDb(t *testing.T) {
 	if err != nil {
 		t.Fatal("Cannot connect to dataDb", err)
 	}
-	if err := ratingDb.Flush(); err != nil {
+	if err := ratingDb.Flush(""); err != nil {
 		t.Fatal("Cannot reset dataDb", err)
 	}
 }

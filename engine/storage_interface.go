@@ -63,7 +63,7 @@ const (
 
 type Storage interface {
 	Close()
-	Flush() error
+	Flush(string) error
 	GetKeysForPrefix(string) ([]string, error)
 }
 

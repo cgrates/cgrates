@@ -45,7 +45,7 @@ func TestFlush(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := rds.Flush(); err != nil {
+	if err := rds.Flush(""); err != nil {
 		t.Error("Failed to Flush redis database", err.Error())
 	}
 	rds.CacheAccounting(nil, nil, nil, nil)

@@ -24,7 +24,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 
 	_ "github.com/bmizerany/pq"
@@ -52,10 +51,9 @@ func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdl
 	return &PostgresStorage{&SQLStorage{Db: db.DB(), db: db}}, nil
 }
 
-func (self *PostgresStorage) Flush() (err error) {
-	cfg := config.CgrConfig()
+func (self *PostgresStorage) Flush(scriptsPath string) (err error) {
 	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
-		if err := self.CreateTablesFromScript(path.Join(cfg.DataFolderPath, "storage", utils.POSTGRES, scriptName)); err != nil {
+		if err := self.CreateTablesFromScript(path.Join(scriptsPath, scriptName)); err != nil {
 			return err
 		}
 	}

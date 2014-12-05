@@ -21,6 +21,7 @@ package engine
 import (
 	"github.com/cgrates/cgrates/config"
 	"os/exec"
+	"path"
 	"time"
 )
 
@@ -35,30 +36,41 @@ func InitDataDb(cfg *config.CGRConfig) error {
 		return err
 	}
 	for _, db := range []Storage{ratingDb, accountDb} {
-		if err := db.Flush(); err != nil {
+		if err := db.Flush(""); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func StartEngine(cfgPath string, waitEngine int) error {
-	enginePath, err := exec.LookPath("cgr-engine")
+func InitCdrDb(cfg *config.CGRConfig) error {
+	storDb, err := ConfigureLoadStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
 	if err != nil {
 		return err
 	}
-	if err := StopEngine(waitEngine); err != nil {
+	if err := storDb.Flush(path.Join(cfg.DataFolderPath, "storage", cfg.StorDBType)); err != nil {
 		return err
 	}
-	engine := exec.Command(enginePath, "-config", cfgPath)
-	if err := engine.Start(); err != nil {
-		return err
-	}
-	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // Give time to rater to fire up
 	return nil
 }
 
-func StopEngine(waitEngine int) error {
+// Return reference towards the command started so we can stop it if necessary
+func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
+	enginePath, err := exec.LookPath("cgr-engine")
+	if err != nil {
+		return nil, err
+	}
+	KillEngine(waitEngine)
+	engine := exec.Command(enginePath, "-config", cfgPath)
+	if err := engine.Start(); err != nil {
+		return nil, err
+	}
+	time.Sleep(time.Duration(waitEngine) * time.Millisecond) // Give time to rater to fire up
+	return engine, nil
+}
+
+func KillEngine(waitEngine int) error {
 	if err := exec.Command("pkill", "cgr-engine").Run(); err != nil {
 		return err
 	}

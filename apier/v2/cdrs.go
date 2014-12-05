@@ -20,6 +20,7 @@ package v2
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -54,4 +55,9 @@ func (apier *ApierV2) CountCdrs(attrs utils.RpcCdrsFilter, reply *int64) error {
 		*reply = count
 	}
 	return nil
+}
+
+// Receive CDRs via RPC methods, not included with APIer because it has way less dependencies and can be standalone
+type CdrsV2 struct {
+	v1.CDRSV1
 }

@@ -62,7 +62,7 @@ func (rs *RedisStorage) Close() {
 	//rs.db.Quit()
 }
 
-func (rs *RedisStorage) Flush() (err error) {
+func (rs *RedisStorage) Flush(ignore string) (err error) {
 	err = rs.db.Flush(false)
 	return
 }

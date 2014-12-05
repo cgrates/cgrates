@@ -208,7 +208,9 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage, mediChan, d
 	cdrServer = engine.NewCdrS(cdrDb, medi, cdrStats, cfg)
 	cdrServer.RegisterHanlersToServer(server)
 	engine.Logger.Info("Registering CDRS RPC service.")
-	server.RpcRegister(&v1.CDRSV1{CdrSrv: cdrServer})
+	cdrSrv := v1.CDRSV1{CdrSrv: cdrServer}
+	server.RpcRegister(&cdrSrv)
+	server.RpcRegister(&v2.CdrsV2{CDRSV1: cdrSrv})
 	responder.CdrSrv = cdrServer // Make the cdrserver available for internal communication
 	close(doneChan)
 }
@@ -343,38 +345,41 @@ func main() {
 	var logDb engine.LogStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
-	ratingDb, err = engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort,
-		cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
-	if err != nil { // Cannot configure getter database, show stopper
-		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
-		return
-	}
-	defer ratingDb.Close()
-	engine.SetRatingStorage(ratingDb)
-	accountDb, err = engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort,
-		cfg.AccountDBName, cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
-	if err != nil { // Cannot configure getter database, show stopper
-		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
-		return
-	}
-	defer accountDb.Close()
-	engine.SetAccountingStorage(accountDb)
-
-	if cfg.StorDBType == SAME {
-		logDb = ratingDb.(engine.LogStorage)
-	} else {
-		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
-			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
-		if err != nil { // Cannot configure logger database, show stopper
-			engine.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+	if cfg.RaterEnabled || cfg.SchedulerEnabled { // Only connect to dataDb if required
+		ratingDb, err = engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort,
+			cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
+		if err != nil { // Cannot configure getter database, show stopper
+			engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
 		}
+		defer ratingDb.Close()
+		engine.SetRatingStorage(ratingDb)
+		accountDb, err = engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort,
+			cfg.AccountDBName, cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
+		if err != nil { // Cannot configure getter database, show stopper
+			engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+			return
+		}
+		defer accountDb.Close()
+		engine.SetAccountingStorage(accountDb)
 	}
-	defer logDb.Close()
-	engine.SetStorageLogger(logDb)
-	// loadDb,cdrDb and logDb are all mapped on the same stordb storage
-	loadDb = logDb.(engine.LoadStorage)
-	cdrDb = logDb.(engine.CdrStorage)
+	if cfg.RaterEnabled || cfg.CDRSEnabled || cfg.MediatorEnabled { // Only connect to storDb if necessary
+		if cfg.StorDBType == SAME {
+			logDb = ratingDb.(engine.LogStorage)
+		} else {
+			logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
+				cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+			if err != nil { // Cannot configure logger database, show stopper
+				engine.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+				return
+			}
+		}
+		defer logDb.Close()
+		engine.SetStorageLogger(logDb)
+		// loadDb,cdrDb and logDb are all mapped on the same stordb storage
+		loadDb = logDb.(engine.LoadStorage)
+		cdrDb = logDb.(engine.CdrStorage)
+	}
 
 	engine.SetRoundingDecimals(cfg.RoundingDecimals)
 	if cfg.SMDebitInterval > 0 {

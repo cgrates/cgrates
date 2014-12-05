@@ -127,7 +127,7 @@ func TestTutLclLoadTariffPlanFromFolder(t *testing.T) {
 
 }
 
-func TestShutdown (t *testing.T) {
+func TestShutdown(t *testing.T) {
 	if !*testLocal {
 		return
 	}

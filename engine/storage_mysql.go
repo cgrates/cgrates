@@ -24,9 +24,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-
 	"github.com/jinzhu/gorm"
 )
 
@@ -51,10 +49,9 @@ type MySQLStorage struct {
 	*SQLStorage
 }
 
-func (self *MySQLStorage) Flush() (err error) {
-	cfg := config.CgrConfig()
+func (self *MySQLStorage) Flush(scriptsPath string) (err error) {
 	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
-		if err := self.CreateTablesFromScript(path.Join(cfg.DataFolderPath, "storage", utils.MYSQL, scriptName)); err != nil {
+		if err := self.CreateTablesFromScript(path.Join(scriptsPath, scriptName)); err != nil {
 			return err
 		}
 	}

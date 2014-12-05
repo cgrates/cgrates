@@ -67,7 +67,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return nil, nil
 }
 
-func (ms *MongoStorage) Flush() (err error) {
+func (ms *MongoStorage) Flush(ignore string) (err error) {
 	err = ms.db.C("ratingprofiles").DropCollection()
 	if err != nil {
 		return

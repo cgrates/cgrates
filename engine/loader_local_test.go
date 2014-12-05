@@ -82,7 +82,7 @@ func TestConnDataDbs(t *testing.T) {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
 	for _, db := range []Storage{ratingDbCsv, ratingDbStor, ratingDbApier, accountDbCsv, accountDbStor, accountDbApier} {
-		if err = db.Flush(); err != nil {
+		if err = db.Flush(""); err != nil {
 			t.Fatal("Error when flushing datadb")
 		}
 	}

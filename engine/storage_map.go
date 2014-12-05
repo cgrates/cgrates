@@ -47,7 +47,7 @@ func NewMapStorageJson() (*MapStorage, error) {
 
 func (ms *MapStorage) Close() {}
 
-func (ms *MapStorage) Flush() error {
+func (ms *MapStorage) Flush(ignore string) error {
 	ms.dict = make(map[string][]byte)
 	return nil
 }

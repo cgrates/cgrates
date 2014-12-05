@@ -25,8 +25,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os/exec"
 	"path"
 	"testing"
+	"time"
 )
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
@@ -36,6 +38,8 @@ var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for r
 var cdrsCfgPath string
 var cdrsCfg *config.CGRConfig
 var cdrsRpc *rpc.Client
+
+var cmdEngineCdrsMysql *exec.Cmd
 
 func TestInitConfig(t *testing.T) {
 	if !*testLocal {
@@ -49,7 +53,7 @@ func TestInitConfig(t *testing.T) {
 	}
 }
 
-func TestV2CdrsInitDataDb(t *testing.T) {
+func TestV2CdrsMysqlInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -58,17 +62,28 @@ func TestV2CdrsInitDataDb(t *testing.T) {
 	}
 }
 
-func TestV2CdrsStartEngine(t *testing.T) {
+// InitDb so we can rely on count
+func TestV2CdrsMysqlInitCdrDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := engine.StartEngine(cdrsCfgPath, *waitRater); err != nil {
+	if err := engine.InitCdrDb(cdrsCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestV2CdrsMysqlStartEngine(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var err error
+	if cmdEngineCdrsMysql, err = engine.StartEngine(cdrsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestV2CdrsRpcConn(t *testing.T) {
+func TestV2CdrsMysqlRpcConn(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -79,7 +94,39 @@ func TestV2CdrsRpcConn(t *testing.T) {
 	}
 }
 
-func TestV2CdrsGetCdrs(t *testing.T) {
+// Insert some CDRs
+func TestV2CdrsMysqlProcessCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply string
+	cdrs := []*utils.StoredCdr{
+		&utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
+		},
+		&utils.StoredCdr{CgrId: utils.Sha1("abcdeftg", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
+		},
+		&utils.StoredCdr{CgrId: utils.Sha1("aererfddf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
+		},
+	}
+	for _, cdr := range cdrs {
+		if err := cdrsRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received: ", reply)
+		}
+	}
+}
+
+func TestV2CdrsMysqlGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -87,12 +134,12 @@ func TestV2CdrsGetCdrs(t *testing.T) {
 	req := utils.AttrGetCdrs{}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} /*else if len(reply) != 2 {
+	} else if len(reply) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
-	}*/
+	}
 }
 
-func TestV2CdrsCountCdrs(t *testing.T) {
+func TestV2CdrsMysqlCountCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -100,16 +147,16 @@ func TestV2CdrsCountCdrs(t *testing.T) {
 	req := utils.AttrGetCdrs{}
 	if err := cdrsRpc.Call("ApierV2.CountCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} /*else if len(reply) != 2 {
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
-	}*/
+	} else if reply != 3 {
+		t.Error("Unexpected number of CDRs returned: ", reply)
+	}
 }
 
-func TestStopEngine(t *testing.T) {
+func TestV2CdrsMysqlKillEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := engine.StopEngine(*waitRater); err != nil {
+	if err := engine.KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

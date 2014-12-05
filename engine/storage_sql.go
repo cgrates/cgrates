@@ -44,7 +44,7 @@ func (self *SQLStorage) Close() {
 	self.db.Close()
 }
 
-func (self *SQLStorage) Flush() (err error) {
+func (self *SQLStorage) Flush(placeholder string) (err error) {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
