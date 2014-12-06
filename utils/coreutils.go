@@ -24,12 +24,12 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"crypto/tls"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"math"
 	"net/http"
 	"os"
@@ -62,8 +62,7 @@ func NewTPid() string {
 	return Sha1(GenUUID())
 }
 
-// helper function for uuid generation
-func GenUUID() string {
+/*func GenUUID() string {
 	uuid := make([]byte, 16)
 	n, err := rand.Read(uuid)
 	if n != len(uuid) || err != nil {
@@ -74,6 +73,19 @@ func GenUUID() string {
 	uuid[4] = 0x40 // version 4 Pseudo Random, see page 7
 
 	return hex.EncodeToString(uuid)
+}*/
+
+// helper function for uuid generation
+func GenUUID() string {
+	b := make([]byte, 16)
+	_, err := io.ReadFull(rand.Reader, b)
+	if err != nil {
+		log.Fatal(err)
+	}
+	b[6] = (b[6] & 0x0F) | 0x40
+	b[8] = (b[8] &^ 0x40) | 0x80
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[:4], b[4:6], b[6:8], b[8:10],
+		b[10:])
 }
 
 // Round return rounded version of x with prec precision.
