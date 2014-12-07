@@ -1179,7 +1179,7 @@ func TestApierGetAccount(t *testing.T) {
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10 {
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 11.5 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 10, received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan3", Direction: "*out"}
