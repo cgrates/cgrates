@@ -147,10 +147,10 @@ CREATE TABLE `tp_actions` (
   `action` varchar(24) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
-  `direction` varchar(8) NOT NULL,
+  `balance_direction` varchar(8) NOT NULL,
   `units` DECIMAL(20,4) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
-  `destination_tag` varchar(64) NOT NULL,
+  `balance_destination_tag` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
   `category` varchar(16) NOT NULL,
   `shared_group` varchar(64) NOT NULL,
@@ -192,12 +192,12 @@ CREATE TABLE `tp_action_triggers` (
   `tag` varchar(64) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
-  `direction` varchar(8) NOT NULL,
+  `balance_direction` varchar(8) NOT NULL,
   `threshold_type` char(12) NOT NULL,
   `threshold_value` DECIMAL(20,4) NOT NULL,
   `recurrent` BOOLEAN NOT NULL,
   `min_sleep` BIGINT NOT NULL,
-  `destination_tag` varchar(64) NOT NULL,
+  `balance_destination_tag` varchar(64) NOT NULL,
   `balance_weight` DECIMAL(8,2) NOT NULL, 
   `balance_expiry_time` varchar(24) NOT NULL, 
   `balance_rating_subject` varchar(64) NOT NULL,
@@ -209,7 +209,7 @@ CREATE TABLE `tp_action_triggers` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`balance_type`,`direction`,`threshold_type`,`threshold_value`,`destination_tag`,`actions_tag`)
+  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`balance_type`,`balance_direction`,`threshold_type`,`threshold_value`,`balance_destination_tag`,`actions_tag`)
 );
 
 --

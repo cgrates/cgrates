@@ -169,12 +169,12 @@ CREATE TABLE tp_action_triggers (
   tag VARCHAR(64) NOT NULL,
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
-  direction VARCHAR(8) NOT NULL,
+  balance_direction VARCHAR(8) NOT NULL,
   threshold_type char(12) NOT NULL,
   threshold_value NUMERIC(20,4) NOT NULL,
   recurrent BOOLEAN NOT NULL,
   min_sleep BIGINT NOT NULL,
-  destination_tag VARCHAR(64) NOT NULL,
+  balance_destination_tag VARCHAR(64) NOT NULL,
   balance_weight NUMERIC(8,2) NOT NULL, 
   balance_expiry_time VARCHAR(24) NOT NULL, 
   balance_rating_subject VARCHAR(64) NOT NULL,
@@ -184,7 +184,7 @@ CREATE TABLE tp_action_triggers (
   actions_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, tag, balance_tag, balance_type, direction, threshold_type, threshold_value, destination_tag, actions_tag)
+  UNIQUE (tpid, tag, balance_tag, balance_type, balance_direction, threshold_type, threshold_value, balance_destination_tag, actions_tag)
 );
 
 --
