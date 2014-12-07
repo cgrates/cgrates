@@ -43,7 +43,23 @@ type Balance struct {
 }
 
 func (b *Balance) Equal(o *Balance) bool {
-	if b.Id != "" || o.Id != "" {
+	if b.DestinationId == "" {
+		b.DestinationId = utils.ANY
+	}
+	if o.DestinationId == "" {
+		o.DestinationId = utils.ANY
+	}
+	return b.Id == o.Id &&
+		b.ExpirationDate.Equal(o.ExpirationDate) &&
+		b.Weight == o.Weight &&
+		b.DestinationId == o.DestinationId &&
+		b.RatingSubject == o.RatingSubject &&
+		b.Category == o.Category &&
+		b.SharedGroup == o.SharedGroup
+}
+
+func (b *Balance) MatchFilter(o *Balance) bool {
+	if o.Id != "" {
 		return b.Id == o.Id
 	}
 	if b.DestinationId == "" {
@@ -121,6 +137,7 @@ func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 func (b *Balance) Clone() *Balance {
 	return &Balance{
 		Uuid:           b.Uuid,
+		Id:             b.Id,
 		Value:          b.Value, // this value is in seconds
 		DestinationId:  b.DestinationId,
 		ExpirationDate: b.ExpirationDate,

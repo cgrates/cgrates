@@ -763,6 +763,44 @@ func TestActionTopupResetCredit(t *testing.T) {
 	}
 }
 
+func TestActionTopupResetCreditId(t *testing.T) {
+	ub := &Account{
+		Id: "TEST_UB",
+		BalanceMap: map[string]BalanceChain{
+			CREDIT + OUTBOUND: BalanceChain{
+				&Balance{Value: 100},
+				&Balance{Id: "TEST_B", Value: 15},
+			},
+		},
+	}
+	a := &Action{BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Id: "TEST_B", Value: 10}}
+	topupResetAction(ub, nil, a)
+	if ub.AllowNegative ||
+		ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != 110 ||
+		len(ub.BalanceMap[CREDIT+OUTBOUND]) != 2 {
+		t.Errorf("Topup reset action failed: %+v", ub.BalanceMap[CREDIT+OUTBOUND][0])
+	}
+}
+
+func TestActionTopupResetCreditNoId(t *testing.T) {
+	ub := &Account{
+		Id: "TEST_UB",
+		BalanceMap: map[string]BalanceChain{
+			CREDIT + OUTBOUND: BalanceChain{
+				&Balance{Value: 100},
+				&Balance{Id: "TEST_B", Value: 15},
+			},
+		},
+	}
+	a := &Action{BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}}
+	topupResetAction(ub, nil, a)
+	if ub.AllowNegative ||
+		ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != 20 ||
+		len(ub.BalanceMap[CREDIT+OUTBOUND]) != 2 {
+		t.Errorf("Topup reset action failed: %+v", ub.BalanceMap[CREDIT+OUTBOUND][1])
+	}
+}
+
 func TestActionTopupResetMinutes(t *testing.T) {
 	ub := &Account{
 		Id: "TEST_UB",
