@@ -68,12 +68,12 @@ func (b *Balance) MatchFilter(o *Balance) bool {
 	if o.DestinationId == "" {
 		o.DestinationId = utils.ANY
 	}
-	return b.ExpirationDate.Equal(o.ExpirationDate) &&
-		b.Weight == o.Weight &&
-		b.DestinationId == o.DestinationId &&
-		b.RatingSubject == o.RatingSubject &&
-		b.Category == o.Category &&
-		b.SharedGroup == o.SharedGroup
+	return (o.ExpirationDate.IsZero() || b.ExpirationDate.Equal(o.ExpirationDate)) &&
+		(o.Weight == 0 || b.Weight == o.Weight) &&
+		(o.DestinationId == "" || b.DestinationId == o.DestinationId) &&
+		(o.RatingSubject == "" || b.RatingSubject == o.RatingSubject) &&
+		(o.Category == "" || b.Category == o.Category) &&
+		(o.SharedGroup == "" || b.SharedGroup == o.SharedGroup)
 }
 
 // the default balance has no destinationid, Expirationdate or ratesubject
