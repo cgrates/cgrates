@@ -107,7 +107,7 @@ type Cdrc struct {
 	cdrSourceId string
 	runDelay         time.Duration
 	csvSep           rune
-	duMultiplyFactor int64
+	duMultiplyFactor float64
 	cdrFields        []*config.CfgCdrField
 	httpSkipTlsCheck bool
 	cdrServer        *engine.CDRS // Reference towards internal cdrServer if that is the case
@@ -160,7 +160,7 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 	}
 	storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
 	if storedCdr.TOR == utils.DATA && self.duMultiplyFactor != 0 {
-		storedCdr.Usage = time.Duration(storedCdr.Usage.Nanoseconds() * self.duMultiplyFactor)
+		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * self.duMultiplyFactor)
 	}
 	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields
 		var outValByte []byte

@@ -112,7 +112,7 @@ func TestGetCdrcCfgs(t *testing.T) {
 	cdrsAddr := "internal"
 	cdrFormat := "csv"
 	fldSep := ","
-	dataUsageMultiplyFactor := int64(1024)
+	dataUsageMultiplyFactor := 1024.0
 	runDelay := int64(0)
 	cdrInDir := "/var/log/cgrates/cdrc/in"
 	cdrOutDir := "/var/log/cgrates/cdrc/out"

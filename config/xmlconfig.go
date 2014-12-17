@@ -59,7 +59,7 @@ type CgrXmlCdrcCfg struct {
 	CdrsAddress             *string           `xml:"cdrs_address"`               // The address where CDRs can be reached
 	CdrFormat               *string           `xml:"cdr_format"`                 // The type of CDR to process <csv>
 	FieldSeparator          *string           `xml:"field_separator"`            // The separator to use when reading csvs
-	DataUsageMultiplyFactor *int64            `xml:"data_usage_multiply_factor"` // Conversion factor for data usage
+	DataUsageMultiplyFactor *float64          `xml:"data_usage_multiply_factor"` // Conversion factor for data usage
 	RunDelay                *int64            `xml:"run_delay"`                  // Delay between runs
 	CdrInDir                *string           `xml:"cdr_in_dir"`                 // Folder to process CDRs from
 	CdrOutDir               *string           `xml:"cdr_out_dir"`                // Folder to move processed CDRs to
