@@ -116,6 +116,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.OsipsMiAddr = "127.0.0.1:8020"
 	eCfg.OsipsEvSubscInterval = time.Duration(60) * time.Second
 	eCfg.OsipsReconnects = 3
+	eCfg.KamailioEvApiAddr = "127.0.0.1:8448"
+	eCfg.KamailioReconnects = 3
 	eCfg.DerivedChargers = make(utils.DerivedChargers, 0)
 	eCfg.CombinedDerivedChargers = true
 	eCfg.HistoryAgentEnabled = false
@@ -281,6 +283,8 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.OsipsMiAddr = "test"
 	eCfg.OsipsEvSubscInterval = time.Duration(99) * time.Second
 	eCfg.OsipsReconnects = 99
+	eCfg.KamailioEvApiAddr = "test"
+	eCfg.KamailioReconnects = 99
 	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", RunFilters: "", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
 	eCfg.CombinedDerivedChargers = true

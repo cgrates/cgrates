@@ -50,6 +50,7 @@ const (
 	REDIS    = "redis"
 	SAME     = "same"
 	FS       = "freeswitch"
+	KAMAILIO = "kamailio"
 	OSIPS    = "opensips"
 )
 
@@ -184,6 +185,8 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval))
 		sm = sessionmanager.NewFSSessionManager(cfg, loggerDb, raterConn, cdrsConn, dp)
+	case KAMAILIO:
+		sm, _ = sessionmanager.NewKamailioSessionManager(cfg, raterConn, cdrsConn)
 	case OSIPS:
 		sm, _ = sessionmanager.NewOSipsSessionManager(cfg, raterConn, cdrsConn)
 	default:

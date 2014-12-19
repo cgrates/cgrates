@@ -135,6 +135,10 @@ empty_balance_context = test    # If defined, call will be transfered to this co
 empty_balance_ann_file = test  	# File to be played before disconnecting prepaid calls (applies only if no context defined)
 cdr_extra_fields = test			# Extra fields to store in CDRs in case of processing them
 
+[kamailio]
+evapi_addr = test
+reconnects = 99					# Number of attempts on connect failure.
+
 [opensips]
 listen_udp = test 				# Address where to listen for event datagrams coming from OpenSIPS
 mi_addr = test					# Adress where to reach OpenSIPS mi_datagram module

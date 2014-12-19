@@ -60,7 +60,9 @@ func (sm *FSSessionManager) Connect() (err error) {
 	} else if !fsock.FS.Connected() {
 		return errors.New("Cannot connect to FreeSWITCH")
 	}
-	fsock.FS.ReadEvents()
+	if err := fsock.FS.ReadEvents(); err != nil {
+		return err
+	}
 	return errors.New("<SessionManager> - Stopped reading events")
 }
 

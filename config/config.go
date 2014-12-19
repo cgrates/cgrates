@@ -127,6 +127,8 @@ type CGRConfig struct {
 	OsipsMiAddr             string                // Adress where to reach OpenSIPS mi_datagram module
 	OsipsEvSubscInterval    time.Duration         // Refresh event subscription at this interval
 	OsipsReconnects         int                   // Number of attempts on connect failure.
+	KamailioEvApiAddr       string                // Address of the kamailio evapi server
+	KamailioReconnects      int                   // Number of reconnect attempts on connection lost
 	HistoryAgentEnabled     bool                  // Starts History as an agent: <true|false>.
 	HistoryServer           string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled    bool                  // Starts History as server: <true|false>.
@@ -212,6 +214,8 @@ func (self *CGRConfig) setDefaults() error {
 	self.OsipsMiAddr = "127.0.0.1:8020"
 	self.OsipsEvSubscInterval = time.Duration(60) * time.Second
 	self.OsipsReconnects = 3
+	self.KamailioEvApiAddr = "127.0.0.1:8448"
+	self.KamailioReconnects = 3
 	self.HistoryAgentEnabled = false
 	self.HistoryServerEnabled = false
 	self.HistoryServer = utils.INTERNAL
@@ -589,6 +593,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("opensips", "reconnects"); hasOpt {
 		cfg.OsipsReconnects, _ = c.GetInt("opensips", "reconnects")
+	}
+	if hasOpt = c.HasOption("kamailio", "evapi_addr"); hasOpt {
+		cfg.KamailioEvApiAddr, _ = c.GetString("kamailio", "evapi_addr")
+	}
+	if hasOpt = c.HasOption("kamailio", "reconnects"); hasOpt {
+		cfg.KamailioReconnects, _ = c.GetInt("kamailio", "reconnects")
 	}
 	if cfg.DerivedChargers, err = ParseCfgDerivedCharging(c); err != nil {
 		return nil, err
