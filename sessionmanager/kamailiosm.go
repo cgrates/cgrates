@@ -35,21 +35,24 @@ func NewKamailioSessionManager(cfg *config.CGRConfig, rater, cdrsrv engine.Conne
 }
 
 type KamailioSessionManager struct {
-	cgrCfg        *config.CGRConfig
-	rater         engine.Connector
-	cdrsrv        engine.Connector
-	eventHandlers map[*regexp.Regexp][]func(string)
-	kea           *kamevapi.KamEvapi
+	cgrCfg *config.CGRConfig
+	rater  engine.Connector
+	cdrsrv engine.Connector
+	kea    *kamevapi.KamEvapi
 }
 
-func (self *KamailioSessionManager) onCgrAuth(rcvData string) {
-	engine.Logger.Info(fmt.Sprintf("onCgrAuth handler, received: %s\n", rcvData))
+func (self *KamailioSessionManager) onCgrAuth(evData []byte) {
+	kev, err := NewKamEvent(evData)
+	if err != nil {
+		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+	}
+	engine.Logger.Info(fmt.Sprintf("onCgrAuth handler, received event: %+v", kev))
 }
 
 func (self *KamailioSessionManager) Connect() error {
 	var err error
-	eventHandlers := map[*regexp.Regexp][]func(string){
-		regexp.MustCompile(".*"): []func(string){self.onCgrAuth},
+	eventHandlers := map[*regexp.Regexp][]func([]byte){
+		regexp.MustCompile(".*"): []func([]byte){self.onCgrAuth},
 	}
 	if self.kea, err = kamevapi.NewKamEvapi(self.cgrCfg.KamailioEvApiAddr, self.cgrCfg.KamailioReconnects, eventHandlers, engine.Logger.(*syslog.Writer)); err != nil {
 		return err
