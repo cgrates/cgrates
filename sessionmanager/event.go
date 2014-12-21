@@ -43,7 +43,7 @@ type Event interface {
 	GetDuration(string) (time.Duration, error)
 	GetOriginatorIP(string) string
 	GetExtraFields() map[string]string
-	MissingParameter() bool
+	MissingParameter(string) bool
 	ParseEventValue(*utils.RSRField) string
 	PassesFieldFilter(*utils.RSRField) (bool, string)
 	AsStoredCdr() *utils.StoredCdr

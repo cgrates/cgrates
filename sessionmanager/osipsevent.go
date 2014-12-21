@@ -43,7 +43,7 @@ const (
 	CGR_DESTINATION          = "cgr_destination"
 	TIME                     = "time"
 	SETUP_DURATION           = "setuptime"
-	OSIPS__SETUP_TIME        = "created"
+	OSIPS_SETUP_TIME         = "created"
 	OSIPS_DURATION           = "duration"
 	OSIPS_AUTH_OK            = "AUTH_OK"
 	OSIPS_INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS"
@@ -130,11 +130,11 @@ func (osipsev *OsipsEvent) GetReqType(fieldName string) string {
 	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_REQTYPE], config.CgrConfig().DefaultReqType)
 }
 func (osipsev *OsipsEvent) GetSetupTime(fieldName string) (time.Time, error) {
-	sTimeStr := utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[OSIPS__SETUP_TIME])
+	sTimeStr := utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[OSIPS_SETUP_TIME])
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else if fieldName == utils.META_DEFAULT {
-		sTimeStr = osipsev.osipsEvent.AttrValues[OSIPS__SETUP_TIME]
+		sTimeStr = osipsev.osipsEvent.AttrValues[OSIPS_SETUP_TIME]
 	}
 	return utils.ParseTimeDetectLayout(sTimeStr)
 }
@@ -172,7 +172,7 @@ func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
 	}
 	return osipsEv.osipsEvent.OriginatorAddress.IP.String()
 }
-func (osipsev *OsipsEvent) MissingParameter() bool {
+func (osipsev *OsipsEvent) MissingParameter(eventName string) bool {
 	return len(osipsev.GetUUID()) == 0 ||
 		len(osipsev.GetAccount(utils.META_DEFAULT)) == 0 ||
 		len(osipsev.GetSubject(utils.META_DEFAULT)) == 0 ||

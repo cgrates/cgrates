@@ -190,7 +190,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 			startTime = time.Now()
 		}
-		if ev.MissingParameter() {
+		if ev.MissingParameter(utils.META_DEFAULT) {
 			sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(dc.DestinationField), MISSING_PARAMETER)
 			engine.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
 			return
@@ -231,7 +231,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
-	if ev.MissingParameter() {
+	if ev.MissingParameter(utils.META_DEFAULT) {
 		sm.DisconnectSession(ev.GetUUID(), MISSING_PARAMETER, "")
 	}
 	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType(""))); err != nil {

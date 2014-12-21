@@ -89,7 +89,7 @@ func (fsev FSEvent) GetDirection(fieldName string) string {
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
 	//TODO: implement direction
-	return "*out"
+	return utils.OUT
 }
 func (fsev FSEvent) GetSubject(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -159,7 +159,7 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], config.CgrConfig().DefaultReqType)
 }
-func (fsev FSEvent) MissingParameter() bool {
+func (fsev FSEvent) MissingParameter(eventName string) bool {
 	return strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" ||

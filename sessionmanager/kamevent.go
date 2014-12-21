@@ -20,9 +20,27 @@ package sessionmanager
 
 import (
 	"encoding/json"
+	"strconv"
+	"strings"
+	"time"
 
-	//"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
+
+const (
+	CGR_AUTHORIZE  = "CGR_AUTHORIZE"
+	CGR_EVENTNAME  = "cgr_event"
+	CGR_SETUPTIME  = "cgr_setuptime"
+	CGR_ANSWERTIME = "cgr_answertime"
+	CGR_STOPTIME   = "cgr_stoptime"
+	CGR_DURATION   = "cgr_duration"
+)
+
+var primaryFields = []string{CGR_EVENTNAME, CALLID, FROM_TAG, TO_TAG, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
+	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION}
+
+var mandatoryAuth = []string{CGR_EVENTNAME, CALLID, FROM_TAG, CGR_ACCOUNT, CGR_DESTINATION, CGR_SETUPTIME}
 
 func NewKamEvent(kamEvData []byte) (KamEvent, error) {
 	kev := make(map[string]string)
@@ -34,3 +52,189 @@ func NewKamEvent(kamEvData []byte) (KamEvent, error) {
 
 // Hold events received from Kamailio
 type KamEvent map[string]string
+
+// Backwards compatibility, should be AsEvent
+func (kev KamEvent) New(ignored string) Event {
+	return Event(kev)
+}
+
+func (kev KamEvent) GetName() string {
+	return kev[CGR_EVENTNAME]
+}
+func (kev KamEvent) GetCgrId() string {
+	setupTime, _ := kev.GetSetupTime(utils.META_DEFAULT)
+	return utils.Sha1(kev.GetUUID(), setupTime.UTC().String())
+}
+func (kev KamEvent) GetUUID() string {
+	return kev[CALLID] + ";" + kev[FROM_TAG] + ";" + kev[TO_TAG]
+}
+func (kev KamEvent) GetDirection(fieldName string) string {
+	return utils.OUT
+}
+func (kev KamEvent) GetAccount(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_ACCOUNT])
+}
+func (kev KamEvent) GetSubject(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_SUBJECT], kev[CGR_ACCOUNT])
+}
+func (kev KamEvent) GetDestination(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_DESTINATION])
+}
+func (kev KamEvent) GetCallDestNr(fieldName string) string {
+	return kev.GetDestination(utils.META_DEFAULT)
+}
+func (kev KamEvent) GetCategory(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_CATEGORY], config.CgrConfig().DefaultCategory)
+}
+func (kev KamEvent) GetTenant(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_TENANT], config.CgrConfig().DefaultTenant)
+}
+func (kev KamEvent) GetReqType(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_REQTYPE], config.CgrConfig().DefaultReqType)
+}
+func (kev KamEvent) GetAnswerTime(fieldName string) (time.Time, error) {
+	aTimeStr := utils.FirstNonEmpty(kev[fieldName], kev[CGR_ANSWERTIME])
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		aTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.ParseTimeDetectLayout(aTimeStr)
+}
+func (kev KamEvent) GetSetupTime(fieldName string) (time.Time, error) {
+	sTimeStr := utils.FirstNonEmpty(kev[fieldName], kev[CGR_SETUPTIME], kev[CGR_ANSWERTIME])
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.ParseTimeDetectLayout(sTimeStr)
+}
+func (kev KamEvent) GetEndTime() (time.Time, error) {
+	return utils.ParseTimeDetectLayout(kev[CGR_STOPTIME])
+}
+func (kev KamEvent) GetDuration(fieldName string) (time.Duration, error) {
+	durStr := utils.FirstNonEmpty(kev[fieldName], kev[CGR_DURATION])
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		durStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.ParseDurationWithSecs(durStr)
+}
+
+//ToDo: extract the IP of the kamailio server generating the event
+func (kev KamEvent) GetOriginatorIP(string) string {
+	return "127.0.0.1"
+}
+func (kev KamEvent) GetExtraFields() map[string]string {
+	extraFields := make(map[string]string)
+	for field, val := range kev {
+		if !utils.IsSliceMember(primaryFields, field) {
+			extraFields[field] = val
+		}
+	}
+	return extraFields
+}
+func (kev KamEvent) GetCdrSource() string {
+	return "KAMAILIO_" + kev.GetName()
+}
+func (kev KamEvent) MissingParameter(eventName string) bool {
+	switch eventName {
+	case CGR_AUTHORIZE:
+		return len(kev.GetUUID()) == 0 ||
+			len(kev.GetCategory(utils.META_DEFAULT)) == 0 ||
+			len(kev.GetTenant(utils.META_DEFAULT)) == 0 ||
+			len(kev.GetAccount(utils.META_DEFAULT)) == 0 ||
+			len(kev.GetDestination(utils.META_DEFAULT)) == 0
+	default:
+		return true
+	}
+
+}
+
+// Useful for CDR generation
+func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField) string {
+	sTime, _ := kev.GetSetupTime(utils.META_DEFAULT)
+	aTime, _ := kev.GetAnswerTime(utils.META_DEFAULT)
+	duration, _ := kev.GetDuration(utils.META_DEFAULT)
+	switch rsrFld.Id {
+	case utils.CGRID:
+		return rsrFld.ParseValue(kev.GetCgrId())
+	case utils.TOR:
+		return rsrFld.ParseValue(utils.VOICE)
+	case utils.ACCID:
+		return rsrFld.ParseValue(kev.GetUUID())
+	case utils.CDRHOST:
+		return rsrFld.ParseValue(kev.GetOriginatorIP(utils.META_DEFAULT))
+	case utils.CDRSOURCE:
+		return rsrFld.ParseValue(kev.GetCdrSource())
+	case utils.REQTYPE:
+		return rsrFld.ParseValue(kev.GetReqType(utils.META_DEFAULT))
+	case utils.DIRECTION:
+		return rsrFld.ParseValue(kev.GetDirection(utils.META_DEFAULT))
+	case utils.TENANT:
+		return rsrFld.ParseValue(kev.GetTenant(utils.META_DEFAULT))
+	case utils.CATEGORY:
+		return rsrFld.ParseValue(kev.GetCategory(utils.META_DEFAULT))
+	case utils.ACCOUNT:
+		return rsrFld.ParseValue(kev.GetAccount(utils.META_DEFAULT))
+	case utils.SUBJECT:
+		return rsrFld.ParseValue(kev.GetSubject(utils.META_DEFAULT))
+	case utils.DESTINATION:
+		return rsrFld.ParseValue(kev.GetDestination(utils.META_DEFAULT))
+	case utils.SETUP_TIME:
+		return rsrFld.ParseValue(sTime.String())
+	case utils.ANSWER_TIME:
+		return rsrFld.ParseValue(aTime.String())
+	case utils.USAGE:
+		return rsrFld.ParseValue(strconv.FormatFloat(utils.Round(duration.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64))
+	case utils.MEDI_RUNID:
+		return rsrFld.ParseValue(utils.META_DEFAULT)
+	case utils.COST:
+		return rsrFld.ParseValue("-1.0")
+	default:
+		return rsrFld.ParseValue(kev.GetExtraFields()[rsrFld.Id])
+	}
+}
+func (kev KamEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
+	return false, ""
+}
+func (kev KamEvent) AsStoredCdr() *utils.StoredCdr {
+	storCdr := new(utils.StoredCdr)
+	storCdr.CgrId = kev.GetCgrId()
+	storCdr.TOR = utils.VOICE
+	storCdr.AccId = kev.GetUUID()
+	storCdr.CdrHost = kev.GetOriginatorIP(utils.META_DEFAULT)
+	storCdr.CdrSource = kev.GetCdrSource()
+	storCdr.ReqType = kev.GetReqType(utils.META_DEFAULT)
+	storCdr.Direction = kev.GetDirection(utils.META_DEFAULT)
+	storCdr.Tenant = kev.GetTenant(utils.META_DEFAULT)
+	storCdr.Category = kev.GetCategory(utils.META_DEFAULT)
+	storCdr.Account = kev.GetAccount(utils.META_DEFAULT)
+	storCdr.Subject = kev.GetSubject(utils.META_DEFAULT)
+	storCdr.Destination = kev.GetDestination(utils.META_DEFAULT)
+	storCdr.SetupTime, _ = kev.GetSetupTime(utils.META_DEFAULT)
+	storCdr.AnswerTime, _ = kev.GetAnswerTime(utils.META_DEFAULT)
+	storCdr.Usage, _ = kev.GetDuration(utils.META_DEFAULT)
+	storCdr.ExtraFields = kev.GetExtraFields()
+	storCdr.Cost = -1
+	return storCdr
+}
+
+func (kev KamEvent) String() string {
+	mrsh, _ := json.Marshal(kev)
+	return string(mrsh)
+}
