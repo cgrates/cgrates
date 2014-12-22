@@ -358,7 +358,7 @@ Task-ID: 2
 Task-Desc: heartbeat
 Task-Group: core
 Task-Runtime: 1349437318`
-	ev := new(FSEvent).New(body)
+	ev := new(FSEvent).AsEvent(body)
 	if ev.GetName() != "RE_SCHEDULE" {
 		t.Error("Event not parsed correctly: ", ev)
 	}
@@ -370,7 +370,7 @@ Task-Runtime: 1349437318`
 
 // Detects if any of the parsers do not return static values
 func TestEventParseStatic(t *testing.T) {
-	ev := new(FSEvent).New("")
+	ev := new(FSEvent).AsEvent("")
 	setupTime, _ := ev.GetSetupTime("^2013-12-07 08:42:24")
 	answerTime, _ := ev.GetAnswerTime("^2013-12-07 08:42:24")
 	dur, _ := ev.GetDuration("^60s")
@@ -419,7 +419,7 @@ Task-Group: core
 Task-Runtime: 1349437318`
 	cfg, _ = config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
-	ev := new(FSEvent).New(body)
+	ev := new(FSEvent).AsEvent(body)
 	setupTime, _ := ev.GetSetupTime("Event-Date-Local")
 	answerTime, _ := ev.GetAnswerTime("Event-Date-Local")
 	dur, _ := ev.GetDuration("Event-Calling-Line-Number")
@@ -457,7 +457,7 @@ Caller-Channel-Created-Time: 0
 Caller-Channel-Answered-Time
 Task-Runtime: 1349437318`
 	var nilTime time.Time
-	ev := new(FSEvent).New(body)
+	ev := new(FSEvent).AsEvent(body)
 	if setupTime, err := ev.GetSetupTime(""); err != nil {
 		t.Error("Error when parsing empty setupTime")
 	} else if setupTime != nilTime {
@@ -473,7 +473,7 @@ Task-Runtime: 1349437318`
 func TestParseFsHangup(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
-	ev := new(FSEvent).New(hangupEv)
+	ev := new(FSEvent).AsEvent(hangupEv)
 	setupTime, _ := ev.GetSetupTime(utils.META_DEFAULT)
 	answerTime, _ := ev.GetAnswerTime(utils.META_DEFAULT)
 	dur, _ := ev.GetDuration(utils.META_DEFAULT)
@@ -504,7 +504,7 @@ func TestParseFsHangup(t *testing.T) {
 func TestParseEventValue(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
-	ev := new(FSEvent).New(hangupEv)
+	ev := new(FSEvent).AsEvent(hangupEv)
 	if cgrid := ev.ParseEventValue(&utils.RSRField{Id: utils.CGRID}); cgrid != "873e5bf7903978f305f7d8fed3f92f968cf82873" {
 		t.Error("Unexpected cgrid parsed", cgrid)
 	}
@@ -570,7 +570,7 @@ FreeSWITCH-Hostname: h1.ip-switch.net
 FreeSWITCH-Switchname: h1.ip-switch.net
 FreeSWITCH-IPv4: 88.198.12.156
 Caller-Username: futurem0005`
-	ev := new(FSEvent).New(body)
+	ev := new(FSEvent).AsEvent(body)
 	acntPrefxFltr, _ := utils.NewRSRField(`~account:s/^\w+[shmp]\d{4}$//`)
 	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
@@ -581,7 +581,7 @@ FreeSWITCH-Hostname: h1.ip-switch.net
 FreeSWITCH-Switchname: h1.ip-switch.net
 FreeSWITCH-IPv4: 88.198.12.156
 Caller-Username: futurem00005`
-	ev = new(FSEvent).New(body)
+	ev = new(FSEvent).AsEvent(body)
 	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
@@ -591,7 +591,7 @@ FreeSWITCH-Hostname: h1.ip-switch.net
 FreeSWITCH-Switchname: h1.ip-switch.net
 FreeSWITCH-IPv4: 88.198.12.156
 Caller-Username: 0402129281`
-	ev = new(FSEvent).New(body)
+	ev = new(FSEvent).AsEvent(body)
 	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^0\d{9}$//`)
 	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
@@ -606,7 +606,7 @@ FreeSWITCH-Hostname: h1.ip-switch.net
 FreeSWITCH-Switchname: h1.ip-switch.net
 FreeSWITCH-IPv4: 88.198.12.156
 Caller-Username: 04021292812`
-	ev = new(FSEvent).New(body)
+	ev = new(FSEvent).AsEvent(body)
 	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
@@ -615,7 +615,7 @@ Caller-Username: 04021292812`
 func TestFsEvAsStoredCdr(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
-	ev := new(FSEvent).New(hangupEv)
+	ev := new(FSEvent).AsEvent(hangupEv)
 	setupTime, _ := utils.ParseTimeDetectLayout("1398442107")
 	aTime, _ := utils.ParseTimeDetectLayout("1398442120")
 	eStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("37e9b766-5256-4e4b-b1ed-3767b930fec8", setupTime.UTC().String()),
@@ -632,7 +632,7 @@ func TestFsEvGetExtraFields(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	cfg.FSCdrExtraFields = []*utils.RSRField{&utils.RSRField{Id: "Channel-Read-Codec-Name"}, &utils.RSRField{Id: "Channel-Write-Codec-Name"}, &utils.RSRField{Id: "NonExistingHeader"}}
 	config.SetCgrConfig(cfg)
-	ev := new(FSEvent).New(hangupEv)
+	ev := new(FSEvent).AsEvent(hangupEv)
 	expectedExtraFields := map[string]string{"Channel-Read-Codec-Name": "G722", "Channel-Write-Codec-Name": "G722", "NonExistingHeader": ""}
 	if extraFields := ev.GetExtraFields(); !reflect.DeepEqual(expectedExtraFields, extraFields) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedExtraFields, extraFields)

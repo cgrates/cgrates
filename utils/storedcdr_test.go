@@ -27,6 +27,7 @@ import (
 func TestStoredCdrInterfaces(t *testing.T) {
 	storedCdr := new(StoredCdr)
 	var _ RawCdr = storedCdr
+	var _ Event = storedCdr
 }
 
 func TestFieldAsString(t *testing.T) {
@@ -400,5 +401,67 @@ func TestStoredCdrAsCgrCdrOut(t *testing.T) {
 	}
 	if cdrOut := storCdr.AsCgrCdrOut(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
 		t.Errorf("Expected: %+v, received: %+v", expectOutCdr, cdrOut)
+	}
+}
+
+func TestStoredCdrEventFields(t *testing.T) {
+	cdr := &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: VOICE, AccId: "dsafdsaf",
+		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dans",
+		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 27, 0, time.UTC),
+		MediationRunId: DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan"}
+	if ev := cdr.AsEvent(""); ev != Event(cdr) {
+		t.Error("Received: ", ev)
+	}
+	if res := cdr.GetName(); res != "test" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetCgrId(); res != Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()) {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetUUID(); res != "dsafdsaf" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetDirection(META_DEFAULT); res != "*out" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetSubject(META_DEFAULT); res != "dans" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetAccount(META_DEFAULT); res != "dan" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetDestination(META_DEFAULT); res != "1002" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetCallDestNr(META_DEFAULT); res != "1002" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetCategory(META_DEFAULT); res != "call" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetTenant(META_DEFAULT); res != "cgrates.org" {
+		t.Error("Received: ", res)
+	}
+	if res := cdr.GetReqType(META_DEFAULT); res != "rated" {
+		t.Error("Received: ", res)
+	}
+	if st, _ := cdr.GetSetupTime(META_DEFAULT); st != time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC) {
+		t.Error("Received: ", st)
+	}
+	if at, _ := cdr.GetAnswerTime(META_DEFAULT); at != time.Date(2013, 11, 7, 8, 42, 27, 0, time.UTC) {
+		t.Error("Received: ", at)
+	}
+	if et, _ := cdr.GetEndTime(); et != time.Date(2013, 11, 7, 8, 42, 37, 0, time.UTC) {
+		t.Error("Received: ", et)
+	}
+	if dur, _ := cdr.GetDuration(META_DEFAULT); dur != cdr.Usage {
+		t.Error("Received: ", dur)
+	}
+	if res := cdr.GetOriginatorIP(META_DEFAULT); res != cdr.CdrHost {
+		t.Error("Received: ", res)
+	}
+	if extraFlds := cdr.GetExtraFields(); !reflect.DeepEqual(cdr.ExtraFields, extraFlds) {
+		t.Error("Received: ", extraFlds)
 	}
 }

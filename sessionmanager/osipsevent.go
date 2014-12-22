@@ -57,7 +57,7 @@ type OsipsEvent struct {
 	osipsEvent *osipsdagram.OsipsEvent
 }
 
-func (osipsev *OsipsEvent) New(evStr string) utils.Event {
+func (osipsev *OsipsEvent) AsEvent(evStr string) utils.Event {
 	return osipsev
 }
 

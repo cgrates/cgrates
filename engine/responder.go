@@ -123,7 +123,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) er
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
-	maxCallDuration := -1.0                      // This will be the maximum duration this channel will be allowed to last, -1 represents no limits
+	maxCallDuration := -1.0
 	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers

@@ -166,6 +166,7 @@ const (
 	METATAG                      = "metatag"
 	HTTP_POST                    = "http_post"
 	NANO_MULTIPLIER              = 1000000000
+	CGR_AUTHORIZE                = "CGR_AUTHORIZE"
 )
 
 var (

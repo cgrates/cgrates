@@ -216,7 +216,7 @@ var jsonCdr = []byte(`{"core-uuid":"feef0b51-7fdf-4c4a-878e-aff233752de2","chann
 func TestEvCorelate(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	engine.NewCdrS(nil, nil, nil, cfg) // So we can set the package cfg
-	answerEv := new(sessionmanager.FSEvent).New(answerEvent)
+	answerEv := new(sessionmanager.FSEvent).AsEvent(answerEvent)
 	if answerEv.GetName() != "CHANNEL_ANSWER" {
 		t.Error("Event not parsed correctly: ", answerEv)
 	}

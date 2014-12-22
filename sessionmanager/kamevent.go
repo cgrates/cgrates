@@ -29,7 +29,6 @@ import (
 )
 
 const (
-	CGR_AUTHORIZE  = "CGR_AUTHORIZE"
 	EVENT          = "event"
 	CGR_SETUPTIME  = "cgr_setuptime"
 	CGR_ANSWERTIME = "cgr_answertime"
@@ -54,7 +53,7 @@ func NewKamEvent(kamEvData []byte) (KamEvent, error) {
 type KamEvent map[string]string
 
 // Backwards compatibility, should be AsEvent
-func (kev KamEvent) New(ignored string) utils.Event {
+func (kev KamEvent) AsEvent(ignored string) utils.Event {
 	return utils.Event(kev)
 }
 
@@ -153,7 +152,7 @@ func (kev KamEvent) GetCdrSource() string {
 }
 func (kev KamEvent) MissingParameter(eventName string) bool {
 	switch eventName {
-	case CGR_AUTHORIZE:
+	case utils.CGR_AUTHORIZE:
 		return len(kev.GetUUID()) == 0 ||
 			len(kev.GetCategory(utils.META_DEFAULT)) == 0 ||
 			len(kev.GetTenant(utils.META_DEFAULT)) == 0 ||

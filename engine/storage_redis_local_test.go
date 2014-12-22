@@ -55,7 +55,7 @@ func TestSetGetDerivedCharges(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	keyCharger1 := utils.ConcatenatedKey("cgrates.org", "call", "*out", "dan", "dan")
+	keyCharger1 := utils.ConcatenatedKey("*out", "cgrates.org", "call", "dan", "dan")
 	charger1 := utils.DerivedChargers{
 		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},

@@ -68,19 +68,19 @@ func (sm *FSSessionManager) Connect() (err error) {
 
 func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string)) {
 	hb := func(body string) {
-		ev := new(FSEvent).New(body)
+		ev := new(FSEvent).AsEvent(body)
 		sm.OnHeartBeat(ev)
 	}
 	cp := func(body string) {
-		ev := new(FSEvent).New(body)
+		ev := new(FSEvent).AsEvent(body)
 		sm.OnChannelPark(ev)
 	}
 	ca := func(body string) {
-		ev := new(FSEvent).New(body)
+		ev := new(FSEvent).AsEvent(body)
 		sm.OnChannelAnswer(ev)
 	}
 	ch := func(body string) {
-		ev := new(FSEvent).New(body)
+		ev := new(FSEvent).AsEvent(body)
 		sm.OnChannelHangupComplete(ev)
 	}
 	return map[string][]func(string){

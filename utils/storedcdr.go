@@ -4,7 +4,7 @@ Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
+the Free Software Foundation, either version 3 of the License, ornt
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -19,11 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -325,6 +327,159 @@ func (storedCdr *StoredCdr) AsCgrCdrOut() *CgrCdrOut {
 		RatedSubject:   storedCdr.RatedSubject,
 		Cost:           storedCdr.Cost,
 	}
+}
+
+// Implementation of Event interface, used in tests
+func (storedCdr *StoredCdr) AsEvent(ignored string) Event {
+	return Event(storedCdr)
+}
+func (storedCdr *StoredCdr) GetName() string {
+	return storedCdr.CdrSource
+}
+func (storedCdr *StoredCdr) GetCgrId() string {
+	return storedCdr.CgrId
+}
+func (storedCdr *StoredCdr) GetUUID() string {
+	return storedCdr.AccId
+}
+func (storedCdr *StoredCdr) GetDirection(fieldName string) string {
+	if IsSliceMember([]string{DIRECTION, META_DEFAULT}, fieldName) {
+		return storedCdr.Direction
+	}
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(STATIC_VALUE_PREFIX):]
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetSubject(fieldName string) string {
+	if IsSliceMember([]string{SUBJECT, META_DEFAULT}, fieldName) {
+		return storedCdr.Subject
+	}
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(STATIC_VALUE_PREFIX):]
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetAccount(fieldName string) string {
+	if IsSliceMember([]string{ACCOUNT, META_DEFAULT}, fieldName) {
+		return storedCdr.Account
+	}
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(STATIC_VALUE_PREFIX):]
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetDestination(fieldName string) string {
+	if IsSliceMember([]string{DESTINATION, META_DEFAULT}, fieldName) {
+		return storedCdr.Destination
+	}
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(STATIC_VALUE_PREFIX):]
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetCallDestNr(fieldName string) string {
+	if IsSliceMember([]string{DESTINATION, META_DEFAULT}, fieldName) {
+		return storedCdr.Destination
+	}
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(STATIC_VALUE_PREFIX):]
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetCategory(fieldName string) string {
+	if IsSliceMember([]string{CATEGORY, META_DEFAULT}, fieldName) {
+		return storedCdr.Category
+	}
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(STATIC_VALUE_PREFIX):]
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetTenant(fieldName string) string {
+	if IsSliceMember([]string{TENANT, META_DEFAULT}, fieldName) {
+		return storedCdr.Tenant
+	}
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(STATIC_VALUE_PREFIX):]
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetReqType(fieldName string) string {
+	if IsSliceMember([]string{REQTYPE, META_DEFAULT}, fieldName) {
+		return storedCdr.ReqType
+	}
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(STATIC_VALUE_PREFIX):]
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetSetupTime(fieldName string) (time.Time, error) {
+	if IsSliceMember([]string{SETUP_TIME, META_DEFAULT}, fieldName) {
+		return storedCdr.SetupTime, nil
+	}
+	var sTimeVal string
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		sTimeVal = fieldName[len(STATIC_VALUE_PREFIX):]
+	} else {
+		sTimeVal = storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	}
+	return ParseTimeDetectLayout(sTimeVal)
+}
+func (storedCdr *StoredCdr) GetAnswerTime(fieldName string) (time.Time, error) {
+	if IsSliceMember([]string{ANSWER_TIME, META_DEFAULT}, fieldName) {
+		return storedCdr.AnswerTime, nil
+	}
+	var aTimeVal string
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		aTimeVal = fieldName[len(STATIC_VALUE_PREFIX):]
+	} else {
+		aTimeVal = storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	}
+	return ParseTimeDetectLayout(aTimeVal)
+}
+func (storedCdr *StoredCdr) GetEndTime() (time.Time, error) {
+	return storedCdr.AnswerTime.Add(storedCdr.Usage), nil
+}
+func (storedCdr *StoredCdr) GetDuration(fieldName string) (time.Duration, error) {
+	if IsSliceMember([]string{USAGE, META_DEFAULT}, fieldName) {
+		return storedCdr.Usage, nil
+	}
+	var durVal string
+	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
+		durVal = fieldName[len(STATIC_VALUE_PREFIX):]
+	} else {
+		durVal = storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	}
+	return ParseDurationWithSecs(durVal)
+}
+func (storedCdr *StoredCdr) GetOriginatorIP(fieldName string) string {
+	if IsSliceMember([]string{CDRHOST, META_DEFAULT}, fieldName) {
+		return storedCdr.CdrHost
+	}
+	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+}
+func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
+	return storedCdr.ExtraFields
+}
+func (storedCdr *StoredCdr) MissingParameter(eventName string) bool {
+	switch eventName {
+	case CGR_AUTHORIZE:
+		return len(storedCdr.AccId) == 0 ||
+			len(storedCdr.Category) == 0 ||
+			len(storedCdr.Tenant) == 0 ||
+			len(storedCdr.Account) == 0 ||
+			len(storedCdr.Destination) == 0
+	default:
+		return true
+	}
+}
+func (storedCdr *StoredCdr) ParseEventValue(rsrFld *RSRField) string {
+	return storedCdr.FieldAsString(rsrFld)
+}
+func (storedCdr *StoredCdr) String() string {
+	mrsh, _ := json.Marshal(storedCdr)
+	return string(mrsh)
 }
 
 type CgrCdrOut struct {
