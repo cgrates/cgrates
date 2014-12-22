@@ -134,6 +134,7 @@ type TpAction struct {
 	Direction       string
 	Units           float64
 	ExpiryTime      string
+	TimingTags      string
 	DestinationTag  string
 	RatingSubject   string
 	Category        string
@@ -168,6 +169,7 @@ type TpActionTrigger struct {
 	BalanceDestinationTag string
 	BalanceWeight         float64
 	BalanceExpiryTime     string
+	BalanceTimingTags     string
 	BalanceRatingSubject  string
 	BalanceCategory       string
 	BalanceSharedGroup    string

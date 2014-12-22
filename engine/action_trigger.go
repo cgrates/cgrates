@@ -40,6 +40,7 @@ type ActionTrigger struct {
 	BalanceDestinationId  string    // filter for balance
 	BalanceWeight         float64   // filter for balance
 	BalanceExpirationDate time.Time // filter for balance
+	BalanceTimingTags     string    // filter for balance
 	BalanceRatingSubject  string    // filter for balance
 	BalanceCategory       string    // filter for balance
 	BalanceSharedGroup    string    // filter for balance

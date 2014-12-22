@@ -87,6 +87,38 @@ func TestBalanceEqual(t *testing.T) {
 	}
 }
 
+func TestBalanceMatchFilter(t *testing.T) {
+	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	mb2 := &Balance{Weight: 1, precision: 1, RatingSubject: "", DestinationId: ""}
+	if !mb1.MatchFilter(mb2) {
+		t.Error("Match filter failure: %+v == %+v", mb1, mb2)
+	}
+}
+
+func TestBalanceMatchFilterEmpty(t *testing.T) {
+	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	mb2 := &Balance{}
+	if !mb1.MatchFilter(mb2) {
+		t.Error("Match filter failure: %+v == %+v", mb1, mb2)
+	}
+}
+
+func TestBalanceMatchFilterId(t *testing.T) {
+	mb1 := &Balance{Id: "T1", Weight: 2, precision: 2, RatingSubject: "2", DestinationId: "NAT"}
+	mb2 := &Balance{Id: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	if !mb1.MatchFilter(mb2) {
+		t.Error("Match filter failure: %+v == %+v", mb1, mb2)
+	}
+}
+
+func TestBalanceMatchFilterDiffId(t *testing.T) {
+	mb1 := &Balance{Id: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	mb2 := &Balance{Id: "T2", Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	if mb1.MatchFilter(mb2) {
+		t.Error("Match filter failure: %+v != %+v", mb1, mb2)
+	}
+}
+
 func TestBalanceClone(t *testing.T) {
 	mb1 := &Balance{Value: 1, Weight: 2, RatingSubject: "test", DestinationId: "5"}
 	mb2 := mb1.Clone()

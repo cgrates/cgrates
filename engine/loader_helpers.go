@@ -47,6 +47,7 @@ const (
 	ACTSCSVIDX_RATING_SUBJECT
 	ACTSCSVIDX_SHARED_GROUP
 	ACTSCSVIDX_EXPIRY_TIME
+	ACTSCSVIDX_TIMING_TAGS
 	ACTSCSVIDX_UNITS
 	ACTSCSVIDX_BALANCE_WEIGHT
 	ACTSCSVIDX_WEIGHT
@@ -67,6 +68,7 @@ const (
 	ATRIGCSVIDX_BAL_RATING_SUBJECT
 	ATRIGCSVIDX_BAL_SHARED_GROUP
 	ATRIGCSVIDX_BAL_EXPIRY_TIME
+	ATRIGCSVIDX_BAL_TIMING_TAGS
 	ATRIGCSVIDX_BAL_WEIGHT
 	ATRIGCSVIDX_STATS_MIN_QUEUED_ITEMS
 	ATRIGCSVIDX_ACTIONS_TAG
@@ -127,11 +129,15 @@ func ValidNextGroup(present, next *utils.RateSlot) error {
 func NewTiming(timingInfo ...string) (rt *utils.TPTiming) {
 	rt = &utils.TPTiming{}
 	rt.Id = timingInfo[0]
-	rt.Years.Parse(timingInfo[1], ";")
-	rt.Months.Parse(timingInfo[2], ";")
-	rt.MonthDays.Parse(timingInfo[3], ";")
-	rt.WeekDays.Parse(timingInfo[4], ";")
-	rt.StartTime = timingInfo[5]
+	rt.Years.Parse(timingInfo[1], utils.INFIELD_SEP)
+	rt.Months.Parse(timingInfo[2], utils.INFIELD_SEP)
+	rt.MonthDays.Parse(timingInfo[3], utils.INFIELD_SEP)
+	rt.WeekDays.Parse(timingInfo[4], utils.INFIELD_SEP)
+	times := strings.Split(timingInfo[5], utils.INFIELD_SEP)
+	rt.StartTime = times[0]
+	if len(times) > 1 {
+		rt.EndTime = times[1]
+	}
 	return
 }
 

@@ -25,6 +25,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var (
+	ACTIVE_TIME = time.Now()
+)
+
 func TestRateIntervalSimpleContains(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
@@ -335,6 +339,10 @@ func TestRateIntervalCronEmpty(t *testing.T) {
 	if cron != expected {
 		t.Errorf("Expected %s was %s", expected, cron)
 	}
+}
+
+func TestTimingIsActive(t *testing.T) {
+
 }
 
 /*********************************Benchmarks**************************************/

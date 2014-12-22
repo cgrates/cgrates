@@ -522,7 +522,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			return fmt.Errorf("Cannot parse activation time from %v", record[4])
 		}
 		// extract aliases from subject
-		aliases := strings.Split(subject, ";")
+		aliases := strings.Split(subject, utils.INFIELD_SEP)
 		csvr.dirtyRpAliases = append(csvr.dirtyRpAliases, &TenantRatingSubject{Tenant: tenant, Subject: aliases[0]})
 		if len(aliases) > 1 {
 			subject = aliases[0]
@@ -692,10 +692,29 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				Value:         units,
 				Weight:        balanceWeight,
 				DestinationId: record[ACTSCSVIDX_DESTINATION_TAG],
+				TimingIDs:     record[ACTSCSVIDX_TIMING_TAGS],
 				RatingSubject: record[ACTSCSVIDX_RATING_SUBJECT],
 				Category:      record[ACTSCSVIDX_CATEGORY],
 				SharedGroup:   record[ACTSCSVIDX_SHARED_GROUP],
 			},
+		}
+		// load action timings from tags
+		if a.Balance.TimingIDs != "" {
+			timingIds := strings.Split(a.Balance.TimingIDs, utils.INFIELD_SEP)
+			for _, timingID := range timingIds {
+				if timing, found := csvr.timings[timingID]; found {
+					a.Balance.Timings = append(a.Balance.Timings, &RITiming{
+						Years:     timing.Years,
+						Months:    timing.Months,
+						MonthDays: timing.MonthDays,
+						WeekDays:  timing.WeekDays,
+						StartTime: timing.StartTime,
+						EndTime:   timing.EndTime,
+					})
+				} else {
+					return fmt.Errorf("Could not find timing: %v", timingID)
+				}
+			}
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {
 			return fmt.Errorf("Could not parse expiration time: %v", err)
@@ -807,6 +826,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			BalanceDestinationId:  record[ATRIGCSVIDX_BAL_DESTINATION_TAG],
 			BalanceWeight:         balanceWeight,
 			BalanceExpirationDate: balanceExp,
+			BalanceTimingTags:     record[ATRIGCSVIDX_BAL_TIMING_TAGS],
 			BalanceRatingSubject:  record[ATRIGCSVIDX_BAL_RATING_SUBJECT],
 			BalanceCategory:       record[ATRIGCSVIDX_BAL_CATEGORY],
 			BalanceSharedGroup:    record[ATRIGCSVIDX_BAL_SHARED_GROUP],
@@ -832,7 +852,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tenant, account, direction := record[0], record[1], record[2]
 		// extract aliases from subject
-		aliases := strings.Split(account, ";")
+		aliases := strings.Split(account, utils.INFIELD_SEP)
 		csvr.dirtyAccAliases = append(csvr.dirtyAccAliases, &TenantAccount{Tenant: tenant, Account: aliases[0]})
 		if len(aliases) > 1 {
 			account = aliases[0]

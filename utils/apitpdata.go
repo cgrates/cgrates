@@ -177,6 +177,7 @@ type TPTiming struct {
 	MonthDays MonthDays
 	WeekDays  WeekDays
 	StartTime string
+	EndTime   string
 }
 
 type TPRatingPlan struct {
@@ -320,6 +321,7 @@ type TPAction struct {
 	Direction       string  // Balance direction
 	Units           float64 // Number of units to add/deduct
 	ExpiryTime      string  // Time when the units will expire
+	TimingTags      string  // Timing when balance is active
 	DestinationId   string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
 	Category        string  // category filter for balances
@@ -522,7 +524,7 @@ func (self *TPActionTriggers) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.ActionTriggers))
 	for idx, at := range self.ActionTriggers {
 		retSlice[idx] = []string{self.ActionTriggersId, at.ThresholdType, strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64), strconv.FormatBool(at.Recurrent), strconv.FormatFloat(at.MinSleep.Seconds(), 'f', -1, 64),
-			at.BalanceTag, at.BalanceType, at.BalanceDirection, at.BalanceCategory, at.BalanceDestinationId, at.BalanceRatingSubject, at.BalanceSharedGroup, at.BalanceExpirationDate,
+			at.BalanceTag, at.BalanceType, at.BalanceDirection, at.BalanceCategory, at.BalanceDestinationId, at.BalanceRatingSubject, at.BalanceSharedGroup, at.BalanceExpirationDate, at.BalanceTimingTags,
 			strconv.FormatFloat(at.BalanceWeight, 'f', -1, 64), strconv.Itoa(at.MinQueuedItems), at.ActionsId, strconv.FormatFloat(at.Weight, 'f', -1, 64)}
 	}
 	return retSlice
@@ -539,6 +541,7 @@ type TPActionTrigger struct {
 	BalanceDestinationId  string        // filter for balance
 	BalanceWeight         float64       // filter for balance
 	BalanceExpirationDate string        // filter for balance
+	BalanceTimingTags     string        // filter for balance
 	BalanceRatingSubject  string        // filter for balance
 	BalanceCategory       string        // filter for balance
 	BalanceSharedGroup    string        // filter for balance

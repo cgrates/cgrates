@@ -10,7 +10,7 @@ CREATE TABLE `tp_timings` (
   `months` varchar(255) NOT NULL,
   `month_days` varchar(255) NOT NULL,
   `week_days` varchar(255) NOT NULL,
-  `time` varchar(16) NOT NULL,
+  `time` varchar(32) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
@@ -150,7 +150,8 @@ CREATE TABLE `tp_actions` (
   `direction` varchar(8) NOT NULL,
   `units` DECIMAL(20,4) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
-  `destination_tag` varchar(64) NOT NULL,
+  `timing_tags` varchar(128) NOT NULL,
+  `balance_destination_tag` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
   `category` varchar(16) NOT NULL,
   `shared_group` varchar(64) NOT NULL,
@@ -160,7 +161,7 @@ CREATE TABLE `tp_actions` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`shared_group`,`balance_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`direction`,`expiry_time`,`timing_tags`,`destination_tag`,`shared_group`,`balance_weight`,`weight`)
 );
 
 --
@@ -199,7 +200,8 @@ CREATE TABLE `tp_action_triggers` (
   `min_sleep` BIGINT NOT NULL,
   `balance_destination_tag` varchar(64) NOT NULL,
   `balance_weight` DECIMAL(8,2) NOT NULL, 
-  `balance_expiry_time` varchar(24) NOT NULL, 
+  `balance_expiry_time` varchar(24) NOT NULL,
+  `balance_timing_tags` varchar(128) NOT NULL, 
   `balance_rating_subject` varchar(64) NOT NULL,
   `balance_category` varchar(16) NOT NULL,
   `balance_shared_group` varchar(64) NOT NULL,

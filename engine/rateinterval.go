@@ -115,6 +115,63 @@ func (rit *RITiming) CronString() string {
 	return rit.cronString
 }
 
+// Returns wheter the Timing is active at the specified time
+func (rit *RITiming) IsActiveAt(t time.Time, endTime bool) bool {
+	// if the received time represents an endtime consider it 24 instead of 0
+	hour := t.Hour()
+	if endTime && hour == 0 {
+		hour = 24
+	}
+	// check for years
+	if len(rit.Years) > 0 && !rit.Years.Contains(t.Year()) {
+		return false
+	}
+	// check for months
+	if len(rit.Months) > 0 && !rit.Months.Contains(t.Month()) {
+		return false
+	}
+	// check for month days
+	if len(rit.MonthDays) > 0 && !rit.MonthDays.Contains(t.Day()) {
+		return false
+	}
+	// check for weekdays
+	if len(rit.WeekDays) > 0 && !rit.WeekDays.Contains(t.Weekday()) {
+		return false
+	}
+	// check for start hour
+	if rit.StartTime != "" {
+		split := strings.Split(rit.StartTime, ":")
+		sh, _ := strconv.Atoi(split[0])
+		sm, _ := strconv.Atoi(split[1])
+		ss, _ := strconv.Atoi(split[2])
+		// if the hour result before or result the same hour but the minute result before
+		if hour < sh ||
+			(hour == sh && t.Minute() < sm) ||
+			(hour == sh && t.Minute() == sm && t.Second() < ss) {
+			return false
+		}
+	}
+	// check for end hour
+	if rit.EndTime != "" {
+		split := strings.Split(rit.EndTime, ":")
+		eh, _ := strconv.Atoi(split[0])
+		em, _ := strconv.Atoi(split[1])
+		es, _ := strconv.Atoi(split[2])
+		// if the hour result after or result the same hour but the minute result after
+		if hour > eh ||
+			(hour == eh && t.Minute() > em) ||
+			(hour == eh && t.Minute() == em && t.Second() > es) {
+			return false
+		}
+	}
+	return true
+}
+
+// Returns wheter the Timing is active now
+func (rit *RITiming) IsActive() bool {
+	return rit.IsActiveAt(time.Now(), false)
+}
+
 func (rit *RITiming) Stringify() string {
 	return utils.Sha1(fmt.Sprintf("%v", rit))[:8]
 }
@@ -202,54 +259,7 @@ func (pg *RateGroups) AddRate(ps ...*Rate) {
 Returns true if the received time result inside the interval
 */
 func (i *RateInterval) Contains(t time.Time, endTime bool) bool {
-	// if the received time represents an endtime cosnidere it 24 instead of 0
-	hour := t.Hour()
-	if endTime && hour == 0 {
-		hour = 24
-	}
-	// check for years
-	if len(i.Timing.Years) > 0 && !i.Timing.Years.Contains(t.Year()) {
-		return false
-	}
-	// check for months
-	if len(i.Timing.Months) > 0 && !i.Timing.Months.Contains(t.Month()) {
-		return false
-	}
-	// check for month days
-	if len(i.Timing.MonthDays) > 0 && !i.Timing.MonthDays.Contains(t.Day()) {
-		return false
-	}
-	// check for weekdays
-	if len(i.Timing.WeekDays) > 0 && !i.Timing.WeekDays.Contains(t.Weekday()) {
-		return false
-	}
-	// check for start hour
-	if i.Timing.StartTime != "" {
-		split := strings.Split(i.Timing.StartTime, ":")
-		sh, _ := strconv.Atoi(split[0])
-		sm, _ := strconv.Atoi(split[1])
-		ss, _ := strconv.Atoi(split[2])
-		// if the hour result before or result the same hour but the minute result before
-		if hour < sh ||
-			(hour == sh && t.Minute() < sm) ||
-			(hour == sh && t.Minute() == sm && t.Second() < ss) {
-			return false
-		}
-	}
-	// check for end hour
-	if i.Timing.EndTime != "" {
-		split := strings.Split(i.Timing.EndTime, ":")
-		eh, _ := strconv.Atoi(split[0])
-		em, _ := strconv.Atoi(split[1])
-		es, _ := strconv.Atoi(split[2])
-		// if the hour result after or result the same hour but the minute result after
-		if hour > eh ||
-			(hour == eh && t.Minute() > em) ||
-			(hour == eh && t.Minute() == em && t.Second() > es) {
-			return false
-		}
-	}
-	return true
+	return i.Timing.IsActiveAt(t, endTime)
 }
 
 /*
