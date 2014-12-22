@@ -157,11 +157,11 @@ func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
 	}
 }
 
-func (sm *FSSessionManager) OnHeartBeat(ev Event) {
+func (sm *FSSessionManager) OnHeartBeat(ev utils.Event) {
 	engine.Logger.Info("freeswitch ♥")
 }
 
-func (sm *FSSessionManager) OnChannelPark(ev Event) {
+func (sm *FSSessionManager) OnChannelPark(ev utils.Event) {
 	var maxCallDuration time.Duration // This will be the maximum duration this channel will be allowed to last
 	var durInitialized bool
 	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
@@ -230,7 +230,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
-func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
+func (sm *FSSessionManager) OnChannelAnswer(ev utils.Event) {
 	if ev.MissingParameter(utils.META_DEFAULT) {
 		sm.DisconnectSession(ev.GetUUID(), MISSING_PARAMETER, "")
 	}
@@ -252,7 +252,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	}
 }
 
-func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
+func (sm *FSSessionManager) OnChannelHangupComplete(ev utils.Event) {
 	go sm.processCdr(ev.AsStoredCdr())
 	s := sm.GetSession(ev.GetUUID())
 	if s == nil { // Not handled by us

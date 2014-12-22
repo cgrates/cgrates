@@ -46,7 +46,13 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte) {
 	if err != nil {
 		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
 	}
-	engine.Logger.Info(fmt.Sprintf("onCgrAuth handler, received event: %+v", kev))
+	var remainingDuration float64
+	if err = self.rater.GetDerivedMaxSessionTime(kev.New(""), &remainingDuration); err != nil {
+		engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", kev.GetUUID(), err))
+	}
+	if remainingDuration == -1.0 { // Unlimited
+		return
+	}
 }
 
 func (self *KamailioSessionManager) Connect() error {

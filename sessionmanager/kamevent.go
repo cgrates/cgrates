@@ -30,17 +30,17 @@ import (
 
 const (
 	CGR_AUTHORIZE  = "CGR_AUTHORIZE"
-	CGR_EVENTNAME  = "cgr_event"
+	EVENT          = "event"
 	CGR_SETUPTIME  = "cgr_setuptime"
 	CGR_ANSWERTIME = "cgr_answertime"
 	CGR_STOPTIME   = "cgr_stoptime"
 	CGR_DURATION   = "cgr_duration"
 )
 
-var primaryFields = []string{CGR_EVENTNAME, CALLID, FROM_TAG, TO_TAG, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
+var primaryFields = []string{EVENT, CALLID, FROM_TAG, TO_TAG, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
 	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION}
 
-var mandatoryAuth = []string{CGR_EVENTNAME, CALLID, FROM_TAG, CGR_ACCOUNT, CGR_DESTINATION, CGR_SETUPTIME}
+var mandatoryAuth = []string{EVENT, CALLID, FROM_TAG, CGR_ACCOUNT, CGR_DESTINATION, CGR_SETUPTIME}
 
 func NewKamEvent(kamEvData []byte) (KamEvent, error) {
 	kev := make(map[string]string)
@@ -54,12 +54,12 @@ func NewKamEvent(kamEvData []byte) (KamEvent, error) {
 type KamEvent map[string]string
 
 // Backwards compatibility, should be AsEvent
-func (kev KamEvent) New(ignored string) Event {
-	return Event(kev)
+func (kev KamEvent) New(ignored string) utils.Event {
+	return utils.Event(kev)
 }
 
 func (kev KamEvent) GetName() string {
-	return kev[CGR_EVENTNAME]
+	return kev[EVENT]
 }
 func (kev KamEvent) GetCgrId() string {
 	setupTime, _ := kev.GetSetupTime(utils.META_DEFAULT)

@@ -118,6 +118,64 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 	return
 }
 
+// Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
+func (rs *Responder) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) error {
+	if rs.Bal != nil {
+		return errors.New("Unsupported method on the balancer")
+	}
+	maxCallDuration := -1.0                      // This will be the maximum duration this channel will be allowed to last, -1 represents no limits
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+	var dcs utils.DerivedChargers
+	if err := rs.GetDerivedChargers(attrsDC, &dcs); err != nil {
+		return err
+	}
+	dcs, _ = dcs.AppendDefaultRun()
+	for _, dc := range dcs {
+		if !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
+			continue
+		}
+		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
+		matchingAllFilters := true
+		for _, dcRunFilter := range runFilters {
+			if fltrPass, _ := ev.PassesFieldFilter(dcRunFilter); !fltrPass {
+				matchingAllFilters = false
+				break
+			}
+		}
+		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
+			continue
+		}
+		startTime, err := ev.GetSetupTime(utils.META_DEFAULT)
+		if err != nil {
+			return err
+		}
+		cd := CallDescriptor{
+			Direction:   ev.GetDirection(dc.DirectionField),
+			Tenant:      ev.GetTenant(dc.TenantField),
+			Category:    ev.GetCategory(dc.CategoryField),
+			Subject:     ev.GetSubject(dc.SubjectField),
+			Account:     ev.GetAccount(dc.AccountField),
+			Destination: ev.GetDestination(dc.DestinationField),
+			TimeStart:   startTime,
+			TimeEnd:     startTime.Add(config.CgrConfig().SMMaxCallDuration),
+		}
+		var remainingDuration float64
+		err = rs.GetMaxSessionTime(cd, &remainingDuration)
+		if err != nil {
+			return err
+		}
+		// Set maxCallDuration, smallest out of all forked sessions
+		if maxCallDuration == -1.0 { // first time we set it /not initialized yet
+			maxCallDuration = remainingDuration
+		} else if maxCallDuration > remainingDuration {
+			maxCallDuration = remainingDuration
+		}
+	}
+	*reply = maxCallDuration
+	return nil
+}
+
 func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
 	// ToDo: Make it work with balancer if needed
 
@@ -296,6 +354,7 @@ type Connector interface {
 	RefundIncrements(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
 	GetDerivedChargers(utils.AttrDerivedChargers, *utils.DerivedChargers) error
+	GetDerivedMaxSessionTime(utils.Event, *float64) error
 	ProcessCdr(*utils.StoredCdr, *string) error
 }
 
@@ -321,6 +380,10 @@ func (rcc *RPCClientConnector) RefundIncrements(cd CallDescriptor, resp *float64
 
 func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
+}
+
+func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) error {
+	return rcc.Client.Call("Responder.GetDerivedMaxSessionTime", ev, reply)
 }
 
 func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {

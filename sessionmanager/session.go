@@ -55,7 +55,7 @@ type SessionRun struct {
 }
 
 // Creates a new session and in case of prepaid starts the debit loop for each of the session runs individually
-func NewSession(ev Event, sm SessionManager, dcs utils.DerivedChargers) *Session {
+func NewSession(ev utils.Event, sm SessionManager, dcs utils.DerivedChargers) *Session {
 	s := &Session{cgrid: ev.GetCgrId(),
 		uuid:           ev.GetUUID(),
 		stopDebit:      make(chan bool),
@@ -134,7 +134,7 @@ func (s *Session) debitLoop(runIdx int) {
 }
 
 // Stops the debit loop
-func (s *Session) Close(ev Event) {
+func (s *Session) Close(ev utils.Event) {
 	// engine.Logger.Debug(fmt.Sprintf("Stopping debit for %s", s.uuid))
 	if s == nil {
 		return

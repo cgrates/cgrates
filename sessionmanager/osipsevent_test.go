@@ -36,7 +36,7 @@ var osipsEv = &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_CDR",
 		"duration": "20", "from_tag": "eb082607", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr}}
 
 func TestOsipsEventInterface(t *testing.T) {
-	var _ Event = Event(osipsEv)
+	var _ utils.Event = utils.Event(osipsEv)
 }
 
 func TestOsipsEventParseStatic(t *testing.T) {

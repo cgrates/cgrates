@@ -76,7 +76,7 @@ func (fsev FSEvent) String() (result string) {
 
 // Loads the new event data from a body of text containing the key value proprieties.
 // It stores the parsed proprieties in the internal map.
-func (fsev FSEvent) New(body string) Event {
+func (fsev FSEvent) New(body string) utils.Event {
 	fsev = fsock.FSEventStrToMap(body, nil)
 	return fsev
 }
