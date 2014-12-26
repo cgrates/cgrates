@@ -139,6 +139,7 @@ func TestV2CdrsMysqlGetCdrs(t *testing.T) {
 	}
 }
 
+/*
 func TestV2CdrsMysqlCountCdrs(t *testing.T) {
 	if !*testLocal {
 		return
@@ -151,6 +152,7 @@ func TestV2CdrsMysqlCountCdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 }
+*/
 
 func TestV2CdrsMysqlKillEngine(t *testing.T) {
 	if !*testLocal {

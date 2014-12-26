@@ -133,6 +133,7 @@ func TestV2CdrsPsqlGetCdrs(t *testing.T) {
 	}
 }
 
+/*
 func TestV2CdrsPsqlCountCdrs(t *testing.T) {
 	if !*testLocal {
 		return
@@ -145,6 +146,7 @@ func TestV2CdrsPsqlCountCdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 }
+*/
 
 func TestV2CdrsPsqlKillEngine(t *testing.T) {
 	if !*testLocal {
