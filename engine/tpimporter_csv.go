@@ -380,8 +380,8 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		actId, actionType, balanceType, direction, destTag, rateSubject, category, sharedGroup := record[ACTSCSVIDX_TAG], record[ACTSCSVIDX_ACTION],
-			record[ACTSCSVIDX_BALANCE_TYPE], record[ACTSCSVIDX_DIRECTION], record[ACTSCSVIDX_DESTINATION_TAG], record[ACTSCSVIDX_RATING_SUBJECT],
+		actId, actionType, balanceTag, balanceType, direction, destTag, rateSubject, category, sharedGroup := record[ACTSCSVIDX_TAG], record[ACTSCSVIDX_ACTION],
+			record[ACTSCSVIDX_BALANCE_TAG], record[ACTSCSVIDX_BALANCE_TYPE], record[ACTSCSVIDX_DIRECTION], record[ACTSCSVIDX_DESTINATION_TAG], record[ACTSCSVIDX_RATING_SUBJECT],
 			record[ACTSCSVIDX_CATEGORY], record[ACTSCSVIDX_SHARED_GROUP]
 		units, err := strconv.ParseFloat(record[ACTSCSVIDX_UNITS], 64)
 		if err != nil && record[ACTSCSVIDX_UNITS] != "" {
@@ -403,6 +403,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 		}
 		acts[actId] = append(acts[actId], &utils.TPAction{
 			Identifier:      actionType,
+			BalanceTag:      balanceTag,
 			BalanceType:     balanceType,
 			Direction:       direction,
 			Units:           units,

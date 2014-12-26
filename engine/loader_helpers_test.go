@@ -61,13 +61,13 @@ DUMMY,INVALID;DATA
 *out,cgrates.org,call,subj1;alias1,2012-01-01T00:00:00Z,RP_RETAIL,
 `
 
-var actionsSample = `#ActionsTag[0],Action[1],ExtraParameters[2],BalanceType[3],Direction[4],Category[5],DestinationTag[6],RatingSubject[7],SharedGroup[8],ExpiryTime[9],Units[10],BalanceWeight[11],Weight[12]
-PREPAID_10,*topup_reset,,*monetary,*out,,*any,,,*unlimited,5,10,10
-WARN_HTTP,*call_url,http://localhost:8000,,,,,,,,,,10
-LOG_BALANCE,*log,,,,,,,,,,,10
+var actionsSample = `#ActionsTag[0],Action[1],ExtraParameters[2],BalanceTag[3],BalanceType[4],Direction[5],Category[6],DestinationTag[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],Units[11],BalanceWeight[12],Weight[13]
+PREPAID_10,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,5,10,10
+WARN_HTTP,*call_url,http://localhost:8000,,,,,,,,,,,10
+LOG_BALANCE,*log,,,,,,,,,,,,10
 DUMMY,INVALID;DATA
-PREPAID_10,*topup_reset,,*monetary,*out,,*any,,*unlimited,5,10,10
-TOPUP_RST_SHARED_5,*topup_reset,param&some,*monetary,*out,,*any,subj,SHARED_A,*unlimited,5,20,10
+PREPAID_10,*topup_reset,,,*monetary,*out,,*any,,*unlimited,5,10,10
+TOPUP_RST_SHARED_5,*topup_reset,param&some,,*monetary,*out,,*any,subj,SHARED_A,*unlimited,5,20,10
 `
 
 var actionTimingsSample = `#Tag,ActionsTag,TimingTag,Weight
@@ -75,11 +75,11 @@ PREPAID_10,PREPAID_10,ASAP,10
 DUMMY,INVALID;DATA
 `
 
-var actionTriggersSample = `#Tag,BalanceTag,Direction,ThresholdType,ThresholdValue,Recurrent,MinSleep,BalanceDestinationTag,BalanceWeight,BalanceExpiryTime,BalanceRatingSubject,BalanceCategory,BalanceSharedGroup,StatsMinQueuedItems,ActionsTag,Weight
-STANDARD_TRIGGERS,*min_balance,2,false,0,*monetary,*out,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*max_balance,20,false,0,*monetary,*out,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*max_counter,15,false,0,*monetary,*out,,FS_USERS,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,*min_asr,45,true,1h,,,,,,,,,3,CDRST_WARN_HTTP,10
+var actionTriggersSample = `#Tag,ThresholdType,ThresholdValue,Recurrent,MinSleep,BalanceTag,BalanceType,BalanceDirection,BalanceDestinationTag,BalanceWeight,BalanceExpiryTime,BalanceTimingTags,BalanceRatingSubject,BalanceCategory,BalanceSharedGroup,StatsMinQueuedItems,ActionsTag,Weight
+STANDARD_TRIGGERS,*min_balance,2,false,0,,*monetary,*out,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*max_balance,20,false,0,,*monetary,*out,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*max_counter,15,false,0,,*monetary,*out,,FS_USERS,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,*min_asr,45,true,1h,,,,,,,,,,3,CDRST_WARN_HTTP,10
 DUMMY,INVALID;DATA
 `
 
