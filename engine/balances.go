@@ -37,6 +37,8 @@ type Balance struct {
 	RatingSubject  string
 	Category       string
 	SharedGroup    string
+	Timings        []*RITiming
+	TimingIDs      string
 	precision      int
 	account        *Account // used to store ub reference for shared balances
 	dirty          bool
@@ -87,6 +89,22 @@ func (b *Balance) IsDefault() bool {
 
 func (b *Balance) IsExpired() bool {
 	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
+}
+
+func (b *Balance) IsActive() bool {
+	return b.IsActiveAt(time.Now())
+}
+
+func (b *Balance) IsActiveAt(t time.Time) bool {
+	if len(b.Timings) == 0 {
+		return true
+	}
+	for _, tim := range b.Timings {
+		if tim.IsActiveAt(t, false) {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *Balance) MatchCategory(category string) bool {
@@ -223,9 +241,14 @@ func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalance
 			continue
 		}
 		tsWasSplit := false
+		currentTime := ts.TimeStart
 		for incrementIndex, increment := range ts.Increments {
 			if tsWasSplit {
 				break
+			}
+			currentTime = currentTime.Add(increment.Duration)
+			if !b.IsActiveAt(currentTime) {
+				continue
 			}
 			if increment.paid {
 				continue
@@ -369,9 +392,14 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 			continue
 		}
 		tsWasSplit := false
+		currentTime := ts.TimeStart
 		for incrementIndex, increment := range ts.Increments {
 			if tsWasSplit {
 				break
+			}
+			currentTime = currentTime.Add(increment.Duration)
+			if !b.IsActiveAt(currentTime) {
+				continue
 			}
 			if increment.paid {
 				continue
@@ -472,7 +500,7 @@ func (bc BalanceChain) Sort() {
 
 func (bc BalanceChain) GetTotalValue() (total float64) {
 	for _, b := range bc {
-		if !b.IsExpired() {
+		if !b.IsExpired() && b.IsActive() {
 			total += b.Value
 		}
 	}

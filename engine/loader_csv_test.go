@@ -140,16 +140,16 @@ SG3,*any,*lowest,
 `
 
 	actions = `
-MINI,*topup_reset,,,*monetary,*out,,,,,*unlimited,10,10,10
-MINI,*topup,,,*voice,*out,,NAT,test,,*unlimited,100,10,10
-SHARED,*topup,,,*monetary,*out,,,,SG1,*unlimited,100,10,10
-TOPUP10_AC,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,1,10,10
-TOPUP10_AC1,*topup_reset,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,40,10,10
-SE0,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,0,10,10
-SE10,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,10,5,10
-SE10,*topup,,,*monetary,*out,,,,,*unlimited,10,10,10
-EE0,*topup_reset,,,*monetary,*out,,,,SG3,*unlimited,0,10,10
-EE0,*allow_negative,,,*monetary,*out,,,,,*unlimited,0,10,10
+MINI,*topup_reset,,,*monetary,*out,,,,,*unlimited,,10,10,10
+MINI,*topup,,,*voice,*out,,NAT,test,,*unlimited,,100,10,10
+SHARED,*topup,,,*monetary,*out,,,,SG1,*unlimited,,100,10,10
+TOPUP10_AC,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,1,10,10
+TOPUP10_AC1,*topup_reset,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,10
+SE0,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,0,10,10
+SE10,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,10,5,10
+SE10,*topup,,,*monetary,*out,,,,,*unlimited,,10,10,10
+EE0,*topup_reset,,,*monetary,*out,,,,SG3,*unlimited,,0,10,10
+EE0,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -162,16 +162,16 @@ TOPUP_EMPTY_AT,EE0,ASAP,10
 `
 
 	actionTriggers = `
-STANDARD_TRIGGER,*min_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,SOME_1,10
-STANDARD_TRIGGER,*max_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,SOME_2,10
-STANDARD_TRIGGERS,*min_balance,2,false,0,,*monetary,*out,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*max_balance,20,false,0,,*monetary,*out,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*max_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,*min_asr,45,true,1h,,,,,,,,,,3,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACD,*min_acd,10,true,1h,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACC,*max_acc,10,true,10m,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ASR,*min_asr,30,true,0,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ACD,*min_acd,3,true,0,,,,,,,,,,5,CDRST_WARN_HTTP,10
+STANDARD_TRIGGER,*min_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,,SOME_1,10
+STANDARD_TRIGGER,*max_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,,SOME_2,10
+STANDARD_TRIGGERS,*min_balance,2,false,0,,*monetary,*out,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*max_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,*min_asr,45,true,1h,,,,,,,,,,,3,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACD,*min_acd,10,true,1h,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACC,*max_acc,10,true,10m,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ASR,*min_asr,30,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ACD,*min_acd,3,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER

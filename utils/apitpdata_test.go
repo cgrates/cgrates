@@ -422,6 +422,7 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 				BalanceDestinationId:  "",
 				BalanceWeight:         0.0,
 				BalanceExpirationDate: "*never",
+				BalanceTimingTags:     "T1",
 				BalanceRatingSubject:  "special1",
 				BalanceCategory:       "call",
 				BalanceSharedGroup:    "SHARED_1",
@@ -439,6 +440,7 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 				BalanceDestinationId:  "FS_USERS",
 				BalanceWeight:         0.0,
 				BalanceExpirationDate: "*never",
+				BalanceTimingTags:     "T1",
 				BalanceRatingSubject:  "special1",
 				BalanceCategory:       "call",
 				BalanceSharedGroup:    "SHARED_1",
@@ -448,8 +450,8 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"STANDARD_TRIGGERS", "*min_balance", "2", "false", "0", "b1", "*monetary", "*out", "call", "", "special1", "SHARED_1", "*never", "0", "0", "LOG_WARNING", "10"},
-		[]string{"STANDARD_TRIGGERS", "*max_counter", "5", "false", "0", "b2", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "0", "0", "LOG_WARNING", "10"},
+		[]string{"STANDARD_TRIGGERS", "*min_balance", "2", "false", "0", "b1", "*monetary", "*out", "call", "", "special1", "SHARED_1", "*never", "T1", "0", "0", "LOG_WARNING", "10"},
+		[]string{"STANDARD_TRIGGERS", "*max_counter", "5", "false", "0", "b2", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "T1", "0", "0", "LOG_WARNING", "10"},
 	}
 	if slc := at.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)

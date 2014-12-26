@@ -10,7 +10,7 @@ CREATE TABLE tp_timings (
   months VARCHAR(255) NOT NULL,
   month_days VARCHAR(255) NOT NULL,
   week_days VARCHAR(255) NOT NULL,
-  time VARCHAR(16) NOT NULL,
+  time VARCHAR(32) NOT NULL,
   created_at TIMESTAMP,
   UNIQUE  (tpid, tag)
 );
@@ -131,6 +131,7 @@ CREATE TABLE tp_actions (
   direction VARCHAR(8) NOT NULL,
   units NUMERIC(20,4) NOT NULL,
   expiry_time VARCHAR(24) NOT NULL,
+  timing_tags VARCHAR(128) NOT NULL,
   destination_tag VARCHAR(64) NOT NULL,
   rating_subject VARCHAR(64) NOT NULL,
   category VARCHAR(16) NOT NULL,
@@ -139,7 +140,7 @@ CREATE TABLE tp_actions (
   extra_parameters VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, tag, action, balance_tag, balance_type, direction, expiry_time, destination_tag, shared_group, balance_weight, weight)
+  UNIQUE (tpid, tag, action, balance_tag, balance_type, direction, expiry_time, timing_tags, destination_tag, shared_group, balance_weight, weight)
 );
 
 --
@@ -176,7 +177,8 @@ CREATE TABLE tp_action_triggers (
   min_sleep BIGINT NOT NULL,
   balance_destination_tag VARCHAR(64) NOT NULL,
   balance_weight NUMERIC(8,2) NOT NULL, 
-  balance_expiry_time VARCHAR(24) NOT NULL, 
+  balance_expiry_time VARCHAR(24) NOT NULL,
+  balance_timing_tags VARCHAR(128) NOT NULL, 
   balance_rating_subject VARCHAR(64) NOT NULL,
   balance_category VARCHAR(16) NOT NULL,
   balance_shared_group VARCHAR(64) NOT NULL,

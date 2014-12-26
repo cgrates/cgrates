@@ -573,10 +573,29 @@ func (dbr *DbReader) LoadActions() (err error) {
 					Id:            tpact.BalanceTag,
 					Value:         tpact.Units,
 					Weight:        tpact.BalanceWeight,
+					TimingIDs:     tpact.TimingTags,
 					RatingSubject: tpact.RatingSubject,
 					Category:      tpact.Category,
 					DestinationId: tpact.DestinationId,
 				},
+			}
+			// load action timings from tags
+			if acts[idx].Balance.TimingIDs != "" {
+				timingIds := strings.Split(acts[idx].Balance.TimingIDs, utils.INFIELD_SEP)
+				for _, timingID := range timingIds {
+					if timing, found := dbr.timings[timingID]; found {
+						acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
+							Years:     timing.Years,
+							Months:    timing.Months,
+							MonthDays: timing.MonthDays,
+							WeekDays:  timing.WeekDays,
+							StartTime: timing.StartTime,
+							EndTime:   timing.EndTime,
+						})
+					} else {
+						return fmt.Errorf("Could not find timing: %v", timingID)
+					}
+				}
 			}
 		}
 		dbr.actions[tag] = acts
@@ -642,6 +661,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 				BalanceDestinationId:  apiAtr.BalanceDestinationId,
 				BalanceWeight:         apiAtr.BalanceWeight,
 				BalanceExpirationDate: balance_expiration_date,
+				BalanceTimingTags:     apiAtr.BalanceTimingTags,
 				BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
 				BalanceCategory:       apiAtr.BalanceCategory,
 				BalanceSharedGroup:    apiAtr.BalanceSharedGroup,
