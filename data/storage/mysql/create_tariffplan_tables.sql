@@ -151,7 +151,7 @@ CREATE TABLE `tp_actions` (
   `units` DECIMAL(20,4) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
   `timing_tags` varchar(128) NOT NULL,
-  `balance_destination_tag` varchar(64) NOT NULL,
+  `destination_tag` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
   `category` varchar(16) NOT NULL,
   `shared_group` varchar(64) NOT NULL,
