@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/kamevapi"
 	"log/syslog"
 	"regexp"
@@ -48,17 +49,36 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte) {
 	}
 	var remainingDuration float64
 	if err = self.rater.GetDerivedMaxSessionTime(kev.AsEvent(""), &remainingDuration); err != nil {
-		engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", kev.GetUUID(), err))
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time for %s, error: %s", kev.GetUUID(), err.Error()))
 	}
-	if remainingDuration == -1.0 { // Unlimited
-		return
+	if kar, err := kev.AsKamAuthReply(remainingDuration, err); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
+	} else if err = self.kea.Send(kar.String()); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
 	}
+}
+
+func (self *KamailioSessionManager) onCallStart(evData []byte) {
+	_, err := NewKamEvent(evData)
+	if err != nil {
+		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+	}
+}
+
+func (self *KamailioSessionManager) onCallEnd(evData []byte) {
+	kev, err := NewKamEvent(evData)
+	if err != nil {
+		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+	}
+	go self.ProcessCdr(kev)
 }
 
 func (self *KamailioSessionManager) Connect() error {
 	var err error
 	eventHandlers := map[*regexp.Regexp][]func([]byte){
-		regexp.MustCompile(".*"): []func([]byte){self.onCgrAuth},
+		regexp.MustCompile("CGR_AUTH_REQUEST"): []func([]byte){self.onCgrAuth},
+		regexp.MustCompile("CGR_CALL_START"):   []func([]byte){self.onCallStart},
+		regexp.MustCompile("CGR_CALL_END"):     []func([]byte){self.onCallEnd},
 	}
 	if self.kea, err = kamevapi.NewKamEvapi(self.cgrCfg.KamailioEvApiAddr, self.cgrCfg.KamailioReconnects, eventHandlers, engine.Logger.(*syslog.Writer)); err != nil {
 		return err
@@ -84,6 +104,16 @@ func (self *KamailioSessionManager) GetDebitPeriod() time.Duration {
 }
 func (self *KamailioSessionManager) GetDbLogger() engine.LogStorage {
 	return nil
+}
+func (self *KamailioSessionManager) ProcessCdr(ev utils.Event) {
+	if self.cdrsrv == nil {
+		return
+	}
+	storedCdr := ev.AsStoredCdr()
+	var reply string
+	if err := self.cdrsrv.ProcessCdr(storedCdr, &reply); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
+	}
 }
 func (self *KamailioSessionManager) Shutdown() error {
 	return nil

@@ -103,7 +103,7 @@ type CGRConfig struct {
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMCdrS                  string        //
+	SMCdrS                  string        // Connection towards CDR server
 	SMReconnects            int           // Number of reconnect attempts to rater
 	SMDebitInterval         int           // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration       time.Duration // The maximum duration of a call

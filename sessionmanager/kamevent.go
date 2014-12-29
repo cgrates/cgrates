@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -30,16 +31,32 @@ import (
 
 const (
 	EVENT          = "event"
+	CGR_AUTH_REPLY = "CGR_AUTH_REPLY"
 	CGR_SETUPTIME  = "cgr_setuptime"
 	CGR_ANSWERTIME = "cgr_answertime"
 	CGR_STOPTIME   = "cgr_stoptime"
 	CGR_DURATION   = "cgr_duration"
+	KAM_TR_INDEX   = "tr_index"
+	KAM_TR_LABEL   = "tr_label"
 )
 
 var primaryFields = []string{EVENT, CALLID, FROM_TAG, TO_TAG, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
 	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION}
 
 var mandatoryAuth = []string{EVENT, CALLID, FROM_TAG, CGR_ACCOUNT, CGR_DESTINATION, CGR_SETUPTIME}
+
+type KamAuthReply struct {
+	Event            string // Kamailio will use this to differentiate between requests and replies
+	TransactionIndex int    // Original transaction index
+	TransactionLabel int    // Original transaction label
+	MaxSessionTime   int    // Maximum session time in case of success, -1 for unlimited
+	AuthError        error  // Reply in case of error
+}
+
+func (self *KamAuthReply) String() string {
+	mrsh, _ := json.Marshal(self)
+	return string(mrsh)
+}
 
 func NewKamEvent(kamEvData []byte) (KamEvent, error) {
 	kev := make(map[string]string)
@@ -65,7 +82,7 @@ func (kev KamEvent) GetCgrId() string {
 	return utils.Sha1(kev.GetUUID(), setupTime.UTC().String())
 }
 func (kev KamEvent) GetUUID() string {
-	return kev[CALLID] + ";" + kev[FROM_TAG] + ";" + kev[TO_TAG]
+	return kev[CALLID] + ";" + kev[FROM_TAG] // ToTag not available in callStart event
 }
 func (kev KamEvent) GetDirection(fieldName string) string {
 	return utils.OUT
@@ -236,4 +253,25 @@ func (kev KamEvent) AsStoredCdr() *utils.StoredCdr {
 func (kev KamEvent) String() string {
 	mrsh, _ := json.Marshal(kev)
 	return string(mrsh)
+}
+
+func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, authErr error) (*KamAuthReply, error) {
+	var err error
+	kar := &KamAuthReply{Event: CGR_AUTH_REPLY}
+	if _, hasIt := kev[KAM_TR_INDEX]; !hasIt {
+		return nil, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, KAM_TR_INDEX)
+	}
+	if kar.TransactionIndex, err = strconv.Atoi(kev[KAM_TR_INDEX]); err != nil {
+		return nil, err
+	}
+	if _, hasIt := kev[KAM_TR_LABEL]; !hasIt {
+		return nil, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, KAM_TR_LABEL)
+	}
+	if kar.TransactionLabel, err = strconv.Atoi(kev[KAM_TR_LABEL]); err != nil {
+		return nil, err
+	}
+	kar.MaxSessionTime = int(utils.Round(maxSessionTime, 0, utils.ROUNDING_MIDDLE))
+	kar.AuthError = authErr
+
+	return kar, nil
 }
