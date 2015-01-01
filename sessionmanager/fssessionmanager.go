@@ -190,7 +190,7 @@ func (sm *FSSessionManager) OnChannelPark(ev utils.Event) {
 			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 			startTime = time.Now()
 		}
-		if ev.MissingParameter(utils.META_DEFAULT) {
+		if ev.MissingParameter() {
 			sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(dc.DestinationField), MISSING_PARAMETER)
 			engine.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
 			return
@@ -231,22 +231,10 @@ func (sm *FSSessionManager) OnChannelPark(ev utils.Event) {
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev utils.Event) {
-	if ev.MissingParameter(utils.META_DEFAULT) {
+	if ev.MissingParameter() {
 		sm.DisconnectSession(ev.GetUUID(), MISSING_PARAMETER, "")
 	}
-	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType(""))); err != nil {
-		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
-	}
-	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT),
-		Direction: ev.GetDirection(utils.META_DEFAULT), Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
-	var dcs utils.DerivedChargers
-	if err := sm.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SessionManager> OnAnswer: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
-		sm.DisconnectSession(ev.GetUUID(), SYSTEM_ERROR, "") // Disconnect the session since we are not able to process sessions
-		return
-	}
-	dcs, _ = dcs.AppendDefaultRun()
-	s := NewSession(ev, sm, dcs)
+	s := NewSession(ev, sm)
 	if s != nil {
 		sm.sessions = append(sm.sessions, s)
 	}
@@ -257,91 +245,10 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev utils.Event) {
 	s := sm.GetSession(ev.GetUUID())
 	if s == nil { // Not handled by us
 		return
-	} else {
-		sm.RemoveSession(s.uuid) // Unreference it early so we avoid concurrency
 	}
-	defer s.Close(ev)                            // Stop loop and save the costs deducted so far to database
-	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
-		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
-	var dcs utils.DerivedChargers
-	if err := sm.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SessionManager> OnHangup: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
-		return
-	}
-	dcs, _ = dcs.AppendDefaultRun()
-	for _, dc := range dcs {
-		if ev.GetReqType(dc.ReqTypeField) != utils.PREPAID {
-			continue
-		}
-		sr := s.GetSessionRun(dc.RunId)
-		if sr == nil {
-			continue // Did not save a sessionRun for this dc
-		}
-		if len(sr.callCosts) == 0 {
-			continue // why would we have 0 callcosts
-		}
-		lastCC := sr.callCosts[len(sr.callCosts)-1]
-		lastCC.Timespans.Decompress()
-		// put credit back
-		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
-		if err != nil {
-			engine.Logger.Crit("Error parsing prepaid call start time from event")
-			return
-		}
-		duration, err := ev.GetDuration(dc.UsageField)
-		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Error parsing call duration from event %s", err.Error()))
-			return
-		}
-		hangupTime := startTime.Add(duration)
-		end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
-		refundDuration := end.Sub(hangupTime)
-		var refundIncrements engine.Increments
-		for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
-			ts := lastCC.Timespans[i]
-			tsDuration := ts.GetDuration()
-			if refundDuration <= tsDuration {
-				lastRefundedIncrementIndex := 0
-				for j := len(ts.Increments) - 1; j >= 0; j-- {
-					increment := ts.Increments[j]
-					if increment.Duration <= refundDuration {
-						refundIncrements = append(refundIncrements, increment)
-						refundDuration -= increment.Duration
-						lastRefundedIncrementIndex = j
-					}
-				}
-				ts.SplitByIncrement(lastRefundedIncrementIndex)
-				break // do not go to other timespans
-			} else {
-				refundIncrements = append(refundIncrements, ts.Increments...)
-				// remove the timespan entirely
-				lastCC.Timespans[i] = nil
-				lastCC.Timespans = lastCC.Timespans[:i]
-				// continue to the next timespan with what is left to refund
-				refundDuration -= tsDuration
-			}
-		}
-		// show only what was actualy refunded (stopped in timespan)
-		// engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
-		if len(refundIncrements) > 0 {
-			cd := &engine.CallDescriptor{
-				Direction:   lastCC.Direction,
-				Tenant:      lastCC.Tenant,
-				Category:    lastCC.Category,
-				Subject:     lastCC.Subject,
-				Account:     lastCC.Account,
-				Destination: lastCC.Destination,
-				Increments:  refundIncrements,
-			}
-			var response float64
-			err := sm.rater.RefundIncrements(*cd, &response)
-			if err != nil {
-				engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
-			}
-		}
-		cost := refundIncrements.GetTotalCost()
-		lastCC.Cost -= cost
-		lastCC.Timespans.Compress()
+	sm.RemoveSession(s.uuid)            // Unreference it early so we avoid concurrency
+	if err := s.Close(ev); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
+		engine.Logger.Err(err.Error())
 	}
 }
 
@@ -366,6 +273,10 @@ func (sm *FSSessionManager) MaxDebit(cd *engine.CallDescriptor, cc *engine.CallC
 
 func (sm *FSSessionManager) GetDbLogger() engine.LogStorage {
 	return sm.loggerDB
+}
+
+func (sm *FSSessionManager) Rater() engine.Connector {
+	return sm.rater
 }
 
 func (sm *FSSessionManager) Shutdown() (err error) {

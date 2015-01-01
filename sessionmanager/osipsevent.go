@@ -172,7 +172,7 @@ func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
 	}
 	return osipsEv.osipsEvent.OriginatorAddress.IP.String()
 }
-func (osipsev *OsipsEvent) MissingParameter(eventName string) bool {
+func (osipsev *OsipsEvent) MissingParameter() bool {
 	return len(osipsev.GetUUID()) == 0 ||
 		len(osipsev.GetAccount(utils.META_DEFAULT)) == 0 ||
 		len(osipsev.GetSubject(utils.META_DEFAULT)) == 0 ||

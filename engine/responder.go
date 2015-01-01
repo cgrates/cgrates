@@ -33,6 +33,13 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// Individual session run
+type SessionRun struct {
+	DerivedCharger *utils.DerivedCharger // Needed in reply
+	CallDescriptor *CallDescriptor
+	CallCosts      []*CallCost
+}
+
 type Responder struct {
 	Bal      *balancer2go.Balancer
 	ExitChan chan bool
@@ -173,6 +180,41 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) er
 		}
 	}
 	*reply = maxCallDuration
+	return nil
+}
+
+// Used by SM to get all the prepaid CallDescriptors attached to a session
+func (rs *Responder) GetSessionRuns(ev utils.Event, sRuns *[]*SessionRun) error {
+	if rs.Bal != nil {
+		return errors.New("Unsupported method on the balancer")
+	}
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+	var dcs utils.DerivedChargers
+	if err := rs.GetDerivedChargers(attrsDC, &dcs); err != nil {
+		return err
+	}
+	dcs, _ = dcs.AppendDefaultRun()
+	sesRuns := make([]*SessionRun, 0)
+	for _, dc := range dcs {
+		if ev.GetReqType(dc.ReqTypeField) != utils.PREPAID {
+			continue // We only consider prepaid sessions
+		}
+		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
+		if err != nil {
+			return errors.New("Error parsing answer event start time")
+		}
+		cd := &CallDescriptor{
+			Direction:   ev.GetDirection(dc.DirectionField),
+			Tenant:      ev.GetTenant(dc.TenantField),
+			Category:    ev.GetCategory(dc.CategoryField),
+			Subject:     ev.GetSubject(dc.SubjectField),
+			Account:     ev.GetAccount(dc.AccountField),
+			Destination: ev.GetDestination(dc.DestinationField),
+			TimeStart:   startTime}
+		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
+	}
+	*sRuns = sesRuns
 	return nil
 }
 
@@ -355,6 +397,7 @@ type Connector interface {
 	GetMaxSessionTime(CallDescriptor, *float64) error
 	GetDerivedChargers(utils.AttrDerivedChargers, *utils.DerivedChargers) error
 	GetDerivedMaxSessionTime(utils.Event, *float64) error
+	GetSessionRuns(utils.Event, *[]*SessionRun) error
 	ProcessCdr(*utils.StoredCdr, *string) error
 }
 
@@ -384,6 +427,10 @@ func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float6
 
 func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) error {
 	return rcc.Client.Call("Responder.GetDerivedMaxSessionTime", ev, reply)
+}
+
+func (rcc *RPCClientConnector) GetSessionRuns(ev utils.Event, sRuns *[]*SessionRun) error {
+	return rcc.Client.Call("Responder.GetSessionRuns", ev, sRuns)
 }
 
 func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {

@@ -30,20 +30,24 @@ import (
 )
 
 const (
-	EVENT          = "event"
-	CGR_AUTH_REPLY = "CGR_AUTH_REPLY"
-	CGR_SETUPTIME  = "cgr_setuptime"
-	CGR_ANSWERTIME = "cgr_answertime"
-	CGR_STOPTIME   = "cgr_stoptime"
-	CGR_DURATION   = "cgr_duration"
-	KAM_TR_INDEX   = "tr_index"
-	KAM_TR_LABEL   = "tr_label"
+	EVENT                  = "event"
+	CGR_AUTH_REQUEST       = "CGR_AUTH_REQUEST"
+	CGR_AUTH_REPLY         = "CGR_AUTH_REPLY"
+	CGR_SESSION_DISCONNECT = "CGR_SESSION_DISCONNECT"
+	CGR_CALL_START         = "CGR_CALL_START"
+	CGR_CALL_END           = "CGR_CALL_END"
+	CGR_SETUPTIME          = "cgr_setuptime"
+	CGR_ANSWERTIME         = "cgr_answertime"
+	CGR_STOPTIME           = "cgr_stoptime"
+	CGR_DURATION           = "cgr_duration"
+	KAM_TR_INDEX           = "tr_index"
+	KAM_TR_LABEL           = "tr_label"
+	HASH_ENTRY             = "h_entry"
+	HASH_ID                = "h_id"
 )
 
-var primaryFields = []string{EVENT, CALLID, FROM_TAG, TO_TAG, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
+var primaryFields = []string{EVENT, CALLID, FROM_TAG, HASH_ENTRY, HASH_ID, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
 	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION}
-
-var mandatoryAuth = []string{EVENT, CALLID, FROM_TAG, CGR_ACCOUNT, CGR_DESTINATION, CGR_SETUPTIME}
 
 type KamAuthReply struct {
 	Event            string // Kamailio will use this to differentiate between requests and replies
@@ -54,6 +58,18 @@ type KamAuthReply struct {
 }
 
 func (self *KamAuthReply) String() string {
+	mrsh, _ := json.Marshal(self)
+	return string(mrsh)
+}
+
+type KamSessionDisconnect struct {
+	Event     string
+	HashEntry string
+	HashId    string
+	Reason    string
+}
+
+func (self *KamSessionDisconnect) String() string {
 	mrsh, _ := json.Marshal(self)
 	return string(mrsh)
 }
@@ -167,14 +183,29 @@ func (kev KamEvent) GetExtraFields() map[string]string {
 func (kev KamEvent) GetCdrSource() string {
 	return "KAMAILIO_" + kev.GetName()
 }
-func (kev KamEvent) MissingParameter(eventName string) bool {
-	switch eventName {
-	case utils.CGR_AUTHORIZE:
+func (kev KamEvent) MissingParameter() bool {
+	var nullTime time.Time
+	switch kev.GetName() {
+	case CGR_AUTH_REQUEST:
+		if setupTime, err := kev.GetSetupTime(utils.META_DEFAULT); err != nil || setupTime == nullTime {
+			return true
+		}
+		return len(kev.GetAccount(utils.META_DEFAULT)) == 0 ||
+			len(kev.GetDestination(utils.META_DEFAULT)) == 0 ||
+			len(kev[KAM_TR_INDEX]) == 0 || len(kev[KAM_TR_LABEL]) == 0
+	case CGR_CALL_START:
+		if aTime, err := kev.GetAnswerTime(utils.META_DEFAULT); err != nil || aTime == nullTime {
+			return true
+		}
 		return len(kev.GetUUID()) == 0 ||
-			len(kev.GetCategory(utils.META_DEFAULT)) == 0 ||
-			len(kev.GetTenant(utils.META_DEFAULT)) == 0 ||
 			len(kev.GetAccount(utils.META_DEFAULT)) == 0 ||
-			len(kev.GetDestination(utils.META_DEFAULT)) == 0
+			len(kev.GetDestination(utils.META_DEFAULT)) == 0 ||
+			len(kev[HASH_ENTRY]) == 0 || len(kev[HASH_ID]) == 0
+	case CGR_CALL_END:
+		return len(kev.GetUUID()) == 0 ||
+			len(kev.GetAccount(utils.META_DEFAULT)) == 0 ||
+			len(kev.GetDestination(utils.META_DEFAULT)) == 0 ||
+			len(kev[CGR_DURATION]) == 0
 	default:
 		return true
 	}

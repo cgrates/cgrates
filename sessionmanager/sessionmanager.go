@@ -31,5 +31,6 @@ type SessionManager interface {
 	MaxDebit(*engine.CallDescriptor, *engine.CallCost) error
 	GetDebitPeriod() time.Duration
 	GetDbLogger() engine.LogStorage
+	Rater() engine.Connector
 	Shutdown() error
 }

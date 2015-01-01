@@ -178,6 +178,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
 			exitChan <- true
+			return
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
@@ -186,7 +187,13 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval))
 		sm = sessionmanager.NewFSSessionManager(cfg, loggerDb, raterConn, cdrsConn, dp)
 	case KAMAILIO:
-		sm, _ = sessionmanager.NewKamailioSessionManager(cfg, raterConn, cdrsConn)
+		var debitInterval time.Duration
+		if debitInterval, err = utils.ParseDurationWithSecs(strconv.Itoa(cfg.SMDebitInterval)); err != nil {
+			engine.Logger.Crit(fmt.Sprintf("<SM-Kamailio> Error: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+		sm, _ = sessionmanager.NewKamailioSessionManager(cfg, raterConn, cdrsConn, loggerDb, debitInterval)
 	case OSIPS:
 		sm, _ = sessionmanager.NewOSipsSessionManager(cfg, raterConn, cdrsConn)
 	default:

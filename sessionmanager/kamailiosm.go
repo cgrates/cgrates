@@ -27,25 +27,37 @@ import (
 	"github.com/cgrates/kamevapi"
 	"log/syslog"
 	"regexp"
+	"strings"
 	"time"
 )
 
-func NewKamailioSessionManager(cfg *config.CGRConfig, rater, cdrsrv engine.Connector) (*KamailioSessionManager, error) {
-	ksm := &KamailioSessionManager{cgrCfg: cfg, rater: rater, cdrsrv: cdrsrv}
+func NewKamailioSessionManager(cfg *config.CGRConfig, rater, cdrsrv engine.Connector, loggerDb engine.LogStorage, debitInterval time.Duration) (*KamailioSessionManager, error) {
+	ksm := &KamailioSessionManager{cgrCfg: cfg, rater: rater, cdrsrv: cdrsrv, loggerDb: loggerDb, debitInterval: debitInterval}
 	return ksm, nil
 }
 
 type KamailioSessionManager struct {
-	cgrCfg *config.CGRConfig
-	rater  engine.Connector
-	cdrsrv engine.Connector
-	kea    *kamevapi.KamEvapi
+	cgrCfg        *config.CGRConfig
+	rater         engine.Connector
+	cdrsrv        engine.Connector
+	loggerDb      engine.LogStorage
+	debitInterval time.Duration
+	kea           *kamevapi.KamEvapi
+	sessions      []*Session
 }
 
 func (self *KamailioSessionManager) onCgrAuth(evData []byte) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
 		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+	}
+	if kev.MissingParameter() {
+		if kar, err := kev.AsKamAuthReply(0.0, errors.New(utils.ERR_MANDATORY_IE_MISSING)); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
+		} else if err = self.kea.Send(kar.String()); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
+		}
+		return
 	}
 	var remainingDuration float64
 	if err = self.rater.GetDerivedMaxSessionTime(kev.AsEvent(""), &remainingDuration); err != nil {
@@ -59,18 +71,37 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte) {
 }
 
 func (self *KamailioSessionManager) onCallStart(evData []byte) {
-	_, err := NewKamEvent(evData)
+	kamEv, err := NewKamEvent(evData)
 	if err != nil {
-		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+	}
+	if kamEv.MissingParameter() {
+		self.DisconnectSession(fmt.Sprintf("%s,%s", kamEv[HASH_ENTRY], kamEv[HASH_ID]), utils.ERR_MANDATORY_IE_MISSING, "")
+		return
+	}
+	s := NewSession(kamEv, self)
+	if s != nil {
+		self.sessions = append(self.sessions, s)
 	}
 }
 
 func (self *KamailioSessionManager) onCallEnd(evData []byte) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
-		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
 	}
-	go self.ProcessCdr(kev)
+	if kev.MissingParameter() {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Mandatory IE missing out of event: %+v", kev))
+	}
+	go self.ProcessCdr(kev.AsStoredCdr())
+	s := self.GetSession(kev.GetUUID())
+	if s == nil { // Not handled by us
+		return
+	}
+	self.RemoveSession(s.uuid)           // Unreference it early so we avoid concurrency
+	if err := s.Close(kev); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
+		engine.Logger.Err(err.Error())
+	}
 }
 
 func (self *KamailioSessionManager) Connect() error {
@@ -90,29 +121,52 @@ func (self *KamailioSessionManager) Connect() error {
 }
 
 func (self *KamailioSessionManager) DisconnectSession(uuid, notify, destnr string) {
+	hashSplt := strings.Split(uuid, ",")
+	disconnectEv := &KamSessionDisconnect{Event: CGR_SESSION_DISCONNECT, HashEntry: hashSplt[0], HashId: hashSplt[1], Reason: notify}
+	if err := self.kea.Send(disconnectEv.String()); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending disconnect request %s", err.Error()))
+	}
 	return
 }
 func (self *KamailioSessionManager) RemoveSession(uuid string) {
-	return
+	for i, ss := range self.sessions {
+		if ss.uuid == uuid {
+			self.sessions = append(self.sessions[:i], self.sessions[i+1:]...)
+			return
+		}
+	}
+}
+
+// Searches and return the session with the specifed uuid
+func (self *KamailioSessionManager) GetSession(uuid string) *Session {
+	for _, s := range self.sessions {
+		if s.uuid == uuid {
+			return s
+		}
+	}
+	return nil
 }
 func (self *KamailioSessionManager) MaxDebit(cd *engine.CallDescriptor, cc *engine.CallCost) error {
-	return nil
+	return self.rater.MaxDebit(*cd, cc)
 }
+
 func (self *KamailioSessionManager) GetDebitPeriod() time.Duration {
-	var nilDuration time.Duration
-	return nilDuration
+	return self.debitInterval
 }
 func (self *KamailioSessionManager) GetDbLogger() engine.LogStorage {
-	return nil
+	return self.loggerDb
 }
-func (self *KamailioSessionManager) ProcessCdr(ev utils.Event) {
+func (self *KamailioSessionManager) Rater() engine.Connector {
+	return self.rater
+}
+
+func (self *KamailioSessionManager) ProcessCdr(cdr *utils.StoredCdr) {
 	if self.cdrsrv == nil {
 		return
 	}
-	storedCdr := ev.AsStoredCdr()
 	var reply string
-	if err := self.cdrsrv.ProcessCdr(storedCdr, &reply); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
+	if err := self.cdrsrv.ProcessCdr(cdr, &reply); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", cdr.CgrId, cdr.AccId, err.Error()))
 	}
 }
 func (self *KamailioSessionManager) Shutdown() error {

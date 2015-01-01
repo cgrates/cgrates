@@ -159,7 +159,7 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], config.CgrConfig().DefaultReqType)
 }
-func (fsev FSEvent) MissingParameter(eventName string) bool {
+func (fsev FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" ||

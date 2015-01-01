@@ -85,5 +85,41 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	} else if maxSessionTime != 9.9e+10 { // Smallest one
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
+}
 
+func TestGetSessionRuns(t *testing.T) {
+	config.CgrConfig().CombinedDerivedChargers = false
+	testTenant := "vdf"
+	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "prepaid", Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan2", Subject: "dan2",
+		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		MediationRunId: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan"}
+	keyCharger1 := utils.ConcatenatedKey("*out", testTenant, "call", "dan2", "dan2")
+	dfDC := &utils.DerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		AccountField: "*default", SubjectField: "*default", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"}
+	extra1DC := &utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "^0",
+		AccountField: "^minitsboy", SubjectField: "^rif", DestinationField: "^0256", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"}
+	extra2DC := &utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		AccountField: "^ivo", SubjectField: "^ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"}
+	extra3DC := &utils.DerivedCharger{RunId: "extra3", ReqTypeField: "^pseudoprepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "^0",
+		AccountField: "^minu", SubjectField: "^rif", DestinationField: "^0256", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"}
+	charger1 := utils.DerivedChargers{extra1DC, extra2DC, extra3DC}
+	if err := accountingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
+		t.Error("Error on setting DerivedChargers", err.Error())
+	}
+	accountingStorage.CacheAccounting(nil, nil, nil, nil)
+	sesRuns := make([]*SessionRun, 0)
+	eSRuns := []*SessionRun{
+		&SessionRun{DerivedCharger: extra1DC,
+			CallDescriptor: &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Account: "minitsboy", Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC)}},
+		&SessionRun{DerivedCharger: extra2DC,
+			CallDescriptor: &CallDescriptor{Direction: "*out", Category: "call", Tenant: "vdf", Subject: "ivo", Account: "ivo", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC)}},
+		&SessionRun{DerivedCharger: dfDC,
+			CallDescriptor: &CallDescriptor{Direction: "*out", Category: "call", Tenant: "vdf", Subject: "dan2", Account: "dan2", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC)}}}
+	if err := rsponder.GetSessionRuns(cdr.AsEvent(""), &sesRuns); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSRuns, sesRuns) {
+		t.Errorf("Received: %+v", sesRuns)
+	}
 }

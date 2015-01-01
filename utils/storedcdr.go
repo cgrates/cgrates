@@ -462,17 +462,12 @@ func (storedCdr *StoredCdr) GetOriginatorIP(fieldName string) string {
 func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
 	return storedCdr.ExtraFields
 }
-func (storedCdr *StoredCdr) MissingParameter(eventName string) bool {
-	switch eventName {
-	case CGR_AUTHORIZE:
-		return len(storedCdr.AccId) == 0 ||
-			len(storedCdr.Category) == 0 ||
-			len(storedCdr.Tenant) == 0 ||
-			len(storedCdr.Account) == 0 ||
-			len(storedCdr.Destination) == 0
-	default:
-		return true
-	}
+func (storedCdr *StoredCdr) MissingParameter() bool {
+	return len(storedCdr.AccId) == 0 ||
+		len(storedCdr.Category) == 0 ||
+		len(storedCdr.Tenant) == 0 ||
+		len(storedCdr.Account) == 0 ||
+		len(storedCdr.Destination) == 0
 }
 func (storedCdr *StoredCdr) ParseEventValue(rsrFld *RSRField) string {
 	return storedCdr.FieldAsString(rsrFld)
