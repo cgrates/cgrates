@@ -94,7 +94,7 @@ func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string)
 // Searches and return the session with the specifed uuid
 func (sm *FSSessionManager) GetSession(uuid string) *Session {
 	for _, s := range sm.sessions {
-		if s.uuid == uuid {
+		if s.eventStart.GetUUID() == uuid {
 			return s
 		}
 	}
@@ -102,24 +102,24 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 }
 
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) DisconnectSession(uuid, notify, destnr string) {
-	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify)); err != nil {
+func (sm *FSSessionManager) DisconnectSession(ev utils.Event, notify string) {
+	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", ev.GetUUID(), notify)); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send disconect api notification to freeswitch: %s", err.Error()))
 	}
 	if notify == INSUFFICIENT_FUNDS {
 		if len(cfg.FSEmptyBalanceContext) != 0 {
-			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s %s\n\n", uuid, destnr, cfg.FSEmptyBalanceContext)); err != nil {
+			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s %s\n\n", ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), cfg.FSEmptyBalanceContext)); err != nil {
 				engine.Logger.Err("<SessionManager> Could not transfer the call to empty balance context")
 			}
 			return
 		} else if len(cfg.FSEmptyBalanceAnnFile) != 0 {
-			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_broadcast %s playback!manager_request::%s aleg\n\n", uuid, cfg.FSEmptyBalanceAnnFile)); err != nil {
+			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_broadcast %s playback!manager_request::%s aleg\n\n", ev.GetUUID(), cfg.FSEmptyBalanceAnnFile)); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send uuid_broadcast to freeswitch: %s", err.Error()))
 			}
 			return
 		}
 	}
-	if err := fsock.FS.SendMsgCmd(uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}); err != nil {
+	if err := fsock.FS.SendMsgCmd(ev.GetUUID(), map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send disconect msg to freeswitch: %v", err))
 	}
 	return
@@ -128,7 +128,7 @@ func (sm *FSSessionManager) DisconnectSession(uuid, notify, destnr string) {
 // Remove session from session list, removes all related in case of multiple runs
 func (sm *FSSessionManager) RemoveSession(uuid string) {
 	for i, ss := range sm.sessions {
-		if ss.uuid == uuid {
+		if ss.eventStart.GetUUID() == uuid {
 			sm.sessions = append(sm.sessions[:i], sm.sessions[i+1:]...)
 			return
 		}
@@ -232,7 +232,7 @@ func (sm *FSSessionManager) OnChannelPark(ev utils.Event) {
 
 func (sm *FSSessionManager) OnChannelAnswer(ev utils.Event) {
 	if ev.MissingParameter() {
-		sm.DisconnectSession(ev.GetUUID(), MISSING_PARAMETER, "")
+		sm.DisconnectSession(ev, MISSING_PARAMETER)
 	}
 	s := NewSession(ev, sm)
 	if s != nil {
@@ -246,8 +246,8 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev utils.Event) {
 	if s == nil { // Not handled by us
 		return
 	}
-	sm.RemoveSession(s.uuid)            // Unreference it early so we avoid concurrency
-	if err := s.Close(ev); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
+	sm.RemoveSession(s.eventStart.GetUUID()) // Unreference it early so we avoid concurrency
+	if err := s.Close(ev); err != nil {      // Stop loop, refund advanced charges and save the costs deducted so far to database
 		engine.Logger.Err(err.Error())
 	}
 }

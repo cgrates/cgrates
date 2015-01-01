@@ -143,6 +143,9 @@ func (fsev FSEvent) GetCgrId() string {
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
 }
+func (fsev FSEvent) GetSessionIds() []string {
+	return []string{fsev.GetUUID()}
+}
 func (fsev FSEvent) GetTenant(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]

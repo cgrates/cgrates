@@ -78,6 +78,10 @@ func (osipsev *OsipsEvent) GetUUID() string {
 	return osipsev.osipsEvent.AttrValues[CALLID] + ";" + osipsev.osipsEvent.AttrValues[FROM_TAG] + ";" + osipsev.osipsEvent.AttrValues[TO_TAG]
 }
 
+func (osipsev *OsipsEvent) GetSessionIds() []string {
+	return []string{osipsev.GetUUID()}
+}
+
 func (osipsev *OsipsEvent) GetDirection(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]

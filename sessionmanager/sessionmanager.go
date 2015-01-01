@@ -22,11 +22,12 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type SessionManager interface {
 	Connect() error
-	DisconnectSession(string, string, string)
+	DisconnectSession(utils.Event, string)
 	RemoveSession(string)
 	MaxDebit(*engine.CallDescriptor, *engine.CallCost) error
 	GetDebitPeriod() time.Duration

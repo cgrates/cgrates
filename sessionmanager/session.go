@@ -31,9 +31,8 @@ import (
 // Session type holding the call information fields, a session delegate for specific
 // actions and a channel to signal end of the debit loop.
 type Session struct {
-	cgrid          string
-	uuid           string
-	stopDebit      chan bool
+	eventStart     utils.Event // Store the original event who started this session so we can use it's info later (eg: disconnect, cgrid)
+	stopDebit      chan bool   // Channel to communicate with debit loops when closing the session
 	sessionManager SessionManager
 	sessionRuns    []*engine.SessionRun
 }
@@ -53,8 +52,7 @@ func (s *Session) SessionRuns() []*engine.SessionRun {
 
 // Creates a new session and in case of prepaid starts the debit loop for each of the session runs individually
 func NewSession(ev utils.Event, sm SessionManager) *Session {
-	s := &Session{cgrid: ev.GetCgrId(),
-		uuid:           ev.GetUUID(),
+	s := &Session{eventStart: ev,
 		stopDebit:      make(chan bool),
 		sessionManager: sm,
 	}
@@ -88,15 +86,15 @@ func (s *Session) debitLoop(runIdx int) {
 		cc := new(engine.CallCost)
 		if err := s.sessionManager.MaxDebit(&nextCd, cc); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
-			s.sessionManager.DisconnectSession(s.uuid, SYSTEM_ERROR, "")
+			s.sessionManager.DisconnectSession(s.eventStart, SYSTEM_ERROR)
 			return
 		}
 		if cc.GetDuration() == 0 {
-			s.sessionManager.DisconnectSession(s.uuid, INSUFFICIENT_FUNDS, nextCd.Destination)
+			s.sessionManager.DisconnectSession(s.eventStart, INSUFFICIENT_FUNDS)
 			return
 		}
 		if cc.GetDuration() <= cfg.FSMinDurLowBalance && len(cfg.FSLowBalanceAnnFile) != 0 {
-			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_broadcast %s %s aleg\n\n", s.uuid, cfg.FSLowBalanceAnnFile)); err != nil {
+			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_broadcast %s %s aleg\n\n", s.eventStart.GetUUID(), cfg.FSLowBalanceAnnFile)); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send uuid_broadcast to freeswitch: %s", err.Error()))
 			}
 		}
@@ -210,6 +208,6 @@ func (s *Session) SaveOperations() {
 		if s.sessionManager.GetDbLogger() == nil {
 			engine.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
 		}
-		s.sessionManager.GetDbLogger().LogCallCost(s.cgrid, engine.SESSION_MANAGER_SOURCE, sr.DerivedCharger.RunId, firstCC)
+		s.sessionManager.GetDbLogger().LogCallCost(s.eventStart.GetCgrId(), engine.SESSION_MANAGER_SOURCE, sr.DerivedCharger.RunId, firstCC)
 	}
 }
