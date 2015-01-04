@@ -100,6 +100,9 @@ func (kev KamEvent) GetCgrId() string {
 func (kev KamEvent) GetUUID() string {
 	return kev[CALLID] + ";" + kev[FROM_TAG] // ToTag not available in callStart event
 }
+func (kev KamEvent) GetSessionIds() []string {
+	return []string{kev[HASH_ENTRY], kev[HASH_ID]}
+}
 func (kev KamEvent) GetDirection(fieldName string) string {
 	return utils.OUT
 }

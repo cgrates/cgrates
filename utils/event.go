@@ -26,6 +26,7 @@ type Event interface {
 	GetName() string
 	GetCgrId() string
 	GetUUID() string
+	GetSessionIds() []string // Returns identifiers needed to control a session (eg disconnect)
 	GetDirection(string) string
 	GetSubject(string) string
 	GetAccount(string) string

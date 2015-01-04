@@ -342,6 +342,9 @@ func (storedCdr *StoredCdr) GetCgrId() string {
 func (storedCdr *StoredCdr) GetUUID() string {
 	return storedCdr.AccId
 }
+func (storedCdr *StoredCdr) GetSessionIds() []string {
+	return []string{storedCdr.GetUUID()}
+}
 func (storedCdr *StoredCdr) GetDirection(fieldName string) string {
 	if IsSliceMember([]string{DIRECTION, META_DEFAULT}, fieldName) {
 		return storedCdr.Direction

@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/kamevapi"
 	"log/syslog"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -76,7 +75,7 @@ func (self *KamailioSessionManager) onCallStart(evData []byte) {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
 	}
 	if kamEv.MissingParameter() {
-		self.DisconnectSession(fmt.Sprintf("%s,%s", kamEv[HASH_ENTRY], kamEv[HASH_ID]), utils.ERR_MANDATORY_IE_MISSING, "")
+		self.DisconnectSession(kamEv, utils.ERR_MANDATORY_IE_MISSING)
 		return
 	}
 	s := NewSession(kamEv, self)
@@ -98,8 +97,8 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte) {
 	if s == nil { // Not handled by us
 		return
 	}
-	self.RemoveSession(s.uuid)           // Unreference it early so we avoid concurrency
-	if err := s.Close(kev); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
+	self.RemoveSession(s.eventStart.GetUUID()) // Unreference it early so we avoid concurrency
+	if err := s.Close(kev); err != nil {       // Stop loop, refund advanced charges and save the costs deducted so far to database
 		engine.Logger.Err(err.Error())
 	}
 }
@@ -120,9 +119,9 @@ func (self *KamailioSessionManager) Connect() error {
 	return errors.New("<SM-Kamailio> Stopped reading events")
 }
 
-func (self *KamailioSessionManager) DisconnectSession(uuid, notify, destnr string) {
-	hashSplt := strings.Split(uuid, ",")
-	disconnectEv := &KamSessionDisconnect{Event: CGR_SESSION_DISCONNECT, HashEntry: hashSplt[0], HashId: hashSplt[1], Reason: notify}
+func (self *KamailioSessionManager) DisconnectSession(ev utils.Event, notify string) {
+	sessionIds := ev.GetSessionIds()
+	disconnectEv := &KamSessionDisconnect{Event: CGR_SESSION_DISCONNECT, HashEntry: sessionIds[0], HashId: sessionIds[1], Reason: notify}
 	if err := self.kea.Send(disconnectEv.String()); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending disconnect request %s", err.Error()))
 	}
@@ -130,7 +129,7 @@ func (self *KamailioSessionManager) DisconnectSession(uuid, notify, destnr strin
 }
 func (self *KamailioSessionManager) RemoveSession(uuid string) {
 	for i, ss := range self.sessions {
-		if ss.uuid == uuid {
+		if ss.eventStart.GetUUID() == uuid {
 			self.sessions = append(self.sessions[:i], self.sessions[i+1:]...)
 			return
 		}
@@ -140,7 +139,7 @@ func (self *KamailioSessionManager) RemoveSession(uuid string) {
 // Searches and return the session with the specifed uuid
 func (self *KamailioSessionManager) GetSession(uuid string) *Session {
 	for _, s := range self.sessions {
-		if s.uuid == uuid {
+		if s.eventStart.GetUUID() == uuid {
 			return s
 		}
 	}
