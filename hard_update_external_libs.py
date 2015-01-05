@@ -10,6 +10,7 @@ libs = ('code.google.com/p/goconf/conf',
         'labix.org/v2/mgo',
         'github.com/cgrates/fsock',
         'github.com/cgrates/liner',
+        'github.com/cgrates/kamevapi',
         'github.com/go-sql-driver/mysql',
         'github.com/hoisie/redis'
         'github.com/howeyc/fsnotify',
