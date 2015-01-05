@@ -176,8 +176,9 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error
 }
 
 type AttrLoadDestination struct {
-	TPid          string
-	DestinationId string
+	TPid               string
+	DestinationId      string
+	PreventCacheReload bool // Set it on true in case of "batch mode" when reloads happen in the end of recursive API call
 }
 
 // Load destinations from storDb into dataDb.
@@ -194,10 +195,12 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	} else if !loaded {
 		return errors.New(utils.ERR_NOT_FOUND)
 	}
-	//Automatic cache of the newly inserted rating plan
-	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(nil, didNotChange, didNotChange, didNotChange, didNotChange); err != nil {
-		return err
+	if !attrs.PreventCacheReload {
+		//Automatic cache of the newly inserted rating plan
+		didNotChange := []string{}
+		if err := self.RatingDb.CacheRating([]string{attrs.DestinationId}, didNotChange, didNotChange, didNotChange, didNotChange); err != nil {
+			return err
+		}
 	}
 	*reply = OK
 	return nil
