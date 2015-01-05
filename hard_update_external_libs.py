@@ -16,6 +16,7 @@ libs = ('code.google.com/p/goconf/conf',
         'github.com/howeyc/fsnotify',
         'github.com/jinzhu/gorm',
         'github.com/gorhill/cronexpr',
+        "github.com/DisposaBoy/JsonConfigReader"
 )
 
 if __name__ == "__main__":

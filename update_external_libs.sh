@@ -14,4 +14,5 @@ go get -u -v github.com/cgrates/rpcclient
 go get -u -v github.com/jinzhu/gorm
 go get -u -v github.com/gorhill/cronexpr
 go get -u -v github.com/cgrates/kamevapi
+go get -u -v github.com/DisposaBoy/JsonConfigReader
 
