@@ -1,0 +1,239 @@
+{
+
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+"general": {
+	"http_skip_tls_veify": false,			// if enabled Http Client will accept any TLS certificate
+	"rounding_decimals": 10,				// system level precision for floats
+	"dbdata_encoding": "msgpack",			// encoding used to store object data in strings: <msgpack|json>
+	"tpexport_dir": "/var/log/cgrates/tpe",	// path towards export folder for offline Tariff Plans
+	"default_reqtype": "rated",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+	"default_category": "call",				// default Type of Record to consider when missing from requests
+	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
+	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
+},
+
+
+"listen": {
+	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
+	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
+	"http": "127.0.0.1:2080",				// HTTP listening address
+},
+
+
+"rating_db": {
+	"db_type": "redis",						// rating subsystem database type: <redis>
+	"db_host": "127.0.0.1",					// rating subsystem database host address
+	"db_port": 6379, 						// rating subsystem port to reach the database
+	"db_name": "10", 						// rating subsystem database name to connect to
+	"db_user": "", 							// rating subsystem username to use when connecting to database
+	"db_passwd": "", 						// rating subsystem password to use when connecting to database
+},
+
+
+"accounting_db": {
+	"db_type": "redis",						// accounting subsystem database: <redis>
+	"db_host": "127.0.0.1",					// accounting subsystem database host address
+	"db_port": 6379, 						// accounting subsystem port to reach the database
+	"db_name": "11", 						// accounting subsystem database name to connect to
+	"db_user": "", 							// accounting subsystem username to use when connecting to database
+	"db_passwd": "", 						// accounting subsystem password to use when connecting to database
+},
+
+
+"stor_db": {
+	"db_type": "mysql",						// stor database type to use: <mysql|postgres>
+	"db_host": "127.0.0.1",					// the host to connect to
+	"db_port": 3306, 						// the port to reach the stordb
+	"db_name": "cgrates", 					// stor database name
+	"db_user": "cgrates", 					// username to use when connecting to stordb
+	"db_passwd": "CGRateS.org", 			// password to use when connecting to stordb
+	"max_open_conns": 0,					// maximum database connections opened
+	"max_idle_conns": -1,					// maximum database connections idle
+},
+
+
+"balancer": {
+	"enabled": false, 						// start Balancer service: <true|false>
+},
+
+
+"rater": {
+	"enabled": false,						// enable Rater service: <true|false>
+	"balancer": "",							// register to Balancer as worker: <""|internal|x.y.z.y:1234>
+},
+
+
+"scheduler": {
+	"enabled": false,						// start Scheduler service: <true|false>
+},
+
+
+"cdrs": {
+	"enabled": false,						// start the CDR Server service:  <true|false>
+	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
+	"mediator": "",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering from raw CDRs <""|internal|x.y.z.y:1234>
+	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+},
+
+
+"mediator": {
+	"enabled": false,						// starts Mediator service: <true|false>.
+	"reconnects": 3,						// number of reconnects to rater/cdrs before giving up.
+	"rater": "internal",					// address where to reach the Rater: <internal|x.y.z.y:1234>
+	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering out of mediated CDRs <""|internal|x.y.z.y:1234>
+	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+},
+
+
+"cdrstats": {
+	"enabled": false,						// starts the cdrstats service: <true|false>
+	"queue_length": 50,						// number of items in the stats buffer
+	"time_window": "1h",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+	"metrics": ["ASR", "ACD", "ACC"],		// stat metric ids to build
+	"setup_interval": [],					// filter on CDR SetupTime
+	"tors":	[],								// filter on CDR TOR fields
+	"cdr_hosts": [],						// filter on CDR CdrHost fields
+	"cdr_sources": [], 						// filter on CDR CdrSource fields
+	"req_types": [],						// filter on CDR ReqType fields
+	"directions": [],						// filter on CDR Direction fields
+	"tenants": [],							// filter on CDR Tenant fields
+	"categories": [],						// filter on CDR Category fields
+	"accounts": [],							// filter on CDR Account fields
+	"subjects": [],							// filter on CDR Subject fields
+	"destination_prefixes": [],				// filter on CDR Destination prefixes
+	"usage_interval": [],					// filter on CDR Usage 
+	"mediation_run_ids": [],				// filter on CDR MediationRunId fields
+	"rated_accounts": [],					// filter on CDR RatedAccount fields
+	"rated_subjects": [],					// filter on CDR RatedSubject fields
+	"cost_intervals": [],					// filter on CDR Cost
+},
+
+
+"cdre": {
+	"CDRE-FW1": {
+		"cdr_format": "csv",							// exported CDRs format <csv>
+		"data_usage_multiply_factor": 1.0,				// multiply data usage before export (eg: convert from KBytes to Bytes)
+		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
+		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
+		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
+		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
+		"mask_length": 0,								// length of the destination suffix to be masked
+		"export_dir": "/var/log/cgrates/cdre",			// path where the exported CDRs will be placed
+		"header_fields": [],							// template of the exported header fields
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CgrId", "type": "cdrfield", "value": "cgrid", "width": "40", "mandatory": "true"},
+			{"tag":"RunId", "type": "cdrfield", "value": "mediation_runid", "width": 20},
+			{"tag":"Tor", "type": "cdrfield", "value": "tor", "width": 6},
+			{"tag":"AccId", "type": "cdrfield", "value": "accid", "width": 36},
+			{"tag":"ReqType", "type": "cdrfield", "value": "reqtype", "width": 13},
+			{"tag":"Direction", "type": "cdrfield", "value": "direction", "width": 4},
+			{"tag":"Tenant", "type": "cdrfield", "value": "tenant", "width": 24},
+			{"tag":"Category", "type": "cdrfield", "value": "category", "width": 10},
+			{"tag":"Account", "type": "cdrfield", "value": "account", "width": 24},
+			{"tag":"Subject", "type": "cdrfield", "value": "subject", "width": 24},
+			{"tag":"Destination", "type": "cdrfield", "value": "destination", "width": 24},
+			{"tag":"SetupTime", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00", "width": 30},
+			{"tag":"AnswerTime", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00", "width": 30},
+			{"tag":"Usage", "type": "cdrfield", "value": "usage", "width": 30},
+			{"tag":"Cost", "type": "cdrfield", "value": "cost", "width": 24},			
+		],
+		"trailer_fields": [],							// template of the exported trailer fields
+	}
+},
+
+
+"cdrc": {
+	"instance1": {
+		"enabled": false,							// enable CDR client functionality
+		"cdrs_address": "internal",					// address where to reach CDR server. <internal|x.y.z.y:1234>
+		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv>
+		"field_separator": ",",						// separator used in case of csv files
+		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+		"data_usage_multiply_factor": 1024,			// conversion factor for data usage
+		"cdr_in_dir": "/var/log/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
+		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
+		"cdr_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"tag": "accid", "value": "0;13"},
+			{"tag": "reqtype", "value": "1"},
+			{"tag": "direction", "value": "2"},
+			{"tag": "tenant", "value": "3"},
+			{"tag": "category", "value": "4"},
+			{"tag": "account", "value": "5"},
+			{"tag": "subject", "value": "6"},
+			{"tag": "destination", "value": "7"},
+			{"tag": "setup_time", "value": "8"},
+			{"tag": "answer_time", "value": "9"},
+			{"tag": "usage", "value": "10"},
+			{"tag": "extr1", "value": "11"},
+			{"tag": "extr2", "value": "12"},
+		],
+	}
+},
+
+
+"session_manager": {
+	"enabled": false,				// starts SessionManager service: <true|false>
+	"switch_type": "freeswitch",	// defines the type of switch behind: <freeswitch|kamailio|opensips>
+	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
+	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"reconnects": 3,				// number of reconnects to rater/cdrs before giving up.
+	"debit_interval": 10,			// interval to perform debits on.
+	"min_call_duration": "0s",		// only authorize calls with allowed duration bigger than this
+	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
+},
+
+
+"freeswitch": {
+	"server": "127.0.0.1:8021",		// adress where to connect to FreeSWITCH socket.
+	"password": "ClueCon",			// freeSWITCH socket password.
+	"reconnects": 5,				// number of attempts on connect failure.
+	"min_dur_low_balance": "5s",	// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+	"low_balance_ann_file": "",		// file to be played when low balance is reached for prepaid calls
+	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance 
+	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
+	"cdr_extra_fields": [],			// extra fields to store in CDRs in case of processing them
+},
+
+
+"kamailio": {
+	"evapi_addr": "127.0.0.1:8448",	// address of the kamailio evapi server
+	"reconnects": 3,				// number of attempts on connect failure
+},
+
+
+"opensips": {
+	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
+	"mi_addr": "127.0.0.1:8020",		// adress where to reach OpenSIPS mi_datagram module
+	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
+	"reconnects": 3,					// number of attempts on connect failure
+},
+
+
+"history_server": {
+	"enabled": false,							// starts History service: <true|false>.
+	"history_dir": "/var/log/cgrates/history",	// location on disk where to store history files.
+	"save_interval": "1s",						// interval to save changed cache into .git archive
+},
+
+
+"history_agent": {
+	"enabled": false,			// starts History as a client: <true|false>.
+	"server": "internal",		// address where to reach the master history server: <internal|x.y.z.y:1234>
+},
+
+
+"mailer": {
+	"server": "localhost",								// the server to use when sending emails out
+	"auth_user": "cgrates",								// authenticate to email server using this user
+	"auth_passwd": "CGRateS.org",						// authenticate to email server with this password
+	"from_address": "cgr-mailer@localhost.localdomain"	// from address used when sending emails out
+},
+
+}

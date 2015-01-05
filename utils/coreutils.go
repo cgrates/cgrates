@@ -347,3 +347,7 @@ func Int64Pointer(i int64) *int64 {
 func Float64Pointer(f float64) *float64 {
 	return &f
 }
+
+func BoolPointer(b bool) *bool {
+	return &b
+}

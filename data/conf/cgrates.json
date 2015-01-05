@@ -75,7 +75,7 @@
 
 //"cdrs": {
 //	"enabled": false,						// start the CDR Server service:  <true|false>
-//	"extra_fields": "",						// extra fields to store in CDRs for non-generic CDRs
+//	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 //	"mediator": "",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 //	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering from raw CDRs <""|internal|x.y.z.y:1234>
 //	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
@@ -192,13 +192,13 @@
 
 //"freeswitch": {
 //	"server": "127.0.0.1:8021",		// adress where to connect to FreeSWITCH socket.
-//	"passwd": "ClueCon",			// freeSWITCH socket password.
+//	"password": "ClueCon",			// freeSWITCH socket password.
 //	"reconnects": 5,				// number of attempts on connect failure.
 //	"min_dur_low_balance": "5s",	// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
 //	"low_balance_ann_file": "",		// file to be played when low balance is reached for prepaid calls
 //	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance 
 //	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-//	"cdr_extra_fields": "",			// extra fields to store in CDRs in case of processing them
+//	"cdr_extra_fields": [],			// extra fields to store in CDRs in case of processing them
 //},
 
 
