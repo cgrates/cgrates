@@ -26,9 +26,26 @@ import (
 )
 
 const (
-	GENERAL_JSN        = "general"
-	CDRE_JSN           = "cdre"
-	CONTENT_FIELDS_JSN = "content_fields"
+	GENERAL_JSN      = "general"
+	LISTEN_JSN       = "listen"
+	RATINGDB_JSN     = "rating_db"
+	ACCOUNTINGDB_JSN = "accounting_db"
+	STORDB_JSN       = "stor_db"
+	BALANCER_JSN     = "balancer"
+	RATER_JSN        = "rater"
+	SCHEDULER_JSN    = "scheduler"
+	CDRS_JSN         = "cdrs"
+	MEDIATOR_JSN     = "mediator"
+	CDRSTATS_JSN     = "cdrstats"
+	CDRE_JSN         = "cdre"
+	CDRC_JSN         = "cdrc"
+	SM_JSN           = "session_manager"
+	FS_JSN           = "freeswitch"
+	KAMAILIO_JSN     = "kamailio"
+	OSIPS_JSN        = "opensips"
+	HISTSERV_JSN     = "history_server"
+	HISTAGENT_JSN    = "history_agent"
+	MAILER_JSN       = "mailer"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -55,204 +72,217 @@ func NewCgrJsonCfgFromFile(fpath string) (CgrJsonCfg, error) {
 type CgrJsonCfg map[string]*json.RawMessage
 
 func (self CgrJsonCfg) GeneralJsonCfg() (*GeneralJsonCfg, error) {
-	rawGCfg, hasKey := self[GENERAL_JSN]
+	rawCfg, hasKey := self[GENERAL_JSN]
 	if !hasKey {
 		return nil, nil
 	}
-	gCfg := new(GeneralJsonCfg)
-	if err := json.Unmarshal(*rawGCfg, gCfg); err != nil {
+	cfg := new(GeneralJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}
-	return gCfg, nil
+	return cfg, nil
 }
 
-// General config section
-type GeneralJsonCfg struct {
-	Http_skip_tls_veify *bool
-	Rounding_decimals   *int
-	Dbdata_encoding     *string
-	Tpexport_dir        *string
-	Default_reqtype     *string
-	Default_category    *string
-	Default_tenant      *string
-	Default_subject     *string
+func (self CgrJsonCfg) ListenJsonCfg() (*ListenJsonCfg, error) {
+	rawCfg, hasKey := self[LISTEN_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(ListenJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Listen config section
-type ListenJsonCfg struct {
-	Rpc_json *string
-	Rpc_gob  *string
-	Http     *string
+func (self CgrJsonCfg) DbJsonCfg(section string) (*DbJsonCfg, error) {
+	rawCfg, hasKey := self[section]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(DbJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Database config
-type DbJsonCfg struct {
-	Db_type        *string
-	Db_host        *string
-	Db_port        *string
-	Db_name        *string
-	Db_user        *string
-	Db_passwd      *string
-	Max_open_conns *int // Used only in case of storDb
-	Max_idle_conns *int
+func (self CgrJsonCfg) BalancerJsonCfg() (*BalancerJsonCfg, error) {
+	rawCfg, hasKey := self[BALANCER_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(BalancerJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Balancer config section
-type BalancerJsonCfg struct {
-	Enabled *bool
+func (self CgrJsonCfg) RaterJsonCfg() (*RaterJsonCfg, error) {
+	rawCfg, hasKey := self[RATER_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(RaterJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Rater config section
-type RaterJsonCfg struct {
-	Enabled  *bool
-	Balancer *string
+func (self CgrJsonCfg) SchedulerJsonCfg() (*SchedulerJsonCfg, error) {
+	rawCfg, hasKey := self[SCHEDULER_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(SchedulerJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Scheduler config section
-type SchedulerJsonCfg struct {
-	Enabled *bool
+func (self CgrJsonCfg) CdrsJsonCfg() (*CdrsJsonCfg, error) {
+	rawCfg, hasKey := self[CDRS_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(CdrsJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Cdrs config section
-type CdrsJsonCfg struct {
-	Enabled       *bool
-	Extra_fields  *[]string
-	Mediator      *string
-	Cdrstats      *string
-	Store_disable *bool
+func (self CgrJsonCfg) MediatorJsonCfg() (*MediatorJsonCfg, error) {
+	rawCfg, hasKey := self[MEDIATOR_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(MediatorJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Mediator config section
-type MediatorJsonCfg struct {
-	Enabled       *bool
-	Reconnects    *int
-	Rater         *string
-	Cdrstats      *string
-	Store_disable *bool
+func (self CgrJsonCfg) CdrStatsJsonCfg() (*CdrStatsJsonCfg, error) {
+	rawCfg, hasKey := self[CDRSTATS_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(CdrStatsJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Cdrstats config section
-type CdrStatsJsonCfg struct {
-	Enabled              *bool
-	Queue_length         *int
-	Time_window          *string
-	Metrics              *[]string
-	Setup_interval       *[]string
-	Tors                 *[]string
-	Cdr_hosts            *[]string
-	Cdr_sources          *[]string
-	Req_types            *[]string
-	Directions           *[]string
-	Tenants              *[]string
-	Categories           *[]string
-	Accounts             *[]string
-	Subjects             *[]string
-	Destination_prefixes *[]string
-	Usage_interval       *[]string
-	Mediation_run_ids    *[]string
-	Rated_accounts       *[]string
-	Rated_subjects       *[]string
-	Cost_intervals       *[]string
+func (self CgrJsonCfg) CdreJsonCfgs() (map[string]*CdreJsonCfg, error) {
+	rawCfg, hasKey := self[CDRE_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := make(map[string]*CdreJsonCfg)
+	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// One cdr field config, used in cdre and cdrc
-type CdrFieldJsonCfg struct {
-	Tag          *string
-	Type         *string
-	Cdr_field_id *string
-	Value        *string
-	Width        *int
-	Strip        *string
-	Padding      *string
-	Layout       *string
-	Filter       *string
-	Mandatory    *bool
+func (self CgrJsonCfg) CdrcJsonCfg() (map[string]*CdrcJsonCfg, error) {
+	rawCfg, hasKey := self[CDRC_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := make(map[string]*CdrcJsonCfg)
+	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Cdre config section
-type CdreJsonCfg struct {
-	Cdr_format                 *string
-	Data_usage_multiply_factor *float64
-	Cost_multiply_factor       *float64
-	Cost_rounding_decimals     *int
-	Cost_shift_digits          *int
-	Mask_destination_id        *string
-	Mask_length                *int
-	Export_dir                 *string
-	Header_fields              *[]CdrFieldJsonCfg
-	Content_fields             *[]CdrFieldJsonCfg
-	Trailer_fields             *[]CdrFieldJsonCfg
+func (self CgrJsonCfg) SessionManagerJsonCfg() (*SessionManagerJsonCfg, error) {
+	rawCfg, hasKey := self[SM_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(SessionManagerJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Cdrc config section
-type CdrcJsonCfg struct {
-	Enabled                    *bool
-	Cdrs_address               *string
-	Cdr_format                 *string
-	Field_separator            *string
-	Run_delay                  *int64
-	Data_usage_multiply_factor *float64
-	Cdr_in_dir                 *string
-	Cdr_out_dir                *string
-	Cdr_source_id              *string
-	Cdr_fields                 *[]CdrFieldJsonCfg
+func (self CgrJsonCfg) FSJsonCfg() (*FSJsonCfg, error) {
+	rawCfg, hasKey := self[FS_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(FSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Session manager config section
-type SessionManagerJsonCfg struct {
-	Enabled           *bool
-	Switch_type       *string
-	Rater             *string
-	Cdrs              *string
-	Reconnects        *int
-	Debit_interval    *int
-	Min_call_duration *string
-	Max_call_duration *string
+func (self CgrJsonCfg) KamailioJsonCfg() (*KamailioJsonCfg, error) {
+	rawCfg, hasKey := self[KAMAILIO_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(KamailioJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// FreeSWITCH config section
-type FSJsonCfg struct {
-	Server                 *string
-	Password               *string
-	Reconnects             *int
-	Min_dur_low_balance    *string
-	Low_balance_ann_file   *string
-	Empty_balance_context  *string
-	Empty_balance_ann_file *string
-	Cdr_extra_fields       *[]string
+func (self CgrJsonCfg) OsipsJsonCfg() (*OsipsJsonCfg, error) {
+	rawCfg, hasKey := self[OSIPS_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(OsipsJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Kamailio config section
-type KamailioJsonCfg struct {
-	Evapi_addr *string
-	Reconnects *int
+func (self CgrJsonCfg) HistServJsonCfg() (*HistServJsonCfg, error) {
+	rawCfg, hasKey := self[HISTSERV_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(HistServJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// Opensips config section
-type OsipsJsonCfg struct {
-	Listen_udp                *string
-	Mi_addr                   *string
-	Events_subscribe_interval *string
-	Reconnects                *int
+func (self CgrJsonCfg) HistAgentJsonCfg() (*HistAgentJsonCfg, error) {
+	rawCfg, hasKey := self[HISTAGENT_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(HistAgentJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-// History server config section
-type HistServJsonCfg struct {
-	Enabled       *bool
-	History_dir   *string
-	Save_interval *string
-}
-
-// History agent config section
-type HistAgentJsonCfg struct {
-	Enabled *bool
-	Server  *string
-}
-
-// Mailer config section
-type MailerJsonCfg struct {
-	Server       *string
-	Auth_user    *string
-	Auth_passwd  *string
-	From_address *string
+func (self CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
+	rawCfg, hasKey := self[MAILER_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(MailerJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }

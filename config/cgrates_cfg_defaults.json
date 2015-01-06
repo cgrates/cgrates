@@ -118,7 +118,7 @@
 "cdre": {
 	"CDRE-FW1": {
 		"cdr_format": "csv",							// exported CDRs format <csv>
-		"data_usage_multiply_factor": 1.0,				// multiply data usage before export (eg: convert from KBytes to Bytes)
+		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
@@ -127,7 +127,7 @@
 		"export_dir": "/var/log/cgrates/cdre",			// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
-			{"tag": "CgrId", "type": "cdrfield", "value": "cgrid", "width": "40", "mandatory": "true"},
+			{"tag": "CgrId", "type": "cdrfield", "value": "cgrid", "width": 40, "mandatory": true},
 			{"tag":"RunId", "type": "cdrfield", "value": "mediation_runid", "width": 20},
 			{"tag":"Tor", "type": "cdrfield", "value": "tor", "width": 6},
 			{"tag":"AccId", "type": "cdrfield", "value": "accid", "width": 36},

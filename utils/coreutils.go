@@ -351,3 +351,7 @@ func Float64Pointer(f float64) *float64 {
 func BoolPointer(b bool) *bool {
 	return &b
 }
+
+func StringSlicePointer(slc []string) *[]string {
+	return &slc
+}
