@@ -86,6 +86,10 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []s
 		CleanStalePrefixes(dKeys)
 	}
 	for _, key := range dKeys {
+		if len(key) <= len(DESTINATION_PREFIX) {
+			Logger.Warning(fmt.Sprintf("Got malformed destination id: ", key))
+			continue
+		}
 		if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):]); err != nil {
 			cache2go.RollbackTransaction()
 			return err

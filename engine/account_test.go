@@ -1138,6 +1138,25 @@ func TestDebitDataMoney(t *testing.T) {
 	}
 }
 
+func TestAccountGetDefaultMoneyBalanceEmpty(t *testing.T) {
+	acc := &Account{}
+	defBal := acc.GetDefaultMoneyBalance(OUTBOUND)
+	if defBal == nil || len(acc.BalanceMap) != 1 || !defBal.IsDefault() {
+		t.Errorf("Bad default money balance: %+v", defBal)
+	}
+}
+
+func TestAccountGetDefaultMoneyBalance(t *testing.T) {
+	acc := &Account{}
+	acc.BalanceMap = make(map[string]BalanceChain)
+	tag := CREDIT + OUTBOUND
+	acc.BalanceMap[tag] = append(acc.BalanceMap[tag], &Balance{Weight: 10})
+	defBal := acc.GetDefaultMoneyBalance(OUTBOUND)
+	if defBal == nil || len(acc.BalanceMap[tag]) != 2 || !defBal.IsDefault() {
+		t.Errorf("Bad default money balance: %+v", defBal)
+	}
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
