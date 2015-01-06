@@ -302,6 +302,9 @@ func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 	}
 	// create default balance
 	defaultBalance := &Balance{Weight: 0} // minimum weight
+	if ub.BalanceMap == nil {
+		ub.BalanceMap = make(map[string]BalanceChain)
+	}
 	ub.BalanceMap[CREDIT+direction] = append(ub.BalanceMap[CREDIT+direction], defaultBalance)
 	return defaultBalance
 }

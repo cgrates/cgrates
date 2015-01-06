@@ -231,3 +231,10 @@ func TestBalanceMatchActionTriggerSharedGroup(t *testing.T) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 }
+
+func TestBalanceIsDefault(t *testing.T) {
+	b := &Balance{Weight: 0}
+	if !b.IsDefault() {
+		t.Errorf("Balance should be default: +v", b)
+	}
+}

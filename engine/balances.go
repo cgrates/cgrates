@@ -84,7 +84,8 @@ func (b *Balance) IsDefault() bool {
 		b.RatingSubject == "" &&
 		b.Category == "" &&
 		b.ExpirationDate.IsZero() &&
-		b.SharedGroup == ""
+		b.SharedGroup == "" &&
+		b.Weight == 0
 }
 
 func (b *Balance) IsExpired() bool {
