@@ -35,6 +35,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | GitHub Username | Full Name |
 | --------------- | --------- |
 | @danbogos | Dan Christian Bogos |
+| @eloycoto | Eloy Coto Pereiro |
 
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |

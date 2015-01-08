@@ -47,7 +47,7 @@ This file makes links between a ratings and timings so each of them can be descr
 +----------+----------------+--------------+--------+
 
 Tag
-    A string by witch this rates timing will be referenced in other places by.
+    A string by which this rates timing will be referenced in other places by.
 RatesTag
     The rating tag described in the rates file.
 TimingTag
@@ -70,13 +70,13 @@ Defines price groups for various destinations which will be associated to variou
 
 
 Tag
-    A string by witch this rate will be referenced in other places by.
+    A string by which this rate will be referenced in other places by.
 DestinationsTag
-    The destination tag witch these rates apply to.
+    The destination tag which these rates apply to.
 ConnectFee
     The price to be charged once at the beginning of the call to the specified destination.
 Price
-    The price for the billing unit expressed in cents.    
+    The price for the billing unit expressed in cents.
 BillingUnit
     The billing unit expressed in seconds
 
@@ -97,7 +97,7 @@ Describes the time periods that have different rates attached to them.
 +-----------------+--------+-----------+-----------+----------+
 
 Tag
-    A string by witch this timing will be referenced in other places by.
+    A string by which this timing will be referenced in other places by.
 Months
     Integers from 1=January to 12=December separated by semicolons (;) specifying the months for this time period.
 MonthDays
@@ -121,7 +121,7 @@ The destinations are binding together various prefixes / caller ids to define a 
 +------------+--------+
 
 Tag
-    A string by witch this destination will be referenced in other places by.
+    A string by which this destination will be referenced in other places by.
 Prefix
     The prefix or caller id to be added to the specified destination.
 
@@ -142,43 +142,103 @@ Balance types are: MONETARY, SMS, INTERNET, INTERNET_TIME, MINUTES.
 | CUSTOMER_1 | dan     | OUT       | STANDARD_ABO     | STANDARD_TRIGGER |
 +------------+---------+-----------+------------------+------------------+
 
+
 Tenant
     Used to distinguish between carriers if more than one share the same database in the CGRates system.
 Account
     The identifier for the user's account.
-Direction 
+Direction
     Can be IN or OUT for the INBOUND and OUTBOUND calls.
 ActionTimingsTag
     Forwards to a timed action group that will be used on this account.
 ActionTriggersTag
     Forwards to a triggered action group that will be applied to this account.
 
-Action triggers
-~~~~~~~~~~~~~~ 
+4.2.7 Action triggers
+~~~~~~~~~~~~~~~~~~~~~~
+
 For each account there are counters that record the activity on various balances. Action triggers allow when a counter reaches a threshold to activate a group of actions. After the execution the action trigger is marked as used and will no longer be evaluated until the triggers are reset. See actions for action trigger resetting.
 
-+------------------+------------+----------------+----------------+------------+--------+
-| Tag              | BalanceTag | ThresholdValue | DestinationTag | ActionsTag | Weight |
-+==================+============+================+================+============+========+
-| STANDARD_TRIGGER | MONETARY   | 30             | \*all          | SOME_1     | 10     |
-+------------------+------------+----------------+----------------+------------+--------+
-| STANDARD_TRIGGER | SMS        | 30             | \*all          | SOME_2     | 10     |
-+------------------+------------+----------------+----------------+------------+--------+
++-------------------+---------------+----------------+-----------+----------+------------+-------------+------------------+-----------------+-----------------------+----------------------+--------------------+-------------------+-------------------+---------------+---------------------+-------------+--------+
+| Tag               | ThresholdType | ThresholdValue | Recurrent | MinSleep | BalanceTag | BalanceType | BalanceDirection | BalanceCategory | BalanceDestinationTag | BalanceRatingSubject | BalanceSharedGroup | BalanceExpiryTime | BalanceTimingTags | BalanceWeight | StatsMinQueuedItems |  ActionsTag | Weight |
++===================+===============+================+===========+==========+============+=============+==================+=================+=======================+======================+====================+===================+===================+===============+=====================+=============+========+
+| STANDARD_TRIGGERS | \*min_balance |       2        |   false   |    0     |            |  \*monetary |      \*out       |                 |                       |                      |                    |                   |                   |               |                     | LOG_WARNING |   10   |
+| STANDARD_TRIGGERS | \*max_counter |       5        |   false   |    0     |            |  \*monetary |      \*out       |                 |        FS_USERS       |                      |                    |                   |                   |               |                     | LOG_WARNING |   10   |
++-------------------+---------------+----------------+-----------+----------+------------+-------------+------------------+-----------------+-----------------------+----------------------+--------------------+-------------------+-------------------+---------------+---------------------+-------------+--------+
 
 Tag
-    A string by witch this action trigger will be referenced in other places by.
-BalanceTag
-    Specifies the balance counter by which this action will be triggered. Can be MONETARY, SMS, INTERNET, INTERNET_TIME, MINUTES.
+    A string by which this action trigger will be referenced in other places by.
+
+ThresholdType
+    The threshold type. Can have one of the following:
+
+    + **\*min_counter**: Fire when counter is less than ThresholdValue
+    + **\*max_counter**: Fire when counter is greater than ThresholdValue
+    + **\*min_balance**: Fire when balance is less than ThresholdValue
+    + **\*max_balance**: Fire when balances is greater than ThresholdValue
+    + **\*min_asr**: Fire when ASR(Average success Ratio) is less than ThresholdValue
+    + **\*max_asr**: Fire when ASR is greater than ThresholdValue
+    + **\*min_acd**: Fire when ACD(Average call Duration) is less than ThresholdValue
+    + **\*max_acd**: Fire when ACD is greater than ThresholdValue
+    + **\*min_acc**: Fire when ACC(Average call cost) is less than ThresholdValue
+    + **\*max_acc**: Fire when ACC is greater than ThresholdValue
+
 ThresholdValue
     The value of the balance counter that will trigger this action.
-DestinationTag
-    This field is used only if the balanceTag is MINUTES. If the balance counter monitors call minutes this field indicates the destination of the calls for which the minutes are recorded. 
+
+Recurrent(Boolean)
+    In case of trigger we can fire recurrent while it's active, or only the first time.
+
+MinSleep
+    When Threshold is triggered we can sleep for the time specified.
+
+BalanceTag
+    Specifies the balance counter by which this action will be triggered. Can be:
+
+    + **MONETARY**
+    + **SMS**
+    + **INTERNET**
+    + **INTERNET_TIME**
+    + **MINUTES**
+
+BalanceType
+    Specifies the balance type for this action:
+
+    + **\*voice**:  units of call minutes
+    + **\*sms**: units of SMS
+    + **\*data**: units of data
+    + **\*monetary**: units of money
+
+BalanceDirection
+    Can be **\*in** or **\*out** for the INBOUND and OUTBOUND calls.
+
+BalanceCategory
+
+BalanceDestinationTag
+
+BalanceRatingSubject
+
+BalanceSharedGroup
+
+BalanceExpiryTime
+
+BalanceTimingTags
+
+BalanceWeight
+
+StatsMinQueuedItems
+
 ActionsTag
     Forwards to an action group to be executed when the threshold is reached.
+
 Weight
     Specifies the order for these triggers to be evaluated. If there are multiple triggers are fired in the same time the ones with the lower weight will be executed first.
 
-4.2.7. Action timings
+
+DestinationTag
+    This field is used only if the balanceTag is MINUTES. If the balance counter monitors call minutes this field indicates the destination of the calls for which the minutes are recorded.a
+
+4.2.8. Action timings
 ~~~~~~~~~~~~~~~~~~~~~
 
 +--------------+------------+------------------+--------+
@@ -190,15 +250,15 @@ Weight
 +--------------+------------+------------------+--------+
 
 Tag
-    A string by witch this action timing will be referenced in other places by.
-ActionsTag 
+    A string by which this action timing will be referenced in other places by.
+ActionsTag
     Forwards to an action group to be executed when the timing is right.
 TimingTag
     A timing (one time or recurrent) at which the action group will be executed
 Weight
     Specifies the order for these timings to be evaluated. If there are multiple action timings set to be execute on the same time the ones with the lower weight will be executed first.
 
-4.2.8. Actions
+4.2.9. Actions
 ~~~~~~~~~~~~~~
 
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
@@ -210,7 +270,7 @@ Weight
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
 
 Tag
-    A string by witch this action will be referenced in other places by.
+    A string by which this action will be referenced in other places by.
 Action
     The action type. Can have one of the following:
 
