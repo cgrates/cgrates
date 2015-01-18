@@ -65,6 +65,9 @@ func stopEngine() error {
 }
 
 func TestLoadConfig(t *testing.T) {
+	if !*testLocal {
+		return
+	}
 	var err error
 	cfgPath = path.Join(*dataDir, "conf", "samples", "multiplecdrc")
 	if cfg, err = config.NewCGRConfigFromFolder(cfgPath); err != nil {
