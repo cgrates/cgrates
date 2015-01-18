@@ -5,7 +5,7 @@
 
 "cdre": {
 	"export1": {
-		"cost_rounding_decimals": 1,					// rounding decimals for Cost values. -1 to disable rounding
+		"cost_rounding_decimals": 3,					// rounding decimals for Cost values. -1 to disable rounding
 		"content_fields": [								// template of the exported content fields
 			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
 			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},

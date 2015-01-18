@@ -20,6 +20,7 @@ package config
 
 import (
 	"flag"
+	"github.com/cgrates/cgrates/utils"
 	"testing"
 )
 
@@ -27,12 +28,82 @@ var testLocal = flag.Bool("local", false, "Perform the tests only on local test 
 
 var mfCgrCfg *CGRConfig
 
-func TestInitConfig(t *testing.T) {
+func TestMfInitConfig(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var err error
 	if mfCgrCfg, err = NewCGRConfigFromFolder("/usr/share/cgrates/conf/samples/multifiles"); err != nil {
 		t.Fatal("Got config error: ", err.Error())
+	}
+}
+
+func TestMfGeneralItems(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if mfCgrCfg.DefaultReqType != utils.PSEUDOPREPAID { // Twice reconfigured
+		t.Error("DefaultReqType: ", mfCgrCfg.DefaultReqType)
+	}
+	if mfCgrCfg.DefaultCategory != "call" { // Not configred, should be inherited from default
+		t.Error("DefaultCategory: ", mfCgrCfg.DefaultCategory)
+	}
+}
+
+func TestMfCdreDefaultInstance(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	for _, prflName := range []string{"*default", "export1"} {
+		if _, hasIt := mfCgrCfg.CdreProfiles[prflName]; !hasIt {
+			t.Error("Cdre does not contain profile ", prflName)
+		}
+	}
+	prfl := "*default"
+	if mfCgrCfg.CdreProfiles[prfl].CdrFormat != "csv" {
+		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CdrFormat)
+	}
+	if mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor != 1024.0 {
+		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor)
+	}
+	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 2 {
+		t.Error("Default instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
+	}
+	if mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag != "RunId" {
+		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag)
+	}
+	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 9 {
+		t.Error("Default instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].ContentFields))
+	}
+	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag != "Account" {
+		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag)
+	}
+}
+
+func TestMfCdreExport1Instance(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	prfl := "export1"
+	if mfCgrCfg.CdreProfiles[prfl].CdrFormat != "csv" {
+		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CdrFormat)
+	}
+	if mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor != 1.0 {
+		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor)
+	}
+	if mfCgrCfg.CdreProfiles[prfl].CostRoundingDecimals != 3.0 {
+		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CostRoundingDecimals)
+	}
+	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 2 {
+		t.Error("Export1 instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
+	}
+	if mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag != "RunId" {
+		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag)
+	}
+	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 9 {
+		t.Error("Export1 instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].ContentFields))
+	}
+	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag != "Account" {
+		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag)
 	}
 }
