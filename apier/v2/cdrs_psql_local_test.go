@@ -40,9 +40,8 @@ func TestV2CdrsPsqlInitConfig(t *testing.T) {
 		return
 	}
 	var err error
-	cdrsPsqlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsv2psql_local_test.cfg")
-	cdrsPsqlCfg, err = config.NewCGRConfigFromFile(&cdrsPsqlCfgPath)
-	if err != nil {
+	cdrsPsqlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsv2psql")
+	if cdrsPsqlCfg, err = config.NewCGRConfigFromFolder(cdrsPsqlCfgPath); err != nil {
 		t.Fatal(err)
 	}
 }

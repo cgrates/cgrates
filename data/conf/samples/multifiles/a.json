@@ -1,0 +1,32 @@
+{
+// CGRateS Configuration file
+// Used in multifile configuration tests
+// Should be the first file loaded
+
+"general": {
+	"default_reqtype": "postpaid",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+},
+
+"cdre": {
+	"*default": {
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
+			{"tag":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
+			{"tag":"Tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "tor"},
+			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
+			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
+			{"tag":"Direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "direction"},
+			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
+			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
+			{"tag":"Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
+			{"tag":"Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "subject"},
+			{"tag":"Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "destination"},
+			{"tag":"SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
+			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
+		],
+	}
+},
+
+}

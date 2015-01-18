@@ -78,7 +78,7 @@ func TestTutLclStartEngine(t *testing.T) {
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	engine := exec.Command(enginePath, "-config", tutCfgPath)
+	engine := exec.Command(enginePath, "-config_dir", tutCfgPath)
 	if err := engine.Start(); err != nil {
 		t.Fatal(err)
 	}

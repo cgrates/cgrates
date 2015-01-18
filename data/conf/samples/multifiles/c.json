@@ -1,0 +1,23 @@
+{
+// CGRateS Configuration file
+// Used in multifile configuration tests
+// Should be the third file loaded
+
+"cdre": {
+	"export1": {
+		"cost_rounding_decimals": 1,					// rounding decimals for Cost values. -1 to disable rounding
+		"content_fields": [								// template of the exported content fields
+			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
+			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
+			{"tag":"Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
+			{"tag":"Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "subject"},
+			{"tag":"Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "destination"},
+			{"tag":"SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
+			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
+		],						// template of the exported header fields
+	}
+},
+
+}

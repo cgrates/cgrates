@@ -1,0 +1,27 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier_local_tests
+// Starts rater, cdrs and mediator connecting over internal channel
+
+"stor_db": {
+	"db_type": "postgres",					// stor database type to use: <mysql|postgres>
+	"db_port": 5432, 						// the port to reach the stordb
+},
+
+
+"rater": {
+	"enabled": true,						// enable Rater service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	"mediator": "internal",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+},
+
+"mediator": {
+	"enabled": true,						// starts Mediator service: <true|false>.
+
+},
+
+}

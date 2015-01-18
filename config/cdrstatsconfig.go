@@ -59,11 +59,13 @@ func (self *CdrStatsConfig) loadFromJsonCfg(jsnCfg *CdrStatsJsonCfg) error {
 	if jsnCfg.Metrics != nil {
 		self.Metrics = *jsnCfg.Metrics
 	}
-	for _, setupTimeStr := range *jsnCfg.Setup_interval {
-		if setupTime, err := utils.ParseTimeDetectLayout(setupTimeStr); err != nil {
-			return err
-		} else {
-			self.SetupInterval = append(self.SetupInterval, setupTime)
+	if jsnCfg.Setup_interval != nil {
+		for _, setupTimeStr := range *jsnCfg.Setup_interval {
+			if setupTime, err := utils.ParseTimeDetectLayout(setupTimeStr); err != nil {
+				return err
+			} else {
+				self.SetupInterval = append(self.SetupInterval, setupTime)
+			}
 		}
 	}
 	if jsnCfg.Tors != nil {
@@ -96,11 +98,13 @@ func (self *CdrStatsConfig) loadFromJsonCfg(jsnCfg *CdrStatsJsonCfg) error {
 	if jsnCfg.Destination_prefixes != nil {
 		self.DestinationPrefixes = *jsnCfg.Destination_prefixes
 	}
-	for _, usageDurStr := range *jsnCfg.Usage_interval {
-		if usageDur, err := utils.ParseDurationWithSecs(usageDurStr); err != nil {
-			return err
-		} else {
-			self.UsageInterval = append(self.UsageInterval, usageDur)
+	if jsnCfg.Usage_interval != nil {
+		for _, usageDurStr := range *jsnCfg.Usage_interval {
+			if usageDur, err := utils.ParseDurationWithSecs(usageDurStr); err != nil {
+				return err
+			} else {
+				self.UsageInterval = append(self.UsageInterval, usageDur)
+			}
 		}
 	}
 	if jsnCfg.Mediation_run_ids != nil {

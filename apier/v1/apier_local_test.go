@@ -64,16 +64,23 @@ var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path h
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
 
-func init() {
-	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
-	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
+func TestLoadConfig(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var err error
+	cfgPath = path.Join(*dataDir, "conf", "samples", "apier")
+	if cfg, err = config.NewCGRConfigFromFolder(cfgPath); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestCreateDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, pathDir := range []string{cfg.CdreDefaultInstance.ExportDir, cfg.CdrcInstances[0].CdrInDir, cfg.CdrcInstances[0].CdrOutDir, cfg.HistoryDir} {
+	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportDir, cfg.CdrcProfiles[utils.META_DEFAULT].CdrInDir, cfg.CdrcProfiles[utils.META_DEFAULT].CdrOutDir,
+		cfg.HistoryDir} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}
@@ -130,7 +137,7 @@ func TestStartEngine(t *testing.T) {
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	engine := exec.Command(enginePath, "-config", cfgPath)
+	engine := exec.Command(enginePath, "-config_dir", cfgPath)
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}

@@ -46,10 +46,9 @@ func TestInitConfig(t *testing.T) {
 		return
 	}
 	var err error
-	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsv2mysql_local_test.cfg")
-	cdrsCfg, err = config.NewCGRConfigFromFile(&cdrsCfgPath)
-	if err != nil {
-		t.Fatal(err)
+	cdrsCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsv2mysql")
+	if cdrsCfg, err = config.NewCGRConfigFromFolder(cdrsCfgPath); err != nil {
+		t.Fatal("Got config error: ", err.Error())
 	}
 }
 

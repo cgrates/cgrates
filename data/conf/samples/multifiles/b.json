@@ -1,0 +1,23 @@
+{
+// CGRateS Configuration file
+// Used in multifile configuration tests
+// Should be the second file loaded
+
+"general": {
+	"default_reqtype": "pseudoprepaid",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+},
+
+"cdre": {
+	"*default": {
+		"data_usage_multiply_factor": 1024,				// multiply data usage before export (eg: convert from KBytes to Bytes)
+		"export_dir": "/tmp/cgrates/cdre",			// path where the exported CDRs will be placed
+	},
+	"export1": {
+		"header_fields": [
+			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
+			{"tag":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
+		],							// template of the exported header fields
+	}
+},
+
+}

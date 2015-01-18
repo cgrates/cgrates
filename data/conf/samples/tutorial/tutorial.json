@@ -28,4 +28,8 @@
 	"cdrstats": "internal",	
 },
 
+"cdrstats": {
+	"enabled": true,						// starts the cdrstats service: <true|false>
+},
+
 }

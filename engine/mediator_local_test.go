@@ -55,7 +55,7 @@ var httpClient *http.Client
 
 var storDbType = flag.String("stordb_type", utils.MYSQL, "The type of the storDb database <mysql>")
 var startDelay = flag.Int("delay_start", 300, "Number of miliseconds to it for rater to start and cache")
-var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator_test1")
+var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator1")
 
 func TestMediInitRatingDb(t *testing.T) {
 	if !*testLocal {
@@ -113,7 +113,7 @@ func TestMediStartEngine(t *testing.T) {
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	time.Sleep(time.Duration(*startDelay) * time.Millisecond)
-	engine := exec.Command(enginePath, "-config", cfgPath)
+	engine := exec.Command(enginePath, "-config_dir", cfgPath)
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
@@ -131,7 +131,7 @@ func TestMediRpcConn(t *testing.T) {
 	//cgrRpc, err = rpc.Dial("tcp", cfg.RPCGOBListen) //ToDo: Fix with automatic config
 	cgrRpc, err = jsonrpc.Dial("tcp", cgrCfg.RPCJSONListen)
 	if err != nil {
-		t.Fatal("Could not connect to CGR GOB-RPC Server: ", err.Error())
+		t.Fatal("Could not connect to CGR JSON-RPC Server: ", err.Error())
 	}
 }
 
@@ -159,7 +159,7 @@ func TestMediPostCdrs(t *testing.T) {
 	time.Sleep(100 * time.Millisecond) // Give time for CDRs to reach database
 	if storedCdrs, _, err := cdrStor.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err)
-	} else if len(storedCdrs) != 6 { // Make sure CDRs made it into StorDb
+	} else if len(storedCdrs) != 3 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
 	if nonErrorCdrs, _, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostEnd: utils.Float64Pointer(-1.0)}); err != nil {
@@ -187,7 +187,7 @@ func TestMediInjectCdrs(t *testing.T) {
 	}
 	if storedCdrs, _, err := cdrStor.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err)
-	} else if len(storedCdrs) != 8 { // Make sure CDRs made it into StorDb
+	} else if len(storedCdrs) != 5 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
 	if nonRatedCdrs, _, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostEnd: utils.Float64Pointer(-1.0)}); err != nil {
@@ -229,7 +229,7 @@ func TestMediRateCdrs(t *testing.T) {
 	}
 	if errRatedCdrs, _, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostStart: utils.Float64Pointer(-1.0), CostEnd: utils.Float64Pointer(0)}); err != nil {
 		t.Error(err)
-	} else if len(errRatedCdrs) != 2 { // The first 2 with errors should be still there before rerating
+	} else if len(errRatedCdrs) != 1 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
 	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{RerateErrors: true}, &reply); err != nil {
@@ -239,7 +239,7 @@ func TestMediRateCdrs(t *testing.T) {
 	}
 	if errRatedCdrs, _, err := cdrStor.GetStoredCdrs(&utils.CdrsFilter{CostStart: utils.Float64Pointer(-1.0), CostEnd: utils.Float64Pointer(0)}); err != nil {
 		t.Error(err)
-	} else if len(errRatedCdrs) != 2 {
+	} else if len(errRatedCdrs) != 1 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
 }
