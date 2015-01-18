@@ -1,3 +1,24 @@
+/*
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package config
+
+const CGRATES_CFG_JSON = `
 {
 
 // Real-time Charging System for Telecom & ISP environments
@@ -111,13 +132,14 @@
 	"mediation_run_ids": [],				// filter on CDR MediationRunId fields
 	"rated_accounts": [],					// filter on CDR RatedAccount fields
 	"rated_subjects": [],					// filter on CDR RatedSubject fields
-	"cost_intervals": [],					// filter on CDR Cost
+	"cost_interval": [],					// filter on CDR Cost
 },
 
 
 "cdre": {
-	"CDRE-FW1": {
+	"*default": {
 		"cdr_format": "csv",							// exported CDRs format <csv>
+		"field_separator": ",",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
@@ -127,21 +149,21 @@
 		"export_dir": "/var/log/cgrates/cdre",			// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
-			{"tag": "CgrId", "type": "cdrfield", "value": "cgrid", "width": 40, "mandatory": true},
-			{"tag":"RunId", "type": "cdrfield", "value": "mediation_runid", "width": 20},
-			{"tag":"Tor", "type": "cdrfield", "value": "tor", "width": 6},
-			{"tag":"AccId", "type": "cdrfield", "value": "accid", "width": 36},
-			{"tag":"ReqType", "type": "cdrfield", "value": "reqtype", "width": 13},
-			{"tag":"Direction", "type": "cdrfield", "value": "direction", "width": 4},
-			{"tag":"Tenant", "type": "cdrfield", "value": "tenant", "width": 24},
-			{"tag":"Category", "type": "cdrfield", "value": "category", "width": 10},
-			{"tag":"Account", "type": "cdrfield", "value": "account", "width": 24},
-			{"tag":"Subject", "type": "cdrfield", "value": "subject", "width": 24},
-			{"tag":"Destination", "type": "cdrfield", "value": "destination", "width": 24},
-			{"tag":"SetupTime", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00", "width": 30},
-			{"tag":"AnswerTime", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00", "width": 30},
-			{"tag":"Usage", "type": "cdrfield", "value": "usage", "width": 30},
-			{"tag":"Cost", "type": "cdrfield", "value": "cost", "width": 24},			
+			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
+			{"tag":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
+			{"tag":"Tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "tor"},
+			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
+			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
+			{"tag":"Direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "direction"},
+			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
+			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
+			{"tag":"Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
+			{"tag":"Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "subject"},
+			{"tag":"Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "destination"},
+			{"tag":"SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
+			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
 		],
 		"trailer_fields": [],							// template of the exported trailer fields
 	}
@@ -149,7 +171,7 @@
 
 
 "cdrc": {
-	"instance1": {
+	"*default": {
 		"enabled": false,							// enable CDR client functionality
 		"cdrs_address": "internal",					// address where to reach CDR server. <internal|x.y.z.y:1234>
 		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv>
@@ -160,19 +182,18 @@
 		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"tag": "accid", "value": "0;13"},
-			{"tag": "reqtype", "value": "1"},
-			{"tag": "direction", "value": "2"},
-			{"tag": "tenant", "value": "3"},
-			{"tag": "category", "value": "4"},
-			{"tag": "account", "value": "5"},
-			{"tag": "subject", "value": "6"},
-			{"tag": "destination", "value": "7"},
-			{"tag": "setup_time", "value": "8"},
-			{"tag": "answer_time", "value": "9"},
-			{"tag": "usage", "value": "10"},
-			{"tag": "extr1", "value": "11"},
-			{"tag": "extr2", "value": "12"},
+			{"tag": "tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "2", "mandatory": true},
+			{"tag": "accid", "cdr_field_id": "accid", "type": "cdrfield", "value": "3", "mandatory": true},
+			{"tag": "reqtype", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "4", "mandatory": true},
+			{"tag": "direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "5", "mandatory": true},
+			{"tag": "tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "6", "mandatory": true},
+			{"tag": "category", "cdr_field_id": "category", "type": "cdrfield", "value": "7", "mandatory": true},
+			{"tag": "account", "cdr_field_id": "account", "type": "cdrfield", "value": "8", "mandatory": true},
+			{"tag": "subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "9", "mandatory": true},
+			{"tag": "destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "10", "mandatory": true},
+			{"tag": "setup_time", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "11", "mandatory": true},
+			{"tag": "answer_time", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "12", "mandatory": true},
+			{"tag": "usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "13", "mandatory": true},
 		],
 	}
 },
@@ -236,4 +257,4 @@
 	"from_address": "cgr-mailer@localhost.localdomain"	// from address used when sending emails out
 },
 
-}
+}`

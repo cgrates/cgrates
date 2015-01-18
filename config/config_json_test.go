@@ -21,19 +21,21 @@ package config
 import (
 	"github.com/cgrates/cgrates/utils"
 	"reflect"
+	"strings"
 	"testing"
 )
 
-var cgrJsonCfg CgrJsonCfg
+var dfCgrJsonCfg *CgrJsonCfg
 
-func TestNewCgrJsonCfgFromFile(t *testing.T) {
+// Loads up the default configuration and  tests it's sections one by one
+func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
 	var err error
-	if cgrJsonCfg, err = NewCgrJsonCfgFromFile("cgrates_cfg_defaults.json"); err != nil {
-		t.Error(err.Error())
+	if dfCgrJsonCfg, err = NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON)); err != nil {
+		t.Error(err)
 	}
 }
 
-func TestGeneralJsonCfg(t *testing.T) {
+func TestDfGeneralJsonCfg(t *testing.T) {
 	eCfg := &GeneralJsonCfg{
 		Http_skip_tls_veify: utils.BoolPointer(false),
 		Rounding_decimals:   utils.IntPointer(10),
@@ -43,26 +45,26 @@ func TestGeneralJsonCfg(t *testing.T) {
 		Default_category:    utils.StringPointer("call"),
 		Default_tenant:      utils.StringPointer("cgrates.org"),
 		Default_subject:     utils.StringPointer("cgrates")}
-	if gCfg, err := cgrJsonCfg.GeneralJsonCfg(); err != nil {
+	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Error("Received: ", gCfg)
 	}
 }
 
-func TestListenJsonCfg(t *testing.T) {
+func TestDfListenJsonCfg(t *testing.T) {
 	eCfg := &ListenJsonCfg{
 		Rpc_json: utils.StringPointer("127.0.0.1:2012"),
 		Rpc_gob:  utils.StringPointer("127.0.0.1:2013"),
 		Http:     utils.StringPointer("127.0.0.1:2080")}
-	if cfg, err := cgrJsonCfg.ListenJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.ListenJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestDbJsonCfg(t *testing.T) {
+func TestDfDbJsonCfg(t *testing.T) {
 	eCfg := &DbJsonCfg{
 		Db_type:   utils.StringPointer("redis"),
 		Db_host:   utils.StringPointer("127.0.0.1"),
@@ -71,7 +73,7 @@ func TestDbJsonCfg(t *testing.T) {
 		Db_user:   utils.StringPointer(""),
 		Db_passwd: utils.StringPointer(""),
 	}
-	if cfg, err := cgrJsonCfg.DbJsonCfg(RATINGDB_JSN); err != nil {
+	if cfg, err := dfCgrJsonCfg.DbJsonCfg(RATINGDB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -84,7 +86,7 @@ func TestDbJsonCfg(t *testing.T) {
 		Db_user:   utils.StringPointer(""),
 		Db_passwd: utils.StringPointer(""),
 	}
-	if cfg, err := cgrJsonCfg.DbJsonCfg(ACCOUNTINGDB_JSN); err != nil {
+	if cfg, err := dfCgrJsonCfg.DbJsonCfg(ACCOUNTINGDB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -99,41 +101,41 @@ func TestDbJsonCfg(t *testing.T) {
 		Max_open_conns: utils.IntPointer(0),
 		Max_idle_conns: utils.IntPointer(-1),
 	}
-	if cfg, err := cgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
+	if cfg, err := dfCgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestBalancerJsonCfg(t *testing.T) {
+func TestDfBalancerJsonCfg(t *testing.T) {
 	eCfg := &BalancerJsonCfg{Enabled: utils.BoolPointer(false)}
-	if cfg, err := cgrJsonCfg.BalancerJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.BalancerJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestRaterJsonCfg(t *testing.T) {
+func TestDfRaterJsonCfg(t *testing.T) {
 	eCfg := &RaterJsonCfg{Enabled: utils.BoolPointer(false), Balancer: utils.StringPointer("")}
-	if cfg, err := cgrJsonCfg.RaterJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.RaterJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestSchedulerJsonCfg(t *testing.T) {
+func TestDfSchedulerJsonCfg(t *testing.T) {
 	eCfg := &SchedulerJsonCfg{Enabled: utils.BoolPointer(false)}
-	if cfg, err := cgrJsonCfg.SchedulerJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.SchedulerJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestCdrsJsonCfg(t *testing.T) {
+func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
 		Enabled:       utils.BoolPointer(false),
 		Extra_fields:  utils.StringSlicePointer([]string{}),
@@ -141,14 +143,14 @@ func TestCdrsJsonCfg(t *testing.T) {
 		Cdrstats:      utils.StringPointer(""),
 		Store_disable: utils.BoolPointer(false),
 	}
-	if cfg, err := cgrJsonCfg.CdrsJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestMediatorJsonCfg(t *testing.T) {
+func TestDfMediatorJsonCfg(t *testing.T) {
 	eCfg := &MediatorJsonCfg{
 		Enabled:       utils.BoolPointer(false),
 		Reconnects:    utils.IntPointer(3),
@@ -156,14 +158,14 @@ func TestMediatorJsonCfg(t *testing.T) {
 		Cdrstats:      utils.StringPointer(""),
 		Store_disable: utils.BoolPointer(false),
 	}
-	if cfg, err := cgrJsonCfg.MediatorJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.MediatorJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestCdrStatsJsonCfg(t *testing.T) {
+func TestDfCdrStatsJsonCfg(t *testing.T) {
 	eCfg := &CdrStatsJsonCfg{
 		Enabled:              utils.BoolPointer(false),
 		Queue_length:         utils.IntPointer(50),
@@ -184,85 +186,85 @@ func TestCdrStatsJsonCfg(t *testing.T) {
 		Mediation_run_ids:    utils.StringSlicePointer([]string{}),
 		Rated_accounts:       utils.StringSlicePointer([]string{}),
 		Rated_subjects:       utils.StringSlicePointer([]string{}),
-		Cost_intervals:       utils.StringSlicePointer([]string{}),
+		Cost_interval:        utils.Float64SlicePointer([]float64{}),
 	}
-	if cfg, err := cgrJsonCfg.CdrStatsJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.CdrStatsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestCdreJsonCfgs(t *testing.T) {
+func TestDfCdreJsonCfgs(t *testing.T) {
 	eFields := []*CdrFieldJsonCfg{}
 	eContentFlds := []*CdrFieldJsonCfg{
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("CgrId"),
-			Type:      utils.StringPointer("cdrfield"),
-			Value:     utils.StringPointer("cgrid"),
-			Width:     utils.IntPointer(40),
-			Mandatory: utils.BoolPointer(true)},
+			Cdr_field_id: utils.StringPointer("cgrid"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("cgrid")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("RunId"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("mediation_runid"),
-			Width: utils.IntPointer(20)},
+			Cdr_field_id: utils.StringPointer("mediation_runid"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("mediation_runid")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tor"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("tor"),
-			Width: utils.IntPointer(6)},
+			Cdr_field_id: utils.StringPointer("tor"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("tor")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("AccId"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("accid"),
-			Width: utils.IntPointer(36)},
+			Cdr_field_id: utils.StringPointer("accid"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("accid")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("ReqType"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("reqtype"),
-			Width: utils.IntPointer(13)},
+			Cdr_field_id: utils.StringPointer("reqtype"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("reqtype")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Direction"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("direction"),
-			Width: utils.IntPointer(4)},
+			Cdr_field_id: utils.StringPointer("direction"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("direction")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Tenant"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("tenant"),
-			Width: utils.IntPointer(24)},
+			Cdr_field_id: utils.StringPointer("tenant"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("tenant")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Category"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("category"),
-			Width: utils.IntPointer(10)},
+			Cdr_field_id: utils.StringPointer("category"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("category")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Account"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("account"),
-			Width: utils.IntPointer(24)},
+			Cdr_field_id: utils.StringPointer("account"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("account")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Subject"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("subject"),
-			Width: utils.IntPointer(24)},
+			Cdr_field_id: utils.StringPointer("subject"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("subject")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Destination"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("destination"),
-			Width: utils.IntPointer(24)},
+			Cdr_field_id: utils.StringPointer("destination"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("destination")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("SetupTime"),
-			Type:   utils.StringPointer("cdrfield"),
-			Value:  utils.StringPointer("setup_time"),
-			Width:  utils.IntPointer(30),
-			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00")},
+			Cdr_field_id: utils.StringPointer("setup_time"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("setup_time"),
+			Layout:       utils.StringPointer("2006-01-02T15:04:05Z07:00")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("AnswerTime"),
-			Type:   utils.StringPointer("cdrfield"),
-			Value:  utils.StringPointer("answer_time"),
-			Width:  utils.IntPointer(30),
-			Layout: utils.StringPointer("2006-01-02T15:04:05Z07:00")},
+			Cdr_field_id: utils.StringPointer("answer_time"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("answer_time"),
+			Layout:       utils.StringPointer("2006-01-02T15:04:05Z07:00")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Usage"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("usage"),
-			Width: utils.IntPointer(30)},
+			Cdr_field_id: utils.StringPointer("usage"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("usage")},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Cost"),
-			Type:  utils.StringPointer("cdrfield"),
-			Value: utils.StringPointer("cost"),
-			Width: utils.IntPointer(24)},
+			Cdr_field_id: utils.StringPointer("cost"),
+			Type:         utils.StringPointer("cdrfield"),
+			Value:        utils.StringPointer("cost")},
 	}
 	eCfg := map[string]*CdreJsonCfg{
-		"CDRE-FW1": &CdreJsonCfg{
+		utils.META_DEFAULT: &CdreJsonCfg{
 			Cdr_format:                 utils.StringPointer("csv"),
+			Field_separator:            utils.StringPointer(","),
 			Data_usage_multiply_factor: utils.Float64Pointer(1.0),
 			Cost_multiply_factor:       utils.Float64Pointer(1.0),
 			Cost_rounding_decimals:     utils.IntPointer(-1),
@@ -275,31 +277,42 @@ func TestCdreJsonCfgs(t *testing.T) {
 			Trailer_fields:             &eFields,
 		},
 	}
-	if cfg, err := cgrJsonCfg.CdreJsonCfgs(); err != nil {
+	if cfg, err := dfCgrJsonCfg.CdreJsonCfgs(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestCdrcJsonCfg(t *testing.T) {
+func TestDfCdrcJsonCfg(t *testing.T) {
 	cdrFields := []*CdrFieldJsonCfg{
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("accid"), Value: utils.StringPointer("0;13")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("reqtype"), Value: utils.StringPointer("1")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("direction"), Value: utils.StringPointer("2")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("tenant"), Value: utils.StringPointer("3")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("category"), Value: utils.StringPointer("4")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("account"), Value: utils.StringPointer("5")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("subject"), Value: utils.StringPointer("6")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("destination"), Value: utils.StringPointer("7")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("setup_time"), Value: utils.StringPointer("8")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("answer_time"), Value: utils.StringPointer("9")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("usage"), Value: utils.StringPointer("10")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("extr1"), Value: utils.StringPointer("11")},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("extr2"), Value: utils.StringPointer("12")},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("tor"), Cdr_field_id: utils.StringPointer("tor"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("2"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("accid"), Cdr_field_id: utils.StringPointer("accid"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("3"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("reqtype"), Cdr_field_id: utils.StringPointer("reqtype"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("4"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("direction"), Cdr_field_id: utils.StringPointer("direction"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("5"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("tenant"), Cdr_field_id: utils.StringPointer("tenant"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("6"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("category"), Cdr_field_id: utils.StringPointer("category"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("7"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("account"), Cdr_field_id: utils.StringPointer("account"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("8"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("subject"), Cdr_field_id: utils.StringPointer("subject"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("9"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("destination"), Cdr_field_id: utils.StringPointer("destination"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("10"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("setup_time"), Cdr_field_id: utils.StringPointer("setup_time"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("11"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("answer_time"), Cdr_field_id: utils.StringPointer("answer_time"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("12"), Mandatory: utils.BoolPointer(true)},
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("usage"), Cdr_field_id: utils.StringPointer("usage"), Type: utils.StringPointer(utils.CDRFIELD),
+			Value: utils.StringPointer("13"), Mandatory: utils.BoolPointer(true)},
 	}
 	eCfg := map[string]*CdrcJsonCfg{
-		"instance1": &CdrcJsonCfg{
+		"*default": &CdrcJsonCfg{
 			Enabled:                    utils.BoolPointer(false),
 			Cdrs_address:               utils.StringPointer("internal"),
 			Cdr_format:                 utils.StringPointer("csv"),
@@ -312,14 +325,14 @@ func TestCdrcJsonCfg(t *testing.T) {
 			Cdr_fields:                 &cdrFields,
 		},
 	}
-	if cfg, err := cgrJsonCfg.CdrcJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestSessionManagerJsonCfg(t *testing.T) {
+func TestDfSessionManagerJsonCfg(t *testing.T) {
 	eCfg := &SessionManagerJsonCfg{
 		Enabled:           utils.BoolPointer(false),
 		Switch_type:       utils.StringPointer("freeswitch"),
@@ -330,14 +343,14 @@ func TestSessionManagerJsonCfg(t *testing.T) {
 		Min_call_duration: utils.StringPointer("0s"),
 		Max_call_duration: utils.StringPointer("3h"),
 	}
-	if cfg, err := cgrJsonCfg.SessionManagerJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.SessionManagerJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestFSJsonCfg(t *testing.T) {
+func TestDfFSJsonCfg(t *testing.T) {
 	eCfg := &FSJsonCfg{
 		Server:                 utils.StringPointer("127.0.0.1:8021"),
 		Password:               utils.StringPointer("ClueCon"),
@@ -348,74 +361,117 @@ func TestFSJsonCfg(t *testing.T) {
 		Empty_balance_ann_file: utils.StringPointer(""),
 		Cdr_extra_fields:       utils.StringSlicePointer([]string{}),
 	}
-	if cfg, err := cgrJsonCfg.FSJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.FSJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestKamailioJsonCfg(t *testing.T) {
+func TestDfKamailioJsonCfg(t *testing.T) {
 	eCfg := &KamailioJsonCfg{
 		Evapi_addr: utils.StringPointer("127.0.0.1:8448"),
 		Reconnects: utils.IntPointer(3),
 	}
-	if cfg, err := cgrJsonCfg.KamailioJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.KamailioJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestOsipsJsonCfg(t *testing.T) {
+func TestDfOsipsJsonCfg(t *testing.T) {
 	eCfg := &OsipsJsonCfg{
 		Listen_udp:                utils.StringPointer("127.0.0.1:2020"),
 		Mi_addr:                   utils.StringPointer("127.0.0.1:8020"),
 		Events_subscribe_interval: utils.StringPointer("60s"),
 		Reconnects:                utils.IntPointer(3),
 	}
-	if cfg, err := cgrJsonCfg.OsipsJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.OsipsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestHistServJsonCfg(t *testing.T) {
+func TestDfHistServJsonCfg(t *testing.T) {
 	eCfg := &HistServJsonCfg{
 		Enabled:       utils.BoolPointer(false),
 		History_dir:   utils.StringPointer("/var/log/cgrates/history"),
 		Save_interval: utils.StringPointer("1s"),
 	}
-	if cfg, err := cgrJsonCfg.HistServJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.HistServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestHistAgentJsonCfg(t *testing.T) {
+func TestDfHistAgentJsonCfg(t *testing.T) {
 	eCfg := &HistAgentJsonCfg{
 		Enabled: utils.BoolPointer(false),
 		Server:  utils.StringPointer("internal"),
 	}
-	if cfg, err := cgrJsonCfg.HistAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.HistAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
 	}
 }
 
-func TestMailerJsonCfg(t *testing.T) {
+func TestDfMailerJsonCfg(t *testing.T) {
 	eCfg := &MailerJsonCfg{
 		Server:       utils.StringPointer("localhost"),
 		Auth_user:    utils.StringPointer("cgrates"),
 		Auth_passwd:  utils.StringPointer("CGRateS.org"),
 		From_address: utils.StringPointer("cgr-mailer@localhost.localdomain"),
 	}
-	if cfg, err := cgrJsonCfg.MailerJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.MailerJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestNewCgrJsonCfgFromFile(t *testing.T) {
+	cgrJsonCfg, err := NewCgrJsonCfgFromFile("cfg_data.json")
+	if err != nil {
+		t.Error(err)
+	}
+	eCfg := &GeneralJsonCfg{Default_reqtype: utils.StringPointer("pseudoprepaid")}
+	if gCfg, err := cgrJsonCfg.GeneralJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, gCfg) {
+		t.Error("Received: ", gCfg)
+	}
+	cdrFields := []*CdrFieldJsonCfg{
+		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("tor"), Value: utils.StringPointer("~7:s/^(voice|data|sms)$/*$1/")},
+		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("answer_time"), Value: utils.StringPointer("1")},
+		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("usage"), Value: utils.StringPointer(`~9:s/^(\d+)$/${1}s/`)},
+	}
+	eCfgCdrc := map[string]*CdrcJsonCfg{
+		"CDRC-CSV1": &CdrcJsonCfg{
+			Enabled:       utils.BoolPointer(true),
+			Cdr_in_dir:    utils.StringPointer("/tmp/cgrates/cdrc1/in"),
+			Cdr_out_dir:   utils.StringPointer("/tmp/cgrates/cdrc1/out"),
+			Cdr_source_id: utils.StringPointer("csv1"),
+		},
+		"CDRC-CSV2": &CdrcJsonCfg{
+			Enabled:       utils.BoolPointer(true),
+			Cdr_in_dir:    utils.StringPointer("/tmp/cgrates/cdrc2/in"),
+			Cdr_out_dir:   utils.StringPointer("/tmp/cgrates/cdrc2/out"),
+			Cdr_source_id: utils.StringPointer("csv2"),
+			Cdr_fields:    &cdrFields,
+		},
+	}
+	if cfg, err := cgrJsonCfg.CdrcJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfgCdrc, cfg) {
+		t.Error("Received: ", cfg)
+	}
+	if cfg, err := cgrJsonCfg.HistAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if cfg != nil {
 		t.Error("Received: ", cfg)
 	}
 }

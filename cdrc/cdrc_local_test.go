@@ -96,10 +96,10 @@ func TestLoadConfigt(*testing.T) {
 	if !*testLocal {
 		return
 	}
-	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
-	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
-	if len(cfg.CdrcInstances) > 0 {
-		cdrcCfg = cfg.CdrcInstances[0]
+	cfgPath = path.Join(*dataDir, "conf", "samples", "apier")
+	cfg, _ = config.NewCGRConfigFromFolder(cfgPath)
+	if len(cfg.CdrcProfiles) > 0 {
+		cdrcCfg = cfg.CdrcProfiles[utils.META_DEFAULT]
 	}
 }
 

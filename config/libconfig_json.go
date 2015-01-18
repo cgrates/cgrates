@@ -104,7 +104,7 @@ type CdrStatsJsonCfg struct {
 	Mediation_run_ids    *[]string
 	Rated_accounts       *[]string
 	Rated_subjects       *[]string
-	Cost_intervals       *[]string
+	Cost_interval        *[]float64
 }
 
 // One cdr field config, used in cdre and cdrc
@@ -124,6 +124,7 @@ type CdrFieldJsonCfg struct {
 // Cdre config section
 type CdreJsonCfg struct {
 	Cdr_format                 *string
+	Field_separator            *string
 	Data_usage_multiply_factor *float64
 	Cost_multiply_factor       *float64
 	Cost_rounding_decimals     *int

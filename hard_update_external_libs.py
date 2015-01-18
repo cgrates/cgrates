@@ -4,8 +4,7 @@ import os
 import os.path
 from subprocess import call
 
-libs = ('code.google.com/p/goconf/conf',
-        'github.com/bmizerany/pq',
+libs = ('github.com/bmizerany/pq',
         'github.com/ugorji/go/codec',
         'labix.org/v2/mgo',
         'github.com/cgrates/fsock',

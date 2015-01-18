@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,10 +21,14 @@ package utils
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 func NewRSRField(fldStr string) (*RSRField, error) {
+	if fldStrUnquoted, err := strconv.Unquote(fldStr); err == nil {
+		fldStr = fldStrUnquoted
+	}
 	if len(fldStr) == 0 {
 		return nil, nil
 	}
@@ -108,8 +112,16 @@ func ParseRSRFields(fldsStr, sep string) (RSRFields, error) {
 		return nil, nil
 	}
 	rulesSplt := strings.Split(fldsStr, sep)
-	rsrFields := make(RSRFields, len(rulesSplt))
-	for idx, ruleStr := range rulesSplt {
+	return ParseRSRFieldsFromSlice(rulesSplt)
+
+}
+
+func ParseRSRFieldsFromSlice(flds []string) (RSRFields, error) {
+	if len(flds) == 0 {
+		return nil, nil
+	}
+	rsrFields := make(RSRFields, len(flds))
+	for idx, ruleStr := range flds {
 		if rsrField, err := NewRSRField(ruleStr); err != nil {
 			return nil, err
 		} else {
@@ -117,6 +129,7 @@ func ParseRSRFields(fldsStr, sep string) (RSRFields, error) {
 		}
 	}
 	return rsrFields, nil
+
 }
 
 type RSRFields []*RSRField

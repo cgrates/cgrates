@@ -34,7 +34,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/cgrates/cgrates/cdre"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -93,28 +92,11 @@ func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 // Export Cdrs to file
 func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
 	var err error
-	exportTemplate := self.Config.CdreDefaultInstance
-	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // XML Template defined, can be field names or xml reference
-		if strings.HasPrefix(*attr.ExportTemplate, utils.XML_PROFILE_PREFIX) {
-			if self.Config.XmlCfgDocument == nil {
-				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "XmlDocumentNotLoaded")
-			}
-			expTplStr := *attr.ExportTemplate
-			if xmlTemplates := self.Config.XmlCfgDocument.GetCdreCfgs(expTplStr[len(utils.XML_PROFILE_PREFIX):]); xmlTemplates == nil {
-				return fmt.Errorf("%s:ExportTemplate", utils.ERR_NOT_FOUND)
-			} else {
-				if exportTemplate, err = config.NewCdreConfigFromXmlCdreCfg(xmlTemplates[expTplStr[len(utils.XML_PROFILE_PREFIX):]]); err != nil {
-					return fmt.Errorf("%s:ExportTemplate:%s", utils.ERR_SERVER_ERROR, err.Error())
-				}
-			}
-		} else {
-			exportTemplate = config.NewDefaultCdreConfig()
-			if contentFlds, err := config.NewCfgCdrFieldsFromIds(exportTemplate.CdrFormat == utils.CDRE_FIXED_WIDTH,
-				strings.Split(*attr.ExportTemplate, string(utils.CSV_SEP))...); err != nil {
-				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-			} else {
-				exportTemplate.ContentFields = contentFlds
-			}
+	exportTemplate := self.Config.CdreProfiles[utils.META_DEFAULT]
+	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
+		var hasIt bool
+		if exportTemplate, hasIt = self.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
+			return fmt.Errorf("%s:ExportTemplate", utils.ERR_NOT_FOUND)
 		}
 	}
 	if exportTemplate == nil {

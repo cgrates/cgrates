@@ -18,77 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
-import (
-	"github.com/cgrates/cgrates/utils"
-)
-
-func NewDefaultCdreConfig() *CdreConfig {
-	cdreCfg := new(CdreConfig)
-	cdreCfg.setDefaults()
-	return cdreCfg
-}
-
-func NewCdreConfigFromXmlCdreCfg(xmlCdreCfg *CgrXmlCdreCfg) (*CdreConfig, error) {
-	var err error
-	cdreCfg := NewDefaultCdreConfig()
-	if xmlCdreCfg.CdrFormat != nil {
-		cdreCfg.CdrFormat = *xmlCdreCfg.CdrFormat
-	}
-	if xmlCdreCfg.FieldSeparator != nil && len(*xmlCdreCfg.FieldSeparator) == 1 {
-		sepStr := *xmlCdreCfg.FieldSeparator
-		cdreCfg.FieldSeparator = rune(sepStr[0])
-	}
-	if xmlCdreCfg.DataUsageMultiplyFactor != nil {
-		cdreCfg.DataUsageMultiplyFactor = *xmlCdreCfg.DataUsageMultiplyFactor
-	}
-	if xmlCdreCfg.CostMultiplyFactor != nil {
-		cdreCfg.CostMultiplyFactor = *xmlCdreCfg.CostMultiplyFactor
-	}
-	if xmlCdreCfg.CostRoundingDecimals != nil {
-		cdreCfg.CostRoundingDecimals = *xmlCdreCfg.CostRoundingDecimals
-	}
-	if xmlCdreCfg.CostShiftDigits != nil {
-		cdreCfg.CostShiftDigits = *xmlCdreCfg.CostShiftDigits
-	}
-	if xmlCdreCfg.MaskDestId != nil {
-		cdreCfg.MaskDestId = *xmlCdreCfg.MaskDestId
-	}
-	if xmlCdreCfg.MaskLength != nil {
-		cdreCfg.MaskLength = *xmlCdreCfg.MaskLength
-	}
-	if xmlCdreCfg.ExportDir != nil {
-		cdreCfg.ExportDir = *xmlCdreCfg.ExportDir
-	}
-	if xmlCdreCfg.Header != nil {
-		cdreCfg.HeaderFields = make([]*CfgCdrField, len(xmlCdreCfg.Header.Fields))
-		for idx, xmlFld := range xmlCdreCfg.Header.Fields {
-			cdreCfg.HeaderFields[idx], err = NewCfgCdrFieldFromCgrXmlCfgCdrField(xmlFld, cdreCfg.CdrFormat == utils.CDRE_FIXED_WIDTH)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	if xmlCdreCfg.Content != nil {
-		cdreCfg.ContentFields = make([]*CfgCdrField, len(xmlCdreCfg.Content.Fields))
-		for idx, xmlFld := range xmlCdreCfg.Content.Fields {
-			cdreCfg.ContentFields[idx], err = NewCfgCdrFieldFromCgrXmlCfgCdrField(xmlFld, cdreCfg.CdrFormat == utils.CDRE_FIXED_WIDTH)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	if xmlCdreCfg.Trailer != nil {
-		cdreCfg.TrailerFields = make([]*CfgCdrField, len(xmlCdreCfg.Trailer.Fields))
-		for idx, xmlFld := range xmlCdreCfg.Trailer.Fields {
-			cdreCfg.TrailerFields[idx], err = NewCfgCdrFieldFromCgrXmlCfgCdrField(xmlFld, cdreCfg.CdrFormat == utils.CDRE_FIXED_WIDTH)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return cdreCfg, nil
-}
-
 // One instance of CdrExporter
 type CdreConfig struct {
 	CdrFormat               string
@@ -105,22 +34,53 @@ type CdreConfig struct {
 	TrailerFields           []*CfgCdrField
 }
 
-// Set here defaults
-func (cdreCfg *CdreConfig) setDefaults() error {
-	cdreCfg.CdrFormat = utils.CSV
-	cdreCfg.FieldSeparator = utils.CSV_SEP
-	cdreCfg.DataUsageMultiplyFactor = 0.0
-	cdreCfg.CostMultiplyFactor = 0.0
-	cdreCfg.CostRoundingDecimals = -1
-	cdreCfg.CostShiftDigits = 0
-	cdreCfg.MaskDestId = ""
-	cdreCfg.MaskLength = 0
-	cdreCfg.ExportDir = "/var/log/cgrates/cdre"
-	if flds, err := NewCfgCdrFieldsFromIds(false, utils.CGRID, utils.MEDI_RUNID, utils.TOR, utils.ACCID, utils.REQTYPE, utils.DIRECTION, utils.TENANT,
-		utils.CATEGORY, utils.ACCOUNT, utils.SUBJECT, utils.DESTINATION, utils.SETUP_TIME, utils.ANSWER_TIME, utils.USAGE, utils.COST); err != nil {
-		return err
-	} else {
-		cdreCfg.ContentFields = flds
+func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
+	if jsnCfg == nil {
+		return nil
+	}
+	var err error
+	if jsnCfg.Cdr_format != nil {
+		self.CdrFormat = *jsnCfg.Cdr_format
+	}
+	if jsnCfg.Field_separator != nil && len(*jsnCfg.Field_separator) > 0 { // Make sure we got at least one character so we don't get panic here
+		sepStr := *jsnCfg.Field_separator
+		self.FieldSeparator = rune(sepStr[0])
+	}
+	if jsnCfg.Data_usage_multiply_factor != nil {
+		self.DataUsageMultiplyFactor = *jsnCfg.Data_usage_multiply_factor
+	}
+	if jsnCfg.Cost_multiply_factor != nil {
+		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
+	}
+	if jsnCfg.Cost_rounding_decimals != nil {
+		self.CostRoundingDecimals = *jsnCfg.Cost_rounding_decimals
+	}
+	if jsnCfg.Cost_shift_digits != nil {
+		self.CostShiftDigits = *jsnCfg.Cost_shift_digits
+	}
+	if jsnCfg.Mask_destination_id != nil {
+		self.MaskDestId = *jsnCfg.Mask_destination_id
+	}
+	if jsnCfg.Mask_length != nil {
+		self.MaskLength = *jsnCfg.Mask_length
+	}
+	if jsnCfg.Export_dir != nil {
+		self.ExportDir = *jsnCfg.Export_dir
+	}
+	if jsnCfg.Header_fields != nil {
+		if self.HeaderFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Header_fields); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Content_fields != nil {
+		if self.ContentFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Content_fields); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Trailer_fields != nil {
+		if self.TrailerFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Trailer_fields); err != nil {
+			return err
+		}
 	}
 	return nil
 }

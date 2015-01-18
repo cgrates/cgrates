@@ -29,7 +29,7 @@ func (self *ApierV1) GetDerivedChargers(attrs utils.AttrDerivedChargers, reply *
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Direction", "Account", "Subject"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if hDc, err := engine.HandleGetDerivedChargers(self.AccountDb, self.Config, attrs); err != nil {
+	if hDc, err := engine.HandleGetDerivedChargers(self.AccountDb, attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if hDc != nil {
 		*reply = hDc

@@ -29,7 +29,6 @@ import (
 	"path"
 	"strconv"
 	"time"
-	"unicode/utf8"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -83,12 +82,8 @@ func populateStoredCdrField(cdr *utils.StoredCdr, fieldId, fieldVal string) erro
 }
 
 func NewCdrc(cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS) (*Cdrc, error) {
-	if len(cdrcCfg.FieldSeparator) != 1 {
-		return nil, fmt.Errorf("Unsupported csv separator: %s", cdrcCfg.FieldSeparator)
-	}
-	csvSepRune, _ := utf8.DecodeRune([]byte(cdrcCfg.FieldSeparator))
 	cdrc := &Cdrc{cdrsAddress: cdrcCfg.CdrsAddress, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
-		cdrSourceId: cdrcCfg.CdrSourceId, runDelay: cdrcCfg.RunDelay, csvSep: csvSepRune, duMultiplyFactor: cdrcCfg.DataUsageMultiplyFactor, cdrFields: cdrcCfg.CdrFields, httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer}
+		cdrSourceId: cdrcCfg.CdrSourceId, runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator, duMultiplyFactor: cdrcCfg.DataUsageMultiplyFactor, cdrFields: cdrcCfg.CdrFields, httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer}
 	// Before processing, make sure in and out folders exist
 	for _, dir := range []string{cdrc.cdrInDir, cdrc.cdrOutDir} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {

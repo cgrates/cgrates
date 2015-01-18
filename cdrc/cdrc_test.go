@@ -29,7 +29,7 @@ import (
 
 func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cdrcConfig := cgrConfig.CdrcInstances[0]
+	cdrcConfig := cgrConfig.CdrcProfiles[utils.META_DEFAULT]
 	cdrcConfig.CdrFields = append(cdrcConfig.CdrFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.CDRFIELD, CdrFieldId: "supplier", Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
 	cdrc := &Cdrc{CdrFormat: CSV, cdrSourceId: "TEST_CDRC", cdrFields: cdrcConfig.CdrFields}
 	cdrRow := []string{"firstField", "secondField"}

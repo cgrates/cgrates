@@ -46,7 +46,10 @@ func TestFirstNonEmpty(t *testing.T) {
 }
 
 func TestCDRFields(t *testing.T) {
-	cfg, _ = config.NewDefaultCGRConfig()
+	cfg, err = config.NewDefaultCGRConfig()
+	if err != nil {
+		t.Error(err)
+	}
 	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "sip_user_agent"}}
 	fsCdr, err := NewFSCdr(body)
 	if err != nil {
@@ -108,10 +111,9 @@ func TestSearchReplaceInExtraFields(t *testing.T) {
 }
 
 func TestDDazRSRExtraFields(t *testing.T) {
-	eFieldsCfg := []byte(`[cdrs]
-extra_fields =  ~effective_caller_id_number:s/(\d+)/+$1/
-
-`)
+	eFieldsCfg := `{"cdrs": {
+	"extra_fields": ["~effective_caller_id_number:s/(\\d+)/+$1/"],
+},}`
 	simpleJsonCdr := []byte(`{
     "core-uuid": "feef0b51-7fdf-4c4a-878e-aff233752de2",
     "channel_data": {
@@ -144,7 +146,7 @@ extra_fields =  ~effective_caller_id_number:s/(\d+)/+$1/
     }
 }`)
 	var err error
-	cfg, err = config.NewCGRConfigFromBytes(eFieldsCfg)
+	cfg, err = config.NewCGRConfigFromJsonString(eFieldsCfg)
 	if err != nil {
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",

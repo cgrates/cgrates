@@ -163,7 +163,11 @@ func TestDebit2(t *testing.T) {
 	if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 20 {
 		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
 	}
-	if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != -0.01 {
-		t.Error("Account does not have expected monetary balance", acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value)
+	for _, blnc := range acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND] { // Test negative balance for default one
+		if blnc.Weight == 10 && blnc.Value != 0 {
+			t.Errorf("Balance with weight: %d, having value: %f  ", blnc.Weight, blnc.Value)
+		} else if blnc.Weight == 0 && blnc.Value != -0.01 {
+			t.Errorf("Balance with weight: %d, having value: %f  ", blnc.Weight, blnc.Value)
+		}
 	}
 }

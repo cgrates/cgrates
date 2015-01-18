@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2014 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -55,14 +55,14 @@ var httpClient *http.Client
 
 var storDbType = flag.String("stordb_type", utils.MYSQL, "The type of the storDb database <mysql>")
 var startDelay = flag.Int("delay_start", 300, "Number of miliseconds to it for rater to start and cache")
-var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator_test1.cfg")
+var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator_test1")
 
 func TestMediInitRatingDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var err error
-	cgrCfg, err = config.NewCGRConfigFromFile(&cfgPath)
+	cgrCfg, err = config.NewCGRConfigFromFolder(cfgPath)
 	if err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}

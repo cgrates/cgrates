@@ -1,0 +1,33 @@
+{
+
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+"general": {
+	"default_reqtype": "pseudoprepaid",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+},
+
+"cdrc": {
+	"CDRC-CSV1": { 
+		"enabled": true,							// enable CDR client functionality
+		"cdr_in_dir": "/tmp/cgrates/cdrc1/in",		// absolute path towards the directory where the CDRs are stored
+		"cdr_out_dir": "/tmp/cgrates/cdrc1/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_source_id": "csv1",					// free form field, tag identifying the source of the CDRs within CDRS database
+	},
+	"CDRC-CSV2": { 
+		"enabled": true,							// enable CDR client functionality
+		"cdr_in_dir": "/tmp/cgrates/cdrc2/in",		// absolute path towards the directory where the CDRs are stored
+		"cdr_out_dir": "/tmp/cgrates/cdrc2/out",	// absolute path towards the directory where processed CDRs will be moved
+		"cdr_source_id": "csv2",					// free form field, tag identifying the source of the CDRs within CDRS database
+		"cdr_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"cdr_field_id": "tor", "value": "~7:s/^(voice|data|sms)$/*$1/"},
+			{"cdr_field_id": "answer_time", "value": "1"},
+			{"cdr_field_id": "usage", "value": "~9:s/^(\\d+)$/${1}s/"},
+		],
+	},
+},
+
+}

@@ -22,11 +22,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
-	"code.google.com/p/goconf/conf"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -53,185 +53,165 @@ func SetCgrConfig(cfg *CGRConfig) {
 	cgrCfg = cfg
 }
 
-// Holds system configuration, defaults are overwritten with values from config file if found
-type CGRConfig struct {
-	RatingDBType            string
-	RatingDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	RatingDBPort            string // The port to bind to.
-	RatingDBName            string // The name of the database to connect to.
-	RatingDBUser            string // The user to sign in as.
-	RatingDBPass            string // The user's password.
-	AccountDBType           string
-	AccountDBHost           string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort           string             // The port to bind to.
-	AccountDBName           string             // The name of the database to connect to.
-	AccountDBUser           string             // The user to sign in as.
-	AccountDBPass           string             // The user's password.
-	StorDBType              string             // Should reflect the database type used to store logs
-	StorDBHost              string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort              string             // Th e port to bind to.
-	StorDBName              string             // The name of the database to connect to.
-	StorDBUser              string             // The user to sign in as.
-	StorDBPass              string             // The user's password.
-	StorDBMaxOpenConns      int                // Maximum database connections opened
-	StorDBMaxIdleConns      int                // Maximum idle connections to keep opened
-	DBDataEncoding          string             // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen           string             // RPC JSON listening address
-	RPCGOBListen            string             // RPC GOB listening address
-	HTTPListen              string             // HTTP listening address
-	DefaultReqType          string             // Use this request type if not defined on top
-	DefaultCategory         string             // set default type of record
-	DefaultTenant           string             // set default tenant
-	DefaultSubject          string             // set default rating subject, useful in case of fallback
-	RoundingDecimals        int                // Number of decimals to round end prices at
-	HttpSkipTlsVerify       bool               // If enabled Http Client will accept any TLS certificate
-	TpExportPath            string             // Path towards export folder for offline Tariff Plans
-	XmlCfgDocument          *CgrXmlCfgDocument // Load additional configuration inside xml document
-	RaterEnabled            bool               // start standalone server (no balancer)
-	RaterBalancer           string             // balancer address host:port
-	BalancerEnabled         bool
-	SchedulerEnabled        bool
-	CDRSEnabled             bool              // Enable CDR Server service
-	CDRSExtraFields         []*utils.RSRField // Extra fields to store in CDRs
-	CDRSMediator            string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CDRSStats               string            // Address where to reach the Mediator. <""|intenal>
-	CDRSStoreDisable        bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	CDRStatsEnabled         bool              // Enable CDR Stats service
-	CDRStatConfig           *CdrStatsConfig   // Active cdr stats configuration instances
-	CdreDefaultInstance     *CdreConfig       // Will be used in the case no specific one selected by API
-	CdrcInstances           []*CdrcConfig     // Number of CDRC instances running imports
-	SMEnabled               bool
-	SMSwitchType            string
-	SMRater                 string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMCdrS                  string        // Connection towards CDR server
-	SMReconnects            int           // Number of reconnect attempts to rater
-	SMDebitInterval         int           // the period to be debited in advanced during a call (in seconds)
-	SMMaxCallDuration       time.Duration // The maximum duration of a call
-	SMMinCallDuration       time.Duration // Only authorize calls with allowed duration bigger than this
-	MediatorEnabled         bool          // Starts Mediator service: <true|false>.
-	MediatorReconnects      int           // Number of reconnects to rater before giving up.
-	MediatorRater           string
-	MediatorStats           string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorStoreDisable    bool                  // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	DerivedChargers         utils.DerivedChargers // System wide derived chargers, added to the account level ones
-	CombinedDerivedChargers bool                  // Combine accounts specific derived_chargers with server configured
-	FreeswitchServer        string                // freeswitch address host:port
-	FreeswitchPass          string                // FS socket password
-	FreeswitchReconnects    int                   // number of times to attempt reconnect after connect fails
-	FSMinDurLowBalance      time.Duration         // Threshold which will trigger low balance warnings
-	FSLowBalanceAnnFile     string                // File to be played when low balance is reached
-	FSEmptyBalanceContext   string                // If defined, call will be transfered to this context on empty balance
-	FSEmptyBalanceAnnFile   string                // File to be played before disconnecting prepaid calls (applies only if no context defined)
-	FSCdrExtraFields        []*utils.RSRField     // Extra fields to store in CDRs in case of processing them
-	OsipsListenUdp          string                // Address where to listen for event datagrams coming from OpenSIPS
-	OsipsMiAddr             string                // Adress where to reach OpenSIPS mi_datagram module
-	OsipsEvSubscInterval    time.Duration         // Refresh event subscription at this interval
-	OsipsReconnects         int                   // Number of attempts on connect failure.
-	KamailioEvApiAddr       string                // Address of the kamailio evapi server
-	KamailioReconnects      int                   // Number of reconnect attempts on connection lost
-	HistoryAgentEnabled     bool                  // Starts History as an agent: <true|false>.
-	HistoryServer           string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled    bool                  // Starts History as server: <true|false>.
-	HistoryDir              string                // Location on disk where to store history files.
-	HistorySaveInterval     time.Duration         // The timout duration between history writes
-	MailerServer            string                // The server to use when sending emails out
-	MailerAuthUser          string                // Authenticate to email server using this user
-	MailerAuthPass          string                // Authenticate to email server with this password
-	MailerFromAddr          string                // From address used when sending emails out
-	DataFolderPath          string                // Path towards data folder, for tests internal usage, not loading out of .cfg options
+func NewDefaultCGRConfig() (*CGRConfig, error) {
+	cfg := new(CGRConfig)
+	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
+	if err != nil {
+		return nil, err
+	}
+	if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+		return nil, err
+	}
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
-func (self *CGRConfig) setDefaults() error {
-	self.RatingDBType = REDIS
-	self.RatingDBHost = "127.0.0.1"
-	self.RatingDBPort = "6379"
-	self.RatingDBName = "10"
-	self.RatingDBUser = ""
-	self.RatingDBPass = ""
-	self.AccountDBType = REDIS
-	self.AccountDBHost = "127.0.0.1"
-	self.AccountDBPort = "6379"
-	self.AccountDBName = "11"
-	self.AccountDBUser = ""
-	self.AccountDBPass = ""
-	self.StorDBType = utils.MYSQL
-	self.StorDBHost = "localhost"
-	self.StorDBPort = "3306"
-	self.StorDBName = "cgrates"
-	self.StorDBUser = "cgrates"
-	self.StorDBPass = "CGRateS.org"
-	self.StorDBMaxOpenConns = 100
-	self.StorDBMaxIdleConns = 10
-	self.DBDataEncoding = utils.MSGPACK
-	self.RPCJSONListen = "127.0.0.1:2012"
-	self.RPCGOBListen = "127.0.0.1:2013"
-	self.HTTPListen = "127.0.0.1:2080"
-	self.DefaultReqType = utils.RATED
-	self.DefaultCategory = "call"
-	self.DefaultTenant = "cgrates.org"
-	self.DefaultSubject = "cgrates"
-	self.RoundingDecimals = 10
-	self.HttpSkipTlsVerify = false
-	self.TpExportPath = "/var/log/cgrates/tpe"
-	self.XmlCfgDocument = nil
-	self.RaterEnabled = false
-	self.RaterBalancer = ""
-	self.BalancerEnabled = false
-	self.SchedulerEnabled = false
-	self.CDRSEnabled = false
-	self.CDRSExtraFields = []*utils.RSRField{}
-	self.CDRSMediator = ""
-	self.CDRSStats = ""
-	self.CDRSStoreDisable = false
-	self.CDRStatsEnabled = false
-	self.CDRStatConfig = NewCdrStatsConfigWithDefaults()
-	self.CdreDefaultInstance = NewDefaultCdreConfig()
-	self.CdrcInstances = []*CdrcConfig{NewDefaultCdrcConfig()} // This instance is just for the sake of defaults, it will be replaced when the file is loaded with the one resulted from there
-	self.MediatorEnabled = false
-	self.MediatorRater = utils.INTERNAL
-	self.MediatorReconnects = 3
-	self.MediatorStats = ""
-	self.MediatorStoreDisable = false
-	self.DerivedChargers = make(utils.DerivedChargers, 0)
-	self.CombinedDerivedChargers = true
-	self.SMEnabled = false
-	self.SMSwitchType = FS
-	self.SMRater = utils.INTERNAL
-	self.SMCdrS = ""
-	self.SMReconnects = 3
-	self.SMDebitInterval = 10
-	self.SMMaxCallDuration = time.Duration(3) * time.Hour
-	self.SMMinCallDuration = time.Duration(0)
-	self.FreeswitchServer = "127.0.0.1:8021"
-	self.FreeswitchPass = "ClueCon"
-	self.FreeswitchReconnects = 5
-	self.FSMinDurLowBalance = time.Duration(5) * time.Second
-	self.FSLowBalanceAnnFile = ""
-	self.FSEmptyBalanceContext = ""
-	self.FSEmptyBalanceAnnFile = ""
-	self.FSCdrExtraFields = []*utils.RSRField{}
-	self.OsipsListenUdp = "127.0.0.1:2020"
-	self.OsipsMiAddr = "127.0.0.1:8020"
-	self.OsipsEvSubscInterval = time.Duration(60) * time.Second
-	self.OsipsReconnects = 3
-	self.KamailioEvApiAddr = "127.0.0.1:8448"
-	self.KamailioReconnects = 3
-	self.HistoryAgentEnabled = false
-	self.HistoryServerEnabled = false
-	self.HistoryServer = utils.INTERNAL
-	self.HistoryDir = "/var/log/cgrates/history"
-	self.HistorySaveInterval = time.Duration(1) * time.Second
-	self.MailerServer = "localhost:25"
-	self.MailerAuthUser = "cgrates"
-	self.MailerAuthPass = "CGRateS.org"
-	self.MailerFromAddr = "cgr-mailer@localhost.localdomain"
-	self.DataFolderPath = "/usr/share/cgrates/"
-	return nil
+func NewCGRConfigFromJsonString(cfgJsonStr string) (*CGRConfig, error) {
+	cfg := new(CGRConfig)
+	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJsonStr)); err != nil {
+		return nil, err
+	} else if err := cfg.loadFromJsonCfg(jsnCfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+// Reads all .json files out of a folder/subfolders and loads them up in lexical order
+func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
+	if fi, err := os.Stat(cfgDir); err != nil {
+		return nil, err
+	} else if !fi.IsDir() {
+		return nil, fmt.Errorf("Path: %s not a directory.", cfgDir)
+	}
+	cfg, err := NewDefaultCGRConfig()
+	if err != nil {
+		return nil, err
+	}
+	jsonFilesFound := false
+	err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			return nil
+		}
+		cfgFiles, err := filepath.Glob(filepath.Join(path, "*.json"))
+		if err != nil {
+			return err
+		}
+		if cfgFiles == nil { // No need of processing further since there are no config files in the folder
+			return nil
+		}
+		if !jsonFilesFound {
+			jsonFilesFound = true
+		}
+		for _, jsonFilePath := range cfgFiles {
+			if cgrJsonCfg, err := NewCgrJsonCfgFromFile(jsonFilePath); err != nil {
+				return err
+			} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	} else if !jsonFilesFound {
+		return nil, fmt.Errorf("No config file found on path %s", cfgDir)
+	}
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+// Holds system configuration, defaults are overwritten with values from config file if found
+type CGRConfig struct {
+	RatingDBType          string
+	RatingDBHost          string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	RatingDBPort          string // The port to bind to.
+	RatingDBName          string // The name of the database to connect to.
+	RatingDBUser          string // The user to sign in as.
+	RatingDBPass          string // The user's password.
+	AccountDBType         string
+	AccountDBHost         string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort         string // The port to bind to.
+	AccountDBName         string // The name of the database to connect to.
+	AccountDBUser         string // The user to sign in as.
+	AccountDBPass         string // The user's password.
+	StorDBType            string // Should reflect the database type used to store logs
+	StorDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort            string // Th e port to bind to.
+	StorDBName            string // The name of the database to connect to.
+	StorDBUser            string // The user to sign in as.
+	StorDBPass            string // The user's password.
+	StorDBMaxOpenConns    int    // Maximum database connections opened
+	StorDBMaxIdleConns    int    // Maximum idle connections to keep opened
+	DBDataEncoding        string // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen         string // RPC JSON listening address
+	RPCGOBListen          string // RPC GOB listening address
+	HTTPListen            string // HTTP listening address
+	DefaultReqType        string // Use this request type if not defined on top
+	DefaultCategory       string // set default type of record
+	DefaultTenant         string // set default tenant
+	DefaultSubject        string // set default rating subject, useful in case of fallback
+	RoundingDecimals      int    // Number of decimals to round end prices at
+	HttpSkipTlsVerify     bool   // If enabled Http Client will accept any TLS certificate
+	TpExportPath          string // Path towards export folder for offline Tariff Plans
+	RaterEnabled          bool   // start standalone server (no balancer)
+	RaterBalancer         string // balancer address host:port
+	BalancerEnabled       bool
+	SchedulerEnabled      bool
+	CDRSEnabled           bool              // Enable CDR Server service
+	CDRSExtraFields       []*utils.RSRField // Extra fields to store in CDRs
+	CDRSMediator          string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CDRSStats             string            // Address where to reach the Mediator. <""|intenal>
+	CDRSStoreDisable      bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	CDRStatsEnabled       bool              // Enable CDR Stats service
+	CDRStatConfig         *CdrStatsConfig   // Active cdr stats configuration instances, platform level
+	CdreProfiles          map[string]*CdreConfig
+	CdrcProfiles          map[string]*CdrcConfig // Number of CDRC instances running imports
+	SMEnabled             bool
+	SMSwitchType          string
+	SMRater               string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMCdrS                string        // Connection towards CDR server
+	SMReconnects          int           // Number of reconnect attempts to rater
+	SMDebitInterval       int           // the period to be debited in advanced during a call (in seconds)
+	SMMaxCallDuration     time.Duration // The maximum duration of a call
+	SMMinCallDuration     time.Duration // Only authorize calls with allowed duration bigger than this
+	MediatorEnabled       bool          // Starts Mediator service: <true|false>.
+	MediatorReconnects    int           // Number of reconnects to rater before giving up.
+	MediatorRater         string
+	MediatorStats         string            // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	MediatorStoreDisable  bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	FreeswitchServer      string            // freeswitch address host:port
+	FreeswitchPass        string            // FS socket password
+	FreeswitchReconnects  int               // number of times to attempt reconnect after connect fails
+	FSMinDurLowBalance    time.Duration     // Threshold which will trigger low balance warnings
+	FSLowBalanceAnnFile   string            // File to be played when low balance is reached
+	FSEmptyBalanceContext string            // If defined, call will be transfered to this context on empty balance
+	FSEmptyBalanceAnnFile string            // File to be played before disconnecting prepaid calls (applies only if no context defined)
+	FSCdrExtraFields      []*utils.RSRField // Extra fields to store in CDRs in case of processing them
+	OsipsListenUdp        string            // Address where to listen for event datagrams coming from OpenSIPS
+	OsipsMiAddr           string            // Adress where to reach OpenSIPS mi_datagram module
+	OsipsEvSubscInterval  time.Duration     // Refresh event subscription at this interval
+	OsipsReconnects       int               // Number of attempts on connect failure.
+	KamailioEvApiAddr     string            // Address of the kamailio evapi server
+	KamailioReconnects    int               // Number of reconnect attempts on connection lost
+	HistoryAgentEnabled   bool              // Starts History as an agent: <true|false>.
+	HistoryServer         string            // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled  bool              // Starts History as server: <true|false>.
+	HistoryDir            string            // Location on disk where to store history files.
+	HistorySaveInterval   time.Duration     // The timout duration between history writes
+	MailerServer          string            // The server to use when sending emails out
+	MailerAuthUser        string            // Authenticate to email server using this user
+	MailerAuthPass        string            // Authenticate to email server with this password
+	MailerFromAddr        string            // From address used when sending emails out
+	DataFolderPath        string            // Path towards data folder, for tests internal usage, not loading out of .json options
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
 	// CDRC sanity checks
-	for _, cdrcInst := range self.CdrcInstances {
+	for _, cdrcInst := range self.CdrcProfiles {
 		if cdrcInst.Enabled == true {
 			if len(cdrcInst.CdrFields) == 0 {
 				return errors.New("CdrC enabled but no fields to be processed defined!")
@@ -259,382 +239,406 @@ func (self *CGRConfig) checkConfigSanity() error {
 	return nil
 }
 
-func NewDefaultCGRConfig() (*CGRConfig, error) {
-	cfg := &CGRConfig{}
-	cfg.setDefaults()
-	if err := cfg.checkConfigSanity(); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-// Unifies the config handling for both tests and real path
-func NewCGRConfig(c *conf.ConfigFile) (*CGRConfig, error) {
-	cfg, err := loadConfig(c)
+// Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
+func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
+	// Load sections out of JSON config, stop on error
+	jsnGeneralCfg, err := jsnCfg.GeneralJsonCfg()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if err := cfg.checkConfigSanity(); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-// Instantiate a new CGRConfig setting defaults or reading from file
-func NewCGRConfigFromFile(cfgPath *string) (*CGRConfig, error) {
-	c, err := conf.ReadConfigFile(*cfgPath)
+	jsnListenCfg, err := jsnCfg.ListenJsonCfg()
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
+		return err
 	}
-	return NewCGRConfig(c)
-}
-
-func NewCGRConfigFromBytes(data []byte) (*CGRConfig, error) {
-	c, err := conf.ReadConfigBytes(data)
+	jsnRatingDbCfg, err := jsnCfg.DbJsonCfg(RATINGDB_JSN)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
+		return err
 	}
-	return NewCGRConfig(c)
-}
-
-func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
-	cfg := &CGRConfig{}
-	cfg.setDefaults()
-	var hasOpt bool
-	var err error
-	if hasOpt = c.HasOption("global", "ratingdb_type"); hasOpt {
-		cfg.RatingDBType, _ = c.GetString("global", "ratingdb_type")
+	jsnAccountingDbCfg, err := jsnCfg.DbJsonCfg(ACCOUNTINGDB_JSN)
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "ratingdb_host"); hasOpt {
-		cfg.RatingDBHost, _ = c.GetString("global", "ratingdb_host")
+	jsnStorDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN)
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "ratingdb_port"); hasOpt {
-		cfg.RatingDBPort, _ = c.GetString("global", "ratingdb_port")
+	jsnBalancerCfg, err := jsnCfg.BalancerJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "ratingdb_name"); hasOpt {
-		cfg.RatingDBName, _ = c.GetString("global", "ratingdb_name")
+	jsnRaterCfg, err := jsnCfg.RaterJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "ratingdb_user"); hasOpt {
-		cfg.RatingDBUser, _ = c.GetString("global", "ratingdb_user")
+	jsnSchedCfg, err := jsnCfg.SchedulerJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "ratingdb_passwd"); hasOpt {
-		cfg.RatingDBPass, _ = c.GetString("global", "ratingdb_passwd")
+	jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "accountdb_type"); hasOpt {
-		cfg.AccountDBType, _ = c.GetString("global", "accountdb_type")
+	jsnMediatorCfg, err := jsnCfg.MediatorJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "accountdb_host"); hasOpt {
-		cfg.AccountDBHost, _ = c.GetString("global", "accountdb_host")
+	jsnCdrstatsCfg, err := jsnCfg.CdrStatsJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "accountdb_port"); hasOpt {
-		cfg.AccountDBPort, _ = c.GetString("global", "accountdb_port")
+	jsnCdreCfg, err := jsnCfg.CdreJsonCfgs()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "accountdb_name"); hasOpt {
-		cfg.AccountDBName, _ = c.GetString("global", "accountdb_name")
+	jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "accountdb_user"); hasOpt {
-		cfg.AccountDBUser, _ = c.GetString("global", "accountdb_user")
+	jsnSMCfg, err := jsnCfg.SessionManagerJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "accountdb_passwd"); hasOpt {
-		cfg.AccountDBPass, _ = c.GetString("global", "accountdb_passwd")
+	jsnFSCfg, err := jsnCfg.FSJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "stordb_type"); hasOpt {
-		cfg.StorDBType, _ = c.GetString("global", "stordb_type")
+	jsnKamCfg, err := jsnCfg.KamailioJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "stordb_host"); hasOpt {
-		cfg.StorDBHost, _ = c.GetString("global", "stordb_host")
+	jsnOsipsCfg, err := jsnCfg.OsipsJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "stordb_port"); hasOpt {
-		cfg.StorDBPort, _ = c.GetString("global", "stordb_port")
+	jsnHistServCfg, err := jsnCfg.HistServJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "stordb_name"); hasOpt {
-		cfg.StorDBName, _ = c.GetString("global", "stordb_name")
+	jsnHistAgentCfg, err := jsnCfg.HistAgentJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "stordb_user"); hasOpt {
-		cfg.StorDBUser, _ = c.GetString("global", "stordb_user")
+	jsnMailerCfg, err := jsnCfg.MailerJsonCfg()
+	if err != nil {
+		return err
 	}
-	if hasOpt = c.HasOption("global", "stordb_passwd"); hasOpt {
-		cfg.StorDBPass, _ = c.GetString("global", "stordb_passwd")
-	}
-	if hasOpt = c.HasOption("global", "stordb_max_open_conns"); hasOpt {
-		cfg.StorDBMaxOpenConns, _ = c.GetInt("global", "stordb_max_open_conns")
-	}
-	if hasOpt = c.HasOption("global", "stordb_max_idle_conns"); hasOpt {
-		cfg.StorDBMaxIdleConns, _ = c.GetInt("global", "stordb_max_idle_conns")
-	}
-	if hasOpt = c.HasOption("global", "dbdata_encoding"); hasOpt {
-		cfg.DBDataEncoding, _ = c.GetString("global", "dbdata_encoding")
-	}
-	if hasOpt = c.HasOption("global", "rpc_json_listen"); hasOpt {
-		cfg.RPCJSONListen, _ = c.GetString("global", "rpc_json_listen")
-	}
-	if hasOpt = c.HasOption("global", "rpc_gob_listen"); hasOpt {
-		cfg.RPCGOBListen, _ = c.GetString("global", "rpc_gob_listen")
-	}
-	if hasOpt = c.HasOption("global", "http_listen"); hasOpt {
-		cfg.HTTPListen, _ = c.GetString("global", "http_listen")
-	}
-	if hasOpt = c.HasOption("global", "default_reqtype"); hasOpt {
-		cfg.DefaultReqType, _ = c.GetString("global", "default_reqtype")
-	}
-	if hasOpt = c.HasOption("global", "default_category"); hasOpt {
-		cfg.DefaultCategory, _ = c.GetString("global", "default_category")
-	}
-	if hasOpt = c.HasOption("global", "default_tenant"); hasOpt {
-		cfg.DefaultTenant, _ = c.GetString("global", "default_tenant")
-	}
-	if hasOpt = c.HasOption("global", "default_subject"); hasOpt {
-		cfg.DefaultSubject, _ = c.GetString("global", "default_subject")
-	}
-	if hasOpt = c.HasOption("global", "rounding_decimals"); hasOpt {
-		cfg.RoundingDecimals, _ = c.GetInt("global", "rounding_decimals")
-	}
-	if hasOpt = c.HasOption("global", "http_skip_tls_veify"); hasOpt {
-		cfg.HttpSkipTlsVerify, _ = c.GetBool("global", "http_skip_tls_veify")
-	}
-	if hasOpt = c.HasOption("global", "tpexport_dir"); hasOpt {
-		cfg.TpExportPath, _ = c.GetString("global", "tpexport_dir")
-	}
-	// XML config path defined, try loading the document
-	if hasOpt = c.HasOption("global", "xmlcfg_path"); hasOpt {
-		xmlCfgPath, _ := c.GetString("global", "xmlcfg_path")
-		xmlFile, err := os.Open(xmlCfgPath)
-		if err != nil {
-			return nil, err
+	// All good, start populating config variables
+	if jsnRatingDbCfg != nil {
+		if jsnRatingDbCfg.Db_type != nil {
+			self.RatingDBType = *jsnRatingDbCfg.Db_type
 		}
-		if cgrXmlCfgDoc, err := ParseCgrXmlConfig(xmlFile); err != nil {
-			return nil, err
-		} else {
-			cfg.XmlCfgDocument = cgrXmlCfgDoc
+		if jsnRatingDbCfg.Db_host != nil {
+			self.RatingDBHost = *jsnRatingDbCfg.Db_host
+		}
+		if jsnRatingDbCfg.Db_port != nil {
+			self.RatingDBPort = strconv.Itoa(*jsnRatingDbCfg.Db_port)
+		}
+		if jsnRatingDbCfg.Db_name != nil {
+			self.RatingDBName = *jsnRatingDbCfg.Db_name
+		}
+		if jsnRatingDbCfg.Db_user != nil {
+			self.RatingDBUser = *jsnRatingDbCfg.Db_user
+		}
+		if jsnRatingDbCfg.Db_passwd != nil {
+			self.RatingDBPass = *jsnRatingDbCfg.Db_passwd
 		}
 	}
-	if hasOpt = c.HasOption("rater", "enabled"); hasOpt {
-		cfg.RaterEnabled, _ = c.GetBool("rater", "enabled")
-	}
-	if hasOpt = c.HasOption("rater", "balancer"); hasOpt {
-		cfg.RaterBalancer, _ = c.GetString("rater", "balancer")
-	}
-	if hasOpt = c.HasOption("balancer", "enabled"); hasOpt {
-		cfg.BalancerEnabled, _ = c.GetBool("balancer", "enabled")
-	}
-	if hasOpt = c.HasOption("scheduler", "enabled"); hasOpt {
-		cfg.SchedulerEnabled, _ = c.GetBool("scheduler", "enabled")
-	}
-	if hasOpt = c.HasOption("cdrs", "enabled"); hasOpt {
-		cfg.CDRSEnabled, _ = c.GetBool("cdrs", "enabled")
-	}
-	if hasOpt = c.HasOption("cdrs", "extra_fields"); hasOpt {
-		extraFieldsStr, _ := c.GetString("cdrs", "extra_fields")
-		if extraFields, err := utils.ParseRSRFields(extraFieldsStr, utils.FIELDS_SEP); err != nil {
-			return nil, err
-		} else {
-			cfg.CDRSExtraFields = extraFields
+	if jsnAccountingDbCfg != nil {
+		if jsnAccountingDbCfg.Db_type != nil {
+			self.AccountDBType = *jsnAccountingDbCfg.Db_type
+		}
+		if jsnAccountingDbCfg.Db_host != nil {
+			self.AccountDBHost = *jsnAccountingDbCfg.Db_host
+		}
+		if jsnAccountingDbCfg.Db_port != nil {
+			self.AccountDBPort = strconv.Itoa(*jsnAccountingDbCfg.Db_port)
+		}
+		if jsnAccountingDbCfg.Db_name != nil {
+			self.AccountDBName = *jsnAccountingDbCfg.Db_name
+		}
+		if jsnAccountingDbCfg.Db_user != nil {
+			self.AccountDBUser = *jsnAccountingDbCfg.Db_user
+		}
+		if jsnAccountingDbCfg.Db_passwd != nil {
+			self.AccountDBPass = *jsnAccountingDbCfg.Db_passwd
 		}
 	}
-	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
-		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
+	if jsnStorDbCfg != nil {
+		if jsnStorDbCfg.Db_type != nil {
+			self.StorDBType = *jsnStorDbCfg.Db_type
+		}
+		if jsnStorDbCfg.Db_host != nil {
+			self.StorDBHost = *jsnStorDbCfg.Db_host
+		}
+		if jsnStorDbCfg.Db_port != nil {
+			self.StorDBPort = strconv.Itoa(*jsnStorDbCfg.Db_port)
+		}
+		if jsnStorDbCfg.Db_name != nil {
+			self.StorDBName = *jsnStorDbCfg.Db_name
+		}
+		if jsnStorDbCfg.Db_user != nil {
+			self.StorDBUser = *jsnStorDbCfg.Db_user
+		}
+		if jsnStorDbCfg.Db_passwd != nil {
+			self.StorDBPass = *jsnStorDbCfg.Db_passwd
+		}
+		if jsnStorDbCfg.Max_open_conns != nil {
+			self.StorDBMaxOpenConns = *jsnStorDbCfg.Max_open_conns
+		}
+		if jsnStorDbCfg.Max_idle_conns != nil {
+			self.StorDBMaxIdleConns = *jsnStorDbCfg.Max_idle_conns
+		}
 	}
-	if hasOpt = c.HasOption("cdrs", "cdrstats"); hasOpt {
-		cfg.CDRSStats, _ = c.GetString("cdrs", "cdrstats")
+	if jsnGeneralCfg != nil {
+		if jsnGeneralCfg.Dbdata_encoding != nil {
+			self.DBDataEncoding = *jsnGeneralCfg.Dbdata_encoding
+		}
+		if jsnGeneralCfg.Default_reqtype != nil {
+			self.DefaultReqType = *jsnGeneralCfg.Default_reqtype
+		}
+		if jsnGeneralCfg.Default_category != nil {
+			self.DefaultCategory = *jsnGeneralCfg.Default_category
+		}
+		if jsnGeneralCfg.Default_tenant != nil {
+			self.DefaultTenant = *jsnGeneralCfg.Default_tenant
+		}
+		if jsnGeneralCfg.Default_subject != nil {
+			self.DefaultSubject = *jsnGeneralCfg.Default_subject
+		}
+		if jsnGeneralCfg.Rounding_decimals != nil {
+			self.RoundingDecimals = *jsnGeneralCfg.Rounding_decimals
+		}
+		if jsnGeneralCfg.Http_skip_tls_veify != nil {
+			self.HttpSkipTlsVerify = *jsnGeneralCfg.Http_skip_tls_veify
+		}
+		if jsnGeneralCfg.Tpexport_dir != nil {
+			self.TpExportPath = *jsnGeneralCfg.Tpexport_dir
+		}
 	}
-	if hasOpt = c.HasOption("cdrs", "store_disable"); hasOpt {
-		cfg.CDRSStoreDisable, _ = c.GetBool("cdrs", "store_disable")
+	if jsnListenCfg != nil {
+		if jsnListenCfg.Rpc_json != nil {
+			self.RPCJSONListen = *jsnListenCfg.Rpc_json
+		}
+		if jsnListenCfg.Rpc_gob != nil {
+			self.RPCGOBListen = *jsnListenCfg.Rpc_gob
+		}
+		if jsnListenCfg.Http != nil {
+			self.HTTPListen = *jsnListenCfg.Http
+		}
 	}
-	if hasOpt = c.HasOption("cdrstats", "enabled"); hasOpt {
-		cfg.CDRStatsEnabled, _ = c.GetBool("cdrstats", "enabled")
+	if jsnRaterCfg != nil {
+		if jsnRaterCfg.Enabled != nil {
+			self.RaterEnabled = *jsnRaterCfg.Enabled
+		}
+		if jsnRaterCfg.Balancer != nil {
+			self.RaterBalancer = *jsnRaterCfg.Balancer
+		}
 	}
-	if cfg.CDRStatConfig, err = ParseCfgDefaultCDRStatsConfig(c); err != nil {
-		return nil, err
+	if jsnBalancerCfg != nil && jsnBalancerCfg.Enabled != nil {
+		self.BalancerEnabled = *jsnBalancerCfg.Enabled
 	}
-	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
-		cfg.CdreDefaultInstance.CdrFormat, _ = c.GetString("cdre", "cdr_format")
+	if jsnSchedCfg != nil && jsnSchedCfg.Enabled != nil {
+		self.SchedulerEnabled = *jsnSchedCfg.Enabled
 	}
-	if hasOpt = c.HasOption("cdre", "mask_destination_id"); hasOpt {
-		cfg.CdreDefaultInstance.MaskDestId, _ = c.GetString("cdre", "mask_destination_id")
+	if jsnCdrsCfg != nil {
+		if jsnCdrsCfg.Enabled != nil {
+			self.CDRSEnabled = *jsnCdrsCfg.Enabled
+		}
+		if jsnCdrsCfg.Extra_fields != nil {
+			if self.CDRSExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCdrsCfg.Extra_fields); err != nil {
+				return err
+			}
+		}
+		if jsnCdrsCfg.Mediator != nil {
+			self.CDRSMediator = *jsnCdrsCfg.Mediator
+		}
+		if jsnCdrsCfg.Cdrstats != nil {
+			self.CDRSStats = *jsnCdrsCfg.Cdrstats
+		}
+		if jsnCdrsCfg.Store_disable != nil {
+			self.CDRSStoreDisable = *jsnCdrsCfg.Store_disable
+		}
 	}
-	if hasOpt = c.HasOption("cdre", "mask_length"); hasOpt {
-		cfg.CdreDefaultInstance.MaskLength, _ = c.GetInt("cdre", "mask_length")
+	if jsnCdrstatsCfg != nil {
+		if jsnCdrstatsCfg.Enabled != nil {
+			self.CDRStatsEnabled = *jsnCdrstatsCfg.Enabled
+		}
+		if jsnCdrstatsCfg != nil { // Have CDRStats config, load it in default object
+			if self.CDRStatConfig == nil {
+				self.CDRStatConfig = &CdrStatsConfig{Id: utils.META_DEFAULT}
+			}
+			if err = self.CDRStatConfig.loadFromJsonCfg(jsnCdrstatsCfg); err != nil {
+				return err
+			}
+		}
 	}
-	if hasOpt = c.HasOption("cdre", "data_usage_multiply_factor"); hasOpt {
-		cfg.CdreDefaultInstance.DataUsageMultiplyFactor, _ = c.GetFloat64("cdre", "data_usage_multiply_factor")
-	}
-	if hasOpt = c.HasOption("cdre", "cost_multiply_factor"); hasOpt {
-		cfg.CdreDefaultInstance.CostMultiplyFactor, _ = c.GetFloat64("cdre", "cost_multiply_factor")
-	}
-	if hasOpt = c.HasOption("cdre", "cost_rounding_decimals"); hasOpt {
-		cfg.CdreDefaultInstance.CostRoundingDecimals, _ = c.GetInt("cdre", "cost_rounding_decimals")
-	}
-	if hasOpt = c.HasOption("cdre", "cost_shift_digits"); hasOpt {
-		cfg.CdreDefaultInstance.CostShiftDigits, _ = c.GetInt("cdre", "cost_shift_digits")
-	}
-	if hasOpt = c.HasOption("cdre", "export_template"); hasOpt { // Load configs for csv normally from template, fixed_width from xml file
-		exportTemplate, _ := c.GetString("cdre", "export_template")
-		if strings.HasPrefix(exportTemplate, utils.XML_PROFILE_PREFIX) {
-			if xmlTemplates := cfg.XmlCfgDocument.GetCdreCfgs(exportTemplate[len(utils.XML_PROFILE_PREFIX):]); xmlTemplates != nil {
-				if cfg.CdreDefaultInstance, err = NewCdreConfigFromXmlCdreCfg(xmlTemplates[exportTemplate[len(utils.XML_PROFILE_PREFIX):]]); err != nil {
-					return nil, err
+	if jsnCdreCfg != nil {
+		if self.CdreProfiles == nil {
+			self.CdreProfiles = make(map[string]*CdreConfig)
+		}
+		for profileName, jsnCdre1Cfg := range jsnCdreCfg {
+			if _, hasProfile := self.CdreProfiles[profileName]; !hasProfile { // New profile, create before loading from json
+				self.CdreProfiles[profileName] = new(CdreConfig)
+				if profileName != utils.META_DEFAULT {
+					self.CdreProfiles[profileName] = self.CdreProfiles[utils.META_DEFAULT] // Load defaults into newly initialized config
 				}
 			}
-		} else { // Not loading out of template
-			if flds, err := NewCfgCdrFieldsFromIds(cfg.CdreDefaultInstance.CdrFormat == utils.CDRE_FIXED_WIDTH,
-				strings.Split(exportTemplate, string(utils.CSV_SEP))...); err != nil {
-				return nil, err
-			} else {
-				cfg.CdreDefaultInstance.ContentFields = flds
+			if err = self.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg); err != nil { // Update the existing profile with content from json config
+				return err
 			}
 		}
 	}
-	if hasOpt = c.HasOption("cdre", "export_dir"); hasOpt {
-		cfg.CdreDefaultInstance.ExportDir, _ = c.GetString("cdre", "export_dir")
-	}
-	// CDRC Default instance parsing
-	if cdrcFileCfgInst, err := NewCdrcConfigFromFileParams(c); err != nil {
-		return nil, err
-	} else {
-		cfg.CdrcInstances = []*CdrcConfig{cdrcFileCfgInst}
-	}
-	if cfg.XmlCfgDocument != nil { // Add the possible configured instances inside xml doc
-		for id, xmlCdrcCfg := range cfg.XmlCfgDocument.GetCdrcCfgs("") {
-			if cdrcInst, err := NewCdrcConfigFromCgrXmlCdrcCfg(id, xmlCdrcCfg); err != nil {
-				return nil, err
-			} else {
-				cfg.CdrcInstances = append(cfg.CdrcInstances, cdrcInst)
+	if jsnCdrcCfg != nil {
+		if self.CdrcProfiles == nil {
+			self.CdrcProfiles = make(map[string]*CdrcConfig)
+		}
+		for profileName, jsnCrc1Cfg := range jsnCdrcCfg {
+			if _, hasProfile := self.CdrcProfiles[profileName]; !hasProfile {
+				self.CdrcProfiles[profileName] = new(CdrcConfig)
+				if profileName != utils.META_DEFAULT {
+					self.CdrcProfiles[profileName] = self.CdrcProfiles[utils.META_DEFAULT] // Load defaults into newly initialized config
+				}
+			}
+			if err = self.CdrcProfiles[profileName].loadFromJsonCfg(jsnCrc1Cfg); err != nil {
+				return err
 			}
 		}
 	}
-	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
-		cfg.MediatorEnabled, _ = c.GetBool("mediator", "enabled")
-	}
-	if hasOpt = c.HasOption("mediator", "rater"); hasOpt {
-		cfg.MediatorRater, _ = c.GetString("mediator", "rater")
-	}
-	if hasOpt = c.HasOption("mediator", "reconnects"); hasOpt {
-		cfg.MediatorReconnects, _ = c.GetInt("mediator", "reconnects")
-	}
-	if hasOpt = c.HasOption("mediator", "cdrstats"); hasOpt {
-		cfg.MediatorStats, _ = c.GetString("mediator", "cdrstats")
-	}
-	if hasOpt = c.HasOption("mediator", "store_disable"); hasOpt {
-		cfg.MediatorStoreDisable, _ = c.GetBool("mediator", "store_disable")
-	}
-	if hasOpt = c.HasOption("session_manager", "enabled"); hasOpt {
-		cfg.SMEnabled, _ = c.GetBool("session_manager", "enabled")
-	}
-	if hasOpt = c.HasOption("session_manager", "switch_type"); hasOpt {
-		cfg.SMSwitchType, _ = c.GetString("session_manager", "switch_type")
-	}
-	if hasOpt = c.HasOption("session_manager", "rater"); hasOpt {
-		cfg.SMRater, _ = c.GetString("session_manager", "rater")
-	}
-	if hasOpt = c.HasOption("session_manager", "cdrs"); hasOpt {
-		cfg.SMCdrS, _ = c.GetString("session_manager", "cdrs")
-	}
-	if hasOpt = c.HasOption("session_manager", "reconnects"); hasOpt {
-		cfg.SMReconnects, _ = c.GetInt("session_manager", "reconnects")
-	}
-	if hasOpt = c.HasOption("session_manager", "debit_interval"); hasOpt {
-		cfg.SMDebitInterval, _ = c.GetInt("session_manager", "debit_interval")
-	}
-	if hasOpt = c.HasOption("session_manager", "min_call_duration"); hasOpt {
-		minCallDurStr, _ := c.GetString("session_manager", "min_call_duration")
-		if cfg.SMMinCallDuration, err = utils.ParseDurationWithSecs(minCallDurStr); err != nil {
-			return nil, err
+	if jsnSMCfg != nil {
+		if jsnSMCfg.Enabled != nil {
+			self.SMEnabled = *jsnSMCfg.Enabled
+		}
+		if jsnSMCfg.Switch_type != nil {
+			self.SMSwitchType = *jsnSMCfg.Switch_type
+		}
+		if jsnSMCfg.Rater != nil {
+			self.SMRater = *jsnSMCfg.Rater
+		}
+		if jsnSMCfg.Cdrs != nil {
+			self.SMCdrS = *jsnSMCfg.Cdrs
+		}
+		if jsnSMCfg.Reconnects != nil {
+			self.SMReconnects = *jsnSMCfg.Reconnects
+		}
+		if jsnSMCfg.Debit_interval != nil {
+			self.SMDebitInterval = *jsnSMCfg.Debit_interval
+		}
+		if jsnSMCfg.Max_call_duration != nil {
+			if self.SMMaxCallDuration, err = utils.ParseDurationWithSecs(*jsnSMCfg.Max_call_duration); err != nil {
+				return err
+			}
+		}
+		if jsnSMCfg.Min_call_duration != nil {
+			if self.SMMinCallDuration, err = utils.ParseDurationWithSecs(*jsnSMCfg.Min_call_duration); err != nil {
+				return err
+			}
 		}
 	}
-	if hasOpt = c.HasOption("session_manager", "max_call_duration"); hasOpt {
-		maxCallDurStr, _ := c.GetString("session_manager", "max_call_duration")
-		if cfg.SMMaxCallDuration, err = utils.ParseDurationWithSecs(maxCallDurStr); err != nil {
-			return nil, err
+	if jsnMediatorCfg != nil {
+		if jsnMediatorCfg.Enabled != nil {
+			self.MediatorEnabled = *jsnMediatorCfg.Enabled
+		}
+		if jsnMediatorCfg.Reconnects != nil {
+			self.MediatorReconnects = *jsnMediatorCfg.Reconnects
+		}
+		if jsnMediatorCfg.Rater != nil {
+			self.MediatorRater = *jsnMediatorCfg.Rater
+		}
+		if jsnMediatorCfg.Cdrstats != nil {
+			self.MediatorStats = *jsnMediatorCfg.Cdrstats
+		}
+		if jsnMediatorCfg.Store_disable != nil {
+			self.MediatorStoreDisable = *jsnMediatorCfg.Store_disable
 		}
 	}
-	if hasOpt = c.HasOption("freeswitch", "server"); hasOpt {
-		cfg.FreeswitchServer, _ = c.GetString("freeswitch", "server")
-	}
-	if hasOpt = c.HasOption("freeswitch", "passwd"); hasOpt {
-		cfg.FreeswitchPass, _ = c.GetString("freeswitch", "passwd")
-	}
-	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
-		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
-	}
-	if hasOpt = c.HasOption("freeswitch", "min_dur_low_balance"); hasOpt {
-		minDurStr, _ := c.GetString("freeswitch", "min_dur_low_balance")
-		if cfg.FSMinDurLowBalance, err = utils.ParseDurationWithSecs(minDurStr); err != nil {
-			return nil, err
+	if jsnFSCfg != nil {
+		if jsnFSCfg.Server != nil {
+			self.FreeswitchServer = *jsnFSCfg.Server
+		}
+		if jsnFSCfg.Password != nil {
+			self.FreeswitchPass = *jsnFSCfg.Password
+		}
+		if jsnFSCfg.Reconnects != nil {
+			self.FreeswitchReconnects = *jsnFSCfg.Reconnects
+		}
+		if jsnFSCfg.Min_dur_low_balance != nil {
+			if self.FSMinDurLowBalance, err = utils.ParseDurationWithSecs(*jsnFSCfg.Min_dur_low_balance); err != nil {
+				return err
+			}
+		}
+		if jsnFSCfg.Low_balance_ann_file != nil {
+			self.FSLowBalanceAnnFile = *jsnFSCfg.Low_balance_ann_file
+		}
+		if jsnFSCfg.Empty_balance_context != nil {
+			self.FSEmptyBalanceContext = *jsnFSCfg.Empty_balance_context
+		}
+		if jsnFSCfg.Empty_balance_ann_file != nil {
+			self.FSEmptyBalanceAnnFile = *jsnFSCfg.Empty_balance_ann_file
+		}
+		if jsnFSCfg.Cdr_extra_fields != nil {
+			if self.FSCdrExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnFSCfg.Cdr_extra_fields); err != nil {
+				return err
+			}
 		}
 	}
-	if hasOpt = c.HasOption("freeswitch", "low_balance_ann_file"); hasOpt {
-		cfg.FSLowBalanceAnnFile, _ = c.GetString("freeswitch", "low_balance_ann_file")
-	}
-	if hasOpt = c.HasOption("freeswitch", "empty_balance_context"); hasOpt {
-		cfg.FSEmptyBalanceContext, _ = c.GetString("freeswitch", "empty_balance_context")
-	}
-	if hasOpt = c.HasOption("freeswitch", "empty_balance_ann_file"); hasOpt {
-		cfg.FSEmptyBalanceAnnFile, _ = c.GetString("freeswitch", "empty_balance_ann_file")
-	}
-	if hasOpt = c.HasOption("freeswitch", "cdr_extra_fields"); hasOpt {
-		extraFieldsStr, _ := c.GetString("freeswitch", "cdr_extra_fields")
-		if extraFields, err := utils.ParseRSRFields(extraFieldsStr, utils.FIELDS_SEP); err != nil {
-			return nil, err
-		} else {
-			cfg.FSCdrExtraFields = extraFields
+	if jsnOsipsCfg != nil {
+		if jsnOsipsCfg.Listen_udp != nil {
+			self.OsipsListenUdp = *jsnOsipsCfg.Listen_udp
+		}
+		if jsnOsipsCfg.Mi_addr != nil {
+			self.OsipsMiAddr = *jsnOsipsCfg.Mi_addr
+		}
+		if jsnOsipsCfg.Events_subscribe_interval != nil {
+			if self.OsipsEvSubscInterval, err = utils.ParseDurationWithSecs(*jsnOsipsCfg.Events_subscribe_interval); err != nil {
+				return err
+			}
+		}
+		if jsnOsipsCfg.Reconnects != nil {
+			self.OsipsReconnects = *jsnOsipsCfg.Reconnects
 		}
 	}
-	if hasOpt = c.HasOption("opensips", "listen_udp"); hasOpt {
-		cfg.OsipsListenUdp, _ = c.GetString("opensips", "listen_udp")
-	}
-	if hasOpt = c.HasOption("opensips", "mi_addr"); hasOpt {
-		cfg.OsipsMiAddr, _ = c.GetString("opensips", "mi_addr")
-	}
-	if hasOpt = c.HasOption("opensips", "events_subscribe_interval"); hasOpt {
-		evSubscIntervalStr, _ := c.GetString("opensips", "events_subscribe_interval")
-		if cfg.OsipsEvSubscInterval, err = utils.ParseDurationWithSecs(evSubscIntervalStr); err != nil {
-			return nil, err
+	if jsnKamCfg != nil {
+		if jsnKamCfg.Evapi_addr != nil {
+			self.KamailioEvApiAddr = *jsnKamCfg.Evapi_addr
+		}
+		if jsnKamCfg.Reconnects != nil {
+			self.KamailioReconnects = *jsnKamCfg.Reconnects
 		}
 	}
-	if hasOpt = c.HasOption("opensips", "reconnects"); hasOpt {
-		cfg.OsipsReconnects, _ = c.GetInt("opensips", "reconnects")
-	}
-	if hasOpt = c.HasOption("kamailio", "evapi_addr"); hasOpt {
-		cfg.KamailioEvApiAddr, _ = c.GetString("kamailio", "evapi_addr")
-	}
-	if hasOpt = c.HasOption("kamailio", "reconnects"); hasOpt {
-		cfg.KamailioReconnects, _ = c.GetInt("kamailio", "reconnects")
-	}
-	if cfg.DerivedChargers, err = ParseCfgDerivedCharging(c); err != nil {
-		return nil, err
-	}
-	if hasOpt = c.HasOption("derived_charging", "combined_chargers"); hasOpt {
-		cfg.CombinedDerivedChargers, _ = c.GetBool("derived_charging", "combined_chargers")
-	}
-	if hasOpt = c.HasOption("history_agent", "enabled"); hasOpt {
-		cfg.HistoryAgentEnabled, _ = c.GetBool("history_agent", "enabled")
-	}
-	if hasOpt = c.HasOption("history_agent", "server"); hasOpt {
-		cfg.HistoryServer, _ = c.GetString("history_agent", "server")
-	}
-	if hasOpt = c.HasOption("history_server", "enabled"); hasOpt {
-		cfg.HistoryServerEnabled, _ = c.GetBool("history_server", "enabled")
-	}
-	if hasOpt = c.HasOption("history_server", "history_dir"); hasOpt {
-		cfg.HistoryDir, _ = c.GetString("history_server", "history_dir")
-	}
-	if hasOpt = c.HasOption("history_server", "save_interval"); hasOpt {
-		saveIntvlStr, _ := c.GetString("history_server", "save_interval")
-		if cfg.HistorySaveInterval, err = utils.ParseDurationWithSecs(saveIntvlStr); err != nil {
-			return nil, err
+	if jsnHistAgentCfg != nil {
+		if jsnHistAgentCfg.Enabled != nil {
+			self.HistoryAgentEnabled = *jsnHistAgentCfg.Enabled
+		}
+		if jsnHistAgentCfg.Server != nil {
+			self.HistoryServer = *jsnHistAgentCfg.Server
 		}
 	}
-	if hasOpt = c.HasOption("mailer", "server"); hasOpt {
-		cfg.MailerServer, _ = c.GetString("mailer", "server")
+	if jsnHistServCfg != nil {
+		if jsnHistServCfg.Enabled != nil {
+			self.HistoryServerEnabled = *jsnHistServCfg.Enabled
+		}
+		if jsnHistServCfg.History_dir != nil {
+			self.HistoryDir = *jsnHistServCfg.History_dir
+		}
+		if jsnHistServCfg.Save_interval != nil {
+			if self.HistorySaveInterval, err = utils.ParseDurationWithSecs(*jsnHistServCfg.Save_interval); err != nil {
+				return err
+			}
+		}
 	}
-	if hasOpt = c.HasOption("mailer", "auth_user"); hasOpt {
-		cfg.MailerAuthUser, _ = c.GetString("mailer", "auth_user")
+	if jsnMailerCfg != nil {
+		if jsnMailerCfg.Server != nil {
+			self.MailerServer = *jsnMailerCfg.Server
+		}
+		if jsnMailerCfg.Auth_user != nil {
+			self.MailerAuthUser = *jsnMailerCfg.Auth_user
+		}
+		if jsnMailerCfg.Auth_passwd != nil {
+			self.MailerAuthPass = *jsnMailerCfg.Auth_passwd
+		}
+		if jsnMailerCfg.From_address != nil {
+			self.MailerFromAddr = *jsnMailerCfg.From_address
+		}
 	}
-	if hasOpt = c.HasOption("mailer", "auth_passwd"); hasOpt {
-		cfg.MailerAuthPass, _ = c.GetString("mailer", "auth_passwd")
-	}
-	if hasOpt = c.HasOption("mailer", "from_address"); hasOpt {
-		cfg.MailerFromAddr, _ = c.GetString("mailer", "from_address")
-	}
-	return cfg, nil
+	return nil
 }

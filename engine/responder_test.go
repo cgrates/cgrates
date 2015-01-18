@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-
 package engine
 
 import (
@@ -29,15 +28,24 @@ import (
 
 var rsponder *Responder
 
+func init() {
+	cfg, _ := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+}
+
 // Test internal abilites of GetDerivedChargers
 func TestResponderGetDerivedChargers(t *testing.T) {
-	cfg, _ := config.NewDefaultCGRConfig()
+
 	cfgedDC := utils.DerivedChargers{&utils.DerivedCharger{RunId: "responder1", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
-	cfg.DerivedChargers = cfgedDC
-	config.SetCgrConfig(cfg)
 	rsponder = &Responder{}
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "responder_test", Subject: "responder_test"}
+	if err := accountingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
+		t.Error(err)
+	}
+	if err := accountingStorage.CacheAccounting(nil, []string{}, []string{}, []string{}); err != nil {
+		t.Error(err)
+	}
 	var dcs utils.DerivedChargers
 	if err := rsponder.GetDerivedChargers(attrs, &dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
@@ -47,7 +55,6 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 }
 
 func TestGetDerivedMaxSessionTime(t *testing.T) {
-	config.CgrConfig().CombinedDerivedChargers = false
 	testTenant := "vdf"
 	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
 		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan", Subject: "dan",
@@ -88,7 +95,6 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 }
 
 func TestGetSessionRuns(t *testing.T) {
-	config.CgrConfig().CombinedDerivedChargers = false
 	testTenant := "vdf"
 	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
 		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "prepaid", Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan2", Subject: "dan2",

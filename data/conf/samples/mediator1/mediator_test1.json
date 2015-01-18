@@ -1,0 +1,30 @@
+{
+// CGRateS Configuration file
+//
+// Used in mediator_local_test
+// Starts rater, cdrs and mediator connecting over internal channel
+
+"rater": {
+	"enabled": true,						// enable Rater service: <true|false>
+},
+
+"scheduler": {
+	"enabled": true,						// start Scheduler service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	"mediator": "internal",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+},
+
+"cdre": {
+	"*default": {
+		"export_dir": "/tmp/cgrates/cdr/cdrexport/csv",			// path where the exported CDRs will be placed
+	}
+},
+
+"mediator": {
+	"enabled": true,						// starts Mediator service: <true|false>.
+},
+
+}

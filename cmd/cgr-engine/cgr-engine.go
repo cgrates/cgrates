@@ -55,7 +55,7 @@ const (
 )
 
 var (
-	cfgPath         = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
+	cfgDir          = flag.String("config_dir", "/etc/cgrates", "Configuration directory path.")
 	version         = flag.Bool("version", false, "Prints the application version.")
 	raterEnabled    = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
 	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
@@ -325,7 +325,7 @@ func main() {
 	}
 	// runtime.GOMAXPROCS(runtime.NumCPU())   // For now it slows down computing due to CPU management, to be reviewed in future Go releases
 
-	cfg, err = config.NewCGRConfigFromFile(cfgPath)
+	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
 		return
@@ -502,7 +502,7 @@ func main() {
 		go shutdownSessionmanagerSingnalHandler()
 	}
 	var cdrcEnabled bool
-	for _, cdrcConfig := range cfg.CdrcInstances {
+	for _, cdrcConfig := range cfg.CdrcProfiles {
 		if cdrcConfig.Enabled == false {
 			continue // Ignore not enabled
 		} else if !cdrcEnabled {

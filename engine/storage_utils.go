@@ -41,12 +41,6 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler str
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
-	/*
-		// Add here as soon as interface implemented
-		case utils.MONGO:
-			d, err = NewMongoStorage(host, port, name, user, pass)
-			db = d.(RatingStorage)
-	*/
 	default:
 		err = errors.New("unknown db")
 	}

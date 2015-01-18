@@ -44,11 +44,6 @@ var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path h
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 
-func init() {
-	cfgPath = path.Join(*dataDir, "conf", "samples", "multiplecdrc_fwexport.cfg")
-	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
-}
-
 func startEngine() error {
 	enginePath, err := exec.LookPath("cgr-engine")
 	if err != nil {
@@ -67,6 +62,14 @@ func stopEngine() error {
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	return nil
+}
+
+func TestLoadConfig(t *testing.T) {
+	var err error
+	cfgPath = path.Join(*dataDir, "conf", "samples", "multiplecdrc")
+	if cfg, err = config.NewCGRConfigFromFolder(cfgPath); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestEmptyTables(t *testing.T) {
@@ -97,7 +100,7 @@ func TestCreateCdrDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, cdrcInst := range cfg.CdrcInstances {
+	for _, cdrcInst := range cfg.CdrcProfiles {
 		for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
 			if err := os.RemoveAll(dir); err != nil {
 				t.Fatal("Error removing folder: ", dir, err)
@@ -151,7 +154,7 @@ dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,rated,*out,cgra
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcInstances[0].CdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcProfiles["CDRC-CSV1"].CdrInDir, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -169,7 +172,7 @@ func TestHandleCdr2File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(*cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcProfiles["CDRC-CSV2"].CdrInDir, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -186,7 +189,7 @@ func TestHandleCdr3File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(*cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcProfiles["CDRC-CSV3"].CdrInDir, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }

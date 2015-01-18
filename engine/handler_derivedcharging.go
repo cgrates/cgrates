@@ -19,33 +19,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Transparently handles merging between storage data and configuration, useful as local handler
-func HandleGetDerivedChargers(acntStorage AccountingStorage, cfg *config.CGRConfig, attrs utils.AttrDerivedChargers) (utils.DerivedChargers, error) {
+// Handles retrieving of DerivedChargers profile based on longest match from AccountingDb
+func HandleGetDerivedChargers(acntStorage AccountingStorage, attrs utils.AttrDerivedChargers) (utils.DerivedChargers, error) {
 	var dcs utils.DerivedChargers
-	var err error
 	strictKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	anySubjKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, utils.ANY)
-	for _, dcKey := range []string{strictKey, anySubjKey} {
+	anyAcntKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, utils.ANY, utils.ANY)
+	anyCategKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, utils.ANY, utils.ANY, utils.ANY)
+	anyTenantKey := utils.DerivedChargersKey(attrs.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY)
+	for _, dcKey := range []string{strictKey, anySubjKey, anyAcntKey, anyCategKey, anyTenantKey} {
 		if dcsDb, err := acntStorage.GetDerivedChargers(dcKey, false); err != nil && err.Error() != utils.ERR_NOT_FOUND {
 			return nil, err
 		} else if dcsDb != nil {
 			dcs = dcsDb
 			break
-		}
-	}
-	if dcs == nil {
-		dcs = cfg.DerivedChargers
-		return dcs, nil
-	}
-	if cfg.CombinedDerivedChargers {
-		for _, cfgDc := range cfg.DerivedChargers {
-			if dcs, err = dcs.Append(cfgDc); err != nil {
-				return nil, err
-			}
 		}
 	}
 	return dcs, nil

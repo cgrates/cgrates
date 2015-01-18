@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -221,7 +221,7 @@ func (rs *Responder) GetSessionRuns(ev utils.Event, sRuns *[]*SessionRun) error 
 func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
 	// ToDo: Make it work with balancer if needed
 
-	if dcsH, err := HandleGetDerivedChargers(accountingStorage, config.CgrConfig(), attrs); err != nil {
+	if dcsH, err := HandleGetDerivedChargers(accountingStorage, attrs); err != nil {
 		return err
 	} else if dcsH != nil {
 		*dcs = dcsH

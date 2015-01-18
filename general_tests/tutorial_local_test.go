@@ -40,9 +40,9 @@ func TestInitCfg(t *testing.T) {
 		return
 	}
 	// Init config first
-	tutCfgPath = path.Join(*dataDir, "conf", "samples", "tutorial_local_test.cfg")
+	tutCfgPath = path.Join(*dataDir, "conf", "samples", "tutorial")
 	var err error
-	tutCfg, err = config.NewCGRConfigFromFile(&tutCfgPath)
+	tutCfg, err = config.NewCGRConfigFromFolder(tutCfgPath)
 	if err != nil {
 		t.Error(err)
 	}

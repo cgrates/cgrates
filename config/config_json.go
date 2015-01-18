@@ -49,23 +49,24 @@ const (
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
-func NewCgrJsonCfg(r io.Reader) (CgrJsonCfg, error) {
+func NewCgrJsonCfgFromReader(r io.Reader) (*CgrJsonCfg, error) {
 	var cgrJsonCfg CgrJsonCfg
 	jr := JsonConfigReader.New(r)
 	if err := json.NewDecoder(jr).Decode(&cgrJsonCfg); err != nil {
 		return nil, err
 	}
-	return cgrJsonCfg, nil
+	return &cgrJsonCfg, nil
 }
 
 // Loads the config out of file
-func NewCgrJsonCfgFromFile(fpath string) (CgrJsonCfg, error) {
+func NewCgrJsonCfgFromFile(fpath string) (*CgrJsonCfg, error) {
 	cfgFile, err := os.Open(fpath)
 	if err != nil {
 		return nil, err
 	}
 	defer cfgFile.Close()
-	return NewCgrJsonCfg(cfgFile)
+
+	return NewCgrJsonCfgFromReader(cfgFile)
 }
 
 // Main object holding the loaded config as section raw messages
