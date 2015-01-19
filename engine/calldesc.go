@@ -343,7 +343,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 
 	}
 	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
-	// split on price intervals
+	// split on rate intervals
 	for i := 0; i < len(timespans); i++ {
 		//log.Printf("==============%v==================", i)
 		//log.Printf("TS: %+v", timespans[i])
@@ -387,7 +387,7 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans TimeSpans) []*Time
 			_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			// if the timespan duration is larger than the rate increment make sure it is a multiple of it
 			if rateIncrement < ts.GetDuration() {
-				rateIncrement = utils.RoundTo(rateIncrement, ts.GetDuration())
+				rateIncrement = utils.RoundDuration(rateIncrement, ts.GetDuration())
 			}
 			if rateIncrement > ts.GetDuration() {
 				initialDuration := ts.GetDuration()

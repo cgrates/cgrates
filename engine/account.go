@@ -218,6 +218,7 @@ func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 			goto CONNECT_FEE
 		}
 	}
+	// split timpespans on unpaid increments
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
 		if paid, incrementIndex := ts.IsPaid(); !paid {

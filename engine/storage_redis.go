@@ -279,7 +279,7 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	case DESTINATION_PREFIX, RATING_PLAN_PREFIX, RATING_PROFILE_PREFIX, ACTION_PREFIX, ACTION_TIMING_PREFIX, ACCOUNT_PREFIX:
 		return rs.db.Exists(category + subject)
 	}
-	return false, errors.New("Unsupported category in ExistsData")
+	return false, errors.New("Unsupported category in HasData")
 }
 
 func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {

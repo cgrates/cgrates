@@ -242,13 +242,11 @@ func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalance
 			continue
 		}
 		tsWasSplit := false
-		currentTime := ts.TimeStart
 		for incrementIndex, increment := range ts.Increments {
 			if tsWasSplit {
 				break
 			}
-			currentTime = currentTime.Add(increment.Duration)
-			if !b.IsActiveAt(currentTime) {
+			if !b.IsActiveAt(ts.GetTimeStartForIncrement(incrementIndex)) {
 				continue
 			}
 			if increment.paid {
@@ -393,13 +391,11 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 			continue
 		}
 		tsWasSplit := false
-		currentTime := ts.TimeStart
 		for incrementIndex, increment := range ts.Increments {
 			if tsWasSplit {
 				break
 			}
-			currentTime = currentTime.Add(increment.Duration)
-			if !b.IsActiveAt(currentTime) {
+			if !b.IsActiveAt(ts.GetTimeStartForIncrement(incrementIndex)) {
 				continue
 			}
 			if increment.paid {

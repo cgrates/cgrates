@@ -195,7 +195,7 @@ func ParseDate(date string) (expDate time.Time, err error) {
 
 // returns a number equeal or larger than the amount that exactly
 // is divisible to whole
-func RoundTo(whole, amount time.Duration) time.Duration {
+func RoundDuration(whole, amount time.Duration) time.Duration {
 	a, w := float64(amount), float64(whole)
 	if math.Mod(a, w) == 0 {
 		return amount

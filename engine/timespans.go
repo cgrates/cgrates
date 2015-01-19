@@ -78,34 +78,36 @@ func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
 
 type TimeSpans []*TimeSpan
 
+// Will delete all timespans that are `under` the timespan at index
 func (timespans *TimeSpans) RemoveOverlapedFromIndex(index int) {
-	tss := *timespans
-	ts := tss[index]
+	tsList := *timespans
+	ts := tsList[index]
 	endOverlapIndex := index
-	for i := index + 1; i < len(tss); i++ {
-		if tss[i].TimeEnd.Before(ts.TimeEnd) || tss[i].TimeEnd.Equal(ts.TimeEnd) {
+	for i := index + 1; i < len(tsList); i++ {
+		if tsList[i].TimeEnd.Before(ts.TimeEnd) || tsList[i].TimeEnd.Equal(ts.TimeEnd) {
 			endOverlapIndex = i
-		} else if tss[i].TimeStart.Before(ts.TimeEnd) {
-			tss[i].TimeStart = ts.TimeEnd
+		} else if tsList[i].TimeStart.Before(ts.TimeEnd) {
+			tsList[i].TimeStart = ts.TimeEnd
 			break
 		}
 	}
 	if endOverlapIndex > index {
-		newSliceEnd := len(tss) - (endOverlapIndex - index)
+		newSliceEnd := len(tsList) - (endOverlapIndex - index)
 		// delete overlapped
-		copy(tss[index+1:], tss[endOverlapIndex+1:])
-		for i := newSliceEnd; i < len(tss); i++ {
-			tss[i] = nil
+		copy(tsList[index+1:], tsList[endOverlapIndex+1:])
+		for i := newSliceEnd; i < len(tsList); i++ {
+			tsList[i] = nil
 		}
-		*timespans = tss[:newSliceEnd]
+		*timespans = tsList[:newSliceEnd]
 		return
 	}
-	*timespans = tss
+	*timespans = tsList
 }
 
-// The paidTs will replace the timespans that are exactly under them from the reciver list
+// The paidTs will replace the timespans that are exactly `under` them
+// from the reciver list
 func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSpan, index int) bool {
-	tss := *timespans
+	tsList := *timespans
 	// calculate overlaped timespans
 	var paidDuration time.Duration
 	for _, pts := range paidTs {
@@ -119,8 +121,8 @@ func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSp
 			remainingTs = append(remainingTs, newTs)
 			overlapStartIndex += 1
 		}
-		for tsi := overlapStartIndex; tsi < len(tss); tsi++ {
-			remainingTs = append(remainingTs, tss[tsi])
+		for tsi := overlapStartIndex; tsi < len(tsList); tsi++ {
+			remainingTs = append(remainingTs, tsList[tsi])
 		}
 		overlapEndIndex := 0
 		for i, rts := range remainingTs {
@@ -132,31 +134,31 @@ func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSp
 					fragment := rts.SplitByDuration(paidDuration)
 					paidTs = append(paidTs, fragment)
 				}
-				// find the end position in tss
+				// find the end position in tsList
 				overlapEndIndex = overlapStartIndex + i
 				break
 			}
-			// find the end position in tss
+			// find the end position in tsList
 			overlapEndIndex = overlapStartIndex + i
 		}
 		// delete from index to current
-		if overlapEndIndex == len(tss)-1 {
-			tss = tss[:overlapStartIndex]
+		if overlapEndIndex == len(tsList)-1 {
+			tsList = tsList[:overlapStartIndex]
 		} else {
-			if overlapEndIndex+1 < len(tss) {
-				tss = append(tss[:overlapStartIndex], tss[overlapEndIndex+1:]...)
+			if overlapEndIndex+1 < len(tsList) {
+				tsList = append(tsList[:overlapStartIndex], tsList[overlapEndIndex+1:]...)
 			}
 		}
-		// append the timespans to outer tss
+		// append the timespans to outer tsList
 		for i, pts := range paidTs {
-			tss = append(tss, nil)
-			copy(tss[overlapStartIndex+i+1:], tss[overlapStartIndex+i:])
-			tss[overlapStartIndex+i] = pts
+			tsList = append(tsList, nil)
+			copy(tsList[overlapStartIndex+i+1:], tsList[overlapStartIndex+i:])
+			tsList[overlapStartIndex+i] = pts
 		}
-		*timespans = tss
+		*timespans = tsList
 		return true
 	}
-	*timespans = tss
+	*timespans = tsList
 	return false
 }
 
@@ -515,7 +517,7 @@ func (ts *TimeSpan) GetTimeStartForIncrement(index int) time.Time {
 
 func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
 	if duration < ts.GetDuration() {
-		duration = utils.RoundTo(duration, ts.GetDuration())
+		duration = utils.RoundDuration(duration, ts.GetDuration())
 	}
 	if duration > ts.GetDuration() {
 		initialDuration := ts.GetDuration()

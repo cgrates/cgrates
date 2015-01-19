@@ -295,39 +295,39 @@ func TestMissingStructFieldsIncorrect(t *testing.T) {
 	}
 }
 
-func TestRoundTo(t *testing.T) {
+func TestRoundDuration(t *testing.T) {
 	minute := time.Minute
-	result := RoundTo(minute, 0*time.Second)
+	result := RoundDuration(minute, 0*time.Second)
 	expected := 0 * time.Second
 	if result != expected {
 		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
 	}
-	result = RoundTo(time.Second, 1*time.Second+500*time.Millisecond)
+	result = RoundDuration(time.Second, 1*time.Second+500*time.Millisecond)
 	expected = 2 * time.Second
 	if result != expected {
 		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
 	}
-	result = RoundTo(minute, 1*time.Second)
+	result = RoundDuration(minute, 1*time.Second)
 	expected = minute
 	if result != expected {
 		t.Errorf("Error rounding to minute2: expected %v was %v", expected, result)
 	}
-	result = RoundTo(minute, 5*time.Second)
+	result = RoundDuration(minute, 5*time.Second)
 	expected = minute
 	if result != expected {
 		t.Errorf("Error rounding to minute3: expected %v was %v", expected, result)
 	}
-	result = RoundTo(minute, minute)
+	result = RoundDuration(minute, minute)
 	expected = minute
 	if result != expected {
 		t.Errorf("Error rounding to minute4: expected %v was %v", expected, result)
 	}
-	result = RoundTo(minute, 90*time.Second)
+	result = RoundDuration(minute, 90*time.Second)
 	expected = 120 * time.Second
 	if result != expected {
 		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
 	}
-	result = RoundTo(60, 120)
+	result = RoundDuration(60, 120)
 	expected = 120.0
 	if result != expected {
 		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
