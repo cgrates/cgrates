@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -91,9 +93,55 @@ func (s *Server) ServeGOB(addr string) {
 }
 
 func (s *Server) ServeHTTP(addr string) {
+	if s.rpcEnabled {
+		http.HandleFunc("/jsonrpc", func(w http.ResponseWriter, req *http.Request) {
+			defer req.Body.Close()
+			w.Header().Set("Content-Type", "application/json")
+			res := NewRPCRequest(req.Body).Call()
+			io.Copy(w, res)
+		})
+		s.httpEnabled = true
+	}
 	if !s.httpEnabled {
 		return
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
 	http.ListenAndServe(addr, nil)
+}
+
+// rpcRequest represents a RPC request.
+// rpcRequest implements the io.ReadWriteCloser interface.
+type rpcRequest struct {
+	r    io.Reader     // holds the JSON formated RPC request
+	rw   io.ReadWriter // holds the JSON formated RPC response
+	done chan bool     // signals then end of the RPC request
+}
+
+// NewRPCRequest returns a new rpcRequest.
+func NewRPCRequest(r io.Reader) *rpcRequest {
+	var buf bytes.Buffer
+	done := make(chan bool)
+	return &rpcRequest{r, &buf, done}
+}
+
+func (r *rpcRequest) Read(p []byte) (n int, err error) {
+	return r.r.Read(p)
+}
+
+func (r *rpcRequest) Write(p []byte) (n int, err error) {
+	n, err = r.rw.Write(p)
+	r.done <- true
+	return
+}
+
+func (r *rpcRequest) Close() error {
+	//r.done <- true // seem to be called sometimes before the write command finishes!
+	return nil
+}
+
+// Call invokes the RPC request, waits for it to complete, and returns the results.
+func (r *rpcRequest) Call() io.Reader {
+	go jsonrpc.ServeConn(r)
+	<-r.done
+	return r.rw
 }
