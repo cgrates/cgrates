@@ -75,3 +75,23 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	}
 	return nil
 }
+
+// Clone itself into a new CdrcConfig
+func (self *CdrcConfig) Clone() *CdrcConfig {
+	clnCdrc := new(CdrcConfig)
+	clnCdrc.Enabled = self.Enabled
+	clnCdrc.CdrsAddress = self.CdrsAddress
+	clnCdrc.CdrFormat = self.CdrFormat
+	clnCdrc.FieldSeparator = self.FieldSeparator
+	clnCdrc.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor
+	clnCdrc.RunDelay = self.RunDelay
+	clnCdrc.CdrInDir = self.CdrInDir
+	clnCdrc.CdrOutDir = self.CdrOutDir
+	clnCdrc.CdrSourceId = self.CdrSourceId
+	clnCdrc.CdrFields = make([]*CfgCdrField, len(self.CdrFields))
+	for idx, fld := range self.CdrFields {
+		clonedVal := *fld
+		clnCdrc.CdrFields[idx] = &clonedVal
+	}
+	return clnCdrc
+}

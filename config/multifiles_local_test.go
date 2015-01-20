@@ -66,16 +66,13 @@ func TestMfCdreDefaultInstance(t *testing.T) {
 	if mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor != 1024.0 {
 		t.Error("Default instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor)
 	}
-	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 2 {
+	if len(mfCgrCfg.CdreProfiles[prfl].HeaderFields) != 0 {
 		t.Error("Default instance has number of header fields: ", len(mfCgrCfg.CdreProfiles[prfl].HeaderFields))
 	}
-	if mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag != "RunId" {
-		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].HeaderFields[1].Tag)
-	}
-	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 9 {
+	if len(mfCgrCfg.CdreProfiles[prfl].ContentFields) != 12 {
 		t.Error("Default instance has number of content fields: ", len(mfCgrCfg.CdreProfiles[prfl].ContentFields))
 	}
-	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag != "Account" {
+	if mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag != "Direction" {
 		t.Error("Unexpected headerField value: ", mfCgrCfg.CdreProfiles[prfl].ContentFields[2].Tag)
 	}
 }
@@ -89,7 +86,7 @@ func TestMfCdreExport1Instance(t *testing.T) {
 		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CdrFormat)
 	}
 	if mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor != 1.0 {
-		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor)
+		t.Error("Export1 instance has DataUsageMultiplyFormat: ", mfCgrCfg.CdreProfiles[prfl].DataUsageMultiplyFactor)
 	}
 	if mfCgrCfg.CdreProfiles[prfl].CostRoundingDecimals != 3.0 {
 		t.Error("Export1 instance has cdrFormat: ", mfCgrCfg.CdreProfiles[prfl].CostRoundingDecimals)

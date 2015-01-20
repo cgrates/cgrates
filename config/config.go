@@ -63,6 +63,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
 		return nil, err
 	}
+	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
+	cfg.dfltCdrcProfile = cfg.CdrcProfiles[utils.META_DEFAULT].Clone()
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -169,7 +171,9 @@ type CGRConfig struct {
 	CDRSStoreDisable      bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
 	CDRStatsEnabled       bool              // Enable CDR Stats service
 	CDRStatConfig         *CdrStatsConfig   // Active cdr stats configuration instances, platform level
+	dfltCdreProfile       *CdreConfig       // Use it to cache the default cdreConfig profile, so we can clone the orginal one in separate instances
 	CdreProfiles          map[string]*CdreConfig
+	dfltCdrcProfile       *CdrcConfig            // Use it to cache the default cdrcConfig profile
 	CdrcProfiles          map[string]*CdrcConfig // Number of CDRC instances running imports
 	SMEnabled             bool
 	SMSwitchType          string
@@ -481,7 +485,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			if _, hasProfile := self.CdreProfiles[profileName]; !hasProfile { // New profile, create before loading from json
 				self.CdreProfiles[profileName] = new(CdreConfig)
 				if profileName != utils.META_DEFAULT {
-					self.CdreProfiles[profileName] = self.CdreProfiles[utils.META_DEFAULT] // Load defaults into newly initialized config
+					self.CdreProfiles[profileName] = self.dfltCdreProfile.Clone() // Clone default so we do not inherit pointers
 				}
 			}
 			if err = self.CdreProfiles[profileName].loadFromJsonCfg(jsnCdre1Cfg); err != nil { // Update the existing profile with content from json config
@@ -497,7 +501,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			if _, hasProfile := self.CdrcProfiles[profileName]; !hasProfile {
 				self.CdrcProfiles[profileName] = new(CdrcConfig)
 				if profileName != utils.META_DEFAULT {
-					self.CdrcProfiles[profileName] = self.CdrcProfiles[utils.META_DEFAULT] // Load defaults into newly initialized config
+					self.CdrcProfiles[profileName] = self.dfltCdrcProfile.Clone() // Clone default so we do not inherit pointers
 				}
 			}
 			if err = self.CdrcProfiles[profileName].loadFromJsonCfg(jsnCrc1Cfg); err != nil {

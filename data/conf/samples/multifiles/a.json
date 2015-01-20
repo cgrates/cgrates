@@ -10,9 +10,6 @@
 "cdre": {
 	"*default": {
 		"content_fields": [								// template of the exported content fields
-			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
-			{"tag":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
-			{"tag":"Tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "tor"},
 			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
 			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
 			{"tag":"Direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "direction"},

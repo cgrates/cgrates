@@ -84,3 +84,33 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 	}
 	return nil
 }
+
+// Clone itself into a new CdreConfig
+func (self *CdreConfig) Clone() *CdreConfig {
+	clnCdre := new(CdreConfig)
+	clnCdre.CdrFormat = self.CdrFormat
+	clnCdre.FieldSeparator = self.FieldSeparator
+	clnCdre.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor
+	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
+	clnCdre.CostRoundingDecimals = self.CostRoundingDecimals
+	clnCdre.CostShiftDigits = self.CostShiftDigits
+	clnCdre.MaskDestId = self.MaskDestId
+	clnCdre.MaskLength = self.MaskLength
+	clnCdre.ExportDir = self.ExportDir
+	clnCdre.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
+	for idx, fld := range self.HeaderFields {
+		clonedVal := *fld
+		clnCdre.HeaderFields[idx] = &clonedVal
+	}
+	clnCdre.ContentFields = make([]*CfgCdrField, len(self.ContentFields))
+	for idx, fld := range self.ContentFields {
+		clonedVal := *fld
+		clnCdre.ContentFields[idx] = &clonedVal
+	}
+	clnCdre.TrailerFields = make([]*CfgCdrField, len(self.TrailerFields))
+	for idx, fld := range self.TrailerFields {
+		clonedVal := *fld
+		clnCdre.TrailerFields[idx] = &clonedVal
+	}
+	return clnCdre
+}
