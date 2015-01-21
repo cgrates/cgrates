@@ -24,7 +24,10 @@ CREATE TABLE cdrs_primary (
   created_at TIMESTAMP,
   deleted_at TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY cgrid (cgrid)
+  UNIQUE KEY cgrid (cgrid),
+  KEY answer_time_idx (answer_time),
+  KEY deleted_at_idx (deleted_at)
+
 );
 
 --
@@ -39,7 +42,8 @@ CREATE TABLE cdrs_extra (
   created_at TIMESTAMP,
   deleted_at TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY cgrid (cgrid)
+  UNIQUE KEY cgrid (cgrid),
+  KEY deleted_at_idx (deleted_at)
 );
 
 --
@@ -65,7 +69,8 @@ CREATE TABLE cost_details (
   updated_at TIMESTAMP,
   deleted_at TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `costid` (`cgrid`,`runid`)
+  UNIQUE KEY `costid` (`cgrid`,`runid`),
+  KEY deleted_at_idx (deleted_at)
 );
 
 --
@@ -92,5 +97,6 @@ CREATE TABLE `rated_cdrs` (
   updated_at TIMESTAMP,
   deleted_at TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `costid` (`cgrid`,`runid`)
+  UNIQUE KEY `costid` (`cgrid`,`runid`),
+  KEY deleted_at_idx (deleted_at)
 );

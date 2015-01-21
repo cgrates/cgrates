@@ -25,6 +25,8 @@ CREATE TABLE cdrs_primary (
   deleted_at TIMESTAMP,
   UNIQUE (cgrid)
 );
+CREATE INDEX answer_time_idx ON cdrs_primary (answer_time);
+CREATE INDEX deleted_at_cp_idx ON cdrs_primary (deleted_at);
 
 --
 -- Table structure for table `cdrs_extra`
@@ -39,6 +41,7 @@ CREATE TABLE cdrs_extra (
   deleted_at TIMESTAMP,
   UNIQUE (cgrid)
 );
+CREATE INDEX deleted_at_ce_idx ON cdrs_extra (deleted_at);
 
 --
 -- Table structure for table `cost_details`
@@ -64,6 +67,7 @@ CREATE TABLE cost_details (
   deleted_at TIMESTAMP,
   UNIQUE (cgrid, runid)
 );
+CREATE INDEX deleted_at_cd_idx ON cost_details (deleted_at);
 
 --
 -- Table structure for table `rated_cdrs`
@@ -90,3 +94,4 @@ CREATE TABLE rated_cdrs (
   deleted_at TIMESTAMP,
   UNIQUE (cgrid, runid)
 );
+CREATE INDEX deleted_at_rc_idx ON rated_cdrs (deleted_at);
