@@ -458,7 +458,12 @@ Returns the approximate max allowed session for user balance. It will try the ma
 If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
-func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Duration, error) {
+func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Duration, error) {
+	// clone the account for discarding chenges on debit dry run
+	account := origAcc.Clone()
+	if account.AllowNegative {
+		return -1, nil
+	}
 	if origCD.DurationIndex < origCD.TimeEnd.Sub(origCD.TimeStart) {
 		origCD.DurationIndex = origCD.TimeEnd.Sub(origCD.TimeStart)
 	}
@@ -466,74 +471,48 @@ func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Dura
 		origCD.TOR = MINUTES
 	}
 	cd := origCD.Clone()
-	//Logger.Debug(fmt.Sprintf("MAX SESSION cd: %+v", cd))
-	err := cd.LoadRatingPlans()
-	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetAccountKey(), err))
-		return 0, err
-	}
-	var availableDuration time.Duration
-	availableCredit := 0.0
-	if account.AllowNegative {
-		return -1, nil
-	} else {
-		availableDuration, availableCredit, _ = account.getCreditForPrefix(cd)
-		// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
-	}
-	if cd.MaxCost > 0 {
-		// limit availableCredit
-		if cd.MaxCostSoFar+availableCredit > cd.MaxCost {
-			availableCredit = cd.MaxCost - cd.MaxCostSoFar
-		}
-	}
-	//Logger.Debug(fmt.Sprintf("availableDuration: %v, availableCredit: %v", availableDuration, availableCredit))
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
-	if initialDuration <= availableDuration {
-		// there are enough minutes for requested interval
-		return initialDuration, nil
-	}
-	//Logger.Debug(fmt.Sprintf("initial Duration: %v", initialDuration))
-	// we must move the timestart for the interval with the available duration because
-	// that was already checked
-	cd.TimeStart = cd.TimeStart.Add(availableDuration)
+	cc, _ := cd.debit(account, true)
 
-	// substract the connect fee
-	cc, err := cd.GetCost()
-	if availableDuration == 0 && cc.deductConnectFee { // only if we did not already used minutes
-		availableCredit -= cc.GetConnectFee()
-	}
-	// check for zero balance
-	if (availableCredit < 0) || (availableCredit == 0 && cc.Cost > 0) {
-		return utils.MinDuration(initialDuration, availableDuration), nil
-	}
-	if err != nil {
-		Logger.Err(fmt.Sprintf("Could not get cost for %s: %s.", cd.GetKey(cd.Subject), err.Error()))
-		return 0, err
-	}
-	// now let's check how many increments are covered with the avilableCredit
-	// also check for max rate/max rate unit
+	//log.Printf("CC: %+v", cc)
+
+	var totalCost float64
+	var totalDuration time.Duration
+	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
+	cc.Timespans.Decompress()
+	//log.Printf("ACC: %+v", account)
 	for _, ts := range cc.Timespans {
-		ts.createIncrementsSlice()
-		//Logger.Debug(fmt.Sprintf("TS: %+v", ts))
+		//if ts.RateInterval != nil {
+		//log.Printf("TS: %+v", ts)
+		//}
 		if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
 			rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
-				return availableDuration, nil
+				return utils.MinDuration(initialDuration, totalDuration), nil
 			}
 		}
 		for _, incr := range ts.Increments {
-			if incr.Cost <= availableCredit {
-				availableCredit -= incr.Cost
-				availableDuration += incr.Duration
-			} else {
-				return availableDuration, nil
+			totalCost += incr.Cost
+			if cd.MaxCost > 0 {
+				// limit availableCredit
+				if cd.MaxCostSoFar+totalCost > cd.MaxCost {
+					return utils.MinDuration(initialDuration, totalDuration), nil
+				}
+			}
+			if defaultBalance.Value < 0 && incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
+				// this increment was payed with debt
+				// TODO: improve this check
+				return utils.MinDuration(initialDuration, totalDuration), nil
+
+			}
+			totalDuration += incr.Duration
+			if totalDuration >= initialDuration {
+				// we have enough, return
+				return initialDuration, nil
 			}
 		}
 	}
-	if initialDuration < availableDuration {
-		return initialDuration, nil
-	}
-	return utils.MinDuration(initialDuration, availableDuration), nil
+	return utils.MinDuration(initialDuration, totalDuration), nil
 }
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
@@ -555,24 +534,21 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
-func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
-	cc, err = cd.GetCost()
-	cc.Timespans.Decompress()
+func (cd *CallDescriptor) debit(account *Account, dryRun bool) (cc *CallCost, err error) {
+	if !dryRun {
+		defer accountingStorage.SetAccount(account)
+	}
+	if cd.TOR == "" {
+		cd.TOR = MINUTES
+	}
+	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun)
+	//log.Print("HERE: ", cc, err)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetAccountKey(), err))
-		return
-	}
-	//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetAccountKey(), cc.Cost+cc.ConnectFee))
-	defer accountingStorage.SetAccount(account)
-	//ub, _ := json.Marshal(account)
-	//Logger.Debug(fmt.Sprintf("Account: %s", ub))
-	//cCost, _ := json.Marshal(cc)
-	//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
-	if cc.Cost != 0 || (cc.deductConnectFee && cc.GetConnectFee() != 0) {
-		account.debitCreditBalance(cc, true)
+		//return
 	}
 	cost := 0.0
-	// re-calculate call cost after balances
+	// calculate call cost after balances
 	if cc.deductConnectFee { // add back the connectFee
 		cost += cc.GetConnectFee()
 	}
@@ -582,6 +558,7 @@ func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
 	}
 	cc.Cost = cost
 	cc.Timespans.Compress()
+	//log.Printf("OUT CC: ", cc)
 	return
 }
 
@@ -593,7 +570,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
-				cc, err = cd.debit(account)
+				cc, err = cd.debit(account, false)
 				return 0, err
 			})
 		} else {
@@ -612,17 +589,22 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
+		//log.Printf("ACC: %+v", account)
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
+				//log.Print("AFTER MAX SESSION: ", cd)
 				if err != nil || remainingDuration == 0 {
 					cc, err = new(CallCost), fmt.Errorf("no more credit: %v", err)
 					return 0, err
 				}
+				//log.Print("Remaining: ", remainingDuration)
 				if remainingDuration > 0 { // for postpaying client returns -1
+					initialDuration := cd.GetDuration()
 					cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
+					cd.DurationIndex -= initialDuration - remainingDuration
 				}
-				cc, err = cd.debit(account)
+				cc, err = cd.debit(account, false)
 				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
 			})
@@ -660,13 +642,14 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 // Creates a CallCost structure copying related data from CallDescriptor
 func (cd *CallDescriptor) CreateCallCost() *CallCost {
 	return &CallCost{
-		Direction:   cd.Direction,
-		Category:    cd.Category,
-		Tenant:      cd.Tenant,
-		Subject:     cd.Subject,
-		Account:     cd.Account,
-		Destination: cd.Destination,
-		TOR:         cd.TOR,
+		Direction:        cd.Direction,
+		Category:         cd.Category,
+		Tenant:           cd.Tenant,
+		Subject:          cd.Subject,
+		Account:          cd.Account,
+		Destination:      cd.Destination,
+		TOR:              cd.TOR,
+		deductConnectFee: cd.LoopIndex == 0,
 	}
 }
 

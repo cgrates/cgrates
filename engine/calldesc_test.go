@@ -464,7 +464,7 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 	acc, _ := cd.getAccount()
 	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
 	if len(balanceMap) != 1 || balanceMap[0].Value != 0 {
-		t.Errorf("Wrong shared balance debited: %+v", balanceMap)
+		t.Errorf("Wrong shared balance debited: %+v", balanceMap[0])
 	}
 	other, err := accountingStorage.GetAccount("*out:vdf:empty10")
 	if err != nil || other.BalanceMap[CREDIT+OUTBOUND][0].Value != 7.5 {
@@ -566,7 +566,17 @@ func TestDebitAndMaxDebit(t *testing.T) {
 		t.Error("Error debiting and/or maxdebiting: ", err1, err2)
 	}
 	if !reflect.DeepEqual(cc1, cc2) {
-		t.Errorf("Debit and MaxDebit differ: %+v != %+v", cc1, cc2)
+		t.Log("===============================")
+		t.Logf("CC1: %+v", cc1)
+		for _, ts := range cc1.Timespans {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Logf("CC2: %+v", cc2)
+		for _, ts := range cc2.Timespans {
+			t.Logf("TS: %+v", ts.Increments[0])
+		}
+		t.Log("===============================")
+		t.Error("Debit and MaxDebit differ")
 	}
 }
 
@@ -622,9 +632,9 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 		Account:     "empty10",
 		Destination: "0723",
 	}
+	cc, err := cd.MaxDebit()
 	acc, _ := cd.getAccount()
 	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
-	cc, err := cd.MaxDebit()
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from share and normal error: %+v, %v", cc, err)
 	}

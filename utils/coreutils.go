@@ -193,7 +193,7 @@ func ParseDate(date string) (expDate time.Time, err error) {
 	return expDate, err
 }
 
-// returns a number equeal or larger than the amount that exactly
+// returns a number equal or larger than the amount that exactly
 // is divisible to whole
 func RoundDuration(whole, amount time.Duration) time.Duration {
 	a, w := float64(amount), float64(whole)
