@@ -525,3 +525,8 @@ func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
 		ts.DurationIndex = ts.DurationIndex + (duration - initialDuration)
 	}
 }
+
+func (ts *TimeSpan) AddIncrement(inc *Increment) {
+	ts.Increments = append(ts.Increments, inc)
+	ts.TimeEnd.Add(inc.Duration)
+}

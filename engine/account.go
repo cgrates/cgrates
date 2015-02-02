@@ -208,90 +208,131 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, balanceT
 	return
 }
 
-func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
-	usefulUnitBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.Category, cc.TOR+cc.Direction)
-	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.Category, CREDIT+cc.Direction)
-	// debit minutes
-	for _, balance := range usefulUnitBalances {
-		balance.DebitUnits(cc, count, balance.account, usefulMoneyBalances)
-		if cc.IsPaid() {
-			goto CONNECT_FEE
-		}
-	}
-	// split timpespans on unpaid increments
-	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
-		ts := cc.Timespans[tsIndex]
-		if paid, incrementIndex := ts.IsPaid(); !paid {
-			newTs := ts.SplitByIncrement(incrementIndex)
-			if newTs != nil {
-				idx := tsIndex + 1
-				cc.Timespans = append(cc.Timespans, nil)
-				copy(cc.Timespans[idx+1:], cc.Timespans[idx:])
-				cc.Timespans[idx] = newTs
+func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool) (cc *CallCost, err error) {
+	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.TOR+cd.Direction)
+	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, CREDIT+cd.Direction)
+	//log.Print(usefulMoneyBalances, usefulUnitBalances)
+	//log.Print("STARTCD: ", cd)
+	var leftCC *CallCost
+	var initialLength int
+	cc = cd.CreateCallCost()
+	generalBalanceChecker := true
+	for generalBalanceChecker {
+		generalBalanceChecker = false
+
+		// debit minutes
+		unitBalanceChecker := true
+		for unitBalanceChecker {
+			// try every balance multiple times in case one becomes active or ratig changes
+			unitBalanceChecker = false
+			//log.Printf("InitialCD: %+v", cd)
+			for _, balance := range usefulUnitBalances {
+				//log.Printf("Unit balance: %+v", balance)
+				// log.Printf("CD BEFORE UNIT: %+v", cd)
+				partCC, _ := balance.DebitUnits(cd, count, balance.account, usefulMoneyBalances)
+				// log.Printf("CD AFTER UNIT: %+v", cd)
+				if partCC != nil {
+					//log.Printf("partCC: %+v", partCC.Timespans[0])
+					initialLength = len(cc.Timespans)
+					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
+					if initialLength == 0 {
+						// this is the first add, debit the connect fee
+						ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
+					}
+					// for i, ts := range cc.Timespans {
+					//	log.Printf("cc.times[an[%d]: %+v\n", i, ts)
+					// }
+					cd.TimeStart = cc.GetEndTime()
+					//log.Printf("CD: %+v", cd)
+					//log.Printf("CD: %+v - %+v", cd.TimeStart, cd.TimeEnd)
+					// check if the calldescriptor is covered
+					if cd.GetDuration() <= 0 {
+						goto COMMIT
+					}
+					unitBalanceChecker = true
+					generalBalanceChecker = true
+				}
 			}
 		}
-	}
-	// debit money
-	for _, balance := range usefulMoneyBalances {
-		balance.DebitMoney(cc, count, balance.account)
-		if cc.IsPaid() {
-			goto CONNECT_FEE
+
+		// debit money
+		moneyBalanceChecker := true
+		for moneyBalanceChecker {
+			// try every balance multiple times in case one becomes active or ratig changes
+			moneyBalanceChecker = false
+			for _, balance := range usefulMoneyBalances {
+				//log.Printf("Money balance: %+v", balance)
+				// log.Printf("CD BEFORE MONEY: %+v", cd)
+				partCC, _ := balance.DebitMoney(cd, count, balance.account)
+				// log.Printf("CD AFTER MONEY: %+v", cd)
+				//log.Printf("partCC: %+v", partCC)
+				//log.Printf("CD: %+v", cd)
+				if partCC != nil {
+					initialLength = len(cc.Timespans)
+					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
+					if initialLength == 0 {
+						// this is the first add, debit the connect fee
+						ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
+					}
+					//for i, ts := range cc.Timespans {
+					//log.Printf("cc.times[an[%d]: %+v\n", i, ts)
+					//}
+					cd.TimeStart = cc.GetEndTime()
+					//log.Printf("CD: %+v", cd)
+					//log.Printf("CD: %+v - %+v", cd.TimeStart, cd.TimeEnd)
+					// check if the calldescriptor is covered
+					if cd.GetDuration() <= 0 {
+						goto COMMIT
+					}
+					moneyBalanceChecker = true
+					generalBalanceChecker = true
+				}
+			}
 		}
+		//log.Printf("END CD: %+v", cd)
+		//log.Print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 	}
+	//log.Printf("After balances CD: %+v", cd)
+	leftCC, err = cd.GetCost()
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+	}
+	initialLength = len(cc.Timespans)
+	cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
+	if initialLength == 0 {
+		// this is the first add, debit the connect fee
+		ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
+	}
+	//log.Printf("Left CC: %+v", leftCC)
 	// get the default money balanance
 	// and go negative on it with the amount still unpaid
-	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
-		ts := cc.Timespans[tsIndex]
+	for _, ts := range leftCC.Timespans {
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
 		}
-		if paid, incrementIndex := ts.IsPaid(); !paid {
-			newTs := ts.SplitByIncrement(incrementIndex)
-			if newTs != nil {
-				idx := tsIndex + 1
-				cc.Timespans = append(cc.Timespans, nil)
-				copy(cc.Timespans[idx+1:], cc.Timespans[idx:])
-				cc.Timespans[idx] = newTs
-				continue
+		for _, increment := range ts.Increments {
+			cost := increment.Cost
+			defaultBalance := ub.GetDefaultMoneyBalance(leftCC.Direction)
+			defaultBalance.SubstractAmount(cost)
+			increment.BalanceInfo.MoneyBalanceUuid = defaultBalance.Uuid
+			increment.BalanceInfo.AccountId = ub.Id
+			increment.paid = true
+			if count {
+				ub.countUnits(&Action{BalanceType: CREDIT, Direction: leftCC.Direction, Balance: &Balance{Value: cost, DestinationId: leftCC.Destination}})
 			}
-			for _, increment := range ts.Increments {
-				cost := increment.Cost
-				ub.GetDefaultMoneyBalance(cc.Direction).SubstractAmount(cost)
-				if count {
-					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
-				}
+			if !ub.AllowNegative {
 				err = errors.New("not enough credit")
 			}
 		}
 	}
-CONNECT_FEE:
-	if cc.deductConnectFee {
-		connectFee := cc.GetConnectFee()
-		connectFeePaid := false
-		for _, b := range usefulMoneyBalances {
-			if b.Value >= connectFee {
-				b.SubstractAmount(connectFee)
-				// the conect fee is not refundable!
-				if count {
-					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
-				}
-				connectFeePaid = true
-				break
-			}
-		}
-		// debit connect fee
-		if connectFee > 0 && !connectFeePaid {
-			// there are no money for the connect fee; go negative
-			ub.GetDefaultMoneyBalance(cc.Direction).Value -= connectFee
-			// the conect fee is not refundable!
-			if count {
-				ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
-			}
-		}
+
+COMMIT:
+	if !dryRun {
+		// save darty shared balances
+		usefulMoneyBalances.SaveDirtyBalances(ub)
+		usefulUnitBalances.SaveDirtyBalances(ub)
 	}
-	// save darty shared balances
-	usefulMoneyBalances.SaveDirtyBalances(ub)
-	usefulUnitBalances.SaveDirtyBalances(ub)
+	//log.Printf("Final CC: %+v", cc)
 	return
 }
 
@@ -302,7 +343,10 @@ func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 		}
 	}
 	// create default balance
-	defaultBalance := &Balance{Weight: 0} // minimum weight
+	defaultBalance := &Balance{
+		Uuid:   "DEFAULT" + utils.GenUUID(),
+		Weight: 0,
+	} // minimum weight
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
@@ -541,4 +585,47 @@ func (account *Account) GetUniqueSharedGroupMembers(destination, direction, cate
 
 type TenantAccount struct {
 	Tenant, Account string
+}
+
+func (acc *Account) Clone() *Account {
+	newAcc := &Account{
+		Id:             acc.Id,
+		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
+		UnitCounters:   nil, // not used when cloned (dryRun)
+		ActionTriggers: nil, // not used when cloned (dryRun)
+		AllowNegative:  acc.AllowNegative,
+		Disabled:       acc.Disabled,
+	}
+	for key, balanceChain := range acc.BalanceMap {
+		newAcc.BalanceMap[key] = balanceChain.Clone()
+	}
+	return newAcc
+}
+
+func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances BalanceChain, count bool) {
+	if cc.deductConnectFee {
+		connectFee := cc.GetConnectFee()
+		//log.Print("CONNECT FEE: %f", connectFee)
+		connectFeePaid := false
+		for _, b := range usefulMoneyBalances {
+			if b.Value >= connectFee {
+				b.SubstractAmount(connectFee)
+				// the conect fee is not refundable!
+				if count {
+					acc.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
+				}
+				connectFeePaid = true
+				break
+			}
+		}
+		// debit connect fee
+		if connectFee > 0 && !connectFeePaid {
+			// there are no money for the connect fee; go negative
+			acc.GetDefaultMoneyBalance(cc.Direction).Value -= connectFee
+			// the conect fee is not refundable!
+			if count {
+				acc.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
+			}
+		}
+	}
 }

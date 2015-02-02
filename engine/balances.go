@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -163,7 +164,10 @@ func (b *Balance) Clone() *Balance {
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
 		Category:       b.Category,
+		SharedGroup:    b.SharedGroup,
+		TimingIDs:      b.TimingIDs,
 	}
+	// clone TimingID slice
 }
 
 // Returns the available number of seconds for a specified credit
@@ -172,7 +176,7 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 	availableDuration := time.Duration(b.Value) * time.Second
 	duration = availableDuration
 	credit = initialCredit
-	cc, err := b.GetCost(cd)
+	cc, err := b.GetCost(cd, false)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 		return 0, credit
@@ -211,16 +215,29 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 	return
 }
 
-func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
-	if b.RatingSubject != "" {
+// Gets the cost using balance RatingSubject if present otherwize
+// retuns a callcost obtained using standard rating
+func (b *Balance) GetCost(cd *CallDescriptor, getStandarIfEmpty bool) (*CallCost, error) {
+	if b.RatingSubject != "" && !strings.HasPrefix(b.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
+		origSubject := cd.Subject
 		cd.Subject = b.RatingSubject
+		origAccount := cd.Account
 		cd.Account = cd.Subject
 		cd.RatingInfos = nil
-		return cd.GetCost()
+		cc, err := cd.GetCost()
+		// restor orig values
+		cd.Subject = origSubject
+		cd.Account = origAccount
+		return cc, err
 	}
-	cc := cd.CreateCallCost()
-	cc.Cost = 0
-	return cc, nil
+	if getStandarIfEmpty {
+		cd.RatingInfos = nil
+		return cd.GetCost()
+	} else {
+		cc := cd.CreateCallCost()
+		cc.Cost = 0
+		return cc, nil
+	}
 }
 
 func (b *Balance) SubstractAmount(amount float64) {
@@ -229,247 +246,161 @@ func (b *Balance) SubstractAmount(amount float64) {
 	b.dirty = true
 }
 
-func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalances BalanceChain) error {
-	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
-		if b.Value <= 0 {
-			return nil
+func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyBalances BalanceChain) (cc *CallCost, err error) {
+	if !b.IsActiveAt(cd.TimeStart) || b.Value <= 0 {
+		return
+	}
+	if duration, err := utils.ParseZeroRatingSubject(b.RatingSubject); err == nil {
+		// we have *zero based units
+		cc = cd.CreateCallCost()
+		cc.Timespans = append(cc.Timespans, &TimeSpan{
+			TimeStart: cd.TimeStart,
+			TimeEnd:   cd.TimeStart,
+		})
+
+		seconds := duration.Seconds()
+		amount := seconds
+
+		cc.Timespans[0].RoundToDuration(duration)
+		cc.Timespans[0].RateInterval = &RateInterval{
+			Rating: &RIRate{
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0,
+						RateIncrement:      duration,
+						RateUnit:           duration,
+					},
+				},
+			},
 		}
-		ts := cc.Timespans[tsIndex]
-		if ts.Increments == nil {
-			ts.createIncrementsSlice()
-		}
-		if paid, _ := ts.IsPaid(); paid {
-			continue
-		}
-		tsWasSplit := false
-		for incrementIndex, increment := range ts.Increments {
-			if tsWasSplit {
-				break
+		cc.Timespans[0].createIncrementsSlice()
+		for _, inc := range cc.Timespans[0].Increments {
+			if seconds == 1 {
+				amount = inc.Duration.Seconds()
 			}
-			if !b.IsActiveAt(ts.GetTimeStartForIncrement(incrementIndex)) {
-				continue
-			}
-			if increment.paid {
-				continue
-			}
-			if duration, err := utils.ParseZeroRatingSubject(b.RatingSubject); err == nil {
-				seconds := duration.Seconds()
-				amount := seconds
-				if seconds == 1 {
-					amount = increment.Duration.Seconds()
+			if b.Value >= amount {
+				b.SubstractAmount(amount)
+				inc.BalanceInfo.UnitBalanceUuid = b.Uuid
+				inc.BalanceInfo.AccountId = ub.Id
+				inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
+				inc.Cost = 0
+				inc.paid = true
+				if count {
+					ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 				}
-				if b.Value >= amount {
-					newTs := ts
-					inc := increment
-					if seconds > 1 { // we need to recreate increments
-						if incrementIndex != 0 {
-							// if increment it's not at the begining we must split the timespan
-							newTs = ts.SplitByIncrement(incrementIndex)
-						}
-						newTs.RoundToDuration(duration)
-						newTs.RateInterval = &RateInterval{
-							Rating: &RIRate{
-								Rates: RateGroups{
-									&Rate{
-										GroupIntervalStart: 0,
-										Value:              0,
-										RateIncrement:      duration,
-										RateUnit:           duration,
-									},
-								},
-							},
-						}
-						newTs.createIncrementsSlice()
-						// insert the new timespan
-						if newTs != ts {
-							tsIndex++
-							cc.Timespans = append(cc.Timespans, nil)
-							copy(cc.Timespans[tsIndex+1:], cc.Timespans[tsIndex:])
-							cc.Timespans[tsIndex] = newTs
-							tsWasSplit = true
-						}
-						cc.Timespans.RemoveOverlapedFromIndex(tsIndex)
-						inc = newTs.Increments[0]
-					}
-					b.SubstractAmount(amount)
-					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.Id
-					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
-					inc.Cost = 0
-					inc.paid = true
-					if count {
-						ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
-					}
-				}
-				continue
 			}
-			// get the new rate
-			cd := cc.CreateCallDescriptor()
-			cd.Subject = b.RatingSubject
-			cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
-			cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
-			cd.DurationIndex = cc.Timespans[len(cc.Timespans)-1].DurationIndex
-			newCC, err := b.GetCost(cd)
-			if err != nil {
-				Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
-				continue
+		}
+	} else {
+		// get the cost from balance
+		//log.Printf("::::::: %+v", cd)
+		cc, err = b.GetCost(cd, true)
+		cc.Timespans.Decompress()
+		if err != nil {
+			return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
+		}
+		for tsIndex, ts := range cc.Timespans {
+			if ts.Increments == nil {
+				ts.createIncrementsSlice()
 			}
-			//debit new callcost
-			var paidTs []*TimeSpan
-			for _, nts := range newCC.Timespans {
-				nts.createIncrementsSlice()
-				paidTs = append(paidTs, nts)
-				for _, nInc := range nts.Increments {
-					// debit minutes and money
-					seconds := nInc.Duration.Seconds()
-					cost := nInc.Cost
-					var moneyBal *Balance
-					for _, mb := range moneyBalances {
-						if mb.Value >= cost {
-							moneyBal = mb
-							break
-						}
-					}
-					if (cost == 0 || moneyBal != nil) && b.Value >= seconds {
-						b.SubstractAmount(seconds)
-						nInc.BalanceInfo.UnitBalanceUuid = b.Uuid
-						nInc.BalanceInfo.AccountId = ub.Id
-						nInc.UnitInfo = &UnitInfo{newCC.Destination, seconds, cc.TOR}
-						if cost != 0 {
-							nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
-							moneyBal.SubstractAmount(cost)
-						}
-						nInc.paid = true
-						if count {
-							ub.countUnits(&Action{BalanceType: newCC.TOR, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
-							if cost != 0 {
-								ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: cost, DestinationId: newCC.Destination}})
-							}
-						}
-					} else {
-						increment.paid = false
+			//log.Printf("TS: %+v", ts)
+			for incIndex, inc := range ts.Increments {
+				// debit minutes and money
+				seconds := inc.Duration.Seconds()
+				cost := inc.Cost
+				var moneyBal *Balance
+				for _, mb := range moneyBalances {
+					if mb.Value >= cost {
+						moneyBal = mb
 						break
 					}
 				}
-			}
-			// make sure the last paid ts is split by the unpaid increment to retain
-			// original rating interval
-			if len(paidTs) > 0 {
-				lastPaidTs := paidTs[len(paidTs)-1]
-				if isPaid, lastPaidIncrementIndex := lastPaidTs.IsPaid(); !isPaid {
-					if lastPaidIncrementIndex > 0 {
-						// shorten the last paid ts
-						lastPaidTs.SplitByIncrement(lastPaidIncrementIndex)
-					} else {
-						// delete if not paid
-						paidTs[len(paidTs)-1] = nil
-						paidTs = paidTs[:len(paidTs)-1]
+				if (cost == 0 || moneyBal != nil) && b.Value >= seconds {
+					b.SubstractAmount(seconds)
+					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
+					inc.BalanceInfo.AccountId = ub.Id
+					inc.UnitInfo = &UnitInfo{cc.Destination, seconds, cc.TOR}
+					if cost != 0 {
+						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
+						moneyBal.SubstractAmount(cost)
 					}
+					inc.paid = true
+					if count {
+						ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: seconds, DestinationId: cc.Destination}})
+						if cost != 0 {
+							ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
+						}
+					}
+				} else {
+					inc.paid = false
+					// delete the rest of the unpiad increments/timespans
+					if incIndex == 0 {
+						// cat the entire current timespan
+						cc.Timespans = cc.Timespans[:tsIndex]
+					} else {
+						ts.SplitByIncrement(incIndex)
+						cc.Timespans = cc.Timespans[:tsIndex+1]
+					}
+					if len(cc.Timespans) == 0 {
+						cc = nil
+					}
+					return cc, nil
 				}
-			}
-			newTs := ts.SplitByIncrement(incrementIndex)
-			increment.paid = (&cc.Timespans).OverlapWithTimeSpans(paidTs, newTs, tsIndex)
-			tsWasSplit = increment.paid
-			if !increment.paid {
-				break
 			}
 		}
 	}
-	return nil
+	return
 }
 
-func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
-	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
-		if b.Value <= 0 {
-			return nil
-		}
-		ts := cc.Timespans[tsIndex]
+func (b *Balance) DebitMoney(cd *CallDescriptor, count bool, ub *Account) (cc *CallCost, err error) {
+	if !b.IsActiveAt(cd.TimeStart) || b.Value <= 0 {
+		return
+	}
+	//log.Printf("}}}}}}} %+v", cd)
+	cc, err = b.GetCost(cd, true)
+	cc.Timespans.Decompress()
+	//log.Printf("CallCost In Debit: %+v", cc)
+	//for _, ts := range cc.Timespans {
+	//	log.Printf("CC_TS: %+v", ts.RateInterval.Rating.Rates[0])
+	//}
+	if err != nil {
+		return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
+	}
+
+	for tsIndex, ts := range cc.Timespans {
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
 		}
-		if paid, _ := ts.IsPaid(); paid {
-			continue
-		}
-		tsWasSplit := false
-		for incrementIndex, increment := range ts.Increments {
-			if tsWasSplit {
-				break
-			}
-			if !b.IsActiveAt(ts.GetTimeStartForIncrement(incrementIndex)) {
-				continue
-			}
-			if increment.paid {
-				continue
-			}
+
+		for incIndex, inc := range ts.Increments {
 			// check standard subject tags
-			if b.RatingSubject == "" {
-				amount := increment.Cost
-				if b.Value >= amount {
-					b.SubstractAmount(amount)
-					increment.BalanceInfo.MoneyBalanceUuid = b.Uuid
-					increment.BalanceInfo.AccountId = ub.Id
-					increment.paid = true
-					if count {
-						ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
-					}
+			amount := inc.Cost
+			if b.Value >= amount {
+				b.SubstractAmount(amount)
+				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
+				inc.BalanceInfo.AccountId = ub.Id
+				inc.paid = true
+				if count {
+					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 				}
 			} else {
-				// get the new rate
-				cd := cc.CreateCallDescriptor()
-				cd.Subject = b.RatingSubject
-				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
-				cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
-				cd.DurationIndex = cc.Timespans[len(cc.Timespans)-1].DurationIndex
-				newCC, err := b.GetCost(cd)
-				if err != nil {
-					Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
-					continue
+				inc.paid = false
+				// delete the rest of the unpiad increments/timespans
+				if incIndex == 0 {
+					// cat the entire current timespan
+					cc.Timespans = cc.Timespans[:tsIndex]
+				} else {
+					ts.SplitByIncrement(incIndex)
+					cc.Timespans = cc.Timespans[:tsIndex+1]
 				}
-				//debit new callcost
-				var paidTs []*TimeSpan
-				for _, nts := range newCC.Timespans {
-					nts.createIncrementsSlice()
-					paidTs = append(paidTs, nts)
-					for _, nInc := range nts.Increments {
-						// debit money
-						amount := nInc.Cost
-						if b.Value >= amount {
-							b.SubstractAmount(amount)
-							nInc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-							nInc.BalanceInfo.AccountId = ub.Id
-							nInc.paid = true
-							if count {
-								ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
-							}
-						} else {
-							increment.paid = false
-							break
-						}
-					}
+				if len(cc.Timespans) == 0 {
+					cc = nil
 				}
-				if len(paidTs) > 0 {
-					lastPaidTs := paidTs[len(paidTs)-1]
-					if isPaid, lastPaidIncrementIndex := lastPaidTs.IsPaid(); !isPaid {
-						if lastPaidIncrementIndex > 0 {
-							// shorten the last paid ts
-							lastPaidTs.SplitByIncrement(lastPaidIncrementIndex)
-						} else {
-							// delete if not paid
-							paidTs[len(paidTs)-1] = nil
-							paidTs = paidTs[:len(paidTs)-1]
-						}
-					}
-				}
-				newTs := ts.SplitByIncrement(incrementIndex)
-				increment.paid = (&cc.Timespans).OverlapWithTimeSpans(paidTs, newTs, tsIndex)
-				tsWasSplit = increment.paid
-				if !increment.paid {
-					break
-				}
+				return cc, nil
 			}
 		}
 	}
-	return nil
+	return cc, nil
 }
 
 /*
@@ -562,7 +493,7 @@ func (bc BalanceChain) HasBalance(balance *Balance) bool {
 
 func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 	for _, b := range bc {
-		// TODO: check if teh account was not already saved ?
+		// TODO: check if the account was not already saved ?
 		if b.account != nil && b.account != acc && b.dirty {
 			accountingStorage.SetAccount(b.account)
 		}
