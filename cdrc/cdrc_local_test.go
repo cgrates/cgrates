@@ -168,7 +168,7 @@ func TestProcessCdrDir(t *testing.T) {
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cdrcCfg, true, nil)
+	cdrc, err := NewCdrc(cdrcCfg, true, nil, make(chan struct{}))
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -204,7 +204,7 @@ func TestProcessCdr3Dir(t *testing.T) {
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cdrcCfg, true, nil)
+	cdrc, err := NewCdrc(cdrcCfg, true, nil, make(chan struct{}))
 	if err != nil {
 		t.Fatal(err.Error())
 	}

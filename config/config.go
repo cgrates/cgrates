@@ -64,6 +64,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
+	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{})
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
