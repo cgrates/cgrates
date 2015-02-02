@@ -118,7 +118,6 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	at := &engine.ActionTiming{
 		AccountIds: []string{tag},
 	}
-
 	if attr.Direction == "" {
 		attr.Direction = engine.OUTBOUND
 	}

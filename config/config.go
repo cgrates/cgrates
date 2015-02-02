@@ -41,7 +41,12 @@ const (
 	FS       = "freeswitch"
 )
 
-var cgrCfg *CGRConfig // will be shared
+var (
+	cgrCfg              *CGRConfig       // will be shared
+	dfltFsConnConfig    *FsConnConfig    // Default FreeSWITCH Connection configuration, built out of json default configuration
+	dfltKamConnConfig   *KamConnConfig   // Default Kamailio Connection configuration
+	dfltOsipsConnConfig *OsipsConnConfig // Default OpenSIPS Connection configuration
+)
 
 // Used to retrieve system configuration from other packages
 func CgrConfig() *CGRConfig {
@@ -56,6 +61,10 @@ func SetCgrConfig(cfg *CGRConfig) {
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
 	cfg.DataFolderPath = "/usr/share/cgrates/"
+	cfg.SmFsConfig = new(SmFsConfig)
+	cfg.SmKamConfig = new(SmKamConfig)
+	cfg.SmOsipsConfig = new(SmOsipsConfig)
+	cfg.ConfigReloads[utils.CDRC] = make(chan struct{})
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
@@ -65,6 +74,9 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	}
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles[utils.META_DEFAULT].Clone()
+	dfltFsConnConfig = cfg.SmFsConfig.Connections[0] // We leave it crashing here on purpose if no Connection defaults defined
+	dfltKamConnConfig = cfg.SmKamConfig.Connections[0]
+	dfltOsipsConnConfig = cfg.SmOsipsConfig.Connections[0]
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -171,10 +183,11 @@ type CGRConfig struct {
 	CDRSStoreDisable      bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
 	CDRStatsEnabled       bool              // Enable CDR Stats service
 	CDRStatConfig         *CdrStatsConfig   // Active cdr stats configuration instances, platform level
-	dfltCdreProfile       *CdreConfig       // Use it to cache the default cdreConfig profile, so we can clone the orginal one in separate instances
 	CdreProfiles          map[string]*CdreConfig
-	dfltCdrcProfile       *CdrcConfig            // Use it to cache the default cdrcConfig profile
 	CdrcProfiles          map[string]*CdrcConfig // Number of CDRC instances running imports
+	SmFsConfig            *SmFsConfig            // SM-FreeSWITCH configuration
+	SmKamConfig           *SmKamConfig           // SM-Kamailio Configuration
+	SmOsipsConfig         *SmOsipsConfig         // SM-OpenSIPS Configuration
 	SMEnabled             bool
 	SMSwitchType          string
 	SMRater               string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -186,32 +199,37 @@ type CGRConfig struct {
 	MediatorEnabled       bool          // Starts Mediator service: <true|false>.
 	MediatorReconnects    int           // Number of reconnects to rater before giving up.
 	MediatorRater         string
-	MediatorStats         string            // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorStoreDisable  bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	FreeswitchServer      string            // freeswitch address host:port
-	FreeswitchPass        string            // FS socket password
-	FreeswitchReconnects  int               // number of times to attempt reconnect after connect fails
-	FSMinDurLowBalance    time.Duration     // Threshold which will trigger low balance warnings
-	FSLowBalanceAnnFile   string            // File to be played when low balance is reached
-	FSEmptyBalanceContext string            // If defined, call will be transfered to this context on empty balance
-	FSEmptyBalanceAnnFile string            // File to be played before disconnecting prepaid calls (applies only if no context defined)
-	FSCdrExtraFields      []*utils.RSRField // Extra fields to store in CDRs in case of processing them
-	OsipsListenUdp        string            // Address where to listen for event datagrams coming from OpenSIPS
-	OsipsMiAddr           string            // Adress where to reach OpenSIPS mi_datagram module
-	OsipsEvSubscInterval  time.Duration     // Refresh event subscription at this interval
-	OsipsReconnects       int               // Number of attempts on connect failure.
-	KamailioEvApiAddr     string            // Address of the kamailio evapi server
-	KamailioReconnects    int               // Number of reconnect attempts on connection lost
-	HistoryAgentEnabled   bool              // Starts History as an agent: <true|false>.
-	HistoryServer         string            // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled  bool              // Starts History as server: <true|false>.
-	HistoryDir            string            // Location on disk where to store history files.
-	HistorySaveInterval   time.Duration     // The timout duration between history writes
-	MailerServer          string            // The server to use when sending emails out
-	MailerAuthUser        string            // Authenticate to email server using this user
-	MailerAuthPass        string            // Authenticate to email server with this password
-	MailerFromAddr        string            // From address used when sending emails out
-	DataFolderPath        string            // Path towards data folder, for tests internal usage, not loading out of .json options
+	MediatorStats         string                   // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	MediatorStoreDisable  bool                     // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	FreeswitchServer      string                   // freeswitch address host:port
+	FreeswitchPass        string                   // FS socket password
+	FreeswitchReconnects  int                      // number of times to attempt reconnect after connect fails
+	FSMinDurLowBalance    time.Duration            // Threshold which will trigger low balance warnings
+	FSLowBalanceAnnFile   string                   // File to be played when low balance is reached
+	FSEmptyBalanceContext string                   // If defined, call will be transfered to this context on empty balance
+	FSEmptyBalanceAnnFile string                   // File to be played before disconnecting prepaid calls (applies only if no context defined)
+	FSCdrExtraFields      []*utils.RSRField        // Extra fields to store in CDRs in case of processing them
+	OsipsListenUdp        string                   // Address where to listen for event datagrams coming from OpenSIPS
+	OsipsMiAddr           string                   // Adress where to reach OpenSIPS mi_datagram module
+	OsipsEvSubscInterval  time.Duration            // Refresh event subscription at this interval
+	OsipsReconnects       int                      // Number of attempts on connect failure.
+	KamailioEvApiAddr     string                   // Address of the kamailio evapi server
+	KamailioReconnects    int                      // Number of reconnect attempts on connection lost
+	HistoryAgentEnabled   bool                     // Starts History as an agent: <true|false>.
+	HistoryServer         string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled  bool                     // Starts History as server: <true|false>.
+	HistoryDir            string                   // Location on disk where to store history files.
+	HistorySaveInterval   time.Duration            // The timout duration between history writes
+	MailerServer          string                   // The server to use when sending emails out
+	MailerAuthUser        string                   // Authenticate to email server using this user
+	MailerAuthPass        string                   // Authenticate to email server with this password
+	MailerFromAddr        string                   // From address used when sending emails out
+	DataFolderPath        string                   // Path towards data folder, for tests internal usage, not loading out of .json options
+	ConfigReloads         map[string]chan struct{} // Signals to specific entities that a config reload should occur
+	// Cache defaults loaded from json and needing clones
+	dfltCdreProfile *CdreConfig // Default cdreConfig profile
+	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
+
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -296,6 +314,18 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 	jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg()
+	if err != nil {
+		return err
+	}
+	jsnSmFsCfg, err := jsnCfg.SmFsJsonCfg()
+	if err != nil {
+		return err
+	}
+	jsnSmKamCfg, err := jsnCfg.SmKamJsonCfg()
+	if err != nil {
+		return err
+	}
+	jsnSmOsipsCfg, err := jsnCfg.SmOsipsJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -507,6 +537,21 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			if err = self.CdrcProfiles[profileName].loadFromJsonCfg(jsnCrc1Cfg); err != nil {
 				return err
 			}
+		}
+	}
+	if jsnSmFsCfg != nil {
+		if err := self.SmFsConfig.loadFromJsonCfg(jsnSmFsCfg); err != nil {
+			return err
+		}
+	}
+	if jsnSmKamCfg != nil {
+		if err := self.SmKamConfig.loadFromJsonCfg(jsnSmKamCfg); err != nil {
+			return err
+		}
+	}
+	if jsnSmOsipsCfg != nil {
+		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
+			return err
 		}
 	}
 	if jsnSMCfg != nil {

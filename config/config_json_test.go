@@ -332,6 +332,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 	}
 }
 
+/*
 func TestDfSessionManagerJsonCfg(t *testing.T) {
 	eCfg := &SessionManagerJsonCfg{
 		Enabled:           utils.BoolPointer(false),
@@ -388,6 +389,80 @@ func TestDfOsipsJsonCfg(t *testing.T) {
 		Reconnects:                utils.IntPointer(3),
 	}
 	if cfg, err := dfCgrJsonCfg.OsipsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+*/
+
+func TestSmFsJsonCfg(t *testing.T) {
+	eCfg := &SmFsJsonCfg{
+		Enabled:                utils.BoolPointer(false),
+		Rater:                  utils.StringPointer("internal"),
+		Cdrs:                   utils.StringPointer(""),
+		Cdr_extra_fields:       utils.StringSlicePointer([]string{}),
+		Debit_interval:         utils.StringPointer("10s"),
+		Min_call_duration:      utils.StringPointer("0s"),
+		Max_call_duration:      utils.StringPointer("3h"),
+		Min_dur_low_balance:    utils.StringPointer("5s"),
+		Low_balance_ann_file:   utils.StringPointer(""),
+		Empty_balance_context:  utils.StringPointer(""),
+		Empty_balance_ann_file: utils.StringPointer(""),
+		Connections: &[]*FsConnJsonCfg{
+			&FsConnJsonCfg{
+				Server:     utils.StringPointer("127.0.0.1:8021"),
+				Password:   utils.StringPointer("ClueCon"),
+				Reconnects: utils.IntPointer(-1),
+			}},
+	}
+	if cfg, err := dfCgrJsonCfg.SmFsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestSmKamJsonCfg(t *testing.T) {
+	eCfg := &SmKamJsonCfg{
+		Enabled:           utils.BoolPointer(false),
+		Rater:             utils.StringPointer("internal"),
+		Cdrs:              utils.StringPointer(""),
+		Debit_interval:    utils.StringPointer("10s"),
+		Min_call_duration: utils.StringPointer("0s"),
+		Max_call_duration: utils.StringPointer("3h"),
+		Connections: &[]*KamConnJsonCfg{
+			&KamConnJsonCfg{
+				Evapi_addr: utils.StringPointer("127.0.0.1:8448"),
+				Reconnects: utils.IntPointer(-1),
+			},
+		},
+	}
+	if cfg, err := dfCgrJsonCfg.SmKamJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestSmOsipsJsonCfg(t *testing.T) {
+	eCfg := &SmOsipsJsonCfg{
+		Enabled:                   utils.BoolPointer(false),
+		Listen_udp:                utils.StringPointer("127.0.0.1:2020"),
+		Rater:                     utils.StringPointer("internal"),
+		Cdrs:                      utils.StringPointer(""),
+		Debit_interval:            utils.StringPointer("10s"),
+		Min_call_duration:         utils.StringPointer("0s"),
+		Max_call_duration:         utils.StringPointer("3h"),
+		Events_subscribe_interval: utils.StringPointer("60s"),
+		Connections: &[]*OsipsConnJsonCfg{
+			&OsipsConnJsonCfg{
+				Mi_addr:    utils.StringPointer("127.0.0.1:8020"),
+				Reconnects: utils.IntPointer(-1),
+			},
+		},
+	}
+	if cfg, err := dfCgrJsonCfg.SmOsipsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

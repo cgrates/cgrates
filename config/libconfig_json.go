@@ -189,6 +189,65 @@ type OsipsJsonCfg struct {
 	Reconnects                *int
 }
 
+// SM-FreeSWITCH config section
+type SmFsJsonCfg struct {
+	Enabled                *bool
+	Rater                  *string
+	Cdrs                   *string
+	Cdr_extra_fields       *[]string
+	Debit_interval         *string
+	Min_call_duration      *string
+	Max_call_duration      *string
+	Min_dur_low_balance    *string
+	Low_balance_ann_file   *string
+	Empty_balance_context  *string
+	Empty_balance_ann_file *string
+	Connections            *[]*FsConnJsonCfg
+}
+
+// Represents one connection instance towards FreeSWITCH
+type FsConnJsonCfg struct {
+	Server     *string
+	Password   *string
+	Reconnects *int
+}
+
+// SM-Kamailio config section
+type SmKamJsonCfg struct {
+	Enabled           *bool
+	Rater             *string
+	Cdrs              *string
+	Debit_interval    *string
+	Min_call_duration *string
+	Max_call_duration *string
+	Connections       *[]*KamConnJsonCfg
+}
+
+// Represents one connection instance towards Kamailio
+type KamConnJsonCfg struct {
+	Evapi_addr *string
+	Reconnects *int
+}
+
+// SM-OpenSIPS config section
+type SmOsipsJsonCfg struct {
+	Enabled                   *bool
+	Listen_udp                *string
+	Rater                     *string
+	Cdrs                      *string
+	Debit_interval            *string
+	Min_call_duration         *string
+	Max_call_duration         *string
+	Events_subscribe_interval *string
+	Connections               *[]*OsipsConnJsonCfg
+}
+
+// Represents one connection instance towards OpenSIPS
+type OsipsConnJsonCfg struct {
+	Mi_addr    *string
+	Reconnects *int
+}
+
 // History server config section
 type HistServJsonCfg struct {
 	Enabled       *bool

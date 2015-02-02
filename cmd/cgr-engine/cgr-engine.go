@@ -125,11 +125,11 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 }
 
 // Fires up a cdrc instance
-func startCdrc(cdrsChan chan struct{}, cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS) {
+func startCdrc(cdrsChan chan struct{}, cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS, closeChan chan struct{}) {
 	if cdrcCfg.CdrsAddress == utils.INTERNAL {
 		<-cdrsChan // Wait for CDRServer to come up before start processing
 	}
-	cdrc, err := cdrc.NewCdrc(cdrcCfg, httpSkipTlsCheck, cdrServer)
+	cdrc, err := cdrc.NewCdrc(cdrcCfg, httpSkipTlsCheck, cdrServer, closeChan)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -508,7 +508,7 @@ func main() {
 		} else if !cdrcEnabled {
 			cdrcEnabled = true // Mark that at least one cdrc service is active
 		}
-		go startCdrc(cdrsChan, cdrcConfig, cfg.HttpSkipTlsVerify, cdrServer)
+		go startCdrc(cdrsChan, cdrcConfig, cfg.HttpSkipTlsVerify, cdrServer, cfg.ConfigReloads[utils.CDRC])
 	}
 	if cdrcEnabled {
 		engine.Logger.Info("Starting CGRateS CDR client.")

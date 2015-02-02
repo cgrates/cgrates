@@ -199,41 +199,49 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"session_manager": {
+"sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-	"switch_type": "freeswitch",	// defines the type of switch behind: <freeswitch|kamailio|opensips>
 	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"reconnects": 3,				// number of reconnects to rater/cdrs before giving up.
-	"debit_interval": 10,			// interval to perform debits on.
-	"min_call_duration": "0s",		// only authorize calls with allowed duration bigger than this
+	"cdr_extra_fields": [],			// extra fields to store in CDRs in case of processing them
+	"debit_interval": "10s",		// interval to perform debits on.
+	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
-},
-
-
-"freeswitch": {
-	"server": "127.0.0.1:8021",		// adress where to connect to FreeSWITCH socket.
-	"password": "ClueCon",			// freeSWITCH socket password.
-	"reconnects": 5,				// number of attempts on connect failure.
 	"min_dur_low_balance": "5s",	// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
 	"low_balance_ann_file": "",		// file to be played when low balance is reached for prepaid calls
-	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance 
+	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance
 	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-	"cdr_extra_fields": [],			// extra fields to store in CDRs in case of processing them
+	"connections":[					// instantiate connections to multiple FreeSWITCH servers
+		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1}	// reconnects -1 to indefinitely connect
+	],
 },
 
 
-"kamailio": {
-	"evapi_addr": "127.0.0.1:8448",	// address of the kamailio evapi server
-	"reconnects": 3,				// number of attempts on connect failure
+"sm_kamailio": {
+	"enabled": false,				// starts SessionManager service: <true|false>
+	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
+	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"debit_interval": "10s",		// interval to perform debits on.
+	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
+	"connections":[					// Instantiate connections to multiple Kamailio servers
+		{"evapi_addr": "127.0.0.1:8448", "reconnects": -1}						// reconnects -1 to indefinitely connect
+	],
 },
 
 
-"opensips": {
+"sm_opensips": {
+	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
-	"mi_addr": "127.0.0.1:8020",		// adress where to reach OpenSIPS mi_datagram module
+	"rater": "internal",				// address where to reach the Rater <""|internal|127.0.0.1:2013>
+	"cdrs": "",							// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"debit_interval": "10s",			// interval to perform debits on.
+	"min_call_duration": "0s",			// only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
-	"reconnects": 3,					// number of attempts on connect failure
+	"connections":[						// instantiate connections to multiple FreeSWITCH servers
+		{"mi_addr": "127.0.0.1:8020", "reconnects": -1}							// reconnects -1 to indefinitely connect
+	],
 },
 
 
