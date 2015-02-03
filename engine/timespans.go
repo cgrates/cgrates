@@ -274,6 +274,13 @@ func (ts *TimeSpan) getCost() float64 {
 	}
 }
 
+func (ts *TimeSpan) setRatingInfo(rp *RatingInfo) {
+	ts.ratingInfo = rp
+	ts.MatchedSubject = rp.MatchedSubject
+	ts.MatchedPrefix = rp.MatchedPrefix
+	ts.MatchedDestId = rp.MatchedDestId
+}
+
 func (ts *TimeSpan) createIncrementsSlice() {
 	if ts.RateInterval == nil {
 		return
@@ -504,10 +511,7 @@ func (nts *TimeSpan) copyRatingInfo(ts *TimeSpan) {
 	if ts.ratingInfo == nil {
 		return
 	}
-	nts.ratingInfo = ts.ratingInfo
-	nts.MatchedSubject = ts.ratingInfo.MatchedSubject
-	nts.MatchedPrefix = ts.ratingInfo.MatchedPrefix
-	nts.MatchedDestId = ts.ratingInfo.MatchedDestId
+	nts.setRatingInfo(ts.ratingInfo)
 }
 
 // returns a time for the specified second in the time span
