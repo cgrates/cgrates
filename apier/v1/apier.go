@@ -175,18 +175,14 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error
 }
 
 type AttrLoadDestination struct {
-	TPid               string
-	DestinationId      string
-	PreventCacheReload bool // Set it on true in case of "batch mode" when reloads happen in the end of recursive API call
+	TPid          string
+	DestinationId string
 }
 
 // Load destinations from storDb into dataDb.
 func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if attrs.DestinationId == utils.EMPTY {
-		attrs.DestinationId = ""
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if loaded, err := dbReader.LoadDestinationByTag(attrs.DestinationId); err != nil {
@@ -194,12 +190,14 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	} else if !loaded {
 		return errors.New(utils.ERR_NOT_FOUND)
 	}
-	if !attrs.PreventCacheReload {
-		//Automatic cache of the newly inserted rating plan
-		didNotChange := []string{}
-		if err := self.RatingDb.CacheRating([]string{attrs.DestinationId}, didNotChange, didNotChange, didNotChange, didNotChange); err != nil {
-			return err
-		}
+	//Automatic cache of the newly inserted rating plan
+	didNotChange := []string{}
+	destIds := []string{engine.DESTINATION_PREFIX + attrs.DestinationId}
+	if len(attrs.DestinationId) == 0 {
+		destIds = nil // Cache all destinations, temporary here until we add ApierV2.LoadDestinations
+	}
+	if err := self.RatingDb.CacheRating(destIds, didNotChange, didNotChange, didNotChange, didNotChange); err != nil {
+		return err
 	}
 	*reply = OK
 	return nil
@@ -207,26 +205,8 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 
 // Load derived chargers from storDb into dataDb.
 func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Category", "Direction", "Account", "Subject"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if attrs.Loadid == utils.EMPTY {
-		attrs.Loadid = ""
-	}
-	if attrs.Tenant == utils.EMPTY {
-		attrs.Tenant = ""
-	}
-	if attrs.Category == utils.EMPTY {
-		attrs.Category = ""
-	}
-	if attrs.Direction == utils.EMPTY {
-		attrs.Direction = ""
-	}
-	if attrs.Account == utils.EMPTY {
-		attrs.Account = ""
-	}
-	if attrs.Subject == utils.EMPTY {
-		attrs.Subject = ""
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if err := dbReader.LoadDerivedChargersFiltered(&attrs); err != nil {
@@ -234,7 +214,11 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 	}
 	//Automatic cache of the newly inserted rating plan
 	didNotChange := []string{}
-	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, didNotChange, nil); err != nil {
+	var derivedChargingKeys []string
+	if len(attrs.Direction) != 0 && len(attrs.Tenant) != 0 && len(attrs.Category) != 0 && len(attrs.Account) != 0 && len(attrs.Subject) != 0 {
+		derivedChargingKeys = []string{engine.DERIVEDCHARGERS_PREFIX + attrs.GetDerivedChargersKey()}
+	}
+	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, didNotChange, derivedChargingKeys); err != nil {
 		return err
 	}
 	*reply = OK
@@ -248,11 +232,8 @@ type AttrLoadRatingPlan struct {
 
 // Process dependencies and load a specific rating plan from storDb into dataDb.
 func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if attrs.RatingPlanId == utils.EMPTY {
-		attrs.RatingPlanId = ""
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if loaded, err := dbReader.LoadRatingPlanByTag(attrs.RatingPlanId); err != nil {
@@ -262,7 +243,11 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	}
 	//Automatic cache of the newly inserted rating plan
 	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(nil, nil, didNotChange, didNotChange, didNotChange); err != nil {
+	var changedRPlKeys []string
+	if len(attrs.TPid) != 0 {
+		changedRPlKeys = []string{engine.RATING_PLAN_PREFIX + attrs.RatingPlanId}
+	}
+	if err := self.RatingDb.CacheRating(nil, changedRPlKeys, didNotChange, didNotChange, didNotChange); err != nil {
 		return err
 	}
 	*reply = OK
@@ -271,26 +256,9 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
 func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Category", "Direction", "Subject"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
-
-	if attrs.LoadId == utils.EMPTY {
-		attrs.LoadId = ""
-	}
-	if attrs.Tenant == utils.EMPTY {
-		attrs.Tenant = ""
-	}
-	if attrs.Category == utils.EMPTY {
-		attrs.Category = ""
-	}
-	if attrs.Direction == utils.EMPTY {
-		attrs.Direction = ""
-	}
-	if attrs.Subject == utils.EMPTY {
-		attrs.Subject = ""
-	}
-
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if err := dbReader.LoadRatingProfileFiltered(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -315,11 +283,8 @@ type AttrLoadSharedGroup struct {
 
 // Load destinations from storDb into dataDb.
 func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if attrs.SharedGroupId == utils.EMPTY {
-		attrs.SharedGroupId = ""
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if err := dbReader.LoadSharedGroupByTag(attrs.SharedGroupId, true); err != nil {
@@ -327,7 +292,11 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	}
 	//Automatic cache of the newly inserted rating plan
 	didNotChange := []string{}
-	if err := self.AccountDb.CacheAccounting(didNotChange, nil, didNotChange, didNotChange); err != nil {
+	var changedSharedGroup []string
+	if len(attrs.SharedGroupId) != 0 {
+		changedSharedGroup = []string{engine.SHARED_GROUP_PREFIX + attrs.SharedGroupId}
+	}
+	if err := self.AccountDb.CacheAccounting(didNotChange, changedSharedGroup, didNotChange, didNotChange); err != nil {
 		return err
 	}
 	*reply = OK
@@ -341,11 +310,8 @@ type AttrLoadCdrStats struct {
 
 // Load destinations from storDb into dataDb.
 func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "CdrStatsId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if attrs.CdrStatsId == utils.EMPTY {
-		attrs.CdrStatsId = ""
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if err := dbReader.LoadCdrStatsByTag(attrs.CdrStatsId, true); err != nil {
@@ -694,22 +660,10 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
 func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-	if attrs.LoadId == utils.EMPTY {
-		attrs.LoadId = ""
-	}
-	if attrs.Tenant == utils.EMPTY {
-		attrs.Tenant = ""
-	}
-	if attrs.Account == utils.EMPTY {
-		attrs.Account = ""
-	}
-	if attrs.Direction == utils.EMPTY {
-		attrs.Direction = ""
-	}
 	if _, err := engine.AccLock.Guard(attrs.KeyId(), func() (float64, error) {
 		if err := dbReader.LoadAccountActionsFiltered(&attrs); err != nil {
 			return 0, err

@@ -25,8 +25,8 @@ binary-arch: clean
 	cd $(SRCDIR) && go install
 	mkdir -p $(PKGDIR)/usr/bin
 	cp $(GOPATH)/bin/cgr-* $(PKGDIR)/usr/bin/
-	mkdir -p $(PKGDIR)/etc/cgrates
-	cp -r $(SRCDIR)/data/conf/cgrates $(PKGDIR)/etc/cgrates
+	mkdir -p $(PKGDIR)/etc/
+	cp -r $(SRCDIR)/data/conf/cgrates $(PKGDIR)/etc/
 	mkdir -p $(PKGDIR)/usr/share/cgrates
 	cp -r $(SRCDIR)/data/* $(PKGDIR)/usr/share/cgrates/
 	mkdir -p $(PKGDIR)/var/log/cgrates/cdrc/in

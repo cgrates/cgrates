@@ -20,7 +20,6 @@ package v2
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
@@ -38,12 +37,8 @@ type AttrLoadRatingProfile struct {
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
 func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-
-	if attrs.RatingProfileId == utils.EMPTY {
-		attrs.RatingProfileId = ""
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	tpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
 	tpRpf.SetRatingProfilesId(attrs.RatingProfileId)
@@ -71,15 +66,10 @@ type AttrLoadAccountActions struct {
 
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
 func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-
-	if attrs.AccountActionsId == utils.EMPTY {
-		attrs.AccountActionsId = ""
-	}
-
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
 
@@ -111,12 +101,8 @@ type AttrLoadDerivedChargers struct {
 
 // Load derived chargers from storDb into dataDb.
 func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DerivedChargersId"}); len(missing) != 0 {
-		log.Printf("ATTR: %+v", attrs)
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if attrs.DerivedChargersId == utils.EMPTY {
-		attrs.DerivedChargersId = ""
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	tpDc := &utils.TPDerivedChargers{TPid: attrs.TPid}
 	tpDc.SetDerivedChargersId(attrs.DerivedChargersId)
@@ -127,7 +113,11 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	}
 	//Automatic cache of the newly inserted rating plan
 	didNotChange := []string{}
-	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, didNotChange, nil); err != nil {
+	var dcsChanged []string
+	if len(attrs.DerivedChargersId) != 0 {
+		dcsChanged = []string{engine.DERIVEDCHARGERS_PREFIX + attrs.DerivedChargersId}
+	}
+	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, didNotChange, dcsChanged); err != nil {
 		return err
 	}
 	*reply = v1.OK
