@@ -166,8 +166,8 @@ func (b *Balance) Clone() *Balance {
 		Category:       b.Category,
 		SharedGroup:    b.SharedGroup,
 		TimingIDs:      b.TimingIDs,
+		Timings:        b.Timings, // should not be a problem with aliasing
 	}
-	// clone TimingID slice
 }
 
 // Returns the available number of seconds for a specified credit

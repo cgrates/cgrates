@@ -317,16 +317,13 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		return
 	}
 
-	firstSpan.ratingInfo = cd.RatingInfos[0]
+	firstSpan.setRatingInfo(cd.RatingInfos[0])
 	if cd.TOR == MINUTES {
 		// split on rating plans
 		afterStart, afterEnd := false, false //optimization for multiple activation periods
 		for _, rp := range cd.RatingInfos {
 			if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
-				firstSpan.ratingInfo = rp
-				firstSpan.MatchedSubject = rp.MatchedSubject
-				firstSpan.MatchedPrefix = rp.MatchedPrefix
-				firstSpan.MatchedDestId = rp.MatchedDestId
+				firstSpan.setRatingInfo(rp)
 			} else {
 				afterStart = true
 				for i := 0; i < len(timespans); i++ {
@@ -358,7 +355,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			}
 			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != MINUTES)
 			if newTs != nil {
-				newTs.ratingInfo = rp
+				newTs.setRatingInfo(rp)
 				// insert the new timespan
 				index := i + 1
 				timespans = append(timespans, nil)
