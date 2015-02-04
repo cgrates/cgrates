@@ -54,7 +54,6 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 	}
 }
 
-/*
 func TestGetDerivedMaxSessionTime(t *testing.T) {
 	testTenant := "vdf"
 	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
@@ -121,7 +120,6 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 }
-*/
 
 func TestGetSessionRuns(t *testing.T) {
 	testTenant := "vdf"

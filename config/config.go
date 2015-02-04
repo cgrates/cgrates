@@ -78,6 +78,14 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	dfltFsConnConfig = cfg.SmFsConfig.Connections[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.Connections[0]
 	dfltOsipsConnConfig = cfg.SmOsipsConfig.Connections[0]
+	// Enforced parameters, here untill session manager will work with new configuration parameters, ToDo
+	cfg.SMEnabled = false
+	cfg.SMSwitchType = "freeswitch"
+	cfg.SMRater = utils.INTERNAL
+	cfg.SMReconnects = 3
+	cfg.SMDebitInterval = 10
+	cfg.SMMaxCallDuration = time.Duration(3) * time.Hour
+	cfg.SMMinCallDuration = time.Duration(5) * time.Second
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -330,10 +338,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if err != nil {
 		return err
 	}
-	jsnSMCfg, err := jsnCfg.SessionManagerJsonCfg()
-	if err != nil {
-		return err
-	}
 	jsnFSCfg, err := jsnCfg.FSJsonCfg()
 	if err != nil {
 		return err
@@ -553,36 +557,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnSmOsipsCfg != nil {
 		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
 			return err
-		}
-	}
-	if jsnSMCfg != nil {
-		if jsnSMCfg.Enabled != nil {
-			self.SMEnabled = *jsnSMCfg.Enabled
-		}
-		if jsnSMCfg.Switch_type != nil {
-			self.SMSwitchType = *jsnSMCfg.Switch_type
-		}
-		if jsnSMCfg.Rater != nil {
-			self.SMRater = *jsnSMCfg.Rater
-		}
-		if jsnSMCfg.Cdrs != nil {
-			self.SMCdrS = *jsnSMCfg.Cdrs
-		}
-		if jsnSMCfg.Reconnects != nil {
-			self.SMReconnects = *jsnSMCfg.Reconnects
-		}
-		if jsnSMCfg.Debit_interval != nil {
-			self.SMDebitInterval = *jsnSMCfg.Debit_interval
-		}
-		if jsnSMCfg.Max_call_duration != nil {
-			if self.SMMaxCallDuration, err = utils.ParseDurationWithSecs(*jsnSMCfg.Max_call_duration); err != nil {
-				return err
-			}
-		}
-		if jsnSMCfg.Min_call_duration != nil {
-			if self.SMMinCallDuration, err = utils.ParseDurationWithSecs(*jsnSMCfg.Min_call_duration); err != nil {
-				return err
-			}
 		}
 	}
 	if jsnMediatorCfg != nil {
