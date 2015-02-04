@@ -930,7 +930,7 @@ type CdrsFilter struct {
 	Count            bool              // If true count the items instead of returning data
 }
 
-// Used in Rpc calls
+// Used in Rpc calls, slightly different than CdrsFilter by using string instead of Time filters
 type RpcCdrsFilter struct {
 	CgrIds           []string          // If provided, it will filter based on the cgrids present in list
 	NotCgrIds        []string          // Filter specific CgrIds out
