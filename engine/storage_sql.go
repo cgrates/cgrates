@@ -478,7 +478,7 @@ func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
 				if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 					buffer.WriteRune(',')
 				}
-				buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s','%v','%v')",
+				buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s','%v','%v', '%v')",
 					tpid, lcr.Direction, lcr.Tenant, lcr.Customer, entry.DestinationId, entry.Category, entry.Strategy, entry.Suppliers, act.ActivationTime, entry.Weight))
 				i++
 			}
