@@ -534,6 +534,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 }
 
 type AttrAddActionTrigger struct {
+	Id                   string
 	Tenant               string
 	Account              string
 	ThresholdType        string
@@ -559,7 +560,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	at := &engine.ActionTrigger{
-		Id:                    utils.GenUUID(),
+		Id:                    attr.Id,
 		ThresholdType:         attr.ThresholdType,
 		ThresholdValue:        attr.ThresholdValue,
 		BalanceId:             attr.BalanceId,
@@ -596,6 +597,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 }
 
 type AttrResetTriggeredAction struct {
+	Id                   string
 	Tenant               string
 	Account              string
 	Direction            string
@@ -609,35 +611,41 @@ type AttrResetTriggeredAction struct {
 }
 
 func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply *string) error {
-	if attr.Direction == "" {
-		attr.Direction = engine.OUTBOUND
-	}
-	extraParameters, err := json.Marshal(struct {
-		ThresholdType        string
-		ThresholdValue       float64
-		DestinationId        string
-		BalanceWeight        float64
-		BalanceRatingSubject string
-		BalanceSharedGroup   string
-	}{
-		attr.ThresholdType,
-		attr.ThresholdValue,
-		attr.DestinationId,
-		attr.BalanceWeight,
-		attr.BalanceRatingSubject,
-		attr.BalanceSharedGroup,
-	})
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	a := &engine.Action{
-		BalanceType:     attr.BalanceType,
-		Direction:       attr.Direction,
-		ExtraParameters: string(extraParameters),
+	var a *engine.Action
+	if attr.Id != "" {
+		// we can identify the trigge by the id
+		a = &engine.Action{Id: attr.Id}
+	} else {
+		if attr.Direction == "" {
+			attr.Direction = engine.OUTBOUND
+		}
+		extraParameters, err := json.Marshal(struct {
+			ThresholdType        string
+			ThresholdValue       float64
+			DestinationId        string
+			BalanceWeight        float64
+			BalanceRatingSubject string
+			BalanceSharedGroup   string
+		}{
+			attr.ThresholdType,
+			attr.ThresholdValue,
+			attr.DestinationId,
+			attr.BalanceWeight,
+			attr.BalanceRatingSubject,
+			attr.BalanceSharedGroup,
+		})
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		a = &engine.Action{
+			BalanceType:     attr.BalanceType,
+			Direction:       attr.Direction,
+			ExtraParameters: string(extraParameters),
+		}
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
-	_, err = engine.AccLock.Guard(accID, func() (float64, error) {
+	_, err := engine.AccLock.Guard(accID, func() (float64, error) {
 		acc, err := self.AccountDb.GetAccount(accID)
 		if err != nil {
 			return 0, err

@@ -21,6 +21,7 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"sort"
 	"time"
 
@@ -28,7 +29,7 @@ import (
 )
 
 type ActionTrigger struct {
-	Id            string // uniquely identify the trigger
+	Id            string // for visual identification
 	ThresholdType string //*min_counter, *max_counter, *min_balance, *max_balance
 	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_acc, *max_acc
 	ThresholdValue        float64
@@ -101,6 +102,11 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 func (at *ActionTrigger) Match(a *Action) bool {
 	if a == nil {
 		return true
+	}
+	// if we have Id than we can draw an early conclusion
+	if a.Id != "" {
+		match, _ := regexp.MatchString(a.Id, at.Id)
+		return match
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
 	direction := a.Direction == "" || at.BalanceDirection == a.Direction

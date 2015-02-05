@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -561,7 +562,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 		acts := make([]*Action, len(tpacts))
 		for idx, tpact := range tpacts {
 			acts[idx] = &Action{
-				Id:               utils.GenUUID(),
+				Id:               tag + strconv.Itoa(idx),
 				ActionType:       tpact.Identifier,
 				BalanceType:      tpact.BalanceType,
 				Direction:        tpact.Direction,
@@ -650,7 +651,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 		for idx, apiAtr := range atrsLst {
 			balance_expiration_date, _ := utils.ParseTimeDetectLayout(apiAtr.BalanceExpirationDate)
 			atrs[idx] = &ActionTrigger{
-				Id:                    utils.GenUUID(),
+				Id:                    key + strconv.Itoa(idx),
 				ThresholdType:         apiAtr.ThresholdType,
 				ThresholdValue:        apiAtr.ThresholdValue,
 				Recurrent:             apiAtr.Recurrent,
@@ -841,7 +842,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				enacts := make([]*Action, len(tpacts))
 				for idx, tpact := range tpacts {
 					enacts[idx] = &Action{
-						Id:               utils.GenUUID(),
+						Id:               tag + strconv.Itoa(idx),
 						ActionType:       tpact.Identifier,
 						BalanceType:      tpact.BalanceType,
 						Direction:        tpact.Direction,

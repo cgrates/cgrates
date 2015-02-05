@@ -514,7 +514,7 @@ type TPActionTiming struct {
 
 type TPActionTriggers struct {
 	TPid             string             // Tariff plan id
-	ActionTriggersId string             // Profile id
+	ActionTriggersId string             // action trigger id
 	ActionTriggers   []*TPActionTrigger // Set of triggers grouped in this profile
 }
 
@@ -531,6 +531,7 @@ func (self *TPActionTriggers) AsExportSlice() [][]string {
 }
 
 type TPActionTrigger struct {
+	Id                    string
 	ThresholdType         string        // This threshold type
 	ThresholdValue        float64       // Threshold
 	Recurrent             bool          // reset executed flag each run

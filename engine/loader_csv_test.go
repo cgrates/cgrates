@@ -696,7 +696,7 @@ func TestLoadActions(t *testing.T) {
 	as1 := csvr.actions["MINI"]
 	expected := []*Action{
 		&Action{
-			Id:               as1[0].Id,
+			Id:               "MINI0",
 			ActionType:       TOPUP_RESET,
 			BalanceType:      CREDIT,
 			Direction:        OUTBOUND,
@@ -710,7 +710,7 @@ func TestLoadActions(t *testing.T) {
 			},
 		},
 		&Action{
-			Id:               as1[1].Id,
+			Id:               "MINI1",
 			ActionType:       TOPUP,
 			BalanceType:      MINUTES,
 			Direction:        OUTBOUND,
@@ -732,7 +732,7 @@ func TestLoadActions(t *testing.T) {
 	as2 := csvr.actions["SHARED"]
 	expected = []*Action{
 		&Action{
-			Id:               as2[0].Id,
+			Id:               "SHARED0",
 			ActionType:       TOPUP,
 			BalanceType:      CREDIT,
 			Direction:        OUTBOUND,
@@ -867,7 +867,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
-		Id:                   atr.Id,
+		Id:                   "STANDARD_TRIGGER0",
 		BalanceType:          MINUTES,
 		BalanceDirection:     OUTBOUND,
 		ThresholdType:        TRIGGER_MIN_COUNTER,
@@ -882,7 +882,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
-		Id:                   atr.Id,
+		Id:                   "STANDARD_TRIGGER1",
 		BalanceType:          MINUTES,
 		BalanceDirection:     OUTBOUND,
 		ThresholdType:        TRIGGER_MAX_BALANCE,

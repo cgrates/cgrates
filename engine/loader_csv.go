@@ -679,7 +679,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			return fmt.Errorf("Could not parse action weight: %v", err)
 		}
 		a := &Action{
-			Id:               utils.GenUUID(),
+			Id:               tag,
 			ActionType:       record[ACTSCSVIDX_ACTION],
 			BalanceType:      record[ACTSCSVIDX_BALANCE_TYPE],
 			Direction:        record[ACTSCSVIDX_DIRECTION],
@@ -719,6 +719,12 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {
 			return fmt.Errorf("Could not parse expiration time: %v", err)
 		}
+		// update Id
+		idx := 0
+		if previous, ok := csvr.actions[tag]; ok {
+			idx = len(previous)
+		}
+		a.Id = a.Id + strconv.Itoa(idx)
 		csvr.actions[tag] = append(csvr.actions[tag], a)
 	}
 	return
@@ -815,7 +821,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		}
 
 		at := &ActionTrigger{
-			Id:                    utils.GenUUID(),
+			Id:                    tag,
 			ThresholdType:         record[ATRIGCSVIDX_THRESHOLD_TYPE],
 			ThresholdValue:        value,
 			Recurrent:             recurrent,
@@ -834,6 +840,12 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			ActionsId:             record[ATRIGCSVIDX_ACTIONS_TAG],
 			Weight:                weight,
 		}
+		// update Id
+		idx := 0
+		if previous, ok := csvr.actionsTriggers[tag]; ok {
+			idx = len(previous)
+		}
+		at.Id = at.Id + strconv.Itoa(idx)
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)
 	}
 	return
