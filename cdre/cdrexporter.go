@@ -22,13 +22,14 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"io"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -239,7 +240,6 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	default:
 		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
-	return "", nil
 }
 
 // Compose and cache the header

@@ -116,7 +116,14 @@ func main() {
 			if *tpid == "" {
 				log.Fatal("TPid required, please define it via *-tpid* command argument.")
 			}
-			csvImporter := engine.TPCSVImporter{*tpid, storDb, *dataPath, ',', *verbose, *runId}
+			csvImporter := engine.TPCSVImporter{
+				TPId:     *tpid,
+				StorDb:   storDb,
+				DirPath:  *dataPath,
+				Sep:      ',',
+				Verbose:  *verbose,
+				ImportId: *runId,
+			}
 			if errImport := csvImporter.Run(); errImport != nil {
 				log.Fatal(errImport)
 			}
@@ -218,7 +225,17 @@ func main() {
 		if *flush {
 			dstIds, rplIds, rpfIds, rpAliases, lcrIds = nil, nil, nil, nil, nil // Should reload all these on flush
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds, shgIds, rpAliases, accAliases, lcrIds, dcs}, &reply); err != nil {
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{
+			DestinationIds:   dstIds,
+			RatingPlanIds:    rplIds,
+			RatingProfileIds: rpfIds,
+			ActionIds:        actIds,
+			SharedGroupIds:   shgIds,
+			RpAliases:        rpAliases,
+			AccAliases:       accAliases,
+			LCRIds:           lcrIds,
+			DerivedChargers:  dcs,
+		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
 		actTmgIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)

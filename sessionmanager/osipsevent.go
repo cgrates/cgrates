@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"fmt"
+	"strings"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
-	"strings"
-	"time"
 )
 
 /*
@@ -61,9 +61,10 @@ func (osipsev *OsipsEvent) AsEvent(evStr string) utils.Event {
 	return osipsev
 }
 
-func (osipsev *OsipsEvent) String() string {
+// arg osipsev for printf causes recursive call to String method
+/*func (osipsev *OsipsEvent) String() string {
 	return fmt.Sprintf("%+v", osipsev)
-}
+}*/
 
 func (osipsev *OsipsEvent) GetName() string {
 	return osipsev.osipsEvent.Name

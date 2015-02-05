@@ -121,7 +121,7 @@ func main() {
 	}
 
 	fmt.Println("Welcome to CGRateS console!")
-	fmt.Println("Type `help` for a list of commands\n")
+	fmt.Print("Type `help` for a list of commands\n\n")
 
 	line := liner.NewLiner()
 	defer line.Close()

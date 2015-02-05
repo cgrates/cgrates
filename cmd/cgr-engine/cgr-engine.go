@@ -424,7 +424,7 @@ func main() {
 			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), nil)
 		}
 		server.RpcRegister(cdrStats)
-		server.RpcRegister(&v1.CDRStatsV1{cdrStats}) // Public APIs
+		server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
 	}
 
 	responder := &engine.Responder{ExitChan: exitChan}
