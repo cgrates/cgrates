@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 	"os/exec"
 	"path"
 	"time"
@@ -40,6 +42,8 @@ func InitDataDb(cfg *config.CGRConfig) error {
 			return err
 		}
 	}
+	ratingDb.CacheRating(nil, nil, nil, nil, nil)
+	accountDb.CacheAccounting(nil, nil, nil, nil)
 	return nil
 }
 
@@ -75,5 +79,30 @@ func KillEngine(waitEngine int) error {
 		return err
 	}
 	time.Sleep(time.Duration(waitEngine) * time.Millisecond)
+	return nil
+}
+
+func LoadTariffPlanFromFolder(tpPath string, ratingDb RatingStorage, accountingDb AccountingStorage) error {
+	loader := NewFileCSVReader(ratingDb, accountingDb, utils.CSV_SEP,
+		path.Join(tpPath, utils.DESTINATIONS_CSV),
+		path.Join(tpPath, utils.TIMINGS_CSV),
+		path.Join(tpPath, utils.RATES_CSV),
+		path.Join(tpPath, utils.DESTINATION_RATES_CSV),
+		path.Join(tpPath, utils.RATING_PLANS_CSV),
+		path.Join(tpPath, utils.RATING_PROFILES_CSV),
+		path.Join(tpPath, utils.SHARED_GROUPS_CSV),
+		path.Join(tpPath, utils.LCRS_CSV),
+		path.Join(tpPath, utils.ACTIONS_CSV),
+		path.Join(tpPath, utils.ACTION_PLANS_CSV),
+		path.Join(tpPath, utils.ACTION_TRIGGERS_CSV),
+		path.Join(tpPath, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(tpPath, utils.DERIVED_CHARGERS_CSV),
+		path.Join(tpPath, utils.CDR_STATS_CSV))
+	if err := loader.LoadAll(); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	if err := loader.WriteToDatabase(false, false); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
 	return nil
 }

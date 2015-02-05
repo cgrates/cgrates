@@ -873,10 +873,10 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 		q = q.Where(utils.TBL_COST_DETAILS+".subject not in (?)", qryFltr.NotRatedSubjects)
 	}
 	if len(qryFltr.Costs) != 0 {
-		q = q.Where(utils.TBL_COST_DETAILS+".cost in (?)", qryFltr.Costs)
+		q = q.Where(utils.TBL_RATED_CDRS+".cost in (?)", qryFltr.Costs)
 	}
 	if len(qryFltr.NotCosts) != 0 {
-		q = q.Where(utils.TBL_COST_DETAILS+".cost not in (?)", qryFltr.NotCosts)
+		q = q.Where(utils.TBL_RATED_CDRS+".cost not in (?)", qryFltr.NotCosts)
 	}
 	if len(qryFltr.ExtraFields) != 0 { // Extra fields searches, implemented as contains in extra field
 		qIds := bytes.NewBufferString("(")
@@ -935,11 +935,15 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 		q = q.Where(utils.TBL_RATED_CDRS+".usage < ?", qryFltr.RatedUsageEnd)
 	}
 	if qryFltr.CostStart != nil {
-		q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.CostStart)
-		if qryFltr.CostEnd != nil {
+		if qryFltr.CostEnd == nil {
+			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.CostStart)
+		} else if *qryFltr.CostStart == 0.0 && *qryFltr.CostEnd == -1.0 { // Special case when we want to skip errors
+			q = q.Where(fmt.Sprintf("( %s.cost IS NULL OR %s.cost >= 0.0 )", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS))
+		} else {
+			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.CostStart)
 			q = q.Where(utils.TBL_RATED_CDRS+".cost < ?", *qryFltr.CostEnd)
 		}
-	} else if qryFltr.CostEnd != nil { // In case of both nil, we do not need to add any filter
+	} else if qryFltr.CostEnd != nil {
 		if *qryFltr.CostEnd == -1.0 { // Non-rated CDRs
 			q = q.Where(utils.TBL_RATED_CDRS + ".cost IS NULL") // Need to include it otherwise all CDRs will be returned
 		} else { // Above limited CDRs, since costStart is empty, make sure we query also NULL cost

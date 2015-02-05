@@ -52,6 +52,7 @@ type StoredCdr struct {
 	RatedAccount   string // Populated out of rating data
 	RatedSubject   string
 	Cost           float64
+	Rated          bool // Mark the CDR as rated so we do not process it during mediation
 }
 
 // Used to multiply usage on export

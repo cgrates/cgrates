@@ -165,8 +165,11 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 	}
 	for _, cdr := range cdrRuns {
 		extraInfo := ""
-		if err := self.rateCDR(cdr); err != nil {
-			extraInfo = err.Error()
+		if cdr.MediationRunId != utils.DEFAULT_RUNID || !cdr.Rated { // Do not rate calls which are out of default run and marked as rated already, eg premium SMSes
+			if err := self.rateCDR(cdr); err != nil {
+				cdr.Cost = -1.0 // If there was an error, mark the CDR as it is
+				extraInfo = err.Error()
+			}
 		}
 		if !self.cgrCfg.MediatorStoreDisable {
 			if err := self.cdrDb.SetRatedCdr(cdr, extraInfo); err != nil {

@@ -101,7 +101,7 @@ const (
 	RATED_ACCOUNT                = "rated_account"
 	RATED_SUBJECT                = "rated_subject"
 	COST                         = "cost"
-	DEFAULT_RUNID                = "default"
+	DEFAULT_RUNID                = "*default"
 	META_DEFAULT                 = "*default"
 	STATIC_VALUE_PREFIX          = "^"
 	CSV                          = "csv"

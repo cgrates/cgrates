@@ -725,8 +725,9 @@ func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
 		}
 	}
 	if self.SkipRated {
-		cdrFltr.CostEnd = Float64Pointer(0.0)
-	} else if self.SkipErrors {
+		cdrFltr.CostEnd = Float64Pointer(-1.0)
+	} else if self.SkipRated {
+		cdrFltr.CostStart = Float64Pointer(0.0)
 		cdrFltr.CostEnd = Float64Pointer(-1.0)
 	}
 	return cdrFltr, nil
@@ -799,8 +800,9 @@ func (self *AttrGetCdrs) AsCdrsFilter() (*CdrsFilter, error) {
 		}
 	}
 	if self.SkipRated {
-		cdrFltr.CostEnd = Float64Pointer(0.0)
-	} else if self.SkipErrors {
+		cdrFltr.CostEnd = Float64Pointer(-1.0)
+	} else if self.SkipRated {
+		cdrFltr.CostStart = Float64Pointer(0.0)
 		cdrFltr.CostEnd = Float64Pointer(-1.0)
 	}
 	return cdrFltr, nil
