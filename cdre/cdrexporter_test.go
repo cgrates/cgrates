@@ -52,7 +52,7 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 			Usage: time.Duration(10) * time.Second, MediationRunId: "RETAIL1", Cost: 5.01},
 	}
 	cdre, err := NewCdrExporter(cdrs, logDb, cfg.CdreProfiles["*default"], cfg.CdreProfiles["*default"].CdrFormat, cfg.CdreProfiles["*default"].FieldSeparator,
-		"firstexport", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", 0, cfg.HttpSkipTlsVerify)
+		"firstexport", 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", 0, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}

@@ -51,7 +51,7 @@ const (
 var err error
 
 func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
-	dataUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
+	dataUsageMultiplyFactor, smsUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -63,6 +63,7 @@ func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl 
 		fieldSeparator:          fieldSeparator,
 		exportId:                exportId,
 		dataUsageMultiplyFactor: dataUsageMultiplyFactor,
+		smsUsageMultiplyFactor:  smsUsageMultiplyFactor,
 		costMultiplyFactor:      costMultiplyFactor,
 		costShiftDigits:         costShiftDigits,
 		roundDecimals:           roundDecimals,
@@ -79,13 +80,15 @@ func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl 
 }
 
 type CdrExporter struct {
-	cdrs                                         []*utils.StoredCdr
-	logDb                                        engine.LogStorage // Used to extract cost_details if these are requested
-	exportTemplate                               *config.CdreConfig
-	cdrFormat                                    string // csv, fwv
-	fieldSeparator                               rune
-	exportId                                     string // Unique identifier or this export
-	dataUsageMultiplyFactor, costMultiplyFactor  float64
+	cdrs           []*utils.StoredCdr
+	logDb          engine.LogStorage // Used to extract cost_details if these are requested
+	exportTemplate *config.CdreConfig
+	cdrFormat      string // csv, fwv
+	fieldSeparator rune
+	exportId       string // Unique identifier or this export
+	dataUsageMultiplyFactor,
+	smsUsageMultiplyFactor, // Multiply the SMS usage (eg: some billing systems billing them as minutes)
+	costMultiplyFactor float64
 	costShiftDigits, roundDecimals, cgrPrecision int
 	maskDestId                                   string
 	maskLen                                      int
@@ -313,8 +316,11 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 	if cdre.dataUsageMultiplyFactor != 0.0 && cdr.TOR == utils.DATA {
 		cdr.UsageMultiply(cdre.dataUsageMultiplyFactor, cdre.cgrPrecision)
 	}
+	if cdre.smsUsageMultiplyFactor != 0 && cdr.TOR == utils.SMS {
+		cdr.UsageMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
+	}
 	if cdre.costMultiplyFactor != 0.0 {
-		cdr.CostMultiply(cdre.costMultiplyFactor, cdre.cgrPrecision)
+		cdr.CostMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
 	}
 	var err error
 	cdrRow := make([]string, len(cdre.exportTemplate.ContentFields))

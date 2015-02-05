@@ -136,6 +136,10 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
 		dataUsageMultiplyFactor = *attr.DataUsageMultiplyFactor
 	}
+	smsUsageMultiplyFactor := exportTemplate.SmsUsageMultiplyFactor
+	if attr.SmsUsageMultiplyFactor != nil && *attr.SmsUsageMultiplyFactor != 0.0 {
+		smsUsageMultiplyFactor = *attr.SmsUsageMultiplyFactor
+	}
 	costMultiplyFactor := exportTemplate.CostMultiplyFactor
 	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *attr.CostMultiplyFactor
@@ -167,8 +171,8 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	cdrexp, err := cdre.NewCdrExporter(cdrs, self.LogDb, exportTemplate, cdrFormat, fieldSep, exportId,
-		dataUsageMultiplyFactor, costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify)
+	cdrexp, err := cdre.NewCdrExporter(cdrs, self.LogDb, exportTemplate, cdrFormat, fieldSep, exportId, dataUsageMultiplyFactor, smsUsageMultiplyFactor,
+		costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify)
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}

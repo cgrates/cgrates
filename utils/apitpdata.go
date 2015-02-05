@@ -663,6 +663,7 @@ type AttrExpFileCdrs struct {
 	ExportFileName          *string  // If provided the output filename will be set to this
 	ExportTemplate          *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
+	SmsUsageMultiplyFactor  *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
 	CostMultiplyFactor      *float64 // Multiply the cost before export, eg: apply VAT
 	CostShiftDigits         *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
 	RoundDecimals           *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones

@@ -266,6 +266,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Cdr_format:                 utils.StringPointer("csv"),
 			Field_separator:            utils.StringPointer(","),
 			Data_usage_multiply_factor: utils.Float64Pointer(1.0),
+			Sms_usage_multiply_factor:  utils.Float64Pointer(1.0),
 			Cost_multiply_factor:       utils.Float64Pointer(1.0),
 			Cost_rounding_decimals:     utils.IntPointer(-1),
 			Cost_shift_digits:          utils.IntPointer(0),

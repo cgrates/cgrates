@@ -128,7 +128,7 @@ func TestWriteCdr(t *testing.T) {
 		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, cdreCfg, utils.CDRE_FIXED_WIDTH, ',', "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, cdreCfg, utils.CDRE_FIXED_WIDTH, ',', "fwv_1", 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)
 	}
@@ -204,7 +204,7 @@ func TestWriteCdrs(t *testing.T) {
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, cdreCfg, utils.CDRE_FIXED_WIDTH, ',',
-		"fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
+		"fwv_1", 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)
 	}
