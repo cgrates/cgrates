@@ -35,7 +35,7 @@ func TestNewRSRField1(t *testing.T) {
 	}
 	// Separator escaped
 	if rsrField, err := NewRSRField(`~sip_redirected_to:s\/sip:\+49(\d+)@/0$1/`); err == nil {
-		t.Error("Parse error, field rule does not contain correct number of separators, received: %v", rsrField)
+		t.Errorf("Parse error, field rule does not contain correct number of separators, received: %v", rsrField)
 	}
 	// One extra separator but escaped
 	expRSRField3 := &RSRField{Id: "sip_redirected_to",

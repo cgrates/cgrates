@@ -193,11 +193,11 @@ func TestUsageMultiply(t *testing.T) {
 func TestCostMultiply(t *testing.T) {
 	cdr := StoredCdr{Cost: 1.01}
 	if cdr.CostMultiply(1.19, 4); cdr.Cost != 1.2019 {
-		t.Error("Unexpected cost after multiply: %v", cdr.Cost)
+		t.Errorf("Unexpected cost after multiply: %v", cdr.Cost)
 	}
 	cdr = StoredCdr{Cost: 1.01}
 	if cdr.CostMultiply(1000, 0); cdr.Cost != 1010 {
-		t.Error("Unexpected cost after multiply: %v", cdr.Cost)
+		t.Errorf("Unexpected cost after multiply: %v", cdr.Cost)
 	}
 }
 
