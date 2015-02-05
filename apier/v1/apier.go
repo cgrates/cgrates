@@ -435,7 +435,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 // Retrieves actions attached to specific ActionsId within cache
 func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 	if len(actsId) == 0 {
-		return fmt.Errorf("%s:ActionsId", utils.ERR_MANDATORY_IE_MISSING, actsId)
+		return fmt.Errorf("%s ActionsId: %s", utils.ERR_MANDATORY_IE_MISSING, actsId)
 	}
 	acts := make([]*utils.TPAction, 0)
 	engActs, err := self.AccountDb.GetActions(actsId, false)

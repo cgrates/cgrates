@@ -56,7 +56,11 @@ func (self *ApierV1) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *u
 	} else if len(atsMap) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		atRply := &utils.TPActionTriggers{attrs.TPid, attrs.ActionTriggersId, atsMap[attrs.ActionTriggersId]}
+		atRply := &utils.TPActionTriggers{
+			TPid:             attrs.TPid,
+			ActionTriggersId: attrs.ActionTriggersId,
+			ActionTriggers:   atsMap[attrs.ActionTriggersId],
+		}
 		*reply = *atRply
 	}
 	return nil

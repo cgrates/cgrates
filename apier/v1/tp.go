@@ -77,7 +77,14 @@ func (self *ApierV1) ImportTPZipFile(attrs AttrImportTPZipFile, reply *string) e
 				*reply = "ERROR: missing TPid!"
 				return err
 			}
-			csvImporter := engine.TPCSVImporter{attrs.TPid, self.StorDb, path, ',', false, ""}
+			csvImporter := engine.TPCSVImporter{
+				TPid:     attrs.TPid,
+				StorDb:   self.StorDb,
+				DirPath:  path,
+				Sep:      ',',
+				Verbose:  false,
+				ImportId: "",
+			}
 			if errImport := csvImporter.Run(); errImport != nil {
 				return errImport
 			}
