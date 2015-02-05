@@ -117,7 +117,7 @@ func main() {
 				log.Fatal("TPid required, please define it via *-tpid* command argument.")
 			}
 			csvImporter := engine.TPCSVImporter{
-				TPId:     *tpid,
+				TPid:     *tpid,
 				StorDb:   storDb,
 				DirPath:  *dataPath,
 				Sep:      ',',
