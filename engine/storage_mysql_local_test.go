@@ -77,7 +77,7 @@ func TestMySQLSetGetTPTiming(t *testing.T) {
 	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
-		t.Errorf("Expecting: %+v, received: %+v", tmgs[tm.TimingId])
+		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
 	}
 }
 

@@ -129,7 +129,7 @@ func TestExecuteActions3(t *testing.T) {
 	} else if len(acnt.BalanceMap) != 1 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
 	} else if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 40 {
-		t.Errorf("Account does not have enough minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
+		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
 	}
 }
 

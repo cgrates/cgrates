@@ -457,6 +457,7 @@ If the user has postpayed plan it returns -1.
 */
 func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Duration, error) {
 	// clone the account for discarding chenges on debit dry run
+	//log.Printf("ORIG CD: %+v", origCD)
 	account := origAcc.Clone()
 	if account.AllowNegative {
 		return -1, nil
@@ -538,6 +539,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool) (cc *CallCost, er
 	if cd.TOR == "" {
 		cd.TOR = MINUTES
 	}
+	//log.Printf("Debit CD: %+v", cd)
 	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun)
 	//log.Print("HERE: ", cc, err)
 	if err != nil {

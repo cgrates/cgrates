@@ -478,7 +478,7 @@ func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
 				if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 					buffer.WriteRune(',')
 				}
-				buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s','%v','%v')",
+				buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s','%v','%v', '%v')",
 					tpid, lcr.Direction, lcr.Tenant, lcr.Customer, entry.DestinationId, entry.Category, entry.Strategy, entry.Suppliers, act.ActivationTime, entry.Weight))
 				i++
 			}
@@ -608,10 +608,10 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 			tx.Rollback()
 			return err
 		}
-		for _, at := range aTriggers {
+		for idx, at := range aTriggers {
 			saved := tx.Save(TpActionTrigger{
 				Tpid:                  tpid,
-				Tag:                   atId,
+				Tag:                   atId + strconv.Itoa(idx),
 				ThresholdType:         at.ThresholdType,
 				ThresholdValue:        at.ThresholdValue,
 				Recurrent:             at.Recurrent,

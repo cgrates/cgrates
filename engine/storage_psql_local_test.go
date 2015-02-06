@@ -67,7 +67,7 @@ func TestPSQLSetGetTPTiming(t *testing.T) {
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
-		t.Errorf("Expecting: %+v, received: %+v", tmgs[tm.TimingId])
+		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
 	}
 	// Update
 	tm.Time = "00:00:01"
@@ -77,7 +77,7 @@ func TestPSQLSetGetTPTiming(t *testing.T) {
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
-		t.Errorf("Expecting: %+v, received: %+v", tmgs[tm.TimingId])
+		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
 	}
 }
 

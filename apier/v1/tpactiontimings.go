@@ -58,7 +58,11 @@ func (self *ApierV1) GetTPActionPlan(attrs AttrGetTPActionPlan, reply *utils.TPA
 	} else if len(ats) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else { // Got the data we need, convert it
-		atRply := &utils.TPActionPlan{attrs.TPid, attrs.Id, ats[attrs.Id]}
+		atRply := &utils.TPActionPlan{
+			TPid:       attrs.TPid,
+			Id:         attrs.Id,
+			ActionPlan: ats[attrs.Id],
+		}
 		*reply = *atRply
 	}
 	return nil

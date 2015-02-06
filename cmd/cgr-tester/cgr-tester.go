@@ -109,7 +109,7 @@ func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	result := engine.CallCost{}
 	client, err := rpc.Dial("tcp", *raterAddress)
 	if err != nil {
-		return nilDuration, fmt.Errorf("Could not connect to engine: ", err.Error())
+		return nilDuration, fmt.Errorf("Could not connect to engine: %s", err.Error())
 	}
 	defer client.Close()
 	start := time.Now()

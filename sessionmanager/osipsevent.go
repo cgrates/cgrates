@@ -19,12 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"fmt"
+	"encoding/json"
+	"strings"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
-	"strings"
-	"time"
 )
 
 /*
@@ -62,7 +63,8 @@ func (osipsev *OsipsEvent) AsEvent(evStr string) utils.Event {
 }
 
 func (osipsev *OsipsEvent) String() string {
-	return fmt.Sprintf("%+v", osipsev)
+	mrsh, _ := json.Marshal(osipsev)
+	return string(mrsh)
 }
 
 func (osipsev *OsipsEvent) GetName() string {

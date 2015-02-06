@@ -21,6 +21,7 @@ package v1
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -120,7 +121,7 @@ type AttrRemAcntActionTriggers struct {
 	Tenant          string // Tenant he account belongs to
 	Account         string // Account name
 	Direction       string // Traffic direction
-	ActionTriggerId string // Id filtering only specific id to remove
+	ActionTriggerId string // Id filtering only specific id to remove (can be regexp pattern)
 }
 
 // Returns a list of ActionTriggers on an account
@@ -135,7 +136,8 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 			return 0, err
 		}
 		for idx, actr := range ub.ActionTriggers {
-			if len(attrs.ActionTriggerId) != 0 && actr.Id != attrs.ActionTriggerId { // Empty actionTriggerId will match always
+			match, _ := regexp.MatchString(attrs.ActionTriggerId, actr.Id)
+			if len(attrs.ActionTriggerId) != 0 && !match {
 				continue
 			}
 			if len(ub.ActionTriggers) != 1 { // Remove by index
