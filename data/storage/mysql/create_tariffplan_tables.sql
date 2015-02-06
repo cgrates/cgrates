@@ -191,6 +191,7 @@ CREATE TABLE `tp_action_triggers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
+  `unique_id` varchar(64) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
   `balance_direction` varchar(8) NOT NULL,
