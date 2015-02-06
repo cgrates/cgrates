@@ -218,6 +218,10 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 // Gets the cost using balance RatingSubject if present otherwize
 // retuns a callcost obtained using standard rating
 func (b *Balance) GetCost(cd *CallDescriptor, getStandarIfEmpty bool) (*CallCost, error) {
+	// testing only
+	if cd.test_callcost != nil {
+		return cd.test_callcost.Clone(), nil
+	}
 	if b.RatingSubject != "" && !strings.HasPrefix(b.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
 		origSubject := cd.Subject
 		cd.Subject = b.RatingSubject
@@ -255,14 +259,14 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyB
 		cc = cd.CreateCallCost()
 		cc.Timespans = append(cc.Timespans, &TimeSpan{
 			TimeStart: cd.TimeStart,
-			TimeEnd:   cd.TimeStart,
+			TimeEnd:   cd.TimeEnd,
 		})
 
 		seconds := duration.Seconds()
 		amount := seconds
-
-		cc.Timespans[0].RoundToDuration(duration)
-		cc.Timespans[0].RateInterval = &RateInterval{
+		ts := cc.Timespans[0]
+		ts.RoundToDuration(duration)
+		ts.RateInterval = &RateInterval{
 			Rating: &RIRate{
 				Rates: RateGroups{
 					&Rate{
@@ -274,8 +278,10 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyB
 				},
 			},
 		}
-		cc.Timespans[0].createIncrementsSlice()
-		for _, inc := range cc.Timespans[0].Increments {
+		ts.createIncrementsSlice()
+		//log.Printf("CC: %+v", ts)
+		for incIndex, inc := range ts.Increments {
+			//log.Printf("INCREMENET: %+v", inc)
 			if seconds == 1 {
 				amount = inc.Duration.Seconds()
 			}
@@ -289,6 +295,19 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyB
 				if count {
 					ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 				}
+			} else {
+				inc.paid = false
+				// delete the rest of the unpiad increments/timespans
+				if incIndex == 0 {
+					// cat the entire current timespan
+					cc.Timespans = nil
+				} else {
+					ts.SplitByIncrement(incIndex)
+				}
+				if len(cc.Timespans) == 0 {
+					cc = nil
+				}
+				return cc, nil
 			}
 		}
 	} else {
@@ -366,7 +385,6 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, count bool, ub *Account) (cc *C
 	if err != nil {
 		return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
 	}
-
 	for tsIndex, ts := range cc.Timespans {
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
@@ -399,6 +417,9 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, count bool, ub *Account) (cc *C
 				return cc, nil
 			}
 		}
+	}
+	if len(cc.Timespans) == 0 {
+		cc = nil
 	}
 	return cc, nil
 }

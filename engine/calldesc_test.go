@@ -551,7 +551,7 @@ func TestMaxDebitDurationNoGreatherThanInitialDuration(t *testing.T) {
 func TestDebitAndMaxDebit(t *testing.T) {
 	cd1 := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
-		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 10, 0, time.UTC),
 		Direction:   "*out",
 		Category:    "0",
 		Tenant:      "vdf",
@@ -573,7 +573,7 @@ func TestDebitAndMaxDebit(t *testing.T) {
 		}
 		t.Logf("CC2: %+v", cc2)
 		for _, ts := range cc2.Timespans {
-			t.Logf("TS: %+v", ts.Increments[0])
+			t.Logf("TS: %+v", ts)
 		}
 		t.Log("===============================")
 		t.Error("Debit and MaxDebit differ")

@@ -227,7 +227,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			unitBalanceChecker = false
 			//log.Printf("InitialCD: %+v", cd)
 			for _, balance := range usefulUnitBalances {
-				//log.Printf("Unit balance: %+v", balance)
+				// log.Printf("Unit balance: %+v", balance)
 				// log.Printf("CD BEFORE UNIT: %+v", cd)
 				partCC, _ := balance.DebitUnits(cd, count, balance.account, usefulMoneyBalances)
 				// log.Printf("CD AFTER UNIT: %+v", cd)
