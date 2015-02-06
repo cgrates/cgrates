@@ -959,17 +959,16 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 	if qryFltr.PaginatorLimit != 0 {
 		q = q.Limit(qryFltr.PaginatorLimit)
 	}
-	/* ToDo: Fix as soon as issue on Gorm analyzed: https://github.com/jinzhu/gorm/issues/354
-	if qryFltr.Count {
-		var cnt int64
-		fmt.Printf("Rows is: %+v\n", rows)
-		//fmt.Printf("Counting, got count: %+v\n", q.Count())
-		if err := q.Count(&cnt).Error; err != nil {
-			fmt.Printf("Counting, got error %s", err.Error())
-			return nil, 0, err
+	/*
+		// ToDo: Fix as soon as issue on Gorm analyzed: https://github.com/jinzhu/gorm/issues/354
+		if qryFltr.Count {
+			var cnt int64
+			//if err := q.Count(&cnt).Error; err != nil {
+			if err := q.Debug().Count(&cnt).Error; err != nil {
+				return nil, 0, err
+			}
+			return nil, cnt, nil
 		}
-		return nil, cnt, nil
-	}
 	*/
 	// Execute query
 	rows, err := q.Rows()

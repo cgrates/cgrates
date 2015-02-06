@@ -52,8 +52,14 @@ func (ms *MapStorage) Flush(ignore string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetKeysForPrefix(string) ([]string, error) {
-	return nil, nil
+func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+	keysForPrefix := make([]string, 0)
+	for key := range ms.dict {
+		if strings.HasPrefix(key, prefix) {
+			keysForPrefix = append(keysForPrefix, key)
+		}
+	}
+	return keysForPrefix, nil
 }
 
 func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) error {
