@@ -19,20 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"github.com/cgrates/cgrates/utils"
 	"time"
 )
 
 type CdrcConfig struct {
-	Enabled                 bool           // Enable/Disable the profile
-	CdrsAddress             string         // The address where CDRs can be reached
-	CdrFormat               string         // The type of CDR file to process <csv>
-	FieldSeparator          rune           // The separator to use when reading csvs
-	DataUsageMultiplyFactor float64        // Conversion factor for data usage
-	RunDelay                time.Duration  // Delay between runs, 0 for inotify driven requests
-	CdrInDir                string         // Folder to process CDRs from
-	CdrOutDir               string         // Folder to move processed CDRs to
-	CdrSourceId             string         // Source identifier for the processed CDRs
-	CdrFields               []*CfgCdrField // List of fields to be processed
+	Enabled                 bool            // Enable/Disable the profile
+	CdrsAddress             string          // The address where CDRs can be reached
+	CdrFormat               string          // The type of CDR file to process <csv>
+	FieldSeparator          rune            // The separator to use when reading csvs
+	DataUsageMultiplyFactor float64         // Conversion factor for data usage
+	RunDelay                time.Duration   // Delay between runs, 0 for inotify driven requests
+	CdrInDir                string          // Folder to process CDRs from
+	CdrOutDir               string          // Folder to move processed CDRs to
+	CdrSourceId             string          // Source identifier for the processed CDRs
+	CdrFilter               utils.RSRFields // Filter CDR records to import
+	CdrFields               []*CfgCdrField  // List of fields to be processed
 }
 
 func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
@@ -67,6 +69,14 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	}
 	if jsnCfg.Cdr_out_dir != nil {
 		self.CdrOutDir = *jsnCfg.Cdr_out_dir
+	}
+	if jsnCfg.Cdr_source_id != nil {
+		self.CdrSourceId = *jsnCfg.Cdr_source_id
+	}
+	if jsnCfg.Cdr_filter != nil {
+		if self.CdrFilter, err = utils.ParseRSRFields(*jsnCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Cdr_fields != nil {
 		if self.CdrFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Cdr_fields); err != nil {

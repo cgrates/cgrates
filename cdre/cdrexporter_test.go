@@ -58,7 +58,7 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 	}
 	fltrRule, _ := utils.ParseRSRFields("~mediation_runid:s/default/RUN_RTL/", utils.INFIELD_SEP)
 	val, _ := utils.ParseRSRFields("cost", utils.INFIELD_SEP)
-	cfgCdrFld := &config.CfgCdrField{Tag: "cost", Type: "cdrfield", CdrFieldId: "cost", Value: val, Filter: fltrRule}
+	cfgCdrFld := &config.CfgCdrField{Tag: "cost", Type: "cdrfield", CdrFieldId: "cost", Value: val, FieldFilter: fltrRule}
 	if costVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if costVal != "1.01" {
@@ -66,7 +66,7 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 	}
 	fltrRule, _ = utils.ParseRSRFields("~mediation_runid:s/default/RETAIL1/", utils.INFIELD_SEP)
 	val, _ = utils.ParseRSRFields("account", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "account", Type: "cdrfield", CdrFieldId: "account", Value: val, Filter: fltrRule}
+	cfgCdrFld = &config.CfgCdrField{Tag: "account", Type: "cdrfield", CdrFieldId: "account", Value: val, FieldFilter: fltrRule}
 	if acntVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if acntVal != "1000" {
@@ -91,7 +91,7 @@ func TestGetDateTimeFieldVal(t *testing.T) {
 	}
 	// Test filter
 	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", CdrFieldId: "stop_time", Value: val, Filter: fltr, Layout: layout}
+	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", CdrFieldId: "stop_time", Value: val, FieldFilter: fltr, Layout: layout}
 	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, cfgCdrFld); err == nil {
 		t.Error(err)
 	}
@@ -117,7 +117,7 @@ func TestCdreCdrFieldValue(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", cdr.Destination, val)
 	}
 	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: "cdrfield", CdrFieldId: "destination", Value: val, Filter: fltr}
+	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: "cdrfield", CdrFieldId: "destination", Value: val, FieldFilter: fltr}
 	if _, err := cdre.cdrFieldValue(cdr, cfgCdrFld); err == nil {
 		t.Error("Failed to use filter")
 	}

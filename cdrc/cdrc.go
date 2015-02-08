@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -81,10 +81,22 @@ func populateStoredCdrField(cdr *utils.StoredCdr, fieldId, fieldVal string) erro
 	return nil
 }
 
-func NewCdrc(cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS, exitChan chan struct{}) (*Cdrc, error) {
+func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS, exitChan chan struct{}) (*Cdrc, error) {
+	var cdrcCfg *config.CdrcConfig
+	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
+		break
+	}
 	cdrc := &Cdrc{cdrsAddress: cdrcCfg.CdrsAddress, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		cdrSourceId: cdrcCfg.CdrSourceId, runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator, duMultiplyFactor: cdrcCfg.DataUsageMultiplyFactor,
-		cdrFields: cdrcCfg.CdrFields, httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer, exitChan: exitChan}
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer, exitChan: exitChan}
+	cdrc.cdrFilters = make([]utils.RSRFields, len(cdrcCfgs))
+	cdrc.cdrFields = make([][]*config.CfgCdrField, len(cdrcCfgs))
+	idx := 0
+	for _, cfg := range cdrcCfgs {
+		cdrc.cdrFilters[idx] = cfg.CdrFilter
+		cdrc.cdrFields[idx] = cfg.CdrFields
+		idx += 1
+	}
 	// Before processing, make sure in and out folders exist
 	for _, dir := range []string{cdrc.cdrInDir, cdrc.cdrOutDir} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
@@ -104,7 +116,8 @@ type Cdrc struct {
 	runDelay         time.Duration
 	csvSep           rune
 	duMultiplyFactor float64
-	cdrFields        []*config.CfgCdrField
+	cdrFilters       []utils.RSRFields       // Should be in sync with cdrFields on indexes
+	cdrFields        [][]*config.CfgCdrField // Profiles directly connected with cdrFilters
 	httpSkipTlsCheck bool
 	cdrServer        *engine.CDRS // Reference towards internal cdrServer if that is the case
 	httpClient       *http.Client
@@ -202,20 +215,39 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - csv error: %s", procRowNr, err.Error()))
 			continue // Other csv related errors, ignore
 		}
-		storedCdr, err := self.recordToStoredCdr(record)
-		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - failed converting to StoredCdr, error: %s", procRowNr, err.Error()))
-			continue
-		}
-		if self.cdrsAddress == utils.INTERNAL {
-			if err := self.cdrServer.ProcessCdr(storedCdr); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
+		recordCdrs := make([]*utils.StoredCdr, 0) // More CDRs based on the number of filters and field templates
+		for idx, cdrFieldsInst := range self.cdrFields {
+			// Make sure filters are matching
+			filterBreak := false
+			for _, rsrFilter := range self.cdrFilters[idx] {
+				if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+					return fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
+				} else if !rsrFilter.FilterPasses(record[cfgFieldIdx]) {
+					filterBreak = true
+					break
+				}
+			}
+			if filterBreak { // Stop importing cdrc fields profile due to non matching filter
 				continue
 			}
-		} else { // CDRs listening on IP
-			if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cdrsAddress), storedCdr.AsHttpForm()); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
+			if storedCdr, err := self.recordToStoredCdr(record, cdrFieldsInst); err != nil {
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - failed converting to StoredCdr, error: %s", procRowNr, err.Error()))
 				continue
+			} else {
+				recordCdrs = append(recordCdrs, storedCdr)
+			}
+		}
+		for _, storedCdr := range recordCdrs {
+			if self.cdrsAddress == utils.INTERNAL {
+				if err := self.cdrServer.ProcessCdr(storedCdr); err != nil {
+					engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
+					continue
+				}
+			} else { // CDRs listening on IP
+				if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cdrsAddress), storedCdr.AsHttpForm()); err != nil {
+					engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
+					continue
+				}
 			}
 		}
 	}
@@ -231,11 +263,11 @@ func (self *Cdrc) processFile(filePath string) error {
 }
 
 // Takes the record out of csv and turns it into http form which can be posted
-func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
+func (self *Cdrc) recordToStoredCdr(record []string, cdrFields []*config.CfgCdrField) (*utils.StoredCdr, error) {
 	storedCdr := &utils.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
-	for _, cdrFldCfg := range self.cdrFields {
+	for _, cdrFldCfg := range cdrFields {
 		var fieldVal string
 		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.CdrFormat) {
 			if cdrFldCfg.Type == utils.CDRFIELD {

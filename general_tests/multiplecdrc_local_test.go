@@ -103,13 +103,15 @@ func TestCreateCdrDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, cdrcInst := range cfg.CdrcProfiles {
-		for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
-			if err := os.RemoveAll(dir); err != nil {
-				t.Fatal("Error removing folder: ", dir, err)
-			}
-			if err := os.MkdirAll(dir, 0755); err != nil {
-				t.Fatal("Error creating folder: ", dir, err)
+	for _, cdrcProfiles := range cfg.CdrcProfiles {
+		for _, cdrcInst := range cdrcProfiles {
+			for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+				if err := os.RemoveAll(dir); err != nil {
+					t.Fatal("Error removing folder: ", dir, err)
+				}
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					t.Fatal("Error creating folder: ", dir, err)
+				}
 			}
 		}
 	}
@@ -157,7 +159,7 @@ dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,rated,*out,cgra
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcProfiles["CDRC-CSV1"].CdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/cgrates/cdrc1/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -175,7 +177,7 @@ func TestHandleCdr2File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcProfiles["CDRC-CSV2"].CdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/cgrates/cdrc2/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -192,7 +194,7 @@ func TestHandleCdr3File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcProfiles["CDRC-CSV3"].CdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join("/tmp/cgrates/cdrc3/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }

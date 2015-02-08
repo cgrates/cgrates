@@ -117,7 +117,7 @@ type CdrFieldJsonCfg struct {
 	Strip        *string
 	Padding      *string
 	Layout       *string
-	Filter       *string
+	Field_filter *string
 	Mandatory    *bool
 }
 
@@ -149,6 +149,7 @@ type CdrcJsonCfg struct {
 	Cdr_in_dir                 *string
 	Cdr_out_dir                *string
 	Cdr_source_id              *string
+	Cdr_filter                 *string
 	Cdr_fields                 *[]*CdrFieldJsonCfg
 }
 

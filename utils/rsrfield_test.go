@@ -33,6 +33,14 @@ func TestNewRSRField1(t *testing.T) {
 	} else if !reflect.DeepEqual(expRSRField1, rsrField) {
 		t.Errorf("Expecting: %v, received: %v", expRSRField1, rsrField)
 	}
+	// With filter
+	expRSRField2 := &RSRField{Id: "sip_redirected_to", filterValue: "086517174963",
+		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}
+	if rsrField, err := NewRSRField(`~sip_redirected_to:s/sip:\+49(\d+)@/0$1/(086517174963)`); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(expRSRField2, rsrField) {
+		t.Errorf("Expecting: %v, received: %v", expRSRField2, rsrField)
+	}
 	// Separator escaped
 	if rsrField, err := NewRSRField(`~sip_redirected_to:s\/sip:\+49(\d+)@/0$1/`); err == nil {
 		t.Errorf("Parse error, field rule does not contain correct number of separators, received: %v", rsrField)
@@ -176,5 +184,15 @@ func TestParseCdrcDn1(t *testing.T) {
 		t.Errorf("Expecting: +49630415354, received: %s", parsed)
 	} else if parsed2 := rl.ParseValue("00491888"); parsed2 != "+4914001888" {
 		t.Errorf("Expecting: +4914001888, received: %s", parsed2)
+	}
+}
+
+func TestFilterPasses(t *testing.T) {
+	rl, err := NewRSRField(`~1:s/^00(\d+)(?:[a-zA-Z].{3})*0*([1-9]\d+)$/+$1$2/:s/^\+49(18\d{2})$/+491400$1/(+49630415354)`)
+	if err != nil {
+		t.Error("Unexpected error: ", err)
+	}
+	if rl.FilterPasses("0031ABOC0630415354") {
+		t.Error("Passing filter")
 	}
 }

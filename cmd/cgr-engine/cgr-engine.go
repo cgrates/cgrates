@@ -125,11 +125,15 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 }
 
 // Fires up a cdrc instance
-func startCdrc(cdrsChan chan struct{}, cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS, closeChan chan struct{}) {
+func startCdrc(cdrsChan chan struct{}, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS, closeChan chan struct{}) {
+	var cdrcCfg *config.CdrcConfig
+	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
+		break
+	}
 	if cdrcCfg.CdrsAddress == utils.INTERNAL {
 		<-cdrsChan // Wait for CDRServer to come up before start processing
 	}
-	cdrc, err := cdrc.NewCdrc(cdrcCfg, httpSkipTlsCheck, cdrServer, closeChan)
+	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrServer, closeChan)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -502,15 +506,19 @@ func main() {
 		go shutdownSessionmanagerSingnalHandler()
 	}
 	var cdrcEnabled bool
-	for _, cdrcConfig := range cfg.CdrcProfiles {
-		if cdrcConfig.Enabled == false {
+	for _, cdrcCfgs := range cfg.CdrcProfiles {
+		var cdrcCfg *config.CdrcConfig
+		for _, cdrcCfg = range cdrcCfgs { // Take a random config out since they should be the same
+			break
+		}
+		if cdrcCfg.Enabled == false {
 			continue // Ignore not enabled
 		} else if !cdrcEnabled {
 			cdrcEnabled = true // Mark that at least one cdrc service is active
 		}
-		go startCdrc(cdrsChan, cdrcConfig, cfg.HttpSkipTlsVerify, cdrServer, cfg.ConfigReloads[utils.CDRC])
+		go startCdrc(cdrsChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cdrServer, cfg.ConfigReloads[utils.CDRC])
 	}
-	if cdrcEnabled {
+	if len(cfg.CdrcProfiles) != 0 {
 		engine.Logger.Info("Starting CGRateS CDR client.")
 	}
 

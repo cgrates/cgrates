@@ -21,17 +21,24 @@ package utils
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
 func NewRSRField(fldStr string) (*RSRField, error) {
-	if fldStrUnquoted, err := strconv.Unquote(fldStr); err == nil {
-		fldStr = fldStrUnquoted
-	}
 	if len(fldStr) == 0 {
 		return nil, nil
 	}
+	var filterVal string
+	if strings.HasSuffix(fldStr, FILTER_VAL_END) { // Has filter, populate the var
+		fltrStart := strings.LastIndex(fldStr, FILTER_VAL_START)
+		if fltrStart < 1 {
+			return nil, fmt.Errorf("Invalid FilterStartValue in string: %s", fldStr)
+		}
+		filterVal = fldStr[fltrStart+1 : len(fldStr)-1]
+		fldStr = fldStr[:fltrStart] // Take the filter part out before compiling further
+
+	}
+
 	if strings.HasPrefix(fldStr, STATIC_VALUE_PREFIX) { // Special case when RSR is defined as static header/value
 		var staticHdr, staticVal string
 		if splt := strings.Split(fldStr, STATIC_HDRVAL_SEP); len(splt) == 2 { // Using / as separator since ':' is often use in date/time fields
@@ -44,17 +51,17 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 		} else {
 			staticHdr, staticVal = splt[0][1:], splt[0][1:] // If no split, header will remain as original, value as header without the prefix
 		}
-		return &RSRField{Id: staticHdr, staticValue: staticVal}, nil
+		return &RSRField{Id: staticHdr, staticValue: staticVal, filterValue: filterVal}, nil
 	}
 	if !strings.HasPrefix(fldStr, REGEXP_PREFIX) {
-		return &RSRField{Id: fldStr}, nil
+		return &RSRField{Id: fldStr, filterValue: filterVal}, nil
 	}
 	spltRgxp := regexp.MustCompile(`:s\/`)
 	spltRules := spltRgxp.Split(fldStr, -1)
 	if len(spltRules) < 2 {
 		return nil, fmt.Errorf("Invalid Split of Search&Replace field rule. %s", fldStr)
 	}
-	rsrField := &RSRField{Id: spltRules[0][1:]} // Original id in form ~hdr_name
+	rsrField := &RSRField{Id: spltRules[0][1:], filterValue: filterVal} // Original id in form ~hdr_name
 	rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.*[^\\])*\/){1,}`)
 	for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
 		allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
@@ -74,6 +81,7 @@ type RSRField struct {
 	Id          string             //  Identifier
 	RSRules     []*ReSearchReplace // Rules to use when processing field value
 	staticValue string             // If defined, enforces parsing always to this value
+	filterValue string             // The value to compare when used as filter
 }
 
 // Parse the field value from a string
@@ -103,6 +111,10 @@ func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a reg
 		}
 	}
 	return false
+}
+
+func (rsrf *RSRField) FilterPasses(value string) bool {
+	return len(rsrf.filterValue) == 0 || rsrf.ParseValue(value) == rsrf.filterValue
 }
 
 // Parses list of RSRFields, used for example as multiple filters in derived charging

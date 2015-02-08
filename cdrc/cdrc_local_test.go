@@ -49,6 +49,7 @@ README:
 
 var cfgPath string
 var cfg *config.CGRConfig
+var cdrcCfgs map[string]*config.CdrcConfig
 var cdrcCfg *config.CdrcConfig
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
@@ -99,7 +100,7 @@ func TestLoadConfigt(*testing.T) {
 	cfgPath = path.Join(*dataDir, "conf", "samples", "apier")
 	cfg, _ = config.NewCGRConfigFromFolder(cfgPath)
 	if len(cfg.CdrcProfiles) > 0 {
-		cdrcCfg = cfg.CdrcProfiles[utils.META_DEFAULT]
+		cdrcCfgs = cfg.CdrcProfiles["/var/log/cgrates/cdrc/in"]
 	}
 }
 
@@ -134,8 +135,11 @@ func TestCreateCdrFiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if cdrcCfg == nil {
+	if cdrcCfgs == nil {
 		t.Fatal("Empty default cdrc configuration")
+	}
+	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
+		break
 	}
 	if err := os.RemoveAll(cdrcCfg.CdrInDir); err != nil {
 		t.Fatal("Error removing folder: ", cdrcCfg.CdrInDir, err)
@@ -162,13 +166,17 @@ func TestProcessCdrDir(t *testing.T) {
 	if !*testLocal {
 		return
 	}
+	var cdrcCfg *config.CdrcConfig
+	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
+		break
+	}
 	if cdrcCfg.CdrsAddress == utils.INTERNAL { // For now we only test over network
 		cdrcCfg.CdrsAddress = "127.0.0.1:2013"
 	}
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cdrcCfg, true, nil, make(chan struct{}))
+	cdrc, err := NewCdrc(cdrcCfgs, true, nil, make(chan struct{}))
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -204,7 +212,7 @@ func TestProcessCdr3Dir(t *testing.T) {
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cdrcCfg, true, nil, make(chan struct{}))
+	cdrc, err := NewCdrc(cdrcCfgs, true, nil, make(chan struct{}))
 	if err != nil {
 		t.Fatal(err.Error())
 	}

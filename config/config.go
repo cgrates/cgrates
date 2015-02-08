@@ -74,7 +74,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 		return nil, err
 	}
 	cfg.dfltCdreProfile = cfg.CdreProfiles[utils.META_DEFAULT].Clone() // So default will stay unique, will have nil pointer in case of no defaults loaded which is an extra check
-	cfg.dfltCdrcProfile = cfg.CdrcProfiles[utils.META_DEFAULT].Clone()
+	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/log/cgrates/cdrc/in"][utils.META_DEFAULT].Clone()
 	dfltFsConnConfig = cfg.SmFsConfig.Connections[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.Connections[0]
 	dfltOsipsConnConfig = cfg.SmOsipsConfig.Connections[0]
@@ -193,10 +193,10 @@ type CGRConfig struct {
 	CDRStatsEnabled       bool              // Enable CDR Stats service
 	CDRStatConfig         *CdrStatsConfig   // Active cdr stats configuration instances, platform level
 	CdreProfiles          map[string]*CdreConfig
-	CdrcProfiles          map[string]*CdrcConfig // Number of CDRC instances running imports
-	SmFsConfig            *SmFsConfig            // SM-FreeSWITCH configuration
-	SmKamConfig           *SmKamConfig           // SM-Kamailio Configuration
-	SmOsipsConfig         *SmOsipsConfig         // SM-OpenSIPS Configuration
+	CdrcProfiles          map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
+	SmFsConfig            *SmFsConfig                       // SM-FreeSWITCH configuration
+	SmKamConfig           *SmKamConfig                      // SM-Kamailio Configuration
+	SmOsipsConfig         *SmOsipsConfig                    // SM-OpenSIPS Configuration
 	SMEnabled             bool
 	SMSwitchType          string
 	SMRater               string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -243,7 +243,7 @@ type CGRConfig struct {
 
 func (self *CGRConfig) checkConfigSanity() error {
 	// CDRC sanity checks
-	for _, cdrcInst := range self.CdrcProfiles {
+	for _, cdrcInst := range self.CdrcProfiles["/var/log/cgrates/cdrc/in"] {
 		if cdrcInst.Enabled == true {
 			if len(cdrcInst.CdrFields) == 0 {
 				return errors.New("CdrC enabled but no fields to be processed defined!")
@@ -530,16 +530,20 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 	if jsnCdrcCfg != nil {
 		if self.CdrcProfiles == nil {
-			self.CdrcProfiles = make(map[string]*CdrcConfig)
+			self.CdrcProfiles = make(map[string]map[string]*CdrcConfig)
 		}
 		for profileName, jsnCrc1Cfg := range jsnCdrcCfg {
+			if _, hasDir := self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir]; !hasDir {
+				self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir] = make(map[string]*CdrcConfig)
+			}
 			if _, hasProfile := self.CdrcProfiles[profileName]; !hasProfile {
-				self.CdrcProfiles[profileName] = new(CdrcConfig)
-				if profileName != utils.META_DEFAULT {
-					self.CdrcProfiles[profileName] = self.dfltCdrcProfile.Clone() // Clone default so we do not inherit pointers
+				if profileName == utils.META_DEFAULT {
+					self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir][profileName] = new(CdrcConfig)
+				} else {
+					self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir][profileName] = self.dfltCdrcProfile.Clone() // Clone default so we do not inherit pointers
 				}
 			}
-			if err = self.CdrcProfiles[profileName].loadFromJsonCfg(jsnCrc1Cfg); err != nil {
+			if err = self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir][profileName].loadFromJsonCfg(jsnCrc1Cfg); err != nil {
 				return err
 			}
 		}

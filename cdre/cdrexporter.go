@@ -121,7 +121,7 @@ func (cdre *CdrExporter) getCdrCostDetails(cgrId, runId string) (string, error) 
 
 func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *utils.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
 	var combinedVal string // Will result as combination of the field values, filters must match
-	for _, filterRule := range cfgCdrFld.Filter {
+	for _, filterRule := range cfgCdrFld.FieldFilter {
 		fltrPass, ftrPassValue := processedCdr.PassesFieldFilter(filterRule)
 		if !fltrPass {
 			return "", nil
@@ -152,7 +152,7 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, cfgCdrFld *co
 	if len(cfgCdrFld.Value) == 0 {
 		return "", nil
 	}
-	for _, fltrRl := range cfgCdrFld.Filter {
+	for _, fltrRl := range cfgCdrFld.FieldFilter {
 		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
 			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
 		}
@@ -170,7 +170,7 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, cfgCdrFld *co
 
 // Extracts the value specified by cfgHdr out of cdr
 func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
-	for _, fltrRl := range cfgCdrFld.Filter {
+	for _, fltrRl := range cfgCdrFld.FieldFilter {
 		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
 			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
 		}

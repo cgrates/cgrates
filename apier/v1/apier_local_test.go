@@ -79,8 +79,8 @@ func TestCreateDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportDir, cfg.CdrcProfiles[utils.META_DEFAULT].CdrInDir, cfg.CdrcProfiles[utils.META_DEFAULT].CdrOutDir,
-		cfg.HistoryDir} {
+	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportDir, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out", cfg.HistoryDir} {
+
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}

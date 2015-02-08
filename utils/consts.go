@@ -78,6 +78,8 @@ const (
 	FIELDS_SEP                   = ","
 	STATIC_HDRVAL_SEP            = "::"
 	REGEXP_PREFIX                = "~"
+	FILTER_VAL_START             = "("
+	FILTER_VAL_END               = ")"
 	JSON                         = "json"
 	GOB                          = "gob"
 	MSGPACK                      = "msgpack"
