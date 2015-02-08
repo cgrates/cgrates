@@ -650,8 +650,12 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, apiAtr := range atrsLst {
 			balance_expiration_date, _ := utils.ParseTimeDetectLayout(apiAtr.BalanceExpirationDate)
+			id := apiAtr.Id
+			if id == "" {
+				id = utils.GenUUID()
+			}
 			atrs[idx] = &ActionTrigger{
-				Id:                    key + strconv.Itoa(idx),
+				Id:                    id,
 				ThresholdType:         apiAtr.ThresholdType,
 				ThresholdValue:        apiAtr.ThresholdValue,
 				Recurrent:             apiAtr.Recurrent,
@@ -669,6 +673,9 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 				Weight:                apiAtr.Weight,
 				ActionsId:             apiAtr.ActionsId,
 				MinQueuedItems:        apiAtr.MinQueuedItems,
+			}
+			if atrs[idx].Id == "" {
+				atrs[idx].Id = utils.GenUUID()
 			}
 		}
 		dbr.actionsTriggers[key] = atrs

@@ -162,16 +162,16 @@ TOPUP_EMPTY_AT,EE0,ASAP,10
 `
 
 	actionTriggers = `
-STANDARD_TRIGGER,*min_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,,SOME_1,10
-STANDARD_TRIGGER,*max_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,,SOME_2,10
-STANDARD_TRIGGERS,*min_balance,2,false,0,,*monetary,*out,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*max_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,*min_asr,45,true,1h,,,,,,,,,,,3,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACD,*min_acd,10,true,1h,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACC,*max_acc,10,true,10m,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ASR,*min_asr,30,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ACD,*min_acd,3,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+STANDARD_TRIGGER,st0,*min_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,,SOME_1,10
+STANDARD_TRIGGER,st1,*max_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,,SOME_2,10
+STANDARD_TRIGGERS,,*min_balance,2,false,0,,*monetary,*out,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,3,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
@@ -867,7 +867,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
-		Id:                   "STANDARD_TRIGGER0",
+		Id:                   "st0",
 		BalanceType:          MINUTES,
 		BalanceDirection:     OUTBOUND,
 		ThresholdType:        TRIGGER_MIN_COUNTER,
@@ -882,7 +882,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
-		Id:                   "STANDARD_TRIGGER1",
+		Id:                   "st1",
 		BalanceType:          MINUTES,
 		BalanceDirection:     OUTBOUND,
 		ThresholdType:        TRIGGER_MAX_BALANCE,

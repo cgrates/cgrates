@@ -157,7 +157,7 @@ func TestAccountStorageStore(t *testing.T) {
 	}
 }
 
-/*func TestDebitCreditZeroSecond(t *testing.T) {
+func TestDebitCreditZeroSecond(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RatingSubject: "*zero1s"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
@@ -172,9 +172,18 @@ func TestAccountStorageStore(t *testing.T) {
 		},
 		TOR: MINUTES,
 	}
-	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
+	cd := &CallDescriptor{
+		TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+		Direction:     OUTBOUND,
+		Destination:   "0723045326",
+		Category:      "0",
+		TOR:           MINUTES,
+		test_callcost: cc,
+	}
+	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1}, CREDIT + OUTBOUND: BalanceChain{&Balance{Category: "0", Value: 21}}}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -203,12 +212,21 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 		},
 		TOR: MINUTES,
 	}
+	cd := &CallDescriptor{
+		TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+		Direction:     OUTBOUND,
+		Destination:   "0723045326",
+		Category:      "0",
+		TOR:           MINUTES,
+		test_callcost: cc,
+	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Value: 21}},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -223,6 +241,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0])
 	}
 }
+
 func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	b1 := &Balance{Uuid: "testm", Value: 70, Weight: 5, DestinationId: "NAT", RatingSubject: "*zero1m"}
 	b2 := &Balance{Uuid: "tests", Value: 10, Weight: 10, DestinationId: "NAT", RatingSubject: "*zero1s"}
@@ -240,12 +259,21 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 		},
 		TOR: MINUTES,
 	}
+	cd := &CallDescriptor{
+		TimeStart:     cc.Timespans[0].TimeStart,
+		TimeEnd:       cc.Timespans[0].TimeEnd,
+		Direction:     cc.Direction,
+		Destination:   cc.Destination,
+		TOR:           cc.TOR,
+		DurationIndex: cc.Timespans[0].GetDuration(),
+		test_callcost: cc,
+	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1, b2},
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Value: 21}},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -256,7 +284,9 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][1].Value != 0 ||
 		rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 ||
 		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 21 {
-		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[MINUTES+OUTBOUND])
+		t.Logf("TS0: %+v", cc.Timespans[0])
+		t.Logf("TS1: %+v", cc.Timespans[1])
+		t.Errorf("Error extracting minutes from balance: %+v", rifsBalance.BalanceMap[MINUTES+OUTBOUND][1])
 	}
 }
 
@@ -281,11 +311,20 @@ func TestDebitCreditNoCredit(t *testing.T) {
 		},
 		TOR: MINUTES,
 	}
+	cd := &CallDescriptor{
+		TimeStart:     cc.Timespans[0].TimeStart,
+		TimeEnd:       cc.Timespans[1].TimeEnd,
+		Direction:     cc.Direction,
+		Destination:   cc.Destination,
+		TOR:           cc.TOR,
+		DurationIndex: cc.GetDuration(),
+		test_callcost: cc,
+	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err == nil {
 		t.Error("Showing no enough credit error ")
 	}
@@ -297,12 +336,12 @@ func TestDebitCreditNoCredit(t *testing.T) {
 		t.Error("Error extracting minutes from balance: ",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0])
 	}
-	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != time.Minute {
+	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != time.Minute {
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
 	}
 }
 
-func TestDebitCreditHasCredit(t *testing.T) {
+/*func TestDebitCreditHasCredit(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RatingSubject: "*zero1m"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
@@ -323,12 +362,21 @@ func TestDebitCreditHasCredit(t *testing.T) {
 		},
 		TOR: MINUTES,
 	}
+	cd := &CallDescriptor{
+		TimeStart:     cc.Timespans[0].TimeStart,
+		TimeEnd:       cc.Timespans[1].TimeEnd,
+		Direction:     cc.Direction,
+		Destination:   cc.Destination,
+		TOR:           cc.TOR,
+		DurationIndex: cc.GetDuration(),
+		test_callcost: cc,
+	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 50}},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -341,12 +389,12 @@ func TestDebitCreditHasCredit(t *testing.T) {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
-	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != time.Minute || cc.Timespans[1].GetDuration() != 20*time.Second {
+	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != time.Minute {
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
 	}
-}
+}*/
 
-func TestDebitCreditSplitMinutesMoney(t *testing.T) {
+/*func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RatingSubject: "*zero1s"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
@@ -367,7 +415,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 50}},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -410,7 +458,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 		MINUTES + OUTBOUND: BalanceChain{b1},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -450,7 +498,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 		MINUTES + OUTBOUND: BalanceChain{b1, b2},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -490,7 +538,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 		MINUTES + OUTBOUND: BalanceChain{b1},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err == nil {
 		t.Error("Error showing debiting balance error: ", err)
 	}
@@ -525,7 +573,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "money", Value: 50}},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err == nil {
 		t.Error("Missing noy enough credit error ")
 	}
@@ -569,7 +617,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 350}},
 	}}
 	var err error
-	cc, err = rifsBalance.debitCreditBalance(cc, false)
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -612,7 +660,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 75, DestinationId: "NAT", RatingSubject: "minu"}},
 	}}
 	var err error
-	err = rifsBalance.debitCreditBalance(cc, false)
+	err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -652,7 +700,7 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 150, RatingSubject: "minu"}},
 	}}
 	var err error
-	err = rifsBalance.debitCreditBalance(cc, false)
+	err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -703,7 +751,7 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 50, RatingSubject: "minu"}},
 	}}
 	var err error
-	err = rifsBalance.debitCreditBalance(cc, false)
+	err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err == nil {
 		t.Error("Error showing debiting balance error: ", err)
 	}
@@ -756,7 +804,7 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 75, RatingSubject: "minu"}},
 	}}
 	var err error
-	err = rifsBalance.debitCreditBalance(cc, false)
+	err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err == nil {
 		t.Error("Error showing debiting balance error: ", err)
 	}
@@ -1012,7 +1060,7 @@ func TestDebitShared(t *testing.T) {
 	accountingStorage.SetAccount(groupie)
 	accountingStorage.SetSharedGroup(sg)
 	cache2go.Cache(SHARED_GROUP_PREFIX+"SG_TEST", sg)
-	err := rif.debitCreditBalance(cc, false)
+	err := rif.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1063,7 +1111,7 @@ func TestDebitSMS(t *testing.T) {
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}},
 	}}
 	var err error
-	err = rifsBalance.debitCreditBalance(cc, false)
+	err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1104,7 +1152,7 @@ func TestDebitDataUnits(t *testing.T) {
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}},
 	}}
 	var err error
-	err = rifsBalance.debitCreditBalance(cc, false)
+	err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
@@ -1144,7 +1192,7 @@ func TestDebitDataMoney(t *testing.T) {
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 160}},
 	}}
 	var err error
-	err = rifsBalance.debitCreditBalance(cc, false)
+	err = rifsBalance.debitCreditBalance(cd, false, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}

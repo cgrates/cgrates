@@ -159,6 +159,7 @@ type TpActionTrigger struct {
 	Id                    int64
 	Tpid                  string
 	Tag                   string
+	UniqueId              string
 	ThresholdType         string
 	ThresholdValue        float64
 	Recurrent             bool

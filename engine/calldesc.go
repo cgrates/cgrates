@@ -115,11 +115,12 @@ type CallDescriptor struct {
 	Increments                            Increments
 	TOR                                   string // used unit balances selector
 	// session limits
-	MaxRate      float64
-	MaxRateUnit  time.Duration
-	MaxCost      float64
-	MaxCostSoFar float64
-	account      *Account
+	MaxRate       float64
+	MaxRateUnit   time.Duration
+	MaxCost       float64
+	MaxCostSoFar  float64
+	account       *Account
+	test_callcost *CallCost // testing purpose only!
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {

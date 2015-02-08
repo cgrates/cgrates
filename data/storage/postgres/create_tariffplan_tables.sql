@@ -168,6 +168,7 @@ CREATE TABLE tp_action_triggers (
   id SERIAL PRIMARY KEY,
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
+  unique_id VARCHAR(64) NOT NULL,
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
   balance_direction VARCHAR(8) NOT NULL,

@@ -821,7 +821,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		}
 
 		at := &ActionTrigger{
-			Id:                    tag,
+			Id:                    record[ATRIGCSVIDX_UNIQUE_ID],
 			ThresholdType:         record[ATRIGCSVIDX_THRESHOLD_TYPE],
 			ThresholdValue:        value,
 			Recurrent:             recurrent,
@@ -840,12 +840,9 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			ActionsId:             record[ATRIGCSVIDX_ACTIONS_TAG],
 			Weight:                weight,
 		}
-		// update Id
-		idx := 0
-		if previous, ok := csvr.actionsTriggers[tag]; ok {
-			idx = len(previous)
+		if at.Id == "" {
+			at.Id = utils.GenUUID()
 		}
-		at.Id = at.Id + strconv.Itoa(idx)
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)
 	}
 	return
