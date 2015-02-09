@@ -617,7 +617,7 @@ func TestApierTPActionTriggers(t *testing.T) {
 	}
 	reply := ""
 	at := &utils.TPActionTriggers{TPid: engine.TEST_SQL, ActionTriggersId: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
-		&utils.TPActionTrigger{BalanceType: "*monetary", BalanceDirection: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
+		&utils.TPActionTrigger{Id: "MYFIRSTTRIGGER", BalanceType: "*monetary", BalanceDirection: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
 	}}
 	atTst := new(utils.TPActionTriggers)
 	*atTst = *at
@@ -646,7 +646,7 @@ func TestApierTPActionTriggers(t *testing.T) {
 	if err := rater.Call("ApierV1.GetTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ActionTriggersId: atTst.ActionTriggersId}, &rplyActs); err != nil {
 		t.Error("Calling ApierV1.GetTPActionTriggers, got error: ", err.Error())
 	} else if !reflect.DeepEqual(atTst, rplyActs) {
-		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %v, received: %v", atTst, rplyActs)
+		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %v, received: %v", atTst.ActionTriggers[0], rplyActs.ActionTriggers[0])
 	}
 	// Test remove
 	if err := rater.Call("ApierV1.RemTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ActionTriggersId: atTst.ActionTriggersId}, &reply); err != nil {

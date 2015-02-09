@@ -266,6 +266,7 @@ func TestMySQLSetGetTPActionTriggers(t *testing.T) {
 		return
 	}
 	atrg := &utils.TPActionTrigger{
+		Id:                   "MY_FIRST_ATGR",
 		BalanceType:          "*monetary",
 		BalanceDirection:     "*out",
 		ThresholdType:        "*min_balance",
@@ -276,10 +277,10 @@ func TestMySQLSetGetTPActionTriggers(t *testing.T) {
 		ActionsId:            "LOG_BALANCE",
 	}
 	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
-	if err := mysqlDb.SetTPActionTriggers(TEST_SQL+"1", mpAtrgs); err != nil {
+	if err := mysqlDb.SetTPActionTriggers(TEST_SQL, mpAtrgs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
-	if rcvMpAtrgs, err := mysqlDb.GetTpActionTriggers(TEST_SQL+"1", TEST_SQL); err != nil {
+	if rcvMpAtrgs, err := mysqlDb.GetTpActionTriggers(TEST_SQL, TEST_SQL); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(mpAtrgs, rcvMpAtrgs) {
 		t.Errorf("Expecting: %v, received: %v", mpAtrgs, rcvMpAtrgs)

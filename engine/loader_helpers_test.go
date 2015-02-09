@@ -76,10 +76,10 @@ DUMMY,INVALID;DATA
 `
 
 var actionTriggersSample = `#Tag[0],ThresholdType[1],ThresholdValue[2],Recurrent[3],MinSleep[4],BalanceTag[5],BalanceType[6],BalanceDirection[7],BalanceCategory[8],BalanceDestinationTag[9],BalanceRatingSubject[10],BalanceSharedGroup[11],BalanceExpiryTime[12],BalanceTimingTags[13],BalanceWeight[14],StatsMinQueuedItems[15],ActionsTag[16],Weight[17]
-STANDARD_TRIGGERS,*min_balance,2,false,0,,*monetary,*out,,,,,,ALWAYS;ASAP,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*max_counter,15,false,0,,*monetary,*out,,FS_USERS,,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,*min_asr,45,true,1h,,,,,,,,,,,3,CDRST_WARN_HTTP,10
+STANDARD_TRIGGERS,,*min_balance,2,false,0,,*monetary,*out,,,,,,ALWAYS;ASAP,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_counter,15,false,0,,*monetary,*out,,FS_USERS,,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,3,CDRST_WARN_HTTP,10
 DUMMY,INVALID;DATA
 `
 
