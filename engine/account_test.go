@@ -1162,10 +1162,10 @@ func TestDebitShared(t *testing.T) {
 		test_callcost: cc,
 	}
 	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
-		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 60, SharedGroup: "SG_TEST"}},
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 0, SharedGroup: "SG_TEST"}},
 	}}
 	groupie := &Account{Id: "groupie", BalanceMap: map[string]BalanceChain{
-		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneyc", Value: 70, SharedGroup: "SG_TEST"}},
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneyc", Value: 130, SharedGroup: "SG_TEST"}},
 	}}
 
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
@@ -1194,9 +1194,9 @@ func TestDebitShared(t *testing.T) {
 			t.Errorf("I%d: %+v (%+v)", index, incr, incr.BalanceInfo)
 		}
 	}
-	if cc.Timespans[0].Increments[0].BalanceInfo.AccountId != "rif" ||
-		cc.Timespans[0].Increments[1].BalanceInfo.AccountId != "rif" ||
-		cc.Timespans[0].Increments[2].BalanceInfo.AccountId != "rif" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.AccountId != "groupie" ||
+		cc.Timespans[0].Increments[1].BalanceInfo.AccountId != "groupie" ||
+		cc.Timespans[0].Increments[2].BalanceInfo.AccountId != "groupie" ||
 		cc.Timespans[0].Increments[3].BalanceInfo.AccountId != "groupie" ||
 		cc.Timespans[0].Increments[4].BalanceInfo.AccountId != "groupie" ||
 		cc.Timespans[0].Increments[5].BalanceInfo.AccountId != "groupie" {

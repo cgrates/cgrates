@@ -262,11 +262,10 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			moneyBalanceChecker = false
 			for _, balance := range usefulMoneyBalances {
 				//log.Printf("Money balance: %+v", balance)
-				//log.Printf("CD BEFORE MONEY: %+v", cd.test_callcost)
+				//log.Printf("CD BEFORE MONEY: %+v", cd)
 				partCC, _ := balance.DebitMoney(cd, count, balance.account)
-				//log.Printf("CD AFTER MONEY: %+v", cd.test_callcost)
+				//log.Printf("CD AFTER MONEY: %+v", cd)
 				//log.Printf("partCC: %+v", partCC)
-				//log.Printf("CD: %+v", cd)
 				if partCC != nil {
 					initialLength = len(cc.Timespans)
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
