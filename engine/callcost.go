@@ -157,19 +157,3 @@ func (cc *CallCost) GetLongestRounding() (roundingDecimals int, roundingMethod s
 	}
 	return
 }
-
-func (cc *CallCost) Clone() *CallCost {
-	newCC := &CallCost{
-		Direction:        cc.Direction,
-		Category:         cc.Category,
-		Tenant:           cc.Tenant,
-		Subject:          cc.Subject,
-		Account:          cc.Account,
-		Destination:      cc.Destination,
-		TOR:              cc.TOR,
-		Cost:             cc.Cost,
-		deductConnectFee: cc.deductConnectFee,
-	}
-	copy(newCC.Timespans, cc.Timespans)
-	return cc
-}

@@ -220,7 +220,7 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 func (b *Balance) GetCost(cd *CallDescriptor, getStandarIfEmpty bool) (*CallCost, error) {
 	// testing only
 	if cd.test_callcost != nil {
-		return cd.test_callcost.Clone(), nil
+		return cd.test_callcost, nil
 	}
 	if b.RatingSubject != "" && !strings.HasPrefix(b.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
 		origSubject := cd.Subject
@@ -315,6 +315,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyB
 		//log.Printf("::::::: %+v", cd)
 		cc, err = b.GetCost(cd, true)
 		cc.Timespans.Decompress()
+		//log.Printf("CC: %+v", cc)
 		if err != nil {
 			return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
 		}
@@ -327,6 +328,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyB
 				// debit minutes and money
 				seconds := inc.Duration.Seconds()
 				cost := inc.Cost
+				//log.Printf("INC: %+v", inc)
 				var moneyBal *Balance
 				for _, mb := range moneyBalances {
 					if mb.Value >= cost {
@@ -375,7 +377,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, count bool, ub *Account) (cc *C
 	if !b.IsActiveAt(cd.TimeStart) || b.Value <= 0 {
 		return
 	}
-	//log.Printf("}}}}}}} %+v", cd)
+	//log.Printf("}}}}}}} %+v", cd.test_callcost)
 	cc, err = b.GetCost(cd, true)
 	cc.Timespans.Decompress()
 	//log.Printf("CallCost In Debit: %+v", cc)
@@ -389,9 +391,10 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, count bool, ub *Account) (cc *C
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
 		}
-
+		//log.Printf("TS: %+v", ts)
 		for incIndex, inc := range ts.Increments {
 			// check standard subject tags
+			//log.Printf("INC: %+v", inc)
 			amount := inc.Cost
 			if b.Value >= amount {
 				b.SubstractAmount(amount)
@@ -418,6 +421,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, count bool, ub *Account) (cc *C
 			}
 		}
 	}
+	//log.Printf("END: %+v", cd.test_callcost)
 	if len(cc.Timespans) == 0 {
 		cc = nil
 	}
