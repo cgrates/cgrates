@@ -608,10 +608,14 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 			tx.Rollback()
 			return err
 		}
-		for idx, at := range aTriggers {
+		for _, at := range aTriggers {
+			id := at.Id
+			if id == "" {
+				id = utils.GenUUID()
+			}
 			saved := tx.Save(TpActionTrigger{
 				Tpid:                  tpid,
-				Tag:                   atId + strconv.Itoa(idx),
+				UniqueId:              id,
 				ThresholdType:         at.ThresholdType,
 				ThresholdValue:        at.ThresholdValue,
 				Recurrent:             at.Recurrent,
@@ -1438,6 +1442,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 	}
 	for _, tpAt := range tpActionTriggers {
 		at := &utils.TPActionTrigger{
+			Id:                    tpAt.UniqueId,
 			ThresholdType:         tpAt.ThresholdType,
 			ThresholdValue:        tpAt.ThresholdValue,
 			Recurrent:             tpAt.Recurrent,
