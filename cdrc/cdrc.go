@@ -220,6 +220,9 @@ func (self *Cdrc) processFile(filePath string) error {
 			// Make sure filters are matching
 			filterBreak := false
 			for _, rsrFilter := range self.cdrFilters[idx] {
+				if rsrFilter == nil { // Nil filter does not need to match anything
+					continue
+				}
 				if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
 					return fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
 				} else if !rsrFilter.FilterPasses(record[cfgFieldIdx]) {

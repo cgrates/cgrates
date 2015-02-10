@@ -78,14 +78,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	dfltFsConnConfig = cfg.SmFsConfig.Connections[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.Connections[0]
 	dfltOsipsConnConfig = cfg.SmOsipsConfig.Connections[0]
-	// Enforced parameters, here untill session manager will work with new configuration parameters, ToDo
-	cfg.SMEnabled = false
-	cfg.SMSwitchType = "freeswitch"
-	cfg.SMRater = utils.INTERNAL
-	cfg.SMReconnects = 3
-	cfg.SMDebitInterval = 10
-	cfg.SMMaxCallDuration = time.Duration(3) * time.Hour
-	cfg.SMMinCallDuration = time.Duration(5) * time.Second
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -326,15 +318,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if err != nil {
 		return err
 	}
-	jsnSmFsCfg, err := jsnCfg.SmFsJsonCfg()
-	if err != nil {
-		return err
-	}
-	jsnSmKamCfg, err := jsnCfg.SmKamJsonCfg()
-	if err != nil {
-		return err
-	}
-	jsnSmOsipsCfg, err := jsnCfg.SmOsipsJsonCfg()
+	jsnSMCfg, err := jsnCfg.SessionManagerJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -347,6 +331,18 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 	jsnOsipsCfg, err := jsnCfg.OsipsJsonCfg()
+	if err != nil {
+		return err
+	}
+	jsnSmFsCfg, err := jsnCfg.SmFsJsonCfg()
+	if err != nil {
+		return err
+	}
+	jsnSmKamCfg, err := jsnCfg.SmKamJsonCfg()
+	if err != nil {
+		return err
+	}
+	jsnSmOsipsCfg, err := jsnCfg.SmOsipsJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -548,36 +544,34 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			}
 		}
 	}
-	if jsnSmFsCfg != nil {
-		if err := self.SmFsConfig.loadFromJsonCfg(jsnSmFsCfg); err != nil {
-			return err
+	if jsnSMCfg != nil {
+		if jsnSMCfg.Enabled != nil {
+			self.SMEnabled = *jsnSMCfg.Enabled
 		}
-	}
-	if jsnSmKamCfg != nil {
-		if err := self.SmKamConfig.loadFromJsonCfg(jsnSmKamCfg); err != nil {
-			return err
+		if jsnSMCfg.Switch_type != nil {
+			self.SMSwitchType = *jsnSMCfg.Switch_type
 		}
-	}
-	if jsnSmOsipsCfg != nil {
-		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
-			return err
+		if jsnSMCfg.Rater != nil {
+			self.SMRater = *jsnSMCfg.Rater
 		}
-	}
-	if jsnMediatorCfg != nil {
-		if jsnMediatorCfg.Enabled != nil {
-			self.MediatorEnabled = *jsnMediatorCfg.Enabled
+		if jsnSMCfg.Cdrs != nil {
+			self.SMCdrS = *jsnSMCfg.Cdrs
 		}
-		if jsnMediatorCfg.Reconnects != nil {
-			self.MediatorReconnects = *jsnMediatorCfg.Reconnects
+		if jsnSMCfg.Reconnects != nil {
+			self.SMReconnects = *jsnSMCfg.Reconnects
 		}
-		if jsnMediatorCfg.Rater != nil {
-			self.MediatorRater = *jsnMediatorCfg.Rater
+		if jsnSMCfg.Debit_interval != nil {
+			self.SMDebitInterval = *jsnSMCfg.Debit_interval
 		}
-		if jsnMediatorCfg.Cdrstats != nil {
-			self.MediatorStats = *jsnMediatorCfg.Cdrstats
+		if jsnSMCfg.Max_call_duration != nil {
+			if self.SMMaxCallDuration, err = utils.ParseDurationWithSecs(*jsnSMCfg.Max_call_duration); err != nil {
+				return err
+			}
 		}
-		if jsnMediatorCfg.Store_disable != nil {
-			self.MediatorStoreDisable = *jsnMediatorCfg.Store_disable
+		if jsnSMCfg.Min_call_duration != nil {
+			if self.SMMinCallDuration, err = utils.ParseDurationWithSecs(*jsnSMCfg.Min_call_duration); err != nil {
+				return err
+			}
 		}
 	}
 	if jsnFSCfg != nil {
@@ -634,6 +628,39 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.KamailioReconnects = *jsnKamCfg.Reconnects
 		}
 	}
+	if jsnSmFsCfg != nil {
+		if err := self.SmFsConfig.loadFromJsonCfg(jsnSmFsCfg); err != nil {
+			return err
+		}
+	}
+	if jsnSmKamCfg != nil {
+		if err := self.SmKamConfig.loadFromJsonCfg(jsnSmKamCfg); err != nil {
+			return err
+		}
+	}
+	if jsnSmOsipsCfg != nil {
+		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
+			return err
+		}
+	}
+	if jsnMediatorCfg != nil {
+		if jsnMediatorCfg.Enabled != nil {
+			self.MediatorEnabled = *jsnMediatorCfg.Enabled
+		}
+		if jsnMediatorCfg.Reconnects != nil {
+			self.MediatorReconnects = *jsnMediatorCfg.Reconnects
+		}
+		if jsnMediatorCfg.Rater != nil {
+			self.MediatorRater = *jsnMediatorCfg.Rater
+		}
+		if jsnMediatorCfg.Cdrstats != nil {
+			self.MediatorStats = *jsnMediatorCfg.Cdrstats
+		}
+		if jsnMediatorCfg.Store_disable != nil {
+			self.MediatorStoreDisable = *jsnMediatorCfg.Store_disable
+		}
+	}
+
 	if jsnHistAgentCfg != nil {
 		if jsnHistAgentCfg.Enabled != nil {
 			self.HistoryAgentEnabled = *jsnHistAgentCfg.Enabled

@@ -334,7 +334,6 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 	}
 }
 
-/*
 func TestDfSessionManagerJsonCfg(t *testing.T) {
 	eCfg := &SessionManagerJsonCfg{
 		Enabled:           utils.BoolPointer(false),
@@ -396,7 +395,6 @@ func TestDfOsipsJsonCfg(t *testing.T) {
 		t.Error("Received: ", cfg)
 	}
 }
-*/
 
 func TestSmFsJsonCfg(t *testing.T) {
 	eCfg := &SmFsJsonCfg{

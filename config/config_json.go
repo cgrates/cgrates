@@ -42,6 +42,10 @@ const (
 	SMFS_JSN         = "sm_freeswitch"
 	SMKAM_JSN        = "sm_kamailio"
 	SMOSIPS_JSN      = "sm_opensips"
+	SM_JSN           = "session_manager"
+	FS_JSN           = "freeswitch"
+	KAMAILIO_JSN     = "kamailio"
+	OSIPS_JSN        = "opensips"
 	HISTSERV_JSN     = "history_server"
 	HISTAGENT_JSN    = "history_agent"
 	MAILER_JSN       = "mailer"
@@ -204,19 +208,51 @@ func (self CgrJsonCfg) CdrcJsonCfg() (map[string]*CdrcJsonCfg, error) {
 }
 
 func (self CgrJsonCfg) SessionManagerJsonCfg() (*SessionManagerJsonCfg, error) {
-	return nil, nil
+	rawCfg, hasKey := self[SM_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(SessionManagerJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (self CgrJsonCfg) FSJsonCfg() (*FSJsonCfg, error) {
-	return nil, nil
+	rawCfg, hasKey := self[FS_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(FSJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (self CgrJsonCfg) KamailioJsonCfg() (*KamailioJsonCfg, error) {
-	return nil, nil
+	rawCfg, hasKey := self[KAMAILIO_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(KamailioJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (self CgrJsonCfg) OsipsJsonCfg() (*OsipsJsonCfg, error) {
-	return nil, nil
+	rawCfg, hasKey := self[OSIPS_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(OsipsJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (self CgrJsonCfg) SmFsJsonCfg() (*SmFsJsonCfg, error) {
