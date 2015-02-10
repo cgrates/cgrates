@@ -89,9 +89,6 @@ func (rsrf *RSRField) ParseValue(value string) string {
 	if len(rsrf.staticValue) != 0 { // Enforce parsing of static values
 		return rsrf.staticValue
 	}
-	if len(value) == 0 {
-		return value
-	}
 	for _, rsRule := range rsrf.RSRules {
 		if rsRule != nil {
 			value = rsRule.Process(value)

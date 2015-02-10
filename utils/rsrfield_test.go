@@ -195,4 +195,14 @@ func TestFilterPasses(t *testing.T) {
 	if rl.FilterPasses("0031ABOC0630415354") {
 		t.Error("Passing filter")
 	}
+	rl, err = NewRSRField(`~1:s/^$/_empty_/(_empty_)`)
+	if err != nil {
+		t.Error("Unexpected error: ", err)
+	}
+	if !rl.FilterPasses("") {
+		t.Error("Not passing filter")
+	}
+	if rl.FilterPasses("Non empty") {
+		t.Error("Passing filter")
+	}
 }
