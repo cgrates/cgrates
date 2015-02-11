@@ -223,20 +223,51 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 }
 
 type AttrGetAccounts struct {
-	Page         int
-	ItemsPerPage int
-	SearchTerm   string
+	Tenant     string
+	Direction  string
+	AccountIds []string
+	Offset     int // Set the item offset
+	Limit      int // Limit number of items retrieved
 }
 
-func (self *ApierV1) GetAccounts(attrs AttrGetAccounts, reply *[]string) error {
-	prefix := engine.ACCOUNT_PREFIX
-	if attrs.SearchTerm != "" {
-		prefix += "*" + attrs.SearchTerm
+func (self *ApierV1) GetAccounts(attr AttrGetAccounts, reply *[]*engine.Account) error {
+	if len(attr.Tenant) == 0 {
+		return fmt.Errorf("%s:Tenant", utils.ERR_MANDATORY_IE_MISSING)
 	}
-	accountKeys, err := self.AccountDb.GetKeysForPrefix(prefix)
-	if err != nil {
-		return err
+	if len(attr.Direction) == 0 {
+		attr.Direction = utils.OUT
 	}
-	*reply = accountKeys
+	var accountKeys []string
+	var err error
+	if len(attr.AccountIds) == 0 {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + utils.ConcatenatedKey(attr.Direction, attr.Tenant)); err != nil {
+			return err
+		}
+	} else {
+		for _, acntId := range attr.AccountIds {
+			if len(acntId) == 0 { // Source of error returned from redis (key not found)
+				continue
+			}
+			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Direction, attr.Tenant, acntId))
+		}
+	}
+	if len(accountKeys) == 0 {
+		return nil
+	}
+	var limitedAccounts []string
+	if attr.Limit != 0 {
+		limitedAccounts = accountKeys[attr.Offset : attr.Offset+attr.Limit]
+	} else {
+		limitedAccounts = accountKeys[attr.Offset:]
+	}
+	retAccounts := make([]*engine.Account, 0)
+	for _, acntKey := range limitedAccounts {
+		if acnt, err := self.AccountDb.GetAccount(acntKey[len(engine.ACCOUNT_PREFIX):]); err != nil && err.Error() != utils.ERR_NOT_FOUND { // Not found is not an error here
+			return err
+		} else if acnt != nil {
+			retAccounts = append(retAccounts, acnt)
+		}
+	}
+	*reply = retAccounts
 	return nil
 }

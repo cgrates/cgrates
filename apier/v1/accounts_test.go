@@ -16,10 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package v2
+package v1
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -27,14 +26,14 @@ import (
 )
 
 var (
-	apierAcnts            *ApierV2
+	apierAcnts            *ApierV1
 	apierAcntsAcntStorage *engine.MapStorage
 )
 
 func init() {
 	apierAcntsAcntStorage, _ = engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	apierAcnts = &ApierV2{v1.ApierV1{AccountDb: engine.AccountingStorage(apierAcntsAcntStorage), Config: cfg}}
+	apierAcnts = &ApierV1{AccountDb: engine.AccountingStorage(apierAcntsAcntStorage), Config: cfg}
 }
 
 func TestSetAccounts(t *testing.T) {
@@ -60,6 +59,7 @@ func TestSetAccounts(t *testing.T) {
 	apierAcntsAcntStorage.CacheAccounting(nil, noReload, noReload, noReload)
 }
 
+/*
 func TestGetAccountIds(t *testing.T) {
 	var accountIds []string
 	var attrs AttrGetAccountIds
@@ -69,13 +69,14 @@ func TestGetAccountIds(t *testing.T) {
 		t.Errorf("Accounts returned: %+v", accountIds)
 	}
 }
+*/
 
 func TestGetAccounts(t *testing.T) {
 	var accounts []*engine.Account
 	var attrs AttrGetAccounts
-	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
+	if err := apierAcnts.GetAccounts(AttrGetAccounts{Tenant: "cgrates.org"}, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
-	} else if len(accounts) != 5 {
+	} else if len(accounts) != 3 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
 	attrs = AttrGetAccounts{Tenant: "itsyscom.com"}
@@ -84,25 +85,13 @@ func TestGetAccounts(t *testing.T) {
 	} else if len(accounts) != 2 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
-	attrs = AttrGetAccounts{Tenant: "cgrates.org", Account: "account1"}
+	attrs = AttrGetAccounts{Tenant: "cgrates.org", AccountIds: []string{"account1"}}
 	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 1 {
 		t.Errorf("Accounts returned: %+v", accounts)
 	}
-	attrs = AttrGetAccounts{Account: "account1"}
-	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if len(accounts) != 2 {
-		t.Errorf("Accounts returned: %+v", accounts)
-	}
-	attrs = AttrGetAccounts{Account: "account3"}
-	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else if len(accounts) != 1 {
-		t.Errorf("Accounts returned: %+v", accounts)
-	}
-	attrs = AttrGetAccounts{Account: "INVALID"}
+	attrs = AttrGetAccounts{Tenant: "itsyscom.com", AccountIds: []string{"INVALID"}}
 	if err := apierAcnts.GetAccounts(attrs, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if len(accounts) != 0 {
