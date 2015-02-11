@@ -36,17 +36,17 @@ const (
 	COST_DETAILS          = "cost_details"
 	CONCATENATED_CDRFIELD = "concatenated_cdrfield"
 	DATETIME              = "datetime"
-	META_EXPORTID         = "export_id"
-	META_TIMENOW          = "time_now"
-	META_FIRSTCDRATIME    = "first_cdr_atime"
-	META_LASTCDRATIME     = "last_cdr_atime"
-	META_NRCDRS           = "cdrs_number"
-	META_DURCDRS          = "cdrs_duration"
-	META_SMSUSAGE         = "sms_usage"
-	META_DATAUSAGE        = "data_usage"
-	META_COSTCDRS         = "cdrs_cost"
-	META_MASKDESTINATION  = "mask_destination"
-	META_FORMATCOST       = "format_cost"
+	META_EXPORTID         = "*export_id"
+	META_TIMENOW          = "*time_now"
+	META_FIRSTCDRATIME    = "*first_cdr_atime"
+	META_LASTCDRATIME     = "*last_cdr_atime"
+	META_NRCDRS           = "*cdrs_number"
+	META_DURCDRS          = "*cdrs_duration"
+	META_SMSUSAGE         = "*sms_usage"
+	META_DATAUSAGE        = "*data_usage"
+	META_COSTCDRS         = "*cdrs_cost"
+	META_MASKDESTINATION  = "*mask_destination"
+	META_FORMATCOST       = "*format_cost"
 )
 
 var err error
@@ -248,16 +248,12 @@ func (cdre *CdrExporter) composeHeader() error {
 		var outVal string
 		switch cfgFld.Type {
 		case utils.FILLER:
-			for _, rsrFld := range cfgFld.Value {
-				outVal += rsrFld.ParseValue("")
-			}
+			outVal = cfgFld.Value.Id()
 			cfgFld.Padding = "right"
 		case utils.CONSTANT:
-			for _, rsrFld := range cfgFld.Value {
-				outVal += rsrFld.ParseValue("")
-			}
+			outVal = cfgFld.Value.Id()
 		case utils.METATAG:
-			outVal, err = cdre.metaHandler(cfgFld.CdrFieldId, cfgFld.Layout)
+			outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
@@ -281,16 +277,12 @@ func (cdre *CdrExporter) composeTrailer() error {
 		var outVal string
 		switch cfgFld.Type {
 		case utils.FILLER:
-			for _, rsrFld := range cfgFld.Value {
-				outVal += rsrFld.ParseValue("")
-			}
+			outVal = cfgFld.Value.Id()
 			cfgFld.Padding = "right"
 		case utils.CONSTANT:
-			for _, rsrFld := range cfgFld.Value {
-				outVal += rsrFld.ParseValue("")
-			}
+			outVal = cfgFld.Value.Id()
 		case utils.METATAG:
-			outVal, err = cdre.metaHandler(cfgFld.CdrFieldId, cfgFld.Layout)
+			outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
@@ -328,25 +320,20 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 		var outVal string
 		switch cfgFld.Type {
 		case utils.FILLER:
-			for _, rsrFld := range cfgFld.Value {
-				outVal += rsrFld.ParseValue("")
-			}
+			outVal = cfgFld.Value.Id()
 			cfgFld.Padding = "right"
 		case utils.CONSTANT:
-			for _, rsrFld := range cfgFld.Value {
-				outVal += rsrFld.ParseValue("")
-			}
+			outVal = cfgFld.Value.Id()
 		case utils.CDRFIELD:
 			outVal, err = cdre.cdrFieldValue(cdr, cfgFld)
 		case DATETIME:
 			outVal, err = cdre.getDateTimeFieldVal(cdr, cfgFld)
 		case utils.HTTP_POST:
 			var outValByte []byte
-			var httpAddr string
-			for _, rsrFld := range cfgFld.Value {
-				httpAddr += rsrFld.ParseValue("")
-			}
-			if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, cdr); err == nil {
+			httpAddr := cfgFld.Value.Id()
+			if len(httpAddr) == 0 {
+				err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
+			} else if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, cdr); err == nil {
 				outVal = string(outValByte)
 				if len(outVal) == 0 && cfgFld.Mandatory {
 					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
@@ -355,10 +342,10 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 		case utils.COMBIMED:
 			outVal, err = cdre.getCombimedCdrFieldVal(cdr, cfgFld)
 		case utils.METATAG:
-			if cfgFld.CdrFieldId == META_MASKDESTINATION {
-				outVal, err = cdre.metaHandler(cfgFld.CdrFieldId, cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}))
+			if cfgFld.Value.Id() == META_MASKDESTINATION {
+				outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}))
 			} else {
-				outVal, err = cdre.metaHandler(cfgFld.CdrFieldId, cfgFld.Layout)
+				outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cfgFld.Layout)
 			}
 		}
 		if err != nil {

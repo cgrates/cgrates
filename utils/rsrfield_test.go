@@ -206,3 +206,18 @@ func TestFilterPasses(t *testing.T) {
 		t.Error("Passing filter")
 	}
 }
+
+func TestRSRFieldsId(t *testing.T) {
+	fieldsStr1 := `~account:s/^\w+[mpls]\d{6}$//;~subject:s/^0\d{9}$//;^destination/+4912345/;~mediation_runid:s/^default$/default/`
+	if rsrFlds, err := ParseRSRFields(fieldsStr1, INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else if idRcv := rsrFlds.Id(); idRcv != "account" {
+		t.Errorf("Received id: %s", idRcv)
+	}
+	fieldsStr2 := ""
+	if rsrFlds, err := ParseRSRFields(fieldsStr2, INFIELD_SEP); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else if idRcv := rsrFlds.Id(); idRcv != "" {
+		t.Errorf("Received id: %s", idRcv)
+	}
+}

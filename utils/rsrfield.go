@@ -142,3 +142,11 @@ func ParseRSRFieldsFromSlice(flds []string) (RSRFields, error) {
 }
 
 type RSRFields []*RSRField
+
+// Return first Id of the rsrFields, used in cdre
+func (self RSRFields) Id() string {
+	if len(self) == 0 {
+		return ""
+	}
+	return self[0].Id
+}
