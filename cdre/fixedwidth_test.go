@@ -71,7 +71,7 @@ var contentJsnCfgFlds = []*config.CdrFieldJsonCfg{
 		Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Filler"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(8)},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Filler"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(8)},
-	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("TerminationCode"), Type: utils.StringPointer(CONCATENATED_CDRFIELD), Value: utils.StringPointer("operator,product"),
+	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("TerminationCode"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer("operator;product"),
 		Width: utils.IntPointer(5), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right")},
 	&config.CdrFieldJsonCfg{Tag: utils.StringPointer("Cost"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer(utils.COST), Width: utils.IntPointer(9),
 		Padding: utils.StringPointer("zeroleft")},

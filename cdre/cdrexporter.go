@@ -33,20 +33,19 @@ import (
 )
 
 const (
-	COST_DETAILS          = "cost_details"
-	CONCATENATED_CDRFIELD = "concatenated_cdrfield"
-	DATETIME              = "datetime"
-	META_EXPORTID         = "*export_id"
-	META_TIMENOW          = "*time_now"
-	META_FIRSTCDRATIME    = "*first_cdr_atime"
-	META_LASTCDRATIME     = "*last_cdr_atime"
-	META_NRCDRS           = "*cdrs_number"
-	META_DURCDRS          = "*cdrs_duration"
-	META_SMSUSAGE         = "*sms_usage"
-	META_DATAUSAGE        = "*data_usage"
-	META_COSTCDRS         = "*cdrs_cost"
-	META_MASKDESTINATION  = "*mask_destination"
-	META_FORMATCOST       = "*format_cost"
+	COST_DETAILS         = "cost_details"
+	DATETIME             = "datetime"
+	META_EXPORTID        = "*export_id"
+	META_TIMENOW         = "*time_now"
+	META_FIRSTCDRATIME   = "*first_cdr_atime"
+	META_LASTCDRATIME    = "*last_cdr_atime"
+	META_NRCDRS          = "*cdrs_number"
+	META_DURCDRS         = "*cdrs_duration"
+	META_SMSUSAGE        = "*sms_usage"
+	META_DATAUSAGE       = "*data_usage"
+	META_COSTCDRS        = "*cdrs_cost"
+	META_MASKDESTINATION = "*mask_destination"
+	META_FORMATCOST      = "*format_cost"
 )
 
 var err error
