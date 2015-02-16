@@ -183,8 +183,10 @@ func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, cfgCdrFld *config.C
 		var cdrVal string
 		switch rsrFld.Id {
 		case COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
-			if cdrVal, err = cdre.getCdrCostDetails(cdr.CgrId, cdr.MediationRunId); err != nil {
+			if cdr.ExtraFields[COST_DETAILS], err = cdre.getCdrCostDetails(cdr.CgrId, cdr.MediationRunId); err != nil {
 				return "", err
+			} else {
+				cdrVal = cdr.FieldAsString(rsrFld)
 			}
 		case utils.COST:
 			cdrVal = cdr.FormatCost(cdre.costShiftDigits, cdre.roundDecimals)
