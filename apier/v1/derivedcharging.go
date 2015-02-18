@@ -43,8 +43,20 @@ type AttrSetDerivedChargers struct {
 }
 
 func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *string) (err error) {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Category", "Direction", "Account", "Subject", "DerivedChargers"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	if len(attrs.Direction) == 0 {
+		attrs.Direction = utils.OUT
+	}
+	if len(attrs.Tenant) == 0 {
+		attrs.Tenant = utils.ANY
+	}
+	if len(attrs.Category) == 0 {
+		attrs.Category = utils.ANY
+	}
+	if len(attrs.Account) == 0 {
+		attrs.Account = utils.ANY
+	}
+	if len(attrs.Subject) == 0 {
+		attrs.Subject = utils.ANY
 	}
 	for _, dc := range attrs.DerivedChargers {
 		if _, err = utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP); err != nil { // Make sure rules are OK before loading in db
@@ -67,8 +79,20 @@ type AttrRemDerivedChargers struct {
 }
 
 func (self *ApierV1) RemDerivedChargers(attrs AttrRemDerivedChargers, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Direction", "Tenant", "Category", "Account", "Subject"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	if len(attrs.Direction) == 0 {
+		attrs.Direction = utils.OUT
+	}
+	if len(attrs.Tenant) == 0 {
+		attrs.Tenant = utils.ANY
+	}
+	if len(attrs.Category) == 0 {
+		attrs.Category = utils.ANY
+	}
+	if len(attrs.Account) == 0 {
+		attrs.Account = utils.ANY
+	}
+	if len(attrs.Subject) == 0 {
+		attrs.Subject = utils.ANY
 	}
 	if err := self.AccountDb.SetDerivedChargers(utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject), nil); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())

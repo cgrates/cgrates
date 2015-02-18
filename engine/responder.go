@@ -219,8 +219,9 @@ func (rs *Responder) GetSessionRuns(ev utils.Event, sRuns *[]*SessionRun) error 
 }
 
 func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
-	// ToDo: Make it work with balancer if needed
-
+	if rs.Bal != nil {
+		return errors.New("BALANCER_UNSUPPORTED_METHOD")
+	}
 	if dcsH, err := HandleGetDerivedChargers(accountingStorage, attrs); err != nil {
 		return err
 	} else if dcsH != nil {
@@ -231,7 +232,7 @@ func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *ut
 
 func (rs *Responder) ProcessCdr(cdr *utils.StoredCdr, reply *string) error {
 	if rs.CdrSrv == nil {
-		return errors.New("CdrServerNotRunning")
+		return errors.New("CDR_SERVER_NOT_RUNNING")
 	}
 	if err := rs.CdrSrv.ProcessCdr(cdr); err != nil {
 		return err

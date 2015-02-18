@@ -68,7 +68,6 @@ func NewCgrJsonCfgFromFile(fpath string) (*CgrJsonCfg, error) {
 		return nil, err
 	}
 	defer cfgFile.Close()
-
 	return NewCgrJsonCfgFromReader(cfgFile)
 }
 
