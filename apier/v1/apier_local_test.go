@@ -1090,7 +1090,7 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var rmReply string
-	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", Direction: "*out", ActionTriggerId: reply[0].Id}
+	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", Direction: "*out", ActionTriggersId: reply[0].Id}
 	if err := rater.Call("ApierV1.RemAccountActionTriggers", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
 	} else if rmReply != OK {

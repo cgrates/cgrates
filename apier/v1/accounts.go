@@ -118,10 +118,10 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 }
 
 type AttrRemAcntActionTriggers struct {
-	Tenant          string // Tenant he account belongs to
-	Account         string // Account name
-	Direction       string // Traffic direction
-	ActionTriggerId string // Id filtering only specific id to remove (can be regexp pattern)
+	Tenant           string // Tenant he account belongs to
+	Account          string // Account name
+	Direction        string // Traffic direction
+	ActionTriggersId string // Id filtering only specific id to remove (can be regexp pattern)
 }
 
 // Returns a list of ActionTriggers on an account
@@ -136,8 +136,8 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 			return 0, err
 		}
 		for idx, actr := range ub.ActionTriggers {
-			match, _ := regexp.MatchString(attrs.ActionTriggerId, actr.Id)
-			if len(attrs.ActionTriggerId) != 0 && !match {
+			match, _ := regexp.MatchString(attrs.ActionTriggersId, actr.Id)
+			if len(attrs.ActionTriggersId) != 0 && !match {
 				continue
 			}
 			if len(ub.ActionTriggers) != 1 { // Remove by index
