@@ -86,7 +86,7 @@ func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 type AttrAddBalance struct {
 	Tenant        string
 	Account       string
-	BalanceTag    string
+	BalanceId     string
 	BalanceType   string
 	Direction     string
 	Value         float64
@@ -134,7 +134,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			BalanceType: attr.BalanceType,
 			Direction:   attr.Direction,
 			Balance: &engine.Balance{
-				Id:             attr.BalanceTag,
+				Id:             attr.BalanceId,
 				Value:          attr.Value,
 				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
@@ -413,7 +413,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 			ExtraParameters:  apiAct.ExtraParameters,
 			Balance: &engine.Balance{
 				Uuid:          utils.GenUUID(),
-				Id:            apiAct.BalanceTag,
+				Id:            apiAct.BalanceId,
 				Value:         apiAct.Units,
 				Weight:        apiAct.BalanceWeight,
 				DestinationId: apiAct.DestinationId,
@@ -534,7 +534,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 }
 
 type AttrAddActionTrigger struct {
-	Id                   string
+	ActionTriggersId     string
 	Tenant               string
 	Account              string
 	ThresholdType        string
@@ -560,7 +560,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	at := &engine.ActionTrigger{
-		Id:                    attr.Id,
+		Id:                    attr.ActionTriggersId,
 		ThresholdType:         attr.ThresholdType,
 		ThresholdValue:        attr.ThresholdValue,
 		BalanceId:             attr.BalanceId,

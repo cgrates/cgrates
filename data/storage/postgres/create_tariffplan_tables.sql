@@ -14,6 +14,7 @@ CREATE TABLE tp_timings (
   created_at TIMESTAMP,
   UNIQUE  (tpid, tag)
 );
+CREATE INDEX tptimings_idx ON tp_timings (tpid,tag);
 
 --
 -- Table structure for table `tp_destinations`
@@ -28,6 +29,7 @@ CREATE TABLE tp_destinations (
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, prefix)
 );
+CREATE INDEX tpdests_idx ON tp_destinations (tpid,tag);
 
 --
 -- Table structure for table `tp_rates`
@@ -46,6 +48,7 @@ CREATE TABLE tp_rates (
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, group_interval_start)
 );
+CREATE INDEX tprates_idx ON tp_rates (tpid,tag);
 
 --
 -- Table structure for table `destination_rates`
@@ -63,6 +66,7 @@ CREATE TABLE tp_destination_rates (
   created_at TIMESTAMP,
   UNIQUE (tpid, tag , destinations_tag)
 );
+CREATE INDEX tpdestrates_idx ON tp_destination_rates (tpid,tag);
 
 --
 -- Table structure for table `tp_rating_plans`
@@ -79,6 +83,8 @@ CREATE TABLE tp_rating_plans (
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, destrates_tag, timing_tag)
 );
+CREATE INDEX tpratingplans_idx ON tp_rating_plans (tpid,tag);
+
 
 --
 -- Table structure for table `tp_rate_profiles`
@@ -99,6 +105,7 @@ CREATE TABLE tp_rating_profiles (
   created_at TIMESTAMP,
   UNIQUE (tpid, loadid, tenant, category, direction, subject, activation_time)
 );
+CREATE INDEX tpratingprofiles_idx ON tp_rating_profiles (tpid,loadid,direction,tenant,category,subject);
 
 --
 -- Table structure for table `tp_shared_groups`
@@ -115,6 +122,7 @@ CREATE TABLE tp_shared_groups (
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, account , strategy , rating_subject)
 );
+CREATE INDEX tpsharedgroups_idx ON tp_shared_groups (tpid,tag);
 
 --
 -- Table structure for table `tp_actions`
@@ -142,6 +150,7 @@ CREATE TABLE tp_actions (
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, action, balance_tag, balance_type, direction, expiry_time, timing_tags, destination_tag, shared_group, balance_weight, weight)
 );
+CREATE INDEX tpactions_idx ON tp_actions (tpid,tag);
 
 --
 -- Table structure for table `tp_action_timings`
@@ -158,6 +167,7 @@ CREATE TABLE tp_action_plans (
   created_at TIMESTAMP,
   UNIQUE  (tpid, tag, actions_tag)
 );
+CREATE INDEX tpactionplans_idx ON tp_action_plans (tpid,tag);
 
 --
 -- Table structure for table tp_action_triggers
@@ -189,6 +199,7 @@ CREATE TABLE tp_action_triggers (
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, balance_tag, balance_type, balance_direction, threshold_type, threshold_value, balance_destination_tag, actions_tag)
 );
+CREATE INDEX tpactiontrigers_idx ON tp_action_triggers (tpid,tag);
 
 --
 -- Table structure for table tp_account_actions
@@ -207,6 +218,7 @@ CREATE TABLE tp_account_actions (
   created_at TIMESTAMP,
   UNIQUE (tpid, loadid, tenant, account, direction)
 );
+CREATE INDEX tpaccountactions_idx ON tp_account_actions (tpid,loadid,tenant,account,direction);
 
 --
 -- Table structure for table `tp_lcr_rules`
@@ -227,6 +239,7 @@ CREATE TABLE tp_lcr_rules (
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP
 );
+CREATE INDEX tplcr_idx ON tp_lcr_rules (tpid,direction,tenant,customer,destination_tag);
 
 --
 -- Table structure for table `tp_derived_chargers`
@@ -256,6 +269,7 @@ CREATE TABLE tp_derived_chargers (
   usage_field  VARCHAR(24) NOT NULL,
   created_at TIMESTAMP
 );
+CREATE INDEX tpderivedchargers_idx ON tp_derived_chargers (tpid,loadid,direction,tenant,category,account,subject);
 
 
 --
@@ -289,3 +303,4 @@ CREATE TABLE tp_cdr_stats (
   action_triggers VARCHAR(64) NOT NULL,
   created_at TIMESTAMP
 );
+CREATE INDEX tpcdrstats_idx ON tp_cdr_stats (tpid,tag);

@@ -403,7 +403,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 		}
 		acts[actId] = append(acts[actId], &utils.TPAction{
 			Identifier:      actionType,
-			BalanceTag:      balanceTag,
+			BalanceId:       balanceTag,
 			BalanceType:     balanceType,
 			Direction:       direction,
 			Units:           units,
@@ -541,7 +541,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			ThresholdValue:        threshold,
 			Recurrent:             recurrent,
 			MinSleep:              minSleep,
-			BalanceTag:            balanceId,
+			BalanceId:             balanceId,
 			BalanceType:           balanceType,
 			BalanceDirection:      direction,
 			BalanceDestinationId:  destinationTag,
