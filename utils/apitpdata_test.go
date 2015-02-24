@@ -21,7 +21,6 @@ package utils
 import (
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestTPDestinationAsExportSlice(t *testing.T) {
@@ -415,7 +414,7 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 				ThresholdType:         "*min_balance",
 				ThresholdValue:        2.0,
 				Recurrent:             false,
-				MinSleep:              time.Duration(0),
+				MinSleep:              "0",
 				BalanceId:             "b1",
 				BalanceType:           "*monetary",
 				BalanceDirection:      "*out",
@@ -433,7 +432,7 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 				ThresholdType:         "*max_counter",
 				ThresholdValue:        5.0,
 				Recurrent:             false,
-				MinSleep:              time.Duration(0),
+				MinSleep:              "0",
 				BalanceId:             "b2",
 				BalanceType:           "*monetary",
 				BalanceDirection:      "*out",

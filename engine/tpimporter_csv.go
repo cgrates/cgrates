@@ -23,7 +23,6 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -509,11 +508,6 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
 			continue
 		}
-		minSleep, err := time.ParseDuration(record[ATRIGCSVIDX_MIN_SLEEP])
-		if err != nil && record[ATRIGCSVIDX_MIN_SLEEP] != "" {
-			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
-			continue
-		}
 		balanceWeight, err := strconv.ParseFloat(record[ATRIGCSVIDX_BAL_WEIGHT], 64)
 		if err != nil && record[ATRIGCSVIDX_BAL_WEIGHT] != "" {
 			if self.Verbose {
@@ -540,7 +534,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			ThresholdType:         thresholdType,
 			ThresholdValue:        threshold,
 			Recurrent:             recurrent,
-			MinSleep:              minSleep,
+			MinSleep:              record[ATRIGCSVIDX_MIN_SLEEP],
 			BalanceId:             balanceId,
 			BalanceType:           balanceType,
 			BalanceDirection:      direction,

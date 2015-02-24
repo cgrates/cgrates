@@ -654,12 +654,16 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 			if id == "" {
 				id = utils.GenUUID()
 			}
+			minSleep, err := utils.ParseDurationWithSecs(apiAtr.MinSleep)
+			if err != nil {
+				return err
+			}
 			atrs[idx] = &ActionTrigger{
 				Id:                    id,
 				ThresholdType:         apiAtr.ThresholdType,
 				ThresholdValue:        apiAtr.ThresholdValue,
 				Recurrent:             apiAtr.Recurrent,
-				MinSleep:              apiAtr.MinSleep,
+				MinSleep:              minSleep,
 				BalanceId:             apiAtr.BalanceId,
 				BalanceType:           apiAtr.BalanceType,
 				BalanceDirection:      apiAtr.BalanceDirection,

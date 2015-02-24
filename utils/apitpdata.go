@@ -523,7 +523,7 @@ type TPActionTriggers struct {
 func (self *TPActionTriggers) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.ActionTriggers))
 	for idx, at := range self.ActionTriggers {
-		retSlice[idx] = []string{self.ActionTriggersId, at.ThresholdType, strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64), strconv.FormatBool(at.Recurrent), strconv.FormatFloat(at.MinSleep.Seconds(), 'f', -1, 64),
+		retSlice[idx] = []string{self.ActionTriggersId, at.ThresholdType, strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64), strconv.FormatBool(at.Recurrent), at.MinSleep,
 			at.BalanceId, at.BalanceType, at.BalanceDirection, at.BalanceCategory, at.BalanceDestinationId, at.BalanceRatingSubject, at.BalanceSharedGroup, at.BalanceExpirationDate, at.BalanceTimingTags,
 			strconv.FormatFloat(at.BalanceWeight, 'f', -1, 64), strconv.Itoa(at.MinQueuedItems), at.ActionsId, strconv.FormatFloat(at.Weight, 'f', -1, 64)}
 	}
@@ -532,23 +532,23 @@ func (self *TPActionTriggers) AsExportSlice() [][]string {
 
 type TPActionTrigger struct {
 	Id                    string
-	ThresholdType         string        // This threshold type
-	ThresholdValue        float64       // Threshold
-	Recurrent             bool          // reset executed flag each run
-	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
-	BalanceId             string        // The id of the balance in the account
-	BalanceType           string        // Type of balance this trigger monitors
-	BalanceDirection      string        // Traffic direction
-	BalanceDestinationId  string        // filter for balance
-	BalanceWeight         float64       // filter for balance
-	BalanceExpirationDate string        // filter for balance
-	BalanceTimingTags     string        // filter for balance
-	BalanceRatingSubject  string        // filter for balance
-	BalanceCategory       string        // filter for balance
-	BalanceSharedGroup    string        // filter for balance
-	MinQueuedItems        int           // Trigger actions only if this number is hit (stats only)
-	ActionsId             string        // Actions which will execute on threshold reached
-	Weight                float64       // weight
+	ThresholdType         string  // This threshold type
+	ThresholdValue        float64 // Threshold
+	Recurrent             bool    // reset executed flag each run
+	MinSleep              string  // Minimum duration between two executions in case of recurrent triggers
+	BalanceId             string  // The id of the balance in the account
+	BalanceType           string  // Type of balance this trigger monitors
+	BalanceDirection      string  // Traffic direction
+	BalanceDestinationId  string  // filter for balance
+	BalanceWeight         float64 // filter for balance
+	BalanceExpirationDate string  // filter for balance
+	BalanceTimingTags     string  // filter for balance
+	BalanceRatingSubject  string  // filter for balance
+	BalanceCategory       string  // filter for balance
+	BalanceSharedGroup    string  // filter for balance
+	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
+	ActionsId             string  // Actions which will execute on threshold reached
+	Weight                float64 // weight
 
 }
 
