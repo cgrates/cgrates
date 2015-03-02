@@ -33,11 +33,11 @@ func (tpdi TPDistinctIds) String() string {
 	return strings.Join(tpdi, ",")
 }
 
-// To paginate stuff from stordb (e.g. ids)
+// Paginate stuff around items returned
 type Paginator struct {
-	Limit      *int
-	Offset     *int
-	SearchTerm string
+	Limit      *int   // Limit the number of items returned
+	Offset     *int   // Offset of the first item returned (eg: use Limit*Page in case of PerPage items)
+	SearchTerm string // Global matching pattern in items returned, partially used in some APIs
 }
 
 /*func (pag *Paginator) GetLimits() (low, high int) {
@@ -691,6 +691,7 @@ type AttrExpFileCdrs struct {
 	SkipErrors              bool     // Do not export errored CDRs
 	SkipRated               bool     // Do not export rated CDRs
 	SuppressCgrIds          bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	Paginator
 }
 
 func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
@@ -711,6 +712,7 @@ func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
 		RatedSubjects: self.RatedSubjects,
 		OrderIdStart:  self.OrderIdStart,
 		OrderIdEnd:    self.OrderIdEnd,
+		Paginator:     self.Paginator,
 	}
 	if len(self.TimeStart) != 0 {
 		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart); err != nil {
@@ -786,6 +788,7 @@ func (self *AttrGetCdrs) AsCdrsFilter() (*CdrsFilter, error) {
 		RatedSubjects: self.RatedSubjects,
 		OrderIdStart:  self.OrderIdStart,
 		OrderIdEnd:    self.OrderIdEnd,
+		Paginator:     self.Paginator,
 	}
 	if len(self.TimeStart) != 0 {
 		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart); err != nil {
