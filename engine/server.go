@@ -27,6 +27,8 @@ import (
 	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+
+	"golang.org/x/net/websocket"
 )
 
 type Server struct {
@@ -100,6 +102,9 @@ func (s *Server) ServeHTTP(addr string) {
 			res := NewRPCRequest(req.Body).Call()
 			io.Copy(w, res)
 		})
+		http.Handle("/ws", websocket.Handler(func(ws *websocket.Conn) {
+			jsonrpc.ServeConn(ws)
+		}))
 		s.httpEnabled = true
 	}
 	if !s.httpEnabled {
