@@ -27,7 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 
 	_ "github.com/bmizerany/pq"
-	"github.com/jinzhu/gorm"
+	"github.com/cgrates/gorm"
 )
 
 type PostgresStorage struct {
