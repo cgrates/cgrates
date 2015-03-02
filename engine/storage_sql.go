@@ -30,8 +30,9 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/gorm"
 	"github.com/go-sql-driver/mysql"
+	//"github.com/jinzhu/gorm"
+	"github.com/cgrates/gorm"
 )
 
 type SQLStorage struct {
@@ -206,7 +207,7 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 		return err
 	}
 	for _, prefix := range dest.Prefixes {
-		save := tx.Save(TpDestination{
+		save := tx.Save(&TpDestination{
 			Tpid:      tpid,
 			Tag:       dest.Id,
 			Prefix:    prefix,
@@ -232,7 +233,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 			return err
 		}
 		for _, rs := range rSlots {
-			save := tx.Save(TpRate{
+			save := tx.Save(&TpRate{
 				Tpid:               tpid,
 				Tag:                rtId,
 				ConnectFee:         rs.ConnectFee,
@@ -265,7 +266,7 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 			return err
 		}
 		for _, dr := range dRates {
-			saved := tx.Save(TpDestinationRate{
+			saved := tx.Save(&TpDestinationRate{
 				Tpid:             tpid,
 				Tag:              drId,
 				DestinationsTag:  dr.DestinationId,
@@ -295,7 +296,7 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 			return err
 		}
 		for _, rp := range rPlans {
-			saved := tx.Save(TpRatingPlan{
+			saved := tx.Save(&TpRatingPlan{
 				Tpid:         tpid,
 				Tag:          rpId,
 				DestratesTag: rp.DestinationRatesId,
@@ -324,7 +325,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.
 			return err
 		}
 		for _, ra := range rpf.RatingPlanActivations {
-			saved := tx.Save(TpRatingProfile{
+			saved := tx.Save(&TpRatingProfile{
 				Tpid:             rpf.TPid,
 				Loadid:           rpf.LoadId,
 				Tenant:           rpf.Tenant,
@@ -357,7 +358,7 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string][]*utils.T
 			return err
 		}
 		for _, sg := range sGroups {
-			saved := tx.Save(TpSharedGroup{
+			saved := tx.Save(&TpSharedGroup{
 				Tpid:          tpid,
 				Tag:           sgId,
 				Account:       sg.Account,
@@ -387,7 +388,7 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 		}
 		for _, cs := range cStats {
 			ql, _ := strconv.Atoi(cs.QueueLength)
-			saved := tx.Save(TpCdrStat{
+			saved := tx.Save(&TpCdrStat{
 				Tpid:              tpid,
 				Tag:               csId,
 				QueueLength:       ql,
@@ -438,7 +439,7 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 			return err
 		}
 		for _, dc := range dChargers {
-			newDc := TpDerivedCharger{
+			newDc := &TpDerivedCharger{
 				Tpid:             tpid,
 				Runid:            dc.RunId,
 				RunFilters:       dc.RunFilters,
@@ -505,7 +506,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 			return err
 		}
 		for _, ac := range acs {
-			saved := tx.Save(TpAction{
+			saved := tx.Save(&TpAction{
 				Tpid:            tpid,
 				Tag:             acId,
 				Action:          ac.Identifier,
@@ -571,7 +572,7 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 			return err
 		}
 		for _, ap := range aPlans {
-			saved := tx.Save(TpActionPlan{
+			saved := tx.Save(&TpActionPlan{
 				Tpid:       tpid,
 				Tag:        apId,
 				ActionsTag: ap.ActionsId,
@@ -616,7 +617,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 			if id == "" {
 				id = utils.GenUUID()
 			}
-			saved := tx.Save(TpActionTrigger{
+			saved := tx.Save(&TpActionTrigger{
 				Tpid:                  tpid,
 				UniqueId:              id,
 				Tag:                   atId,
@@ -967,18 +968,15 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 	if qryFltr.Paginator.Offset != nil {
 		q = q.Offset(*qryFltr.Paginator.Offset)
 	}
-
-	/*
-		// ToDo: Fix as soon as issue on Gorm analyzed: https://github.com/jinzhu/gorm/issues/354
-		if qryFltr.Count {
-			var cnt int64
-			//if err := q.Count(&cnt).Error; err != nil {
-			if err := q.Debug().Count(&cnt).Error; err != nil {
-				return nil, 0, err
-			}
-			return nil, cnt, nil
+	if qryFltr.Count {
+		var cnt int64
+		if err := q.Count(&cnt).Error; err != nil {
+			//if err := q.Debug().Count(&cnt).Error; err != nil {
+			return nil, 0, err
 		}
-	*/
+		return nil, cnt, nil
+	}
+
 	// Execute query
 	rows, err := q.Rows()
 	if err != nil {
@@ -1012,9 +1010,6 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 			storCdr.Cost = -1
 		}
 		cdrs = append(cdrs, storCdr)
-	}
-	if qryFltr.Count { // Emulate Count for now
-		return nil, int64(len(cdrs)), nil
 	}
 	return cdrs, 0, nil
 }
