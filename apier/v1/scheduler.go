@@ -115,7 +115,13 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 		return errors.New("SCHEDULER_NOT_ENABLED")
 	}
 	scheduledActions := self.Sched.GetQueue()
-	min, max := attrs.GetLimits()
+	var min, max int
+	if attrs.Paginator.Offset != nil {
+		min = *attrs.Paginator.Offset
+	}
+	if attrs.Paginator.Limit != nil {
+		max = *attrs.Paginator.Limit
+	}
 	if max > len(scheduledActions) {
 		max = len(scheduledActions)
 	}

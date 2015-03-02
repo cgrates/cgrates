@@ -96,43 +96,46 @@ func NewCGRConfigFromJsonString(cfgJsonStr string) (*CGRConfig, error) {
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
 func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
-	if fi, err := os.Stat(cfgDir); err != nil {
-		return nil, err
-	} else if !fi.IsDir() {
-		return nil, fmt.Errorf("Path: %s not a directory.", cfgDir)
-	}
 	cfg, err := NewDefaultCGRConfig()
 	if err != nil {
 		return nil, err
 	}
-	jsonFilesFound := false
-	err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			return nil
-		}
-		cfgFiles, err := filepath.Glob(filepath.Join(path, "*.json"))
-		if err != nil {
-			return err
-		}
-		if cfgFiles == nil { // No need of processing further since there are no config files in the folder
-			return nil
-		}
-		if !jsonFilesFound {
-			jsonFilesFound = true
-		}
-		for _, jsonFilePath := range cfgFiles {
-			if cgrJsonCfg, err := NewCgrJsonCfgFromFile(jsonFilePath); err != nil {
-				return err
-			} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+	fi, err := os.Stat(cfgDir)
 	if err != nil {
 		return nil, err
-	} else if !jsonFilesFound {
-		return nil, fmt.Errorf("No config file found on path %s", cfgDir)
+	} else if !fi.IsDir() && cfgDir != utils.CONFIG_DIR { // If config dir defined, needs to exist, not checking for default
+		return nil, fmt.Errorf("Path: %s not a directory.", cfgDir)
+	}
+	if fi.IsDir() {
+		jsonFilesFound := false
+		err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) error {
+			if !info.IsDir() {
+				return nil
+			}
+			cfgFiles, err := filepath.Glob(filepath.Join(path, "*.json"))
+			if err != nil {
+				return err
+			}
+			if cfgFiles == nil { // No need of processing further since there are no config files in the folder
+				return nil
+			}
+			if !jsonFilesFound {
+				jsonFilesFound = true
+			}
+			for _, jsonFilePath := range cfgFiles {
+				if cgrJsonCfg, err := NewCgrJsonCfgFromFile(jsonFilePath); err != nil {
+					return err
+				} else if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			return nil, err
+		} else if !jsonFilesFound {
+			return nil, fmt.Errorf("No config file found on path %s", cfgDir)
+		}
 	}
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err

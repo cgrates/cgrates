@@ -110,18 +110,21 @@ func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDisti
 			qry += fmt.Sprintf(" AND %s='%s'", key, value)
 		}
 	}
-	if pagination.SearchTerm != "" {
-		qry += fmt.Sprintf(" AND (%s LIKE '%%%s%%'", distinct[0], pagination.SearchTerm)
-		for _, d := range distinct[1:] {
-			qry += fmt.Sprintf(" OR %s LIKE '%%%s%%'", d, pagination.SearchTerm)
-		}
-		qry += fmt.Sprintf(")")
-	}
 	if pagination != nil {
-		limLow, limHigh := pagination.GetLimits()
-		qry += fmt.Sprintf(" LIMIT %d,%d", limLow, limHigh)
+		if len(pagination.SearchTerm) != 0 {
+			qry += fmt.Sprintf(" AND (%s LIKE '%%%s%%'", distinct[0], pagination.SearchTerm)
+			for _, d := range distinct[1:] {
+				qry += fmt.Sprintf(" OR %s LIKE '%%%s%%'", d, pagination.SearchTerm)
+			}
+			qry += fmt.Sprintf(")")
+		}
+		if pagination.Limit != nil { // Keep Postgres compatibility by adding offset only when limit defined
+			qry += fmt.Sprintf(" LIMIT %d", *pagination.Limit)
+			if pagination.Offset != nil {
+				qry += fmt.Sprintf(" OFFSET %d", *pagination.Offset)
+			}
+		}
 	}
-
 	rows, err := self.Db.Query(qry)
 	if err != nil {
 		return nil, err
@@ -958,12 +961,13 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 	if qryFltr.IgnoreDerived {
 		q = q.Where(utils.TBL_RATED_CDRS+".runid = ?", utils.DEFAULT_RUNID)
 	}
-	if qryFltr.PaginatorOffset != 0 {
-		q = q.Offset(qryFltr.PaginatorOffset)
+	if qryFltr.Paginator.Limit != nil {
+		q = q.Limit(*qryFltr.Paginator.Limit)
 	}
-	if qryFltr.PaginatorLimit != 0 {
-		q = q.Limit(qryFltr.PaginatorLimit)
+	if qryFltr.Paginator.Offset != nil {
+		q = q.Offset(*qryFltr.Paginator.Offset)
 	}
+
 	/*
 		// ToDo: Fix as soon as issue on Gorm analyzed: https://github.com/jinzhu/gorm/issues/354
 		if qryFltr.Count {
@@ -1106,9 +1110,12 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *util
 		q = q.Where("tag = ?", tag)
 	}
 	if pagination != nil {
-		limLow, limHigh := pagination.GetLimits()
-		q = q.Offset(limLow)
-		q = q.Limit(limHigh)
+		if pagination.Limit != nil {
+			q = q.Limit(*pagination.Limit)
+		}
+		if pagination.Offset != nil {
+			q = q.Offset(*pagination.Offset)
+		}
 	}
 	if err := q.Find(&tpDestinationRates).Error; err != nil {
 		return nil, err
@@ -1166,11 +1173,13 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Pag
 	if err := q.Find(&tpRatingPlans).Error; err != nil {
 		return nil, err
 	}
-
 	if pagination != nil {
-		limLow, limHigh := pagination.GetLimits()
-		q = q.Offset(limLow)
-		q = q.Limit(limHigh)
+		if pagination.Limit != nil {
+			q = q.Limit(*pagination.Limit)
+		}
+		if pagination.Offset != nil {
+			q = q.Offset(*pagination.Offset)
+		}
 	}
 
 	for _, tpRp := range tpRatingPlans {

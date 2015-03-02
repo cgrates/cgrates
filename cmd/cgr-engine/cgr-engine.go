@@ -55,7 +55,7 @@ const (
 )
 
 var (
-	cfgDir          = flag.String("config_dir", "/etc/cgrates", "Configuration directory path.")
+	cfgDir          = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
 	version         = flag.Bool("version", false, "Prints the application version.")
 	raterEnabled    = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
 	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")

@@ -1,4 +1,0 @@
-#Tag,DestinationsTag,RatesTag,RoundingMethod,RoundingDecimals
-DR_RETAIL,DST_1002,RT_20CNT,*up,4
-DR_RETAIL,DST_1003,RT_40CNT,*up,4
-DR_RETAIL,DST_FS,RT_10CNT,*up,4

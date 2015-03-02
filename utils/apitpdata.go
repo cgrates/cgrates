@@ -20,7 +20,6 @@ package utils
 
 import (
 	"fmt"
-	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -36,17 +35,18 @@ func (tpdi TPDistinctIds) String() string {
 
 // To paginate stuff from stordb (e.g. ids)
 type Paginator struct {
-	Page         int
-	ItemsPerPage int
-	SearchTerm   string
+	Limit      *int
+	Offset     *int
+	SearchTerm string
 }
 
-func (pag *Paginator) GetLimits() (low, high int) {
+/*func (pag *Paginator) GetLimits() (low, high int) {
 	if pag.ItemsPerPage == 0 {
 		return 0, math.MaxInt32
 	}
 	return pag.Page * pag.ItemsPerPage, pag.ItemsPerPage
 }
+*/
 
 // Used on exports (eg: TPExport)
 type ExportedData interface {
@@ -929,9 +929,8 @@ type CdrsFilter struct {
 	CostStart        *float64          // Start of the cost interval (>=)
 	CostEnd          *float64          // End of the usage interval (<)
 	IgnoreDerived    bool              // Do not consider derived CDRs but original one
-	PaginatorOffset  int               // Start retrieving from this offset
-	PaginatorLimit   int               // Limit the number of items retrieved
 	Count            bool              // If true count the items instead of returning data
+	Paginator
 }
 
 // Used in Rpc calls, slightly different than CdrsFilter by using string instead of Time filters
@@ -1027,8 +1026,7 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 		CostStart:        self.CostStart,
 		CostEnd:          self.CostEnd,
 		IgnoreDerived:    self.IgnoreDerived,
-		PaginatorOffset:  self.Paginator.Page,
-		PaginatorLimit:   self.Paginator.ItemsPerPage,
+		Paginator:        self.Paginator,
 	}
 	if len(self.SetupTimeStart) != 0 {
 		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart); err != nil {

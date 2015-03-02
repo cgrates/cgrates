@@ -1,7 +1,7 @@
 package utils
 
 const (
-	VERSION                      = "0.9.1rc5"
+	VERSION                      = "0.9.1rc6"
 	POSTGRES                     = "postgres"
 	MYSQL                        = "mysql"
 	MONGO                        = "mongo"
@@ -168,6 +168,7 @@ const (
 	HTTP_POST                    = "http_post"
 	NANO_MULTIPLIER              = 1000000000
 	CGR_AUTHORIZE                = "CGR_AUTHORIZE"
+	CONFIG_DIR                   = "/etc/cgrates"
 )
 
 var (
