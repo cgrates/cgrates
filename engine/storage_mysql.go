@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/jinzhu/gorm"
+	"github.com/cgrates/gorm"
 )
 
 func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (Storage, error) {

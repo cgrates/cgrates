@@ -13,7 +13,7 @@ libs = ('github.com/bmizerany/pq',
         'github.com/go-sql-driver/mysql',
         'github.com/hoisie/redis'
         'github.com/howeyc/fsnotify',
-        'github.com/jinzhu/gorm',
+        'github.com/cgrates/gorm',
         'github.com/gorhill/cronexpr',
         "github.com/DisposaBoy/JsonConfigReader"
 )
