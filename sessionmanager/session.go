@@ -56,11 +56,11 @@ func NewSession(ev utils.Event, sm SessionManager) *Session {
 		stopDebit:      make(chan bool),
 		sessionManager: sm,
 	}
-	sRuns := make([]*engine.SessionRun, 0)
-	if err := sm.Rater().GetSessionRuns(ev, &sRuns); err != nil || len(sRuns) == 0 {
+	//sRuns := make([]*engine.SessionRun, 0)
+	if err := sm.Rater().GetSessionRuns(ev, &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
 	}
-	for runIdx := range sRuns {
+	for runIdx := range s.sessionRuns {
 		go s.debitLoop(runIdx) // Send index of the just appended sessionRun
 	}
 	return s
