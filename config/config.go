@@ -102,6 +102,9 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 	}
 	fi, err := os.Stat(cfgDir)
 	if err != nil {
+		if strings.HasSuffix(err.Error(), "no such file or directory") {
+			return cfg, nil
+		}
 		return nil, err
 	} else if !fi.IsDir() && cfgDir != utils.CONFIG_DIR { // If config dir defined, needs to exist, not checking for default
 		return nil, fmt.Errorf("Path: %s not a directory.", cfgDir)

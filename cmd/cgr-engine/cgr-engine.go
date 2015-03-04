@@ -518,7 +518,7 @@ func main() {
 		}
 		go startCdrc(cdrsChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cdrServer, cfg.ConfigReloads[utils.CDRC])
 	}
-	if len(cfg.CdrcProfiles) != 0 {
+	if cdrcEnabled {
 		engine.Logger.Info("Starting CGRateS CDR client.")
 	}
 
