@@ -31,6 +31,7 @@ import (
 	"path"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -1253,8 +1254,16 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 		return
 	}
 	reply := ""
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: ""}
+	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
+		t.Error(err)
+	}
+	attrs = &utils.AttrLoadTpFromFolder{FolderPath: "/INVALID/"}
+	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err == nil || err.Error() != utils.ERR_INVALID_PATH {
+		t.Error(err)
+	}
 	// Simple test that command is executed without errors
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
+	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
 	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {

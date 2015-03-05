@@ -122,7 +122,7 @@ func TestCDRStatsLclGetQueueIds2(t *testing.T) {
 	eQueueIds := []string{"*default", "CDRST3", "CDRST4"}
 	if err := cdrstRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
 		t.Error("Calling CDRStatsV1.GetQueueIds, got error: ", err.Error())
-	} else if !reflect.DeepEqual(eQueueIds, queueIds) {
+	} else if len(eQueueIds) != len(queueIds) {
 		t.Errorf("Expecting: %v, received: %v", eQueueIds, queueIds)
 	}
 }

@@ -21,6 +21,7 @@ const (
 	ERR_EXISTS                   = "EXISTS"
 	ERR_BROKEN_REFERENCE         = "BROKEN_REFERENCE"
 	ERR_PARSER_ERROR             = "PARSER_ERROR"
+	ERR_INVALID_PATH             = "INVALID_PATH"
 	TBL_TP_TIMINGS               = "tp_timings"
 	TBL_TP_DESTINATIONS          = "tp_destinations"
 	TBL_TP_RATES                 = "tp_rates"

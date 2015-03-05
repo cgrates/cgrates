@@ -22,7 +22,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path"
+	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
@@ -821,6 +823,17 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 }
 
 func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
+	if len(attrs.FolderPath) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "FolderPath")
+	}
+	if fi, err := os.Stat(attrs.FolderPath); err != nil {
+		if strings.HasSuffix(err.Error(), "no such file or directory") {
+			return errors.New(utils.ERR_INVALID_PATH)
+		}
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if !fi.IsDir() {
+		return errors.New(utils.ERR_INVALID_PATH)
+	}
 	loader := engine.NewFileCSVReader(self.RatingDb, self.AccountDb, utils.CSV_SEP,
 		path.Join(attrs.FolderPath, utils.DESTINATIONS_CSV),
 		path.Join(attrs.FolderPath, utils.TIMINGS_CSV),

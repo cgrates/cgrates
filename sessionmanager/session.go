@@ -56,7 +56,6 @@ func NewSession(ev utils.Event, sm SessionManager) *Session {
 		stopDebit:      make(chan bool),
 		sessionManager: sm,
 	}
-	//sRuns := make([]*engine.SessionRun, 0)
 	if err := sm.Rater().GetSessionRuns(ev, &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
 	}
