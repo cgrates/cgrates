@@ -306,13 +306,12 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 	if cdr == nil || len(cdr.CgrId) == 0 { // We do not export empty CDRs
 		return nil
 	}
+	// Cost multiply
 	if cdre.dataUsageMultiplyFactor != 0.0 && cdr.TOR == utils.DATA {
 		cdr.UsageMultiply(cdre.dataUsageMultiplyFactor, cdre.cgrPrecision)
-	}
-	if cdre.smsUsageMultiplyFactor != 0 && cdr.TOR == utils.SMS {
+	} else if cdre.smsUsageMultiplyFactor != 0 && cdr.TOR == utils.SMS {
 		cdr.UsageMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
-	}
-	if cdre.costMultiplyFactor != 0.0 {
+	} else if cdre.costMultiplyFactor != 0.0 {
 		cdr.CostMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
 	}
 	var err error
