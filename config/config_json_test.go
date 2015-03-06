@@ -455,12 +455,8 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 		Min_call_duration:         utils.StringPointer("0s"),
 		Max_call_duration:         utils.StringPointer("3h"),
 		Events_subscribe_interval: utils.StringPointer("60s"),
-		Connections: &[]*OsipsConnJsonCfg{
-			&OsipsConnJsonCfg{
-				Mi_addr:    utils.StringPointer("127.0.0.1:8020"),
-				Reconnects: utils.IntPointer(-1),
-			},
-		},
+		Mi_addr:                   utils.StringPointer("127.0.0.1:8020"),
+		Reconnects:                utils.IntPointer(-1),
 	}
 	if cfg, err := dfCgrJsonCfg.SmOsipsJsonCfg(); err != nil {
 		t.Error(err)

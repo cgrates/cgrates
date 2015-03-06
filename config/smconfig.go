@@ -274,8 +274,8 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 			return err
 		}
 	}
-	if jsnCfg.MiAddr != nil {
-		self.MiAddr = *jsnCfg.MiAddr
+	if jsnCfg.Mi_addr != nil {
+		self.MiAddr = *jsnCfg.Mi_addr
 	}
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects

@@ -272,9 +272,9 @@ const CGRATES_CFG_JSON = `
 	"min_call_duration": "0s",			// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
-	"connections":[						// instantiate connections to multiple FreeSWITCH servers
-		{"mi_addr": "127.0.0.1:8020", "reconnects": -1}							// reconnects -1 to indefinitely connect
-	],
+	"mi_addr": "127.0.0.1:8020",		// Address where to reach OpenSIPS MI to send session disconnects
+	"reconnects": -1,					// reconnects -1 to indefinitely connect
+
 },
 
 

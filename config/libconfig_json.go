@@ -241,7 +241,7 @@ type SmOsipsJsonCfg struct {
 	Min_call_duration         *string
 	Max_call_duration         *string
 	Events_subscribe_interval *string
-	MiAddr                    *string
+	Mi_addr                   *string
 	Reconnects                *int
 }
 
