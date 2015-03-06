@@ -88,13 +88,6 @@ func SetStorageLogger(sg LogStorage) {
 	storageLogger = sg
 }
 
-/*
-Exported method to set the debit period for caching purposes.
-*/
-func SetDebitPeriod(d time.Duration) {
-	debitPeriod = d
-}
-
 // Exported method to set the history scribe.
 func SetHistoryScribe(scribe history.Scribe) {
 	historyScribe = scribe

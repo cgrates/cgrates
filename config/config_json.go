@@ -206,54 +206,6 @@ func (self CgrJsonCfg) CdrcJsonCfg() (map[string]*CdrcJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) SessionManagerJsonCfg() (*SessionManagerJsonCfg, error) {
-	rawCfg, hasKey := self[SM_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(SessionManagerJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) FSJsonCfg() (*FSJsonCfg, error) {
-	rawCfg, hasKey := self[FS_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(FSJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) KamailioJsonCfg() (*KamailioJsonCfg, error) {
-	rawCfg, hasKey := self[KAMAILIO_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(KamailioJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) OsipsJsonCfg() (*OsipsJsonCfg, error) {
-	rawCfg, hasKey := self[OSIPS_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(OsipsJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
 func (self CgrJsonCfg) SmFsJsonCfg() (*SmFsJsonCfg, error) {
 	rawCfg, hasKey := self[SMFS_JSN]
 	if !hasKey {

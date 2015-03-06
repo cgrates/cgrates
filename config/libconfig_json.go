@@ -153,49 +153,12 @@ type CdrcJsonCfg struct {
 	Cdr_fields                 *[]*CdrFieldJsonCfg
 }
 
-// Session manager config section
-type SessionManagerJsonCfg struct {
-	Enabled           *bool
-	Switch_type       *string
-	Rater             *string
-	Cdrs              *string
-	Reconnects        *int
-	Debit_interval    *int
-	Min_call_duration *string
-	Max_call_duration *string
-}
-
-// FreeSWITCH config section
-type FSJsonCfg struct {
-	Server                 *string
-	Password               *string
-	Reconnects             *int
-	Min_dur_low_balance    *string
-	Low_balance_ann_file   *string
-	Empty_balance_context  *string
-	Empty_balance_ann_file *string
-	Cdr_extra_fields       *[]string
-}
-
-// Kamailio config section
-type KamailioJsonCfg struct {
-	Evapi_addr *string
-	Reconnects *int
-}
-
-// Opensips config section
-type OsipsJsonCfg struct {
-	Listen_udp                *string
-	Mi_addr                   *string
-	Events_subscribe_interval *string
-	Reconnects                *int
-}
-
 // SM-FreeSWITCH config section
 type SmFsJsonCfg struct {
 	Enabled                *bool
 	Rater                  *string
 	Cdrs                   *string
+	Reconnects             *int
 	Cdr_extra_fields       *[]string
 	Debit_interval         *string
 	Min_call_duration      *string
@@ -219,6 +182,7 @@ type SmKamJsonCfg struct {
 	Enabled           *bool
 	Rater             *string
 	Cdrs              *string
+	Reconnects        *int
 	Debit_interval    *string
 	Min_call_duration *string
 	Max_call_duration *string

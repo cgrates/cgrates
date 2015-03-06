@@ -58,7 +58,8 @@ type SmFsConfig struct {
 	Enabled             bool
 	Rater               string
 	Cdrs                string
-	CdrExtraFields      []string
+	Reconnects          int
+	CdrExtraFields      []*utils.RSRField
 	DebitInterval       time.Duration
 	MinCallDuration     time.Duration
 	MaxCallDuration     time.Duration
@@ -83,8 +84,13 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	if jsnCfg.Cdrs != nil {
 		self.Cdrs = *jsnCfg.Cdrs
 	}
+	if jsnCfg.Reconnects != nil {
+		self.Reconnects = *jsnCfg.Reconnects
+	}
 	if jsnCfg.Cdr_extra_fields != nil {
-		self.CdrExtraFields = *jsnCfg.Cdr_extra_fields
+		if self.CdrExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCfg.Cdr_extra_fields); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Debit_interval != nil {
 		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
@@ -157,6 +163,7 @@ type SmKamConfig struct {
 	Enabled         bool
 	Rater           string
 	Cdrs            string
+	Reconnects      int
 	DebitInterval   time.Duration
 	MinCallDuration time.Duration
 	MaxCallDuration time.Duration
@@ -176,6 +183,9 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 	}
 	if jsnCfg.Cdrs != nil {
 		self.Cdrs = *jsnCfg.Cdrs
+	}
+	if jsnCfg.Reconnects != nil {
+		self.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.Debit_interval != nil {
 		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
@@ -202,14 +212,6 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 	return nil
 }
 
-// Returns the first cached default value for a SM-FreeSWITCH connection
-func NewDfltOsipsConnConfig() *OsipsConnConfig {
-	if dfltOsipsConnConfig == nil {
-		return new(OsipsConnConfig) // No defaults, most probably we are building the defaults now
-	}
-	return dfltOsipsConnConfig
-}
-
 // Represents one connection instance towards OpenSIPS, not in use for now but planned for future
 type OsipsConnConfig struct {
 	MiAddr     string
@@ -232,12 +234,12 @@ type SmOsipsConfig struct {
 	ListenUdp               string
 	Rater                   string
 	Cdrs                    string
+	Reconnects              int
 	DebitInterval           time.Duration
 	MinCallDuration         time.Duration
 	MaxCallDuration         time.Duration
 	EventsSubscribeInterval time.Duration
 	MiAddr                  string
-	Reconnects              int
 }
 
 func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {

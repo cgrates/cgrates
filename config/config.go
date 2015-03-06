@@ -42,10 +42,9 @@ const (
 )
 
 var (
-	cgrCfg              *CGRConfig       // will be shared
-	dfltFsConnConfig    *FsConnConfig    // Default FreeSWITCH Connection configuration, built out of json default configuration
-	dfltKamConnConfig   *KamConnConfig   // Default Kamailio Connection configuration
-	dfltOsipsConnConfig *OsipsConnConfig // Default OpenSIPS Connection configuration
+	cgrCfg            *CGRConfig     // will be shared
+	dfltFsConnConfig  *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
+	dfltKamConnConfig *KamConnConfig // Default Kamailio Connection configuration
 )
 
 // Used to retrieve system configuration from other packages
@@ -70,6 +69,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	cfg.MaxCallDuration = time.Duration(3) * time.Hour // Hardcoded for now
 	if err := cfg.loadFromJsonCfg(cgrJsonCfg); err != nil {
 		return nil, err
 	}
@@ -147,91 +147,70 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	RatingDBType          string
-	RatingDBHost          string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	RatingDBPort          string // The port to bind to.
-	RatingDBName          string // The name of the database to connect to.
-	RatingDBUser          string // The user to sign in as.
-	RatingDBPass          string // The user's password.
-	AccountDBType         string
-	AccountDBHost         string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort         string // The port to bind to.
-	AccountDBName         string // The name of the database to connect to.
-	AccountDBUser         string // The user to sign in as.
-	AccountDBPass         string // The user's password.
-	StorDBType            string // Should reflect the database type used to store logs
-	StorDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort            string // Th e port to bind to.
-	StorDBName            string // The name of the database to connect to.
-	StorDBUser            string // The user to sign in as.
-	StorDBPass            string // The user's password.
-	StorDBMaxOpenConns    int    // Maximum database connections opened
-	StorDBMaxIdleConns    int    // Maximum idle connections to keep opened
-	DBDataEncoding        string // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen         string // RPC JSON listening address
-	RPCGOBListen          string // RPC GOB listening address
-	HTTPListen            string // HTTP listening address
-	DefaultReqType        string // Use this request type if not defined on top
-	DefaultCategory       string // set default type of record
-	DefaultTenant         string // set default tenant
-	DefaultSubject        string // set default rating subject, useful in case of fallback
-	RoundingDecimals      int    // Number of decimals to round end prices at
-	HttpSkipTlsVerify     bool   // If enabled Http Client will accept any TLS certificate
-	TpExportPath          string // Path towards export folder for offline Tariff Plans
-	RaterEnabled          bool   // start standalone server (no balancer)
-	RaterBalancer         string // balancer address host:port
-	BalancerEnabled       bool
-	SchedulerEnabled      bool
-	CDRSEnabled           bool              // Enable CDR Server service
-	CDRSExtraFields       []*utils.RSRField // Extra fields to store in CDRs
-	CDRSMediator          string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CDRSStats             string            // Address where to reach the Mediator. <""|intenal>
-	CDRSStoreDisable      bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	CDRStatsEnabled       bool              // Enable CDR Stats service
-	CDRStatConfig         *CdrStatsConfig   // Active cdr stats configuration instances, platform level
-	CdreProfiles          map[string]*CdreConfig
-	CdrcProfiles          map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
-	SmFsConfig            *SmFsConfig                       // SM-FreeSWITCH configuration
-	SmKamConfig           *SmKamConfig                      // SM-Kamailio Configuration
-	SmOsipsConfig         *SmOsipsConfig                    // SM-OpenSIPS Configuration
-	SMEnabled             bool
-	SMSwitchType          string
-	SMRater               string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMCdrS                string        // Connection towards CDR server
-	SMReconnects          int           // Number of reconnect attempts to rater
-	SMDebitInterval       int           // the period to be debited in advanced during a call (in seconds)
-	SMMaxCallDuration     time.Duration // The maximum duration of a call
-	SMMinCallDuration     time.Duration // Only authorize calls with allowed duration bigger than this
-	MediatorEnabled       bool          // Starts Mediator service: <true|false>.
-	MediatorReconnects    int           // Number of reconnects to rater before giving up.
-	MediatorRater         string
-	MediatorStats         string                   // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorStoreDisable  bool                     // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	FreeswitchServer      string                   // freeswitch address host:port
-	FreeswitchPass        string                   // FS socket password
-	FreeswitchReconnects  int                      // number of times to attempt reconnect after connect fails
-	FSMinDurLowBalance    time.Duration            // Threshold which will trigger low balance warnings
-	FSLowBalanceAnnFile   string                   // File to be played when low balance is reached
-	FSEmptyBalanceContext string                   // If defined, call will be transfered to this context on empty balance
-	FSEmptyBalanceAnnFile string                   // File to be played before disconnecting prepaid calls (applies only if no context defined)
-	FSCdrExtraFields      []*utils.RSRField        // Extra fields to store in CDRs in case of processing them
-	OsipsListenUdp        string                   // Address where to listen for event datagrams coming from OpenSIPS
-	OsipsMiAddr           string                   // Adress where to reach OpenSIPS mi_datagram module
-	OsipsEvSubscInterval  time.Duration            // Refresh event subscription at this interval
-	OsipsReconnects       int                      // Number of attempts on connect failure.
-	KamailioEvApiAddr     string                   // Address of the kamailio evapi server
-	KamailioReconnects    int                      // Number of reconnect attempts on connection lost
-	HistoryAgentEnabled   bool                     // Starts History as an agent: <true|false>.
-	HistoryServer         string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled  bool                     // Starts History as server: <true|false>.
-	HistoryDir            string                   // Location on disk where to store history files.
-	HistorySaveInterval   time.Duration            // The timout duration between history writes
-	MailerServer          string                   // The server to use when sending emails out
-	MailerAuthUser        string                   // Authenticate to email server using this user
-	MailerAuthPass        string                   // Authenticate to email server with this password
-	MailerFromAddr        string                   // From address used when sending emails out
-	DataFolderPath        string                   // Path towards data folder, for tests internal usage, not loading out of .json options
-	ConfigReloads         map[string]chan struct{} // Signals to specific entities that a config reload should occur
+	RatingDBType         string
+	RatingDBHost         string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	RatingDBPort         string // The port to bind to.
+	RatingDBName         string // The name of the database to connect to.
+	RatingDBUser         string // The user to sign in as.
+	RatingDBPass         string // The user's password.
+	AccountDBType        string
+	AccountDBHost        string        // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort        string        // The port to bind to.
+	AccountDBName        string        // The name of the database to connect to.
+	AccountDBUser        string        // The user to sign in as.
+	AccountDBPass        string        // The user's password.
+	StorDBType           string        // Should reflect the database type used to store logs
+	StorDBHost           string        // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort           string        // Th e port to bind to.
+	StorDBName           string        // The name of the database to connect to.
+	StorDBUser           string        // The user to sign in as.
+	StorDBPass           string        // The user's password.
+	StorDBMaxOpenConns   int           // Maximum database connections opened
+	StorDBMaxIdleConns   int           // Maximum idle connections to keep opened
+	DBDataEncoding       string        // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen        string        // RPC JSON listening address
+	RPCGOBListen         string        // RPC GOB listening address
+	HTTPListen           string        // HTTP listening address
+	DefaultReqType       string        // Use this request type if not defined on top
+	DefaultCategory      string        // set default type of record
+	DefaultTenant        string        // set default tenant
+	DefaultSubject       string        // set default rating subject, useful in case of fallback
+	RoundingDecimals     int           // Number of decimals to round end prices at
+	HttpSkipTlsVerify    bool          // If enabled Http Client will accept any TLS certificate
+	TpExportPath         string        // Path towards export folder for offline Tariff Plans
+	MaxCallDuration      time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
+	RaterEnabled         bool          // start standalone server (no balancer)
+	RaterBalancer        string        // balancer address host:port
+	BalancerEnabled      bool
+	SchedulerEnabled     bool
+	CDRSEnabled          bool              // Enable CDR Server service
+	CDRSExtraFields      []*utils.RSRField // Extra fields to store in CDRs
+	CDRSMediator         string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CDRSStats            string            // Address where to reach the Mediator. <""|intenal>
+	CDRSStoreDisable     bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	CDRStatsEnabled      bool              // Enable CDR Stats service
+	CDRStatConfig        *CdrStatsConfig   // Active cdr stats configuration instances, platform level
+	CdreProfiles         map[string]*CdreConfig
+	CdrcProfiles         map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
+	SmFsConfig           *SmFsConfig                       // SM-FreeSWITCH configuration
+	SmKamConfig          *SmKamConfig                      // SM-Kamailio Configuration
+	SmOsipsConfig        *SmOsipsConfig                    // SM-OpenSIPS Configuration
+	MediatorEnabled      bool                              // Starts Mediator service: <true|false>.
+	MediatorReconnects   int                               // Number of reconnects to rater before giving up.
+	MediatorRater        string
+	MediatorStats        string                   // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	MediatorStoreDisable bool                     // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	HistoryAgentEnabled  bool                     // Starts History as an agent: <true|false>.
+	HistoryServer        string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled bool                     // Starts History as server: <true|false>.
+	HistoryDir           string                   // Location on disk where to store history files.
+	HistorySaveInterval  time.Duration            // The timout duration between history writes
+	MailerServer         string                   // The server to use when sending emails out
+	MailerAuthUser       string                   // Authenticate to email server using this user
+	MailerAuthPass       string                   // Authenticate to email server with this password
+	MailerFromAddr       string                   // From address used when sending emails out
+	DataFolderPath       string                   // Path towards data folder, for tests internal usage, not loading out of .json options
+	ConfigReloads        map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
@@ -262,9 +241,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.MediatorStats == utils.INTERNAL && !self.CDRStatsEnabled {
 		return errors.New("CDRStats not enabled but requested by Mediator.")
 	}
-	if self.SMCdrS == utils.INTERNAL && !self.CDRSEnabled {
-		return errors.New("CDRS not enabled but requested by SessionManager")
-	}
+	/*
+		if self.SMCdrS == utils.INTERNAL && !self.CDRSEnabled {
+			return errors.New("CDRS not enabled but requested by SessionManager")
+		}
+	*/
 	return nil
 }
 
@@ -320,22 +301,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 	jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg()
-	if err != nil {
-		return err
-	}
-	jsnSMCfg, err := jsnCfg.SessionManagerJsonCfg()
-	if err != nil {
-		return err
-	}
-	jsnFSCfg, err := jsnCfg.FSJsonCfg()
-	if err != nil {
-		return err
-	}
-	jsnKamCfg, err := jsnCfg.KamailioJsonCfg()
-	if err != nil {
-		return err
-	}
-	jsnOsipsCfg, err := jsnCfg.OsipsJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -547,90 +512,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			if err = self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir][profileName].loadFromJsonCfg(jsnCrc1Cfg); err != nil {
 				return err
 			}
-		}
-	}
-	if jsnSMCfg != nil {
-		if jsnSMCfg.Enabled != nil {
-			self.SMEnabled = *jsnSMCfg.Enabled
-		}
-		if jsnSMCfg.Switch_type != nil {
-			self.SMSwitchType = *jsnSMCfg.Switch_type
-		}
-		if jsnSMCfg.Rater != nil {
-			self.SMRater = *jsnSMCfg.Rater
-		}
-		if jsnSMCfg.Cdrs != nil {
-			self.SMCdrS = *jsnSMCfg.Cdrs
-		}
-		if jsnSMCfg.Reconnects != nil {
-			self.SMReconnects = *jsnSMCfg.Reconnects
-		}
-		if jsnSMCfg.Debit_interval != nil {
-			self.SMDebitInterval = *jsnSMCfg.Debit_interval
-		}
-		if jsnSMCfg.Max_call_duration != nil {
-			if self.SMMaxCallDuration, err = utils.ParseDurationWithSecs(*jsnSMCfg.Max_call_duration); err != nil {
-				return err
-			}
-		}
-		if jsnSMCfg.Min_call_duration != nil {
-			if self.SMMinCallDuration, err = utils.ParseDurationWithSecs(*jsnSMCfg.Min_call_duration); err != nil {
-				return err
-			}
-		}
-	}
-	if jsnFSCfg != nil {
-		if jsnFSCfg.Server != nil {
-			self.FreeswitchServer = *jsnFSCfg.Server
-		}
-		if jsnFSCfg.Password != nil {
-			self.FreeswitchPass = *jsnFSCfg.Password
-		}
-		if jsnFSCfg.Reconnects != nil {
-			self.FreeswitchReconnects = *jsnFSCfg.Reconnects
-		}
-		if jsnFSCfg.Min_dur_low_balance != nil {
-			if self.FSMinDurLowBalance, err = utils.ParseDurationWithSecs(*jsnFSCfg.Min_dur_low_balance); err != nil {
-				return err
-			}
-		}
-		if jsnFSCfg.Low_balance_ann_file != nil {
-			self.FSLowBalanceAnnFile = *jsnFSCfg.Low_balance_ann_file
-		}
-		if jsnFSCfg.Empty_balance_context != nil {
-			self.FSEmptyBalanceContext = *jsnFSCfg.Empty_balance_context
-		}
-		if jsnFSCfg.Empty_balance_ann_file != nil {
-			self.FSEmptyBalanceAnnFile = *jsnFSCfg.Empty_balance_ann_file
-		}
-		if jsnFSCfg.Cdr_extra_fields != nil {
-			if self.FSCdrExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnFSCfg.Cdr_extra_fields); err != nil {
-				return err
-			}
-		}
-	}
-	if jsnOsipsCfg != nil {
-		if jsnOsipsCfg.Listen_udp != nil {
-			self.OsipsListenUdp = *jsnOsipsCfg.Listen_udp
-		}
-		if jsnOsipsCfg.Mi_addr != nil {
-			self.OsipsMiAddr = *jsnOsipsCfg.Mi_addr
-		}
-		if jsnOsipsCfg.Events_subscribe_interval != nil {
-			if self.OsipsEvSubscInterval, err = utils.ParseDurationWithSecs(*jsnOsipsCfg.Events_subscribe_interval); err != nil {
-				return err
-			}
-		}
-		if jsnOsipsCfg.Reconnects != nil {
-			self.OsipsReconnects = *jsnOsipsCfg.Reconnects
-		}
-	}
-	if jsnKamCfg != nil {
-		if jsnKamCfg.Evapi_addr != nil {
-			self.KamailioEvApiAddr = *jsnKamCfg.Evapi_addr
-		}
-		if jsnKamCfg.Reconnects != nil {
-			self.KamailioReconnects = *jsnKamCfg.Reconnects
 		}
 	}
 	if jsnSmFsCfg != nil {

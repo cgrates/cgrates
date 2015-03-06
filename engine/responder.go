@@ -165,7 +165,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) er
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime,
-			TimeEnd:     startTime.Add(config.CgrConfig().SMMaxCallDuration),
+			TimeEnd:     startTime.Add(config.CgrConfig().MaxCallDuration),
 		}
 		var remainingDuration float64
 		err = rs.GetMaxSessionTime(cd, &remainingDuration)
