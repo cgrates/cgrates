@@ -241,7 +241,8 @@ type SmOsipsJsonCfg struct {
 	Min_call_duration         *string
 	Max_call_duration         *string
 	Events_subscribe_interval *string
-	Connections               *[]*OsipsConnJsonCfg
+	MiAddr                    *string
+	Reconnects                *int
 }
 
 // Represents one connection instance towards OpenSIPS

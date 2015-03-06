@@ -77,7 +77,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/log/cgrates/cdrc/in"][utils.META_DEFAULT].Clone()
 	dfltFsConnConfig = cfg.SmFsConfig.Connections[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.Connections[0]
-	dfltOsipsConnConfig = cfg.SmOsipsConfig.Connections[0]
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}

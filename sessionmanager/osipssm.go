@@ -31,41 +31,41 @@ import (
 	"github.com/cgrates/osipsdagram"
 )
 
-func NewOSipsSessionManager(cfg *config.CGRConfig, rater, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
-	osm := &OsipsSessionManager{cgrCfg: cfg, rater: rater, cdrsrv: cdrsrv}
+func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
+	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
-		"E_OPENSIPS_START": []func(*osipsdagram.OsipsEvent){osm.OnOpensipsStart},
+		"E_OPENSIPS_START": []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart},
 		"E_ACC_CDR":        []func(*osipsdagram.OsipsEvent){osm.onCdr},
-		"E_CGR_AUTHORIZE":  []func(*osipsdagram.OsipsEvent){osm.OnAuthorize},
+		"E_CGR_AUTHORIZE":  []func(*osipsdagram.OsipsEvent){osm.onAuthorize},
 	}
 	return osm, nil
 }
 
 type OsipsSessionManager struct {
-	cgrCfg          *config.CGRConfig
+	cfg             *config.SmOsipsConfig
 	rater           engine.Connector
 	cdrsrv          engine.Connector
 	eventHandlers   map[string][]func(*osipsdagram.OsipsEvent)
-	evSubscribeStop *chan struct{} // Reference towards the channel controlling subscriptions, keep it as reference so we do not need to copy it
-	stopServing     chan struct{}  // Stop serving datagrams
-	miConn          *osipsdagram.OsipsMiDatagramConnector
+	evSubscribeStop *chan struct{}                        // Reference towards the channel controlling subscriptions, keep it as reference so we do not need to copy it
+	stopServing     chan struct{}                         // Stop serving datagrams
+	miConn          *osipsdagram.OsipsMiDatagramConnector // Pool of connections used to various OpenSIPS servers, keep reference towards events received so we can issue commands always to the same remote
 }
 
 func (osm *OsipsSessionManager) Connect() (err error) {
 	osm.stopServing = make(chan struct{})
-	if osm.miConn, err = osipsdagram.NewOsipsMiDatagramConnector(osm.cgrCfg.OsipsMiAddr, osm.cgrCfg.OsipsReconnects); err != nil {
-		return fmt.Errorf("Cannot connect to OpenSIPS at %s, error: %s", osm.cgrCfg.OsipsMiAddr, err.Error())
+	if osm.miConn, err = osipsdagram.NewOsipsMiDatagramConnector(osm.cfg.MiAddr, osm.cfg.Reconnects); err != nil {
+		return fmt.Errorf("Cannot connect to OpenSIPS at %s, error: %s", osm.cfg.MiAddr, err.Error())
 	}
 	evSubscribeStop := make(chan struct{})
 	osm.evSubscribeStop = &evSubscribeStop
 	defer close(*osm.evSubscribeStop) // Stop subscribing on disconnect
 	go osm.SubscribeEvents(evSubscribeStop)
-	evsrv, err := osipsdagram.NewEventServer(osm.cgrCfg.OsipsListenUdp, osm.eventHandlers)
+	evsrv, err := osipsdagram.NewEventServer(osm.cfg.ListenUdp, osm.eventHandlers)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Cannot initialize datagram server, error: <%s>", err.Error()))
 		return
 	}
-	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPS> Listening for datagram events at <%s>", osm.cgrCfg.OsipsListenUdp))
+	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPS> Listening for datagram events at <%s>", osm.cfg.ListenUdp))
 	evsrv.ServeEvents(osm.stopServing) // Will break through stopServing on error in other places
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
 }
@@ -105,8 +105,8 @@ func (osm *OsipsSessionManager) SubscribeEvents(evStop chan struct{}) error {
 		case <-evStop: // Break this loop from outside
 			return nil
 		default:
-			subscribeInterval := osm.cgrCfg.OsipsEvSubscInterval + time.Duration(1)*time.Second // Avoid concurrency on expiry
-			listenAddrSplt := strings.Split(osm.cgrCfg.OsipsListenUdp, ":")
+			subscribeInterval := osm.cfg.EventsSubscribeInterval + time.Duration(1)*time.Second // Avoid concurrency on expiry
+			listenAddrSplt := strings.Split(osm.cfg.ListenUdp, ":")
 			portListen := listenAddrSplt[1]
 			addrListen := listenAddrSplt[0]
 			if len(addrListen) == 0 { //Listen on all addresses, try finding out from mi connection
@@ -120,7 +120,7 @@ func (osm *OsipsSessionManager) SubscribeEvents(evStop chan struct{}) error {
 				}
 				cmd := fmt.Sprintf(":event_subscribe:\n%s\nudp:%s:%s\n%d\n", eventName, addrListen, portListen, int(subscribeInterval.Seconds()))
 				success := false
-				for attempts := 0; attempts < osm.cgrCfg.OsipsReconnects; attempts++ {
+				for attempts := 0; attempts < osm.cfg.Reconnects; attempts++ {
 					if reply, err := osm.miConn.SendCommand([]byte(cmd)); err == nil && bytes.HasPrefix(reply, []byte("200 OK")) {
 						success = true
 						break
@@ -129,17 +129,17 @@ func (osm *OsipsSessionManager) SubscribeEvents(evStop chan struct{}) error {
 					continue                                                // Try again
 				}
 				if !success {
-					engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Shutting down, failed subscribing to OpenSIPS at address: <%s>", osm.cgrCfg.OsipsMiAddr))
+					engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Shutting down, failed subscribing to OpenSIPS at address: <%s>", osm.cfg.MiAddr))
 					close(osm.stopServing) // Do not serve anymore since we got errors on subscribing
 					return errors.New("Failed subscribing to OpenSIPS events")
 				}
 			}
-			time.Sleep(osm.cgrCfg.OsipsEvSubscInterval)
+			time.Sleep(osm.cfg.EventsSubscribeInterval)
 		}
 	}
 }
 
-func (osm *OsipsSessionManager) OnOpensipsStart(cdrDagram *osipsdagram.OsipsEvent) {
+func (osm *OsipsSessionManager) onOpensipsStart(cdrDagram *osipsdagram.OsipsEvent) {
 	close(*osm.evSubscribeStop) // Cancel previous subscribes
 	evStop := make(chan struct{})
 	osm.evSubscribeStop = &evStop
@@ -160,7 +160,7 @@ func (osm *OsipsSessionManager) ProcessCdr(storedCdr *utils.StoredCdr) error {
 }
 
 // Process Authorize request from OpenSIPS and communicate back maxdur
-func (osm *OsipsSessionManager) OnAuthorize(osipsDagram *osipsdagram.OsipsEvent) {
+func (osm *OsipsSessionManager) onAuthorize(osipsDagram *osipsdagram.OsipsEvent) {
 	ev, _ := NewOsipsEvent(osipsDagram)
 	if ev.MissingParameter() {
 		cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n2\n\n", ev.GetUUID(), utils.ERR_MANDATORY_IE_MISSING)
@@ -175,7 +175,7 @@ func (osm *OsipsSessionManager) OnAuthorize(osipsDagram *osipsdagram.OsipsEvent)
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := osm.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> OnAuthorize: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
+		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> onAuthorize: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
 		cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n2\n\n", ev.GetUUID(), utils.ERR_SERVER_ERROR)
 		if reply, err := osm.miConn.SendCommand([]byte(cmdNotify)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {
 			engine.Logger.Err(fmt.Sprintf("Failed setting cgr_notify variable for accid: %s, err: %v, reply: %s", ev.GetUUID(), err, string(reply)))
@@ -208,7 +208,7 @@ func (osm *OsipsSessionManager) OnAuthorize(osipsDagram *osipsdagram.OsipsEvent)
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime,
-			TimeEnd:     startTime.Add(osm.cgrCfg.SMMaxCallDuration),
+			TimeEnd:     startTime.Add(osm.cfg.MaxCallDuration),
 		}
 		var remainingDurationFloat float64
 		err = osm.rater.GetMaxSessionTime(cd, &remainingDurationFloat)
@@ -229,7 +229,7 @@ func (osm *OsipsSessionManager) OnAuthorize(osipsDagram *osipsdagram.OsipsEvent)
 			maxCallDuration = remainingDuration
 		}
 	}
-	if maxCallDuration <= osm.cgrCfg.SMMinCallDuration {
+	if maxCallDuration <= osm.cfg.MinCallDuration {
 		cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n2\n\n", ev.GetUUID(), OSIPS_INSUFFICIENT_FUNDS)
 		if reply, err := osm.miConn.SendCommand([]byte(cmdNotify)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {
 			engine.Logger.Err(fmt.Sprintf("Failed setting cgr_notify variable for accid: %s, err: %v, reply: %s", ev.GetUUID(), err, string(reply)))

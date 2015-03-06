@@ -198,7 +198,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		}
 		sm, _ = sessionmanager.NewKamailioSessionManager(cfg, raterConn, cdrsConn, loggerDb, debitInterval)
 	case OSIPS:
-		sm, _ = sessionmanager.NewOSipsSessionManager(cfg, raterConn, cdrsConn)
+		sm, _ = sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn)
 	default:
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.SMSwitchType))
 		exitChan <- true

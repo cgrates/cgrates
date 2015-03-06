@@ -210,7 +210,7 @@ func NewDfltOsipsConnConfig() *OsipsConnConfig {
 	return dfltOsipsConnConfig
 }
 
-// Represents one connection instance towards OpenSIPS
+// Represents one connection instance towards OpenSIPS, not in use for now but planned for future
 type OsipsConnConfig struct {
 	MiAddr     string
 	Reconnects int
@@ -236,7 +236,8 @@ type SmOsipsConfig struct {
 	MinCallDuration         time.Duration
 	MaxCallDuration         time.Duration
 	EventsSubscribeInterval time.Duration
-	Connections             []*OsipsConnConfig
+	MiAddr                  string
+	Reconnects              int
 }
 
 func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
@@ -273,12 +274,11 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 			return err
 		}
 	}
-	if jsnCfg.Connections != nil {
-		self.Connections = make([]*OsipsConnConfig, len(*jsnCfg.Connections))
-		for idx, jsnConnCfg := range *jsnCfg.Connections {
-			self.Connections[idx] = NewDfltOsipsConnConfig()
-			self.Connections[idx].loadFromJsonCfg(jsnConnCfg)
-		}
+	if jsnCfg.MiAddr != nil {
+		self.MiAddr = *jsnCfg.MiAddr
+	}
+	if jsnCfg.Reconnects != nil {
+		self.Reconnects = *jsnCfg.Reconnects
 	}
 	return nil
 }
