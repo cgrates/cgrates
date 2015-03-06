@@ -30,22 +30,21 @@ import (
 	"time"
 )
 
-func NewKamailioSessionManager(cfg *config.CGRConfig, rater, cdrsrv engine.Connector, loggerDb engine.LogStorage, debitInterval time.Duration) (*KamailioSessionManager, error) {
-	ksm := &KamailioSessionManager{cgrCfg: cfg, rater: rater, cdrsrv: cdrsrv, loggerDb: loggerDb, debitInterval: debitInterval}
+func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv engine.Connector, loggerDb engine.LogStorage) (*KamailioSessionManager, error) {
+	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, loggerDb: loggerDb, conns: make(map[string]*kamevapi.KamEvapi)}
 	return ksm, nil
 }
 
 type KamailioSessionManager struct {
-	cgrCfg        *config.CGRConfig
-	rater         engine.Connector
-	cdrsrv        engine.Connector
-	loggerDb      engine.LogStorage
-	debitInterval time.Duration
-	kea           *kamevapi.KamEvapi
-	sessions      []*Session
+	cfg      *config.SmKamConfig
+	rater    engine.Connector
+	cdrsrv   engine.Connector
+	loggerDb engine.LogStorage
+	conns    map[string]*kamevapi.KamEvapi
+	sessions []*Session
 }
 
-func (self *KamailioSessionManager) onCgrAuth(evData []byte) {
+func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
 		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
@@ -53,7 +52,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte) {
 	if kev.MissingParameter() {
 		if kar, err := kev.AsKamAuthReply(0.0, errors.New(utils.ERR_MANDATORY_IE_MISSING)); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
-		} else if err = self.kea.Send(kar.String()); err != nil {
+		} else if err = self.conns[connId].Send(kar.String()); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
 		}
 		return
@@ -64,12 +63,12 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte) {
 	}
 	if kar, err := kev.AsKamAuthReply(remainingDuration, err); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
-	} else if err = self.kea.Send(kar.String()); err != nil {
+	} else if err = self.conns[connId].Send(kar.String()); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
 	}
 }
 
-func (self *KamailioSessionManager) onCallStart(evData []byte) {
+func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
 	kamEv, err := NewKamEvent(evData)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
@@ -84,7 +83,7 @@ func (self *KamailioSessionManager) onCallStart(evData []byte) {
 	}
 }
 
-func (self *KamailioSessionManager) onCallEnd(evData []byte) {
+func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
@@ -105,25 +104,32 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte) {
 
 func (self *KamailioSessionManager) Connect() error {
 	var err error
-	eventHandlers := map[*regexp.Regexp][]func([]byte){
-		regexp.MustCompile("CGR_AUTH_REQUEST"): []func([]byte){self.onCgrAuth},
-		regexp.MustCompile("CGR_CALL_START"):   []func([]byte){self.onCallStart},
-		regexp.MustCompile("CGR_CALL_END"):     []func([]byte){self.onCallEnd},
+	eventHandlers := map[*regexp.Regexp][]func([]byte, string){
+		regexp.MustCompile("CGR_AUTH_REQUEST"): []func([]byte, string){self.onCgrAuth},
+		regexp.MustCompile("CGR_CALL_START"):   []func([]byte, string){self.onCallStart},
+		regexp.MustCompile("CGR_CALL_END"):     []func([]byte, string){self.onCallEnd},
 	}
-	if self.kea, err = kamevapi.NewKamEvapi(self.cgrCfg.KamailioEvApiAddr, self.cgrCfg.KamailioReconnects, eventHandlers, engine.Logger.(*syslog.Writer)); err != nil {
-		return err
+	errChan := make(chan error)
+	for _, connCfg := range self.cfg.Connections {
+		connId := utils.GenUUID()
+		if self.conns[connId], err = kamevapi.NewKamEvapi(connCfg.EvapiAddr, connId, connCfg.Reconnects, eventHandlers, engine.Logger.(*syslog.Writer)); err != nil {
+			return err
+		}
+		go func() { // Start reading in own goroutine, return on error
+			if err := self.conns[connId].ReadEvents(); err != nil {
+				errChan <- err
+			}
+		}()
 	}
-	if err := self.kea.ReadEvents(); err != nil {
-		return err
-	}
-	return errors.New("<SM-Kamailio> Stopped reading events")
+	err = <-errChan // Will keep the Connect locked until the first error in one of the connections
+	return err
 }
 
 func (self *KamailioSessionManager) DisconnectSession(ev utils.Event, connId, notify string) {
 	sessionIds := ev.GetSessionIds()
 	disconnectEv := &KamSessionDisconnect{Event: CGR_SESSION_DISCONNECT, HashEntry: sessionIds[0], HashId: sessionIds[1], Reason: notify}
-	if err := self.kea.Send(disconnectEv.String()); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending disconnect request %s", err.Error()))
+	if err := self.conns[connId].Send(disconnectEv.String()); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending disconnect request, error %s, connection id: %s", err.Error(), connId))
 	}
 	return
 }
@@ -145,12 +151,8 @@ func (self *KamailioSessionManager) GetSession(uuid string) *Session {
 	}
 	return nil
 }
-func (self *KamailioSessionManager) MaxDebit(cd *engine.CallDescriptor, cc *engine.CallCost) error {
-	return self.rater.MaxDebit(*cd, cc)
-}
-
 func (self *KamailioSessionManager) DebitInterval() time.Duration {
-	return self.debitInterval
+	return self.cfg.DebitInterval
 }
 func (self *KamailioSessionManager) DbLogger() engine.LogStorage {
 	return self.loggerDb

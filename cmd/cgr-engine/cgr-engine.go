@@ -190,13 +190,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 	case FS:
 		sm = sessionmanager.NewFSSessionManager(cfg.SmFsConfig, loggerDb, raterConn, cdrsConn)
 	case KAMAILIO:
-		var debitInterval time.Duration
-		if debitInterval, err = utils.ParseDurationWithSecs(strconv.Itoa(cfg.SMDebitInterval)); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<SM-Kamailio> Error: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-		sm, _ = sessionmanager.NewKamailioSessionManager(cfg, raterConn, cdrsConn, loggerDb, debitInterval)
+		sm, _ = sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn, loggerDb)
 	case OSIPS:
 		sm, _ = sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn)
 	default:
