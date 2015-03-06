@@ -68,7 +68,7 @@ func TestOsipsEventParseStatic(t *testing.T) {
 }
 
 func TestOsipsEventGetValues(t *testing.T) {
-	cfg, _ = config.NewDefaultCGRConfig()
+	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	setupTime, _ := osipsEv.GetSetupTime(utils.META_DEFAULT)
 	eSetupTime, _ := utils.ParseTimeDetectLayout("1406370492")

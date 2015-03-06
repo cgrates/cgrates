@@ -75,10 +75,10 @@ func (self *KamailioSessionManager) onCallStart(evData []byte) {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
 	}
 	if kamEv.MissingParameter() {
-		self.DisconnectSession(kamEv, utils.ERR_MANDATORY_IE_MISSING)
+		self.DisconnectSession(kamEv, "", utils.ERR_MANDATORY_IE_MISSING)
 		return
 	}
-	s := NewSession(kamEv, self)
+	s := NewSession(kamEv, "", self)
 	if s != nil {
 		self.sessions = append(self.sessions, s)
 	}
@@ -119,7 +119,7 @@ func (self *KamailioSessionManager) Connect() error {
 	return errors.New("<SM-Kamailio> Stopped reading events")
 }
 
-func (self *KamailioSessionManager) DisconnectSession(ev utils.Event, notify string) {
+func (self *KamailioSessionManager) DisconnectSession(ev utils.Event, connId, notify string) {
 	sessionIds := ev.GetSessionIds()
 	disconnectEv := &KamSessionDisconnect{Event: CGR_SESSION_DISCONNECT, HashEntry: sessionIds[0], HashId: sessionIds[1], Reason: notify}
 	if err := self.kea.Send(disconnectEv.String()); err != nil {
@@ -149,24 +149,28 @@ func (self *KamailioSessionManager) MaxDebit(cd *engine.CallDescriptor, cc *engi
 	return self.rater.MaxDebit(*cd, cc)
 }
 
-func (self *KamailioSessionManager) GetDebitPeriod() time.Duration {
+func (self *KamailioSessionManager) DebitInterval() time.Duration {
 	return self.debitInterval
 }
-func (self *KamailioSessionManager) GetDbLogger() engine.LogStorage {
+func (self *KamailioSessionManager) DbLogger() engine.LogStorage {
 	return self.loggerDb
 }
 func (self *KamailioSessionManager) Rater() engine.Connector {
 	return self.rater
 }
 
-func (self *KamailioSessionManager) ProcessCdr(cdr *utils.StoredCdr) {
+func (self *KamailioSessionManager) ProcessCdr(cdr *utils.StoredCdr) error {
 	if self.cdrsrv == nil {
-		return
+		return nil
 	}
 	var reply string
 	if err := self.cdrsrv.ProcessCdr(cdr, &reply); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", cdr.CgrId, cdr.AccId, err.Error()))
 	}
+	return nil
+}
+
+func (sm *KamailioSessionManager) WarnSessionMinDuration(sessionUuid, connId string) {
 }
 func (self *KamailioSessionManager) Shutdown() error {
 	return nil

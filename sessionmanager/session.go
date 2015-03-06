@@ -25,7 +25,6 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/fsock"
 )
 
 // Session type holding the call information fields, a session delegate for specific
@@ -34,6 +33,8 @@ type Session struct {
 	eventStart     utils.Event // Store the original event who started this session so we can use it's info later (eg: disconnect, cgrid)
 	stopDebit      chan bool   // Channel to communicate with debit loops when closing the session
 	sessionManager SessionManager
+	connId         string // Reference towards connection id on the session manager side.
+	warnMinDur     time.Duration
 	sessionRuns    []*engine.SessionRun
 }
 
@@ -51,10 +52,11 @@ func (s *Session) SessionRuns() []*engine.SessionRun {
 }
 
 // Creates a new session and in case of prepaid starts the debit loop for each of the session runs individually
-func NewSession(ev utils.Event, sm SessionManager) *Session {
+func NewSession(ev utils.Event, connId string, sm SessionManager) *Session {
 	s := &Session{eventStart: ev,
 		stopDebit:      make(chan bool),
 		sessionManager: sm,
+		connId:         connId,
 	}
 	if err := sm.Rater().GetSessionRuns(ev, &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
@@ -69,7 +71,7 @@ func NewSession(ev utils.Event, sm SessionManager) *Session {
 func (s *Session) debitLoop(runIdx int) {
 	nextCd := *s.sessionRuns[runIdx].CallDescriptor
 	index := 0.0
-	debitPeriod := s.sessionManager.GetDebitPeriod()
+	debitPeriod := s.sessionManager.DebitInterval()
 	for {
 		select {
 		case <-s.stopDebit:
@@ -83,19 +85,17 @@ func (s *Session) debitLoop(runIdx int) {
 		nextCd.LoopIndex = index
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
-		if err := s.sessionManager.MaxDebit(&nextCd, cc); err != nil {
+		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
-			s.sessionManager.DisconnectSession(s.eventStart, SYSTEM_ERROR)
+			s.sessionManager.DisconnectSession(s.eventStart, s.connId, SYSTEM_ERROR)
 			return
 		}
 		if cc.GetDuration() == 0 {
-			s.sessionManager.DisconnectSession(s.eventStart, INSUFFICIENT_FUNDS)
+			s.sessionManager.DisconnectSession(s.eventStart, s.connId, INSUFFICIENT_FUNDS)
 			return
 		}
-		if cc.GetDuration() <= cfg.FSMinDurLowBalance && len(cfg.FSLowBalanceAnnFile) != 0 {
-			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_broadcast %s %s aleg\n\n", s.eventStart.GetUUID(), cfg.FSLowBalanceAnnFile)); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send uuid_broadcast to freeswitch: %s", err.Error()))
-			}
+		if s.warnMinDur != time.Duration(0) && cc.GetDuration() <= s.warnMinDur {
+			s.sessionManager.WarnSessionMinDuration(s.eventStart.GetUUID(), s.connId)
 		}
 		s.sessionRuns[runIdx].CallCosts = append(s.sessionRuns[runIdx].CallCosts, cc)
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
@@ -204,9 +204,6 @@ func (s *Session) SaveOperations() {
 		for _, cc := range sr.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		if s.sessionManager.GetDbLogger() == nil {
-			engine.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
-		}
-		s.sessionManager.GetDbLogger().LogCallCost(s.eventStart.GetCgrId(), engine.SESSION_MANAGER_SOURCE, sr.DerivedCharger.RunId, firstCC)
+		s.sessionManager.DbLogger().LogCallCost(s.eventStart.GetCgrId(), engine.SESSION_MANAGER_SOURCE, sr.DerivedCharger.RunId, firstCC)
 	}
 }

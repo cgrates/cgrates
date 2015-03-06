@@ -35,7 +35,7 @@ func NewOSipsSessionManager(cfg *config.CGRConfig, rater, cdrsrv engine.Connecto
 	osm := &OsipsSessionManager{cgrCfg: cfg, rater: rater, cdrsrv: cdrsrv}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
 		"E_OPENSIPS_START": []func(*osipsdagram.OsipsEvent){osm.OnOpensipsStart},
-		"E_ACC_CDR":        []func(*osipsdagram.OsipsEvent){osm.OnCdr},
+		"E_ACC_CDR":        []func(*osipsdagram.OsipsEvent){osm.onCdr},
 		"E_CGR_AUTHORIZE":  []func(*osipsdagram.OsipsEvent){osm.OnAuthorize},
 	}
 	return osm, nil
@@ -70,7 +70,7 @@ func (osm *OsipsSessionManager) Connect() (err error) {
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
 }
 
-func (osm *OsipsSessionManager) DisconnectSession(ev utils.Event, notify string) {
+func (osm *OsipsSessionManager) DisconnectSession(ev utils.Event, cgrId, notify string) {
 	return
 }
 func (osm *OsipsSessionManager) RemoveSession(uuid string) {
@@ -79,15 +79,18 @@ func (osm *OsipsSessionManager) RemoveSession(uuid string) {
 func (osm *OsipsSessionManager) MaxDebit(cd *engine.CallDescriptor, cc *engine.CallCost) error {
 	return nil
 }
-func (osm *OsipsSessionManager) GetDebitPeriod() time.Duration {
+func (osm *OsipsSessionManager) DebitInterval() time.Duration {
 	var nilDuration time.Duration
 	return nilDuration
 }
-func (osm *OsipsSessionManager) GetDbLogger() engine.LogStorage {
+func (osm *OsipsSessionManager) DbLogger() engine.LogStorage {
 	return nil
 }
-func (self *OsipsSessionManager) Rater() engine.Connector {
-	return self.rater
+func (osm *OsipsSessionManager) Rater() engine.Connector {
+	return osm.rater
+}
+func (osm *OsipsSessionManager) WarnSessionMinDuration(sessionUuid, connId string) {
+	return
 }
 func (osm *OsipsSessionManager) Shutdown() error {
 	return nil
@@ -143,13 +146,17 @@ func (osm *OsipsSessionManager) OnOpensipsStart(cdrDagram *osipsdagram.OsipsEven
 	go osm.SubscribeEvents(evStop)
 }
 
-func (osm *OsipsSessionManager) OnCdr(cdrDagram *osipsdagram.OsipsEvent) {
-	var reply string
+func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	osipsEv, _ := NewOsipsEvent(cdrDagram)
-	storedCdr := osipsEv.AsStoredCdr()
-	if err := osm.cdrsrv.ProcessCdr(storedCdr, &reply); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
+	if err := osm.ProcessCdr(osipsEv.AsStoredCdr()); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(), osipsEv.GetUUID(), err.Error()))
 	}
+
+}
+
+func (osm *OsipsSessionManager) ProcessCdr(storedCdr *utils.StoredCdr) error {
+	var reply string
+	return osm.cdrsrv.ProcessCdr(storedCdr, &reply)
 }
 
 // Process Authorize request from OpenSIPS and communicate back maxdur

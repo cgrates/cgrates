@@ -26,12 +26,13 @@ import (
 )
 
 type SessionManager interface {
-	Connect() error
-	DisconnectSession(utils.Event, string)
-	RemoveSession(string)
-	MaxDebit(*engine.CallDescriptor, *engine.CallCost) error
-	GetDebitPeriod() time.Duration
-	GetDbLogger() engine.LogStorage
+	DbLogger() engine.LogStorage
 	Rater() engine.Connector
+	DebitInterval() time.Duration
+	Connect() error
+	DisconnectSession(utils.Event, string, string)
+	WarnSessionMinDuration(string, string)
+	RemoveSession(string)
+	ProcessCdr(*utils.StoredCdr) error
 	Shutdown() error
 }

@@ -188,8 +188,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 	}
 	switch cfg.SMSwitchType {
 	case FS:
-		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval))
-		sm = sessionmanager.NewFSSessionManager(cfg, loggerDb, raterConn, cdrsConn, dp)
+		sm = sessionmanager.NewFSSessionManager(cfg.SmFsConfig, loggerDb, raterConn, cdrsConn)
 	case KAMAILIO:
 		var debitInterval time.Duration
 		if debitInterval, err = utils.ParseDurationWithSecs(strconv.Itoa(cfg.SMDebitInterval)); err != nil {

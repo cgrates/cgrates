@@ -417,7 +417,7 @@ Task-ID: 2
 Task-Desc: heartbeat
 Task-Group: core
 Task-Runtime: 1349437318`
-	cfg, _ = config.NewDefaultCGRConfig()
+	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(body)
 	setupTime, _ := ev.GetSetupTime("Event-Date-Local")
@@ -471,7 +471,7 @@ Task-Runtime: 1349437318`
 }
 
 func TestParseFsHangup(t *testing.T) {
-	cfg, _ = config.NewDefaultCGRConfig()
+	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
 	setupTime, _ := ev.GetSetupTime(utils.META_DEFAULT)
@@ -502,7 +502,7 @@ func TestParseFsHangup(t *testing.T) {
 }
 
 func TestParseEventValue(t *testing.T) {
-	cfg, _ = config.NewDefaultCGRConfig()
+	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
 	if cgrid := ev.ParseEventValue(&utils.RSRField{Id: utils.CGRID}); cgrid != "873e5bf7903978f305f7d8fed3f92f968cf82873" {
@@ -613,7 +613,7 @@ Caller-Username: 04021292812`
 }
 
 func TestFsEvAsStoredCdr(t *testing.T) {
-	cfg, _ = config.NewDefaultCGRConfig()
+	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
 	setupTime, _ := utils.ParseTimeDetectLayout("1398442107")
@@ -629,7 +629,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 }
 
 func TestFsEvGetExtraFields(t *testing.T) {
-	cfg, _ = config.NewDefaultCGRConfig()
+	cfg, _ := config.NewDefaultCGRConfig()
 	cfg.FSCdrExtraFields = []*utils.RSRField{&utils.RSRField{Id: "Channel-Read-Codec-Name"}, &utils.RSRField{Id: "Channel-Write-Codec-Name"}, &utils.RSRField{Id: "NonExistingHeader"}}
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
