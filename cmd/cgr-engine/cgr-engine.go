@@ -367,6 +367,7 @@ func serveHttp(httpWaitChans []chan struct{}) {
 
 func checkConfigSanity() error {
 	/*
+		Add here checks on session manager
 		if cfg.SMEnabled && cfg.RaterEnabled && cfg.RaterBalancer != "" {
 			engine.Logger.Crit("The session manager must not be enabled on a worker engine (change [engine]/balancer to disabled)!")
 			return errors.New("SessionManager on Worker")
