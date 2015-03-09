@@ -160,10 +160,6 @@ func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, 
 			}
 			time.Sleep(time.Duration(i+1) * time.Second)
 		}
-		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to engine: %v", err))
-			exitChan <- true
-		}
 		raterConn = &engine.RPCClientConnector{Client: client}
 	}
 	if cfg.SmFsConfig.Cdrs == cfg.SmFsConfig.Rater {

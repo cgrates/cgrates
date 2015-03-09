@@ -54,14 +54,14 @@ func (sm *FSSessionManager) Connect() error {
 		connId := utils.GenUUID()
 		fSock, err := fsock.NewFSock(connCfg.Server, connCfg.Password, connCfg.Reconnects, sm.createHandlers(), eventFilters, engine.Logger.(*syslog.Writer), connId)
 		if err != nil {
-			errChan <- err
+			return err
 		} else if !fSock.Connected() {
-			errChan <- errors.New("Could not connect to FreeSWITCH")
+			return errors.New("Could not connect to FreeSWITCH")
 		} else {
 			sm.conns[connId] = fSock
 		}
 		go func() { // Start reading in own goroutine, return on error
-			if err := fsock.FS.ReadEvents(); err != nil {
+			if err := sm.conns[connId].ReadEvents(); err != nil {
 				errChan <- err
 			}
 		}()
