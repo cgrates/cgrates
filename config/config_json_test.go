@@ -352,7 +352,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 			&FsConnJsonCfg{
 				Server:     utils.StringPointer("127.0.0.1:8021"),
 				Password:   utils.StringPointer("ClueCon"),
-				Reconnects: utils.IntPointer(-1),
+				Reconnects: utils.IntPointer(5),
 			}},
 	}
 	if cfg, err := dfCgrJsonCfg.SmFsJsonCfg(); err != nil {
@@ -374,7 +374,7 @@ func TestSmKamJsonCfg(t *testing.T) {
 		Connections: &[]*KamConnJsonCfg{
 			&KamConnJsonCfg{
 				Evapi_addr: utils.StringPointer("127.0.0.1:8448"),
-				Reconnects: utils.IntPointer(-1),
+				Reconnects: utils.IntPointer(5),
 			},
 		},
 	}
@@ -396,7 +396,7 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 		Max_call_duration:         utils.StringPointer("3h"),
 		Events_subscribe_interval: utils.StringPointer("60s"),
 		Mi_addr:                   utils.StringPointer("127.0.0.1:8020"),
-		Reconnects:                utils.IntPointer(-1),
+		Reconnects:                utils.IntPointer(5),
 	}
 	if cfg, err := dfCgrJsonCfg.SmOsipsJsonCfg(); err != nil {
 		t.Error(err)

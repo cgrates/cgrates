@@ -214,7 +214,7 @@ const CGRATES_CFG_JSON = `
 	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance
 	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1}	// reconnects -1 to indefinitely connect
+		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
 	],
 },
 
@@ -228,7 +228,7 @@ const CGRATES_CFG_JSON = `
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
 	"connections":[					// instantiate connections to multiple Kamailio servers
-		{"evapi_addr": "127.0.0.1:8448", "reconnects": -1}						// reconnects -1 to indefinitely connect
+		{"evapi_addr": "127.0.0.1:8448", "reconnects": 5}
 	],
 },
 
@@ -243,7 +243,7 @@ const CGRATES_CFG_JSON = `
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
-	"reconnects": -1,					// reconnects -1 to indefinitely connect
+	"reconnects": 5,					// number of reconnects if connection is lost
 },
 
 

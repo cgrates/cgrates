@@ -80,7 +80,7 @@ func (self *MySQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost)
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 		return err
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,tor,direction,tenant,category,account,subject,destination,cost,timespans,cost_source,created_at) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s',%f,'%s','%s',%d) ON DUPLICATE KEY UPDATE tor=values(tor),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),cost=values(cost),timespans=values(timespans),cost_source=values(cost_source),updated_at=%d",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,tor,direction,tenant,category,account,subject,destination,cost,timespans,cost_source,created_at) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s',%f,'%s','%s','%s') ON DUPLICATE KEY UPDATE tor=values(tor),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),cost=values(cost),timespans=values(timespans),cost_source=values(cost_source),updated_at='%s'",
 		utils.TBL_COST_DETAILS,
 		cgrid,
 		runid,
@@ -94,8 +94,8 @@ func (self *MySQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost)
 		cc.Cost,
 		tss,
 		source,
-		time.Now().Unix(),
-		time.Now().Unix()))
+		time.Now().Format(time.RFC3339),
+		time.Now().Format(time.RFC3339)))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
 		return err
