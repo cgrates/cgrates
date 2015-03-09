@@ -183,7 +183,14 @@ func (sm *FSSessionManager) onChannelAnswer(ev utils.Event, connId string) {
 
 func (sm *FSSessionManager) onChannelHangupComplete(ev utils.Event) {
 	go sm.ProcessCdr(ev.AsStoredCdr())
-	s := sm.GetSession(ev.GetUUID())
+	var s *Session
+	for i := 0; i < 2; i++ { // Protect us against concurrency, wait a couple of seconds for the answer to be populated before we process hangup
+		s = sm.GetSession(ev.GetUUID())
+		if s != nil {
+			break
+		}
+		time.Sleep(time.Duration(i+1) * time.Second)
+	}
 	if s == nil { // Not handled by us
 		return
 	}
