@@ -504,7 +504,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		if exists, err := self.AccountDb.HasData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
-			return fmt.Errorf("%s:%s", utils.ERR_BROKEN_REFERENCE, err.Error())
+			return fmt.Errorf("%s:%s", utils.ERR_BROKEN_REFERENCE, apiAtm)
 		}
 		timing := new(engine.RITiming)
 		timing.Years.Parse(apiAtm.Years, ";")
