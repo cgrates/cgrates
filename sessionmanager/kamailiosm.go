@@ -58,7 +58,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 		return
 	}
 	var remainingDuration float64
-	if err = self.rater.GetDerivedMaxSessionTime(kev.AsEvent(""), &remainingDuration); err != nil {
+	if err = self.rater.GetDerivedMaxSessionTime(*kev.AsStoredCdr(), &remainingDuration); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time for %s, error: %s", kev.GetUUID(), err.Error()))
 	}
 	if kar, err := kev.AsKamAuthReply(remainingDuration, err); err != nil {

@@ -158,7 +158,7 @@ func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string
 
 func (sm *FSSessionManager) onChannelPark(ev utils.Event, connId string) {
 	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
-	if err := sm.rater.GetDerivedMaxSessionTime(ev, &maxCallDuration); err != nil {
+	if err := sm.rater.GetDerivedMaxSessionTime(*ev.AsStoredCdr(), &maxCallDuration); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
 	}
 	maxCallDur := time.Duration(maxCallDuration)

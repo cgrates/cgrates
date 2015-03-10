@@ -126,7 +126,7 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 }
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
-func (rs *Responder) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) error {
+func (rs *Responder) GetDerivedMaxSessionTime(ev utils.StoredCdr, reply *float64) error {
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
@@ -184,7 +184,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) er
 }
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
-func (rs *Responder) GetSessionRuns(ev utils.Event, sRuns *[]*SessionRun) error {
+func (rs *Responder) GetSessionRuns(ev utils.StoredCdr, sRuns *[]*SessionRun) error {
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
@@ -397,8 +397,8 @@ type Connector interface {
 	RefundIncrements(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
 	GetDerivedChargers(utils.AttrDerivedChargers, *utils.DerivedChargers) error
-	GetDerivedMaxSessionTime(utils.Event, *float64) error
-	GetSessionRuns(utils.Event, *[]*SessionRun) error
+	GetDerivedMaxSessionTime(utils.StoredCdr, *float64) error
+	GetSessionRuns(utils.StoredCdr, *[]*SessionRun) error
 	ProcessCdr(*utils.StoredCdr, *string) error
 }
 
@@ -426,11 +426,11 @@ func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float6
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
 }
 
-func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev utils.Event, reply *float64) error {
+func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev utils.StoredCdr, reply *float64) error {
 	return rcc.Client.Call("Responder.GetDerivedMaxSessionTime", ev, reply)
 }
 
-func (rcc *RPCClientConnector) GetSessionRuns(ev utils.Event, sRuns *[]*SessionRun) error {
+func (rcc *RPCClientConnector) GetSessionRuns(ev utils.StoredCdr, sRuns *[]*SessionRun) error {
 	return rcc.Client.Call("Responder.GetSessionRuns", ev, sRuns)
 }
 

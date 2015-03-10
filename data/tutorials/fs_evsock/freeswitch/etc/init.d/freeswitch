@@ -18,22 +18,37 @@ NAME=freeswitch
 DAEMON=/usr/bin/freeswitch
 USER=freeswitch
 GROUP=freeswitch
-TUTDIR=/usr/share/cgrates/tutorials/fs_csv/freeswitch
+TUTDIR=/usr/share/cgrates/tutorials/fs_evsock/freeswitch
+SCRIPTNAME=$TUTDIR/etc/init.d/$NAME
+TMP_DIR=/tmp/cgr_fsevsock/freeswitch
 CONFDIR=$TUTDIR/etc/$NAME
-DEFAULTS=$TUTDIR/etc/default/freeswitch
-RUNDIR=/var/run/$NAME
-LOGDIR=/var/log/freeswitch
+RUNDIR=$TMP_DIR//run
+LOGDIR=$TMP_DIR/log
 PIDFILE=$RUNDIR/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
-WORKDIR=/var/lib/$NAME
+WORKDIR=$TMP_DIR/lib
 DBDIR=$WORKDIR/db/
 DAEMON_ARGS="-rp -conf $CONFDIR -db $DBDIR -log $LOGDIR -u $USER -g $GROUP -nonat -nc"
 
 
 [ -x $DAEMON ] || exit 0
-[ -r DEFAULTS ] && . DEFAULTS
 . /lib/init/vars.sh
 . /lib/lsb/init-functions
+
+if [ ! -d $RUNDIR ]; then
+  mkdir -p $RUNDIR
+  chown -R $USER:$GROUP $RUNDIR
+  chmod -R ug=rwX,o= $RUNDIR
+fi
+
+if [ ! -d $LOGDIR ]; then
+  mkdir -p $LOGDIR
+  chown -R $USER:$GROUP $LOGDIR
+fi
+
+if [ ! -d $DBDIR ]; then
+  mkdir -p $DBDIR
+  chown -R $USER:$GROUP $DBDIR
+fi
 
 do_start() {
   if ! [ -f $CONFDIR/freeswitch.xml ]; then
@@ -41,11 +56,6 @@ do_start() {
     echo "Please review /usr/share/doc/$NAME/README.Debian">&2
     return 3
   fi
-
-  # Directory in /var/run may disappear on reboot (e.g. when tmpfs used for /var/run).
-  mkdir -p $RUNDIR
-  chown -R $USER:$GROUP $RUNDIR
-  chmod -R ug=rwX,o= $RUNDIR
 
   start-stop-daemon --start --quiet \
     --pidfile $PIDFILE --exec $DAEMON --name $NAME --user $USER \

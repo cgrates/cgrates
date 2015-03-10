@@ -26,7 +26,7 @@ import (
 // Returns MaxSessionTime in seconds, -1 for no limit
 func (self *ApierV1) GetMaxSessionTime(cdr utils.StoredCdr, maxSessionTime *float64) error {
 	var maxDur float64
-	if err := self.Responder.GetDerivedMaxSessionTime(&cdr, &maxDur); err != nil {
+	if err := self.Responder.GetDerivedMaxSessionTime(cdr, &maxDur); err != nil {
 		return err
 	}
 	if maxDur == -1.0 {

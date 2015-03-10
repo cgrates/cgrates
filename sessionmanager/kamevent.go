@@ -262,6 +262,7 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 func (kev KamEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return false, ""
 }
+
 func (kev KamEvent) AsStoredCdr() *utils.StoredCdr {
 	storCdr := new(utils.StoredCdr)
 	storCdr.CgrId = kev.GetCgrId()
