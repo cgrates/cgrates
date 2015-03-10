@@ -208,7 +208,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, balanceT
 	return
 }
 
-func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool) (cc *CallCost, err error) {
+func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.TOR+cd.Direction)
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, CREDIT+cd.Direction)
 	//log.Print(usefulMoneyBalances, usefulUnitBalances)
@@ -240,7 +240,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 						ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
 					}
 					// for i, ts := range cc.Timespans {
-					//	log.Printf("cc.times[an[%d]: %+v\n", i, ts)
+					//  log.Printf("cc.times[an[%d]: %+v\n", i, ts)
 					// }
 					cd.TimeStart = cc.GetEndTime()
 					//log.Printf("CD: %+v", cd)
@@ -302,25 +302,27 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		// this is the first add, debit the connect fee
 		ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
 	}
-	//log.Printf("Left CC: %+v", leftCC)
-	// get the default money balanance
-	// and go negative on it with the amount still unpaid
-	for _, ts := range leftCC.Timespans {
-		if ts.Increments == nil {
-			ts.createIncrementsSlice()
+	if leftCC.Cost == 0 || goNegative {
+		//log.Printf("Left CC: %+v", leftCC)
+		// get the default money balanance
+		// and go negative on it with the amount still unpaid
+		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !ub.AllowNegative {
+			err = errors.New("not enough credit")
 		}
-		for _, increment := range ts.Increments {
-			cost := increment.Cost
-			defaultBalance := ub.GetDefaultMoneyBalance(leftCC.Direction)
-			defaultBalance.SubstractAmount(cost)
-			increment.BalanceInfo.MoneyBalanceUuid = defaultBalance.Uuid
-			increment.BalanceInfo.AccountId = ub.Id
-			increment.paid = true
-			if count {
-				ub.countUnits(&Action{BalanceType: CREDIT, Direction: leftCC.Direction, Balance: &Balance{Value: cost, DestinationId: leftCC.Destination}})
+		for _, ts := range leftCC.Timespans {
+			if ts.Increments == nil {
+				ts.createIncrementsSlice()
 			}
-			if !ub.AllowNegative {
-				err = errors.New("not enough credit")
+			for _, increment := range ts.Increments {
+				cost := increment.Cost
+				defaultBalance := ub.GetDefaultMoneyBalance(leftCC.Direction)
+				defaultBalance.SubstractAmount(cost)
+				increment.BalanceInfo.MoneyBalanceUuid = defaultBalance.Uuid
+				increment.BalanceInfo.AccountId = ub.Id
+				increment.paid = true
+				if count {
+					ub.countUnits(&Action{BalanceType: CREDIT, Direction: leftCC.Direction, Balance: &Balance{Value: cost, DestinationId: leftCC.Destination}})
+				}
 			}
 		}
 	}

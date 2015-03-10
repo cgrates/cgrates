@@ -464,7 +464,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	}
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
-	cc, _ := cd.debit(account, true)
+	cc, _ := cd.debit(account, true, false)
 
 	//log.Printf("CC: %+v", cc)
 
@@ -526,7 +526,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
-func (cd *CallDescriptor) debit(account *Account, dryRun bool) (cc *CallCost, err error) {
+func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	if !dryRun {
 		defer accountingStorage.SetAccount(account)
 	}
@@ -534,7 +534,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool) (cc *CallCost, er
 		cd.TOR = MINUTES
 	}
 	//log.Printf("Debit CD: %+v", cd)
-	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun)
+	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)
 	//log.Print("HERE: ", cc, err)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetAccountKey(), err))
@@ -563,7 +563,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
-				cc, err = cd.debit(account, false)
+				cc, err = cd.debit(account, false, true)
 				return 0, err
 			})
 		} else {
@@ -597,7 +597,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 					cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
 					cd.DurationIndex -= initialDuration - remainingDuration
 				}
-				cc, err = cd.debit(account, false)
+				cc, err = cd.debit(account, false, true)
 				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
 			})

@@ -523,7 +523,10 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		TOR:           MINUTES,
 	}
 	initial := cd.Clone()
-	cd.GetMaxSessionDuration()
+	_, err := cd.GetMaxSessionDuration()
+	if err != nil {
+		t.Error("Got error from max duration: ", err)
+	}
 	cd.account = nil // it's OK to cache the account
 	if !reflect.DeepEqual(cd, initial) {
 		t.Errorf("GetMaxSessionDuration is changing the call descriptor %+v != %+v", cd, initial)
@@ -542,7 +545,10 @@ func TestMaxDebitDurationNoGreatherThanInitialDuration(t *testing.T) {
 		Destination: "0723",
 	}
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
-	result, _ := cd.GetMaxSessionDuration()
+	result, err := cd.GetMaxSessionDuration()
+	if err != nil {
+		t.Error("Got error from max duration: ", err)
+	}
 	if result > initialDuration {
 		t.Error("max session duration greather than initial duration", initialDuration, result)
 	}
