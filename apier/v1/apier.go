@@ -58,6 +58,17 @@ func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) err
 	return nil
 }
 
+func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
+	if sg, err := apier.AccountDb.GetSharedGroup(sgId, false); err != nil && err.Error() != utils.ERR_NOT_FOUND { // Not found is not an error here
+		return err
+	} else {
+		if sg != nil {
+			*reply = *sg
+		}
+	}
+	return nil
+}
+
 type AttrSetDestination struct { //ToDo
 	Id        string
 	Prefixes  []string

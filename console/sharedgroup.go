@@ -18,42 +18,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdExecuteAction{
-		name:      "action_execute",
-		rpcMethod: "ApierV1.ExecuteAction",
-		rpcParams: &v1.AttrExecuteAction{Direction: "*out"},
+	c := &CmdGetSharedGroup{
+		name:      "sharedgroup",
+		rpcMethod: "ApierV1.GetSharedGroup",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdExecuteAction struct {
+type CmdGetSharedGroup struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrExecuteAction
+	rpcParams *StringWrapper
 	*CommandExecuter
 }
 
-func (self *CmdExecuteAction) Name() string {
+func (self *CmdGetSharedGroup) Name() string {
 	return self.name
 }
 
-func (self *CmdExecuteAction) RpcMethod() string {
+func (self *CmdGetSharedGroup) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdExecuteAction) RpcParams() interface{} {
+func (self *CmdGetSharedGroup) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &v1.AttrExecuteAction{Direction: "*out"}
+		self.rpcParams = &StringWrapper{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdExecuteAction) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetSharedGroup) RpcResult() interface{} {
+	return &engine.SharedGroup{}
 }

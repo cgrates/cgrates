@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) 2012-2015 ITsysCOM GmbH
 
 This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -123,7 +123,7 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 
 func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) error {
 	storedCdr.MediationRunId = utils.DEFAULT_RUNID
-	cdrRuns := []*utils.StoredCdr{storedCdr}     // Start with initial storCdr, will add here all to be mediated
+	cdrRuns := []*utils.StoredCdr{storedCdr} // Start with initial storCdr, will add here all to be mediated
 	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
 		Account: storedCdr.Account, Subject: storedCdr.Subject}
 	var dcs utils.DerivedChargers

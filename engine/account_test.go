@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2014 ITsysCOM
+Copyright (C) 2012-2015 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1202,6 +1202,55 @@ func TestDebitShared(t *testing.T) {
 		cc.Timespans[0].Increments[5].BalanceInfo.AccountId != "groupie" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
+}
+
+func TestMaxDurationShared(t *testing.T) {
+	cc := &CallCost{
+		Tenant:      "vdf",
+		Category:    "0",
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 0, 0, time.UTC),
+				DurationIndex: 55 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		deductConnectFee: true,
+	}
+	cd := &CallDescriptor{
+		Tenant:        cc.Tenant,
+		Category:      cc.Category,
+		TimeStart:     cc.Timespans[0].TimeStart,
+		TimeEnd:       cc.Timespans[0].TimeEnd,
+		Direction:     cc.Direction,
+		Destination:   cc.Destination,
+		TOR:           cc.TOR,
+		DurationIndex: cc.GetDuration(),
+		test_callcost: cc,
+	}
+	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 0, SharedGroup: "SG_TEST"}},
+	}}
+	groupie := &Account{Id: "groupie", BalanceMap: map[string]BalanceChain{
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneyc", Value: 130, SharedGroup: "SG_TEST"}},
+	}}
+
+	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
+
+	accountingStorage.SetAccount(groupie)
+	accountingStorage.SetSharedGroup(sg)
+	cache2go.Cache(SHARED_GROUP_PREFIX+"SG_TEST", sg)
+	duration, err := cd.getMaxSessionDuration(rif)
+	if err != nil {
+		t.Error("Error getting max session duration from shared group: ", err)
+	}
+	if duration != 1*time.Minute {
+		t.Error("Wrong max session from shared group: ", duration)
+	}
+
 }
 
 func TestDebitSMS(t *testing.T) {

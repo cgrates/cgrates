@@ -1,6 +1,6 @@
 /*
 Real-Time Charging System for Telecom Environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) 2012-2015 ITsysCOM GmbH
 
 This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
