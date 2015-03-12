@@ -300,3 +300,49 @@ MinutesWeight
     This field is used only if the balanceTag is MINUTES. If more minute balances are suitable for a call the one with smaller weight will be used first.
 Weight
     If there are multiple actions in a group, they will be executed in the order of their weight (smaller first).
+
+4.2.10. Derived Chargers
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For each call we can bill more than one time, for that we need to use the
+following options:
+
++-----------+-------------+----------+---------+---------+--------------+-----------+--------------+----------------+-------------+---------------+--------------+--------------+------------------+----------------+-----------------+------------+
+| Direction |    Tenant   | Category | Account | Subject |    RunId     | RunFilter | ReqTypeField | DirectionField | TenantField | CategoryField | AccountField | SubjectField | DestinationField | SetupTimeField | AnswerTimeField | UsageField |
++===========+=============+==========+=========+=========+==============+===========+==============+================+=============+===============+==============+==============+==================+================+=================+============+
+|   \*out   | cgrates.org |   call   |   1001  |   1001  | derived_run1 |           |    ^rated    |   \*default    |  \*default  |   \*default   |  \*default   |    ^1002     |    \*default     |   \*default    |    \*default    | \*default  |
++-----------+-------------+----------+---------+---------+--------------+-----------+--------------+----------------+-------------+---------------+--------------+--------------+------------------+----------------+-----------------+------------+
+
+
+In derived charges we have 2 different kind of options, filters, and actions:
+
+Filters: With the following fields we filter the calls that need to run a extra
+billing parameter.
+    + Direction
+    + Tenant
+    + Category
+    + Account
+    + Subject
+
+Actions: In case of the filter options match, platform creates extra runid with
+the fields that we want to modify.
+
+    + RunId
+    + RunFilter
+    + ReqTypeField
+    + DirectionField
+    + TenantField
+    + CategoryField
+    + AccountField
+    + SubjectField
+    + DestinationField
+    + SetupTimeField
+    + AnswerTimeField
+    + UsageField
+
+In the example, all the calls with direction=out, tenant=cgrates.org,
+category="call" and account and subject equal 1001. Will be created a new cdr in
+the table *rated_cdrs* with the runID derived_run1, and the subject 1002.
+
+This feature it's useful in the case that you want to rated the calls 2 times,
+for example rated for different tenants or resellers.
