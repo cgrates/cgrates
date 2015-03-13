@@ -916,6 +916,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, dc := range dcs {
 		dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
 	}
+	engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
 		return err
 	}
@@ -923,6 +924,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return err
 	}
 	if self.Sched != nil {
+		engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
 		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()
 	}
