@@ -51,6 +51,7 @@ func TestTutFsCallsInitCfg(t *testing.T) {
 	config.SetCgrConfig(tutFsCallsCfg)
 }
 
+// Wipe out the cdr database
 func TestTutFsCallsResetDb(t *testing.T) {
 	if !*testCalls {
 		return
@@ -60,6 +61,7 @@ func TestTutFsCallsResetDb(t *testing.T) {
 	}
 }
 
+// Remove data in both rating and accounting db
 func TestTutFsCallsResetDataDb(t *testing.T) {
 	if !*testCalls {
 		return
@@ -69,6 +71,7 @@ func TestTutFsCallsResetDataDb(t *testing.T) {
 	}
 }
 
+// start FS server
 func TestTutFsCallsStartFS(t *testing.T) {
 	if !*testCalls {
 		return
@@ -78,6 +81,7 @@ func TestTutFsCallsStartFS(t *testing.T) {
 	}
 }
 
+// Start CGR Engine
 func TestTutFsCallsStartEngine(t *testing.T) {
 	if !*testCalls {
 		return
@@ -99,6 +103,7 @@ func TestTutFsCallsRpcConn(t *testing.T) {
 	}
 }
 
+// Load the tariff plan, creating accounts and their balances
 func TestTutFsCallsLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testCalls {
 		return
@@ -113,33 +118,91 @@ func TestTutFsCallsLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+// Start Pjsua as listener and register it to receive calls
 func TestTutFsCallsStartPjsuaListener(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	var err error
 	acnts := []*engine.PjsuaAccount{
-		&engine.PjsuaAccount{Id: "sip:1001@10.10.10.102", Username: "1001", Password: "1234", Realm: "*", Registrar: "sip:10.10.10.102:5060"},
-		&engine.PjsuaAccount{Id: "sip:1002@10.10.10.102", Username: "1002", Password: "1234", Realm: "*", Registrar: "sip:10.10.10.102:5060"}}
+		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:25060"},
+		&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:25060"}}
 	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
+// Call from 1001 (prepaid) to 1002
 func TestTutFsCallsCall1001To1002(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@10.10.10.102", Username: "1001", Password: "1234", Realm: "*"}, "sip:1002@10.10.10.102", time.Duration(35)*time.Second, 5071); err != nil {
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
+		"sip:127.0.0.1:25060", time.Duration(67)*time.Second, 5071); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(time.Duration(40) * time.Second)
+}
+
+// Make sure account was debited properly
+func TestTutFsCallsAccount1001(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	time.Sleep(time.Duration(70) * time.Second) // Allow calls to finish before start querying the results
+	var reply *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() == 10.0 { // Make sure we debitted
+		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
+	}
+}
+
+// Make sure account was debited properly
+func TestTutFsCallsCdrs1001(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	var reply []*utils.CgrCdrOut
+	req := utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{utils.META_DEFAULT}}
+	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
+			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		}
+		if reply[0].ReqType != utils.PREPAID {
+			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		}
+		if reply[0].Usage != 67.0 { // Usage as seconds
+			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
+		}
+		if reply[0].Cost != 0.0159 {
+			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
+		}
+	}
+	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}}
+	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		if reply[0].ReqType != utils.RATED {
+			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		}
+		if reply[0].Cost != 0.3059 {
+			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
+		}
+	}
 }
 
 func TestTutFsCallsStopPjsuaListener(t *testing.T) {
 	if !*testCalls {
 		return
 	}
+
 	tutFsCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
 	time.Sleep(time.Duration(1) * time.Second)   // Allow pjsua to finish it's tasks, eg un-REGISTER
 }

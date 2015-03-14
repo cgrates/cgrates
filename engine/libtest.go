@@ -139,9 +139,10 @@ func StartPjsuaListener(acnts []*PjsuaAccount, waitMs int) (*os.File, error) {
 	return fPty, nil
 }
 
-func PjsuaCallUri(acnt *PjsuaAccount, dstUri string, callDur time.Duration, localPort int) error {
+func PjsuaCallUri(acnt *PjsuaAccount, dstUri, outboundUri string, callDur time.Duration, localPort int) error {
 	cmdArgs := []string{"--null-audio", "--app-log-level=0", fmt.Sprintf("--local-port=%d", localPort), fmt.Sprintf("--duration=%d", int(callDur.Seconds())),
-		"--id=" + acnt.Id, "--username=" + acnt.Username, "--password=" + acnt.Password, "--realm=" + acnt.Realm, dstUri}
+		"--outbound=" + outboundUri, "--id=" + acnt.Id, "--username=" + acnt.Username, "--password=" + acnt.Password, "--realm=" + acnt.Realm, dstUri}
+
 	pjsuaPath, err := exec.LookPath("pjsua")
 	if err != nil {
 		return err
