@@ -1050,13 +1050,13 @@ func (csvr *CSVReader) LoadAll() error {
 func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
-		ids := make([]string, len(csvr.destinations))
+		keys := make([]string, len(csvr.destinations))
 		i := 0
 		for k := range csvr.destinations {
-			ids[i] = k
+			keys[i] = k
 			i++
 		}
-		return ids, nil
+		return keys, nil
 	case RATING_PLAN_PREFIX:
 		keys := make([]string, len(csvr.ratingPlans))
 		i := 0
@@ -1117,6 +1117,14 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(csvr.cdrStats))
 		i := 0
 		for k := range csvr.cdrStats {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case SHARED_GROUP_PREFIX:
+		keys := make([]string, len(csvr.sharedGroups))
+		i := 0
+		for k := range csvr.sharedGroups {
 			keys[i] = k
 			i++
 		}

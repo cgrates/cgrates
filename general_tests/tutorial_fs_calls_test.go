@@ -82,7 +82,7 @@ func TestTutFsCallsStartEngine(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if _, err := engine.StartEngine(tutFsCallsCfgPath, 3000); err != nil {
+	if _, err := engine.StartEngine(tutFsCallsCfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -119,8 +119,8 @@ func TestTutFsCallsStartPjsuaListener(t *testing.T) {
 	}
 	var err error
 	acnts := []*engine.PjsuaAccount{
-		&engine.PjsuaAccount{Id: "sip:1004@10.10.10.102", Username: "1001", Password: "1234", Realm: "*", Registrar: "sip:10.10.10.102:5060"},
-		&engine.PjsuaAccount{Id: "sip:1007@10.10.10.102", Username: "1002", Password: "1234", Realm: "*", Registrar: "sip:10.10.10.102:5060"}}
+		&engine.PjsuaAccount{Id: "sip:1001@10.10.10.102", Username: "1001", Password: "1234", Realm: "*", Registrar: "sip:10.10.10.102:5060"},
+		&engine.PjsuaAccount{Id: "sip:1002@10.10.10.102", Username: "1002", Password: "1234", Realm: "*", Registrar: "sip:10.10.10.102:5060"}}
 	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, *waitRater); err != nil {
 		t.Fatal(err)
 	}
