@@ -15,4 +15,5 @@ go get -u -v github.com/gorhill/cronexpr
 go get -u -v github.com/cgrates/kamevapi
 go get -u -v github.com/DisposaBoy/JsonConfigReader
 go get -u -v golang.org/x/net/websocket
+go get -u -v github.com/kr/pty
 
