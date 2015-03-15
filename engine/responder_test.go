@@ -57,7 +57,7 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 func TestGetDerivedMaxSessionTime(t *testing.T) {
 	testTenant := "vdf"
 	cdr := utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan", Subject: "dan",
+		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan", Subject: "dan",
 		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		MediationRunId: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan"}
@@ -83,11 +83,11 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	}
 	keyCharger1 := utils.ConcatenatedKey("*out", testTenant, "call", "dan", "dan")
 	charger1 := utils.DerivedChargers{
-		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^" + utils.META_PREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^dan", SubjectField: "^dan", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^ivo", SubjectField: "^ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunId: "extra3", ReqTypeField: "^pseudoprepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		&utils.DerivedCharger{RunId: "extra3", ReqTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^rif", SubjectField: "^rif", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}
 	if err := accountingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
@@ -124,18 +124,18 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 func TestGetSessionRuns(t *testing.T) {
 	testTenant := "vdf"
 	cdr := utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "prepaid", Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan2", Subject: "dan2",
+		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan2", Subject: "dan2",
 		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		MediationRunId: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan"}
 	keyCharger1 := utils.ConcatenatedKey("*out", testTenant, "call", "dan2", "dan2")
 	dfDC := &utils.DerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 		AccountField: "*default", SubjectField: "*default", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"}
-	extra1DC := &utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "^0",
+	extra1DC := &utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^" + utils.META_PREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "^0",
 		AccountField: "^minitsboy", SubjectField: "^rif", DestinationField: "^0256", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"}
 	extra2DC := &utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 		AccountField: "^ivo", SubjectField: "^ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"}
-	extra3DC := &utils.DerivedCharger{RunId: "extra3", ReqTypeField: "^pseudoprepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "^0",
+	extra3DC := &utils.DerivedCharger{RunId: "extra3", ReqTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "^0",
 		AccountField: "^minu", SubjectField: "^rif", DestinationField: "^0256", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"}
 	charger1 := utils.DerivedChargers{extra1DC, extra2DC, extra3DC}
 	if err := accountingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {

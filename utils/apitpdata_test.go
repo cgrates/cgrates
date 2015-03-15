@@ -281,7 +281,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 				TOR:               "*voice",
 				CdrHost:           "87.139.12.167",
 				CdrSource:         "FS_JSON",
-				ReqType:           "rated",
+				ReqType:           META_RATED,
 				Direction:         "*out",
 				Tenant:            "cgrates.org",
 				Category:          "call",
@@ -302,7 +302,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 				TOR:               "*voice",
 				CdrHost:           "87.139.12.167",
 				CdrSource:         "FS_JSON",
-				ReqType:           "rated",
+				ReqType:           META_RATED,
 				Direction:         "*out",
 				Tenant:            "cgrates.org",
 				Category:          "call",
@@ -318,9 +318,9 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"CDRST1", "5", "60m", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
+		[]string{"CDRST1", "5", "60m", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", META_RATED, "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
 			"default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"},
-		[]string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
+		[]string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", META_RATED, "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
 			"default", "dan", "dan", "0;2", "STANDARD_TRIGGERS"},
 	}
 	if slc := cdrStats.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {

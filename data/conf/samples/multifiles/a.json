@@ -4,7 +4,7 @@
 // Should be the first file loaded
 
 "general": {
-	"default_reqtype": "postpaid",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+	"default_reqtype": "*postpaid",				// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 },
 
 "cdre": {

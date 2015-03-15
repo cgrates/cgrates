@@ -139,14 +139,14 @@ func TestMediPostCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cdrForm1 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
+	cdrForm1 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED}, utils.DIRECTION: []string{"*out"},
 		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"2001"}, utils.SUBJECT: []string{"2001"},
 		utils.DESTINATION: []string{"+4986517174963"},
 		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrForm2 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
+	cdrForm2 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED}, utils.DIRECTION: []string{"*out"},
 		utils.TENANT: []string{"itsyscom.com"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1003"}, utils.SUBJECT: []string{"1003"}, utils.DESTINATION: []string{"+4986517174964"},
 		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrFormData1 := url.Values{utils.TOR: []string{utils.DATA}, utils.ACCID: []string{"616350843"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"},
+	cdrFormData1 := url.Values{utils.TOR: []string{utils.DATA}, utils.ACCID: []string{"616350843"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED},
 		utils.DIRECTION: []string{"*out"}, utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"data"},
 		utils.ACCOUNT: []string{"1010"}, utils.SUBJECT: []string{"1010"}, utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"},
 		utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
@@ -174,10 +174,10 @@ func TestMediInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
+	cgrCdr1 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517174963",
 		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "10"}
-	cgrCdr2 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
+	cgrCdr2 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517173964",
 		utils.ANSWER_TIME: "2013-11-07T09:42:26Z", utils.USAGE: "20"}
 	for _, cdr := range []utils.CgrCdr{cgrCdr1, cgrCdr2} {
@@ -256,11 +256,11 @@ func TestMediatePseudoprepaid(t *testing.T) {
 	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 11 {
 		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
-	voiceCdr := &utils.StoredCdr{TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.PSEUDOPREPAID, Direction: utils.OUT,
+	voiceCdr := &utils.StoredCdr{TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PSEUDOPREPAID, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "+4986517174963",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(5) * time.Second}
-	dataCdr := &utils.StoredCdr{TOR: utils.DATA, AccId: "6163508432", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.PSEUDOPREPAID, Direction: utils.OUT,
+	dataCdr := &utils.StoredCdr{TOR: utils.DATA, AccId: "6163508432", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PSEUDOPREPAID, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "data", Account: "1003", Subject: "1003",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second}

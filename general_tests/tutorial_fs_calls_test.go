@@ -173,7 +173,7 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
-		if reply[0].ReqType != utils.PREPAID {
+		if reply[0].ReqType != utils.META_PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
 		}
 		if reply[0].Usage != "67" { // Usage as seconds
@@ -189,7 +189,7 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].ReqType != utils.RATED {
+		if reply[0].ReqType != utils.META_RATED {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
 		}
 		if reply[0].Subject != "1002" {

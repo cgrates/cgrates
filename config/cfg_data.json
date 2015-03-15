@@ -7,7 +7,7 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
-	"default_reqtype": "pseudoprepaid",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+	"default_reqtype": "*pseudoprepaid",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
 },
 
 "cdrc": {

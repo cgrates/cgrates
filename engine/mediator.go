@@ -89,7 +89,7 @@ func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*CallCost, e
 		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Usage),
 		DurationIndex: storedCdr.Usage,
 	}
-	if utils.IsSliceMember([]string{utils.PSEUDOPREPAID, utils.POSTPAID}, storedCdr.ReqType) {
+	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.PSEUDOPREPAID, utils.POSTPAID}, storedCdr.ReqType) {
 		err = self.connector.Debit(cd, cc)
 	} else {
 		err = self.connector.GetCost(cd, cc)
@@ -106,7 +106,7 @@ func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*CallCost, e
 func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 	var qryCC *CallCost
 	var errCost error
-	if storedCdr.ReqType == utils.PREPAID {
+	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
 	} else {
@@ -122,8 +122,8 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 }
 
 func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) error {
-	storedCdr.MediationRunId = utils.DEFAULT_RUNID
-	cdrRuns := []*utils.StoredCdr{storedCdr} // Start with initial storCdr, will add here all to be mediated
+	storedCdr.MediationRunId = utils.META_DEFAULT
+	cdrRuns := []*utils.StoredCdr{storedCdr}     // Start with initial storCdr, will add here all to be mediated
 	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
 		Account: storedCdr.Account, Subject: storedCdr.Subject}
 	var dcs utils.DerivedChargers
@@ -165,7 +165,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 	}
 	for _, cdr := range cdrRuns {
 		extraInfo := ""
-		if cdr.MediationRunId != utils.DEFAULT_RUNID || !cdr.Rated { // Do not rate calls which are out of default run and marked as rated already, eg premium SMSes
+		if cdr.MediationRunId != utils.META_DEFAULT || !cdr.Rated { // Do not rate calls which are out of default run and marked as rated already, eg premium SMSes
 			if err := self.rateCDR(cdr); err != nil {
 				cdr.Cost = -1.0 // If there was an error, mark the CDR as it is
 				extraInfo = err.Error()

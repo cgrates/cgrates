@@ -33,7 +33,7 @@ func TestCgrCdrInterfaces(t *testing.T) {
 }
 
 func TestCgrCdrAsStoredCdr(t *testing.T) {
-	cgrCdr := CgrCdr{TOR: VOICE, ACCID: "dsafdsaf", CDRHOST: "192.168.1.1", CDRSOURCE: "internal_test", REQTYPE: "rated", DIRECTION: "*out", TENANT: "cgrates.org", CATEGORY: "call",
+	cgrCdr := CgrCdr{TOR: VOICE, ACCID: "dsafdsaf", CDRHOST: "192.168.1.1", CDRSOURCE: "internal_test", REQTYPE: META_RATED, DIRECTION: "*out", TENANT: "cgrates.org", CATEGORY: "call",
 		ACCOUNT: "1001", SUBJECT: "1001", DESTINATION: "1002", SETUP_TIME: "2013-11-07T08:42:20Z", ANSWER_TIME: "2013-11-07T08:42:26Z", USAGE: "10",
 		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	setupTime, _ := ParseTimeDetectLayout(cgrCdr["setup_time"])

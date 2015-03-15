@@ -190,7 +190,7 @@ vdf,emptyY,*out,TOPUP_EMPTY_AT,
 `
 	cdrStats = `
 #Id,QueueLength,TimeWindow,Metrics,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
-CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,rated,*out,cgrates.org,call,dan,dan,49,5m;10m,default,rif,rif,0;2,STANDARD_TRIGGERS
+CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,5m;10m,default,rif,rif,0;2,STANDARD_TRIGGERS
 CDRST1,,,ACD,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
 CDRST1,,,ACC,,,,,,,,,,,,,,,,,
 CDRST2,10,10m,ASR,,,,,,,cgrates.org,call,,,,,,,,,
@@ -974,7 +974,7 @@ func TestLoadCdrStats(t *testing.T) {
 		TOR:               []string{utils.VOICE},
 		CdrHost:           []string{"87.139.12.167"},
 		CdrSource:         []string{"FS_JSON"},
-		ReqType:           []string{"rated"},
+		ReqType:           []string{utils.META_RATED},
 		Direction:         []string{utils.OUT},
 		Tenant:            []string{"cgrates.org"},
 		Category:          []string{"call"},

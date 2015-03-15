@@ -139,7 +139,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev utils.StoredCdr, reply *float64
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	for _, dc := range dcs {
-		if !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
+		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.META_PSEUDOPREPAID, utils.PREPAID, utils.PSEUDOPREPAID}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
 			continue
 		}
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
@@ -197,7 +197,7 @@ func (rs *Responder) GetSessionRuns(ev utils.StoredCdr, sRuns *[]*SessionRun) er
 	dcs, _ = dcs.AppendDefaultRun()
 	sesRuns := make([]*SessionRun, 0)
 	for _, dc := range dcs {
-		if ev.GetReqType(dc.ReqTypeField) != utils.PREPAID {
+		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.ReqTypeField)) {
 			continue // We only consider prepaid sessions
 		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)

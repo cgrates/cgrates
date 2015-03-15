@@ -41,7 +41,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Rounding_decimals:   utils.IntPointer(10),
 		Dbdata_encoding:     utils.StringPointer("msgpack"),
 		Tpexport_dir:        utils.StringPointer("/var/log/cgrates/tpe"),
-		Default_reqtype:     utils.StringPointer("rated"),
+		Default_reqtype:     utils.StringPointer(utils.META_RATED),
 		Default_category:    utils.StringPointer("call"),
 		Default_tenant:      utils.StringPointer("cgrates.org"),
 		Default_subject:     utils.StringPointer("cgrates")}
@@ -449,7 +449,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	eCfg := &GeneralJsonCfg{Default_reqtype: utils.StringPointer("pseudoprepaid")}
+	eCfg := &GeneralJsonCfg{Default_reqtype: utils.StringPointer(utils.META_PSEUDOPREPAID)}
 	if gCfg, err := cgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {

@@ -274,7 +274,7 @@ func TestMissingStructFieldsCorrect(t *testing.T) {
 		Account         string
 		Type            string
 		ActionTimingsId string
-	}{"bevoip.eu", "OUT", "danconns0001", "prepaid", "mama"}
+	}{"bevoip.eu", "OUT", "danconns0001", META_PREPAID, "mama"}
 	if missing := MissingStructFields(&attr,
 		[]string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
 		t.Error("Found missing field on correct struct", missing)
@@ -288,7 +288,7 @@ func TestMissingStructFieldsIncorrect(t *testing.T) {
 		Account         string
 		Type            string
 		ActionTimingsId string
-	}{Tenant: "bevoip.eu", Direction: "OUT", Account: "danconns0001", Type: "prepaid"}
+	}{Tenant: "bevoip.eu", Direction: "OUT", Account: "danconns0001", Type: META_PREPAID}
 	if missing := MissingStructFields(&attr,
 		[]string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 1 || missing[0] != "ActionTimingsId" {
 		t.Error("Found missing field on correct struct", missing)

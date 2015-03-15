@@ -37,7 +37,7 @@ func TestRecordForkCdr(t *testing.T) {
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
-	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
+	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
 		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
 	rtCdr, err := cdrc.recordToStoredCdr(cdrRow, cdrc.cdrFields[0])
 	if err != nil {
@@ -132,7 +132,7 @@ func TestDnTdmCdrs(t *testing.T) {
 			AccId:       "49773280254",
 			CdrHost:     "0.0.0.0",
 			CdrSource:   cgrConfig.CdrcSourceId,
-			ReqType:     "rated",
+			ReqType:     utils.META_RATED,
 			Direction:   "*out",
 			Tenant:      "sip.test.deanconnect.nl",
 			Category:    "call",
@@ -150,7 +150,7 @@ func TestDnTdmCdrs(t *testing.T) {
 			AccId:       "49893252121",
 			CdrHost:     "0.0.0.0",
 			CdrSource:   cgrConfig.CdrcSourceId,
-			ReqType:     "rated",
+			ReqType:     utils.META_RATED,
 			Direction:   "*out",
 			Tenant:      "sip.test.deanconnect.nl",
 			Category:    "call",
@@ -168,7 +168,7 @@ func TestDnTdmCdrs(t *testing.T) {
 			AccId:       "49497361022",
 			CdrHost:     "0.0.0.0",
 			CdrSource:   cgrConfig.CdrcSourceId,
-			ReqType:     "rated",
+			ReqType:     utils.META_RATED,
 			Direction:   "*out",
 			Tenant:      "sip.test.deanconnect.nl",
 			Category:    "call",

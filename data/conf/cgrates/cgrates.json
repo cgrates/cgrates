@@ -11,7 +11,7 @@
 //	"rounding_decimals": 10,				// system level precision for floats
 //	"dbdata_encoding": "msgpack",			// encoding used to store object data in strings: <msgpack|json>
 //	"tpexport_dir": "/var/log/cgrates/tpe",	// path towards export folder for offline Tariff Plans
-//	"default_reqtype": "rated",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+//	"default_reqtype": "*rated",			// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 //	"default_category": "call",				// default Type of Record to consider when missing from requests
 //	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 //	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests

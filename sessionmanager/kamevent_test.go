@@ -26,7 +26,7 @@ import (
 )
 
 var kamEv = KamEvent{KAM_TR_INDEX: "29223", KAM_TR_LABEL: "698469260", "callid": "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", "from_tag": "eb082607", "to_tag": "4ea9687f", "cgr_account": "dan",
-	"cgr_reqtype": "prepaid", "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com",
+	"cgr_reqtype": utils.META_PREPAID, "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com",
 	"cgr_duration": "20", "extra1": "val1", "extra2": "val2"}
 
 func TestKamailioEventInterface(t *testing.T) {
@@ -38,13 +38,13 @@ func TestNewKamEvent(t *testing.T) {
 		"callid":"46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0",
 		"from_tag":"bf71ad59",
 		"to_tag":"7351fecf",
-		"cgr_reqtype":"postpaid",
+		"cgr_reqtype":"*postpaid",
 		"cgr_account":"1001", 
 		"cgr_destination":"1002",
 		"cgr_answertime":"1419839310",
 		"cgr_duration":"3"}`
 	eKamEv := KamEvent{"event": "CGR_CALL_END", "callid": "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0", "from_tag": "bf71ad59", "to_tag": "7351fecf",
-		"cgr_reqtype": "postpaid", "cgr_account": "1001", "cgr_destination": "1002", "cgr_answertime": "1419839310", "cgr_duration": "3"}
+		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001", "cgr_destination": "1002", "cgr_answertime": "1419839310", "cgr_duration": "3"}
 	if kamEv, err := NewKamEvent([]byte(evStr)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eKamEv, kamEv) {
@@ -62,7 +62,7 @@ func TestKevAsKamAuthReply(t *testing.T) {
 }
 
 func TestKevMissingParameter(t *testing.T) {
-	kamEv := KamEvent{"event": "CGR_AUTH_REQUEST", "tr_index": "36045", "tr_label": "612369399", "cgr_reqtype": "postpaid",
+	kamEv := KamEvent{"event": "CGR_AUTH_REQUEST", "tr_index": "36045", "tr_label": "612369399", "cgr_reqtype": utils.META_POSTPAID,
 		"cgr_account": "1001", "cgr_destination": "1002"}
 	if !kamEv.MissingParameter() {
 		t.Error("Failed detecting missing parameters")
@@ -76,7 +76,7 @@ func TestKevMissingParameter(t *testing.T) {
 		t.Error("Failed detecting missing parameters")
 	}
 	kamEv = KamEvent{"event": "CGR_CALL_START", "callid": "9d28ec3ee068babdfe036623f42c0969@0:0:0:0:0:0:0:0", "from_tag": "3131b566",
-		"cgr_reqtype": "postpaid", "cgr_account": "1001", "cgr_destination": "1002"}
+		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001", "cgr_destination": "1002"}
 	if !kamEv.MissingParameter() {
 		t.Error("Failed detecting missing parameters")
 	}

@@ -42,7 +42,7 @@ func TestMfGeneralItems(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if mfCgrCfg.DefaultReqType != utils.PSEUDOPREPAID { // Twice reconfigured
+	if mfCgrCfg.DefaultReqType != utils.META_PSEUDOPREPAID { // Twice reconfigured
 		t.Error("DefaultReqType: ", mfCgrCfg.DefaultReqType)
 	}
 	if mfCgrCfg.DefaultCategory != "call" { // Not configred, should be inherited from default

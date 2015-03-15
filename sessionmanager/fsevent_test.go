@@ -236,7 +236,7 @@ variable_last_bridge_to: b7f3d830-b3a4-4e1c-b600-572eeb462c39
 variable_bridge_channel: sofia/internal/sip%3A1002%40192.168.56.1%3A5060
 variable_bridge_uuid: b7f3d830-b3a4-4e1c-b600-572eeb462c39
 variable_signal_bond: b7f3d830-b3a4-4e1c-b600-572eeb462c39
-variable_cgr_reqtype: pseudoprepaid
+variable_cgr_reqtype: *pseudoprepaid
 variable_last_sent_callee_id_name: Outbound%20Call
 variable_last_sent_callee_id_number: 1002
 variable_sip_reinvite_sdp: v%3D0%0D%0Ao%3D1003%200%201%20IN%20IP4%20192.168.56.1%0D%0As%3D-%0D%0Ac%3DIN%20IP4%20192.168.56.1%0D%0At%3D0%200%0D%0Am%3Daudio%205052%20RTP/AVP%2096%2097%2098%209%20100%20102%200%208%20103%203%20104%20101%0D%0Aa%3Dsendonly%0D%0Aa%3Drtpmap%3A96%20opus/48000/2%0D%0Aa%3Dfmtp%3A96%20usedtx%3D1%0D%0Aa%3Drtpmap%3A97%20SILK/24000%0D%0Aa%3Drtpmap%3A98%20SILK/16000%0D%0Aa%3Drtpmap%3A9%20G722/8000%0D%0Aa%3Drtpmap%3A100%20speex/32000%0D%0Aa%3Drtpmap%3A102%20speex/16000%0D%0Aa%3Drtpmap%3A0%20PCMU/8000%0D%0Aa%3Drtpmap%3A8%20PCMA/8000%0D%0Aa%3Drtpmap%3A103%20iLBC/8000%0D%0Aa%3Drtpmap%3A3%20GSM/8000%0D%0Aa%3Drtpmap%3A104%20speex/8000%0D%0Aa%3Drtpmap%3A101%20telephone-event/8000%0D%0Aa%3Dextmap%3A1%20urn%3Aietf%3Aparams%3Artp-hdrext%3Acsrc-audio-level%0D%0Aa%3Dzrtp-hash%3A1.10%20bd7a58a0a6cb4b71870cc776f1901436f82ab3c9f960b9fc9645086206a8a804%0D%0Am%3Dvideo%200%20RTP/AVP%20105%2099%0D%0A
@@ -477,7 +477,7 @@ func TestParseFsHangup(t *testing.T) {
 	setupTime, _ := ev.GetSetupTime(utils.META_DEFAULT)
 	answerTime, _ := ev.GetAnswerTime(utils.META_DEFAULT)
 	dur, _ := ev.GetDuration(utils.META_DEFAULT)
-	if ev.GetReqType(utils.META_DEFAULT) != utils.PSEUDOPREPAID ||
+	if ev.GetReqType(utils.META_DEFAULT) != utils.META_PSEUDOPREPAID ||
 		ev.GetDirection(utils.META_DEFAULT) != "*out" ||
 		ev.GetTenant(utils.META_DEFAULT) != "cgrates.org" ||
 		ev.GetCategory(utils.META_DEFAULT) != "call" ||
@@ -488,7 +488,7 @@ func TestParseFsHangup(t *testing.T) {
 		answerTime.UTC() != time.Date(2014, 4, 25, 16, 8, 40, 0, time.UTC) ||
 		dur != time.Duration(5)*time.Second {
 		t.Error("Default values not matching",
-			ev.GetReqType(utils.META_DEFAULT) != utils.PSEUDOPREPAID,
+			ev.GetReqType(utils.META_DEFAULT) != utils.META_PSEUDOPREPAID,
 			ev.GetDirection(utils.META_DEFAULT) != "*out",
 			ev.GetTenant(utils.META_DEFAULT) != "cgrates.org",
 			ev.GetCategory(utils.META_DEFAULT) != "call",
@@ -520,7 +520,7 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CDRSOURCE}); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.REQTYPE}); parsed != utils.PSEUDOPREPAID {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.REQTYPE}); parsed != utils.META_PSEUDOPREPAID {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DIRECTION}); parsed != utils.OUT {
@@ -619,7 +619,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1398442107")
 	aTime, _ := utils.ParseTimeDetectLayout("1398442120")
 	eStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("37e9b766-5256-4e4b-b1ed-3767b930fec8", setupTime.UTC().String()),
-		TOR: utils.VOICE, AccId: "37e9b766-5256-4e4b-b1ed-3767b930fec8", CdrHost: "10.0.2.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.PSEUDOPREPAID,
+		TOR: utils.VOICE, AccId: "37e9b766-5256-4e4b-b1ed-3767b930fec8", CdrHost: "10.0.2.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.META_PSEUDOPREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003",
 		Destination: "1002", SetupTime: setupTime, AnswerTime: aTime,
 		Usage: time.Duration(5) * time.Second, ExtraFields: make(map[string]string), Cost: -1}
