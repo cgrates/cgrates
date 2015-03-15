@@ -163,7 +163,7 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*utils.CgrCdrOut
+	var reply []*utils.CgrExtCdr
 	req := utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -176,7 +176,7 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 		if reply[0].ReqType != utils.PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
 		}
-		if reply[0].Usage != 67.0 { // Usage as seconds
+		if reply[0].Usage != "67" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Cost != 0.0159 {
@@ -191,6 +191,9 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 	} else {
 		if reply[0].ReqType != utils.RATED {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		}
+		if reply[0].Subject != "1002" {
+			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
 		}
 		if reply[0].Cost != 0.3059 {
 			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])

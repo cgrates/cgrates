@@ -115,9 +115,9 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 	case DESTINATION:
 		return rsrFld.ParseValue(storedCdr.Destination)
 	case SETUP_TIME:
-		return rsrFld.ParseValue(storedCdr.SetupTime.String())
+		return rsrFld.ParseValue(storedCdr.SetupTime.Format(time.RFC3339))
 	case ANSWER_TIME:
-		return rsrFld.ParseValue(storedCdr.AnswerTime.String())
+		return rsrFld.ParseValue(storedCdr.AnswerTime.Format(time.RFC3339))
 	case USAGE:
 		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
 	case MEDI_RUNID:
@@ -174,8 +174,8 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v.Set(ACCOUNT, storedCdr.Account)
 	v.Set(SUBJECT, storedCdr.Subject)
 	v.Set(DESTINATION, storedCdr.Destination)
-	v.Set(SETUP_TIME, storedCdr.SetupTime.String())
-	v.Set(ANSWER_TIME, storedCdr.AnswerTime.String())
+	v.Set(SETUP_TIME, storedCdr.SetupTime.Format(time.RFC3339))
+	v.Set(ANSWER_TIME, storedCdr.AnswerTime.Format(time.RFC3339))
 	v.Set(USAGE, storedCdr.FormatUsage(SECONDS))
 	return v
 }
@@ -305,8 +305,8 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	return frkStorCdr, nil
 }
 
-func (storedCdr *StoredCdr) AsCgrCdrOut() *CgrCdrOut {
-	return &CgrCdrOut{CgrId: storedCdr.CgrId,
+func (storedCdr *StoredCdr) AsCgrExtCdr() *CgrExtCdr {
+	return &CgrExtCdr{CgrId: storedCdr.CgrId,
 		OrderId:        storedCdr.OrderId,
 		TOR:            storedCdr.TOR,
 		AccId:          storedCdr.AccId,
@@ -319,9 +319,9 @@ func (storedCdr *StoredCdr) AsCgrCdrOut() *CgrCdrOut {
 		Account:        storedCdr.Account,
 		Subject:        storedCdr.Subject,
 		Destination:    storedCdr.Destination,
-		SetupTime:      storedCdr.SetupTime,
-		AnswerTime:     storedCdr.AnswerTime,
-		Usage:          storedCdr.Usage.Seconds(),
+		SetupTime:      storedCdr.SetupTime.Format(time.RFC3339),
+		AnswerTime:     storedCdr.AnswerTime.Format(time.RFC3339),
+		Usage:          storedCdr.FormatUsage(SECONDS),
 		ExtraFields:    storedCdr.ExtraFields,
 		MediationRunId: storedCdr.MediationRunId,
 		RatedAccount:   storedCdr.RatedAccount,
@@ -481,7 +481,7 @@ func (storedCdr *StoredCdr) String() string {
 	return string(mrsh)
 }
 
-type CgrCdrOut struct {
+type CgrExtCdr struct {
 	CgrId          string
 	OrderId        int64
 	TOR            string
@@ -495,9 +495,9 @@ type CgrCdrOut struct {
 	Account        string
 	Subject        string
 	Destination    string
-	SetupTime      time.Time
-	AnswerTime     time.Time
-	Usage          float64
+	SetupTime      string
+	AnswerTime     string
+	Usage          string
 	ExtraFields    map[string]string
 	MediationRunId string
 	RatedAccount   string

@@ -155,7 +155,7 @@ func TestV2CdrsMysqlGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply []*utils.StoredCdr
+	var reply []*utils.CgrExtCdr
 	req := utils.RpcCdrsFilter{}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())

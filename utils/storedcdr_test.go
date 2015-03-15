@@ -47,8 +47,8 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&RSRField{Id: ACCOUNT}) != cdr.Account ||
 		cdr.FieldAsString(&RSRField{Id: SUBJECT}) != cdr.Subject ||
 		cdr.FieldAsString(&RSRField{Id: DESTINATION}) != cdr.Destination ||
-		cdr.FieldAsString(&RSRField{Id: SETUP_TIME}) != cdr.SetupTime.String() ||
-		cdr.FieldAsString(&RSRField{Id: ANSWER_TIME}) != cdr.AnswerTime.String() ||
+		cdr.FieldAsString(&RSRField{Id: SETUP_TIME}) != cdr.SetupTime.Format(time.RFC3339) ||
+		cdr.FieldAsString(&RSRField{Id: ANSWER_TIME}) != cdr.AnswerTime.Format(time.RFC3339) ||
 		cdr.FieldAsString(&RSRField{Id: USAGE}) != "10" ||
 		cdr.FieldAsString(&RSRField{Id: MEDI_RUNID}) != cdr.MediationRunId ||
 		cdr.FieldAsString(&RSRField{Id: COST}) != "1.01" ||
@@ -70,8 +70,8 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&RSRField{Id: ACCOUNT}) != cdr.Account,
 			cdr.FieldAsString(&RSRField{Id: SUBJECT}) != cdr.Subject,
 			cdr.FieldAsString(&RSRField{Id: DESTINATION}) != cdr.Destination,
-			cdr.FieldAsString(&RSRField{Id: SETUP_TIME}) != cdr.SetupTime.String(),
-			cdr.FieldAsString(&RSRField{Id: ANSWER_TIME}) != cdr.AnswerTime.String(),
+			cdr.FieldAsString(&RSRField{Id: SETUP_TIME}) != cdr.SetupTime.Format(time.RFC3339),
+			cdr.FieldAsString(&RSRField{Id: ANSWER_TIME}) != cdr.AnswerTime.Format(time.RFC3339),
 			cdr.FieldAsString(&RSRField{Id: USAGE}) != "10",
 			cdr.FieldAsString(&RSRField{Id: MEDI_RUNID}) != cdr.MediationRunId,
 			cdr.FieldAsString(&RSRField{Id: RATED_ACCOUNT}) != "dan",
@@ -283,11 +283,11 @@ func TestStoredCdrAsHttpForm(t *testing.T) {
 	if cdrForm.Get(DESTINATION) != "1002" {
 		t.Errorf("Expected: %s, received: %s", "1002", cdrForm.Get(DESTINATION))
 	}
-	if cdrForm.Get(SETUP_TIME) != "2013-11-07 08:42:20 +0000 UTC" {
-		t.Errorf("Expected: %s, received: %s", "2013-11-07 08:42:20 +0000 UTC", cdrForm.Get(SETUP_TIME))
+	if cdrForm.Get(SETUP_TIME) != "2013-11-07T08:42:20Z" {
+		t.Errorf("Expected: %s, received: %s", "2013-11-07T08:42:20Z", cdrForm.Get(SETUP_TIME))
 	}
-	if cdrForm.Get(ANSWER_TIME) != "2013-11-07 08:42:26 +0000 UTC" {
-		t.Errorf("Expected: %s, received: %s", "2013-11-07 08:42:26 +0000 UTC", cdrForm.Get(ANSWER_TIME))
+	if cdrForm.Get(ANSWER_TIME) != "2013-11-07T08:42:26Z" {
+		t.Errorf("Expected: %s, received: %s", "2013-11-07T08:42:26Z", cdrForm.Get(ANSWER_TIME))
 	}
 	if cdrForm.Get(USAGE) != "10" {
 		t.Errorf("Expected: %s, received: %s", "10", cdrForm.Get(USAGE))
@@ -388,18 +388,18 @@ func TestStoredCdrForkCdrFromMetaDefaults(t *testing.T) {
 	}
 }
 
-func TestStoredCdrAsCgrCdrOut(t *testing.T) {
+func TestStoredCdrAsCgrExtCdr(t *testing.T) {
 	storCdr := StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 		CdrSource: UNIT_TEST, ReqType: "rated", Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
 		Usage: time.Duration(10), ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
 	}
-	expectOutCdr := &CgrCdrOut{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+	expectOutCdr := &CgrExtCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 		CdrSource: UNIT_TEST, ReqType: "rated", Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
-		Usage: 0.00000001, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
+		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", MediationRunId: DEFAULT_RUNID,
+		Usage: "0.00000001", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
 	}
-	if cdrOut := storCdr.AsCgrCdrOut(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
+	if cdrOut := storCdr.AsCgrExtCdr(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
 		t.Errorf("Expected: %+v, received: %+v", expectOutCdr, cdrOut)
 	}
 }

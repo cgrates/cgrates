@@ -149,7 +149,7 @@ func TestV2CdrsPsqlGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply []*utils.StoredCdr
+	var reply []*utils.CgrExtCdr
 	req := utils.RpcCdrsFilter{}
 	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
