@@ -109,6 +109,7 @@ const CGRATES_CFG_JSON = `
 	"rater": "internal",					// address where to reach the Rater: <internal|x.y.z.y:1234>
 	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering out of mediated CDRs <""|internal|x.y.z.y:1234>
 	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	"cdr_replication":[],					// replicate the rated CDR to a number of servers
 },
 
 

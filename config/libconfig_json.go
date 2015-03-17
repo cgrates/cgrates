@@ -74,13 +74,20 @@ type CdrsJsonCfg struct {
 	Store_disable *bool
 }
 
+type CdrReplicationJsonCfg struct {
+	Transport   *string
+	Server      *string
+	Synchronous *bool
+}
+
 // Mediator config section
 type MediatorJsonCfg struct {
-	Enabled       *bool
-	Reconnects    *int
-	Rater         *string
-	Cdrstats      *string
-	Store_disable *bool
+	Enabled         *bool
+	Reconnects      *int
+	Rater           *string
+	Cdrstats        *string
+	Store_disable   *bool
+	Cdr_replication *[]*CdrReplicationJsonCfg
 }
 
 // Cdrstats config section

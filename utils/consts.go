@@ -171,6 +171,8 @@ const (
 	FILLER                       = "filler"
 	METATAG                      = "metatag"
 	HTTP_POST                    = "http_post"
+	META_HTTP_POST               = "*http_post"
+	META_HTTP_JSONRPC            = "*http_jsonrpc"
 	NANO_MULTIPLIER              = 1000000000
 	CGR_AUTHORIZE                = "CGR_AUTHORIZE"
 	CONFIG_DIR                   = "/etc/cgrates"
