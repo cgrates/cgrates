@@ -468,15 +468,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnCdrsCfg.Cdr_replication != nil {
 			for idx, rplJsonCfg := range *jsnCdrsCfg.Cdr_replication {
-				self.MediCdrReplication[idx] = new(CdrReplicationCfg)
+				self.CDRSCdrReplication[idx] = new(CdrReplicationCfg)
 				if rplJsonCfg.Transport != nil {
-					self.MediCdrReplication[idx].Transport = *rplJsonCfg.Transport
+					self.CDRSCdrReplication[idx].Transport = *rplJsonCfg.Transport
 				}
 				if rplJsonCfg.Server != nil {
-					self.MediCdrReplication[idx].Server = *rplJsonCfg.Server
+					self.CDRSCdrReplication[idx].Server = *rplJsonCfg.Server
 				}
 				if rplJsonCfg.Synchronous != nil {
-					self.MediCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
+					self.CDRSCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
 				}
 			}
 		}
