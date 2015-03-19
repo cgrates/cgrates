@@ -183,13 +183,14 @@ type CGRConfig struct {
 	RaterBalancer        string        // balancer address host:port
 	BalancerEnabled      bool
 	SchedulerEnabled     bool
-	CDRSEnabled          bool              // Enable CDR Server service
-	CDRSExtraFields      []*utils.RSRField // Extra fields to store in CDRs
-	CDRSMediator         string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CDRSStats            string            // Address where to reach the Mediator. <""|intenal>
-	CDRSStoreDisable     bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	CDRStatsEnabled      bool              // Enable CDR Stats service
-	CDRStatConfig        *CdrStatsConfig   // Active cdr stats configuration instances, platform level
+	CDRSEnabled          bool                 // Enable CDR Server service
+	CDRSExtraFields      []*utils.RSRField    // Extra fields to store in CDRs
+	CDRSMediator         string               // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CDRSStats            string               // Address where to reach the Mediator. <""|intenal>
+	CDRSStoreDisable     bool                 // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
+	CDRStatsEnabled      bool                 // Enable CDR Stats service
+	CDRStatConfig        *CdrStatsConfig      // Active cdr stats configuration instances, platform level
 	CdreProfiles         map[string]*CdreConfig
 	CdrcProfiles         map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
 	SmFsConfig           *SmFsConfig                       // SM-FreeSWITCH configuration
@@ -200,6 +201,7 @@ type CGRConfig struct {
 	MediatorRater        string
 	MediatorStats        string                   // Address where to reach the Rater: <internal|x.y.z.y:1234>
 	MediatorStoreDisable bool                     // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	MediCdrReplication   []*CdrReplicationCfg     // Replicate CDRs to a number of servers
 	HistoryAgentEnabled  bool                     // Starts History as an agent: <true|false>.
 	HistoryServer        string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled bool                     // Starts History as server: <true|false>.
@@ -464,6 +466,20 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnCdrsCfg.Store_disable != nil {
 			self.CDRSStoreDisable = *jsnCdrsCfg.Store_disable
 		}
+		if jsnCdrsCfg.Cdr_replication != nil {
+			for idx, rplJsonCfg := range *jsnCdrsCfg.Cdr_replication {
+				self.MediCdrReplication[idx] = new(CdrReplicationCfg)
+				if rplJsonCfg.Transport != nil {
+					self.MediCdrReplication[idx].Transport = *rplJsonCfg.Transport
+				}
+				if rplJsonCfg.Server != nil {
+					self.MediCdrReplication[idx].Server = *rplJsonCfg.Server
+				}
+				if rplJsonCfg.Synchronous != nil {
+					self.MediCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
+				}
+			}
+		}
 	}
 	if jsnCdrstatsCfg != nil {
 		if jsnCdrstatsCfg.Enabled != nil {
@@ -544,6 +560,20 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnMediatorCfg.Store_disable != nil {
 			self.MediatorStoreDisable = *jsnMediatorCfg.Store_disable
+		}
+		if jsnMediatorCfg.Cdr_replication != nil {
+			for idx, rplJsonCfg := range *jsnMediatorCfg.Cdr_replication {
+				self.MediCdrReplication[idx] = new(CdrReplicationCfg)
+				if rplJsonCfg.Transport != nil {
+					self.MediCdrReplication[idx].Transport = *rplJsonCfg.Transport
+				}
+				if rplJsonCfg.Server != nil {
+					self.MediCdrReplication[idx].Server = *rplJsonCfg.Server
+				}
+				if rplJsonCfg.Synchronous != nil {
+					self.MediCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
+				}
+			}
 		}
 	}
 

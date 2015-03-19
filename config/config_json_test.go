@@ -137,11 +137,12 @@ func TestDfSchedulerJsonCfg(t *testing.T) {
 
 func TestDfCdrsJsonCfg(t *testing.T) {
 	eCfg := &CdrsJsonCfg{
-		Enabled:       utils.BoolPointer(false),
-		Extra_fields:  utils.StringSlicePointer([]string{}),
-		Mediator:      utils.StringPointer(""),
-		Cdrstats:      utils.StringPointer(""),
-		Store_disable: utils.BoolPointer(false),
+		Enabled:         utils.BoolPointer(false),
+		Extra_fields:    utils.StringSlicePointer([]string{}),
+		Mediator:        utils.StringPointer(""),
+		Cdrstats:        utils.StringPointer(""),
+		Store_disable:   utils.BoolPointer(false),
+		Cdr_replication: &[]*CdrReplicationJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)

@@ -100,6 +100,7 @@ const CGRATES_CFG_JSON = `
 	"mediator": "",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering from raw CDRs <""|internal|x.y.z.y:1234>
 	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	"cdr_replication":[],					// replicate the raw CDR to a number of servers
 },
 
 

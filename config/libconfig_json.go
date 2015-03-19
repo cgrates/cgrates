@@ -67,11 +67,12 @@ type SchedulerJsonCfg struct {
 
 // Cdrs config section
 type CdrsJsonCfg struct {
-	Enabled       *bool
-	Extra_fields  *[]string
-	Mediator      *string
-	Cdrstats      *string
-	Store_disable *bool
+	Enabled         *bool
+	Extra_fields    *[]string
+	Mediator        *string
+	Cdrstats        *string
+	Store_disable   *bool
+	Cdr_replication *[]*CdrReplicationJsonCfg
 }
 
 type CdrReplicationJsonCfg struct {
