@@ -160,7 +160,7 @@ func TestCDRStatsLclPostCdrs(t *testing.T) {
 		},
 	}
 	for _, storedCdr := range storedCdrs {
-		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", "127.0.0.1:2080"), storedCdr.AsHttpForm()); err != nil {
+		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", "127.0.0.1:2080"), storedCdr.AsHttpForm()); err != nil {
 			t.Error(err.Error())
 		}
 	}

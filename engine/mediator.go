@@ -180,9 +180,12 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 		if sendToStats && self.stats != nil { // We send to stats only after saving to db since there are chances we cannot store and then no way to reproduce stats offline
 			go func(cdr *utils.StoredCdr) { // Pass it by value since the variable will be overwritten by for
 				if err := self.stats.AppendCDR(cdr, nil); err != nil {
-					Logger.Err(fmt.Sprintf("Could not append cdr to stats (mediator): %s", err.Error()))
+					Logger.Err(fmt.Sprintf("<Mediator> Could not append cdr to stats: %s", err.Error()))
 				}
 			}(cdr)
+		}
+		if cfg.MediCdrReplication != nil {
+			replicateCdr(cdr, cfg.MediCdrReplication)
 		}
 	}
 	return nil

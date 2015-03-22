@@ -152,7 +152,7 @@ func TestMediPostCdrs(t *testing.T) {
 		utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2, cdrFormData1} {
 		cdrForm.Set(utils.CDRSOURCE, TEST_SQL)
-		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cgrCfg.HTTPListen), cdrForm); err != nil {
+		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", cgrCfg.HTTPListen), cdrForm); err != nil {
 			t.Error(err.Error())
 		}
 	}
@@ -266,7 +266,7 @@ func TestMediatePseudoprepaid(t *testing.T) {
 		Usage: time.Duration(10) * time.Second}
 	for _, cdrForm := range []url.Values{voiceCdr.AsHttpForm(), dataCdr.AsHttpForm()} {
 		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
-		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cfg.HTTPListen), cdrForm); err != nil {
+		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", cfg.HTTPListen), cdrForm); err != nil {
 			t.Error(err.Error())
 		}
 	}

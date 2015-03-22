@@ -1,0 +1,22 @@
+{
+// CGRateS Configuration file
+//
+// Used in apier_local_tests
+// Starts rater, cdrs and mediator connecting over internal channel
+
+"listen": {
+	"rpc_json": "127.0.0.1:12012",			// RPC JSON listening address
+	"rpc_gob": "127.0.0.1:12013",			// RPC GOB listening address
+	"http": "127.0.0.1:12080",				// HTTP listening address
+},
+
+"rater": {
+	"enabled": true,						// enable Rater service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	
+},
+
+}

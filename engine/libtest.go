@@ -69,7 +69,6 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	if err != nil {
 		return nil, err
 	}
-	KillEngine(waitEngine)
 	engine := exec.Command(enginePath, "-config_dir", cfgPath)
 	if err := engine.Start(); err != nil {
 		return nil, err
@@ -84,6 +83,11 @@ func KillEngine(waitEngine int) error {
 	}
 	time.Sleep(time.Duration(waitEngine) * time.Millisecond)
 	return nil
+}
+
+func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
+	KillEngine(waitEngine)
+	return StartEngine(cfgPath, waitEngine)
 }
 
 func LoadTariffPlanFromFolder(tpPath string, ratingDb RatingStorage, accountingDb AccountingStorage) error {

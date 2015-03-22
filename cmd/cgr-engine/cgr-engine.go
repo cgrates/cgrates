@@ -98,7 +98,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		var err error
 
 		for i := 0; i < cfg.MediatorReconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, 0, cfg.MediatorReconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, cfg.MediatorReconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -154,7 +154,7 @@ func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, 
 	} else {
 		var err error
 		for i := 0; i < cfg.SmFsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Rater, 0, cfg.SmFsConfig.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Rater, cfg.SmFsConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -169,7 +169,7 @@ func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, 
 		cdrsConn = responder
 	} else if len(cfg.SmFsConfig.Cdrs) != 0 {
 		for i := 0; i < cfg.SmFsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Cdrs, 0, cfg.SmFsConfig.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Cdrs, cfg.SmFsConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -198,7 +198,7 @@ func startSmKamailio(responder *engine.Responder, loggerDb engine.LogStorage, ca
 	} else {
 		var err error
 		for i := 0; i < cfg.SmKamConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Rater, 0, cfg.SmKamConfig.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Rater, cfg.SmKamConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -217,7 +217,7 @@ func startSmKamailio(responder *engine.Responder, loggerDb engine.LogStorage, ca
 		cdrsConn = responder
 	} else if len(cfg.SmKamConfig.Cdrs) != 0 {
 		for i := 0; i < cfg.SmKamConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Cdrs, 0, cfg.SmKamConfig.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Cdrs, cfg.SmKamConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -246,7 +246,7 @@ func startSmOpenSIPS(responder *engine.Responder, loggerDb engine.LogStorage, ca
 	} else {
 		var err error
 		for i := 0; i < cfg.SmOsipsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Rater, 0, cfg.SmOsipsConfig.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Rater, cfg.SmOsipsConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -265,7 +265,7 @@ func startSmOpenSIPS(responder *engine.Responder, loggerDb engine.LogStorage, ca
 		cdrsConn = responder
 	} else if len(cfg.SmOsipsConfig.Cdrs) != 0 {
 		for i := 0; i < cfg.SmOsipsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Cdrs, 0, cfg.SmOsipsConfig.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Cdrs, cfg.SmOsipsConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}

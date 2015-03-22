@@ -247,7 +247,7 @@ func (self *Cdrc) processFile(filePath string) error {
 					continue
 				}
 			} else { // CDRs listening on IP
-				if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cdrsAddress), storedCdr.AsHttpForm()); err != nil {
+				if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", self.cdrsAddress), storedCdr.AsHttpForm()); err != nil {
 					engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
 					continue
 				}

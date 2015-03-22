@@ -467,6 +467,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.CDRSStoreDisable = *jsnCdrsCfg.Store_disable
 		}
 		if jsnCdrsCfg.Cdr_replication != nil {
+			self.CDRSCdrReplication = make([]*CdrReplicationCfg, len(*jsnCdrsCfg.Cdr_replication))
 			for idx, rplJsonCfg := range *jsnCdrsCfg.Cdr_replication {
 				self.CDRSCdrReplication[idx] = new(CdrReplicationCfg)
 				if rplJsonCfg.Transport != nil {
@@ -562,6 +563,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.MediatorStoreDisable = *jsnMediatorCfg.Store_disable
 		}
 		if jsnMediatorCfg.Cdr_replication != nil {
+			self.MediCdrReplication = make([]*CdrReplicationCfg, len(*jsnMediatorCfg.Cdr_replication))
 			for idx, rplJsonCfg := range *jsnMediatorCfg.Cdr_replication {
 				self.MediCdrReplication[idx] = new(CdrReplicationCfg)
 				if rplJsonCfg.Transport != nil {

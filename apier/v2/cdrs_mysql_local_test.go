@@ -99,7 +99,7 @@ func TestV2CdrsMysqlStartEngine(t *testing.T) {
 		return
 	}
 	var err error
-	if cmdEngineCdrsMysql, err = engine.StartEngine(cdrsCfgPath, *waitRater); err != nil {
+	if cmdEngineCdrsMysql, err = engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }

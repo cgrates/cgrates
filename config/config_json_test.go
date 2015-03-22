@@ -464,7 +464,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 		Cdrstats:      utils.StringPointer(""),
 		Store_disable: utils.BoolPointer(false),
 		Cdr_replication: &[]*CdrReplicationJsonCfg{
-			&CdrReplicationJsonCfg{Transport: utils.StringPointer(utils.META_HTTP_POST), Server: utils.StringPointer("1.2.3.4:2080")},
+			&CdrReplicationJsonCfg{Transport: utils.StringPointer(utils.META_HTTP_POST), Server: utils.StringPointer("1.2.3.4:2080/cdr_post")},
 			&CdrReplicationJsonCfg{Transport: utils.StringPointer(utils.META_HTTP_JSONRPC), Server: utils.StringPointer("2.3.4.5:2080/jsonrpc"), Synchronous: utils.BoolPointer(true)},
 		},
 	}
