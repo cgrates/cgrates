@@ -35,14 +35,14 @@ var (
 )
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
-func storeAndMediate(storedCdr *utils.StoredCdr) error {
+func storeAndMediate(storedCdr *StoredCdr) error {
 	if !cfg.CDRSStoreDisable {
 		if err := storage.SetCdr(storedCdr); err != nil {
 			return err
 		}
 	}
 	if stats != nil {
-		go func(storedCdr *utils.StoredCdr) {
+		go func(storedCdr *StoredCdr) {
 			if err := stats.AppendCDR(storedCdr, nil); err != nil {
 				Logger.Err(fmt.Sprintf("<CDRS> Could not append cdr to stats: %s", err.Error()))
 			}
@@ -52,7 +52,7 @@ func storeAndMediate(storedCdr *utils.StoredCdr) error {
 		replicateCdr(storedCdr, cfg.CDRSCdrReplication)
 	}
 	if cfg.CDRSMediator == utils.INTERNAL {
-		go func(storedCdr *utils.StoredCdr) {
+		go func(storedCdr *StoredCdr) {
 			if err := medi.RateCdr(storedCdr, true); err != nil {
 				Logger.Err(fmt.Sprintf("<CDRS> Could not run mediation on CDR: %s", err.Error()))
 			}
@@ -62,13 +62,13 @@ func storeAndMediate(storedCdr *utils.StoredCdr) error {
 }
 
 // ToDo: Add websocket support
-func replicateCdr(cdr *utils.StoredCdr, replCfgs []*config.CdrReplicationCfg) error {
+func replicateCdr(cdr *StoredCdr, replCfgs []*config.CdrReplicationCfg) error {
 	for _, rplCfg := range replCfgs {
 		switch rplCfg.Transport {
 		case utils.META_HTTP_POST:
 			httpClient := new(http.Client)
 			errChan := make(chan error)
-			go func(cdr *utils.StoredCdr, rplCfg *config.CdrReplicationCfg, errChan chan error) {
+			go func(cdr *StoredCdr, rplCfg *config.CdrReplicationCfg, errChan chan error) {
 				if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", rplCfg.Server), cdr.AsHttpForm()); err != nil {
 					Logger.Err(fmt.Sprintf("<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
 					errChan <- err
@@ -85,7 +85,7 @@ func replicateCdr(cdr *utils.StoredCdr, replCfgs []*config.CdrReplicationCfg) er
 
 // Handler for generic cgr cdr http
 func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
-	cgrCdr, err := utils.NewCgrCdrFromHttpReq(r)
+	cgrCdr, err := NewCgrCdrFromHttpReq(r)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 	}
@@ -134,6 +134,6 @@ func (cdrs *CDRS) RegisterHanlersToServer(server *Server) {
 }
 
 // Used to internally process CDR
-func (cdrs *CDRS) ProcessCdr(cdr *utils.StoredCdr) error {
+func (cdrs *CDRS) ProcessCdr(cdr *StoredCdr) error {
 	return storeAndMediate(cdr)
 }

@@ -30,7 +30,7 @@ import (
 type StatsInterface interface {
 	GetValues(string, *map[string]float64) error
 	GetQueueIds(int, *[]string) error
-	AppendCDR(*utils.StoredCdr, *int) error
+	AppendCDR(*StoredCdr, *int) error
 	AddQueue(*CdrStats, *int) error
 	ReloadQueues([]string, *int) error
 	ResetQueues([]string, *int) error
@@ -163,7 +163,7 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	return nil
 }
 
-func (s *Stats) AppendCDR(cdr *utils.StoredCdr, out *int) error {
+func (s *Stats) AppendCDR(cdr *StoredCdr, out *int) error {
 	s.mux.RLock()
 	defer s.mux.RUnlock()
 	for _, sq := range s.queues {
@@ -189,7 +189,7 @@ func (ps *ProxyStats) GetValues(sqID string, values *map[string]float64) error {
 	return ps.Client.Call("Stats.GetValues", sqID, values)
 }
 
-func (ps *ProxyStats) AppendCDR(cdr *utils.StoredCdr, out *int) error {
+func (ps *ProxyStats) AppendCDR(cdr *StoredCdr, out *int) error {
 	return ps.Client.Call("Stats.AppendCDR", cdr, out)
 }
 

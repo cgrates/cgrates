@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package engine
 
 import (
 	"encoding/json"
@@ -27,6 +27,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Kinda standard of internal CDR, complies to CDR interface also
@@ -52,18 +54,18 @@ type StoredCdr struct {
 	RatedAccount   string // Populated out of rating data
 	RatedSubject   string
 	Cost           float64
-	//CostDetails    *CallCost
-	Rated bool // Mark the CDR as rated so we do not process it during mediation
+	CostDetails    *CallCost // Attach the cost details to CDR when possible
+	Rated          bool      // Mark the CDR as rated so we do not process it during mediation
 }
 
 // Used to multiply usage on export
 func (storedCdr *StoredCdr) UsageMultiply(multiplyFactor float64, roundDecimals int) {
-	storedCdr.Usage = time.Duration(int(Round(float64(storedCdr.Usage.Nanoseconds())*multiplyFactor, roundDecimals, ROUNDING_MIDDLE))) // Rounding down could introduce a slight loss here but only at nanoseconds level
+	storedCdr.Usage = time.Duration(int(utils.Round(float64(storedCdr.Usage.Nanoseconds())*multiplyFactor, roundDecimals, utils.ROUNDING_MIDDLE))) // Rounding down could introduce a slight loss here but only at nanoseconds level
 }
 
 // Used to multiply cost on export
 func (storedCdr *StoredCdr) CostMultiply(multiplyFactor float64, roundDecimals int) {
-	storedCdr.Cost = Round(storedCdr.Cost*multiplyFactor, roundDecimals, ROUNDING_MIDDLE)
+	storedCdr.Cost = utils.Round(storedCdr.Cost*multiplyFactor, roundDecimals, utils.ROUNDING_MIDDLE)
 }
 
 // Format cost as string on export
@@ -77,8 +79,8 @@ func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string 
 
 // Formats usage on export
 func (storedCdr *StoredCdr) FormatUsage(layout string) string {
-	if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
-		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
+	if utils.IsSliceMember([]string{utils.DATA, utils.SMS}, storedCdr.TOR) {
+		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	}
 	switch layout {
 	default:
@@ -87,64 +89,64 @@ func (storedCdr *StoredCdr) FormatUsage(layout string) string {
 }
 
 // Used to retrieve fields as string, primary fields are const labeled
-func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
+func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 	switch rsrFld.Id {
-	case CGRID:
+	case utils.CGRID:
 		return rsrFld.ParseValue(storedCdr.CgrId)
-	case ORDERID:
+	case utils.ORDERID:
 		return rsrFld.ParseValue(strconv.FormatInt(storedCdr.OrderId, 10))
-	case TOR:
+	case utils.TOR:
 		return rsrFld.ParseValue(storedCdr.TOR)
-	case ACCID:
+	case utils.ACCID:
 		return rsrFld.ParseValue(storedCdr.AccId)
-	case CDRHOST:
+	case utils.CDRHOST:
 		return rsrFld.ParseValue(storedCdr.CdrHost)
-	case CDRSOURCE:
+	case utils.CDRSOURCE:
 		return rsrFld.ParseValue(storedCdr.CdrSource)
-	case REQTYPE:
+	case utils.REQTYPE:
 		return rsrFld.ParseValue(storedCdr.ReqType)
-	case DIRECTION:
+	case utils.DIRECTION:
 		return rsrFld.ParseValue(storedCdr.Direction)
-	case TENANT:
+	case utils.TENANT:
 		return rsrFld.ParseValue(storedCdr.Tenant)
-	case CATEGORY:
+	case utils.CATEGORY:
 		return rsrFld.ParseValue(storedCdr.Category)
-	case ACCOUNT:
+	case utils.ACCOUNT:
 		return rsrFld.ParseValue(storedCdr.Account)
-	case SUBJECT:
+	case utils.SUBJECT:
 		return rsrFld.ParseValue(storedCdr.Subject)
-	case DESTINATION:
+	case utils.DESTINATION:
 		return rsrFld.ParseValue(storedCdr.Destination)
-	case SETUP_TIME:
+	case utils.SETUP_TIME:
 		return rsrFld.ParseValue(storedCdr.SetupTime.Format(time.RFC3339))
-	case ANSWER_TIME:
+	case utils.ANSWER_TIME:
 		return rsrFld.ParseValue(storedCdr.AnswerTime.Format(time.RFC3339))
-	case USAGE:
-		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
-	case MEDI_RUNID:
+	case utils.USAGE:
+		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(storedCdr.MediationRunId)
-	case RATED_ACCOUNT:
+	case utils.RATED_ACCOUNT:
 		return rsrFld.ParseValue(storedCdr.RatedAccount)
-	case RATED_SUBJECT:
+	case utils.RATED_SUBJECT:
 		return rsrFld.ParseValue(storedCdr.RatedSubject)
-	case COST:
+	case utils.COST:
 		return rsrFld.ParseValue(strconv.FormatFloat(storedCdr.Cost, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
 		return rsrFld.ParseValue(storedCdr.ExtraFields[rsrFld.Id])
 	}
 }
 
-func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *RSRField) (bool, string) {
+func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string) {
 	if fieldFilter == nil {
 		return true, ""
 	}
-	if fieldFilter.IsStatic() && storedCdr.FieldAsString(&RSRField{Id: fieldFilter.Id}) == storedCdr.FieldAsString(fieldFilter) {
-		return true, storedCdr.FieldAsString(&RSRField{Id: fieldFilter.Id})
+	if fieldFilter.IsStatic() && storedCdr.FieldAsString(&utils.RSRField{Id: fieldFilter.Id}) == storedCdr.FieldAsString(fieldFilter) {
+		return true, storedCdr.FieldAsString(&utils.RSRField{Id: fieldFilter.Id})
 	}
-	preparedFilter := &RSRField{Id: fieldFilter.Id, RSRules: make([]*ReSearchReplace, len(fieldFilter.RSRules))} // Reset rules so they do not point towards same structures as original fieldFilter
+	preparedFilter := &utils.RSRField{Id: fieldFilter.Id, RSRules: make([]*utils.ReSearchReplace, len(fieldFilter.RSRules))} // Reset rules so they do not point towards same structures as original fieldFilter
 	for idx := range fieldFilter.RSRules {
 		// Hardcode the template with maximum of 5 groups ordered
-		preparedFilter.RSRules[idx] = &ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: FILTER_REGEXP_TPL}
+		preparedFilter.RSRules[idx] = &utils.ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: utils.FILTER_REGEXP_TPL}
 	}
 	preparedVal := storedCdr.FieldAsString(preparedFilter)
 	filteredValue := storedCdr.FieldAsString(fieldFilter)
@@ -164,85 +166,85 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	for fld, val := range storedCdr.ExtraFields {
 		v.Set(fld, val)
 	}
-	v.Set(TOR, storedCdr.TOR)
-	v.Set(ACCID, storedCdr.AccId)
-	v.Set(CDRHOST, storedCdr.CdrHost)
-	v.Set(CDRSOURCE, storedCdr.CdrSource)
-	v.Set(REQTYPE, storedCdr.ReqType)
-	v.Set(DIRECTION, storedCdr.Direction)
-	v.Set(TENANT, storedCdr.Tenant)
-	v.Set(CATEGORY, storedCdr.Category)
-	v.Set(ACCOUNT, storedCdr.Account)
-	v.Set(SUBJECT, storedCdr.Subject)
-	v.Set(DESTINATION, storedCdr.Destination)
-	v.Set(SETUP_TIME, storedCdr.SetupTime.Format(time.RFC3339))
-	v.Set(ANSWER_TIME, storedCdr.AnswerTime.Format(time.RFC3339))
-	v.Set(USAGE, storedCdr.FormatUsage(SECONDS))
+	v.Set(utils.TOR, storedCdr.TOR)
+	v.Set(utils.ACCID, storedCdr.AccId)
+	v.Set(utils.CDRHOST, storedCdr.CdrHost)
+	v.Set(utils.CDRSOURCE, storedCdr.CdrSource)
+	v.Set(utils.REQTYPE, storedCdr.ReqType)
+	v.Set(utils.DIRECTION, storedCdr.Direction)
+	v.Set(utils.TENANT, storedCdr.Tenant)
+	v.Set(utils.CATEGORY, storedCdr.Category)
+	v.Set(utils.ACCOUNT, storedCdr.Account)
+	v.Set(utils.SUBJECT, storedCdr.Subject)
+	v.Set(utils.DESTINATION, storedCdr.Destination)
+	v.Set(utils.SETUP_TIME, storedCdr.SetupTime.Format(time.RFC3339))
+	v.Set(utils.ANSWER_TIME, storedCdr.AnswerTime.Format(time.RFC3339))
+	v.Set(utils.USAGE, storedCdr.FormatUsage(utils.SECONDS))
 	return v
 }
 
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
-func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld *RSRField,
-	extraFlds []*RSRField, primaryMandatory bool) (*StoredCdr, error) {
+func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld *utils.RSRField,
+	extraFlds []*utils.RSRField, primaryMandatory bool) (*StoredCdr, error) {
 	if reqTypeFld == nil {
-		reqTypeFld, _ = NewRSRField(META_DEFAULT)
+		reqTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if reqTypeFld.Id == META_DEFAULT {
-		reqTypeFld.Id = REQTYPE
+	if reqTypeFld.Id == utils.META_DEFAULT {
+		reqTypeFld.Id = utils.REQTYPE
 	}
 	if directionFld == nil {
-		directionFld, _ = NewRSRField(META_DEFAULT)
+		directionFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if directionFld.Id == META_DEFAULT {
-		directionFld.Id = DIRECTION
+	if directionFld.Id == utils.META_DEFAULT {
+		directionFld.Id = utils.DIRECTION
 	}
 	if tenantFld == nil {
-		tenantFld, _ = NewRSRField(META_DEFAULT)
+		tenantFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if tenantFld.Id == META_DEFAULT {
-		tenantFld.Id = TENANT
+	if tenantFld.Id == utils.META_DEFAULT {
+		tenantFld.Id = utils.TENANT
 	}
 	if categFld == nil {
-		categFld, _ = NewRSRField(META_DEFAULT)
+		categFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if categFld.Id == META_DEFAULT {
-		categFld.Id = CATEGORY
+	if categFld.Id == utils.META_DEFAULT {
+		categFld.Id = utils.CATEGORY
 	}
 	if accountFld == nil {
-		accountFld, _ = NewRSRField(META_DEFAULT)
+		accountFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if accountFld.Id == META_DEFAULT {
-		accountFld.Id = ACCOUNT
+	if accountFld.Id == utils.META_DEFAULT {
+		accountFld.Id = utils.ACCOUNT
 	}
 	if subjectFld == nil {
-		subjectFld, _ = NewRSRField(META_DEFAULT)
+		subjectFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if subjectFld.Id == META_DEFAULT {
-		subjectFld.Id = SUBJECT
+	if subjectFld.Id == utils.META_DEFAULT {
+		subjectFld.Id = utils.SUBJECT
 	}
 	if destFld == nil {
-		destFld, _ = NewRSRField(META_DEFAULT)
+		destFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if destFld.Id == META_DEFAULT {
-		destFld.Id = DESTINATION
+	if destFld.Id == utils.META_DEFAULT {
+		destFld.Id = utils.DESTINATION
 	}
 	if setupTimeFld == nil {
-		setupTimeFld, _ = NewRSRField(META_DEFAULT)
+		setupTimeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if setupTimeFld.Id == META_DEFAULT {
-		setupTimeFld.Id = SETUP_TIME
+	if setupTimeFld.Id == utils.META_DEFAULT {
+		setupTimeFld.Id = utils.SETUP_TIME
 	}
 	if answerTimeFld == nil {
-		answerTimeFld, _ = NewRSRField(META_DEFAULT)
+		answerTimeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if answerTimeFld.Id == META_DEFAULT {
-		answerTimeFld.Id = ANSWER_TIME
+	if answerTimeFld.Id == utils.META_DEFAULT {
+		answerTimeFld.Id = utils.ANSWER_TIME
 	}
 	if durationFld == nil {
-		durationFld, _ = NewRSRField(META_DEFAULT)
+		durationFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if durationFld.Id == META_DEFAULT {
-		durationFld.Id = USAGE
+	if durationFld.Id == utils.META_DEFAULT {
+		durationFld.Id = utils.USAGE
 	}
 	var err error
 	frkStorCdr := new(StoredCdr)
@@ -255,48 +257,48 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	frkStorCdr.CdrSource = storedCdr.CdrSource
 	frkStorCdr.ReqType = storedCdr.FieldAsString(reqTypeFld)
 	if primaryMandatory && len(frkStorCdr.ReqType) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, REQTYPE, reqTypeFld.Id))
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.REQTYPE, reqTypeFld.Id))
 	}
 	frkStorCdr.Direction = storedCdr.FieldAsString(directionFld)
 	if primaryMandatory && len(frkStorCdr.Direction) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, DIRECTION, directionFld.Id))
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.DIRECTION, directionFld.Id))
 	}
 	frkStorCdr.Tenant = storedCdr.FieldAsString(tenantFld)
 	if primaryMandatory && len(frkStorCdr.Tenant) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, TENANT, tenantFld.Id))
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.TENANT, tenantFld.Id))
 	}
 	frkStorCdr.Category = storedCdr.FieldAsString(categFld)
 	if primaryMandatory && len(frkStorCdr.Category) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, CATEGORY, categFld.Id))
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.CATEGORY, categFld.Id))
 	}
 	frkStorCdr.Account = storedCdr.FieldAsString(accountFld)
 	if primaryMandatory && len(frkStorCdr.Account) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, ACCOUNT, accountFld.Id))
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.ACCOUNT, accountFld.Id))
 	}
 	frkStorCdr.Subject = storedCdr.FieldAsString(subjectFld)
 	if primaryMandatory && len(frkStorCdr.Subject) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, SUBJECT, subjectFld.Id))
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.SUBJECT, subjectFld.Id))
 	}
 	frkStorCdr.Destination = storedCdr.FieldAsString(destFld)
-	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.TOR == VOICE {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, DESTINATION, destFld.Id))
+	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.TOR == utils.VOICE {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.DESTINATION, destFld.Id))
 	}
 	sTimeStr := storedCdr.FieldAsString(setupTimeFld)
 	if primaryMandatory && len(sTimeStr) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, SETUP_TIME, setupTimeFld.Id))
-	} else if frkStorCdr.SetupTime, err = ParseTimeDetectLayout(sTimeStr); err != nil {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.SETUP_TIME, setupTimeFld.Id))
+	} else if frkStorCdr.SetupTime, err = utils.ParseTimeDetectLayout(sTimeStr); err != nil {
 		return nil, err
 	}
 	aTimeStr := storedCdr.FieldAsString(answerTimeFld)
 	if primaryMandatory && len(aTimeStr) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, ANSWER_TIME, answerTimeFld.Id))
-	} else if frkStorCdr.AnswerTime, err = ParseTimeDetectLayout(aTimeStr); err != nil {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.ANSWER_TIME, answerTimeFld.Id))
+	} else if frkStorCdr.AnswerTime, err = utils.ParseTimeDetectLayout(aTimeStr); err != nil {
 		return nil, err
 	}
 	durStr := storedCdr.FieldAsString(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, USAGE, durationFld.Id))
-	} else if frkStorCdr.Usage, err = ParseDurationWithSecs(durStr); err != nil {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.USAGE, durationFld.Id))
+	} else if frkStorCdr.Usage, err = utils.ParseDurationWithSecs(durStr); err != nil {
 		return nil, err
 	}
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
@@ -322,7 +324,7 @@ func (storedCdr *StoredCdr) AsCgrExtCdr() *CgrExtCdr {
 		Destination:    storedCdr.Destination,
 		SetupTime:      storedCdr.SetupTime.Format(time.RFC3339),
 		AnswerTime:     storedCdr.AnswerTime.Format(time.RFC3339),
-		Usage:          storedCdr.FormatUsage(SECONDS),
+		Usage:          storedCdr.FormatUsage(utils.SECONDS),
 		ExtraFields:    storedCdr.ExtraFields,
 		MediationRunId: storedCdr.MediationRunId,
 		RatedAccount:   storedCdr.RatedAccount,
@@ -348,121 +350,121 @@ func (storedCdr *StoredCdr) GetSessionIds() []string {
 	return []string{storedCdr.GetUUID()}
 }
 func (storedCdr *StoredCdr) GetDirection(fieldName string) string {
-	if IsSliceMember([]string{DIRECTION, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.DIRECTION, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Direction
 	}
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetSubject(fieldName string) string {
-	if IsSliceMember([]string{SUBJECT, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.SUBJECT, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Subject
 	}
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetAccount(fieldName string) string {
-	if IsSliceMember([]string{ACCOUNT, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.ACCOUNT, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Account
 	}
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetDestination(fieldName string) string {
-	if IsSliceMember([]string{DESTINATION, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.DESTINATION, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Destination
 	}
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetCallDestNr(fieldName string) string {
-	if IsSliceMember([]string{DESTINATION, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.DESTINATION, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Destination
 	}
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetCategory(fieldName string) string {
-	if IsSliceMember([]string{CATEGORY, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.CATEGORY, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Category
 	}
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetTenant(fieldName string) string {
-	if IsSliceMember([]string{TENANT, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.TENANT, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Tenant
 	}
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetReqType(fieldName string) string {
-	if IsSliceMember([]string{REQTYPE, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.REQTYPE, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.ReqType
 	}
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetSetupTime(fieldName string) (time.Time, error) {
-	if IsSliceMember([]string{SETUP_TIME, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.SETUP_TIME, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.SetupTime, nil
 	}
 	var sTimeVal string
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		sTimeVal = fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		sTimeVal = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else {
-		sTimeVal = storedCdr.FieldAsString(&RSRField{Id: fieldName})
+		sTimeVal = storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 	}
-	return ParseTimeDetectLayout(sTimeVal)
+	return utils.ParseTimeDetectLayout(sTimeVal)
 }
 func (storedCdr *StoredCdr) GetAnswerTime(fieldName string) (time.Time, error) {
-	if IsSliceMember([]string{ANSWER_TIME, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.ANSWER_TIME, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.AnswerTime, nil
 	}
 	var aTimeVal string
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		aTimeVal = fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		aTimeVal = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else {
-		aTimeVal = storedCdr.FieldAsString(&RSRField{Id: fieldName})
+		aTimeVal = storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 	}
-	return ParseTimeDetectLayout(aTimeVal)
+	return utils.ParseTimeDetectLayout(aTimeVal)
 }
 func (storedCdr *StoredCdr) GetEndTime() (time.Time, error) {
 	return storedCdr.AnswerTime.Add(storedCdr.Usage), nil
 }
 func (storedCdr *StoredCdr) GetDuration(fieldName string) (time.Duration, error) {
-	if IsSliceMember([]string{USAGE, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.USAGE, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Usage, nil
 	}
 	var durVal string
-	if strings.HasPrefix(fieldName, STATIC_VALUE_PREFIX) { // Static value
-		durVal = fieldName[len(STATIC_VALUE_PREFIX):]
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		durVal = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else {
-		durVal = storedCdr.FieldAsString(&RSRField{Id: fieldName})
+		durVal = storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 	}
-	return ParseDurationWithSecs(durVal)
+	return utils.ParseDurationWithSecs(durVal)
 }
 func (storedCdr *StoredCdr) GetOriginatorIP(fieldName string) string {
-	if IsSliceMember([]string{CDRHOST, META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.CDRHOST, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.CdrHost
 	}
-	return storedCdr.FieldAsString(&RSRField{Id: fieldName})
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
 	return storedCdr.ExtraFields
@@ -474,7 +476,7 @@ func (storedCdr *StoredCdr) MissingParameter() bool {
 		len(storedCdr.Account) == 0 ||
 		len(storedCdr.Destination) == 0
 }
-func (storedCdr *StoredCdr) ParseEventValue(rsrFld *RSRField) string {
+func (storedCdr *StoredCdr) ParseEventValue(rsrFld *utils.RSRField) string {
 	return storedCdr.FieldAsString(rsrFld)
 }
 func (storedCdr *StoredCdr) String() string {

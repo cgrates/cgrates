@@ -75,7 +75,7 @@ type CdrStats struct {
 	Triggers          ActionTriggerPriotityList
 }
 
-func (cs *CdrStats) AcceptCdr(cdr *utils.StoredCdr) bool {
+func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 	if cdr == nil {
 		return false
 	}

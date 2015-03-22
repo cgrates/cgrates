@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
@@ -76,7 +77,7 @@ func (fsev FSEvent) String() (result string) {
 
 // Loads the new event data from a body of text containing the key value proprieties.
 // It stores the parsed proprieties in the internal map.
-func (fsev FSEvent) AsEvent(body string) utils.Event {
+func (fsev FSEvent) AsEvent(body string) engine.Event {
 	fsev = fsock.FSEventStrToMap(body, nil)
 	return fsev
 }
@@ -292,8 +293,8 @@ func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string
 	return false, ""
 }
 
-func (fsev FSEvent) AsStoredCdr() *utils.StoredCdr {
-	storCdr := new(utils.StoredCdr)
+func (fsev FSEvent) AsStoredCdr() *engine.StoredCdr {
+	storCdr := new(engine.StoredCdr)
 	storCdr.CgrId = fsev.GetCgrId()
 	storCdr.TOR = utils.VOICE
 	storCdr.AccId = fsev.GetUUID()

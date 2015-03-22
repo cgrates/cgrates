@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -43,7 +44,7 @@ func TestRecordForkCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
-	expectedCdr := &utils.StoredCdr{
+	expectedCdr := &engine.StoredCdr{
 		CgrId:       utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
 		TOR:         cdrRow[2],
 		AccId:       cdrRow[3],
@@ -77,7 +78,7 @@ func TestDataMultiplyFactor(t *testing.T) {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	var sTime time.Time
-	expectedCdr := &utils.StoredCdr{
+	expectedCdr := &engine.StoredCdr{
 		CgrId:       utils.Sha1("", sTime.String()),
 		TOR:         cdrRow[0],
 		CdrHost:     "0.0.0.0",
@@ -90,7 +91,7 @@ func TestDataMultiplyFactor(t *testing.T) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	cdrc.duMultiplyFactor = 1024
-	expectedCdr = &utils.StoredCdr{
+	expectedCdr = &engine.StoredCdr{
 		CgrId:       utils.Sha1("", sTime.String()),
 		TOR:         cdrRow[0],
 		CdrHost:     "0.0.0.0",
@@ -103,7 +104,7 @@ func TestDataMultiplyFactor(t *testing.T) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	cdrRow = []string{"*voice", "1"}
-	expectedCdr = &utils.StoredCdr{
+	expectedCdr = &engine.StoredCdr{
 		CgrId:       utils.Sha1("", sTime.String()),
 		TOR:         cdrRow[0],
 		CdrHost:     "0.0.0.0",
@@ -125,8 +126,8 @@ func TestDnTdmCdrs(t *testing.T) {
 49497361022,0049LM0409005226,N_MO_MTMB_00-RW-Mobile,02.07.2014 15:24:41,02.07.2014 15:24:41,1,43,Peak,0.021050,49MTMB
 `
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	eCdrs := []*utils.StoredCdr{
-		&utils.StoredCdr{
+	eCdrs := []*engine.StoredCdr{
+		&engine.StoredCdr{
 			CgrId:       utils.Sha1("49773280254", time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC).String()),
 			TOR:         utils.VOICE,
 			AccId:       "49773280254",
@@ -144,7 +145,7 @@ func TestDnTdmCdrs(t *testing.T) {
 			Usage:       time.Duration(25) * time.Second,
 			Cost:        -1,
 		},
-		&utils.StoredCdr{
+		&engine.StoredCdr{
 			CgrId:       utils.Sha1("49893252121", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
 			TOR:         utils.VOICE,
 			AccId:       "49893252121",
@@ -162,7 +163,7 @@ func TestDnTdmCdrs(t *testing.T) {
 			Usage:       time.Duration(8) * time.Second,
 			Cost:        -1,
 		},
-		&utils.StoredCdr{
+		&engine.StoredCdr{
 			CgrId:       utils.Sha1("49497361022", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
 			TOR:         utils.VOICE,
 			AccId:       "49497361022",
@@ -207,7 +208,7 @@ func TestDnTdmCdrs(t *testing.T) {
 		cgrConfig.CdrcCdrFields, new(cdrs.CDRS), nil}
 	cdrsContent := bytes.NewReader([]byte(tdmCdrs))
 	csvReader := csv.NewReader(cdrsContent)
-	cdrs := make([]*utils.StoredCdr, 0)
+	cdrs := make([]*engine.StoredCdr, 0)
 	for {
 		cdrCsv, err := csvReader.Read()
 		if err != nil && err == io.EOF {

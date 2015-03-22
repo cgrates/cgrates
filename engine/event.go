@@ -16,9 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package engine
 
 import (
+	"github.com/cgrates/cgrates/utils"
 	"time"
 )
 
@@ -42,8 +43,8 @@ type Event interface {
 	GetOriginatorIP(string) string
 	GetExtraFields() map[string]string
 	MissingParameter() bool
-	ParseEventValue(*RSRField) string
-	PassesFieldFilter(*RSRField) (bool, string)
+	ParseEventValue(*utils.RSRField) string
+	PassesFieldFilter(*utils.RSRField) (bool, string)
 	AsStoredCdr() *StoredCdr
 	String() string
 	AsEvent(string) Event

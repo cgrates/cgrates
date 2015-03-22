@@ -174,13 +174,13 @@ func TestMediInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
+	cgrCdr1 := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517174963",
 		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "10"}
-	cgrCdr2 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
+	cgrCdr2 := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517173964",
 		utils.ANSWER_TIME: "2013-11-07T09:42:26Z", utils.USAGE: "20"}
-	for _, cdr := range []utils.CgrCdr{cgrCdr1, cgrCdr2} {
+	for _, cdr := range []CgrCdr{cgrCdr1, cgrCdr2} {
 		if err := cdrStor.SetCdr(cdr.AsStoredCdr()); err != nil {
 			t.Error(err)
 		}

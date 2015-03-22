@@ -42,7 +42,7 @@ const (
 )
 
 // Populates the
-func populateStoredCdrField(cdr *utils.StoredCdr, fieldId, fieldVal string) error {
+func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) error {
 	var err error
 	switch fieldId {
 	case utils.TOR:
@@ -215,7 +215,7 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - csv error: %s", procRowNr, err.Error()))
 			continue // Other csv related errors, ignore
 		}
-		recordCdrs := make([]*utils.StoredCdr, 0) // More CDRs based on the number of filters and field templates
+		recordCdrs := make([]*engine.StoredCdr, 0) // More CDRs based on the number of filters and field templates
 		for idx, cdrFieldsInst := range self.cdrFields {
 			// Make sure filters are matching
 			filterBreak := false
@@ -266,8 +266,8 @@ func (self *Cdrc) processFile(filePath string) error {
 }
 
 // Takes the record out of csv and turns it into http form which can be posted
-func (self *Cdrc) recordToStoredCdr(record []string, cdrFields []*config.CfgCdrField) (*utils.StoredCdr, error) {
-	storedCdr := &utils.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
+func (self *Cdrc) recordToStoredCdr(record []string, cdrFields []*config.CfgCdrField) (*engine.StoredCdr, error) {
+	storedCdr := &engine.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range cdrFields {

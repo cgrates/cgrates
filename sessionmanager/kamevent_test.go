@@ -22,6 +22,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -30,7 +31,7 @@ var kamEv = KamEvent{KAM_TR_INDEX: "29223", KAM_TR_LABEL: "698469260", "callid":
 	"cgr_duration": "20", "extra1": "val1", "extra2": "val2"}
 
 func TestKamailioEventInterface(t *testing.T) {
-	var _ utils.Event = utils.Event(kamEv)
+	var _ engine.Event = engine.Event(kamEv)
 }
 
 func TestNewKamEvent(t *testing.T) {

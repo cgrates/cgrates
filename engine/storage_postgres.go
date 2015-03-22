@@ -120,7 +120,7 @@ func (self *PostgresStorage) LogCallCost(cgrid, source, runid string, cc *CallCo
 	return nil
 }
 
-func (self *PostgresStorage) SetRatedCdr(cdr *utils.StoredCdr, extraInfo string) (err error) {
+func (self *PostgresStorage) SetRatedCdr(cdr *StoredCdr, extraInfo string) (err error) {
 	tx := self.db.Begin()
 	saved := tx.Save(&TblRatedCdr{
 		Cgrid:       cdr.CgrId,

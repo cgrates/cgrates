@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 type SessionManager interface {
@@ -30,9 +29,9 @@ type SessionManager interface {
 	Rater() engine.Connector
 	DebitInterval() time.Duration
 	Connect() error
-	DisconnectSession(utils.Event, string, string)
+	DisconnectSession(engine.Event, string, string)
 	WarnSessionMinDuration(string, string)
 	RemoveSession(string)
-	ProcessCdr(*utils.StoredCdr) error
+	ProcessCdr(*engine.StoredCdr) error
 	Shutdown() error
 }

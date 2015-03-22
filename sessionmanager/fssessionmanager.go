@@ -101,7 +101,7 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 }
 
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) DisconnectSession(ev utils.Event, connId, notify string) {
+func (sm *FSSessionManager) DisconnectSession(ev engine.Event, connId, notify string) {
 	if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", ev.GetUUID(), notify)); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send disconect api notification to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
 	}
@@ -156,7 +156,7 @@ func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string
 	}
 }
 
-func (sm *FSSessionManager) onChannelPark(ev utils.Event, connId string) {
+func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
 	if err := sm.rater.GetDerivedMaxSessionTime(*ev.AsStoredCdr(), &maxCallDuration); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
@@ -171,7 +171,7 @@ func (sm *FSSessionManager) onChannelPark(ev utils.Event, connId string) {
 	sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
-func (sm *FSSessionManager) onChannelAnswer(ev utils.Event, connId string) {
+func (sm *FSSessionManager) onChannelAnswer(ev engine.Event, connId string) {
 	if ev.MissingParameter() {
 		sm.DisconnectSession(ev, connId, MISSING_PARAMETER)
 	}
@@ -181,7 +181,7 @@ func (sm *FSSessionManager) onChannelAnswer(ev utils.Event, connId string) {
 	}
 }
 
-func (sm *FSSessionManager) onChannelHangupComplete(ev utils.Event) {
+func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 	go sm.ProcessCdr(ev.AsStoredCdr())
 	var s *Session
 	for i := 0; i < 2; i++ { // Protect us against concurrency, wait a couple of seconds for the answer to be populated before we process hangup
@@ -200,7 +200,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev utils.Event) {
 	}
 }
 
-func (sm *FSSessionManager) ProcessCdr(storedCdr *utils.StoredCdr) error {
+func (sm *FSSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
 	if sm.cdrs != nil {
 		var reply string
 		if err := sm.cdrs.ProcessCdr(storedCdr, &reply); err != nil {

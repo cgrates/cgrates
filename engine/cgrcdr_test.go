@@ -16,9 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package engine
 
 import (
+	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
 	"time"
@@ -33,13 +34,18 @@ func TestCgrCdrInterfaces(t *testing.T) {
 }
 
 func TestCgrCdrAsStoredCdr(t *testing.T) {
-	cgrCdr := CgrCdr{TOR: VOICE, ACCID: "dsafdsaf", CDRHOST: "192.168.1.1", CDRSOURCE: "internal_test", REQTYPE: META_RATED, DIRECTION: "*out", TENANT: "cgrates.org", CATEGORY: "call",
-		ACCOUNT: "1001", SUBJECT: "1001", DESTINATION: "1002", SETUP_TIME: "2013-11-07T08:42:20Z", ANSWER_TIME: "2013-11-07T08:42:26Z", USAGE: "10",
+	cgrCdr := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "dsafdsaf", utils.CDRHOST: "192.168.1.1", utils.CDRSOURCE: "internal_test", utils.REQTYPE: utils.META_RATED,
+		utils.DIRECTION: utils.OUT,
+		utils.TENANT:    "cgrates.org", utils.CATEGORY: "call",
+		utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-07T08:42:20Z", utils.ANSWER_TIME: "2013-11-07T08:42:26Z",
+		utils.USAGE:   "10",
 		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
-	setupTime, _ := ParseTimeDetectLayout(cgrCdr["setup_time"])
-	expctRtCdr := &StoredCdr{CgrId: Sha1(cgrCdr["accid"], setupTime.String()), TOR: VOICE, AccId: cgrCdr["accid"], CdrHost: cgrCdr["cdrhost"], CdrSource: cgrCdr["cdrsource"], ReqType: cgrCdr["reqtype"],
-		Direction: cgrCdr[DIRECTION], Tenant: cgrCdr["tenant"], Category: cgrCdr[CATEGORY], Account: cgrCdr["account"], Subject: cgrCdr["subject"],
-		Destination: cgrCdr["destination"], SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(10) * time.Second,
+	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr["setup_time"])
+	expctRtCdr := &StoredCdr{CgrId: utils.Sha1(cgrCdr["accid"], setupTime.String()), TOR: utils.VOICE, AccId: cgrCdr["accid"], CdrHost: cgrCdr["cdrhost"], CdrSource: cgrCdr["cdrsource"],
+		ReqType:   cgrCdr["reqtype"],
+		Direction: cgrCdr[utils.DIRECTION], Tenant: cgrCdr["tenant"], Category: cgrCdr[utils.CATEGORY], Account: cgrCdr["account"], Subject: cgrCdr["subject"],
+		Destination: cgrCdr["destination"], SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage:       time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: -1}
 	if storedCdr := cgrCdr.AsStoredCdr(); !reflect.DeepEqual(expctRtCdr, storedCdr) {
 		t.Errorf("Expecting %v, received: %v", expctRtCdr, storedCdr)

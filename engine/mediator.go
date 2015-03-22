@@ -71,7 +71,7 @@ func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *CallCost, err err
 }
 
 // Retrive the cost from engine
-func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*CallCost, error) {
+func (self *Mediator) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error) {
 	cc := &CallCost{}
 	var err error
 	if storedCdr.Usage == time.Duration(0) { // failed call,  returning empty callcost, no error
@@ -103,7 +103,7 @@ func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*CallCost, e
 	return cc, err
 }
 
-func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
+func (self *Mediator) rateCDR(storedCdr *StoredCdr) error {
 	var qryCC *CallCost
 	var errCost error
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
@@ -121,9 +121,9 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 	return nil
 }
 
-func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) error {
+func (self *Mediator) RateCdr(storedCdr *StoredCdr, sendToStats bool) error {
 	storedCdr.MediationRunId = utils.META_DEFAULT
-	cdrRuns := []*utils.StoredCdr{storedCdr}     // Start with initial storCdr, will add here all to be mediated
+	cdrRuns := []*StoredCdr{storedCdr}           // Start with initial storCdr, will add here all to be mediated
 	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
 		Account: storedCdr.Account, Subject: storedCdr.Subject}
 	var dcs utils.DerivedChargers
@@ -157,7 +157,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld, dcSTimeFld, dcATimeFld, dcDurFld,
 			[]*utils.RSRField{}, true)
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis
-			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: storedCdr.CgrId, CdrSource: utils.FORKED_CDR, MediationRunId: dc.RunId, Cost: -1},
+			self.cdrDb.SetRatedCdr(&StoredCdr{CgrId: storedCdr.CgrId, CdrSource: utils.FORKED_CDR, MediationRunId: dc.RunId, Cost: -1},
 				err.Error()) // Cannot fork CDR, important just runid and error
 			continue
 		}
@@ -178,7 +178,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 			}
 		}
 		if sendToStats && self.stats != nil { // We send to stats only after saving to db since there are chances we cannot store and then no way to reproduce stats offline
-			go func(cdr *utils.StoredCdr) { // Pass it by value since the variable will be overwritten by for
+			go func(cdr *StoredCdr) { // Pass it by value since the variable will be overwritten by for
 				if err := self.stats.AppendCDR(cdr, nil); err != nil {
 					Logger.Err(fmt.Sprintf("<Mediator> Could not append cdr to stats: %s", err.Error()))
 				}

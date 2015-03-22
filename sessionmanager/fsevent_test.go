@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -618,7 +619,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 	ev := new(FSEvent).AsEvent(hangupEv)
 	setupTime, _ := utils.ParseTimeDetectLayout("1398442107")
 	aTime, _ := utils.ParseTimeDetectLayout("1398442120")
-	eStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("37e9b766-5256-4e4b-b1ed-3767b930fec8", setupTime.UTC().String()),
+	eStoredCdr := &engine.StoredCdr{CgrId: utils.Sha1("37e9b766-5256-4e4b-b1ed-3767b930fec8", setupTime.UTC().String()),
 		TOR: utils.VOICE, AccId: "37e9b766-5256-4e4b-b1ed-3767b930fec8", CdrHost: "10.0.2.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.META_PSEUDOPREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003",
 		Destination: "1002", SetupTime: setupTime, AnswerTime: aTime,

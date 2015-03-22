@@ -16,9 +16,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package engine
 
 import (
+	"github.com/cgrates/cgrates/utils"
 	"net/http"
 )
 
@@ -29,7 +30,7 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 		}
 	}
 	cgrCdr := make(CgrCdr)
-	cgrCdr[CDRHOST] = req.RemoteAddr
+	cgrCdr[utils.CDRHOST] = req.RemoteAddr
 	for k, vals := range req.Form {
 		cgrCdr[k] = vals[0] // We only support the first value for now, if more are provided it is considered remote's fault
 	}
@@ -39,14 +40,14 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 type CgrCdr map[string]string
 
 func (cgrCdr CgrCdr) getCgrId() string {
-	setupTime, _ := ParseTimeDetectLayout(cgrCdr[SETUP_TIME])
-	return Sha1(cgrCdr[ACCID], setupTime.UTC().String())
+	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME])
+	return utils.Sha1(cgrCdr[utils.ACCID], setupTime.UTC().String())
 }
 
 func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for k, v := range cgrCdr {
-		if !IsSliceMember(PrimaryCdrFields, k) {
+		if !utils.IsSliceMember(utils.PrimaryCdrFields, k) {
 			extraFields[k] = v
 		}
 	}
@@ -56,20 +57,20 @@ func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 func (cgrCdr CgrCdr) AsStoredCdr() *StoredCdr {
 	storCdr := new(StoredCdr)
 	storCdr.CgrId = cgrCdr.getCgrId()
-	storCdr.TOR = cgrCdr[TOR]
-	storCdr.AccId = cgrCdr[ACCID]
-	storCdr.CdrHost = cgrCdr[CDRHOST]
-	storCdr.CdrSource = cgrCdr[CDRSOURCE]
-	storCdr.ReqType = cgrCdr[REQTYPE]
+	storCdr.TOR = cgrCdr[utils.TOR]
+	storCdr.AccId = cgrCdr[utils.ACCID]
+	storCdr.CdrHost = cgrCdr[utils.CDRHOST]
+	storCdr.CdrSource = cgrCdr[utils.CDRSOURCE]
+	storCdr.ReqType = cgrCdr[utils.REQTYPE]
 	storCdr.Direction = "*out"
-	storCdr.Tenant = cgrCdr[TENANT]
-	storCdr.Category = cgrCdr[CATEGORY]
-	storCdr.Account = cgrCdr[ACCOUNT]
-	storCdr.Subject = cgrCdr[SUBJECT]
-	storCdr.Destination = cgrCdr[DESTINATION]
-	storCdr.SetupTime, _ = ParseTimeDetectLayout(cgrCdr[SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
-	storCdr.AnswerTime, _ = ParseTimeDetectLayout(cgrCdr[ANSWER_TIME])
-	storCdr.Usage, _ = ParseDurationWithSecs(cgrCdr[USAGE])
+	storCdr.Tenant = cgrCdr[utils.TENANT]
+	storCdr.Category = cgrCdr[utils.CATEGORY]
+	storCdr.Account = cgrCdr[utils.ACCOUNT]
+	storCdr.Subject = cgrCdr[utils.SUBJECT]
+	storCdr.Destination = cgrCdr[utils.DESTINATION]
+	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
+	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.ANSWER_TIME])
+	storCdr.Usage, _ = utils.ParseDurationWithSecs(cgrCdr[utils.USAGE])
 	storCdr.ExtraFields = cgrCdr.getExtraFields()
 	storCdr.Cost = -1
 	return storCdr

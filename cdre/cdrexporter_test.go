@@ -30,24 +30,24 @@ import (
 func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 	logDb, _ := engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdrs := []*utils.StoredCdr{
-		&utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+	cdrs := []*engine.StoredCdr{
+		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, MediationRunId: "RUN_RTL", Cost: 1.01},
-		&utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf2", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf2", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, MediationRunId: "CUSTOMER1", Cost: 2.01},
-		&utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, MediationRunId: "CUSTOMER1", Cost: 3.01},
-		&utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 4.01},
-		&utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1000", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, MediationRunId: "RETAIL1", Cost: 5.01},
@@ -77,7 +77,7 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 
 func TestGetDateTimeFieldVal(t *testing.T) {
 	cdreTst := new(CdrExporter)
-	cdrTst := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+	cdrTst := &engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 		ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.01,
@@ -106,7 +106,7 @@ func TestGetDateTimeFieldVal(t *testing.T) {
 
 func TestCdreCdrFieldValue(t *testing.T) {
 	cdre := new(CdrExporter)
-	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+	cdr := &engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 		ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.01}

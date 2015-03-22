@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
 )
@@ -58,7 +59,7 @@ type OsipsEvent struct {
 	osipsEvent *osipsdagram.OsipsEvent
 }
 
-func (osipsev *OsipsEvent) AsEvent(evStr string) utils.Event {
+func (osipsev *OsipsEvent) AsEvent(evStr string) engine.Event {
 	return osipsev
 }
 
@@ -202,8 +203,8 @@ func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
 	return extraFields
 }
 
-func (osipsEv *OsipsEvent) AsStoredCdr() *utils.StoredCdr {
-	storCdr := new(utils.StoredCdr)
+func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
+	storCdr := new(engine.StoredCdr)
 	storCdr.CgrId = osipsEv.GetCgrId()
 	storCdr.TOR = utils.VOICE
 	storCdr.AccId = osipsEv.GetUUID()

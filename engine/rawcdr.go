@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package engine
 
 // RawCDR is the original CDR received from external sources (eg: FreeSWITCH)
 type RawCdr interface {

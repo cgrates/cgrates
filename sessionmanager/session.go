@@ -24,14 +24,13 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 // Session type holding the call information fields, a session delegate for specific
 // actions and a channel to signal end of the debit loop.
 type Session struct {
-	eventStart     utils.Event // Store the original event who started this session so we can use it's info later (eg: disconnect, cgrid)
-	stopDebit      chan bool   // Channel to communicate with debit loops when closing the session
+	eventStart     engine.Event // Store the original event who started this session so we can use it's info later (eg: disconnect, cgrid)
+	stopDebit      chan bool    // Channel to communicate with debit loops when closing the session
 	sessionManager SessionManager
 	connId         string // Reference towards connection id on the session manager side.
 	warnMinDur     time.Duration
@@ -52,7 +51,7 @@ func (s *Session) SessionRuns() []*engine.SessionRun {
 }
 
 // Creates a new session and in case of prepaid starts the debit loop for each of the session runs individually
-func NewSession(ev utils.Event, connId string, sm SessionManager) *Session {
+func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 	s := &Session{eventStart: ev,
 		stopDebit:      make(chan bool),
 		sessionManager: sm,
@@ -108,7 +107,7 @@ func (s *Session) debitLoop(runIdx int) {
 }
 
 // Stops the debit loop
-func (s *Session) Close(ev utils.Event) error {
+func (s *Session) Close(ev engine.Event) error {
 	close(s.stopDebit) // Close the channel so all the sessionRuns listening will be notified
 	if _, err := ev.GetEndTime(); err != nil {
 		engine.Logger.Err("Error parsing answer event stop time.")

@@ -29,7 +29,7 @@ type CDRSV1 struct {
 	CdrSrv *engine.CDRS
 }
 
-func (cdrsrv *CDRSV1) ProcessCdr(cdr *utils.StoredCdr, reply *string) error {
+func (cdrsrv *CDRSV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
 	if cdrsrv.CdrSrv == nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "CDRS_NOT_RUNNING")
 	}

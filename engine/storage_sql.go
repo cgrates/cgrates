@@ -716,7 +716,7 @@ func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 }
 func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error) { return }
 
-func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) error {
+func (self *SQLStorage) SetCdr(cdr *StoredCdr) error {
 	extraFields, err := json.Marshal(cdr.ExtraFields)
 	if err != nil {
 		return err
@@ -752,12 +752,12 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) error {
 	return nil
 }
 
-func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string) error {
+func (self *SQLStorage) SetRatedCdr(storedCdr *StoredCdr, extraInfo string) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.StoredCdr, int64, error) {
-	var cdrs []*utils.StoredCdr
+func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, int64, error) {
+	var cdrs []*StoredCdr
 	// Select string
 	var selectStr string
 	if qryFltr.IgnoreDerived { // We use different tables to query account data in case of derived
@@ -999,7 +999,7 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*utils.Store
 			}
 		}
 		usageDur, _ := time.ParseDuration(strconv.FormatFloat(usage.Float64, 'f', -1, 64) + "s")
-		storCdr := &utils.StoredCdr{
+		storCdr := &StoredCdr{
 			CgrId: cgrid.String, OrderId: orderid, TOR: tor.String, AccId: accid.String, CdrHost: cdrhost.String, CdrSource: cdrsrc.String, ReqType: reqtype.String,
 			Direction: direction.String, Tenant: tenant.String,
 			Category: category.String, Account: account.String, Subject: subject.String, Destination: destination.String,

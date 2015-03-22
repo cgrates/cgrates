@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -86,8 +87,8 @@ func NewKamEvent(kamEvData []byte) (KamEvent, error) {
 type KamEvent map[string]string
 
 // Backwards compatibility, should be AsEvent
-func (kev KamEvent) AsEvent(ignored string) utils.Event {
-	return utils.Event(kev)
+func (kev KamEvent) AsEvent(ignored string) engine.Event {
+	return engine.Event(kev)
 }
 
 func (kev KamEvent) GetName() string {
@@ -263,8 +264,8 @@ func (kev KamEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return false, ""
 }
 
-func (kev KamEvent) AsStoredCdr() *utils.StoredCdr {
-	storCdr := new(utils.StoredCdr)
+func (kev KamEvent) AsStoredCdr() *engine.StoredCdr {
+	storCdr := new(engine.StoredCdr)
 	storCdr.CgrId = kev.GetCgrId()
 	storCdr.TOR = utils.VOICE
 	storCdr.AccId = kev.GetUUID()

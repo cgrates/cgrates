@@ -50,7 +50,7 @@ const (
 
 var err error
 
-func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
+func NewCdrExporter(cdrs []*engine.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
 	dataUsageMultiplyFactor, smsUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
@@ -80,7 +80,7 @@ func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl 
 }
 
 type CdrExporter struct {
-	cdrs           []*utils.StoredCdr
+	cdrs           []*engine.StoredCdr
 	logDb          engine.LogStorage // Used to extract cost_details if these are requested
 	exportTemplate *config.CdreConfig
 	cdrFormat      string // csv, fwv
@@ -118,7 +118,7 @@ func (cdre *CdrExporter) getCdrCostDetails(cgrId, runId string) (string, error) 
 	return string(ccJson), nil
 }
 
-func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *utils.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *engine.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
 	var combinedVal string // Will result as combination of the field values, filters must match
 	for _, filterRule := range cfgCdrFld.FieldFilter {
 		fltrPass, ftrPassValue := processedCdr.PassesFieldFilter(filterRule)
@@ -147,7 +147,7 @@ func (cdre *CdrExporter) maskedDestination(destination string) bool {
 	return false
 }
 
-func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
 	if len(cfgCdrFld.Value) == 0 {
 		return "", nil
 	}
@@ -168,7 +168,7 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, cfgCdrFld *co
 }
 
 // Extracts the value specified by cfgHdr out of cdr
-func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+func (cdre *CdrExporter) cdrFieldValue(cdr *engine.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
 	for _, fltrRl := range cfgCdrFld.FieldFilter {
 		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
 			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
@@ -223,13 +223,13 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	case META_NRCDRS:
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case META_DURCDRS:
-		emulatedCdr := &utils.StoredCdr{TOR: utils.VOICE, Usage: cdre.totalDuration}
+		emulatedCdr := &engine.StoredCdr{TOR: utils.VOICE, Usage: cdre.totalDuration}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_SMSUSAGE:
-		emulatedCdr := &utils.StoredCdr{TOR: utils.SMS, Usage: cdre.totalSmsUsage}
+		emulatedCdr := &engine.StoredCdr{TOR: utils.SMS, Usage: cdre.totalSmsUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_DATAUSAGE:
-		emulatedCdr := &utils.StoredCdr{TOR: utils.DATA, Usage: cdre.totalDataUsage}
+		emulatedCdr := &engine.StoredCdr{TOR: utils.DATA, Usage: cdre.totalDataUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
@@ -302,7 +302,7 @@ func (cdre *CdrExporter) composeTrailer() error {
 }
 
 // Write individual cdr into content buffer, build stats
-func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
+func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 	if cdr == nil || len(cdr.CgrId) == 0 { // We do not export empty CDRs
 		return nil
 	}

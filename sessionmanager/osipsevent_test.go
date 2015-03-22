@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
 )
@@ -36,7 +37,7 @@ var osipsEv = &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_CDR",
 		"duration": "20", "from_tag": "eb082607", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr}}
 
 func TestOsipsEventInterface(t *testing.T) {
-	var _ utils.Event = utils.Event(osipsEv)
+	var _ engine.Event = engine.Event(osipsEv)
 }
 
 func TestOsipsEventParseStatic(t *testing.T) {
@@ -128,7 +129,7 @@ func TestOsipsEventMissingParameter(t *testing.T) {
 func TestOsipsEventAsStoredCdr(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1406370492")
 	answerTime, _ := utils.ParseTimeDetectLayout("1406370499")
-	eStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", setupTime.UTC().String()),
+	eStoredCdr := &engine.StoredCdr{CgrId: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", setupTime.UTC().String()),
 		TOR: utils.VOICE, AccId: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", CdrHost: "172.16.254.77", CdrSource: "OSIPS_E_ACC_CDR", ReqType: utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "itsyscom.com", Category: "call", Account: "dan", Subject: "dan",
 		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime,

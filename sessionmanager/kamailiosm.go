@@ -125,7 +125,7 @@ func (self *KamailioSessionManager) Connect() error {
 	return err
 }
 
-func (self *KamailioSessionManager) DisconnectSession(ev utils.Event, connId, notify string) {
+func (self *KamailioSessionManager) DisconnectSession(ev engine.Event, connId, notify string) {
 	sessionIds := ev.GetSessionIds()
 	disconnectEv := &KamSessionDisconnect{Event: CGR_SESSION_DISCONNECT, HashEntry: sessionIds[0], HashId: sessionIds[1], Reason: notify}
 	if err := self.conns[connId].Send(disconnectEv.String()); err != nil {
@@ -161,7 +161,7 @@ func (self *KamailioSessionManager) Rater() engine.Connector {
 	return self.rater
 }
 
-func (self *KamailioSessionManager) ProcessCdr(cdr *utils.StoredCdr) error {
+func (self *KamailioSessionManager) ProcessCdr(cdr *engine.StoredCdr) error {
 	if self.cdrsrv == nil {
 		return nil
 	}

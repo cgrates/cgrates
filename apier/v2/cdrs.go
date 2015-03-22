@@ -22,11 +22,12 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/apier/v1"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Retrieves CDRs based on the filters
-func (apier *ApierV2) GetCdrs(attrs utils.RpcCdrsFilter, reply *[]*utils.CgrExtCdr) error {
+func (apier *ApierV2) GetCdrs(attrs utils.RpcCdrsFilter, reply *[]*engine.CgrExtCdr) error {
 	cdrsFltr, err := attrs.AsCdrsFilter()
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -34,7 +35,7 @@ func (apier *ApierV2) GetCdrs(attrs utils.RpcCdrsFilter, reply *[]*utils.CgrExtC
 	if cdrs, _, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(cdrs) == 0 {
-		*reply = make([]*utils.CgrExtCdr, 0)
+		*reply = make([]*engine.CgrExtCdr, 0)
 	} else {
 		for _, cdr := range cdrs {
 			*reply = append(*reply, cdr.AsCgrExtCdr())

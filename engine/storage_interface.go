@@ -112,9 +112,9 @@ type AccountingStorage interface {
 
 type CdrStorage interface {
 	Storage
-	SetCdr(*utils.StoredCdr) error
-	SetRatedCdr(*utils.StoredCdr, string) error
-	GetStoredCdrs(*utils.CdrsFilter) ([]*utils.StoredCdr, int64, error)
+	SetCdr(*StoredCdr) error
+	SetRatedCdr(*StoredCdr, string) error
+	GetStoredCdrs(*utils.CdrsFilter) ([]*StoredCdr, int64, error)
 	RemStoredCdrs([]string) error
 }
 

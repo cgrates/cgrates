@@ -18,8 +18,6 @@ echo 'go test github.com/cgrates/cgrates/config -local'
 go test github.com/cgrates/cgrates/config -local
 cfg=$?
 echo 'go test github.com/cgrates/cgrates/utils -local'
-go test github.com/cgrates/cgrates/utils -local
-utl=$?
 echo 'go test github.com/cgrates/cgrates/general_tests -local'
 go test github.com/cgrates/cgrates/general_tests -local
 gnr=$?
@@ -29,5 +27,5 @@ gnr=$?
 
 
 
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $gnr
 

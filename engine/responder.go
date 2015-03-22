@@ -126,7 +126,7 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 }
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
-func (rs *Responder) GetDerivedMaxSessionTime(ev utils.StoredCdr, reply *float64) error {
+func (rs *Responder) GetDerivedMaxSessionTime(ev StoredCdr, reply *float64) error {
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
@@ -184,7 +184,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev utils.StoredCdr, reply *float64
 }
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
-func (rs *Responder) GetSessionRuns(ev utils.StoredCdr, sRuns *[]*SessionRun) error {
+func (rs *Responder) GetSessionRuns(ev StoredCdr, sRuns *[]*SessionRun) error {
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
@@ -230,7 +230,7 @@ func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *ut
 	return nil
 }
 
-func (rs *Responder) ProcessCdr(cdr *utils.StoredCdr, reply *string) error {
+func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	if rs.CdrSrv == nil {
 		return errors.New("CDR_SERVER_NOT_RUNNING")
 	}
@@ -397,9 +397,9 @@ type Connector interface {
 	RefundIncrements(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
 	GetDerivedChargers(utils.AttrDerivedChargers, *utils.DerivedChargers) error
-	GetDerivedMaxSessionTime(utils.StoredCdr, *float64) error
-	GetSessionRuns(utils.StoredCdr, *[]*SessionRun) error
-	ProcessCdr(*utils.StoredCdr, *string) error
+	GetDerivedMaxSessionTime(StoredCdr, *float64) error
+	GetSessionRuns(StoredCdr, *[]*SessionRun) error
+	ProcessCdr(*StoredCdr, *string) error
 }
 
 type RPCClientConnector struct {
@@ -426,11 +426,11 @@ func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float6
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
 }
 
-func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev utils.StoredCdr, reply *float64) error {
+func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev StoredCdr, reply *float64) error {
 	return rcc.Client.Call("Responder.GetDerivedMaxSessionTime", ev, reply)
 }
 
-func (rcc *RPCClientConnector) GetSessionRuns(ev utils.StoredCdr, sRuns *[]*SessionRun) error {
+func (rcc *RPCClientConnector) GetSessionRuns(ev StoredCdr, sRuns *[]*SessionRun) error {
 	return rcc.Client.Call("Responder.GetSessionRuns", ev, sRuns)
 }
 
@@ -438,6 +438,6 @@ func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedCharger
 	return rcc.Client.Call("ApierV1.GetDerivedChargers", attrs, dcs)
 }
 
-func (rcc *RPCClientConnector) ProcessCdr(cdr *utils.StoredCdr, reply *string) error {
+func (rcc *RPCClientConnector) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	return rcc.Client.Call("CDRSV1.ProcessCdr", cdr, reply)
 }

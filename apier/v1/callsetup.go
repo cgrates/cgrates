@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/engine"
 	"time"
 )
 
 // Returns MaxSessionTime in seconds, -1 for no limit
-func (self *ApierV1) GetMaxSessionTime(cdr utils.StoredCdr, maxSessionTime *float64) error {
+func (self *ApierV1) GetMaxSessionTime(cdr engine.StoredCdr, maxSessionTime *float64) error {
 	var maxDur float64
 	if err := self.Responder.GetDerivedMaxSessionTime(cdr, &maxDur); err != nil {
 		return err

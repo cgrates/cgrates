@@ -120,8 +120,8 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 	return
 }
 
-func (fsCdr FSCdr) AsStoredCdr() *utils.StoredCdr {
-	storCdr := new(utils.StoredCdr)
+func (fsCdr FSCdr) AsStoredCdr() *StoredCdr {
+	storCdr := new(StoredCdr)
 	storCdr.CgrId = fsCdr.getCgrId()
 	storCdr.TOR = utils.VOICE
 	storCdr.AccId = fsCdr.vars[FS_UUID]

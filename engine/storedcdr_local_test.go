@@ -16,27 +16,33 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package utils
+package engine
 
 import (
 	"flag"
+	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
 )
 
+// Arguments received via test command
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
+var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 
 // Sample HttpJsonPost, more for usage purposes
 func TestHttpJsonPost(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cdrOut := &CgrExtCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
-		CdrSource: UNIT_TEST, ReqType: META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "account1", Subject: "tgooiscs0014", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String(), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String(), MediationRunId: DEFAULT_RUNID,
-		Usage: "0.00000001", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	cdrOut := &CgrExtCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+		CdrHost:   "192.168.1.1",
+		CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		Category: "call", Account: "account1", Subject: "tgooiscs0014", Destination: "1002",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String(), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String(),
+		MediationRunId: utils.DEFAULT_RUNID,
+		Usage:          "0.00000001", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if _, err := HttpJsonPost("http://localhost:8000", false, cdrOut); err == nil || err.Error() != "Post http://localhost:8000: dial tcp 127.0.0.1:8000: connection refused" {
+	if _, err := utils.HttpJsonPost("http://localhost:8000", false, cdrOut); err == nil || err.Error() != "Post http://localhost:8000: dial tcp 127.0.0.1:8000: connection refused" {
 		t.Error(err)
 	}
 }

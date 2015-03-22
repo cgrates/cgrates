@@ -70,7 +70,7 @@ func (osm *OsipsSessionManager) Connect() (err error) {
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
 }
 
-func (osm *OsipsSessionManager) DisconnectSession(ev utils.Event, cgrId, notify string) {
+func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, cgrId, notify string) {
 	return
 }
 func (osm *OsipsSessionManager) RemoveSession(uuid string) {
@@ -154,7 +154,7 @@ func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 
 }
 
-func (osm *OsipsSessionManager) ProcessCdr(storedCdr *utils.StoredCdr) error {
+func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
 	var reply string
 	return osm.cdrsrv.ProcessCdr(storedCdr, &reply)
 }

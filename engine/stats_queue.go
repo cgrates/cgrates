@@ -22,8 +22,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 type StatsQueue struct {
@@ -72,7 +70,7 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	}
 }
 
-func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
+func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	if sq.conf.AcceptCdr(cdr) {
@@ -117,7 +115,7 @@ func (sq *StatsQueue) removeFromMetrics(cdr *QCdr) {
 	}
 }
 
-func (sq *StatsQueue) simplifyCdr(cdr *utils.StoredCdr) *QCdr {
+func (sq *StatsQueue) simplifyCdr(cdr *StoredCdr) *QCdr {
 	return &QCdr{
 		SetupTime:  cdr.SetupTime,
 		AnswerTime: cdr.AnswerTime,
