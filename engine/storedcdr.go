@@ -58,6 +58,14 @@ type StoredCdr struct {
 	Rated          bool      // Mark the CDR as rated so we do not process it during mediation
 }
 
+func (storedCdr *StoredCdr) CostDetailsJson() string {
+	if storedCdr.CostDetails == nil {
+		return ""
+	}
+	mrshled, _ := json.Marshal(storedCdr.CostDetails)
+	return string(mrshled)
+}
+
 // Used to multiply usage on export
 func (storedCdr *StoredCdr) UsageMultiply(multiplyFactor float64, roundDecimals int) {
 	storedCdr.Usage = time.Duration(int(utils.Round(float64(storedCdr.Usage.Nanoseconds())*multiplyFactor, roundDecimals, utils.ROUNDING_MIDDLE))) // Rounding down could introduce a slight loss here but only at nanoseconds level
@@ -131,6 +139,8 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(storedCdr.RatedSubject)
 	case utils.COST:
 		return rsrFld.ParseValue(strconv.FormatFloat(storedCdr.Cost, 'f', -1, 64)) // Recommended to use FormatCost
+	case utils.COST_DETAILS:
+		return rsrFld.ParseValue(storedCdr.CostDetailsJson())
 	default:
 		return rsrFld.ParseValue(storedCdr.ExtraFields[rsrFld.Id])
 	}
@@ -180,6 +190,9 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v.Set(utils.SETUP_TIME, storedCdr.SetupTime.Format(time.RFC3339))
 	v.Set(utils.ANSWER_TIME, storedCdr.AnswerTime.Format(time.RFC3339))
 	v.Set(utils.USAGE, storedCdr.FormatUsage(utils.SECONDS))
+	if storedCdr.CostDetails != nil {
+		v.Set(utils.COST_DETAILS, storedCdr.CostDetailsJson())
+	}
 	return v
 }
 
@@ -330,6 +343,7 @@ func (storedCdr *StoredCdr) AsCgrExtCdr() *CgrExtCdr {
 		RatedAccount:   storedCdr.RatedAccount,
 		RatedSubject:   storedCdr.RatedSubject,
 		Cost:           storedCdr.Cost,
+		CostDetails:    storedCdr.CostDetailsJson(),
 	}
 }
 
@@ -506,4 +520,5 @@ type CgrExtCdr struct {
 	RatedAccount   string
 	RatedSubject   string
 	Cost           float64
+	CostDetails    string
 }
