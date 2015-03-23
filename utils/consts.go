@@ -60,8 +60,8 @@ const (
 	CDR_STATS_CSV                = "CdrStats.csv"
 	TIMINGS_NRCOLS               = 6
 	DESTINATIONS_NRCOLS          = 2
-	RATES_NRCOLS                 = 8
-	DESTINATION_RATES_NRCOLS     = 5
+	RATES_NRCOLS                 = 6
+	DESTINATION_RATES_NRCOLS     = 7
 	DESTRATE_TIMINGS_NRCOLS      = 4
 	RATE_PROFILES_NRCOLS         = 7
 	SHARED_GROUPS_NRCOLS         = 4

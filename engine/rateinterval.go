@@ -187,7 +187,7 @@ type RIRate struct {
 }
 
 func (rir *RIRate) Stringify() string {
-	str := fmt.Sprintf("%v %v %v", rir.ConnectFee, rir.RoundingMethod, rir.RoundingDecimals)
+	str := fmt.Sprintf("%v %v %v %v %v", rir.ConnectFee, rir.RoundingMethod, rir.RoundingDecimals, rir.MaxCost, rir.MaxCostStrategy)
 	for _, r := range rir.Rates {
 		str += r.Stringify()
 	}

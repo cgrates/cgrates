@@ -157,7 +157,7 @@ func (self *TPCSVImporter) importRates(fn string) error {
 			}
 			continue
 		}
-		newRt, err := NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
+		newRt, err := NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5])
 		if err != nil {
 			return err
 		}
@@ -200,6 +200,11 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 			log.Printf("Error parsing rounding decimals: %s", record[4])
 			return err
 		}
+		maxCost, err := strconv.ParseFloat(record[5], 64)
+		if err != nil {
+			log.Printf("Error parsing max cost from: %v", record[5])
+			return err
+		}
 		if _, hasIt := drs[record[0]]; !hasIt {
 			drs[record[0]] = make([]*utils.DestinationRate, 0)
 		}
@@ -208,6 +213,8 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 			RateId:           record[2],
 			RoundingMethod:   record[3],
 			RoundingDecimals: roundingDecimals,
+			MaxCost:          maxCost,
+			MaxCostStrategy:  record[6],
 		})
 	}
 

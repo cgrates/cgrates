@@ -40,15 +40,15 @@ DUMMY,INVALID;DATA
 GERMANY_MOBILE,+4915
 `
 var ratesSample = `#Tag,DestinationRatesTag,TimingTag,Weight
-RT_1CENT,0,0,,1,1s,1s,0s
+RT_1CENT,0,1,1s,1s,0s
 DUMMY,INVALID;DATA
-RT_DATA_2c,0,0,,0.002,10,10,0
+RT_DATA_2c,0,0.002,10,10,0
 `
 
-var destRatesSample = `#Tag,DestinationsTag,RatesTag
-DR_RETAIL,GERMANY,RT_1CENT,*up,0
+var destRatesSample = `#Tag,DestinationsTag,RatesTag,MaxCost,MaxCostStrategy
+DR_RETAIL,GERMANY,RT_1CENT,*up,0,0,
 DUMMY,INVALID;DATA
-DR_DATA_1,*any,RT_DATA_2c,*up,2
+DR_DATA_1,*any,RT_DATA_2c,*up,2,0,
 `
 var ratingPlansSample = `#Tag,DestinationRatesTag,TimingTag,Weight
 RP_RETAIL,DR_RETAIL,ALWAYS,10
@@ -415,7 +415,7 @@ func TestTPCSVFileParser(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			if !reflect.DeepEqual(record, []string{"RT_1CENT", "0", "0", "", "1", "1s", "1s", "0s"}) {
+			if !reflect.DeepEqual(record, []string{"RT_1CENT", "0", "1", "1s", "1s", "0s"}) {
 				t.Error("Unexpected record extracted", record)
 			}
 		case 3:

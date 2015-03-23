@@ -54,8 +54,6 @@ type TpRate struct {
 	Tpid               string
 	Tag                string
 	ConnectFee         float64
-	MaxCost            float64
-	MaxCostStrategy    string
 	Rate               float64
 	RateUnit           string
 	RateIncrement      string
@@ -71,6 +69,8 @@ type TpDestinationRate struct {
 	RatesTag         string
 	RoundingMethod   string
 	RoundingDecimals int
+	MaxCost          float64
+	MaxCostStrategy  string
 	CreatedAt        time.Time
 }
 
