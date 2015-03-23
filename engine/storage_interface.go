@@ -26,7 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
-	"labix.org/v2/mgo/bson"
+	"gopkg.in/mgo.v2/bson"
 )
 
 const (

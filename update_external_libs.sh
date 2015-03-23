@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 go get -v -u github.com/bmizerany/pq
 go get -v -u github.com/ugorji/go/codec
-go get -v -u labix.org/v2/mgo
+go get -v -u gopkg.in/mgo.v2
 go get -v -u github.com/cgrates/fsock
 go get -v -u github.com/cgrates/kamevapi
 go get -v -u github.com/cgrates/osipsdagram

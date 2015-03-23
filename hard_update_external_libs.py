@@ -6,7 +6,7 @@ from subprocess import call
 
 libs = ('github.com/bmizerany/pq',
         'github.com/ugorji/go/codec',
-        'labix.org/v2/mgo',
+        'gopkg.in/mgo.v2',
         'github.com/cgrates/fsock',
         'github.com/cgrates/liner',
         'github.com/cgrates/kamevapi',
