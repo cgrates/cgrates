@@ -195,8 +195,8 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 		if reply[0].Subject != "1002" {
 			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
 		}
-		if reply[0].Cost != 0.3059 {
-			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
+		if reply[0].Cost != 1.2059 {
+			t.Errorf("Unexpected Cost for CDR: %+v", reply[0].Cost)
 		}
 	}
 }
