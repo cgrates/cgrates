@@ -218,6 +218,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 	var leftCC *CallCost
 	var initialLength int
 	cc = cd.CreateCallCost()
+
 	generalBalanceChecker := true
 	for generalBalanceChecker {
 		generalBalanceChecker = false
@@ -231,7 +232,8 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			for _, balance := range usefulUnitBalances {
 				//log.Printf("Unit balance: %+v", balance)
 				// log.Printf("CD BEFORE UNIT: %+v", cd)
-				partCC, _ := balance.DebitUnits(cd, count, balance.account, usefulMoneyBalances)
+
+				partCC, _ := balance.DebitUnits(cd, balance.account, usefulMoneyBalances, count, dryRun)
 				//log.Printf("CD AFTER UNIT: %+v", cd)
 				if partCC != nil {
 					//log.Printf("partCC: %+v", partCC.Timespans[0])
@@ -253,6 +255,11 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					}
 					unitBalanceChecker = true
 					generalBalanceChecker = true
+					// check for max cost disconnect
+					if dryRun && cc.maxCostDisconect {
+						// only return if we are in dry run (max call duration)
+						return
+					}
 				}
 			}
 		}
@@ -265,7 +272,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			for _, balance := range usefulMoneyBalances {
 				//log.Printf("Money balance: %+v", balance)
 				//log.Printf("CD BEFORE MONEY: %+v", cd)
-				partCC, _ := balance.DebitMoney(cd, count, balance.account)
+				partCC, _ := balance.DebitMoney(cd, balance.account, count, dryRun)
 				//log.Printf("CD AFTER MONEY: %+v", cd)
 				//log.Printf("partCC: %+v", partCC)
 				if partCC != nil {
@@ -287,6 +294,10 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					}
 					moneyBalanceChecker = true
 					generalBalanceChecker = true
+					if dryRun && cc.maxCostDisconect {
+						// only return if we are in dry run (max call duration)
+						return
+					}
 				}
 			}
 		}

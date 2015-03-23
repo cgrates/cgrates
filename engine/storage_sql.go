@@ -1073,7 +1073,7 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 	}
 
 	for _, tr := range tpRates {
-		rs, err := utils.NewRateSlot(tr.ConnectFee, tr.Rate, tr.RateUnit, tr.RateIncrement, tr.GroupIntervalStart)
+		rs, err := utils.NewRateSlot(tr.ConnectFee, tr.MaxCost, tr.MaxCostStrategy, tr.Rate, tr.RateUnit, tr.RateIncrement, tr.GroupIntervalStart)
 		if err != nil {
 			return nil, err
 		}

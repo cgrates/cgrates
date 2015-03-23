@@ -45,6 +45,8 @@ CREATE TABLE `tp_rates` (
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
   `connect_fee` decimal(7,4) NOT NULL,
+  `max_cost` decimal(7,4) NOT NULL,
+  `max_cost_strategy` varchar(16) NOT NULL,
   `rate` decimal(7,4) NOT NULL,
   `rate_unit` varchar(16) NOT NULL,
   `rate_increment` varchar(16) NOT NULL,

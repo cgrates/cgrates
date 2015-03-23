@@ -398,7 +398,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		var r *utils.TPRate
-		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5])
+		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
 		if err != nil {
 			return err
 		}

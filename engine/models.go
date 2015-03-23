@@ -54,6 +54,8 @@ type TpRate struct {
 	Tpid               string
 	Tag                string
 	ConnectFee         float64
+	MaxCost            float64
+	MaxCostStrategy    string
 	Rate               float64
 	RateUnit           string
 	RateIncrement      string

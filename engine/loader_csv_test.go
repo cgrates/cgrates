@@ -55,19 +55,19 @@ ALWAYS,*any,*any,*any,*any,00:00:00
 ASAP,*any,*any,*any,*any,*asap
 `
 	rates = `
-R1,0,0.2,60,1,0
-R2,0,0.1,60s,1s,0
-R3,0,0.05,60s,1s,0
-R4,1,1,1s,1s,0
-R5,0,0.5,1s,1s,0
-LANDLINE_OFFPEAK,0,1,1,60,0
-LANDLINE_OFFPEAK,0,1,1,1,60
-GBP_71,0.000000,5.55555,1s,1s,0s
-GBP_72,0.000000,7.77777,1s,1s,0s
-GBP_70,0.000000,1,1,1,0
-RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s
-RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s
-R_URG,0,0,1,1,0
+R1,0,0,,0.2,60,1,0
+R2,0,0,,0.1,60s,1s,0
+R3,0,0,,0.05,60s,1s,0
+R4,1,0,,1,1s,1s,0
+R5,0,0,,0.5,1s,1s,0
+LANDLINE_OFFPEAK,0,0,,1,1,60,0
+LANDLINE_OFFPEAK,0,0,,1,1,1,60
+GBP_71,0.000000,0,,5.55555,1s,1s,0s
+GBP_72,0.000000,0,,7.77777,1s,1s,0s
+GBP_70,0.000000,0,,1,1,1,0
+RT_UK_Mobile_BIG5_PKG,0.01,0,,0,20s,20s,0s
+RT_UK_Mobile_BIG5,0.01,0,,0.10,1s,1s,0s
+R_URG,0,0,,0,1,1,0
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1,*middle,4
@@ -323,7 +323,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
-	expctRs, err := utils.NewRateSlot(0, 0.2, "60", "1", "0")
+	expctRs, err := utils.NewRateSlot(0, 0, "", 0.2, "60", "1", "0")
 	if err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -333,7 +333,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate, expctRs)
 	}
 	rate = csvr.rates["R2"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.1, "60s", "1s", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0, "", 0.1, "60s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -342,7 +342,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R3"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.05, "60s", "1s", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0, "", 0.05, "60s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -351,7 +351,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R4"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(1, 1.0, "1s", "1s", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(1, 0, "", 1.0, "1s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -360,7 +360,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R5"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.5, "1s", "1s", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0, "", 0.5, "1s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -369,7 +369,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1", "60", "0"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0, "", 1, "1", "60", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -378,7 +378,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[1]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1", "1", "60"); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0, "", 1, "1", "1", "60"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||

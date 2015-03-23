@@ -86,8 +86,8 @@ func (self *TPRate) AsExportSlice() [][]string {
 }
 
 // Needed so we make sure we always use SetDurations() on a newly created value
-func NewRateSlot(connectFee, rate float64, rateUnit, rateIncrement, grpInterval string) (*RateSlot, error) {
-	rs := &RateSlot{ConnectFee: connectFee, Rate: rate, RateUnit: rateUnit, RateIncrement: rateIncrement,
+func NewRateSlot(connectFee, maxCost float64, maxCostStrategy string, rate float64, rateUnit, rateIncrement, grpInterval string) (*RateSlot, error) {
+	rs := &RateSlot{ConnectFee: connectFee, Rate: rate, RateUnit: rateUnit, RateIncrement: rateIncrement, MaxCost: maxCost, MaxCostStrategy: maxCostStrategy,
 		GroupIntervalStart: grpInterval}
 	if err := rs.SetDurations(); err != nil {
 		return nil, err
@@ -103,6 +103,8 @@ type RateSlot struct {
 	GroupIntervalStart    string  // Group position
 	rateUnitDur           time.Duration
 	rateIncrementDur      time.Duration
+	MaxCost               float64
+	MaxCostStrategy       string
 	groupIntervalStartDur time.Duration
 }
 

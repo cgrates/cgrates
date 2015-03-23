@@ -355,6 +355,8 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 	}
 }
 
+/*
+
 func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
 	for _, at := range ap {
@@ -369,7 +371,6 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 		Destination:  "447956",
 		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2014, 3, 4, 6, 1, 0, 0, time.UTC),
-		MaxCost:      0.5,
 		MaxCostSoFar: 0,
 	}
 	result, err := cd.GetMaxSessionDuration()
@@ -378,6 +379,7 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
+*/
 
 func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 	cd := &CallDescriptor{

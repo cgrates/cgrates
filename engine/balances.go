@@ -250,7 +250,7 @@ func (b *Balance) SubstractAmount(amount float64) {
 	b.dirty = true
 }
 
-func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyBalances BalanceChain) (cc *CallCost, err error) {
+func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.Value <= 0 {
 		return
 	}
@@ -324,11 +324,32 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyB
 				ts.createIncrementsSlice()
 			}
 			//log.Printf("TS: %+v", ts)
+			maxCost, strategy := ts.RateInterval.GetMaxCost()
+			if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
+				// cat the entire current timespan
+				cc.maxCostDisconect = true
+				if dryRun {
+					cc.Timespans = cc.Timespans[:tsIndex]
+					return cc, nil
+				}
+			}
 			for incIndex, inc := range ts.Increments {
 				// debit minutes and money
 				seconds := inc.Duration.Seconds()
 				cost := inc.Cost
 				//log.Printf("INC: %+v", inc)
+				inc.paid = false
+				if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
+					cost, inc.Cost = 0.0, 0.0
+					inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
+					inc.BalanceInfo.AccountId = ub.Id
+					inc.paid = true
+					if count {
+						ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
+					}
+					// go to nextincrement
+					continue
+				}
 				var moneyBal *Balance
 				for _, mb := range moneyBalances {
 					if mb.Value >= cost {
@@ -344,6 +365,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyB
 					if cost != 0 {
 						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
 						moneyBal.SubstractAmount(cost)
+						cd.MaxCostSoFar += cost
 					}
 					inc.paid = true
 					if count {
@@ -373,7 +395,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, count bool, ub *Account, moneyB
 	return
 }
 
-func (b *Balance) DebitMoney(cd *CallDescriptor, count bool, ub *Account) (cc *CallCost, err error) {
+func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.Value <= 0 {
 		return
 	}
@@ -392,12 +414,35 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, count bool, ub *Account) (cc *C
 			ts.createIncrementsSlice()
 		}
 		//log.Printf("TS: %+v", ts)
+		maxCost, strategy := ts.RateInterval.GetMaxCost()
+		if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
+			// cat the entire current timespan
+			cc.maxCostDisconect = true
+			if dryRun {
+				cc.Timespans = cc.Timespans[:tsIndex]
+				return cc, nil
+			}
+		}
 		for incIndex, inc := range ts.Increments {
 			// check standard subject tags
 			//log.Printf("INC: %+v", inc)
 			amount := inc.Cost
+			inc.paid = false
+			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
+				amount, inc.Cost = 0.0, 0.0
+				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
+				inc.BalanceInfo.AccountId = ub.Id
+				inc.paid = true
+				if count {
+					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+				}
+				// go to nextincrement
+				continue
+			}
+
 			if b.Value >= amount {
 				b.SubstractAmount(amount)
+				cd.MaxCostSoFar += amount
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true

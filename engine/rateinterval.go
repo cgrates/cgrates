@@ -181,6 +181,8 @@ type RIRate struct {
 	ConnectFee       float64
 	RoundingMethod   string
 	RoundingDecimals int
+	MaxCost          float64
+	MaxCostStrategy  string
 	Rates            RateGroups // GroupRateInterval (start time): Rate
 }
 
@@ -339,6 +341,13 @@ func (i *RateInterval) GetRateParameters(startSecond time.Duration) (rate float6
 		}
 	}
 	return -1, -1, -1
+}
+
+func (ri *RateInterval) GetMaxCost() (float64, string) {
+	if ri.Rating == nil {
+		return 0.0, ""
+	}
+	return ri.Rating.MaxCost, ri.Rating.MaxCostStrategy
 }
 
 // Structure to store intervals according to weight

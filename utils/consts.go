@@ -60,7 +60,7 @@ const (
 	CDR_STATS_CSV                = "CdrStats.csv"
 	TIMINGS_NRCOLS               = 6
 	DESTINATIONS_NRCOLS          = 2
-	RATES_NRCOLS                 = 6
+	RATES_NRCOLS                 = 8
 	DESTINATION_RATES_NRCOLS     = 5
 	DESTRATE_TIMINGS_NRCOLS      = 4
 	RATE_PROFILES_NRCOLS         = 7
@@ -130,6 +130,8 @@ const (
 	SMS                          = "*sms"
 	DATA                         = "*data"
 	VOICE                        = "*voice"
+	MAX_COST_FREE                = "*free"
+	MAX_COST_DISCONNECT          = "*disconnect"
 	TOR                          = "tor"
 	HOURS                        = "hours"
 	MINUTES                      = "minutes"

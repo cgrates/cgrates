@@ -110,7 +110,6 @@ type CallDescriptor struct {
 	// session limits
 	MaxRate       float64
 	MaxRateUnit   time.Duration
-	MaxCost       float64
 	MaxCostSoFar  float64
 	account       *Account
 	test_callcost *CallCost // testing purpose only!
@@ -485,12 +484,6 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 		}
 		for _, incr := range ts.Increments {
 			totalCost += incr.Cost
-			if cd.MaxCost > 0 {
-				// limit availableCredit
-				if cd.MaxCostSoFar+totalCost > cd.MaxCost {
-					return utils.MinDuration(initialDuration, totalDuration), nil
-				}
-			}
 			if defaultBalance.Value < 0 && incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
 				// this increment was payed with debt
 				// TODO: improve this check
@@ -660,7 +653,6 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		DurationIndex:   cd.DurationIndex,
 		MaxRate:         cd.MaxRate,
 		MaxRateUnit:     cd.MaxRateUnit,
-		MaxCost:         cd.MaxCost,
 		MaxCostSoFar:    cd.MaxCostSoFar,
 		FallbackSubject: cd.FallbackSubject,
 		//RatingInfos:     cd.RatingInfos,

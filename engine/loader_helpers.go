@@ -95,10 +95,15 @@ type TPLoader interface {
 	WriteToDatabase(bool, bool) error
 }
 
-func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval string) (r *utils.TPRate, err error) {
+func NewLoadRate(tag, connectFee, maxCost, maxCostStrategy, price, ratedUnits, rateIncrements, groupInterval string) (r *utils.TPRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
+		return
+	}
+	mc, err := strconv.ParseFloat(maxCost, 64)
+	if err != nil {
+		log.Printf("Error parsing max cost from: %v", maxCost)
 		return
 	}
 	p, err := strconv.ParseFloat(price, 64)
@@ -106,7 +111,8 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		log.Printf("Error parsing price from: %v", price)
 		return
 	}
-	rs, err := utils.NewRateSlot(cf, p, ratedUnits, rateIncrements, groupInterval)
+
+	rs, err := utils.NewRateSlot(cf, mc, maxCostStrategy, p, ratedUnits, rateIncrements, groupInterval)
 	if err != nil {
 		return nil, err
 	}
@@ -365,7 +371,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
 		"Tag([0-9A-Za-z_]),Years([0-9;]|*any|<empty>),Months([0-9;]|*any|<empty>),MonthDays([0-9;]|*any|<empty>),WeekDays([0-9;]|*any|<empty>),Time([0-9:]|*asap)"},
 	utils.RATES_CSV: &FileLineRegexValidator{utils.RATES_NRCOLS,
-		regexp.MustCompile(`(?:\w+\s*),(?:\d+\.*\d*s*),(?:\d+\.*\d*s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*)$`),
+		regexp.MustCompile(`(?:\w+\s*),(?:\d+\.*\d*s*),(?:\d+\.*\d*s*),(?:\*free|\*diconnect)?,(?:\d+\.*\d*s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*)$`),
 		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RateUnit([0-9.]ns|us|µs|ms|s|m|h),RateIncrementStart([0-9.]ns|us|µs|ms|s|m|h),GroupIntervalStart([0-9.]ns|us|µs|ms|s|m|h)"},
 	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
 		regexp.MustCompile(`^(?:\w+\s*),(?:\w+\s*|\*any),(?:\w+\s*),(?:\*up|\*down|\*middle),(?:\d+)$`),

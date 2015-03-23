@@ -29,6 +29,7 @@ type CallCost struct {
 	Cost                                                            float64
 	Timespans                                                       TimeSpans
 	deductConnectFee                                                bool
+	maxCostDisconect                                                bool
 }
 
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.
