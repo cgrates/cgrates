@@ -83,6 +83,13 @@ func populateDB() {
 			},
 		},
 	}
+	max := &Account{
+		Id: "*out:cgrates.org:max",
+		BalanceMap: map[string]BalanceChain{
+			CREDIT + OUTBOUND: BalanceChain{
+				&Balance{Value: 11, Weight: 20},
+			}},
+	}
 	if accountingStorage != nil {
 		accountingStorage.SetActions("TEST_ACTIONS", ats)
 		accountingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
@@ -90,6 +97,7 @@ func populateDB() {
 		accountingStorage.SetAccount(minu)
 		accountingStorage.SetAccount(minitsboy)
 		accountingStorage.SetAccount(luna)
+		accountingStorage.SetAccount(max)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}
@@ -355,8 +363,6 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 	}
 }
 
-/*
-
 func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
 	for _, at := range ap {
@@ -366,20 +372,42 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 		Direction:    "*out",
 		Category:     "call",
 		Tenant:       "cgrates.org",
-		Subject:      "12345",
-		Account:      "12345",
-		Destination:  "447956",
-		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 1, 0, 0, time.UTC),
+		Subject:      "max",
+		Account:      "max",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 3, 23, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 3, 23, 6, 30, 0, 0, time.UTC),
 		MaxCostSoFar: 0,
 	}
 	result, err := cd.GetMaxSessionDuration()
-	expected := 45 * time.Second
+	expected := 10 * time.Second
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
-*/
+
+func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "max",
+		Account:      "max",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 3, 23, 19, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 3, 23, 19, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err := cd.GetMaxSessionDuration()
+	expected := 30 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
 
 func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 	cd := &CallDescriptor{

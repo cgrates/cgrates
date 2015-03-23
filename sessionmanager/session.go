@@ -101,6 +101,7 @@ func (s *Session) debitLoop(runIdx int) {
 		// update call duration with real debited duration
 		nextCd.DurationIndex -= debitPeriod
 		nextCd.DurationIndex += nextCd.GetDuration()
+		nextCd.MaxCostSoFar += cc.Cost
 		time.Sleep(cc.GetDuration())
 		index++
 	}

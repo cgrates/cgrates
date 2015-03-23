@@ -40,9 +40,7 @@ CREATE TABLE tp_rates (
   id SERIAL PRIMARY KEY,
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
-  connect_fee NUMERIC(7,4) NOT NULL,
-  max_cost NUMERIC(7,4) NOT NULL,
-  max_cost_strategy VARCHAR(16) NOT NULL,
+  connect_fee NUMERIC(7,4) NOT NULL,  
   rate NUMERIC(7,4) NOT NULL,
   rate_unit VARCHAR(16) NOT NULL,
   rate_increment VARCHAR(16) NOT NULL,
@@ -65,6 +63,8 @@ CREATE TABLE tp_destination_rates (
   rates_tag VARCHAR(64) NOT NULL,
   rounding_method VARCHAR(255) NOT NULL,
   rounding_decimals SMALLINT NOT NULL,
+  max_cost NUMERIC(7,4) NOT NULL,
+  max_cost_strategy VARCHAR(16) NOT NULL,
   created_at TIMESTAMP,
   UNIQUE (tpid, tag , destinations_tag)
 );

@@ -37,10 +37,10 @@ func TestSetStorageDtChrg1(t *testing.T) {
 func TestLoadCsvTpDtChrg1(t *testing.T) {
 	timings := `TM1,*any,*any,*any,*any,00:00:00
 TM2,*any,*any,*any,*any,01:00:00`
-	rates := `RT_DATA_2c,0,0,,0.002,10,10,0
-RT_DATA_1c,0,0,,0.001,10,10,0`
-	destinationRates := `DR_DATA_1,*any,RT_DATA_2c,*up,4
-DR_DATA_2,*any,RT_DATA_1c,*up,4`
+	rates := `RT_DATA_2c,0,0.002,10,10,0
+RT_DATA_1c,0,0.001,10,10,0`
+	destinationRates := `DR_DATA_1,*any,RT_DATA_2c,*up,4,0,
+DR_DATA_2,*any,RT_DATA_1c,*up,4,0,`
 	ratingPlans := `RP_DATA1,DR_DATA_1,TM1,10
 RP_DATA1,DR_DATA_2,TM2,10`
 	ratingProfiles := `*out,cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,`

@@ -42,10 +42,10 @@ func TestLoadCsvTp2(t *testing.T) {
 ASAP,*any,*any,*any,*any,*asap`
 	destinations := `DST_UK_Mobile_BIG5,447596
 DST_UK_Mobile_BIG5,447956`
-	rates := `RT_UK_Mobile_BIG5_PKG,0.01,0,,0,20s,20s,0s
-RT_UK_Mobile_BIG5,0.01,0,,0.10,1s,1s,0s`
-	destinationRates := `DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG,*up,8
-DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5,*up,8`
+	rates := `RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s
+RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s`
+	destinationRates := `DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG,*up,8,0,
+DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5,*up,8,0,`
 	ratingPlans := `RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,ALWAYS,10
 RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	ratingProfiles := `*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_UK,

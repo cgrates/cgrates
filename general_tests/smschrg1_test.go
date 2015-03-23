@@ -36,8 +36,8 @@ func TestSMSSetStorageSmsChrg1(t *testing.T) {
 
 func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 	timings := `ALWAYS,*any,*any,*any,*any,00:00:00`
-	rates := `RT_SMS_5c,0,0,,0.005,1,1,0`
-	destinationRates := `DR_SMS_1,*any,RT_SMS_5c,*up,4`
+	rates := `RT_SMS_5c,0,0.005,1,1,0`
+	destinationRates := `DR_SMS_1,*any,RT_SMS_5c,*up,4,0,`
 	ratingPlans := `RP_SMS1,DR_SMS_1,ALWAYS,10`
 	ratingProfiles := `*out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
 	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,

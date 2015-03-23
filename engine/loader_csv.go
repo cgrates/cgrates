@@ -398,7 +398,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		var r *utils.TPRate
-		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
+		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5])
 		if err != nil {
 			return err
 		}
@@ -438,6 +438,11 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 			log.Printf("Error parsing rounding decimals: %s", record[4])
 			return err
 		}
+		maxCost, err := strconv.ParseFloat(record[5], 64)
+		if err != nil {
+			log.Printf("Error parsing max cost from: %v", record[5])
+			return err
+		}
 		destinationExists := record[1] == utils.ANY
 		if !destinationExists {
 			_, destinationExists = csvr.destinations[record[1]]
@@ -458,6 +463,8 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 					Rate:             r,
 					RoundingMethod:   record[3],
 					RoundingDecimals: roundingDecimals,
+					MaxCost:          maxCost,
+					MaxCostStrategy:  record[6],
 				},
 			},
 		}

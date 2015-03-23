@@ -1,2 +1,2 @@
-#Tag,DestinationsTag,RatesTag,RoundingMethod,RoundingDecimals
-DR_RETAIL,GERMANY,RT_1CENT,*up,4
+#Tag,DestinationsTag,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_RETAIL,GERMANY,RT_1CENT,*up,4,0,

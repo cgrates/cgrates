@@ -83,7 +83,6 @@ func (rp *RatingPlan) AddRateInterval(dId string, ris ...*RateInterval) {
 		}
 		if ri.Rating != nil {
 			ratingTag := ri.Rating.Stringify()
-
 			rp.Ratings[ratingTag] = ri.Rating
 			rpr.Rating = ratingTag
 		}

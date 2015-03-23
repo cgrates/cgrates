@@ -247,15 +247,18 @@ Will set the interval as spans's interval if new Weight is lower then span's int
 or if the Weights are equal and new price is lower then spans's interval price
 */
 func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
+	//log.Printf("SETRATEINTERVAL: %+v", i.Timing)
 	if ts.RateInterval == nil || ts.RateInterval.Weight < i.Weight {
 		ts.RateInterval = i
+		//log.Printf("RET TS: %+v", ts.RateInterval.Timing)
 		return
 	}
 	iPrice, _, _ := i.GetRateParameters(ts.GetGroupStart())
 	tsPrice, _, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	if ts.RateInterval.Weight == i.Weight && iPrice < tsPrice {
+	if ts.RateInterval.Weight == i.Weight && iPrice <= tsPrice {
 		ts.RateInterval = i
 	}
+	//log.Printf("END TS: %+v", ts.RateInterval.Timing)
 }
 
 // Returns the cost of the timespan according to the relevant cost interval.
@@ -363,8 +366,9 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		return
 	}
 	// if the span is enclosed in the interval try to set as new interval and return nil
+	//log.Printf("Timing: %+v", i.Timing)
 	if i.Contains(ts.TimeStart, false) && i.Contains(ts.TimeEnd, true) {
-		//Logger.Debug("All in interval")
+		//log.Print("All in interval")
 		ts.SetRateInterval(i)
 		return
 	}
