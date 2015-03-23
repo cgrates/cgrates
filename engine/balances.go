@@ -325,20 +325,26 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			}
 			//log.Printf("TS: %+v", ts)
 			maxCost, strategy := ts.RateInterval.GetMaxCost()
-			if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
-				// cat the entire current timespan
-				cc.maxCostDisconect = true
-				if dryRun {
-					cc.Timespans = cc.Timespans[:tsIndex]
-					return cc, nil
-				}
-			}
 			for incIndex, inc := range ts.Increments {
 				// debit minutes and money
 				seconds := inc.Duration.Seconds()
 				cost := inc.Cost
 				//log.Printf("INC: %+v", inc)
 				inc.paid = false
+				if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
+					// cat the entire current timespan
+					cc.maxCostDisconect = true
+					if dryRun {
+						if incIndex == 0 {
+							// cat the entire current timespan
+							cc.Timespans = cc.Timespans[:tsIndex]
+						} else {
+							ts.SplitByIncrement(incIndex)
+							cc.Timespans = cc.Timespans[:tsIndex+1]
+						}
+						return cc, nil
+					}
+				}
 				if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 					cost, inc.Cost = 0.0, 0.0
 					inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
@@ -415,19 +421,27 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 		}
 		//log.Printf("TS: %+v", ts)
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
-		if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
-			// cat the entire current timespan
-			cc.maxCostDisconect = true
-			if dryRun {
-				cc.Timespans = cc.Timespans[:tsIndex]
-				return cc, nil
-			}
-		}
+		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
+		//log.Printf("Rate: %+v", ts.RateInterval.Rating)
 		for incIndex, inc := range ts.Increments {
 			// check standard subject tags
 			//log.Printf("INC: %+v", inc)
 			amount := inc.Cost
 			inc.paid = false
+			if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
+				// cat the entire current timespan
+				cc.maxCostDisconect = true
+				if dryRun {
+					if incIndex == 0 {
+						// cat the entire current timespan
+						cc.Timespans = cc.Timespans[:tsIndex]
+					} else {
+						ts.SplitByIncrement(incIndex)
+						cc.Timespans = cc.Timespans[:tsIndex+1]
+					}
+					return cc, nil
+				}
+			}
 			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 				amount, inc.Cost = 0.0, 0.0
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid

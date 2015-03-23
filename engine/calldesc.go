@@ -360,10 +360,10 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	}
 
 	//Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
-	//log.Printf("After SplitByRateInterval: %+v", timespans)
+	//log.Printf("After SplitByRateInterval: %+v", timespans[0].RateInterval.Timing)
 	timespans = cd.roundTimeSpansToIncrement(timespans)
 	// Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
-	//log.Printf("After round: %+v", timespans)
+	//log.Printf("After round: %+v", timespans[0].RateInterval.Timing)
 	return
 }
 
@@ -417,6 +417,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 
 	for i, ts := range timespans {
 		// only add connect fee if this is the first/only call cost request
+		//log.Printf("Interval: %+v", ts.RateInterval.Timing)
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
 			cost += ts.RateInterval.Rating.ConnectFee
 		}

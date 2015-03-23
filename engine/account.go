@@ -256,7 +256,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					unitBalanceChecker = true
 					generalBalanceChecker = true
 					// check for max cost disconnect
-					if dryRun && cc.maxCostDisconect {
+					if dryRun && partCC.maxCostDisconect {
 						// only return if we are in dry run (max call duration)
 						return
 					}
@@ -294,7 +294,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					}
 					moneyBalanceChecker = true
 					generalBalanceChecker = true
-					if dryRun && cc.maxCostDisconect {
+					if dryRun && partCC.maxCostDisconect {
 						// only return if we are in dry run (max call duration)
 						return
 					}
