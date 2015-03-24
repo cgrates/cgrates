@@ -31,6 +31,28 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr) (*StoredCdr, error) {
+	var err error
+	storedCdr := &StoredCdr{CgrId: extCdr.CgrId, OrderId: extCdr.OrderId, TOR: extCdr.TOR, AccId: extCdr.AccId, CdrHost: extCdr.CdrHost, CdrSource: extCdr.CdrSource, ReqType: extCdr.ReqType,
+		Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category, Account: extCdr.Account, Subject: extCdr.Subject, Destination: extCdr.Destination,
+		ExtraFields: extCdr.ExtraFields, MediationRunId: extCdr.MediationRunId, RatedAccount: extCdr.RatedAccount, RatedSubject: extCdr.RatedSubject, Cost: extCdr.Cost, Rated: extCdr.Rated}
+	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime); err != nil {
+		return nil, err
+	}
+	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime); err != nil {
+		return nil, err
+	}
+	if storedCdr.Usage, err = utils.ParseDurationWithSecs(extCdr.Usage); err != nil {
+		return nil, err
+	}
+	if len(extCdr.CostDetails) != 0 {
+		if err = json.Unmarshal([]byte(extCdr.CostDetails), storedCdr.CostDetails); err != nil {
+			return nil, err
+		}
+	}
+	return storedCdr, nil
+}
+
 // Kinda standard of internal CDR, complies to CDR interface also
 type StoredCdr struct {
 	CgrId          string
@@ -321,8 +343,8 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	return frkStorCdr, nil
 }
 
-func (storedCdr *StoredCdr) AsCgrExtCdr() *CgrExtCdr {
-	return &CgrExtCdr{CgrId: storedCdr.CgrId,
+func (storedCdr *StoredCdr) AsExternalCdr() *ExternalCdr {
+	return &ExternalCdr{CgrId: storedCdr.CgrId,
 		OrderId:        storedCdr.OrderId,
 		TOR:            storedCdr.TOR,
 		AccId:          storedCdr.AccId,
@@ -498,7 +520,7 @@ func (storedCdr *StoredCdr) String() string {
 	return string(mrsh)
 }
 
-type CgrExtCdr struct {
+type ExternalCdr struct {
 	CgrId          string
 	OrderId        int64
 	TOR            string
@@ -521,4 +543,5 @@ type CgrExtCdr struct {
 	RatedSubject   string
 	Cost           float64
 	CostDetails    string
+	Rated          bool // Mark the CDR as rated so we do not process it during mediation
 }

@@ -30,10 +30,15 @@ type CDRSV1 struct {
 }
 
 func (cdrsrv *CDRSV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
-	if cdrsrv.CdrSrv == nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "CDRS_NOT_RUNNING")
-	}
 	if err := cdrsrv.CdrSrv.ProcessCdr(cdr); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = utils.OK
+	return nil
+}
+
+func (cdrsrv *CDRSV1) ProcessExternalCdr(cdr *engine.ExternalCdr, reply *string) error {
+	if err := cdrsrv.CdrSrv.ProcessExternalCdr(cdr); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK

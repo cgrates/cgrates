@@ -163,7 +163,7 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.CgrExtCdr
+	var reply []*engine.ExternalCdr
 	req := utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())

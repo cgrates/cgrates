@@ -137,3 +137,12 @@ func (cdrs *CDRS) RegisterHanlersToServer(server *Server) {
 func (cdrs *CDRS) ProcessCdr(cdr *StoredCdr) error {
 	return storeAndMediate(cdr)
 }
+
+// Used to process external CDR
+func (cdrs *CDRS) ProcessExternalCdr(cdr *ExternalCdr) error {
+	storedCdr, err := NewStoredCdrFromExternalCdr(cdr)
+	if err != nil {
+		return err
+	}
+	return storeAndMediate(storedCdr)
+}

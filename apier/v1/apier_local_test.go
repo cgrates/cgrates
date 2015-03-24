@@ -1441,7 +1441,7 @@ func TestLocalGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply []*engine.CgrExtCdr
+	var reply []*engine.ExternalCdr
 	req := utils.AttrGetCdrs{}
 	if err := rater.Call("ApierV1.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -1465,7 +1465,7 @@ func TestLocalProcessCdr(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	var cdrs []*engine.CgrExtCdr
+	var cdrs []*engine.ExternalCdr
 	req := utils.AttrGetCdrs{}
 	if err := rater.Call("ApierV1.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())

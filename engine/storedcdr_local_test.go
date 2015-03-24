@@ -34,7 +34,7 @@ func TestHttpJsonPost(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cdrOut := &CgrExtCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+	cdrOut := &ExternalCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
 		CdrHost:   "192.168.1.1",
 		CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "account1", Subject: "tgooiscs0014", Destination: "1002",
