@@ -42,4 +42,12 @@
 	},
 },
 
+"sm_freeswitch": {
+	"enabled": true,				// starts SessionManager service: <true|false>
+	"connections":[					// instantiate connections to multiple FreeSWITCH servers
+		{"server": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 5},
+		{"server": "2.3.4.5:8021", "password": "ClueCon", "reconnects": 5},
+	],
+},
+
 }

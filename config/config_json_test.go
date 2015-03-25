@@ -503,4 +503,24 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	} else if cfg != nil {
 		t.Error("Received: ", cfg)
 	}
+	eCfgSmFs := &SmFsJsonCfg{
+		Enabled: utils.BoolPointer(true),
+		Connections: &[]*FsConnJsonCfg{
+			&FsConnJsonCfg{
+				Server:     utils.StringPointer("1.2.3.4:8021"),
+				Password:   utils.StringPointer("ClueCon"),
+				Reconnects: utils.IntPointer(5),
+			},
+			&FsConnJsonCfg{
+				Server:     utils.StringPointer("2.3.4.5:8021"),
+				Password:   utils.StringPointer("ClueCon"),
+				Reconnects: utils.IntPointer(5),
+			},
+		},
+	}
+	if smFsCfg, err := cgrJsonCfg.SmFsJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfgSmFs, smFsCfg) {
+		t.Error("Received: ", smFsCfg)
+	}
 }
