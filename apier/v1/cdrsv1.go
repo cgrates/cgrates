@@ -22,23 +22,51 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 // Receive CDRs via RPC methods
-type CDRSV1 struct {
-	CdrSrv *engine.CDRS
+type CdrsV1 struct {
+	CdrSrv *engine.CdrServer
 }
 
-func (cdrsrv *CDRSV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
-	if err := cdrsrv.CdrSrv.ProcessCdr(cdr); err != nil {
+// Designed for CGR internal usage
+func (self *CdrsV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
+	if err := self.CdrSrv.ProcessCdr(cdr); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (cdrsrv *CDRSV1) ProcessExternalCdr(cdr *engine.ExternalCdr, reply *string) error {
-	if err := cdrsrv.CdrSrv.ProcessExternalCdr(cdr); err != nil {
+// Designed for external programs feeding CDRs to CGRateS
+func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCdr, reply *string) error {
+	if err := self.CdrSrv.ProcessExternalCdr(cdr); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// Remotely start mediation with specific runid, runs asynchronously, it's status will be displayed in syslog
+func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
+	var tStart, tEnd time.Time
+	var err error
+	if len(attrs.TimeStart) != 0 {
+		if tStart, err = utils.ParseTimeDetectLayout(attrs.TimeStart); err != nil {
+			return err
+		}
+	}
+	if len(attrs.TimeEnd) != 0 {
+		if tEnd, err = utils.ParseTimeDetectLayout(attrs.TimeEnd); err != nil {
+			return err
+		}
+	}
+	//RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes []string,
+	//orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated bool)
+	if err := self.CdrSrv.RateCdrs(attrs.CgrIds, attrs.MediationRunIds, attrs.TORs, attrs.CdrHosts, attrs.CdrSources, attrs.ReqTypes, attrs.Directions,
+		attrs.Tenants, attrs.Categories, attrs.Accounts, attrs.Subjects, attrs.DestinationPrefixes, attrs.RatedAccounts, attrs.RatedSubjects,
+		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.RerateErrors, attrs.RerateRated, attrs.SendToStats); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK

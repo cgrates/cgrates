@@ -60,5 +60,5 @@ func (apier *ApierV2) CountCdrs(attrs utils.RpcCdrsFilter, reply *int64) error {
 
 // Receive CDRs via RPC methods, not included with APIer because it has way less dependencies and can be standalone
 type CdrsV2 struct {
-	v1.CDRSV1
+	v1.CdrsV1
 }

@@ -34,7 +34,7 @@ func TestConnectRedis(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cfg, _ = config.NewDefaultCGRConfig()
+	cfg, _ := config.NewDefaultCGRConfig()
 	rds, err = NewRedisStorage(fmt.Sprintf("%s:%s", cfg.RatingDBHost, cfg.RatingDBPort), 4, cfg.RatingDBPass, cfg.DBDataEncoding)
 	if err != nil {
 		t.Fatal("Could not connect to Redis", err.Error())

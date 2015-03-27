@@ -21,10 +21,10 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"net/rpc"
 	"sync"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type StatsInterface interface {
@@ -173,12 +173,11 @@ func (s *Stats) AppendCDR(cdr *StoredCdr, out *int) error {
 }
 
 type ProxyStats struct {
-	Client *rpc.Client
+	Client *rpcclient.RpcClient
 }
 
-func NewProxyStats(addr string) (*ProxyStats, error) {
-	client, err := rpc.Dial("tcp", addr)
-
+func NewProxyStats(addr string, reconnects int) (*ProxyStats, error) {
+	client, err := rpcclient.NewRpcClient("tcp", addr, reconnects, utils.GOB)
 	if err != nil {
 		return nil, err
 	}

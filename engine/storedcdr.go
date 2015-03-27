@@ -76,6 +76,7 @@ type StoredCdr struct {
 	RatedAccount   string // Populated out of rating data
 	RatedSubject   string
 	Cost           float64
+	ExtraInfo      string    // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
 	CostDetails    *CallCost // Attach the cost details to CDR when possible
 	Rated          bool      // Mark the CDR as rated so we do not process it during mediation
 }

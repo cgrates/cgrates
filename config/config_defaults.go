@@ -32,7 +32,7 @@ const CGRATES_CFG_JSON = `
 	"rounding_decimals": 10,				// system level precision for floats
 	"dbdata_encoding": "msgpack",			// encoding used to store object data in strings: <msgpack|json>
 	"tpexport_dir": "/var/log/cgrates/tpe",	// path towards export folder for offline Tariff Plans
-	"default_reqtype": "*rated",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+	"default_reqtype": "*rated",			// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 	"default_category": "call",				// default Type of Record to consider when missing from requests
 	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
@@ -97,24 +97,15 @@ const CGRATES_CFG_JSON = `
 "cdrs": {
 	"enabled": false,						// start the CDR Server service:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
-	"mediator": "",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering from raw CDRs <""|internal|x.y.z.y:1234>
-	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	"store_cdrs": true,						// store cdrs in storDb
+	"rater": "",							// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
+	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+	"reconnects": 5,						// number of reconnect attempts to rater or cdrs
 	"cdr_replication":[],					// replicate the raw CDR to a number of servers
 },
 
 
-"mediator": {
-	"enabled": false,						// starts Mediator service: <true|false>.
-	"reconnects": 3,						// number of reconnects to rater/cdrs before giving up.
-	"rater": "internal",					// address where to reach the Rater: <internal|x.y.z.y:1234>
-	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering out of mediated CDRs <""|internal|x.y.z.y:1234>
-	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	"cdr_replication":[],					// replicate the rated CDR to a number of servers
-},
-
-
-"cdrstats": {
+"cdr_stats": {
 	"enabled": false,						// starts the cdrstats service: <true|false>
 	"queue_length": 50,						// number of items in the stats buffer
 	"time_window": "1h",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
@@ -176,7 +167,7 @@ const CGRATES_CFG_JSON = `
 "cdrc": {
 	"*default": {
 		"enabled": false,							// enable CDR client functionality
-		"cdrs_address": "internal",					// address where to reach CDR server. <internal|x.y.z.y:1234>
+		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
 		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv>
 		"field_separator": ",",						// separator used in case of csv files
 		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify

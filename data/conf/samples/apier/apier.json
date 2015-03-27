@@ -14,18 +14,13 @@
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
-	"mediator": "internal",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
 },
 
 "cdre": {
 	"*default": {
 		"export_dir": "/tmp/cgrates/cdr/cdrexport/csv",			// path where the exported CDRs will be placed
 	}
-},
-
-"mediator": {
-	"enabled": true,						// starts Mediator service: <true|false>.
-
 },
 
 }

@@ -164,6 +164,9 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], config.CgrConfig().DefaultReqType)
 }
 func (fsev FSEvent) MissingParameter() bool {
+	fmt.Printf("Uuid: <%s>, Direction: <%s>, Account: <%s>, Subject: <%s>, Destination: <%s>, Category: <%s>, Tenant: <%s>, CallDestNr: %s\n", fsev.GetUUID(),
+		fsev.GetDirection(utils.META_DEFAULT), fsev.GetAccount(utils.META_DEFAULT), fsev.GetSubject(utils.META_DEFAULT), fsev.GetDestination(utils.META_DEFAULT),
+		fsev.GetCategory(utils.META_DEFAULT), fsev.GetTenant(utils.META_DEFAULT), fsev.GetCallDestNr(utils.META_DEFAULT))
 	return strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" ||

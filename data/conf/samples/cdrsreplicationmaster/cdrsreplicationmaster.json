@@ -9,9 +9,9 @@
 },
 
 "cdrs": {
-	"enabled": true,						// start the CDR Server service:  <true|false>
-	"store_disable": true,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	"cdr_replication":[						// replicate the rated CDR to a number of servers
+	"enabled": true,			// start the CDR Server service:  <true|false>
+	"store_cdrs": false,		// store cdrs in storDb
+	"cdr_replication":[			// replicate the rated CDR to a number of servers
 			{"transport": "*http_jsonrpc", "server": "http://127.0.0.1:12080/jsonrpc"},
 	],
 },

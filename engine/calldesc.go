@@ -408,7 +408,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost for key %s: %v", cd.GetKey(cd.Subject), err))
+		Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
 		return &CallCost{Cost: -1}, err
 	}
 
@@ -503,7 +503,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	if account, err := cd.getAccount(); err != nil || account == nil {
-		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
@@ -531,7 +531,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)
 	//log.Print("HERE: ", cc, err)
 	if err != nil {
-		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetAccountKey(), err))
+		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
 		//return
 	}
 	cost := 0.0
@@ -552,7 +552,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	// lock all group members
 	if account, err := cd.getAccount(); err != nil || account == nil {
-		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
@@ -573,7 +573,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	if account, err := cd.getAccount(); err != nil || account == nil {
-		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
 		//log.Printf("ACC: %+v", account)

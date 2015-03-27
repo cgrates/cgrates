@@ -24,6 +24,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -50,9 +51,8 @@ const (
 	FS_SIP_REQUSER  = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
 )
 
-func NewFSCdr(body []byte) (*FSCdr, error) {
-	fsCdr := new(FSCdr)
-	fsCdr.vars = make(map[string]string)
+func NewFSCdr(body []byte, cgrCfg *config.CGRConfig) (*FSCdr, error) {
+	fsCdr := &FSCdr{cgrCfg: cgrCfg, vars: make(map[string]string)}
 	var err error
 	if err = json.Unmarshal(body, &fsCdr.body); err == nil {
 		if variables, ok := fsCdr.body[FS_CDR_MAP]; ok {
@@ -68,8 +68,9 @@ func NewFSCdr(body []byte) (*FSCdr, error) {
 }
 
 type FSCdr struct {
-	vars map[string]string
-	body map[string]interface{} // keeps the loaded body for extra field search
+	cgrCfg *config.CGRConfig
+	vars   map[string]string
+	body   map[string]interface{} // keeps the loaded body for extra field search
 }
 
 func (fsCdr FSCdr) getCgrId() string {
@@ -78,8 +79,8 @@ func (fsCdr FSCdr) getCgrId() string {
 }
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
-	extraFields := make(map[string]string, len(cfg.CDRSExtraFields))
-	for _, field := range cfg.CDRSExtraFields {
+	extraFields := make(map[string]string, len(fsCdr.cgrCfg.CDRSExtraFields))
+	for _, field := range fsCdr.cgrCfg.CDRSExtraFields {
 		origFieldVal, foundInVars := fsCdr.vars[field.Id]
 		if strings.HasPrefix(field.Id, utils.STATIC_VALUE_PREFIX) { // Support for static values injected in the CDRS. it will show up as {^value:value}
 			foundInVars = true
@@ -127,10 +128,10 @@ func (fsCdr FSCdr) AsStoredCdr() *StoredCdr {
 	storCdr.AccId = fsCdr.vars[FS_UUID]
 	storCdr.CdrHost = fsCdr.vars[FS_IP]
 	storCdr.CdrSource = FS_CDR_SOURCE
-	storCdr.ReqType = utils.FirstNonEmpty(fsCdr.vars[FS_REQTYPE], cfg.DefaultReqType)
+	storCdr.ReqType = utils.FirstNonEmpty(fsCdr.vars[FS_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
 	storCdr.Direction = "*out"
-	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[FS_CSTMID], cfg.DefaultTenant)
-	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[FS_CATEGORY], cfg.DefaultCategory)
+	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[FS_CSTMID], fsCdr.cgrCfg.DefaultTenant)
+	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[FS_CATEGORY], fsCdr.cgrCfg.DefaultCategory)
 	storCdr.Account = utils.FirstNonEmpty(fsCdr.vars[FS_ACCOUNT], fsCdr.vars[FS_USERNAME])
 	storCdr.Subject = utils.FirstNonEmpty(fsCdr.vars[FS_SUBJECT], fsCdr.vars[FS_USERNAME])
 	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[FS_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])

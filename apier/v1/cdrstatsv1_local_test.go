@@ -26,7 +26,6 @@ import (
 	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"os/exec"
 	"path"
 	"reflect"
 	"testing"
@@ -37,7 +36,7 @@ var cdrstCfgPath string
 var cdrstCfg *config.CGRConfig
 var cdrstRpc *rpc.Client
 
-func TestCDRStatsLoadConfig(t *testing.T) {
+func TestCDRStatsLclLoadConfig(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -61,17 +60,9 @@ func TestCDRStatsLclStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	enginePath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		t.Fatal("Cannot find cgr-engine executable")
+	if _, err := engine.StopStartEngine(cdrstCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
 	}
-	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	engine := exec.Command(enginePath, "-config_dir", cdrstCfgPath)
-	if err := engine.Start(); err != nil {
-		t.Fatal("Cannot start cgr-engine: ", err.Error())
-	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
 }
 
 // Connect rpc client to rater

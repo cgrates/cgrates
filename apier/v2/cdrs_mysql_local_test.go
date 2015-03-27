@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -38,8 +37,6 @@ var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for r
 var cdrsCfgPath string
 var cdrsCfg *config.CGRConfig
 var cdrsRpc *rpc.Client
-
-var cmdEngineCdrsMysql *exec.Cmd
 
 func TestV2CdrsMysqlInitConfig(t *testing.T) {
 	if !*testLocal {
@@ -98,8 +95,7 @@ func TestV2CdrsMysqlStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var err error
-	if cmdEngineCdrsMysql, err = engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }

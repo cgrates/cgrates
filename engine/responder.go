@@ -43,7 +43,7 @@ type SessionRun struct {
 type Responder struct {
 	Bal      *balancer2go.Balancer
 	ExitChan chan bool
-	CdrSrv   *CDRS
+	CdrSrv   *CdrServer
 }
 
 /*

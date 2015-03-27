@@ -505,7 +505,7 @@ func TestMySQLSetRatedCdr(t *testing.T) {
 	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
 
 	for _, cdr := range []*StoredCdr{strCdr1, strCdr2, strCdr3} {
-		if err := mysqlDb.SetRatedCdr(cdr, ""); err != nil {
+		if err := mysqlDb.SetRatedCdr(cdr); err != nil {
 			t.Error(err.Error())
 		}
 	}

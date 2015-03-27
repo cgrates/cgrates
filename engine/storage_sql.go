@@ -752,7 +752,7 @@ func (self *SQLStorage) SetCdr(cdr *StoredCdr) error {
 	return nil
 }
 
-func (self *SQLStorage) SetRatedCdr(storedCdr *StoredCdr, extraInfo string) error {
+func (self *SQLStorage) SetRatedCdr(storedCdr *StoredCdr) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

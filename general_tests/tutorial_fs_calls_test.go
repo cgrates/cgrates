@@ -179,8 +179,8 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 		if reply[0].Usage != "67" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
-		if reply[0].Cost != 0.0159 {
-			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
+		if reply[0].Cost != 0.0218 {
+			t.Errorf("Unexpected Cost for CDR: %+v", reply[0].Cost)
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}}
@@ -195,7 +195,7 @@ func TestTutFsCallsCdrs1001(t *testing.T) {
 		if reply[0].Subject != "1002" {
 			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
 		}
-		if reply[0].Cost != 1.2059 {
+		if reply[0].Cost != 1.2334 {
 			t.Errorf("Unexpected Cost for CDR: %+v", reply[0].Cost)
 		}
 	}

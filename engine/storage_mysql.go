@@ -75,6 +75,9 @@ func (self *MySQLStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
 }
 
 func (self *MySQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
+	if cc == nil {
+		return nil
+	}
 	tss, err := json.Marshal(cc.Timespans)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
@@ -103,7 +106,7 @@ func (self *MySQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost)
 	return nil
 }
 
-func (self *MySQLStorage) SetRatedCdr(storedCdr *StoredCdr, extraInfo string) (err error) {
+func (self *MySQLStorage) SetRatedCdr(storedCdr *StoredCdr) (err error) {
 	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,cost,extra_info,created_at) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%v,%f,'%s','%s') ON DUPLICATE KEY UPDATE reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),cost=values(cost),extra_info=values(extra_info), updated_at='%s'",
 		utils.TBL_RATED_CDRS,
 		storedCdr.CgrId,
@@ -119,7 +122,7 @@ func (self *MySQLStorage) SetRatedCdr(storedCdr *StoredCdr, extraInfo string) (e
 		storedCdr.AnswerTime,
 		storedCdr.Usage.Seconds(),
 		storedCdr.Cost,
-		extraInfo,
+		storedCdr.ExtraInfo,
 		time.Now().Format(time.RFC3339),
 		time.Now().Format(time.RFC3339)))
 	if err != nil {

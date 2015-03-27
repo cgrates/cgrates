@@ -185,9 +185,10 @@ type CGRConfig struct {
 	SchedulerEnabled     bool
 	CDRSEnabled          bool                 // Enable CDR Server service
 	CDRSExtraFields      []*utils.RSRField    // Extra fields to store in CDRs
-	CDRSMediator         string               // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CDRSStats            string               // Address where to reach the Mediator. <""|intenal>
-	CDRSStoreDisable     bool                 // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	CDRSStoreCdrs        bool                 // store cdrs in storDb
+	CDRSRater            string               // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
+	CDRSStats            string               // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	CDRSReconnects       int                  // number of reconnects to remote services before giving up
 	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
 	CDRStatsEnabled      bool                 // Enable CDR Stats service
 	CDRStatConfig        *CdrStatsConfig      // Active cdr stats configuration instances, platform level
@@ -196,23 +197,17 @@ type CGRConfig struct {
 	SmFsConfig           *SmFsConfig                       // SM-FreeSWITCH configuration
 	SmKamConfig          *SmKamConfig                      // SM-Kamailio Configuration
 	SmOsipsConfig        *SmOsipsConfig                    // SM-OpenSIPS Configuration
-	MediatorEnabled      bool                              // Starts Mediator service: <true|false>.
-	MediatorReconnects   int                               // Number of reconnects to rater before giving up.
-	MediatorRater        string
-	MediatorStats        string                   // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorStoreDisable bool                     // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	MediCdrReplication   []*CdrReplicationCfg     // Replicate CDRs to a number of servers
-	HistoryAgentEnabled  bool                     // Starts History as an agent: <true|false>.
-	HistoryServer        string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled bool                     // Starts History as server: <true|false>.
-	HistoryDir           string                   // Location on disk where to store history files.
-	HistorySaveInterval  time.Duration            // The timout duration between history writes
-	MailerServer         string                   // The server to use when sending emails out
-	MailerAuthUser       string                   // Authenticate to email server using this user
-	MailerAuthPass       string                   // Authenticate to email server with this password
-	MailerFromAddr       string                   // From address used when sending emails out
-	DataFolderPath       string                   // Path towards data folder, for tests internal usage, not loading out of .json options
-	ConfigReloads        map[string]chan struct{} // Signals to specific entities that a config reload should occur
+	HistoryAgentEnabled  bool                              // Starts History as an agent: <true|false>.
+	HistoryServer        string                            // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled bool                              // Starts History as server: <true|false>.
+	HistoryDir           string                            // Location on disk where to store history files.
+	HistorySaveInterval  time.Duration                     // The timout duration between history writes
+	MailerServer         string                            // The server to use when sending emails out
+	MailerAuthUser       string                            // Authenticate to email server using this user
+	MailerAuthPass       string                            // Authenticate to email server with this password
+	MailerFromAddr       string                            // From address used when sending emails out
+	DataFolderPath       string                            // Path towards data folder, for tests internal usage, not loading out of .json options
+	ConfigReloads        map[string]chan struct{}          // Signals to specific entities that a config reload should occur
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
@@ -240,9 +235,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.CDRSStats == utils.INTERNAL && !self.CDRStatsEnabled {
 		return errors.New("CDRStats not enabled but requested by CDRS component.")
 	}
-	if self.MediatorStats == utils.INTERNAL && !self.CDRStatsEnabled {
-		return errors.New("CDRStats not enabled but requested by Mediator.")
-	}
 	/*
 		if self.SMCdrS == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but requested by SessionManager")
@@ -253,83 +245,98 @@ func (self *CGRConfig) checkConfigSanity() error {
 
 // Loads from json configuration object, will be used for defaults, config from file and reload, might need lock
 func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
+
 	// Load sections out of JSON config, stop on error
 	jsnGeneralCfg, err := jsnCfg.GeneralJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnListenCfg, err := jsnCfg.ListenJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnRatingDbCfg, err := jsnCfg.DbJsonCfg(RATINGDB_JSN)
 	if err != nil {
 		return err
 	}
+
 	jsnAccountingDbCfg, err := jsnCfg.DbJsonCfg(ACCOUNTINGDB_JSN)
 	if err != nil {
 		return err
 	}
+
 	jsnStorDbCfg, err := jsnCfg.DbJsonCfg(STORDB_JSN)
 	if err != nil {
 		return err
 	}
+
 	jsnBalancerCfg, err := jsnCfg.BalancerJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnRaterCfg, err := jsnCfg.RaterJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnSchedCfg, err := jsnCfg.SchedulerJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnCdrsCfg, err := jsnCfg.CdrsJsonCfg()
 	if err != nil {
 		return err
 	}
-	jsnMediatorCfg, err := jsnCfg.MediatorJsonCfg()
-	if err != nil {
-		return err
-	}
+
 	jsnCdrstatsCfg, err := jsnCfg.CdrStatsJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnCdreCfg, err := jsnCfg.CdreJsonCfgs()
 	if err != nil {
 		return err
 	}
+
 	jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnSmFsCfg, err := jsnCfg.SmFsJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnSmKamCfg, err := jsnCfg.SmKamJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnSmOsipsCfg, err := jsnCfg.SmOsipsJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnHistServCfg, err := jsnCfg.HistServJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnHistAgentCfg, err := jsnCfg.HistAgentJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	jsnMailerCfg, err := jsnCfg.MailerJsonCfg()
 	if err != nil {
 		return err
 	}
+
 	// All good, start populating config variables
 	if jsnRatingDbCfg != nil {
 		if jsnRatingDbCfg.Db_type != nil {
@@ -351,6 +358,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.RatingDBPass = *jsnRatingDbCfg.Db_passwd
 		}
 	}
+
 	if jsnAccountingDbCfg != nil {
 		if jsnAccountingDbCfg.Db_type != nil {
 			self.AccountDBType = *jsnAccountingDbCfg.Db_type
@@ -371,6 +379,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.AccountDBPass = *jsnAccountingDbCfg.Db_passwd
 		}
 	}
+
 	if jsnStorDbCfg != nil {
 		if jsnStorDbCfg.Db_type != nil {
 			self.StorDBType = *jsnStorDbCfg.Db_type
@@ -397,6 +406,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.StorDBMaxIdleConns = *jsnStorDbCfg.Max_idle_conns
 		}
 	}
+
 	if jsnGeneralCfg != nil {
 		if jsnGeneralCfg.Dbdata_encoding != nil {
 			self.DBDataEncoding = *jsnGeneralCfg.Dbdata_encoding
@@ -423,6 +433,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.TpExportPath = *jsnGeneralCfg.Tpexport_dir
 		}
 	}
+
 	if jsnListenCfg != nil {
 		if jsnListenCfg.Rpc_json != nil {
 			self.RPCJSONListen = *jsnListenCfg.Rpc_json
@@ -434,6 +445,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.HTTPListen = *jsnListenCfg.Http
 		}
 	}
+
 	if jsnRaterCfg != nil {
 		if jsnRaterCfg.Enabled != nil {
 			self.RaterEnabled = *jsnRaterCfg.Enabled
@@ -442,12 +454,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.RaterBalancer = *jsnRaterCfg.Balancer
 		}
 	}
+
 	if jsnBalancerCfg != nil && jsnBalancerCfg.Enabled != nil {
 		self.BalancerEnabled = *jsnBalancerCfg.Enabled
 	}
+
 	if jsnSchedCfg != nil && jsnSchedCfg.Enabled != nil {
 		self.SchedulerEnabled = *jsnSchedCfg.Enabled
 	}
+
 	if jsnCdrsCfg != nil {
 		if jsnCdrsCfg.Enabled != nil {
 			self.CDRSEnabled = *jsnCdrsCfg.Enabled
@@ -457,14 +472,17 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 				return err
 			}
 		}
-		if jsnCdrsCfg.Mediator != nil {
-			self.CDRSMediator = *jsnCdrsCfg.Mediator
+		if jsnCdrsCfg.Store_cdrs != nil {
+			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
+		}
+		if jsnCdrsCfg.Rater != nil {
+			self.CDRSRater = *jsnCdrsCfg.Rater
 		}
 		if jsnCdrsCfg.Cdrstats != nil {
 			self.CDRSStats = *jsnCdrsCfg.Cdrstats
 		}
-		if jsnCdrsCfg.Store_disable != nil {
-			self.CDRSStoreDisable = *jsnCdrsCfg.Store_disable
+		if jsnCdrsCfg.Reconnects != nil {
+			self.CDRSReconnects = *jsnCdrsCfg.Reconnects
 		}
 		if jsnCdrsCfg.Cdr_replication != nil {
 			self.CDRSCdrReplication = make([]*CdrReplicationCfg, len(*jsnCdrsCfg.Cdr_replication))
@@ -479,9 +497,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 				if rplJsonCfg.Synchronous != nil {
 					self.CDRSCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
 				}
+				if rplJsonCfg.Cdr_filter != nil {
+					if self.CDRSCdrReplication[idx].CdrFilter, err = utils.ParseRSRFields(*rplJsonCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
+						return err
+					}
+				}
 			}
 		}
 	}
+
 	if jsnCdrstatsCfg != nil {
 		if jsnCdrstatsCfg.Enabled != nil {
 			self.CDRStatsEnabled = *jsnCdrstatsCfg.Enabled
@@ -495,6 +519,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			}
 		}
 	}
+
 	if jsnCdreCfg != nil {
 		if self.CdreProfiles == nil {
 			self.CdreProfiles = make(map[string]*CdreConfig)
@@ -511,6 +536,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			}
 		}
 	}
+
 	if jsnCdrcCfg != nil {
 		if self.CdrcProfiles == nil {
 			self.CdrcProfiles = make(map[string]map[string]*CdrcConfig)
@@ -531,51 +557,22 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			}
 		}
 	}
+
 	if jsnSmFsCfg != nil {
 		if err := self.SmFsConfig.loadFromJsonCfg(jsnSmFsCfg); err != nil {
 			return err
 		}
 	}
+
 	if jsnSmKamCfg != nil {
 		if err := self.SmKamConfig.loadFromJsonCfg(jsnSmKamCfg); err != nil {
 			return err
 		}
 	}
+
 	if jsnSmOsipsCfg != nil {
 		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
 			return err
-		}
-	}
-	if jsnMediatorCfg != nil {
-		if jsnMediatorCfg.Enabled != nil {
-			self.MediatorEnabled = *jsnMediatorCfg.Enabled
-		}
-		if jsnMediatorCfg.Reconnects != nil {
-			self.MediatorReconnects = *jsnMediatorCfg.Reconnects
-		}
-		if jsnMediatorCfg.Rater != nil {
-			self.MediatorRater = *jsnMediatorCfg.Rater
-		}
-		if jsnMediatorCfg.Cdrstats != nil {
-			self.MediatorStats = *jsnMediatorCfg.Cdrstats
-		}
-		if jsnMediatorCfg.Store_disable != nil {
-			self.MediatorStoreDisable = *jsnMediatorCfg.Store_disable
-		}
-		if jsnMediatorCfg.Cdr_replication != nil {
-			self.MediCdrReplication = make([]*CdrReplicationCfg, len(*jsnMediatorCfg.Cdr_replication))
-			for idx, rplJsonCfg := range *jsnMediatorCfg.Cdr_replication {
-				self.MediCdrReplication[idx] = new(CdrReplicationCfg)
-				if rplJsonCfg.Transport != nil {
-					self.MediCdrReplication[idx].Transport = *rplJsonCfg.Transport
-				}
-				if rplJsonCfg.Server != nil {
-					self.MediCdrReplication[idx].Server = *rplJsonCfg.Server
-				}
-				if rplJsonCfg.Synchronous != nil {
-					self.MediCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
-				}
-			}
 		}
 	}
 
@@ -587,6 +584,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			self.HistoryServer = *jsnHistAgentCfg.Server
 		}
 	}
+
 	if jsnHistServCfg != nil {
 		if jsnHistServCfg.Enabled != nil {
 			self.HistoryServerEnabled = *jsnHistServCfg.Enabled
@@ -600,6 +598,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			}
 		}
 	}
+
 	if jsnMailerCfg != nil {
 		if jsnMailerCfg.Server != nil {
 			self.MailerServer = *jsnMailerCfg.Server

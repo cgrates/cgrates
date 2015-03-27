@@ -84,6 +84,9 @@ func (self *PostgresStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
 }
 
 func (self *PostgresStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
+	if cc == nil {
+		return nil
+	}
 	tss, err := json.Marshal(cc.Timespans)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
@@ -120,7 +123,7 @@ func (self *PostgresStorage) LogCallCost(cgrid, source, runid string, cc *CallCo
 	return nil
 }
 
-func (self *PostgresStorage) SetRatedCdr(cdr *StoredCdr, extraInfo string) (err error) {
+func (self *PostgresStorage) SetRatedCdr(cdr *StoredCdr) (err error) {
 	tx := self.db.Begin()
 	saved := tx.Save(&TblRatedCdr{
 		Cgrid:       cdr.CgrId,
@@ -136,7 +139,7 @@ func (self *PostgresStorage) SetRatedCdr(cdr *StoredCdr, extraInfo string) (err 
 		AnswerTime:  cdr.AnswerTime,
 		Usage:       cdr.Usage.Seconds(),
 		Cost:        cdr.Cost,
-		ExtraInfo:   extraInfo,
+		ExtraInfo:   cdr.ExtraInfo,
 		CreatedAt:   time.Now(),
 	})
 	if saved.Error != nil {
@@ -144,7 +147,7 @@ func (self *PostgresStorage) SetRatedCdr(cdr *StoredCdr, extraInfo string) (err 
 		tx = self.db.Begin()
 		updated := tx.Model(TblRatedCdr{}).Where(&TblRatedCdr{Cgrid: cdr.CgrId, Runid: cdr.MediationRunId}).Updates(&TblRatedCdr{Reqtype: cdr.ReqType,
 			Direction: cdr.Direction, Tenant: cdr.Tenant, Category: cdr.Category, Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination,
-			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Cost: cdr.Cost, ExtraInfo: extraInfo, UpdatedAt: time.Now()})
+			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Cost: cdr.Cost, ExtraInfo: cdr.ExtraInfo, UpdatedAt: time.Now()})
 		if updated.Error != nil {
 			tx.Rollback()
 			return updated.Error

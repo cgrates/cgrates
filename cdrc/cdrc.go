@@ -81,12 +81,12 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) err
 	return nil
 }
 
-func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS, exitChan chan struct{}) (*Cdrc, error) {
+func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CdrServer, exitChan chan struct{}) (*Cdrc, error) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
 	}
-	cdrc := &Cdrc{cdrsAddress: cdrcCfg.CdrsAddress, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
+	cdrc := &Cdrc{cdrsAddress: cdrcCfg.Cdrs, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		cdrSourceId: cdrcCfg.CdrSourceId, runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator, duMultiplyFactor: cdrcCfg.DataUsageMultiplyFactor,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer, exitChan: exitChan}
 	cdrc.cdrFilters = make([]utils.RSRFields, len(cdrcCfgs))
@@ -119,7 +119,7 @@ type Cdrc struct {
 	cdrFilters       []utils.RSRFields       // Should be in sync with cdrFields on indexes
 	cdrFields        [][]*config.CfgCdrField // Profiles directly connected with cdrFilters
 	httpSkipTlsCheck bool
-	cdrServer        *engine.CDRS // Reference towards internal cdrServer if that is the case
+	cdrServer        *engine.CdrServer // Reference towards internal cdrServer if that is the case
 	httpClient       *http.Client
 	exitChan         chan struct{}
 }

@@ -36,7 +36,7 @@ const (
 	SCHEDULER_JSN    = "scheduler"
 	CDRS_JSN         = "cdrs"
 	MEDIATOR_JSN     = "mediator"
-	CDRSTATS_JSN     = "cdrstats"
+	CDRSTATS_JSN     = "cdr_stats"
 	CDRE_JSN         = "cdre"
 	CDRC_JSN         = "cdrc"
 	SMFS_JSN         = "sm_freeswitch"
@@ -152,18 +152,6 @@ func (self CgrJsonCfg) CdrsJsonCfg() (*CdrsJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(CdrsJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func (self CgrJsonCfg) MediatorJsonCfg() (*MediatorJsonCfg, error) {
-	rawCfg, hasKey := self[MEDIATOR_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(MediatorJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

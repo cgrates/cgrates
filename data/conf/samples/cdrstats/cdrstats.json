@@ -10,17 +10,12 @@
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
-	"mediator": "internal",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	"store_disable": true,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-},
-
-"mediator": {
-	"enabled": true,						// starts Mediator service: <true|false>.
+	"store_cdrs": false,						// store cdrs in storDb
+	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
 	"cdrstats": "internal",							// address where to reach the cdrstats service. Empty to disable stats gathering out of mediated CDRs <""|internal|x.y.z.y:1234>
-	"store_disable": true,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
 },
 
-"cdrstats": {
+"cdr_stats": {
 	"enabled": true,						// starts the cdrstats service: <true|false>
 	"queue_length": 5,						// number of items in the stats buffer
 	"time_window": "0",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow

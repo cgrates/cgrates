@@ -55,23 +55,21 @@ const (
 )
 
 var (
-	cfgDir          = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
-	version         = flag.Bool("version", false, "Prints the application version.")
-	raterEnabled    = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
-	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
-	cdrsEnabled     = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
-	mediatorEnabled = flag.Bool("mediator", false, "Enforce starting of the mediator service overwriting config")
-	pidFile         = flag.String("pid", "", "Write pid file")
-	bal             = balancer2go.NewBalancer()
-	exitChan        = make(chan bool)
-	server          = &engine.Server{}
-	scribeServer    history.Scribe
-	cdrServer       *engine.CDRS
-	cdrStats        *engine.Stats
-	sm              sessionmanager.SessionManager
-	medi            *engine.Mediator
-	cfg             *config.CGRConfig
-	err             error
+	cfgDir       = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
+	version      = flag.Bool("version", false, "Prints the application version.")
+	raterEnabled = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
+	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
+	cdrsEnabled  = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
+	pidFile      = flag.String("pid", "", "Write pid file")
+	bal          = balancer2go.NewBalancer()
+	exitChan     = make(chan bool)
+	server       = &engine.Server{}
+	scribeServer history.Scribe
+	cdrServer    *engine.CdrServer
+	cdrStats     *engine.Stats
+	sm           sessionmanager.SessionManager
+	cfg          *config.CGRConfig
+	err          error
 )
 
 func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, doneChan chan struct{}) {
@@ -88,6 +86,7 @@ func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage
 	close(doneChan)
 }
 
+/*
 func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrDb engine.CdrStorage, cacheChan, chanDone chan struct{}) {
 	var connector engine.Connector
 	if cfg.MediatorRater == utils.INTERNAL {
@@ -123,14 +122,15 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 
 	close(chanDone)
 }
+*/
 
 // Fires up a cdrc instance
-func startCdrc(cdrsChan chan struct{}, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS, closeChan chan struct{}) {
+func startCdrc(cdrsChan chan struct{}, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CdrServer, closeChan chan struct{}) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
 	}
-	if cdrcCfg.CdrsAddress == utils.INTERNAL {
+	if cdrcCfg.Cdrs == utils.INTERNAL {
 		<-cdrsChan // Wait for CDRServer to come up before start processing
 	}
 	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrServer, closeChan)
@@ -285,21 +285,60 @@ func startSmOpenSIPS(responder *engine.Responder, loggerDb engine.LogStorage, ca
 	exitChan <- true
 }
 
-func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage, mediChan, doneChan chan struct{}) {
-	if cfg.CDRSMediator == utils.INTERNAL {
-		<-mediChan // Deadlock if mediator not started
-		if medi == nil {
-			engine.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
+func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engine.Responder, stats *engine.Stats, responderReady, doneChan chan struct{}) {
+	var err error
+	var client *rpcclient.RpcClient
+	// Rater connection init
+	var raterConn engine.Connector
+	if cfg.CDRSRater == utils.INTERNAL {
+		<-responderReady // Wait for the cache to init before start doing queries
+		raterConn = responder
+	} else if len(cfg.CDRSRater) != 0 {
+		for i := 0; i < cfg.CDRSReconnects; i++ {
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSRater, cfg.CDRSReconnects, utils.GOB)
+			if err == nil { //Connected so no need to reiterate
+				break
+			}
+			time.Sleep(time.Duration(i+1) * time.Second)
+		}
+		if err != nil {
+			engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to rater: %s", err.Error()))
 			exitChan <- true
 			return
 		}
+		raterConn = &engine.RPCClientConnector{Client: client}
 	}
-	cdrServer = engine.NewCdrS(cdrDb, medi, cdrStats, cfg)
+	// Stats connection init
+	var statsConn engine.StatsInterface
+	if cfg.CDRSStats == utils.INTERNAL {
+		statsConn = stats
+	} else if len(cfg.CDRSStats) != 0 {
+		if cfg.CDRSRater == cfg.CDRSStats {
+			statsConn = &engine.ProxyStats{Client: client}
+		} else {
+			for i := 0; i < cfg.CDRSReconnects; i++ {
+				client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.CDRSReconnects, utils.GOB)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i+1) * time.Second)
+			}
+			if err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			statsConn = &engine.ProxyStats{Client: client}
+		}
+	}
+
+	cdrServer, _ := engine.NewCdrServer(cfg, logDb, cdrDb, raterConn, statsConn)
+	engine.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHanlersToServer(server)
 	engine.Logger.Info("Registering CDRS RPC service.")
-	cdrSrv := v1.CDRSV1{CdrSrv: cdrServer}
+	cdrSrv := v1.CdrsV1{CdrSrv: cdrServer}
 	server.RpcRegister(&cdrSrv)
-	server.RpcRegister(&v2.CdrsV2{CDRSV1: cdrSrv})
+	server.RpcRegister(&v2.CdrsV2{CdrsV1: cdrSrv})
 	responder.CdrSrv = cdrServer // Make the cdrserver available for internal communication
 	close(doneChan)
 }
@@ -373,10 +412,6 @@ func checkConfigSanity() error {
 		engine.Logger.Crit("The balancer is enabled so it cannot connect to another balancer (change rater/balancer to disabled)!")
 		return errors.New("Improperly configured balancer")
 	}
-	if cfg.CDRSEnabled && cfg.CDRSMediator == utils.INTERNAL && !cfg.MediatorEnabled {
-		engine.Logger.Crit("CDRS cannot connect to mediator, Mediator not enabled in configuration!")
-		return errors.New("Internal Mediator required by CDRS")
-	}
 	if cfg.HistoryServerEnabled && cfg.HistoryServer == utils.INTERNAL && !cfg.HistoryServerEnabled {
 		engine.Logger.Crit("The history agent is enabled and internal and history server is disabled!")
 		return errors.New("Improperly configured history service")
@@ -422,9 +457,6 @@ func main() {
 	if *cdrsEnabled {
 		cfg.CDRSEnabled = *cdrsEnabled
 	}
-	if *mediatorEnabled {
-		cfg.MediatorEnabled = *mediatorEnabled
-	}
 
 	// some consitency checks
 	errCfg := checkConfigSanity()
@@ -455,7 +487,7 @@ func main() {
 		defer accountDb.Close()
 		engine.SetAccountingStorage(accountDb)
 	}
-	if cfg.RaterEnabled || cfg.CDRSEnabled || cfg.MediatorEnabled { // Only connect to storDb if necessary
+	if cfg.RaterEnabled || cfg.CDRSEnabled { // Only connect to storDb if necessary
 		if cfg.StorDBType == SAME {
 			logDb = ratingDb.(engine.LogStorage)
 		} else {
@@ -556,19 +588,12 @@ func main() {
 		go startHistoryAgent(histServChan)
 	}
 
-	var medChan chan struct{}
-	if cfg.MediatorEnabled {
-		engine.Logger.Info("Starting CGRateS Mediator service.")
-		medChan = make(chan struct{})
-		go startMediator(responder, logDb, cdrDb, cacheChan, medChan)
-	}
-
 	var cdrsChan chan struct{}
 	if cfg.CDRSEnabled {
 		engine.Logger.Info("Starting CGRateS CDRS service.")
 		cdrsChan = make(chan struct{})
 		httpWait = append(httpWait, cdrsChan)
-		go startCDRS(responder, cdrDb, medChan, cdrsChan)
+		go startCDRS(logDb, cdrDb, responder, cdrStats, cacheChan, cdrsChan)
 	}
 
 	if cfg.SmFsConfig.Enabled {

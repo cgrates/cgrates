@@ -69,9 +69,10 @@ type SchedulerJsonCfg struct {
 type CdrsJsonCfg struct {
 	Enabled         *bool
 	Extra_fields    *[]string
-	Mediator        *string
+	Store_cdrs      *bool
+	Rater           *string
 	Cdrstats        *string
-	Store_disable   *bool
+	Reconnects      *int
 	Cdr_replication *[]*CdrReplicationJsonCfg
 }
 
@@ -79,16 +80,7 @@ type CdrReplicationJsonCfg struct {
 	Transport   *string
 	Server      *string
 	Synchronous *bool
-}
-
-// Mediator config section
-type MediatorJsonCfg struct {
-	Enabled         *bool
-	Reconnects      *int
-	Rater           *string
-	Cdrstats        *string
-	Store_disable   *bool
-	Cdr_replication *[]*CdrReplicationJsonCfg
+	Cdr_filter  *string
 }
 
 // Cdrstats config section
@@ -149,7 +141,7 @@ type CdreJsonCfg struct {
 // Cdrc config section
 type CdrcJsonCfg struct {
 	Enabled                    *bool
-	Cdrs_address               *string
+	Cdrs                       *string
 	Cdr_format                 *string
 	Field_separator            *string
 	Run_delay                  *int

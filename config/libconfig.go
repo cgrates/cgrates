@@ -18,8 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package config
 
+import (
+	"github.com/cgrates/cgrates/utils"
+)
+
 type CdrReplicationCfg struct {
 	Transport   string
 	Server      string
 	Synchronous bool
+	CdrFilter   utils.RSRFields // Only replicate if the filters here are matching
 }

@@ -26,7 +26,7 @@ import (
 
 type CdrcConfig struct {
 	Enabled                 bool            // Enable/Disable the profile
-	CdrsAddress             string          // The address where CDRs can be reached
+	Cdrs                    string          // The address where CDRs can be reached
 	CdrFormat               string          // The type of CDR file to process <csv>
 	FieldSeparator          rune            // The separator to use when reading csvs
 	DataUsageMultiplyFactor float64         // Conversion factor for data usage
@@ -46,11 +46,8 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Cdrs_address != nil {
-		self.CdrsAddress = *jsnCfg.Cdrs_address
-	}
-	if jsnCfg.Cdrs_address != nil {
-		self.CdrsAddress = *jsnCfg.Cdrs_address
+	if jsnCfg.Cdrs != nil {
+		self.Cdrs = *jsnCfg.Cdrs
 	}
 	if jsnCfg.Cdr_format != nil {
 		self.CdrFormat = *jsnCfg.Cdr_format
@@ -91,7 +88,7 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc := new(CdrcConfig)
 	clnCdrc.Enabled = self.Enabled
-	clnCdrc.CdrsAddress = self.CdrsAddress
+	clnCdrc.Cdrs = self.Cdrs
 	clnCdrc.CdrFormat = self.CdrFormat
 	clnCdrc.FieldSeparator = self.FieldSeparator
 	clnCdrc.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor

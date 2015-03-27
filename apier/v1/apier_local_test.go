@@ -65,7 +65,7 @@ var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path h
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
 
-func TestLoadConfig(t *testing.T) {
+func TestApierLoadConfig(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -76,7 +76,7 @@ func TestLoadConfig(t *testing.T) {
 	}
 }
 
-func TestCreateDirs(t *testing.T) {
+func TestApierCreateDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -92,7 +92,7 @@ func TestCreateDirs(t *testing.T) {
 }
 
 // Empty tables before using them
-func TestCreateTables(t *testing.T) {
+func TestApierCreateTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -118,7 +118,7 @@ func TestCreateTables(t *testing.T) {
 	}
 }
 
-func TestInitDataDb(t *testing.T) {
+func TestApierInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -128,7 +128,7 @@ func TestInitDataDb(t *testing.T) {
 }
 
 // Finds cgr-engine executable and starts it with default configuration
-func TestStartEngine(t *testing.T) {
+func TestApierStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -146,7 +146,7 @@ func TestStartEngine(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestRpcConn(t *testing.T) {
+func TestApierRpcConn(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1205,7 +1205,7 @@ func TestApierGetAccount(t *testing.T) {
 }
 
 // Start with initial balance, top-up to test max_balance
-func TestTriggersExecute(t *testing.T) {
+func TestApierTriggersExecute(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1225,11 +1225,11 @@ func TestTriggersExecute(t *testing.T) {
 }
 
 // Start fresh before loading from folder
-func TestResetDataBeforeLoadFromFolder(t *testing.T) {
+func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	TestInitDataDb(t)
+	TestApierInitDataDb(t)
 	reply := ""
 	arc := new(utils.ApiReloadCache)
 	// Simple test that command is executed without errors
@@ -1272,7 +1272,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
 
-func TestResetDataAfterLoadFromFolder(t *testing.T) {
+func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1310,7 +1310,7 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 }
 
 // Test here ResponderGetCost
-func TestResponderGetCost(t *testing.T) {
+func TestApierResponderGetCost(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1337,7 +1337,7 @@ func TestResponderGetCost(t *testing.T) {
 }
 
 // Test here ResponderGetCost
-func TestGetCallCostLog(t *testing.T) {
+func TestApierGetCallCostLog(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1354,7 +1354,7 @@ func TestGetCallCostLog(t *testing.T) {
 	}
 }
 
-func TestMaxDebitInexistentAcnt(t *testing.T) {
+func TestApierMaxDebitInexistentAcnt(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1378,7 +1378,7 @@ func TestMaxDebitInexistentAcnt(t *testing.T) {
 
 }
 
-func TestCdrServer(t *testing.T) {
+func TestApierCdrServer(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1400,7 +1400,7 @@ func TestCdrServer(t *testing.T) {
 }
 
 /*
-func TestExportCdrsToFile(t *testing.T) {
+func TestApierExportCdrsToFile(t *testing.T) {
     if !*testLocal {
         return
     }
@@ -1437,7 +1437,7 @@ func TestExportCdrsToFile(t *testing.T) {
 }
 */
 
-func TestLocalGetCdrs(t *testing.T) {
+func TestApierLocalGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1450,7 +1450,7 @@ func TestLocalGetCdrs(t *testing.T) {
 	}
 }
 
-func TestLocalProcessCdr(t *testing.T) {
+func TestApierLocalProcessCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1460,7 +1460,7 @@ func TestLocalProcessCdr(t *testing.T) {
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
 	}
-	if err := rater.Call("CDRSV1.ProcessCdr", cdr, &reply); err != nil {
+	if err := rater.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
@@ -1474,7 +1474,7 @@ func TestLocalProcessCdr(t *testing.T) {
 	}
 }
 
-func TestLocalSetDC(t *testing.T) {
+func TestApierLocalSetDC(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1493,7 +1493,7 @@ func TestLocalSetDC(t *testing.T) {
 	}
 }
 
-func TestLocalGetDC(t *testing.T) {
+func TestApierLocalGetDC(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1512,7 +1512,7 @@ func TestLocalGetDC(t *testing.T) {
 	}
 }
 
-func TestLocalRemDC(t *testing.T) {
+func TestApierLocalRemDC(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1525,7 +1525,7 @@ func TestLocalRemDC(t *testing.T) {
 	}
 }
 
-func TestLocalGetRatingSubjectAliases(t *testing.T) {
+func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1537,7 +1537,7 @@ func TestLocalGetRatingSubjectAliases(t *testing.T) {
 	}
 }
 
-func TestLocalAddRatingSubjectAliases(t *testing.T) {
+func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1562,7 +1562,7 @@ func TestLocalAddRatingSubjectAliases(t *testing.T) {
 	}
 }
 
-func TestLocalRemRatingSubjectAliases(t *testing.T) {
+func TestApierLocalRemRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1581,7 +1581,7 @@ func TestLocalRemRatingSubjectAliases(t *testing.T) {
 	}
 }
 
-func TestLocalGetAccountAliases(t *testing.T) {
+func TestApierLocalGetAccountAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1594,7 +1594,7 @@ func TestLocalGetAccountAliases(t *testing.T) {
 	}
 }
 
-func TestLocalAddAccountAliases(t *testing.T) {
+func TestApierLocalAddAccountAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1619,7 +1619,7 @@ func TestLocalAddAccountAliases(t *testing.T) {
 	}
 }
 
-func TestLocalRemAccountAliases(t *testing.T) {
+func TestApierLocalRemAccountAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1638,7 +1638,7 @@ func TestLocalRemAccountAliases(t *testing.T) {
 	}
 }
 
-func TestLocalGetScheduledActions(t *testing.T) {
+func TestApierLocalGetScheduledActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1648,7 +1648,7 @@ func TestLocalGetScheduledActions(t *testing.T) {
 	}
 }
 
-func TestLocalGetDataCost(t *testing.T) {
+func TestApierLocalGetDataCost(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1662,7 +1662,7 @@ func TestLocalGetDataCost(t *testing.T) {
 }
 
 // Simply kill the engine after we are done with tests within this file
-func TestStopEngine(t *testing.T) {
+func TestApierStopEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}

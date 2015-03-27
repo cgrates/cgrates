@@ -11,7 +11,7 @@
 //	"rounding_decimals": 10,				// system level precision for floats
 //	"dbdata_encoding": "msgpack",			// encoding used to store object data in strings: <msgpack|json>
 //	"tpexport_dir": "/var/log/cgrates/tpe",	// path towards export folder for offline Tariff Plans
-//	"default_reqtype": "*rated",			// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
+//	"default_reqtype": "*rated",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
 //	"default_category": "call",				// default Type of Record to consider when missing from requests
 //	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 //	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
@@ -76,22 +76,16 @@
 //"cdrs": {
 //	"enabled": false,						// start the CDR Server service:  <true|false>
 //	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
-//	"mediator": "",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-//	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering from raw CDRs <""|internal|x.y.z.y:1234>
-//	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+//	"rate_cdrs": true,						// enable CDR rating calculation
+//	"store_cdrs": true,						// store cdrs in storDb
+//	"rater": "",							// address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
+//	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+//	"reconnects": 5,						// number of reconnect attempts to rater or cdrs
+//	"cdr_replication":[],					// replicate the raw CDR to a number of servers
 //},
 
 
-//"mediator": {
-//	"enabled": false,						// starts Mediator service: <true|false>.
-//	"reconnects": 3,						// number of reconnects to rater/cdrs before giving up.
-//	"rater": "internal",					// address where to reach the Rater: <internal|x.y.z.y:1234>
-//	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering out of mediated CDRs <""|internal|x.y.z.y:1234>
-//	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-//},
-
-
-//"cdrstats": {
+//"cdr_stats": {
 //	"enabled": false,						// starts the cdrstats service: <true|false>
 //	"queue_length": 50,						// number of items in the stats buffer
 //	"time_window": "1h",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
@@ -153,7 +147,7 @@
 //"cdrc": {
 //	"*default": {
 //		"enabled": false,							// enable CDR client functionality
-//		"cdrs_address": "internal",					// address where to reach CDR server. <internal|x.y.z.y:1234>
+//		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
 //		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv>
 //		"field_separator": ",",						// separator used in case of csv files
 //		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
@@ -179,6 +173,7 @@
 //	}
 //},
 
+
 //"sm_freeswitch": {
 //	"enabled": false,				// starts SessionManager service: <true|false>
 //	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
@@ -193,7 +188,7 @@
 //	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance
 //	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 //	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-//		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": -1}	// reconnects -1 to indefinitely connect
+//		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
 //	],
 //},
 
@@ -207,7 +202,7 @@
 //	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 //	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
 //	"connections":[					// instantiate connections to multiple Kamailio servers
-//		{"evapi_addr": "127.0.0.1:8448", "reconnects": -1}						// reconnects -1 to indefinitely connect
+//		{"evapi_addr": "127.0.0.1:8448", "reconnects": 5}
 //	],
 //},
 
@@ -222,7 +217,7 @@
 //	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 //	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 //	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
-//	"reconnects": -1,					// reconnects -1 to indefinitely connect
+//	"reconnects": 5,					// number of reconnects if connection is lost
 //},
 
 
@@ -247,4 +242,4 @@
 //},
 
 
-//}
+}

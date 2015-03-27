@@ -165,6 +165,7 @@ const (
 	LOG_MEDIATED_CDR             = "mcd_"
 	SESSION_MANAGER_SOURCE       = "SMR"
 	MEDIATOR_SOURCE              = "MED"
+	CDRS_SOURCE                  = "CDRS"
 	SCHED_SOURCE                 = "SCH"
 	RATER_SOURCE                 = "RAT"
 	CREATE_CDRS_TABLES_SQL       = "create_cdrs_tables.sql"

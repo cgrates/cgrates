@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
+/*
 import (
 	"flag"
 	"fmt"
@@ -34,19 +35,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-/*
-README:
 
- Enable local tests by passing '-local' to the go test command
- It is expected that the data folder of CGRateS exists at path /usr/share/cgrates/data or passed via command arguments.
- Prior running the tests, create database and users by running:
-  mysql -pyourrootpwd < /usr/share/cgrates/data/storage/mysql/create_db_with_users.sql
- What these tests do:
-  * Flush tables in storDb to start clean.
-  * Start engine with default configuration and give it some time to listen (here caching can slow down, hence the command argument parameter).
-  * Connect rpc client depending on encoding defined in configuration.
-  * Execute remote Apis and test their replies(follow prepaid1cent scenario so we can test load in dataDb also).
-*/
 
 var cgrCfg *config.CGRConfig
 var cgrRpc *rpc.Client
@@ -57,7 +46,7 @@ var storDbType = flag.String("stordb_type", utils.MYSQL, "The type of the storDb
 var startDelay = flag.Int("delay_start", 300, "Number of miliseconds to it for rater to start and cache")
 var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator1")
 
-func TestMediInitRatingDb(t *testing.T) {
+func TestMediInitConfig(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -66,12 +55,14 @@ func TestMediInitRatingDb(t *testing.T) {
 	if err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
-	ratingDb, err := ConfigureRatingStorage(cgrCfg.RatingDBType, cgrCfg.RatingDBHost, cgrCfg.RatingDBPort, cgrCfg.RatingDBName, cgrCfg.RatingDBUser, cgrCfg.RatingDBPass, cgrCfg.DBDataEncoding)
-	if err != nil {
-		t.Fatal("Cannot connect to dataDb", err)
+}
+
+func TestMediInitDataDb(t *testing.T) {
+	if !*testLocal {
+		return
 	}
-	if err := ratingDb.Flush(""); err != nil {
-		t.Fatal("Cannot reset dataDb", err)
+	if err := InitDataDb(cgrCfg); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -107,18 +98,9 @@ func TestMediStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	enginePath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		t.Fatal("Cannot find cgr-engine executable")
+	if _, err := StartEngine(cfgPath, *startDelay); err != nil {
+		t.Fatal(err)
 	}
-	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	time.Sleep(time.Duration(*startDelay) * time.Millisecond)
-	engine := exec.Command(enginePath, "-config_dir", cfgPath)
-	if err := engine.Start(); err != nil {
-		t.Fatal("Cannot start cgr-engine: ", err.Error())
-	}
-
-	time.Sleep(time.Duration(*startDelay) * time.Millisecond) // Give time to rater to fire up
 	httpClient = new(http.Client)
 }
 
@@ -142,13 +124,13 @@ func TestMediPostCdrs(t *testing.T) {
 	cdrForm1 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED}, utils.DIRECTION: []string{"*out"},
 		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"2001"}, utils.SUBJECT: []string{"2001"},
 		utils.DESTINATION: []string{"+4986517174963"},
-		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+		utils.ANSWER_TIME: []string{"2014-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	cdrForm2 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED}, utils.DIRECTION: []string{"*out"},
 		utils.TENANT: []string{"itsyscom.com"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1003"}, utils.SUBJECT: []string{"1003"}, utils.DESTINATION: []string{"+4986517174964"},
-		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+		utils.ANSWER_TIME: []string{"2014-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	cdrFormData1 := url.Values{utils.TOR: []string{utils.DATA}, utils.ACCID: []string{"616350843"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED},
 		utils.DIRECTION: []string{"*out"}, utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"data"},
-		utils.ACCOUNT: []string{"1010"}, utils.SUBJECT: []string{"1010"}, utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"},
+		utils.ACCOUNT: []string{"1010"}, utils.SUBJECT: []string{"1010"}, utils.ANSWER_TIME: []string{"2014-11-07T08:42:26Z"},
 		utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2, cdrFormData1} {
 		cdrForm.Set(utils.CDRSOURCE, TEST_SQL)
@@ -174,12 +156,12 @@ func TestMediInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
+	cgrCdr1 := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": "TEST_INJECT", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517174963",
-		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "10"}
-	cgrCdr2 := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
+		utils.ANSWER_TIME: "2014-11-07T08:42:26Z", utils.USAGE: "10"}
+	cgrCdr2 := CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": "TEST_INJECT", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517173964",
-		utils.ANSWER_TIME: "2013-11-07T09:42:26Z", utils.USAGE: "20"}
+		utils.ANSWER_TIME: "2014-11-07T09:42:26Z", utils.USAGE: "20"}
 	for _, cdr := range []CgrCdr{cgrCdr1, cgrCdr2} {
 		if err := cdrStor.SetCdr(cdr.AsStoredCdr()); err != nil {
 			t.Error(err)
@@ -204,7 +186,7 @@ func TestMediLoadTariffPlanFromFolder(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := cgrRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
@@ -212,12 +194,13 @@ func TestMediLoadTariffPlanFromFolder(t *testing.T) {
 	}
 }
 
+/*
 func TestMediRateCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var reply string
-	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{}, &reply); err != nil {
+	if err := cgrRpc.Call("CdrsV1.RateCdrs", utils.AttrRateCdrs{}, &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
@@ -232,7 +215,7 @@ func TestMediRateCdrs(t *testing.T) {
 	} else if len(errRatedCdrs) != 1 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
-	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{RerateErrors: true}, &reply); err != nil {
+	if err := cgrRpc.Call("CdrsV1.RateCdrs", utils.AttrRateCdrs{RerateErrors: true}, &reply); err != nil {
 		t.Error(err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
@@ -244,41 +227,6 @@ func TestMediRateCdrs(t *testing.T) {
 	}
 }
 
-/*
-func TestMediatePseudoprepaid(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003", Direction: "*out"}
-	if err := cgrRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 11 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
-	}
-	voiceCdr := &utils.StoredCdr{TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PSEUDOPREPAID, Direction: utils.OUT,
-		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "+4986517174963",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(5) * time.Second}
-	dataCdr := &utils.StoredCdr{TOR: utils.DATA, AccId: "6163508432", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PSEUDOPREPAID, Direction: utils.OUT,
-		Tenant: "cgrates.org", Category: "data", Account: "1003", Subject: "1003",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second}
-	for _, cdrForm := range []url.Values{voiceCdr.AsHttpForm(), dataCdr.AsHttpForm()} {
-		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
-		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", cfg.HTTPListen), cdrForm); err != nil {
-			t.Error(err.Error())
-		}
-	}
-	time.Sleep(time.Duration(*startDelay) * time.Millisecond) // Give time for debits to happen
-	expectBalance := 5.998
-	if err := cgrRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != expectBalance { // 5 from voice, 0.002 from DATA
-		t.Errorf("Calling ApierV1.GetBalance expected: %f, received: %f", expectBalance, reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
-	}
-}
-*/
 
 // Simply kill the engine after we are done with tests within this file
 func TestMediStopEngine(t *testing.T) {
@@ -287,3 +235,4 @@ func TestMediStopEngine(t *testing.T) {
 	}
 	exec.Command("pkill", "cgr-engine").Run()
 }
+*/
