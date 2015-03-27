@@ -46,6 +46,7 @@ const (
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_cgr_tenant"
 	CALL_DEST_NR       = "Caller-Destination-Number"
+	SIP_REQ_USER       = "variable_sip_req_user"
 	PARK_TIME          = "Caller-Profile-Created-Time"
 	SETUP_TIME         = "Caller-Channel-Created-Time"
 	ANSWER_TIME        = "Caller-Channel-Answered-Time"
@@ -115,9 +116,9 @@ func (fsev FSEvent) GetDestination(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[DESTINATION], fsev[CALL_DEST_NR])
+		return utils.FirstNonEmpty(fsev[DESTINATION], fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[DESTINATION], fsev[CALL_DEST_NR])
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[DESTINATION], fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 }
 
 // Original dialed destination number, useful in case of unpark
@@ -125,9 +126,9 @@ func (fsev FSEvent) GetCallDestNr(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else if fieldName == utils.META_DEFAULT {
-		return fsev[CALL_DEST_NR]
+		return utils.FirstNonEmpty(fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[CALL_DEST_NR])
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 }
 func (fsev FSEvent) GetCategory(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value

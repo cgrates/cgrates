@@ -1,4 +1,5 @@
 make deb:
 	cd ..;\
 	ln -sf packages/debian . ;\
-	dpkg-buildpackage -us -uc
+	dpkg-buildpackage -rfakeroot -tc; \
+	rm debian
