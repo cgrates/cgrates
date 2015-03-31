@@ -141,10 +141,9 @@ SG3,*any,*lowest,
 `
 
 	lcrs = `
-*in,cgrates.org,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
-*in,cgrates.org,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
+cgrates.org,call,*in,*any,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
+cgrates.org,call,*in,*any,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
 `
-
 	actions = `
 MINI,*topup_reset,,,*monetary,*out,,,,,*unlimited,,10,10,10
 MINI,*topup,,,*voice,*out,,NAT,test,,*unlimited,,100,10,10
@@ -809,35 +808,37 @@ func TestLoadLCRs(t *testing.T) {
 		t.Error("Failed to load LCRs: ", csvr.lcrs)
 	}
 
-	lcr := csvr.lcrs["*in:cgrates.org:*any"]
+	lcr := csvr.lcrs["*in:cgrates.org:call:*any:*any"]
 	expected := &LCR{
-		Direction: "*in",
 		Tenant:    "cgrates.org",
-		Customer:  "*any",
+		Category:  "call",
+		Direction: "*in",
+		Account:   "*any",
+		Subject:   "*any",
 		Activations: []*LCRActivation{
 			&LCRActivation{
 				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
 					&LCREntry{
-						DestinationId: "EU_LANDLINE",
-						Category:      "LCR_STANDARD",
-						Strategy:      "*static",
-						Suppliers:     "ivo;dan;rif",
-						Weight:        10,
+						DestinationId:  "EU_LANDLINE",
+						RPCategory:     "LCR_STANDARD",
+						Strategy:       "*static",
+						StrategyParams: "ivo;dan;rif",
+						Weight:         10,
 					},
 					&LCREntry{
-						DestinationId: "*any",
-						Category:      "LCR_STANDARD",
-						Strategy:      "*lowest_cost",
-						Suppliers:     "",
-						Weight:        20,
+						DestinationId:  "*any",
+						RPCategory:     "LCR_STANDARD",
+						Strategy:       "*lowest_cost",
+						StrategyParams: "",
+						Weight:         20,
 					},
 				},
 			},
 		},
 	}
 	if !reflect.DeepEqual(lcr, expected) {
-		t.Errorf("Error loading lcr %+v: ", lcr.Activations)
+		t.Errorf("Error loading lcr %+v: ", lcr)
 	}
 }
 

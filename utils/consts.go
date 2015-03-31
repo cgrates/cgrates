@@ -65,7 +65,7 @@ const (
 	DESTRATE_TIMINGS_NRCOLS      = 4
 	RATE_PROFILES_NRCOLS         = 7
 	SHARED_GROUPS_NRCOLS         = 4
-	LCRS_NRCOLS                  = 9
+	LCRS_NRCOLS                  = 11
 	ACTIONS_NRCOLS               = 15
 	ACTION_PLANS_NRCOLS          = 4
 	ACTION_TRIGGERS_NRCOLS       = 19

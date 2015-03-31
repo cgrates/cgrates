@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"sort"
 	"time"
 
@@ -34,9 +33,11 @@ const (
 )
 
 type LCR struct {
-	Direction   string
 	Tenant      string
-	Customer    string
+	Category    string
+	Direction   string
+	Account     string
+	Subject     string
 	Activations []*LCRActivation
 }
 type LCRActivation struct {
@@ -44,12 +45,12 @@ type LCRActivation struct {
 	Entries        []*LCREntry
 }
 type LCREntry struct {
-	DestinationId string
-	Category      string
-	Strategy      string
-	Suppliers     string
-	Weight        float64
-	precision     int
+	DestinationId  string
+	RPCategory     string
+	Strategy       string
+	StrategyParams string
+	Weight         float64
+	precision      int
 }
 
 type LCRCost struct {
@@ -69,7 +70,7 @@ type LCRSupplierCost struct {
 }
 
 func (lcr *LCR) GetId() string {
-	return fmt.Sprintf("%s:%s:%s", lcr.Direction, lcr.Tenant, lcr.Customer)
+	return utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcr.Category, lcr.Account, lcr.Subject)
 }
 
 func (lcr *LCR) Len() int {
