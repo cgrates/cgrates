@@ -243,7 +243,7 @@ CREATE TABLE tp_lcr_rules (
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP
 );
-CREATE INDEX tplcr_idx ON tp_lcr_rules (tpid,direction,tenant,customer,destination_tag);
+CREATE INDEX tplcr_idx ON tp_lcr_rules (tpid,tenant,category,direction,account,subject,destination_tag);
 
 --
 -- Table structure for table `tp_derived_chargers`
