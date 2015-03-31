@@ -93,6 +93,16 @@ func NewCGRConfigFromJsonString(cfgJsonStr string) (*CGRConfig, error) {
 	return cfg, nil
 }
 
+func NewCGRConfigFromJsonStringWithDefaults(cfgJsonStr string) (*CGRConfig, error) {
+	cfg, _ := NewDefaultCGRConfig()
+	if jsnCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(cfgJsonStr)); err != nil {
+		return nil, err
+	} else if err := cfg.loadFromJsonCfg(jsnCfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
 func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 	cfg, err := NewDefaultCGRConfig()

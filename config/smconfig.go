@@ -28,7 +28,8 @@ func NewDfltFsConnConfig() *FsConnConfig {
 	if dfltFsConnConfig == nil {
 		return new(FsConnConfig) // No defaults, most probably we are building the defaults now
 	}
-	return dfltFsConnConfig
+	dfltVal := *dfltFsConnConfig // Copy the value instead of it's pointer
+	return &dfltVal
 }
 
 // One connection to FreeSWITCH server
@@ -136,7 +137,8 @@ func NewDfltKamConnConfig() *KamConnConfig {
 	if dfltKamConnConfig == nil {
 		return new(KamConnConfig) // No defaults, most probably we are building the defaults now
 	}
-	return dfltKamConnConfig
+	dfltVal := *dfltKamConnConfig
+	return &dfltVal
 }
 
 // Represents one connection instance towards Kamailio
