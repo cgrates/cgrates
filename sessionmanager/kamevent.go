@@ -306,6 +306,10 @@ func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, authErr error) (*KamA
 	if kar.TransactionLabel, err = strconv.Atoi(kev[KAM_TR_LABEL]); err != nil {
 		return nil, err
 	}
+	if maxSessionTime != -1 { // Convert maxSessionTime from nanoseconds into seconds
+		maxSessionDur := time.Duration(maxSessionTime)
+		maxSessionTime = maxSessionDur.Seconds()
+	}
 	kar.MaxSessionTime = int(utils.Round(maxSessionTime, 0, utils.ROUNDING_MIDDLE))
 	kar.AuthError = authErr
 
