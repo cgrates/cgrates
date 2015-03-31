@@ -165,24 +165,16 @@ func PjsuaCallUri(acnt *PjsuaAccount, dstUri, outboundUri string, callDur time.D
 	return nil
 }
 
-func KillFreeSWITCH(waitMs int) error {
-	if err := exec.Command("pkill", "freeswitch").Run(); err != nil {
+func KillProcName(procName string, waitMs int) error {
+	if err := exec.Command("pkill", procName).Run(); err != nil {
 		return err
 	}
 	time.Sleep(time.Duration(waitMs) * time.Millisecond)
 	return nil
 }
 
-func StopFreeSWITCH(scriptPath string, waitStop int) error {
-	if err := exec.Command(scriptPath, "stop").Run(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func StartFreeSWITCH(scriptPath string, waitMs int) error {
-	KillFreeSWITCH(1000)
-	if err := exec.Command(scriptPath, "start").Run(); err != nil {
+func CallScript(scriptPath string, subcommand string, waitMs int) error {
+	if err := exec.Command(scriptPath, subcommand).Run(); err != nil {
 		return err
 	}
 	time.Sleep(time.Duration(waitMs) * time.Millisecond) // Give time to rater to fire up

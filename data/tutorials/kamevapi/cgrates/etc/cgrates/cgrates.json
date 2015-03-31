@@ -77,18 +77,6 @@
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
 //	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
-//	"rate_cdrs": true,						// enable CDR rating calculation
-//	"store_cdrs": true,						// store cdrs in storDb
-	"rater": "internal",					// address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	"cdrstats": "internal",					// address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
-//	"reconnects": 5,						// number of reconnect attempts to rater or cdrs
-//	"cdr_replication":[],					// replicate the raw CDR to a number of servers
-},
-
-
-"cdrs": {
-	"enabled": true,						// start the CDR Server service:  <true|false>
-//	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 //	"store_cdrs": true,						// store cdrs in storDb
 	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
 	"cdrstats": "internal",					// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
@@ -131,7 +119,7 @@
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
 		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
 		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_dir": "/tmp/cgr_fsevsock/cgrates/cdre",			// path where the exported CDRs will be placed
+		"export_dir": "/tmp/cgr_kamevapi/cgrates/cdre",			// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
 			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
@@ -185,37 +173,37 @@
 //},
 
 
-"sm_freeswitch": {
-	"enabled": true,				// starts SessionManager service: <true|false>
-	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+//"sm_freeswitch": {
+//	"enabled": false,				// starts SessionManager service: <true|false>
+//	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
+//	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 //	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 //	"cdr_extra_fields": [],			// extra fields to store in CDRs in case of processing them
-	"debit_interval": "5s",			// interval to perform debits on.
+//	"debit_interval": "10s",		// interval to perform debits on.
 //	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 //	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
 //	"min_dur_low_balance": "5s",	// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
 //	"low_balance_ann_file": "",		// file to be played when low balance is reached for prepaid calls
 //	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance
 //	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 15}
-	],
-},
+//	"connections":[					// instantiate connections to multiple FreeSWITCH servers
+//		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
+//	],
+//},
 
 
-//"sm_kamailio": {
-//	"enabled": false,				// starts SessionManager service: <true|false>
+"sm_kamailio": {
+	"enabled": true,				// starts SessionManager service: <true|false>
 //	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-//	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 //	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 //	"debit_interval": "10s",		// interval to perform debits on.
 //	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 //	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
 //	"connections":[					// instantiate connections to multiple Kamailio servers
-//		{"evapi_addr": "127.0.0.1:8448", "reconnects": -1}						// reconnects -1 to indefinitely connect
+//		{"evapi_addr": "127.0.0.1:8448", "reconnects": 5}						// reconnects -1 to indefinitely connect
 //	],
-//},
+},
 
 
 //"sm_opensips": {
@@ -235,7 +223,7 @@
 
 "history_server": {
 	"enabled": true,									// starts History service: <true|false>.
-	"history_dir": "/tmp/cgr_fsevsock/cgrates/history",	// location on disk where to store history files.
+	"history_dir": "/tmp/cgr_kamevapi/cgrates/history",	// location on disk where to store history files.
 //	"save_interval": "1s",								// interval to save changed cache into .git archive
 },
 
