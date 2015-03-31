@@ -482,8 +482,8 @@ func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
 				if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 					buffer.WriteRune(',')
 				}
-				buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s','%v','%v', '%v')",
-					tpid, lcr.Direction, lcr.Tenant, lcr.Customer, entry.DestinationId, entry.Category, entry.Strategy, entry.Suppliers, act.ActivationTime, entry.Weight))
+				buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%v', '%v')",
+					tpid, lcr.Tenant, lcr.Category, lcr.Direction, lcr.Account, lcr.Subject, entry.DestinationId, entry.RPCategory, entry.Strategy, entry.RPCategory, act.ActivationTime, entry.Weight))
 				i++
 			}
 		}
@@ -1379,19 +1379,21 @@ func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var id int
-		var tpid, direction, tenant, customer, destinationId, category, strategy, suppliers, activationTimeString string
+		var tpid, tenant, category, direction, account, subject, destinationId, rpCategory, strategy, strategyParams, suppliers, activationTimeString string
 		var weight float64
-		if err := rows.Scan(&id, &tpid, &direction, &tenant, &customer, &destinationId, &category, &strategy, &suppliers, &activationTimeString, &weight); err != nil {
+		if err := rows.Scan(&id, &tpid, &tenant, &category, &direction, &account, &subject, &destinationId, &rpCategory, &strategy, &strategyParams, &suppliers, &activationTimeString, &weight); err != nil {
 			return nil, err
 		}
-		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, customer)
+		tag := utils.ConcatenatedKey(direction, tenant, category, account, subject)
 		lcr, found := lcrs[tag]
 		activationTime, _ := utils.ParseTimeDetectLayout(activationTimeString)
 		if !found {
 			lcr = &LCR{
-				Direction: direction,
 				Tenant:    tenant,
-				Customer:  customer,
+				Category:  category,
+				Direction: direction,
+				Account:   account,
+				Subject:   subject,
 			}
 		}
 		var act *LCRActivation
@@ -1408,11 +1410,11 @@ func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {
 			lcr.Activations = append(lcr.Activations, act)
 		}
 		act.Entries = append(act.Entries, &LCREntry{
-			DestinationId: destinationId,
-			Category:      category,
-			Strategy:      strategy,
-			Suppliers:     suppliers,
-			Weight:        weight,
+			DestinationId:  destinationId,
+			RPCategory:     category,
+			Strategy:       strategy,
+			StrategyParams: strategyParams,
+			Weight:         weight,
 		})
 		lcrs[tag] = lcr
 	}

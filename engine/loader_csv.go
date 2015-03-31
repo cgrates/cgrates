@@ -608,22 +608,24 @@ func (csvr *CSVReader) LoadLCRs() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		direction, tenant, customer := record[0], record[1], record[2]
-		id := fmt.Sprintf("%s:%s:%s", direction, tenant, customer)
+		tenant, category, direction, account, subject := record[0], record[1], record[2], record[3], record[4]
+		id := utils.ConcatenatedKey(direction, tenant, category, account, subject)
 		lcr, found := csvr.lcrs[id]
-		activationTime, err := utils.ParseTimeDetectLayout(record[7])
+		activationTime, err := utils.ParseTimeDetectLayout(record[9])
 		if err != nil {
 			return fmt.Errorf("Could not parse LCR activation time: %v", err)
 		}
-		weight, err := strconv.ParseFloat(record[8], 64)
+		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {
 			return fmt.Errorf("Could not parse LCR weight: %v", err)
 		}
 		if !found {
 			lcr = &LCR{
-				Direction: direction,
 				Tenant:    tenant,
-				Customer:  customer,
+				Category:  category,
+				Direction: direction,
+				Account:   account,
+				Subject:   subject,
 			}
 		}
 		var act *LCRActivation
@@ -640,11 +642,11 @@ func (csvr *CSVReader) LoadLCRs() (err error) {
 			lcr.Activations = append(lcr.Activations, act)
 		}
 		act.Entries = append(act.Entries, &LCREntry{
-			DestinationId: record[3],
-			Category:      record[4],
-			Strategy:      record[5],
-			Suppliers:     record[6],
-			Weight:        weight,
+			DestinationId:  record[5],
+			RPCategory:     record[6],
+			Strategy:       record[7],
+			StrategyParams: record[8],
+			Weight:         weight,
 		})
 		csvr.lcrs[id] = lcr
 	}

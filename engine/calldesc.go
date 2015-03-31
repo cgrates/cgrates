@@ -692,8 +692,8 @@ func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
 	}
 	for _, ts := range lcrCost.TimeSpans {
 		if ts.Entry.Strategy == LCR_STRATEGY_STATIC {
-			for _, supplier := range strings.Split(ts.Entry.Suppliers, ";") {
-				supplier = strings.TrimSpace(supplier)
+			for _, param := range strings.Split(ts.Entry.StrategyParams, ";") {
+				supplier := strings.TrimSpace(param)
 				lcrCD := cd.Clone()
 				lcrCD.Subject = supplier
 				if cc, err := lcrCD.GetCost(); err != nil || cc == nil {
@@ -710,7 +710,7 @@ func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
 			}
 		} else {
 			// find rating profiles
-			ratingProfileSearchKey := fmt.Sprintf("%s:%s:%s:", lcr.Direction, lcr.Tenant, ts.Entry.Category)
+			ratingProfileSearchKey := fmt.Sprintf("%s:%s:%s:", lcr.Direction, lcr.Tenant, ts.Entry.RPCategory)
 			suppliers := cache2go.GetEntriesKeys(LCR_PREFIX + ratingProfileSearchKey)
 			for _, supplier := range suppliers {
 				split := strings.Split(supplier, ":")
