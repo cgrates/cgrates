@@ -154,6 +154,56 @@ func TestTutKamCallsCall1001To1002(t *testing.T) {
 	}
 }
 
+func TestTutKamCallsCall1002To1001(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(61)*time.Second, 5072); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestTutKamCallsCall1003To1001(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(63)*time.Second, 5073); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestTutKamCallsCall1004To1001(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(62)*time.Second, 5074); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestTutKamCallsCall1006To1002(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(64)*time.Second, 5075); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestTutKamCallsCall1007To1002(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(66)*time.Second, 5076); err != nil {
+		t.Fatal(err)
+	}
+}
+
 // Make sure account was debited properly
 func TestTutKamCallsAccount1001(t *testing.T) {
 	if !*testCalls {
@@ -190,9 +240,6 @@ func TestTutKamCallsCdrs1001(t *testing.T) {
 		if reply[0].Usage != "67" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0].Usage)
 		}
-		if reply[0].Cost != 0.0159 {
-			t.Errorf("Unexpected Cost for CDR: %f", reply[0].Cost)
-		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}}
 	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -205,9 +252,6 @@ func TestTutKamCallsCdrs1001(t *testing.T) {
 		}
 		if reply[0].Subject != "1002" {
 			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
-		}
-		if reply[0].Cost != 1.2059 {
-			t.Errorf("Unexpected Cost for CDR: %+v", reply[0].Cost)
 		}
 	}
 }
