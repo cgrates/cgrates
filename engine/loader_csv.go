@@ -537,7 +537,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 				csvr.rpAliases[utils.RatingSubjectAliasKey(tenant, alias)] = subject
 			}
 		}
-		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
+		key := utils.ConcatenatedKey(direction, tenant, tor, subject)
 		rp, ok := csvr.ratingProfiles[key]
 		if !ok {
 			rp = &RatingProfile{Id: key}
@@ -878,7 +878,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 				csvr.accAliases[utils.AccountAliasKey(tenant, alias)] = account
 			}
 		}
-		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
+		tag := utils.ConcatenatedKey(direction, tenant, account)
 		if _, alreadyDefined := csvr.accountActions[tag]; alreadyDefined {
 			return fmt.Errorf("Duplicate account action found: %s", tag)
 		}

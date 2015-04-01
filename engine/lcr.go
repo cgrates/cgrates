@@ -20,6 +20,8 @@ package engine
 
 import (
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -27,9 +29,11 @@ import (
 )
 
 const (
-	LCR_STRATEGY_STATIC  = "*static"
-	LCR_STRATEGY_LOWEST  = "*lowest"
-	LCR_STRATEGY_HIGHEST = "*highest"
+	LCR_STRATEGY_STATIC             = "*static"
+	LCR_STRATEGY_LOWEST             = "*lowest_cost"
+	LCR_STRATEGY_HIGHEST            = "*highest_cost"
+	LCR_STRATEGY_QOS_WITH_THRESHOLD = "*qos_with_threshold"
+	LCR_STRATEGY_QOS                = "*qos"
 )
 
 type LCR struct {
@@ -87,6 +91,35 @@ func (lcr *LCR) Less(i, j int) bool {
 
 func (lcr *LCR) Sort() {
 	sort.Sort(lcr)
+}
+
+func (le *LCREntry) GetSuppliers() []string {
+	suppliers := strings.Split(le.StrategyParams, ";")
+	for i := 0; i < len(suppliers); i++ {
+		suppliers[i] = strings.TrimSpace(suppliers[i])
+	}
+	return suppliers
+}
+
+func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minACD, maxACD time.Duration) {
+	// MIN_ASR;MAX_ASR;MIN_ACD;MAX_ACD
+	params := strings.Split(le.StrategyParams, ";")
+	if len(params) == 4 {
+		var err error
+		if minASR, err = strconv.ParseFloat(params[0], 64); err != nil {
+			minASR = -1
+		}
+		if maxASR, err = strconv.ParseFloat(params[1], 64); err != nil {
+			maxASR = -1
+		}
+		if minACD, err = time.ParseDuration(params[2]); err != nil {
+			minACD = -1
+		}
+		if maxACD, err = time.ParseDuration(params[3]); err != nil {
+			maxACD = -1
+		}
+	}
+	return
 }
 
 type LCREntriesSorter []*LCREntry
