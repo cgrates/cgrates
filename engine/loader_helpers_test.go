@@ -56,9 +56,9 @@ DUMMY,INVALID;DATA
 `
 
 var ratingProfilesSample = `#Tenant,TOR,Direction,Subject,ActivationTime,RatingPlanTag,FallbackSubject
-*out,cgrates.org,call,*any,2012-01-01T00:00:00Z,RP_RETAIL,
+*out,cgrates.org,call,*any,2012-01-01T00:00:00Z,RP_RETAIL,,
 DUMMY,INVALID;DATA
-*out,cgrates.org,call,subj1;alias1,2012-01-01T00:00:00Z,RP_RETAIL,
+*out,cgrates.org,call,subj1;alias1,2012-01-01T00:00:00Z,RP_RETAIL,,
 `
 
 var actionsSample = `#ActionsTag[0],Action[1],ExtraParameters[2],BalanceTag[3],BalanceType[4],Direction[5],Category[6],DestinationTag[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingTags[11],Units[12],BalanceWeight[13],Weight[14]

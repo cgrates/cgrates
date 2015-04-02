@@ -50,9 +50,9 @@ DR_SMS_1,*any,RT_SMS_5c,*up,4,0,`
 	ratingPlans := `RP_RETAIL,DR_RETAIL,ALWAYS,10
 RP_DATA1,DR_DATA_1,ALWAYS,10
 RP_SMS1,DR_SMS_1,ALWAYS,10`
-	ratingProfiles := `*out,cgrates.org,call,*any,2012-01-01T00:00:00Z,RP_RETAIL,
-*out,cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,
-*out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
+	ratingProfiles := `*out,cgrates.org,call,*any,2012-01-01T00:00:00Z,RP_RETAIL,,
+*out,cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,,
+*out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,,`
 	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		"", "", "", "", "", "", "", "")
 	if err := csvr.LoadTimings(); err != nil {

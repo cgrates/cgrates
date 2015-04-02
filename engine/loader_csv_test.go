@@ -113,26 +113,26 @@ RP_MX,MX_DISC,WORKDAYS_00,10
 RP_MX,MX_FREE,WORKDAYS_18,10
 `
 	ratingProfiles = `
-*out,CUSTOMER_1,0,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb
-*out,CUSTOMER_1,0,rif:from:tm,2012-02-28T00:00:00Z,STANDARD,danb
-*out,CUSTOMER_2,0,danb:87.139.12.167,2012-01-01T00:00:00Z,STANDARD,danb
-*out,CUSTOMER_1,0,danb,2012-01-01T00:00:00Z,PREMIUM,
-*out,vdf,0,rif,2012-01-01T00:00:00Z,EVENING,
-*out,vdf,0,rif,2012-02-28T00:00:00Z,EVENING,
-*out,vdf,0,minu;a1;a2;a3,2012-01-01T00:00:00Z,EVENING,
-*out,vdf,0,*any,2012-02-28T00:00:00Z,EVENING,
-*out,vdf,0,one,2012-02-28T00:00:00Z,STANDARD,
-*out,vdf,0,inf,2012-02-28T00:00:00Z,STANDARD,inf
-*out,vdf,0,fall,2012-02-28T00:00:00Z,PREMIUM,rif
-*out,test,0,trp,2013-10-01T00:00:00Z,TDRT,rif;danb
-*out,vdf,0,fallback1,2013-11-18T13:45:00Z,G,fallback2
-*out,vdf,0,fallback1,2013-11-18T13:46:00Z,G,fallback2
-*out,vdf,0,fallback1,2013-11-18T13:47:00Z,G,fallback2
-*out,vdf,0,fallback2,2013-11-18T13:45:00Z,R,rif
-*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_UK,
-*out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
-*out,cgrates.org,data,rif,2013-01-06T00:00:00Z,RP_DATA,
-*out,cgrates.org,call,max,2013-03-23T00:00:00Z,RP_MX,
+*out,CUSTOMER_1,0,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb,
+*out,CUSTOMER_1,0,rif:from:tm,2012-02-28T00:00:00Z,STANDARD,danb,
+*out,CUSTOMER_2,0,danb:87.139.12.167,2012-01-01T00:00:00Z,STANDARD,danb,
+*out,CUSTOMER_1,0,danb,2012-01-01T00:00:00Z,PREMIUM,,
+*out,vdf,0,rif,2012-01-01T00:00:00Z,EVENING,,
+*out,vdf,0,rif,2012-02-28T00:00:00Z,EVENING,,
+*out,vdf,0,minu;a1;a2;a3,2012-01-01T00:00:00Z,EVENING,,
+*out,vdf,0,*any,2012-02-28T00:00:00Z,EVENING,,
+*out,vdf,0,one,2012-02-28T00:00:00Z,STANDARD,,
+*out,vdf,0,inf,2012-02-28T00:00:00Z,STANDARD,inf,
+*out,vdf,0,fall,2012-02-28T00:00:00Z,PREMIUM,rif,
+*out,test,0,trp,2013-10-01T00:00:00Z,TDRT,rif;danb,
+*out,vdf,0,fallback1,2013-11-18T13:45:00Z,G,fallback2,
+*out,vdf,0,fallback1,2013-11-18T13:46:00Z,G,fallback2,
+*out,vdf,0,fallback1,2013-11-18T13:47:00Z,G,fallback2,
+*out,vdf,0,fallback2,2013-11-18T13:45:00Z,R,rif,
+*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_UK,,
+*out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,,
+*out,cgrates.org,data,rif,2013-01-06T00:00:00Z,RP_DATA,,
+*out,cgrates.org,call,max,2013-03-23T00:00:00Z,RP_MX,,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -684,9 +684,10 @@ func TestLoadRatingProfiles(t *testing.T) {
 	expected := &RatingProfile{
 		Id: "*out:test:0:trp",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
-			ActivationTime: time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
-			RatingPlanId:   "TDRT",
-			FallbackKeys:   []string{"*out:test:0:danb", "*out:test:0:rif"},
+			ActivationTime:  time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
+			RatingPlanId:    "TDRT",
+			FallbackKeys:    []string{"*out:test:0:danb", "*out:test:0:rif"},
+			CdrStatQueueIds: []string{""},
 		}},
 	}
 	if !reflect.DeepEqual(rp, expected) {

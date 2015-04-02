@@ -28,7 +28,7 @@ import (
 func TestHistoryRatinPlans(t *testing.T) {
 	scribe := historyScribe.(*history.MockScribe)
 	buf := scribe.GetBuffer(history.RATING_PROFILES_FN)
-	if !strings.Contains(buf.String(), `{"Id":"*out:vdf:0:minu","RatingPlanActivations":[{"ActivationTime":"2012-01-01T00:00:00Z","RatingPlanId":"EVENING","FallbackKeys":null}]}`) {
+	if !strings.Contains(buf.String(), `{"Id":"*out:vdf:0:minu","RatingPlanActivations":[{"ActivationTime":"2012-01-01T00:00:00Z","RatingPlanId":"EVENING","FallbackKeys":null,"CdrStatQueueIds":[""]}]}`) {
 		t.Error("Error in destination history content:", buf.String())
 	}
 }

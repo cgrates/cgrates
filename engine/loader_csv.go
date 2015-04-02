@@ -553,9 +553,10 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			return fmt.Errorf("Could not load rating plans for tag: %v", record[5])
 		}
 		rpa := &RatingPlanActivation{
-			ActivationTime: at,
-			RatingPlanId:   record[5],
-			FallbackKeys:   utils.FallbackSubjKeys(direction, tenant, tor, fallbacksubject),
+			ActivationTime:  at,
+			RatingPlanId:    record[5],
+			FallbackKeys:    utils.FallbackSubjKeys(direction, tenant, tor, fallbacksubject),
+			CdrStatQueueIds: strings.Split(record[7], utils.INFIELD_SEP),
 		}
 		rp.RatingPlanActivations = append(rp.RatingPlanActivations, rpa)
 		csvr.ratingProfiles[rp.Id] = rp

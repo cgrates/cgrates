@@ -95,6 +95,7 @@ type TpRatingProfile struct {
 	ActivationTime   string
 	RatingPlanTag    string
 	FallbackSubjects string
+	CdrStatQueueIds  string
 	CreatedAt        time.Time
 }
 
