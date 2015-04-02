@@ -254,14 +254,7 @@ func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
 }
 
 func ConcatenatedKey(keyVals ...string) string {
-	resKey := ""
-	for idx, key := range keyVals {
-		if idx != 0 {
-			resKey += CONCATENATED_KEY_SEP
-		}
-		resKey += key
-	}
-	return resKey
+	return strings.Join(keyVals, CONCATENATED_KEY_SEP)
 }
 
 func RatingSubjectAliasKey(tenant, subject string) string {
