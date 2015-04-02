@@ -95,13 +95,13 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 	} else {
 		var client *rpcclient.RpcClient
 		var err error
-
+        delay := utils.Fib()
 		for i := 0; i < cfg.MediatorReconnects; i++ {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, cfg.MediatorReconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(delay())
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<Mediator> Could not connect to engine: %v", err))
@@ -148,6 +148,7 @@ func startCdrc(cdrsChan chan struct{}, cdrcCfgs map[string]*config.CdrcConfig, h
 func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, cacheChan chan struct{}) {
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
+	delay := utils.Fib()
 	if cfg.SmFsConfig.Rater == utils.INTERNAL {
 		<-cacheChan // Wait for the cache to init before start doing queries
 		raterConn = responder
@@ -158,7 +159,7 @@ func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, 
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(delay())
 		}
 		raterConn = &engine.RPCClientConnector{Client: client}
 	}
@@ -168,12 +169,13 @@ func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, 
 		<-cacheChan // Wait for the cache to init before start doing queries
 		cdrsConn = responder
 	} else if len(cfg.SmFsConfig.Cdrs) != 0 {
+		delay = utils.Fib()
 		for i := 0; i < cfg.SmFsConfig.Reconnects; i++ {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Cdrs, cfg.SmFsConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(delay())
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
@@ -197,12 +199,13 @@ func startSmKamailio(responder *engine.Responder, loggerDb engine.LogStorage, ca
 		raterConn = responder
 	} else {
 		var err error
+		delay := utils.Fib()
 		for i := 0; i < cfg.SmKamConfig.Reconnects; i++ {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Rater, cfg.SmKamConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(delay())
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to engine: %v", err))
@@ -216,12 +219,13 @@ func startSmKamailio(responder *engine.Responder, loggerDb engine.LogStorage, ca
 		<-cacheChan // Wait for the cache to init before start doing queries
 		cdrsConn = responder
 	} else if len(cfg.SmKamConfig.Cdrs) != 0 {
+		delay := utils.Fib()
 		for i := 0; i < cfg.SmKamConfig.Reconnects; i++ {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Cdrs, cfg.SmKamConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(delay())
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
@@ -245,12 +249,13 @@ func startSmOpenSIPS(responder *engine.Responder, loggerDb engine.LogStorage, ca
 		raterConn = responder
 	} else {
 		var err error
+		delay := utils.Fib()
 		for i := 0; i < cfg.SmOsipsConfig.Reconnects; i++ {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Rater, cfg.SmOsipsConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(delay())
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to engine: %v", err))
@@ -264,12 +269,13 @@ func startSmOpenSIPS(responder *engine.Responder, loggerDb engine.LogStorage, ca
 		<-cacheChan // Wait for the cache to init before start doing queries
 		cdrsConn = responder
 	} else if len(cfg.SmOsipsConfig.Cdrs) != 0 {
+		delay := utils.Fib()
 		for i := 0; i < cfg.SmOsipsConfig.Reconnects; i++ {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Cdrs, cfg.SmOsipsConfig.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(delay())
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
@@ -294,12 +300,13 @@ func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engi
 		<-responderReady // Wait for the cache to init before start doing queries
 		raterConn = responder
 	} else if len(cfg.CDRSRater) != 0 {
+		delay := utils.Fib()
 		for i := 0; i < cfg.CDRSReconnects; i++ {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSRater, cfg.CDRSReconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(delay())
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to rater: %s", err.Error()))
@@ -316,12 +323,13 @@ func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engi
 		if cfg.CDRSRater == cfg.CDRSStats {
 			statsConn = &engine.ProxyStats{Client: client}
 		} else {
+			delay := utils.Fib()
 			for i := 0; i < cfg.CDRSReconnects; i++ {
 				client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.CDRSReconnects, utils.GOB)
 				if err == nil { //Connected so no need to reiterate
 					break
 				}
-				time.Sleep(time.Duration(i+1) * time.Second)
+				time.Sleep(delay())
 			}
 			if err != nil {
 				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
@@ -367,6 +375,7 @@ func startHistoryAgent(chanServerStarted chan struct{}) {
 		}
 		//<-chanServerStarted // If server is not enabled, will have deadlock here
 	} else { // Connect in iteration since there are chances of concurrency here
+		delay := utils.Fib()
 		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
 			//engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Trying to connect, iteration: %d, time %s", i, time.Now()))
 			if scribeServer, err = history.NewProxyScribe(cfg.HistoryServer); err == nil {
@@ -376,7 +385,7 @@ func startHistoryAgent(chanServerStarted chan struct{}) {
 				exitChan <- true
 				return
 			}
-			time.Sleep(time.Duration(i) * time.Second)
+			time.Sleep(delay())
 		}
 	}
 	engine.SetHistoryScribe(scribeServer) // scribeServer comes from global variable
@@ -559,6 +568,30 @@ func main() {
 			engine.Logger.Info("<Balancer> Registering internal rater")
 			bal.AddClient("local", new(engine.ResponderWorker))
 		}
+	}
+
+	if cfg.RaterCdrStats != "" {
+		var statsConn engine.StatsInterface
+		if cfg.CDRSStats == utils.INTERNAL {
+			statsConn = cdrStats
+		} else {
+			delay := utils.Fib()
+			var client *rpcclient.RpcClient
+			for i := 0; i < cfg.CDRSReconnects; i++ {
+				client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.CDRSReconnects, utils.GOB)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(delay())
+			}
+			if err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			statsConn = &engine.ProxyStats{Client: client}
+		}
+		responder.Stats = statsConn
 	}
 
 	if !stopHandled {

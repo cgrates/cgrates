@@ -324,6 +324,15 @@ func Unzip(src, dest string) error {
 	return nil
 }
 
+// successive Fibonacci numbers.
+func Fib() func() time.Duration {
+	a, b := 0, 1
+	return func() time.Duration {
+		a, b = b, a+b
+		return time.Duration(a) * time.Second
+	}
+}
+
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
 	return &str
