@@ -275,7 +275,7 @@ func (cd *CallDescriptor) GetKey(subject string) string {
 		subject = realSubject
 		cd.Subject = realSubject
 	}
-	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.Category, subject)
+	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, subject)
 }
 
 // Returns the key used to retrive the user balance involved in this call
@@ -288,17 +288,11 @@ func (cd *CallDescriptor) GetAccountKey() string {
 		}
 		subj = cd.Account
 	}
-	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
+	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, subj)
 }
 
 func (cd *CallDescriptor) GetLCRKey(subj string) string {
-	if subj == "" {
-		subj = cd.Subject
-		if cd.Account != "" {
-			subj = cd.Account
-		}
-	}
-	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
+	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject)
 }
 
 // Splits the received timespan into sub time spans according to the activation periods intervals.
@@ -692,11 +686,14 @@ func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
 	}
 	for _, ts := range lcrCost.TimeSpans {
 		if ts.Entry.Strategy == LCR_STRATEGY_STATIC {
-			for _, param := range strings.Split(ts.Entry.StrategyParams, ";") {
-				supplier := strings.TrimSpace(param)
+			for _, supplier := range ts.Entry.GetSuppliers() {
 				lcrCD := cd.Clone()
 				lcrCD.Subject = supplier
-				if cc, err := lcrCD.GetCost(); err != nil || cc == nil {
+				if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
+					continue
+				}
+
+				if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
 					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
 						Error:    err,
@@ -710,14 +707,21 @@ func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
 			}
 		} else {
 			// find rating profiles
-			ratingProfileSearchKey := fmt.Sprintf("%s:%s:%s:", lcr.Direction, lcr.Tenant, ts.Entry.RPCategory)
+			ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, ts.Entry.RPCategory)
 			suppliers := cache2go.GetEntriesKeys(LCR_PREFIX + ratingProfileSearchKey)
 			for _, supplier := range suppliers {
 				split := strings.Split(supplier, ":")
 				supplier = split[len(split)-1]
 				lcrCD := cd.Clone()
 				lcrCD.Subject = supplier
-				if cc, err := lcrCD.GetCost(); err != nil || cc == nil {
+				if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
+					continue
+				}
+				if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+					// get stats and filter suppliers by qos thresholds
+
+				}
+				if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
 					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
 						Error:    err,
