@@ -656,7 +656,7 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 	}
 }
 
-func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
+func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 	lcr, err := dataStorage.GetLCR(cd.GetLCRKey(""), false)
 	if err != nil || lcr == nil {
 		// try the *any customer
@@ -719,7 +719,7 @@ func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
 				}
 				if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
 					// get stats and filter suppliers by qos thresholds
-
+					//stats.GetValues()
 				}
 				if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
 					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{

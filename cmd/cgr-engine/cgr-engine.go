@@ -339,7 +339,8 @@ func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engi
 	cdrSrv := v1.CdrsV1{CdrSrv: cdrServer}
 	server.RpcRegister(&cdrSrv)
 	server.RpcRegister(&v2.CdrsV2{CdrsV1: cdrSrv})
-	responder.CdrSrv = cdrServer // Make the cdrserver available for internal communication
+	// Make the cdr servers available for internal communication
+	responder.CdrSrv = cdrServer
 	close(doneChan)
 }
 
