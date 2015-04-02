@@ -85,7 +85,8 @@ const CGRATES_CFG_JSON = `
 
 "rater": {
 	"enabled": false,						// enable Rater service: <true|false>
-	"balancer": "",							// register to Balancer as worker: <""|internal|x.y.z.y:1234>
+	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
+	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 },
 
 

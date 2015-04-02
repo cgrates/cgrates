@@ -191,6 +191,7 @@ type CGRConfig struct {
 	MaxCallDuration      time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	RaterEnabled         bool          // start standalone server (no balancer)
 	RaterBalancer        string        // balancer address host:port
+	RaterCdrStats        string        // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
 	BalancerEnabled      bool
 	SchedulerEnabled     bool
 	CDRSEnabled          bool                 // Enable CDR Server service
@@ -462,6 +463,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnRaterCfg.Balancer != nil {
 			self.RaterBalancer = *jsnRaterCfg.Balancer
+		}
+		if jsnRaterCfg.Cdrstats != nil {
+			self.RaterCdrStats = *jsnRaterCfg.Cdrstats
 		}
 	}
 

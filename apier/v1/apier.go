@@ -118,6 +118,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 		return err
 	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
+	engine.Logger.Debug("Add balance before getAccount")
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
 		account := &engine.Account{
@@ -128,6 +129,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			return err
 		}
 	}
+	engine.Logger.Debug("Add balance after getAccount")
 	at := &engine.ActionTiming{
 		AccountIds: []string{tag},
 	}
@@ -141,6 +143,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	if attr.Overwrite {
 		aType = engine.DEBIT_RESET
 	}
+	engine.Logger.Debug("Add balance before SetActions")
 	at.SetActions(engine.Actions{
 		&engine.Action{
 			ActionType:  aType,
@@ -157,10 +160,12 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			},
 		},
 	})
+	engine.Logger.Debug("Add balance before at.Execute")
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
 	}
+	engine.Logger.Debug("AddBalance done!")
 	*reply = OK
 	return nil
 }

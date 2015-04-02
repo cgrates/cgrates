@@ -118,7 +118,7 @@ func TestDfBalancerJsonCfg(t *testing.T) {
 }
 
 func TestDfRaterJsonCfg(t *testing.T) {
-	eCfg := &RaterJsonCfg{Enabled: utils.BoolPointer(false), Balancer: utils.StringPointer("")}
+	eCfg := &RaterJsonCfg{Enabled: utils.BoolPointer(false), Balancer: utils.StringPointer(""), Cdrstats: utils.StringPointer("")}
 	if cfg, err := dfCgrJsonCfg.RaterJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
