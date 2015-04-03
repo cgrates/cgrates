@@ -34,7 +34,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -358,4 +360,10 @@ func StringSlicePointer(slc []string) *[]string {
 
 func Float64SlicePointer(slc []float64) *[]float64 {
 	return &slc
+}
+
+func ReflectFuncLocation(handler interface{}) (file string, line int) {
+	f := runtime.FuncForPC(reflect.ValueOf(handler).Pointer())
+	entry := f.Entry()
+	return f.FileLine(entry)
 }
