@@ -49,18 +49,6 @@ type SharingParameters struct {
 	RatingSubject string
 }
 
-func (sg *SharedGroup) GetMembersExceptUser(ubId string) []string {
-	for i, m := range sg.MemberIds {
-		if m == ubId {
-			a := make([]string, len(sg.MemberIds))
-			copy(a, sg.MemberIds)
-			a[i], a = a[len(a)-1], a[:len(a)-1]
-			return a
-		}
-	}
-	return sg.MemberIds
-}
-
 func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChain) BalanceChain {
 	sharingParameters := sg.AccountParameters[utils.ANY]
 	if sp, hasParamsForAccount := sg.AccountParameters[myBalance.account.Id]; hasParamsForAccount {

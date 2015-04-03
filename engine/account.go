@@ -566,19 +566,15 @@ func (ub *Account) GetSharedGroups() (groups []string) {
 	return
 }
 
-func (account *Account) GetUniqueSharedGroupMembers(destination, direction, category, unitType string) ([]string, error) {
-	creditBalances := account.getBalancesForPrefix(destination, category, account.BalanceMap[CREDIT+direction], "")
-	unitBalances := account.getBalancesForPrefix(destination, category, account.BalanceMap[unitType+direction], "")
+func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]string, error) {
+	var balances []*Balance
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, account.BalanceMap[CREDIT+cd.Direction], "")...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, account.BalanceMap[cd.TOR+cd.Direction], "")...)
 	// gather all shared group ids
 	var sharedGroupIds []string
-	for _, cb := range creditBalances {
-		if cb.SharedGroup != "" {
-			sharedGroupIds = append(sharedGroupIds, cb.SharedGroup)
-		}
-	}
-	for _, mb := range unitBalances {
-		if mb.SharedGroup != "" {
-			sharedGroupIds = append(sharedGroupIds, mb.SharedGroup)
+	for _, b := range balances {
+		if b.SharedGroup != "" {
+			sharedGroupIds = append(sharedGroupIds, b.SharedGroup)
 		}
 	}
 	var memberIds []string
@@ -588,7 +584,7 @@ func (account *Account) GetUniqueSharedGroupMembers(destination, direction, cate
 			Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 			return nil, err
 		}
-		for _, memberId := range sharedGroup.GetMembersExceptUser(account.Id) {
+		for _, memberId := range sharedGroup.MemberIds {
 			if !utils.IsSliceMember(memberIds, memberId) {
 				memberIds = append(memberIds, memberId)
 			}

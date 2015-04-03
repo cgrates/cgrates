@@ -22,19 +22,12 @@ import (
 	"sync"
 )
 
-var AccLock *AccountLock
-
-func init() {
-	AccLock = NewAccountLock()
-}
+// global package variable
+var AccLock = &AccountLock{queue: make(map[string]chan bool)}
 
 type AccountLock struct {
 	queue map[string]chan bool
 	mu    sync.Mutex
-}
-
-func NewAccountLock() *AccountLock {
-	return &AccountLock{queue: make(map[string]chan bool)}
 }
 
 func (cm *AccountLock) Guard(handler func() (interface{}, error), names ...string) (reply interface{}, err error) {
