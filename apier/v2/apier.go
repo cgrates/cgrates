@@ -73,12 +73,12 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
 
-	if _, err := engine.AccLock.Guard(attrs.AccountActionsId, func() (float64, error) {
+	if _, err := engine.AccLock.Guard(func() (float64, error) {
 		if err := dbReader.LoadAccountActionsFiltered(tpAa); err != nil {
 			return 0, err
 		}
 		return 0, nil
-	}); err != nil {
+	}, attrs.AccountActionsId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache

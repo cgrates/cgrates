@@ -229,7 +229,13 @@ func (qoss QOSSorter) Swap(i, j int) {
 }
 
 func (qoss QOSSorter) Less(i, j int) bool {
-	//for _, param := range qoss[i].qosSortParams
-	//qoss[i].Cost > qoss[j].Cost
+	for _, param := range qoss[i].qosSortParams {
+		if qoss[i].QOS[param] < qoss[j].QOS[param] {
+			return true
+		}
+		if qoss[i].QOS[param] == qoss[j].QOS[param] {
+			continue
+		}
+	}
 	return false
 }
