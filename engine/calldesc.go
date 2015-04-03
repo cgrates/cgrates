@@ -502,7 +502,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		return 0, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
-			AccLock.Guard(func() (float64, error) {
+			AccLock.Guard(func() (interface{}, error) {
 				duration, err = cd.getMaxSessionDuration(account)
 				return 0, err
 			}, memberIds...)
@@ -551,7 +551,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		return nil, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
-			AccLock.Guard(func() (float64, error) {
+			AccLock.Guard(func() (interface{}, error) {
 				cc, err = cd.debit(account, false, true)
 				return 0, err
 			}, memberIds...)
@@ -573,7 +573,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	} else {
 		//log.Printf("ACC: %+v", account)
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
-			AccLock.Guard(func() (float64, error) {
+			AccLock.Guard(func() (interface{}, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				//log.Print("AFTER MAX SESSION: ", cd)
 				if err != nil || remainingDuration == 0 {

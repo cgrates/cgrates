@@ -73,7 +73,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
 
-	if _, err := engine.AccLock.Guard(func() (float64, error) {
+	if _, err := engine.AccLock.Guard(func() (interface{}, error) {
 		if err := dbReader.LoadAccountActionsFiltered(tpAa); err != nil {
 			return 0, err
 		}

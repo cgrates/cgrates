@@ -37,21 +37,7 @@ func NewAccountLock() *AccountLock {
 	return &AccountLock{queue: make(map[string]chan bool)}
 }
 
-func (cm *AccountLock) GuardCallCost(handler func() (*CallCost, error), name string) (reply *CallCost, err error) {
-	cm.mu.Lock()
-	lock, exists := AccLock.queue[name]
-	if !exists {
-		lock = make(chan bool, 1)
-		AccLock.queue[name] = lock
-	}
-	lock <- true
-	cm.mu.Unlock()
-	reply, err = handler()
-	<-lock
-	return
-}
-
-func (cm *AccountLock) Guard(handler func() (float64, error), names ...string) (reply float64, err error) {
+func (cm *AccountLock) Guard(handler func() (interface{}, error), names ...string) (reply interface{}, err error) {
 	cm.mu.Lock()
 	for _, name := range names {
 		lock, exists := AccLock.queue[name]
