@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"log/syslog"
+	"sort"
 	"strings"
 	"time"
 	//"encoding/json"
@@ -719,7 +720,50 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				}
 				if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
 					// get stats and filter suppliers by qos thresholds
-					//stats.GetValues()
+					rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
+					if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err == nil || rpf != nil {
+						rpf.RatingPlanActivations.Sort()
+						activeRas := rpf.RatingPlanActivations.GetActiveForCall(cd)
+						var cdrStatsQueueIds []string
+						for _, ra := range activeRas {
+							for _, qId := range ra.CdrStatQueueIds {
+								if qId != "" {
+									cdrStatsQueueIds = append(cdrStatsQueueIds, qId)
+								}
+							}
+						}
+
+						var asrValues sort.Float64Slice
+						var acdValues sort.Float64Slice
+						for _, qId := range cdrStatsQueueIds {
+							statValues := make(map[string]float64)
+							if err := stats.GetValues(qId, &statValues); err != nil {
+								Logger.Warning(fmt.Sprintf("Error getting stats values for queue id %s: %v", qId, err))
+							}
+							if asr, exists := statValues[ASR]; exists {
+								asrValues = append(asrValues, asr)
+							}
+							if acd, exists := statValues[ACD]; exists {
+								acdValues = append(acdValues, acd)
+							}
+						}
+						asrValues.Sort()
+						acdValues.Sort()
+						asrMin, asrMax, acdMin, acdMax := ts.Entry.GetQOSLimits()
+						// skip current supplier if off limits
+						if asrMin > 0 && asrValues[0] < asrMin {
+							continue
+						}
+						if asrMax > 0 && asrValues[len(asrValues)-1] > asrMax {
+							continue
+						}
+						if acdMin > 0 && acdValues[0] < float64(acdMin) {
+							continue
+						}
+						if acdMax > 0 && acdValues[len(acdValues)-1] > float64(acdMax) {
+							continue
+						}
+					}
 				}
 				if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
 					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
