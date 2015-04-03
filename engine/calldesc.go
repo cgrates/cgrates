@@ -502,10 +502,10 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		return 0, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
-			AccLock.GuardMany(memberIds, func() (float64, error) {
+			AccLock.Guard(func() (float64, error) {
 				duration, err = cd.getMaxSessionDuration(account)
 				return 0, err
-			})
+			}, memberIds...)
 		} else {
 			return 0, err
 		}
@@ -551,10 +551,10 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		return nil, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
-			AccLock.GuardMany(memberIds, func() (float64, error) {
+			AccLock.Guard(func() (float64, error) {
 				cc, err = cd.debit(account, false, true)
 				return 0, err
-			})
+			}, memberIds...)
 		} else {
 			return nil, err
 		}
@@ -573,7 +573,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	} else {
 		//log.Printf("ACC: %+v", account)
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
-			AccLock.GuardMany(memberIds, func() (float64, error) {
+			AccLock.Guard(func() (float64, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				//log.Print("AFTER MAX SESSION: ", cd)
 				if err != nil || remainingDuration == 0 {
@@ -589,7 +589,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				cc, err = cd.debit(account, false, true)
 				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
-			})
+			}, memberIds...)
 		} else {
 			return nil, err
 		}
@@ -657,7 +657,7 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 	}
 }
 
-func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
+func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
 	lcr, err := dataStorage.GetLCR(cd.GetLCRKey(""), false)
 	if err != nil || lcr == nil {
 		// try the *any customer
@@ -666,26 +666,24 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 		}
 	}
 	lcr.Sort()
-	lcrCost := &LCRCost{
-		TimeSpans: []*LCRTimeSpan{&LCRTimeSpan{StartTime: cd.TimeStart}},
-	}
+	lcrCost := LCRCost{&LCRTimeSpan{StartTime: cd.TimeStart}}
 	for _, lcrActivation := range lcr.Activations {
 		// TODO: filer entry by destination
 		lcrEntry := lcrActivation.GetLCREntryForPrefix(cd.Destination)
 		if lcrActivation.ActivationTime.Before(cd.TimeStart) ||
 			lcrActivation.ActivationTime.Equal(cd.TimeStart) {
-			lcrCost.TimeSpans[0].Entry = lcrEntry
+			lcrCost[0].Entry = lcrEntry
 		} else {
 			if lcrActivation.ActivationTime.Before(cd.TimeEnd) {
 				// add lcr timespan
-				lcrCost.TimeSpans = append(lcrCost.TimeSpans, &LCRTimeSpan{
+				lcrCost = append(lcrCost, &LCRTimeSpan{
 					StartTime: lcrActivation.ActivationTime,
 					Entry:     lcrEntry,
 				})
 			}
 		}
 	}
-	for _, ts := range lcrCost.TimeSpans {
+	for _, ts := range lcrCost {
 		if ts.Entry.Strategy == LCR_STRATEGY_STATIC {
 			for _, supplier := range ts.Entry.GetSuppliers() {
 				lcrCD := cd.Clone()
@@ -718,8 +716,9 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
 					continue
 				}
-				if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
-					// get stats and filter suppliers by qos thresholds
+				var asr, acd float64
+				var qosSortParams []string
+				if ts.Entry.Strategy == LCR_STRATEGY_QOS || ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
 					rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
 					if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err == nil || rpf != nil {
 						rpf.RatingPlanActivations.Sort()
@@ -749,19 +748,27 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 						}
 						asrValues.Sort()
 						acdValues.Sort()
-						asrMin, asrMax, acdMin, acdMax := ts.Entry.GetQOSLimits()
-						// skip current supplier if off limits
-						if asrMin > 0 && asrValues[0] < asrMin {
-							continue
+						asr = utils.Avg(asrValues)
+						acd = utils.Avg(acdValues)
+						if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+							qosSortParams = ts.Entry.GetQOSSortParams()
 						}
-						if asrMax > 0 && asrValues[len(asrValues)-1] > asrMax {
-							continue
-						}
-						if acdMin > 0 && acdValues[0] < float64(acdMin) {
-							continue
-						}
-						if acdMax > 0 && acdValues[len(acdValues)-1] > float64(acdMax) {
-							continue
+						if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+							// filter suppliers by qos thresholds
+							asrMin, asrMax, acdMin, acdMax := ts.Entry.GetQOSLimits()
+							// skip current supplier if off limits
+							if asrMin > 0 && asrValues[0] < asrMin {
+								continue
+							}
+							if asrMax > 0 && asrValues[len(asrValues)-1] > asrMax {
+								continue
+							}
+							if acdMin > 0 && acdValues[0] < float64(acdMin) {
+								continue
+							}
+							if acdMax > 0 && acdValues[len(acdValues)-1] > float64(acdMax) {
+								continue
+							}
 						}
 					}
 				}
@@ -774,6 +781,11 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
 						Cost:     cc.Cost,
+						QOS: map[string]float64{
+							"ASR": asr,
+							"ACD": acd,
+						},
+						qosSortParams: qosSortParams,
 					})
 				}
 			}

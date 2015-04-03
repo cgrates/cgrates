@@ -257,7 +257,7 @@ func (at *ActionTiming) Execute() (err error) {
 			return
 		}
 		for _, ubId := range at.AccountIds {
-			_, err := AccLock.Guard(ubId, func() (float64, error) {
+			_, err := AccLock.Guard(func() (float64, error) {
 				ub, err := accountingStorage.GetAccount(ubId)
 				if err != nil {
 					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
@@ -270,7 +270,7 @@ func (at *ActionTiming) Execute() (err error) {
 				//Logger.Info(fmt.Sprintf("After execute, account: %+v", ub))
 				accountingStorage.SetAccount(ub)
 				return 0, nil
-			})
+			}, ubId)
 			if err != nil {
 				Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
 			}

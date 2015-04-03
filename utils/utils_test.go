@@ -436,3 +436,21 @@ func TestConcatenatedKey(t *testing.T) {
 		t.Error("Unexpected key value received: ", key)
 	}
 }
+
+func TestAvg(t *testing.T) {
+	values := []float64{1, 2, 3}
+	result := Avg(values)
+	expected := 2.0
+	if expected != result {
+		t.Errorf("Wrong Avg: expected %v got %v", expected, result)
+	}
+}
+
+func TestAvgEmpty(t *testing.T) {
+	values := []float64{}
+	result := Avg(values)
+	expected := 0.0
+	if expected != result {
+		t.Errorf("Wrong Avg: expected %v got %v", expected, result)
+	}
+}

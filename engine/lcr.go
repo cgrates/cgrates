@@ -57,9 +57,7 @@ type LCREntry struct {
 	precision      int
 }
 
-type LCRCost struct {
-	TimeSpans []*LCRTimeSpan
-}
+type LCRCost []*LCRTimeSpan
 
 type LCRTimeSpan struct {
 	StartTime     time.Time
@@ -68,9 +66,11 @@ type LCRTimeSpan struct {
 }
 
 type LCRSupplierCost struct {
-	Supplier string
-	Cost     float64
-	Error    error
+	Supplier      string
+	Cost          float64
+	Error         error
+	QOS           map[string]float64
+	qosSortParams []string
 }
 
 func (lcr *LCR) GetId() string {
@@ -94,7 +94,7 @@ func (lcr *LCR) Sort() {
 }
 
 func (le *LCREntry) GetSuppliers() []string {
-	suppliers := strings.Split(le.StrategyParams, ";")
+	suppliers := strings.Split(le.StrategyParams, utils.INFIELD_SEP)
 	for i := 0; i < len(suppliers); i++ {
 		suppliers[i] = strings.TrimSpace(suppliers[i])
 	}
@@ -103,7 +103,7 @@ func (le *LCREntry) GetSuppliers() []string {
 
 func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minACD, maxACD time.Duration) {
 	// MIN_ASR;MAX_ASR;MIN_ACD;MAX_ACD
-	params := strings.Split(le.StrategyParams, ";")
+	params := strings.Split(le.StrategyParams, utils.INFIELD_SEP)
 	if len(params) == 4 {
 		var err error
 		if minASR, err = strconv.ParseFloat(params[0], 64); err != nil {
@@ -120,6 +120,14 @@ func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minACD, maxACD time.
 		}
 	}
 	return
+}
+
+func (le *LCREntry) GetQOSSortParams() []string {
+	// ASR;ACD
+	if params := strings.Split(le.StrategyParams, utils.INFIELD_SEP); len(params) > 0 {
+		return params
+	}
+	return []string{ASR, ACD}
 }
 
 type LCREntriesSorter []*LCREntry
@@ -177,6 +185,8 @@ func (lts *LCRTimeSpan) Sort() {
 		sort.Sort(LowestSupplierCostSorter(lts.SupplierCosts))
 	case LCR_STRATEGY_HIGHEST:
 		sort.Sort(HighestSupplierCostSorter(lts.SupplierCosts))
+	case LCR_STRATEGY_QOS:
+		sort.Sort(QOSSorter(lts.SupplierCosts))
 	}
 }
 
@@ -206,4 +216,20 @@ func (hscs HighestSupplierCostSorter) Swap(i, j int) {
 
 func (hscs HighestSupplierCostSorter) Less(i, j int) bool {
 	return hscs[i].Cost > hscs[j].Cost
+}
+
+type QOSSorter []*LCRSupplierCost
+
+func (qoss QOSSorter) Len() int {
+	return len(qoss)
+}
+
+func (qoss QOSSorter) Swap(i, j int) {
+	qoss[i], qoss[j] = qoss[j], qoss[i]
+}
+
+func (qoss QOSSorter) Less(i, j int) bool {
+	//for _, param := range qoss[i].qosSortParams
+	//qoss[i].Cost > qoss[j].Cost
+	return false
 }
