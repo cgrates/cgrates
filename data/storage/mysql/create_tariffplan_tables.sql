@@ -113,6 +113,7 @@ CREATE TABLE `tp_rating_profiles` (
   `activation_time` varchar(24) NOT NULL,
   `rating_plan_tag` varchar(64) NOT NULL,
   `fallback_subjects` varchar(64),
+  `cdr_stat_queue_ids` varchar(64),
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid_loadid` (`tpid`, `loadid`),

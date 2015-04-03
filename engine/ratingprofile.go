@@ -36,9 +36,10 @@ type RatingProfile struct {
 }
 
 type RatingPlanActivation struct {
-	ActivationTime time.Time
-	RatingPlanId   string
-	FallbackKeys   []string
+	ActivationTime  time.Time
+	RatingPlanId    string
+	FallbackKeys    []string
+	CdrStatQueueIds []string
 }
 
 func (rpa *RatingPlanActivation) Equal(orpa *RatingPlanActivation) bool {

@@ -104,6 +104,7 @@ CREATE TABLE tp_rating_profiles (
   activation_time VARCHAR(24) NOT NULL,
   rating_plan_tag VARCHAR(64) NOT NULL,
   fallback_subjects VARCHAR(64),
+  cdr_stat_queue_ids varchar(64),
   created_at TIMESTAMP,
   UNIQUE (tpid, loadid, tenant, category, direction, subject, activation_time)
 );

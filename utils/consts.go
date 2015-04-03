@@ -63,7 +63,7 @@ const (
 	RATES_NRCOLS                 = 6
 	DESTINATION_RATES_NRCOLS     = 7
 	DESTRATE_TIMINGS_NRCOLS      = 4
-	RATE_PROFILES_NRCOLS         = 7
+	RATE_PROFILES_NRCOLS         = 8
 	SHARED_GROUPS_NRCOLS         = 4
 	LCRS_NRCOLS                  = 11
 	ACTIONS_NRCOLS               = 15

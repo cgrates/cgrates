@@ -335,6 +335,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.
 				ActivationTime:   ra.ActivationTime,
 				RatingPlanTag:    ra.RatingPlanId,
 				FallbackSubjects: ra.FallbackSubjects,
+				CdrStatQueueIds:  ra.CdrStatQueueIds,
 				CreatedAt:        time.Now(),
 			})
 			if saved.Error != nil {
@@ -1243,6 +1244,7 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 			ActivationTime:   tpRpf.ActivationTime,
 			RatingPlanId:     tpRpf.RatingPlanTag,
 			FallbackSubjects: tpRpf.FallbackSubjects,
+			CdrStatQueueIds:  tpRpf.CdrStatQueueIds,
 		}
 		if existingRpf, exists := rpfs[rp.KeyId()]; !exists {
 			rp.RatingPlanActivations = []*utils.TPRatingActivation{ra}

@@ -44,6 +44,7 @@ type Responder struct {
 	Bal      *balancer2go.Balancer
 	ExitChan chan bool
 	CdrSrv   *CdrServer
+	Stats    StatsInterface
 }
 
 /*
@@ -239,6 +240,12 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	}
 	*reply = utils.OK
 	return nil
+}
+
+func (rs *Responder) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
+	lcrCost, err := cd.GetLCR(rs.Stats)
+	*reply = *lcrCost
+	return err
 }
 
 func (rs *Responder) FlushCache(arg CallDescriptor, reply *float64) (err error) {

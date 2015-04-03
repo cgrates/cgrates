@@ -256,14 +256,7 @@ func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
 }
 
 func ConcatenatedKey(keyVals ...string) string {
-	resKey := ""
-	for idx, key := range keyVals {
-		if idx != 0 {
-			resKey += CONCATENATED_KEY_SEP
-		}
-		resKey += key
-	}
-	return resKey
+	return strings.Join(keyVals, CONCATENATED_KEY_SEP)
 }
 
 func RatingSubjectAliasKey(tenant, subject string) string {
@@ -331,6 +324,15 @@ func Unzip(src, dest string) error {
 	}
 
 	return nil
+}
+
+// successive Fibonacci numbers.
+func Fib() func() time.Duration {
+	a, b := 0, 1
+	return func() time.Duration {
+		a, b = b, a+b
+		return time.Duration(a) * time.Second
+	}
 }
 
 // Utilities to provide pointers where we need to define ad-hoc

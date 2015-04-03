@@ -117,7 +117,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 		*reply = err.Error()
 		return err
 	}
-	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
+	tag := utils.ConcatenatedKey(attr.Direction, attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
 		account := &engine.Account{
