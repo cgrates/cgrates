@@ -38,14 +38,13 @@ func TestCgrCdrAsStoredCdr(t *testing.T) {
 		utils.DIRECTION: utils.OUT,
 		utils.TENANT:    "cgrates.org", utils.CATEGORY: "call",
 		utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-07T08:42:20Z", utils.ANSWER_TIME: "2013-11-07T08:42:26Z",
-		utils.USAGE:   "10",
-		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+		utils.USAGE: "10", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr["setup_time"])
 	expctRtCdr := &StoredCdr{CgrId: utils.Sha1(cgrCdr["accid"], setupTime.String()), TOR: utils.VOICE, AccId: cgrCdr["accid"], CdrHost: cgrCdr["cdrhost"], CdrSource: cgrCdr["cdrsource"],
 		ReqType:   cgrCdr["reqtype"],
 		Direction: cgrCdr[utils.DIRECTION], Tenant: cgrCdr["tenant"], Category: cgrCdr[utils.CATEGORY], Account: cgrCdr["account"], Subject: cgrCdr["subject"],
 		Destination: cgrCdr["destination"], SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Usage:       time.Duration(10) * time.Second,
+		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: -1}
 	if storedCdr := cgrCdr.AsStoredCdr(); !reflect.DeepEqual(expctRtCdr, storedCdr) {
 		t.Errorf("Expecting %v, received: %v", expctRtCdr, storedCdr)

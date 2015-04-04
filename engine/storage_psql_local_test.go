@@ -803,7 +803,7 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreDerived
-	if storedCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, IgnoreDerived: true}); err != nil {
+	if storedCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnDerived: true}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 { // ToDo: Recheck this value
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)

@@ -241,7 +241,7 @@ func TestTutKamCallsCdrs1001(t *testing.T) {
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0].Usage)
 		}
 	}
-	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}}
+	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnDerived: true}
 	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {

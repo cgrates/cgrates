@@ -104,6 +104,7 @@ const (
 	SETUP_TIME                   = "setup_time"
 	ANSWER_TIME                  = "answer_time"
 	USAGE                        = "usage"
+	SUPPLIER                     = "supplier"
 	MEDI_RUNID                   = "mediation_runid"
 	RATED_ACCOUNT                = "rated_account"
 	RATED_SUBJECT                = "rated_subject"
@@ -184,5 +185,5 @@ const (
 
 var (
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
-	PrimaryCdrFields = []string{TOR, ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, USAGE}
+	PrimaryCdrFields = []string{TOR, ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, USAGE, SUPPLIER}
 )

@@ -914,6 +914,8 @@ type CdrsFilter struct {
 	NotSubjects      []string          // Filter out specific subjects
 	DestPrefixes     []string          // If provided, it will filter on destination prefix
 	NotDestPrefixes  []string          // Filter out specific destination prefixes
+	Suppliers        []string          // If provided, it will filter the supplier
+	NotSuppliers     []string          // Filter out specific suppliers
 	RatedAccounts    []string          // If provided, it will filter ratedaccount
 	NotRatedAccounts []string          // Filter out specific RatedAccounts
 	RatedSubjects    []string          // If provided, it will filter the ratedsubject
@@ -928,13 +930,15 @@ type CdrsFilter struct {
 	SetupTimeEnd     *time.Time        // End interval, smaller than setupTime
 	AnswerTimeStart  *time.Time        // Start of interval, bigger or equal than configured
 	AnswerTimeEnd    *time.Time        // End interval, smaller than answerTime
+	CreatedAtStart   *time.Time        // Start of interval, bigger or equal than configured
+	CreatedAtEnd     *time.Time        // End interval, smaller than
+	UpdatedAtStart   *time.Time        // Start of interval, bigger or equal than configured
+	UpdatedAtEnd     *time.Time        // End interval, smaller than
 	UsageStart       *float64          // Start of the usage interval (>=)
 	UsageEnd         *float64          // End of the usage interval (<)
-	RatedUsageStart  *float64          // Start of the ratedUsage interval (>=)
-	RatedUsageEnd    *float64          // End of the ratedUsage interval (<)
 	CostStart        *float64          // Start of the cost interval (>=)
 	CostEnd          *float64          // End of the usage interval (<)
-	IgnoreDerived    bool              // Do not consider derived CDRs but original one
+	FilterOnDerived  bool              // Do not consider derived CDRs but original one
 	Count            bool              // If true count the items instead of returning data
 	Paginator
 }
@@ -965,6 +969,8 @@ type RpcCdrsFilter struct {
 	NotSubjects      []string          // Filter out specific subjects
 	DestPrefixes     []string          // If provided, it will filter on destination prefix
 	NotDestPrefixes  []string          // Filter out specific destination prefixes
+	Suppliers        []string          // If provided, it will filter the supplier
+	NotSuppliers     []string          // Filter out specific suppliers
 	RatedAccounts    []string          // If provided, it will filter ratedaccount
 	NotRatedAccounts []string          // Filter out specific RatedAccounts
 	RatedSubjects    []string          // If provided, it will filter the ratedsubject
@@ -979,13 +985,15 @@ type RpcCdrsFilter struct {
 	SetupTimeEnd     string            // End interval, smaller than setupTime
 	AnswerTimeStart  string            // Start of interval, bigger or equal than configured
 	AnswerTimeEnd    string            // End interval, smaller than answerTime
+	CreatedAtStart   string            // Start of interval, bigger or equal than configured
+	CreatedAtEnd     string            // End interval, smaller than
+	UpdatedAtStart   string            // Start of interval, bigger or equal than configured
+	UpdatedAtEnd     string            // End interval, smaller than
 	UsageStart       *float64          // Start of the usage interval (>=)
 	UsageEnd         *float64          // End of the usage interval (<)
-	RatedUsageStart  *float64          // Start of the ratedUsage interval (>=)
-	RatedUsageEnd    *float64          // End of the ratedUsage interval (<)
 	CostStart        *float64          // Start of the cost interval (>=)
 	CostEnd          *float64          // End of the usage interval (<)
-	IgnoreDerived    bool              // Do not consider derived CDRs but original one
+	FilterOnDerived  bool              // Do not consider derived CDRs but original one
 	Paginator                          // Add pagination
 }
 
@@ -1015,6 +1023,8 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 		NotSubjects:      self.NotSubjects,
 		DestPrefixes:     self.DestPrefixes,
 		NotDestPrefixes:  self.NotDestPrefixes,
+		Suppliers:        self.Suppliers,
+		NotSuppliers:     self.NotSuppliers,
 		RatedAccounts:    self.RatedAccounts,
 		NotRatedAccounts: self.NotRatedAccounts,
 		RatedSubjects:    self.RatedSubjects,
@@ -1027,11 +1037,9 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 		OrderIdEnd:       self.OrderIdEnd,
 		UsageStart:       self.UsageStart,
 		UsageEnd:         self.UsageEnd,
-		RatedUsageStart:  self.RatedUsageStart,
-		RatedUsageEnd:    self.RatedUsageEnd,
 		CostStart:        self.CostStart,
 		CostEnd:          self.CostEnd,
-		IgnoreDerived:    self.IgnoreDerived,
+		FilterOnDerived:  self.FilterOnDerived,
 		Paginator:        self.Paginator,
 	}
 	if len(self.SetupTimeStart) != 0 {
@@ -1060,6 +1068,34 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &aTimeEnd
+		}
+	}
+	if len(self.CreatedAtStart) != 0 {
+		if tStart, err := ParseTimeDetectLayout(self.CreatedAtStart); err != nil {
+			return nil, err
+		} else {
+			cdrFltr.CreatedAtStart = &tStart
+		}
+	}
+	if len(self.CreatedAtEnd) != 0 {
+		if tEnd, err := ParseTimeDetectLayout(self.CreatedAtEnd); err != nil {
+			return nil, err
+		} else {
+			cdrFltr.CreatedAtEnd = &tEnd
+		}
+	}
+	if len(self.UpdatedAtStart) != 0 {
+		if tStart, err := ParseTimeDetectLayout(self.UpdatedAtStart); err != nil {
+			return nil, err
+		} else {
+			cdrFltr.UpdatedAtStart = &tStart
+		}
+	}
+	if len(self.UpdatedAtEnd) != 0 {
+		if tEnd, err := ParseTimeDetectLayout(self.UpdatedAtEnd); err != nil {
+			return nil, err
+		} else {
+			cdrFltr.UpdatedAtEnd = &tEnd
 		}
 	}
 	return cdrFltr, nil

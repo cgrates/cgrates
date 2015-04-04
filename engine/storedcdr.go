@@ -33,9 +33,10 @@ import (
 
 func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr) (*StoredCdr, error) {
 	var err error
-	storedCdr := &StoredCdr{CgrId: extCdr.CgrId, OrderId: extCdr.OrderId, TOR: extCdr.TOR, AccId: extCdr.AccId, CdrHost: extCdr.CdrHost, CdrSource: extCdr.CdrSource, ReqType: extCdr.ReqType,
-		Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category, Account: extCdr.Account, Subject: extCdr.Subject, Destination: extCdr.Destination,
-		ExtraFields: extCdr.ExtraFields, MediationRunId: extCdr.MediationRunId, RatedAccount: extCdr.RatedAccount, RatedSubject: extCdr.RatedSubject, Cost: extCdr.Cost, Rated: extCdr.Rated}
+	storedCdr := &StoredCdr{CgrId: extCdr.CgrId, OrderId: extCdr.OrderId, TOR: extCdr.TOR, AccId: extCdr.AccId, CdrHost: extCdr.CdrHost, CdrSource: extCdr.CdrSource,
+		ReqType: extCdr.ReqType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category, Account: extCdr.Account, Subject: extCdr.Subject,
+		Destination: extCdr.Destination, Supplier: extCdr.Supplier, ExtraFields: extCdr.ExtraFields, MediationRunId: extCdr.MediationRunId,
+		RatedAccount: extCdr.RatedAccount, RatedSubject: extCdr.RatedSubject, Cost: extCdr.Cost, Rated: extCdr.Rated}
 	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime); err != nil {
 		return nil, err
 	}
@@ -71,6 +72,7 @@ type StoredCdr struct {
 	SetupTime      time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
 	AnswerTime     time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
 	Usage          time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+	Supplier       string            // Supplier information when available
 	ExtraFields    map[string]string // Extra fields to be stored in CDR
 	MediationRunId string
 	RatedAccount   string // Populated out of rating data
@@ -154,6 +156,8 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(storedCdr.AnswerTime.Format(time.RFC3339))
 	case utils.USAGE:
 		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+	case utils.SUPPLIER:
+		return rsrFld.ParseValue(storedCdr.Supplier)
 	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(storedCdr.MediationRunId)
 	case utils.RATED_ACCOUNT:
@@ -213,6 +217,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v.Set(utils.SETUP_TIME, storedCdr.SetupTime.Format(time.RFC3339))
 	v.Set(utils.ANSWER_TIME, storedCdr.AnswerTime.Format(time.RFC3339))
 	v.Set(utils.USAGE, storedCdr.FormatUsage(utils.SECONDS))
+	v.Set(utils.SUPPLIER, storedCdr.Supplier)
 	if storedCdr.CostDetails != nil {
 		v.Set(utils.COST_DETAILS, storedCdr.CostDetailsJson())
 	}
@@ -361,6 +366,7 @@ func (storedCdr *StoredCdr) AsExternalCdr() *ExternalCdr {
 		SetupTime:      storedCdr.SetupTime.Format(time.RFC3339),
 		AnswerTime:     storedCdr.AnswerTime.Format(time.RFC3339),
 		Usage:          storedCdr.FormatUsage(utils.SECONDS),
+		Supplier:       storedCdr.Supplier,
 		ExtraFields:    storedCdr.ExtraFields,
 		MediationRunId: storedCdr.MediationRunId,
 		RatedAccount:   storedCdr.RatedAccount,
@@ -538,6 +544,7 @@ type ExternalCdr struct {
 	SetupTime      string
 	AnswerTime     string
 	Usage          string
+	Supplier       string
 	ExtraFields    map[string]string
 	MediationRunId string
 	RatedAccount   string
