@@ -225,7 +225,8 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 }
 
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
-func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld *utils.RSRField,
+func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld,
+	answerTimeFld, durationFld, supplierFld *utils.RSRField,
 	extraFlds []*utils.RSRField, primaryMandatory bool) (*StoredCdr, error) {
 	if reqTypeFld == nil {
 		reqTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -287,6 +288,12 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	if durationFld.Id == utils.META_DEFAULT {
 		durationFld.Id = utils.USAGE
 	}
+	if supplierFld == nil {
+		supplierFld, _ = utils.NewRSRField(utils.META_DEFAULT)
+	}
+	if supplierFld.Id == utils.META_DEFAULT {
+		supplierFld.Id = utils.SUPPLIER
+	}
 	var err error
 	frkStorCdr := new(StoredCdr)
 	frkStorCdr.CgrId = storedCdr.CgrId
@@ -341,6 +348,10 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.USAGE, durationFld.Id))
 	} else if frkStorCdr.Usage, err = utils.ParseDurationWithSecs(durStr); err != nil {
 		return nil, err
+	}
+	frkStorCdr.Supplier = storedCdr.FieldAsString(supplierFld)
+	if primaryMandatory && len(frkStorCdr.Supplier) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.SUPPLIER, supplierFld.Id))
 	}
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
 	for _, fld := range extraFlds {

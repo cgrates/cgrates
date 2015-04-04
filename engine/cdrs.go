@@ -266,8 +266,9 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 		dcSTimeFld, _ := utils.NewRSRField(dc.SetupTimeField)
 		dcATimeFld, _ := utils.NewRSRField(dc.AnswerTimeField)
 		dcDurFld, _ := utils.NewRSRField(dc.UsageField)
-		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld, dcSTimeFld, dcATimeFld, dcDurFld,
-			[]*utils.RSRField{}, true)
+		dcSupplFld, _ := utils.NewRSRField(dc.SupplierField)
+		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
+			dcSTimeFld, dcATimeFld, dcDurFld, dcSupplFld, []*utils.RSRField{}, true)
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis
 			Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", storedCdr.CgrId, dc.RunId, err.Error()))
 			//forkedCdr = &StoredCdr{CgrId: storedCdr.CgrId, CdrSource: utils.FORKED_CDR, MediationRunId: dc.RunId, Cost: -1, CostExtraInfo: err.Error()}
