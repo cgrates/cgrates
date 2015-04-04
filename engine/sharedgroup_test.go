@@ -18,24 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import (
-	"reflect"
-	"testing"
-)
-
-func TestSharedGroupGetMembersExcept(t *testing.T) {
-	sg := &SharedGroup{
-		MemberIds: []string{"1", "2", "3"},
-	}
-	a1 := sg.GetMembersExceptUser("1")
-	a2 := sg.GetMembersExceptUser("2")
-	a3 := sg.GetMembersExceptUser("3")
-	if !reflect.DeepEqual(a1, []string{"3", "2"}) ||
-		!reflect.DeepEqual(a2, []string{"1", "3"}) ||
-		!reflect.DeepEqual(a3, []string{"1", "2"}) {
-		t.Error("Error getting shared group members: ", a1, a2, a3)
-	}
-}
+import "testing"
 
 func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 	bc := BalanceChain{

@@ -588,7 +588,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	}
 
 	tag := utils.AccountKey(attr.Tenant, attr.Account, attr.BalanceDirection)
-	_, err = engine.AccLock.Guard(tag, func() (float64, error) {
+	_, err = engine.AccLock.Guard(func() (interface{}, error) {
 		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {
 			return 0, err
@@ -600,7 +600,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 			return 0, err
 		}
 		return 0, nil
-	})
+	}, tag)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -658,7 +658,7 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 		}
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
-	_, err := engine.AccLock.Guard(accID, func() (float64, error) {
+	_, err := engine.AccLock.Guard(func() (interface{}, error) {
 		acc, err := self.AccountDb.GetAccount(accID)
 		if err != nil {
 			return 0, err
@@ -670,7 +670,7 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 			return 0, err
 		}
 		return 0, nil
-	})
+	}, accID)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -685,12 +685,12 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-	if _, err := engine.AccLock.Guard(attrs.KeyId(), func() (float64, error) {
+	if _, err := engine.AccLock.Guard(func() (interface{}, error) {
 		if err := dbReader.LoadAccountActionsFiltered(&attrs); err != nil {
 			return 0, err
 		}
 		return 0, nil
-	}); err != nil {
+	}, attrs.KeyId()); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache

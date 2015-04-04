@@ -22,66 +22,25 @@ import (
 	"sync"
 )
 
-var AccLock *AccountLock
-
-func init() {
-	AccLock = NewAccountLock()
-}
+// global package variable
+var AccLock = &AccountLock{queue: make(map[string]chan bool)}
 
 type AccountLock struct {
 	queue map[string]chan bool
-	sync.RWMutex
+	mu    sync.Mutex
 }
 
-func NewAccountLock() *AccountLock {
-	return &AccountLock{queue: make(map[string]chan bool)}
-}
-
-func (cm *AccountLock) GuardGetCost(name string, handler func() (*CallCost, error)) (reply *CallCost, err error) {
-	cm.RLock()
-	lock, exists := AccLock.queue[name]
-	cm.RUnlock()
-	if !exists {
-		cm.Lock()
-		lock = make(chan bool, 1)
-		AccLock.queue[name] = lock
-		cm.Unlock()
-	}
-	lock <- true
-	reply, err = handler()
-	<-lock
-	return
-}
-
-func (cm *AccountLock) Guard(name string, handler func() (float64, error)) (reply float64, err error) {
-	cm.RLock()
-	lock, exists := AccLock.queue[name]
-	cm.RUnlock()
-	if !exists {
-		cm.Lock()
-		lock = make(chan bool, 1)
-		AccLock.queue[name] = lock
-		cm.Unlock()
-	}
-	lock <- true
-	reply, err = handler()
-	<-lock
-	return
-}
-
-func (cm *AccountLock) GuardMany(names []string, handler func() (float64, error)) (reply float64, err error) {
+func (cm *AccountLock) Guard(handler func() (interface{}, error), names ...string) (reply interface{}, err error) {
+	cm.mu.Lock()
 	for _, name := range names {
-		cm.RLock()
 		lock, exists := AccLock.queue[name]
-		cm.RUnlock()
 		if !exists {
-			cm.Lock()
 			lock = make(chan bool, 1)
 			AccLock.queue[name] = lock
-			cm.Unlock()
 		}
 		lock <- true
 	}
+	cm.mu.Unlock()
 	reply, err = handler()
 	for _, name := range names {
 		lock := AccLock.queue[name]

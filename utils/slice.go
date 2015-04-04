@@ -41,3 +41,14 @@ func SliceMemberHasPrefix(ss []string, prfx string) bool {
 	}
 	return false
 }
+
+func Avg(values []float64) float64 {
+	if len(values) == 0 {
+		return 0.0
+	}
+	var sum float64
+	for _, val := range values {
+		sum += val
+	}
+	return sum / float64(len(values))
+}

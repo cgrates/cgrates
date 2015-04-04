@@ -108,10 +108,10 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 			newAts = append(newAts, at)
 		}
 		if toBeSaved {
-			engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) {
+			engine.AccLock.Guard(func() (interface{}, error) {
 				storage.SetActionTimings(key, newAts)
 				return 0, nil
-			})
+			}, engine.ACTION_TIMING_PREFIX)
 		}
 	}
 	sort.Sort(s.queue)

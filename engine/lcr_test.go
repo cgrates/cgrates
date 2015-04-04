@@ -17,3 +17,72 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package engine
+
+import (
+	"sort"
+	"testing"
+)
+
+func TestLcrQOSSorter(t *testing.T) {
+	s := QOSSorter{
+		&LCRSupplierCost{
+			QOS: map[string]float64{
+				"ASR": 3,
+				"ACD": 3,
+			},
+			qosSortParams: []string{ASR, ACD},
+		},
+		&LCRSupplierCost{
+			QOS: map[string]float64{
+				"ASR": 1,
+				"ACD": 1,
+			},
+			qosSortParams: []string{ASR, ACD},
+		},
+		&LCRSupplierCost{
+			QOS: map[string]float64{
+				"ASR": 2,
+				"ACD": 2,
+			},
+			qosSortParams: []string{ASR, ACD},
+		},
+	}
+	sort.Sort(s)
+	if s[0].QOS[ASR] != 1 ||
+		s[1].QOS[ASR] != 2 ||
+		s[2].QOS[ASR] != 3 {
+		t.Error("Lcr qos sort failed: ", s)
+	}
+}
+
+func TestLcrQOSSorterOACD(t *testing.T) {
+	s := QOSSorter{
+		&LCRSupplierCost{
+			QOS: map[string]float64{
+				"ASR": 1,
+				"ACD": 3,
+			},
+			qosSortParams: []string{ASR, ACD},
+		},
+		&LCRSupplierCost{
+			QOS: map[string]float64{
+				"ASR": 1,
+				"ACD": 1,
+			},
+			qosSortParams: []string{ASR, ACD},
+		},
+		&LCRSupplierCost{
+			QOS: map[string]float64{
+				"ASR": 1,
+				"ACD": 2,
+			},
+			qosSortParams: []string{ASR, ACD},
+		},
+	}
+	sort.Sort(s)
+	if s[0].QOS[ACD] != 1 ||
+		s[1].QOS[ACD] != 2 ||
+		s[2].QOS[ACD] != 3 {
+		t.Error("Lcr qos sort failed: ", s)
+	}
+}

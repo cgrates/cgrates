@@ -80,7 +80,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 		}
 	}
-	_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) {
+	_, err := engine.AccLock.Guard(func() (interface{}, error) {
 		ats, err := self.AccountDb.GetActionTimings(attrs.ActionPlanId)
 		if err != nil {
 			return 0, err
@@ -92,7 +92,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return 0, err
 		}
 		return 0, nil
-	})
+	}, engine.ACTION_TIMING_PREFIX)
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -130,7 +130,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	balanceId := utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)
-	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
+	_, err := engine.AccLock.Guard(func() (interface{}, error) {
 		ub, err := self.AccountDb.GetAccount(balanceId)
 		if err != nil {
 			return 0, err
@@ -150,7 +150,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 			return 0, err
 		}
 		return 0, nil
-	})
+	}, balanceId)
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -174,7 +174,7 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 	balanceId := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
 	var ub *engine.Account
 	var ats engine.ActionPlan
-	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
+	_, err := engine.AccLock.Guard(func() (interface{}, error) {
 		if bal, _ := self.AccountDb.GetAccount(balanceId); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
@@ -199,17 +199,17 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 			return 0, err
 		}
 		return 0, nil
-	})
+	}, balanceId)
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	if len(ats) != 0 {
-		_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) { // ToDo: Try locking it above on read somehow
+		_, err := engine.AccLock.Guard(func() (interface{}, error) { // ToDo: Try locking it above on read somehow
 			if err := self.AccountDb.SetActionTimings(attr.ActionPlanId, ats); err != nil {
 				return 0, err
 			}
 			return 0, nil
-		})
+		}, engine.ACTION_TIMING_PREFIX)
 		if err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		}

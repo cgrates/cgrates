@@ -25,23 +25,23 @@ import (
 )
 
 func ATestAccountLock(t *testing.T) {
-	go AccLock.Guard("1", func() (float64, error) {
+	go AccLock.Guard(func() (interface{}, error) {
 		log.Print("first 1")
 		time.Sleep(1 * time.Second)
 		log.Print("end first 1")
 		return 0, nil
-	})
-	go AccLock.Guard("2", func() (float64, error) {
+	}, "1")
+	go AccLock.Guard(func() (interface{}, error) {
 		log.Print("first 2")
 		time.Sleep(1 * time.Second)
 		log.Print("end first 2")
 		return 0, nil
-	})
-	go AccLock.Guard("1", func() (float64, error) {
+	}, "2")
+	go AccLock.Guard(func() (interface{}, error) {
 		log.Print("second 1")
 		time.Sleep(1 * time.Second)
 		log.Print("end second 1")
 		return 0, nil
-	})
+	}, "1")
 	time.Sleep(3 * time.Second)
 }
