@@ -454,6 +454,7 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 				SetupTimeField:   dc.SetupTimeField,
 				AnswerTimeField:  dc.AnswerTimeField,
 				UsageField:       dc.UsageField,
+				SupplierField:    dc.SupplierField,
 				CreatedAt:        time.Now(),
 			}
 			if err := newDc.SetDerivedChargersId(dcId); err != nil {
@@ -1480,6 +1481,7 @@ func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[s
 			SetupTimeField:   tpDcMdl.SetupTimeField,
 			AnswerTimeField:  tpDcMdl.AnswerTimeField,
 			UsageField:       tpDcMdl.UsageField,
+			SupplierField:    tpDcMdl.SupplierField,
 		})
 	}
 	return dcs, nil

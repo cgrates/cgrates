@@ -212,7 +212,8 @@ func TestMySQLSetGetTPDerivedChargers(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	dc := &utils.TPDerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: "^" + utils.META_PREPAID, AccountField: "^rif", SubjectField: "^rif", UsageField: "cgr_duration"}
+	dc := &utils.TPDerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: "^" + utils.META_PREPAID, AccountField: "^rif", SubjectField: "^rif",
+		UsageField: "cgr_duration", SupplierField: "^supplier1"}
 	dcs := &utils.TPDerivedChargers{TPid: TEST_SQL, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: []*utils.TPDerivedCharger{dc}}
 	DCS_ID := dcs.GetDerivedChargesId()
 	setDCs := map[string][]*utils.TPDerivedCharger{DCS_ID: []*utils.TPDerivedCharger{dc}}

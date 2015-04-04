@@ -70,7 +70,7 @@ const (
 	ACTION_PLANS_NRCOLS          = 4
 	ACTION_TRIGGERS_NRCOLS       = 19
 	ACCOUNT_ACTIONS_NRCOLS       = 5
-	DERIVED_CHARGERS_NRCOLS      = 17
+	DERIVED_CHARGERS_NRCOLS      = 18
 	CDR_STATS_NRCOLS             = 21
 	ROUNDING_UP                  = "*up"
 	ROUNDING_MIDDLE              = "*middle"

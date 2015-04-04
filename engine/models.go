@@ -238,6 +238,7 @@ type TpDerivedCharger struct {
 	SetupTimeField   string
 	AnswerTimeField  string
 	UsageField       string
+	SupplierField    string
 	CreatedAt        time.Time
 }
 

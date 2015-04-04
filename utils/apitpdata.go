@@ -435,12 +435,13 @@ type TPDerivedChargers struct {
 	DerivedChargers []*TPDerivedCharger
 }
 
-//#Direction,Tenant,Category,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,CategoryField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,UsageField
+//#Direction,Tenant,Category,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,CategoryField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,UsageField,SupplierField
 func (self *TPDerivedChargers) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.DerivedChargers))
 	for idx, dc := range self.DerivedChargers {
 		retSlice[idx] = []string{self.Direction, self.Tenant, self.Category, self.Account, self.Subject, dc.RunId, dc.RunFilters, dc.ReqTypeField,
-			dc.DirectionField, dc.TenantField, dc.CategoryField, dc.AccountField, dc.SubjectField, dc.DestinationField, dc.SetupTimeField, dc.AnswerTimeField, dc.UsageField}
+			dc.DirectionField, dc.TenantField, dc.CategoryField, dc.AccountField, dc.SubjectField, dc.DestinationField, dc.SetupTimeField, dc.AnswerTimeField,
+			dc.UsageField, dc.SupplierField}
 	}
 	return retSlice
 }
@@ -492,6 +493,7 @@ type TPDerivedCharger struct {
 	SetupTimeField   string
 	AnswerTimeField  string
 	UsageField       string
+	SupplierField    string
 }
 
 type TPActionPlan struct {

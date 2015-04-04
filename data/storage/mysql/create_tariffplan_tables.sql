@@ -288,6 +288,7 @@ CREATE TABLE tp_derived_chargers (
   `setup_time_field`  varchar(24) NOT NULL,
   `answer_time_field`  varchar(24) NOT NULL,
   `usage_field`  varchar(24) NOT NULL,
+  `supplier_field`  varchar(24) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)

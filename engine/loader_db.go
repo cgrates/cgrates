@@ -916,7 +916,7 @@ func (dbr *DbReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers
 		}
 		for _, tpDc := range tpDcs.DerivedChargers {
 			if dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
-				tpDc.AccountField, tpDc.SubjectField, tpDc.DestinationField, tpDc.SetupTimeField, tpDc.AnswerTimeField, tpDc.UsageField); err != nil {
+				tpDc.AccountField, tpDc.SubjectField, tpDc.DestinationField, tpDc.SetupTimeField, tpDc.AnswerTimeField, tpDc.UsageField, tpDc.SupplierField); err != nil {
 				return err
 			} else {
 				allDcs[tag] = append(allDcs[tag], dc)

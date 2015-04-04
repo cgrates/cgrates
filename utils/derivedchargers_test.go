@@ -58,9 +58,10 @@ func TestNewDerivedCharger(t *testing.T) {
 		SetupTimeField:   "setuptime1",
 		AnswerTimeField:  "answertime1",
 		UsageField:       "duration1",
+		SupplierField:    "supplier1",
 	}
 	if dc1, err := NewDerivedCharger("test1", "", "reqtype1", "direction1", "tenant1", "tor1", "account1", "subject1", "destination1",
-		"setuptime1", "answertime1", "duration1"); err != nil {
+		"setuptime1", "answertime1", "duration1", "supplier1"); err != nil {
 		t.Error("Unexpected error", err.Error)
 	} else if !reflect.DeepEqual(edc1, dc1) {
 		t.Errorf("Expecting: %v, received: %v", edc1, dc1)
@@ -78,6 +79,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		SetupTimeField:   "~setuptime2:s/sip:(.+)/$1/",
 		AnswerTimeField:  "~answertime2:s/sip:(.+)/$1/",
 		UsageField:       "~duration2:s/sip:(.+)/$1/",
+		SupplierField:    "~supplier2:s/(.+)/$1/",
 	}
 	edc2.rsrRunFilters, _ = ParseRSRFields("^cdr_source/tdm_cdrs/", INFIELD_SEP)
 	edc2.rsrReqTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
@@ -90,6 +92,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	edc2.rsrSetupTimeField, _ = NewRSRField("~setuptime2:s/sip:(.+)/$1/")
 	edc2.rsrAnswerTimeField, _ = NewRSRField("~answertime2:s/sip:(.+)/$1/")
 	edc2.rsrUsageField, _ = NewRSRField("~duration2:s/sip:(.+)/$1/")
+	edc2.rsrSupplierField, _ = NewRSRField("~supplier2:s/(.+)/$1/")
 	if dc2, err := NewDerivedCharger("test2",
 		"^cdr_source/tdm_cdrs/",
 		"~reqtype2:s/sip:(.+)/$1/",
@@ -101,7 +104,8 @@ func TestNewDerivedCharger(t *testing.T) {
 		"~destination2:s/sip:(.+)/$1/",
 		"~setuptime2:s/sip:(.+)/$1/",
 		"~answertime2:s/sip:(.+)/$1/",
-		"~duration2:s/sip:(.+)/$1/"); err != nil {
+		"~duration2:s/sip:(.+)/$1/",
+		"~supplier2:s/(.+)/$1/"); err != nil {
 		t.Error("Unexpected error", err)
 	} else if !reflect.DeepEqual(edc2, dc2) {
 		t.Errorf("Expecting: %v, received: %v", edc2, dc2)
@@ -118,16 +122,17 @@ func TestAppendDefaultRun(t *testing.T) {
 	var dc1 DerivedChargers
 	dcDf := &DerivedCharger{RunId: DEFAULT_RUNID, RunFilters: "", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
 		TenantField: META_DEFAULT, CategoryField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
-		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT}
+		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT, SupplierField: META_DEFAULT}
 	eDc1 := DerivedChargers{dcDf}
 	if dc1, _ = dc1.AppendDefaultRun(); !reflect.DeepEqual(dc1, eDc1) {
 		t.Error("Unexpected result.")
 	}
 	dc2 := DerivedChargers{
-		&DerivedCharger{RunId: "extra1", RunFilters: "", ReqTypeField: "reqtype2", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+		&DerivedCharger{RunId: "extra1", RunFilters: "", ReqTypeField: "reqtype2", DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
+			AccountField: "rif", SubjectField: "rif", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT},
+		&DerivedCharger{RunId: "extra2", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
+			AccountField: "ivo", SubjectField: "ivo", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT,
+			UsageField: META_DEFAULT, SupplierField: META_DEFAULT},
 	}
 	eDc2 := append(dc2, dcDf)
 	if dc2, _ = dc2.AppendDefaultRun(); !reflect.DeepEqual(dc2, eDc2) {

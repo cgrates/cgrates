@@ -24,7 +24,7 @@ import (
 )
 
 // Wraps regexp compiling in case of rsr fields
-func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld string) (dc *DerivedCharger, err error) {
+func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld, supplFld string) (dc *DerivedCharger, err error) {
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
@@ -95,6 +95,12 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 			return nil, err
 		}
 	}
+	dc.SupplierField = supplFld
+	if strings.HasPrefix(dc.SupplierField, REGEXP_PREFIX) || strings.HasPrefix(dc.SupplierField, STATIC_VALUE_PREFIX) {
+		if dc.rsrSupplierField, err = NewRSRField(dc.SupplierField); err != nil {
+			return nil, err
+		}
+	}
 	return dc, nil
 }
 
@@ -111,6 +117,7 @@ type DerivedCharger struct {
 	SetupTimeField      string      // Field containing setup time information
 	AnswerTimeField     string      // Field containing answer time information
 	UsageField          string      // Field containing usage information
+	SupplierField       string      // Field containing supplier information
 	rsrRunFilters       []*RSRField // Storage for compiled Regexp in case of RSRFields
 	rsrReqTypeField     *RSRField
 	rsrDirectionField   *RSRField
@@ -122,6 +129,7 @@ type DerivedCharger struct {
 	rsrSetupTimeField   *RSRField
 	rsrAnswerTimeField  *RSRField
 	rsrUsageField       *RSRField
+	rsrSupplierField    *RSRField
 }
 
 func DerivedChargersKey(direction, tenant, category, account, subject string) string {
@@ -145,6 +153,6 @@ func (dcs DerivedChargers) Append(dc *DerivedCharger) (DerivedChargers, error) {
 
 func (dcs DerivedChargers) AppendDefaultRun() (DerivedChargers, error) {
 	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
-		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
 	return append(dcs, dcDf), nil
 }
