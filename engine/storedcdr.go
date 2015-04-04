@@ -514,6 +514,12 @@ func (storedCdr *StoredCdr) GetDuration(fieldName string) (time.Duration, error)
 	}
 	return utils.ParseDurationWithSecs(durVal)
 }
+func (storedCdr *StoredCdr) GetSupplier(fieldName string) string {
+	if utils.IsSliceMember([]string{utils.SUPPLIER, utils.META_DEFAULT}, fieldName) {
+		return storedCdr.Supplier
+	}
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
+}
 func (storedCdr *StoredCdr) GetOriginatorIP(fieldName string) string {
 	if utils.IsSliceMember([]string{utils.CDRHOST, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.CdrHost

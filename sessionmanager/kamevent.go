@@ -171,6 +171,13 @@ func (kev KamEvent) GetDuration(fieldName string) (time.Duration, error) {
 	return utils.ParseDurationWithSecs(durStr)
 }
 
+func (kev KamEvent) GetSupplier(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(kev[fieldName], kev[utils.CGR_SUPPLIER])
+}
+
 //ToDo: extract the IP of the kamailio server generating the event
 func (kev KamEvent) GetOriginatorIP(string) string {
 	return "127.0.0.1"
@@ -252,6 +259,8 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(aTime.String())
 	case utils.USAGE:
 		return rsrFld.ParseValue(strconv.FormatFloat(utils.Round(duration.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64))
+	case utils.SUPPLIER:
+		return rsrFld.ParseValue(kev.GetSupplier(utils.META_DEFAULT))
 	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(utils.META_DEFAULT)
 	case utils.COST:
@@ -281,6 +290,7 @@ func (kev KamEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.SetupTime, _ = kev.GetSetupTime(utils.META_DEFAULT)
 	storCdr.AnswerTime, _ = kev.GetAnswerTime(utils.META_DEFAULT)
 	storCdr.Usage, _ = kev.GetDuration(utils.META_DEFAULT)
+	storCdr.Supplier = kev.GetSupplier(utils.META_DEFAULT)
 	storCdr.ExtraFields = kev.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr

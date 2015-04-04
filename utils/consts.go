@@ -181,6 +181,7 @@ const (
 	NANO_MULTIPLIER              = 1000000000
 	CGR_AUTHORIZE                = "CGR_AUTHORIZE"
 	CONFIG_DIR                   = "/etc/cgrates"
+	CGR_SUPPLIER                 = "cgr_supplier"
 )
 
 var (

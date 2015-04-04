@@ -450,8 +450,9 @@ func TestStoredCdrEventFields(t *testing.T) {
 	cdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
 		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dans",
 		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 27, 0, time.UTC),
-		MediationRunId: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan"}
+		MediationRunId: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, Supplier: "suppl1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan"}
+
 	if ev := cdr.AsEvent(""); ev != Event(cdr) {
 		t.Error("Received: ", ev)
 	}
@@ -499,6 +500,9 @@ func TestStoredCdrEventFields(t *testing.T) {
 	}
 	if dur, _ := cdr.GetDuration(utils.META_DEFAULT); dur != cdr.Usage {
 		t.Error("Received: ", dur)
+	}
+	if suppl := cdr.GetSupplier(utils.META_DEFAULT); suppl != cdr.Supplier {
+		t.Error("Received: ", suppl)
 	}
 	if res := cdr.GetOriginatorIP(utils.META_DEFAULT); res != cdr.CdrHost {
 		t.Error("Received: ", res)

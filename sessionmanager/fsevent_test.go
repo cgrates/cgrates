@@ -238,6 +238,7 @@ variable_bridge_channel: sofia/internal/sip%3A1002%40192.168.56.1%3A5060
 variable_bridge_uuid: b7f3d830-b3a4-4e1c-b600-572eeb462c39
 variable_signal_bond: b7f3d830-b3a4-4e1c-b600-572eeb462c39
 variable_cgr_reqtype: *pseudoprepaid
+variable_cgr_supplier: supplier1
 variable_last_sent_callee_id_name: Outbound%20Call
 variable_last_sent_callee_id_number: 1002
 variable_sip_reinvite_sdp: v%3D0%0D%0Ao%3D1003%200%201%20IN%20IP4%20192.168.56.1%0D%0As%3D-%0D%0Ac%3DIN%20IP4%20192.168.56.1%0D%0At%3D0%200%0D%0Am%3Daudio%205052%20RTP/AVP%2096%2097%2098%209%20100%20102%200%208%20103%203%20104%20101%0D%0Aa%3Dsendonly%0D%0Aa%3Drtpmap%3A96%20opus/48000/2%0D%0Aa%3Dfmtp%3A96%20usedtx%3D1%0D%0Aa%3Drtpmap%3A97%20SILK/24000%0D%0Aa%3Drtpmap%3A98%20SILK/16000%0D%0Aa%3Drtpmap%3A9%20G722/8000%0D%0Aa%3Drtpmap%3A100%20speex/32000%0D%0Aa%3Drtpmap%3A102%20speex/16000%0D%0Aa%3Drtpmap%3A0%20PCMU/8000%0D%0Aa%3Drtpmap%3A8%20PCMA/8000%0D%0Aa%3Drtpmap%3A103%20iLBC/8000%0D%0Aa%3Drtpmap%3A3%20GSM/8000%0D%0Aa%3Drtpmap%3A104%20speex/8000%0D%0Aa%3Drtpmap%3A101%20telephone-event/8000%0D%0Aa%3Dextmap%3A1%20urn%3Aietf%3Aparams%3Artp-hdrext%3Acsrc-audio-level%0D%0Aa%3Dzrtp-hash%3A1.10%20bd7a58a0a6cb4b71870cc776f1901436f82ab3c9f960b9fc9645086206a8a804%0D%0Am%3Dvideo%200%20RTP/AVP%20105%2099%0D%0A
@@ -384,7 +385,8 @@ func TestEventParseStatic(t *testing.T) {
 		ev.GetDestination("^test") != "test" ||
 		setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
 		answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
-		dur != time.Duration(60)*time.Second {
+		dur != time.Duration(60)*time.Second ||
+		ev.GetSupplier("^test") != "test" {
 		t.Error("Values out of static not matching",
 			ev.GetReqType("^test") != "test",
 			ev.GetDirection("^test") != "test",
@@ -395,7 +397,8 @@ func TestEventParseStatic(t *testing.T) {
 			ev.GetDestination("^test") != "test",
 			setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 			answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
-			dur != time.Duration(60)*time.Second)
+			dur != time.Duration(60)*time.Second,
+			ev.GetSupplier("^test") != "test")
 	}
 }
 
@@ -433,7 +436,8 @@ Task-Runtime: 1349437318`
 		ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
 		answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
-		dur != time.Duration(65)*time.Second {
+		dur != time.Duration(65)*time.Second ||
+		ev.GetSupplier("FreeSWITCH-Hostname") != "h1.ip-switch.net" {
 		t.Error("Values out of static not matching",
 			ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetDirection("FreeSWITCH-Hostname") != "*out",
@@ -444,7 +448,8 @@ Task-Runtime: 1349437318`
 			ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
 			answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
-			dur != time.Duration(65)*time.Second)
+			dur != time.Duration(65)*time.Second,
+			ev.GetSupplier("FreeSWITCH-Hostname") != "h1.ip-switch.net")
 	}
 }
 
@@ -487,7 +492,8 @@ func TestParseFsHangup(t *testing.T) {
 		ev.GetDestination(utils.META_DEFAULT) != "1002" ||
 		setupTime.UTC() != time.Date(2014, 4, 25, 16, 8, 27, 0, time.UTC) ||
 		answerTime.UTC() != time.Date(2014, 4, 25, 16, 8, 40, 0, time.UTC) ||
-		dur != time.Duration(5)*time.Second {
+		dur != time.Duration(5)*time.Second ||
+		ev.GetSupplier(utils.META_DEFAULT) != "supplier1" {
 		t.Error("Default values not matching",
 			ev.GetReqType(utils.META_DEFAULT) != utils.META_PSEUDOPREPAID,
 			ev.GetDirection(utils.META_DEFAULT) != "*out",
@@ -498,7 +504,8 @@ func TestParseFsHangup(t *testing.T) {
 			ev.GetDestination(utils.META_DEFAULT) != "1002",
 			setupTime.UTC() != time.Date(2014, 4, 25, 17, 8, 27, 0, time.UTC),
 			answerTime.UTC() != time.Date(2014, 4, 25, 17, 8, 40, 0, time.UTC),
-			dur != time.Duration(5)*time.Second)
+			dur != time.Duration(5)*time.Second,
+			ev.GetSupplier(utils.META_DEFAULT) != "supplier1")
 	}
 }
 
@@ -551,6 +558,9 @@ func TestParseEventValue(t *testing.T) {
 		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.USAGE}); parsed != "5000000000" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUPPLIER}); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.MEDI_RUNID}); parsed != utils.DEFAULT_RUNID {
@@ -623,7 +633,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 		TOR: utils.VOICE, AccId: "37e9b766-5256-4e4b-b1ed-3767b930fec8", CdrHost: "10.0.2.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.META_PSEUDOPREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003",
 		Destination: "1002", SetupTime: setupTime, AnswerTime: aTime,
-		Usage: time.Duration(5) * time.Second, ExtraFields: make(map[string]string), Cost: -1}
+		Usage: time.Duration(5) * time.Second, Supplier: "supplier1", ExtraFields: make(map[string]string), Cost: -1}
 	if storedCdr := ev.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}

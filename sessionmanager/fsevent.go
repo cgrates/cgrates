@@ -43,6 +43,7 @@ const (
 	DESTINATION        = "variable_cgr_destination"
 	REQTYPE            = "variable_cgr_reqtype" //prepaid or postpaid
 	Category           = "variable_cgr_category"
+	VAR_CGR_SUPPLIER   = "variable_" + utils.CGR_SUPPLIER
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_cgr_tenant"
 	CALL_DEST_NR       = "Caller-Destination-Number"
@@ -211,6 +212,13 @@ func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error)
 	return utils.ParseDurationWithSecs(durStr)
 }
 
+func (fsev FSEvent) GetSupplier(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[VAR_CGR_SUPPLIER])
+}
+
 func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
@@ -264,6 +272,8 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 	case utils.USAGE:
 		dur, _ := fsev.GetDuration("")
 		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
+	case utils.SUPPLIER:
+		return rsrFld.ParseValue(fsev.GetSupplier(""))
 	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(utils.DEFAULT_RUNID)
 	case utils.COST:
@@ -313,5 +323,6 @@ func (fsev FSEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
 	storCdr.ExtraFields = fsev.GetExtraFields()
 	storCdr.Cost = -1
+	storCdr.Supplier = fsev.GetSupplier(utils.META_DEFAULT)
 	return storCdr
 }

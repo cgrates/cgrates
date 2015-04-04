@@ -40,7 +40,7 @@ type Event interface {
 	GetAnswerTime(string) (time.Time, error)
 	GetEndTime() (time.Time, error)
 	GetDuration(string) (time.Duration, error)
-	//GetSupplier(string) string
+	GetSupplier(string) string
 	GetOriginatorIP(string) string
 	GetExtraFields() map[string]string
 	MissingParameter() bool

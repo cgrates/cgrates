@@ -173,6 +173,12 @@ func (osipsev *OsipsEvent) GetDuration(fieldName string) (time.Duration, error) 
 	}
 	return utils.ParseDurationWithSecs(durStr)
 }
+func (osipsev *OsipsEvent) GetSupplier(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[utils.CGR_SUPPLIER])
+}
 func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
 	if osipsEv.osipsEvent == nil || osipsEv.osipsEvent.OriginatorAddress == nil {
 		return ""
@@ -193,7 +199,7 @@ func (osipsev *OsipsEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 }
 func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
 	primaryFields := []string{"to_tag", "setuptime", "created", "method", "callid", "sip_reason", "time", "sip_code", "duration", "from_tag",
-		"cgr_tenant", "cgr_category", "cgr_reqtype", "cgr_account", "cgr_subject", "cgr_destination"}
+		"cgr_tenant", "cgr_category", "cgr_reqtype", "cgr_account", "cgr_subject", "cgr_destination", utils.CGR_SUPPLIER}
 	extraFields := make(map[string]string)
 	for field, val := range osipsev.osipsEvent.AttrValues {
 		if !utils.IsSliceMember(primaryFields, field) {
@@ -220,6 +226,7 @@ func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.SetupTime, _ = osipsEv.GetSetupTime(utils.META_DEFAULT)
 	storCdr.AnswerTime, _ = osipsEv.GetAnswerTime(utils.META_DEFAULT)
 	storCdr.Usage, _ = osipsEv.GetDuration(utils.META_DEFAULT)
+	storCdr.Supplier = osipsEv.GetSupplier(utils.META_DEFAULT)
 	storCdr.ExtraFields = osipsEv.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr
