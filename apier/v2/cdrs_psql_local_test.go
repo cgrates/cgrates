@@ -60,7 +60,7 @@ func TestV2CdrsPsqlInitCdrDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := engine.InitCdrDb(cdrsPsqlCfg); err != nil {
+	if err := engine.InitStorDb(cdrsPsqlCfg); err != nil {
 		t.Fatal(err)
 	}
 }

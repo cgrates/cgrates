@@ -63,7 +63,7 @@ func TestV2CdrsMysqlInitCdrDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := engine.InitCdrDb(cdrsCfg); err != nil {
+	if err := engine.InitStorDb(cdrsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

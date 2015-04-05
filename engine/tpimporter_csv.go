@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -62,7 +63,9 @@ func (self *TPCSVImporter) Run() error {
 		if !hasName {
 			continue
 		}
-		fHandler(self, f.Name())
+		if err := fHandler(self, f.Name()); err != nil {
+			Logger.Err(fmt.Sprintf("<TPCSVImporter> Importing file: %s, got error: %s", err.Error()))
+		}
 	}
 	return nil
 }
@@ -653,6 +656,7 @@ func (self *TPCSVImporter) importDerivedChargers(fn string) error {
 			SetupTimeField:   ValueOrDefault(record[14], "*default"),
 			AnswerTimeField:  ValueOrDefault(record[15], "*default"),
 			UsageField:       ValueOrDefault(record[16], "*default"),
+			SupplierField:    ValueOrDefault(record[17], "*default"),
 		})
 	}
 	if err := self.StorDb.SetTPDerivedChargers(self.TPid, dcs); err != nil {

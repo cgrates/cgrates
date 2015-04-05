@@ -54,7 +54,7 @@ func TestTutLclResetDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := engine.InitCdrDb(tutCfg); err != nil {
+	if err := engine.InitStorDb(tutCfg); err != nil {
 		t.Fatal(err)
 	}
 }

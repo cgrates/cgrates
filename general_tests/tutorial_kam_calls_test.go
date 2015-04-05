@@ -54,7 +54,7 @@ func TestTutKamCallsResetDb(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.InitCdrDb(tutKamCallsCfg); err != nil {
+	if err := engine.InitStorDb(tutKamCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

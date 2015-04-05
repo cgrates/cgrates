@@ -222,7 +222,7 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-	if err := dbReader.LoadDerivedChargersFiltered(&attrs); err != nil {
+	if err := dbReader.LoadDerivedChargersFiltered(&attrs, true); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	//Automatic cache of the newly inserted rating plan
@@ -331,6 +331,133 @@ func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = OK
+	return nil
+}
+
+type AttrLoadTpFromStorDb struct {
+	TPid    string
+	FlushDb bool // Flush ratingDb before loading
+	DryRun  bool // Only simulate, no write
+}
+
+// Loads complete data in a TP from storDb
+func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply *string) error {
+	if len(attrs.TPid) == 0 {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	if err := dbReader.LoadAll(); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	if attrs.DryRun {
+		*reply = "OK"
+		return nil // Mission complete, no errors
+	}
+	if err := dbReader.WriteToDatabase(attrs.FlushDb, false); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	// Make sure the items are in the cache
+	dstIds, _ := dbReader.GetLoadedIds(engine.DESTINATION_PREFIX)
+	dstKeys := make([]string, len(dstIds))
+	for idx, dId := range dstIds {
+		dstKeys[idx] = engine.DESTINATION_PREFIX + dId // Cache expects them as redis keys
+	}
+	rplIds, _ := dbReader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
+	rpKeys := make([]string, len(rplIds))
+	for idx, rpId := range rplIds {
+		rpKeys[idx] = engine.RATING_PLAN_PREFIX + rpId
+	}
+	rpfIds, _ := dbReader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
+	rpfKeys := make([]string, len(rpfIds))
+	for idx, rpfId := range rpfIds {
+		rpfKeys[idx] = engine.RATING_PROFILE_PREFIX + rpfId
+	}
+	actIds, _ := dbReader.GetLoadedIds(engine.ACTION_PREFIX)
+	actKeys := make([]string, len(actIds))
+	for idx, actId := range actIds {
+		actKeys[idx] = engine.ACTION_PREFIX + actId
+	}
+	shgIds, _ := dbReader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
+	shgKeys := make([]string, len(shgIds))
+	for idx, shgId := range shgIds {
+		shgKeys[idx] = engine.SHARED_GROUP_PREFIX + shgId
+	}
+	rpAliases, _ := dbReader.GetLoadedIds(engine.RP_ALIAS_PREFIX)
+	rpAlsKeys := make([]string, len(rpAliases))
+	for idx, alias := range rpAliases {
+		rpAlsKeys[idx] = engine.RP_ALIAS_PREFIX + alias
+	}
+	accAliases, _ := dbReader.GetLoadedIds(engine.ACC_ALIAS_PREFIX)
+	accAlsKeys := make([]string, len(accAliases))
+	for idx, alias := range accAliases {
+		accAlsKeys[idx] = engine.ACC_ALIAS_PREFIX + alias
+	}
+	lcrIds, _ := dbReader.GetLoadedIds(engine.LCR_PREFIX)
+	lcrKeys := make([]string, len(lcrIds))
+	for idx, lcrId := range lcrIds {
+		lcrKeys[idx] = engine.LCR_PREFIX + lcrId
+	}
+	dcs, _ := dbReader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
+	dcsKeys := make([]string, len(dcs))
+	for idx, dc := range dcs {
+		dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
+	}
+	engine.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
+		return err
+	}
+	if self.Sched != nil {
+		engine.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
+		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.Restart()
+	}
+	cstKeys, _ := dbReader.GetLoadedIds(engine.CDR_STATS_PREFIX)
+	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
+		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
+			return err
+		}
+	}
+	*reply = OK
+	return nil
+}
+
+type AttrImportTPFromFolder struct {
+	TPid         string
+	FolderPath   string
+	RunId        string
+	CsvSeparator string
+}
+
+func (self *ApierV1) ImportTariffPlanFromFolder(attrs AttrImportTPFromFolder, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "FolderPath"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if len(attrs.CsvSeparator) == 0 {
+		attrs.CsvSeparator = ","
+	}
+	if fi, err := os.Stat(attrs.FolderPath); err != nil {
+		if strings.HasSuffix(err.Error(), "no such file or directory") {
+			return errors.New(utils.ERR_INVALID_PATH)
+		}
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if !fi.IsDir() {
+		return errors.New(utils.ERR_INVALID_PATH)
+	}
+	csvImporter := engine.TPCSVImporter{
+		TPid:     attrs.TPid,
+		StorDb:   self.StorDb,
+		DirPath:  attrs.FolderPath,
+		Sep:      rune(attrs.CsvSeparator[0]),
+		Verbose:  false,
+		ImportId: attrs.RunId,
+	}
+	if err := csvImporter.Run(); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = utils.OK
 	return nil
 }
 

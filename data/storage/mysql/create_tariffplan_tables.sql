@@ -116,6 +116,7 @@ CREATE TABLE `tp_rating_profiles` (
   `cdr_stat_queue_ids` varchar(64),
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
+   KEY `tpid` (`tpid`),
   KEY `tpid_loadid` (`tpid`, `loadid`),
   UNIQUE KEY `tpid_loadid_tenant_category_dir_subj_atime` (`tpid`,`loadid`, `tenant`,`category`,`direction`,`subject`,`activation_time`)
 );

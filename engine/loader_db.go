@@ -429,9 +429,7 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 	for tag, rplBnds := range mpRpls {
 		ratingPlan := &RatingPlan{Id: tag}
 		for _, rp := range rplBnds {
-			// Logger.Debug(fmt.Sprintf("Rating Plan binding: %v", rp))
 			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, rp.TimingId)
-			// Logger.Debug(fmt.Sprintf("Timing: %v", tm))
 			if err != nil || len(tm) == 0 {
 				return false, fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
 			}
@@ -442,12 +440,10 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 				return false, fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
 			}
 			for _, drate := range drm[rp.DestinationRatesId].DestinationRates {
-				// Logger.Debug(fmt.Sprintf("Destination rate: %v", drate))
 				rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateId)
 				if err != nil || len(rt) == 0 {
 					return false, fmt.Errorf("No Rates profile with id %s: %v", drate.RateId, err)
 				}
-				// Logger.Debug(fmt.Sprintf("Rate: %v", rt))
 				drate.Rate = rt[drate.RateId]
 				ratingPlan.AddRateInterval(drate.DestinationId, GetRateInterval(rp, drate))
 				if drate.DestinationId == utils.ANY {
@@ -464,9 +460,7 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 					}
 					continue
 				}
-				// Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationId, dms))
 				for _, destination := range dms {
-					// Logger.Debug(fmt.Sprintf("Destination: %v", destination))
 					dbr.dataDb.SetDestination(destination)
 				}
 			}
@@ -485,7 +479,6 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 		return fmt.Errorf("No RateProfile for filter %v, error: %v", qriedRpf, err)
 	}
 	for _, tpRpf := range mpTpRpfs {
-		// Logger.Debug(fmt.Sprintf("Rating profile: %v", tpRpf))
 		resultRatingProfile = &RatingProfile{Id: tpRpf.KeyId()}
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseDate(tpRa.ActivationTime)
@@ -900,32 +893,33 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 }
 
 func (dbr *DbReader) LoadDerivedChargers() (err error) {
-	return dbr.LoadDerivedChargersFiltered(&utils.TPDerivedChargers{TPid: dbr.tpid})
+	return dbr.LoadDerivedChargersFiltered(&utils.TPDerivedChargers{TPid: dbr.tpid}, false)
 }
 
-func (dbr *DbReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers) (err error) {
+func (dbr *DbReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers, save bool) (err error) {
 	tpDcses, err := dbr.storDb.GetTpDerivedChargers(filter)
 	if err != nil {
 		return err
 	}
-	allDcs := make(map[string]utils.DerivedChargers) // We load in map first so we can pre-process data for errors
 	for _, tpDcs := range tpDcses {
 		tag := tpDcs.GetDerivedChargersKey()
-		if _, hasIt := allDcs[tag]; !hasIt {
-			allDcs[tag] = make(utils.DerivedChargers, 0)
+		if _, hasIt := dbr.derivedChargers[tag]; !hasIt {
+			dbr.derivedChargers[tag] = make(utils.DerivedChargers, 0) // Load object map since we use this method also from LoadDerivedChargers
 		}
 		for _, tpDc := range tpDcs.DerivedChargers {
 			if dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
 				tpDc.AccountField, tpDc.SubjectField, tpDc.DestinationField, tpDc.SetupTimeField, tpDc.AnswerTimeField, tpDc.UsageField, tpDc.SupplierField); err != nil {
 				return err
 			} else {
-				allDcs[tag] = append(allDcs[tag], dc)
+				dbr.derivedChargers[tag] = append(dbr.derivedChargers[tag], dc)
 			}
 		}
 	}
-	for dcsKey, dcs := range allDcs {
-		if err := dbr.accountDb.SetDerivedChargers(dcsKey, dcs); err != nil {
-			return err
+	if save {
+		for dcsKey, dcs := range dbr.derivedChargers {
+			if err := dbr.accountDb.SetDerivedChargers(dcsKey, dcs); err != nil {
+				return err
+			}
 		}
 	}
 	return nil // Placeholder for now
@@ -1078,6 +1072,14 @@ func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(dbr.derivedChargers))
 		i := 0
 		for k := range dbr.derivedChargers {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case SHARED_GROUP_PREFIX:
+		keys := make([]string, len(dbr.sharedGroups))
+		i := 0
+		for k := range dbr.sharedGroups {
 			keys[i] = k
 			i++
 		}

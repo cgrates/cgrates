@@ -91,38 +91,21 @@ func TestApierCreateDirs(t *testing.T) {
 	}
 }
 
-// Empty tables before using them
-func TestApierCreateTables(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	if *storDbType != utils.MYSQL {
-		t.Fatal("Unsupported storDbType")
-	}
-	var mysql *engine.MySQLStorage
-	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns); err != nil {
-		t.Fatal("Error on opening database connection: ", err)
-	} else {
-		mysql = d.(*engine.MySQLStorage)
-	}
-	for _, scriptName := range []string{engine.CREATE_CDRS_TABLES_SQL, engine.CREATE_TARIFFPLAN_TABLES_SQL} {
-		if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, scriptName)); err != nil {
-			t.Fatal("Error on mysql creation: ", err.Error())
-			return // No point in going further
-		}
-	}
-	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
-		if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
-			t.Fatal(err.Error())
-		}
-	}
-}
-
 func TestApierInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	if err := engine.InitDataDb(cfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Empty tables before using them
+func TestApierInitStorDb(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if err := engine.InitStorDb(cfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -988,7 +971,7 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 }
 
-func TestLocalApierSetActions(t *testing.T) {
+func TestApierSetActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1006,7 +989,7 @@ func TestLocalApierSetActions(t *testing.T) {
 	}
 }
 
-func TestLocalApierGetActions(t *testing.T) {
+func TestApierGetActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1658,6 +1641,116 @@ func TestApierLocalGetDataCost(t *testing.T) {
 		t.Error("Unexpected nil error received: ", err.Error())
 	} else if rply.Cost != 128.0240 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
+	}
+}
+
+// Test LoadTPFromStorDb
+func TestApierInitDataDb2(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if err := engine.InitDataDb(cfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestApierInitStorDb2(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if err := engine.InitStorDb(cfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestApierReloadCache2(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	arc := new(utils.ApiReloadCache)
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+	}
+}
+
+func TestApierReloadScheduler2(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.ReloadScheduler", reply, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadScheduler: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.ReloadScheduler got reply: ", reply)
+	}
+}
+
+func TestApierImportTPFromFolderPath(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply string
+	if err := rater.Call("ApierV1.ImportTariffPlanFromFolder", AttrImportTPFromFolder{TPid: "TEST_TPID2", FolderPath: "/usr/share/cgrates/tariffplans/tutorial"}, &reply); err != nil {
+		t.Error("Got error on ApierV1.ImportTarrifPlanFromFolder: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.ImportTarrifPlanFromFolder got reply: ", reply)
+	}
+}
+
+func TestApierLoadTariffPlanFromStorDbDryRun(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply string
+	if err := rater.Call("ApierV1.LoadTariffPlanFromStorDb", AttrLoadTpFromStorDb{TPid: "TEST_TPID2", DryRun: true}, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadTariffPlanFromStorDb: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.LoadTariffPlanFromStorDb got reply: ", reply)
+	}
+}
+
+func TestApierGetCacheStats2(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var rcvStats *utils.CacheStats
+	expectedStats := new(utils.CacheStats)
+	var args utils.AttrCacheStats
+	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
+	}
+}
+
+func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply string
+	if err := rater.Call("ApierV1.LoadTariffPlanFromStorDb", AttrLoadTpFromStorDb{TPid: "TEST_TPID2"}, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadTariffPlanFromStorDb: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV1.LoadTariffPlanFromStorDb got reply: ", reply)
+	}
+}
+
+func TestApierGetCacheStats3(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var rcvStats *utils.CacheStats
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 3, RatingProfiles: 3, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
+	var args utils.AttrCacheStats
+	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
 	}
 }
 

@@ -106,6 +106,7 @@ DUMMY_DATA
 *out,cgrates.org,call,dan,*any,run1,,,,,,,,,,,,
 *out,cgrates.org,call,dan,*default,,,,,,,,,,,,
 *out,cgrates.org,call,dan,dan,extra3,~filterhdr1:s/(.+)/special_run3/,,,,,^runusr3,^runusr3,,,,,
+*out,cgrates.org,call,1001,1001,derived_run1,,^*rated,*default,*default,*default,*default,^1002,*default,*default,*default,*default,*default
 `
 
 func TestTimingsValidator(t *testing.T) {
@@ -388,7 +389,7 @@ func TestDerivedChargersValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2, 6, 7, 10, 11, 13:
+		case 2, 6, 7, 10, 11, 13, 14:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}

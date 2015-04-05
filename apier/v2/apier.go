@@ -108,7 +108,7 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	tpDc.SetDerivedChargersId(attrs.DerivedChargersId)
 
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-	if err := dbReader.LoadDerivedChargersFiltered(tpDc); err != nil {
+	if err := dbReader.LoadDerivedChargersFiltered(tpDc, true); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	//Automatic cache of the newly inserted rating plan

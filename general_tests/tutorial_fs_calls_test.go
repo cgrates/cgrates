@@ -57,7 +57,7 @@ func TestTutFsCallsResetDb(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.InitCdrDb(tutFsCallsCfg); err != nil {
+	if err := engine.InitStorDb(tutFsCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }

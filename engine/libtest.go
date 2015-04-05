@@ -51,7 +51,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 	return nil
 }
 
-func InitCdrDb(cfg *config.CGRConfig) error {
+func InitStorDb(cfg *config.CGRConfig) error {
 	storDb, err := ConfigureLoadStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
 		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
 	if err != nil {

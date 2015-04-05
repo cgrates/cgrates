@@ -350,9 +350,6 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 		return nil, err
 	}
 	frkStorCdr.Supplier = storedCdr.FieldAsString(supplierFld)
-	if primaryMandatory && len(frkStorCdr.Supplier) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.SUPPLIER, supplierFld.Id))
-	}
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
 	for _, fld := range extraFlds {
 		frkStorCdr.ExtraFields[fld.Id] = storedCdr.FieldAsString(fld)

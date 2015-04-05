@@ -55,10 +55,10 @@ func TestCdrsInitCdrDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := InitCdrDb(cdrsMasterCfg); err != nil {
+	if err := InitStorDb(cdrsMasterCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := InitCdrDb(cdrsSlaveCfg); err != nil {
+	if err := InitStorDb(cdrsSlaveCfg); err != nil {
 		t.Fatal(err)
 	}
 }
