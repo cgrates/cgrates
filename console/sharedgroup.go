@@ -52,6 +52,10 @@ func (self *CmdGetSharedGroup) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdGetSharedGroup) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdGetSharedGroup) RpcResult() interface{} {
 	return &engine.SharedGroup{}
 }

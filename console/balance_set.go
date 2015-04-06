@@ -55,6 +55,10 @@ func (self *CmdAddBalance) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdAddBalance) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdAddBalance) RpcResult() interface{} {
 	var s string
 	return &s

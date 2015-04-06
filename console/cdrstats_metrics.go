@@ -52,6 +52,10 @@ func (self *CmdCdrStatsMetrics) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdCdrStatsMetrics) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdCdrStatsMetrics) RpcResult() interface{} {
 	return &map[string]float64{}
 }

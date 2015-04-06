@@ -52,6 +52,10 @@ func (self *CmdCdrResetQueues) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdCdrResetQueues) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdCdrResetQueues) RpcResult() interface{} {
 	var s string
 	return &s

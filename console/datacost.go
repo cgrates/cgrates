@@ -58,6 +58,10 @@ func (self *CmdGetDataCost) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdGetDataCost) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdGetDataCost) RpcResult() interface{} {
 	return &engine.DataCost{}
 }

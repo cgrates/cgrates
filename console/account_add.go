@@ -52,6 +52,10 @@ func (self *CmdAddAccount) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdAddAccount) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdAddAccount) RpcResult() interface{} {
 	var s string
 	return &s

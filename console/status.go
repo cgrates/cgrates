@@ -49,6 +49,10 @@ func (self *CmdStatus) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdStatus) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdStatus) RpcResult() interface{} {
 	var s map[string]interface{}
 	return &s

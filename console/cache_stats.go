@@ -52,6 +52,10 @@ func (self *CmdGetCacheStats) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdGetCacheStats) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdGetCacheStats) RpcResult() interface{} {
 	return &utils.CacheStats{}
 }

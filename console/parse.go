@@ -60,6 +60,10 @@ func (self *CmdParse) RpcResult() interface{} {
 	return nil
 }
 
+func (self *CmdParse) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdParse) LocalExecute() string {
 	if self.rpcParams.Expression == "" {
 		return "Empty expression error"

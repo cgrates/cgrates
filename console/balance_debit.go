@@ -55,6 +55,10 @@ func (self *CmdDebitBalance) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdDebitBalance) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdDebitBalance) RpcResult() interface{} {
 	return &engine.CallCost{}
 }

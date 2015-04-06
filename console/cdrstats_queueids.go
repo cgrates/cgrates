@@ -49,6 +49,10 @@ func (self *CmdCdrStatsQueueIds) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdCdrStatsQueueIds) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdCdrStatsQueueIds) RpcResult() interface{} {
 	var s []string
 	return &s

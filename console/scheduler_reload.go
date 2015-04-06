@@ -50,6 +50,10 @@ func (self *CmdReloadScheduler) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdReloadScheduler) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdReloadScheduler) RpcResult() interface{} {
 	var s string
 	return &s

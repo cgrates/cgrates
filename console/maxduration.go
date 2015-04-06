@@ -54,6 +54,10 @@ func (self *CmdGetMaxDuration) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdGetMaxDuration) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdGetMaxDuration) RpcResult() interface{} {
 	var f float64
 	return &f

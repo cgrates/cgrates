@@ -52,6 +52,10 @@ func (self *CmdRemCdrs) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdRemCdrs) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdRemCdrs) RpcResult() interface{} {
 	var s string
 	return &s

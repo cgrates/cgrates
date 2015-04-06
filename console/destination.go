@@ -52,6 +52,10 @@ func (self *CmdGetDestination) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdGetDestination) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdGetDestination) RpcResult() interface{} {
 	return &engine.Destination{}
 }

@@ -53,6 +53,10 @@ func (self *CmdSetRatingProfile) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdSetRatingProfile) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdSetRatingProfile) RpcResult() interface{} {
 	var s string
 	return &s

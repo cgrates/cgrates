@@ -52,6 +52,10 @@ func (self *CmdExportCdrs) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdExportCdrs) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdExportCdrs) RpcResult() interface{} {
 	return &utils.ExportedFileCdrs{}
 }

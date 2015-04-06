@@ -53,6 +53,10 @@ func (self *CmdReloadCache) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdReloadCache) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdReloadCache) RpcResult() interface{} {
 	var s string
 	return &s

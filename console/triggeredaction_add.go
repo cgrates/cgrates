@@ -52,6 +52,10 @@ func (self *CmdAddTriggeredAction) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdAddTriggeredAction) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdAddTriggeredAction) RpcResult() interface{} {
 	var s string
 	return &s

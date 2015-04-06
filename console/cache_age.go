@@ -52,6 +52,10 @@ func (self *CmdGetCacheAge) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdGetCacheAge) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdGetCacheAge) RpcResult() interface{} {
 	return &utils.CachedItemAge{}
 }

@@ -56,6 +56,10 @@ func (self *CmdGetAccount) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdGetAccount) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdGetAccount) RpcResult() interface{} {
 	return &engine.Account{}
 }

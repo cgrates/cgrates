@@ -54,6 +54,10 @@ func (self *CmdCdrReloadQueues) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdCdrReloadQueues) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdCdrReloadQueues) RpcResult() interface{} {
 	var s string
 	return &s

@@ -53,6 +53,10 @@ func (self *CmdExecuteAction) RpcParams() interface{} {
 	return self.rpcParams
 }
 
+func (self *CmdExecuteAction) PostprocessRpcParams() error {
+	return nil
+}
+
 func (self *CmdExecuteAction) RpcResult() interface{} {
 	var s string
 	return &s

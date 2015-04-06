@@ -34,6 +34,7 @@ type Commander interface {
 	Usage() string                            // usage message
 	RpcMethod() string                        // Method which should be called remotely
 	RpcParams() interface{}                   // Parameters to send out on rpc
+	PostprocessRpcParams() error              // Corrects rpc parameters when needed
 	RpcResult() interface{}                   // Only requirement is to have a String method to print on console
 	ClientArgs() []string                     // for autocompletion
 	Name() string
@@ -72,6 +73,9 @@ func GetCommandValue(command string, verbose bool) (Commander, error) {
 		return nil, getAvailabelCommandsErr()
 	}
 	if err := cmdVal.FromArgs(cmdArgs, verbose); err != nil {
+		return nil, err
+	}
+	if err := cmdVal.PostprocessRpcParams(); err != nil {
 		return nil, err
 	}
 	return cmdVal, nil
