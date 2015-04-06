@@ -93,14 +93,6 @@ func (lcr *LCR) Sort() {
 	sort.Sort(lcr)
 }
 
-func (le *LCREntry) GetSuppliers() []string {
-	suppliers := strings.Split(le.StrategyParams, utils.INFIELD_SEP)
-	for i := 0; i < len(suppliers); i++ {
-		suppliers[i] = strings.TrimSpace(suppliers[i])
-	}
-	return suppliers
-}
-
 func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minACD, maxACD time.Duration) {
 	// MIN_ASR;MAX_ASR;MIN_ACD;MAX_ACD
 	params := strings.Split(le.StrategyParams, utils.INFIELD_SEP)
@@ -122,10 +114,19 @@ func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minACD, maxACD time.
 	return
 }
 
-func (le *LCREntry) GetQOSSortParams() []string {
+func (le *LCREntry) GetParams() []string {
 	// ASR;ACD
-	if params := strings.Split(le.StrategyParams, utils.INFIELD_SEP); len(params) > 0 {
-		return params
+	params := strings.Split(le.StrategyParams, utils.INFIELD_SEP)
+	// eliminate empty strings
+	var cleanParams []string
+	for _, p := range params {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			cleanParams = append(cleanParams, p)
+		}
+	}
+	if len(cleanParams) > 0 {
+		return cleanParams
 	}
 	return []string{ASR, ACD}
 }

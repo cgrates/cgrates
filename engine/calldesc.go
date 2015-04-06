@@ -685,7 +685,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
 	}
 	for _, ts := range lcrCost {
 		if ts.Entry.Strategy == LCR_STRATEGY_STATIC {
-			for _, supplier := range ts.Entry.GetSuppliers() {
+			for _, supplier := range ts.Entry.GetParams() {
 				lcrCD := cd.Clone()
 				lcrCD.Subject = supplier
 				if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
@@ -751,7 +751,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
 						asr = utils.Avg(asrValues)
 						acd = utils.Avg(acdValues)
 						if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
-							qosSortParams = ts.Entry.GetQOSSortParams()
+							qosSortParams = ts.Entry.GetParams()
 						}
 						if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
 							// filter suppliers by qos thresholds

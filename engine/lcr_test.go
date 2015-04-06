@@ -21,6 +21,7 @@ package engine
 import (
 	"sort"
 	"testing"
+	"time"
 )
 
 func TestLcrQOSSorter(t *testing.T) {
@@ -84,5 +85,88 @@ func TestLcrQOSSorterOACD(t *testing.T) {
 		s[1].QOS[ACD] != 2 ||
 		s[2].QOS[ACD] != 3 {
 		t.Error("Lcr qos sort failed: ", s)
+	}
+}
+
+func TestLcrGetQosLimitsAll(t *testing.T) {
+	le := &LCREntry{
+		StrategyParams: "1.2;2.3;45s;67m",
+	}
+	minAsr, maxAsr, minAcd, maxAcd := le.GetQOSLimits()
+	if minAsr != 1.2 || maxAsr != 2.3 ||
+		minAcd != time.Duration(45)*time.Second || maxAcd != time.Duration(67)*time.Minute {
+		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
+	}
+}
+
+func TestLcrGetQosLimitsSome(t *testing.T) {
+	le := &LCREntry{
+		StrategyParams: "1.2;;;67m",
+	}
+	minAsr, maxAsr, minAcd, maxAcd := le.GetQOSLimits()
+	if minAsr != 1.2 || maxAsr != -1 ||
+		minAcd != -1 || maxAcd != time.Duration(67)*time.Minute {
+		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
+	}
+}
+
+func TestLcrGetQosLimitsNone(t *testing.T) {
+	le := &LCREntry{
+		StrategyParams: ";;;",
+	}
+	minAsr, maxAsr, minAcd, maxAcd := le.GetQOSLimits()
+	if minAsr != -1 || maxAsr != -1 ||
+		minAcd != -1 || maxAcd != -1 {
+		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
+	}
+}
+
+func TestLcrGetQosSortParamsNone(t *testing.T) {
+	le := &LCREntry{
+		StrategyParams: "",
+	}
+	sort := le.GetParams()
+	if sort[0] != ASR || sort[1] != ACD {
+		t.Error("Wrong qos sort params parsed: ", sort)
+	}
+}
+
+func TestLcrGetQosSortParamsEmpty(t *testing.T) {
+	le := &LCREntry{
+		StrategyParams: ";",
+	}
+	sort := le.GetParams()
+	if sort[0] != ASR || sort[1] != ACD {
+		t.Error("Wrong qos sort params parsed: ", sort)
+	}
+}
+
+func TestLcrGetQosSortParamsOne(t *testing.T) {
+	le := &LCREntry{
+		StrategyParams: "ACD",
+	}
+	sort := le.GetParams()
+	if sort[0] != ACD || len(sort) != 1 {
+		t.Error("Wrong qos sort params parsed: ", sort)
+	}
+}
+
+func TestLcrGetQosSortParamsSpace(t *testing.T) {
+	le := &LCREntry{
+		StrategyParams: "; ",
+	}
+	sort := le.GetParams()
+	if sort[0] != ASR || sort[1] != ACD {
+		t.Error("Wrong qos sort params parsed: ", sort)
+	}
+}
+
+func TestLcrGetQosSortParamsFull(t *testing.T) {
+	le := &LCREntry{
+		StrategyParams: "ACD;ASR",
+	}
+	sort := le.GetParams()
+	if sort[0] != ACD || sort[1] != ASR {
+		t.Error("Wrong qos sort params parsed: ", sort)
 	}
 }
