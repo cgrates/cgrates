@@ -292,10 +292,6 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, subj)
 }
 
-func (cd *CallDescriptor) GetLCRKey(subj string) string {
-	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject)
-}
-
 // Splits the received timespan into sub time spans according to the activation periods intervals.
 func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	firstSpan := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, DurationIndex: cd.DurationIndex}
@@ -657,19 +653,35 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 	}
 }
 
-func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
-	lcr, err := dataStorage.GetLCR(cd.GetLCRKey(""), false)
-	if err != nil || lcr == nil {
-		// try the *any customer
-		if lcr, err = dataStorage.GetLCR(cd.GetLCRKey(utils.ANY), false); err != nil || lcr == nil {
+func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
+	keyVariants := []string{
+		utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject),
+		utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, utils.ANY),
+		utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, utils.ANY, utils.ANY),
+		utils.LCRKey(cd.Direction, cd.Tenant, utils.ANY, utils.ANY, utils.ANY),
+		utils.LCRKey(cd.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
+	}
+	for _, key := range keyVariants {
+		if lcr, err := dataStorage.GetLCR(key, false); err != nil && err.Error() != utils.ERR_NOT_FOUND {
 			return nil, err
+		} else if err == nil {
+			return lcr, nil
 		}
+	}
+	return nil, errors.New(utils.ERR_NOT_FOUND)
+}
+
+func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
+	lcr, err := cd.GetLCRFromStorage()
+	if err != nil {
+		return nil, err
 	}
 	lcr.Sort()
 	lcrCost := LCRCost{&LCRTimeSpan{StartTime: cd.TimeStart}}
 	for _, lcrActivation := range lcr.Activations {
-		// TODO: filer entry by destination
+		//log.Printf("Activation: %+v", lcrActivation)
 		lcrEntry := lcrActivation.GetLCREntryForPrefix(cd.Destination)
+		//log.Printf("Entry: %+v", lcrEntry)
 		if lcrActivation.ActivationTime.Before(cd.TimeStart) ||
 			lcrActivation.ActivationTime.Equal(cd.TimeStart) {
 			lcrCost[0].Entry = lcrEntry
@@ -684,6 +696,11 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
 		}
 	}
 	for _, ts := range lcrCost {
+		//log.Printf("TS: %+v", ts)
+		if ts.Entry == nil {
+			continue
+		}
+		//log.Printf("Entry: %+v", ts.Entry)
 		if ts.Entry.Strategy == LCR_STRATEGY_STATIC {
 			for _, supplier := range ts.Entry.GetParams() {
 				lcrCD := cd.Clone()
@@ -707,7 +724,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
 		} else {
 			// find rating profiles
 			ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, ts.Entry.RPCategory)
-			suppliers := cache2go.GetEntriesKeys(LCR_PREFIX + ratingProfileSearchKey)
+			suppliers := cache2go.GetEntriesKeys(RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 			for _, supplier := range suppliers {
 				split := strings.Split(supplier, ":")
 				supplier = split[len(split)-1]

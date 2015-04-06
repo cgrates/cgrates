@@ -37,9 +37,9 @@ const (
 )
 
 type LCR struct {
+	Direction   string
 	Tenant      string
 	Category    string
-	Direction   string
 	Account     string
 	Subject     string
 	Activations []*LCRActivation
@@ -74,7 +74,7 @@ type LCRSupplierCost struct {
 }
 
 func (lcr *LCR) GetId() string {
-	return utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcr.Category, lcr.Account, lcr.Subject)
+	return utils.LCRKey(lcr.Direction, lcr.Tenant, lcr.Category, lcr.Account, lcr.Subject)
 }
 
 func (lcr *LCR) Len() int {
@@ -155,8 +155,10 @@ func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 	var potentials LCREntriesSorter
 	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
 		if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
-			destIds := x.([]string)
-			for _, dId := range destIds {
+
+			destIds := x.(map[interface{}]struct{})
+			for idId := range destIds {
+				dId := idId.(string)
 				for _, entry := range lcra.Entries {
 					if entry.DestinationId == dId {
 						entry.precision = len(p)

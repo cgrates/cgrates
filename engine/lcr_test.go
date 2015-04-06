@@ -170,3 +170,20 @@ func TestLcrGetQosSortParamsFull(t *testing.T) {
 		t.Error("Wrong qos sort params parsed: ", sort)
 	}
 }
+
+func TestLcrGet(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 04, 06, 17, 41, 0, 0, time.UTC),
+		Tenant:      "cgrates.org",
+		Direction:   "*in",
+		Category:    "call",
+		Destination: "0723098765",
+		Account:     "rif",
+		Subject:     "rif",
+	}
+	lcrs, err := cd.GetLCR(nil)
+	if err != nil || len(lcrs) != 1 {
+		t.Errorf("Bad lcr: %+v, %v", lcrs, err)
+	}
+}

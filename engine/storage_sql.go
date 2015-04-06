@@ -1500,19 +1500,19 @@ func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var id int
-		var tpid, tenant, category, direction, account, subject, destinationId, rpCategory, strategy, strategyParams, suppliers, activationTimeString string
+		var tpid, direction, tenant, category, account, subject, destinationId, rpCategory, strategy, strategyParams, suppliers, activationTimeString string
 		var weight float64
-		if err := rows.Scan(&id, &tpid, &tenant, &category, &direction, &account, &subject, &destinationId, &rpCategory, &strategy, &strategyParams, &suppliers, &activationTimeString, &weight); err != nil {
+		if err := rows.Scan(&id, &tpid, &direction, &tenant, &category, &account, &subject, &destinationId, &rpCategory, &strategy, &strategyParams, &suppliers, &activationTimeString, &weight); err != nil {
 			return nil, err
 		}
-		tag := utils.ConcatenatedKey(direction, tenant, category, account, subject)
+		tag := utils.LCRKey(direction, tenant, category, account, subject)
 		lcr, found := lcrs[tag]
 		activationTime, _ := utils.ParseTimeDetectLayout(activationTimeString)
 		if !found {
 			lcr = &LCR{
+				Direction: direction,
 				Tenant:    tenant,
 				Category:  category,
-				Direction: direction,
 				Account:   account,
 				Subject:   subject,
 			}

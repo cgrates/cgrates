@@ -246,10 +246,10 @@ CREATE TABLE `tp_account_actions` (
 DROP TABLE IF EXISTS tp_lcr_rules;
 CREATE TABLE tp_lcr_rules (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` varchar(64) NOT NULL,  
-  `tenant` varchar(64) NOT NULL,
-  `category` varchar(32) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
   `direction` varchar(8) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `category` varchar(32) NOT NULL,  
   `account` varchar(24) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `destination_tag` varchar(64) NOT NULL,

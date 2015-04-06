@@ -241,10 +241,10 @@ CREATE INDEX tpaccountactions_idx ON tp_account_actions (tpid,loadid,tenant,acco
 DROP TABLE IF EXISTS tp_lcr_rules;
 CREATE TABLE tp_lcr_rules (
   id SERIAL PRIMARY KEY,
-  tpid VARCHAR(64) NOT NULL,    
-  tenant VARCHAR(64) NOT NULL,
-  category VARCHAR(32) NOT NULL,
+  tpid VARCHAR(64) NOT NULL,
   direction VARCHAR(8) NOT NULL,
+  tenant VARCHAR(64) NOT NULL,
+  category VARCHAR(32) NOT NULL,  
   account VARCHAR(24) NOT NULL,
   subject VARCHAR(64) NOT NULL,
   destination_tag VARCHAR(64) NOT NULL,

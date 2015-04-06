@@ -259,6 +259,10 @@ func ConcatenatedKey(keyVals ...string) string {
 	return strings.Join(keyVals, CONCATENATED_KEY_SEP)
 }
 
+func LCRKey(direction, tenant, category, account, subject string) string {
+	return ConcatenatedKey(direction, tenant, category, account, subject)
+}
+
 func RatingSubjectAliasKey(tenant, subject string) string {
 	return ConcatenatedKey(tenant, subject)
 }
