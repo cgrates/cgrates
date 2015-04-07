@@ -141,8 +141,8 @@ SG3,*any,*lowest,
 `
 
 	lcrs = `
-cgrates.org,call,*in,*any,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
-cgrates.org,call,*in,*any,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
+*in,cgrates.org,call,*any,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
+*in,cgrates.org,call,*any,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
 `
 	actions = `
 MINI,*topup_reset,,,*monetary,*out,,,,,*unlimited,,10,10,10

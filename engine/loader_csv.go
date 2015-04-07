@@ -609,7 +609,7 @@ func (csvr *CSVReader) LoadLCRs() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tenant, category, direction, account, subject := record[0], record[1], record[2], record[3], record[4]
+		direction, tenant, category, account, subject := record[0], record[1], record[2], record[3], record[4]
 		id := utils.LCRKey(direction, tenant, category, account, subject)
 		lcr, found := csvr.lcrs[id]
 		activationTime, err := utils.ParseTimeDetectLayout(record[9])
