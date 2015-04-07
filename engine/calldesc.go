@@ -676,7 +676,11 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
 	if err != nil {
 		return nil, err
 	}
+	// sort by activation time
 	lcr.Sort()
+
+	// find if one ore more entries apply to this cd (create lcr timespans)
+	// create timespans and attach lcr entries to them
 	lcrCost := LCRCost{&LCRTimeSpan{StartTime: cd.TimeStart}}
 	for _, lcrActivation := range lcr.Activations {
 		//log.Printf("Activation: %+v", lcrActivation)

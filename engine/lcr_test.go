@@ -183,6 +183,8 @@ func TestLcrGet(t *testing.T) {
 		Subject:     "rif",
 	}
 	lcrs, err := cd.GetLCR(nil)
+	//lcr, _ := json.Marshal(lcrs[0])
+	//log.Print("LCR: ", string(lcr))
 	if err != nil || len(lcrs) != 1 {
 		t.Errorf("Bad lcr: %+v, %v", lcrs, err)
 	}

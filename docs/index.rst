@@ -16,7 +16,6 @@ Contents:
    installation
    configuration   
    administration
-   lcr
    advanced
    tutorials
    miscellaneous
