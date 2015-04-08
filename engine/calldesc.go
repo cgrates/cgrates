@@ -671,7 +671,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 	return nil, errors.New(utils.ERR_NOT_FOUND)
 }
 
-func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
+func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 	lcr, err := cd.GetLCRFromStorage()
 	if err != nil {
 		return nil, err
@@ -681,138 +681,133 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (LCRCost, error) {
 
 	// find if one ore more entries apply to this cd (create lcr timespans)
 	// create timespans and attach lcr entries to them
-	lcrCost := LCRCost{&LCRTimeSpan{StartTime: cd.TimeStart}}
+	lcrCost := &LCRCost{}
 	for _, lcrActivation := range lcr.Activations {
 		//log.Printf("Activation: %+v", lcrActivation)
 		lcrEntry := lcrActivation.GetLCREntryForPrefix(cd.Destination)
 		//log.Printf("Entry: %+v", lcrEntry)
 		if lcrActivation.ActivationTime.Before(cd.TimeStart) ||
 			lcrActivation.ActivationTime.Equal(cd.TimeStart) {
-			lcrCost[0].Entry = lcrEntry
+			lcrCost.Entry = lcrEntry
 		} else {
-			if lcrActivation.ActivationTime.Before(cd.TimeEnd) {
-				// add lcr timespan
-				lcrCost = append(lcrCost, &LCRTimeSpan{
-					StartTime: lcrActivation.ActivationTime,
-					Entry:     lcrEntry,
+			// because lcr is sorted the folowing ones will
+			// only activate later than cd.Timestart
+			break
+		}
+	}
+	if lcrCost.Entry == nil {
+		return lcrCost, nil
+	}
+	//log.Printf("Entry: %+v", ts.Entry)
+	if lcrCost.Entry.Strategy == LCR_STRATEGY_STATIC {
+		for _, supplier := range lcrCost.Entry.GetParams() {
+			lcrCD := cd.Clone()
+			lcrCD.Subject = supplier
+			if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
+				continue
+			}
+
+			if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
+				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+					Supplier: supplier,
+					Error:    err,
+				})
+			} else {
+				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+					Supplier: supplier,
+					Cost:     cc.Cost,
+					Duration: cc.GetDuration().String(),
 				})
 			}
 		}
-	}
-	for _, ts := range lcrCost {
-		//log.Printf("TS: %+v", ts)
-		if ts.Entry == nil {
-			continue
-		}
-		//log.Printf("Entry: %+v", ts.Entry)
-		if ts.Entry.Strategy == LCR_STRATEGY_STATIC {
-			for _, supplier := range ts.Entry.GetParams() {
-				lcrCD := cd.Clone()
-				lcrCD.Subject = supplier
-				if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
-					continue
-				}
-
-				if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
-					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
-						Supplier: supplier,
-						Error:    err,
-					})
-				} else {
-					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
-						Supplier: supplier,
-						Cost:     cc.Cost,
-					})
-				}
+	} else {
+		// find rating profiles
+		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
+		suppliers := cache2go.GetEntriesKeys(RATING_PROFILE_PREFIX + ratingProfileSearchKey)
+		for _, supplier := range suppliers {
+			split := strings.Split(supplier, ":")
+			supplier = split[len(split)-1]
+			lcrCD := cd.Clone()
+			lcrCD.Subject = supplier
+			if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
+				continue
 			}
-		} else {
-			// find rating profiles
-			ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, ts.Entry.RPCategory)
-			suppliers := cache2go.GetEntriesKeys(RATING_PROFILE_PREFIX + ratingProfileSearchKey)
-			for _, supplier := range suppliers {
-				split := strings.Split(supplier, ":")
-				supplier = split[len(split)-1]
-				lcrCD := cd.Clone()
-				lcrCD.Subject = supplier
-				if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
-					continue
-				}
-				var asr, acd float64
-				var qosSortParams []string
-				if ts.Entry.Strategy == LCR_STRATEGY_QOS || ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
-					rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
-					if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err == nil || rpf != nil {
-						rpf.RatingPlanActivations.Sort()
-						activeRas := rpf.RatingPlanActivations.GetActiveForCall(cd)
-						var cdrStatsQueueIds []string
-						for _, ra := range activeRas {
-							for _, qId := range ra.CdrStatQueueIds {
-								if qId != "" {
-									cdrStatsQueueIds = append(cdrStatsQueueIds, qId)
-								}
-							}
-						}
-
-						var asrValues sort.Float64Slice
-						var acdValues sort.Float64Slice
-						for _, qId := range cdrStatsQueueIds {
-							statValues := make(map[string]float64)
-							if err := stats.GetValues(qId, &statValues); err != nil {
-								Logger.Warning(fmt.Sprintf("Error getting stats values for queue id %s: %v", qId, err))
-							}
-							if asr, exists := statValues[ASR]; exists {
-								asrValues = append(asrValues, asr)
-							}
-							if acd, exists := statValues[ACD]; exists {
-								acdValues = append(acdValues, acd)
-							}
-						}
-						asrValues.Sort()
-						acdValues.Sort()
-						asr = utils.Avg(asrValues)
-						acd = utils.Avg(acdValues)
-						if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
-							qosSortParams = ts.Entry.GetParams()
-						}
-						if ts.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
-							// filter suppliers by qos thresholds
-							asrMin, asrMax, acdMin, acdMax := ts.Entry.GetQOSLimits()
-							// skip current supplier if off limits
-							if asrMin > 0 && asrValues[0] < asrMin {
-								continue
-							}
-							if asrMax > 0 && asrValues[len(asrValues)-1] > asrMax {
-								continue
-							}
-							if acdMin > 0 && acdValues[0] < float64(acdMin) {
-								continue
-							}
-							if acdMax > 0 && acdValues[len(acdValues)-1] > float64(acdMax) {
-								continue
+			var asr, acd float64
+			var qosSortParams []string
+			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
+				if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err == nil || rpf != nil {
+					rpf.RatingPlanActivations.Sort()
+					activeRas := rpf.RatingPlanActivations.GetActiveForCall(cd)
+					var cdrStatsQueueIds []string
+					for _, ra := range activeRas {
+						for _, qId := range ra.CdrStatQueueIds {
+							if qId != "" {
+								cdrStatsQueueIds = append(cdrStatsQueueIds, qId)
 							}
 						}
 					}
-				}
-				if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
-					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
-						Supplier: supplier,
-						Error:    err,
-					})
-				} else {
-					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
-						Supplier: supplier,
-						Cost:     cc.Cost,
-						QOS: map[string]float64{
-							"ASR": asr,
-							"ACD": acd,
-						},
-						qosSortParams: qosSortParams,
-					})
+
+					var asrValues sort.Float64Slice
+					var acdValues sort.Float64Slice
+					for _, qId := range cdrStatsQueueIds {
+						statValues := make(map[string]float64)
+						if err := stats.GetValues(qId, &statValues); err != nil {
+							Logger.Warning(fmt.Sprintf("Error getting stats values for queue id %s: %v", qId, err))
+						}
+						if asr, exists := statValues[ASR]; exists {
+							asrValues = append(asrValues, asr)
+						}
+						if acd, exists := statValues[ACD]; exists {
+							acdValues = append(acdValues, acd)
+						}
+					}
+					asrValues.Sort()
+					acdValues.Sort()
+					asr = utils.Avg(asrValues)
+					acd = utils.Avg(acdValues)
+					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+						qosSortParams = lcrCost.Entry.GetParams()
+					}
+					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+						// filter suppliers by qos thresholds
+						asrMin, asrMax, acdMin, acdMax := lcrCost.Entry.GetQOSLimits()
+						// skip current supplier if off limits
+						if asrMin > 0 && asrValues[0] < asrMin {
+							continue
+						}
+						if asrMax > 0 && asrValues[len(asrValues)-1] > asrMax {
+							continue
+						}
+						if acdMin > 0 && acdValues[0] < float64(acdMin) {
+							continue
+						}
+						if acdMax > 0 && acdValues[len(acdValues)-1] > float64(acdMax) {
+							continue
+						}
+					}
 				}
 			}
-			// sort according to strategy
-			ts.Sort()
+			if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
+				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+					Supplier: supplier,
+					Error:    err,
+				})
+			} else {
+				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+					Supplier: supplier,
+					Cost:     cc.Cost,
+					Duration: cc.GetDuration().String(),
+					QOS: map[string]float64{
+						"ASR": asr,
+						"ACD": acd,
+					},
+					qosSortParams: qosSortParams,
+				})
+			}
 		}
+		// sort according to strategy
+		lcrCost.Sort()
 	}
 	return lcrCost, nil
 }

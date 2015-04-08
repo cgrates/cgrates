@@ -57,10 +57,7 @@ type LCREntry struct {
 	precision      int
 }
 
-type LCRCost []*LCRTimeSpan
-
-type LCRTimeSpan struct {
-	StartTime     time.Time
+type LCRCost struct {
 	SupplierCosts []*LCRSupplierCost
 	Entry         *LCREntry
 }
@@ -68,6 +65,7 @@ type LCRTimeSpan struct {
 type LCRSupplierCost struct {
 	Supplier      string
 	Cost          float64
+	Duration      string
 	Error         error
 	QOS           map[string]float64
 	qosSortParams []string
@@ -182,14 +180,14 @@ func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 	return nil
 }
 
-func (lts *LCRTimeSpan) Sort() {
-	switch lts.Entry.Strategy {
+func (lc *LCRCost) Sort() {
+	switch lc.Entry.Strategy {
 	case LCR_STRATEGY_LOWEST:
-		sort.Sort(LowestSupplierCostSorter(lts.SupplierCosts))
+		sort.Sort(LowestSupplierCostSorter(lc.SupplierCosts))
 	case LCR_STRATEGY_HIGHEST:
-		sort.Sort(HighestSupplierCostSorter(lts.SupplierCosts))
+		sort.Sort(HighestSupplierCostSorter(lc.SupplierCosts))
 	case LCR_STRATEGY_QOS:
-		sort.Sort(QOSSorter(lts.SupplierCosts))
+		sort.Sort(QOSSorter(lc.SupplierCosts))
 	}
 }
 

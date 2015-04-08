@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
+	"log"
 	"sort"
 	"testing"
 	"time"
@@ -182,10 +184,10 @@ func TestLcrGet(t *testing.T) {
 		Account:     "rif",
 		Subject:     "rif",
 	}
-	lcrs, err := cd.GetLCR(nil)
-	//lcr, _ := json.Marshal(lcrs[0])
-	//log.Print("LCR: ", string(lcr))
-	if err != nil || len(lcrs) != 1 {
-		t.Errorf("Bad lcr: %+v, %v", lcrs, err)
+	lcr, err := cd.GetLCR(nil)
+	jsn, _ := json.Marshal(lcr)
+	log.Print("LCR: ", string(jsn))
+	if err != nil || lcr == nil {
+		t.Errorf("Bad lcr: %+v, %v", lcr, err)
 	}
 }

@@ -237,7 +237,7 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 
 func (rs *Responder) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
 	lcrCost, err := cd.GetLCR(rs.Stats)
-	*reply = lcrCost
+	*reply = *lcrCost
 	return err
 }
 

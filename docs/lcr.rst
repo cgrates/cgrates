@@ -54,9 +54,9 @@ The LCR rules for a specific call descriptor are searched using direction, tenan
 
 Because a rule can have several entries they will be sorted by activation time.
 
-Next the system will find out if one ore more LCR entries apply to this call considering entry's  activation time. If more than one applies the call will be split into LCR time-spans attaching the corresponding entry to each timespan.
+Next the system will find out the most recent LCR entry that applies to this call considering entries activation times.
 
-Each timespan is than iterated and acted upon according to it's entry strategy. For static strategy the cost is calculated for each supplier found in the parameters and the suppliers are listed as they are found.
+The LCR entry is processed according to it's strategy. For static strategy the cost is calculated for each supplier found in the parameters and the suppliers are listed as they are found.
 
 For the QOS strategies the suppliers are searched using call descriptor parameters (direction, tenant, category, account, subject), than the cdrstats module is queried for the QOS values and the suppliers are filtered or sorted according to the StrategyParameters field.
 
@@ -64,7 +64,7 @@ For the lowest/highest cost strategies the matched suppliers are sorted ascendin
 
 ::
    
-   [{
+   {
     "Entry": {
         "DestinationId": "*any",
         "RPCategory": "LCR_STANDARD",
@@ -72,8 +72,7 @@ For the lowest/highest cost strategies the matched suppliers are sorted ascendin
         "StrategyParams": "",
         "Weight": 20
     },
-    "StartTime": "2015-04-06T17:40:00Z",
     "SupplierCosts": [{"Supplier":"rif", Cost:"2.0"},{"Supplier":"dan", Cost:"1.0"}]
-    }]
+    }
 
 .. [WIKI2015] http://en.wikipedia.org/wiki/Least-cost_routing
