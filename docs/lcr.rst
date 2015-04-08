@@ -37,7 +37,7 @@ Strategy indicates supplier selection algorithm and StrategyParams will be speci
 
 ActivationTime is the date/time when the LCR entry starts to be active.
 
-Weight is used to further sort the rules. It passed untouched and unused by the system for the session manager use only.
+Weight is used to sort the rules with the same activation time.
 
 Example
 +++++++
@@ -64,8 +64,8 @@ For the lowest/highest cost strategies the matched suppliers are sorted ascendin
 
 ::
    
-   {
-    "Entry": {
+  {
+   "Entry": {
         "DestinationId": "*any",
         "RPCategory": "LCR_STANDARD",
         "Strategy": "*lowest_cost",
@@ -73,6 +73,6 @@ For the lowest/highest cost strategies the matched suppliers are sorted ascendin
         "Weight": 20
     },
     "SupplierCosts": [{"Supplier":"rif", Cost:"2.0"},{"Supplier":"dan", Cost:"1.0"}]
-    }
+   }
 
 .. [WIKI2015] http://en.wikipedia.org/wiki/Least-cost_routing

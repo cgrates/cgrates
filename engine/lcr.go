@@ -140,8 +140,8 @@ func (es LCREntriesSorter) Swap(i, j int) {
 }
 
 func (es LCREntriesSorter) Less(j, i int) bool {
-	return es[i].precision < es[j].precision ||
-		(es[i].precision == es[j].precision && es[i].Weight < es[j].Weight)
+	return es[i].Weight < es[j].Weight ||
+		(es[i].Weight == es[j].Weight && es[i].precision < es[j].precision)
 
 }
 
