@@ -182,8 +182,10 @@ func TestLcrGet(t *testing.T) {
 		Account:     "rif",
 		Subject:     "rif",
 	}
-	lcrs, err := cd.GetLCR(nil)
-	if err != nil || len(lcrs) != 1 {
-		t.Errorf("Bad lcr: %+v, %v", lcrs, err)
+	lcr, err := cd.GetLCR(nil)
+	//jsn, _ := json.Marshal(lcr)
+	//log.Print("LCR: ", string(jsn))
+	if err != nil || lcr == nil {
+		t.Errorf("Bad lcr: %+v, %v", lcr, err)
 	}
 }

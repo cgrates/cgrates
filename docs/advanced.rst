@@ -9,6 +9,7 @@
    cdrclient
    cdrexporter
    cdrstats
+   lcr
    derived_charging
    history
    ratinglogic
