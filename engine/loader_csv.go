@@ -438,7 +438,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 			log.Printf("Error parsing rounding decimals: %s", record[4])
 			return err
 		}
-		maxCost, err := strconv.ParseFloat(record[5], 64)
+		maxCost, err := strconv.ParseFloat(ValueOrDefault(record[5], "0"), 64)
 		if err != nil {
 			log.Printf("Error parsing max cost from: %v", record[5])
 			return err
