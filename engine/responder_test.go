@@ -238,8 +238,10 @@ func TestGetLCRStatic(t *testing.T) {
 			},
 		},
 	}
-	if err := dataStorage.SetRatingPlan(rp1); err != nil {
-		t.Error(err)
+	for _, rpf := range []*RatingPlan{rp1, rp2} {
+		if err := dataStorage.SetRatingPlan(rpf); err != nil {
+			t.Error(err)
+		}
 	}
 	danRpfl := &RatingProfile{Id: "*out:cgrates.org:call:dan",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
@@ -301,7 +303,10 @@ func TestGetLCRStatic(t *testing.T) {
 	var lcr LCRCost
 	if err := rsponder.GetLCR(cd, &lcr); err != nil {
 		t.Error(err)
-	} else if reflect.DeepEqual(eLcr, lcr) {
-		t.Errorf("Received: %+v", lcr.SupplierCosts[1])
+	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
+		t.Errorf("Expecting: %+v, received: %+v", eLcr.Entry, lcr.Entry)
+
+	} else if !reflect.DeepEqual(eLcr.SupplierCosts, lcr.SupplierCosts) {
+		t.Errorf("Expecting: %+v, received: %+v", eLcr.SupplierCosts, lcr.SupplierCosts)
 	}
 }
