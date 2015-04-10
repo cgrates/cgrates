@@ -295,8 +295,8 @@ func TestGetLCRStatic(t *testing.T) {
 	eLcr := &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "dan;rif", Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{
-			&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan", Cost: 0.6, Duration: "60s"},
-			&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif", Cost: 1.2, Duration: "60s"},
+			&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan", Cost: 0.6, Duration: 60 * time.Second},
+			&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
 	var lcr LCRCost

@@ -717,7 +717,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 					Supplier: supplier,
 					Cost:     cc.Cost,
-					Duration: cc.GetDuration().String(),
+					Duration: cc.GetDuration(),
 				})
 			}
 		}
@@ -798,7 +798,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 					Supplier: supplier,
 					Cost:     cc.Cost,
-					Duration: cc.GetDuration().String(),
+					Duration: cc.GetDuration(),
 					QOS: map[string]float64{
 						"ASR": asr,
 						"ACD": acd,

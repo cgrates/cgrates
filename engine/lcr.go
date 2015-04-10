@@ -58,14 +58,14 @@ type LCREntry struct {
 }
 
 type LCRCost struct {
-	SupplierCosts []*LCRSupplierCost
 	Entry         *LCREntry
+	SupplierCosts []*LCRSupplierCost
 }
 
 type LCRSupplierCost struct {
 	Supplier      string
 	Cost          float64
-	Duration      string
+	Duration      time.Duration
 	Error         error
 	QOS           map[string]float64
 	qosSortParams []string

@@ -94,7 +94,7 @@ func TestLcrGetQosLimitsAll(t *testing.T) {
 	}
 	minAsr, maxAsr, minAcd, maxAcd := le.GetQOSLimits()
 	if minAsr != 1.2 || maxAsr != 2.3 ||
-		minAcd != time.Duration(45)*time.Second || maxAcd != time.Duration(67)*time.Minute {
+		minAcd != 45*time.Second || maxAcd != 67*time.Minute {
 		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
 	}
 }
@@ -105,7 +105,7 @@ func TestLcrGetQosLimitsSome(t *testing.T) {
 	}
 	minAsr, maxAsr, minAcd, maxAcd := le.GetQOSLimits()
 	if minAsr != 1.2 || maxAsr != -1 ||
-		minAcd != -1 || maxAcd != time.Duration(67)*time.Minute {
+		minAcd != -1 || maxAcd != 67*time.Minute {
 		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
 	}
 }
