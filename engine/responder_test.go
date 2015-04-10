@@ -161,7 +161,6 @@ func TestGetSessionRuns(t *testing.T) {
 	}
 }
 
-/*
 func TestGetLCRStatic(t *testing.T) {
 	dstDe := &Destination{Id: "GERMANY", Prefixes: []string{"+49"}}
 	if err := dataStorage.SetDestination(dstDe); err != nil {
@@ -302,8 +301,7 @@ func TestGetLCRStatic(t *testing.T) {
 	var lcr LCRCost
 	if err := rsponder.GetLCR(cd, &lcr); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eLcr, lcr) {
+	} else if reflect.DeepEqual(eLcr, lcr) {
 		t.Errorf("Received: %+v", lcr)
 	}
 }
-*/

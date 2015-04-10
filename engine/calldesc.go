@@ -704,21 +704,32 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 		for _, supplier := range lcrCost.Entry.GetParams() {
 			lcrCD := cd.Clone()
 			lcrCD.Subject = supplier
-			if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
-				continue
-			}
-
-			if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
-				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-					Supplier: supplier,
-					Error:    err,
-				})
+			if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err == nil {
+				if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    err,
+					})
+				} else {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Cost:     cc.Cost,
+						Duration: cc.GetDuration(),
+					})
+				}
 			} else {
-				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-					Supplier: supplier,
-					Cost:     cc.Cost,
-					Duration: cc.GetDuration(),
-				})
+				if cc, err := lcrCD.GetCost(); err != nil || cc == nil {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    err,
+					})
+				} else {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Cost:     cc.Cost,
+						Duration: cc.GetDuration(),
+					})
+				}
 			}
 		}
 	} else {
@@ -730,9 +741,6 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			supplier = split[len(split)-1]
 			lcrCD := cd.Clone()
 			lcrCD.Subject = supplier
-			if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err != nil {
-				continue
-			}
 			var asr, acd float64
 			var qosSortParams []string
 			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
@@ -789,22 +797,42 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					}
 				}
 			}
-			if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
-				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-					Supplier: supplier,
-					Error:    err,
-				})
+			if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err == nil {
+				if cc, err := lcrCD.debit(cd.account, true, true); err != nil || cc == nil {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    err,
+					})
+				} else {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Cost:     cc.Cost,
+						Duration: cc.GetDuration(),
+						QOS: map[string]float64{
+							"ASR": asr,
+							"ACD": acd,
+						},
+						qosSortParams: qosSortParams,
+					})
+				}
 			} else {
-				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-					Supplier: supplier,
-					Cost:     cc.Cost,
-					Duration: cc.GetDuration(),
-					QOS: map[string]float64{
-						"ASR": asr,
-						"ACD": acd,
-					},
-					qosSortParams: qosSortParams,
-				})
+				if cc, err := lcrCD.GetCost(); err != nil || cc == nil {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    err,
+					})
+				} else {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Cost:     cc.Cost,
+						Duration: cc.GetDuration(),
+						QOS: map[string]float64{
+							"ASR": asr,
+							"ACD": acd,
+						},
+						qosSortParams: qosSortParams,
+					})
+				}
 			}
 		}
 		// sort according to strategy
