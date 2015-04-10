@@ -139,14 +139,14 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []s
 		Logger.Info("Finished rating profile caching.")
 	}
 	if lcrKeys == nil {
-		Logger.Info("Caching LCRs")
+		Logger.Info("Caching LCR rules.")
 		if lcrKeys, err = rs.db.Keys(LCR_PREFIX + "*"); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
 		cache2go.RemPrefixKey(LCR_PREFIX)
 	} else if len(lcrKeys) != 0 {
-		Logger.Info(fmt.Sprintf("Caching LCR: %v", lcrKeys))
+		Logger.Info(fmt.Sprintf("Caching LCR rules: %v", lcrKeys))
 	}
 	for _, key := range lcrKeys {
 		cache2go.RemKey(key)
@@ -156,7 +156,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []s
 		}
 	}
 	if len(lcrKeys) != 0 {
-		Logger.Info("Finished rating profile caching.")
+		Logger.Info("Finished LCR rules caching.")
 	}
 	if alsKeys == nil {
 		Logger.Info("Caching all rating subject aliases.")
