@@ -302,6 +302,6 @@ func TestGetLCRStatic(t *testing.T) {
 	if err := rsponder.GetLCR(cd, &lcr); err != nil {
 		t.Error(err)
 	} else if reflect.DeepEqual(eLcr, lcr) {
-		t.Errorf("Received: %+v", lcr)
+		t.Errorf("Received: %+v", lcr.SupplierCosts[1])
 	}
 }
