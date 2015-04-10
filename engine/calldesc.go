@@ -728,6 +728,10 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 		}
 	} else {
 		// find rating profiles
+		category := lcrCost.Entry.RPCategory
+		if category == utils.META_DEFAULT {
+			category = lcr.Category
+		}
 		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
 		suppliers := cache2go.GetEntriesKeys(RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 		for _, supplier := range suppliers {
