@@ -237,8 +237,11 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 
 func (rs *Responder) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
 	lcrCost, err := cd.GetLCR(rs.Stats)
+	if err != nil {
+		return err
+	}
 	*reply = *lcrCost
-	return err
+	return nil
 }
 
 func (rs *Responder) FlushCache(arg CallDescriptor, reply *float64) (err error) {

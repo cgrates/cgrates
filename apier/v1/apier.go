@@ -409,7 +409,8 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
 		return err
 	}
-	if self.Sched != nil {
+	aps, _ := dbReader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
+	if len(aps) != 0 && self.Sched != nil {
 		engine.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
 		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()
@@ -1043,6 +1044,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, dc := range dcs {
 		dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
 	}
+	aps, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
 	engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
 		return err
@@ -1050,7 +1052,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
 		return err
 	}
-	if self.Sched != nil {
+	if len(aps) != 0 && self.Sched != nil {
 		engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
 		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()

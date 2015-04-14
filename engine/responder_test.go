@@ -161,7 +161,7 @@ func TestGetSessionRuns(t *testing.T) {
 	}
 }
 
-func TestGetLCRStatic(t *testing.T) {
+func TestGetLCR(t *testing.T) {
 	dstDe := &Destination{Id: "GERMANY", Prefixes: []string{"+49"}}
 	if err := dataStorage.SetDestination(dstDe); err != nil {
 		t.Error(err)
@@ -238,7 +238,43 @@ func TestGetLCRStatic(t *testing.T) {
 			},
 		},
 	}
-	for _, rpf := range []*RatingPlan{rp1, rp2} {
+	rp3 := &RatingPlan{
+		Id: "RP2",
+		Timings: map[string]*RITiming{
+			"30eab300": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
+		},
+		Ratings: map[string]*RIRate{
+			"b457f86d": &RIRate{
+				ConnectFee: 0,
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.03,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
+			},
+		},
+		DestinationRates: map[string]RPRateList{
+			"GERMANY": []*RPRate{
+				&RPRate{
+					Timing: "30eab300",
+					Rating: "b457f86d",
+					Weight: 10,
+				},
+			},
+		},
+	}
+	for _, rpf := range []*RatingPlan{rp1, rp2, rp3} {
 		if err := dataStorage.SetRatingPlan(rpf); err != nil {
 			t.Error(err)
 		}
@@ -259,54 +295,104 @@ func TestGetLCRStatic(t *testing.T) {
 			CdrStatQueueIds: []string{},
 		}},
 	}
-	for _, rpfl := range []*RatingProfile{danRpfl, rifRpfl} {
+	ivoRpfl := &RatingProfile{Id: "*out:cgrates.org:call:ivo",
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+			RatingPlanId:    rp3.Id,
+			FallbackKeys:    []string{},
+			CdrStatQueueIds: []string{},
+		}},
+	}
+	for _, rpfl := range []*RatingProfile{danRpfl, rifRpfl, ivoRpfl} {
 		if err := dataStorage.SetRatingProfile(rpfl); err != nil {
 			t.Error(err)
 		}
 	}
-	lcrSet := &LCR{Direction: utils.ANY, Tenant: utils.ANY, Category: utils.ANY, Account: utils.ANY, Subject: utils.ANY,
+	lcrStatic := &LCR{Direction: utils.ANY, Tenant: utils.ANY, Category: "call_static", Account: utils.ANY, Subject: utils.ANY,
 		Activations: []*LCRActivation{
 			&LCRActivation{
 				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
-					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "dan;rif", Weight: 10.0}},
+					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo;dan;rif", Weight: 10.0}},
 			},
 		},
 	}
-	if err := dataStorage.SetLCR(lcrSet); err != nil {
-		t.Error(err)
+	lcrLowestCost := &LCR{Direction: utils.ANY, Tenant: utils.ANY, Category: "call_least_cost", Account: utils.ANY, Subject: utils.ANY,
+		Activations: []*LCRActivation{
+			&LCRActivation{
+				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+				Entries: []*LCREntry{
+					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0}},
+			},
+		},
+	}
+	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost} {
+		if err := dataStorage.SetLCR(lcr); err != nil {
+			t.Error(err)
+		}
 	}
 	if err := dataStorage.CacheRating([]string{DESTINATION_PREFIX + dstDe.Id},
 		[]string{RATING_PLAN_PREFIX + rp1.Id, RATING_PLAN_PREFIX + rp2.Id},
 		[]string{RATING_PROFILE_PREFIX + danRpfl.Id, RATING_PROFILE_PREFIX + rifRpfl.Id},
 		[]string{},
-		[]string{LCR_PREFIX + lcrSet.GetId()}); err != nil {
+		[]string{LCR_PREFIX + lcrStatic.GetId(), LCR_PREFIX + lcrLowestCost.GetId()}); err != nil {
 		t.Error(err)
 	}
-	cd := &CallDescriptor{
-		TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
-		TimeEnd:     time.Date(2015, 04, 06, 17, 41, 0, 0, time.UTC),
-		Tenant:      "cgrates.org",
-		Direction:   utils.OUT,
-		Category:    "call",
-		Destination: "+4986517174963",
-		Account:     "dan",
-		Subject:     "dan",
-	}
-	eLcr := &LCRCost{
-		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "dan;rif", Weight: 10.0},
-		SupplierCosts: []*LCRSupplierCost{
-			&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan", Cost: 0.6, Duration: 60 * time.Second},
-			&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif", Cost: 1.2, Duration: 60 * time.Second},
-		},
-	}
-	var lcr LCRCost
-	if err := rsponder.GetLCR(cd, &lcr); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
-		t.Errorf("Expecting: %+v, received: %+v", eLcr.Entry, lcr.Entry)
+	/*
+		cdStatic := &CallDescriptor{
+			TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2015, 04, 06, 17, 41, 0, 0, time.UTC),
+			Tenant:      "cgrates.org",
+			Direction:   utils.OUT,
+			Category:    "call_static",
+			Destination: "+4986517174963",
+			Account:     "dan",
+			Subject:     "dan",
+		}
+		eStLcr := &LCRCost{
+			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: cdStatic.Category, Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo;dan;rif", Weight: 10.0},
+			SupplierCosts: []*LCRSupplierCost{
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:ivo", Cost: 1.8, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan", Cost: 0.6, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif", Cost: 1.2, Duration: 60 * time.Second},
+			},
+		}
+		var lcr LCRCost
+		if err := rsponder.GetLCR(cdStatic, &lcr); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
+			t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
+		} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
+			t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
+		}
 
-	} else if !reflect.DeepEqual(eLcr.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eLcr.SupplierCosts, lcr.SupplierCosts)
-	}
+		// Test *least_cost strategy here
+		cdLowestCost := &CallDescriptor{
+			TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2015, 04, 06, 17, 41, 0, 0, time.UTC),
+			Tenant:      "cgrates.org",
+			Direction:   utils.OUT,
+			Category:    "call_least_cost",
+			Destination: "+4986517174963",
+			Account:     "dan",
+			Subject:     "dan",
+		}
+		eLcLcr := &LCRCost{
+			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: cdLowestCost.Category, Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0},
+			SupplierCosts: []*LCRSupplierCost{
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan", Cost: 0.6, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif", Cost: 1.2, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:ivo", Cost: 1.8, Duration: 60 * time.Second},
+			},
+		}
+		var lcrLc LCRCost
+		if err := rsponder.GetLCR(cdLowestCost, &lcrLc); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(eLcLcr.Entry, lcrLc.Entry) {
+			t.Errorf("Expecting: %+v, received: %+v", eLcLcr.Entry, lcrLc.Entry)
+
+		} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
+			t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts[2], lcrLc.SupplierCosts[2])
+		}
+	*/
 }

@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	//"runtime"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -450,7 +450,7 @@ func main() {
 	if *pidFile != "" {
 		writePid()
 	}
-	// runtime.GOMAXPROCS(runtime.NumCPU())   // For now it slows down computing due to CPU management, to be reviewed in future Go releases
+	runtime.GOMAXPROCS(runtime.NumCPU()) // For now it slows down computing due to CPU management, to be reviewed in future Go releases
 
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
