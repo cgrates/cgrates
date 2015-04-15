@@ -737,7 +737,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			category = lcr.Category
 		}
 		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
-		log.Print("KEY: ", ratingProfileSearchKey)
+		//log.Print("KEY: ", ratingProfileSearchKey)
 		suppliers := cache2go.GetEntriesKeys(RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 		for _, supplier := range suppliers {
 			log.Print("Supplier: ", supplier)
