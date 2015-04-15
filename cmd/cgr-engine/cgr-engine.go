@@ -25,6 +25,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"runtime/pprof"
 	"strconv"
 	"time"
 
@@ -61,6 +62,8 @@ var (
 	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
 	cdrsEnabled  = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
 	pidFile      = flag.String("pid", "", "Write pid file")
+	cpuprofile   = flag.String("cpuprofile", "", "write cpu profile to file")
+	singlecpu    = flag.Bool("singlecpu", false, "Run on single CPU core")
 	bal          = balancer2go.NewBalancer()
 	exitChan     = make(chan bool)
 	server       = &engine.Server{}
@@ -85,44 +88,6 @@ func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage
 	}
 	close(doneChan)
 }
-
-/*
-func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrDb engine.CdrStorage, cacheChan, chanDone chan struct{}) {
-	var connector engine.Connector
-	if cfg.MediatorRater == utils.INTERNAL {
-		<-cacheChan // Cache needs to come up before we are ready
-		connector = responder
-	} else {
-		var client *rpcclient.RpcClient
-		var err error
-        delay := utils.Fib()
-		for i := 0; i < cfg.MediatorReconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, cfg.MediatorReconnects, utils.GOB)
-			if err == nil { //Connected so no need to reiterate
-				break
-			}
-			time.Sleep(delay())
-		}
-		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<Mediator> Could not connect to engine: %v", err))
-			exitChan <- true
-			return
-		}
-		connector = &engine.RPCClientConnector{Client: client}
-	}
-	var err error
-	medi, err = engine.NewMediator(connector, loggerDb, cdrDb, cdrStats, cfg)
-	if err != nil {
-		engine.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
-		exitChan <- true
-		return
-	}
-	engine.Logger.Info("Registering Mediator RPC service.")
-	server.RpcRegister(&v1.MediatorV1{Medi: medi})
-
-	close(chanDone)
-}
-*/
 
 // Fires up a cdrc instance
 func startCdrc(cdrsChan chan struct{}, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CdrServer, closeChan chan struct{}) {
@@ -161,6 +126,11 @@ func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, 
 			}
 			time.Sleep(delay())
 		}
+		if err != nil {
+			engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
+			exitChan <- true
+			return
+		}
 		raterConn = &engine.RPCClientConnector{Client: client}
 	}
 	if cfg.SmFsConfig.Cdrs == cfg.SmFsConfig.Rater {
@@ -178,7 +148,7 @@ func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, 
 			time.Sleep(delay())
 		}
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
 			exitChan <- true
 			return
 		}
@@ -208,7 +178,7 @@ func startSmKamailio(responder *engine.Responder, loggerDb engine.LogStorage, ca
 			time.Sleep(delay())
 		}
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to engine: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to rater: %v", err))
 			exitChan <- true
 		}
 		raterConn = &engine.RPCClientConnector{Client: client}
@@ -228,7 +198,7 @@ func startSmKamailio(responder *engine.Responder, loggerDb engine.LogStorage, ca
 			time.Sleep(delay())
 		}
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("<SM-Kamailio> Could not connect to CDRS via RPC: %v", err))
 			exitChan <- true
 			return
 		}
@@ -258,7 +228,7 @@ func startSmOpenSIPS(responder *engine.Responder, loggerDb engine.LogStorage, ca
 			time.Sleep(delay())
 		}
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to engine: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to rater: %v", err))
 			exitChan <- true
 		}
 		raterConn = &engine.RPCClientConnector{Client: client}
@@ -450,8 +420,17 @@ func main() {
 	if *pidFile != "" {
 		writePid()
 	}
-	runtime.GOMAXPROCS(runtime.NumCPU()) // For now it slows down computing due to CPU management, to be reviewed in future Go releases
-
+	if !*singlecpu {
+		runtime.GOMAXPROCS(runtime.NumCPU()) // For now it slows down computing due to CPU management, to be reviewed in future Go releases
+	}
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
