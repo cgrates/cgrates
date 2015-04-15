@@ -279,7 +279,7 @@ func TestGetLCR(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	danRpfl := &RatingProfile{Id: "*out:cgrates.org:call:dan",
+	danRpfl := &RatingProfile{Id: "*out:cgrates.org:call:dan12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 			RatingPlanId:    rp1.Id,
@@ -287,7 +287,7 @@ func TestGetLCR(t *testing.T) {
 			CdrStatQueueIds: []string{},
 		}},
 	}
-	rifRpfl := &RatingProfile{Id: "*out:cgrates.org:call:rif",
+	rifRpfl := &RatingProfile{Id: "*out:cgrates.org:call:rif12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 			RatingPlanId:    rp2.Id,
@@ -295,7 +295,7 @@ func TestGetLCR(t *testing.T) {
 			CdrStatQueueIds: []string{},
 		}},
 	}
-	ivoRpfl := &RatingProfile{Id: "*out:cgrates.org:call:ivo",
+	ivoRpfl := &RatingProfile{Id: "*out:cgrates.org:call:ivo12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 			RatingPlanId:    rp3.Id,
@@ -308,16 +308,16 @@ func TestGetLCR(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	lcrStatic := &LCR{Direction: utils.ANY, Tenant: utils.ANY, Category: "call_static", Account: utils.ANY, Subject: utils.ANY,
+	lcrStatic := &LCR{Direction: utils.OUT, Tenant: "cgrates.org", Category: "call_static", Account: utils.ANY, Subject: utils.ANY,
 		Activations: []*LCRActivation{
 			&LCRActivation{
 				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 				Entries: []*LCREntry{
-					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo;dan;rif", Weight: 10.0}},
+					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo12;dan12;rif12", Weight: 10.0}},
 			},
 		},
 	}
-	lcrLowestCost := &LCR{Direction: utils.ANY, Tenant: utils.ANY, Category: "call_least_cost", Account: utils.ANY, Subject: utils.ANY,
+	lcrLowestCost := &LCR{Direction: utils.OUT, Tenant: "cgrates.org", Category: "call_least_cost", Account: utils.ANY, Subject: utils.ANY,
 		Activations: []*LCRActivation{
 			&LCRActivation{
 				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -350,11 +350,11 @@ func TestGetLCR(t *testing.T) {
 			Subject:     "dan",
 		}
 		eStLcr := &LCRCost{
-			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: cdStatic.Category, Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo;dan;rif", Weight: 10.0},
+			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo12;dan12;rif12", Weight: 10.0},
 			SupplierCosts: []*LCRSupplierCost{
-				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:ivo", Cost: 1.8, Duration: 60 * time.Second},
-				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan", Cost: 0.6, Duration: 60 * time.Second},
-				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif", Cost: 1.2, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:ivo12", Cost: 1.8, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif12", Cost: 1.2, Duration: 60 * time.Second},
 			},
 		}
 		var lcr LCRCost
@@ -363,9 +363,8 @@ func TestGetLCR(t *testing.T) {
 		} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 			t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
 		} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
-			t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
+			t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[2], lcr.SupplierCosts[2])
 		}
-
 		// Test *least_cost strategy here
 		cdLowestCost := &CallDescriptor{
 			TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
@@ -378,11 +377,11 @@ func TestGetLCR(t *testing.T) {
 			Subject:     "dan",
 		}
 		eLcLcr := &LCRCost{
-			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: cdLowestCost.Category, Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0},
+			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0},
 			SupplierCosts: []*LCRSupplierCost{
-				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan", Cost: 0.6, Duration: 60 * time.Second},
-				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif", Cost: 1.2, Duration: 60 * time.Second},
-				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:ivo", Cost: 1.8, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:rif12", Cost: 1.2, Duration: 60 * time.Second},
+				&LCRSupplierCost{Supplier: "*out:cgrates.org:call:ivo12", Cost: 1.8, Duration: 60 * time.Second},
 			},
 		}
 		var lcrLc LCRCost
