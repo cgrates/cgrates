@@ -24,14 +24,13 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"strings"
 
 	"github.com/cgrates/cgrates/console"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/liner"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -40,7 +39,7 @@ var (
 	verbose      = flag.Bool("verbose", false, "Show extra info about command execution.")
 	server       = flag.String("server", "127.0.0.1:2012", "server address host:port")
 	rpc_encoding = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
-	client       *rpc.Client
+	client       *rpcclient.RpcClient
 )
 
 func executeCommand(command string) {
@@ -102,18 +101,12 @@ func main() {
 		fmt.Println("CGRateS " + utils.VERSION)
 		return
 	}
-
 	var err error
-	if *rpc_encoding == "json" {
-		client, err = jsonrpc.Dial("tcp", *server)
-	} else {
-		client, err = rpc.Dial("tcp", *server)
-	}
+	client, err = rpcclient.NewRpcClient("tcp", *server, 3, *rpc_encoding)
 	if err != nil {
 		flag.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)
 	}
-	defer client.Close()
 
 	if len(flag.Args()) != 0 {
 		executeCommand(strings.Join(flag.Args(), " "))
