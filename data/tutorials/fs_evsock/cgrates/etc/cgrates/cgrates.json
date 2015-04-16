@@ -85,17 +85,6 @@
 //	"cdr_replication":[],					// replicate the raw CDR to a number of servers
 },
 
-
-"cdrs": {
-	"enabled": true,						// start the CDR Server service:  <true|false>
-//	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
-//	"store_cdrs": true,						// store cdrs in storDb
-	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
-	"cdrstats": "internal",					// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-//	"reconnects": 5,						// number of reconnect attempts to rater or cdrs
-//	"cdr_replication":[],					// replicate the raw CDR to a number of servers
-},
-
 "cdr_stats": {
 	"enabled": true,						// starts the cdrstats service: <true|false>
 //	"queue_length": 50,						// number of items in the stats buffer
