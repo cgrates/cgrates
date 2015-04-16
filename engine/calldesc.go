@@ -21,7 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"log"
+	//"log"
 	"log/syslog"
 	"sort"
 	"strings"
