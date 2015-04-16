@@ -123,10 +123,10 @@ func (le *LCREntry) GetParams() []string {
 			cleanParams = append(cleanParams, p)
 		}
 	}
-	if len(cleanParams) > 0 {
-		return cleanParams
+	if len(cleanParams) == 0 && le.Strategy == LCR_STRATEGY_QOS {
+		return []string{ASR, ACD} // Default QoS stats if none configured
 	}
-	return []string{ASR, ACD}
+	return cleanParams
 }
 
 type LCREntriesSorter []*LCREntry

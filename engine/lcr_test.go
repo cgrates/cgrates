@@ -123,6 +123,7 @@ func TestLcrGetQosLimitsNone(t *testing.T) {
 
 func TestLcrGetQosSortParamsNone(t *testing.T) {
 	le := &LCREntry{
+		Strategy:       LCR_STRATEGY_QOS,
 		StrategyParams: "",
 	}
 	sort := le.GetParams()
@@ -133,6 +134,7 @@ func TestLcrGetQosSortParamsNone(t *testing.T) {
 
 func TestLcrGetQosSortParamsEmpty(t *testing.T) {
 	le := &LCREntry{
+		Strategy:       LCR_STRATEGY_QOS,
 		StrategyParams: ";",
 	}
 	sort := le.GetParams()
@@ -153,6 +155,7 @@ func TestLcrGetQosSortParamsOne(t *testing.T) {
 
 func TestLcrGetQosSortParamsSpace(t *testing.T) {
 	le := &LCREntry{
+		Strategy:       LCR_STRATEGY_QOS,
 		StrategyParams: "; ",
 	}
 	sort := le.GetParams()

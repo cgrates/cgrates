@@ -816,16 +816,16 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					Error:    err,
 				})
 			} else {
-				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+				supplCost := &LCRSupplierCost{
 					Supplier: supplier,
 					Cost:     cc.Cost,
 					Duration: cc.GetDuration(),
-					QOS: map[string]float64{
-						"ASR": asr,
-						"ACD": acd,
-					},
-					qosSortParams: qosSortParams,
-				})
+				}
+				if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_WITH_THRESHOLD}, lcrCost.Entry.Strategy) {
+					supplCost.QOS = map[string]float64{"ASR": asr, "ACD": acd}
+					supplCost.qosSortParams = qosSortParams
+				}
+				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, supplCost)
 			}
 		}
 		// sort according to strategy
