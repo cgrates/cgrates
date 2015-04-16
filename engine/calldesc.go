@@ -740,7 +740,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 		//log.Print("KEY: ", ratingProfileSearchKey)
 		suppliers := cache2go.GetEntriesKeys(RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 		for _, supplier := range suppliers {
-			log.Print("Supplier: ", supplier)
+			//log.Print("Supplier: ", supplier)
 			split := strings.Split(supplier, ":")
 			supplier = split[len(split)-1]
 			lcrCD := cd.Clone()
