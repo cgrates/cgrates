@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	//"log"
+
 	"log/syslog"
 	"sort"
 	"strings"
@@ -705,11 +706,12 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 	if lcrCost.Entry.Strategy == LCR_STRATEGY_STATIC {
 		for _, supplier := range lcrCost.Entry.GetParams() {
 			lcrCD := cd.Clone()
+			lcrCD.Account = supplier
 			lcrCD.Subject = supplier
 			lcrCD.Category = lcrCost.Entry.RPCategory
 			var cc *CallCost
 			var err error
-			if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err == nil {
+			if cd.account, err = accountingStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
 				cc, err = lcrCD.debit(cd.account, true, true)
 			} else {
 				cc, err = lcrCD.GetCost()
@@ -745,6 +747,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			supplier = split[len(split)-1]
 			lcrCD := cd.Clone()
 			lcrCD.Category = category
+			lcrCD.Account = supplier
 			lcrCD.Subject = supplier
 			var asr, acd float64
 			var qosSortParams []string
@@ -804,11 +807,15 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			}
 			var cc *CallCost
 			var err error
-			if cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey()); err == nil {
+			//log.Print("CD: ", lcrCD.GetAccountKey())
+			if cd.account, err = accountingStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
+				//log.Print("ACCCOUNT")
 				cc, err = lcrCD.debit(cd.account, true, true)
 			} else {
+				//log.Print("STANDARD")
 				cc, err = lcrCD.GetCost()
 			}
+			//log.Printf("CC: %+v", cc)
 			supplier = utils.ConcatenatedKey(lcrCD.Direction, lcrCD.Tenant, lcrCD.Category, lcrCD.Subject)
 			if err != nil || cc == nil {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{

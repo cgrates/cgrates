@@ -392,31 +392,29 @@ func TestGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts[1], lcrLc.SupplierCosts[1])
 	}
-	/*
-		bRif12 := &Balance{Value: 40, Weight: 10, DestinationId: dstDe.Id}
-		bIvo12 := &Balance{Value: 60, Weight: 10, DestinationId: dstDe.Id}
-		rif12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "rif12"), BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{bRif12}}}
-		ivo12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{bIvo12}}}
-		for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {
-			if err := accountingStorage.SetAccount(acnt); err != nil {
-				t.Error(err)
-			}
-		}
-		eLcLcr = &LCRCost{
-			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0},
-			SupplierCosts: []*LCRSupplierCost{
-				&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second},
-				&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 0.4, Duration: 60 * time.Second},
-				&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
-			},
-		}
-		if err := rsponder.GetLCR(cdLowestCost, &lcrLc); err != nil {
+	bRif12 := &Balance{Value: 40, Weight: 10, DestinationId: dstDe.Id}
+	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationId: dstDe.Id}
+	rif12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "rif12"), BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{bRif12}}, AllowNegative: true}
+	ivo12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{bIvo12}}, AllowNegative: true}
+	for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {
+		if err := accountingStorage.SetAccount(acnt); err != nil {
 			t.Error(err)
-		} else if !reflect.DeepEqual(eLcLcr.Entry, lcrLc.Entry) {
-			t.Errorf("Expecting: %+v, received: %+v", eLcLcr.Entry, lcrLc.Entry)
-
-		} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
-			t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts[1], lcrLc.SupplierCosts[1])
 		}
-	*/
+	}
+	eLcLcr = &LCRCost{
+		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOWEST, Weight: 10.0},
+		SupplierCosts: []*LCRSupplierCost{
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 0.4, Duration: 60 * time.Second},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
+		},
+	}
+	if err := rsponder.GetLCR(cdLowestCost, &lcrLc); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eLcLcr.Entry, lcrLc.Entry) {
+		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.Entry, lcrLc.Entry)
+
+	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
+		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts, lcrLc.SupplierCosts)
+	}
 }
