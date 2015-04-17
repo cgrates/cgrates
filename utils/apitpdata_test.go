@@ -289,6 +289,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 				Subject:           "dan",
 				DestinationPrefix: "49",
 				UsageInterval:     "5m;10m",
+				Supplier:          "supplier1",
 				MediationRunIds:   "default",
 				RatedAccount:      "rif",
 				RatedSubject:      "rif",
@@ -310,6 +311,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 				Subject:           "dan",
 				DestinationPrefix: "49",
 				UsageInterval:     "5m;10m",
+				Supplier:          "supplier1",
 				MediationRunIds:   "default",
 				RatedAccount:      "dan",
 				RatedSubject:      "dan",
@@ -318,10 +320,10 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"CDRST1", "5", "60m", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", META_RATED, "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
-			"default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"},
-		[]string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", META_RATED, "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
-			"default", "dan", "dan", "0;2", "STANDARD_TRIGGERS"},
+		[]string{"CDRST1", "5", "60m", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", META_RATED, "*out", "cgrates.org", "call",
+			"dan", "dan", "49", "5m;10m", "supplier1", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"},
+		[]string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", META_RATED, "*out", "cgrates.org", "call",
+			"dan", "dan", "49", "5m;10m", "supplier1", "default", "dan", "dan", "0;2", "STANDARD_TRIGGERS"},
 	}
 	if slc := cdrStats.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)

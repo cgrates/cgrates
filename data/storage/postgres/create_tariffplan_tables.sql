@@ -315,6 +315,7 @@ CREATE TABLE tp_cdr_stats (
   subject VARCHAR(64) NOT NULL,
   destination_prefix VARCHAR(64) NOT NULL,
   usage_interval VARCHAR(64) NOT NULL,
+  supplier VARCHAR(64) NOT NULL,
   mediation_runids VARCHAR(64) NOT NULL,
   rated_account VARCHAR(64) NOT NULL,
   rated_subject VARCHAR(64) NOT NULL,

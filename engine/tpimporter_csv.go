@@ -688,37 +688,38 @@ func (self *TPCSVImporter) importCdrStats(fn string) error {
 			}
 			continue
 		}
-		if len(record[1]) == 0 {
-			record[1] = "0" // Empty value will be translated to 0 as QueueLength
+		if len(record[CDRSTATIDX_QLENGHT]) == 0 {
+			record[CDRSTATIDX_QLENGHT] = "0"
 		}
-		if _, err = strconv.Atoi(record[1]); err != nil {
+		if _, err = strconv.Atoi(record[CDRSTATIDX_QLENGHT]); err != nil {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
 			continue
 		}
-		if _, hasIt := css[record[0]]; !hasIt {
-			css[record[0]] = make([]*utils.TPCdrStat, 0)
+		if _, hasIt := css[record[CDRSTATIDX_TAG]]; !hasIt {
+			css[record[CDRSTATIDX_TAG]] = make([]*utils.TPCdrStat, 0)
 		}
 		css[record[0]] = append(css[record[0]], &utils.TPCdrStat{
-			QueueLength:       record[1],
-			TimeWindow:        ValueOrDefault(record[2], "0"),
-			Metrics:           record[3],
-			SetupInterval:     record[4],
-			TOR:               record[5],
-			CdrHost:           record[6],
-			CdrSource:         record[7],
-			ReqType:           record[8],
-			Direction:         record[9],
-			Tenant:            record[10],
-			Category:          record[11],
-			Account:           record[12],
-			Subject:           record[13],
-			DestinationPrefix: record[14],
-			UsageInterval:     record[15],
-			MediationRunIds:   record[16],
-			RatedAccount:      record[17],
-			RatedSubject:      record[18],
-			CostInterval:      record[19],
-			ActionTriggers:    record[20],
+			QueueLength:       record[CDRSTATIDX_QLENGHT],
+			TimeWindow:        ValueOrDefault(record[CDRSTATIDX_TIMEWINDOW], "0"),
+			Metrics:           record[CDRSTATIDX_METRICS],
+			SetupInterval:     record[CDRSTATIDX_SETUPTIME],
+			TOR:               record[CDRSTATIDX_TOR],
+			CdrHost:           record[CDRSTATIDX_CDRHOST],
+			CdrSource:         record[CDRSTATIDX_CDRSRC],
+			ReqType:           record[CDRSTATIDX_REQTYPE],
+			Direction:         record[CDRSTATIDX_DIRECTION],
+			Tenant:            record[CDRSTATIDX_TENANT],
+			Category:          record[CDRSTATIDX_CATEGORY],
+			Account:           record[CDRSTATIDX_ACCOUNT],
+			Subject:           record[CDRSTATIDX_SUBJECT],
+			DestinationPrefix: record[CDRSTATIDX_DSTPREFIX],
+			UsageInterval:     record[CDRSTATIDX_USAGE],
+			Supplier:          record[CDRSTATIDX_SUPPLIER],
+			MediationRunIds:   record[CDRSTATIDX_MEDRUN],
+			RatedAccount:      record[CDRSTATIDX_RTACCOUNT],
+			RatedSubject:      record[CDRSTATIDX_RTSUBJECT],
+			CostInterval:      record[CDRSTATIDX_COST],
+			ActionTriggers:    record[CDRSTATIDX_ATRIGGER],
 		})
 	}
 	if err := self.StorDb.SetTPCdrStats(self.TPid, css); err != nil {

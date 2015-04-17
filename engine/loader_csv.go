@@ -973,39 +973,40 @@ func (csvr *CSVReader) LoadCdrStats() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
+		tag := record[CDRSTATIDX_TAG]
 		var cs *CdrStats
 		var exists bool
 		if cs, exists = csvr.cdrStats[tag]; !exists {
 			cs = &CdrStats{Id: tag}
 		}
-		triggerTag := record[20]
+		triggerTag := record[CDRSTATIDX_ATRIGGER]
 		triggers, exists := csvr.actionsTriggers[triggerTag]
 		if triggerTag != "" && !exists {
 			// only return error if there was something there for the tag
 			return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
 		}
 		tpCs := &utils.TPCdrStat{
-			QueueLength:       record[1],
-			TimeWindow:        record[2],
-			Metrics:           record[3],
-			SetupInterval:     record[4],
-			TOR:               record[5],
-			CdrHost:           record[6],
-			CdrSource:         record[7],
-			ReqType:           record[8],
-			Direction:         record[9],
-			Tenant:            record[10],
-			Category:          record[11],
-			Account:           record[12],
-			Subject:           record[13],
-			DestinationPrefix: record[14],
-			UsageInterval:     record[15],
-			MediationRunIds:   record[16],
-			RatedAccount:      record[17],
-			RatedSubject:      record[18],
-			CostInterval:      record[19],
-			ActionTriggers:    record[20],
+			QueueLength:       record[CDRSTATIDX_QLENGHT],
+			TimeWindow:        record[CDRSTATIDX_TIMEWINDOW],
+			Metrics:           record[CDRSTATIDX_METRICS],
+			SetupInterval:     record[CDRSTATIDX_SETUPTIME],
+			TOR:               record[CDRSTATIDX_TOR],
+			CdrHost:           record[CDRSTATIDX_CDRHOST],
+			CdrSource:         record[CDRSTATIDX_CDRSRC],
+			ReqType:           record[CDRSTATIDX_REQTYPE],
+			Direction:         record[CDRSTATIDX_DIRECTION],
+			Tenant:            record[CDRSTATIDX_TENANT],
+			Category:          record[CDRSTATIDX_CATEGORY],
+			Account:           record[CDRSTATIDX_ACCOUNT],
+			Subject:           record[CDRSTATIDX_SUBJECT],
+			DestinationPrefix: record[CDRSTATIDX_DSTPREFIX],
+			UsageInterval:     record[CDRSTATIDX_USAGE],
+			Supplier:          record[CDRSTATIDX_SUPPLIER],
+			MediationRunIds:   record[CDRSTATIDX_MEDRUN],
+			RatedAccount:      record[CDRSTATIDX_RTACCOUNT],
+			RatedSubject:      record[CDRSTATIDX_RTSUBJECT],
+			CostInterval:      record[CDRSTATIDX_COST],
+			ActionTriggers:    record[CDRSTATIDX_ATRIGGER],
 		}
 		UpdateCdrStats(cs, triggers, tpCs)
 		csvr.cdrStats[tag] = cs

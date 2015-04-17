@@ -76,6 +76,32 @@ const (
 	ATRIGCSVIDX_WEIGHT
 )
 
+// utils.CDR_STATS_CSV
+const (
+	CDRSTATIDX_TAG = iota
+	CDRSTATIDX_QLENGHT
+	CDRSTATIDX_TIMEWINDOW
+	CDRSTATIDX_METRICS
+	CDRSTATIDX_SETUPTIME
+	CDRSTATIDX_TOR
+	CDRSTATIDX_CDRHOST
+	CDRSTATIDX_CDRSRC
+	CDRSTATIDX_REQTYPE
+	CDRSTATIDX_DIRECTION
+	CDRSTATIDX_TENANT
+	CDRSTATIDX_CATEGORY
+	CDRSTATIDX_ACCOUNT
+	CDRSTATIDX_SUBJECT
+	CDRSTATIDX_DSTPREFIX
+	CDRSTATIDX_USAGE
+	CDRSTATIDX_SUPPLIER
+	CDRSTATIDX_MEDRUN
+	CDRSTATIDX_RTACCOUNT
+	CDRSTATIDX_RTSUBJECT
+	CDRSTATIDX_COST
+	CDRSTATIDX_ATRIGGER
+)
+
 type TPLoader interface {
 	LoadDestinations() error
 	LoadRates() error
@@ -398,7 +424,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		"Direction(*out),Tenant[0-9A-Za-z_],Category([0-9A-Za-z_]),Account[0-9A-Za-z_],Subject([0-9A-Za-z_]|*any),RunId([0-9A-Za-z_]),RunFilter([^~]*[0-9A-Za-z_/]),ReqTypeField([^~]*[0-9A-Za-z_/]|*default),DirectionField([^~]*[0-9A-Za-z_/]|*default),TenantField([^~]*[0-9A-Za-z_/]|*default),TorField([^~]*[0-9A-Za-z_/]|*default),AccountField([^~]*[0-9A-Za-z_/]|*default),SubjectField([^~]*[0-9A-Za-z_/]|*default),DestinationField([^~]*[0-9A-Za-z_/]|*default),SetupTimeField([^~]*[0-9A-Za-z_/]|*default),AnswerTimeField([^~]*[0-9A-Za-z_/]|*default),UsageField([^~]*[0-9A-Za-z_/]|*default),SupplierField([^~]*[0-9A-Za-z_/]|*default)"},
 	utils.CDR_STATS_CSV: &FileLineRegexValidator{utils.CDR_STATS_NRCOLS,
 		regexp.MustCompile(`.+`), //ToDo: Fix me with proper rules
-		"Id,QueueLength,TimeWindow,Metric,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers(*?[0-9A-Za-z_]),Strategy(*[0-9A-Za-z_]),RatingSubject(*?[0-9A-Za-z_])"},
+		"Id,QueueLength,TimeWindow,Metric,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,Supplier,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers(*?[0-9A-Za-z_]),Strategy(*[0-9A-Za-z_]),RatingSubject(*?[0-9A-Za-z_])"},
 }
 
 func NewTPCSVFileParser(dirPath, fileName string) (*TPCSVFileParser, error) {

@@ -275,6 +275,7 @@ type TpCdrStat struct {
 	Subject           string
 	DestinationPrefix string
 	UsageInterval     string
+	Supplier          string
 	MediationRunids   string
 	RatedAccount      string
 	RatedSubject      string

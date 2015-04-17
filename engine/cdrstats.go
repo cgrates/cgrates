@@ -68,6 +68,7 @@ type CdrStats struct {
 	Subject           []string        // CDRFieldFilter on Subjects
 	DestinationPrefix []string        // CDRFieldFilter on DestinationPrefixes
 	UsageInterval     []time.Duration // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
+	Supplier          []string        // CDRFieldFilter on Suppliers
 	MediationRunIds   []string        // CDRFieldFilter on MediationRunIds
 	RatedAccount      []string        // CDRFieldFilter on RatedAccounts
 	RatedSubject      []string        // CDRFieldFilter on RatedSubjects
@@ -133,6 +134,9 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 		if len(cs.UsageInterval) > 1 && cdr.Usage >= cs.UsageInterval[1] {
 			return false
 		}
+	}
+	if len(cs.Supplier) > 0 && !utils.IsSliceMember(cs.Supplier, cdr.Supplier) {
+		return false
 	}
 	if len(cs.MediationRunIds) > 0 && !utils.IsSliceMember(cs.MediationRunIds, cdr.MediationRunId) {
 		return false

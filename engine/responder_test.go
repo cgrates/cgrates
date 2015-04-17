@@ -162,6 +162,7 @@ func TestGetSessionRuns(t *testing.T) {
 }
 
 func TestGetLCR(t *testing.T) {
+	rsponder.Stats = NewStats(dataStorage) // Load stats instance
 	dstDe := &Destination{Id: "GERMANY", Prefixes: []string{"+49"}}
 	if err := dataStorage.SetDestination(dstDe); err != nil {
 		t.Error(err)
@@ -279,28 +280,34 @@ func TestGetLCR(t *testing.T) {
 			t.Error(err)
 		}
 	}
+	danStatsId := "dan_stats"
+	rsponder.Stats.AddQueue(&CdrStats{Id: danStatsId}, nil)
 	danRpfl := &RatingProfile{Id: "*out:tenant12:call:dan12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 			RatingPlanId:    rp1.Id,
 			FallbackKeys:    []string{},
-			CdrStatQueueIds: []string{},
+			CdrStatQueueIds: []string{danStatsId},
 		}},
 	}
+	rifStatsId := "rif_stats"
+	rsponder.Stats.AddQueue(&CdrStats{Id: rifStatsId}, nil)
 	rifRpfl := &RatingProfile{Id: "*out:tenant12:call:rif12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 			RatingPlanId:    rp2.Id,
 			FallbackKeys:    []string{},
-			CdrStatQueueIds: []string{},
+			CdrStatQueueIds: []string{rifStatsId},
 		}},
 	}
+	ivoStatsId := "ivo_stats"
+	rsponder.Stats.AddQueue(&CdrStats{Id: ivoStatsId}, nil)
 	ivoRpfl := &RatingProfile{Id: "*out:tenant12:call:ivo12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
 			RatingPlanId:    rp3.Id,
 			FallbackKeys:    []string{},
-			CdrStatQueueIds: []string{},
+			CdrStatQueueIds: []string{ivoStatsId},
 		}},
 	}
 	for _, rpfl := range []*RatingProfile{danRpfl, rifRpfl, ivoRpfl} {

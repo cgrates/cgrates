@@ -194,12 +194,12 @@ vdf,emptyY,*out,TOPUP_EMPTY_AT,
 *out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,
 `
 	cdrStats = `
-#Id,QueueLength,TimeWindow,Metrics,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
-CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,5m;10m,default,rif,rif,0;2,STANDARD_TRIGGERS
-CDRST1,,,ACD,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
-CDRST1,,,ACC,,,,,,,,,,,,,,,,,
-CDRST2,10,10m,ASR,,,,,,,cgrates.org,call,,,,,,,,,
-CDRST2,,,ACD,,,,,,,,,,,,,,,,,
+#Id,QueueLength,TimeWindow,Metrics,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,Supplier,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
+CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,5m;10m,suppl1,default,rif,rif,0;2,STANDARD_TRIGGERS
+CDRST1,,,ACD,,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
+CDRST1,,,ACC,,,,,,,,,,,,,,,,,,
+CDRST2,10,10m,ASR,,,,,,,cgrates.org,call,,,,,,,,,,
+CDRST2,,,ACD,,,,,,,,,,,,,,,,,,
 `
 )
 

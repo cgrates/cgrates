@@ -395,8 +395,8 @@ func (self *TPCdrStats) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.CdrStats))
 	for idx, cdrStat := range self.CdrStats {
 		retSlice[idx] = []string{self.CdrStatsId, cdrStat.QueueLength, cdrStat.TimeWindow, cdrStat.Metrics, cdrStat.SetupInterval, cdrStat.TOR, cdrStat.CdrHost, cdrStat.CdrSource,
-			cdrStat.ReqType, cdrStat.Direction, cdrStat.Tenant, cdrStat.Category, cdrStat.Account, cdrStat.Subject, cdrStat.DestinationPrefix, cdrStat.UsageInterval, cdrStat.MediationRunIds,
-			cdrStat.RatedAccount, cdrStat.RatedSubject, cdrStat.CostInterval, cdrStat.ActionTriggers}
+			cdrStat.ReqType, cdrStat.Direction, cdrStat.Tenant, cdrStat.Category, cdrStat.Account, cdrStat.Subject, cdrStat.DestinationPrefix, cdrStat.UsageInterval, cdrStat.Supplier,
+			cdrStat.MediationRunIds, cdrStat.RatedAccount, cdrStat.RatedSubject, cdrStat.CostInterval, cdrStat.ActionTriggers}
 	}
 	return retSlice
 }
@@ -417,6 +417,7 @@ type TPCdrStat struct {
 	Subject           string
 	DestinationPrefix string
 	UsageInterval     string
+	Supplier          string
 	MediationRunIds   string
 	RatedAccount      string
 	RatedSubject      string
