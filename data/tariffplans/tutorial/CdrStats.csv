@@ -1,12 +1,12 @@
-#Id,QueueLength,TimeWindow,Metric,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,Supplier,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
+#Id[0],QueueLength[1],TimeWindow[2],Metric[3],SetupInterval[4],TOR[5],CdrHost[6],CdrSource[7],ReqType[8],Direction[9],Tenant[10],Category[11],Account[12],Subject[13],DestinationPrefix[14],UsageInterval[15],Supplier[16],MediationRunIds[17],RatedAccount[18],RatedSubject[19],CostInterval[20],Triggers[21]
 CDRST1,10,0,ASR,,,,,,,cgrates.org,,,,,,,default,,,,CDRST1_WARN
 CDRST1,,,ACD,,,,,,,,,,,,,,,,,,
-CDRST1,,,ACC,,,,,,,,,,,,,,,,,
+CDRST1,,,ACC,,,,,,,,,,,,,,,,,,
 CDRST_1001,10,10m,ASR,,,,,,,cgrates.org,,,1001,,,,default,,,,CDRST1001_WARN
 CDRST_1001,,,ACD,,,,,,,,,,,,,,,,,,
-CDRST_1001,,,ACC,,,,,,,,,,,,,,,,,
+CDRST_1001,,,ACC,,,,,,,,,,,,,,,,,,
 CDRST_1002,10,10m,ASR,,,,,,,cgrates.org,,,1002,,,,default,,,,CDRST1001_WARN
 CDRST_1002,,,ACD,,,,,,,,,,,,,,,,,,
-CDRST_1002,,,ACC,,,,,,,,,,,,,,,,,
+CDRST_1002,,,ACC,,,,,,,,,,,,,,,,,,
 CDRST_1003,,,ASR,,,,,,,cgrates.org,,,,1003,,,default,,,,CDRST3_WARN
 CDRST_1003,,,ACD,,,,,,,,,,,,,,,,,,
