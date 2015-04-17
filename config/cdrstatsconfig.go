@@ -40,6 +40,7 @@ type CdrStatsConfig struct {
 	Subjects            []string
 	DestinationPrefixes []string
 	UsageInterval       []time.Duration // 2 or less items (>= Usage, <Usage)
+	Suppliers           []string
 	MediationRunIds     []string
 	RatedAccounts       []string
 	RatedSubjects       []string
@@ -106,6 +107,9 @@ func (self *CdrStatsConfig) loadFromJsonCfg(jsnCfg *CdrStatsJsonCfg) error {
 				self.UsageInterval = append(self.UsageInterval, usageDur)
 			}
 		}
+	}
+	if jsnCfg.Suppliers != nil {
+		self.Suppliers = *jsnCfg.Suppliers
 	}
 	if jsnCfg.Mediation_run_ids != nil {
 		self.MediationRunIds = *jsnCfg.Mediation_run_ids

@@ -44,6 +44,7 @@ func NewCdrStatsFromCdrStatsCfg(csCfg *config.CdrStatsConfig) *CdrStats {
 		Subject:           csCfg.Subjects,
 		DestinationPrefix: csCfg.DestinationPrefixes,
 		UsageInterval:     csCfg.UsageInterval,
+		Supplier:          csCfg.Suppliers,
 		MediationRunIds:   csCfg.MediationRunIds,
 		RatedAccount:      csCfg.RatedAccounts,
 		RatedSubject:      csCfg.RatedSubjects,

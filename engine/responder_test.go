@@ -280,8 +280,8 @@ func TestGetLCR(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	danStatsId := "dan_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: danStatsId}, nil)
+	danStatsId := "dan12_stats"
+	rsponder.Stats.AddQueue(&CdrStats{Id: danStatsId, Supplier: []string{"dan12"}}, nil)
 	danRpfl := &RatingProfile{Id: "*out:tenant12:call:dan12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -290,8 +290,8 @@ func TestGetLCR(t *testing.T) {
 			CdrStatQueueIds: []string{danStatsId},
 		}},
 	}
-	rifStatsId := "rif_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: rifStatsId}, nil)
+	rifStatsId := "rif12_stats"
+	rsponder.Stats.AddQueue(&CdrStats{Id: rifStatsId, Supplier: []string{"rif12"}}, nil)
 	rifRpfl := &RatingProfile{Id: "*out:tenant12:call:rif12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -300,8 +300,8 @@ func TestGetLCR(t *testing.T) {
 			CdrStatQueueIds: []string{rifStatsId},
 		}},
 	}
-	ivoStatsId := "ivo_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: ivoStatsId}, nil)
+	ivoStatsId := "ivo12_stats"
+	rsponder.Stats.AddQueue(&CdrStats{Id: ivoStatsId, Supplier: []string{"ivo12"}}, nil)
 	ivoRpfl := &RatingProfile{Id: "*out:tenant12:call:ivo12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -333,7 +333,25 @@ func TestGetLCR(t *testing.T) {
 			},
 		},
 	}
-	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost} {
+	lcrQosThreshold := &LCR{Direction: utils.OUT, Tenant: "tenant12", Category: "call_qos_threshold", Account: utils.ANY, Subject: utils.ANY,
+		Activations: []*LCRActivation{
+			&LCRActivation{
+				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+				Entries: []*LCREntry{
+					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;4m;", Weight: 10.0}},
+			},
+		},
+	}
+	lcrQos := &LCR{Direction: utils.OUT, Tenant: "tenant12", Category: "call_qos", Account: utils.ANY, Subject: utils.ANY,
+		Activations: []*LCRActivation{
+			&LCRActivation{
+				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+				Entries: []*LCREntry{
+					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS, Weight: 10.0}},
+			},
+		},
+	}
+	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost, lcrQosThreshold, lcrQos} {
 		if err := dataStorage.SetLCR(lcr); err != nil {
 			t.Error(err)
 		}
@@ -424,4 +442,58 @@ func TestGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts, lcrLc.SupplierCosts)
 	}
+	/*
+		// Test *qos_threshold strategy here
+		cdQosThreshold := &CallDescriptor{
+			TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
+			TimeEnd:     time.Date(2015, 04, 06, 17, 41, 0, 0, time.UTC),
+			Tenant:      "tenant12",
+			Direction:   utils.OUT,
+			Category:    "call_qos_threshold",
+			Destination: "+4986517174963",
+			Account:     "dan",
+			Subject:     "dan",
+		}
+		eQTLcr := &LCRCost{
+			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;4m;", Weight: 10.0},
+			SupplierCosts: []*LCRSupplierCost{
+				&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second,
+					QOS: map[string]float64{ACD: 0, ASR: 0}, qosSortParams: []string{"35", "", "4m", ""}},
+				&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 0.4, Duration: 60 * time.Second,
+					QOS: map[string]float64{ACD: 0, ASR: 0}, qosSortParams: []string{"35", "", "4m", ""}},
+				&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second,
+					QOS: map[string]float64{ACD: 0, ASR: 0}, qosSortParams: []string{"35", "", "4m", ""}},
+			},
+		}
+		var lcrQT LCRCost
+		if err := rsponder.GetLCR(cdQosThreshold, &lcrQT); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(eQTLcr.Entry, lcrQT.Entry) {
+			t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
+
+		} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
+			t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts[0], lcrQT.SupplierCosts[0])
+		}
+		cdr := &StoredCdr{Supplier: "rif12", Usage: 3 * time.Minute}
+		rsponder.Stats.AppendCDR(cdr, nil)
+		cdr = &StoredCdr{Supplier: "dan12", Usage: 5 * time.Minute}
+		rsponder.Stats.AppendCDR(cdr, nil)
+		eQTLcr = &LCRCost{
+			Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;4m;", Weight: 10.0},
+			SupplierCosts: []*LCRSupplierCost{
+				&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second,
+					QOS: map[string]float64{ACD: 0, ASR: 0}, qosSortParams: []string{"35", "", "4m", ""}},
+				&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second,
+					QOS: map[string]float64{ACD: 5.0, ASR: 100}, qosSortParams: []string{"35", "", "4m", ""}},
+			},
+		}
+		if err := rsponder.GetLCR(cdQosThreshold, &lcrQT); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(eQTLcr.Entry, lcrQT.Entry) {
+			t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
+
+		} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
+			t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts, lcrQT.SupplierCosts)
+		}
+	*/
 }

@@ -790,16 +790,16 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 						// filter suppliers by qos thresholds
 						asrMin, asrMax, acdMin, acdMax := lcrCost.Entry.GetQOSLimits()
 						// skip current supplier if off limits
-						if asrMin > 0 && asrValues[0] < asrMin {
+						if asrMin > 0 && len(asrValues) != 0 && asrValues[0] < asrMin {
 							continue
 						}
-						if asrMax > 0 && asrValues[len(asrValues)-1] > asrMax {
+						if asrMax > 0 && len(asrValues) != 0 && asrValues[len(asrValues)-1] > asrMax {
 							continue
 						}
-						if acdMin > 0 && acdValues[0] < float64(acdMin) {
+						if acdMin > 0 && len(acdValues) != 0 && acdValues[0] < float64(acdMin) {
 							continue
 						}
-						if acdMax > 0 && acdValues[len(acdValues)-1] > float64(acdMax) {
+						if acdMax > 0 && len(acdValues) != 0 && acdValues[len(acdValues)-1] > float64(acdMax) {
 							continue
 						}
 					}
