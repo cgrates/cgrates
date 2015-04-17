@@ -29,11 +29,11 @@ import (
 )
 
 const (
-	LCR_STRATEGY_STATIC             = "*static"
-	LCR_STRATEGY_LOWEST             = "*lowest_cost"
-	LCR_STRATEGY_HIGHEST            = "*highest_cost"
-	LCR_STRATEGY_QOS_WITH_THRESHOLD = "*qos_with_threshold"
-	LCR_STRATEGY_QOS                = "*qos"
+	LCR_STRATEGY_STATIC        = "*static"
+	LCR_STRATEGY_LOWEST        = "*lowest_cost"
+	LCR_STRATEGY_HIGHEST       = "*highest_cost"
+	LCR_STRATEGY_QOS_THRESHOLD = "*qos_threshold"
+	LCR_STRATEGY_QOS           = "*qos"
 )
 
 type LCR struct {

@@ -751,7 +751,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			lcrCD.Subject = supplier
 			var asr, acd float64
 			var qosSortParams []string
-			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
 				if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err == nil || rpf != nil {
 					rpf.RatingPlanActivations.Sort()
@@ -783,10 +783,10 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					acdValues.Sort()
 					asr = utils.Avg(asrValues)
 					acd = utils.Avg(acdValues)
-					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 						qosSortParams = lcrCost.Entry.GetParams()
 					}
-					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_WITH_THRESHOLD {
+					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 						// filter suppliers by qos thresholds
 						asrMin, asrMax, acdMin, acdMax := lcrCost.Entry.GetQOSLimits()
 						// skip current supplier if off limits
@@ -828,7 +828,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					Cost:     cc.Cost,
 					Duration: cc.GetDuration(),
 				}
-				if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_WITH_THRESHOLD}, lcrCost.Entry.Strategy) {
+				if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD}, lcrCost.Entry.Strategy) {
 					supplCost.QOS = map[string]float64{"ASR": asr, "ACD": acd}
 					supplCost.qosSortParams = qosSortParams
 				}
