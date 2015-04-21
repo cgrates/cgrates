@@ -52,22 +52,22 @@ func TestTutFsCallsInitCfg(t *testing.T) {
 	config.SetCgrConfig(tutFsCallsCfg)
 }
 
-// Wipe out the cdr database
-func TestTutFsCallsResetDb(t *testing.T) {
-	if !*testCalls {
-		return
-	}
-	if err := engine.InitStorDb(tutFsCallsCfg); err != nil {
-		t.Fatal(err)
-	}
-}
-
 // Remove data in both rating and accounting db
 func TestTutFsCallsResetDataDb(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	if err := engine.InitDataDb(tutFsCallsCfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Wipe out the cdr database
+func TestTutFsCallsResetStorDb(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.InitStorDb(tutFsCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -149,7 +149,7 @@ func TestTutFsCallsCacheStats(t *testing.T) {
 }
 
 // Check items age
-func TestApierGetCachedItemAge(t *testing.T) {
+func TestTutFsCallsGetCachedItemAge(t *testing.T) {
 	if !*testCalls {
 		return
 	}
