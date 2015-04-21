@@ -49,9 +49,9 @@ func TestLcrQOSSorter(t *testing.T) {
 		},
 	}
 	sort.Sort(s)
-	if s[0].QOS[ASR] != 1 ||
+	if s[0].QOS[ASR] != 3 ||
 		s[1].QOS[ASR] != 2 ||
-		s[2].QOS[ASR] != 3 {
+		s[2].QOS[ASR] != 1 {
 		t.Error("Lcr qos sort failed: ", s)
 	}
 }
@@ -81,9 +81,9 @@ func TestLcrQOSSorterOACD(t *testing.T) {
 		},
 	}
 	sort.Sort(s)
-	if s[0].QOS[ACD] != 1 ||
+	if s[0].QOS[ACD] != 3 ||
 		s[1].QOS[ACD] != 2 ||
-		s[2].QOS[ACD] != 3 {
+		s[2].QOS[ACD] != 1 {
 		t.Error("Lcr qos sort failed: ", s)
 	}
 }
