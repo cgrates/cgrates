@@ -310,7 +310,7 @@ func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engi
 		}
 	}
 
-	cdrServer, _ := engine.NewCdrServer(cfg, logDb, cdrDb, raterConn, statsConn)
+	cdrServer, _ = engine.NewCdrServer(cfg, logDb, cdrDb, raterConn, statsConn)
 	engine.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHanlersToServer(server)
 	engine.Logger.Info("Registering CDRS RPC service.")
