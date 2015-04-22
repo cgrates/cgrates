@@ -333,6 +333,8 @@ func RemActionTiming(ats ActionPlan, actionTimingId, balanceId string) ActionPla
 				} else {
 					at.AccountIds[iBlnc], at.AccountIds = at.AccountIds[len(at.AccountIds)-1], at.AccountIds[:len(at.AccountIds)-1]
 				}
+				// only remove the first one matching
+				break
 			}
 		}
 	}
