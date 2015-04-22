@@ -90,33 +90,39 @@ func TestLcrQOSSorterOACD(t *testing.T) {
 
 func TestLcrGetQosLimitsAll(t *testing.T) {
 	le := &LCREntry{
-		StrategyParams: "1.2;2.3;45s;67m",
+		StrategyParams: "1.2;2.3;45s;67m;8.9;10.11;12.13;14.15",
 	}
-	minAsr, maxAsr, minAcd, maxAcd := le.GetQOSLimits()
+	minAsr, maxAsr, minAcd, maxAcd, minAcc, maxAcc, minTcc, maxTcc := le.GetQOSLimits()
 	if minAsr != 1.2 || maxAsr != 2.3 ||
-		minAcd != 45*time.Second || maxAcd != 67*time.Minute {
-		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
+		minAcd != 45*time.Second || maxAcd != 67*time.Minute ||
+		minAcc != 8.9 || maxAcc != 10.11 ||
+		minTcc != 12.13 || maxTcc != 14.15 {
+		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd, minAcc, maxAcc, minTcc, maxTcc)
 	}
 }
 
 func TestLcrGetQosLimitsSome(t *testing.T) {
 	le := &LCREntry{
-		StrategyParams: "1.2;;;67m",
+		StrategyParams: "1.2;;;67m;1;;3;",
 	}
-	minAsr, maxAsr, minAcd, maxAcd := le.GetQOSLimits()
+	minAsr, maxAsr, minAcd, maxAcd, minAcc, maxAcc, minTcc, maxTcc := le.GetQOSLimits()
 	if minAsr != 1.2 || maxAsr != -1 ||
-		minAcd != -1 || maxAcd != 67*time.Minute {
+		minAcd != -1 || maxAcd != 67*time.Minute ||
+		minAcc != 1 || maxAcc != -1 ||
+		minTcc != 3 || maxTcc != -1 {
 		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
 	}
 }
 
 func TestLcrGetQosLimitsNone(t *testing.T) {
 	le := &LCREntry{
-		StrategyParams: ";;;",
+		StrategyParams: ";;;;;;;",
 	}
-	minAsr, maxAsr, minAcd, maxAcd := le.GetQOSLimits()
+	minAsr, maxAsr, minAcd, maxAcd, minAcc, maxAcc, minTcc, maxTcc := le.GetQOSLimits()
 	if minAsr != -1 || maxAsr != -1 ||
-		minAcd != -1 || maxAcd != -1 {
+		minAcd != -1 || maxAcd != -1 ||
+		minAcc != -1 || maxAcc != -1 ||
+		minTcc != -1 || maxTcc != -1 {
 		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
 	}
 }
@@ -127,7 +133,7 @@ func TestLcrGetQosSortParamsNone(t *testing.T) {
 		StrategyParams: "",
 	}
 	sort := le.GetParams()
-	if sort[0] != ASR || sort[1] != ACD {
+	if sort[0] != ASR || sort[1] != ACD || sort[2] != ACC || sort[3] != TCC {
 		t.Error("Wrong qos sort params parsed: ", sort)
 	}
 }
@@ -135,10 +141,10 @@ func TestLcrGetQosSortParamsNone(t *testing.T) {
 func TestLcrGetQosSortParamsEmpty(t *testing.T) {
 	le := &LCREntry{
 		Strategy:       LCR_STRATEGY_QOS,
-		StrategyParams: ";",
+		StrategyParams: ";;;",
 	}
 	sort := le.GetParams()
-	if sort[0] != ASR || sort[1] != ACD {
+	if sort[0] != ASR || sort[1] != ACD || sort[2] != ACC || sort[3] != TCC {
 		t.Error("Wrong qos sort params parsed: ", sort)
 	}
 }
