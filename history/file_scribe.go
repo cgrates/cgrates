@@ -75,6 +75,7 @@ func (s *FileScribe) Record(rec Record, out *int) error {
 		t := time.NewTicker(s.savePeriod)
 		select {
 		case <-s.loopChecker:
+			t.Stop()
 			// cancel saving
 		case <-t.C:
 			if fileToSave != "" {
