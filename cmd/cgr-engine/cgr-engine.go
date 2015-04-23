@@ -261,7 +261,7 @@ func startSmOpenSIPS(responder *engine.Responder, loggerDb engine.LogStorage, ca
 	exitChan <- true
 }
 
-func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engine.Responder, stats *engine.Stats, responderReady, doneChan chan struct{}) {
+func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engine.Responder, responderReady, doneChan chan struct{}) {
 	var err error
 	var client *rpcclient.RpcClient
 	// Rater connection init
@@ -288,7 +288,7 @@ func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engi
 	// Stats connection init
 	var statsConn engine.StatsInterface
 	if cfg.CDRSStats == utils.INTERNAL {
-		statsConn = stats
+		statsConn = cdrStats
 	} else if len(cfg.CDRSStats) != 0 {
 		if cfg.CDRSRater == cfg.CDRSStats {
 			statsConn = &engine.ProxyStats{Client: client}
@@ -606,7 +606,7 @@ func main() {
 		engine.Logger.Info("Starting CGRateS CDRS service.")
 		cdrsChan = make(chan struct{})
 		httpWait = append(httpWait, cdrsChan)
-		go startCDRS(logDb, cdrDb, responder, cdrStats, cacheChan, cdrsChan)
+		go startCDRS(logDb, cdrDb, responder, cacheChan, cdrsChan)
 	}
 
 	if cfg.SmFsConfig.Enabled {
