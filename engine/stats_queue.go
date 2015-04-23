@@ -36,6 +36,8 @@ var METRIC_TRIGGER_MAP = map[string]string{
 	"*max_asr": ASR,
 	"*min_acd": ACD,
 	"*max_acd": ACD,
+	"*min_tcd": TCD,
+	"*max_tcd": TCD,
 	"*min_acc": ACC,
 	"*max_acc": ACC,
 	"*min_tcc": ACC,

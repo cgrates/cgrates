@@ -32,6 +32,7 @@ type Metric interface {
 
 const ASR = "ASR"
 const ACD = "ACD"
+const TCD = "TCD"
 const ACC = "ACC"
 const TCC = "TCC"
 const STATS_NA = -1
@@ -42,6 +43,8 @@ func CreateMetric(metric string) Metric {
 		return &ASRMetric{}
 	case ACD:
 		return &ACDMetric{}
+	case TCD:
+		return &TCDMetric{}
 	case ACC:
 		return &ACCMetric{}
 	case TCC:
@@ -106,6 +109,34 @@ func (acd *ACDMetric) GetValue() float64 {
 	}
 	val := acd.sum.Seconds() / acd.count
 	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+}
+
+// TCD – Total Call Duration
+// the sum of billable seconds (billsec) of answered calls
+type TCDMetric struct {
+	sum   time.Duration
+	count float64
+}
+
+func (tcd *TCDMetric) AddCdr(cdr *QCdr) {
+	if !cdr.AnswerTime.IsZero() {
+		tcd.sum += cdr.Usage
+		tcd.count += 1
+	}
+}
+
+func (tcd *TCDMetric) RemoveCdr(cdr *QCdr) {
+	if !cdr.AnswerTime.IsZero() {
+		tcd.sum -= cdr.Usage
+		tcd.count -= 1
+	}
+}
+
+func (tcd *TCDMetric) GetValue() float64 {
+	if tcd.count == 0 {
+		return STATS_NA
+	}
+	return utils.Round(tcd.sum.Seconds(), globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
 
 // ACC – Average Call Cost
