@@ -89,14 +89,14 @@ func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 			}
 			if strings.HasPrefix(at.ThresholdType, "*min_") {
 				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
-					if value <= at.ThresholdValue {
+					if value > STATS_NA && value <= at.ThresholdValue {
 						at.Execute(nil, sq.Triggered(at))
 					}
 				}
 			}
 			if strings.HasPrefix(at.ThresholdType, "*max_") {
 				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
-					if value >= at.ThresholdValue {
+					if value > STATS_NA && value >= at.ThresholdValue {
 						at.Execute(nil, sq.Triggered(at))
 					}
 				}

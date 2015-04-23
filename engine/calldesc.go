@@ -773,16 +773,16 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 						if err := stats.GetValues(qId, &statValues); err != nil {
 							Logger.Warning(fmt.Sprintf("Error getting stats values for queue id %s: %v", qId, err))
 						}
-						if asr, exists := statValues[ASR]; exists {
+						if asr, exists := statValues[ASR]; exists && asr > STATS_NA {
 							asrValues = append(asrValues, asr)
 						}
-						if acd, exists := statValues[ACD]; exists {
+						if acd, exists := statValues[ACD]; exists && acd > STATS_NA {
 							acdValues = append(acdValues, acd)
 						}
-						if acc, exists := statValues[ACC]; exists {
+						if acc, exists := statValues[ACC]; exists && acc > STATS_NA {
 							accValues = append(accValues, acc)
 						}
-						if tcc, exists := statValues[TCC]; exists {
+						if tcc, exists := statValues[TCC]; exists && tcc > STATS_NA {
 							tccValues = append(tccValues, tcc)
 						}
 					}

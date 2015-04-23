@@ -34,6 +34,7 @@ const ASR = "ASR"
 const ACD = "ACD"
 const ACC = "ACC"
 const TCC = "TCC"
+const STATS_NA = -1
 
 func CreateMetric(metric string) Metric {
 	switch metric {
@@ -53,28 +54,28 @@ func CreateMetric(metric string) Metric {
 // successfully answered Calls divided by the total number of Calls attempted and multiplied by 100
 type ASRMetric struct {
 	answered float64
-	total    float64
+	count    float64
 }
 
 func (asr *ASRMetric) AddCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() {
 		asr.answered += 1
 	}
-	asr.total += 1
+	asr.count += 1
 }
 
 func (asr *ASRMetric) RemoveCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() {
 		asr.answered -= 1
 	}
-	asr.total -= 1
+	asr.count -= 1
 }
 
 func (asr *ASRMetric) GetValue() float64 {
-	if asr.total == 0 {
-		return 0
+	if asr.count == 0 {
+		return STATS_NA
 	}
-	val := asr.answered / asr.total * 100
+	val := asr.answered / asr.count * 100
 	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
 
@@ -101,7 +102,7 @@ func (acd *ACDMetric) RemoveCdr(cdr *QCdr) {
 
 func (acd *ACDMetric) GetValue() float64 {
 	if acd.count == 0 {
-		return 0
+		return STATS_NA
 	}
 	val := acd.sum.Seconds() / acd.count
 	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
@@ -130,7 +131,7 @@ func (acc *ACCMetric) RemoveCdr(cdr *QCdr) {
 
 func (acc *ACCMetric) GetValue() float64 {
 	if acc.count == 0 {
-		return 0
+		return STATS_NA
 	}
 	val := acc.sum / acc.count
 	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
@@ -139,21 +140,27 @@ func (acc *ACCMetric) GetValue() float64 {
 // TCC – Total Call Cost
 // the sum of cost of answered calls
 type TCCMetric struct {
-	sum float64
+	sum   float64
+	count float64
 }
 
 func (tcc *TCCMetric) AddCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() && cdr.Cost >= 0 {
 		tcc.sum += cdr.Cost
+		tcc.count += 1
 	}
 }
 
 func (tcc *TCCMetric) RemoveCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() && cdr.Cost >= 0 {
 		tcc.sum -= cdr.Cost
+		tcc.count -= 1
 	}
 }
 
 func (tcc *TCCMetric) GetValue() float64 {
+	if tcc.count == 0 {
+		return STATS_NA
+	}
 	return utils.Round(tcc.sum, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
