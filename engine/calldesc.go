@@ -749,7 +749,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			lcrCD.Category = category
 			lcrCD.Account = supplier
 			lcrCD.Subject = supplier
-			var asrMean, acdMean float64
+			var asrMean, acdMean, accMean, tccMean float64
 			var qosSortParams []string
 			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
@@ -766,6 +766,8 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					}
 					var asrValues sort.Float64Slice
 					var acdValues sort.Float64Slice
+					var accValues sort.Float64Slice
+					var tccValues sort.Float64Slice
 					for _, qId := range cdrStatsQueueIds {
 						statValues := make(map[string]float64)
 						if err := stats.GetValues(qId, &statValues); err != nil {
@@ -777,18 +779,28 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 						if acd, exists := statValues[ACD]; exists {
 							acdValues = append(acdValues, acd)
 						}
+						if acc, exists := statValues[ACC]; exists {
+							accValues = append(accValues, acc)
+						}
+						if tcc, exists := statValues[TCC]; exists {
+							tccValues = append(tccValues, tcc)
+						}
 					}
 					asrValues.Sort()
 					acdValues.Sort()
+					accValues.Sort()
+					tccValues.Sort()
 					asrMean = utils.Avg(asrValues)
 					acdMean = utils.Avg(acdValues)
+					accMean = utils.Avg(accValues)
+					tccMean = utils.Avg(tccValues)
 					//log.Print(asrValues, acdValues)
 					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS {
 						qosSortParams = lcrCost.Entry.GetParams()
 					}
 					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 						// filter suppliers by qos thresholds
-						asrMin, asrMax, acdMin, acdMax := lcrCost.Entry.GetQOSLimits()
+						asrMin, asrMax, acdMin, acdMax, accMin, accMax, tccMin, tccMax := lcrCost.Entry.GetQOSLimits()
 						//log.Print(asrMin, asrMax, acdMin, acdMax)
 						// skip current supplier if off limits
 						if asrMin > 0 && len(asrValues) != 0 && asrValues[0] < asrMin {
@@ -801,6 +813,18 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							continue
 						}
 						if acdMax > 0 && len(acdValues) != 0 && acdValues[len(acdValues)-1] > acdMax.Seconds() {
+							continue
+						}
+						if accMin > 0 && len(accValues) != 0 && accValues[0] < accMin {
+							continue
+						}
+						if accMax > 0 && len(accValues) != 0 && accValues[len(accValues)-1] > accMax {
+							continue
+						}
+						if tccMin > 0 && len(tccValues) != 0 && tccValues[0] < tccMin {
+							continue
+						}
+						if tccMax > 0 && len(tccValues) != 0 && tccValues[len(tccValues)-1] > tccMax {
 							continue
 						}
 					}
@@ -830,7 +854,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					Duration: cc.GetDuration(),
 				}
 				if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD}, lcrCost.Entry.Strategy) {
-					supplCost.QOS = map[string]float64{"ASR": asrMean, "ACD": acdMean}
+					supplCost.QOS = map[string]float64{ASR: asrMean, ACD: acdMean, ACC: accMean, TCC: tccMean}
 					supplCost.qosSortParams = qosSortParams
 				}
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, supplCost)

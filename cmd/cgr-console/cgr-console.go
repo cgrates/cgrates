@@ -84,6 +84,7 @@ func executeCommand(command string) {
 			param = param.(*console.StringWrapper).Item
 		}
 		//log.Printf("Param: %+v", param)
+
 		if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
 			fmt.Println("Error executing command: " + rpcErr.Error())
 		} else {

@@ -33,6 +33,7 @@ type Metric interface {
 const ASR = "ASR"
 const ACD = "ACD"
 const ACC = "ACC"
+const TCC = "TCC"
 
 func CreateMetric(metric string) Metric {
 	switch metric {
@@ -42,6 +43,8 @@ func CreateMetric(metric string) Metric {
 		return &ACDMetric{}
 	case ACC:
 		return &ACCMetric{}
+	case TCC:
+		return &TCCMetric{}
 	}
 	return nil
 }
@@ -131,4 +134,26 @@ func (acc *ACCMetric) GetValue() float64 {
 	}
 	val := acc.sum / acc.count
 	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+}
+
+// TCC – Total Call Cost
+// the sum of cost of answered calls
+type TCCMetric struct {
+	sum float64
+}
+
+func (tcc *TCCMetric) AddCdr(cdr *QCdr) {
+	if !cdr.AnswerTime.IsZero() && cdr.Cost >= 0 {
+		tcc.sum += cdr.Cost
+	}
+}
+
+func (tcc *TCCMetric) RemoveCdr(cdr *QCdr) {
+	if !cdr.AnswerTime.IsZero() && cdr.Cost >= 0 {
+		tcc.sum -= cdr.Cost
+	}
+}
+
+func (tcc *TCCMetric) GetValue() float64 {
+	return utils.Round(tcc.sum, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }

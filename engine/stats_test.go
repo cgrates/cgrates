@@ -33,7 +33,7 @@ func TestStatsQueueInit(t *testing.T) {
 }
 
 func TestStatsValue(t *testing.T) {
-	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, ACC}})
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, ACC, TCC}})
 	cdr := &StoredCdr{
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		Usage:      10 * time.Second,
@@ -47,7 +47,8 @@ func TestStatsValue(t *testing.T) {
 	s := sq.GetStats()
 	if s[ASR] != 100 ||
 		s[ACD] != 10 ||
-		s[ACC] != 2 {
+		s[ACC] != 2 ||
+		s[TCC] != 6 {
 		t.Errorf("Error getting stats: %+v", s)
 	}
 }
