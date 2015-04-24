@@ -250,12 +250,22 @@ func (qoss QOSSorter) Swap(i, j int) {
 
 func (qoss QOSSorter) Less(i, j int) bool {
 	for _, param := range qoss[i].qosSortParams {
-		if qoss[j].QOS[param] == -1 { // -1 is the best
+		// if one of the supplier is missing the qos parram skip to next one
+		if _, exists := qoss[i].QOS[param]; !exists {
+			continue
+		}
+		if _, exists := qoss[j].QOS[param]; !exists {
+			continue
+		}
+		// -1 is the best
+		if qoss[j].QOS[param] == -1 {
 			return false
 		}
+		// more is better
 		if qoss[i].QOS[param] == -1 || qoss[i].QOS[param] > qoss[j].QOS[param] {
 			return true
 		}
+		// skip to next param
 		if qoss[i].QOS[param] == qoss[j].QOS[param] {
 			continue
 		}
