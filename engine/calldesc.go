@@ -795,11 +795,12 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					tcdValues.Sort()
 					accValues.Sort()
 					tccValues.Sort()
-					asrMean = utils.Avg(asrValues)
-					acdMean = utils.Avg(acdValues)
-					tcdMean = utils.Avg(tcdValues)
-					accMean = utils.Avg(accValues)
-					tccMean = utils.Avg(tccValues)
+
+					asrMean = utils.AvgNegative(asrValues)
+					acdMean = utils.AvgNegative(acdValues)
+					tcdMean = utils.AvgNegative(tcdValues)
+					accMean = utils.AvgNegative(accValues)
+					tccMean = utils.AvgNegative(tccValues)
 					//log.Print(asrValues, acdValues)
 					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS {
 						qosSortParams = lcrCost.Entry.GetParams()

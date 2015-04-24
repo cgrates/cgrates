@@ -201,7 +201,7 @@ func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 
 func (lc *LCRCost) Sort() {
 	switch lc.Entry.Strategy {
-	case LCR_STRATEGY_LOWEST:
+	case LCR_STRATEGY_LOWEST, LCR_STRATEGY_QOS_THRESHOLD:
 		sort.Sort(LowestSupplierCostSorter(lc.SupplierCosts))
 	case LCR_STRATEGY_HIGHEST:
 		sort.Sort(HighestSupplierCostSorter(lc.SupplierCosts))
@@ -250,7 +250,10 @@ func (qoss QOSSorter) Swap(i, j int) {
 
 func (qoss QOSSorter) Less(i, j int) bool {
 	for _, param := range qoss[i].qosSortParams {
-		if qoss[i].QOS[param] > qoss[j].QOS[param] {
+		if qoss[j].QOS[param] == -1 { // -1 is the best
+			return false
+		}
+		if qoss[i].QOS[param] == -1 || qoss[i].QOS[param] > qoss[j].QOS[param] {
 			return true
 		}
 		if qoss[i].QOS[param] == qoss[j].QOS[param] {
