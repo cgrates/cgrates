@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var ratingDb2 engine.RatingStorage
@@ -130,10 +131,10 @@ func TestExecuteActions2(t *testing.T) {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
-	} else if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 40 {
-		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
-	} else if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != 0 {
-		t.Error("Account does not have enough monetary balance", acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value)
+	} else if acnt.BalanceMap[utils.VOICE+engine.OUTBOUND][0].Value != 40 {
+		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[utils.VOICE+engine.OUTBOUND][0].Value)
+	} else if acnt.BalanceMap[utils.MONETARY+engine.OUTBOUND][0].Value != 0 {
+		t.Error("Account does not have enough monetary balance", acnt.BalanceMap[utils.MONETARY+engine.OUTBOUND][0].Value)
 	}
 }
 
@@ -160,10 +161,10 @@ func TestDebit2(t *testing.T) {
 	if len(acnt.BalanceMap) != 2 {
 		t.Error("Wrong number of user balances found", acnt.BalanceMap)
 	}
-	if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 20 {
-		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
+	if acnt.BalanceMap[utils.VOICE+engine.OUTBOUND][0].Value != 20 {
+		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[utils.VOICE+engine.OUTBOUND][0].Value)
 	}
-	for _, blnc := range acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND] { // Test negative balance for default one
+	for _, blnc := range acnt.BalanceMap[utils.MONETARY+engine.OUTBOUND] { // Test negative balance for default one
 		if blnc.Weight == 10 && blnc.Value != 0 {
 			t.Errorf("Balance with weight: %f, having value: %f  ", blnc.Weight, blnc.Value)
 		} else if blnc.Weight == 0 && blnc.Value != -0.01 {

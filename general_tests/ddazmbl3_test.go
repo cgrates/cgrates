@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var ratingDb3 engine.RatingStorage
@@ -128,8 +129,8 @@ func TestExecuteActions3(t *testing.T) {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
-	} else if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 40 {
-		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
+	} else if acnt.BalanceMap[utils.VOICE+engine.OUTBOUND][0].Value != 40 {
+		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[utils.VOICE+engine.OUTBOUND][0].Value)
 	}
 }
 
@@ -156,10 +157,10 @@ func TestDebit3(t *testing.T) {
 	if len(acnt.BalanceMap) != 2 {
 		t.Error("Wrong number of user balances found", acnt.BalanceMap)
 	}
-	if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 20 {
-		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
+	if acnt.BalanceMap[utils.VOICE+engine.OUTBOUND][0].Value != 20 {
+		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[utils.VOICE+engine.OUTBOUND][0].Value)
 	}
-	if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != -0.01 {
-		t.Error("Account does not have expected monetary balance", acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value)
+	if acnt.BalanceMap[utils.MONETARY+engine.OUTBOUND][0].Value != -0.01 {
+		t.Error("Account does not have expected monetary balance", acnt.BalanceMap[utils.MONETARY+engine.OUTBOUND][0].Value)
 	}
 }
