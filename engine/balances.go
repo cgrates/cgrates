@@ -217,7 +217,7 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 
 // Gets the cost using balance RatingSubject if present otherwize
 // retuns a callcost obtained using standard rating
-func (b *Balance) GetCost(cd *CallDescriptor, getStandarIfEmpty bool) (*CallCost, error) {
+func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCost, error) {
 	// testing only
 	if cd.test_callcost != nil {
 		return cd.test_callcost, nil
@@ -234,7 +234,7 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandarIfEmpty bool) (*CallCost
 		cd.Account = origAccount
 		return cc, err
 	}
-	if getStandarIfEmpty {
+	if getStandardIfEmpty {
 		cd.RatingInfos = nil
 		return cd.GetCost()
 	} else {
@@ -419,6 +419,8 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
 		}
+		//log.Printf("CD: %+v", cd)
+		//log.Printf("CC: %+v", cc)
 		//log.Printf("TS: %+v", ts)
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
