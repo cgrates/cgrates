@@ -157,7 +157,6 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	if err != nil || !cd.continousRatingInfos() {
 		//log.Print("ERR: ", cd.GetKey(cd.Subject), err)
 		err = errors.New("Could not determine rating plans for call")
-		return
 	}
 	return
 }
@@ -305,7 +304,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	}
 
 	firstSpan.setRatingInfo(cd.RatingInfos[0])
-	if cd.TOR == MINUTES {
+	if cd.TOR == utils.VOICE {
 		// split on rating plans
 		afterStart, afterEnd := false, false //optimization for multiple activation periods
 		for _, rp := range cd.RatingInfos {
@@ -340,7 +339,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			if timespans[i].RateInterval != nil && timespans[i].RateInterval.Weight < interval.Weight {
 				continue // if the timespan has an interval than it already has a heigher weight
 			}
-			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != MINUTES)
+			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != utils.VOICE)
 			if newTs != nil {
 				newTs.setRatingInfo(rp)
 				// insert the new timespan
@@ -398,7 +397,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		cd.DurationIndex = cd.TimeEnd.Sub(cd.TimeStart)
 	}
 	if cd.TOR == "" {
-		cd.TOR = MINUTES
+		cd.TOR = utils.VOICE
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
@@ -454,7 +453,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 		origCD.DurationIndex = origCD.TimeEnd.Sub(origCD.TimeStart)
 	}
 	if origCD.TOR == "" {
-		origCD.TOR = MINUTES
+		origCD.TOR = utils.VOICE
 	}
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
@@ -519,7 +518,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		defer accountingStorage.SetAccount(account)
 	}
 	if cd.TOR == "" {
-		cd.TOR = MINUTES
+		cd.TOR = utils.VOICE
 	}
 	//log.Printf("Debit CD: %+v", cd)
 	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)

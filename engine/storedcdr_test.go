@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestStoredCdrInterfaces(t *testing.T) {
@@ -255,7 +256,7 @@ func TestFormatUsage(t *testing.T) {
 	if cdr.FormatUsage("default") != "10" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
-	cdr = StoredCdr{TOR: DATA, Usage: time.Duration(1640113000000000)}
+	cdr = StoredCdr{TOR: utils.DATA, Usage: time.Duration(1640113000000000)}
 	if cdr.FormatUsage("default") != "1640113" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}

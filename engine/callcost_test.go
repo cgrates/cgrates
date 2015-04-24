@@ -173,7 +173,7 @@ func TestCallCostToDataCostError(t *testing.T) {
 		Destination: utils.ANY,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		TOR:         MINUTES,
+		TOR:         utils.VOICE,
 	}
 	cc, _ := cd.GetCost()
 	_, err := cc.ToDataCost()

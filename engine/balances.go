@@ -351,7 +351,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					inc.BalanceInfo.AccountId = ub.Id
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
+						ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
 					}
 					// go to nextincrement
 					continue
@@ -377,7 +377,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					if count {
 						ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: seconds, DestinationId: cc.Destination}})
 						if cost != 0 {
-							ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
+							ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
 						}
 					}
 				} else {
@@ -419,8 +419,6 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
 		}
-		//log.Printf("CD: %+v", cd)
-		//log.Printf("CC: %+v", cc)
 		//log.Printf("TS: %+v", ts)
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
@@ -450,7 +448,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 				}
 				// go to nextincrement
 				continue
@@ -463,7 +461,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 				}
 			} else {
 				inc.paid = false
