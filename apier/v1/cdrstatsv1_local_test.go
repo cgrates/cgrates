@@ -198,7 +198,7 @@ func TestCDRStatsLclResetMetrics(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", expectedMetrics1, rcvMetrics1)
 	}
 	var rcvMetrics2 map[string]float64
-	expectedMetrics2 := map[string]float64{"ASR": 0, "ACD": 0}
+	expectedMetrics2 := map[string]float64{"ASR": -1, "ACD": -1}
 	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "CDRST4"}, &rcvMetrics2); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedMetrics2, rcvMetrics2) {
