@@ -1,5 +1,7 @@
 #! /usr/bin/env sh
 
+go test -i github.com/cgrates/cgrates/apier/v1
+go test -i github.com/cgrates/cgrates/apier/v2
 go test -i github.com/cgrates/cgrates/engine
 go test -i github.com/cgrates/cgrates/sessionmanager
 go test -i github.com/cgrates/cgrates/config
@@ -10,6 +12,10 @@ go test -i github.com/cgrates/cgrates/utils
 go test -i github.com/cgrates/cgrates/history
 go test -i github.com/cgrates/cgrates/cdre
 
+go test github.com/cgrates/cgrates/apier/v1
+v1=$?
+go test github.com/cgrates/cgrates/apier/v2
+v2=$?
 go test github.com/cgrates/cgrates/engine
 en=$?
 go test github.com/cgrates/cgrates/general_tests
@@ -31,5 +37,5 @@ c2g=$?
 go test github.com/cgrates/cgrates/cdre
 cdre=$?
 
-exit $en && $gt && $sm && $cfg && $bl && $cr && $cdrc && $ut && $hs && $c2g && $cdre
+exit $v1 && $v2 && $en && $gt && $sm && $cfg && $bl && $cr && $cdrc && $ut && $hs && $c2g && $cdre
 
