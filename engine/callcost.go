@@ -21,6 +21,8 @@ import (
 	"errors"
 	"reflect"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // The output structure that will be returned with the call cost information.
@@ -104,7 +106,7 @@ func (cc *CallCost) IsPaid() bool {
 }
 
 func (cc *CallCost) ToDataCost() (*DataCost, error) {
-	if cc.TOR == MINUTES {
+	if cc.TOR == utils.VOICE {
 		return nil, errors.New("Not a data call!")
 	}
 	dc := &DataCost{

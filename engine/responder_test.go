@@ -73,8 +73,8 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	}
 	b10 := &Balance{Value: 10, Weight: 10, DestinationId: "DE_TMOBILE"}
 	b20 := &Balance{Value: 20, Weight: 10, DestinationId: "DE_TMOBILE"}
-	rifsAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, testTenant, "rif"), BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b10}}}
-	dansAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, testTenant, "dan"), BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b20}}}
+	rifsAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, testTenant, "rif"), BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{b10}}}
+	dansAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, testTenant, "dan"), BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{b20}}}
 	if err := accountingStorage.SetAccount(rifsAccount); err != nil {
 		t.Error(err)
 	}
@@ -97,15 +97,15 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	accountingStorage.CacheAccounting(nil, nil, nil, nil)
 	if rifStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(utils.OUT, testTenant, "rif")); err != nil {
 		t.Error(err)
-		//} else if rifStoredAcnt.BalanceMap[MINUTES+OUTBOUND].Equal(rifsAccount.BalanceMap[MINUTES+OUTBOUND]) {
-		//	t.Errorf("Expected: %+v, received: %+v", rifsAccount.BalanceMap[MINUTES+OUTBOUND][0], rifStoredAcnt.BalanceMap[MINUTES+OUTBOUND][0])
-	} else if rifStoredAcnt.BalanceMap[MINUTES+OUTBOUND][0].Value != rifsAccount.BalanceMap[MINUTES+OUTBOUND][0].Value {
-		t.Error("BalanceValue: ", rifStoredAcnt.BalanceMap[MINUTES+OUTBOUND][0].Value)
+		//} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND].Equal(rifsAccount.BalanceMap[utils.VOICE+OUTBOUND]) {
+		//	t.Errorf("Expected: %+v, received: %+v", rifsAccount.BalanceMap[utils.VOICE+OUTBOUND][0], rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0])
+	} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].Value != rifsAccount.BalanceMap[utils.VOICE+OUTBOUND][0].Value {
+		t.Error("BalanceValue: ", rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
 	}
 	if danStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(utils.OUT, testTenant, "dan")); err != nil {
 		t.Error(err)
-	} else if danStoredAcnt.BalanceMap[MINUTES+OUTBOUND][0].Value != dansAccount.BalanceMap[MINUTES+OUTBOUND][0].Value {
-		t.Error("BalanceValue: ", danStoredAcnt.BalanceMap[MINUTES+OUTBOUND][0].Value)
+	} else if danStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].Value != dansAccount.BalanceMap[utils.VOICE+OUTBOUND][0].Value {
+		t.Error("BalanceValue: ", danStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
 	}
 	var dcs utils.DerivedChargers
 	attrs := utils.AttrDerivedChargers{Tenant: testTenant, Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
@@ -419,8 +419,8 @@ func TestGetLCR(t *testing.T) {
 	}
 	bRif12 := &Balance{Value: 40, Weight: 10, DestinationId: dstDe.Id}
 	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationId: dstDe.Id}
-	rif12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "rif12"), BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{bRif12}}, AllowNegative: true}
-	ivo12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{bIvo12}}, AllowNegative: true}
+	rif12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "rif12"), BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{bRif12}}, AllowNegative: true}
+	ivo12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{bIvo12}}, AllowNegative: true}
 	for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {
 		if err := accountingStorage.SetAccount(acnt); err != nil {
 			t.Error(err)
@@ -457,9 +457,9 @@ func TestGetLCR(t *testing.T) {
 	eQTLcr := &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;4m;;;;;;;", Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second, QOS: map[string]float64{TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1}, qosSortParams: []string{"35", "", "4m"}},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 1.2, Duration: 60 * time.Second, QOS: map[string]float64{TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1}, qosSortParams: []string{"35", "", "4m"}},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 1.8, Duration: 60 * time.Second, QOS: map[string]float64{TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1}, qosSortParams: []string{"35", "", "4m"}},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second, QOS: map[string]float64{TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1}, qosSortParams: []string{"35", "4m"}},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 0.4, Duration: 60 * time.Second, QOS: map[string]float64{TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1}, qosSortParams: []string{"35", "4m"}},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second, QOS: map[string]float64{TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1}, qosSortParams: []string{"35", "4m"}},
 		},
 	}
 	var lcrQT LCRCost
@@ -469,7 +469,7 @@ func TestGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
 
 	} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
-		//t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts, lcrQT.SupplierCosts)
+		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts[0], lcrQT.SupplierCosts[0])
 	}
 	cdr := &StoredCdr{Supplier: "rif12", AnswerTime: time.Now(), Usage: 3 * time.Minute, Cost: 1}
 	rsponder.Stats.AppendCDR(cdr, nil)
@@ -478,8 +478,8 @@ func TestGetLCR(t *testing.T) {
 	eQTLcr = &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;4m;;;;;;;", Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second, QOS: map[string]float64{ACD: 300, TCD: 300, ASR: 100, ACC: 2, TCC: 2}, qosSortParams: []string{"35", "", "4m"}},
-			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 1.8, Duration: 60 * time.Second, QOS: map[string]float64{TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1}, qosSortParams: []string{"35", "", "4m"}},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 0, Duration: 60 * time.Second, QOS: map[string]float64{TCD: -1, ACC: -1, TCC: -1, ASR: -1, ACD: -1}, qosSortParams: []string{"35", "4m"}},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second, QOS: map[string]float64{ACD: 300, TCD: 300, ASR: 100, ACC: 2, TCC: 2}, qosSortParams: []string{"35", "4m"}},
 		},
 	}
 	if err := rsponder.GetLCR(cdQosThreshold, &lcrQT); err != nil {
@@ -488,7 +488,7 @@ func TestGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
 
 	} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
-		//t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts[1], lcrQT.SupplierCosts[1])
+		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts[0], lcrQT.SupplierCosts[0])
 	}
 
 	// Test *qos strategy here
@@ -517,6 +517,6 @@ func TestGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eQosLcr.Entry, lcrQ.Entry)
 
 	} else if !reflect.DeepEqual(eQosLcr.SupplierCosts, lcrQ.SupplierCosts) {
-		//		t.Errorf("Expecting: %+v, received: %+v", eQosLcr.SupplierCosts[0], lcrQ.SupplierCosts[0])
+		t.Errorf("Expecting: %+v, received: %+v", eQosLcr.SupplierCosts[0], lcrQ.SupplierCosts[0])
 	}
 }

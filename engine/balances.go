@@ -217,7 +217,7 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 
 // Gets the cost using balance RatingSubject if present otherwize
 // retuns a callcost obtained using standard rating
-func (b *Balance) GetCost(cd *CallDescriptor, getStandarIfEmpty bool) (*CallCost, error) {
+func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCost, error) {
 	// testing only
 	if cd.test_callcost != nil {
 		return cd.test_callcost, nil
@@ -234,7 +234,7 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandarIfEmpty bool) (*CallCost
 		cd.Account = origAccount
 		return cc, err
 	}
-	if getStandarIfEmpty {
+	if getStandardIfEmpty {
 		cd.RatingInfos = nil
 		return cd.GetCost()
 	} else {
@@ -351,7 +351,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					inc.BalanceInfo.AccountId = ub.Id
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
+						ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
 					}
 					// go to nextincrement
 					continue
@@ -377,7 +377,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					if count {
 						ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: seconds, DestinationId: cc.Destination}})
 						if cost != 0 {
-							ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
+							ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
 						}
 					}
 				} else {
@@ -448,7 +448,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 				}
 				// go to nextincrement
 				continue
@@ -461,7 +461,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 				}
 			} else {
 				inc.paid = false

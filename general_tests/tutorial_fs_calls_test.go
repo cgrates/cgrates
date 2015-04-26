@@ -202,32 +202,32 @@ func TestTutFsCallsAccountsBefore(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
+		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002", Direction: "*out"}
 	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
+		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003", Direction: "*out"}
 	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
+		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1004", Direction: "*out"}
 	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
+		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1007", Direction: "*out"}
 	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 0.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 0.0 { // Make sure we debitted
+		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005", Direction: "*out"}
 	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
@@ -453,8 +453,8 @@ func TestTutFsCallsAccount1001(t *testing.T) {
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() == 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() == 10.0 { // Make sure we debitted
+		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	} else if reply.Disabled == true {
 		t.Error("Account disabled")
 	}

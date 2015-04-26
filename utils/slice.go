@@ -52,3 +52,10 @@ func Avg(values []float64) float64 {
 	}
 	return sum / float64(len(values))
 }
+
+func AvgNegative(values []float64) float64 {
+	if len(values) == 0 {
+		return -1 // return -1 if no data
+	}
+	return Avg(values)
+}

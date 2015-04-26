@@ -157,7 +157,6 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	if err != nil || !cd.continousRatingInfos() {
 		//log.Print("ERR: ", cd.GetKey(cd.Subject), err)
 		err = errors.New("Could not determine rating plans for call")
-		return
 	}
 	return
 }
@@ -305,7 +304,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	}
 
 	firstSpan.setRatingInfo(cd.RatingInfos[0])
-	if cd.TOR == MINUTES {
+	if cd.TOR == utils.VOICE {
 		// split on rating plans
 		afterStart, afterEnd := false, false //optimization for multiple activation periods
 		for _, rp := range cd.RatingInfos {
@@ -340,7 +339,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			if timespans[i].RateInterval != nil && timespans[i].RateInterval.Weight < interval.Weight {
 				continue // if the timespan has an interval than it already has a heigher weight
 			}
-			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != MINUTES)
+			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != utils.VOICE)
 			if newTs != nil {
 				newTs.setRatingInfo(rp)
 				// insert the new timespan
@@ -398,7 +397,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		cd.DurationIndex = cd.TimeEnd.Sub(cd.TimeStart)
 	}
 	if cd.TOR == "" {
-		cd.TOR = MINUTES
+		cd.TOR = utils.VOICE
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
@@ -454,7 +453,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 		origCD.DurationIndex = origCD.TimeEnd.Sub(origCD.TimeStart)
 	}
 	if origCD.TOR == "" {
-		origCD.TOR = MINUTES
+		origCD.TOR = utils.VOICE
 	}
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
@@ -519,7 +518,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		defer accountingStorage.SetAccount(account)
 	}
 	if cd.TOR == "" {
-		cd.TOR = MINUTES
+		cd.TOR = utils.VOICE
 	}
 	//log.Printf("Debit CD: %+v", cd)
 	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)
@@ -749,8 +748,18 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			lcrCD.Category = category
 			lcrCD.Account = supplier
 			lcrCD.Subject = supplier
-			var asrMean, acdMean, tcdMean, accMean, tccMean float64
 			var qosSortParams []string
+			var asrValues sort.Float64Slice
+			var acdValues sort.Float64Slice
+			var tcdValues sort.Float64Slice
+			var accValues sort.Float64Slice
+			var tccValues sort.Float64Slice
+			// track if one value is never calculated
+			asrNeverConsidered := true
+			acdNeverConsidered := true
+			tcdNeverConsidered := true
+			accNeverConsidered := true
+			tccNeverConsidered := true
 			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
 				if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err == nil || rpf != nil {
@@ -764,30 +773,41 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							}
 						}
 					}
-					var asrValues sort.Float64Slice
-					var acdValues sort.Float64Slice
-					var tcdValues sort.Float64Slice
-					var accValues sort.Float64Slice
-					var tccValues sort.Float64Slice
+
 					for _, qId := range cdrStatsQueueIds {
 						statValues := make(map[string]float64)
 						if err := stats.GetValues(qId, &statValues); err != nil {
 							Logger.Warning(fmt.Sprintf("Error getting stats values for queue id %s: %v", qId, err))
 						}
-						if asr, exists := statValues[ASR]; exists && asr > STATS_NA {
-							asrValues = append(asrValues, asr)
+						if asr, exists := statValues[ASR]; exists {
+							if asr > STATS_NA {
+								asrValues = append(asrValues, asr)
+							}
+							asrNeverConsidered = false
 						}
-						if acd, exists := statValues[ACD]; exists && acd > STATS_NA {
-							acdValues = append(acdValues, acd)
+						if acd, exists := statValues[ACD]; exists {
+							if acd > STATS_NA {
+								acdValues = append(acdValues, acd)
+							}
+							acdNeverConsidered = false
 						}
-						if tcd, exists := statValues[TCD]; exists && tcd > STATS_NA {
-							tcdValues = append(tcdValues, tcd)
+						if tcd, exists := statValues[TCD]; exists {
+							if tcd > STATS_NA {
+								tcdValues = append(tcdValues, tcd)
+							}
+							tcdNeverConsidered = false
 						}
-						if acc, exists := statValues[ACC]; exists && acc > STATS_NA {
-							accValues = append(accValues, acc)
+						if acc, exists := statValues[ACC]; exists {
+							if acc > STATS_NA {
+								accValues = append(accValues, acc)
+							}
+							accNeverConsidered = false
 						}
-						if tcc, exists := statValues[TCC]; exists && tcc > STATS_NA {
-							tccValues = append(tccValues, tcc)
+						if tcc, exists := statValues[TCC]; exists {
+							if tcc > STATS_NA {
+								tccValues = append(tccValues, tcc)
+							}
+							tccNeverConsidered = false
 						}
 					}
 					asrValues.Sort()
@@ -795,11 +815,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					tcdValues.Sort()
 					accValues.Sort()
 					tccValues.Sort()
-					asrMean = utils.Avg(asrValues)
-					acdMean = utils.Avg(acdValues)
-					tcdMean = utils.Avg(tcdValues)
-					accMean = utils.Avg(accValues)
-					tccMean = utils.Avg(tccValues)
+
 					//log.Print(asrValues, acdValues)
 					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS {
 						qosSortParams = lcrCost.Entry.GetParams()
@@ -865,8 +881,24 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					Cost:     cc.Cost,
 					Duration: cc.GetDuration(),
 				}
+				qos := make(map[string]float64, 5)
+				if !asrNeverConsidered {
+					qos[ASR] = utils.AvgNegative(asrValues)
+				}
+				if !acdNeverConsidered {
+					qos[ACD] = utils.AvgNegative(acdValues)
+				}
+				if !tcdNeverConsidered {
+					qos[TCD] = utils.AvgNegative(tcdValues)
+				}
+				if !accNeverConsidered {
+					qos[ACC] = utils.AvgNegative(accValues)
+				}
+				if !tccNeverConsidered {
+					qos[TCC] = utils.AvgNegative(tccValues)
+				}
 				if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD}, lcrCost.Entry.Strategy) {
-					supplCost.QOS = map[string]float64{ASR: asrMean, ACD: acdMean, TCD: tcdMean, ACC: accMean, TCC: tccMean}
+					supplCost.QOS = qos
 					supplCost.qosSortParams = qosSortParams
 				}
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, supplCost)

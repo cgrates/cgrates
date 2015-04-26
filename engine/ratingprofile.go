@@ -107,6 +107,20 @@ func (ris RatingInfos) Sort() {
 	sort.Sort(ris)
 }
 
+func (ris RatingInfos) String() string {
+	result := "Rating Infos:\n"
+	for _, ri := range ris {
+		result += fmt.Sprintf("%+v\n", ri)
+		result += "Rate Intervals:\n"
+		for _, interval := range ri.RateIntervals {
+			result += fmt.Sprintf("%+v\n", interval.Timing)
+			result += fmt.Sprintf("%+v\n", interval.Rating)
+			result += fmt.Sprintf("%+v\n", interval.Weight)
+		}
+	}
+	return result
+}
+
 func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
 	for index, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {

@@ -205,12 +205,12 @@ func TestGetAccountAliases(t *testing.T) {
 func GetUB() *Account {
 	uc := &UnitsCounter{
 		Direction:   OUTBOUND,
-		BalanceType: SMS,
+		BalanceType: utils.SMS,
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
 		Id:                   "some_uuid",
-		BalanceType:          CREDIT,
+		BalanceType:          utils.MONETARY,
 		BalanceDirection:     OUTBOUND,
 		ThresholdValue:       100.0,
 		BalanceDestinationId: "NAT",
@@ -222,7 +222,7 @@ func GetUB() *Account {
 	ub := &Account{
 		Id:             "rif",
 		AllowNegative:  true,
-		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{utils.SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}

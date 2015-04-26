@@ -39,18 +39,18 @@ func init() {
 
 func populateDB() {
 	ats := []*Action{
-		&Action{ActionType: "*topup", BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}},
-		&Action{ActionType: "*topup", BalanceType: MINUTES, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationId: "NAT"}},
+		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}},
+		&Action{ActionType: "*topup", BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationId: "NAT"}},
 	}
 	ats1 := []*Action{
-		&Action{ActionType: "*topup", BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 20},
+		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 20},
 		&Action{ActionType: "*reset_account", Weight: 10},
 	}
 	minu := &Account{
 		Id: "*out:vdf:minu",
 		BalanceMap: map[string]BalanceChain{
-			CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 50}},
-			MINUTES + OUTBOUND: BalanceChain{
+			utils.MONETARY + OUTBOUND: BalanceChain{&Balance{Value: 50}},
+			utils.VOICE + OUTBOUND: BalanceChain{
 				&Balance{Value: 200, DestinationId: "NAT", Weight: 10},
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
@@ -58,7 +58,7 @@ func populateDB() {
 	broker := &Account{
 		Id: "*out:vdf:broker",
 		BalanceMap: map[string]BalanceChain{
-			MINUTES + OUTBOUND: BalanceChain{
+			utils.VOICE + OUTBOUND: BalanceChain{
 				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RatingSubject: "rif"},
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
@@ -66,7 +66,7 @@ func populateDB() {
 	luna := &Account{
 		Id: "*out:vdf:luna",
 		BalanceMap: map[string]BalanceChain{
-			CREDIT + OUTBOUND: BalanceChain{
+			utils.MONETARY + OUTBOUND: BalanceChain{
 				&Balance{Value: 0, Weight: 20},
 			}},
 	}
@@ -74,11 +74,11 @@ func populateDB() {
 	minitsboy := &Account{
 		Id: "*out:vdf:minitsboy",
 		BalanceMap: map[string]BalanceChain{
-			MINUTES + OUTBOUND: BalanceChain{
+			utils.VOICE + OUTBOUND: BalanceChain{
 				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RatingSubject: "rif"},
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			},
-			CREDIT + OUTBOUND: BalanceChain{
+			utils.MONETARY + OUTBOUND: BalanceChain{
 				&Balance{Value: 100, Weight: 10},
 			},
 		},
@@ -86,7 +86,7 @@ func populateDB() {
 	max := &Account{
 		Id: "*out:cgrates.org:max",
 		BalanceMap: map[string]BalanceChain{
-			CREDIT + OUTBOUND: BalanceChain{
+			utils.MONETARY + OUTBOUND: BalanceChain{
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
@@ -106,7 +106,7 @@ func populateDB() {
 func TestSplitSpans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, TOR: MINUTES}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, TOR: utils.VOICE}
 
 	cd.LoadRatingPlans()
 	timespans := cd.splitInTimeSpans()
@@ -492,13 +492,13 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 		t.Errorf("Wrong callcost in shared debit: %+v, %v", cc, err)
 	}
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
+	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
 	if len(balanceMap) != 1 || balanceMap[0].Value != 0 {
 		t.Errorf("Wrong shared balance debited: %+v", balanceMap[0])
 	}
 	other, err := accountingStorage.GetAccount("*out:vdf:empty10")
-	if err != nil || other.BalanceMap[CREDIT+OUTBOUND][0].Value != 7.5 {
-		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[CREDIT+OUTBOUND][0])
+	if err != nil || other.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 7.5 {
+		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MONETARY+OUTBOUND][0])
 	}
 }
 
@@ -529,7 +529,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Tenant:      "vdf",
 		Subject:     "broker",
 		Destination: "0723",
-		TOR:         MINUTES,
+		TOR:         utils.VOICE,
 	}
 	result, err := cd.GetMaxSessionDuration()
 	if result != time.Minute || err != nil {
@@ -550,7 +550,7 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		Account:       "minu",
 		Destination:   "0723",
 		DurationIndex: t2.Sub(t1),
-		TOR:           MINUTES,
+		TOR:           utils.VOICE,
 	}
 	initial := cd.Clone()
 	_, err := cd.GetMaxSessionDuration()
@@ -670,7 +670,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 	}
 	cc, err := cd.MaxDebit()
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
+	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from share and normal error: %+v, %v", cc, err)
 	}
@@ -702,7 +702,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
 	}
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
+	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
 	if len(balanceMap) != 2 || balanceMap[0].Value != 0 || balanceMap[1].Value != -2.5 {
 		t.Errorf("Error debiting from empty share: %+v", balanceMap)
 	}
@@ -781,8 +781,8 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 		LoopIndex:     0,
 		DurationIndex: 0}
 	cd1.MaxDebit()
-	if cd1.account.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 {
-		t.Error("Error using minutes: ", cd1.account.BalanceMap[MINUTES+OUTBOUND][0].Value)
+	if cd1.account.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 20 {
+		t.Error("Error using minutes: ", cd1.account.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
 	}
 }
 
@@ -795,7 +795,7 @@ func TestCDGetCostANY(t *testing.T) {
 		Destination: utils.ANY,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
-		TOR:         DATA,
+		TOR:         utils.DATA,
 	}
 	cc, err := cd1.GetCost()
 	if err != nil || cc.Cost != 60 {
@@ -812,7 +812,7 @@ func TestCDSplitInDataSlots(t *testing.T) {
 		Destination:   utils.ANY,
 		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		TOR:           DATA,
+		TOR:           utils.DATA,
 		DurationIndex: 65 * time.Second,
 	}
 	cd.LoadRatingPlans()
@@ -832,7 +832,7 @@ func TestCDDataGetCost(t *testing.T) {
 		Destination: utils.ANY,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		TOR:         DATA,
+		TOR:         utils.DATA,
 	}
 	cc, err := cd.GetCost()
 	if err != nil || cc.Cost != 65 {

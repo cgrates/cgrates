@@ -33,11 +33,6 @@ const (
 	// Direction type
 	INBOUND  = "*in"
 	OUTBOUND = "*out"
-	// Balance types
-	CREDIT  = utils.MONETARY
-	SMS     = utils.SMS
-	DATA    = utils.DATA
-	MINUTES = utils.VOICE
 	// action trigger threshold types
 	TRIGGER_MIN_COUNTER = "*min_counter"
 	TRIGGER_MAX_COUNTER = "*max_counter"
@@ -60,14 +55,14 @@ type Account struct {
 
 // User's available minutes for the specified destination
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
-	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, ub.BalanceMap[CREDIT+cd.Direction], "")
+	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, ub.BalanceMap[utils.MONETARY+cd.Direction], "")
 	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, ub.BalanceMap[cd.TOR+cd.Direction], "")
 	// gather all balances from shared groups
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
 		if cb.SharedGroup != "" {
 			if sharedGroup, _ := accountingStorage.GetSharedGroup(cb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, CREDIT+cd.Direction, ub)
+				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, utils.MONETARY+cd.Direction, ub)
 				sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
 				extendedCreditBalances = append(extendedCreditBalances, sgb...)
 			}
@@ -212,7 +207,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, balanceT
 
 func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.TOR+cd.Direction)
-	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, CREDIT+cd.Direction)
+	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY+cd.Direction)
 	//log.Print(usefulMoneyBalances, usefulUnitBalances)
 	//log.Print("STARTCD: ", cd)
 	var leftCC *CallCost
@@ -334,7 +329,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				increment.BalanceInfo.AccountId = ub.Id
 				increment.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: CREDIT, Direction: leftCC.Direction, Balance: &Balance{Value: cost, DestinationId: leftCC.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: leftCC.Direction, Balance: &Balance{Value: cost, DestinationId: leftCC.Destination}})
 				}
 			}
 		}
@@ -351,7 +346,7 @@ COMMIT:
 }
 
 func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
-	for _, balance := range ub.BalanceMap[CREDIT+direction] {
+	for _, balance := range ub.BalanceMap[utils.MONETARY+direction] {
 		if balance.IsDefault() {
 			return balance
 		}
@@ -364,7 +359,7 @@ func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	ub.BalanceMap[CREDIT+direction] = append(ub.BalanceMap[CREDIT+direction], defaultBalance)
+	ub.BalanceMap[utils.MONETARY+direction] = append(ub.BalanceMap[utils.MONETARY+direction], defaultBalance)
 	return defaultBalance
 }
 
@@ -381,12 +376,12 @@ func (ub *Account) refundIncrement(increment *Increment, direction, unitType str
 	}
 	// check money too
 	if increment.BalanceInfo.MoneyBalanceUuid != "" {
-		if balance = ub.BalanceMap[CREDIT+direction].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
+		if balance = ub.BalanceMap[utils.MONETARY+direction].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
 			return
 		}
 		balance.Value += increment.Cost
 		if count {
-			ub.countUnits(&Action{BalanceType: CREDIT, Direction: direction, Balance: &Balance{Value: -increment.Cost}})
+			ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: direction, Balance: &Balance{Value: -increment.Cost}})
 		}
 	}
 }
@@ -568,7 +563,7 @@ func (ub *Account) GetSharedGroups() (groups []string) {
 
 func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]string, error) {
 	var balances []*Balance
-	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, account.BalanceMap[CREDIT+cd.Direction], "")...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, account.BalanceMap[utils.MONETARY+cd.Direction], "")...)
 	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, account.BalanceMap[cd.TOR+cd.Direction], "")...)
 	// gather all shared group ids
 	var sharedGroupIds []string
@@ -622,7 +617,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 				b.SubstractAmount(connectFee)
 				// the conect fee is not refundable!
 				if count {
-					acc.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
+					acc.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
 				}
 				connectFeePaid = true
 				break
@@ -634,7 +629,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 			acc.GetDefaultMoneyBalance(cc.Direction).Value -= connectFee
 			// the conect fee is not refundable!
 			if count {
-				acc.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
+				acc.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
 			}
 		}
 	}

@@ -20,7 +20,7 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
@@ -50,7 +50,7 @@ func (self *CmdAddBalance) RpcMethod() string {
 
 func (self *CmdAddBalance) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &v1.AttrAddBalance{BalanceType: engine.CREDIT, Overwrite: false}
+		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MONETARY, Overwrite: false}
 	}
 	return self.rpcParams
 }
