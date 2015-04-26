@@ -141,6 +141,14 @@ func ParseRSRFieldsFromSlice(flds []string) (RSRFields, error) {
 
 }
 
+func ParseRSRFieldsMustCompile(fldsStr, sep string) RSRFields {
+	if flds, err := ParseRSRFields(fldsStr, sep); err != nil {
+		return nil
+	} else {
+		return flds
+	}
+}
+
 type RSRFields []*RSRField
 
 // Return first Id of the rsrFields, used in cdre

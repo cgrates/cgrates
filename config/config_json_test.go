@@ -473,11 +473,13 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 			Cdr_source_id: utils.StringPointer("csv1"),
 		},
 		"CDRC-CSV2": &CdrcJsonCfg{
-			Enabled:       utils.BoolPointer(true),
-			Cdr_in_dir:    utils.StringPointer("/tmp/cgrates/cdrc2/in"),
-			Cdr_out_dir:   utils.StringPointer("/tmp/cgrates/cdrc2/out"),
-			Cdr_source_id: utils.StringPointer("csv2"),
-			Cdr_fields:    &cdrFields,
+			Enabled:                    utils.BoolPointer(true),
+			Data_usage_multiply_factor: utils.Float64Pointer(0.000976563),
+			Run_delay:                  utils.IntPointer(1),
+			Cdr_in_dir:                 utils.StringPointer("/tmp/cgrates/cdrc2/in"),
+			Cdr_out_dir:                utils.StringPointer("/tmp/cgrates/cdrc2/out"),
+			Cdr_source_id:              utils.StringPointer("csv2"),
+			Cdr_fields:                 &cdrFields,
 		},
 	}
 	if cfg, err := cgrJsonCfg.CdrcJsonCfg(); err != nil {
