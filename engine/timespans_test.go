@@ -1597,3 +1597,87 @@ func TestTSMultipleCompressDecompress(t *testing.T) {
 		t.Error("Error decompressing timespans: ", tss[0].Increments)
 	}
 }
+
+func TestTSBetterIntervalZero(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
+		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}},
+	}
+
+	interval := &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}}
+	if !ts.hasBetterRateIntervalThan(interval) {
+		t.Error("Wrong better rate interval!")
+	}
+}
+
+func TestTSBetterIntervalBefore(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
+		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}},
+	}
+
+	interval := &RateInterval{Timing: &RITiming{StartTime: "07:00:00"}}
+	if !ts.hasBetterRateIntervalThan(interval) {
+		t.Error("Wrong better rate interval!")
+	}
+}
+
+func TestTSBetterIntervalEqual(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
+		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}},
+	}
+
+	interval := &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}}
+	if !ts.hasBetterRateIntervalThan(interval) {
+		t.Error("Wrong better rate interval!")
+	}
+}
+
+func TestTSBetterIntervalAfter(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
+		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}},
+	}
+
+	interval := &RateInterval{Timing: &RITiming{StartTime: "13:00:00"}}
+	if !ts.hasBetterRateIntervalThan(interval) {
+		t.Error("Wrong better rate interval!")
+	}
+}
+
+func TestTSBetterIntervalBetter(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
+		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}},
+	}
+
+	interval := &RateInterval{Timing: &RITiming{StartTime: "08:00:00"}}
+	if ts.hasBetterRateIntervalThan(interval) {
+		t.Error("Wrong better rate interval!")
+	}
+}
+
+func TestTSBetterIntervalBetterHour(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
+		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}},
+	}
+
+	interval := &RateInterval{Timing: &RITiming{StartTime: "06:00:00"}}
+	if ts.hasBetterRateIntervalThan(interval) {
+		t.Error("Wrong better rate interval!")
+	}
+}
+
+func TestTSBetterIntervalAgainAfter(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2015, 4, 27, 8, 0, 0, 0, time.UTC),
+		RateInterval: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}},
+	}
+
+	interval := &RateInterval{Timing: &RITiming{StartTime: "13:00:00"}}
+	if !ts.hasBetterRateIntervalThan(interval) {
+		t.Error("Wrong better rate interval!")
+	}
+}

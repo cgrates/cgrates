@@ -331,8 +331,9 @@ The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSpan) {
 	// if the span is not in interval return nil
+	//log.Printf("Checking: %+v (%v,%v)", i.Timing, ts.TimeStart, ts.TimeEnd)
 	if !(i.Contains(ts.TimeStart, false) || i.Contains(ts.TimeEnd, true)) {
-		//Logger.Debug("Not in interval")
+		//log.Print("Not in interval")
 		return
 	}
 	//Logger.Debug(fmt.Sprintf("TS: %+v", ts))
@@ -374,7 +375,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 	}
 	// if only the start time is in the interval split the interval to the right
 	if i.Contains(ts.TimeStart, false) {
-		//Logger.Debug("Start in interval")
+		//log.Print("Start in interval")
 		splitTime := i.getRightMargin(ts.TimeStart)
 
 		ts.SetRateInterval(i)
@@ -394,7 +395,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 	}
 	// if only the end time is in the interval split the interval to the left
 	if i.Contains(ts.TimeEnd, true) {
-		//Logger.Debug("End in interval")
+		//log.Print("End in interval")
 		//tmpTime := time.Date(ts.TimeStart.)
 		splitTime := i.getLeftMargin(ts.TimeEnd)
 		splitTime = utils.CopyHour(splitTime, ts.TimeStart)
@@ -537,4 +538,30 @@ func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
 func (ts *TimeSpan) AddIncrement(inc *Increment) {
 	ts.Increments = append(ts.Increments, inc)
 	ts.TimeEnd.Add(inc.Duration)
+}
+
+func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
+	if ts.RateInterval == nil {
+		return false
+	}
+	//log.Print("StartTime: ", ts.TimeStart)
+	//log.Printf("OWN: %+v", ts.RateInterval.Timing)
+	//log.Printf("OTHER: %+v", interval.Timing)
+	if ts.RateInterval != nil &&
+		ts.RateInterval.Weight < interval.Weight {
+		return true
+	}
+	// check interval is closer
+	ownLeftMargin := ts.RateInterval.getLeftMargin(ts.TimeStart)
+	otherLeftMargin := interval.getLeftMargin(ts.TimeStart)
+	ownDistance := ts.TimeStart.Sub(ownLeftMargin)
+	otherDistance := ts.TimeStart.Sub(otherLeftMargin)
+	endOtherDistance := ts.TimeEnd.Sub(otherLeftMargin)
+	if otherDistance < 0 && endOtherDistance < 0 {
+		return true
+	}
+	if ownDistance <= otherDistance {
+		return true
+	}
+	return false
 }

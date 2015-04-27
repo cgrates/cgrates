@@ -302,7 +302,6 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	if len(cd.RatingInfos) == 0 {
 		return
 	}
-
 	firstSpan.setRatingInfo(cd.RatingInfos[0])
 	if cd.TOR == utils.VOICE {
 		// split on rating plans
@@ -335,11 +334,14 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		//timespans[i].RatingPlan = nil
 		rp.RateIntervals.Sort()
 		for _, interval := range rp.RateIntervals {
-			//log.Printf("\tINTERVAL: %+v %v", interval, len(rp.RateIntervals))
-			if timespans[i].RateInterval != nil && timespans[i].RateInterval.Weight < interval.Weight {
+			//log.Printf("\tINTERVAL: %+v", interval.Timing)
+			if timespans[i].hasBetterRateIntervalThan(interval) {
+				//log.Print("continue")
 				continue // if the timespan has an interval than it already has a heigher weight
 			}
 			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != utils.VOICE)
+			//utils.PrintFull(timespans[i])
+			//utils.PrintFull(newTs)
 			if newTs != nil {
 				newTs.setRatingInfo(rp)
 				// insert the new timespan
@@ -347,7 +349,9 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				timespans = append(timespans, nil)
 				copy(timespans[index+1:], timespans[index:])
 				timespans[index] = newTs
-				break
+				if timespans[i].RateInterval != nil {
+					break
+				}
 			}
 		}
 	}
