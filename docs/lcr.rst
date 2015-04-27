@@ -29,7 +29,7 @@ Strategy indicates supplier selection algorithm and StrategyParams will be speci
 
 \*qos_with_threshold (filter)
   The system will reject the suppliers that have out of bounds average success ratio or average call duration.
-  StrategyParams: min_asr;max_asr;min_acd;max_acd 
+  StrategyParams: min_asr;max_asr;min_acd;max_acd;min_tcd;max_tcd;min_acc;max_acc;min_tcc;max_tcc
 
 \*qos (sorting)
   The system will sort by metrics in the order of appearance.
@@ -58,7 +58,7 @@ Next the system will find out the most recent LCR entry that applies to this cal
 
 The LCR entry is processed according to it's strategy. For static strategy the cost is calculated for each supplier found in the parameters and the suppliers are listed as they are found.
 
-For the QOS strategies the suppliers are searched using call descriptor parameters (direction, tenant, category, account, subject), than the cdrstats module is queried for the QOS values and the suppliers are filtered or sorted according to the StrategyParameters field.
+For the QOS strategies the suppliers are searched using call descriptor parameters (direction, tenant, category, account, subject), than the cdrstats module is queried for the QOS values and the suppliers are filtered or sorted according to the StrategyParameters field. The suppliers that have the QOS parameters in the stats queues but did not get the chance to process any calls are favored in the QOS sorting algorithm. If a certain QOS metric is missing from the supplier queues than the metric is ignored and the sorting or filtering is done using the next metrics that are considered.
 
 For the lowest/highest cost strategies the matched suppliers are sorted ascending/descending on cost.
 
