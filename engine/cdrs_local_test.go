@@ -40,11 +40,13 @@ func TestCdrsInitConfig(t *testing.T) {
 		return
 	}
 	var err error
-	cdrsMasterCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsreplicationmaster")
+	cdrsMasterCfgPath = path.Join(
+		*dataDir, "conf", "samples", "cdrsreplicationmaster")
 	if cdrsMasterCfg, err = config.NewCGRConfigFromFolder(cdrsMasterCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
-	cdrsSlaveCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsreplicationslave")
+	cdrsSlaveCfgPath = path.Join(
+		*dataDir, "conf", "samples", "cdrsreplicationslave")
 	if cdrsSlaveCfg, err = config.NewCGRConfigFromFolder(cdrsSlaveCfgPath); err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
@@ -86,16 +88,38 @@ func TestCdrsHttpJsonRpcCdrReplication(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cdrsHttpJsonRpc, err := rpcclient.NewRpcClient("tcp", cdrsMasterCfg.CDRSCdrReplication[0].Server, 3, cdrsMasterCfg.CDRSCdrReplication[0].Transport[1:])
+	cdrsHttpJsonRpc, err := rpcclient.NewRpcClient(
+		"tcp",
+		cdrsMasterCfg.CDRSCdrReplication[0].Server,
+		3,
+		cdrsMasterCfg.CDRSCdrReplication[0].Transport[1:])
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	testCdr1 := &StoredCdr{CgrId: utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, AccId: "httpjsonrpc1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_PSEUDOPREPAID,
-		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201, Rated: true}
+	testCdr1 := &StoredCdr{
+		CgrId: utils.Sha1(
+			"httpjsonrpc1",
+			time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		TOR:         utils.VOICE,
+		AccId:       "httpjsonrpc1",
+		CdrHost:     "192.168.1.1",
+		CdrSource:   "UNKNOWN",
+		ReqType:     utils.META_PSEUDOPREPAID,
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1001",
+		Subject:     "1001",
+		Destination: "1002",
+		SetupTime:   time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
+		AnswerTime:  time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage:       time.Duration(10) * time.Second,
+		ExtraFields: map[string]string{
+			"field_extr1": "val_extr1",
+			"fieldextr2":  "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID,
+		Cost:           1.201,
+		Rated:          true}
 	var reply string
 	if err := cdrsHttpJsonRpc.Call("CdrsV2.ProcessCdr", testCdr1, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())

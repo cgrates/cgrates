@@ -199,10 +199,13 @@ func (self *CdrServer) getCostsFromDB(cgrid, runId string) (cc *CallCost, err er
 
 // Retrive the cost from engine
 func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error) {
-	if storedCdr.Usage == time.Duration(0) { // failed call,  nil cost
-		return nil, nil // No costs present, better than empty call cost since could lead us to 0 costs
-	}
 	cc := new(CallCost)
+
+	if storedCdr.Usage == time.Duration(0) {
+		// Missed call. We return default cost(0). Issue #62
+		return cc, nil
+	}
+
 	var err error
 	cd := CallDescriptor{
 		TOR:           storedCdr.TOR,
