@@ -402,6 +402,7 @@ type Connector interface {
 	GetDerivedMaxSessionTime(StoredCdr, *float64) error
 	GetSessionRuns(StoredCdr, *[]*SessionRun) error
 	ProcessCdr(*StoredCdr, *string) error
+	GetLCR(*CallDescriptor, *LCRCost) error
 }
 
 type RPCClientConnector struct {
@@ -442,4 +443,8 @@ func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedCharger
 
 func (rcc *RPCClientConnector) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	return rcc.Client.Call("CDRSV1.ProcessCdr", cdr, reply)
+}
+
+func (rcc *RPCClientConnector) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
+	return rcc.Client.Call("Responder.GetLCR", cd, reply)
 }

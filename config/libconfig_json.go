@@ -161,6 +161,7 @@ type SmFsJsonCfg struct {
 	Rater                  *string
 	Cdrs                   *string
 	Reconnects             *int
+	Compute_lcr            *bool
 	Cdr_extra_fields       *[]string
 	Debit_interval         *string
 	Min_call_duration      *string

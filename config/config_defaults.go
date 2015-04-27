@@ -199,6 +199,7 @@ const CGRATES_CFG_JSON = `
 	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
+	"compute_lcr": false,			// when enabled it will compute and set cgr_lcr channel variable with least cost route ids
 	"cdr_extra_fields": [],			// extra fields to store in CDRs in case of processing them
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this

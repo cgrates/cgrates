@@ -145,6 +145,41 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string, maxDur time.
 	return nil
 }
 
+// Queries LCR and sets the cgr_lcr channel variable
+func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
+	var lcrCost engine.LCRCost
+	startTime, err := ev.GetSetupTime(utils.META_DEFAULT)
+	if err != nil {
+		return err
+	}
+	cd := &engine.CallDescriptor{
+		Direction:   ev.GetDirection(utils.META_DEFAULT),
+		Tenant:      ev.GetTenant(utils.META_DEFAULT),
+		Category:    ev.GetCategory(utils.META_DEFAULT),
+		Subject:     ev.GetSubject(utils.META_DEFAULT),
+		Account:     ev.GetAccount(utils.META_DEFAULT),
+		Destination: ev.GetDestination(utils.META_DEFAULT),
+		TimeStart:   startTime,
+		TimeEnd:     startTime.Add(config.CgrConfig().MaxCallDuration),
+	}
+	if err := sm.rater.GetLCR(cd, &lcrCost); err != nil {
+		return err
+	}
+	supps := []string{}
+	for _, supplCost := range lcrCost.SupplierCosts {
+		if dtcs, err := utils.NewDTCSFromRPKey(supplCost.Supplier); err != nil {
+			return err
+		} else if len(dtcs.Subject) != 0 {
+			supps = append(supps, dtcs.Subject)
+		}
+	}
+	fsArray := SliceAsFsArray(supps)
+	if _, err = sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", ev.GetUUID(), fsArray)); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Sends the transfer command to unpark the call to freeswitch
 func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string) {
 	_, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
@@ -168,6 +203,13 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 		return
 	}
 	sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
+	if sm.cfg.ComputeLcr {
+		if err := sm.setCgrLcr(ev, connId); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not set LCR for %s, error: %s", ev.GetUUID(), err.Error()))
+			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+			return
+		}
+	}
 	sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
@@ -182,7 +224,9 @@ func (sm *FSSessionManager) onChannelAnswer(ev engine.Event, connId string) {
 }
 
 func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
-	go sm.ProcessCdr(ev.AsStoredCdr())
+	if sm.cdrs != nil {
+		go sm.ProcessCdr(ev.AsStoredCdr())
+	}
 	var s *Session
 	for i := 0; i < 2; i++ { // Protect us against concurrency, wait a couple of seconds for the answer to be populated before we process hangup
 		s = sm.GetSession(ev.GetUUID())
@@ -201,12 +245,9 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 }
 
 func (sm *FSSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
-	if sm.cdrs != nil {
-		var reply string
-		if err := sm.cdrs.ProcessCdr(storedCdr, &reply); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
-		}
-
+	var reply string
+	if err := sm.cdrs.ProcessCdr(storedCdr, &reply); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
 	}
 	return nil
 }

@@ -60,6 +60,7 @@ type SmFsConfig struct {
 	Rater               string
 	Cdrs                string
 	Reconnects          int
+	ComputeLcr          bool
 	CdrExtraFields      []*utils.RSRField
 	DebitInterval       time.Duration
 	MinCallDuration     time.Duration
@@ -87,6 +88,9 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	}
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects
+	}
+	if jsnCfg.Compute_lcr != nil {
+		self.ComputeLcr = *jsnCfg.Compute_lcr
 	}
 	if jsnCfg.Cdr_extra_fields != nil {
 		if self.CdrExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCfg.Cdr_extra_fields); err != nil {

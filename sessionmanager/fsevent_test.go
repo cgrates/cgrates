@@ -649,3 +649,14 @@ func TestFsEvGetExtraFields(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedExtraFields, extraFields)
 	}
 }
+
+func TestSliceAsFsArray(t *testing.T) {
+	items := []string{}
+	if fsArray := SliceAsFsArray(items); fsArray != "" {
+		t.Error(fsArray)
+	}
+	items = []string{"item1", "item2", "item3"}
+	if fsArray := SliceAsFsArray(items); fsArray != "ARRAY::item1|:item2|:item3" {
+		t.Error(fsArray)
+	}
+}

@@ -327,6 +327,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 		Rater:                  utils.StringPointer("internal"),
 		Cdrs:                   utils.StringPointer(""),
 		Reconnects:             utils.IntPointer(5),
+		Compute_lcr:            utils.BoolPointer(false),
 		Cdr_extra_fields:       utils.StringSlicePointer([]string{}),
 		Debit_interval:         utils.StringPointer("10s"),
 		Min_call_duration:      utils.StringPointer("0s"),

@@ -326,3 +326,19 @@ func (fsev FSEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.Supplier = fsev.GetSupplier(utils.META_DEFAULT)
 	return storCdr
 }
+
+// Converts a slice of strings into a FS array string
+func SliceAsFsArray(slc []string) string {
+	arry := ""
+	if len(slc) == 0 {
+		return arry
+	}
+	for idx, itm := range slc {
+		if idx == 0 {
+			arry += "ARRAY::" + itm
+		} else {
+			arry += "|:" + itm
+		}
+	}
+	return arry
+}

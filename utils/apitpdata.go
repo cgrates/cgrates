@@ -873,6 +873,18 @@ type DirectionTenantAccount struct {
 	Direction, Tenant, Account string
 }
 
+func NewDTCSFromRPKey(rpKey string) (*DirectionTenantCategorySubject, error) {
+	rpSplt := strings.Split(rpKey, CONCATENATED_KEY_SEP)
+	if len(rpSplt) != 4 {
+		return nil, fmt.Errorf("Unsupported format for DirectionTenantCategorySubject: %s", rpKey)
+	}
+	return &DirectionTenantCategorySubject{rpSplt[0], rpSplt[1], rpSplt[2], rpSplt[3]}, nil
+}
+
+type DirectionTenantCategorySubject struct {
+	Direction, Tenant, Category, Subject string
+}
+
 type AttrCDRStatsReloadQueues struct {
 	StatsQueueIds []string
 }
