@@ -547,19 +547,22 @@ func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
 	//log.Print("StartTime: ", ts.TimeStart)
 	//log.Printf("OWN: %+v", ts.RateInterval.Timing)
 	//log.Printf("OTHER: %+v", interval.Timing)
+	// the lower the weight the better
 	if ts.RateInterval != nil &&
 		ts.RateInterval.Weight < interval.Weight {
 		return true
 	}
-	// check interval is closer
+	// check interval is closer than the new one
 	ownLeftMargin := ts.RateInterval.getLeftMargin(ts.TimeStart)
 	otherLeftMargin := interval.getLeftMargin(ts.TimeStart)
 	ownDistance := ts.TimeStart.Sub(ownLeftMargin)
 	otherDistance := ts.TimeStart.Sub(otherLeftMargin)
 	endOtherDistance := ts.TimeEnd.Sub(otherLeftMargin)
+	// if thr distance is negative relative to both ends it's not usable
 	if otherDistance < 0 && endOtherDistance < 0 {
 		return true
 	}
+	// if own interval is closer than its better
 	if ownDistance <= otherDistance {
 		return true
 	}
