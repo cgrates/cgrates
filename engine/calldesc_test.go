@@ -116,6 +116,87 @@ func TestSplitSpans(t *testing.T) {
 	}
 }
 
+func TestSplitSpansWeekend(t *testing.T) {
+	cd := &CallDescriptor{Direction: OUTBOUND,
+		Category:        "postpaid",
+		TOR:             utils.VOICE,
+		Tenant:          "foehn",
+		Subject:         "foehn",
+		Account:         "foehn",
+		Destination:     "0034678096720",
+		TimeStart:       time.Date(2015, 4, 24, 7, 59, 4, 0, time.UTC),
+		TimeEnd:         time.Date(2015, 4, 24, 8, 2, 0, 0, time.UTC),
+		LoopIndex:       0,
+		DurationIndex:   176 * time.Second,
+		FallbackSubject: "",
+		RatingInfos: RatingInfos{
+			&RatingInfo{
+				MatchedSubject: "*out:foehn:postpaid:foehn",
+				MatchedPrefix:  "0034678",
+				MatchedDestId:  "SPN_MOB",
+				ActivationTime: time.Date(2015, 4, 23, 0, 0, 0, 0, time.UTC),
+				RateIntervals: []*RateInterval{
+					&RateInterval{
+						Timing: &RITiming{
+							WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+							StartTime: "08:00:00",
+						},
+						Rating: &RIRate{
+							ConnectFee:       0,
+							RoundingMethod:   "*up",
+							RoundingDecimals: 6,
+							Rates: RateGroups{
+								&Rate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+							},
+						},
+					},
+					&RateInterval{
+						Timing: &RITiming{
+							WeekDays:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+							StartTime: "00:00:00",
+						},
+						Rating: &RIRate{
+							ConnectFee:       0,
+							RoundingMethod:   "*up",
+							RoundingDecimals: 6,
+							Rates: RateGroups{
+								&Rate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+							},
+						},
+					},
+					&RateInterval{
+						Timing: &RITiming{
+							WeekDays:  []time.Weekday{time.Saturday, time.Sunday},
+							StartTime: "00:00:00",
+						},
+						Rating: &RIRate{
+							ConnectFee:       0,
+							RoundingMethod:   "*up",
+							RoundingDecimals: 6,
+							Rates: RateGroups{
+								&Rate{Value: 1, RateIncrement: 1 * time.Second, RateUnit: 1 * time.Second},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	//log.Print("=============================")
+	timespans := cd.splitInTimeSpans()
+	if len(timespans) != 2 {
+		t.Log(cd.RatingInfos)
+		t.Error("Wrong number of timespans: ", len(timespans))
+	}
+	if timespans[0].RateInterval == nil ||
+		timespans[0].RateInterval.Timing.StartTime != "00:00:00" ||
+		timespans[1].RateInterval == nil ||
+		timespans[1].RateInterval.Timing.StartTime != "08:00:00" {
+		t.Errorf("Error setting rateinterval: %+v %+v", timespans[0].RateInterval.Timing.StartTime, timespans[1].RateInterval.Timing.StartTime)
+	}
+}
+
 func TestSplitSpansRoundToIncrements(t *testing.T) {
 	t1 := time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC)

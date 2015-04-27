@@ -373,3 +373,8 @@ func ReflectFuncLocation(handler interface{}) (file string, line int) {
 	entry := f.Entry()
 	return f.FileLine(entry)
 }
+
+func PrintFull(v interface{}) {
+	b, _ := json.MarshalIndent(v, "", " ")
+	log.Print(string(b))
+}
