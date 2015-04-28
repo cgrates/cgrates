@@ -40,8 +40,8 @@ var METRIC_TRIGGER_MAP = map[string]string{
 	"*max_tcd": TCD,
 	"*min_acc": ACC,
 	"*max_acc": ACC,
-	"*min_tcc": ACC,
-	"*max_tcc": ACC,
+	"*min_tcc": TCC,
+	"*max_tcc": TCC,
 }
 
 // Simplified cdr structure containing only the necessary info
