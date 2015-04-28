@@ -23,7 +23,9 @@ import (
 	"errors"
 	"fmt"
 	"net/smtp"
+	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -65,7 +67,7 @@ const (
 	CALL_URL_ASYNC  = "*call_url_async"
 	MAIL_ASYNC      = "*mail_async"
 	UNLIMITED       = "*unlimited"
-	CDR_LOG         = "*cdr_log"
+	CDRLOG          = "*cdrlog"
 )
 
 type actionTypeFunc func(*Account, *StatsQueueTriggered, *Action, Actions) error
@@ -74,7 +76,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	switch typ {
 	case LOG:
 		return logAction, true
-	case CDR_LOG:
+	case CDRLOG:
 		return cdrLogAction, true
 	case RESET_TRIGGERS:
 		return resetTriggersAction, true
@@ -126,11 +128,18 @@ func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (er
 	return
 }
 
-func cdrLogAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-	defaultTemplate := map[string]*utils.RSRField{}
+func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+	tor, _ := utils.NewRSRField("^tor_test")
+	cdrhost, _ := utils.NewRSRField("^127.0.0.1")
+	defaultTemplate := map[string]*utils.RSRField{
+		"TOR":     tor,
+		"CdrHost": cdrhost,
+	}
 	template := make(map[string]string)
+
+	// overwrite default template
 	if a.ExtraParameters != "" {
-		if err = json.Unmarshal(a.ExtraParameters, &template); err != nil {
+		if err = json.Unmarshal([]byte(a.ExtraParameters), &template); err != nil {
 			return
 		}
 		for field, rsr := range template {
@@ -141,11 +150,35 @@ func cdrLogAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 			}
 		}
 	}
-	for _, action := range acs {
-		if action.ActionType == DEBIT {
 
+	// set sored cdr values
+	var cdrs []*StoredCdr
+	for _, action := range acs {
+		if action.ActionType == DEBIT || action.ActionType == DEBIT_RESET {
+			cdr := &StoredCdr{CdrSource: CDRLOG, SetupTime: time.Now(), AnswerTime: time.Now(), AccId: utils.GenUUID()}
+			cdr.CgrId = utils.Sha1(cdr.AccId, cdr.SetupTime.String())
+			elem := reflect.ValueOf(cdr).Elem()
+			for key, rsr := range defaultTemplate {
+				field := elem.FieldByName(key)
+				if field.IsValid() && field.CanSet() {
+					switch field.Kind() {
+					case reflect.Float64:
+						value, err := strconv.ParseFloat(rsr.ParseValue(""), 64)
+						if err != nil {
+							continue
+						}
+						field.SetFloat(value)
+					case reflect.String:
+						field.SetString(rsr.ParseValue(""))
+					}
+				}
+			}
+			cdrs = append(cdrs, cdr)
 		}
 	}
+
+	b, _ := json.Marshal(cdrs)
+	a.ExpirationString = string(b) // testing purpose only
 	return
 }
 

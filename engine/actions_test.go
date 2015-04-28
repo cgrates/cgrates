@@ -23,6 +23,7 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 
+	"encoding/json"
 	"testing"
 	"time"
 )
@@ -1108,6 +1109,50 @@ func TestTopupActionLoaded(t *testing.T) {
 		t.Logf("Initial: %+v", initialUb)
 		t.Logf("After: %+v", afterUb)
 		t.Error("Bad topup before and after: ", initialValue, afterValue)
+	}
+}
+
+func TestActionCdrlogEmpty(t *testing.T) {
+	cdrlog := &Action{
+		ActionType: CDRLOG,
+	}
+	err := cdrLogAction(nil, nil, cdrlog, Actions{
+		&Action{
+			ActionType: DEBIT,
+		},
+	})
+	if err != nil {
+		t.Error("Error performing cdrlog action: ", err)
+	}
+	cdrs := make([]*StoredCdr, 0)
+	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
+	if len(cdrs) != 1 || cdrs[0].TOR != "tor_test" {
+		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
+	}
+}
+
+func TestActionCdrlogWithParams(t *testing.T) {
+	cdrlog := &Action{
+		ActionType:      CDRLOG,
+		ExtraParameters: `{"Account":"^dan","Subject": "^rif","Destination":"^1234","Tor":"~action_tag:s/^at(.)$/0$1/"}`,
+	}
+	err := cdrLogAction(nil, nil, cdrlog, Actions{
+		&Action{
+			ActionType: DEBIT,
+		},
+		&Action{
+			ActionType: DEBIT_RESET,
+		},
+	})
+	if err != nil {
+		t.Error("Error performing cdrlog action: ", err)
+	}
+	cdrs := make([]*StoredCdr, 0)
+	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
+	if len(cdrs) != 2 ||
+		cdrs[0].TOR != "tor_test" ||
+		cdrs[0].Subject != "rif" {
+		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
 	}
 }
 
