@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
@@ -107,5 +109,29 @@ func TestCdrsHttpJsonRpcCdrReplication(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
+	} else {
+		rcvSetupTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].SetupTime)
+		rcvAnswerTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].AnswerTime)
+		fmt.Printf("rcv: %+v, answer: %+v", rcvSetupTime, rcvAnswerTime)
+		rcvUsage, _ := utils.ParseDurationWithSecs(rcvedCdrs[0].Usage)
+		if rcvedCdrs[0].CgrId != testCdr1.CgrId ||
+			rcvedCdrs[0].TOR != testCdr1.TOR ||
+			rcvedCdrs[0].CdrHost != testCdr1.CdrHost ||
+			rcvedCdrs[0].CdrSource != testCdr1.CdrSource ||
+			rcvedCdrs[0].ReqType != testCdr1.ReqType ||
+			rcvedCdrs[0].Direction != testCdr1.Direction ||
+			rcvedCdrs[0].Tenant != testCdr1.Tenant ||
+			rcvedCdrs[0].Category != testCdr1.Category ||
+			rcvedCdrs[0].Account != testCdr1.Account ||
+			rcvedCdrs[0].Subject != testCdr1.Subject ||
+			rcvedCdrs[0].Destination != testCdr1.Destination ||
+			!rcvSetupTime.Equal(testCdr1.SetupTime) ||
+			!rcvAnswerTime.Equal(testCdr1.AnswerTime) ||
+			rcvUsage != testCdr1.Usage ||
+			rcvedCdrs[0].MediationRunId != testCdr1.MediationRunId ||
+			rcvedCdrs[0].Cost != testCdr1.Cost ||
+			!reflect.DeepEqual(rcvedCdrs[0].ExtraFields, testCdr1.ExtraFields) {
+			t.Error("Received: ", rcvedCdrs[0])
+		}
 	}
 }
