@@ -32,15 +32,15 @@ func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/log/cgrates/cdrc/in"][utils.META_DEFAULT]
 	cdrcConfig.CdrFields = append(cdrcConfig.CdrFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.CDRFIELD, CdrFieldId: "supplier", Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
-	cdrc := &Cdrc{CdrFormat: CSV, cdrSourceId: "TEST_CDRC", cdrFields: [][]*config.CfgCdrField{cdrcConfig.CdrFields}}
+	cdrc := &Cdrc{CdrFormat: CSV, cdrSourceIds: []string{"TEST_CDRC"}, cdrFields: [][]*config.CfgCdrField{cdrcConfig.CdrFields}}
 	cdrRow := []string{"firstField", "secondField"}
-	_, err := cdrc.recordToStoredCdr(cdrRow, cdrc.cdrFields[0])
+	_, err := cdrc.recordToStoredCdr(cdrRow, 0)
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
 		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
-	rtCdr, err := cdrc.recordToStoredCdr(cdrRow, cdrc.cdrFields[0])
+	rtCdr, err := cdrc.recordToStoredCdr(cdrRow, 0)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
@@ -71,9 +71,9 @@ func TestRecordForkCdr(t *testing.T) {
 func TestDataMultiplyFactor(t *testing.T) {
 	cdrFields := []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.CDRFIELD, CdrFieldId: "tor", Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
 		&config.CfgCdrField{Tag: "UsageField", Type: utils.CDRFIELD, CdrFieldId: "usage", Value: []*utils.RSRField{&utils.RSRField{Id: "1"}}}}
-	cdrc := &Cdrc{CdrFormat: CSV, cdrSourceId: "TEST_CDRC", cdrFields: [][]*config.CfgCdrField{cdrFields}}
+	cdrc := &Cdrc{CdrFormat: CSV, cdrSourceIds: []string{"TEST_CDRC"}, duMultiplyFactors: []float64{0}, cdrFields: [][]*config.CfgCdrField{cdrFields}}
 	cdrRow := []string{"*data", "1"}
-	rtCdr, err := cdrc.recordToStoredCdr(cdrRow, cdrc.cdrFields[0])
+	rtCdr, err := cdrc.recordToStoredCdr(cdrRow, 0)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
@@ -90,7 +90,7 @@ func TestDataMultiplyFactor(t *testing.T) {
 	if !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
-	cdrc.duMultiplyFactor = 1024
+	cdrc.duMultiplyFactors = []float64{1024}
 	expectedCdr = &engine.StoredCdr{
 		CgrId:       utils.Sha1("", sTime.String()),
 		TOR:         cdrRow[0],
@@ -100,7 +100,7 @@ func TestDataMultiplyFactor(t *testing.T) {
 		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
-	if rtCdr, _ := cdrc.recordToStoredCdr(cdrRow, cdrc.cdrFields[0]); !reflect.DeepEqual(expectedCdr, rtCdr) {
+	if rtCdr, _ := cdrc.recordToStoredCdr(cdrRow, 0); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	cdrRow = []string{"*voice", "1"}
@@ -113,7 +113,7 @@ func TestDataMultiplyFactor(t *testing.T) {
 		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
-	if rtCdr, _ := cdrc.recordToStoredCdr(cdrRow, cdrc.cdrFields[0]); !reflect.DeepEqual(expectedCdr, rtCdr) {
+	if rtCdr, _ := cdrc.recordToStoredCdr(cdrRow, 0); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 }
