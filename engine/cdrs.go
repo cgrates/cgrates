@@ -129,6 +129,9 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) rateStoreStatsReplicate(storedCdr *StoredCdr) (err error) {
+	if storedCdr.ReqType == utils.META_NONE {
+		return nil
+	}
 	cdrs := []*StoredCdr{storedCdr}
 	if self.rater != nil && !storedCdr.Rated { // Rate CDR
 		if cdrs, err = self.deriveAndRateCdr(storedCdr); err != nil {

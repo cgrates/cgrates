@@ -76,7 +76,7 @@ func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
 	}
-	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+	if kamEv.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
 	if kamEv.MissingParameter() {
