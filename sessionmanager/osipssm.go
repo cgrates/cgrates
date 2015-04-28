@@ -162,6 +162,9 @@ func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
 // Process Authorize request from OpenSIPS and communicate back maxdur
 func (osm *OsipsSessionManager) onAuthorize(osipsDagram *osipsdagram.OsipsEvent) {
 	ev, _ := NewOsipsEvent(osipsDagram)
+	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
+	}
 	if ev.MissingParameter() {
 		cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n2\n\n", ev.GetUUID(), utils.ERR_MANDATORY_IE_MISSING)
 		if reply, err := osm.miConn.SendCommand([]byte(cmdNotify)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {

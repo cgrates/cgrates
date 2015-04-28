@@ -49,6 +49,9 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	if err != nil {
 		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
 	}
+	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
+	}
 	if kev.MissingParameter() {
 		if kar, err := kev.AsKamAuthReply(0.0, errors.New(utils.ERR_MANDATORY_IE_MISSING)); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
@@ -73,6 +76,9 @@ func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
 	}
+	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
+	}
 	if kamEv.MissingParameter() {
 		self.DisconnectSession(kamEv, "", utils.ERR_MANDATORY_IE_MISSING)
 		return
@@ -87,6 +93,9 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+	}
+	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
 	}
 	if kev.MissingParameter() {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Mandatory IE missing out of event: %+v", kev))

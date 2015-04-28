@@ -192,6 +192,9 @@ func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string
 }
 
 func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
+	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
+	}
 	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
 	if err := sm.rater.GetDerivedMaxSessionTime(*ev.AsStoredCdr(), &maxCallDuration); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
@@ -214,6 +217,9 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 }
 
 func (sm *FSSessionManager) onChannelAnswer(ev engine.Event, connId string) {
+	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
+	}
 	if ev.MissingParameter() {
 		sm.DisconnectSession(ev, connId, MISSING_PARAMETER)
 	}
@@ -224,6 +230,9 @@ func (sm *FSSessionManager) onChannelAnswer(ev engine.Event, connId string) {
 }
 
 func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
+	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
+	}
 	if sm.cdrs != nil {
 		go sm.ProcessCdr(ev.AsStoredCdr())
 	}
