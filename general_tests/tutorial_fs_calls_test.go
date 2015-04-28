@@ -256,7 +256,7 @@ func TestTutFsCallsGetCosts(t *testing.T) {
 	var cc engine.CallCost
 	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6 {
+	} else if cc.Cost != 0.01 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -274,7 +274,7 @@ func TestTutFsCallsGetCosts(t *testing.T) {
 	}
 	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.85 {
+	} else if cc.Cost != 0.05 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")

@@ -254,7 +254,7 @@ func TestTutKamCallsGetCosts(t *testing.T) {
 	var cc engine.CallCost
 	if err := tutKamCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6 {
+	} else if cc.Cost != 0.01 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -272,7 +272,7 @@ func TestTutKamCallsGetCosts(t *testing.T) {
 	}
 	if err := tutKamCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6209 {
+	} else if cc.Cost != 0.05 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
