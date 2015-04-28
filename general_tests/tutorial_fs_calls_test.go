@@ -256,7 +256,7 @@ func TestTutFsCallsGetCosts(t *testing.T) {
 	var cc engine.CallCost
 	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.3 {
+	} else if cc.Cost != 0.6 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -274,7 +274,7 @@ func TestTutFsCallsGetCosts(t *testing.T) {
 	}
 	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6209 {
+	} else if cc.Cost != 0.85 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -292,7 +292,7 @@ func TestTutFsCallsGetCosts(t *testing.T) {
 	}
 	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.3 {
+	} else if cc.Cost != 1 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -310,7 +310,7 @@ func TestTutFsCallsGetCosts(t *testing.T) {
 	}
 	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.2209 {
+	} else if cc.Cost != 1.3 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -328,7 +328,7 @@ func TestTutFsCallsGetCosts(t *testing.T) {
 	}
 	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.3 {
+	} else if cc.Cost != 1 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -346,7 +346,7 @@ func TestTutFsCallsGetCosts(t *testing.T) {
 	}
 	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.2209 {
+	} else if cc.Cost != 1.3 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 }
