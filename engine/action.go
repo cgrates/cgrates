@@ -65,14 +65,17 @@ const (
 	CALL_URL_ASYNC  = "*call_url_async"
 	MAIL_ASYNC      = "*mail_async"
 	UNLIMITED       = "*unlimited"
+	CDR_LOG         = "*cdr_log"
 )
 
-type actionTypeFunc func(*Account, *StatsQueueTriggered, *Action) error
+type actionTypeFunc func(*Account, *StatsQueueTriggered, *Action, Actions) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	switch typ {
 	case LOG:
 		return logAction, true
+	case CDR_LOG:
+		return cdrLogAction, true
 	case RESET_TRIGGERS:
 		return resetTriggersAction, true
 	case SET_RECURRENT:
@@ -111,7 +114,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	return nil, false
 }
 
-func logAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub != nil {
 		body, _ := json.Marshal(ub)
 		Logger.Info(fmt.Sprintf("Threshold hit, Balance: %s", body))
@@ -123,7 +126,30 @@ func logAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
 	return
 }
 
-func resetTriggersAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func cdrLogAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+	defaultTemplate := map[string]*utils.RSRField{}
+	template := make(map[string]string)
+	if a.ExtraParameters != "" {
+		if err = json.Unmarshal(a.ExtraParameters, &template); err != nil {
+			return
+		}
+		for field, rsr := range template {
+			if rsrField, err := utils.NewRSRField(rsr); err == nil {
+				defaultTemplate[field] = rsrField
+			} else {
+				return err
+			}
+		}
+	}
+	for _, action := range acs {
+		if action.ActionType == DEBIT {
+
+		}
+	}
+	return
+}
+
+func resetTriggersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -131,7 +157,7 @@ func resetTriggersAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err e
 	return
 }
 
-func setRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func setRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -139,7 +165,7 @@ func setRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err er
 	return
 }
 
-func unsetRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func unsetRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -147,7 +173,7 @@ func unsetRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err 
 	return
 }
 
-func allowNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func allowNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -155,7 +181,7 @@ func allowNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err e
 	return
 }
 
-func denyNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func denyNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -163,14 +189,14 @@ func denyNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err er
 	return
 }
 
-func resetAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func resetAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
 	return genericReset(ub)
 }
 
-func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -181,7 +207,7 @@ func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err erro
 	return genericDebit(ub, a, true)
 }
 
-func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -189,7 +215,7 @@ func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
 	return genericDebit(ub, a, false)
 }
 
-func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -199,14 +225,14 @@ func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err erro
 	return genericDebit(ub, a, true)
 }
 
-func debitAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func debitAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
 	return genericDebit(ub, a, false)
 }
 
-func resetCounterAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func resetCounterAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -219,7 +245,7 @@ func resetCounterAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err er
 	return
 }
 
-func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -245,7 +271,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	return
 }
 
-func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -253,7 +279,7 @@ func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err erro
 	return
 }
 
-func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("Nil user balance")
 	}
@@ -270,7 +296,7 @@ func genericReset(ub *Account) error {
 	return nil
 }
 
-func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
+func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	var o interface{}
 	if ub != nil {
 		o = ub
@@ -288,7 +314,7 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action) (err error) {
 }
 
 // Does not block for posts, no error reports
-func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action) error {
+func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	var o interface{}
 	if ub != nil {
 		o = ub
@@ -317,7 +343,7 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action) error {
 }
 
 // Mails the balance hitting the threshold towards predefined list of addresses
-func mailAsync(ub *Account, sq *StatsQueueTriggered, a *Action) error {
+func mailAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	cgrCfg := config.CgrConfig()
 	params := strings.Split(a.ExtraParameters, string(utils.CSV_SEP))
 	if len(params) == 0 {

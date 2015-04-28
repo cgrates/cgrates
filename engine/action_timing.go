@@ -266,7 +266,7 @@ func (at *ActionTiming) Execute() (err error) {
 					return 0, fmt.Errorf("Account %s is disabled", ubId)
 				}
 				//Logger.Info(fmt.Sprintf("Executing %v on %+v", a.ActionType, ub))
-				err = actionFunction(ub, nil, a)
+				err = actionFunction(ub, nil, a, aac)
 				//Logger.Info(fmt.Sprintf("After execute, account: %+v", ub))
 				accountingStorage.SetAccount(ub)
 				return 0, nil
