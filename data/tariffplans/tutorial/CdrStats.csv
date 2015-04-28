@@ -2,6 +2,8 @@
 CDRST1,10,0,ASR,,,,,,,cgrates.org,,,,,,,default,,,,CDRST1_WARN
 CDRST1,,,ACD,,,,,,,,,,,,,,,,,,
 CDRST1,,,ACC,,,,,,,,,,,,,,,,,,
+CDRST1,,,TCD,,,,,,,,,,,,,,,,,,
+CDRST1,,,TCC,,,,,,,,,,,,,,,,,,
 CDRST_1001,10,10m,ASR,,,,,,,cgrates.org,,,1001,,,,default,,,,CDRST1001_WARN
 CDRST_1001,,,ACD,,,,,,,,,,,,,,,,,,
 CDRST_1001,,,ACC,,,,,,,,,,,,,,,,,,
