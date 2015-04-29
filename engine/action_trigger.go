@@ -82,7 +82,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 			return
 		}
 		//go Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
-		err = actionFunction(ub, sq, a)
+		err = actionFunction(ub, sq, a, aac)
 		if err == nil {
 			atLeastOneActionExecuted = true
 		}
