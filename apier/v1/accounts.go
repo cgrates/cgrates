@@ -158,16 +158,8 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 	return nil
 }
 
-type AttrSetAccount struct {
-	Tenant        string
-	Direction     string
-	Account       string
-	ActionPlanId  string
-	AllowNegative bool
-}
-
 // Ads a new account into dataDb. If already defined, returns success.
-func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
+func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}

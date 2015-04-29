@@ -18,13 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import (
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
 	c := &CmdExecuteAction{
 		name:      "action_execute",
 		rpcMethod: "ApierV1.ExecuteAction",
-		rpcParams: &v1.AttrExecuteAction{Direction: "*out"},
+		rpcParams: &utils.AttrExecuteAction{Direction: utils.OUT},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +36,7 @@ func init() {
 type CmdExecuteAction struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrExecuteAction
+	rpcParams *utils.AttrExecuteAction
 	*CommandExecuter
 }
 
@@ -48,7 +50,7 @@ func (self *CmdExecuteAction) RpcMethod() string {
 
 func (self *CmdExecuteAction) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &v1.AttrExecuteAction{Direction: "*out"}
+		self.rpcParams = &utils.AttrExecuteAction{Direction: utils.OUT}
 	}
 	return self.rpcParams
 }

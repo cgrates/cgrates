@@ -957,7 +957,7 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 	reply := ""
 	// Add balance to a previously known account
-	attrs := AttrExecuteAction{Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "PREPAID_10"}
+	attrs := utils.AttrExecuteAction{Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "PREPAID_10"}
 	if err := rater.Call("ApierV1.ExecuteAction", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != "OK" {
@@ -965,7 +965,7 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 	reply2 := ""
 	// Add balance to an account which does n exist
-	attrs = AttrExecuteAction{Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
+	attrs = utils.AttrExecuteAction{Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
 	if err := rater.Call("ApierV1.ExecuteAction", attrs, &reply2); err == nil || reply2 == "OK" {
 		t.Error("Expecting error on ApierV1.ExecuteAction.", err, reply2)
 	}
@@ -976,7 +976,7 @@ func TestApierSetActions(t *testing.T) {
 		return
 	}
 	act1 := &utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}
-	attrs1 := &AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{act1}}
+	attrs1 := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{act1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err != nil {
 		t.Error("Got error on ApierV1.SetActions: ", err.Error())
@@ -1093,14 +1093,14 @@ func TestApierSetAccount(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", ActionPlanId: "ATMS_1"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", ActionPlanId: "ATMS_1"}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	reply2 := ""
-	attrs2 := new(AttrSetAccount)
+	attrs2 := new(utils.AttrSetAccount)
 	*attrs2 = *attrs
 	attrs2.ActionPlanId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
 	// Add account with actions timing which does not exist
@@ -1193,7 +1193,7 @@ func TestApierTriggersExecute(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8"}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {

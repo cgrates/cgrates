@@ -114,6 +114,8 @@ type CdrStorage interface {
 	Storage
 	SetCdr(*StoredCdr) error
 	SetRatedCdr(*StoredCdr) error
+	LogCallCost(cgrid, source, runid string, cc *CallCost) error
+	GetCallCostLog(cgrid, source, runid string) (*CallCost, error)
 	GetStoredCdrs(*utils.CdrsFilter) ([]*StoredCdr, int64, error)
 	RemStoredCdrs([]string) error
 }
@@ -121,11 +123,9 @@ type CdrStorage interface {
 type LogStorage interface {
 	Storage
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogCallCost(cgrid, source, runid string, cc *CallCost) error
 	LogError(uuid, source, runid, errstr string) error
 	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
 	LogActionTiming(source string, at *ActionTiming, as Actions) error
-	GetCallCostLog(cgrid, source, runid string) (*CallCost, error)
 }
 
 type LoadStorage interface {

@@ -1115,3 +1115,24 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 	}
 	return cdrFltr, nil
 }
+
+type AttrSetActions struct {
+	ActionsId string      // Actions id
+	Overwrite bool        // If previously defined, will be overwritten
+	Actions   []*TPAction // Set of actions this Actions profile will perform
+}
+
+type AttrExecuteAction struct {
+	Direction string
+	Tenant    string
+	Account   string
+	ActionsId string
+}
+
+type AttrSetAccount struct {
+	Tenant        string
+	Direction     string
+	Account       string
+	ActionPlanId  string
+	AllowNegative bool
+}

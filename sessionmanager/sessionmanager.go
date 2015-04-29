@@ -25,7 +25,7 @@ import (
 )
 
 type SessionManager interface {
-	DbLogger() engine.LogStorage
+	CdrDb() engine.CdrStorage
 	Rater() engine.Connector
 	DebitInterval() time.Duration
 	Connect() error

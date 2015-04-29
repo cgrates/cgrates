@@ -102,7 +102,6 @@ var hdrCfgFlds, contentCfgFlds, trailerCfgFlds []*config.CfgCdrField
 func TestWriteCdr(t *testing.T) {
 	var err error
 	wrBuf := &bytes.Buffer{}
-	logDb, _ := engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
 	if hdrCfgFlds, err = config.CfgCdrFieldsFromCdrFieldsJsonCfg(hdrJsnCfgFlds); err != nil {
 		t.Error(err)
@@ -128,7 +127,7 @@ func TestWriteCdr(t *testing.T) {
 		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	cdre, err := NewCdrExporter([]*engine.StoredCdr{cdr}, logDb, cdreCfg, utils.CDRE_FIXED_WIDTH, ',', "fwv_1", 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
+	cdre, err := NewCdrExporter([]*engine.StoredCdr{cdr}, nil, cdreCfg, utils.CDRE_FIXED_WIDTH, ',', "fwv_1", 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)
 	}
@@ -170,7 +169,6 @@ func TestWriteCdr(t *testing.T) {
 
 func TestWriteCdrs(t *testing.T) {
 	wrBuf := &bytes.Buffer{}
-	logDb, _ := engine.NewMapStorage()
 	cdreCfg := &config.CdreConfig{
 		CdrFormat:     utils.CDRE_FIXED_WIDTH,
 		HeaderFields:  hdrCfgFlds,
@@ -203,7 +201,7 @@ func TestWriteCdrs(t *testing.T) {
 		ExtraFields: map[string]string{"productnumber": "12344", "fieldextr2": "valextr2"},
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdre, err := NewCdrExporter([]*engine.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, cdreCfg, utils.CDRE_FIXED_WIDTH, ',',
+	cdre, err := NewCdrExporter([]*engine.StoredCdr{cdr1, cdr2, cdr3, cdr4}, nil, cdreCfg, utils.CDRE_FIXED_WIDTH, ',',
 		"fwv_1", 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)

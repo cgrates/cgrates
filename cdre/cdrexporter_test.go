@@ -28,7 +28,6 @@ import (
 )
 
 func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
-	logDb, _ := engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdrs := []*engine.StoredCdr{
 		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
@@ -52,7 +51,7 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 			Category: "call", Account: "1000", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, MediationRunId: "RETAIL1", Cost: 5.01},
 	}
-	cdre, err := NewCdrExporter(cdrs, logDb, cfg.CdreProfiles["*default"], cfg.CdreProfiles["*default"].CdrFormat, cfg.CdreProfiles["*default"].FieldSeparator,
+	cdre, err := NewCdrExporter(cdrs, nil, cfg.CdreProfiles["*default"], cfg.CdreProfiles["*default"].CdrFormat, cfg.CdreProfiles["*default"].FieldSeparator,
 		"firstexport", 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", 0, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)

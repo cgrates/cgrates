@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"path"
 	"reflect"
 	"testing"
@@ -112,7 +111,6 @@ func TestCdrsHttpJsonRpcCdrReplication(t *testing.T) {
 	} else {
 		rcvSetupTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].SetupTime)
 		rcvAnswerTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].AnswerTime)
-		fmt.Printf("rcv: %+v, answer: %+v", rcvSetupTime, rcvAnswerTime)
 		rcvUsage, _ := utils.ParseDurationWithSecs(rcvedCdrs[0].Usage)
 		if rcvedCdrs[0].CgrId != testCdr1.CgrId ||
 			rcvedCdrs[0].TOR != testCdr1.TOR ||

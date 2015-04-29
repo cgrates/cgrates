@@ -110,7 +110,7 @@ func startCdrc(cdrsChan chan struct{}, cdrcCfgs map[string]*config.CdrcConfig, h
 	exitChan <- true // If run stopped, something is bad, stop the application
 }
 
-func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, cacheChan chan struct{}) {
+func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cacheChan chan struct{}) {
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	delay := utils.Fib()
@@ -154,14 +154,14 @@ func startSmFreeSWITCH(responder *engine.Responder, loggerDb engine.LogStorage, 
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, loggerDb, raterConn, cdrsConn)
+	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, cdrDb, raterConn, cdrsConn)
 	if err = sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
 	exitChan <- true
 }
 
-func startSmKamailio(responder *engine.Responder, loggerDb engine.LogStorage, cacheChan chan struct{}) {
+func startSmKamailio(responder *engine.Responder, cdrDb engine.CdrStorage, cacheChan chan struct{}) {
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	if cfg.SmKamConfig.Rater == utils.INTERNAL {
@@ -204,14 +204,14 @@ func startSmKamailio(responder *engine.Responder, loggerDb engine.LogStorage, ca
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn, loggerDb)
+	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn, cdrDb)
 	if err = sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
 	exitChan <- true
 }
 
-func startSmOpenSIPS(responder *engine.Responder, loggerDb engine.LogStorage, cacheChan chan struct{}) {
+func startSmOpenSIPS(responder *engine.Responder, cdrDb engine.CdrStorage, cacheChan chan struct{}) {
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	if cfg.SmOsipsConfig.Rater == utils.INTERNAL {
@@ -310,7 +310,7 @@ func startCDRS(logDb engine.LogStorage, cdrDb engine.CdrStorage, responder *engi
 		}
 	}
 
-	cdrServer, _ = engine.NewCdrServer(cfg, logDb, cdrDb, raterConn, statsConn)
+	cdrServer, _ = engine.NewCdrServer(cfg, cdrDb, raterConn, statsConn)
 	engine.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHanlersToServer(server)
 	engine.Logger.Info("Registering CDRS RPC service.")
@@ -476,7 +476,7 @@ func main() {
 		defer accountDb.Close()
 		engine.SetAccountingStorage(accountDb)
 	}
-	if cfg.RaterEnabled || cfg.CDRSEnabled { // Only connect to storDb if necessary
+	if cfg.RaterEnabled || cfg.CDRSEnabled || cfg.SchedulerEnabled { // Only connect to storDb if necessary
 		if cfg.StorDBType == SAME {
 			logDb = ratingDb.(engine.LogStorage)
 		} else {
@@ -492,6 +492,7 @@ func main() {
 		// loadDb,cdrDb and logDb are all mapped on the same stordb storage
 		loadDb = logDb.(engine.LoadStorage)
 		cdrDb = logDb.(engine.CdrStorage)
+		engine.SetCdrStorage(cdrDb)
 	}
 
 	engine.SetRoundingDecimals(cfg.RoundingDecimals)
@@ -611,17 +612,17 @@ func main() {
 
 	if cfg.SmFsConfig.Enabled {
 		engine.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
-		go startSmFreeSWITCH(responder, logDb, cacheChan)
+		go startSmFreeSWITCH(responder, cdrDb, cacheChan)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler()
 	}
 	if cfg.SmKamConfig.Enabled {
 		engine.Logger.Info("Starting CGRateS SM-Kamailio service.")
-		go startSmKamailio(responder, logDb, cacheChan)
+		go startSmKamailio(responder, cdrDb, cacheChan)
 	}
 	if cfg.SmOsipsConfig.Enabled {
 		engine.Logger.Info("Starting CGRateS SM-OpenSIPS service.")
-		go startSmOpenSIPS(responder, logDb, cacheChan)
+		go startSmOpenSIPS(responder, cdrDb, cacheChan)
 	}
 	var cdrcEnabled bool
 	for _, cdrcCfgs := range cfg.CdrcProfiles {

@@ -38,11 +38,11 @@ type FSSessionManager struct {
 	sessions []*Session
 	rater    engine.Connector
 	cdrs     engine.Connector
-	loggerDB engine.LogStorage
+	cdrDb    engine.CdrStorage
 }
 
-func NewFSSessionManager(smFsConfig *config.SmFsConfig, storage engine.LogStorage, rater, cdrs engine.Connector) *FSSessionManager {
-	return &FSSessionManager{cfg: smFsConfig, conns: make(map[string]*fsock.FSock), loggerDB: storage, rater: rater, cdrs: cdrs}
+func NewFSSessionManager(smFsConfig *config.SmFsConfig, storage engine.CdrStorage, rater, cdrs engine.Connector) *FSSessionManager {
+	return &FSSessionManager{cfg: smFsConfig, conns: make(map[string]*fsock.FSock), cdrDb: storage, rater: rater, cdrs: cdrs}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
@@ -264,8 +264,8 @@ func (sm *FSSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
 func (sm *FSSessionManager) DebitInterval() time.Duration {
 	return sm.cfg.DebitInterval
 }
-func (sm *FSSessionManager) DbLogger() engine.LogStorage {
-	return sm.loggerDB
+func (sm *FSSessionManager) CdrDb() engine.CdrStorage {
+	return sm.cdrDb
 }
 
 func (sm *FSSessionManager) Rater() engine.Connector {

@@ -50,14 +50,14 @@ const (
 
 var err error
 
-func NewCdrExporter(cdrs []*engine.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
+func NewCdrExporter(cdrs []*engine.StoredCdr, cdrDb engine.CdrStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
 	dataUsageMultiplyFactor, smsUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
 	cdre := &CdrExporter{
 		cdrs:                    cdrs,
-		logDb:                   logDb,
+		cdrDb:                   cdrDb,
 		exportTemplate:          exportTpl,
 		cdrFormat:               cdrFormat,
 		fieldSeparator:          fieldSeparator,
@@ -81,7 +81,7 @@ func NewCdrExporter(cdrs []*engine.StoredCdr, logDb engine.LogStorage, exportTpl
 
 type CdrExporter struct {
 	cdrs           []*engine.StoredCdr
-	logDb          engine.LogStorage // Used to extract cost_details if these are requested
+	cdrDb          engine.CdrStorage // Used to extract cost_details if these are requested
 	exportTemplate *config.CdreConfig
 	cdrFormat      string // csv, fwv
 	fieldSeparator rune
@@ -108,7 +108,7 @@ type CdrExporter struct {
 // Return Json marshaled callCost attached to
 // Keep it separately so we test only this part in local tests
 func (cdre *CdrExporter) getCdrCostDetails(cgrId, runId string) (string, error) {
-	cc, err := cdre.logDb.GetCallCostLog(cgrId, "", runId)
+	cc, err := cdre.cdrDb.GetCallCostLog(cgrId, "", runId)
 	if err != nil {
 		return "", err
 	} else if cc == nil {

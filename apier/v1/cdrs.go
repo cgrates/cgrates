@@ -35,7 +35,7 @@ func (apier *ApierV1) GetCallCostLog(attrs AttrGetCallCost, reply *engine.CallCo
 	if missing := utils.MissingStructFields(&attrs, []string{"CgrId", "RunId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if cc, err := apier.LogDb.GetCallCostLog(attrs.CgrId, "", attrs.RunId); err != nil {
+	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, "", attrs.RunId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if cc == nil {
 		return fmt.Errorf("NOT_FOUND")

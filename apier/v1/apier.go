@@ -165,20 +165,13 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	return nil
 }
 
-type AttrExecuteAction struct {
-	Direction string
-	Tenant    string
-	Account   string
-	ActionsId string
-}
-
-func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error {
+func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
+	engine.Logger.Debug(fmt.Sprintf("Executing action, attrs: %+v", attr))
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	at := &engine.ActionTiming{
 		AccountIds: []string{tag},
 		ActionsId:  attr.ActionsId,
 	}
-
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
@@ -516,13 +509,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	return nil
 }
 
-type AttrSetActions struct {
-	ActionsId string            // Actions id
-	Overwrite bool              // If previously defined, will be overwritten
-	Actions   []*utils.TPAction // Set of actions this Actions profile will perform
-}
-
-func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
+func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}

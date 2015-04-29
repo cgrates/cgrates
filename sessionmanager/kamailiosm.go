@@ -30,8 +30,8 @@ import (
 	"time"
 )
 
-func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv engine.Connector, loggerDb engine.LogStorage) (*KamailioSessionManager, error) {
-	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, loggerDb: loggerDb, conns: make(map[string]*kamevapi.KamEvapi)}
+func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv engine.Connector, cdrDb engine.CdrStorage) (*KamailioSessionManager, error) {
+	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, cdrDb: cdrDb, conns: make(map[string]*kamevapi.KamEvapi)}
 	return ksm, nil
 }
 
@@ -39,7 +39,7 @@ type KamailioSessionManager struct {
 	cfg      *config.SmKamConfig
 	rater    engine.Connector
 	cdrsrv   engine.Connector
-	loggerDb engine.LogStorage
+	cdrDb    engine.CdrStorage
 	conns    map[string]*kamevapi.KamEvapi
 	sessions []*Session
 }
@@ -163,8 +163,8 @@ func (self *KamailioSessionManager) GetSession(uuid string) *Session {
 func (self *KamailioSessionManager) DebitInterval() time.Duration {
 	return self.cfg.DebitInterval
 }
-func (self *KamailioSessionManager) DbLogger() engine.LogStorage {
-	return self.loggerDb
+func (self *KamailioSessionManager) CdrDb() engine.CdrStorage {
+	return self.cdrDb
 }
 func (self *KamailioSessionManager) Rater() engine.Connector {
 	return self.rater

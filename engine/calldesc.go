@@ -64,6 +64,7 @@ var (
 	dataStorage            RatingStorage
 	accountingStorage      AccountingStorage
 	storageLogger          LogStorage
+	cdrStorage             CdrStorage
 	debitPeriod            = 10 * time.Second
 	globalRoundingDecimals = 10
 	historyScribe          history.Scribe
@@ -89,6 +90,13 @@ Sets the database for logging (can be de same  as storage getter or different db
 */
 func SetStorageLogger(sg LogStorage) {
 	storageLogger = sg
+}
+
+/*
+Sets the database for CDR storing, used by *cdrlog in first place
+*/
+func SetCdrStorage(cStorage CdrStorage) {
+	cdrStorage = cStorage
 }
 
 // Exported method to set the history scribe.

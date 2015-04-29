@@ -129,11 +129,10 @@ func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (er
 }
 
 func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-	tor, _ := utils.NewRSRField("^tor_test")
-	cdrhost, _ := utils.NewRSRField("^127.0.0.1")
 	defaultTemplate := map[string]*utils.RSRField{
-		"TOR":     tor,
-		"CdrHost": cdrhost,
+		"CdrHost":        utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP)[0],
+		"ReqType":        utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP)[0],
+		"MediationRunId": utils.ParseRSRFieldsMustCompile("^"+utils.META_DEFAULT, utils.INFIELD_SEP)[0],
 	}
 	template := make(map[string]string)
 
@@ -143,38 +142,61 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 			return
 		}
 		for field, rsr := range template {
-			if rsrField, err := utils.NewRSRField(rsr); err == nil {
-				defaultTemplate[field] = rsrField
-			} else {
+			defaultTemplate[field], err = utils.NewRSRField(rsr)
+			if err != nil {
 				return err
 			}
 		}
 	}
 
-	// set sored cdr values
+	// set stored cdr values
 	var cdrs []*StoredCdr
 	for _, action := range acs {
-		if action.ActionType == DEBIT || action.ActionType == DEBIT_RESET {
-			cdr := &StoredCdr{CdrSource: CDRLOG, SetupTime: time.Now(), AnswerTime: time.Now(), AccId: utils.GenUUID()}
-			cdr.CgrId = utils.Sha1(cdr.AccId, cdr.SetupTime.String())
-			elem := reflect.ValueOf(cdr).Elem()
-			for key, rsr := range defaultTemplate {
-				field := elem.FieldByName(key)
-				if field.IsValid() && field.CanSet() {
-					switch field.Kind() {
-					case reflect.Float64:
-						value, err := strconv.ParseFloat(rsr.ParseValue(""), 64)
-						if err != nil {
-							continue
-						}
-						field.SetFloat(value)
-					case reflect.String:
-						field.SetString(rsr.ParseValue(""))
+		if !utils.IsSliceMember([]string{DEBIT, DEBIT_RESET}, action.ActionType) {
+			continue // Only log specific actions
+		}
+		cdr := &StoredCdr{CdrSource: CDRLOG, SetupTime: time.Now(), AnswerTime: time.Now(), AccId: utils.GenUUID()}
+		cdr.CgrId = utils.Sha1(cdr.AccId, cdr.SetupTime.String())
+		cdr.Usage = time.Duration(1) * time.Second
+		elem := reflect.ValueOf(cdr).Elem()
+		for key, rsr := range defaultTemplate {
+			field := elem.FieldByName(key)
+			if field.IsValid() && field.CanSet() {
+				switch field.Kind() {
+				case reflect.Float64:
+					value, err := strconv.ParseFloat(rsr.ParseValue(""), 64)
+					if err != nil {
+						continue
 					}
+					field.SetFloat(value)
+				case reflect.String:
+					field.SetString(rsr.ParseValue(""))
 				}
 			}
-			cdrs = append(cdrs, cdr)
 		}
+		// Hardcode the data for now, expand it with templates later
+		cdr.TOR = action.BalanceType
+		cdr.Direction = action.Direction
+		if action.Balance != nil {
+			cdr.Cost = action.Balance.Value
+		}
+		Logger.Debug(fmt.Sprintf("action: %+v, balance: %+v", action, action.Balance))
+		cdrs = append(cdrs, cdr)
+		if cdrStorage == nil { // Only save if the cdrStorage is defined
+			continue
+		}
+		Logger.Debug(fmt.Sprintf("SetCdr: %+v\n", cdr))
+		if err := cdrStorage.SetCdr(cdr); err != nil {
+			return err
+		}
+		if err := cdrStorage.SetRatedCdr(cdr); err != nil {
+			return err
+		}
+		// FixMe
+		//if err := cdrStorage.LogCallCost(); err != nil {
+		//	return err
+		//}
+
 	}
 
 	b, _ := json.Marshal(cdrs)

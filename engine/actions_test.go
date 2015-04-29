@@ -1,5 +1,5 @@
 /*
-Rating system designed to be used in VoIP Carriers World
+Real-time Charging System for Telecom & ISP environments
 Copyright (C) 2012-2015 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
@@ -1126,7 +1126,7 @@ func TestActionCdrlogEmpty(t *testing.T) {
 	}
 	cdrs := make([]*StoredCdr, 0)
 	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
-	if len(cdrs) != 1 || cdrs[0].TOR != "tor_test" {
+	if len(cdrs) != 1 || cdrs[0].CdrSource != CDRLOG {
 		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
 	}
 }
@@ -1150,7 +1150,6 @@ func TestActionCdrlogWithParams(t *testing.T) {
 	cdrs := make([]*StoredCdr, 0)
 	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
 	if len(cdrs) != 2 ||
-		cdrs[0].TOR != "tor_test" ||
 		cdrs[0].Subject != "rif" {
 		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
 	}

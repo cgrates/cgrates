@@ -53,8 +53,8 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, logDb LogStorage, cdrDb CdrStorage, rater Connector, stats StatsInterface) (*CdrServer, error) {
-	return &CdrServer{cgrCfg: cgrCfg, logDb: logDb, cdrDb: cdrDb, rater: rater, stats: stats}, nil
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, stats StatsInterface) (*CdrServer, error) {
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, stats: stats}, nil
 	/*
 		if cfg.CDRSStats != "" {
 			if cfg.CDRSStats != utils.INTERNAL {
@@ -73,7 +73,6 @@ func NewCdrServer(cgrCfg *config.CGRConfig, logDb LogStorage, cdrDb CdrStorage, 
 
 type CdrServer struct {
 	cgrCfg *config.CGRConfig
-	logDb  LogStorage
 	cdrDb  CdrStorage
 	rater  Connector
 	stats  StatsInterface
@@ -150,7 +149,7 @@ func (self *CdrServer) rateStoreStatsReplicate(storedCdr *StoredCdr) (err error)
 			}
 			// Store CostDetails
 			if cdr.Rated || utils.IsSliceMember([]string{utils.RATED, utils.META_RATED}, cdr.ReqType) { // Account related CDRs are saved automatically, so save the others here if requested
-				if err := self.logDb.LogCallCost(cdr.CgrId, utils.CDRS_SOURCE, cdr.MediationRunId, storedCdr.CostDetails); err != nil {
+				if err := self.cdrDb.LogCallCost(cdr.CgrId, utils.CDRS_SOURCE, cdr.MediationRunId, storedCdr.CostDetails); err != nil {
 					Logger.Err(fmt.Sprintf("<CDRS> Storing costs for CDR %+v, costDetails: %+v, got error: %s", cdr, cdr.CostDetails, err.Error()))
 				}
 			}
@@ -191,7 +190,7 @@ func (self *CdrServer) deriveAndRateCdr(storedCdr *StoredCdr) ([]*StoredCdr, err
 // Retrive the cost from logging database, nil in case of no log
 func (self *CdrServer) getCostsFromDB(cgrid, runId string) (cc *CallCost, err error) {
 	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
-		cc, err = self.logDb.GetCallCostLog(cgrid, SESSION_MANAGER_SOURCE, runId)
+		cc, err = self.cdrDb.GetCallCostLog(cgrid, SESSION_MANAGER_SOURCE, runId)
 		if cc != nil {
 			break
 		}
@@ -221,7 +220,7 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.PSEUDOPREPAID, utils.POSTPAID}, storedCdr.ReqType) {
 		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
-			self.logDb.LogCallCost(storedCdr.CgrId, MEDIATOR_SOURCE, storedCdr.MediationRunId, cc)
+			self.cdrDb.LogCallCost(storedCdr.CgrId, MEDIATOR_SOURCE, storedCdr.MediationRunId, cc)
 		}
 	} else {
 		err = self.rater.GetCost(cd, cc)
