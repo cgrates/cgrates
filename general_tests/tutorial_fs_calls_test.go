@@ -139,7 +139,7 @@ func TestTutFsCallsCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 3, RatingProfiles: 3, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
 	var args utils.AttrCacheStats
 	if err := tutFsCallsRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -356,7 +356,7 @@ func TestTutFsCallsCdrStats(t *testing.T) {
 		return
 	}
 	var queueIds []string
-	eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003"}
+	eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
 	if err := tutFsCallsRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
 		t.Error("Calling CDRStatsV1.GetQueueIds, got error: ", err.Error())
 	} else if len(eQueueIds) != len(queueIds) {
