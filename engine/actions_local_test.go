@@ -111,6 +111,9 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 		rcvedCdrs[0].CdrHost != "127.0.0.1" ||
 		rcvedCdrs[0].CdrSource != CDRLOG ||
 		rcvedCdrs[0].ReqType != utils.META_PREPAID ||
+		rcvedCdrs[0].Tenant != "cgrates.org" ||
+		rcvedCdrs[0].Account != "dan2904" ||
+		rcvedCdrs[0].Subject != "dan2904" ||
 		rcvedCdrs[0].Usage != "1" ||
 		rcvedCdrs[0].MediationRunId != utils.META_DEFAULT ||
 		rcvedCdrs[0].Cost != attrsAA.Actions[0].Units {

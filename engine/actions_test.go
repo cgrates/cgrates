@@ -1113,12 +1113,14 @@ func TestTopupActionLoaded(t *testing.T) {
 }
 
 func TestActionCdrlogEmpty(t *testing.T) {
+	acnt := &Account{Id: "*out:cgrates.org:dan2904"}
 	cdrlog := &Action{
 		ActionType: CDRLOG,
 	}
-	err := cdrLogAction(nil, nil, cdrlog, Actions{
+	err := cdrLogAction(acnt, nil, cdrlog, Actions{
 		&Action{
 			ActionType: DEBIT,
+			Balance:    &Balance{Value: 25, DestinationId: "RET", Weight: 20},
 		},
 	})
 	if err != nil {
@@ -1132,16 +1134,19 @@ func TestActionCdrlogEmpty(t *testing.T) {
 }
 
 func TestActionCdrlogWithParams(t *testing.T) {
+	acnt := &Account{Id: "*out:cgrates.org:dan2904"}
 	cdrlog := &Action{
 		ActionType:      CDRLOG,
-		ExtraParameters: `{"Account":"^dan","Subject": "^rif","Destination":"^1234","Tor":"~action_tag:s/^at(.)$/0$1/"}`,
+		ExtraParameters: `{"ReqType":"^*pseudoprepaid","Subject":"^rif", "TOR":"~action_type:s/^\\*(.*)$/did_$1/"}`,
 	}
-	err := cdrLogAction(nil, nil, cdrlog, Actions{
+	err := cdrLogAction(acnt, nil, cdrlog, Actions{
 		&Action{
 			ActionType: DEBIT,
+			Balance:    &Balance{Value: 25, DestinationId: "RET", Weight: 20},
 		},
 		&Action{
 			ActionType: DEBIT_RESET,
+			Balance:    &Balance{Value: 25, DestinationId: "RET", Weight: 20},
 		},
 	})
 	if err != nil {
@@ -1154,6 +1159,34 @@ func TestActionCdrlogWithParams(t *testing.T) {
 		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
 	}
 }
+
+/*
+func TestActionCdrLogParamsOverload(t *testing.T) {
+	cdrlog := &Action{
+		ActionType:      CDRLOG,
+		ExtraParameters: `{"Account":"^dan","Subject": "^rif","Destination":"^1234","Tor":"~action_tag:s/^at(.)$/0$1/"}`,
+	}
+	err := cdrLogAction(nil, nil, cdrlog, Actions{
+		&Action{
+			ActionType: DEBIT,
+			Balance:    &Balance{Value: 25, DestinationId: "RET", Weight: 20},
+		},
+		&Action{
+			ActionType: DEBIT_RESET,
+			Balance:    &Balance{Value: 25, DestinationId: "RET", Weight: 20},
+		},
+	})
+	if err != nil {
+		t.Error("Error performing cdrlog action: ", err)
+	}
+	cdrs := make([]*StoredCdr, 0)
+	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
+	if len(cdrs) != 2 ||
+		cdrs[0].Subject != "rif" {
+		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
+	}
+}
+*/
 
 /********************************** Benchmarks ********************************/
 

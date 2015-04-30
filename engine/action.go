@@ -128,11 +128,64 @@ func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (er
 	return
 }
 
+// Used by cdrLogAction to dynamically parse values out of account and action
+func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) string {
+	dta, err := utils.NewDTAFromAccountKey(acnt.Id) // Account information should be valid
+	if err != nil {
+		dta = new(utils.DirectionTenantAccount) // Init with empty values
+	}
+	var parsedValue string // Template values
+	for _, rsrFld := range rsrFlds {
+		switch rsrFld.Id {
+		case "account_id":
+			parsedValue += rsrFld.ParseValue(acnt.Id)
+		case "direction":
+			parsedValue += rsrFld.ParseValue(dta.Direction)
+		case "tenant":
+			parsedValue += rsrFld.ParseValue(dta.Tenant)
+		case "account":
+			parsedValue += rsrFld.ParseValue(dta.Account)
+		case "action_id":
+			parsedValue += rsrFld.ParseValue(action.Id)
+		case "action_type":
+			parsedValue += rsrFld.ParseValue(action.ActionType)
+		case "balance_type":
+			parsedValue += rsrFld.ParseValue(action.BalanceType)
+		case "balance_uuid":
+			parsedValue += rsrFld.ParseValue(action.Balance.Uuid)
+		case "balance_id":
+			parsedValue += rsrFld.ParseValue(action.Balance.Id)
+		case "balance_value":
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.Value, 'f', -1, 64))
+		case "destination_id":
+			parsedValue += rsrFld.ParseValue(action.Balance.DestinationId)
+		case "extra_params":
+			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
+		case "rating_subject":
+			parsedValue += rsrFld.ParseValue(action.Balance.RatingSubject)
+		case "category":
+			parsedValue += rsrFld.ParseValue(action.Balance.Category)
+		case "shared_group":
+			parsedValue += rsrFld.ParseValue(action.Balance.SharedGroup)
+		default:
+			parsedValue += rsrFld.ParseValue("") // Mostly for static values
+		}
+	}
+	return parsedValue
+}
+
 func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-	defaultTemplate := map[string]*utils.RSRField{
-		"CdrHost":        utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP)[0],
-		"ReqType":        utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP)[0],
-		"MediationRunId": utils.ParseRSRFieldsMustCompile("^"+utils.META_DEFAULT, utils.INFIELD_SEP)[0],
+
+	defaultTemplate := map[string]utils.RSRFields{
+		"TOR":            utils.ParseRSRFieldsMustCompile("balance_type", utils.INFIELD_SEP),
+		"CdrHost":        utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
+		"Direction":      utils.ParseRSRFieldsMustCompile("direction", utils.INFIELD_SEP),
+		"ReqType":        utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
+		"Tenant":         utils.ParseRSRFieldsMustCompile("tenant", utils.INFIELD_SEP),
+		"Account":        utils.ParseRSRFieldsMustCompile("account", utils.INFIELD_SEP),
+		"Subject":        utils.ParseRSRFieldsMustCompile("account", utils.INFIELD_SEP),
+		"Cost":           utils.ParseRSRFieldsMustCompile("balance_value", utils.INFIELD_SEP),
+		"MediationRunId": utils.ParseRSRFieldsMustCompile("^"+utils.META_DEFAULT, utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 
@@ -142,7 +195,7 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 			return
 		}
 		for field, rsr := range template {
-			defaultTemplate[field], err = utils.NewRSRField(rsr)
+			defaultTemplate[field], err = utils.ParseRSRFields(rsr, utils.INFIELD_SEP)
 			if err != nil {
 				return err
 			}
@@ -152,35 +205,32 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 	// set stored cdr values
 	var cdrs []*StoredCdr
 	for _, action := range acs {
-		if !utils.IsSliceMember([]string{DEBIT, DEBIT_RESET}, action.ActionType) {
+		if !utils.IsSliceMember([]string{DEBIT, DEBIT_RESET}, action.ActionType) || action.Balance == nil {
 			continue // Only log specific actions
 		}
-		cdr := &StoredCdr{CdrSource: CDRLOG, SetupTime: time.Now(), AnswerTime: time.Now(), AccId: utils.GenUUID()}
+		cdr := &StoredCdr{CdrSource: CDRLOG, SetupTime: time.Now(), AnswerTime: time.Now(), AccId: utils.GenUUID(), ExtraFields: make(map[string]string)}
 		cdr.CgrId = utils.Sha1(cdr.AccId, cdr.SetupTime.String())
 		cdr.Usage = time.Duration(1) * time.Second
 		elem := reflect.ValueOf(cdr).Elem()
-		for key, rsr := range defaultTemplate {
+		for key, rsrFlds := range defaultTemplate {
+			parsedValue := parseTemplateValue(rsrFlds, acc, action)
 			field := elem.FieldByName(key)
 			if field.IsValid() && field.CanSet() {
 				switch field.Kind() {
 				case reflect.Float64:
-					value, err := strconv.ParseFloat(rsr.ParseValue(""), 64)
+					value, err := strconv.ParseFloat(parsedValue, 64)
 					if err != nil {
 						continue
 					}
 					field.SetFloat(value)
 				case reflect.String:
-					field.SetString(rsr.ParseValue(""))
+					field.SetString(parsedValue)
 				}
+			} else { // invalid fields go in extraFields of CDR
+				cdr.ExtraFields[key] = parsedValue
 			}
 		}
-		// Hardcode the data for now, expand it with templates later
-		cdr.TOR = action.BalanceType
-		cdr.Direction = action.Direction
-		if action.Balance != nil {
-			cdr.Cost = action.Balance.Value
-		}
-		Logger.Debug(fmt.Sprintf("action: %+v, balance: %+v", action, action.Balance))
+		//Logger.Debug(fmt.Sprintf("account: %+v, action: %+v, balance: %+v", acc, action, action.Balance))
 		cdrs = append(cdrs, cdr)
 		if cdrStorage == nil { // Only save if the cdrStorage is defined
 			continue
