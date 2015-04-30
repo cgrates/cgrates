@@ -69,6 +69,7 @@ LOG_BALANCE,*log,,,,,,,,,,,,,10
 DUMMY,INVALID;DATA
 PREPAID_10,*topup_reset,,,*monetary,*out,,*any,,*unlimited,,5,10,10
 TOPUP_RST_SHARED_5,*topup_reset,param&some,,*monetary,*out,,*any,subj,SHARED_A,*unlimited,,5,20,10
+DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,10
 `
 
 var actionTimingsSample = `#Tag,ActionsTag,TimingTag,Weight
@@ -270,7 +271,7 @@ func TestActionsValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2, 3, 4, 7:
+		case 2, 3, 4, 7, 8:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}

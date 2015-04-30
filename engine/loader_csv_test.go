@@ -155,6 +155,7 @@ SE10,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,10,5,10
 SE10,*topup,,,*monetary,*out,,,,,*unlimited,,10,10,10
 EE0,*topup_reset,,,*monetary,*out,,,,SG3,*unlimited,,0,10,10
 EE0,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,10
+DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -696,7 +697,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 7 {
+	if len(csvr.actions) != 8 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
 	as1 := csvr.actions["MINI"]
@@ -754,6 +755,21 @@ func TestLoadActions(t *testing.T) {
 	}
 	if !reflect.DeepEqual(as2, expected) {
 		t.Errorf("Error loading action: %+v", as2[0].Balance)
+	}
+	as3 := csvr.actions["DEFEE"]
+	expected = []*Action{
+		&Action{
+			Id:              "DEFEE0",
+			ActionType:      CDRLOG,
+			ExtraParameters: `{"Category":"^ddi","MediationRunId":"^did_run"}`,
+			Weight:          10,
+			Balance: &Balance{
+				Uuid: as3[0].Balance.Uuid,
+			},
+		},
+	}
+	if !reflect.DeepEqual(as3, expected) {
+		t.Errorf("Error loading action: %+v", as3[0])
 	}
 }
 
