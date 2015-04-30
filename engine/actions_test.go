@@ -19,11 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
-
-	"github.com/cgrates/cgrates/utils"
-
 	"encoding/json"
+	"fmt"
+	"github.com/cgrates/cgrates/utils"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -1160,13 +1159,13 @@ func TestActionCdrlogWithParams(t *testing.T) {
 	}
 }
 
-/*
-func TestActionCdrLogParamsOverload(t *testing.T) {
+func TestActionCdrLogParamsWithOverload(t *testing.T) {
+	acnt := &Account{Id: "*out:cgrates.org:dan2904"}
 	cdrlog := &Action{
 		ActionType:      CDRLOG,
-		ExtraParameters: `{"Account":"^dan","Subject": "^rif","Destination":"^1234","Tor":"~action_tag:s/^at(.)$/0$1/"}`,
+		ExtraParameters: `{"Subject":"^rif","Destination":"^1234","TOR":"~action_tag:s/^at(.)$/0$1/","AccountId":"~account_id:s/^\\*(.*)$/$1/"}`,
 	}
-	err := cdrLogAction(nil, nil, cdrlog, Actions{
+	err := cdrLogAction(acnt, nil, cdrlog, Actions{
 		&Action{
 			ActionType: DEBIT,
 			Balance:    &Balance{Value: 25, DestinationId: "RET", Weight: 20},
@@ -1181,12 +1180,17 @@ func TestActionCdrLogParamsOverload(t *testing.T) {
 	}
 	cdrs := make([]*StoredCdr, 0)
 	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
+	expectedExtraFields := map[string]string{
+		"AccountId": "out:cgrates.org:dan2904",
+	}
 	if len(cdrs) != 2 ||
 		cdrs[0].Subject != "rif" {
 		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
 	}
+	if !reflect.DeepEqual(cdrs[0].ExtraFields, expectedExtraFields) {
+		t.Errorf("Received extra_fields: %+v", cdrs[0].ExtraFields)
+	}
 }
-*/
 
 /********************************** Benchmarks ********************************/
 
