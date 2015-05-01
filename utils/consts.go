@@ -53,7 +53,7 @@ const (
 	RATING_PLANS_CSV             = "RatingPlans.csv"
 	RATING_PROFILES_CSV          = "RatingProfiles.csv"
 	SHARED_GROUPS_CSV            = "SharedGroups.csv"
-	LCRS_CSV                     = "LCRRules.csv"
+	LCRS_CSV                     = "LcrRules.csv"
 	ACTIONS_CSV                  = "Actions.csv"
 	ACTION_PLANS_CSV             = "ActionPlans.csv"
 	ACTION_TRIGGERS_CSV          = "ActionTriggers.csv"

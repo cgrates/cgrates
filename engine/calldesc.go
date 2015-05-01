@@ -773,6 +773,10 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			accNeverConsidered := true
 			tccNeverConsidered := true
 			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
+				if stats == nil {
+					Logger.Warning(fmt.Sprintf("LCR_WARNING: Ignoring supplier: %s, lcr strategy: %s - no cdr_stats service configured.", supplier, lcrCost.Entry.Strategy))
+					continue
+				}
 				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
 				if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err == nil || rpf != nil {
 					rpf.RatingPlanActivations.Sort()

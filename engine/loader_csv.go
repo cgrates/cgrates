@@ -1038,6 +1038,9 @@ func (csvr *CSVReader) LoadAll() error {
 	if err = csvr.LoadSharedGroups(); err != nil {
 		return err
 	}
+	if err = csvr.LoadLCRs(); err != nil {
+		return err
+	}
 	if err = csvr.LoadActions(); err != nil {
 		return err
 	}
