@@ -144,6 +144,9 @@ func (self *CdrServer) rateStoreStatsReplicate(storedCdr *StoredCdr) (err error)
 		}
 		// Store rated CDRs (including derived)
 		for _, cdr := range cdrs {
+			if len(cdr.MediationRunId) == 0 { // Do not store rating info for rawCDRs
+				continue
+			}
 			if err := self.cdrDb.SetRatedCdr(cdr); err != nil {
 				Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", cdr, err.Error()))
 			}
