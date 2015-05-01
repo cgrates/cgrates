@@ -19,6 +19,7 @@ const (
 	RATED                        = "rated"
 	META_RATED                   = "*rated"
 	META_NONE                    = "*none"
+	META_NOW                     = "*now"
 	ERR_NOT_IMPLEMENTED          = "NOT_IMPLEMENTED"
 	ERR_SERVER_ERROR             = "SERVER_ERROR"
 	ERR_NOT_FOUND                = "NOT_FOUND"
