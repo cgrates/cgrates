@@ -104,6 +104,28 @@ func TestCosts1GetCost1(t *testing.T) {
 	}
 }
 
+/*
+func TestCosts1GetCostZeroDuration(t *testing.T) {
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z")
+	cd := &engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "+4986517174963",
+		TimeStart:   tStart,
+		TimeEnd:     tEnd,
+	}
+	if cc, err := cd.GetCost(); err != nil {
+		t.Error(err)
+	} else if cc.Cost != 0 {
+		t.Error("Wrong cost returned: ", cc.Cost)
+	}
+}
+*/
+
 /* FixMe
 func TestCosts1GetCost2(t *testing.T) {
 	tStart, _ := utils.ParseTimeDetectLayout("2004-06-04T00:00:01Z")
