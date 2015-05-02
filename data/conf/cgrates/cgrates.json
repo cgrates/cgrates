@@ -6,12 +6,18 @@
 // This file contains the default configuration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
 
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
 //"general": {
 //	"http_skip_tls_veify": false,			// if enabled Http Client will accept any TLS certificate
 //	"rounding_decimals": 10,				// system level precision for floats
 //	"dbdata_encoding": "msgpack",			// encoding used to store object data in strings: <msgpack|json>
 //	"tpexport_dir": "/var/log/cgrates/tpe",	// path towards export folder for offline Tariff Plans
-//	"default_reqtype": "*rated",				// default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>
+//	"default_reqtype": "*rated",			// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 //	"default_category": "call",				// default Type of Record to consider when missing from requests
 //	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 //	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
@@ -64,8 +70,8 @@
 
 //"rater": {
 //	"enabled": false,						// enable Rater service: <true|false>
-//	"balancer": "",							// register to Balancer as worker: <""|internal|x.y.z.y:1234>
-// "cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+//	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
+//	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 //},
 
 
@@ -77,10 +83,9 @@
 //"cdrs": {
 //	"enabled": false,						// start the CDR Server service:  <true|false>
 //	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
-//	"rate_cdrs": true,						// enable CDR rating calculation
 //	"store_cdrs": true,						// store cdrs in storDb
-//	"rater": "",							// address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-//	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+//	"rater": "",							// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
+//	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 //	"reconnects": 5,						// number of reconnect attempts to rater or cdrs
 //	"cdr_replication":[],					// replicate the raw CDR to a number of servers
 //},
@@ -174,12 +179,12 @@
 //	}
 //},
 
-
 //"sm_freeswitch": {
 //	"enabled": false,				// starts SessionManager service: <true|false>
 //	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
 //	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 //	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
+//	"compute_lcr": false,			// when enabled it will compute and set cgr_lcr channel variable with least cost route ids
 //	"cdr_extra_fields": [],			// extra fields to store in CDRs in case of processing them
 //	"debit_interval": "10s",		// interval to perform debits on.
 //	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this

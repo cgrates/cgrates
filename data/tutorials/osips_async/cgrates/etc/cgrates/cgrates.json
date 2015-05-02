@@ -1,0 +1,94 @@
+{
+
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+
+"rater": {
+	"enabled": true,						// enable Rater service: <true|false>
+	"cdrstats": "internal",					// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+},
+
+
+"scheduler": {
+	"enabled": true,						// start Scheduler service: <true|false>
+},
+
+
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
+	"cdrstats": "internal",					// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+},
+
+
+"cdr_stats": {
+	"enabled": true,						// starts the cdrstats service: <true|false>
+},
+
+
+"cdre": {
+	"*default": {
+		"cdr_format": "csv",							// exported CDRs format <csv>
+		"field_separator": ",",
+		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
+		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
+		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
+		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
+		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
+		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
+		"mask_length": 0,								// length of the destination suffix to be masked
+		"export_dir": "/tmp/cgr_fsevsock/cgrates/cdre",			// path where the exported CDRs will be placed
+		"header_fields": [],							// template of the exported header fields
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
+			{"tag":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
+			{"tag":"Tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "tor"},
+			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
+			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
+			{"tag":"Direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "direction"},
+			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
+			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
+			{"tag":"Account", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
+			{"tag":"Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "subject"},
+			{"tag":"Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "destination"},
+			{"tag":"SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
+			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
+		],
+		"trailer_fields": [],							// template of the exported trailer fields
+	}
+},
+
+
+"sm_opensips": {
+	"enabled": true,					// starts SessionManager service: <true|false>
+	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
+	"rater": "internal",				// address where to reach the Rater <""|internal|127.0.0.1:2013>
+	"cdrs": "internal",					// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"debit_interval": "5s",			// interval to perform debits on.
+	"min_call_duration": "0s",			// only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
+	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
+	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
+},
+
+
+"history_server": {
+	"enabled": true,									// starts History service: <true|false>.
+	"history_dir": "/tmp/cgr_osipsasync/cgrates/history",	// location on disk where to store history files.
+},
+
+
+"history_agent": {
+	"enabled": true,			// starts History as a client: <true|false>.
+	"server": "internal",		// address where to reach the master history server: <internal|x.y.z.y:1234>
+},
+
+
+}
+

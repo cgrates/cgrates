@@ -31,12 +31,63 @@ import (
 	"github.com/cgrates/osipsdagram"
 )
 
+/*
+E_ACC_EVENT
+method::INVITE
+from_tag::87d02470
+to_tag::a671a98
+callid::05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0
+sip_code::200
+sip_reason::OK
+time::1430579770
+cgr_reqtype::*pseudoprepaid
+cgr_account::1002
+cgr_subject::1002
+cgr_destination::1002
+originalUri::sip:1002@172.16.254.77
+duration::
+
+#
+E_ACC_EVENT
+method::BYE
+from_tag::a671a98
+to_tag::87d02470
+callid::05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0
+sip_code::200
+sip_reason::OK
+time::1430579797
+cgr_reqtype::
+cgr_account::
+cgr_subject::
+cgr_destination::
+originalUri::sip:1002@172.16.254.1:5060;transport=udp;registering_acc=172_16_254_77
+duration::
+
+E_ACC_MISSED_EVENT
+method::INVITE
+from_tag::1d5efcc1
+to_tag::
+callid::c0965d3f42c720397ca1a5be9619c2ef@0:0:0:0:0:0:0:0
+sip_code::404
+sip_reason::Not Found
+time::1430579759
+cgr_reqtype::*pseudoprepaid
+cgr_account::1002
+cgr_subject::1002
+cgr_destination::1002
+originalUri::sip:1002@172.16.254.77
+duration::
+
+*/
+
 func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
 	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
-		"E_OPENSIPS_START": []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart},
-		"E_ACC_CDR":        []func(*osipsdagram.OsipsEvent){osm.onCdr},
-		"E_CGR_AUTHORIZE":  []func(*osipsdagram.OsipsEvent){osm.onAuthorize},
+		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart},
+		"E_ACC_CDR":          []func(*osipsdagram.OsipsEvent){osm.onCdr},
+		"E_CGR_AUTHORIZE":    []func(*osipsdagram.OsipsEvent){osm.onAuthorize},
+		"E_ACC_EVENT":        []func(*osipsdagram.OsipsEvent){osm.onCdr},
+		"E_ACC_MISSED_EVENT": []func(*osipsdagram.OsipsEvent){osm.onCdr},
 	}
 	return osm, nil
 }
