@@ -20,7 +20,6 @@ package engine
 
 import (
 	"flag"
-	"fmt"
 	"path"
 	"testing"
 
