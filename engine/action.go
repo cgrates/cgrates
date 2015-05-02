@@ -235,7 +235,6 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 		if cdrStorage == nil { // Only save if the cdrStorage is defined
 			continue
 		}
-		Logger.Debug(fmt.Sprintf("SetCdr: %+v\n", cdr))
 		if err := cdrStorage.SetCdr(cdr); err != nil {
 			return err
 		}

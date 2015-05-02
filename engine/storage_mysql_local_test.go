@@ -134,7 +134,6 @@ func TestMySQLSetGetTPDestinationRates(t *testing.T) {
 	if drs, err := mysqlDb.GetTpDestinationRates(TEST_SQL, DR_ID, nil); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(eDrs, drs[DR_ID]) {
-		fmt.Printf("Received: %+v\n", drs[DR_ID].DestinationRates[0])
 		t.Errorf("Expecting: %+v, received: %+v", eDrs, drs[DR_ID])
 	}
 }

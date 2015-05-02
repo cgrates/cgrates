@@ -887,10 +887,12 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			//log.Printf("CC: %+v", cc)
 			supplier = utils.ConcatenatedKey(lcrCD.Direction, lcrCD.Tenant, lcrCD.Category, lcrCD.Subject)
 			if err != nil || cc == nil {
-				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-					Supplier: supplier,
-					Error:    err,
-				})
+				//lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+				//	Supplier: supplier,
+				//	Error:    err,
+				//})
+				Logger.Warning(fmt.Sprintf("LCR_WARNING: Ignoring supplier: %s, cannot calculate cost, error: %v", err))
+				continue
 			} else {
 				supplCost := &LCRSupplierCost{
 					Supplier: supplier,

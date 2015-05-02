@@ -47,7 +47,6 @@ func (s *Scheduler) Loop() {
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime(now).Equal(now) || a0.GetNextStartTime(now).Before(now) {
-			engine.Logger.Debug(fmt.Sprintf("%v - %v", a0.Id, a0.Timing))
 			go a0.Execute()
 			// if after execute the next start time is in the past then
 			// do not add it to the queue

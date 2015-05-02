@@ -166,7 +166,6 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 }
 
 func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
-	engine.Logger.Debug(fmt.Sprintf("Executing action, attrs: %+v", attr))
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	at := &engine.ActionTiming{
 		AccountIds: []string{tag},

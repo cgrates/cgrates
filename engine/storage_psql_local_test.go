@@ -116,9 +116,6 @@ func TestPSQLSetGetTPRates(t *testing.T) {
 	if rts, err := psqlDb.GetTpRates(TEST_SQL, RT_ID); err != nil {
 		t.Error(err.Error())
 	} else if len(expectedTPRate.RateSlots) != len(rts[RT_ID].RateSlots) {
-		for _, slot := range rts[RT_ID].RateSlots {
-			fmt.Printf("Rates slot receievd: %+v\n", slot)
-		}
 		t.Errorf("Expecting: %+v, received: %+v", expectedTPRate, rts[RT_ID])
 	}
 }
@@ -137,7 +134,6 @@ func TestPSQLSetGetTPDestinationRates(t *testing.T) {
 	if drs, err := psqlDb.GetTpDestinationRates(TEST_SQL, DR_ID, nil); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(eDrs, drs[DR_ID]) {
-		fmt.Printf("Received: %+v\n", drs[DR_ID].DestinationRates[0])
 		t.Errorf("Expecting: %+v, received: %+v", eDrs, drs[DR_ID])
 	}
 }
