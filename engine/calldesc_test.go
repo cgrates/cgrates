@@ -229,6 +229,17 @@ func TestGetCost(t *testing.T) {
 	}
 }
 
+func TestGetCostZero(t *testing.T) {
+	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
+	result, _ := cd.GetCost()
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 0}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 0 {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
 func TestGetCostTimespans(t *testing.T) {
 	t1 := time.Date(2013, time.October, 8, 9, 23, 2, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 8, 9, 24, 27, 0, time.UTC)

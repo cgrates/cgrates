@@ -405,6 +405,10 @@ func (cd *CallDescriptor) GetDuration() time.Duration {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
+	// check for 0 duration
+	if cd.TimeEnd.Sub(cd.TimeStart) == 0 {
+		return cd.CreateCallCost(), nil
+	}
 	if cd.DurationIndex < cd.TimeEnd.Sub(cd.TimeStart) {
 		cd.DurationIndex = cd.TimeEnd.Sub(cd.TimeStart)
 	}
@@ -429,18 +433,10 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		cost += ts.getCost()
 	}
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
-	cc := &CallCost{
-		Direction:        cd.Direction,
-		Category:         cd.Category,
-		Tenant:           cd.Tenant,
-		Account:          cd.Account,
-		Destination:      cd.Destination,
-		Subject:          cd.Subject,
-		Cost:             cost,
-		Timespans:        timespans,
-		deductConnectFee: cd.LoopIndex == 0,
-		TOR:              cd.TOR,
-	}
+	cc := cd.CreateCallCost()
+	cc.Cost = cost
+	cc.Timespans = timespans
+
 	// global rounding
 	roundingDecimals, roundingMethod := cc.GetLongestRounding()
 	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
@@ -526,6 +522,9 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) (cc *CallCost, err error) {
+	if cd.TimeEnd.Sub(cd.TimeStart) == 0 {
+		return cd.CreateCallCost(), nil
+	}
 	if !dryRun {
 		defer accountingStorage.SetAccount(account)
 	}
