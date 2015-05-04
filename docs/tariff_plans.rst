@@ -10,13 +10,9 @@ The rest of this section we will describe the content of every csv files.
 
 The rates profile describes the prices to be applied for various calls to various destinations in various time frames. When a call is made the CGRateS system will locate the rates to be applied to the call using the rating profiles.
 
-+------------+-----+-----------+-------------+----------------------+----------------+----------------------+
-| Tenant     | TOR | Direction | Subject     | RatesFallbackSubject | RatesTimingTag | ActivationTime       |
-+============+=====+===========+=============+======================+================+======================+
-| CUSTOMER_1 | 0   | OUT       | rif:from:tm | danb                 | PREMIUM        | 2012-01-01T00:00:00Z |
-+------------+-----+-----------+-------------+----------------------+----------------+----------------------+
-| CUSTOMER_1 | 0   | OUT       | rif:from:tm | danb                 | STANDARD       | 2012-02-28T00:00:00Z |
-+------------+-----+-----------+-------------+----------------------+----------------+----------------------+
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/RatingProfiles.csv
+    :header-rows: 1
 
 Tenant
     Used to distinguish between carriers if more than one share the same database in the CGRates system.
@@ -33,18 +29,14 @@ RatesTimingTag
 ActivationTime
     Multiple rates timings/prices can be created for one profile with different activation times. When a call is made the appropriate profile(s) will be used to rate the call. So future prices can be defined here and the activation time can be set as appropriate.
 
-4.2.2. Rates timing
+4.2.2. Rating Plans
 ~~~~~~~~~~~~~~~~~~~
 
 This file makes links between a ratings and timings so each of them can be described once and various combinations are made possible.
 
-+----------+----------------+--------------+--------+
-| Tag      | RatesTag       | TimingTag    | Weight |
-+==========+================+==============+========+
-| STANDARD | RT_STANDARD    | WORKDAYS_00  | 10     |
-+----------+----------------+--------------+--------+
-| STANDARD | RT_STD_WEEKEND |  WORKDAYS_18 | 10     |
-+----------+----------------+--------------+--------+
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/RatingPlans.csv
+    :header-rows: 1
 
 Tag
     A string by which this rates timing will be referenced in other places by.
@@ -60,13 +52,10 @@ Weight
 ~~~~~~~~~~~~
 Defines price groups for various destinations which will be associated to various timings.
 
-+---------------------+-----------------+------------+-------+-------------+
-| Tag                 | DestinationsTag | ConnectFee | Price | BillingUnit |
-+=====================+=================+============+=======+=============+
-| RT_STANDARD         | GERMANY         | 0          | 0.2   | 1           |
-+---------------------+-----------------+------------+-------+-------------+
-| RT_STANDARD         | GERMANY_O2      | 0          | 0.1   | 1           |
-+---------------------+-----------------+------------+-------+-------------+
+
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/Rates.csv
+    :header-rows: 1
 
 
 Tag
@@ -84,17 +73,9 @@ BillingUnit
 ~~~~~~~~~~~~~~
 Describes the time periods that have different rates attached to them.
 
-+-----------------+--------+-----------+-----------+----------+
-| Tag             | Months | MonthDays |  WeekDays | StartTime|
-+=================+========+===========+===========+==========+
-| WORKDAYS        | \*all  | \*all     | 1;2;3;4;5 | 00:00:00 |
-+-----------------+--------+-----------+-----------+----------+
-| WEEKENDS        | \*all  | \*all     | 6,7       | 00:00:00 |
-+-----------------+--------+-----------+-----------+----------+
-| DAILY_SAME_TIME | \*all  | \*all     | \*all     | \*now    |
-+-----------------+--------+-----------+-----------+----------+
-| ONE_TIME_RUN    | \*none | \*none    | \*none    | \*now    |
-+-----------------+--------+-----------+-----------+----------+
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/Timings.csv
+    :header-rows: 1
 
 Tag
     A string by which this timing will be referenced in other places by.
@@ -112,14 +93,9 @@ StartTime
 
 The destinations are binding together various prefixes / caller ids to define a logical destination group. A prefix can appear in multiple destination groups.
 
-+------------+--------+
-| Tag        | Prefix |
-+============+========+
-| GERMANY    | 49     |
-+------------+--------+
-| GERMANY_O2 | 49176  |
-+------------+--------+
-
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/Destinations.csv
+    :header-rows: 1
 Tag
     A string by which this destination will be referenced in other places by.
 Prefix
@@ -134,14 +110,9 @@ The accounts hold the various balances and counters to activate the triggered ac
 
 Balance types are: MONETARY, SMS, INTERNET, INTERNET_TIME, MINUTES.
 
-+------------+---------+-----------+------------------+------------------+
-|Tenant      | Account | Direction | ActionTimingsTag | ActionTriggersTag|
-+============+=========+===========+==================+==================+
-| CUSTOMER_1 | rif     | OUT       | STANDARD_ABO     | STANDARD_TRIGGER |
-+------------+---------+-----------+------------------+------------------+
-| CUSTOMER_1 | dan     | OUT       | STANDARD_ABO     | STANDARD_TRIGGER |
-+------------+---------+-----------+------------------+------------------+
-
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/AccountActions.csv
+    :header-rows: 1
 
 Tenant
     Used to distinguish between carriers if more than one share the same database in the CGRates system.
@@ -159,12 +130,9 @@ ActionTriggersTag
 
 For each account there are counters that record the activity on various balances. Action triggers allow when a counter reaches a threshold to activate a group of actions. After the execution the action trigger is marked as used and will no longer be evaluated until the triggers are reset. See actions for action trigger resetting.
 
-+-------------------+---------------+----------------+-----------+----------+------------+-------------+------------------+-----------------+-----------------------+----------------------+--------------------+-------------------+-------------------+---------------+---------------------+-------------+--------+
-| Tag               | ThresholdType | ThresholdValue | Recurrent | MinSleep | BalanceTag | BalanceType | BalanceDirection | BalanceCategory | BalanceDestinationTag | BalanceRatingSubject | BalanceSharedGroup | BalanceExpiryTime | BalanceTimingTags | BalanceWeight | StatsMinQueuedItems |  ActionsTag | Weight |
-+===================+===============+================+===========+==========+============+=============+==================+=================+=======================+======================+====================+===================+===================+===============+=====================+=============+========+
-| STANDARD_TRIGGERS | \*min_balance |       2        |   false   |    0     |            |  \*monetary |      \*out       |                 |                       |                      |                    |                   |                   |               |                     | LOG_WARNING |   10   |
-| STANDARD_TRIGGERS | \*max_counter |       5        |   false   |    0     |            |  \*monetary |      \*out       |                 |        FS_USERS       |                      |                    |                   |                   |               |                     | LOG_WARNING |   10   |
-+-------------------+---------------+----------------+-----------+----------+------------+-------------+------------------+-----------------+-----------------------+----------------------+--------------------+-------------------+-------------------+---------------+---------------------+-------------+--------+
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/ActionTriggers.csv
+    :header-rows: 1
 
 Tag
     A string by which this action trigger will be referenced in other places by.
@@ -238,16 +206,12 @@ Weight
 DestinationTag
     This field is used only if the balanceTag is MINUTES. If the balance counter monitors call minutes this field indicates the destination of the calls for which the minutes are recorded.a
 
-4.2.8. Action timings
-~~~~~~~~~~~~~~~~~~~~~
+4.2.8. Action Plans
+~~~~~~~~~~~~~~~~~~~
 
-+--------------+------------+------------------+--------+
-| Tag          | ActionsTag | TimingTag        | Weight |
-+==============+============+==================+========+
-| STANDARD_ABO | SOME       | WEEKLY_SAME_TIME | 10     |
-+--------------+------------+------------------+--------+
-| STANDARD_ABO | SOME       | WEEKLY_SAME_TIME | 10     |
-+--------------+------------+------------------+--------+
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/ActionPlans.csv
+    :header-rows: 1
 
 Tag
     A string by which this action timing will be referenced in other places by.
@@ -261,13 +225,11 @@ Weight
 4.2.9. Actions
 ~~~~~~~~~~~~~~
 
-+--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
-| Tag    | Action      | BalanceTag | Units | DestinationTag | PriceType | PriceValue | MinutesWeight | Weight |
-+========+=============+============+=======+================+===========+============+===============+========+
-| SOME   | TOPUP_RESET | MONETARY   | 10    | \*all          |           |            |               | 10     |
-+--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
-| SOME_1 | DEBIT       | MINUTES    | 10    | GERMANY_O2     | PERCENT   | 25         | 10            | 10     |
-+--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
+
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/Actions.csv
+    :header-rows: 1
+
 
 Tag
     A string by which this action will be referenced in other places by.
@@ -301,18 +263,16 @@ MinutesWeight
 Weight
     If there are multiple actions in a group, they will be executed in the order of their weight (smaller first).
 
+
 4.2.10. Derived Chargers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For each call we can bill more than one time, for that we need to use the
 following options:
 
-+-----------+-------------+----------+---------+---------+--------------+-----------+--------------+----------------+-------------+---------------+--------------+--------------+------------------+----------------+-----------------+------------+
-| Direction |    Tenant   | Category | Account | Subject |    RunId     | RunFilter | ReqTypeField | DirectionField | TenantField | CategoryField | AccountField | SubjectField | DestinationField | SetupTimeField | AnswerTimeField | UsageField |
-+===========+=============+==========+=========+=========+==============+===========+==============+================+=============+===============+==============+==============+==================+================+=================+============+
-|   \*out   | cgrates.org |   call   |   1001  |   1001  | derived_run1 |           |    ^rated    |   \*default    |  \*default  |   \*default   |  \*default   |    ^1002     |    \*default     |   \*default    |    \*default    | \*default  |
-+-----------+-------------+----------+---------+---------+--------------+-----------+--------------+----------------+-------------+---------------+--------------+--------------+------------------+----------------+-----------------+------------+
-
+.. csv-table::
+    :file: ../data/tariffplans/tutorial/DerivedChargers.csv
+    :header-rows: 1
 
 In derived charges we have 2 different kind of options, filters, and actions:
 
