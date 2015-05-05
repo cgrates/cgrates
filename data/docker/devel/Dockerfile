@@ -10,7 +10,7 @@ RUN gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF && gpg -
 # add freeswitch apt repo
 RUN echo 'deb http://files.freeswitch.org/repo/deb/debian/ jessie main' > /etc/apt/sources.list.d/freeswitch.list
     
-# install dependency
+# install dependencies
 RUN apt-get -y update && apt-get -y install git bzr mercurial redis-server mysql-server python-pycurl python-mysqldb postgresql postgresql-client sudo wget freeswitch-meta-vanilla
 
 # add cgrates user
