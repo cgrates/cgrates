@@ -24,5 +24,5 @@ ln -s /root/code/bin/cgr-engine /usr/bin/cgr-engine
 # expand freeswitch conf
 cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_conf.tar.gz       
 
-
+cd /root/cgr
 bash --rcfile /root/.bashrc
