@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdExportCdrs{
 		name:      "cdrs_export",
-		rpcMethod: "ApierV1.ExportCdrsToFile",
+		rpcMethod: "ApierV2.ExportCdrsToFile",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -33,7 +33,7 @@ func init() {
 type CmdExportCdrs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrExpFileCdrs
+	rpcParams *utils.AttrExportCdrsToFile
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdExportCdrs) RpcMethod() string {
 
 func (self *CmdExportCdrs) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.AttrExpFileCdrs{}
+		self.rpcParams = &utils.AttrExportCdrsToFile{}
 	}
 	return self.rpcParams
 }
@@ -57,5 +57,5 @@ func (self *CmdExportCdrs) PostprocessRpcParams() error {
 }
 
 func (self *CmdExportCdrs) RpcResult() interface{} {
-	return &utils.ExportedFileCdrs{}
+	return &utils.AttrExportCdrsToFile{}
 }
