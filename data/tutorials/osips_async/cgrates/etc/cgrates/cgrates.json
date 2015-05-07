@@ -70,9 +70,6 @@
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
 	"rater": "internal",				// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "internal",					// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"debit_interval": "5s",			// interval to perform debits on.
-	"min_call_duration": "0s",			// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
 },

@@ -162,6 +162,8 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 		return time.Parse("20060102150405", tmStr)
 	case oneSpaceTimestampRule.MatchString(tmStr):
 		return time.Parse("02.01.2006  15:04:05", tmStr)
+	case tmStr == "*now":
+		return time.Now(), nil
 	}
 	return nilTime, errors.New("Unsupported time format")
 }

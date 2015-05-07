@@ -219,6 +219,11 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if !tsTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", tsTm, expectedTime)
 	}
+	if nowTm, err := ParseTimeDetectLayout(META_NOW); err != nil {
+		t.Error(err)
+	} else if time.Now().Sub(nowTm) > time.Duration(1)*time.Millisecond {
+		t.Errorf("Unexpected time parsed: %v", nowTm)
+	}
 }
 
 func TestParseDateUnix(t *testing.T) {

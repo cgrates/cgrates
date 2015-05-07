@@ -512,3 +512,18 @@ func TestStoredCdrEventFields(t *testing.T) {
 		t.Error("Received: ", extraFlds)
 	}
 }
+
+func TestMaxUsageReqAsStoredCdr(t *testing.T) {
+	setupReq := &MaxUsageReq{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call",
+		Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", Usage: "0.00000001",
+	}
+	eStorCdr := &StoredCdr{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: "*out",
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(10)}
+	if storedCdr, err := setupReq.AsStoredCdr(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eStorCdr, storedCdr) {
+		t.Errorf("Expected: %+v, received: %+v", eStorCdr, storedCdr)
+	}
+}

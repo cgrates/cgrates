@@ -567,3 +567,34 @@ type ExternalCdr struct {
 	CostDetails    string
 	Rated          bool // Mark the CDR as rated so we do not process it during mediation
 }
+
+// Used when authorizing requests from outside, eg ApierV1.GetMaxSessionTime
+type MaxUsageReq struct {
+	TOR         string
+	ReqType     string
+	Direction   string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	SetupTime   string
+	AnswerTime  string
+	Usage       string
+}
+
+func (self *MaxUsageReq) AsStoredCdr() (*StoredCdr, error) {
+	var err error
+	storedCdr := &StoredCdr{TOR: self.TOR, ReqType: self.ReqType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
+		Account: self.Account, Subject: self.Subject, Destination: self.Destination}
+	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime); err != nil {
+		return nil, err
+	}
+	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(self.AnswerTime); err != nil {
+		return nil, err
+	}
+	if storedCdr.Usage, err = utils.ParseDurationWithSecs(self.Usage); err != nil {
+		return nil, err
+	}
+	return storedCdr, nil
+}
