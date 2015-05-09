@@ -83,8 +83,8 @@ func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engi
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
 		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart},
 		"E_ACC_CDR":          []func(*osipsdagram.OsipsEvent){osm.onCdr},
-		"E_ACC_EVENT":        []func(*osipsdagram.OsipsEvent){osm.onCdr},
 		"E_ACC_MISSED_EVENT": []func(*osipsdagram.OsipsEvent){osm.onCdr},
+		"E_CGR_DIALOG_START": []func(*osipsdagram.OsipsEvent){osm.onDialogStart},
 	}
 	return osm, nil
 }
@@ -206,6 +206,10 @@ func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(), osipsEv.GetUUID(), err.Error()))
 	}
 
+}
+
+func (osm *OsipsSessionManager) onDialogStart(osipsDgram *osipsdagram.OsipsEvent) {
+	engine.Logger.Debug(fmt.Sprintf("onDialogStart, event: %+v", osipsDgram))
 }
 
 func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
