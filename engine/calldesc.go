@@ -268,16 +268,16 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 	}
 	for _, ri := range cd.RatingInfos {
 		if ri.RateIntervals == nil {
-			for i, new_ri := range ris {
+			for i, newRi := range ris {
 				_ = i
-				_ = new_ri
+				_ = newRi
 			}
 		}
 	}
 	return true
 }
 
-// Constructs the key for the storage lookup.
+// GetKey constructs the key for the storage lookup.
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	// check if subject is alias
@@ -289,7 +289,7 @@ func (cd *CallDescriptor) GetKey(subject string) string {
 	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, subject)
 }
 
-// Returns the key used to retrive the user balance involved in this call
+// GetAccountKey returns the key used to retrive the user balance involved in this call
 func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
