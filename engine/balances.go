@@ -219,8 +219,8 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 // retuns a callcost obtained using standard rating
 func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCost, error) {
 	// testing only
-	if cd.test_callcost != nil {
-		return cd.test_callcost, nil
+	if cd.testCallcost != nil {
+		return cd.testCallcost, nil
 	}
 	if b.RatingSubject != "" && !strings.HasPrefix(b.RatingSubject, utils.ZERO_RATING_SUBJECT_PREFIX) {
 		origSubject := cd.Subject
@@ -405,7 +405,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 	if !b.IsActiveAt(cd.TimeStart) || b.Value <= 0 {
 		return
 	}
-	//log.Printf("}}}}}}} %+v", cd.test_callcost)
+	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
 	cc.Timespans.Decompress()
 	//log.Printf("CallCost In Debit: %+v", cc)
@@ -480,7 +480,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 			}
 		}
 	}
-	//log.Printf("END: %+v", cd.test_callcost)
+	//log.Printf("END: %+v", cd.testCallcost)
 	if len(cc.Timespans) == 0 {
 		cc = nil
 	}

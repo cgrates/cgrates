@@ -176,13 +176,13 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 		TOR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
-		TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-		TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-		Direction:     OUTBOUND,
-		Destination:   "0723045326",
-		Category:      "0",
-		TOR:           utils.VOICE,
-		test_callcost: cc,
+		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+		Direction:    OUTBOUND,
+		Destination:  "0723045326",
+		Category:     "0",
+		TOR:          utils.VOICE,
+		testCallcost: cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{b1}, utils.MONETARY + OUTBOUND: BalanceChain{&Balance{Category: "0", Value: 21}}}}
 	var err error
@@ -216,13 +216,13 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 		TOR: utils.VOICE,
 	}
 	cd := &CallDescriptor{
-		TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-		TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-		Direction:     OUTBOUND,
-		Destination:   "0723045326",
-		Category:      "0",
-		TOR:           utils.VOICE,
-		test_callcost: cc,
+		TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+		Direction:    OUTBOUND,
+		Destination:  "0723045326",
+		Category:     "0",
+		TOR:          utils.VOICE,
+		testCallcost: cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND:    BalanceChain{b1},
@@ -269,7 +269,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.Timespans[0].GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND:    BalanceChain{b1, b2},
@@ -321,7 +321,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND: BalanceChain{b1},
@@ -372,7 +372,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND:    BalanceChain{b1},
@@ -420,7 +420,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND:    BalanceChain{b1},
@@ -473,7 +473,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND: BalanceChain{b1},
@@ -522,7 +522,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND: BalanceChain{b1, b2},
@@ -572,7 +572,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND: BalanceChain{b1},
@@ -616,7 +616,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.MONETARY + OUTBOUND: BalanceChain{&Balance{Uuid: "money", Value: 50}},
@@ -669,7 +669,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND:    BalanceChain{b1},
@@ -724,7 +724,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.MONETARY + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 75, DestinationId: "NAT", RatingSubject: "minu"}},
@@ -774,7 +774,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost: cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND: BalanceChain{b1},
@@ -836,7 +836,7 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND:    BalanceChain{b1},
@@ -900,7 +900,7 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.VOICE + OUTBOUND:    BalanceChain{b1},
@@ -1160,7 +1160,7 @@ func TestDebitShared(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
 		utils.MONETARY + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 0, SharedGroup: "SG_TEST"}},
@@ -1230,7 +1230,7 @@ func TestMaxDurationShared(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
 		utils.MONETARY + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 0, SharedGroup: "SG_TEST"}},
@@ -1276,7 +1276,7 @@ func TestDebitSMS(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.SMS + OUTBOUND:      BalanceChain{&Balance{Uuid: "testm", Value: 100, Weight: 5, DestinationId: "NAT"}},
@@ -1326,7 +1326,7 @@ func TestDebitDataUnits(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.DATA + OUTBOUND:     BalanceChain{&Balance{Uuid: "testm", Value: 100, Weight: 5, DestinationId: "NAT"}},
@@ -1375,7 +1375,7 @@ func TestDebitDataMoney(t *testing.T) {
 		Destination:   cc.Destination,
 		TOR:           cc.TOR,
 		DurationIndex: cc.GetDuration(),
-		test_callcost: cc,
+		testCallcost:  cc,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		utils.DATA + OUTBOUND:     BalanceChain{&Balance{Uuid: "testm", Value: 0, Weight: 5, DestinationId: "NAT"}},
