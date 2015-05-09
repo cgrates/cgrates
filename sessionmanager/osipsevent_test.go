@@ -118,7 +118,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 }
 
 func TestOsipsEventMissingParameter(t *testing.T) {
-	if osipsEv.MissingParameter() {
+	if !osipsEv.MissingParameter() {
 		t.Errorf("Wrongly detected missing parameter: %+v", osipsEv)
 	}
 	osipsEv2 := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_CDR",
