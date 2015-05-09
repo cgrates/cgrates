@@ -5,9 +5,9 @@
 // Starts rater, scheduler
 
 "listen": {
-	"rpc_json": "127.0.0.1:2012",			// RPC JSON listening address
-	"rpc_gob": "127.0.0.1:2013",			// RPC GOB listening address
-	"http": "127.0.0.1:2080",				// HTTP listening address
+	"rpc_json": ":2012",			// RPC JSON listening address
+	"rpc_gob": ":2013",			// RPC GOB listening address
+	"http": ":2080",				// HTTP listening address
 },
 
 "rater": {
