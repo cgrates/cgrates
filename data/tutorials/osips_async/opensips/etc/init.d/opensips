@@ -114,7 +114,7 @@ if test "$DUMP_CORE" = "yes" ; then
     # echo "$COREDIR/core.%e.sig%s.%p" > /proc/sys/kernel/core_pattern
 fi
 
-OPTIONS="-f $CFGFILE -P $PIDFILE -m $S_MEMORY -M $P_MEMORY -u $USER -g $GROUP"
+OPTIONS="-f $CFGFILE -P $PIDFILE -m $S_MEMORY -M $P_MEMORY -u $USER -g $GROUP -w $HOMEDIR"
 
 case "$1" in
   start|debug)
