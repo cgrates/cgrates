@@ -46,9 +46,11 @@ const (
 	TIME                     = "time"
 	SETUP_DURATION           = "setuptime"
 	OSIPS_SETUP_TIME         = "created"
+	OSIPS_EVENT_TIME         = "time"
 	OSIPS_DURATION           = "duration"
 	OSIPS_AUTH_OK            = "AUTH_OK"
 	OSIPS_INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS"
+	OSIPS_DIALOG_ID          = "dialog_id"
 )
 
 func NewOsipsEvent(osipsDagramEvent *osipsdagram.OsipsEvent) (*OsipsEvent, error) {
@@ -81,8 +83,9 @@ func (osipsev *OsipsEvent) GetUUID() string {
 	return osipsev.osipsEvent.AttrValues[CALLID] + ";" + osipsev.osipsEvent.AttrValues[FROM_TAG] + ";" + osipsev.osipsEvent.AttrValues[TO_TAG]
 }
 
+// Returns the dialog identifier which opensips needs to disconnect a dialog
 func (osipsev *OsipsEvent) GetSessionIds() []string {
-	return []string{osipsev.GetUUID()}
+	return strings.Split(osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID], ":")
 }
 
 func (osipsev *OsipsEvent) GetDirection(fieldName string) string {
@@ -96,7 +99,7 @@ func (osipsev *OsipsEvent) GetSubject(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_SUBJECT])
+	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_SUBJECT], osipsev.GetAccount(fieldName))
 }
 
 func (osipsev *OsipsEvent) GetAccount(fieldName string) string {
@@ -137,11 +140,9 @@ func (osipsev *OsipsEvent) GetReqType(fieldName string) string {
 	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_REQTYPE], config.CgrConfig().DefaultReqType)
 }
 func (osipsev *OsipsEvent) GetSetupTime(fieldName string) (time.Time, error) {
-	sTimeStr := utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[OSIPS_SETUP_TIME])
+	sTimeStr := utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[OSIPS_SETUP_TIME], osipsev.osipsEvent.AttrValues[OSIPS_EVENT_TIME])
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		sTimeStr = osipsev.osipsEvent.AttrValues[OSIPS_SETUP_TIME]
 	}
 	return utils.ParseTimeDetectLayout(sTimeStr)
 }
@@ -186,10 +187,13 @@ func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
 	return osipsEv.osipsEvent.OriginatorAddress.IP.String()
 }
 func (osipsev *OsipsEvent) MissingParameter() bool {
-	return len(osipsev.GetUUID()) == 0 ||
-		len(osipsev.GetAccount(utils.META_DEFAULT)) == 0 ||
-		len(osipsev.GetSubject(utils.META_DEFAULT)) == 0 ||
-		len(osipsev.GetDestination(utils.META_DEFAULT)) == 0
+	if osipsev.GetName() == "E_ACC_EVENT" && osipsev.osipsEvent.AttrValues["method"] == "INVITE" {
+		return len(osipsev.GetUUID()) == 0 ||
+			len(osipsev.GetAccount(utils.META_DEFAULT)) == 0 ||
+			len(osipsev.GetDestination(utils.META_DEFAULT)) == 0 ||
+			len(osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID]) == 0
+	}
+	return true
 }
 func (osipsev *OsipsEvent) ParseEventValue(*utils.RSRField) string {
 	return ""
@@ -198,8 +202,8 @@ func (osipsev *OsipsEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return false, ""
 }
 func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
-	primaryFields := []string{"to_tag", "setuptime", "created", "method", "callid", "sip_reason", "time", "sip_code", "duration", "from_tag",
-		"cgr_tenant", "cgr_category", "cgr_reqtype", "cgr_account", "cgr_subject", "cgr_destination", utils.CGR_SUPPLIER}
+	primaryFields := []string{TO_TAG, SETUP_DURATION, OSIPS_SETUP_TIME, "method", "callid", "sip_reason", OSIPS_EVENT_TIME, "sip_code", "duration", "from_tag", "dialog_id",
+		CGR_TENANT, CGR_CATEGORY, CGR_REQTYPE, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION, utils.CGR_SUPPLIER}
 	extraFields := make(map[string]string)
 	for field, val := range osipsev.osipsEvent.AttrValues {
 		if !utils.IsSliceMember(primaryFields, field) {
@@ -230,4 +234,15 @@ func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.ExtraFields = osipsEv.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr
+}
+
+// Computes duration out of setup time of the callEnd
+func (osipsEv *OsipsEvent) updateDurationFromEvent(updatedOsipsEv *OsipsEvent) error {
+	endTime, err := updatedOsipsEv.GetSetupTime(TIME)
+	if err != nil {
+		return err
+	}
+	answerTime, err := osipsEv.GetAnswerTime(utils.META_DEFAULT)
+	osipsEv.osipsEvent.AttrValues[OSIPS_DURATION] = endTime.Sub(answerTime).String()
+	return nil
 }

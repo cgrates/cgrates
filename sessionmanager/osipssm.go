@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
 	"strings"
 	"time"
@@ -81,10 +82,10 @@ duration::
 func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
 	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
-		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart},
-		"E_ACC_CDR":          []func(*osipsdagram.OsipsEvent){osm.onCdr},
-		"E_ACC_MISSED_EVENT": []func(*osipsdagram.OsipsEvent){osm.onCdr},
-		"E_CGR_DIALOG_START": []func(*osipsdagram.OsipsEvent){osm.onDialogStart},
+		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart}, // Raised when OpenSIPS starts so we can register our event handlers
+		"E_ACC_CDR":          []func(*osipsdagram.OsipsEvent){osm.onCdr},           // Raised if cdr_flag is configured
+		"E_ACC_MISSED_EVENT": []func(*osipsdagram.OsipsEvent){osm.onCdr},           // Raised if evi_missed_flag is configured
+		"E_ACC_EVENT":        []func(*osipsdagram.OsipsEvent){osm.onAccEvent},      // Raised if evi_flag is configured and not cdr_flag containing start/stop events
 	}
 	return osm, nil
 }
@@ -115,10 +116,6 @@ func (osm *OsipsSessionManager) Connect() (err error) {
 	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPS> Listening for datagram events at <%s>", osm.cfg.ListenUdp))
 	evsrv.ServeEvents(osm.stopServing) // Will break through stopServing on error in other places
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
-}
-
-func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, cgrId, notify string) {
-	return
 }
 func (osm *OsipsSessionManager) RemoveSession(uuid string) {
 	return
@@ -200,19 +197,69 @@ func (osm *OsipsSessionManager) onOpensipsStart(cdrDagram *osipsdagram.OsipsEven
 	go osm.SubscribeEvents(osm.evSubscribeStop)
 }
 
+func (osm *OsipsSessionManager) onAccEvent(osipsDgram *osipsdagram.OsipsEvent) {
+	osipsEv, _ := NewOsipsEvent(osipsDgram)
+	if osipsEv.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+		return
+	}
+	if osipsDgram.AttrValues["method"] == "INVITE" { // Call start
+		if err := osm.callStart(osipsEv); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_START out of %+v, error: <%s>", osipsDgram, err.Error()))
+		}
+	} else if osipsDgram.AttrValues["method"] == "BYE" {
+		if err := osm.callEnd(osipsEv); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_END out of %+v, error: <%s>", osipsDgram, err.Error()))
+		}
+	}
+}
+
 func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	osipsEv, _ := NewOsipsEvent(cdrDagram)
 	if err := osm.ProcessCdr(osipsEv.AsStoredCdr()); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(), osipsEv.GetUUID(), err.Error()))
 	}
-
-}
-
-func (osm *OsipsSessionManager) onDialogStart(osipsDgram *osipsdagram.OsipsEvent) {
-	engine.Logger.Debug(fmt.Sprintf("onDialogStart, event: %+v", osipsDgram))
 }
 
 func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
 	var reply string
 	return osm.cdrsrv.ProcessCdr(storedCdr, &reply)
+}
+
+func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, connId, notify string) error {
+	sessionIds := ev.GetSessionIds()
+	if len(sessionIds) != 2 {
+		errMsg := fmt.Sprintf("Failed disconnecting session for event: %+v, notify: %s, dialogId: %v", ev, notify, sessionIds)
+		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> " + errMsg))
+		return errors.New(errMsg)
+	}
+	cmd := fmt.Sprintf(":dlg_end_dlg:\n%s\n%s\n\n", sessionIds[0], sessionIds[1])
+	success := false
+	for attempts := 0; attempts < osm.cfg.Reconnects; attempts++ {
+		if reply, err := osm.miConn.SendCommand([]byte(cmd)); err == nil && bytes.HasPrefix(reply, []byte("200 OK")) {
+			success = true
+			break
+		}
+		time.Sleep(time.Duration((attempts+1)/2) * time.Second) // Allow OpenSIPS to recover from errors
+		continue                                                // Try again
+	}
+	if !success {
+		errStr := fmt.Sprintf("Failed disconnecting session for event: %+v, notify: %s, dialogId: %v", ev, notify, sessionIds)
+		engine.Logger.Err("<SM-OpenSIPS> " + errStr)
+		return errors.New(errStr)
+	}
+	return nil
+}
+
+func (osm *OsipsSessionManager) callStart(osipsEv *OsipsEvent) error {
+	engine.Logger.Debug(fmt.Sprintf("callStart, event: %+v", osipsEv.osipsEvent))
+	if osipsEv.MissingParameter() {
+		osm.DisconnectSession(osipsEv, "", utils.ERR_MANDATORY_IE_MISSING)
+		return errors.New(utils.ERR_MANDATORY_IE_MISSING)
+	}
+	return nil
+}
+
+func (osm *OsipsSessionManager) callEnd(osipsEv *OsipsEvent) error {
+	engine.Logger.Debug(fmt.Sprintf("callEnd, event: %+v", osipsEv.osipsEvent))
+	return nil
 }

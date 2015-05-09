@@ -142,3 +142,48 @@ func TestOsipsEventAsStoredCdr(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }
+
+func TestOsipsAccMissedToStoredCdr(t *testing.T) {
+	setupTime, _ := utils.ParseTimeDetectLayout("1431182699")
+	osipsEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_MISSED_EVENT",
+		AttrValues: map[string]string{"method": "INVITE", "from_tag": "5cb81eaa", "to_tag": "", "callid": "27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0",
+			"sip_code": "404", "sip_reason": "Not Found", "time": "1431182699", "cgr_reqtype": utils.META_PSEUDOPREPAID,
+			"cgr_account": "1001", "cgr_destination": "1002", utils.CGR_SUPPLIER: "supplier1",
+			"duration": "", "dialog_id": "3547:277000822", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr,
+	}}
+	eStoredCdr := &engine.StoredCdr{CgrId: utils.Sha1("27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0;5cb81eaa;", setupTime.UTC().String()),
+		TOR: utils.VOICE, AccId: "27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0;5cb81eaa;", CdrHost: "172.16.254.77", CdrSource: "OSIPS_E_ACC_MISSED_EVENT",
+		ReqType: utils.META_PSEUDOPREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Supplier: "supplier1",
+		Destination: "1002", SetupTime: setupTime, AnswerTime: setupTime,
+		Usage: time.Duration(0), ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
+	if storedCdr := osipsEv.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
+	}
+
+}
+
+func TestOsipsUpdateDurationFromEvent(t *testing.T) {
+	osipsEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_EVENT",
+		AttrValues: map[string]string{"method": "INVITE", "from_tag": "87d02470", "to_tag": "a671a98", "callid": "05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0",
+			"sip_code": "200", "sip_reason": "OK", "time": "1430579770", "cgr_reqtype": utils.META_PREPAID,
+			"cgr_account": "1001", "cgr_destination": "1002", utils.CGR_SUPPLIER: "supplier1",
+			"duration": "", "dialog_id": "3547:277000822", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr,
+	}}
+	updatedEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_EVENT",
+		AttrValues: map[string]string{"method": "BYE", "from_tag": "a671a98", "to_tag": "87d02470", "callid": "05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0",
+			"sip_code": "200", "sip_reason": "OK", "time": "1430579797", "cgr_reqtype": "",
+			"cgr_account": "", "cgr_destination": "", utils.CGR_SUPPLIER: "",
+			"duration": "", "dialog_id": "3547:277000822"}, OriginatorAddress: addr,
+	}}
+	eOsipsEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_EVENT",
+		AttrValues: map[string]string{"method": "INVITE", "from_tag": "87d02470", "to_tag": "a671a98", "callid": "05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0",
+			"sip_code": "200", "sip_reason": "OK", "time": "1430579770", "cgr_reqtype": utils.META_PREPAID,
+			"cgr_account": "1001", "cgr_destination": "1002", utils.CGR_SUPPLIER: "supplier1",
+			"duration": "27s", "dialog_id": "3547:277000822", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr,
+	}}
+	if err := osipsEv.updateDurationFromEvent(updatedEv); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOsipsEv, osipsEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOsipsEv.osipsEvent, osipsEv.osipsEvent)
+	}
+}

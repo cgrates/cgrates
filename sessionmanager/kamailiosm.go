@@ -140,7 +140,6 @@ func (self *KamailioSessionManager) DisconnectSession(ev engine.Event, connId, n
 	if err := self.conns[connId].Send(disconnectEv.String()); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending disconnect request, error %s, connection id: %s", err.Error(), connId))
 	}
-	return
 }
 func (self *KamailioSessionManager) RemoveSession(uuid string) {
 	for i, ss := range self.sessions {
