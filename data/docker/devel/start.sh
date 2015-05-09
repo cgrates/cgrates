@@ -27,4 +27,5 @@ ln -s /root/code/bin/cgr-engine /usr/bin/cgr-engine
 cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_conf.tar.gz       
 
 cd /root/cgr
+echo "for cgradmin run: cgr-engine -config_dir data/conf/samples/cgradmin"
 zsh
