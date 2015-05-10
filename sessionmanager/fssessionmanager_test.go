@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,17 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessionmanager
 
-// "github.com/cgrates/cgrates/timespans"
-// "testing"
+import (
+	"testing"
+)
 
-/*func TestConnect(t *testing.T) {
-	sm := &FSSessionManager{}
-	sm.Connect(&SessionDelegate{&timespans.Responder{}}, "localhost:8021", "ClueCon")
-	//for {
-	ev := sm.readNextEvent()
-	if ev == nil {
-		t.Error("Got nil event!")
-	}
-	//log.Print(ev)
-	//}
-}*/
+func TestFSSMInterface(t *testing.T) {
+	var _ SessionManager = SessionManager(new(FSSessionManager))
+}

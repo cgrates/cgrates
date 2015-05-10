@@ -23,7 +23,6 @@ import (
 	"net/rpc/jsonrpc"
 	"os"
 	"path"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -133,66 +132,6 @@ func TestTutFsCallsLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-// Check loaded stats
-func TestTutFsCallsCacheStats(t *testing.T) {
-	if !*testCalls {
-		return
-	}
-	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
-	var args utils.AttrCacheStats
-	if err := tutFsCallsRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
-	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
-	}
-}
-
-// Check items age
-func TestTutFsCallsGetCachedItemAge(t *testing.T) {
-	if !*testCalls {
-		return
-	}
-	var rcvAge *utils.CachedItemAge
-	if err := tutFsCallsRpc.Call("ApierV1.GetCachedItemAge", "1002", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Destination > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutFsCallsRpc.Call("ApierV1.GetCachedItemAge", "RP_RETAIL1", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingPlan > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutFsCallsRpc.Call("ApierV1.GetCachedItemAge", "*out:cgrates.org:call:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingProfile > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutFsCallsRpc.Call("ApierV1.GetCachedItemAge", "LOG_WARNING", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Action > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutFsCallsRpc.Call("ApierV1.GetCachedItemAge", "SHARED_A", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	/*
-		if err := tutFsCallsRpc.Call("ApierV1.GetCachedItemAge", "1006", &rcvAge); err != nil {
-			t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-		} else if rcvAge.RatingAlias > time.Duration(2)*time.Second {
-			t.Errorf("Cache too old: %d", rcvAge)
-		}
-		if err := tutFsCallsRpc.Call("ApierV1.GetCachedItemAge", "1006", &rcvAge); err != nil {
-			t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-		} else if rcvAge.RatingAlias > time.Duration(2)*time.Second || rcvAge.AccountAlias > time.Duration(2)*time.Second {
-			t.Errorf("Cache too old: %d", rcvAge)
-		}
-	*/
-}
-
 // Make sure account was debited properly
 func TestTutFsCallsAccountsBefore(t *testing.T) {
 	if !*testCalls {
@@ -232,122 +171,6 @@ func TestTutFsCallsAccountsBefore(t *testing.T) {
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005", Direction: "*out"}
 	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
 		t.Error("Got error on ApierV1.GetAccount: %v", err)
-	}
-}
-
-// Check call costs
-func TestTutFsCallsGetCosts(t *testing.T) {
-	if !*testCalls {
-		return
-	}
-	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ := utils.ParseDate("2014-08-04T13:00:20Z")
-	cd := engine.CallDescriptor{
-		Direction:     "*out",
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "1001",
-		Account:       "1001",
-		Destination:   "1002",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tEnd,
-	}
-	var cc engine.CallCost
-	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
-		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6 {
-		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
-	}
-	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ = utils.ParseDate("2014-08-04T13:01:25Z")
-	cd = engine.CallDescriptor{
-		Direction:     "*out",
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "1001",
-		Account:       "1001",
-		Destination:   "1002",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tEnd,
-	}
-	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
-		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6417 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
-		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
-	}
-	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ = utils.ParseDate("2014-08-04T13:00:20Z")
-	cd = engine.CallDescriptor{
-		Direction:     "*out",
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "1001",
-		Account:       "1001",
-		Destination:   "1003",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tEnd,
-	}
-	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
-		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1 {
-		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
-	}
-	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ = utils.ParseDate("2014-08-04T13:01:25Z")
-	cd = engine.CallDescriptor{
-		Direction:     "*out",
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "1001",
-		Account:       "1001",
-		Destination:   "1003",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tEnd,
-	}
-	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
-		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3 {
-		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
-	}
-	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ = utils.ParseDate("2014-08-04T13:00:20Z")
-	cd = engine.CallDescriptor{
-		Direction:     "*out",
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "1001",
-		Account:       "1001",
-		Destination:   "1004",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tEnd,
-	}
-	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
-		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1 {
-		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
-	}
-	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ = utils.ParseDate("2014-08-04T13:01:25Z")
-	cd = engine.CallDescriptor{
-		Direction:     "*out",
-		Category:      "call",
-		Tenant:        "cgrates.org",
-		Subject:       "1001",
-		Account:       "1001",
-		Destination:   "1004",
-		DurationIndex: 0,
-		TimeStart:     tStart,
-		TimeEnd:       tEnd,
-	}
-	if err := tutFsCallsRpc.Call("Responder.GetCost", cd, &cc); err != nil {
-		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3 {
-		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 }
 

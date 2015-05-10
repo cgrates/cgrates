@@ -254,7 +254,7 @@ func startSmOpenSIPS(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn)
+	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn, cdrDb)
 	if err := sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
 	}

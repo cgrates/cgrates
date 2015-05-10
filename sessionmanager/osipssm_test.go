@@ -19,19 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"time"
-
-	"github.com/cgrates/cgrates/engine"
+	"testing"
 )
 
-type SessionManager interface {
-	CdrDb() engine.CdrStorage
-	Rater() engine.Connector
-	DebitInterval() time.Duration
-	Connect() error
-	DisconnectSession(engine.Event, string, string) error
-	WarnSessionMinDuration(string, string)
-	RemoveSession(string)
-	ProcessCdr(*engine.StoredCdr) error
-	Shutdown() error
+func TestOsipsSMInterface(t *testing.T) {
+	var _ SessionManager = SessionManager(new(OsipsSessionManager))
 }

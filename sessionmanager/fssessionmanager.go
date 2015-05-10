@@ -101,27 +101,31 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 }
 
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) DisconnectSession(ev engine.Event, connId, notify string) {
+func (sm *FSSessionManager) DisconnectSession(ev engine.Event, connId, notify string) error {
 	if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", ev.GetUUID(), notify)); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send disconect api notification to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
+		return err
 	}
 	if notify == INSUFFICIENT_FUNDS {
 		if len(sm.cfg.EmptyBalanceContext) != 0 {
 			if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_transfer %s %s %s\n\n", ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), sm.cfg.EmptyBalanceContext)); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not transfer the call to empty balance context, error: <%s>, connId: %s", err.Error(), connId))
+				return err
 			}
-			return
+			return nil
 		} else if len(sm.cfg.EmptyBalanceAnnFile) != 0 {
 			if _, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_broadcast %s playback!manager_request::%s aleg\n\n", ev.GetUUID(), sm.cfg.EmptyBalanceAnnFile)); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send uuid_broadcast to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
+				return err
 			}
-			return
+			return nil
 		}
 	}
 	if err := sm.conns[connId].SendMsgCmd(ev.GetUUID(), map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send disconect msg to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
+		return err
 	}
-	return
+	return nil
 }
 
 // Remove session from session list, removes all related in case of multiple runs

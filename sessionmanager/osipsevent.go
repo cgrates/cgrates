@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -80,7 +81,7 @@ func (osipsev *OsipsEvent) GetCgrId() string {
 }
 
 func (osipsev *OsipsEvent) GetUUID() string {
-	return osipsev.osipsEvent.AttrValues[CALLID] + ";" + osipsev.osipsEvent.AttrValues[FROM_TAG] + ";" + osipsev.osipsEvent.AttrValues[TO_TAG]
+	return osipsev.osipsEvent.AttrValues[CALLID]
 }
 
 // Returns the dialog identifier which opensips needs to disconnect a dialog
@@ -187,11 +188,38 @@ func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
 	return osipsEv.osipsEvent.OriginatorAddress.IP.String()
 }
 func (osipsev *OsipsEvent) MissingParameter() bool {
+	engine.Logger.Debug(fmt.Sprintf("Missing parameters on: %+v", osipsev.osipsEvent))
+	var nilTime time.Time
 	if osipsev.GetName() == "E_ACC_EVENT" && osipsev.osipsEvent.AttrValues["method"] == "INVITE" {
 		return len(osipsev.GetUUID()) == 0 ||
 			len(osipsev.GetAccount(utils.META_DEFAULT)) == 0 ||
 			len(osipsev.GetDestination(utils.META_DEFAULT)) == 0 ||
 			len(osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID]) == 0
+	} else if osipsev.GetName() == "E_ACC_EVENT" && osipsev.osipsEvent.AttrValues["method"] == "BYE" {
+		return len(osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID]) == 0 ||
+			len(osipsev.osipsEvent.AttrValues[TIME]) == 0
+	} else if osipsev.GetName() == "E_ACC_EVENT" && osipsev.osipsEvent.AttrValues["method"] == "UPDATE" { // Updated event out of start/stop
+		// Data needed when stopping a prepaid loop or building a CDR with start/stop event
+		setupTime, err := osipsev.GetSetupTime(TIME)
+		if err != nil || setupTime.Equal(nilTime) {
+			return true
+		}
+		aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT)
+		if err != nil || aTime.Equal(nilTime) {
+			return true
+		}
+		endTime, err := osipsev.GetEndTime()
+		if err != nil || endTime.Equal(nilTime) {
+			return true
+		}
+		_, err = osipsev.GetDuration(utils.META_DEFAULT)
+		if err != nil {
+			return true
+		}
+		if osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID] == "" {
+			return true
+		}
+		return false
 	}
 	return true
 }
@@ -211,6 +239,10 @@ func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
 		}
 	}
 	return extraFields
+}
+
+func (osipsev *OsipsEvent) DialogId() string {
+	return osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID]
 }
 
 func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
@@ -244,5 +276,6 @@ func (osipsEv *OsipsEvent) updateDurationFromEvent(updatedOsipsEv *OsipsEvent) e
 	}
 	answerTime, err := osipsEv.GetAnswerTime(utils.META_DEFAULT)
 	osipsEv.osipsEvent.AttrValues[OSIPS_DURATION] = endTime.Sub(answerTime).String()
+	osipsEv.osipsEvent.AttrValues["method"] = "UPDATE" // So we can know it is an end event
 	return nil
 }
