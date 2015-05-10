@@ -143,7 +143,7 @@ func (osm *OsipsSessionManager) Shutdown() error {
 // Automatic subscribe to OpenSIPS for events, trigered on Connect or OpenSIPS restart
 func (osm *OsipsSessionManager) SubscribeEvents(evStop chan struct{}) error {
 	if err := osm.subscribeEvents(); err != nil { // Init subscribe
-		return err
+		close(osm.stopServing) // Do not serve anymore since we got errors on subscribing
 	}
 	for {
 		select {
@@ -151,6 +151,7 @@ func (osm *OsipsSessionManager) SubscribeEvents(evStop chan struct{}) error {
 			return nil
 		case <-time.After(osm.cfg.EventsSubscribeInterval): // Subscribe on interval
 			if err := osm.subscribeEvents(); err != nil {
+				close(osm.stopServing) // Do not serve anymore since we got errors on subscribing
 				return err
 			}
 		}
@@ -173,18 +174,11 @@ func (osm *OsipsSessionManager) subscribeEvents() error {
 			continue
 		}
 		cmd := fmt.Sprintf(":event_subscribe:\n%s\nudp:%s:%s\n%d\n", eventName, addrListen, portListen, int(subscribeInterval.Seconds()))
-		success := false
-		for attempts := 0; attempts < osm.cfg.Reconnects; attempts++ {
-			if reply, err := osm.miConn.SendCommand([]byte(cmd)); err == nil && bytes.HasPrefix(reply, []byte("200 OK")) {
-				success = true
-				break
-			}
-			time.Sleep(time.Duration((attempts+1)/2) * time.Second) // Allow OpenSIPS to recover from errors
-			continue                                                // Try again
-		}
-		if !success {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Shutting down, failed subscribing to OpenSIPS at address: <%s>", osm.cfg.MiAddr))
-			close(osm.stopServing) // Do not serve anymore since we got errors on subscribing
+		if reply, err := osm.miConn.SendCommand([]byte(cmd)); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>, error: <%s>", osm.cfg.MiAddr, err))
+			return err
+		} else if !bytes.HasPrefix(reply, []byte("200 OK")) {
+			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>", osm.cfg.MiAddr))
 			return errors.New("Failed subscribing to OpenSIPS events")
 		}
 	}
@@ -233,16 +227,10 @@ func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, connId, notif
 		return errors.New(errMsg)
 	}
 	cmd := fmt.Sprintf(":dlg_end_dlg:\n%s\n%s\n\n", sessionIds[0], sessionIds[1])
-	success := false
-	for attempts := 0; attempts < osm.cfg.Reconnects; attempts++ {
-		if reply, err := osm.miConn.SendCommand([]byte(cmd)); err == nil && bytes.HasPrefix(reply, []byte("200 OK")) {
-			success = true
-			break
-		}
-		time.Sleep(time.Duration((attempts+1)/2) * time.Second) // Allow OpenSIPS to recover from errors
-		continue                                                // Try again
-	}
-	if !success {
+	if reply, err := osm.miConn.SendCommand([]byte(cmd)); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed disconnecting session for event: %+v, notify: %s, dialogId: %v, error: <%s>", ev, notify, sessionIds, err))
+		return err
+	} else if !bytes.HasPrefix(reply, []byte("200 OK")) {
 		errStr := fmt.Sprintf("Failed disconnecting session for event: %+v, notify: %s, dialogId: %v", ev, notify, sessionIds)
 		engine.Logger.Err("<SM-OpenSIPS> " + errStr)
 		return errors.New(errStr)
@@ -251,15 +239,15 @@ func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, connId, notif
 }
 
 func (osm *OsipsSessionManager) callStart(osipsEv *OsipsEvent) error {
-	engine.Logger.Debug(fmt.Sprintf("callStart, event: %+v", osipsEv.osipsEvent))
 	if osipsEv.MissingParameter() {
-		osm.DisconnectSession(osipsEv, "", utils.ERR_MANDATORY_IE_MISSING)
+		if err := osm.DisconnectSession(osipsEv, "", utils.ERR_MANDATORY_IE_MISSING); err != nil {
+			return err
+		}
 		return errors.New(utils.ERR_MANDATORY_IE_MISSING)
 	}
 	return nil
 }
 
 func (osm *OsipsSessionManager) callEnd(osipsEv *OsipsEvent) error {
-	engine.Logger.Debug(fmt.Sprintf("callEnd, event: %+v", osipsEv.osipsEvent))
 	return nil
 }
