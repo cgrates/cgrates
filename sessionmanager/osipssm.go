@@ -100,9 +100,10 @@ type OsipsSessionManager struct {
 	stopServing     chan struct{}                         // Stop serving datagrams
 	miConn          *osipsdagram.OsipsMiDatagramConnector // Pool of connections used to various OpenSIPS servers, keep reference towards events received so we can issue commands always to the same remote
 	sessions        []*Session
-	cdrStartEvents  map[string]*OsipsEvent // Used when building CDRs
+	cdrStartEvents  map[string]*OsipsEvent // Used when building CDRs, ToDo: secure access to map
 }
 
+// Called when firing up the session manager, will stay connected for the duration of the daemon running
 func (osm *OsipsSessionManager) Connect() (err error) {
 	osm.stopServing = make(chan struct{})
 	if osm.miConn, err = osipsdagram.NewOsipsMiDatagramConnector(osm.cfg.MiAddr, osm.cfg.Reconnects); err != nil {
@@ -120,6 +121,8 @@ func (osm *OsipsSessionManager) Connect() (err error) {
 	evsrv.ServeEvents(osm.stopServing) // Will break through stopServing on error in other places
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
 }
+
+// Removes a session on call end
 func (osm *OsipsSessionManager) RemoveSession(uuid string) {
 	for i, ss := range osm.sessions {
 		if ss.eventStart.GetUUID() == uuid {
@@ -128,32 +131,39 @@ func (osm *OsipsSessionManager) RemoveSession(uuid string) {
 		}
 	}
 }
-func (osm *OsipsSessionManager) MaxDebit(cd *engine.CallDescriptor, cc *engine.CallCost) error {
-	return nil
-}
+
+// DebitInterval will give out the frequence of the debits sent to engine
 func (osm *OsipsSessionManager) DebitInterval() time.Duration {
 	return osm.cfg.DebitInterval
 }
+
+// Returns the connection to local cdr database, used by session to log it's final costs
 func (osm *OsipsSessionManager) CdrDb() engine.CdrStorage {
 	return osm.cdrDb
 }
-func (osm *OsipsSessionManager) DbLogger() engine.LogStorage {
-	return nil
-}
+
+// Returns connection to rater/controller
 func (osm *OsipsSessionManager) Rater() engine.Connector {
 	return osm.rater
 }
+
+// Part of the session manager interface, not really used with OpenSIPS now
 func (osm *OsipsSessionManager) WarnSessionMinDuration(sessionUuid, connId string) {
 	return
 }
+
+// Called on session manager shutdown, could add more cleanup actions in the future
 func (osm *OsipsSessionManager) Shutdown() error {
 	return nil
 }
+
+// Process the CDR with CDRS component
 func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
 	var reply string
 	return osm.cdrsrv.ProcessCdr(storedCdr, &reply)
 }
 
+// Disconnects the session
 func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, connId, notify string) error {
 	sessionIds := ev.GetSessionIds()
 	if len(sessionIds) != 2 {
@@ -169,16 +179,6 @@ func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, connId, notif
 		errStr := fmt.Sprintf("Failed disconnecting session for event: %+v, notify: %s, dialogId: %v", ev, notify, sessionIds)
 		engine.Logger.Err("<SM-OpenSIPS> " + errStr)
 		return errors.New(errStr)
-	}
-	return nil
-}
-
-// Searches and return the session with the specifed uuid
-func (osm *OsipsSessionManager) getSession(uuid string) *Session {
-	for _, s := range osm.sessions {
-		if s.eventStart.GetUUID() == uuid {
-			return s
-		}
 	}
 	return nil
 }
@@ -227,12 +227,14 @@ func (osm *OsipsSessionManager) subscribeEvents() error {
 	return nil
 }
 
+// Triggered opensips_start  event
 func (osm *OsipsSessionManager) onOpensipsStart(cdrDagram *osipsdagram.OsipsEvent) {
 	osm.evSubscribeStop <- struct{}{}         // Cancel previous subscribes
 	osm.evSubscribeStop = make(chan struct{}) // Create a fresh communication channel
 	go osm.SubscribeEvents(osm.evSubscribeStop)
 }
 
+// Triggered by CDR event
 func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	osipsEv, _ := NewOsipsEvent(cdrDagram)
 	if err := osm.ProcessCdr(osipsEv.AsStoredCdr()); err != nil {
@@ -240,6 +242,7 @@ func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	}
 }
 
+// Triggered by ACC_EVENT
 func (osm *OsipsSessionManager) onAccEvent(osipsDgram *osipsdagram.OsipsEvent) {
 	osipsEv, _ := NewOsipsEvent(osipsDgram)
 	if osipsEv.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
@@ -262,6 +265,7 @@ func (osm *OsipsSessionManager) onAccEvent(osipsDgram *osipsdagram.OsipsEvent) {
 	}
 }
 
+// Handler of call start event. Mostly starts a session if needed
 func (osm *OsipsSessionManager) callStart(osipsEv *OsipsEvent) error {
 	if osipsEv.MissingParameter() {
 		if err := osm.DisconnectSession(osipsEv, "", utils.ERR_MANDATORY_IE_MISSING); err != nil {
@@ -276,6 +280,7 @@ func (osm *OsipsSessionManager) callStart(osipsEv *OsipsEvent) error {
 	return nil
 }
 
+// Handler for callEnd. Mostly removes a session if needed
 func (osm *OsipsSessionManager) callEnd(osipsEv *OsipsEvent) error {
 	s := osm.getSession(osipsEv.GetUUID())
 	if s == nil { // Not handled by us
@@ -326,4 +331,14 @@ func (osm *OsipsSessionManager) processCdrStop(osipsEv *OsipsEvent) error {
 		return err
 	}
 	return osm.ProcessCdr(osipsEvStart.AsStoredCdr())
+}
+
+// Searches and return the session with the specifed uuid
+func (osm *OsipsSessionManager) getSession(uuid string) *Session {
+	for _, s := range osm.sessions {
+		if s.eventStart.GetUUID() == uuid {
+			return s
+		}
+	}
+	return nil
 }

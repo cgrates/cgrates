@@ -80,8 +80,8 @@ func TestOsipsEventGetValues(t *testing.T) {
 	dur, _ := osipsEv.GetDuration(utils.META_DEFAULT)
 	endTime, _ := osipsEv.GetEndTime()
 	if osipsEv.GetName() != "E_ACC_CDR" ||
-		osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ"+";"+"eb082607"+";"+"4ea9687f", setupTime.UTC().String()) ||
-		osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f" ||
+		osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()) ||
+		osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ" ||
 		osipsEv.GetDirection(utils.META_DEFAULT) != utils.OUT ||
 		osipsEv.GetSubject(utils.META_DEFAULT) != "dan" ||
 		osipsEv.GetAccount(utils.META_DEFAULT) != "dan" ||
@@ -97,8 +97,8 @@ func TestOsipsEventGetValues(t *testing.T) {
 		osipsEv.GetSupplier(utils.META_DEFAULT) != "supplier3" ||
 		osipsEv.GetOriginatorIP(utils.META_DEFAULT) != "172.16.254.77" {
 		t.Error("GetValues not matching: ", osipsEv.GetName() != "E_ACC_CDR",
-			osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ"+";"+"eb082607"+";"+"4ea9687f", setupTime.UTC().String()),
-			osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f",
+			osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()),
+			osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ",
 			osipsEv.GetDirection(utils.META_DEFAULT) != utils.OUT,
 			osipsEv.GetSubject(utils.META_DEFAULT) != "dan",
 			osipsEv.GetAccount(utils.META_DEFAULT) != "dan",
@@ -133,8 +133,9 @@ func TestOsipsEventMissingParameter(t *testing.T) {
 func TestOsipsEventAsStoredCdr(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1406370492")
 	answerTime, _ := utils.ParseTimeDetectLayout("1406370499")
-	eStoredCdr := &engine.StoredCdr{CgrId: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", setupTime.UTC().String()),
-		TOR: utils.VOICE, AccId: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", CdrHost: "172.16.254.77", CdrSource: "OSIPS_E_ACC_CDR", ReqType: utils.META_PREPAID,
+	eStoredCdr := &engine.StoredCdr{CgrId: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()),
+		TOR: utils.VOICE, AccId: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", CdrHost: "172.16.254.77", CdrSource: "OSIPS_E_ACC_CDR",
+		ReqType:   utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "itsyscom.com", Category: "call", Account: "dan", Subject: "dan",
 		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime,
 		Usage: time.Duration(20) * time.Second, Supplier: "supplier3", ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
@@ -151,8 +152,8 @@ func TestOsipsAccMissedToStoredCdr(t *testing.T) {
 			"cgr_account": "1001", "cgr_destination": "1002", utils.CGR_SUPPLIER: "supplier1",
 			"duration": "", "dialog_id": "3547:277000822", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr,
 	}}
-	eStoredCdr := &engine.StoredCdr{CgrId: utils.Sha1("27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0;5cb81eaa;", setupTime.UTC().String()),
-		TOR: utils.VOICE, AccId: "27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0;5cb81eaa;", CdrHost: "172.16.254.77", CdrSource: "OSIPS_E_ACC_MISSED_EVENT",
+	eStoredCdr := &engine.StoredCdr{CgrId: utils.Sha1("27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0", setupTime.UTC().String()),
+		TOR: utils.VOICE, AccId: "27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0", CdrHost: "172.16.254.77", CdrSource: "OSIPS_E_ACC_MISSED_EVENT",
 		ReqType: utils.META_PSEUDOPREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Supplier: "supplier1",
 		Destination: "1002", SetupTime: setupTime, AnswerTime: setupTime,
 		Usage: time.Duration(0), ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
@@ -176,7 +177,7 @@ func TestOsipsUpdateDurationFromEvent(t *testing.T) {
 			"duration": "", "dialog_id": "3547:277000822"}, OriginatorAddress: addr,
 	}}
 	eOsipsEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_EVENT",
-		AttrValues: map[string]string{"method": "INVITE", "from_tag": "87d02470", "to_tag": "a671a98", "callid": "05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0",
+		AttrValues: map[string]string{"method": "UPDATE", "from_tag": "87d02470", "to_tag": "a671a98", "callid": "05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0",
 			"sip_code": "200", "sip_reason": "OK", "time": "1430579770", "cgr_reqtype": utils.META_PREPAID,
 			"cgr_account": "1001", "cgr_destination": "1002", utils.CGR_SUPPLIER: "supplier1",
 			"duration": "27s", "dialog_id": "3547:277000822", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr,
