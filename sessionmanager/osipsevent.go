@@ -20,7 +20,6 @@ package sessionmanager
 
 import (
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
