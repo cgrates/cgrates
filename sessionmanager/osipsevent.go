@@ -188,7 +188,6 @@ func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
 	return osipsEv.osipsEvent.OriginatorAddress.IP.String()
 }
 func (osipsev *OsipsEvent) MissingParameter() bool {
-	engine.Logger.Debug(fmt.Sprintf("Missing parameters on: %+v", osipsev.osipsEvent))
 	var nilTime time.Time
 	if osipsev.GetName() == "E_ACC_EVENT" && osipsev.osipsEvent.AttrValues["method"] == "INVITE" {
 		return len(osipsev.GetUUID()) == 0 ||

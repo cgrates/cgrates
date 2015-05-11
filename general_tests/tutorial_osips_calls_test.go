@@ -293,7 +293,7 @@ func TestTutOsipsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
@@ -322,7 +322,7 @@ func TestTutOsipsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_POSTPAID {
@@ -341,7 +341,7 @@ func TestTutOsipsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PSEUDOPREPAID {
@@ -360,7 +360,7 @@ func TestTutOsipsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_RATED {
@@ -379,7 +379,7 @@ func TestTutOsipsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
@@ -398,7 +398,7 @@ func TestTutOsipsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
