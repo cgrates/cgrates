@@ -33,96 +33,96 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var tutKamCallsCfg *config.CGRConfig
-var tutKamCallsRpc *rpc.Client
-var tutKamCallsPjSuaListener *os.File
+var tutOsipsCallsCfg *config.CGRConfig
+var tutOsipsCallsRpc *rpc.Client
+var tutOsipsCallsPjSuaListener *os.File
 
-func TestTutKamCallsInitCfg(t *testing.T) {
+func TestTutOsipsCallsInitCfg(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	// Init config first
 	var err error
-	tutKamCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "kamevapi", "cgrates", "etc", "cgrates"))
+	tutOsipsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "kamevapi", "cgrates", "etc", "cgrates"))
 	if err != nil {
 		t.Error(err)
 	}
-	tutKamCallsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
-	config.SetCgrConfig(tutKamCallsCfg)
+	tutOsipsCallsCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
+	config.SetCgrConfig(tutOsipsCallsCfg)
 }
 
 // Remove data in both rating and accounting db
-func TestTutKamCallsResetDataDb(t *testing.T) {
+func TestTutOsipsCallsResetDataDb(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.InitDataDb(tutKamCallsCfg); err != nil {
+	if err := engine.InitDataDb(tutOsipsCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Wipe out the cdr database
-func TestTutKamCallsResetStorDb(t *testing.T) {
+func TestTutOsipsCallsResetStorDb(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.InitStorDb(tutKamCallsCfg); err != nil {
+	if err := engine.InitStorDb(tutOsipsCallsCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // start Kam server
-func TestTutKamCallsStartKam(t *testing.T) {
+func TestTutOsipsCallsStartOsips(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	engine.KillProcName("kamailio", *waitRater)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "kamailio", "etc", "init.d", "kamailio"), "start", 3000); err != nil {
+	engine.KillProcName("opensips", *waitRater)
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "opensips", "etc", "init.d", "opensips"), "start", 100); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Start CGR Engine
-func TestTutKamCallsStartEngine(t *testing.T) {
+func TestTutOsipsCallsStartEngine(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	engine.KillProcName("cgr-engine", *waitRater)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Restart Kam so we make sure reconnects are working
-func TestTutKamCallsRestartKam(t *testing.T) {
+func TestTutOsipsCallsRestartKam(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "kamailio", "etc", "init.d", "kamailio"), "restart", 1000); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "opensips", "etc", "init.d", "opensips"), "restart", 200); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestTutKamCallsRpcConn(t *testing.T) {
+func TestTutOsipsCallsRpcConn(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	var err error
-	tutKamCallsRpc, err = jsonrpc.Dial("tcp", tutKamCallsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	tutOsipsCallsRpc, err = jsonrpc.Dial("tcp", tutOsipsCallsCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestTutKamCallsLoadTariffPlanFromFolder(t *testing.T) {
+func TestTutOsipsCallsLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	reply := ""
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tutKamCallsRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error(err)
 	} else if reply != "OK" {
 		t.Error(reply)
@@ -131,54 +131,54 @@ func TestTutKamCallsLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 // Make sure account was debited properly
-func TestTutKamCallsAccountsBefore(t *testing.T) {
+func TestTutOsipsCallsAccountsBefore(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
-	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002", Direction: "*out"}
-	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003", Direction: "*out"}
-	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1004", Direction: "*out"}
-	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1007", Direction: "*out"}
-	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 0.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005", Direction: "*out"}
-	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
+	if err := tutOsipsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
 		t.Error("Got error on ApierV1.GetAccount: %v", err)
 	}
 }
 
-func TestTutKamCallsCdrStats(t *testing.T) {
+func TestTutOsipsCallsCdrStats(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	var queueIds []string
 	eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
-	if err := tutKamCallsRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
+	if err := tutOsipsCallsRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
 		t.Error("Calling CDRStatsV1.GetQueueIds, got error: ", err.Error())
 	} else if len(eQueueIds) != len(queueIds) {
 		t.Errorf("Expecting: %v, received: %v", eQueueIds, queueIds)
@@ -186,7 +186,7 @@ func TestTutKamCallsCdrStats(t *testing.T) {
 }
 
 // Start Pjsua as listener and register it to receive calls
-func TestTutKamCallsStartPjsuaListener(t *testing.T) {
+func TestTutOsipsCallsStartPjsuaListener(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -198,13 +198,13 @@ func TestTutKamCallsStartPjsuaListener(t *testing.T) {
 		&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
 		&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
 		&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"}}
-	if tutKamCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, *waitRater); err != nil {
+	if tutOsipsCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Call from 1001 (prepaid) to 1002
-func TestTutKamCallsCall1001To1002(t *testing.T) {
+func TestTutOsipsCallsCall1001To1002(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -214,7 +214,7 @@ func TestTutKamCallsCall1001To1002(t *testing.T) {
 	}
 }
 
-func TestTutKamCallsCall1002To1001(t *testing.T) {
+func TestTutOsipsCallsCall1002To1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -224,7 +224,7 @@ func TestTutKamCallsCall1002To1001(t *testing.T) {
 	}
 }
 
-func TestTutKamCallsCall1003To1001(t *testing.T) {
+func TestTutOsipsCallsCall1003To1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -234,7 +234,7 @@ func TestTutKamCallsCall1003To1001(t *testing.T) {
 	}
 }
 
-func TestTutKamCallsCall1004To1001(t *testing.T) {
+func TestTutOsipsCallsCall1004To1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -244,7 +244,7 @@ func TestTutKamCallsCall1004To1001(t *testing.T) {
 	}
 }
 
-func TestTutKamCallsCall1006To1002(t *testing.T) {
+func TestTutOsipsCallsCall1006To1002(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -254,7 +254,7 @@ func TestTutKamCallsCall1006To1002(t *testing.T) {
 	}
 }
 
-func TestTutKamCallsCall1007To1002(t *testing.T) {
+func TestTutOsipsCallsCall1007To1002(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -265,14 +265,14 @@ func TestTutKamCallsCall1007To1002(t *testing.T) {
 }
 
 // Make sure account was debited properly
-func TestTutKamCallsAccount1001(t *testing.T) {
+func TestTutOsipsCallsAccount1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	time.Sleep(time.Duration(70) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
-	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() == 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
@@ -282,13 +282,13 @@ func TestTutKamCallsAccount1001(t *testing.T) {
 }
 
 // Make sure account was debited properly
-func TestTutKamCallsCdrs(t *testing.T) {
+func TestTutOsipsCallsCdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	var reply []*engine.ExternalCdr
 	req := utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{utils.META_DEFAULT}}
-	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -304,7 +304,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnDerived: true}
-	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -317,7 +317,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1002"}, RunIds: []string{utils.META_DEFAULT}}
-	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -336,7 +336,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1003"}, RunIds: []string{utils.META_DEFAULT}}
-	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -355,7 +355,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1004"}, RunIds: []string{utils.META_DEFAULT}}
-	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -374,7 +374,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1006"}, RunIds: []string{utils.META_DEFAULT}}
-	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -393,7 +393,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1007"}, RunIds: []string{utils.META_DEFAULT}}
-	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
@@ -414,13 +414,13 @@ func TestTutKamCallsCdrs(t *testing.T) {
 }
 
 // Make sure account was debited properly
-func TestTutKamCallsAccountFraud1001(t *testing.T) {
+func TestTutOsipsCallsAccountFraud1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	var reply string
 	attrAddBlnc := &v1.AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out", Value: 101}
-	if err := tutKamCallsRpc.Call("ApierV1.AddBalance", attrAddBlnc, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.AddBalance", attrAddBlnc, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
@@ -428,29 +428,29 @@ func TestTutKamCallsAccountFraud1001(t *testing.T) {
 }
 
 // Based on Fraud automatic mitigation, our account should be disabled
-func TestTutKamCallsAccountDisabled1001(t *testing.T) {
+func TestTutOsipsCallsAccountDisabled1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
-	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := tutOsipsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.Disabled == false {
 		t.Error("Account should be disabled per fraud detection rules.")
 	}
 }
 
-func TestTutKamCallsStopPjsuaListener(t *testing.T) {
+func TestTutOsipsCallsStopPjsuaListener(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 
-	tutKamCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
-	time.Sleep(time.Duration(1) * time.Second)    // Allow pjsua to finish it's tasks, eg un-REGISTER
+	tutOsipsCallsPjSuaListener.Write([]byte("q\n")) // Close pjsua
+	time.Sleep(time.Duration(1) * time.Second)      // Allow pjsua to finish it's tasks, eg un-REGISTER
 }
 
-func TestTutKamCallsStopCgrEngine(t *testing.T) {
+func TestTutOsipsCallsStopCgrEngine(t *testing.T) {
 	if !*testCalls {
 		return
 	}
@@ -459,9 +459,9 @@ func TestTutKamCallsStopCgrEngine(t *testing.T) {
 	}
 }
 
-func TestTutKamCallsStopKam(t *testing.T) {
+func TestTutOsipsCallsStopOpensips(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	engine.KillProcName("kamailio", 1000)
+	engine.KillProcName("opensips", 100)
 }
