@@ -27,6 +27,5 @@ COPY /opensips/etc cgrates/etc /etc
 # cleanup
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# set start command
-CMD /root/code/data/docker/prod/start.sh
+
 
