@@ -420,10 +420,10 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 			ts.createIncrementsSlice()
 		}
 		//log.Printf("TS: %+v", ts)
-		if ts.RateInterval == nil {
+		/*if ts.RateInterval == nil {
 			Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 			continue
-		}
+		}*/
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 		//log.Printf("Timing: %+v", ts.RateInterval.Timing)
 		//log.Printf("Rate: %+v", ts.RateInterval.Rating)
