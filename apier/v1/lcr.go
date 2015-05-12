@@ -112,3 +112,63 @@ func (self *ApierV1) GetLcr(lcrReq LcrRequest, lcrReply *LcrReply) (err error) {
 	}
 	return nil
 }
+
+// Computes the LCR for a specific request emulating a call, returns a comma separated list of suppliers
+func (self *ApierV1) GetLcrSuppliers(lcrReq LcrRequest, suppliers *string) (err error) {
+	if missing := utils.MissingStructFields(&lcrReq, []string{"Account", "Destination"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	// Handle defaults
+	if len(lcrReq.Direction) == 0 {
+		lcrReq.Direction = utils.OUT
+	}
+	if len(lcrReq.Tenant) == 0 {
+		lcrReq.Tenant = self.Config.DefaultTenant
+	}
+	if len(lcrReq.Category) == 0 {
+		lcrReq.Category = self.Config.DefaultCategory
+	}
+	if len(lcrReq.Subject) == 0 {
+		lcrReq.Subject = lcrReq.Account
+	}
+	var timeStart time.Time
+	if len(lcrReq.TimeStart) == 0 {
+		timeStart = time.Now()
+	} else if timeStart, err = utils.ParseTimeDetectLayout(lcrReq.TimeStart); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	var callDur time.Duration
+	if len(lcrReq.Duration) == 0 {
+		callDur = time.Duration(1) * time.Minute
+	} else if callDur, err = utils.ParseDurationWithSecs(lcrReq.Duration); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	cd := &engine.CallDescriptor{
+		Direction:   lcrReq.Direction,
+		Tenant:      lcrReq.Tenant,
+		Category:    lcrReq.Category,
+		Account:     lcrReq.Account,
+		Subject:     lcrReq.Subject,
+		Destination: lcrReq.Destination,
+		TimeStart:   timeStart,
+		TimeEnd:     timeStart.Add(callDur),
+	}
+	var lcrQried engine.LCRCost
+	if err := self.Responder.GetLCR(cd, &lcrQried); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	if lcrQried.Entry == nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	}
+	for idx, qriedSuppl := range lcrQried.SupplierCosts {
+		if dtcs, err := utils.NewDTCSFromRPKey(qriedSuppl.Supplier); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		} else {
+			if idx != 0 {
+				*suppliers += ","
+			}
+			*suppliers += dtcs.Subject
+		}
+	}
+	return nil
+}
