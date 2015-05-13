@@ -96,19 +96,19 @@ DUMMY,INVALID;DATA
 cgrates.org,1002;1006,*out,PACKAGE_10,STANDARD_TRIGGERS
 `
 var derivedChargesSample = `#Direction,Tenant,Tor,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
-*out,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1,^prepaid,,,,rif,rif,,,,,*default
-*out,cgrates.org,,dan,dan,extra1,^filteredHeader1/filterValue1,^prepaid,,,,rif,rif,,,,
-*in,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1,^prepaid,,,,rif,rif,,,,
+*out,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1,^prepaid,,,,rif,rif,,,,,*default,*default
+*out,cgrates.org,,dan,dan,extra1,^filteredHeader1/filterValue1,^prepaid,,,,rif,rif,,,,,
+*in,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1,^prepaid,,,,rif,rif,,,,,
 DUMMY_DATA
-*out,cgrates.org,call,dan,dan,extra2,,,,,,ivo,ivo,,,,,
-*out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,
+*out,cgrates.org,call,dan,dan,extra2,,,,,,ivo,ivo,,,,,,
+*out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,,
 *out,cgrates.org,call,dan,*any,*any,,,,,,rif2,rif2,,,,
-*out,cgrates.org,call,dan,*any,*default,,*default,*default,*default,*default,rif2,rif2,*default,*default,*default,*default
-*out,cgrates.org,call,dan,*any,test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test
-*out,cgrates.org,call,dan,*any,run1,,,,,,,,,,,,
-*out,cgrates.org,call,dan,*default,,,,,,,,,,,,
-*out,cgrates.org,call,dan,dan,extra3,~filterhdr1:s/(.+)/special_run3/,,,,,^runusr3,^runusr3,,,,,
-*out,cgrates.org,call,1001,1001,derived_run1,,^*rated,*default,*default,*default,*default,^1002,*default,*default,*default,*default,*default
+*out,cgrates.org,call,dan,*any,*default,,*default,*default,*default,*default,rif2,rif2,*default,*default,*default,*default,*default
+*out,cgrates.org,call,dan,*any,test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test
+*out,cgrates.org,call,dan,*any,run1,,,,,,,,,,,,,
+*out,cgrates.org,call,dan,*default,,,,,,,,,,,,,
+*out,cgrates.org,call,dan,dan,extra3,~filterhdr1:s/(.+)/special_run3/,,,,,^runusr3,^runusr3,,,,,,
+*out,cgrates.org,call,1001,1001,derived_run1,,^*rated,*default,*default,*default,*default,^1002,*default,*default,*default,*default,*default,*default
 `
 
 func TestTimingsValidator(t *testing.T) {

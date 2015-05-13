@@ -178,6 +178,13 @@ func (kev KamEvent) GetSupplier(fieldName string) string {
 	return utils.FirstNonEmpty(kev[fieldName], kev[utils.CGR_SUPPLIER])
 }
 
+func (kev KamEvent) GetDisconnectCause(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(kev[fieldName], kev[utils.CGR_DISCONNECT_CAUSE])
+}
+
 //ToDo: extract the IP of the kamailio server generating the event
 func (kev KamEvent) GetOriginatorIP(string) string {
 	return "127.0.0.1"
@@ -261,6 +268,8 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(strconv.FormatFloat(utils.Round(duration.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64))
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(kev.GetSupplier(utils.META_DEFAULT))
+	case utils.DISCONNECT_CAUSE:
+		return rsrFld.ParseValue(kev.GetDisconnectCause(utils.META_DEFAULT))
 	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(utils.META_DEFAULT)
 	case utils.COST:

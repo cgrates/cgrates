@@ -342,7 +342,7 @@ func TestStoredCdrForkCdr(t *testing.T) {
 	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.DIRECTION}, &utils.RSRField{Id: utils.TENANT},
 		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.ACCOUNT}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.DESTINATION},
 		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE}, &utils.RSRField{Id: utils.SUPPLIER},
-		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "field_extr2"}}, true)
+		&utils.RSRField{Id: utils.DISCONNECT_CAUSE}, []*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "field_extr2"}}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
@@ -373,15 +373,16 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	rsrStAT, _ := utils.NewRSRField("^2013-12-07T08:42:26Z")
 	rsrStDur, _ := utils.NewRSRField("^12s")
 	rsrStSuppl, _ := utils.NewRSRField("^supplier1")
+	rsrStDCause, _ := utils.NewRSRField("^HANGUP_COMPLETE")
 	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStIn, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: "destination"},
-		rsrStST, rsrStAT, rsrStDur, rsrStSuppl, []*utils.RSRField{}, true)
+		rsrStST, rsrStAT, rsrStDur, rsrStSuppl, rsrStDCause, []*utils.RSRField{}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
 	expctRatedCdr2 := &StoredCdr{CgrId: storCdr.CgrId, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_POSTPAID,
 		Direction: "*in", Tenant: "cgrates.com", Category: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "1002",
 		SetupTime:  time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
-		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(12) * time.Second, Supplier: "supplier1",
+		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(12) * time.Second, Supplier: "supplier1", DisconnectCause: "HANGUP_COMPLETE",
 		ExtraFields: map[string]string{}, MediationRunId: "wholesale_run", Cost: -1}
 	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
@@ -389,7 +390,7 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	_, err = storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: "dummy_header"}, &utils.RSRField{Id: "direction"}, &utils.RSRField{Id: "tenant"},
 		&utils.RSRField{Id: "tor"}, &utils.RSRField{Id: "account"}, &utils.RSRField{Id: "subject"}, &utils.RSRField{Id: "destination"},
 		&utils.RSRField{Id: "setup_time"}, &utils.RSRField{Id: "answer_time"}, &utils.RSRField{Id: "duration"}, &utils.RSRField{Id: utils.SUPPLIER},
-		[]*utils.RSRField{}, true)
+		&utils.RSRField{Id: utils.DISCONNECT_CAUSE}, []*utils.RSRField{}, true)
 	if err == nil {
 		t.Error("Failed to detect missing header")
 	}
@@ -410,7 +411,7 @@ func TestStoredCdrForkCdrFromMetaDefaults(t *testing.T) {
 	cdrOut, err := storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
 		&utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
 		&utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
-		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "fieldextr2"}}, true)
+		&utils.RSRField{Id: utils.META_DEFAULT}, []*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "fieldextr2"}}, true)
 	if err != nil {
 		t.Fatal("Unexpected error received", err)
 	}
@@ -419,7 +420,7 @@ func TestStoredCdrForkCdrFromMetaDefaults(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", expctCdr, cdrOut)
 	}
 	// Should also accept nil as defaults
-	if cdrOut, err := storCdr.ForkCdr("wholesale_run", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+	if cdrOut, err := storCdr.ForkCdr("wholesale_run", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "fieldextr2"}}, true); err != nil {
 		t.Fatal("Unexpected error received", err)
 	} else if !reflect.DeepEqual(expctCdr, cdrOut) {

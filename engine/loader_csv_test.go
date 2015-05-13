@@ -190,9 +190,9 @@ vdf,emptyY,*out,TOPUP_EMPTY_AT,
 
 	derivedCharges = `
 #Direction,Tenant,Category,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,UsageField
-*out,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1/,^prepaid,,,,rif,rif,,,,,
-*out,cgrates.org,call,dan,dan,extra2,,,,,,ivo,ivo,,,,,
-*out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,
+*out,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1/,^prepaid,,,,rif,rif,,,,,,
+*out,cgrates.org,call,dan,dan,extra2,,,,,,ivo,ivo,,,,,,
+*out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,,
 `
 	cdrStats = `
 #Id,QueueLength,TimeWindow,Metrics,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,Supplier,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
@@ -973,14 +973,16 @@ func TestLoadDerivedChargers(t *testing.T) {
 	expCharger1 := utils.DerivedChargers{
 		&utils.DerivedCharger{RunId: "extra1", RunFilters: "^filteredHeader1/filterValue1/", ReqTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
 			TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT, AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
-			SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT},
+			SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
+			DisconnectCauseField: utils.META_DEFAULT},
 		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 			CategoryField: utils.META_DEFAULT, AccountField: "ivo", SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
-			SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT},
+			SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
+			DisconnectCauseField: utils.META_DEFAULT},
 	}
 	keyCharger1 := utils.DerivedChargersKey("*out", "cgrates.org", "call", "dan", "dan")
 	if !reflect.DeepEqual(csvr.derivedChargers[keyCharger1], expCharger1) {
-		t.Error("Unexpected charger", csvr.derivedChargers[keyCharger1])
+		t.Errorf("Unexpected charger %+v", csvr.derivedChargers[keyCharger1][0])
 	}
 }
 func TestLoadCdrStats(t *testing.T) {

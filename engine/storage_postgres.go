@@ -126,29 +126,30 @@ func (self *PostgresStorage) LogCallCost(cgrid, source, runid string, cc *CallCo
 func (self *PostgresStorage) SetRatedCdr(cdr *StoredCdr) (err error) {
 	tx := self.db.Begin()
 	saved := tx.Save(&TblRatedCdr{
-		Cgrid:       cdr.CgrId,
-		Runid:       cdr.MediationRunId,
-		Reqtype:     cdr.ReqType,
-		Direction:   cdr.Direction,
-		Tenant:      cdr.Tenant,
-		Category:    cdr.Category,
-		Account:     cdr.Account,
-		Subject:     cdr.Subject,
-		Destination: cdr.Destination,
-		SetupTime:   cdr.SetupTime,
-		AnswerTime:  cdr.AnswerTime,
-		Usage:       cdr.Usage.Seconds(),
-		Supplier:    cdr.Supplier,
-		Cost:        cdr.Cost,
-		ExtraInfo:   cdr.ExtraInfo,
-		CreatedAt:   time.Now(),
+		Cgrid:           cdr.CgrId,
+		Runid:           cdr.MediationRunId,
+		Reqtype:         cdr.ReqType,
+		Direction:       cdr.Direction,
+		Tenant:          cdr.Tenant,
+		Category:        cdr.Category,
+		Account:         cdr.Account,
+		Subject:         cdr.Subject,
+		Destination:     cdr.Destination,
+		SetupTime:       cdr.SetupTime,
+		AnswerTime:      cdr.AnswerTime,
+		Usage:           cdr.Usage.Seconds(),
+		Supplier:        cdr.Supplier,
+		DisconnectCause: cdr.DisconnectCause,
+		Cost:            cdr.Cost,
+		ExtraInfo:       cdr.ExtraInfo,
+		CreatedAt:       time.Now(),
 	})
 	if saved.Error != nil {
 		tx.Rollback()
 		tx = self.db.Begin()
 		updated := tx.Model(TblRatedCdr{}).Where(&TblRatedCdr{Cgrid: cdr.CgrId, Runid: cdr.MediationRunId}).Updates(&TblRatedCdr{Reqtype: cdr.ReqType,
 			Direction: cdr.Direction, Tenant: cdr.Tenant, Category: cdr.Category, Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination,
-			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Supplier: cdr.Supplier, Cost: cdr.Cost, ExtraInfo: cdr.ExtraInfo,
+			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Supplier: cdr.Supplier, DisconnectCause: cdr.DisconnectCause, Cost: cdr.Cost, ExtraInfo: cdr.ExtraInfo,
 			UpdatedAt: time.Now()})
 		if updated.Error != nil {
 			tx.Rollback()

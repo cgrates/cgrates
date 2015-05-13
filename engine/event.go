@@ -41,6 +41,7 @@ type Event interface {
 	GetEndTime() (time.Time, error)
 	GetDuration(string) (time.Duration, error)
 	GetSupplier(string) string
+	GetDisconnectCause(string) string
 	GetOriginatorIP(string) string
 	GetExtraFields() map[string]string
 	MissingParameter() bool

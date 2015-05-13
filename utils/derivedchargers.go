@@ -24,7 +24,7 @@ import (
 )
 
 // Wraps regexp compiling in case of rsr fields
-func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld, supplFld string) (dc *DerivedCharger, err error) {
+func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld, supplFld, dCauseFld string) (dc *DerivedCharger, err error) {
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
@@ -101,35 +101,43 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 			return nil, err
 		}
 	}
+	dc.DisconnectCauseField = dCauseFld
+	if strings.HasPrefix(dc.DisconnectCauseField, REGEXP_PREFIX) || strings.HasPrefix(dc.DisconnectCauseField, STATIC_VALUE_PREFIX) {
+		if dc.rsrDisconnectCauseField, err = NewRSRField(dc.DisconnectCauseField); err != nil {
+			return nil, err
+		}
+	}
 	return dc, nil
 }
 
 type DerivedCharger struct {
-	RunId               string      // Unique runId in the chain
-	RunFilters          string      // Only run the charger if all the filters match
-	ReqTypeField        string      // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
-	DirectionField      string      // Field containing direction info
-	TenantField         string      // Field containing tenant info
-	CategoryField       string      // Field containing tor info
-	AccountField        string      // Field containing account information
-	SubjectField        string      // Field containing subject information
-	DestinationField    string      // Field containing destination information
-	SetupTimeField      string      // Field containing setup time information
-	AnswerTimeField     string      // Field containing answer time information
-	UsageField          string      // Field containing usage information
-	SupplierField       string      // Field containing supplier information
-	rsrRunFilters       []*RSRField // Storage for compiled Regexp in case of RSRFields
-	rsrReqTypeField     *RSRField
-	rsrDirectionField   *RSRField
-	rsrTenantField      *RSRField
-	rsrCategoryField    *RSRField
-	rsrAccountField     *RSRField
-	rsrSubjectField     *RSRField
-	rsrDestinationField *RSRField
-	rsrSetupTimeField   *RSRField
-	rsrAnswerTimeField  *RSRField
-	rsrUsageField       *RSRField
-	rsrSupplierField    *RSRField
+	RunId                   string      // Unique runId in the chain
+	RunFilters              string      // Only run the charger if all the filters match
+	ReqTypeField            string      // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
+	DirectionField          string      // Field containing direction info
+	TenantField             string      // Field containing tenant info
+	CategoryField           string      // Field containing tor info
+	AccountField            string      // Field containing account information
+	SubjectField            string      // Field containing subject information
+	DestinationField        string      // Field containing destination information
+	SetupTimeField          string      // Field containing setup time information
+	AnswerTimeField         string      // Field containing answer time information
+	UsageField              string      // Field containing usage information
+	SupplierField           string      // Field containing supplier information
+	DisconnectCauseField    string      // Field containing disconnect cause information
+	rsrRunFilters           []*RSRField // Storage for compiled Regexp in case of RSRFields
+	rsrReqTypeField         *RSRField
+	rsrDirectionField       *RSRField
+	rsrTenantField          *RSRField
+	rsrCategoryField        *RSRField
+	rsrAccountField         *RSRField
+	rsrSubjectField         *RSRField
+	rsrDestinationField     *RSRField
+	rsrSetupTimeField       *RSRField
+	rsrAnswerTimeField      *RSRField
+	rsrUsageField           *RSRField
+	rsrSupplierField        *RSRField
+	rsrDisconnectCauseField *RSRField
 }
 
 func DerivedChargersKey(direction, tenant, category, account, subject string) string {
@@ -153,6 +161,6 @@ func (dcs DerivedChargers) Append(dc *DerivedCharger) (DerivedChargers, error) {
 
 func (dcs DerivedChargers) AppendDefaultRun() (DerivedChargers, error) {
 	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
-		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
 	return append(dcs, dcDf), nil
 }

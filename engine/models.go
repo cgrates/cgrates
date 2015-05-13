@@ -218,28 +218,29 @@ type TpSharedGroup struct {
 }
 
 type TpDerivedCharger struct {
-	Id               int64
-	Tpid             string
-	Loadid           string
-	Direction        string
-	Tenant           string
-	Category         string
-	Account          string
-	Subject          string
-	Runid            string
-	RunFilters       string
-	ReqTypeField     string
-	DirectionField   string
-	TenantField      string
-	CategoryField    string
-	AccountField     string
-	SubjectField     string
-	DestinationField string
-	SetupTimeField   string
-	AnswerTimeField  string
-	UsageField       string
-	SupplierField    string
-	CreatedAt        time.Time
+	Id                   int64
+	Tpid                 string
+	Loadid               string
+	Direction            string
+	Tenant               string
+	Category             string
+	Account              string
+	Subject              string
+	Runid                string
+	RunFilters           string
+	ReqTypeField         string
+	DirectionField       string
+	TenantField          string
+	CategoryField        string
+	AccountField         string
+	SubjectField         string
+	DestinationField     string
+	SetupTimeField       string
+	AnswerTimeField      string
+	UsageField           string
+	SupplierField        string
+	DisconnectCauseField string
+	CreatedAt            time.Time
 }
 
 func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
@@ -285,25 +286,26 @@ type TpCdrStat struct {
 }
 
 type TblCdrsPrimary struct {
-	Id          int64
-	Cgrid       string
-	Tor         string
-	Accid       string
-	Cdrhost     string
-	Cdrsource   string
-	Reqtype     string
-	Direction   string
-	Tenant      string
-	Category    string
-	Account     string
-	Subject     string
-	Destination string
-	SetupTime   time.Time
-	AnswerTime  time.Time
-	Usage       float64
-	Supplier    string
-	CreatedAt   time.Time
-	DeletedAt   time.Time
+	Id              int64
+	Cgrid           string
+	Tor             string
+	Accid           string
+	Cdrhost         string
+	Cdrsource       string
+	Reqtype         string
+	Direction       string
+	Tenant          string
+	Category        string
+	Account         string
+	Subject         string
+	Destination     string
+	SetupTime       time.Time
+	AnswerTime      time.Time
+	Usage           float64
+	Supplier        string
+	DisconnectCause string
+	CreatedAt       time.Time
+	DeletedAt       time.Time
 }
 
 func (t TblCdrsPrimary) TableName() string {
@@ -346,25 +348,26 @@ func (t TblCostDetail) TableName() string {
 }
 
 type TblRatedCdr struct {
-	Id          int64
-	Cgrid       string
-	Runid       string
-	Reqtype     string
-	Direction   string
-	Tenant      string
-	Category    string
-	Account     string
-	Subject     string
-	Destination string
-	SetupTime   time.Time
-	AnswerTime  time.Time
-	Usage       float64
-	Supplier    string
-	Cost        float64
-	ExtraInfo   string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   time.Time
+	Id              int64
+	Cgrid           string
+	Runid           string
+	Reqtype         string
+	Direction       string
+	Tenant          string
+	Category        string
+	Account         string
+	Subject         string
+	Destination     string
+	SetupTime       time.Time
+	AnswerTime      time.Time
+	Usage           float64
+	Supplier        string
+	DisconnectCause string
+	Cost            float64
+	ExtraInfo       string
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	DeletedAt       time.Time
 }
 
 func (t TblRatedCdr) TableName() string {

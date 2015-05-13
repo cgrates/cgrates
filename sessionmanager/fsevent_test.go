@@ -386,7 +386,8 @@ func TestEventParseStatic(t *testing.T) {
 		setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
 		answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
 		dur != time.Duration(60)*time.Second ||
-		ev.GetSupplier("^test") != "test" {
+		ev.GetSupplier("^test") != "test" ||
+		ev.GetDisconnectCause("^test") != "test" {
 		t.Error("Values out of static not matching",
 			ev.GetReqType("^test") != "test",
 			ev.GetDirection("^test") != "test",
@@ -398,7 +399,8 @@ func TestEventParseStatic(t *testing.T) {
 			setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 			answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 			dur != time.Duration(60)*time.Second,
-			ev.GetSupplier("^test") != "test")
+			ev.GetSupplier("^test") != "test",
+			ev.GetDisconnectCause("^test") != "test")
 	}
 }
 
@@ -437,7 +439,8 @@ Task-Runtime: 1349437318`
 		setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
 		answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
 		dur != time.Duration(65)*time.Second ||
-		ev.GetSupplier("FreeSWITCH-Hostname") != "h1.ip-switch.net" {
+		ev.GetSupplier("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
+		ev.GetDisconnectCause("FreeSWITCH-Hostname") != "h1.ip-switch.net" {
 		t.Error("Values out of static not matching",
 			ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetDirection("FreeSWITCH-Hostname") != "*out",
@@ -449,7 +452,8 @@ Task-Runtime: 1349437318`
 			setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
 			answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
 			dur != time.Duration(65)*time.Second,
-			ev.GetSupplier("FreeSWITCH-Hostname") != "h1.ip-switch.net")
+			ev.GetSupplier("FreeSWITCH-Hostname") != "h1.ip-switch.net",
+			ev.GetDisconnectCause("FreeSWITCH-Hostname") != "h1.ip-switch.net")
 	}
 }
 
@@ -493,7 +497,8 @@ func TestParseFsHangup(t *testing.T) {
 		setupTime.UTC() != time.Date(2014, 4, 25, 16, 8, 27, 0, time.UTC) ||
 		answerTime.UTC() != time.Date(2014, 4, 25, 16, 8, 40, 0, time.UTC) ||
 		dur != time.Duration(5)*time.Second ||
-		ev.GetSupplier(utils.META_DEFAULT) != "supplier1" {
+		ev.GetSupplier(utils.META_DEFAULT) != "supplier1" ||
+		ev.GetDisconnectCause(utils.META_DEFAULT) != "NORMAL_CLEARING" {
 		t.Error("Default values not matching",
 			ev.GetReqType(utils.META_DEFAULT) != utils.META_PSEUDOPREPAID,
 			ev.GetDirection(utils.META_DEFAULT) != "*out",
@@ -505,7 +510,8 @@ func TestParseFsHangup(t *testing.T) {
 			setupTime.UTC() != time.Date(2014, 4, 25, 17, 8, 27, 0, time.UTC),
 			answerTime.UTC() != time.Date(2014, 4, 25, 17, 8, 40, 0, time.UTC),
 			dur != time.Duration(5)*time.Second,
-			ev.GetSupplier(utils.META_DEFAULT) != "supplier1")
+			ev.GetSupplier(utils.META_DEFAULT) != "supplier1",
+			ev.GetDisconnectCause(utils.META_DEFAULT) != "NORMAL_CLEARING")
 	}
 }
 
@@ -633,7 +639,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 		TOR: utils.VOICE, AccId: "37e9b766-5256-4e4b-b1ed-3767b930fec8", CdrHost: "10.0.2.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.META_PSEUDOPREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003",
 		Destination: "1002", SetupTime: setupTime, AnswerTime: aTime,
-		Usage: time.Duration(5) * time.Second, Supplier: "supplier1", ExtraFields: make(map[string]string), Cost: -1}
+		Usage: time.Duration(5) * time.Second, Supplier: "supplier1", DisconnectCause: "NORMAL_CLEARING", ExtraFields: make(map[string]string), Cost: -1}
 	if storedCdr := ev.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}

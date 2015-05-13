@@ -51,6 +51,7 @@ const (
 	OSIPS_AUTH_OK            = "AUTH_OK"
 	OSIPS_INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS"
 	OSIPS_DIALOG_ID          = "dialog_id"
+	OSIPS_SIPCODE            = "sip_code"
 )
 
 func NewOsipsEvent(osipsDagramEvent *osipsdagram.OsipsEvent) (*OsipsEvent, error) {
@@ -180,6 +181,12 @@ func (osipsev *OsipsEvent) GetSupplier(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[utils.CGR_SUPPLIER])
 }
+func (osipsev *OsipsEvent) GetDisconnectCause(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[OSIPS_SIPCODE], osipsev.osipsEvent.AttrValues[utils.DISCONNECT_CAUSE])
+}
 func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
 	if osipsEv.osipsEvent == nil || osipsEv.osipsEvent.OriginatorAddress == nil {
 		return ""
@@ -261,6 +268,7 @@ func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.AnswerTime, _ = osipsEv.GetAnswerTime(utils.META_DEFAULT)
 	storCdr.Usage, _ = osipsEv.GetDuration(utils.META_DEFAULT)
 	storCdr.Supplier = osipsEv.GetSupplier(utils.META_DEFAULT)
+	storCdr.DisconnectCause = osipsEv.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = osipsEv.GetExtraFields()
 	storCdr.Cost = -1
 	return storCdr
@@ -275,5 +283,6 @@ func (osipsEv *OsipsEvent) updateDurationFromEvent(updatedOsipsEv *OsipsEvent) e
 	answerTime, err := osipsEv.GetAnswerTime(utils.META_DEFAULT)
 	osipsEv.osipsEvent.AttrValues[OSIPS_DURATION] = endTime.Sub(answerTime).String()
 	osipsEv.osipsEvent.AttrValues["method"] = "UPDATE" // So we can know it is an end event
+	osipsEv.osipsEvent.AttrValues[OSIPS_SIPCODE] = updatedOsipsEv.osipsEvent.AttrValues[OSIPS_SIPCODE]
 	return nil
 }

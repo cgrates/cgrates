@@ -131,7 +131,8 @@ func TestGetSessionRuns(t *testing.T) {
 	keyCharger1 := utils.ConcatenatedKey("*out", testTenant, "call", "dan2", "dan2")
 	dfDC := &utils.DerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 		CategoryField: utils.META_DEFAULT, AccountField: utils.META_DEFAULT, SubjectField: utils.META_DEFAULT, DestinationField: utils.META_DEFAULT,
-		SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT}
+		SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
+		DisconnectCauseField: utils.META_DEFAULT}
 	extra1DC := &utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^" + utils.META_PREPAID, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 		CategoryField: "^0", AccountField: "^minitsboy", SubjectField: "^rif", DestinationField: "^0256",
 		SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT}
@@ -140,7 +141,8 @@ func TestGetSessionRuns(t *testing.T) {
 		SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT}
 	extra3DC := &utils.DerivedCharger{RunId: "extra3", ReqTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 		CategoryField: "^0", AccountField: "^minu", SubjectField: "^rif", DestinationField: "^0256",
-		SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT}
+		SetupTimeField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
+		DisconnectCauseField: utils.META_DEFAULT}
 	charger1 := utils.DerivedChargers{extra1DC, extra2DC, extra3DC}
 	if err := accountingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())

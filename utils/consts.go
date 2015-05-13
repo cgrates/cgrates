@@ -72,7 +72,7 @@ const (
 	ACTION_PLANS_NRCOLS          = 4
 	ACTION_TRIGGERS_NRCOLS       = 19
 	ACCOUNT_ACTIONS_NRCOLS       = 5
-	DERIVED_CHARGERS_NRCOLS      = 18
+	DERIVED_CHARGERS_NRCOLS      = 19
 	CDR_STATS_NRCOLS             = 22
 	ROUNDING_UP                  = "*up"
 	ROUNDING_MIDDLE              = "*middle"
@@ -184,6 +184,8 @@ const (
 	CGR_AUTHORIZE                = "CGR_AUTHORIZE"
 	CONFIG_DIR                   = "/etc/cgrates"
 	CGR_SUPPLIER                 = "cgr_supplier"
+	DISCONNECT_CAUSE             = "disconnect_cause"
+	CGR_DISCONNECT_CAUSE         = "cgr_disconnect_cause"
 )
 
 var (

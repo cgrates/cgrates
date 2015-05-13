@@ -922,19 +922,20 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 		tag := utils.DerivedChargersKey(record[0], record[1], record[2], record[3], record[4])
 		if _, found := csvr.derivedChargers[tag]; found {
 			if csvr.derivedChargers[tag], err = csvr.derivedChargers[tag].Append(&utils.DerivedCharger{
-				RunId:            ValueOrDefault(record[5], "*default"),
-				RunFilters:       record[6],
-				ReqTypeField:     ValueOrDefault(record[7], "*default"),
-				DirectionField:   ValueOrDefault(record[8], "*default"),
-				TenantField:      ValueOrDefault(record[9], "*default"),
-				CategoryField:    ValueOrDefault(record[10], "*default"),
-				AccountField:     ValueOrDefault(record[11], "*default"),
-				SubjectField:     ValueOrDefault(record[12], "*default"),
-				DestinationField: ValueOrDefault(record[13], "*default"),
-				SetupTimeField:   ValueOrDefault(record[14], "*default"),
-				AnswerTimeField:  ValueOrDefault(record[15], "*default"),
-				UsageField:       ValueOrDefault(record[16], "*default"),
-				SupplierField:    ValueOrDefault(record[17], "*default"),
+				RunId:                ValueOrDefault(record[5], "*default"),
+				RunFilters:           record[6],
+				ReqTypeField:         ValueOrDefault(record[7], "*default"),
+				DirectionField:       ValueOrDefault(record[8], "*default"),
+				TenantField:          ValueOrDefault(record[9], "*default"),
+				CategoryField:        ValueOrDefault(record[10], "*default"),
+				AccountField:         ValueOrDefault(record[11], "*default"),
+				SubjectField:         ValueOrDefault(record[12], "*default"),
+				DestinationField:     ValueOrDefault(record[13], "*default"),
+				SetupTimeField:       ValueOrDefault(record[14], "*default"),
+				AnswerTimeField:      ValueOrDefault(record[15], "*default"),
+				UsageField:           ValueOrDefault(record[16], "*default"),
+				SupplierField:        ValueOrDefault(record[17], "*default"),
+				DisconnectCauseField: ValueOrDefault(record[18], "*default"),
 			}); err != nil {
 				return err
 			}
@@ -943,19 +944,20 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 				return errors.New("Reserved RunId")
 			}
 			csvr.derivedChargers[tag] = utils.DerivedChargers{&utils.DerivedCharger{
-				RunId:            ValueOrDefault(record[5], "*default"),
-				RunFilters:       record[6],
-				ReqTypeField:     ValueOrDefault(record[7], "*default"),
-				DirectionField:   ValueOrDefault(record[8], "*default"),
-				TenantField:      ValueOrDefault(record[9], "*default"),
-				CategoryField:    ValueOrDefault(record[10], "*default"),
-				AccountField:     ValueOrDefault(record[11], "*default"),
-				SubjectField:     ValueOrDefault(record[12], "*default"),
-				DestinationField: ValueOrDefault(record[13], "*default"),
-				SetupTimeField:   ValueOrDefault(record[14], "*default"),
-				AnswerTimeField:  ValueOrDefault(record[15], "*default"),
-				UsageField:       ValueOrDefault(record[16], "*default"),
-				SupplierField:    ValueOrDefault(record[17], "*default"),
+				RunId:                ValueOrDefault(record[5], "*default"),
+				RunFilters:           record[6],
+				ReqTypeField:         ValueOrDefault(record[7], "*default"),
+				DirectionField:       ValueOrDefault(record[8], "*default"),
+				TenantField:          ValueOrDefault(record[9], "*default"),
+				CategoryField:        ValueOrDefault(record[10], "*default"),
+				AccountField:         ValueOrDefault(record[11], "*default"),
+				SubjectField:         ValueOrDefault(record[12], "*default"),
+				DestinationField:     ValueOrDefault(record[13], "*default"),
+				SetupTimeField:       ValueOrDefault(record[14], "*default"),
+				AnswerTimeField:      ValueOrDefault(record[15], "*default"),
+				UsageField:           ValueOrDefault(record[16], "*default"),
+				SupplierField:        ValueOrDefault(record[17], "*default"),
+				DisconnectCauseField: ValueOrDefault(record[18], "*default"),
 			}}
 		}
 	}

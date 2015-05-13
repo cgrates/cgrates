@@ -35,8 +35,8 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr) (*StoredCdr, error) {
 	var err error
 	storedCdr := &StoredCdr{CgrId: extCdr.CgrId, OrderId: extCdr.OrderId, TOR: extCdr.TOR, AccId: extCdr.AccId, CdrHost: extCdr.CdrHost, CdrSource: extCdr.CdrSource,
 		ReqType: extCdr.ReqType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category, Account: extCdr.Account, Subject: extCdr.Subject,
-		Destination: extCdr.Destination, Supplier: extCdr.Supplier, ExtraFields: extCdr.ExtraFields, MediationRunId: extCdr.MediationRunId,
-		RatedAccount: extCdr.RatedAccount, RatedSubject: extCdr.RatedSubject, Cost: extCdr.Cost, Rated: extCdr.Rated}
+		Destination: extCdr.Destination, Supplier: extCdr.Supplier, DisconnectCause: extCdr.DisconnectCause, ExtraFields: extCdr.ExtraFields,
+		MediationRunId: extCdr.MediationRunId, RatedAccount: extCdr.RatedAccount, RatedSubject: extCdr.RatedSubject, Cost: extCdr.Cost, Rated: extCdr.Rated}
 	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime); err != nil {
 		return nil, err
 	}
@@ -56,31 +56,32 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr) (*StoredCdr, error) {
 
 // Kinda standard of internal CDR, complies to CDR interface also
 type StoredCdr struct {
-	CgrId          string
-	OrderId        int64             // Stor order id used as export order id
-	TOR            string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
-	AccId          string            // represents the unique accounting id given by the telecom switch generating the CDR
-	CdrHost        string            // represents the IP address of the host generating the CDR (automatically populated by the server)
-	CdrSource      string            // formally identifies the source of the CDR (free form field)
-	ReqType        string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
-	Direction      string            // matching the supported direction identifiers of the CGRateS <*out>
-	Tenant         string            // tenant whom this record belongs
-	Category       string            // free-form filter for this record, matching the category defined in rating profiles.
-	Account        string            // account id (accounting subsystem) the record should be attached to
-	Subject        string            // rating subject (rating subsystem) this record should be attached to
-	Destination    string            // destination to be charged
-	SetupTime      time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
-	AnswerTime     time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
-	Usage          time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
-	Supplier       string            // Supplier information when available
-	ExtraFields    map[string]string // Extra fields to be stored in CDR
-	MediationRunId string
-	RatedAccount   string // Populated out of rating data
-	RatedSubject   string
-	Cost           float64
-	ExtraInfo      string    // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
-	CostDetails    *CallCost // Attach the cost details to CDR when possible
-	Rated          bool      // Mark the CDR as rated so we do not process it during mediation
+	CgrId           string
+	OrderId         int64             // Stor order id used as export order id
+	TOR             string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
+	AccId           string            // represents the unique accounting id given by the telecom switch generating the CDR
+	CdrHost         string            // represents the IP address of the host generating the CDR (automatically populated by the server)
+	CdrSource       string            // formally identifies the source of the CDR (free form field)
+	ReqType         string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
+	Direction       string            // matching the supported direction identifiers of the CGRateS <*out>
+	Tenant          string            // tenant whom this record belongs
+	Category        string            // free-form filter for this record, matching the category defined in rating profiles.
+	Account         string            // account id (accounting subsystem) the record should be attached to
+	Subject         string            // rating subject (rating subsystem) this record should be attached to
+	Destination     string            // destination to be charged
+	SetupTime       time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	AnswerTime      time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	Usage           time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+	Supplier        string            // Supplier information when available
+	DisconnectCause string            // Disconnect cause of the event
+	ExtraFields     map[string]string // Extra fields to be stored in CDR
+	MediationRunId  string
+	RatedAccount    string // Populated out of rating data
+	RatedSubject    string
+	Cost            float64
+	ExtraInfo       string    // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
+	CostDetails     *CallCost // Attach the cost details to CDR when possible
+	Rated           bool      // Mark the CDR as rated so we do not process it during mediation
 }
 
 func (storedCdr *StoredCdr) CostDetailsJson() string {
@@ -158,6 +159,8 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(storedCdr.Supplier)
+	case utils.DISCONNECT_CAUSE:
+		return rsrFld.ParseValue(storedCdr.DisconnectCause)
 	case utils.MEDI_RUNID:
 		return rsrFld.ParseValue(storedCdr.MediationRunId)
 	case utils.RATED_ACCOUNT:
@@ -218,6 +221,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v.Set(utils.ANSWER_TIME, storedCdr.AnswerTime.Format(time.RFC3339))
 	v.Set(utils.USAGE, storedCdr.FormatUsage(utils.SECONDS))
 	v.Set(utils.SUPPLIER, storedCdr.Supplier)
+	v.Set(utils.DISCONNECT_CAUSE, storedCdr.DisconnectCause)
 	if storedCdr.CostDetails != nil {
 		v.Set(utils.COST_DETAILS, storedCdr.CostDetailsJson())
 	}
@@ -226,7 +230,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
 func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld,
-	answerTimeFld, durationFld, supplierFld *utils.RSRField,
+	answerTimeFld, durationFld, supplierFld, disconnectCauseFld *utils.RSRField,
 	extraFlds []*utils.RSRField, primaryMandatory bool) (*StoredCdr, error) {
 	if reqTypeFld == nil {
 		reqTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -294,6 +298,12 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	if supplierFld.Id == utils.META_DEFAULT {
 		supplierFld.Id = utils.SUPPLIER
 	}
+	if disconnectCauseFld == nil {
+		disconnectCauseFld, _ = utils.NewRSRField(utils.META_DEFAULT)
+	}
+	if disconnectCauseFld.Id == utils.META_DEFAULT {
+		disconnectCauseFld.Id = utils.DISCONNECT_CAUSE
+	}
 	var err error
 	frkStorCdr := new(StoredCdr)
 	frkStorCdr.CgrId = storedCdr.CgrId
@@ -350,6 +360,7 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 		return nil, err
 	}
 	frkStorCdr.Supplier = storedCdr.FieldAsString(supplierFld)
+	frkStorCdr.DisconnectCause = storedCdr.FieldAsString(disconnectCauseFld)
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
 	for _, fld := range extraFlds {
 		frkStorCdr.ExtraFields[fld.Id] = storedCdr.FieldAsString(fld)
@@ -359,28 +370,29 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 
 func (storedCdr *StoredCdr) AsExternalCdr() *ExternalCdr {
 	return &ExternalCdr{CgrId: storedCdr.CgrId,
-		OrderId:        storedCdr.OrderId,
-		TOR:            storedCdr.TOR,
-		AccId:          storedCdr.AccId,
-		CdrHost:        storedCdr.CdrHost,
-		CdrSource:      storedCdr.CdrSource,
-		ReqType:        storedCdr.ReqType,
-		Direction:      storedCdr.Direction,
-		Tenant:         storedCdr.Tenant,
-		Category:       storedCdr.Category,
-		Account:        storedCdr.Account,
-		Subject:        storedCdr.Subject,
-		Destination:    storedCdr.Destination,
-		SetupTime:      storedCdr.SetupTime.Format(time.RFC3339),
-		AnswerTime:     storedCdr.AnswerTime.Format(time.RFC3339),
-		Usage:          storedCdr.FormatUsage(utils.SECONDS),
-		Supplier:       storedCdr.Supplier,
-		ExtraFields:    storedCdr.ExtraFields,
-		MediationRunId: storedCdr.MediationRunId,
-		RatedAccount:   storedCdr.RatedAccount,
-		RatedSubject:   storedCdr.RatedSubject,
-		Cost:           storedCdr.Cost,
-		CostDetails:    storedCdr.CostDetailsJson(),
+		OrderId:         storedCdr.OrderId,
+		TOR:             storedCdr.TOR,
+		AccId:           storedCdr.AccId,
+		CdrHost:         storedCdr.CdrHost,
+		CdrSource:       storedCdr.CdrSource,
+		ReqType:         storedCdr.ReqType,
+		Direction:       storedCdr.Direction,
+		Tenant:          storedCdr.Tenant,
+		Category:        storedCdr.Category,
+		Account:         storedCdr.Account,
+		Subject:         storedCdr.Subject,
+		Destination:     storedCdr.Destination,
+		SetupTime:       storedCdr.SetupTime.Format(time.RFC3339),
+		AnswerTime:      storedCdr.AnswerTime.Format(time.RFC3339),
+		Usage:           storedCdr.FormatUsage(utils.SECONDS),
+		Supplier:        storedCdr.Supplier,
+		DisconnectCause: storedCdr.DisconnectCause,
+		ExtraFields:     storedCdr.ExtraFields,
+		MediationRunId:  storedCdr.MediationRunId,
+		RatedAccount:    storedCdr.RatedAccount,
+		RatedSubject:    storedCdr.RatedSubject,
+		Cost:            storedCdr.Cost,
+		CostDetails:     storedCdr.CostDetailsJson(),
 	}
 }
 
@@ -517,6 +529,12 @@ func (storedCdr *StoredCdr) GetSupplier(fieldName string) string {
 	}
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
+func (storedCdr *StoredCdr) GetDisconnectCause(fieldName string) string {
+	if utils.IsSliceMember([]string{utils.DISCONNECT_CAUSE, utils.META_DEFAULT}, fieldName) {
+		return storedCdr.DisconnectCause
+	}
+	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
+}
 func (storedCdr *StoredCdr) GetOriginatorIP(fieldName string) string {
 	if utils.IsSliceMember([]string{utils.CDRHOST, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.CdrHost
@@ -542,30 +560,31 @@ func (storedCdr *StoredCdr) String() string {
 }
 
 type ExternalCdr struct {
-	CgrId          string
-	OrderId        int64
-	TOR            string
-	AccId          string
-	CdrHost        string
-	CdrSource      string
-	ReqType        string
-	Direction      string
-	Tenant         string
-	Category       string
-	Account        string
-	Subject        string
-	Destination    string
-	SetupTime      string
-	AnswerTime     string
-	Usage          string
-	Supplier       string
-	ExtraFields    map[string]string
-	MediationRunId string
-	RatedAccount   string
-	RatedSubject   string
-	Cost           float64
-	CostDetails    string
-	Rated          bool // Mark the CDR as rated so we do not process it during mediation
+	CgrId           string
+	OrderId         int64
+	TOR             string
+	AccId           string
+	CdrHost         string
+	CdrSource       string
+	ReqType         string
+	Direction       string
+	Tenant          string
+	Category        string
+	Account         string
+	Subject         string
+	Destination     string
+	SetupTime       string
+	AnswerTime      string
+	Usage           string
+	Supplier        string
+	DisconnectCause string
+	ExtraFields     map[string]string
+	MediationRunId  string
+	RatedAccount    string
+	RatedSubject    string
+	Cost            float64
+	CostDetails     string
+	Rated           bool // Mark the CDR as rated so we do not process it during mediation
 }
 
 // Used when authorizing requests from outside, eg ApierV1.GetMaxSessionTime

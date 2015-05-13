@@ -22,6 +22,7 @@ CREATE TABLE cdrs_primary (
   answer_time TIMESTAMP NOT NULL,
   usage NUMERIC(30,9) NOT NULL,
   supplier VARCHAR(128) NOT NULL,
+  disconnect_cause VARCHAR(64) NOT NULL,
   created_at TIMESTAMP,
   deleted_at TIMESTAMP,
   UNIQUE (cgrid)
@@ -89,6 +90,7 @@ CREATE TABLE rated_cdrs (
   answer_time TIMESTAMP NOT NULL,
   usage NUMERIC(30,9) NOT NULL,
   supplier VARCHAR(128) NOT NULL,
+  disconnect_cause VARCHAR(64) NOT NULL,
   cost NUMERIC(20,4) DEFAULT NULL,
   extra_info text,
   created_at TIMESTAMP,
