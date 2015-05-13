@@ -15,7 +15,7 @@ cd /usr/share/cgrates/storage/mysql && ./setup_cgr_db.sh root CGRateS.org
 cd /usr/share/cgrates/storage/postgres && ./setup_cgr_db.sh
 
 #env vars
-export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
 
 # build and install cgrates
 /root/cgr/update_external_libs.sh
@@ -29,5 +29,5 @@ cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_
 
 cd /root/cgr
 echo "for cgradmin run: cgr-engine -config_dir data/conf/samples/cgradmin"
-echo 'export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$PATH:$GOROOT/bin:$GOPATH/bin'>>/root/.zshrc
+echo 'export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH'>>/root/.zshrc
 zsh
