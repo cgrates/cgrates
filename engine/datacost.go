@@ -25,13 +25,13 @@ type DataCost struct {
 	deductConnectFee                                                bool
 }
 type DataSpan struct {
-	DataStart, DataEnd                           float64
-	Cost                                         float64
-	ratingInfo                                   *RatingInfo
-	RateInterval                                 *RateInterval
-	DataIndex                                    float64 // the data transfer so far till DataEnd
-	Increments                                   []*DataIncrement
-	MatchedSubject, MatchedPrefix, MatchedDestId string
+	DataStart, DataEnd                                         float64
+	Cost                                                       float64
+	ratingInfo                                                 *RatingInfo
+	RateInterval                                               *RateInterval
+	DataIndex                                                  float64 // the data transfer so far till DataEnd
+	Increments                                                 []*DataIncrement
+	MatchedSubject, MatchedPrefix, MatchedDestID, RatingPlanID string
 }
 
 type DataIncrement struct {

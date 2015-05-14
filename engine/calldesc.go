@@ -890,7 +890,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				//	Supplier: supplier,
 				//	Error:    err,
 				//})
-				Logger.Warning(fmt.Sprintf("LCR_WARNING: Ignoring supplier: %s, cannot calculate cost, error: %v", err))
+				Logger.Warning(fmt.Sprintf("LCR_WARNING: Ignoring supplier: %s, cannot calculate cost, error: %v", supplier, err))
 				continue
 			} else {
 				supplCost := &LCRSupplierCost{

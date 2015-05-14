@@ -133,7 +133,7 @@ func TestSplitSpansWeekend(t *testing.T) {
 			&RatingInfo{
 				MatchedSubject: "*out:foehn:postpaid:foehn",
 				MatchedPrefix:  "0034678",
-				MatchedDestId:  "SPN_MOB",
+				MatchedDestID:  "SPN_MOB",
 				ActivationTime: time.Date(2015, 4, 23, 0, 0, 0, 0, time.UTC),
 				RateIntervals: []*RateInterval{
 					&RateInterval{

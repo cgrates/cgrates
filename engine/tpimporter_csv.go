@@ -64,7 +64,7 @@ func (self *TPCSVImporter) Run() error {
 			continue
 		}
 		if err := fHandler(self, f.Name()); err != nil {
-			Logger.Err(fmt.Sprintf("<TPCSVImporter> Importing file: %s, got error: %s", err.Error()))
+			Logger.Err(fmt.Sprintf("<TPCSVImporter> Importing file: %s, got error: %s", f.Name(), err.Error()))
 		}
 	}
 	return nil
