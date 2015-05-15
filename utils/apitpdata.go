@@ -394,35 +394,38 @@ type TPCdrStats struct {
 func (self *TPCdrStats) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.CdrStats))
 	for idx, cdrStat := range self.CdrStats {
-		retSlice[idx] = []string{self.CdrStatsId, cdrStat.QueueLength, cdrStat.TimeWindow, cdrStat.Metrics, cdrStat.SetupInterval, cdrStat.TOR, cdrStat.CdrHost, cdrStat.CdrSource,
-			cdrStat.ReqType, cdrStat.Direction, cdrStat.Tenant, cdrStat.Category, cdrStat.Account, cdrStat.Subject, cdrStat.DestinationPrefix, cdrStat.UsageInterval, cdrStat.Supplier,
-			cdrStat.MediationRunIds, cdrStat.RatedAccount, cdrStat.RatedSubject, cdrStat.CostInterval, cdrStat.ActionTriggers}
+		retSlice[idx] = []string{self.CdrStatsId, cdrStat.QueueLength, cdrStat.TimeWindow, cdrStat.Metrics, cdrStat.SetupInterval, cdrStat.TORs, cdrStat.CdrHosts,
+			cdrStat.CdrSources, cdrStat.ReqTypes, cdrStat.Directions, cdrStat.Tenants, cdrStat.Categories, cdrStat.Accounts, cdrStat.Subjects, cdrStat.DestinationPrefixes,
+			cdrStat.UsageInterval, cdrStat.Suppliers, cdrStat.DisconnectCauses, cdrStat.MediationRunIds, cdrStat.RatedAccounts, cdrStat.RatedSubjects, cdrStat.CostInterval,
+			cdrStat.ActionTriggers}
+
 	}
 	return retSlice
 }
 
 type TPCdrStat struct {
-	QueueLength       string
-	TimeWindow        string
-	Metrics           string
-	SetupInterval     string
-	TOR               string
-	CdrHost           string
-	CdrSource         string
-	ReqType           string
-	Direction         string
-	Tenant            string
-	Category          string
-	Account           string
-	Subject           string
-	DestinationPrefix string
-	UsageInterval     string
-	Supplier          string
-	MediationRunIds   string
-	RatedAccount      string
-	RatedSubject      string
-	CostInterval      string
-	ActionTriggers    string
+	QueueLength         string
+	TimeWindow          string
+	Metrics             string
+	SetupInterval       string
+	TORs                string
+	CdrHosts            string
+	CdrSources          string
+	ReqTypes            string
+	Directions          string
+	Tenants             string
+	Categories          string
+	Accounts            string
+	Subjects            string
+	DestinationPrefixes string
+	UsageInterval       string
+	Suppliers           string
+	DisconnectCauses    string
+	MediationRunIds     string
+	RatedAccounts       string
+	RatedSubjects       string
+	CostInterval        string
+	ActionTriggers      string
 }
 
 type TPDerivedChargers struct {

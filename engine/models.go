@@ -258,31 +258,32 @@ func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
 }
 
 type TpCdrStat struct {
-	Id                int64
-	Tpid              string
-	Tag               string
-	QueueLength       int
-	TimeWindow        string
-	Metrics           string
-	SetupInterval     string
-	Tor               string
-	CdrHost           string
-	CdrSource         string
-	ReqType           string
-	Direction         string
-	Tenant            string
-	Category          string
-	Account           string
-	Subject           string
-	DestinationPrefix string
-	UsageInterval     string
-	Supplier          string
-	MediationRunids   string
-	RatedAccount      string
-	RatedSubject      string
-	CostInterval      string
-	ActionTriggers    string
-	CreatedAt         time.Time
+	Id                  int64
+	Tpid                string
+	Tag                 string
+	QueueLength         int
+	TimeWindow          string
+	Metrics             string
+	SetupInterval       string
+	Tors                string
+	CdrHosts            string
+	CdrSources          string
+	ReqTypes            string
+	Directions          string
+	Tenants             string
+	Categories          string
+	Accounts            string
+	Subjects            string
+	DestinationPrefixes string
+	UsageInterval       string
+	Suppliers           string
+	DisconnectCauses    string
+	MediationRunids     string
+	RatedAccounts       string
+	RatedSubjects       string
+	CostInterval        string
+	ActionTriggers      string
+	CreatedAt           time.Time
 }
 
 type TblCdrsPrimary struct {

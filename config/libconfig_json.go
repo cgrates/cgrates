@@ -103,6 +103,7 @@ type CdrStatsJsonCfg struct {
 	Destination_prefixes *[]string
 	Usage_interval       *[]string
 	Suppliers            *[]string
+	Disconnect_causes    *[]string
 	Mediation_run_ids    *[]string
 	Rated_accounts       *[]string
 	Rated_subjects       *[]string

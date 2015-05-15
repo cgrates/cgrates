@@ -199,12 +199,14 @@ func TestStatsQueueIds(t *testing.T) {
 func TestStatsAppendCdr(t *testing.T) {
 	cdrStats := NewStats(dataStorage)
 	cdr := &StoredCdr{
-		Tenant:     "cgrates.org",
-		Category:   "call",
-		AnswerTime: time.Now(),
-		SetupTime:  time.Now(),
-		Usage:      10 * time.Second,
-		Cost:       10,
+		Tenant:          "cgrates.org",
+		Category:        "call",
+		AnswerTime:      time.Now(),
+		SetupTime:       time.Now(),
+		Usage:           10 * time.Second,
+		Cost:            10,
+		Supplier:        "suppl1",
+		DisconnectCause: "NORMAL_CLEARNING",
 	}
 	err := cdrStats.AppendCDR(cdr, nil)
 	if err != nil {

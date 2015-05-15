@@ -95,6 +95,7 @@ const (
 	CDRSTATIDX_DSTPREFIX
 	CDRSTATIDX_USAGE
 	CDRSTATIDX_SUPPLIER
+	CDRSTATIDX_DISCONNECT_CAUSE
 	CDRSTATIDX_MEDRUN
 	CDRSTATIDX_RTACCOUNT
 	CDRSTATIDX_RTSUBJECT
@@ -212,35 +213,35 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 			}
 		}
 	}
-	if tpCs.TOR != "" {
-		cs.TOR = append(cs.TOR, tpCs.TOR)
+	if tpCs.TORs != "" {
+		cs.TOR = append(cs.TOR, tpCs.TORs)
 	}
-	if tpCs.CdrHost != "" {
-		cs.CdrHost = append(cs.CdrHost, tpCs.CdrHost)
+	if tpCs.CdrHosts != "" {
+		cs.CdrHost = append(cs.CdrHost, tpCs.CdrHosts)
 	}
-	if tpCs.CdrSource != "" {
-		cs.CdrSource = append(cs.CdrSource, tpCs.CdrSource)
+	if tpCs.CdrSources != "" {
+		cs.CdrSource = append(cs.CdrSource, tpCs.CdrSources)
 	}
-	if tpCs.ReqType != "" {
-		cs.ReqType = append(cs.ReqType, tpCs.ReqType)
+	if tpCs.ReqTypes != "" {
+		cs.ReqType = append(cs.ReqType, tpCs.ReqTypes)
 	}
-	if tpCs.Direction != "" {
-		cs.Direction = append(cs.Direction, tpCs.Direction)
+	if tpCs.Directions != "" {
+		cs.Direction = append(cs.Direction, tpCs.Directions)
 	}
-	if tpCs.Tenant != "" {
-		cs.Tenant = append(cs.Tenant, tpCs.Tenant)
+	if tpCs.Tenants != "" {
+		cs.Tenant = append(cs.Tenant, tpCs.Tenants)
 	}
-	if tpCs.Category != "" {
-		cs.Category = append(cs.Category, tpCs.Category)
+	if tpCs.Categories != "" {
+		cs.Category = append(cs.Category, tpCs.Categories)
 	}
-	if tpCs.Account != "" {
-		cs.Account = append(cs.Account, tpCs.Account)
+	if tpCs.Accounts != "" {
+		cs.Account = append(cs.Account, tpCs.Accounts)
 	}
-	if tpCs.Subject != "" {
-		cs.Subject = append(cs.Subject, tpCs.Subject)
+	if tpCs.Subjects != "" {
+		cs.Subject = append(cs.Subject, tpCs.Subjects)
 	}
-	if tpCs.DestinationPrefix != "" {
-		cs.DestinationPrefix = append(cs.DestinationPrefix, tpCs.DestinationPrefix)
+	if tpCs.DestinationPrefixes != "" {
+		cs.DestinationPrefix = append(cs.DestinationPrefix, tpCs.DestinationPrefixes)
 	}
 	if tpCs.UsageInterval != "" {
 		durations := strings.Split(tpCs.UsageInterval, utils.INFIELD_SEP)
@@ -267,14 +268,20 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 			}
 		}
 	}
+	if tpCs.Suppliers != "" {
+		cs.Supplier = append(cs.Supplier, tpCs.Suppliers)
+	}
+	if tpCs.DisconnectCauses != "" {
+		cs.DisconnectCause = append(cs.DisconnectCause, tpCs.DisconnectCauses)
+	}
 	if tpCs.MediationRunIds != "" {
 		cs.MediationRunIds = append(cs.MediationRunIds, tpCs.MediationRunIds)
 	}
-	if tpCs.RatedAccount != "" {
-		cs.RatedAccount = append(cs.RatedAccount, tpCs.RatedAccount)
+	if tpCs.RatedAccounts != "" {
+		cs.RatedAccount = append(cs.RatedAccount, tpCs.RatedAccounts)
 	}
-	if tpCs.RatedSubject != "" {
-		cs.RatedSubject = append(cs.RatedSubject, tpCs.RatedSubject)
+	if tpCs.RatedSubjects != "" {
+		cs.RatedSubject = append(cs.RatedSubject, tpCs.RatedSubjects)
 	}
 	if tpCs.CostInterval != "" {
 		costs := strings.Split(tpCs.CostInterval, utils.INFIELD_SEP)
@@ -424,7 +431,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		"Direction(*out),Tenant[0-9A-Za-z_],Category([0-9A-Za-z_]),Account[0-9A-Za-z_],Subject([0-9A-Za-z_]|*any),RunId([0-9A-Za-z_]),RunFilter([^~]*[0-9A-Za-z_/]),ReqTypeField([^~]*[0-9A-Za-z_/]|*default),DirectionField([^~]*[0-9A-Za-z_/]|*default),TenantField([^~]*[0-9A-Za-z_/]|*default),TorField([^~]*[0-9A-Za-z_/]|*default),AccountField([^~]*[0-9A-Za-z_/]|*default),SubjectField([^~]*[0-9A-Za-z_/]|*default),DestinationField([^~]*[0-9A-Za-z_/]|*default),SetupTimeField([^~]*[0-9A-Za-z_/]|*default),AnswerTimeField([^~]*[0-9A-Za-z_/]|*default),UsageField([^~]*[0-9A-Za-z_/]|*default),SupplierField([^~]*[0-9A-Za-z_/]|*default),DisconnectCauseField([^~]*[0-9A-Za-z_/]|*default)"},
 	utils.CDR_STATS_CSV: &FileLineRegexValidator{utils.CDR_STATS_NRCOLS,
 		regexp.MustCompile(`.+`), //ToDo: Fix me with proper rules
-		"Id,QueueLength,TimeWindow,Metric,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,Supplier,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers(*?[0-9A-Za-z_]),Strategy(*[0-9A-Za-z_]),RatingSubject(*?[0-9A-Za-z_])"},
+		"Id,QueueLength,TimeWindow,Metric,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,Supplier,DisconnectCause,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers(*?[0-9A-Za-z_]),Strategy(*[0-9A-Za-z_]),RatingSubject(*?[0-9A-Za-z_])"},
 }
 
 func NewTPCSVFileParser(dirPath, fileName string) (*TPCSVFileParser, error) {

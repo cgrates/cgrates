@@ -195,7 +195,7 @@ func TestMySQLSetGetTPCdrStats(t *testing.T) {
 	}
 	CS_ID := "CDRSTATS_1"
 	setCS := map[string][]*utils.TPCdrStat{CS_ID: []*utils.TPCdrStat{
-		&utils.TPCdrStat{QueueLength: "10", TimeWindow: "10m", Metrics: "ASR", Tenant: "cgrates.org", Category: "call"},
+		&utils.TPCdrStat{QueueLength: "10", TimeWindow: "10m", Metrics: "ASR", Tenants: "cgrates.org", Categories: "call"},
 	}}
 	if err := mysqlDb.SetTPCdrStats(TEST_SQL, setCS); err != nil {
 		t.Error(err.Error())

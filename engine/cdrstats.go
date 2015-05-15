@@ -45,6 +45,7 @@ func NewCdrStatsFromCdrStatsCfg(csCfg *config.CdrStatsConfig) *CdrStats {
 		DestinationPrefix: csCfg.DestinationPrefixes,
 		UsageInterval:     csCfg.UsageInterval,
 		Supplier:          csCfg.Suppliers,
+		DisconnectCause:   csCfg.DisconnectCauses,
 		MediationRunIds:   csCfg.MediationRunIds,
 		RatedAccount:      csCfg.RatedAccounts,
 		RatedSubject:      csCfg.RatedSubjects,
@@ -70,6 +71,7 @@ type CdrStats struct {
 	DestinationPrefix []string        // CDRFieldFilter on DestinationPrefixes
 	UsageInterval     []time.Duration // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
 	Supplier          []string        // CDRFieldFilter on Suppliers
+	DisconnectCause   []string        // Filter on DisconnectCause
 	MediationRunIds   []string        // CDRFieldFilter on MediationRunIds
 	RatedAccount      []string        // CDRFieldFilter on RatedAccounts
 	RatedSubject      []string        // CDRFieldFilter on RatedSubjects
@@ -137,6 +139,9 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 		}
 	}
 	if len(cs.Supplier) > 0 && !utils.IsSliceMember(cs.Supplier, cdr.Supplier) {
+		return false
+	}
+	if len(cs.DisconnectCause) > 0 && !utils.IsSliceMember(cs.DisconnectCause, cdr.DisconnectCause) {
 		return false
 	}
 	if len(cs.MediationRunIds) > 0 && !utils.IsSliceMember(cs.MediationRunIds, cdr.MediationRunId) {
