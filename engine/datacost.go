@@ -31,7 +31,7 @@ type DataSpan struct {
 	RateInterval                                               *RateInterval
 	DataIndex                                                  float64 // the data transfer so far till DataEnd
 	Increments                                                 []*DataIncrement
-	MatchedSubject, MatchedPrefix, MatchedDestID, RatingPlanID string
+	MatchedSubject, MatchedPrefix, MatchedDestId, RatingPlanId string
 }
 
 type DataIncrement struct {

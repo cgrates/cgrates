@@ -37,7 +37,7 @@ type TimeSpan struct {
 	RateInterval                                               *RateInterval
 	DurationIndex                                              time.Duration // the call duration so far till TimeEnd
 	Increments                                                 Increments
-	MatchedSubject, MatchedPrefix, MatchedDestID, RatingPlanID string
+	MatchedSubject, MatchedPrefix, MatchedDestId, RatingPlanId string
 }
 
 type Increment struct {
@@ -281,8 +281,8 @@ func (ts *TimeSpan) setRatingInfo(rp *RatingInfo) {
 	ts.ratingInfo = rp
 	ts.MatchedSubject = rp.MatchedSubject
 	ts.MatchedPrefix = rp.MatchedPrefix
-	ts.MatchedDestID = rp.MatchedDestID
-	ts.RatingPlanID = rp.RatingPlanID
+	ts.MatchedDestId = rp.MatchedDestId
+	ts.RatingPlanId = rp.RatingPlanId
 }
 
 func (ts *TimeSpan) createIncrementsSlice() {

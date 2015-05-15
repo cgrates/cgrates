@@ -82,9 +82,9 @@ func (rpas RatingPlanActivations) GetActiveForCall(cd *CallDescriptor) RatingPla
 
 type RatingInfo struct {
 	MatchedSubject string
-	RatingPlanID   string
+	RatingPlanId   string
 	MatchedPrefix  string
-	MatchedDestID  string
+	MatchedDestId  string
 	ActivationTime time.Time
 	RateIntervals  RateIntervalList
 	FallbackKeys   []string
@@ -163,7 +163,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 			ris = append(ris, &RatingInfo{
 				MatchedSubject: "",
 				MatchedPrefix:  "",
-				MatchedDestID:  "",
+				MatchedDestId:  "",
 				ActivationTime: cd.TimeStart,
 				RateIntervals:  nil,
 				FallbackKeys:   []string{cd.GetKey(FALLBACK_SUBJECT)}})
@@ -171,9 +171,9 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		if len(prefix) > 0 {
 			ris = append(ris, &RatingInfo{
 				MatchedSubject: rp.Id,
-				RatingPlanID:   rpl.Id,
+				RatingPlanId:   rpl.Id,
 				MatchedPrefix:  prefix,
-				MatchedDestID:  destinationId,
+				MatchedDestId:  destinationId,
 				ActivationTime: rpa.ActivationTime,
 				RateIntervals:  rps,
 				FallbackKeys:   rpa.FallbackKeys})
@@ -182,7 +182,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 			ris = append(ris, &RatingInfo{
 				MatchedSubject: "",
 				MatchedPrefix:  "",
-				MatchedDestID:  "",
+				MatchedDestId:  "",
 				ActivationTime: rpa.ActivationTime,
 				RateIntervals:  nil,
 				FallbackKeys:   rpa.FallbackKeys,

@@ -133,8 +133,8 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 			DataIndex:      callDuration,
 			MatchedSubject: ts.MatchedSubject,
 			MatchedPrefix:  ts.MatchedPrefix,
-			MatchedDestID:  ts.MatchedDestID,
-			RatingPlanID:   ts.RatingPlanID,
+			MatchedDestId:  ts.MatchedDestId,
+			RatingPlanId:   ts.RatingPlanId,
 		}
 		dc.DataSpans[i].Increments = make([]*DataIncrement, len(ts.Increments))
 		for j, incr := range ts.Increments {
