@@ -31,13 +31,13 @@ import (
 A unit in which a call will be split that has a specific price related interval attached to it.
 */
 type TimeSpan struct {
-	TimeStart, TimeEnd                           time.Time
-	Cost                                         float64
-	ratingInfo                                   *RatingInfo
-	RateInterval                                 *RateInterval
-	DurationIndex                                time.Duration // the call duration so far till TimeEnd
-	Increments                                   Increments
-	MatchedSubject, MatchedPrefix, MatchedDestId string
+	TimeStart, TimeEnd                                         time.Time
+	Cost                                                       float64
+	ratingInfo                                                 *RatingInfo
+	RateInterval                                               *RateInterval
+	DurationIndex                                              time.Duration // the call duration so far till TimeEnd
+	Increments                                                 Increments
+	MatchedSubject, MatchedPrefix, MatchedDestID, RatingPlanID string
 }
 
 type Increment struct {
@@ -281,7 +281,8 @@ func (ts *TimeSpan) setRatingInfo(rp *RatingInfo) {
 	ts.ratingInfo = rp
 	ts.MatchedSubject = rp.MatchedSubject
 	ts.MatchedPrefix = rp.MatchedPrefix
-	ts.MatchedDestId = rp.MatchedDestId
+	ts.MatchedDestID = rp.MatchedDestID
+	ts.RatingPlanID = rp.RatingPlanID
 }
 
 func (ts *TimeSpan) createIncrementsSlice() {
