@@ -42,7 +42,7 @@ CREATE TABLE tp_rates (
   id SERIAL PRIMARY KEY,
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
-  connect_fee NUMERIC(7,4) NOT NULL,  
+  connect_fee NUMERIC(7,4) NOT NULL,
   rate NUMERIC(7,4) NOT NULL,
   rate_unit VARCHAR(16) NOT NULL,
   rate_increment VARCHAR(16) NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE tp_actions (
   units NUMERIC(20,4) NOT NULL,
   expiry_time VARCHAR(24) NOT NULL,
   timing_tags VARCHAR(128) NOT NULL,
-  destination_tag VARCHAR(64) NOT NULL,
+  destination_tags VARCHAR(64) NOT NULL,
   rating_subject VARCHAR(64) NOT NULL,
   category VARCHAR(32) NOT NULL,
   shared_group VARCHAR(64) NOT NULL,
@@ -158,7 +158,7 @@ CREATE TABLE tp_actions (
   extra_parameters VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, tag, action, balance_tag, balance_type, direction, expiry_time, timing_tags, destination_tag, shared_group, balance_weight, weight)
+  UNIQUE (tpid, tag, action, balance_tag, balance_type, direction, expiry_time, timing_tags, destination_tags, shared_group, balance_weight, weight)
 );
 CREATE INDEX tpactions_tpid_idx ON tp_actions (tpid);
 CREATE INDEX tpactions_idx ON tp_actions (tpid,tag);
@@ -198,10 +198,10 @@ CREATE TABLE tp_action_triggers (
   threshold_value NUMERIC(20,4) NOT NULL,
   recurrent BOOLEAN NOT NULL,
   min_sleep VARCHAR(16) NOT NULL,
-  balance_destination_tag VARCHAR(64) NOT NULL,
-  balance_weight NUMERIC(8,2) NOT NULL, 
+  balance_destination_tags VARCHAR(64) NOT NULL,
+  balance_weight NUMERIC(8,2) NOT NULL,
   balance_expiry_time VARCHAR(24) NOT NULL,
-  balance_timing_tags VARCHAR(128) NOT NULL, 
+  balance_timing_tags VARCHAR(128) NOT NULL,
   balance_rating_subject VARCHAR(64) NOT NULL,
   balance_category VARCHAR(32) NOT NULL,
   balance_shared_group VARCHAR(64) NOT NULL,
@@ -209,7 +209,7 @@ CREATE TABLE tp_action_triggers (
   actions_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, tag, balance_tag, balance_type, balance_direction, threshold_type, threshold_value, balance_destination_tag, actions_tag)
+  UNIQUE (tpid, tag, balance_tag, balance_type, balance_direction, threshold_type, threshold_value, balance_destination_tags, actions_tag)
 );
 CREATE INDEX tpactiontrigers_tpid_idx ON tp_action_triggers (tpid);
 CREATE INDEX tpactiontrigers_idx ON tp_action_triggers (tpid,tag);
@@ -244,7 +244,7 @@ CREATE TABLE tp_lcr_rules (
   tpid VARCHAR(64) NOT NULL,
   direction VARCHAR(8) NOT NULL,
   tenant VARCHAR(64) NOT NULL,
-  category VARCHAR(32) NOT NULL,  
+  category VARCHAR(32) NOT NULL,
   account VARCHAR(24) NOT NULL,
   subject VARCHAR(64) NOT NULL,
   destination_tag VARCHAR(64) NOT NULL,

@@ -40,7 +40,7 @@ func init() {
 func populateDB() {
 	ats := []*Action{
 		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}},
-		&Action{ActionType: "*topup", BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationId: "NAT"}},
+		&Action{ActionType: "*topup", BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationIds: "NAT"}},
 	}
 	ats1 := []*Action{
 		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 20},
@@ -51,16 +51,16 @@ func populateDB() {
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY + OUTBOUND: BalanceChain{&Balance{Value: 50}},
 			utils.VOICE + OUTBOUND: BalanceChain{
-				&Balance{Value: 200, DestinationId: "NAT", Weight: 10},
-				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
+				&Balance{Value: 200, DestinationIds: "NAT", Weight: 10},
+				&Balance{Value: 100, DestinationIds: "RET", Weight: 20},
 			}},
 	}
 	broker := &Account{
 		Id: "*out:vdf:broker",
 		BalanceMap: map[string]BalanceChain{
 			utils.VOICE + OUTBOUND: BalanceChain{
-				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
+				&Balance{Value: 20, DestinationIds: "NAT", Weight: 10, RatingSubject: "rif"},
+				&Balance{Value: 100, DestinationIds: "RET", Weight: 20},
 			}},
 	}
 	luna := &Account{
@@ -75,8 +75,8 @@ func populateDB() {
 		Id: "*out:vdf:minitsboy",
 		BalanceMap: map[string]BalanceChain{
 			utils.VOICE + OUTBOUND: BalanceChain{
-				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
+				&Balance{Value: 20, DestinationIds: "NAT", Weight: 10, RatingSubject: "rif"},
+				&Balance{Value: 100, DestinationIds: "RET", Weight: 20},
 			},
 			utils.MONETARY + OUTBOUND: BalanceChain{
 				&Balance{Value: 100, Weight: 10},

@@ -489,7 +489,7 @@ func TestApierTPActions(t *testing.T) {
 	reply := ""
 	act := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
-			DestinationId: "*any", BalanceWeight: 10, Weight: 10},
+			DestinationIds: "*any", BalanceWeight: 10, Weight: 10},
 	}}
 	actWarn := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
@@ -1030,7 +1030,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	reply := ""
 	// Add balance to a previously known account
 	attrs := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan2", BalanceDirection: "*out", BalanceType: "*monetary",
-		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationId: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
+		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
 	if err := rater.Call("ApierV1.AddTriggeredAction", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
 	} else if reply != "OK" {

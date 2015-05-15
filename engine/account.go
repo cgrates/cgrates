@@ -156,14 +156,20 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, balances Balanc
 			continue
 		}
 		b.account = ub
-		if b.DestinationId != "" && b.DestinationId != utils.ANY {
+		if b.DestinationIds != "" && b.DestinationIds != utils.ANY {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
-						if dId == b.DestinationId {
-							b.precision = len(p)
-							usefulBalances = append(usefulBalances, b)
+						balDestIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
+						for _, balDestID := range balDestIds {
+							if dId == balDestID {
+								b.precision = len(p)
+								usefulBalances = append(usefulBalances, b)
+								break
+							}
+						}
+						if b.precision > 0 {
 							break
 						}
 					}
@@ -329,7 +335,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				increment.BalanceInfo.AccountId = ub.Id
 				increment.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: leftCC.Direction, Balance: &Balance{Value: cost, DestinationId: leftCC.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: leftCC.Direction, Balance: &Balance{Value: cost, DestinationIds: leftCC.Destination}})
 				}
 			}
 		}
@@ -492,7 +498,7 @@ func (ub *Account) countUnits(a *Action) {
 		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
 	}
 
-	unitsCounter.addUnits(a.Balance.Value, a.Balance.DestinationId) // DestinationId is actually a destination (number or prefix)
+	unitsCounter.addUnits(a.Balance.Value, a.Balance.DestinationIds) // DestinationIds is actually a destination (number or prefix)
 	ub.executeActionTriggers(nil)
 }
 
@@ -617,7 +623,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 				b.SubstractAmount(connectFee)
 				// the conect fee is not refundable!
 				if count {
-					acc.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
+					acc.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationIds: cc.Destination}})
 				}
 				connectFeePaid = true
 				break
@@ -629,7 +635,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 			acc.GetDefaultMoneyBalance(cc.Direction).Value -= connectFee
 			// the conect fee is not refundable!
 			if count {
-				acc.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
+				acc.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationIds: cc.Destination}})
 			}
 		}
 	}

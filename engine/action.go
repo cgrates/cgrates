@@ -158,7 +158,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "balance_value":
 			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.Value, 'f', -1, 64))
 		case "destination_id":
-			parsedValue += rsrFld.ParseValue(action.Balance.DestinationId)
+			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds)
 		case "extra_params":
 			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
 		case "rating_subject":

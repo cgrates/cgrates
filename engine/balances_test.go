@@ -21,6 +21,8 @@ package engine
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestBalanceSortPrecision(t *testing.T) {
@@ -79,24 +81,24 @@ func TestBalanceSortWeightLess(t *testing.T) {
 }
 
 func TestBalanceEqual(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
-	mb2 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
-	mb3 := &Balance{Weight: 1, precision: 1, RatingSubject: "2", DestinationId: ""}
+	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: ""}
+	mb2 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: ""}
+	mb3 := &Balance{Weight: 1, precision: 1, RatingSubject: "2", DestinationIds: ""}
 	if !mb1.Equal(mb2) || mb2.Equal(mb3) {
 		t.Error("Equal failure!", mb1 == mb2, mb3)
 	}
 }
 
 func TestBalanceMatchFilter(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
-	mb2 := &Balance{Weight: 1, precision: 1, RatingSubject: "", DestinationId: ""}
+	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: ""}
+	mb2 := &Balance{Weight: 1, precision: 1, RatingSubject: "", DestinationIds: ""}
 	if !mb1.MatchFilter(mb2) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
 }
 
 func TestBalanceMatchFilterEmpty(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: ""}
 	mb2 := &Balance{}
 	if !mb1.MatchFilter(mb2) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
@@ -104,23 +106,23 @@ func TestBalanceMatchFilterEmpty(t *testing.T) {
 }
 
 func TestBalanceMatchFilterId(t *testing.T) {
-	mb1 := &Balance{Id: "T1", Weight: 2, precision: 2, RatingSubject: "2", DestinationId: "NAT"}
-	mb2 := &Balance{Id: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	mb1 := &Balance{Id: "T1", Weight: 2, precision: 2, RatingSubject: "2", DestinationIds: "NAT"}
+	mb2 := &Balance{Id: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: ""}
 	if !mb1.MatchFilter(mb2) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
 }
 
 func TestBalanceMatchFilterDiffId(t *testing.T) {
-	mb1 := &Balance{Id: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
-	mb2 := &Balance{Id: "T2", Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	mb1 := &Balance{Id: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: ""}
+	mb2 := &Balance{Id: "T2", Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: ""}
 	if mb1.MatchFilter(mb2) {
 		t.Errorf("Match filter failure: %+v != %+v", mb1, mb2)
 	}
 }
 
 func TestBalanceClone(t *testing.T) {
-	mb1 := &Balance{Value: 1, Weight: 2, RatingSubject: "test", DestinationId: "5"}
+	mb1 := &Balance{Value: 1, Weight: 2, RatingSubject: "test", DestinationIds: "5"}
 	mb2 := mb1.Clone()
 	if mb1 == mb2 || !reflect.DeepEqual(mb1, mb2) {
 		t.Errorf("Cloning failure: \n%v\n%v", mb1, mb2)
@@ -149,21 +151,21 @@ func TestBalanceMatchActionTriggerId(t *testing.T) {
 }
 
 func TestBalanceMatchActionTriggerDestination(t *testing.T) {
-	at := &ActionTrigger{BalanceDestinationId: "test"}
-	b := &Balance{DestinationId: "test"}
+	at := &ActionTrigger{BalanceDestinationIds: "test"}
+	b := &Balance{DestinationIds: "test"}
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
-	b.DestinationId = "test1"
+	b.DestinationIds = "test1"
 	if b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
-	b.DestinationId = ""
+	b.DestinationIds = ""
 	if b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
-	b.DestinationId = "test"
-	at.BalanceDestinationId = ""
+	b.DestinationIds = "test"
+	at.BalanceDestinationIds = ""
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
@@ -236,5 +238,29 @@ func TestBalanceIsDefault(t *testing.T) {
 	b := &Balance{Weight: 0}
 	if !b.IsDefault() {
 		t.Errorf("Balance should be default: %+v", b)
+	}
+}
+
+func TestBalanceSortDestinationIds(t *testing.T) {
+	b := Balance{DestinationIds: "a_first;c_third;b_second"}
+	sortedDestIds := b.sortDestinationIds()
+	if sortedDestIds != "a_first;b_second;c_third" {
+		t.Error("Error sorting destination ids: ", sortedDestIds)
+	}
+}
+
+func TestBalanceSortDestinationIdsOne(t *testing.T) {
+	b := Balance{DestinationIds: utils.ANY}
+	sortedDestIds := b.sortDestinationIds()
+	if sortedDestIds != utils.ANY {
+		t.Error("Error sorting destination ids: ", sortedDestIds)
+	}
+}
+
+func TestBalanceSortDestinationEmpty(t *testing.T) {
+	b := Balance{DestinationIds: ""}
+	sortedDestIds := b.sortDestinationIds()
+	if sortedDestIds != "" {
+		t.Error("Error sorting destination ids: ", sortedDestIds)
 	}
 }

@@ -206,23 +206,23 @@ func GetUB() *Account {
 	uc := &UnitsCounter{
 		Direction:   OUTBOUND,
 		BalanceType: utils.SMS,
-		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
+		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
 	}
 	at := &ActionTrigger{
-		Id:                   "some_uuid",
-		BalanceType:          utils.MONETARY,
-		BalanceDirection:     OUTBOUND,
-		ThresholdValue:       100.0,
-		BalanceDestinationId: "NAT",
-		Weight:               10.0,
-		ActionsId:            "Commando",
+		Id:                    "some_uuid",
+		BalanceType:           utils.MONETARY,
+		BalanceDirection:      OUTBOUND,
+		ThresholdValue:        100.0,
+		BalanceDestinationIds: "NAT",
+		Weight:                10.0,
+		ActionsId:             "Commando",
 	}
 	var zeroTime time.Time
 	zeroTime = zeroTime.UTC() // for deep equal to find location
 	ub := &Account{
 		Id:             "rif",
 		AllowNegative:  true,
-		BalanceMap:     map[string]BalanceChain{utils.SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{utils.SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}

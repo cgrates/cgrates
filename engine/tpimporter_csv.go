@@ -389,7 +389,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		actId, actionType, balanceTag, balanceType, direction, destTag, rateSubject, category, sharedGroup := record[ACTSCSVIDX_TAG], record[ACTSCSVIDX_ACTION],
+		actId, actionType, balanceTag, balanceType, direction, destTags, rateSubject, category, sharedGroup := record[ACTSCSVIDX_TAG], record[ACTSCSVIDX_ACTION],
 			record[ACTSCSVIDX_BALANCE_TAG], record[ACTSCSVIDX_BALANCE_TYPE], record[ACTSCSVIDX_DIRECTION], record[ACTSCSVIDX_DESTINATION_TAG], record[ACTSCSVIDX_RATING_SUBJECT],
 			record[ACTSCSVIDX_CATEGORY], record[ACTSCSVIDX_SHARED_GROUP]
 		units, err := strconv.ParseFloat(record[ACTSCSVIDX_UNITS], 64)
@@ -417,7 +417,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			Direction:       direction,
 			Units:           units,
 			ExpiryTime:      record[ACTSCSVIDX_EXPIRY_TIME],
-			DestinationId:   destTag,
+			DestinationIds:  destTags,
 			RatingSubject:   rateSubject,
 			Category:        category,
 			SharedGroup:     sharedGroup,
@@ -503,7 +503,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		tag, balanceId, balanceType, direction, thresholdType, destinationTag, balanceExpirationDate, balanceRatingSubject, balanceCategory, balanceSharedGroup, actionsTag := record[ATRIGCSVIDX_TAG], record[ATRIGCSVIDX_BAL_TAG], record[ATRIGCSVIDX_BAL_TYPE],
+		tag, balanceId, balanceType, direction, thresholdType, destinationTags, balanceExpirationDate, balanceRatingSubject, balanceCategory, balanceSharedGroup, actionsTag := record[ATRIGCSVIDX_TAG], record[ATRIGCSVIDX_BAL_TAG], record[ATRIGCSVIDX_BAL_TYPE],
 			record[ATRIGCSVIDX_BAL_DIRECTION], record[ATRIGCSVIDX_THRESHOLD_TYPE], record[ATRIGCSVIDX_BAL_DESTINATION_TAG], record[ATRIGCSVIDX_BAL_EXPIRY_TIME], record[ATRIGCSVIDX_BAL_RATING_SUBJECT],
 			record[ATRIGCSVIDX_BAL_CATEGORY], record[ATRIGCSVIDX_BAL_SHARED_GROUP], record[ATRIGCSVIDX_ACTIONS_TAG]
 		threshold, err := strconv.ParseFloat(record[ATRIGCSVIDX_THRESHOLD_VALUE], 64)
@@ -548,7 +548,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			BalanceId:             balanceId,
 			BalanceType:           balanceType,
 			BalanceDirection:      direction,
-			BalanceDestinationId:  destinationTag,
+			BalanceDestinationIds: destinationTags,
 			BalanceWeight:         balanceWeight,
 			BalanceExpirationDate: balanceExpirationDate,
 			BalanceRatingSubject:  balanceRatingSubject,

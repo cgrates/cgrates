@@ -725,11 +725,11 @@ func TestLoadActions(t *testing.T) {
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &Balance{
-				Uuid:          as1[1].Balance.Uuid,
-				Value:         100,
-				Weight:        10,
-				RatingSubject: "test",
-				DestinationId: "NAT",
+				Uuid:           as1[1].Balance.Uuid,
+				Value:          100,
+				Weight:         10,
+				RatingSubject:  "test",
+				DestinationIds: "NAT",
 			},
 		},
 	}
@@ -891,30 +891,30 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
-		Id:                   "st0",
-		BalanceType:          utils.VOICE,
-		BalanceDirection:     OUTBOUND,
-		ThresholdType:        TRIGGER_MIN_COUNTER,
-		ThresholdValue:       10,
-		BalanceDestinationId: "GERMANY_O2",
-		Weight:               10,
-		ActionsId:            "SOME_1",
-		Executed:             false,
+		Id:                    "st0",
+		BalanceType:           utils.VOICE,
+		BalanceDirection:      OUTBOUND,
+		ThresholdType:         TRIGGER_MIN_COUNTER,
+		ThresholdValue:        10,
+		BalanceDestinationIds: "GERMANY_O2",
+		Weight:                10,
+		ActionsId:             "SOME_1",
+		Executed:              false,
 	}
 	if !reflect.DeepEqual(atr, expected) {
 		t.Error("Error loading action trigger: ", atr)
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
-		Id:                   "st1",
-		BalanceType:          utils.VOICE,
-		BalanceDirection:     OUTBOUND,
-		ThresholdType:        TRIGGER_MAX_BALANCE,
-		ThresholdValue:       200,
-		BalanceDestinationId: "GERMANY",
-		Weight:               10,
-		ActionsId:            "SOME_2",
-		Executed:             false,
+		Id:                    "st1",
+		BalanceType:           utils.VOICE,
+		BalanceDirection:      OUTBOUND,
+		ThresholdType:         TRIGGER_MAX_BALANCE,
+		ThresholdValue:        200,
+		BalanceDestinationIds: "GERMANY",
+		Weight:                10,
+		ActionsId:             "SOME_2",
+		Executed:              false,
 	}
 	if !reflect.DeepEqual(atr, expected) {
 		t.Error("Error loading action trigger: ", atr)

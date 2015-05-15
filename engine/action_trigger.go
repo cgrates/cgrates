@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -38,7 +39,7 @@ type ActionTrigger struct {
 	BalanceId             string
 	BalanceType           string
 	BalanceDirection      string
-	BalanceDestinationId  string    // filter for balance
+	BalanceDestinationIds string    // filter for balance
 	BalanceWeight         float64   // filter for balance
 	BalanceExpirationDate time.Time // filter for balance
 	BalanceTimingTags     string    // filter for balance
@@ -124,13 +125,19 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
 		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
 		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
-		destinationId = t.DestinationId == "" || at.BalanceDestinationId == t.DestinationId
+		destinationId = t.DestinationId == "" || strings.Contains(at.BalanceDestinationIds, t.DestinationId)
 		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
 		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
 		category = t.BalanceCategory == "" || at.BalanceCategory == t.BalanceCategory
 		sharedGroup = t.BalanceSharedGroup == "" || at.BalanceSharedGroup == t.BalanceSharedGroup
 	}
 	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && category && sharedGroup
+}
+
+func (at *ActionTrigger) sortDestinationIds() string {
+	destIds := strings.Split(at.BalanceDestinationIds, utils.INFIELD_SEP)
+	sort.StringSlice(destIds).Sort()
+	return strings.Join(destIds, utils.INFIELD_SEP)
 }
 
 // Structure to store actions according to weight

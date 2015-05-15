@@ -232,7 +232,7 @@ func TestPSQLSetGetTPActions(t *testing.T) {
 	ACTS_ID := "PREPAID_10"
 	acts := []*utils.TPAction{
 		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
-			DestinationId: "*any", BalanceWeight: 10, Weight: 10}}
+			DestinationIds: "*any", BalanceWeight: 10, Weight: 10}}
 	tpActions := &utils.TPActions{TPid: TEST_SQL, ActionsId: ACTS_ID, Actions: acts}
 	if err := psqlDb.SetTPActions(TEST_SQL, map[string][]*utils.TPAction{ACTS_ID: acts}); err != nil {
 		t.Error(err.Error())
@@ -265,15 +265,15 @@ func TestPSQLSetGetTPActionTriggers(t *testing.T) {
 		return
 	}
 	atrg := &utils.TPActionTrigger{
-		Id:                   "MY_FIRST_ATGR",
-		BalanceType:          "*monetary",
-		BalanceDirection:     "*out",
-		ThresholdType:        "*min_balance",
-		ThresholdValue:       2.0,
-		Recurrent:            true,
-		BalanceDestinationId: "*any",
-		Weight:               10.0,
-		ActionsId:            "LOG_BALANCE",
+		Id:                    "MY_FIRST_ATGR",
+		BalanceType:           "*monetary",
+		BalanceDirection:      "*out",
+		ThresholdType:         "*min_balance",
+		ThresholdValue:        2.0,
+		Recurrent:             true,
+		BalanceDestinationIds: "*any",
+		Weight:                10.0,
+		ActionsId:             "LOG_BALANCE",
 	}
 	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
 	if err := psqlDb.SetTPActionTriggers(TEST_SQL, mpAtrgs); err != nil {

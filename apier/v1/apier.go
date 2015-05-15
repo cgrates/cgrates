@@ -151,7 +151,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				Value:          attr.Value,
 				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
-				DestinationId:  attr.DestinationId,
+				DestinationIds: attr.DestinationId,
 				Weight:         attr.Weight,
 				SharedGroup:    attr.SharedGroup,
 			},
@@ -539,13 +539,13 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 			ExpirationString: apiAct.ExpiryTime,
 			ExtraParameters:  apiAct.ExtraParameters,
 			Balance: &engine.Balance{
-				Uuid:          utils.GenUUID(),
-				Id:            apiAct.BalanceId,
-				Value:         apiAct.Units,
-				Weight:        apiAct.BalanceWeight,
-				DestinationId: apiAct.DestinationId,
-				RatingSubject: apiAct.RatingSubject,
-				SharedGroup:   apiAct.SharedGroup,
+				Uuid:           utils.GenUUID(),
+				Id:             apiAct.BalanceId,
+				Value:          apiAct.Units,
+				Weight:         apiAct.BalanceWeight,
+				DestinationIds: apiAct.DestinationIds,
+				RatingSubject:  apiAct.RatingSubject,
+				SharedGroup:    apiAct.SharedGroup,
 			},
 		}
 		storeActions[idx] = a
@@ -579,7 +579,7 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 		}
 		if engAct.Balance != nil {
 			act.Units = engAct.Balance.Value
-			act.DestinationId = engAct.Balance.DestinationId
+			act.DestinationIds = engAct.Balance.DestinationIds
 			act.RatingSubject = engAct.Balance.RatingSubject
 			act.SharedGroup = engAct.Balance.SharedGroup
 			act.BalanceWeight = engAct.Balance.Weight
@@ -661,21 +661,21 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 }
 
 type AttrAddActionTrigger struct {
-	ActionTriggersId     string
-	Tenant               string
-	Account              string
-	ThresholdType        string
-	ThresholdValue       float64
-	BalanceId            string
-	BalanceType          string
-	BalanceDirection     string
-	BalanceDestinationId string
-	BalanceRatingSubject string //ToDo
-	BalanceWeight        float64
-	BalanceExpiryTime    string
-	BalanceSharedGroup   string //ToDo
-	Weight               float64
-	ActionsId            string
+	ActionTriggersId      string
+	Tenant                string
+	Account               string
+	ThresholdType         string
+	ThresholdValue        float64
+	BalanceId             string
+	BalanceType           string
+	BalanceDirection      string
+	BalanceDestinationIds string
+	BalanceRatingSubject  string //ToDo
+	BalanceWeight         float64
+	BalanceExpiryTime     string
+	BalanceSharedGroup    string //ToDo
+	Weight                float64
+	ActionsId             string
 }
 
 func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
@@ -693,7 +693,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		BalanceId:             attr.BalanceId,
 		BalanceType:           attr.BalanceType,
 		BalanceDirection:      attr.BalanceDirection,
-		BalanceDestinationId:  attr.BalanceDestinationId,
+		BalanceDestinationIds: attr.BalanceDestinationIds,
 		BalanceWeight:         attr.BalanceWeight,
 		BalanceExpirationDate: balExpiryTime,
 		Weight:                attr.Weight,

@@ -138,7 +138,7 @@ type TpAction struct {
 	Units           float64
 	ExpiryTime      string
 	TimingTags      string
-	DestinationTag  string
+	DestinationTags string
 	RatingSubject   string
 	Category        string
 	SharedGroup     string
@@ -159,28 +159,28 @@ type TpActionPlan struct {
 }
 
 type TpActionTrigger struct {
-	Id                    int64
-	Tpid                  string
-	Tag                   string
-	UniqueId              string
-	ThresholdType         string
-	ThresholdValue        float64
-	Recurrent             bool
-	MinSleep              string
-	BalanceTag            string
-	BalanceType           string
-	BalanceDirection      string
-	BalanceDestinationTag string
-	BalanceWeight         float64
-	BalanceExpiryTime     string
-	BalanceTimingTags     string
-	BalanceRatingSubject  string
-	BalanceCategory       string
-	BalanceSharedGroup    string
-	MinQueuedItems        int
-	ActionsTag            string
-	Weight                float64
-	CreatedAt             time.Time
+	Id                     int64
+	Tpid                   string
+	Tag                    string
+	UniqueId               string
+	ThresholdType          string
+	ThresholdValue         float64
+	Recurrent              bool
+	MinSleep               string
+	BalanceTag             string
+	BalanceType            string
+	BalanceDirection       string
+	BalanceDestinationTags string
+	BalanceWeight          float64
+	BalanceExpiryTime      string
+	BalanceTimingTags      string
+	BalanceRatingSubject   string
+	BalanceCategory        string
+	BalanceSharedGroup     string
+	MinQueuedItems         int
+	ActionsTag             string
+	Weight                 float64
+	CreatedAt              time.Time
 }
 
 type TpAccountAction struct {

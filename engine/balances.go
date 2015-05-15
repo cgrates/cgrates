@@ -34,7 +34,7 @@ type Balance struct {
 	Value          float64
 	ExpirationDate time.Time
 	Weight         float64
-	DestinationId  string
+	DestinationIds string
 	RatingSubject  string
 	Category       string
 	SharedGroup    string
@@ -46,16 +46,18 @@ type Balance struct {
 }
 
 func (b *Balance) Equal(o *Balance) bool {
-	if b.DestinationId == "" {
-		b.DestinationId = utils.ANY
+	if b.DestinationIds == "" {
+		b.DestinationIds = utils.ANY
 	}
-	if o.DestinationId == "" {
-		o.DestinationId = utils.ANY
+	if o.DestinationIds == "" {
+		o.DestinationIds = utils.ANY
 	}
+	bDestIds := b.sortDestinationIds()
+	oDestIds := o.sortDestinationIds()
 	return b.Id == o.Id &&
 		b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
-		b.DestinationId == o.DestinationId &&
+		bDestIds == oDestIds &&
 		b.RatingSubject == o.RatingSubject &&
 		b.Category == o.Category &&
 		b.SharedGroup == o.SharedGroup
@@ -65,15 +67,17 @@ func (b *Balance) MatchFilter(o *Balance) bool {
 	if o.Id != "" {
 		return b.Id == o.Id
 	}
-	if b.DestinationId == "" {
-		b.DestinationId = utils.ANY
+	if b.DestinationIds == "" {
+		b.DestinationIds = utils.ANY
 	}
-	if o.DestinationId == "" {
-		o.DestinationId = utils.ANY
+	if o.DestinationIds == "" {
+		o.DestinationIds = utils.ANY
 	}
+	bDestIds := b.sortDestinationIds()
+	oDestIds := o.sortDestinationIds()
 	return (o.ExpirationDate.IsZero() || b.ExpirationDate.Equal(o.ExpirationDate)) &&
 		(o.Weight == 0 || b.Weight == o.Weight) &&
-		(o.DestinationId == "" || b.DestinationId == o.DestinationId) &&
+		(oDestIds == "" || bDestIds == oDestIds) &&
 		(o.RatingSubject == "" || b.RatingSubject == o.RatingSubject) &&
 		(o.Category == "" || b.Category == o.Category) &&
 		(o.SharedGroup == "" || b.SharedGroup == o.SharedGroup)
@@ -81,7 +85,7 @@ func (b *Balance) MatchFilter(o *Balance) bool {
 
 // the default balance has no destinationid, Expirationdate or ratesubject
 func (b *Balance) IsDefault() bool {
-	return (b.DestinationId == "" || b.DestinationId == utils.ANY) &&
+	return (b.DestinationIds == "" || b.DestinationIds == utils.ANY) &&
 		b.RatingSubject == "" &&
 		b.Category == "" &&
 		b.ExpirationDate.IsZero() &&
@@ -109,16 +113,22 @@ func (b *Balance) IsActiveAt(t time.Time) bool {
 	return false
 }
 
+func (b *Balance) sortDestinationIds() string {
+	destIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
+	sort.StringSlice(destIds).Sort()
+	return strings.Join(destIds, utils.INFIELD_SEP)
+}
+
 func (b *Balance) MatchCategory(category string) bool {
 	return b.Category == "" || b.Category == category
 }
 
 func (b *Balance) HasDestination() bool {
-	return b.DestinationId != "" && b.DestinationId != utils.ANY
+	return b.DestinationIds != "" && b.DestinationIds != utils.ANY
 }
 
 func (b *Balance) MatchDestination(destinationId string) bool {
-	return !b.HasDestination() || b.DestinationId == destinationId
+	return !b.HasDestination() || strings.Contains(b.DestinationIds, destinationId)
 }
 
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
@@ -126,8 +136,10 @@ func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 		return b.Id == at.BalanceId
 	}
 	matchesDestination := true
-	if at.BalanceDestinationId != "" {
-		matchesDestination = (at.BalanceDestinationId == b.DestinationId)
+	if at.BalanceDestinationIds != "" {
+		bDestIds := b.sortDestinationIds()
+		atDestinationIds := at.sortDestinationIds()
+		matchesDestination = (bDestIds == atDestinationIds)
 	}
 	matchesExpirationDate := true
 	if !at.BalanceExpirationDate.IsZero() {
@@ -159,7 +171,7 @@ func (b *Balance) Clone() *Balance {
 		Uuid:           b.Uuid,
 		Id:             b.Id,
 		Value:          b.Value, // this value is in seconds
-		DestinationId:  b.DestinationId,
+		DestinationIds: b.DestinationIds,
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
@@ -293,7 +305,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				inc.Cost = 0
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+					ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationIds: cc.Destination}})
 				}
 			} else {
 				inc.paid = false
@@ -355,7 +367,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					inc.BalanceInfo.AccountId = ub.Id
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
+						ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationIds: cc.Destination}})
 					}
 					// go to nextincrement
 					continue
@@ -379,9 +391,9 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: seconds, DestinationId: cc.Destination}})
+						ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: seconds, DestinationIds: cc.Destination}})
 						if cost != 0 {
-							ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
+							ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationIds: cc.Destination}})
 						}
 					}
 				} else {
@@ -456,7 +468,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationIds: cc.Destination}})
 				}
 				// go to nextincrement
 				continue
@@ -469,7 +481,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationIds: cc.Destination}})
 				}
 			} else {
 				inc.paid = false
