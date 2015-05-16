@@ -226,9 +226,35 @@ type CGRConfig struct {
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
+	// Rater checks
+	if self.RaterEnabled {
+		if self.RaterBalancer == utils.INTERNAL && !self.BalancerEnabled {
+			return errors.New("Balancer not enabled but requested by Rater component.")
+		}
+		if self.RaterCdrStats == utils.INTERNAL && !self.CDRStatsEnabled {
+			return errors.New("CDRStats not enabled but requested by Rater component.")
+		}
+	}
+	// CDRServer checks
+	if self.CDRSEnabled {
+		if self.CDRSRater == utils.INTERNAL && !self.RaterEnabled {
+			return errors.New("Rater not enabled but requested by CDRS component.")
+		}
+		if self.CDRSStats == utils.INTERNAL && !self.CDRStatsEnabled {
+			return errors.New("CDRStats not enabled but requested by CDRS component.")
+		}
+	}
 	// CDRC sanity checks
-	for _, cdrcInst := range self.CdrcProfiles["/var/log/cgrates/cdrc/in"] {
-		if cdrcInst.Enabled == true {
+	for _, cdrcCfgs := range self.CdrcProfiles {
+		for _, cdrcInst := range cdrcCfgs {
+			if !cdrcInst.Enabled {
+				continue
+			}
+			if len(cdrcInst.Cdrs) == 0 {
+				return errors.New("CdrC enabled but no CDRS defined!")
+			} else if cdrcInst.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
+				return errors.New("CDRS not enabled but referenced from CDRC")
+			}
 			if len(cdrcInst.CdrFields) == 0 {
 				return errors.New("CdrC enabled but no fields to be processed defined!")
 			}
@@ -243,14 +269,37 @@ func (self *CGRConfig) checkConfigSanity() error {
 			}
 		}
 	}
-	if self.CDRSStats == utils.INTERNAL && !self.CDRStatsEnabled {
-		return errors.New("CDRStats not enabled but requested by CDRS component.")
-	}
-	/*
-		if self.SMCdrS == utils.INTERNAL && !self.CDRSEnabled {
-			return errors.New("CDRS not enabled but requested by SessionManager")
+	// SM-FreeSWITCH checks
+	if self.SmFsConfig.Enabled {
+		if self.SmFsConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
+			return errors.New("Rater not enabled but requested by SM-FreeSWITCH component.")
 		}
-	*/
+		if self.SmFsConfig.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
+			return errors.New("CDRS not enabled but referenced by SM-FreeSWITCH component")
+		}
+	}
+	// SM-Kamailio checks
+	if self.SmKamConfig.Enabled {
+		if self.SmKamConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
+			return errors.New("Rater not enabled but requested by SM-Kamailio component.")
+		}
+		if self.SmKamConfig.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
+			return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
+		}
+	}
+	// SM-OpenSIPS checks
+	if self.SmOsipsConfig.Enabled {
+		if self.SmOsipsConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
+			return errors.New("Rater not enabled but requested by SM-OpenSIPS component.")
+		}
+		if self.SmOsipsConfig.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
+			return errors.New("CDRS not enabled but referenced by SM-OpenSIPS component")
+		}
+	}
+	// HistoryAgent
+	if self.HistoryAgentEnabled && !self.HistoryServerEnabled {
+		return errors.New("HistoryServer not enabled but referenced by HistoryAgent component")
+	}
 	return nil
 }
 

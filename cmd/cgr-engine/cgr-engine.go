@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -380,25 +379,6 @@ func serveHttp(httpWaitChans []chan struct{}) {
 	server.ServeHTTP(cfg.HTTPListen)
 }
 
-func checkConfigSanity() error {
-	/*
-		Add here checks on session manager
-		if cfg.SMEnabled && cfg.RaterEnabled && cfg.RaterBalancer != "" {
-			engine.Logger.Crit("The session manager must not be enabled on a worker engine (change [engine]/balancer to disabled)!")
-			return errors.New("SessionManager on Worker")
-		}
-	*/
-	if cfg.BalancerEnabled && cfg.RaterEnabled && cfg.RaterBalancer != "" {
-		engine.Logger.Crit("The balancer is enabled so it cannot connect to another balancer (change rater/balancer to disabled)!")
-		return errors.New("Improperly configured balancer")
-	}
-	if cfg.HistoryServerEnabled && cfg.HistoryServer == utils.INTERNAL && !cfg.HistoryServerEnabled {
-		engine.Logger.Crit("The history agent is enabled and internal and history server is disabled!")
-		return errors.New("Improperly configured history service")
-	}
-	return nil
-}
-
 func writePid() {
 	engine.Logger.Info(*pidFile)
 	f, err := os.Create(*pidFile)
@@ -445,13 +425,6 @@ func main() {
 	}
 	if *cdrsEnabled {
 		cfg.CDRSEnabled = *cdrsEnabled
-	}
-
-	// some consitency checks
-	errCfg := checkConfigSanity()
-	if errCfg != nil {
-		engine.Logger.Crit(errCfg.Error())
-		return
 	}
 	var ratingDb engine.RatingStorage
 	var accountDb engine.AccountingStorage

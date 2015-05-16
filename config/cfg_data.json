@@ -10,16 +10,12 @@
 	"default_reqtype": "*pseudoprepaid",				// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 },
 
-"mediator": {
-	"enabled": true,						// starts Mediator service: <true|false>.
-	"reconnects": 5,						// number of reconnects to rater/cdrs before giving up.
-	"rater": "internal",					// address where to reach the Rater: <internal|x.y.z.y:1234>
-	"cdrstats": "",							// address where to reach the cdrstats service. Empty to disable stats gathering out of mediated CDRs <""|internal|x.y.z.y:1234>
-	"store_disable": false,					// when true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	"cdr_replication":[						// replicate the rated CDR to a number of servers
-			{"transport": "*http_post", "server": "1.2.3.4:2080/cdr_post"},
-			{"transport": "*http_jsonrpc", "server": "2.3.4.5:2080/jsonrpc", "synchronous": true, "cdr_filter": "~account:s/(.+)/1001/"},
-	],
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
+},
+
+"rater": {
+	"enabled": true,						// enable Rater service: <true|false>
 },
 
 "cdrc": {
