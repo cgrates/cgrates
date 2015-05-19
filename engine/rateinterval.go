@@ -327,6 +327,9 @@ func (i *RateInterval) GetCost(duration, startSecond time.Duration) float64 {
 
 // Gets the price for a the provided start second
 func (i *RateInterval) GetRateParameters(startSecond time.Duration) (rate float64, rateIncrement, rateUnit time.Duration) {
+	if i.Rating == nil {
+		return -1, -1, -1
+	}
 	i.Rating.Rates.Sort()
 	for index, price := range i.Rating.Rates {
 		if price.GroupIntervalStart <= startSecond && (index == len(i.Rating.Rates)-1 ||

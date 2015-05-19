@@ -218,6 +218,38 @@ func TestSplitSpansRoundToIncrements(t *testing.T) {
 	}
 }
 
+func TestCalldescHolliday(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart: time.Date(2015, time.May, 1, 13, 30, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, time.May, 1, 13, 35, 26, 0, time.UTC),
+		RatingInfos: RatingInfos{
+			&RatingInfo{
+				RateIntervals: RateIntervalList{
+					&RateInterval{
+						Timing: &RITiming{WeekDays: utils.WeekDays{1, 2, 3, 4, 5}, StartTime: "00:00:00"},
+						Weight: 10,
+					},
+					&RateInterval{
+						Timing: &RITiming{WeekDays: utils.WeekDays{6, 7}, StartTime: "00:00:00"},
+						Weight: 10,
+					},
+					&RateInterval{
+						Timing: &RITiming{Months: utils.Months{time.May}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
+						Weight: 5,
+					},
+				},
+			},
+		},
+	}
+	timespans := cd.splitInTimeSpans()
+	if len(timespans) != 1 {
+		t.Error("Error assiging holidy rate interval: ", timespans)
+	}
+	if timespans[0].RateInterval.Timing.MonthDays == nil {
+		t.Errorf("Error setting holiday rate interval: %+v", timespans[0].RateInterval.Timing)
+	}
+}
+
 func TestGetCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)

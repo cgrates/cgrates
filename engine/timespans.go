@@ -546,8 +546,8 @@ func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
 		return false
 	}
 	//log.Print("StartTime: ", ts.TimeStart)
-	//log.Printf("OWN: %+v", ts.RateInterval.Timing)
-	//log.Printf("OTHER: %+v", interval.Timing)
+	//log.Printf("OWN: %+v", ts.RateInterval)
+	//log.Printf("OTHER: %+v", interval)
 	// the lower the weight the better
 	if ts.RateInterval != nil &&
 		ts.RateInterval.Weight < interval.Weight {
