@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -115,6 +116,7 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v ", charger1, dcs)
 	}
 	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err != nil {
+		log.Printf("CD: %+v", cdr)
 		t.Error(err)
 	} else if maxSessionTime != 1e+10 { // Smallest one, 10 seconds
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)

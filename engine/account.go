@@ -234,7 +234,10 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				//log.Printf("Unit balance: %+v", balance)
 				// log.Printf("CD BEFORE UNIT: %+v", cd)
 
-				partCC, _ := balance.DebitUnits(cd, balance.account, usefulMoneyBalances, count, dryRun)
+				partCC, debitErr := balance.DebitUnits(cd, balance.account, usefulMoneyBalances, count, dryRun)
+				if debitErr != nil {
+					return nil, debitErr
+				}
 				//log.Printf("CD AFTER UNIT: %+v", cd)
 				if partCC != nil {
 					//log.Printf("partCC: %+v", partCC.Timespans[0])
@@ -273,7 +276,10 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			for _, balance := range usefulMoneyBalances {
 				//log.Printf("Money balance: %+v", balance)
 				//log.Printf("CD BEFORE MONEY: %+v", cd)
-				partCC, _ := balance.DebitMoney(cd, balance.account, count, dryRun)
+				partCC, debitErr := balance.DebitMoney(cd, balance.account, count, dryRun)
+				if debitErr != nil {
+					return nil, debitErr
+				}
 				//log.Printf("CD AFTER MONEY: %+v", cd)
 				//log.Printf("partCC: %+v", partCC)
 				if partCC != nil {

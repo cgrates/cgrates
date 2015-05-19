@@ -41,7 +41,7 @@ func TestHistoryDestinations(t *testing.T) {
 {"Id":"GERMANY","Prefixes":["49"]},
 {"Id":"GERMANY_O2","Prefixes":["41"]},
 {"Id":"GERMANY_PREMIUM","Prefixes":["43"]},
-{"Id":"NAT","Prefixes":["0256","0257","0723"]},
+{"Id":"NAT","Prefixes":["0256","0257","0723","+49"]},
 {"Id":"PSTN_70","Prefixes":["+4970"]},
 {"Id":"PSTN_71","Prefixes":["+4971"]},
 {"Id":"PSTN_72","Prefixes":["+4972"]},

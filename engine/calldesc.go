@@ -465,7 +465,10 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	}
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
-	cc, _ := cd.debit(account, true, false)
+	cc, err := cd.debit(account, true, false)
+	if err != nil {
+		return 0, err
+	}
 
 	//log.Printf("CC: %+v", cc)
 
@@ -508,10 +511,12 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		return 0, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
-			AccLock.Guard(func() (interface{}, error) {
+			if _, err := AccLock.Guard(func() (interface{}, error) {
 				duration, err = cd.getMaxSessionDuration(account)
 				return 0, err
-			}, memberIds...)
+			}, memberIds...); err != nil {
+				return 0, err
+			}
 		} else {
 			return 0, err
 		}
@@ -536,7 +541,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 	//log.Print("HERE: ", cc, err)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
-		//return
+		return nil, err
 	}
 	cost := 0.0
 	// calculate call cost after balances

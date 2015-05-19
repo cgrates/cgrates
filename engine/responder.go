@@ -122,7 +122,7 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
 func (rs *Responder) GetDerivedMaxSessionTime(ev StoredCdr, reply *float64) error {
 	if rs.Bal != nil {
-		return errors.New("Unsupported method on the balancer")
+		return errors.New("unsupported method on the balancer")
 	}
 	maxCallDuration := -1.0
 	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
@@ -164,6 +164,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev StoredCdr, reply *float64) erro
 		var remainingDuration float64
 		err = rs.GetMaxSessionTime(cd, &remainingDuration)
 		if err != nil {
+			*reply = 0
 			return err
 		}
 		// Set maxCallDuration, smallest out of all forked sessions

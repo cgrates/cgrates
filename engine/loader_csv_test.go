@@ -38,6 +38,7 @@ ALL,43
 NAT,0256
 NAT,0257
 NAT,0723
+NAT,+49
 RET,0723
 RET,0724
 PSTN_71,+4971
@@ -118,7 +119,8 @@ RP_MX,MX_FREE,WORKDAYS_18,10
 *out,CUSTOMER_2,0,danb:87.139.12.167,2012-01-01T00:00:00Z,STANDARD,danb,
 *out,CUSTOMER_1,0,danb,2012-01-01T00:00:00Z,PREMIUM,,
 *out,vdf,0,rif,2012-01-01T00:00:00Z,EVENING,,
-*out,vdf,0,rif,2012-02-28T00:00:00Z,EVENING,,
+*out,vdf,call,rif,2012-02-28T00:00:00Z,EVENING,,
+*out,vdf,call,dan,2012-01-01T00:00:00Z,EVENING,,
 *out,vdf,0,minu;a1;a2;a3,2012-01-01T00:00:00Z,EVENING,,
 *out,vdf,0,*any,2012-02-28T00:00:00Z,EVENING,,
 *out,vdf,0,one,2012-02-28T00:00:00Z,STANDARD,,
@@ -235,7 +237,7 @@ func TestLoadDestinations(t *testing.T) {
 	for _, d := range csvr.destinations {
 		switch d.Id {
 		case "NAT":
-			if !reflect.DeepEqual(d.Prefixes, []string{`0256`, `0257`, `0723`}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`0256`, `0257`, `0723`, `+49`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "ALL":
@@ -678,7 +680,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 16 {
+	if len(csvr.ratingProfiles) != 18 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
