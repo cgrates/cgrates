@@ -502,7 +502,8 @@ func (apl Actions) Swap(i, j int) {
 	apl[i], apl[j] = apl[j], apl[i]
 }
 
-func (apl Actions) Less(i, j int) bool {
+// we need higher weights earlyer in the list
+func (apl Actions) Less(j, i int) bool {
 	return apl[i].Weight < apl[j].Weight
 }
 

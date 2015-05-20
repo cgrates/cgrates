@@ -297,7 +297,8 @@ func (atpl ActionTimingPriotityList) Swap(i, j int) {
 
 func (atpl ActionTimingPriotityList) Less(i, j int) bool {
 	if atpl[i].GetNextStartTime(time.Now()).Equal(atpl[j].GetNextStartTime(time.Now())) {
-		return atpl[i].Weight < atpl[j].Weight
+		// higher weights earlyer in the list
+		return atpl[i].Weight > atpl[j].Weight
 	}
 	return atpl[i].GetNextStartTime(time.Now()).Before(atpl[j].GetNextStartTime(time.Now()))
 }

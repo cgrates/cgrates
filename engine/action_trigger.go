@@ -151,7 +151,8 @@ func (atpl ActionTriggerPriotityList) Swap(i, j int) {
 	atpl[i], atpl[j] = atpl[j], atpl[i]
 }
 
-func (atpl ActionTriggerPriotityList) Less(i, j int) bool {
+//we need higher weights earlyer in the list
+func (atpl ActionTriggerPriotityList) Less(j, i int) bool {
 	return atpl[i].Weight < atpl[j].Weight
 }
 

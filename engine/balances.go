@@ -521,6 +521,7 @@ func (bc BalanceChain) Swap(i, j int) {
 	bc[i], bc[j] = bc[j], bc[i]
 }
 
+// we need the better ones at the beginning
 func (bc BalanceChain) Less(j, i int) bool {
 	return bc[i].precision < bc[j].precision ||
 		(bc[i].precision == bc[j].precision && bc[i].Weight < bc[j].Weight)

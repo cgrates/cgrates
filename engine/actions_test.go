@@ -463,7 +463,7 @@ func TestActionTimingPriotityListWeight(t *testing.T) {
 				StartTime: "00:00:00",
 			},
 		},
-		Weight: 10.0,
+		Weight: 20,
 	}
 	at2 := &ActionTiming{
 		Timing: &RateInterval{
@@ -473,7 +473,7 @@ func TestActionTimingPriotityListWeight(t *testing.T) {
 				StartTime: "00:00:00",
 			},
 		},
-		Weight: 20.0,
+		Weight: 10,
 	}
 	var atpl ActionTimingPriotityList
 	atpl = append(atpl, at2, at1)
@@ -634,9 +634,9 @@ func TestActionTriggerMatchAll(t *testing.T) {
 }
 
 func TestActionTriggerPriotityList(t *testing.T) {
-	at1 := &ActionTrigger{Weight: 10}
+	at1 := &ActionTrigger{Weight: 30}
 	at2 := &ActionTrigger{Weight: 20}
-	at3 := &ActionTrigger{Weight: 30}
+	at3 := &ActionTrigger{Weight: 10}
 	var atpl ActionTriggerPriotityList
 	atpl = append(atpl, at2, at1, at3)
 	atpl.Sort()

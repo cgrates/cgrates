@@ -364,7 +364,8 @@ func (il RateIntervalList) Swap(i, j int) {
 	il[i], il[j] = il[j], il[i]
 }
 
-func (il RateIntervalList) Less(i, j int) bool {
+// we need higher weights earlyer in the list
+func (il RateIntervalList) Less(j, i int) bool {
 	return il[i].Weight < il[j].Weight
 }
 

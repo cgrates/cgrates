@@ -248,6 +248,7 @@ or if the Weights are equal and new price is lower then spans's interval price
 */
 func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
 	//log.Printf("SETRATEINTERVAL: %+v", i.Timing)
+	// higher weights are better
 	if ts.RateInterval == nil || ts.RateInterval.Weight < i.Weight {
 		ts.RateInterval = i
 		//log.Printf("RET TS: %+v", ts.RateInterval.Timing)
@@ -548,9 +549,9 @@ func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
 	//log.Print("StartTime: ", ts.TimeStart)
 	//log.Printf("OWN: %+v", ts.RateInterval)
 	//log.Printf("OTHER: %+v", interval)
-	// the lower the weight the better
+	// the higher the weight the better
 	if ts.RateInterval != nil &&
-		ts.RateInterval.Weight < interval.Weight {
+		ts.RateInterval.Weight > interval.Weight {
 		return true
 	}
 	// check interval is closer than the new one

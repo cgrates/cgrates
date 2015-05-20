@@ -158,6 +158,7 @@ func (es LCREntriesSorter) Swap(i, j int) {
 	es[i], es[j] = es[j], es[i]
 }
 
+// we need the best earlyer in the list
 func (es LCREntriesSorter) Less(j, i int) bool {
 	return es[i].Weight < es[j].Weight ||
 		(es[i].Weight == es[j].Weight && es[i].precision < es[j].precision)

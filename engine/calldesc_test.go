@@ -42,10 +42,12 @@ func populateDB() {
 		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}},
 		&Action{ActionType: "*topup", BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationIds: "NAT"}},
 	}
+
 	ats1 := []*Action{
-		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 20},
-		&Action{ActionType: "*reset_account", Weight: 10},
+		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 10},
+		&Action{ActionType: "*reset_account", Weight: 20},
 	}
+
 	minu := &Account{
 		Id: "*out:vdf:minu",
 		BalanceMap: map[string]BalanceChain{
@@ -235,7 +237,7 @@ func TestCalldescHolliday(t *testing.T) {
 					},
 					&RateInterval{
 						Timing: &RITiming{Months: utils.Months{time.May}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
-						Weight: 5,
+						Weight: 20,
 					},
 				},
 			},
