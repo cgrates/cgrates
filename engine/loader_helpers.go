@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"path"
 	"regexp"
@@ -170,8 +169,16 @@ func NewTPData() *TPData {
 func (tp *TPData) IsValid() bool {
 	valid := true
 	for rplTag, rpl := range tp.ratingPlans {
-		if !rpl.IsValid() {
+		if !rpl.isContinous() {
 			log.Printf("The rating plan %s is not covering all weekdays", rplTag)
+			valid = false
+		}
+		if !rpl.areRatesSane() {
+			log.Printf("The rating plan %s contains invalid rate groups", rplTag)
+			valid = false
+		}
+		if !rpl.areTimingsSane() {
+			log.Printf("The rating plan %s contains invalid timings", rplTag)
 			valid = false
 		}
 	}
@@ -505,16 +512,6 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		RateSlots: []*utils.RateSlot{rs},
 	}
 	return
-}
-
-func ValidNextGroup(present, next *utils.RateSlot) error {
-	if next.GroupIntervalStartDuration() <= present.GroupIntervalStartDuration() {
-		return errors.New(fmt.Sprintf("Next rate group interval start: %#v must be heigher than the previous one: %#v", next, present))
-	}
-	if math.Mod(next.GroupIntervalStartDuration().Seconds(), present.RateIncrementDuration().Seconds()) != 0 {
-		return errors.New(fmt.Sprintf("GroupIntervalStart of %#v must be a multiple of RateIncrement of %#v", next, present))
-	}
-	return nil
 }
 
 func NewTiming(timingInfo ...string) (rt *utils.TPTiming) {

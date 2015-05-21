@@ -1234,9 +1234,6 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 		// same tag only to create rate groups
 		er, exists := rts[tr.Tag]
 		if exists {
-			if err := ValidNextGroup(er.RateSlots[len(er.RateSlots)-1], r.RateSlots[0]); err != nil {
-				return nil, err
-			}
 			er.RateSlots = append(er.RateSlots, r.RateSlots[0])
 		} else {
 			rts[tr.Tag] = r

@@ -218,26 +218,26 @@ func TestGetActiveForCall(t *testing.T) {
 	}
 }
 
-func TestRatingPlanIsValidEmpty(t *testing.T) {
+func TestRatingPlanIsContinousEmpty(t *testing.T) {
 	rpl := &RatingPlan{}
-	if rpl.IsValid() {
+	if rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
 	}
 }
 
-func TestRatingPlanIsValidBlank(t *testing.T) {
+func TestRatingPlanIsContinousBlank(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
 			"blank": &RITiming{StartTime: "00:00:00"},
 			"other": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 		},
 	}
-	if !rpl.IsValid() {
+	if !rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
 	}
 }
 
-func TestRatingPlanIsValidGood(t *testing.T) {
+func TestRatingPlanIsContinousGood(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
 			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
@@ -245,24 +245,24 @@ func TestRatingPlanIsValidGood(t *testing.T) {
 			"third":  &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
-	if !rpl.IsValid() {
+	if !rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
 	}
 }
 
-func TestRatingPlanIsValidBad(t *testing.T) {
+func TestRatingPlanisContinousBad(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
 			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 0}, StartTime: "00:00:00"},
 		},
 	}
-	if rpl.IsValid() {
+	if rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
 	}
 }
 
-func TestRatingPlanIsValidSpecial(t *testing.T) {
+func TestRatingPlanIsContinousSpecial(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
 			"special": &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
@@ -271,12 +271,12 @@ func TestRatingPlanIsValidSpecial(t *testing.T) {
 			"third":   &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
-	if !rpl.IsValid() {
+	if !rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
 	}
 }
 
-func TestRatingPlanIsValidMultiple(t *testing.T) {
+func TestRatingPlanIsContinousMultiple(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
 			"special":  &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
@@ -286,12 +286,12 @@ func TestRatingPlanIsValidMultiple(t *testing.T) {
 			"third":    &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
-	if !rpl.IsValid() {
+	if !rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
 	}
 }
 
-func TestRatingPlanIsValidMissing(t *testing.T) {
+func TestRatingPlanIsContinousMissing(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
 			"special":  &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
@@ -300,8 +300,97 @@ func TestRatingPlanIsValidMissing(t *testing.T) {
 			"third":    &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
-	if rpl.IsValid() {
+	if rpl.isContinous() {
 		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
+	}
+}
+
+func TestRatingPlanSaneTimingsBad(t *testing.T) {
+	rpl := &RatingPlan{
+		Timings: map[string]*RITiming{
+			"one": &RITiming{Years: utils.Years{2015}, WeekDays: utils.WeekDays{time.Monday}},
+		},
+	}
+	if rpl.areTimingsSane() {
+		t.Errorf("Error detecting bad timings in rating profile: %+v", rpl)
+	}
+}
+
+func TestRatingPlanSaneTimingsGood(t *testing.T) {
+	rpl := &RatingPlan{
+		Timings: map[string]*RITiming{
+			"one": &RITiming{Years: utils.Years{2015}},
+			"two": &RITiming{WeekDays: utils.WeekDays{0, 1, 2, 3, 4}, StartTime: "00:00:00"},
+		},
+	}
+	if !rpl.areTimingsSane() {
+		t.Errorf("Error detecting bad timings in rating profile: %+v", rpl)
+	}
+}
+
+func TestRatingPlanSaneRatingsEqual(t *testing.T) {
+	rpl := &RatingPlan{
+		Ratings: map[string]*RIRate{
+			"one": &RIRate{
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0 * time.Second,
+						RateIncrement:      30 * time.Second,
+					},
+					&Rate{
+						GroupIntervalStart: 0 * time.Second,
+						RateIncrement:      30 * time.Second,
+					},
+				},
+			},
+		},
+	}
+	if rpl.areRatesSane() {
+		t.Errorf("Error detecting bad rate groups in rating profile: %+v", rpl)
+	}
+}
+
+func TestRatingPlanSaneRatingsNotMultiple(t *testing.T) {
+	rpl := &RatingPlan{
+		Ratings: map[string]*RIRate{
+			"one": &RIRate{
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0 * time.Second,
+						RateIncrement:      30 * time.Second,
+					},
+					&Rate{
+						GroupIntervalStart: 15 * time.Second,
+						RateIncrement:      30 * time.Second,
+					},
+				},
+			},
+		},
+	}
+	if rpl.areRatesSane() {
+		t.Errorf("Error detecting bad rate groups in rating profile: %+v", rpl)
+	}
+}
+
+func TestRatingPlanSaneRatingsGoot(t *testing.T) {
+	rpl := &RatingPlan{
+		Ratings: map[string]*RIRate{
+			"one": &RIRate{
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 60 * time.Second,
+						RateIncrement:      30 * time.Second,
+					},
+					&Rate{
+						GroupIntervalStart: 0 * time.Second,
+						RateIncrement:      30 * time.Second,
+					},
+				},
+			},
+		},
+	}
+	if !rpl.areRatesSane() {
+		t.Errorf("Error detecting bad rate groups in rating profile: %+v", rpl)
 	}
 }
 

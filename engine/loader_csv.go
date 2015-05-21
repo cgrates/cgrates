@@ -162,12 +162,8 @@ func (csvr *CSVReader) LoadRates() (err error) {
 			return err
 		}
 		// same tag only to create rate groups
-		existingRates, exists := csvr.tp.rates[tag]
+		_, exists := csvr.tp.rates[tag]
 		if exists {
-			rss := existingRates.RateSlots
-			if err := ValidNextGroup(rss[len(rss)-1], r.RateSlots[0]); err != nil {
-				return fmt.Errorf("RatesTag: %s, error: <%s>", tag, err.Error())
-			}
 			csvr.tp.rates[tag].RateSlots = append(csvr.tp.rates[tag].RateSlots, r.RateSlots[0])
 		} else {
 			csvr.tp.rates[tag] = r

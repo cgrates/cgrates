@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/json"
+	"math"
 
 	"github.com/cgrates/cgrates/history"
 )
@@ -114,7 +115,7 @@ func (rp *RatingPlan) GetHistoryRecord() history.Record {
 }
 
 // IsValid determines if the rating plan covers a continous period of time
-func (rp *RatingPlan) IsValid() bool {
+func (rp *RatingPlan) isContinous() bool {
 	weekdays := make([]int, 7)
 	for _, tm := range rp.Timings {
 		// if it is a blank timing than it will match all
@@ -145,4 +146,32 @@ func (rp *RatingPlan) IsValid() bool {
 		}
 	}
 	return false
+}
+
+func (rp *RatingPlan) areRatesSane() bool {
+	for _, rating := range rp.Ratings {
+		rating.Rates.Sort()
+		for i, rate := range rating.Rates {
+			if i < (len(rating.Rates) - 1) {
+				nextRate := rating.Rates[i+1]
+				if nextRate.GroupIntervalStart <= rate.GroupIntervalStart {
+					return false
+				}
+				if math.Mod(nextRate.GroupIntervalStart.Seconds(), rate.RateIncrement.Seconds()) != 0 {
+					return false
+				}
+			}
+		}
+	}
+	return true
+}
+
+func (rp *RatingPlan) areTimingsSane() bool {
+	for _, timing := range rp.Timings {
+		if (len(timing.Years) != 0 || len(timing.Months) != 0 || len(timing.MonthDays) != 0) &&
+			len(timing.WeekDays) != 0 {
+			return false
+		}
+	}
+	return true
 }
