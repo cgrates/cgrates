@@ -20,6 +20,7 @@ package utils
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -146,6 +147,12 @@ func (m Months) Serialize(sep string) string {
 		}
 	}
 	return mStr
+}
+
+func (m Months) IsComplete() bool {
+	allMonths := Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December}
+	m.Sort()
+	return reflect.DeepEqual(m, allMonths)
 }
 
 // Defines month days series

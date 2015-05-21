@@ -218,6 +218,93 @@ func TestGetActiveForCall(t *testing.T) {
 	}
 }
 
+func TestRatingPlanIsValidEmpty(t *testing.T) {
+	rpl := &RatingPlan{}
+	if rpl.IsValid() {
+		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
+	}
+}
+
+func TestRatingPlanIsValidBlank(t *testing.T) {
+	rpl := &RatingPlan{
+		Timings: map[string]*RITiming{
+			"blank": &RITiming{StartTime: "00:00:00"},
+			"other": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+		},
+	}
+	if !rpl.IsValid() {
+		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
+	}
+}
+
+func TestRatingPlanIsValidGood(t *testing.T) {
+	rpl := &RatingPlan{
+		Timings: map[string]*RITiming{
+			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
+			"third":  &RITiming{WeekDays: utils.WeekDays{7}, StartTime: "00:00:00"},
+		},
+	}
+	if !rpl.IsValid() {
+		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
+	}
+}
+
+func TestRatingPlanIsValidBad(t *testing.T) {
+	rpl := &RatingPlan{
+		Timings: map[string]*RITiming{
+			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 7}, StartTime: "00:00:00"},
+		},
+	}
+	if rpl.IsValid() {
+		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
+	}
+}
+
+func TestRatingPlanIsValidSpecial(t *testing.T) {
+	rpl := &RatingPlan{
+		Timings: map[string]*RITiming{
+			"special": &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
+			"first":   &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"second":  &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
+			"third":   &RITiming{WeekDays: utils.WeekDays{7}, StartTime: "00:00:00"},
+		},
+	}
+	if !rpl.IsValid() {
+		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
+	}
+}
+
+func TestRatingPlanIsValidMultiple(t *testing.T) {
+	rpl := &RatingPlan{
+		Timings: map[string]*RITiming{
+			"special":  &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
+			"first":    &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
+			"first_08": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
+			"second":   &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
+			"third":    &RITiming{WeekDays: utils.WeekDays{7}, StartTime: "00:00:00"},
+		},
+	}
+	if !rpl.IsValid() {
+		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
+	}
+}
+
+func TestRatingPlanIsValidMissing(t *testing.T) {
+	rpl := &RatingPlan{
+		Timings: map[string]*RITiming{
+			"special":  &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
+			"first_08": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
+			"second":   &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
+			"third":    &RITiming{WeekDays: utils.WeekDays{7}, StartTime: "00:00:00"},
+		},
+	}
+	if rpl.IsValid() {
+		t.Errorf("Error determining rating plan's valididty: %+v", rpl)
+	}
+}
+
 /**************************** Benchmarks *************************************/
 
 func BenchmarkRatingPlanMarshalJson(b *testing.B) {

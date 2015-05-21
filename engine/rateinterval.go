@@ -167,9 +167,17 @@ func (rit *RITiming) IsActiveAt(t time.Time, endTime bool) bool {
 	return true
 }
 
-// Returns wheter the Timing is active now
+// IsActive returns wheter the Timing is active now
 func (rit *RITiming) IsActive() bool {
 	return rit.IsActiveAt(time.Now(), false)
+}
+
+func (rit *RITiming) IsBlank() bool {
+	return len(rit.Years) == 0 &&
+		len(rit.Months) == 0 &&
+		len(rit.MonthDays) == 0 &&
+		len(rit.WeekDays) == 0 &&
+		rit.StartTime == "00:00:00"
 }
 
 func (rit *RITiming) Stringify() string {

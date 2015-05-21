@@ -63,6 +63,7 @@ var (
 	version         = flag.Bool("version", false, "Prints the application version.")
 	verbose         = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	dryRun          = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
+	validate        = flag.Bool("validate", false, "When true will run various check on the loaded data to check for structural errors")
 	stats           = flag.Bool("stats", false, "Generates statsistics about given data.")
 	fromStorDb      = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb        = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
@@ -161,6 +162,11 @@ func main() {
 	}
 	if *stats {
 		loader.ShowStatistics()
+	}
+	if *validate {
+		if !loader.IsDataValid() {
+			return
+		}
 	}
 	if *dryRun { // We were just asked to parse the data, not saving it
 		return

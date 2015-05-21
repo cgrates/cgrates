@@ -327,9 +327,10 @@ func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
 }
 
 type AttrLoadTpFromStorDb struct {
-	TPid    string
-	FlushDb bool // Flush ratingDb before loading
-	DryRun  bool // Only simulate, no write
+	TPid     string
+	FlushDb  bool // Flush ratingDb before loading
+	DryRun   bool // Only simulate, no write
+	Validate bool // Run structural checks
 }
 
 // Loads complete data in a TP from storDb
@@ -341,8 +342,14 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	if err := dbReader.LoadAll(); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	if attrs.Validate {
+		if !dbReader.IsDataValid() {
+			*reply = OK
+			return errors.New("invalid data")
+		}
+	}
 	if attrs.DryRun {
-		*reply = "OK"
+		*reply = OK
 		return nil // Mission complete, no errors
 	}
 	if err := dbReader.WriteToDatabase(attrs.FlushDb, false); err != nil {
@@ -978,9 +985,17 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	if attrs.DryRun {
-		*reply = "OK"
+		*reply = OK
 		return nil // Mission complete, no errors
 	}
+
+	if attrs.Validate {
+		if !loader.IsDataValid() {
+			*reply = OK
+			return errors.New("invalid data")
+		}
+	}
+
 	if err := loader.WriteToDatabase(attrs.FlushDb, false); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}

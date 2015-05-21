@@ -112,3 +112,37 @@ func (rp *RatingPlan) GetHistoryRecord() history.Record {
 		Payload:  js,
 	}
 }
+
+// IsValid determines if the rating plan covers a continous period of time
+func (rp *RatingPlan) IsValid() bool {
+	weekdays := make([]int, 7)
+	for _, tm := range rp.Timings {
+		// if it is a blank timing than it will match all
+		if tm.IsBlank() {
+			return true
+		}
+		// skip the special timings (for specific dates)
+		if len(tm.Years) != 0 || len(tm.Months) != 0 || len(tm.MonthDays) != 0 {
+			continue
+		}
+		// if the startime is not midnight than is an extra time
+		if tm.StartTime != "00:00:00" {
+			continue
+		}
+		//check if all weekdays are covered
+		for _, wd := range tm.WeekDays {
+			weekdays[wd-1] = 1
+		}
+		allWeekdaysCovered := true
+		for _, wd := range weekdays {
+			if wd != 1 {
+				allWeekdaysCovered = false
+				break
+			}
+		}
+		if allWeekdaysCovered {
+			return true
+		}
+	}
+	return false
+}

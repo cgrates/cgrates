@@ -119,6 +119,7 @@ type TPLoader interface {
 	LoadAll() error
 	GetLoadedIds(string) ([]string, error)
 	ShowStatistics()
+	IsDataValid() bool
 	WriteToDatabase(bool, bool) error
 }
 

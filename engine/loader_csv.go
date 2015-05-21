@@ -179,6 +179,17 @@ func (csvr *CSVReader) ShowStatistics() {
 	log.Print("CDR stats: ", len(csvr.cdrStats))
 }
 
+func (csvr *CSVReader) IsDataValid() bool {
+	valid := true
+	for rplTag, rpl := range csvr.ratingPlans {
+		if !rpl.IsValid() {
+			log.Printf("The rating plan %s is not covering all weekdays", rplTag)
+			valid = false
+		}
+	}
+	return valid
+}
+
 func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	dataStorage := csvr.dataStorage
 	accountingStorage := csvr.accountingStorage

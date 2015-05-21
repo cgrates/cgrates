@@ -25,7 +25,7 @@ import (
 	"time"
 )
 
-func TestMonthStoreRestoreJson(t *testing.T) {
+func TestDateseriesMonthStoreRestoreJson(t *testing.T) {
 	m := Months{5, 6, 7, 8}
 	r, _ := json.Marshal(m)
 	if string(r) != "[5,6,7,8]" {
@@ -38,7 +38,7 @@ func TestMonthStoreRestoreJson(t *testing.T) {
 	}
 }
 
-func TestMonthDayStoreRestoreJson(t *testing.T) {
+func TestDateseriesMonthDayStoreRestoreJson(t *testing.T) {
 	md := MonthDays{24, 25, 26}
 	r, _ := json.Marshal(md)
 	if string(r) != "[24,25,26]" {
@@ -51,7 +51,7 @@ func TestMonthDayStoreRestoreJson(t *testing.T) {
 	}
 }
 
-func TestWeekDayStoreRestoreJson(t *testing.T) {
+func TestDateseriesWeekDayStoreRestoreJson(t *testing.T) {
 	wd := WeekDays{time.Saturday, time.Sunday}
 	r, _ := json.Marshal(wd)
 	if string(r) != "[6,0]" {
@@ -64,7 +64,7 @@ func TestWeekDayStoreRestoreJson(t *testing.T) {
 	}
 }
 
-func TestYearsSerialize(t *testing.T) {
+func TestDateseriesYearsSerialize(t *testing.T) {
 	ys := &Years{}
 	yString := ys.Serialize(";")
 	expectString := "*any"
@@ -85,7 +85,7 @@ func TestYearsSerialize(t *testing.T) {
 	}
 }
 
-func TestMonthsSerialize(t *testing.T) {
+func TestDateseriesMonthsSerialize(t *testing.T) {
 	mths := &Months{}
 	mString := mths.Serialize(";")
 	expectString := "*any"
@@ -106,7 +106,7 @@ func TestMonthsSerialize(t *testing.T) {
 	}
 }
 
-func TestMonthDaysSerialize(t *testing.T) {
+func TestDateseriesMonthDaysSerialize(t *testing.T) {
 	mds := &MonthDays{}
 	mdsString := mds.Serialize(";")
 	expectString := "*any"
@@ -127,7 +127,7 @@ func TestMonthDaysSerialize(t *testing.T) {
 	}
 }
 
-func TestWeekDaysSerialize(t *testing.T) {
+func TestDateseriesWeekDaysSerialize(t *testing.T) {
 	wds := &WeekDays{}
 	wdsString := wds.Serialize(";")
 	expectString := "*any"
@@ -145,5 +145,19 @@ func TestWeekDaysSerialize(t *testing.T) {
 	expectString3 := "1;6;0"
 	if expectString3 != wdsString3 {
 		t.Errorf("Expected: %s, got: %s", expectString3, wdsString3)
+	}
+}
+
+func TestDateseriesMonthsIsCompleteNot(t *testing.T) {
+	months := Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November}
+	if months.IsComplete() {
+		t.Error("Error months IsComplete: ", months)
+	}
+}
+
+func TestDateseriesMonthsIsCompleteYes(t *testing.T) {
+	months := Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December}
+	if !months.IsComplete() {
+		t.Error("Error months IsComplete: ", months)
 	}
 }

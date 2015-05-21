@@ -132,6 +132,17 @@ func (dbr *DbReader) ShowStatistics() {
 	log.Print("LCR rules: ", len(dbr.lcrs))
 }
 
+func (dbr *DbReader) IsDataValid() bool {
+	valid := true
+	for rplTag, rpl := range dbr.ratingPlans {
+		if !rpl.IsValid() {
+			log.Printf("The rating plan %s is not covering all weekdays", rplTag)
+			valid = false
+		}
+	}
+	return valid
+}
+
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	storage := dbr.dataDb
 	if flush {
