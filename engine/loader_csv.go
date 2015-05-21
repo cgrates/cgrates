@@ -36,24 +36,7 @@ type CSVReader struct {
 	dataStorage       RatingStorage
 	accountingStorage AccountingStorage
 	readerFunc        func(string, rune, int) (*csv.Reader, *os.File, error)
-	actions           map[string][]*Action
-	actionsTimings    map[string][]*ActionTiming
-	actionsTriggers   map[string][]*ActionTrigger
-	rpAliases         map[string]string
-	accAliases        map[string]string
-	accountActions    map[string]*Account
-	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
-	dirtyAccAliases   []*TenantAccount       // used to clean aliases that might have changed
-	destinations      map[string]*Destination
-	timings           map[string]*utils.TPTiming
-	rates             map[string]*utils.TPRate
-	destinationRates  map[string]*utils.TPDestinationRate
-	ratingPlans       map[string]*RatingPlan
-	ratingProfiles    map[string]*RatingProfile
-	sharedGroups      map[string]*SharedGroup
-	lcrs              map[string]*LCR
-	derivedChargers   map[string]utils.DerivedChargers
-	cdrStats          map[string]*CdrStats
+	tp                *TPData
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn string
@@ -66,23 +49,8 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.sep = sep
 	c.dataStorage = dataStorage
 	c.accountingStorage = accountingStorage
-	c.actions = make(map[string][]*Action)
-	c.actionsTimings = make(map[string][]*ActionTiming)
-	c.actionsTriggers = make(map[string][]*ActionTrigger)
-	c.accountActions = make(map[string]*Account)
-	c.rates = make(map[string]*utils.TPRate)
-	c.destinationRates = make(map[string]*utils.TPDestinationRate)
-	c.timings = make(map[string]*utils.TPTiming)
-	c.destinations = make(map[string]*Destination)
-	c.ratingPlans = make(map[string]*RatingPlan)
-	c.ratingProfiles = make(map[string]*RatingProfile)
-	c.sharedGroups = make(map[string]*SharedGroup)
-	c.lcrs = make(map[string]*LCR)
-	c.derivedChargers = make(map[string]utils.DerivedChargers)
-	c.cdrStats = make(map[string]*CdrStats)
+	c.tp = NewTPData()
 	c.readerFunc = openFileCSVReader
-	c.rpAliases = make(map[string]string)
-	c.accAliases = make(map[string]string)
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
 		c.sharedgroupsFn, c.lcrFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn, c.derivedChargersFn, c.cdrStatsFn = destinationsFn, timingsFn,
 		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn
@@ -122,11 +90,11 @@ func openStringCSVReader(data string, comma rune, nrFields int) (csvReader *csv.
 
 func (csvr *CSVReader) ShowStatistics() {
 	// destinations
-	destCount := len(csvr.destinations)
+	destCount := len(csvr.tp.destinations)
 	log.Print("Destinations: ", destCount)
 	prefixDist := make(map[int]int, 50)
 	prefixCount := 0
-	for _, d := range csvr.destinations {
+	for _, d := range csvr.tp.destinations {
 		prefixDist[len(d.Prefixes)] += 1
 		prefixCount += len(d.Prefixes)
 	}
@@ -136,11 +104,11 @@ func (csvr *CSVReader) ShowStatistics() {
 		log.Printf("%d: %d", k, v)
 	}
 	// rating plans
-	rplCount := len(csvr.ratingPlans)
+	rplCount := len(csvr.tp.ratingPlans)
 	log.Print("Rating plans: ", rplCount)
 	destRatesDist := make(map[int]int, 50)
 	destRatesCount := 0
-	for _, rpl := range csvr.ratingPlans {
+	for _, rpl := range csvr.tp.ratingPlans {
 		destRatesDist[len(rpl.DestinationRates)] += 1
 		destRatesCount += len(rpl.DestinationRates)
 	}
@@ -150,11 +118,11 @@ func (csvr *CSVReader) ShowStatistics() {
 		log.Printf("%d: %d", k, v)
 	}
 	// rating profiles
-	rpfCount := len(csvr.ratingProfiles)
+	rpfCount := len(csvr.tp.ratingProfiles)
 	log.Print("Rating profiles: ", rpfCount)
 	activDist := make(map[int]int, 50)
 	activCount := 0
-	for _, rpf := range csvr.ratingProfiles {
+	for _, rpf := range csvr.tp.ratingProfiles {
 		activDist[len(rpf.RatingPlanActivations)] += 1
 		activCount += len(rpf.RatingPlanActivations)
 	}
@@ -164,24 +132,24 @@ func (csvr *CSVReader) ShowStatistics() {
 		log.Printf("%d: %d", k, v)
 	}
 	// actions
-	log.Print("Actions: ", len(csvr.actions))
+	log.Print("Actions: ", len(csvr.tp.actions))
 	// action plans
-	log.Print("Action plans: ", len(csvr.actionsTimings))
+	log.Print("Action plans: ", len(csvr.tp.actionsTimings))
 	// action trigers
-	log.Print("Action trigers: ", len(csvr.actionsTriggers))
+	log.Print("Action trigers: ", len(csvr.tp.actionsTriggers))
 	// account actions
-	log.Print("Account actions: ", len(csvr.accountActions))
+	log.Print("Account actions: ", len(csvr.tp.accountActions))
 	// derivedChargers
-	log.Print("Derived Chargers: ", len(csvr.derivedChargers))
+	log.Print("Derived Chargers: ", len(csvr.tp.derivedChargers))
 	// lcr rules
-	log.Print("LCR rules: ", len(csvr.lcrs))
+	log.Print("LCR rules: ", len(csvr.tp.lcrs))
 	// cdr stats
-	log.Print("CDR stats: ", len(csvr.cdrStats))
+	log.Print("CDR stats: ", len(csvr.tp.cdrStats))
 }
 
 func (csvr *CSVReader) IsDataValid() bool {
 	valid := true
-	for rplTag, rpl := range csvr.ratingPlans {
+	for rplTag, rpl := range csvr.tp.ratingPlans {
 		if !rpl.IsValid() {
 			log.Printf("The rating plan %s is not covering all weekdays", rplTag)
 			valid = false
@@ -202,7 +170,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Destinations:")
 	}
-	for _, d := range csvr.destinations {
+	for _, d := range csvr.tp.destinations {
 		err = dataStorage.SetDestination(d)
 		if err != nil {
 			return err
@@ -214,7 +182,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Rating Plans:")
 	}
-	for _, rp := range csvr.ratingPlans {
+	for _, rp := range csvr.tp.ratingPlans {
 		err = dataStorage.SetRatingPlan(rp)
 		if err != nil {
 			return err
@@ -226,7 +194,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Rating Profiles:")
 	}
-	for _, rp := range csvr.ratingProfiles {
+	for _, rp := range csvr.tp.ratingProfiles {
 		err = dataStorage.SetRatingProfile(rp)
 		if err != nil {
 			return err
@@ -238,7 +206,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Action Plans:")
 	}
-	for k, ats := range csvr.actionsTimings {
+	for k, ats := range csvr.tp.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)
 		if err != nil {
 			return err
@@ -250,7 +218,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Shared Groups:")
 	}
-	for k, sg := range csvr.sharedGroups {
+	for k, sg := range csvr.tp.sharedGroups {
 		err = accountingStorage.SetSharedGroup(sg)
 		if err != nil {
 			return err
@@ -262,7 +230,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("LCR Rules:")
 	}
-	for k, lcr := range csvr.lcrs {
+	for k, lcr := range csvr.tp.lcrs {
 		err = dataStorage.SetLCR(lcr)
 		if err != nil {
 			return err
@@ -274,7 +242,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Actions:")
 	}
-	for k, as := range csvr.actions {
+	for k, as := range csvr.tp.actions {
 		err = accountingStorage.SetActions(k, as)
 		if err != nil {
 			return err
@@ -286,7 +254,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Account Actions:")
 	}
-	for _, ub := range csvr.accountActions {
+	for _, ub := range csvr.tp.accountActions {
 		err = accountingStorage.SetAccount(ub)
 		if err != nil {
 			return err
@@ -298,10 +266,10 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Rating Profile Aliases:")
 	}
-	if err := dataStorage.RemoveRpAliases(csvr.dirtyRpAliases); err != nil {
+	if err := dataStorage.RemoveRpAliases(csvr.tp.dirtyRpAliases); err != nil {
 		return err
 	}
-	for key, alias := range csvr.rpAliases {
+	for key, alias := range csvr.tp.rpAliases {
 		err = dataStorage.SetRpAlias(key, alias)
 		if err != nil {
 			return err
@@ -313,10 +281,10 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Account Aliases:")
 	}
-	if err := accountingStorage.RemoveAccAliases(csvr.dirtyAccAliases); err != nil {
+	if err := accountingStorage.RemoveAccAliases(csvr.tp.dirtyAccAliases); err != nil {
 		return err
 	}
-	for key, alias := range csvr.accAliases {
+	for key, alias := range csvr.tp.accAliases {
 		err = accountingStorage.SetAccAlias(key, alias)
 		if err != nil {
 			return err
@@ -328,7 +296,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Derived Chargers:")
 	}
-	for key, dcs := range csvr.derivedChargers {
+	for key, dcs := range csvr.tp.derivedChargers {
 		err = accountingStorage.SetDerivedChargers(key, dcs)
 		if err != nil {
 			return err
@@ -340,7 +308,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("CDR Stats Queues:")
 	}
-	for _, sq := range csvr.cdrStats {
+	for _, sq := range csvr.tp.cdrStats {
 		err = dataStorage.SetCdrStats(sq)
 		if err != nil {
 			return err
@@ -366,9 +334,9 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 		tag := record[0]
 		var dest *Destination
 		var found bool
-		if dest, found = csvr.destinations[tag]; !found {
+		if dest, found = csvr.tp.destinations[tag]; !found {
 			dest = &Destination{Id: tag}
-			csvr.destinations[tag] = dest
+			csvr.tp.destinations[tag] = dest
 		}
 		dest.AddPrefix(record[1])
 	}
@@ -387,10 +355,10 @@ func (csvr *CSVReader) LoadTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if _, exists := csvr.timings[tag]; exists {
+		if _, exists := csvr.tp.timings[tag]; exists {
 			log.Print("Warning: duplicate timing found: ", tag)
 		}
-		csvr.timings[tag] = NewTiming(record...)
+		csvr.tp.timings[tag] = NewTiming(record...)
 	}
 	return
 }
@@ -414,15 +382,15 @@ func (csvr *CSVReader) LoadRates() (err error) {
 			return err
 		}
 		// same tag only to create rate groups
-		existingRates, exists := csvr.rates[tag]
+		existingRates, exists := csvr.tp.rates[tag]
 		if exists {
 			rss := existingRates.RateSlots
 			if err := ValidNextGroup(rss[len(rss)-1], r.RateSlots[0]); err != nil {
 				return fmt.Errorf("RatesTag: %s, error: <%s>", tag, err.Error())
 			}
-			csvr.rates[tag].RateSlots = append(csvr.rates[tag].RateSlots, r.RateSlots[0])
+			csvr.tp.rates[tag].RateSlots = append(csvr.tp.rates[tag].RateSlots, r.RateSlots[0])
 		} else {
-			csvr.rates[tag] = r
+			csvr.tp.rates[tag] = r
 		}
 	}
 	return
@@ -440,7 +408,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		r, exists := csvr.rates[record[2]]
+		r, exists := csvr.tp.rates[record[2]]
 		if !exists {
 			return fmt.Errorf("Could not get rates for tag %v", record[2])
 		}
@@ -456,7 +424,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 		}
 		destinationExists := record[1] == utils.ANY
 		if !destinationExists {
-			_, destinationExists = csvr.destinations[record[1]]
+			_, destinationExists = csvr.tp.destinations[record[1]]
 		}
 		if !destinationExists && csvr.dataStorage != nil {
 			if destinationExists, err = csvr.dataStorage.HasData(DESTINATION_PREFIX, record[1]); err != nil {
@@ -479,13 +447,13 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 				},
 			},
 		}
-		existingDR, exists := csvr.destinationRates[tag]
+		existingDR, exists := csvr.tp.destinationRates[tag]
 		if exists {
 			existingDR.DestinationRates = append(existingDR.DestinationRates, dr.DestinationRates[0])
 		} else {
 			existingDR = dr
 		}
-		csvr.destinationRates[tag] = existingDR
+		csvr.tp.destinationRates[tag] = existingDR
 	}
 	return
 }
@@ -502,19 +470,19 @@ func (csvr *CSVReader) LoadRatingPlans() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		t, exists := csvr.timings[record[2]]
+		t, exists := csvr.tp.timings[record[2]]
 		if !exists {
 			return fmt.Errorf("Could not get timing for tag %v", record[2])
 		}
-		drs, exists := csvr.destinationRates[record[1]]
+		drs, exists := csvr.tp.destinationRates[record[1]]
 		if !exists {
 			return fmt.Errorf("Could not find destination rate for tag %v", record[1])
 		}
 		rpl := NewRatingPlan(t, record[3])
-		plan, exists := csvr.ratingPlans[tag]
+		plan, exists := csvr.tp.ratingPlans[tag]
 		if !exists {
 			plan = &RatingPlan{Id: tag}
-			csvr.ratingPlans[tag] = plan
+			csvr.tp.ratingPlans[tag] = plan
 		}
 		for _, dr := range drs.DestinationRates {
 			plan.AddRateInterval(dr.DestinationId, GetRateInterval(rpl, dr))
@@ -541,20 +509,20 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		}
 		// extract aliases from subject
 		aliases := strings.Split(subject, utils.INFIELD_SEP)
-		csvr.dirtyRpAliases = append(csvr.dirtyRpAliases, &TenantRatingSubject{Tenant: tenant, Subject: aliases[0]})
+		csvr.tp.dirtyRpAliases = append(csvr.tp.dirtyRpAliases, &TenantRatingSubject{Tenant: tenant, Subject: aliases[0]})
 		if len(aliases) > 1 {
 			subject = aliases[0]
 			for _, alias := range aliases[1:] {
-				csvr.rpAliases[utils.RatingSubjectAliasKey(tenant, alias)] = subject
+				csvr.tp.rpAliases[utils.RatingSubjectAliasKey(tenant, alias)] = subject
 			}
 		}
 		key := utils.ConcatenatedKey(direction, tenant, tor, subject)
-		rp, ok := csvr.ratingProfiles[key]
+		rp, ok := csvr.tp.ratingProfiles[key]
 		if !ok {
 			rp = &RatingProfile{Id: key}
-			csvr.ratingProfiles[key] = rp
+			csvr.tp.ratingProfiles[key] = rp
 		}
-		_, exists := csvr.ratingPlans[record[5]]
+		_, exists := csvr.tp.ratingPlans[record[5]]
 		if !exists && csvr.dataStorage != nil {
 			if exists, err = csvr.dataStorage.HasData(RATING_PLAN_PREFIX, record[5]); err != nil {
 				return err
@@ -570,7 +538,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			CdrStatQueueIds: strings.Split(record[7], utils.INFIELD_SEP),
 		}
 		rp.RatingPlanActivations = append(rp.RatingPlanActivations, rpa)
-		csvr.ratingProfiles[rp.Id] = rp
+		csvr.tp.ratingProfiles[rp.Id] = rp
 	}
 	return
 }
@@ -587,7 +555,7 @@ func (csvr *CSVReader) LoadSharedGroups() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		sg, found := csvr.sharedGroups[tag]
+		sg, found := csvr.tp.sharedGroups[tag]
 		if found {
 			sg.AccountParameters[record[1]] = &SharingParameters{
 				Strategy:      record[2],
@@ -604,7 +572,7 @@ func (csvr *CSVReader) LoadSharedGroups() (err error) {
 				},
 			}
 		}
-		csvr.sharedGroups[tag] = sg
+		csvr.tp.sharedGroups[tag] = sg
 	}
 	return
 }
@@ -622,7 +590,7 @@ func (csvr *CSVReader) LoadLCRs() (err error) {
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		direction, tenant, category, account, subject := record[0], record[1], record[2], record[3], record[4]
 		id := utils.LCRKey(direction, tenant, category, account, subject)
-		lcr, found := csvr.lcrs[id]
+		lcr, found := csvr.tp.lcrs[id]
 		activationTime, err := utils.ParseTimeDetectLayout(record[9])
 		if err != nil {
 			return fmt.Errorf("Could not parse LCR activation time: %v", err)
@@ -660,7 +628,7 @@ func (csvr *CSVReader) LoadLCRs() (err error) {
 			StrategyParams: record[8],
 			Weight:         weight,
 		})
-		csvr.lcrs[id] = lcr
+		csvr.tp.lcrs[id] = lcr
 	}
 	return
 }
@@ -723,7 +691,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if a.Balance.TimingIDs != "" {
 			timingIds := strings.Split(a.Balance.TimingIDs, utils.INFIELD_SEP)
 			for _, timingID := range timingIds {
-				if timing, found := csvr.timings[timingID]; found {
+				if timing, found := csvr.tp.timings[timingID]; found {
 					a.Balance.Timings = append(a.Balance.Timings, &RITiming{
 						Years:     timing.Years,
 						Months:    timing.Months,
@@ -742,11 +710,11 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		}
 		// update Id
 		idx := 0
-		if previous, ok := csvr.actions[tag]; ok {
+		if previous, ok := csvr.tp.actions[tag]; ok {
 			idx = len(previous)
 		}
 		a.Id = a.Id + strconv.Itoa(idx)
-		csvr.actions[tag] = append(csvr.actions[tag], a)
+		csvr.tp.actions[tag] = append(csvr.tp.actions[tag], a)
 	}
 	return
 }
@@ -763,11 +731,11 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		_, exists := csvr.actions[record[1]]
+		_, exists := csvr.tp.actions[record[1]]
 		if !exists {
 			return fmt.Errorf("ActionPlan: Could not load the action for tag: %v", record[1])
 		}
-		t, exists := csvr.timings[record[2]]
+		t, exists := csvr.tp.timings[record[2]]
 		if !exists {
 			return fmt.Errorf("ActionPlan: Could not load the timing for tag: %v", record[2])
 		}
@@ -790,7 +758,7 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 			},
 			ActionsId: record[1],
 		}
-		csvr.actionsTimings[tag] = append(csvr.actionsTimings[tag], at)
+		csvr.tp.actionsTimings[tag] = append(csvr.tp.actionsTimings[tag], at)
 	}
 	return
 }
@@ -864,7 +832,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		if at.Id == "" {
 			at.Id = utils.GenUUID()
 		}
-		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)
+		csvr.tp.actionsTriggers[tag] = append(csvr.tp.actionsTriggers[tag], at)
 	}
 	return
 }
@@ -883,18 +851,18 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		tenant, account, direction := record[0], record[1], record[2]
 		// extract aliases from subject
 		aliases := strings.Split(account, utils.INFIELD_SEP)
-		csvr.dirtyAccAliases = append(csvr.dirtyAccAliases, &TenantAccount{Tenant: tenant, Account: aliases[0]})
+		csvr.tp.dirtyAccAliases = append(csvr.tp.dirtyAccAliases, &TenantAccount{Tenant: tenant, Account: aliases[0]})
 		if len(aliases) > 1 {
 			account = aliases[0]
 			for _, alias := range aliases[1:] {
-				csvr.accAliases[utils.AccountAliasKey(tenant, alias)] = account
+				csvr.tp.accAliases[utils.AccountAliasKey(tenant, alias)] = account
 			}
 		}
 		tag := utils.ConcatenatedKey(direction, tenant, account)
-		if _, alreadyDefined := csvr.accountActions[tag]; alreadyDefined {
+		if _, alreadyDefined := csvr.tp.accountActions[tag]; alreadyDefined {
 			return fmt.Errorf("Duplicate account action found: %s", tag)
 		}
-		aTriggers, exists := csvr.actionsTriggers[record[4]]
+		aTriggers, exists := csvr.tp.actionsTriggers[record[4]]
 		if record[4] != "" && !exists {
 			// only return error if there was something there for the tag
 			return fmt.Errorf("Could not get action triggers for tag %s", record[4])
@@ -903,8 +871,8 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 			Id:             tag,
 			ActionTriggers: aTriggers,
 		}
-		csvr.accountActions[tag] = ub
-		aTimings, exists := csvr.actionsTimings[record[3]]
+		csvr.tp.accountActions[tag] = ub
+		aTimings, exists := csvr.tp.actionsTimings[record[3]]
 		if !exists {
 			log.Printf("Could not get action plan for tag %s", record[3])
 			// must not continue here
@@ -931,8 +899,8 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 			return err
 		}
 		tag := utils.DerivedChargersKey(record[0], record[1], record[2], record[3], record[4])
-		if _, found := csvr.derivedChargers[tag]; found {
-			if csvr.derivedChargers[tag], err = csvr.derivedChargers[tag].Append(&utils.DerivedCharger{
+		if _, found := csvr.tp.derivedChargers[tag]; found {
+			if csvr.tp.derivedChargers[tag], err = csvr.tp.derivedChargers[tag].Append(&utils.DerivedCharger{
 				RunId:                ValueOrDefault(record[5], "*default"),
 				RunFilters:           record[6],
 				ReqTypeField:         ValueOrDefault(record[7], "*default"),
@@ -954,7 +922,7 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 			if record[5] == utils.DEFAULT_RUNID {
 				return errors.New("Reserved RunId")
 			}
-			csvr.derivedChargers[tag] = utils.DerivedChargers{&utils.DerivedCharger{
+			csvr.tp.derivedChargers[tag] = utils.DerivedChargers{&utils.DerivedCharger{
 				RunId:                ValueOrDefault(record[5], "*default"),
 				RunFilters:           record[6],
 				ReqTypeField:         ValueOrDefault(record[7], "*default"),
@@ -989,11 +957,11 @@ func (csvr *CSVReader) LoadCdrStats() (err error) {
 		tag := record[CDRSTATIDX_TAG]
 		var cs *CdrStats
 		var exists bool
-		if cs, exists = csvr.cdrStats[tag]; !exists {
+		if cs, exists = csvr.tp.cdrStats[tag]; !exists {
 			cs = &CdrStats{Id: tag}
 		}
 		triggerTag := record[CDRSTATIDX_ATRIGGER]
-		triggers, exists := csvr.actionsTriggers[triggerTag]
+		triggers, exists := csvr.tp.actionsTriggers[triggerTag]
 		if triggerTag != "" && !exists {
 			// only return error if there was something there for the tag
 			return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
@@ -1023,7 +991,7 @@ func (csvr *CSVReader) LoadCdrStats() (err error) {
 			ActionTriggers:      record[CDRSTATIDX_ATRIGGER],
 		}
 		UpdateCdrStats(cs, triggers, tpCs)
-		csvr.cdrStats[tag] = cs
+		csvr.tp.cdrStats[tag] = cs
 	}
 	return
 }
@@ -1080,81 +1048,81 @@ func (csvr *CSVReader) LoadAll() error {
 func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
-		keys := make([]string, len(csvr.destinations))
+		keys := make([]string, len(csvr.tp.destinations))
 		i := 0
-		for k := range csvr.destinations {
+		for k := range csvr.tp.destinations {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case RATING_PLAN_PREFIX:
-		keys := make([]string, len(csvr.ratingPlans))
+		keys := make([]string, len(csvr.tp.ratingPlans))
 		i := 0
-		for k := range csvr.ratingPlans {
+		for k := range csvr.tp.ratingPlans {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case RATING_PROFILE_PREFIX:
-		keys := make([]string, len(csvr.ratingProfiles))
+		keys := make([]string, len(csvr.tp.ratingProfiles))
 		i := 0
-		for k := range csvr.ratingProfiles {
+		for k := range csvr.tp.ratingProfiles {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case ACTION_PREFIX: // actionsTimings
-		keys := make([]string, len(csvr.actions))
+		keys := make([]string, len(csvr.tp.actions))
 		i := 0
-		for k := range csvr.actions {
+		for k := range csvr.tp.actions {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case ACTION_TIMING_PREFIX: // actionsTimings
-		keys := make([]string, len(csvr.actionsTimings))
+		keys := make([]string, len(csvr.tp.actionsTimings))
 		i := 0
-		for k := range csvr.actionsTimings {
+		for k := range csvr.tp.actionsTimings {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case RP_ALIAS_PREFIX: // aliases
-		keys := make([]string, len(csvr.rpAliases))
+		keys := make([]string, len(csvr.tp.rpAliases))
 		i := 0
-		for k := range csvr.rpAliases {
+		for k := range csvr.tp.rpAliases {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case ACC_ALIAS_PREFIX: // aliases
-		keys := make([]string, len(csvr.accAliases))
+		keys := make([]string, len(csvr.tp.accAliases))
 		i := 0
-		for k := range csvr.accAliases {
+		for k := range csvr.tp.accAliases {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case DERIVEDCHARGERS_PREFIX: // derived chargers
-		keys := make([]string, len(csvr.derivedChargers))
+		keys := make([]string, len(csvr.tp.derivedChargers))
 		i := 0
-		for k := range csvr.derivedChargers {
+		for k := range csvr.tp.derivedChargers {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case CDR_STATS_PREFIX: // cdr stats
-		keys := make([]string, len(csvr.cdrStats))
+		keys := make([]string, len(csvr.tp.cdrStats))
 		i := 0
-		for k := range csvr.cdrStats {
+		for k := range csvr.tp.cdrStats {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case SHARED_GROUP_PREFIX:
-		keys := make([]string, len(csvr.sharedGroups))
+		keys := make([]string, len(csvr.tp.sharedGroups))
 		i := 0
-		for k := range csvr.sharedGroups {
+		for k := range csvr.tp.sharedGroups {
 			keys[i] = k
 			i++
 		}

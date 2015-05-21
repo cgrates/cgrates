@@ -123,6 +123,50 @@ type TPLoader interface {
 	WriteToDatabase(bool, bool) error
 }
 
+type TPData struct {
+	actions          map[string][]*Action
+	actionsTimings   map[string][]*ActionTiming
+	actionsTriggers  map[string][]*ActionTrigger
+	accountActions   map[string]*Account
+	dirtyRpAliases   []*TenantRatingSubject // used to clean aliases that might have changed
+	dirtyAccAliases  []*TenantAccount       // used to clean aliases that might have changed
+	destinations     map[string]*Destination
+	rpAliases        map[string]string
+	accAliases       map[string]string
+	timings          map[string]*utils.TPTiming
+	rates            map[string]*utils.TPRate
+	destinationRates map[string]*utils.TPDestinationRate
+	ratingPlans      map[string]*RatingPlan
+	ratingProfiles   map[string]*RatingProfile
+	sharedGroups     map[string]*SharedGroup
+	lcrs             map[string]*LCR
+	derivedChargers  map[string]utils.DerivedChargers
+	cdrStats         map[string]*CdrStats
+}
+
+func NewTPData() *TPData {
+	tp := &TPData{}
+	tp.actions = make(map[string][]*Action)
+	tp.actionsTimings = make(map[string][]*ActionTiming)
+	tp.actionsTriggers = make(map[string][]*ActionTrigger)
+	tp.rates = make(map[string]*utils.TPRate)
+	tp.destinations = make(map[string]*Destination)
+	tp.destinationRates = make(map[string]*utils.TPDestinationRate)
+	tp.timings = make(map[string]*utils.TPTiming)
+	tp.ratingPlans = make(map[string]*RatingPlan)
+	tp.ratingProfiles = make(map[string]*RatingProfile)
+	tp.sharedGroups = make(map[string]*SharedGroup)
+	tp.lcrs = make(map[string]*LCR)
+	tp.rpAliases = make(map[string]string)
+	tp.accAliases = make(map[string]string)
+	tp.timings = make(map[string]*utils.TPTiming)
+	tp.accountActions = make(map[string]*Account)
+	tp.destinations = make(map[string]*Destination)
+	tp.cdrStats = make(map[string]*CdrStats)
+	tp.derivedChargers = make(map[string]utils.DerivedChargers)
+	return tp
+}
+
 func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval string) (r *utils.TPRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {

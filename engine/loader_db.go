@@ -29,28 +29,11 @@ import (
 )
 
 type DbReader struct {
-	tpid             string
-	storDb           LoadStorage
-	dataDb           RatingStorage
-	accountDb        AccountingStorage
-	actions          map[string][]*Action
-	actionsTimings   map[string][]*ActionTiming
-	actionsTriggers  map[string][]*ActionTrigger
-	accountActions   map[string]*Account
-	dirtyRpAliases   []*TenantRatingSubject // used to clean aliases that might have changed
-	dirtyAccAliases  []*TenantAccount       // used to clean aliases that might have changed
-	destinations     map[string]*Destination
-	rpAliases        map[string]string
-	accAliases       map[string]string
-	timings          map[string]*utils.TPTiming
-	rates            map[string]*utils.TPRate
-	destinationRates map[string]*utils.TPDestinationRate
-	ratingPlans      map[string]*RatingPlan
-	ratingProfiles   map[string]*RatingProfile
-	sharedGroups     map[string]*SharedGroup
-	lcrs             map[string]*LCR
-	derivedChargers  map[string]utils.DerivedChargers
-	cdrStats         map[string]*CdrStats
+	tpid      string
+	storDb    LoadStorage
+	dataDb    RatingStorage
+	accountDb AccountingStorage
+	tp        *TPData
 }
 
 func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb AccountingStorage, tpid string) *DbReader {
@@ -59,31 +42,18 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.dataDb = ratingDb
 	c.accountDb = accountDb
 	c.tpid = tpid
-	c.actions = make(map[string][]*Action)
-	c.actionsTimings = make(map[string][]*ActionTiming)
-	c.actionsTriggers = make(map[string][]*ActionTrigger)
-	c.ratingPlans = make(map[string]*RatingPlan)
-	c.ratingProfiles = make(map[string]*RatingProfile)
-	c.sharedGroups = make(map[string]*SharedGroup)
-	c.lcrs = make(map[string]*LCR)
-	c.rpAliases = make(map[string]string)
-	c.accAliases = make(map[string]string)
-	c.timings = make(map[string]*utils.TPTiming)
-	c.accountActions = make(map[string]*Account)
-	c.destinations = make(map[string]*Destination)
-	c.cdrStats = make(map[string]*CdrStats)
-	c.derivedChargers = make(map[string]utils.DerivedChargers)
+	c.tp = NewTPData()
 	return c
 }
 
 // FIXME: this method is code duplication from csv loader
 func (dbr *DbReader) ShowStatistics() {
 	// destinations
-	destCount := len(dbr.destinations)
+	destCount := len(dbr.tp.destinations)
 	log.Print("Destinations: ", destCount)
 	prefixDist := make(map[int]int, 50)
 	prefixCount := 0
-	for _, d := range dbr.destinations {
+	for _, d := range dbr.tp.destinations {
 		prefixDist[len(d.Prefixes)] += 1
 		prefixCount += len(d.Prefixes)
 	}
@@ -93,11 +63,11 @@ func (dbr *DbReader) ShowStatistics() {
 		log.Printf("%d: %d", k, v)
 	}
 	// rating plans
-	rplCount := len(dbr.ratingPlans)
+	rplCount := len(dbr.tp.ratingPlans)
 	log.Print("Rating plans: ", rplCount)
 	destRatesDist := make(map[int]int, 50)
 	destRatesCount := 0
-	for _, rpl := range dbr.ratingPlans {
+	for _, rpl := range dbr.tp.ratingPlans {
 		destRatesDist[len(rpl.DestinationRates)] += 1
 		destRatesCount += len(rpl.DestinationRates)
 	}
@@ -107,11 +77,11 @@ func (dbr *DbReader) ShowStatistics() {
 		log.Printf("%d: %d", k, v)
 	}
 	// rating profiles
-	rpfCount := len(dbr.ratingProfiles)
+	rpfCount := len(dbr.tp.ratingProfiles)
 	log.Print("Rating profiles: ", rpfCount)
 	activDist := make(map[int]int, 50)
 	activCount := 0
-	for _, rpf := range dbr.ratingProfiles {
+	for _, rpf := range dbr.tp.ratingProfiles {
 		activDist[len(rpf.RatingPlanActivations)] += 1
 		activCount += len(rpf.RatingPlanActivations)
 	}
@@ -121,20 +91,20 @@ func (dbr *DbReader) ShowStatistics() {
 		log.Printf("%d: %d", k, v)
 	}
 	// actions
-	log.Print("Actions: ", len(dbr.actions))
+	log.Print("Actions: ", len(dbr.tp.actions))
 	// action timings
-	log.Print("Action plans: ", len(dbr.actionsTimings))
+	log.Print("Action plans: ", len(dbr.tp.actionsTimings))
 	// account actions
-	log.Print("Account actions: ", len(dbr.accountActions))
+	log.Print("Account actions: ", len(dbr.tp.accountActions))
 	// derivedChargers
-	log.Print("Derived Chargers: ", len(dbr.derivedChargers))
+	log.Print("Derived Chargers: ", len(dbr.tp.derivedChargers))
 	// lcr rules
-	log.Print("LCR rules: ", len(dbr.lcrs))
+	log.Print("LCR rules: ", len(dbr.tp.lcrs))
 }
 
 func (dbr *DbReader) IsDataValid() bool {
 	valid := true
-	for rplTag, rpl := range dbr.ratingPlans {
+	for rplTag, rpl := range dbr.tp.ratingPlans {
 		if !rpl.IsValid() {
 			log.Printf("The rating plan %s is not covering all weekdays", rplTag)
 			valid = false
@@ -151,7 +121,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Destinations")
 	}
-	for _, d := range dbr.destinations {
+	for _, d := range dbr.tp.destinations {
 		err = storage.SetDestination(d)
 		if err != nil {
 			return err
@@ -163,7 +133,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Rating plans")
 	}
-	for _, rp := range dbr.ratingPlans {
+	for _, rp := range dbr.tp.ratingPlans {
 		err = storage.SetRatingPlan(rp)
 		if err != nil {
 			return err
@@ -175,7 +145,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Rating profiles")
 	}
-	for _, rp := range dbr.ratingProfiles {
+	for _, rp := range dbr.tp.ratingProfiles {
 		err = storage.SetRatingProfile(rp)
 		if err != nil {
 			return err
@@ -187,7 +157,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Action plans")
 	}
-	for k, ats := range dbr.actionsTimings {
+	for k, ats := range dbr.tp.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)
 		if err != nil {
 			return err
@@ -199,7 +169,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Shared groups")
 	}
-	for k, sg := range dbr.sharedGroups {
+	for k, sg := range dbr.tp.sharedGroups {
 		err = accountingStorage.SetSharedGroup(sg)
 		if err != nil {
 			return err
@@ -211,7 +181,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("LCR Rules")
 	}
-	for k, lcr := range dbr.lcrs {
+	for k, lcr := range dbr.tp.lcrs {
 		err = dataStorage.SetLCR(lcr)
 		if err != nil {
 			return err
@@ -223,7 +193,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Actions")
 	}
-	for k, as := range dbr.actions {
+	for k, as := range dbr.tp.actions {
 		err = accountingStorage.SetActions(k, as)
 		if err != nil {
 			return err
@@ -235,7 +205,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Account actions")
 	}
-	for _, ub := range dbr.accountActions {
+	for _, ub := range dbr.tp.accountActions {
 		err = accountingStorage.SetAccount(ub)
 		if err != nil {
 			return err
@@ -247,10 +217,10 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Rating profile aliases")
 	}
-	if err := storage.RemoveRpAliases(dbr.dirtyRpAliases); err != nil {
+	if err := storage.RemoveRpAliases(dbr.tp.dirtyRpAliases); err != nil {
 		return err
 	}
-	for key, alias := range dbr.rpAliases {
+	for key, alias := range dbr.tp.rpAliases {
 		err = storage.SetRpAlias(key, alias)
 		if err != nil {
 			return err
@@ -262,10 +232,10 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Account aliases")
 	}
-	if err := accountingStorage.RemoveAccAliases(dbr.dirtyAccAliases); err != nil {
+	if err := accountingStorage.RemoveAccAliases(dbr.tp.dirtyAccAliases); err != nil {
 		return err
 	}
-	for key, alias := range dbr.accAliases {
+	for key, alias := range dbr.tp.accAliases {
 		err = accountingStorage.SetAccAlias(key, alias)
 		if err != nil {
 			return err
@@ -277,7 +247,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Derived Chargers")
 	}
-	for key, dcs := range dbr.derivedChargers {
+	for key, dcs := range dbr.tp.derivedChargers {
 		err = accountingStorage.SetDerivedChargers(key, dcs)
 		if err != nil {
 			return err
@@ -289,7 +259,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("CDR Stats Queues")
 	}
-	for _, sq := range dbr.cdrStats {
+	for _, sq := range dbr.tp.cdrStats {
 		err = dataStorage.SetCdrStats(sq)
 		if err != nil {
 			return err
@@ -302,7 +272,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 }
 
 func (dbr *DbReader) LoadDestinations() (err error) {
-	dbr.destinations, err = dbr.storDb.GetTpDestinations(dbr.tpid, "")
+	dbr.tp.destinations, err = dbr.storDb.GetTpDestinations(dbr.tpid, "")
 	return
 }
 
@@ -320,31 +290,31 @@ func (dbr *DbReader) LoadTimings() (err error) {
 		return err
 	}
 	for _, tpTm := range tpTmgs {
-		dbr.timings[tpTm.TimingId] = NewTiming(tpTm.TimingId, tpTm.Years, tpTm.Months, tpTm.MonthDays, tpTm.WeekDays, tpTm.Time)
+		dbr.tp.timings[tpTm.TimingId] = NewTiming(tpTm.TimingId, tpTm.Years, tpTm.Months, tpTm.MonthDays, tpTm.WeekDays, tpTm.Time)
 	}
 	return nil
 }
 
 func (dbr *DbReader) LoadRates() (err error) {
-	dbr.rates, err = dbr.storDb.GetTpRates(dbr.tpid, "")
+	dbr.tp.rates, err = dbr.storDb.GetTpRates(dbr.tpid, "")
 	return err
 }
 
 func (dbr *DbReader) LoadDestinationRates() (err error) {
-	dbr.destinationRates, err = dbr.storDb.GetTpDestinationRates(dbr.tpid, "", nil)
+	dbr.tp.destinationRates, err = dbr.storDb.GetTpDestinationRates(dbr.tpid, "", nil)
 	if err != nil {
 		return err
 	}
-	for _, drs := range dbr.destinationRates {
+	for _, drs := range dbr.tp.destinationRates {
 		for _, dr := range drs.DestinationRates {
-			rate, exists := dbr.rates[dr.RateId]
+			rate, exists := dbr.tp.rates[dr.RateId]
 			if !exists {
 				return fmt.Errorf("Could not find rate for tag %v", dr.RateId)
 			}
 			dr.Rate = rate
 			destinationExists := dr.DestinationId == utils.ANY
 			if !destinationExists {
-				_, destinationExists = dbr.destinations[dr.DestinationId]
+				_, destinationExists = dbr.tp.destinations[dr.DestinationId]
 			}
 			if !destinationExists {
 				if dbExists, err := dbr.dataDb.HasData(DESTINATION_PREFIX, dr.DestinationId); err != nil {
@@ -365,19 +335,19 @@ func (dbr *DbReader) LoadRatingPlans() error {
 	}
 	for tag, rplBnds := range mpRpls {
 		for _, rplBnd := range rplBnds {
-			t, exists := dbr.timings[rplBnd.TimingId]
+			t, exists := dbr.tp.timings[rplBnd.TimingId]
 			if !exists {
 				return fmt.Errorf("Could not get timing for tag %v", rplBnd.TimingId)
 			}
 			rplBnd.SetTiming(t)
-			drs, exists := dbr.destinationRates[rplBnd.DestinationRatesId]
+			drs, exists := dbr.tp.destinationRates[rplBnd.DestinationRatesId]
 			if !exists {
 				return fmt.Errorf("Could not find destination rate for tag %v", rplBnd.DestinationRatesId)
 			}
-			plan, exists := dbr.ratingPlans[tag]
+			plan, exists := dbr.tp.ratingPlans[tag]
 			if !exists {
 				plan = &RatingPlan{Id: tag}
-				dbr.ratingPlans[plan.Id] = plan
+				dbr.tp.ratingPlans[plan.Id] = plan
 			}
 			for _, dr := range drs.DestinationRates {
 				plan.AddRateInterval(dr.DestinationId, GetRateInterval(rplBnd, dr))
@@ -395,11 +365,11 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 	for _, tpRpf := range mpTpRpfs {
 		// extract aliases from subject
 		aliases := strings.Split(tpRpf.Subject, ";")
-		dbr.dirtyRpAliases = append(dbr.dirtyRpAliases, &TenantRatingSubject{Tenant: tpRpf.Tenant, Subject: aliases[0]})
+		dbr.tp.dirtyRpAliases = append(dbr.tp.dirtyRpAliases, &TenantRatingSubject{Tenant: tpRpf.Tenant, Subject: aliases[0]})
 		if len(aliases) > 1 {
 			tpRpf.Subject = aliases[0]
 			for _, alias := range aliases[1:] {
-				dbr.rpAliases[utils.RatingSubjectAliasKey(tpRpf.Tenant, alias)] = tpRpf.Subject
+				dbr.tp.rpAliases[utils.RatingSubjectAliasKey(tpRpf.Tenant, alias)] = tpRpf.Subject
 			}
 		}
 		rpf := &RatingProfile{Id: tpRpf.KeyId()}
@@ -408,7 +378,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 			if err != nil {
 				return fmt.Errorf("Cannot parse activation time from %v", tpRa.ActivationTime)
 			}
-			_, exists := dbr.ratingPlans[tpRa.RatingPlanId]
+			_, exists := dbr.tp.ratingPlans[tpRa.RatingPlanId]
 			if !exists {
 				if dbExists, err := dbr.dataDb.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
@@ -424,12 +394,12 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 					CdrStatQueueIds: strings.Split(tpRa.CdrStatQueueIds, utils.INFIELD_SEP),
 				})
 		}
-		dbr.ratingProfiles[tpRpf.KeyId()] = rpf
+		dbr.tp.ratingProfiles[tpRpf.KeyId()] = rpf
 	}
 	return nil
 }
 
-// Returns true, nil in case of load success, false, nil in case of RatingPlan  not found in storDb
+// Returns true, nil in case of load success, false, nil in case of RatingPlan  not found storDb
 func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 	mpRpls, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, tag, nil)
 	if err != nil {
@@ -496,7 +466,7 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 			if err != nil {
 				return fmt.Errorf("Cannot parse activation time from %v", tpRa.ActivationTime)
 			}
-			_, exists := dbr.ratingPlans[tpRa.RatingPlanId]
+			_, exists := dbr.tp.ratingPlans[tpRa.RatingPlanId]
 			if !exists {
 				if dbExists, err := dbr.dataDb.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
@@ -526,7 +496,7 @@ func (dbr *DbReader) LoadSharedGroupByTag(tag string, save bool) error {
 	}
 	var loadedTags []string
 	for tag, tpSgs := range storSgs {
-		sg, exists := dbr.sharedGroups[tag]
+		sg, exists := dbr.tp.sharedGroups[tag]
 		if !exists {
 			sg = &SharedGroup{
 				Id:                tag,
@@ -539,12 +509,12 @@ func (dbr *DbReader) LoadSharedGroupByTag(tag string, save bool) error {
 				RatingSubject: tpSg.RatingSubject,
 			}
 		}
-		dbr.sharedGroups[tag] = sg
+		dbr.tp.sharedGroups[tag] = sg
 		loadedTags = append(loadedTags, tag)
 	}
 	if save {
 		for _, tag := range loadedTags {
-			if err := dbr.accountDb.SetSharedGroup(dbr.sharedGroups[tag]); err != nil {
+			if err := dbr.accountDb.SetSharedGroup(dbr.tp.sharedGroups[tag]); err != nil {
 				return err
 			}
 		}
@@ -557,7 +527,7 @@ func (dbr *DbReader) LoadSharedGroups() error {
 }
 
 func (dbr *DbReader) LoadLCRs() (err error) {
-	dbr.lcrs, err = dbr.storDb.GetTpLCRs(dbr.tpid, "")
+	dbr.tp.lcrs, err = dbr.storDb.GetTpLCRs(dbr.tpid, "")
 	return err
 }
 
@@ -593,7 +563,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 			if acts[idx].Balance.TimingIDs != "" {
 				timingIds := strings.Split(acts[idx].Balance.TimingIDs, utils.INFIELD_SEP)
 				for _, timingID := range timingIds {
-					if timing, found := dbr.timings[timingID]; found {
+					if timing, found := dbr.tp.timings[timingID]; found {
 						acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
 							Years:     timing.Years,
 							Months:    timing.Months,
@@ -608,7 +578,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 				}
 			}
 		}
-		dbr.actions[tag] = acts
+		dbr.tp.actions[tag] = acts
 	}
 	return nil
 }
@@ -621,11 +591,11 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 	for atId, ats := range atsMap {
 		for _, at := range ats {
 
-			_, exists := dbr.actions[at.ActionsId]
+			_, exists := dbr.tp.actions[at.ActionsId]
 			if !exists {
 				return fmt.Errorf("ActionTiming: Could not load the action for tag: %v", at.ActionsId)
 			}
-			t, exists := dbr.timings[at.TimingId]
+			t, exists := dbr.tp.timings[at.TimingId]
 			if !exists {
 				return fmt.Errorf("ActionTiming: Could not load the timing for tag: %v", at.TimingId)
 			}
@@ -644,7 +614,7 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 				},
 				ActionsId: at.ActionsId,
 			}
-			dbr.actionsTimings[atId] = append(dbr.actionsTimings[atId], actTmg)
+			dbr.tp.actionsTimings[atId] = append(dbr.tp.actionsTimings[atId], actTmg)
 		}
 	}
 	return err
@@ -691,7 +661,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 				atrs[idx].Id = utils.GenUUID()
 			}
 		}
-		dbr.actionsTriggers[key] = atrs
+		dbr.tp.actionsTriggers[key] = atrs
 	}
 	return err
 }
@@ -702,20 +672,20 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		return err
 	}
 	for _, aa := range acs {
-		if _, alreadyDefined := dbr.accountActions[aa.KeyId()]; alreadyDefined {
+		if _, alreadyDefined := dbr.tp.accountActions[aa.KeyId()]; alreadyDefined {
 			return fmt.Errorf("Duplicate account action found: %s", aa.KeyId())
 		}
 
 		// extract aliases from subject
 		aliases := strings.Split(aa.Account, ";")
-		dbr.dirtyAccAliases = append(dbr.dirtyAccAliases, &TenantAccount{Tenant: aa.Tenant, Account: aliases[0]})
+		dbr.tp.dirtyAccAliases = append(dbr.tp.dirtyAccAliases, &TenantAccount{Tenant: aa.Tenant, Account: aliases[0]})
 		if len(aliases) > 1 {
 			aa.Account = aliases[0]
 			for _, alias := range aliases[1:] {
-				dbr.accAliases[utils.AccountAliasKey(aa.Tenant, alias)] = aa.Account
+				dbr.tp.accAliases[utils.AccountAliasKey(aa.Tenant, alias)] = aa.Account
 			}
 		}
-		aTriggers, exists := dbr.actionsTriggers[aa.ActionTriggersId]
+		aTriggers, exists := dbr.tp.actionsTriggers[aa.ActionTriggersId]
 		if !exists {
 			return fmt.Errorf("Could not get action triggers for tag %v", aa.ActionTriggersId)
 		}
@@ -723,8 +693,8 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 			Id:             aa.KeyId(),
 			ActionTriggers: aTriggers,
 		}
-		dbr.accountActions[aa.KeyId()] = ub
-		aTimings, exists := dbr.actionsTimings[aa.ActionPlanId]
+		dbr.tp.accountActions[aa.KeyId()] = ub
+		aTimings, exists := dbr.tp.actionsTimings[aa.ActionPlanId]
 		if !exists {
 			log.Printf("Could not get action timing for tag %v", aa.ActionPlanId)
 			// must not continue here
@@ -914,8 +884,8 @@ func (dbr *DbReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers
 	}
 	for _, tpDcs := range tpDcses {
 		tag := tpDcs.GetDerivedChargersKey()
-		if _, hasIt := dbr.derivedChargers[tag]; !hasIt {
-			dbr.derivedChargers[tag] = make(utils.DerivedChargers, 0) // Load object map since we use this method also from LoadDerivedChargers
+		if _, hasIt := dbr.tp.derivedChargers[tag]; !hasIt {
+			dbr.tp.derivedChargers[tag] = make(utils.DerivedChargers, 0) // Load object map since we use this method also from LoadDerivedChargers
 		}
 		for _, tpDc := range tpDcs.DerivedChargers {
 			if dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
@@ -923,12 +893,12 @@ func (dbr *DbReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers
 				tpDc.DisconnectCauseField); err != nil {
 				return err
 			} else {
-				dbr.derivedChargers[tag] = append(dbr.derivedChargers[tag], dc)
+				dbr.tp.derivedChargers[tag] = append(dbr.tp.derivedChargers[tag], dc)
 			}
 		}
 	}
 	if save {
-		for dcsKey, dcs := range dbr.derivedChargers {
+		for dcsKey, dcs := range dbr.tp.derivedChargers {
 			if err := dbr.accountDb.SetDerivedChargers(dcsKey, dcs); err != nil {
 				return err
 			}
@@ -942,7 +912,7 @@ func (dbr *DbReader) LoadCdrStatsByTag(tag string, save bool) error {
 	if err != nil {
 		return err
 	}
-	if save && len(dbr.actionsTriggers) == 0 {
+	if save && len(dbr.tp.actionsTriggers) == 0 {
 		// load action triggers to check existence
 		dbr.LoadActionTriggers()
 	}
@@ -951,23 +921,23 @@ func (dbr *DbReader) LoadCdrStatsByTag(tag string, save bool) error {
 		for _, tpStat := range tpStats {
 			var cs *CdrStats
 			var exists bool
-			if cs, exists = dbr.cdrStats[tag]; !exists {
+			if cs, exists = dbr.tp.cdrStats[tag]; !exists {
 				cs = &CdrStats{Id: tag}
 			}
 			triggerTag := tpStat.ActionTriggers
-			triggers, exists := dbr.actionsTriggers[triggerTag]
+			triggers, exists := dbr.tp.actionsTriggers[triggerTag]
 			if triggerTag != "" && !exists {
 				// only return error if there was something there for the tag
 				return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
 			}
 			UpdateCdrStats(cs, triggers, tpStat)
-			dbr.cdrStats[tag] = cs
+			dbr.tp.cdrStats[tag] = cs
 			loadedTags = append(loadedTags, tag)
 		}
 	}
 	if save {
 		for _, tag := range loadedTags {
-			if err := dbr.dataDb.SetCdrStats(dbr.cdrStats[tag]); err != nil {
+			if err := dbr.dataDb.SetCdrStats(dbr.tp.cdrStats[tag]); err != nil {
 				return err
 			}
 		}
@@ -1025,81 +995,81 @@ func (dbr *DbReader) LoadAll() error {
 func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
-		ids := make([]string, len(dbr.destinations))
+		ids := make([]string, len(dbr.tp.destinations))
 		i := 0
-		for k := range dbr.destinations {
+		for k := range dbr.tp.destinations {
 			ids[i] = k
 			i++
 		}
 		return ids, nil
 	case RATING_PLAN_PREFIX:
-		keys := make([]string, len(dbr.ratingPlans))
+		keys := make([]string, len(dbr.tp.ratingPlans))
 		i := 0
-		for k := range dbr.ratingPlans {
+		for k := range dbr.tp.ratingPlans {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case RATING_PROFILE_PREFIX:
-		keys := make([]string, len(dbr.ratingProfiles))
+		keys := make([]string, len(dbr.tp.ratingProfiles))
 		i := 0
-		for k := range dbr.ratingProfiles {
+		for k := range dbr.tp.ratingProfiles {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case ACTION_PREFIX: // actions
-		keys := make([]string, len(dbr.actions))
+		keys := make([]string, len(dbr.tp.actions))
 		i := 0
-		for k := range dbr.actions {
+		for k := range dbr.tp.actions {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case ACTION_TIMING_PREFIX: // actionsTimings
-		keys := make([]string, len(dbr.actionsTimings))
+		keys := make([]string, len(dbr.tp.actionsTimings))
 		i := 0
-		for k := range dbr.actionsTimings {
+		for k := range dbr.tp.actionsTimings {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case RP_ALIAS_PREFIX: // aliases
-		keys := make([]string, len(dbr.rpAliases))
+		keys := make([]string, len(dbr.tp.rpAliases))
 		i := 0
-		for k := range dbr.rpAliases {
+		for k := range dbr.tp.rpAliases {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case ACC_ALIAS_PREFIX: // aliases
-		keys := make([]string, len(dbr.accAliases))
+		keys := make([]string, len(dbr.tp.accAliases))
 		i := 0
-		for k := range dbr.accAliases {
+		for k := range dbr.tp.accAliases {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case DERIVEDCHARGERS_PREFIX: // derived charges
-		keys := make([]string, len(dbr.derivedChargers))
+		keys := make([]string, len(dbr.tp.derivedChargers))
 		i := 0
-		for k := range dbr.derivedChargers {
+		for k := range dbr.tp.derivedChargers {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case SHARED_GROUP_PREFIX:
-		keys := make([]string, len(dbr.sharedGroups))
+		keys := make([]string, len(dbr.tp.sharedGroups))
 		i := 0
-		for k := range dbr.sharedGroups {
+		for k := range dbr.tp.sharedGroups {
 			keys[i] = k
 			i++
 		}
 		return keys, nil
 	case CDR_STATS_PREFIX: // cdr stats
-		keys := make([]string, len(dbr.cdrStats))
+		keys := make([]string, len(dbr.tp.cdrStats))
 		i := 0
-		for k := range dbr.cdrStats {
+		for k := range dbr.tp.cdrStats {
 			keys[i] = k
 			i++
 		}
