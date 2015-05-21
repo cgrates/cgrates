@@ -380,10 +380,12 @@ func TestRatingPlanSaneRatingsGoot(t *testing.T) {
 					&Rate{
 						GroupIntervalStart: 60 * time.Second,
 						RateIncrement:      30 * time.Second,
+						RateUnit:           1 * time.Second,
 					},
 					&Rate{
 						GroupIntervalStart: 0 * time.Second,
 						RateIncrement:      30 * time.Second,
+						RateUnit:           1 * time.Second,
 					},
 				},
 			},

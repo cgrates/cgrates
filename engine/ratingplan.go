@@ -160,6 +160,9 @@ func (rp *RatingPlan) areRatesSane() bool {
 				if math.Mod(nextRate.GroupIntervalStart.Seconds(), rate.RateIncrement.Seconds()) != 0 {
 					return false
 				}
+				if rate.RateUnit == 0 || rate.RateIncrement == 0 {
+					return false
+				}
 			}
 		}
 	}
