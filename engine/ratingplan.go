@@ -131,7 +131,7 @@ func (rp *RatingPlan) IsValid() bool {
 		}
 		//check if all weekdays are covered
 		for _, wd := range tm.WeekDays {
-			weekdays[wd-1] = 1
+			weekdays[wd] = 1
 		}
 		allWeekdaysCovered := true
 		for _, wd := range weekdays {

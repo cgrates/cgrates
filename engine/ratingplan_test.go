@@ -242,7 +242,7 @@ func TestRatingPlanIsValidGood(t *testing.T) {
 		Timings: map[string]*RITiming{
 			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
-			"third":  &RITiming{WeekDays: utils.WeekDays{7}, StartTime: "00:00:00"},
+			"third":  &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
 	if !rpl.IsValid() {
@@ -254,7 +254,7 @@ func TestRatingPlanIsValidBad(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
 			"first":  &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
-			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 7}, StartTime: "00:00:00"},
+			"second": &RITiming{WeekDays: utils.WeekDays{4, 5, 0}, StartTime: "00:00:00"},
 		},
 	}
 	if rpl.IsValid() {
@@ -268,7 +268,7 @@ func TestRatingPlanIsValidSpecial(t *testing.T) {
 			"special": &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
 			"first":   &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 			"second":  &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
-			"third":   &RITiming{WeekDays: utils.WeekDays{7}, StartTime: "00:00:00"},
+			"third":   &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
 	if !rpl.IsValid() {
@@ -283,7 +283,7 @@ func TestRatingPlanIsValidMultiple(t *testing.T) {
 			"first":    &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "00:00:00"},
 			"first_08": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
 			"second":   &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
-			"third":    &RITiming{WeekDays: utils.WeekDays{7}, StartTime: "00:00:00"},
+			"third":    &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
 	if !rpl.IsValid() {
@@ -297,7 +297,7 @@ func TestRatingPlanIsValidMissing(t *testing.T) {
 			"special":  &RITiming{Years: utils.Years{2015}, Months: utils.Months{5}, MonthDays: utils.MonthDays{1}, StartTime: "00:00:00"},
 			"first_08": &RITiming{WeekDays: utils.WeekDays{1, 2, 3}, StartTime: "08:00:00"},
 			"second":   &RITiming{WeekDays: utils.WeekDays{4, 5, 6}, StartTime: "00:00:00"},
-			"third":    &RITiming{WeekDays: utils.WeekDays{7}, StartTime: "00:00:00"},
+			"third":    &RITiming{WeekDays: utils.WeekDays{0}, StartTime: "00:00:00"},
 		},
 	}
 	if rpl.IsValid() {
