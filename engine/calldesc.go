@@ -727,6 +727,13 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			var cc *CallCost
 			var err error
 			if cd.account, err = accountingStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
+				if cd.account.Disabled {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    fmt.Errorf("supplier %s is disabled", supplier),
+					})
+					continue
+				}
 				cc, err = lcrCD.debit(cd.account, true, true)
 			} else {
 				cc, err = lcrCD.GetCost()
@@ -883,6 +890,13 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			//log.Print("CD: ", lcrCD.GetAccountKey())
 			if cd.account, err = accountingStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
 				//log.Print("ACCCOUNT")
+				if cd.account.Disabled {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    fmt.Errorf("supplier %s is disabled", supplier),
+					})
+					continue
+				}
 				cc, err = lcrCD.debit(cd.account, true, true)
 			} else {
 				//log.Print("STANDARD")
@@ -891,11 +905,10 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			//log.Printf("CC: %+v", cc)
 			supplier = utils.ConcatenatedKey(lcrCD.Direction, lcrCD.Tenant, lcrCD.Category, lcrCD.Subject)
 			if err != nil || cc == nil {
-				//lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-				//	Supplier: supplier,
-				//	Error:    err,
-				//})
-				Logger.Warning(fmt.Sprintf("LCR_WARNING: Ignoring supplier: %s, cannot calculate cost, error: %v", supplier, err))
+				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+					Supplier: supplier,
+					Error:    err,
+				})
 				continue
 			} else {
 				supplCost := &LCRSupplierCost{
