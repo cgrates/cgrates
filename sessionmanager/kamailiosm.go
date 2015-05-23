@@ -48,12 +48,13 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
 		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+		return
 	}
 	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
 	if kev.MissingParameter() {
-		if kar, err := kev.AsKamAuthReply(0.0, errors.New(utils.ERR_MANDATORY_IE_MISSING)); err != nil {
+		if kar, err := kev.AsKamAuthReply(0.0, "", errors.New(utils.ERR_MANDATORY_IE_MISSING)); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
 		} else if err = self.conns[connId].Send(kar.String()); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
@@ -61,14 +62,59 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 		return
 	}
 	var remainingDuration float64
-	if err = self.rater.GetDerivedMaxSessionTime(*kev.AsStoredCdr(), &remainingDuration); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time for %s, error: %s", kev.GetUUID(), err.Error()))
+	var errMaxSession error
+	if errMaxSession = self.rater.GetDerivedMaxSessionTime(*kev.AsStoredCdr(), &remainingDuration); errMaxSession != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time for %s, error: %s", kev.GetUUID(), errMaxSession.Error()))
 	}
-	if kar, err := kev.AsKamAuthReply(remainingDuration, err); err != nil {
+	var supplStr string
+	var errSuppl error
+	if kev.ComputeLcr() {
+		if supplStr, errSuppl = self.getSuppliers(kev); errSuppl != nil {
+			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get suppliers for %s, error: %s", kev.GetUUID(), errSuppl.Error()))
+		}
+	}
+	if errMaxSession == nil { // Overwrite the error from maxSessionTime with the one from suppliers if nil
+		errMaxSession = errSuppl
+	}
+	if kar, err := kev.AsKamAuthReply(remainingDuration, supplStr, errMaxSession); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
 	} else if err = self.conns[connId].Send(kar.String()); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
 	}
+}
+
+func (self *KamailioSessionManager) onCgrLcrReq(evData []byte, connId string) {
+	kev, err := NewKamEvent(evData)
+	if err != nil {
+		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+		return
+	}
+	supplStr, err := self.getSuppliers(kev)
+	kamLcrReply, errReply := kev.AsKamAuthReply(-1.0, supplStr, err)
+	kamLcrReply.Event = CGR_LCR_REPLY // Hit the CGR_LCR_REPLY event route on Kamailio side
+	if errReply != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", errReply.Error()))
+	} else if err = self.conns[connId].Send(kamLcrReply.String()); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending lcr reply %s", err.Error()))
+	}
+}
+
+func (self *KamailioSessionManager) getSuppliers(kev KamEvent) (string, error) {
+	cd, err := kev.AsCallDescriptor()
+	if err != nil {
+		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> LCR_PREPROCESS_ERROR error: %s", err.Error()))
+		return "", errors.New("LCR_PREPROCESS_ERROR")
+	}
+	var lcr engine.LCRCost
+	if err = self.Rater().GetLCR(cd, &lcr); err != nil {
+		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> LCR_API_ERROR error: %s", err.Error()))
+		return "", errors.New("LCR_API_ERROR")
+	}
+	if lcr.HasErrors() {
+		lcr.LogErrors()
+		return "", errors.New("LCR_COMPUTE_ERROR")
+	}
+	return lcr.SuppliersString()
 }
 
 func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
@@ -115,6 +161,7 @@ func (self *KamailioSessionManager) Connect() error {
 	var err error
 	eventHandlers := map[*regexp.Regexp][]func([]byte, string){
 		regexp.MustCompile("CGR_AUTH_REQUEST"): []func([]byte, string){self.onCgrAuth},
+		regexp.MustCompile("CGR_LCR_REQUEST"):  []func([]byte, string){self.onCgrLcrReq},
 		regexp.MustCompile("CGR_CALL_START"):   []func([]byte, string){self.onCallStart},
 		regexp.MustCompile("CGR_CALL_END"):     []func([]byte, string){self.onCallEnd},
 	}

@@ -175,7 +175,6 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 }
 
 func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-
 	defaultTemplate := map[string]utils.RSRFields{
 		"TOR":            utils.ParseRSRFieldsMustCompile("balance_type", utils.INFIELD_SEP),
 		"CdrHost":        utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),

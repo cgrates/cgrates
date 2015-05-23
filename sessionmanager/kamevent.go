@@ -33,7 +33,9 @@ import (
 const (
 	EVENT                  = "event"
 	CGR_AUTH_REQUEST       = "CGR_AUTH_REQUEST"
+	CGR_LCR_REQUEST        = "CGR_LCR_REQUEST"
 	CGR_AUTH_REPLY         = "CGR_AUTH_REPLY"
+	CGR_LCR_REPLY          = "CGR_LCR_REPLY"
 	CGR_SESSION_DISCONNECT = "CGR_SESSION_DISCONNECT"
 	CGR_CALL_START         = "CGR_CALL_START"
 	CGR_CALL_END           = "CGR_CALL_END"
@@ -41,6 +43,7 @@ const (
 	CGR_ANSWERTIME         = "cgr_answertime"
 	CGR_STOPTIME           = "cgr_stoptime"
 	CGR_DURATION           = "cgr_duration"
+	CGR_COMPUTELCR         = "cgr_computelcr"
 	KAM_TR_INDEX           = "tr_index"
 	KAM_TR_LABEL           = "tr_label"
 	HASH_ENTRY             = "h_entry"
@@ -55,10 +58,23 @@ type KamAuthReply struct {
 	TransactionIndex int    // Original transaction index
 	TransactionLabel int    // Original transaction label
 	MaxSessionTime   int    // Maximum session time in case of success, -1 for unlimited
-	AuthError        error  // Reply in case of error
+	Suppliers        string // List of suppliers, comma separated
+	Error            error  // Reply in case of error
 }
 
 func (self *KamAuthReply) String() string {
+	mrsh, _ := json.Marshal(self)
+	return string(mrsh)
+}
+
+type KamLcrReply struct {
+	Event     string
+	Suppliers string
+	Error     error
+}
+
+func (self *KamLcrReply) String() string {
+	self.Event = CGR_LCR_REPLY
 	mrsh, _ := json.Marshal(self)
 	return string(mrsh)
 }
@@ -201,6 +217,12 @@ func (kev KamEvent) GetExtraFields() map[string]string {
 func (kev KamEvent) GetCdrSource() string {
 	return "KAMAILIO_" + kev.GetName()
 }
+
+func (kev KamEvent) ComputeLcr() bool {
+	compute, _ := strconv.ParseBool(kev[CGR_COMPUTELCR])
+	return compute
+}
+
 func (kev KamEvent) MissingParameter() bool {
 	var nullTime time.Time
 	switch kev.GetName() {
@@ -208,6 +230,10 @@ func (kev KamEvent) MissingParameter() bool {
 		if setupTime, err := kev.GetSetupTime(utils.META_DEFAULT); err != nil || setupTime == nullTime {
 			return true
 		}
+		return len(kev.GetAccount(utils.META_DEFAULT)) == 0 ||
+			len(kev.GetDestination(utils.META_DEFAULT)) == 0 ||
+			len(kev[KAM_TR_INDEX]) == 0 || len(kev[KAM_TR_LABEL]) == 0
+	case CGR_LCR_REQUEST:
 		return len(kev.GetAccount(utils.META_DEFAULT)) == 0 ||
 			len(kev.GetDestination(utils.META_DEFAULT)) == 0 ||
 			len(kev[KAM_TR_INDEX]) == 0 || len(kev[KAM_TR_LABEL]) == 0
@@ -310,9 +336,9 @@ func (kev KamEvent) String() string {
 	return string(mrsh)
 }
 
-func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, authErr error) (*KamAuthReply, error) {
+func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string, resErr error) (*KamAuthReply, error) {
 	var err error
-	kar := &KamAuthReply{Event: CGR_AUTH_REPLY}
+	kar := &KamAuthReply{Event: CGR_AUTH_REPLY, Suppliers: suppliers, Error: resErr}
 	if _, hasIt := kev[KAM_TR_INDEX]; !hasIt {
 		return nil, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, KAM_TR_INDEX)
 	}
@@ -330,7 +356,20 @@ func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, authErr error) (*KamA
 		maxSessionTime = maxSessionDur.Seconds()
 	}
 	kar.MaxSessionTime = int(utils.Round(maxSessionTime, 0, utils.ROUNDING_MIDDLE))
-	kar.AuthError = authErr
-
 	return kar, nil
+}
+
+// Converts into CallDescriptor due to responder interface needs
+func (kev KamEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
+	lcrReq := &engine.LcrRequest{
+		Direction:   kev.GetDirection(utils.META_DEFAULT),
+		Tenant:      kev.GetTenant(utils.META_DEFAULT),
+		Category:    kev.GetCategory(utils.META_DEFAULT),
+		Account:     kev.GetAccount(utils.META_DEFAULT),
+		Subject:     kev.GetSubject(utils.META_DEFAULT),
+		Destination: kev.GetDestination(utils.META_DEFAULT),
+		StartTime:   utils.FirstNonEmpty(kev[CGR_SETUPTIME], kev[CGR_ANSWERTIME]),
+		Duration:    kev[CGR_DURATION],
+	}
+	return lcrReq.AsCallDescriptor()
 }
