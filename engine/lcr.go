@@ -294,7 +294,7 @@ func (lc *LCRCost) HasErrors() bool {
 func (lc *LCRCost) LogErrors() {
 	for _, supplCost := range lc.SupplierCosts {
 		if supplCost.Error != nil {
-			Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>"))
+			Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", supplCost.Supplier, supplCost.Error))
 		}
 	}
 }

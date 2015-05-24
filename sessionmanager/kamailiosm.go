@@ -64,13 +64,13 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	var remainingDuration float64
 	var errMaxSession error
 	if errMaxSession = self.rater.GetDerivedMaxSessionTime(*kev.AsStoredCdr(), &remainingDuration); errMaxSession != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time for %s, error: %s", kev.GetUUID(), errMaxSession.Error()))
+		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time, error: %s", errMaxSession.Error()))
 	}
 	var supplStr string
 	var errSuppl error
 	if kev.ComputeLcr() {
 		if supplStr, errSuppl = self.getSuppliers(kev); errSuppl != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get suppliers for %s, error: %s", kev.GetUUID(), errSuppl.Error()))
+			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get suppliers, error: %s", errSuppl.Error()))
 		}
 	}
 	if errMaxSession == nil { // Overwrite the error from maxSessionTime with the one from suppliers if nil
@@ -86,7 +86,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 func (self *KamailioSessionManager) onCgrLcrReq(evData []byte, connId string) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
-		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", string(evData), err.Error()))
 		return
 	}
 	supplStr, err := self.getSuppliers(kev)
@@ -121,15 +121,16 @@ func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
 	kamEv, err := NewKamEvent(evData)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+		return
 	}
 	if kamEv.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
 	if kamEv.MissingParameter() {
-		self.DisconnectSession(kamEv, "", utils.ERR_MANDATORY_IE_MISSING)
+		self.DisconnectSession(kamEv, connId, utils.ERR_MANDATORY_IE_MISSING)
 		return
 	}
-	s := NewSession(kamEv, "", self)
+	s := NewSession(kamEv, connId, self)
 	if s != nil {
 		self.sessions = append(self.sessions, s)
 	}
@@ -139,6 +140,7 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 	kev, err := NewKamEvent(evData)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> ERROR unmarshalling event: %s, error: %s", evData, err.Error()))
+		return
 	}
 	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
@@ -182,6 +184,7 @@ func (self *KamailioSessionManager) Connect() error {
 }
 
 func (self *KamailioSessionManager) DisconnectSession(ev engine.Event, connId, notify string) error {
+	engine.Logger.Debug(fmt.Sprintf("DisconnectSession, ev: %+v, connId: %s, notify: %s", ev, connId, notify))
 	sessionIds := ev.GetSessionIds()
 	disconnectEv := &KamSessionDisconnect{Event: CGR_SESSION_DISCONNECT, HashEntry: sessionIds[0], HashId: sessionIds[1], Reason: notify}
 	if err := self.conns[connId].Send(disconnectEv.String()); err != nil {

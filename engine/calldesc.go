@@ -785,11 +785,20 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			tccNeverConsidered := true
 			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 				if stats == nil {
-					Logger.Warning(fmt.Sprintf("LCR_WARNING: Ignoring supplier: %s, lcr strategy: %s - no cdr_stats service configured.", supplier, lcrCost.Entry.Strategy))
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    errors.New("Cdr stats service not configured"),
+					})
 					continue
 				}
 				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
-				if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err == nil || rpf != nil {
+				if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err != nil {
+					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    fmt.Errorf("Rating plan error: %s", err.Error()),
+					})
+					continue
+				} else if rpf != nil {
 					rpf.RatingPlanActivations.Sort()
 					activeRas := rpf.RatingPlanActivations.GetActiveForCall(cd)
 					var cdrStatsQueueIds []string
@@ -800,11 +809,16 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							}
 						}
 					}
-
+					statsErr := false
 					for _, qId := range cdrStatsQueueIds {
 						statValues := make(map[string]float64)
 						if err := stats.GetValues(qId, &statValues); err != nil {
-							Logger.Warning(fmt.Sprintf("Error getting stats values for queue id %s: %v", qId, err))
+							lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+								Supplier: supplier,
+								Error:    fmt.Errorf("Get stats values for queue id %s, error %s", qId, err.Error()),
+							})
+							statsErr = true
+							break
 						}
 						if asr, exists := statValues[ASR]; exists {
 							if asr > STATS_NA {
@@ -836,6 +850,9 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							}
 							tccNeverConsidered = false
 						}
+					}
+					if statsErr { // Stats error in loop, to go next supplier
+						continue
 					}
 					asrValues.Sort()
 					acdValues.Sort()
@@ -885,6 +902,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					}
 				}
 			}
+
 			var cc *CallCost
 			var err error
 			//log.Print("CD: ", lcrCD.GetAccountKey())

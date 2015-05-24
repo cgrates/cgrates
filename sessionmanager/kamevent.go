@@ -43,11 +43,11 @@ const (
 	CGR_ANSWERTIME         = "cgr_answertime"
 	CGR_STOPTIME           = "cgr_stoptime"
 	CGR_DURATION           = "cgr_duration"
-	CGR_COMPUTELCR         = "cgr_computelcr"
-	KAM_TR_INDEX           = "tr_index"
-	KAM_TR_LABEL           = "tr_label"
-	HASH_ENTRY             = "h_entry"
-	HASH_ID                = "h_id"
+
+	KAM_TR_INDEX = "tr_index"
+	KAM_TR_LABEL = "tr_label"
+	HASH_ENTRY   = "h_entry"
+	HASH_ID      = "h_id"
 )
 
 var primaryFields = []string{EVENT, CALLID, FROM_TAG, HASH_ENTRY, HASH_ID, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
@@ -59,7 +59,7 @@ type KamAuthReply struct {
 	TransactionLabel int    // Original transaction label
 	MaxSessionTime   int    // Maximum session time in case of success, -1 for unlimited
 	Suppliers        string // List of suppliers, comma separated
-	Error            error  // Reply in case of error
+	Error            string // Reply in case of error
 }
 
 func (self *KamAuthReply) String() string {
@@ -219,7 +219,7 @@ func (kev KamEvent) GetCdrSource() string {
 }
 
 func (kev KamEvent) ComputeLcr() bool {
-	compute, _ := strconv.ParseBool(kev[CGR_COMPUTELCR])
+	compute, _ := strconv.ParseBool(kev[utils.CGR_COMPUTELCR])
 	return compute
 }
 
@@ -338,7 +338,10 @@ func (kev KamEvent) String() string {
 
 func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string, resErr error) (*KamAuthReply, error) {
 	var err error
-	kar := &KamAuthReply{Event: CGR_AUTH_REPLY, Suppliers: suppliers, Error: resErr}
+	kar := &KamAuthReply{Event: CGR_AUTH_REPLY, Suppliers: suppliers}
+	if resErr != nil {
+		kar.Error = resErr.Error()
+	}
 	if _, hasIt := kev[KAM_TR_INDEX]; !hasIt {
 		return nil, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, KAM_TR_INDEX)
 	}
