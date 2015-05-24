@@ -172,19 +172,6 @@ func TestTutOsipsCallsAccountsBefore(t *testing.T) {
 	}
 }
 
-func TestTutOsipsCallsCdrStats(t *testing.T) {
-	if !*testCalls {
-		return
-	}
-	var queueIds []string
-	eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
-	if err := tutOsipsCallsRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
-		t.Error("Calling CDRStatsV1.GetQueueIds, got error: ", err.Error())
-	} else if len(eQueueIds) != len(queueIds) {
-		t.Errorf("Expecting: %v, received: %v", eQueueIds, queueIds)
-	}
-}
-
 // Start Pjsua as listener and register it to receive calls
 func TestTutOsipsCallsStartPjsuaListener(t *testing.T) {
 	if !*testCalls {

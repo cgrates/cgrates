@@ -42,7 +42,7 @@ func TestTutLocalInitCfg(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "cgradmin")
+	tutLocalCfgPath = path.Join(*dataDir, "conf", "samples", "tutlocal")
 	// Init config first
 	var err error
 	tutFsLocalCfg, err = config.NewCGRConfigFromFolder(tutLocalCfgPath)
@@ -116,7 +116,8 @@ func TestTutLocalCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 3, RatingProfiles: 8, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1,
+		DerivedChargers: 1, LcrProfiles: 4}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -156,6 +157,17 @@ func TestTutLocalGetCachedItemAge(t *testing.T) {
 	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
+	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "*out:cgrates.org:call:1001:*any", &rcvAge); err != nil {
+		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
+		t.Errorf("Cache too old: %d", rcvAge)
+	}
+	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "*out:cgrates.org:call:*any:*any", &rcvAge); err != nil {
+		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
+		t.Errorf("Cache too old: %d", rcvAge)
+	}
+
 	/*
 		if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "1006", &rcvAge); err != nil {
 			t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
@@ -309,6 +321,82 @@ func TestTutLocalMaxDebit(t *testing.T) {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.GetDuration() == 20 {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
+	}
+}
+
+// Make sure queueids were created
+func TestTutFsCallsCdrStats(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	var queueIds []string
+	eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
+	if err := tutLocalRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
+		t.Error("Calling CDRStatsV1.GetQueueIds, got error: ", err.Error())
+	} else if len(eQueueIds) != len(queueIds) {
+		t.Errorf("Expecting: %v, received: %v", eQueueIds, queueIds)
+	}
+}
+
+// Check LCR
+//FixMe:
+/*{"id":16,"result":{"Entry":{"DestinationId":"*any","RPCategory":"lcr_profile1","Strategy":"*static","StrategyParams":"suppl1;suppl2","Weight":10},"SupplierCosts":[{"Supplier":"*out:cgrates.org:lcr_profile1:suppl1","Cost":0,"Duration":0,"Error":{},"QOS":null},{"Supplier":"*out:cgrates.org:lcr_profile1:suppl2","Cost":0,"Duration":0,"Error":{},"QOS":null}]},"error":null}
+ */
+
+func TestTutLocalLcrStatic(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
+	tEnd, _ := utils.ParseDate("2014-08-04T13:01:00Z")
+	cd := engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		TimeStart:   tStart,
+		TimeEnd:     tEnd,
+	}
+	eStLcr := &engine.LCRCost{
+		Entry: &engine.LCREntry{DestinationId: "DST_1002", RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_STATIC, StrategyParams: "suppl2;suppl1", Weight: 10.0},
+		SupplierCosts: []*engine.LCRSupplierCost{
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 0.6, Duration: 60 * time.Second},
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
+		},
+	}
+	var lcr engine.LCRCost
+	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
+	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1003",
+		TimeStart:   tStart,
+		TimeEnd:     tEnd,
+	}
+	eStLcr = &engine.LCRCost{
+		Entry: &engine.LCREntry{DestinationId: utils.ANY, RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_STATIC, StrategyParams: "suppl1;suppl2", Weight: 10.0},
+		SupplierCosts: []*engine.LCRSupplierCost{
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
+		},
+	}
+	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
+	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
 	}
 }
 
