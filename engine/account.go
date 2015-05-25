@@ -96,11 +96,13 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 // Returns the remaining credit in user's balance.
 func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	if a == nil {
-		return errors.New("nil minute action!")
+		return errors.New("nil minute action")
 	}
 	if a.Balance.Uuid == "" {
 		a.Balance.Uuid = utils.GenUUID()
 	}
+	bClone := a.Balance.Clone()
+
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)
 	}
@@ -115,15 +117,17 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			if reset {
 				b.Value = 0
 			}
-			b.SubstractAmount(a.Balance.Value)
+			b.SubstractAmount(bClone.Value)
 			found = true
 		}
 	}
 	// if it is not found then we add it to the list
 	if !found {
-		a.Balance.Value = -a.Balance.Value
-		a.Balance.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
-		ub.BalanceMap[id] = append(ub.BalanceMap[id], a.Balance)
+		if bClone.Value != 0 {
+			bClone.Value = -bClone.Value
+		}
+		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
+		ub.BalanceMap[id] = append(ub.BalanceMap[id], bClone)
 	}
 	if a.Balance.SharedGroup != "" {
 		// add shared group member
