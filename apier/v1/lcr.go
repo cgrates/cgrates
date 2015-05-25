@@ -50,7 +50,7 @@ func (self *ApierV1) GetLcr(lcrReq engine.LcrRequest, lcrReply *engine.LcrReply)
 		if dtcs, err := utils.NewDTCSFromRPKey(qriedSuppl.Supplier); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else {
-			lcrReply.Suppliers = append(lcrReply.Suppliers, &engine.LcrSupplier{Supplier: dtcs.Subject, Cost: qriedSuppl.Cost})
+			lcrReply.Suppliers = append(lcrReply.Suppliers, &engine.LcrSupplier{Supplier: dtcs.Subject, Cost: qriedSuppl.Cost, QOS: qriedSuppl.QOS})
 		}
 	}
 	return nil

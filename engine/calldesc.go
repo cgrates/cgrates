@@ -730,7 +730,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				if cd.account.Disabled {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
-						Error:    fmt.Errorf("supplier %s is disabled", supplier),
+						Error:    fmt.Sprintf("supplier %s is disabled", supplier),
 					})
 					continue
 				}
@@ -744,7 +744,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			if err != nil || cc == nil {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 					Supplier: supplier,
-					Error:    err,
+					Error:    err.Error(),
 				})
 			} else {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
@@ -787,7 +787,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				if stats == nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
-						Error:    errors.New("Cdr stats service not configured"),
+						Error:    fmt.Sprintf("Cdr stats service not configured"),
 					})
 					continue
 				}
@@ -795,7 +795,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err != nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
-						Error:    fmt.Errorf("Rating plan error: %s", err.Error()),
+						Error:    fmt.Sprintf("Rating plan error: %s", err.Error()),
 					})
 					continue
 				} else if rpf != nil {
@@ -815,7 +815,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 						if err := stats.GetValues(qId, &statValues); err != nil {
 							lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 								Supplier: supplier,
-								Error:    fmt.Errorf("Get stats values for queue id %s, error %s", qId, err.Error()),
+								Error:    fmt.Sprintf("Get stats values for queue id %s, error %s", qId, err.Error()),
 							})
 							statsErr = true
 							break
@@ -911,7 +911,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				if cd.account.Disabled {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
-						Error:    fmt.Errorf("supplier %s is disabled", supplier),
+						Error:    fmt.Sprintf("supplier %s is disabled", supplier),
 					})
 					continue
 				}
@@ -925,7 +925,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			if err != nil || cc == nil {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 					Supplier: supplier,
-					Error:    err,
+					Error:    err.Error(),
 				})
 				continue
 			} else {

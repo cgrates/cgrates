@@ -105,6 +105,7 @@ type LcrReply struct {
 type LcrSupplier struct {
 	Supplier string
 	Cost     float64
+	QOS      map[string]float64
 }
 
 type LCR struct {
@@ -137,7 +138,7 @@ type LCRSupplierCost struct {
 	Supplier      string
 	Cost          float64
 	Duration      time.Duration
-	Error         error
+	Error         string // Not error due to JSON automatic serialization into struct
 	QOS           map[string]float64
 	qosSortParams []string
 }
@@ -284,7 +285,7 @@ func (lc *LCRCost) Sort() {
 
 func (lc *LCRCost) HasErrors() bool {
 	for _, supplCost := range lc.SupplierCosts {
-		if supplCost.Error != nil {
+		if len(supplCost.Error) != 0 {
 			return true
 		}
 	}
@@ -293,7 +294,7 @@ func (lc *LCRCost) HasErrors() bool {
 
 func (lc *LCRCost) LogErrors() {
 	for _, supplCost := range lc.SupplierCosts {
-		if supplCost.Error != nil {
+		if len(supplCost.Error) != 0 {
 			Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", supplCost.Supplier, supplCost.Error))
 		}
 	}
