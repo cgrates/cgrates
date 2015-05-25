@@ -634,6 +634,7 @@ type ApiReloadCache struct {
 	AccAliases       []string
 	LCRIds           []string
 	DerivedChargers  []string
+	LcrProfiles      []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
@@ -648,6 +649,7 @@ type CacheStats struct {
 	RatingAliases   int
 	AccountAliases  int
 	DerivedChargers int
+	LcrProfiles     int
 }
 
 type AttrCachedItemAge struct {
@@ -664,6 +666,7 @@ type CachedItemAge struct {
 	RatingAlias     time.Duration
 	AccountAlias    time.Duration
 	DerivedChargers time.Duration
+	LcrProfiles     time.Duration
 }
 
 type AttrExpFileCdrs struct {

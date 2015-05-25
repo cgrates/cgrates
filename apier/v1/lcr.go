@@ -21,77 +21,16 @@ package v1
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// A request for LCR
-type LcrRequest struct {
-	Direction   string
-	Tenant      string
-	Category    string
-	Account     string
-	Subject     string
-	Destination string
-	TimeStart   string
-	Duration    string
-}
-
-// A LCR reply
-type LcrReply struct {
-	DestinationId string
-	RPCategory    string
-	Strategy      string
-	Suppliers     []*LcrSupplier
-}
-
-// One supplier out of LCR reply
-type LcrSupplier struct {
-	Supplier string
-	Cost     float64
-}
-
 // Computes the LCR for a specific request emulating a call
-func (self *ApierV1) GetLcr(lcrReq LcrRequest, lcrReply *LcrReply) (err error) {
-	if missing := utils.MissingStructFields(&lcrReq, []string{"Account", "Destination"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	// Handle defaults
-	if len(lcrReq.Direction) == 0 {
-		lcrReq.Direction = utils.OUT
-	}
-	if len(lcrReq.Tenant) == 0 {
-		lcrReq.Tenant = self.Config.DefaultTenant
-	}
-	if len(lcrReq.Category) == 0 {
-		lcrReq.Category = self.Config.DefaultCategory
-	}
-	if len(lcrReq.Subject) == 0 {
-		lcrReq.Subject = lcrReq.Account
-	}
-	var timeStart time.Time
-	if len(lcrReq.TimeStart) == 0 {
-		timeStart = time.Now()
-	} else if timeStart, err = utils.ParseTimeDetectLayout(lcrReq.TimeStart); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	}
-	var callDur time.Duration
-	if len(lcrReq.Duration) == 0 {
-		callDur = time.Duration(1) * time.Minute
-	} else if callDur, err = utils.ParseDurationWithSecs(lcrReq.Duration); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	}
-	cd := &engine.CallDescriptor{
-		Direction:   lcrReq.Direction,
-		Tenant:      lcrReq.Tenant,
-		Category:    lcrReq.Category,
-		Account:     lcrReq.Account,
-		Subject:     lcrReq.Subject,
-		Destination: lcrReq.Destination,
-		TimeStart:   timeStart,
-		TimeEnd:     timeStart.Add(callDur),
+func (self *ApierV1) GetLcr(lcrReq engine.LcrRequest, lcrReply *engine.LcrReply) error {
+	cd, err := lcrReq.AsCallDescriptor()
+	if err != nil {
+		return err
 	}
 	var lcrQried engine.LCRCost
 	if err := self.Responder.GetLCR(cd, &lcrQried); err != nil {
@@ -99,6 +38,10 @@ func (self *ApierV1) GetLcr(lcrReq LcrRequest, lcrReply *LcrReply) (err error) {
 	}
 	if lcrQried.Entry == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
+	}
+	if lcrQried.HasErrors() {
+		lcrQried.LogErrors()
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "LCR_COMPUTE_ERRORS")
 	}
 	lcrReply.DestinationId = lcrQried.Entry.DestinationId
 	lcrReply.RPCategory = lcrQried.Entry.RPCategory
@@ -107,68 +50,30 @@ func (self *ApierV1) GetLcr(lcrReq LcrRequest, lcrReply *LcrReply) (err error) {
 		if dtcs, err := utils.NewDTCSFromRPKey(qriedSuppl.Supplier); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else {
-			lcrReply.Suppliers = append(lcrReply.Suppliers, &LcrSupplier{Supplier: dtcs.Subject, Cost: qriedSuppl.Cost})
+			lcrReply.Suppliers = append(lcrReply.Suppliers, &engine.LcrSupplier{Supplier: dtcs.Subject, Cost: qriedSuppl.Cost, QOS: qriedSuppl.QOS})
 		}
 	}
 	return nil
 }
 
 // Computes the LCR for a specific request emulating a call, returns a comma separated list of suppliers
-func (self *ApierV1) GetLcrSuppliers(lcrReq LcrRequest, suppliers *string) (err error) {
-	if missing := utils.MissingStructFields(&lcrReq, []string{"Account", "Destination"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	// Handle defaults
-	if len(lcrReq.Direction) == 0 {
-		lcrReq.Direction = utils.OUT
-	}
-	if len(lcrReq.Tenant) == 0 {
-		lcrReq.Tenant = self.Config.DefaultTenant
-	}
-	if len(lcrReq.Category) == 0 {
-		lcrReq.Category = self.Config.DefaultCategory
-	}
-	if len(lcrReq.Subject) == 0 {
-		lcrReq.Subject = lcrReq.Account
-	}
-	var timeStart time.Time
-	if len(lcrReq.TimeStart) == 0 {
-		timeStart = time.Now()
-	} else if timeStart, err = utils.ParseTimeDetectLayout(lcrReq.TimeStart); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	}
-	var callDur time.Duration
-	if len(lcrReq.Duration) == 0 {
-		callDur = time.Duration(1) * time.Minute
-	} else if callDur, err = utils.ParseDurationWithSecs(lcrReq.Duration); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	}
-	cd := &engine.CallDescriptor{
-		Direction:   lcrReq.Direction,
-		Tenant:      lcrReq.Tenant,
-		Category:    lcrReq.Category,
-		Account:     lcrReq.Account,
-		Subject:     lcrReq.Subject,
-		Destination: lcrReq.Destination,
-		TimeStart:   timeStart,
-		TimeEnd:     timeStart.Add(callDur),
+func (self *ApierV1) GetLcrSuppliers(lcrReq engine.LcrRequest, suppliers *string) (err error) {
+	cd, err := lcrReq.AsCallDescriptor()
+	if err != nil {
+		return err
 	}
 	var lcrQried engine.LCRCost
 	if err := self.Responder.GetLCR(cd, &lcrQried); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	if lcrQried.Entry == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+	if lcrQried.HasErrors() {
+		lcrQried.LogErrors()
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "LCR_ERRORS")
 	}
-	for idx, qriedSuppl := range lcrQried.SupplierCosts {
-		if dtcs, err := utils.NewDTCSFromRPKey(qriedSuppl.Supplier); err != nil {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-		} else {
-			if idx != 0 {
-				*suppliers += ","
-			}
-			*suppliers += dtcs.Subject
-		}
+	if suppliersStr, err := lcrQried.SuppliersString(); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*suppliers = suppliersStr
 	}
 	return nil
 }

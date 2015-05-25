@@ -19,12 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,6 +38,75 @@ const (
 	LCR_STRATEGY_QOS_THRESHOLD = "*qos_threshold"
 	LCR_STRATEGY_QOS           = "*qos"
 )
+
+// A request for LCR, used in APIer and SM where we need to expose it
+type LcrRequest struct {
+	Direction   string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	StartTime   string
+	Duration    string
+}
+
+func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
+	if len(self.Account) == 0 || len(self.Destination) == 0 {
+		return nil, errors.New(utils.ERR_MANDATORY_IE_MISSING)
+	}
+	// Set defaults
+	if len(self.Direction) == 0 {
+		self.Direction = utils.OUT
+	}
+	if len(self.Tenant) == 0 {
+		self.Tenant = config.CgrConfig().DefaultTenant
+	}
+	if len(self.Category) == 0 {
+		self.Category = config.CgrConfig().DefaultCategory
+	}
+	if len(self.Subject) == 0 {
+		self.Subject = self.Account
+	}
+	var timeStart time.Time
+	var err error
+	if len(self.StartTime) == 0 {
+		timeStart = time.Now()
+	} else if timeStart, err = utils.ParseTimeDetectLayout(self.StartTime); err != nil {
+		return nil, err
+	}
+	var callDur time.Duration
+	if len(self.Duration) == 0 {
+		callDur = time.Duration(1) * time.Minute
+	} else if callDur, err = utils.ParseDurationWithSecs(self.Duration); err != nil {
+		return nil, err
+	}
+	return &CallDescriptor{
+		Direction:   self.Direction,
+		Tenant:      self.Tenant,
+		Category:    self.Category,
+		Account:     self.Account,
+		Subject:     self.Subject,
+		Destination: self.Destination,
+		TimeStart:   timeStart,
+		TimeEnd:     timeStart.Add(callDur),
+	}, nil
+}
+
+// A LCR reply, used in APIer and SM where we need to expose it
+type LcrReply struct {
+	DestinationId string
+	RPCategory    string
+	Strategy      string
+	Suppliers     []*LcrSupplier
+}
+
+// One supplier out of LCR reply
+type LcrSupplier struct {
+	Supplier string
+	Cost     float64
+	QOS      map[string]float64
+}
 
 type LCR struct {
 	Direction   string
@@ -66,7 +138,7 @@ type LCRSupplierCost struct {
 	Supplier      string
 	Cost          float64
 	Duration      time.Duration
-	Error         error
+	Error         string // Not error due to JSON automatic serialization into struct
 	QOS           map[string]float64
 	qosSortParams []string
 }
@@ -209,6 +281,42 @@ func (lc *LCRCost) Sort() {
 	case LCR_STRATEGY_QOS:
 		sort.Sort(QOSSorter(lc.SupplierCosts))
 	}
+}
+
+func (lc *LCRCost) HasErrors() bool {
+	for _, supplCost := range lc.SupplierCosts {
+		if len(supplCost.Error) != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func (lc *LCRCost) LogErrors() {
+	for _, supplCost := range lc.SupplierCosts {
+		if len(supplCost.Error) != 0 {
+			Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", supplCost.Supplier, supplCost.Error))
+		}
+	}
+}
+
+// Returns a list of suppliers separated via
+func (lc *LCRCost) SuppliersString() (string, error) {
+	supplStr := ""
+	if lc.Entry == nil {
+		return "", errors.New(utils.ERR_NOT_FOUND)
+	}
+	for idx, supplCost := range lc.SupplierCosts {
+		if dtcs, err := utils.NewDTCSFromRPKey(supplCost.Supplier); err != nil {
+			return "", err
+		} else {
+			if idx != 0 {
+				supplStr += utils.FIELDS_SEP
+			}
+			supplStr += dtcs.Subject
+		}
+	}
+	return supplStr, nil
 }
 
 type LowestSupplierCostSorter []*LCRSupplierCost

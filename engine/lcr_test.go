@@ -19,9 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"sort"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestLcrQOSSorter(t *testing.T) {
@@ -199,5 +203,51 @@ func TestLcrGet(t *testing.T) {
 	//log.Print("LCR: ", string(jsn))
 	if err != nil || lcr == nil {
 		t.Errorf("Bad lcr: %+v, %v", lcr, err)
+	}
+}
+
+func TestLcrRequestAsCallDescriptor(t *testing.T) {
+	sTime := time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC)
+	callDur := time.Duration(1) * time.Minute
+	lcrReq := &LcrRequest{Account: "1001", StartTime: sTime.String()}
+	if _, err := lcrReq.AsCallDescriptor(); err == nil || err.Error() != utils.ERR_MANDATORY_IE_MISSING {
+		t.Error("Unexpected error received: %v", err)
+	}
+	lcrReq = &LcrRequest{Account: "1001", Destination: "1002", StartTime: sTime.String()}
+	eCd := &CallDescriptor{
+		Direction:   utils.OUT,
+		Tenant:      config.CgrConfig().DefaultTenant,
+		Category:    config.CgrConfig().DefaultCategory,
+		Account:     lcrReq.Account,
+		Subject:     lcrReq.Account,
+		Destination: lcrReq.Destination,
+		TimeStart:   sTime,
+		TimeEnd:     sTime.Add(callDur),
+	}
+	if cd, err := lcrReq.AsCallDescriptor(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCd, cd) {
+		t.Errorf("Expected: %+v, received: %+v", eCd, cd)
+	}
+}
+
+func TestLCRCostSuppliersString(t *testing.T) {
+	lcrCost := new(LCRCost)
+	if _, err := lcrCost.SuppliersString(); err == nil || err.Error() != utils.ERR_NOT_FOUND {
+		t.Errorf("Unexpected error received: %v", err)
+	}
+	lcrCost = &LCRCost{
+		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo12;dan12;rif12", Weight: 10.0},
+		SupplierCosts: []*LCRSupplierCost{
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 1.8, Duration: 60 * time.Second},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 1.2, Duration: 60 * time.Second},
+		},
+	}
+	eSupplStr := "ivo12,dan12,rif12"
+	if supplStr, err := lcrCost.SuppliersString(); err != nil {
+		t.Error(err)
+	} else if supplStr != eSupplStr {
+		t.Errorf("Expecting: %s, received: %s", eSupplStr, supplStr)
 	}
 }

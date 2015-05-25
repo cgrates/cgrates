@@ -18,13 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import (
+	"github.com/cgrates/cgrates/engine"
+)
 
 func init() {
 	c := &CmdGetLcr{
 		name:      "lcr",
 		rpcMethod: "ApierV1.GetLcr",
-		rpcParams: &v1.LcrRequest{},
+		rpcParams: &engine.LcrRequest{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +36,7 @@ func init() {
 type CmdGetLcr struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.LcrRequest
+	rpcParams *engine.LcrRequest
 	*CommandExecuter
 }
 
@@ -55,5 +57,5 @@ func (self *CmdGetLcr) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetLcr) RpcResult() interface{} {
-	return &v1.LcrReply{}
+	return &engine.LcrReply{}
 }

@@ -940,8 +940,8 @@ func TestAccountdebitBalance(t *testing.T) {
 	newMb := &Balance{Weight: 20, DestinationIds: "NEW"}
 	a := &Action{BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: newMb}
 	ub.debitBalanceAction(a, false)
-	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 3 || ub.BalanceMap[utils.VOICE+OUTBOUND][2] != newMb {
-		t.Error("Error adding minute bucket!", len(ub.BalanceMap[utils.VOICE+OUTBOUND]), ub.BalanceMap[utils.VOICE+OUTBOUND])
+	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 3 || ub.BalanceMap[utils.VOICE+OUTBOUND][2].Uuid != newMb.Uuid {
+		t.Errorf("Error adding minute bucket! %d %+v %+v", len(ub.BalanceMap[utils.VOICE+OUTBOUND]), ub.BalanceMap[utils.VOICE+OUTBOUND][2], newMb)
 	}
 }
 
