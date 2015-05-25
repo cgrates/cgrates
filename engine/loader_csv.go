@@ -110,16 +110,14 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 	if fp != nil {
 		defer fp.Close()
 	}
+	var tpDests []*TpDestination
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		var dest *Destination
-		var found bool
-		if dest, found = csvr.tp.destinations[tag]; !found {
-			dest = &Destination{Id: tag}
-			csvr.tp.destinations[tag] = dest
-		}
-		dest.AddPrefix(record[1])
+		tpDest := &TpDestination{}
+		tpDest.Load(record)
+		tpDests = append(tpDests, tpDest)
+		//log.Printf("%+v\n", tpDest)
 	}
+	csvr.tp.LoadDestinations(tpDests)
 	return
 }
 

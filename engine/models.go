@@ -49,6 +49,11 @@ type TpDestination struct {
 	CreatedAt time.Time
 }
 
+func (d *TpDestination) Load(row []string) {
+	d.Tag = row[0]
+	d.Prefix = row[1]
+}
+
 type TpRate struct {
 	Id                 int64
 	Tpid               string

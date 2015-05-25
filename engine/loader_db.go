@@ -60,16 +60,21 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 }
 
 func (dbr *DbReader) LoadDestinations() (err error) {
-	dbr.tp.destinations, err = dbr.storDb.GetTpDestinations(dbr.tpid, "")
-	return
+	tpDests, err := dbr.storDb.GetTpDestinations(dbr.tpid, "")
+	if err == nil {
+		return
+	}
+	return csvr.tp.LoadDestinations(tpDests)
 }
 
 func (dbr *DbReader) LoadDestinationByTag(tag string) (bool, error) {
-	destinations, err := dbr.storDb.GetTpDestinations(dbr.tpid, tag)
-	for _, destination := range destinations {
-		dbr.dataDb.SetDestination(destination)
+	tpDests, err := dbr.storDb.GetTpDestinations(dbr.tpid, tag)
+	dest := &Destination{Id: tag}
+	for _, tpDest := range tpDests {
+		dest.AddPrefix(tpDest.Prefix)
 	}
-	return len(destinations) > 0, err
+	dbr.dataDb.SetDestination(dest)
+	return len(tpDests) > 0, err
 }
 
 func (dbr *DbReader) LoadTimings() (err error) {

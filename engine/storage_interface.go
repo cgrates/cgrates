@@ -139,7 +139,7 @@ type LoadStorage interface {
 	GetTpTimings(string, string) (map[string]*utils.ApierTPTiming, error)
 
 	SetTPDestination(string, *Destination) error
-	GetTpDestinations(string, string) (map[string]*Destination, error)
+	GetTpDestinations(string, string) ([]*TpDestination, error)
 
 	SetTPRates(string, map[string][]*utils.RateSlot) error
 	GetTpRates(string, string) (map[string]*utils.TPRate, error)
