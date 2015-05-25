@@ -50,6 +50,8 @@ DR_RETAIL,GERMANY,RT_1CENT,*up,0,0,
 DUMMY,INVALID;DATA
 DR_DATA_1,*any,RT_DATA_2c,*up,2,0,
 _TNT_1211_01_V_ANY,CST_1246534_BRB02,C_TNT_1211_01_V_1246534_BRB02_ANY,*up,2,,
+DR_1007_MAXCOST_DISC,DST_1007,RT_1CNT,*up,4,0.62,*disconnect
+DR_1007_MAXCOST_FREE,DST_1007,RT_1CNT,*up,4,0.62,*free
 `
 var ratingPlansSample = `#Tag,DestinationRatesTag,TimingTag,Weight
 RP_RETAIL,DR_RETAIL,ALWAYS,10
@@ -199,7 +201,7 @@ func TestDestRatesValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2, 4, 5:
+		case 2, 4, 5, 6, 7:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
