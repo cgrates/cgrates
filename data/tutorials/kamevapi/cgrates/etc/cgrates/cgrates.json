@@ -66,6 +66,7 @@
 "rater": {
 	"enabled": true,						// enable Rater service: <true|false>
 //	"balancer": "",							// register to Balancer as worker: <""|internal|x.y.z.y:1234>
+	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 },
 
 

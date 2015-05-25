@@ -23,6 +23,7 @@ import (
 	"net/rpc/jsonrpc"
 	"os"
 	"path"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -130,7 +131,7 @@ func TestTutKamCallsLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-// Make sure account was debited properly
+// Make sure account was topped-up properly
 func TestTutKamCallsAccountsBefore(t *testing.T) {
 	if !*testCalls {
 		return
@@ -169,6 +170,57 @@ func TestTutKamCallsAccountsBefore(t *testing.T) {
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005", Direction: "*out"}
 	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
 		t.Error("Got error on ApierV1.GetAccount: %v", err)
+	}
+}
+
+// Make sure all stats queues are in place
+func TestTutKamCallsCdrStatsBefore(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	//eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
+	var statMetrics map[string]float64
+	eMetrics := map[string]float64{engine.ACC: -1, engine.ACD: -1, engine.ASR: -1}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: utils.META_DEFAULT}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST1"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACC: -1, engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1001"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1002"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1003"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL1"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL2"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
 }
 
@@ -289,6 +341,9 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		if reply[0].Usage != "67" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
+		if reply[0].Supplier != "suppl2" { // Usage as seconds
+			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
+		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnDerived: true}
 	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -300,6 +355,9 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
 		}
 		if reply[0].Subject != "1002" {
+			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+		}
+		if reply[0].Supplier != "suppl2" {
 			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
 		}
 	}
@@ -321,6 +379,9 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		if reply[0].Usage != "61" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
+		if reply[0].Supplier != "suppl1" {
+			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1003"}, RunIds: []string{utils.META_DEFAULT}}
 	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -339,6 +400,9 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		}
 		if reply[0].Usage != "63" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
+		}
+		if reply[0].Supplier != "suppl1" {
+			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1004"}, RunIds: []string{utils.META_DEFAULT}}
@@ -359,6 +423,9 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		if reply[0].Usage != "62" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
+		if reply[0].Supplier != "suppl1" {
+			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1006"}, RunIds: []string{utils.META_DEFAULT}}
 	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -377,6 +444,9 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		}
 		if reply[0].Usage != "64" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
+		}
+		if reply[0].Supplier != "suppl3" {
+			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1007"}, RunIds: []string{utils.META_DEFAULT}}
@@ -397,6 +467,59 @@ func TestTutKamCallsCdrs(t *testing.T) {
 		if reply[0].Usage != "66" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
+		if reply[0].Supplier != "suppl3" {
+			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+		}
+	}
+}
+
+// Make sure all stats queues were updated
+func TestTutKamCallsCdrStatsAfter(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	var statMetrics map[string]float64
+	eMetrics := map[string]float64{engine.ACC: 0.9707714286, engine.ACD: 64.2857142857, engine.ASR: 100}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: utils.META_DEFAULT}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACC: 0.927, engine.ACD: 63.8333333333, engine.ASR: 100, engine.TCC: 5.562, engine.TCD: 383}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST1"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.TCC: 5.562, engine.TCD: 383, engine.ACC: 0.0217, engine.ACD: 67, engine.ASR: 100}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1001"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACD: 61, engine.ASR: 100, engine.TCC: 5.562, engine.TCD: 383, engine.ACC: 1.2334}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1002"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.TCC: 5.562, engine.TCD: 383, engine.ACC: 1.2334, engine.ACD: -1, engine.ASR: -1}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1003"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACC: 1.2334, engine.ACD: 62, engine.ASR: 100, engine.TCC: 3.7002, engine.TCD: 186}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL1"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACD: 67, engine.ASR: 100, engine.TCC: 1.2551, engine.TCD: 134, engine.ACC: 0.62755}
+	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL2"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
 }
 
