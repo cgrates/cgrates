@@ -180,6 +180,7 @@ func (b *Balance) Clone() *Balance {
 		SharedGroup:    b.SharedGroup,
 		TimingIDs:      b.TimingIDs,
 		Timings:        b.Timings, // should not be a problem with aliasing
+		dirty:          b.dirty,
 	}
 }
 

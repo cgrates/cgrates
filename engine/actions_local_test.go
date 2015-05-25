@@ -118,7 +118,7 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 		rcvedCdrs[0].Usage != "1" ||
 		rcvedCdrs[0].MediationRunId != utils.META_DEFAULT ||
 		rcvedCdrs[0].Cost != attrsAA.Actions[0].Units {
-		t.Error("Received: ", rcvedCdrs[0])
+		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}
 
 }
