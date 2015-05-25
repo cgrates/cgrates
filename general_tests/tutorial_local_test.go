@@ -296,6 +296,67 @@ func TestTutLocalGetCosts(t *testing.T) {
 	} else if cc.Cost != 1.3 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
+	tStart = time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1007",
+		TimeStart:   tStart,
+		TimeEnd:     tStart.Add(time.Duration(50) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.5 {
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1007",
+		TimeStart:   tStart,
+		TimeEnd:     tStart.Add(time.Duration(70) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.62 {
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1002",
+		Account:     "1002",
+		Destination: "1007",
+		TimeStart:   tStart,
+		TimeEnd:     tStart.Add(time.Duration(50) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.5 {
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1002",
+		Account:     "1002",
+		Destination: "1007",
+		TimeStart:   tStart,
+		TimeEnd:     tStart.Add(time.Duration(70) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.62 {
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
 }
 
 // Check call costs
