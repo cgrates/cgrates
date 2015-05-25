@@ -242,7 +242,7 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCos
 		origAccount := cd.Account
 		cd.Account = cd.Subject
 		cd.RatingInfos = nil
-		cc, err := cd.GetCost()
+		cc, err := cd.getCost()
 		// restor orig values
 		cd.Subject = origSubject
 		cd.Account = origAccount
@@ -250,7 +250,7 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCos
 	}
 	if getStandardIfEmpty {
 		cd.RatingInfos = nil
-		return cd.GetCost()
+		return cd.getCost()
 	} else {
 		cc := cd.CreateCallCost()
 		cc.Cost = 0
