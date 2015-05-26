@@ -89,7 +89,9 @@ func TestMySQLSetGetTPDestination(t *testing.T) {
 	if err := mysqlDb.SetTPDestination(TEST_SQL, dst); err != nil {
 		t.Error(err.Error())
 	}
-	if dsts, err := mysqlDb.GetTpDestinations(TEST_SQL, TEST_SQL); err != nil {
+	storData, err := mysqlDb.GetTpDestinations(TEST_SQL, TEST_SQL)
+	dsts := TpDestinations(storData).GetDestinations()
+	if err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(dst, dsts[TEST_SQL]) {
 		t.Errorf("Expecting: %+v, received: %+v", dst, dsts[TEST_SQL])

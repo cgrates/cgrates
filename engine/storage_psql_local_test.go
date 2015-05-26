@@ -89,7 +89,9 @@ func TestPSQLSetGetTPDestination(t *testing.T) {
 	if err := psqlDb.SetTPDestination(TEST_SQL, dst); err != nil {
 		t.Error(err.Error())
 	}
-	if dsts, err := psqlDb.GetTpDestinations(TEST_SQL, TEST_SQL); err != nil {
+	storData, err := psqlDb.GetTpDestinations(TEST_SQL, TEST_SQL)
+	dsts := TpDestinations(storData).GetDestinations()
+	if err != nil {
 		t.Error(err.Error())
 	} else if len(dst.Prefixes) != len(dsts[TEST_SQL].Prefixes) {
 		t.Errorf("Expecting: %+v, received: %+v", dst, dsts[TEST_SQL])

@@ -1186,9 +1186,8 @@ func (self *SQLStorage) RemStoredCdrs(cgrIds []string) error {
 	return nil
 }
 
-func (self *SQLStorage) GetTpDestinations(tpid, tag string) (map[string]*Destination, error) {
-	dests := make(map[string]*Destination)
-	var tpDests []TpDestination
+func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*TpDestination, error) {
+	var tpDests []*TpDestination
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
@@ -1197,16 +1196,7 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) (map[string]*Destina
 		return nil, err
 	}
 
-	for _, tpDest := range tpDests {
-		var dest *Destination
-		var found bool
-		if dest, found = dests[tpDest.Tag]; !found {
-			dest = &Destination{Id: tpDest.Tag}
-			dests[tpDest.Tag] = dest
-		}
-		dest.AddPrefix(tpDest.Prefix)
-	}
-	return dests, nil
+	return tpDests, nil
 }
 
 func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, error) {

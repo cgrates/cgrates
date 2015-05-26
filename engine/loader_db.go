@@ -61,9 +61,11 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 
 func (dbr *DbReader) LoadDestinations() (err error) {
 	tpDests, err := dbr.storDb.GetTpDestinations(dbr.tpid, "")
-	if err == nil {
-		return
+	if err != nil {
+		log.Print("ERRRR: ", err)
+		return err
 	}
+	log.Print("TpDESTS: ", tpDests)
 	return dbr.tp.LoadDestinations(tpDests)
 }
 
