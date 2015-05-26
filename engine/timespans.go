@@ -274,7 +274,16 @@ func (ts *TimeSpan) getCost() float64 {
 		ts.Cost = utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
 		return ts.Cost
 	} else {
-		return ts.Increments[0].Cost * float64(ts.Increments.Length())
+		cost := 0.0
+		// some increments may have 0 cost because of the max  cost strategy
+		for _, inc := range ts.Increments {
+			cost += inc.Cost
+		}
+		if ts.RateInterval != nil && ts.RateInterval.Rating != nil {
+			return utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
+		} else {
+			return utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+		}
 	}
 }
 

@@ -558,6 +558,29 @@ func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 	}
 }
 
+func TestMaxDebitWithMaxCostFree(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "max",
+		Account:      "max",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 3, 23, 19, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 3, 23, 19, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.MaxDebit()
+	expected := 10.0
+	if cc.Cost != expected || err != nil {
+		t.Errorf("Expected %v was %v", expected, cc.Cost)
+	}
+}
+
 func TestGetCostWithMaxCostFree(t *testing.T) {
 	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
 	for _, at := range ap {
