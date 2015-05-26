@@ -405,6 +405,44 @@ func (cd *CallDescriptor) GetDuration() time.Duration {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
+	cc, err := cd.getCost()
+	if err != nil {
+		return nil, err
+	}
+
+	cost := 0.0
+	for i, ts := range cc.Timespans {
+		// only add connect fee if this is the first/only call cost request
+		//log.Printf("Interval: %+v", ts.RateInterval.Timing)
+		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
+			cost += ts.RateInterval.Rating.ConnectFee
+		}
+		//log.Printf("TS: %+v", ts)
+		// handle max cost
+		maxCost, strategy := ts.RateInterval.GetMaxCost()
+
+		cost += ts.getCost()
+		cd.MaxCostSoFar += cost
+		//log.Print("Before: ", cost)
+		if strategy != "" && maxCost > 0 {
+			//log.Print("HERE: ", strategy, maxCost)
+			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
+				cost = maxCost
+				cd.MaxCostSoFar = maxCost
+			}
+
+		}
+		//log.Print("Cost: ", cost)
+	}
+	cc.Cost = cost
+	// global rounding
+	roundingDecimals, roundingMethod := cc.GetLongestRounding()
+	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
+
+	return cc, nil
+}
+
+func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	// check for 0 duration
 	if cd.TimeEnd.Sub(cd.TimeStart) == 0 {
 		return cd.CreateCallCost(), nil
@@ -420,7 +458,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
 		return &CallCost{Cost: -1}, err
 	}
-
 	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 
@@ -432,6 +469,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 		cost += ts.getCost()
 	}
+
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
 	cc := cd.CreateCallCost()
 	cc.Cost = cost
@@ -538,7 +576,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 	}
 	//log.Printf("Debit CD: %+v", cd)
 	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)
-	//log.Print("HERE: ", cc, err)
+	//log.Printf("HERE: %+v %v", cc, err)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
 		return nil, err
@@ -579,7 +617,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
-// by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
+// by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))

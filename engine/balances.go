@@ -242,7 +242,7 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCos
 		origAccount := cd.Account
 		cd.Account = cd.Subject
 		cd.RatingInfos = nil
-		cc, err := cd.GetCost()
+		cc, err := cd.getCost()
 		// restor orig values
 		cd.Subject = origSubject
 		cd.Account = origAccount
@@ -250,7 +250,7 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCos
 	}
 	if getStandardIfEmpty {
 		cd.RatingInfos = nil
-		return cd.GetCost()
+		return cd.getCost()
 	} else {
 		cc := cd.CreateCallCost()
 		cc.Cost = 0
@@ -337,7 +337,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
 			}
-			//log.Printf("TS: %+v", ts)
+
 			if ts.RateInterval == nil {
 				Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 				return nil, errors.New("timespan with no rate interval assigned")
@@ -472,6 +472,8 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				if count {
 					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationIds: cc.Destination}})
 				}
+
+				//log.Printf("TS: %+v", cc.Cost)
 				// go to nextincrement
 				continue
 			}

@@ -394,7 +394,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		regexp.MustCompile(`(?:\w+\s*),(?:\d+\.*\d*s*),(?:\d+\.*\d*s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*),(?:\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*)$`),
 		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RateUnit([0-9.]ns|us|µs|ms|s|m|h),RateIncrementStart([0-9.]ns|us|µs|ms|s|m|h),GroupIntervalStart([0-9.]ns|us|µs|ms|s|m|h)"},
 	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
-		regexp.MustCompile(`^(?:\w+\s*),(?:\w+\s*|\*any),(?:\w+\s*),(?:\*up|\*down|\*middle),(?:\d+),(?:\d+\.*\d*s*)?,(?:\*free|\*diconnect)?$`),
+		regexp.MustCompile(`^(?:\w+\s*),(?:\w+\s*|\*any),(?:\w+\s*),(?:\*up|\*down|\*middle),(?:\d+),(?:\d+\.*\d*s*)?,(?:\*free|\*disconnect)?$`),
 		"Tag([0-9A-Za-z_]),DestinationsTag([0-9A-Za-z_]|*any),RatesTag([0-9A-Za-z_]),RoundingMethod(*up|*middle|*down),RoundingDecimals([0-9.])"},
 	utils.RATING_PLANS_CSV: &FileLineRegexValidator{utils.DESTRATE_TIMINGS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),

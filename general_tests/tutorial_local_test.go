@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	//"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -116,7 +116,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 3, RatingProfiles: 8, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1,
 		DerivedChargers: 1, LcrProfiles: 4}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
@@ -296,6 +296,67 @@ func TestTutLocalGetCosts(t *testing.T) {
 	} else if cc.Cost != 1.3 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
+	tStart = time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1007",
+		TimeStart:   tStart,
+		TimeEnd:     tStart.Add(time.Duration(50) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.5 {
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1007",
+		TimeStart:   tStart,
+		TimeEnd:     tStart.Add(time.Duration(70) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.62 {
+		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1002",
+		Account:     "1002",
+		Destination: "1007",
+		TimeStart:   tStart,
+		TimeEnd:     tStart.Add(time.Duration(50) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.5 {
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1002",
+		Account:     "1002",
+		Destination: "1007",
+		TimeStart:   tStart,
+		TimeEnd:     tStart.Add(time.Duration(70) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.7 { // In case of *disconnect strategy, it will not be applied so we can go on negative costs
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
 }
 
 // Check call costs
@@ -303,8 +364,7 @@ func TestTutLocalMaxDebit(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ := utils.ParseDate("2014-08-04T13:00:20Z")
+	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
 		Direction:     "*out",
 		Category:      "call",
@@ -314,7 +374,7 @@ func TestTutLocalMaxDebit(t *testing.T) {
 		Destination:   "1002",
 		DurationIndex: 0,
 		TimeStart:     tStart,
-		TimeEnd:       tEnd,
+		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
 	}
 	var cc engine.CallCost
 	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
@@ -322,11 +382,81 @@ func TestTutLocalMaxDebit(t *testing.T) {
 	} else if cc.GetDuration() == 20 {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
 	}
+	cd = engine.CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "1007",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(time.Duration(120) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.GetDuration() == 120 {
+		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
+	}
+	cd = engine.CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1004",
+		Account:       "1004",
+		Destination:   "1007",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(time.Duration(120) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.GetDuration() != time.Duration(62)*time.Second { // We have as strategy *dsconnect
+		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
+	}
+	var maxTime float64
+	if err := tutLocalRpc.Call("Responder.GetMaxSessionTime", cd, &maxTime); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if maxTime != 62000000000 { // We have as strategy *dsconnect
+		t.Errorf("Calling Responder.GetMaxSessionTime got maxTime: %f", maxTime)
+	}
+}
+
+// Check call costs
+func TestTutLocalDerivedMaxSessionTime(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
+	ev := engine.StoredCdr{
+		CgrId:       utils.Sha1("testevent1", tStart.String()),
+		TOR:         utils.VOICE,
+		AccId:       "testevent1",
+		CdrHost:     "127.0.0.1",
+		ReqType:     utils.META_PREPAID,
+		Direction:   utils.OUT,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1004",
+		Subject:     "1004",
+		Destination: "1007",
+		SetupTime:   tStart,
+		AnswerTime:  tStart,
+		Usage:       time.Duration(120) * time.Second,
+		Supplier:    "suppl1",
+		Cost:        -1,
+	}
+	var maxTime float64
+	if err := tutLocalRpc.Call("Responder.GetDerivedMaxSessionTime", ev, &maxTime); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if maxTime != 62000000000 { // We have as strategy *dsconnect
+		t.Errorf("Calling Responder.GetMaxSessionTime got maxTime: %f", maxTime)
+	}
 }
 
 // Make sure queueids were created
 func TestTutFsCallsCdrStats(t *testing.T) {
-	if !*testCalls {
+	if !*testLocal {
 		return
 	}
 	var queueIds []string
@@ -707,12 +837,69 @@ func TestTutLocalLeastCost(t *testing.T) {
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
+	eStLcr2 := &engine.LCRCost{
+		Entry: &engine.LCREntry{DestinationId: utils.ANY, RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_LOWEST, StrategyParams: "", Weight: 10.0},
+		SupplierCosts: []*engine.LCRSupplierCost{
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
+			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
+		},
+	}
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
-	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
+	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) && !reflect.DeepEqual(eStLcr2.SupplierCosts, lcr.SupplierCosts) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
+	}
+}
+
+// Make sure all stats queues were updated
+func TestTutLocalCdrStatsAfter(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var statMetrics map[string]float64
+	eMetrics := map[string]float64{engine.ACC: 0.3452380952, engine.ACD: 111.4761904762, engine.ASR: 100}
+	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: utils.META_DEFAULT}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACD: 90.2, engine.ASR: 100, engine.TCC: 1.675, engine.TCD: 451, engine.ACC: 0.335}
+	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST1"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.ACC: 0.35, engine.ACD: 120, engine.ASR: 100, engine.TCC: 1.675, engine.TCD: 451}
+	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1001"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.TCD: 451, engine.ACC: 0.325, engine.ACD: 90, engine.ASR: 100, engine.TCC: 1.675}
+	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1002"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.TCC: 1.675, engine.TCD: 451, engine.ACC: 0.325, engine.ACD: 90, engine.ASR: 100}
+	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1003"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.TCC: 0.7, engine.TCD: 240, engine.ACC: 0.35, engine.ACD: 120, engine.ASR: 100}
+	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL1"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
+	}
+	eMetrics = map[string]float64{engine.TCD: 331, engine.ACC: 0.33125, engine.ACD: 82.75, engine.ASR: 100, engine.TCC: 1.325}
+	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL2"}, &statMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
+		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
 }
 
