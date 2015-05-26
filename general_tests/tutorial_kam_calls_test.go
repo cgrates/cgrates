@@ -304,16 +304,28 @@ func TestTutKamCallsCall1007To1002(t *testing.T) {
 }
 
 /*
-// Should hangup at 62 seconds
-func TestTutKamCallsCall1006To1007(t *testing.T) {
+// Should hangup at 62 seconds, disconnect from SM
+func TestTutKamCallsCall1007To1007(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "CGRateS.org", Realm: "*"}, "sip:1007@127.0.0.1",
-		"sip:127.0.0.1:5060", time.Duration(90)*time.Second, 5077); err != nil {
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "CGRateS.org", Realm: "*"}, "sip:1007@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(75)*time.Second, 5077); err != nil {
 		t.Fatal(err)
 	}
 }
+
+// Should hangup at 62 seconds, disconnect from Kamailio
+func TestTutKamCallsCall1003To1007(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"}, "sip:1007@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(73)*time.Second, 5078); err != nil {
+		t.Fatal(err)
+	}
+}
+*/
 
 // Call from 1001 (prepaid) to 1007, should not cost more than 62 which is MaxCallCost
 func TestTutKamCallsCall1001To1007(t *testing.T) {
@@ -321,18 +333,17 @@ func TestTutKamCallsCall1001To1007(t *testing.T) {
 		return
 	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"}, "sip:1007@127.0.0.1",
-		"sip:127.0.0.1:5060", time.Duration(100)*time.Second, 5079); err != nil {
+		"sip:127.0.0.1:5060", time.Duration(70)*time.Second, 5079); err != nil {
 		t.Fatal(err)
 	}
 }
-*/
 
 // Make sure account was debited properly
 func TestTutKamCallsAccount1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	time.Sleep(time.Duration(70) * time.Second) // Allow calls to finish before start querying the results
+	time.Sleep(time.Duration(80) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := tutKamCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
@@ -353,7 +364,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 	req := utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{utils.META_DEFAULT}}
 	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
+	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
@@ -363,7 +374,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
 		}
 		if reply[0].Usage != "67" { // Usage as seconds
-			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
+			t.Errorf("Unexpected Usage for 428CDR: %+v", reply[0])
 		}
 		if reply[0].Supplier != "suppl2" { // Usage as seconds
 			t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
@@ -372,7 +383,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnDerived: true}
 	if err := tutKamCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
+	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		if reply[0].ReqType != utils.META_RATED {
@@ -503,43 +514,43 @@ func TestTutKamCallsCdrStatsAfter(t *testing.T) {
 		return
 	}
 	var statMetrics map[string]float64
-	eMetrics := map[string]float64{engine.ACC: 0.9707714286, engine.ACD: 64.2857142857, engine.ASR: 100}
+	eMetrics := map[string]float64{engine.ACC: 0.9015222222, engine.ACD: 65.5555555556, engine.ASR: 100}
 	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: utils.META_DEFAULT}, &statMetrics); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
 		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
-	eMetrics = map[string]float64{engine.ACC: 0.927, engine.ACD: 63.8333333333, engine.ASR: 100, engine.TCC: 5.562, engine.TCD: 383}
+	eMetrics = map[string]float64{engine.ACC: 0.8829, engine.ACD: 64.7142857143, engine.ASR: 100, engine.TCC: 6.1803, engine.TCD: 453}
 	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST1"}, &statMetrics); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
 		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
-	eMetrics = map[string]float64{engine.TCC: 5.562, engine.TCD: 383, engine.ACC: 0.0217, engine.ACD: 67, engine.ASR: 100}
+	eMetrics = map[string]float64{engine.TCC: 6.1803, engine.TCD: 453, engine.ACC: 0.32, engine.ACD: 68.5, engine.ASR: 100}
 	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1001"}, &statMetrics); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
 		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
-	eMetrics = map[string]float64{engine.ACD: 61, engine.ASR: 100, engine.TCC: 5.562, engine.TCD: 383, engine.ACC: 1.2334}
+	eMetrics = map[string]float64{engine.ACD: 61, engine.ASR: 100, engine.TCC: 6.1803, engine.TCD: 453, engine.ACC: 1.2334}
 	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1002"}, &statMetrics); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
 		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
-	eMetrics = map[string]float64{engine.TCC: 5.562, engine.TCD: 383, engine.ACC: 1.2334, engine.ACD: -1, engine.ASR: -1}
+	eMetrics = map[string]float64{engine.TCC: 6.1803, engine.TCD: 453, engine.ACC: 1.2334, engine.ACD: -1, engine.ASR: -1}
 	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1003"}, &statMetrics); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
 		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
-	eMetrics = map[string]float64{engine.ACC: 1.2334, engine.ACD: 62, engine.ASR: 100, engine.TCC: 3.7002, engine.TCD: 186}
+	eMetrics = map[string]float64{engine.ACC: 1.00404, engine.ACD: 65.2, engine.ASR: 100, engine.TCC: 5.0202, engine.TCD: 326}
 	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL1"}, &statMetrics); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
 		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
-	eMetrics = map[string]float64{engine.ACD: 67, engine.ASR: 100, engine.TCC: 1.2551, engine.TCD: 134, engine.ACC: 0.62755}
+	eMetrics = map[string]float64{engine.ACD: 67, engine.ASR: 100, engine.TCC: 1.2534, engine.TCD: 134, engine.ACC: 0.6267}
 	if err := tutKamCallsRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL2"}, &statMetrics); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
