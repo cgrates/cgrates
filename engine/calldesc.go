@@ -433,6 +433,10 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 	}
 	cc.Cost = cost
+	// global rounding
+	roundingDecimals, roundingMethod := cc.GetLongestRounding()
+	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
+
 	return cc, nil
 }
 
