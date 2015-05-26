@@ -316,7 +316,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		//log.Print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
 	}
 	//log.Printf("After balances CD: %+v", cd)
-	leftCC, err = cd.GetCost()
+	leftCC, err = cd.getCost()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 	}

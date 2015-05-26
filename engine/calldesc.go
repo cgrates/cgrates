@@ -405,6 +405,42 @@ func (cd *CallDescriptor) GetDuration() time.Duration {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
+	cc, err := cd.getCost()
+	if err != nil {
+		return nil, err
+	}
+
+	cost := 0.0
+	for i, ts := range cc.Timespans {
+		// only add connect fee if this is the first/only call cost request
+		//log.Printf("Interval: %+v", ts.RateInterval.Timing)
+		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
+			cost += ts.RateInterval.Rating.ConnectFee
+		}
+		// handle max cost
+		maxCost, strategy := ts.RateInterval.GetMaxCost()
+		if strategy != "" && maxCost > 0 {
+			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
+				cost = maxCost
+				cd.MaxCostSoFar = maxCost
+			} else {
+				cost += ts.getCost()
+				cd.MaxCostSoFar += cost
+			}
+
+		} else {
+			cost += ts.getCost()
+		}
+	}
+	cc.Cost = cost
+	// global rounding
+	roundingDecimals, roundingMethod := cc.GetLongestRounding()
+	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
+
+	return cc, nil
+}
+
+func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	// check for 0 duration
 	if cd.TimeEnd.Sub(cd.TimeStart) == 0 {
 		return cd.CreateCallCost(), nil
@@ -420,7 +456,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
 		return &CallCost{Cost: -1}, err
 	}
-
 	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 
@@ -432,6 +467,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 		cost += ts.getCost()
 	}
+
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
 	cc := cd.CreateCallCost()
 	cc.Cost = cost
