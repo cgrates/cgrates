@@ -185,7 +185,7 @@ const (
 	CONFIG_DIR                   = "/etc/cgrates/"
 	CGR_SUPPLIER                 = "cgr_supplier"
 	DISCONNECT_CAUSE             = "disconnect_cause"
-	CGR_DISCONNECT_CAUSE         = "cgr_disconnect_cause"
+	CGR_DISCONNECT_CAUSE         = "cgr_disconnectcause"
 	CGR_COMPUTELCR               = "cgr_computelcr"
 )
 

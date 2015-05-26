@@ -51,7 +51,7 @@ const (
 )
 
 var primaryFields = []string{EVENT, CALLID, FROM_TAG, HASH_ENTRY, HASH_ID, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
-	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION}
+	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE}
 
 type KamAuthReply struct {
 	Event            string // Kamailio will use this to differentiate between requests and replies
@@ -326,8 +326,10 @@ func (kev KamEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.AnswerTime, _ = kev.GetAnswerTime(utils.META_DEFAULT)
 	storCdr.Usage, _ = kev.GetDuration(utils.META_DEFAULT)
 	storCdr.Supplier = kev.GetSupplier(utils.META_DEFAULT)
+	storCdr.DisconnectCause = kev.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = kev.GetExtraFields()
 	storCdr.Cost = -1
+
 	return storCdr
 }
 

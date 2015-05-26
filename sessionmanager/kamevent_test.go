@@ -47,7 +47,7 @@ func TestNewKamEvent(t *testing.T) {
 		"cgr_answertime":"1419839310",
 		"cgr_duration":"3",
 		"cgr_supplier":"supplier2",
-		"cgr_disconnect_cause": "200"}`
+		"cgr_disconnectcause": "200"}`
 	eKamEv := KamEvent{"event": "CGR_CALL_END", "callid": "46c01a5c249b469e76333fc6bfa87f6a@0:0:0:0:0:0:0:0", "from_tag": "bf71ad59", "to_tag": "7351fecf",
 		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001", "cgr_destination": "1002", "cgr_answertime": "1419839310", "cgr_duration": "3", utils.CGR_SUPPLIER: "supplier2",
 		utils.CGR_DISCONNECT_CAUSE: "200"}
