@@ -1,0 +1,28 @@
+{
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",					// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+"rater": {
+	"enabled": true,					// enable Rater service: <true|false>
+	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+},
+
+"scheduler": {
+	"enabled": true,					// start Scheduler service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,					// start the CDR Server service:  <true|false>
+	"rater": "internal",				// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
+	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+},
+
+"cdr_stats": {
+	"enabled": true,					// starts the cdrstats service: <true|false>
+},
+
+}
