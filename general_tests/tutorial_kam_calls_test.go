@@ -303,6 +303,30 @@ func TestTutKamCallsCall1007To1002(t *testing.T) {
 	}
 }
 
+/*
+// Should hangup at 62 seconds
+func TestTutKamCallsCall1006To1007(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "CGRateS.org", Realm: "*"}, "sip:1007@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(90)*time.Second, 5077); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Call from 1001 (prepaid) to 1007, should not cost more than 62 which is MaxCallCost
+func TestTutKamCallsCall1001To1007(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"}, "sip:1007@127.0.0.1",
+		"sip:127.0.0.1:5060", time.Duration(100)*time.Second, 5079); err != nil {
+		t.Fatal(err)
+	}
+}
+*/
+
 // Make sure account was debited properly
 func TestTutKamCallsAccount1001(t *testing.T) {
 	if !*testCalls {
@@ -342,7 +366,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Supplier != "suppl2" { // Usage as seconds
-			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
+			t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnDerived: true}
@@ -358,7 +382,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
 		}
 		if reply[0].Supplier != "suppl2" {
-			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+			t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1002"}, RunIds: []string{utils.META_DEFAULT}}
@@ -380,7 +404,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Supplier != "suppl1" {
-			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+			t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1003"}, RunIds: []string{utils.META_DEFAULT}}
@@ -402,7 +426,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Supplier != "suppl1" {
-			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+			t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1004"}, RunIds: []string{utils.META_DEFAULT}}
@@ -424,7 +448,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Supplier != "suppl1" {
-			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+			t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1006"}, RunIds: []string{utils.META_DEFAULT}}
@@ -446,7 +470,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Supplier != "suppl3" {
-			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+			t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1007"}, RunIds: []string{utils.META_DEFAULT}}
@@ -468,7 +492,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Supplier != "suppl3" {
-			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
+			t.Errorf("Unexpected Supplier for CDR: %+v", reply[0])
 		}
 	}
 }

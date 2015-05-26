@@ -325,7 +325,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.Cost != 0.62 {
-		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	cd = engine.CallDescriptor{
 		Direction:   "*out",
@@ -354,7 +354,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.62 {
+	} else if cc.Cost != 0.7 { // In case of *disconnect strategy, it will not be applied so we can go on negative costs
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
 }
@@ -364,8 +364,7 @@ func TestTutLocalMaxDebit(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	tStart, _ := utils.ParseDate("2014-08-04T13:00:00Z")
-	tEnd, _ := utils.ParseDate("2014-08-04T13:00:20Z")
+	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
 		Direction:     "*out",
 		Category:      "call",
@@ -375,13 +374,83 @@ func TestTutLocalMaxDebit(t *testing.T) {
 		Destination:   "1002",
 		DurationIndex: 0,
 		TimeStart:     tStart,
-		TimeEnd:       tEnd,
+		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
 	}
 	var cc engine.CallCost
 	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.GetDuration() == 20 {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
+	}
+	cd = engine.CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "1007",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(time.Duration(120) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.GetDuration() == 120 {
+		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
+	}
+	cd = engine.CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1004",
+		Account:       "1004",
+		Destination:   "1007",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(time.Duration(120) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.GetDuration() != time.Duration(62)*time.Second { // We have as strategy *dsconnect
+		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
+	}
+	var maxTime float64
+	if err := tutLocalRpc.Call("Responder.GetMaxSessionTime", cd, &maxTime); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if maxTime != 62000000000 { // We have as strategy *dsconnect
+		t.Errorf("Calling Responder.GetMaxSessionTime got maxTime: %f", maxTime)
+	}
+}
+
+// Check call costs
+func TestTutLocalDerivedMaxSessionTime(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tStart := time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
+	ev := engine.StoredCdr{
+		CgrId:       utils.Sha1("testevent1", tStart.String()),
+		TOR:         utils.VOICE,
+		AccId:       "testevent1",
+		CdrHost:     "127.0.0.1",
+		ReqType:     utils.META_PREPAID,
+		Direction:   utils.OUT,
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "1004",
+		Subject:     "1004",
+		Destination: "1007",
+		SetupTime:   tStart,
+		AnswerTime:  tStart,
+		Usage:       time.Duration(120) * time.Second,
+		Supplier:    "suppl1",
+		Cost:        -1,
+	}
+	var maxTime float64
+	if err := tutLocalRpc.Call("Responder.GetDerivedMaxSessionTime", ev, &maxTime); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if maxTime != 62000000000 { // We have as strategy *dsconnect
+		t.Errorf("Calling Responder.GetMaxSessionTime got maxTime: %f", maxTime)
 	}
 }
 
