@@ -417,20 +417,22 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
 			cost += ts.RateInterval.Rating.ConnectFee
 		}
+		//log.Printf("TS: %+v", ts)
 		// handle max cost
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
+
+		cost += ts.getCost()
+		cd.MaxCostSoFar += cost
+		//log.Print("Before: ", cost)
 		if strategy != "" && maxCost > 0 {
+			//log.Print("HERE: ", strategy, maxCost)
 			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 				cost = maxCost
 				cd.MaxCostSoFar = maxCost
-			} else {
-				cost += ts.getCost()
-				cd.MaxCostSoFar += cost
 			}
 
-		} else {
-			cost += ts.getCost()
 		}
+		//log.Print("Cost: ", cost)
 	}
 	cc.Cost = cost
 	// global rounding
@@ -615,7 +617,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
-// by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
+// by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
