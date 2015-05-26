@@ -576,7 +576,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 	}
 	//log.Printf("Debit CD: %+v", cd)
 	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)
-	//log.Print("HERE: ", cc, err)
+	//log.Printf("HERE: %+v %v", cc, err)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
 		return nil, err

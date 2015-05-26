@@ -337,7 +337,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
 			}
-			//log.Printf("TS: %+v", ts)
+
 			if ts.RateInterval == nil {
 				Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 				return nil, errors.New("timespan with no rate interval assigned")
@@ -472,6 +472,8 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				if count {
 					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationIds: cc.Destination}})
 				}
+
+				//log.Printf("TS: %+v", cc.Cost)
 				// go to nextincrement
 				continue
 			}

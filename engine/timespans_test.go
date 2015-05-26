@@ -235,7 +235,7 @@ func TestTimespanGetCostIntervals(t *testing.T) {
 		ts.Increments[i] = &Increment{Cost: 0.02}
 	}
 	if ts.getCost() != 0.22 {
-		t.Error("Error caclulating timspan cost: ", ts.getCost())
+		t.Error("Error caclulating timespan cost: ", ts.getCost())
 	}
 }
 
