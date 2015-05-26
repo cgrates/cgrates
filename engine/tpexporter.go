@@ -194,12 +194,13 @@ func (self *TPExporter) exportTimings() error {
 func (self *TPExporter) exportDestinations() error {
 	fileName := exportedFiles[1]
 	storData, err := self.storDb.GetTpDestinations(self.tpID, "")
+	dsts := TpDestinations(storData).GetDestinations()
 	if err != nil {
 		return nil
 	}
 	exportedData := make([]utils.ExportedData, len(storData))
 	idx := 0
-	for _, dst := range storData {
+	for _, dst := range dsts {
 		exportedData[idx] = &utils.TPDestination{TPid: self.tpID, DestinationId: dst.Id, Prefixes: dst.Prefixes}
 		idx += 1
 	}

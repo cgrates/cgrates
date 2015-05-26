@@ -44,14 +44,9 @@ type TpTiming struct {
 type TpDestination struct {
 	Id        int64
 	Tpid      string
-	Tag       string
-	Prefix    string
+	Tag       string `index:"0" re:"(?:\w+\s*,\s*){1}"`
+	Prefix    string `index:"1" re:"(?:\+?\d+.?\d*){1}"`
 	CreatedAt time.Time
-}
-
-func (d *TpDestination) Load(row []string) {
-	d.Tag = row[0]
-	d.Prefix = row[1]
 }
 
 type TpRate struct {

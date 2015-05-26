@@ -112,9 +112,12 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 	}
 	var tpDests []*TpDestination
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tpDest := &TpDestination{}
-		tpDest.Load(record)
-		tpDests = append(tpDests, tpDest)
+		if tpDest, err := csvLoad(TpDestination{}, record); err != nil {
+			return err
+		} else {
+			tpd := tpDest.(TpDestination)
+			tpDests = append(tpDests, &tpd)
+		}
 		//log.Printf("%+v\n", tpDest)
 	}
 	csvr.tp.LoadDestinations(tpDests)

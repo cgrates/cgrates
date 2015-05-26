@@ -64,7 +64,7 @@ func (dbr *DbReader) LoadDestinations() (err error) {
 	if err == nil {
 		return
 	}
-	return csvr.tp.LoadDestinations(tpDests)
+	return dbr.tp.LoadDestinations(tpDests)
 }
 
 func (dbr *DbReader) LoadDestinationByTag(tag string) (bool, error) {
@@ -223,7 +223,8 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 				if drate.DestinationId == utils.ANY {
 					continue // no need of loading the destinations in this case
 				}
-				dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationId)
+				tpDests, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationId)
+				dms := TpDestinations(tpDests).GetDestinations()
 				if err != nil {
 					return false, err
 				} else if len(dms) == 0 {
