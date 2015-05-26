@@ -49,7 +49,7 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 
 type TpDestinations []*TpDestination
 
-func (tps TpDestinations) GetDestinations() (dsts []*Destination) {
+func (tps TpDestinations) GetDestinations() map[string]*Destination {
 	destinations := make(map[string]*Destination)
 	for _, tpDest := range tps {
 		var dest *Destination
@@ -60,8 +60,5 @@ func (tps TpDestinations) GetDestinations() (dsts []*Destination) {
 		}
 		dest.AddPrefix(tpDest.Prefix)
 	}
-	for _, dest := range destinations {
-		dsts = append(dsts, dest)
-	}
-	return
+	return destinations
 }

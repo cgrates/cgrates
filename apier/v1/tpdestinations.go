@@ -48,11 +48,13 @@ func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.T
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if dsts, err := self.StorDb.GetTpDestinations(attrs.TPid, attrs.DestinationId); err != nil {
+	if storData, err := self.StorDb.GetTpDestinations(attrs.TPid, attrs.DestinationId); err != nil {
+
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if len(dsts) == 0 {
+	} else if len(storData) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
+		dsts := engine.TpDestinations(storData).GetDestinations()
 		*reply = utils.TPDestination{
 			TPid:          attrs.TPid,
 			DestinationId: dsts[attrs.DestinationId].Id,
