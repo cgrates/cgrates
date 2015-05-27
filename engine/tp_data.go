@@ -51,17 +51,19 @@ func NewTPData() *TPData {
 	return tp
 }
 
-func (tp *TPData) LoadDestinations(tpDests []*TpDestination) error {
-	for _, tpDest := range tpDests {
-		var dest *Destination
-		var found bool
-		if dest, found = tp.destinations[tpDest.Tag]; !found {
-			dest = &Destination{Id: tpDest.Tag}
-			tp.destinations[tpDest.Tag] = dest
-		}
-		dest.AddPrefix(tpDest.Prefix)
-	}
-	return nil
+func (tp *TPData) LoadDestinations(tps []*TpDestination) (err error) {
+	tp.destinations, err = TpDestinations(tps).GetDestinations()
+	return err
+}
+
+func (tp *TPData) LoadTimings(tps []*TpTiming) (err error) {
+	tp.timings, err = TpTimings(tps).GetTimings()
+	return err
+}
+
+func (tp *TPData) LoadRates(tps []*TpRate) (err error) {
+	tp.rates, err = TpRates(tps).GetRates()
+	return err
 }
 
 func (tp *TPData) IsValid() bool {

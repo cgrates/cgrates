@@ -130,52 +130,45 @@ type LogStorage interface {
 
 type LoadStorage interface {
 	Storage
-	// Apier functions
-	RemTPData(string, string, ...string) error
+	LoadReader
+	LoadWriter
+}
+
+type LoadReader interface {
 	GetTPIds() ([]string, error)
 	GetTPTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
-
-	SetTPTiming(*utils.ApierTPTiming) error
-	GetTpTimings(string, string) (map[string]*utils.ApierTPTiming, error)
-
-	SetTPDestination(string, *Destination) error
+	GetTpTimings(string, string) ([]*TpTiming, error)
 	GetTpDestinations(string, string) ([]*TpDestination, error)
-
-	SetTPRates(string, map[string][]*utils.RateSlot) error
-	GetTpRates(string, string) (map[string]*utils.TPRate, error)
-
-	SetTPDestinationRates(string, map[string][]*utils.DestinationRate) error
+	GetTpRates(string, string) ([]*TpRate, error)
 	GetTpDestinationRates(string, string, *utils.Paginator) (map[string]*utils.TPDestinationRate, error)
-
-	SetTPRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
 	GetTpRatingPlans(string, string, *utils.Paginator) (map[string][]*utils.TPRatingPlanBinding, error)
-
-	SetTPRatingProfiles(string, map[string]*utils.TPRatingProfile) error
 	GetTpRatingProfiles(*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error)
-
-	SetTPSharedGroups(string, map[string][]*utils.TPSharedGroup) error
 	GetTpSharedGroups(string, string) (map[string][]*utils.TPSharedGroup, error)
-
-	SetTPCdrStats(string, map[string][]*utils.TPCdrStat) error
 	GetTpCdrStats(string, string) (map[string][]*utils.TPCdrStat, error)
-
-	SetTPDerivedChargers(string, map[string][]*utils.TPDerivedCharger) error
 	GetTpDerivedChargers(*utils.TPDerivedChargers) (map[string]*utils.TPDerivedChargers, error)
-
-	SetTPLCRs(string, map[string]*LCR) error
 	GetTpLCRs(string, string) (map[string]*LCR, error)
-
-	SetTPActions(string, map[string][]*utils.TPAction) error
 	GetTpActions(string, string) (map[string][]*utils.TPAction, error)
-
-	SetTPActionTimings(string, map[string][]*utils.TPActionTiming) error
 	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
-
-	SetTPActionTriggers(string, map[string][]*utils.TPActionTrigger) error
 	GetTpActionTriggers(string, string) (map[string][]*utils.TPActionTrigger, error)
-
-	SetTPAccountActions(string, map[string]*utils.TPAccountActions) error
 	GetTpAccountActions(*utils.TPAccountActions) (map[string]*utils.TPAccountActions, error)
+}
+
+type LoadWriter interface {
+	RemTPData(string, string, ...string) error
+	SetTPTiming(*utils.ApierTPTiming) error
+	SetTPDestination(string, *Destination) error
+	SetTPRates(string, map[string][]*utils.RateSlot) error
+	SetTPDestinationRates(string, map[string][]*utils.DestinationRate) error
+	SetTPRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
+	SetTPRatingProfiles(string, map[string]*utils.TPRatingProfile) error
+	SetTPSharedGroups(string, map[string][]*utils.TPSharedGroup) error
+	SetTPCdrStats(string, map[string][]*utils.TPCdrStat) error
+	SetTPDerivedChargers(string, map[string][]*utils.TPDerivedCharger) error
+	SetTPLCRs(string, map[string]*LCR) error
+	SetTPActions(string, map[string][]*utils.TPAction) error
+	SetTPActionTimings(string, map[string][]*utils.TPActionTiming) error
+	SetTPActionTriggers(string, map[string][]*utils.TPActionTrigger) error
+	SetTPAccountActions(string, map[string]*utils.TPAccountActions) error
 }
 
 type Marshaler interface {

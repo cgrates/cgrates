@@ -5,6 +5,9 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func csvLoad(s interface{}, values []string) (interface{}, error) {
@@ -49,16 +52,67 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 
 type TpDestinations []*TpDestination
 
-func (tps TpDestinations) GetDestinations() map[string]*Destination {
+func (tps TpDestinations) GetDestinations() (map[string]*Destination, error) {
 	destinations := make(map[string]*Destination)
-	for _, tpDest := range tps {
+	for _, tp := range tps {
 		var dest *Destination
 		var found bool
-		if dest, found = destinations[tpDest.Tag]; !found {
-			dest = &Destination{Id: tpDest.Tag}
-			destinations[tpDest.Tag] = dest
+		if dest, found = destinations[tp.Tag]; !found {
+			dest = &Destination{Id: tp.Tag}
+			destinations[tp.Tag] = dest
 		}
-		dest.AddPrefix(tpDest.Prefix)
+		dest.AddPrefix(tp.Prefix)
 	}
-	return destinations
+	return destinations, nil
+}
+
+type TpTimings []*TpTiming
+
+func (tps TpTimings) GetTimings() (map[string]*utils.TPTiming, error) {
+	timings := make(map[string]*utils.TPTiming)
+	for _, tp := range tps {
+		rt := &utils.TPTiming{}
+		rt.Id = tp.Tag
+		rt.Years.Parse(tp.Years, utils.INFIELD_SEP)
+		rt.Months.Parse(tp.Months, utils.INFIELD_SEP)
+		rt.MonthDays.Parse(tp.MonthDays, utils.INFIELD_SEP)
+		rt.WeekDays.Parse(tp.WeekDays, utils.INFIELD_SEP)
+		times := strings.Split(tp.Time, utils.INFIELD_SEP)
+		rt.StartTime = times[0]
+		if len(times) > 1 {
+			rt.EndTime = times[1]
+		}
+
+		if _, found := timings[tp.Tag]; found {
+			return nil, fmt.Errorf("duplicate timing tag: %s", tp.Tag)
+		}
+		timings[tp.Tag] = rt
+	}
+	return timings, nil
+}
+
+type TpRates []*TpRate
+
+func (tps TpRates) GetRates() (map[string]*utils.TPRate, error) {
+	rates := make(map[string]*utils.TPRate)
+	for _, tp := range tps {
+
+		rs, err := utils.NewRateSlot(tp.ConnectFee, tp.Rate, tp.RateUnit, tp.RateIncrement, tp.GroupIntervalStart)
+		if err != nil {
+			return nil, err
+		}
+		r := &utils.TPRate{
+			RateId:    tp.Tag,
+			RateSlots: []*utils.RateSlot{rs},
+		}
+
+		// same tag only to create rate groups
+		_, exists := rates[tp.Tag]
+		if exists {
+			rates[tp.Tag].RateSlots = append(rates[tp.Tag].RateSlots, r.RateSlots[0])
+		} else {
+			rates[tp.Tag] = r
+		}
+	}
+	return rates, nil
 }

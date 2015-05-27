@@ -1199,9 +1199,9 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*TpDestination, e
 	return tpDests, nil
 }
 
-func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, error) {
+func (self *SQLStorage) GetTpRates(tpid, tag string) ([]*TpRate, error) {
 	rts := make(map[string]*utils.TPRate)
-	var tpRates []TpRate
+	var tpRates []*TpRate
 	q := self.db.Where("tpid = ?", tpid).Order("id")
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
@@ -1209,27 +1209,7 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 	if err := q.Find(&tpRates).Error; err != nil {
 		return nil, err
 	}
-
-	for _, tr := range tpRates {
-		rs, err := utils.NewRateSlot(tr.ConnectFee, tr.Rate, tr.RateUnit, tr.RateIncrement, tr.GroupIntervalStart)
-		if err != nil {
-			return nil, err
-		}
-		r := &utils.TPRate{
-			TPid:      tpid,
-			RateId:    tr.Tag,
-			RateSlots: []*utils.RateSlot{rs},
-		}
-
-		// same tag only to create rate groups
-		er, exists := rts[tr.Tag]
-		if exists {
-			er.RateSlots = append(er.RateSlots, r.RateSlots[0])
-		} else {
-			rts[tr.Tag] = r
-		}
-	}
-	return rts, nil
+	return tpRates, nil
 }
 
 func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *utils.Paginator) (map[string]*utils.TPDestinationRate, error) {
@@ -1278,9 +1258,8 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *util
 	return rts, nil
 }
 
-func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.ApierTPTiming, error) {
-	tms := make(map[string]*utils.ApierTPTiming)
-	var tpTimings []TpTiming
+func (self *SQLStorage) GetTpTimings(tpid, tag string) ([]*TpTiming, error) {
+	var tpTimings []*TpTiming
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
@@ -1288,10 +1267,7 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.ApierT
 	if err := q.Find(&tpTimings).Error; err != nil {
 		return nil, err
 	}
-	for _, tpTm := range tpTimings {
-		tms[tpTm.Tag] = &utils.ApierTPTiming{TPid: tpTm.Tpid, TimingId: tpTm.Tag, Years: tpTm.Years, Months: tpTm.Months, MonthDays: tpTm.MonthDays, WeekDays: tpTm.WeekDays, Time: tpTm.Time}
-	}
-	return tms, nil
+	return tpTimings, nil
 }
 
 func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Paginator) (map[string][]*utils.TPRatingPlanBinding, error) {

@@ -21,14 +21,15 @@ package engine
 import (
 	"bytes"
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/kr/pty"
 	"io"
 	"os"
 	"os/exec"
 	"path"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/kr/pty"
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
@@ -91,7 +92,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 }
 
 func LoadTariffPlanFromFolder(tpPath string, ratingDb RatingStorage, accountingDb AccountingStorage) error {
-	loader := NewFileCSVReader(ratingDb, accountingDb, utils.CSV_SEP,
+	loader := NewTpReader(ratingDb, accountingDb, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(tpPath, utils.DESTINATIONS_CSV),
 		path.Join(tpPath, utils.TIMINGS_CSV),
 		path.Join(tpPath, utils.RATES_CSV),
@@ -105,7 +106,7 @@ func LoadTariffPlanFromFolder(tpPath string, ratingDb RatingStorage, accountingD
 		path.Join(tpPath, utils.ACTION_TRIGGERS_CSV),
 		path.Join(tpPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(tpPath, utils.DERIVED_CHARGERS_CSV),
-		path.Join(tpPath, utils.CDR_STATS_CSV))
+		path.Join(tpPath, utils.CDR_STATS_CSV)), "")
 	if err := loader.LoadAll(); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
