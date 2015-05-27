@@ -135,40 +135,40 @@ type LoadStorage interface {
 }
 
 type LoadReader interface {
-	GetTPIds() ([]string, error)
-	GetTPTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
+	GetTpIds() ([]string, error)
+	GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
 	GetTpTimings(string, string) ([]*TpTiming, error)
 	GetTpDestinations(string, string) ([]*TpDestination, error)
 	GetTpRates(string, string) ([]*TpRate, error)
-	GetTpDestinationRates(string, string, *utils.Paginator) (map[string]*utils.TPDestinationRate, error)
-	GetTpRatingPlans(string, string, *utils.Paginator) (map[string][]*utils.TPRatingPlanBinding, error)
-	GetTpRatingProfiles(*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error)
-	GetTpSharedGroups(string, string) (map[string][]*utils.TPSharedGroup, error)
-	GetTpCdrStats(string, string) (map[string][]*utils.TPCdrStat, error)
-	GetTpDerivedChargers(*utils.TPDerivedChargers) (map[string]*utils.TPDerivedChargers, error)
-	GetTpLCRs(string, string) (map[string]*LCR, error)
-	GetTpActions(string, string) (map[string][]*utils.TPAction, error)
-	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
-	GetTpActionTriggers(string, string) (map[string][]*utils.TPActionTrigger, error)
-	GetTpAccountActions(*utils.TPAccountActions) (map[string]*utils.TPAccountActions, error)
+	GetTpDestinationRates(string, string, *utils.Paginator) ([]*TpDestinationRate, error)
+	GetTpRatingPlans(string, string, *utils.Paginator) ([]*TpRatingPlan, error)
+	GetTpRatingProfiles(*utils.TPRatingProfile) ([]*TpRatingProfile, error)
+	GetTpSharedGroups(string, string) ([]*TpSharedGroup, error)
+	GetTpCdrStats(string, string) ([]*TpCdrStat, error)
+	GetTpDerivedChargers(*utils.TPDerivedChargers) ([]*TpDerivedCharger, error)
+	GetTpLCRs(string, string) ([]*TpLcrRules, error)
+	GetTpActions(string, string) ([]*TpAction, error)
+	GetTpActionTimings(string, string) ([]*TpActionPlan, error)
+	GetTpActionTriggers(string, string) ([]*TpActionTrigger, error)
+	GetTpAccountActions(*utils.TPAccountActions) ([]*TpAccountAction, error)
 }
 
 type LoadWriter interface {
-	RemTPData(string, string, ...string) error
-	SetTPTiming(*utils.ApierTPTiming) error
-	SetTPDestination(string, *Destination) error
-	SetTPRates(string, map[string][]*utils.RateSlot) error
-	SetTPDestinationRates(string, map[string][]*utils.DestinationRate) error
-	SetTPRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
-	SetTPRatingProfiles(string, map[string]*utils.TPRatingProfile) error
-	SetTPSharedGroups(string, map[string][]*utils.TPSharedGroup) error
-	SetTPCdrStats(string, map[string][]*utils.TPCdrStat) error
-	SetTPDerivedChargers(string, map[string][]*utils.TPDerivedCharger) error
-	SetTPLCRs(string, map[string]*LCR) error
-	SetTPActions(string, map[string][]*utils.TPAction) error
-	SetTPActionTimings(string, map[string][]*utils.TPActionTiming) error
-	SetTPActionTriggers(string, map[string][]*utils.TPActionTrigger) error
-	SetTPAccountActions(string, map[string]*utils.TPAccountActions) error
+	RemTpData(string, string, ...string) error
+	SetTpTiming(*utils.ApierTPTiming) error
+	SetTpDestination(string, *Destination) error
+	SetTpRates(string, map[string][]*utils.RateSlot) error
+	SetTpDestinationRates(string, map[string][]*utils.DestinationRate) error
+	SetTpRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
+	SetTpRatingProfiles(string, map[string]*utils.TPRatingProfile) error
+	SetTpSharedGroups(string, map[string][]*utils.TPSharedGroup) error
+	SetTpCdrStats(string, map[string][]*utils.TPCdrStat) error
+	SetTpDerivedChargers(string, map[string][]*utils.TPDerivedCharger) error
+	SetTpLCRs(string, map[string]*LCR) error
+	SetTpActions(string, map[string][]*utils.TPAction) error
+	SetTpActionTimings(string, map[string][]*utils.TPActionTiming) error
+	SetTpActionTriggers(string, map[string][]*utils.TPActionTrigger) error
+	SetTpAccountActions(string, map[string]*utils.TPAccountActions) error
 }
 
 type Marshaler interface {

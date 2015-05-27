@@ -50,6 +50,20 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 	return elem.Interface(), nil
 }
 
+func getColumnCount(s interface{}) int {
+	st := reflect.TypeOf(s)
+	numFields := st.NumField()
+	count := 0
+	for i := 0; i < numFields; i++ {
+		field := st.Field(i)
+		index := field.Tag.Get("index")
+		if index != "" {
+			count++
+		}
+	}
+	return count
+}
+
 type TpDestinations []*TpDestination
 
 func (tps TpDestinations) GetDestinations() (map[string]*Destination, error) {
@@ -115,4 +129,114 @@ func (tps TpRates) GetRates() (map[string]*utils.TPRate, error) {
 		}
 	}
 	return rates, nil
+}
+
+type TpDestinationRates []*TpDestinationRate
+
+func (tps TpDestinationRates) GetDestinationRates() (map[string]*utils.TPDestinationRate, error) {
+	rts := make(map[string]*utils.TPDestinationRate)
+	for _, tpDr := range tps {
+		dr := &utils.TPDestinationRate{
+			DestinationRateId: tpDr.Tag,
+			DestinationRates: []*utils.DestinationRate{
+				&utils.DestinationRate{
+					DestinationId:    tpDr.DestinationsTag,
+					RateId:           tpDr.RatesTag,
+					RoundingMethod:   tpDr.RoundingMethod,
+					RoundingDecimals: tpDr.RoundingDecimals,
+					MaxCost:          tpDr.MaxCost,
+					MaxCostStrategy:  tpDr.MaxCostStrategy,
+				},
+			},
+		}
+		existingDR, exists := rts[tpDr.Tag]
+		if exists {
+			existingDR.DestinationRates = append(existingDR.DestinationRates, dr.DestinationRates[0])
+		} else {
+			existingDR = dr
+		}
+		rts[tpDr.Tag] = existingDR
+
+	}
+	return rts, nil
+}
+
+type TpRatingPlans []*TpRatingPlan
+
+func (tps TpRatingPlans) GetRatingPlans() (map[string][]*utils.TPRatingPlanBinding, error) {
+	rpbns := make(map[string][]*utils.TPRatingPlanBinding)
+
+	for _, tpRp := range tps {
+		rpb := &utils.TPRatingPlanBinding{
+			DestinationRatesId: tpRp.DestratesTag,
+			TimingId:           tpRp.TimingTag,
+			Weight:             tpRp.Weight,
+		}
+		if _, exists := rpbns[tpRp.Tag]; exists {
+			rpbns[tpRp.Tag] = append(rpbns[tpRp.Tag], rpb)
+		} else { // New
+			rpbns[tpRp.Tag] = []*utils.TPRatingPlanBinding{rpb}
+		}
+	}
+	return rpbns, nil
+}
+
+func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) (i *RateInterval) {
+	i = &RateInterval{
+		Timing: &RITiming{
+			Years:     rpl.Timing().Years,
+			Months:    rpl.Timing().Months,
+			MonthDays: rpl.Timing().MonthDays,
+			WeekDays:  rpl.Timing().WeekDays,
+			StartTime: rpl.Timing().StartTime,
+		},
+		Weight: rpl.Weight,
+		Rating: &RIRate{
+			ConnectFee:       dr.Rate.RateSlots[0].ConnectFee,
+			RoundingMethod:   dr.RoundingMethod,
+			RoundingDecimals: dr.RoundingDecimals,
+			MaxCost:          dr.MaxCost,
+			MaxCostStrategy:  dr.MaxCostStrategy,
+		},
+	}
+	for _, rl := range dr.Rate.RateSlots {
+		i.Rating.Rates = append(i.Rating.Rates, &Rate{
+			GroupIntervalStart: rl.GroupIntervalStartDuration(),
+			Value:              rl.Rate,
+			RateIncrement:      rl.RateIncrementDuration(),
+			RateUnit:           rl.RateUnitDuration(),
+		})
+	}
+	return
+}
+
+type TpRatingProfiles []*TpRatingProfile
+
+func (tps TpRatingProfiles) GetRatingProfiles() (map[string]*utils.TPRatingProfile, error) {
+	rpfs := make(map[string]*utils.TPRatingProfile)
+	for _, tpRpf := range tps {
+
+		rp := &utils.TPRatingProfile{
+			TPid:      tpRpf.Tpid,
+			LoadId:    tpRpf.Loadid,
+			Direction: tpRpf.Direction,
+			Tenant:    tpRpf.Tenant,
+			Category:  tpRpf.Category,
+			Subject:   tpRpf.Subject,
+		}
+		ra := &utils.TPRatingActivation{
+			ActivationTime:   tpRpf.ActivationTime,
+			RatingPlanId:     tpRpf.RatingPlanTag,
+			FallbackSubjects: tpRpf.FallbackSubjects,
+			CdrStatQueueIds:  tpRpf.CdrStatQueueIds,
+		}
+		if existingRpf, exists := rpfs[rp.KeyId()]; !exists {
+			rp.RatingPlanActivations = []*utils.TPRatingActivation{ra}
+			rpfs[rp.KeyId()] = rp
+		} else { // Exists, update
+			existingRpf.RatingPlanActivations = append(existingRpf.RatingPlanActivations, ra)
+		}
+
+	}
+	return rpfs, nil
 }

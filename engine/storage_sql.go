@@ -72,7 +72,7 @@ func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 }
 
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
-func (self *SQLStorage) GetTPIds() ([]string, error) {
+func (self *SQLStorage) GetTpIds() ([]string, error) {
 	rows, err := self.Db.Query(
 		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
 			utils.TBL_TP_TIMINGS,
@@ -103,7 +103,7 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 }
 
 // ToDo: TEST
-func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, pagination *utils.Paginator) ([]string, error) {
+func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, pagination *utils.Paginator) ([]string, error) {
 
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {
@@ -160,11 +160,11 @@ func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDisti
 	return ids, nil
 }
 
-func (self *SQLStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
+func (self *SQLStorage) SetTpTiming(tm *utils.ApierTPTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
+func (self *SQLStorage) RemTpData(table, tpid string, args ...string) error {
 	tx := self.db.Begin()
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES,
@@ -197,7 +197,7 @@ func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
+func (self *SQLStorage) SetTpDestination(tpid string, dest *Destination) error {
 	if len(dest.Prefixes) == 0 {
 		return nil
 	}
@@ -222,7 +222,7 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot) error {
+func (self *SQLStorage) SetTpRates(tpid string, rts map[string][]*utils.RateSlot) error {
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
@@ -254,7 +254,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 	return nil
 }
 
-func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*utils.DestinationRate) error {
+func (self *SQLStorage) SetTpDestinationRates(tpid string, drs map[string][]*utils.DestinationRate) error {
 	if len(drs) == 0 {
 		return nil //Nothing to set
 	}
@@ -285,7 +285,7 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 	return nil
 }
 
-func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.TPRatingPlanBinding) error {
+func (self *SQLStorage) SetTpRatingPlans(tpid string, drts map[string][]*utils.TPRatingPlanBinding) error {
 	if len(drts) == 0 {
 		return nil //Nothing to set
 	}
@@ -314,7 +314,7 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 	return nil
 }
 
-func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.TPRatingProfile) error {
+func (self *SQLStorage) SetTpRatingProfiles(tpid string, rpfs map[string]*utils.TPRatingProfile) error {
 	if len(rpfs) == 0 {
 		return nil //Nothing to set
 	}
@@ -348,7 +348,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.
 	return nil
 }
 
-func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string][]*utils.TPSharedGroup) error {
+func (self *SQLStorage) SetTpSharedGroups(tpid string, sgs map[string][]*utils.TPSharedGroup) error {
 	if len(sgs) == 0 {
 		return nil //Nothing to set
 	}
@@ -377,7 +377,7 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string][]*utils.T
 	return nil
 }
 
-func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdrStat) error {
+func (self *SQLStorage) SetTpCdrStats(tpid string, css map[string][]*utils.TPCdrStat) error {
 	if len(css) == 0 {
 		return nil //Nothing to set
 	}
@@ -426,7 +426,7 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 	return nil
 }
 
-func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*utils.TPDerivedCharger) error {
+func (self *SQLStorage) SetTpDerivedChargers(tpid string, sgs map[string][]*utils.TPDerivedCharger) error {
 	if len(sgs) == 0 {
 		return nil //Nothing to set
 	}
@@ -473,7 +473,7 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 	return nil
 }
 
-func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
+func (self *SQLStorage) SetTpLCRs(tpid string, lcrs map[string]*LCR) error {
 	if len(lcrs) == 0 {
 		return nil //Nothing to set
 	}
@@ -498,7 +498,7 @@ func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAction) error {
+func (self *SQLStorage) SetTpActions(tpid string, acts map[string][]*utils.TPAction) error {
 	if len(acts) == 0 {
 		return nil //Nothing to set
 	}
@@ -539,7 +539,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 	return nil
 }
 
-func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
+func (self *SQLStorage) GetTpActions(tpid, actsId string) (*utils.TPActions, error) {
 	acts := &utils.TPActions{TPid: tpid, ActionsId: actsId}
 	var tpActions []*TpAction
 	if err := self.db.Where(&TpAction{Tpid: tpid, Tag: actsId}).Find(&tpActions).Error; err != nil {
@@ -565,7 +565,7 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 }
 
 // Sets actionTimings in sqlDB. Imput is expected in form map[actionTimingId][]rows, eg a full .csv file content
-func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTiming) error {
+func (self *SQLStorage) SetTpActionTimings(tpid string, ats map[string][]*utils.TPActionTiming) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
@@ -606,7 +606,7 @@ func (self *SQLStorage) GetTPActionTimings(tpid, tag string) (map[string][]*util
 	return ats, nil
 }
 
-func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils.TPActionTrigger) error {
+func (self *SQLStorage) SetTpActionTriggers(tpid string, ats map[string][]*utils.TPActionTrigger) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
@@ -655,7 +655,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 }
 
 // Sets a group of account actions. Map key has the role of grouping within a tpid
-func (self *SQLStorage) SetTPAccountActions(tpid string, aas map[string]*utils.TPAccountActions) error {
+func (self *SQLStorage) SetTpAccountActions(tpid string, aas map[string]*utils.TPAccountActions) error {
 	if len(aas) == 0 {
 		return nil //Nothing to set
 	}
@@ -1212,9 +1212,8 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) ([]*TpRate, error) {
 	return tpRates, nil
 }
 
-func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *utils.Paginator) (map[string]*utils.TPDestinationRate, error) {
-	rts := make(map[string]*utils.TPDestinationRate)
-	var tpDestinationRates []TpDestinationRate
+func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *utils.Paginator) ([]*TpDestinationRate, error) {
+	var tpDestinationRates []*TpDestinationRate
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
@@ -1231,31 +1230,7 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *util
 		return nil, err
 	}
 
-	for _, tpDr := range tpDestinationRates {
-		dr := &utils.TPDestinationRate{
-			TPid:              tpid,
-			DestinationRateId: tpDr.Tag,
-			DestinationRates: []*utils.DestinationRate{
-				&utils.DestinationRate{
-					DestinationId:    tpDr.DestinationsTag,
-					RateId:           tpDr.RatesTag,
-					RoundingMethod:   tpDr.RoundingMethod,
-					RoundingDecimals: tpDr.RoundingDecimals,
-					MaxCost:          tpDr.MaxCost,
-					MaxCostStrategy:  tpDr.MaxCostStrategy,
-				},
-			},
-		}
-		existingDR, exists := rts[tpDr.Tag]
-		if exists {
-			existingDR.DestinationRates = append(existingDR.DestinationRates, dr.DestinationRates[0])
-		} else {
-			existingDR = dr
-		}
-		rts[tpDr.Tag] = existingDR
-
-	}
-	return rts, nil
+	return tpDestinationRates, nil
 }
 
 func (self *SQLStorage) GetTpTimings(tpid, tag string) ([]*TpTiming, error) {
@@ -1270,10 +1245,8 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) ([]*TpTiming, error) {
 	return tpTimings, nil
 }
 
-func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Paginator) (map[string][]*utils.TPRatingPlanBinding, error) {
-	rpbns := make(map[string][]*utils.TPRatingPlanBinding)
-
-	var tpRatingPlans []TpRatingPlan
+func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Paginator) ([]*TpRatingPlan, error) {
+	var tpRatingPlans []*TpRatingPlan
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
@@ -1290,25 +1263,11 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Pag
 		}
 	}
 
-	for _, tpRp := range tpRatingPlans {
-		rpb := &utils.TPRatingPlanBinding{
-			DestinationRatesId: tpRp.DestratesTag,
-			TimingId:           tpRp.TimingTag,
-			Weight:             tpRp.Weight,
-		}
-		if _, exists := rpbns[tpRp.Tag]; exists {
-			rpbns[tpRp.Tag] = append(rpbns[tpRp.Tag], rpb)
-		} else { // New
-			rpbns[tpRp.Tag] = []*utils.TPRatingPlanBinding{rpb}
-		}
-	}
-	return rpbns, nil
+	return tpRatingPlans, nil
 }
 
-func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
-
-	rpfs := make(map[string]*utils.TPRatingProfile)
-	var tpRpfs []TpRatingProfile
+func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) ([]*TpRatingProfile, error) {
+	var tpRpfs []*TpRatingProfile
 	q := self.db.Where("tpid = ?", qryRpf.TPid)
 	if len(qryRpf.Direction) != 0 {
 		q = q.Where("direction = ?", qryRpf.Direction)
@@ -1328,31 +1287,8 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 	if err := q.Find(&tpRpfs).Error; err != nil {
 		return nil, err
 	}
-	for _, tpRpf := range tpRpfs {
 
-		rp := &utils.TPRatingProfile{
-			TPid:      tpRpf.Tpid,
-			LoadId:    tpRpf.Loadid,
-			Direction: tpRpf.Direction,
-			Tenant:    tpRpf.Tenant,
-			Category:  tpRpf.Category,
-			Subject:   tpRpf.Subject,
-		}
-		ra := &utils.TPRatingActivation{
-			ActivationTime:   tpRpf.ActivationTime,
-			RatingPlanId:     tpRpf.RatingPlanTag,
-			FallbackSubjects: tpRpf.FallbackSubjects,
-			CdrStatQueueIds:  tpRpf.CdrStatQueueIds,
-		}
-		if existingRpf, exists := rpfs[rp.KeyId()]; !exists {
-			rp.RatingPlanActivations = []*utils.TPRatingActivation{ra}
-			rpfs[rp.KeyId()] = rp
-		} else { // Exists, update
-			existingRpf.RatingPlanActivations = append(existingRpf.RatingPlanActivations, ra)
-		}
-
-	}
-	return rpfs, nil
+	return tpRpfs, nil
 }
 
 func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string][]*utils.TPSharedGroup, error) {
