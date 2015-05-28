@@ -148,7 +148,7 @@ type LoadReader interface {
 	GetTpDerivedChargers(*utils.TPDerivedChargers) ([]*TpDerivedCharger, error)
 	GetTpLCRs(string, string) ([]*TpLcrRules, error)
 	GetTpActions(string, string) ([]*TpAction, error)
-	GetTpActionTimings(string, string) ([]*TpActionPlan, error)
+	GetTpActionPlans(string, string) ([]*TpActionPlan, error)
 	GetTpActionTriggers(string, string) ([]*TpActionTrigger, error)
 	GetTpAccountActions(*utils.TPAccountActions) ([]*TpAccountAction, error)
 }

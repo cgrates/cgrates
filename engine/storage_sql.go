@@ -539,31 +539,6 @@ func (self *SQLStorage) SetTpActions(tpid string, acts map[string][]*utils.TPAct
 	return nil
 }
 
-func (self *SQLStorage) GetTpActions(tpid, actsId string) (*utils.TPActions, error) {
-	acts := &utils.TPActions{TPid: tpid, ActionsId: actsId}
-	var tpActions []*TpAction
-	if err := self.db.Where(&TpAction{Tpid: tpid, Tag: actsId}).Find(&tpActions).Error; err != nil {
-		return nil, err
-	}
-	for _, tpAct := range tpActions {
-		acts.Actions = append(acts.Actions, &utils.TPAction{
-			Identifier:      tpAct.Action,
-			BalanceType:     tpAct.BalanceType,
-			Direction:       tpAct.Direction,
-			Units:           tpAct.Units,
-			ExpiryTime:      tpAct.ExpiryTime,
-			TimingTags:      tpAct.TimingTags,
-			DestinationIds:  tpAct.DestinationTags,
-			RatingSubject:   tpAct.RatingSubject,
-			Category:        tpAct.Category,
-			BalanceWeight:   tpAct.BalanceWeight,
-			SharedGroup:     tpAct.SharedGroup,
-			ExtraParameters: tpAct.ExtraParameters,
-			Weight:          tpAct.Weight})
-	}
-	return acts, nil
-}
-
 // Sets actionTimings in sqlDB. Imput is expected in form map[actionTimingId][]rows, eg a full .csv file content
 func (self *SQLStorage) SetTpActionTimings(tpid string, ats map[string][]*utils.TPActionTiming) error {
 	if len(ats) == 0 {
@@ -594,16 +569,13 @@ func (self *SQLStorage) SetTpActionTimings(tpid string, ats map[string][]*utils.
 	return r.Error
 }
 
-func (self *SQLStorage) GetTPActionTimings(tpid, tag string) (map[string][]*utils.TPActionTiming, error) {
-	ats := make(map[string][]*utils.TPActionTiming)
-	var tpActionPlans []TpActionPlan
+func (self *SQLStorage) GetTPActionPlan(tpid, tag string) ([]*TpActionPlan, error) {
+
+	var tpActionPlans []*TpActionPlan
 	if err := self.db.Where(&TpActionPlan{Tpid: tpid, Tag: tag}).Find(&tpActionPlans).Error; err != nil {
 		return nil, err
 	}
-	for _, tpAp := range tpActionPlans {
-		ats[tpAp.Tag] = append(ats[tpAp.Tag], &utils.TPActionTiming{ActionsId: tpAp.ActionsTag, TimingId: tpAp.TimingTag, Weight: tpAp.Weight})
-	}
-	return ats, nil
+	return tpActionPlans, nil
 }
 
 func (self *SQLStorage) SetTpActionTriggers(tpid string, ats map[string][]*utils.TPActionTrigger) error {
@@ -1291,72 +1263,78 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) ([]*T
 	return tpRpfs, nil
 }
 
-func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string][]*utils.TPSharedGroup, error) {
-	sgs := make(map[string][]*utils.TPSharedGroup)
-
-	var tpCdrStats []TpSharedGroup
+func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) ([]*TpSharedGroup, error) {
+	var tpShareGroups []*TpSharedGroup
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
 	}
-	if err := q.Find(&tpCdrStats).Error; err != nil {
+	if err := q.Find(&tpShareGroups).Error; err != nil {
 		return nil, err
 	}
+	return tpShareGroups, nil
 
-	for _, tpSg := range tpCdrStats {
-		sgs[tpSg.Tag] = append(sgs[tpSg.Tag], &utils.TPSharedGroup{
-			Account:       tpSg.Account,
-			Strategy:      tpSg.Strategy,
-			RatingSubject: tpSg.RatingSubject,
-		})
-	}
-	return sgs, nil
 }
 
-func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPCdrStat, error) {
-	css := make(map[string][]*utils.TPCdrStat)
-
-	var tpCdrStats []TpCdrStat
+func (self *SQLStorage) GetTpLCRs(tpid, tag string) ([]*TpLcrRules, error) {
+	var tpLcrRules []*TpLcrRules
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
 	}
-	if err := q.Find(&tpCdrStats).Error; err != nil {
+	if err := q.Find(&tpLcrRules).Error; err != nil {
 		return nil, err
 	}
 
-	for _, tpCs := range tpCdrStats {
-		css[tpCs.Tag] = append(css[tpCs.Tag], &utils.TPCdrStat{
-			QueueLength:         strconv.Itoa(tpCs.QueueLength),
-			TimeWindow:          tpCs.TimeWindow,
-			Metrics:             tpCs.Metrics,
-			SetupInterval:       tpCs.SetupInterval,
-			TORs:                tpCs.Tors,
-			CdrHosts:            tpCs.CdrHosts,
-			CdrSources:          tpCs.CdrSources,
-			ReqTypes:            tpCs.ReqTypes,
-			Directions:          tpCs.Directions,
-			Tenants:             tpCs.Tenants,
-			Categories:          tpCs.Categories,
-			Accounts:            tpCs.Accounts,
-			Subjects:            tpCs.Subjects,
-			DestinationPrefixes: tpCs.DestinationPrefixes,
-			UsageInterval:       tpCs.UsageInterval,
-			Suppliers:           tpCs.Suppliers,
-			DisconnectCauses:    tpCs.DisconnectCauses,
-			MediationRunIds:     tpCs.MediationRunids,
-			RatedAccounts:       tpCs.RatedAccounts,
-			RatedSubjects:       tpCs.RatedSubjects,
-			CostInterval:        tpCs.CostInterval,
-			ActionTriggers:      tpCs.ActionTriggers,
-		})
-	}
-	return css, nil
+	return tpLcrRules, nil
 }
 
-func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[string]*utils.TPDerivedChargers, error) {
-	dcs := make(map[string]*utils.TPDerivedChargers)
-	var tpDerivedChargers []TpDerivedCharger
+func (self *SQLStorage) GetTpActions(tpid, tag string) ([]*TpAction, error) {
+	var tpActions []*TpAction
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("tag = ?", tag)
+	}
+	if err := q.Find(&tpActions).Error; err != nil {
+		return nil, err
+	}
+
+	return tpActions, nil
+}
+
+func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) ([]*TpActionTrigger, error) {
+
+	var tpActionTriggers []*TpActionTrigger
+	if err := self.db.Where(&TpActionTrigger{Tpid: tpid, Tag: tag}).Find(&tpActionTriggers).Error; err != nil {
+		return nil, err
+	}
+	return tpActionTriggers, nil
+}
+
+func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) ([]*TpAccountAction, error) {
+
+	var tpAccActs []*TpAccountAction
+	q := self.db.Where("tpid = ?", aaFltr.TPid)
+	if len(aaFltr.Direction) != 0 {
+		q = q.Where("direction = ?", aaFltr.Direction)
+	}
+	if len(aaFltr.Tenant) != 0 {
+		q = q.Where("tenant = ?", aaFltr.Tenant)
+	}
+	if len(aaFltr.Account) != 0 {
+		q = q.Where("account = ?", aaFltr.Account)
+	}
+	if len(aaFltr.LoadId) != 0 {
+		q = q.Where("loadid = ?", aaFltr.LoadId)
+	}
+	if err := q.Find(&tpAccActs).Error; err != nil {
+		return nil, err
+	}
+	return tpAccActs, nil
+}
+
+func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) ([]*TpDerivedCharger, error) {
+	var tpDerivedChargers []*TpDerivedCharger
 	q := self.db.Where("tpid = ?", dc.TPid)
 	if len(dc.Direction) != 0 {
 		q = q.Where("direction = ?", dc.Direction)
@@ -1379,184 +1357,18 @@ func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[s
 	if err := q.Find(&tpDerivedChargers).Error; err != nil {
 		return nil, err
 	}
-	for _, tpDcMdl := range tpDerivedChargers {
-		tpDc := &utils.TPDerivedChargers{TPid: tpDcMdl.Tpid, Loadid: tpDcMdl.Loadid, Direction: tpDcMdl.Direction, Tenant: tpDcMdl.Tenant, Category: tpDcMdl.Category,
-			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject}
-		tag := tpDc.GetDerivedChargesId()
-		if _, hasIt := dcs[tag]; !hasIt {
-			dcs[tag] = tpDc
-		}
-		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, &utils.TPDerivedCharger{
-			RunId:                tpDcMdl.Runid,
-			RunFilters:           tpDcMdl.RunFilters,
-			ReqTypeField:         tpDcMdl.ReqTypeField,
-			DirectionField:       tpDcMdl.DirectionField,
-			TenantField:          tpDcMdl.TenantField,
-			CategoryField:        tpDcMdl.CategoryField,
-			AccountField:         tpDcMdl.AccountField,
-			SubjectField:         tpDcMdl.SubjectField,
-			DestinationField:     tpDcMdl.DestinationField,
-			SetupTimeField:       tpDcMdl.SetupTimeField,
-			AnswerTimeField:      tpDcMdl.AnswerTimeField,
-			UsageField:           tpDcMdl.UsageField,
-			SupplierField:        tpDcMdl.SupplierField,
-			DisconnectCauseField: tpDcMdl.DisconnectCauseField,
-		})
-	}
-	return dcs, nil
+	return tpDerivedChargers, nil
 }
 
-func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {
-	lcrs := make(map[string]*LCR)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_LCRS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
-	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	for rows.Next() {
-		var id int
-		var tpid, direction, tenant, category, account, subject, destinationId, rpCategory, strategy, strategyParams, suppliers, activationTimeString string
-		var weight float64
-		if err := rows.Scan(&id, &tpid, &direction, &tenant, &category, &account, &subject, &destinationId, &rpCategory, &strategy, &strategyParams, &suppliers, &activationTimeString, &weight); err != nil {
-			return nil, err
-		}
-		tag := utils.LCRKey(direction, tenant, category, account, subject)
-		lcr, found := lcrs[tag]
-		activationTime, _ := utils.ParseTimeDetectLayout(activationTimeString)
-		if !found {
-			lcr = &LCR{
-				Direction: direction,
-				Tenant:    tenant,
-				Category:  category,
-				Account:   account,
-				Subject:   subject,
-			}
-		}
-		var act *LCRActivation
-		for _, existingAct := range lcr.Activations {
-			if existingAct.ActivationTime.Equal(activationTime) {
-				act = existingAct
-				break
-			}
-		}
-		if act == nil {
-			act = &LCRActivation{
-				ActivationTime: activationTime,
-			}
-			lcr.Activations = append(lcr.Activations, act)
-		}
-		act.Entries = append(act.Entries, &LCREntry{
-			DestinationId:  destinationId,
-			RPCategory:     category,
-			Strategy:       strategy,
-			StrategyParams: strategyParams,
-			Weight:         weight,
-		})
-		lcrs[tag] = lcr
-	}
-	return lcrs, nil
-}
-
-func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAction, error) {
-	as := make(map[string][]*utils.TPAction)
-
-	var tpActions []TpAction
+func (self *SQLStorage) GetTpCdrStats(tpid, tag string) ([]*TpCdrStat, error) {
+	var tpCdrStats []*TpCdrStat
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
 	}
-	if err := q.Find(&tpActions).Error; err != nil {
+	if err := q.Find(&tpCdrStats).Error; err != nil {
 		return nil, err
 	}
 
-	for _, tpAc := range tpActions {
-		a := &utils.TPAction{
-			Identifier:      tpAc.Action,
-			BalanceId:       tpAc.BalanceTag,
-			BalanceType:     tpAc.BalanceType,
-			Direction:       tpAc.Direction,
-			Units:           tpAc.Units,
-			ExpiryTime:      tpAc.ExpiryTime,
-			TimingTags:      tpAc.TimingTags,
-			DestinationIds:  tpAc.DestinationTags,
-			RatingSubject:   tpAc.RatingSubject,
-			Category:        tpAc.Category,
-			SharedGroup:     tpAc.SharedGroup,
-			BalanceWeight:   tpAc.BalanceWeight,
-			ExtraParameters: tpAc.ExtraParameters,
-			Weight:          tpAc.Weight,
-		}
-		as[tpAc.Tag] = append(as[tpAc.Tag], a)
-	}
-	return as, nil
-}
-
-func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {
-	ats := make(map[string][]*utils.TPActionTrigger)
-	var tpActionTriggers []TpActionTrigger
-	if err := self.db.Where(&TpActionTrigger{Tpid: tpid, Tag: tag}).Find(&tpActionTriggers).Error; err != nil {
-		return nil, err
-	}
-	for _, tpAt := range tpActionTriggers {
-		at := &utils.TPActionTrigger{
-			Id:                    tpAt.UniqueId,
-			ThresholdType:         tpAt.ThresholdType,
-			ThresholdValue:        tpAt.ThresholdValue,
-			Recurrent:             tpAt.Recurrent,
-			MinSleep:              tpAt.MinSleep,
-			BalanceId:             tpAt.BalanceTag,
-			BalanceType:           tpAt.BalanceType,
-			BalanceDirection:      tpAt.BalanceDirection,
-			BalanceDestinationIds: tpAt.BalanceDestinationTags,
-			BalanceWeight:         tpAt.BalanceWeight,
-			BalanceExpirationDate: tpAt.BalanceExpiryTime,
-			BalanceTimingTags:     tpAt.BalanceTimingTags,
-			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
-			BalanceCategory:       tpAt.BalanceCategory,
-			BalanceSharedGroup:    tpAt.BalanceSharedGroup,
-			Weight:                tpAt.Weight,
-			ActionsId:             tpAt.ActionsTag,
-			MinQueuedItems:        tpAt.MinQueuedItems,
-		}
-		ats[tpAt.Tag] = append(ats[tpAt.Tag], at)
-	}
-	return ats, nil
-}
-
-func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map[string]*utils.TPAccountActions, error) {
-	aas := make(map[string]*utils.TPAccountActions)
-	var tpAccActs []TpAccountAction
-	q := self.db.Where("tpid = ?", aaFltr.TPid)
-	if len(aaFltr.Direction) != 0 {
-		q = q.Where("direction = ?", aaFltr.Direction)
-	}
-	if len(aaFltr.Tenant) != 0 {
-		q = q.Where("tenant = ?", aaFltr.Tenant)
-	}
-	if len(aaFltr.Account) != 0 {
-		q = q.Where("account = ?", aaFltr.Account)
-	}
-	if len(aaFltr.LoadId) != 0 {
-		q = q.Where("loadid = ?", aaFltr.LoadId)
-	}
-	if err := q.Find(&tpAccActs).Error; err != nil {
-		return nil, err
-	}
-	for _, tpAa := range tpAccActs {
-		aacts := &utils.TPAccountActions{
-			TPid:             tpAa.Tpid,
-			LoadId:           tpAa.Loadid,
-			Tenant:           tpAa.Tenant,
-			Account:          tpAa.Account,
-			Direction:        tpAa.Direction,
-			ActionPlanId:     tpAa.ActionPlanTag,
-			ActionTriggersId: tpAa.ActionTriggersTag,
-		}
-		aas[aacts.KeyId()] = aacts
-	}
-	return aas, nil
+	return tpCdrStats, nil
 }

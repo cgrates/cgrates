@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -100,7 +101,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 		for _, dr := range drs.DestinationRates {
 			rate, exists := tpr.rates[dr.RateId]
 			if !exists {
-				return fmt.Errorf("Could not find rate for tag %v", dr.RateId)
+				return fmt.Errorf("could not find rate for tag %v", dr.RateId)
 			}
 			dr.Rate = rate
 			destinationExists := dr.DestinationId == utils.ANY
@@ -111,7 +112,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 				if dbExists, err := tpr.ratingStorage.HasData(DESTINATION_PREFIX, dr.DestinationId); err != nil {
 					return err
 				} else if !dbExists {
-					return fmt.Errorf("Could not get destination for tag %v", dr.DestinationId)
+					return fmt.Errorf("could not get destination for tag %v", dr.DestinationId)
 				}
 			}
 		}
@@ -134,12 +135,12 @@ func (tpr *TpReader) LoadRatingPlans() (err error) {
 		for _, rplBnd := range rplBnds {
 			t, exists := tpr.timings[rplBnd.TimingId]
 			if !exists {
-				return fmt.Errorf("Could not get timing for tag %v", rplBnd.TimingId)
+				return fmt.Errorf("could not get timing for tag %v", rplBnd.TimingId)
 			}
 			rplBnd.SetTiming(t)
 			drs, exists := tpr.destinationRates[rplBnd.DestinationRatesId]
 			if !exists {
-				return fmt.Errorf("Could not find destination rate for tag %v", rplBnd.DestinationRatesId)
+				return fmt.Errorf("could not find destination rate for tag %v", rplBnd.DestinationRatesId)
 			}
 			plan, exists := tpr.ratingPlans[tag]
 			if !exists {
@@ -178,14 +179,14 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseDate(tpRa.ActivationTime)
 			if err != nil {
-				return fmt.Errorf("Cannot parse activation time from %v", tpRa.ActivationTime)
+				return fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists {
 				if dbExists, err := tpr.ratingStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				} else if !dbExists {
-					return fmt.Errorf("Could not load rating plans for tag: %v", tpRa.RatingPlanId)
+					return fmt.Errorf("could not load rating plans for tag: %v", tpRa.RatingPlanId)
 				}
 			}
 			rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
@@ -197,6 +198,331 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 				})
 		}
 		tpr.ratingProfiles[tpRpf.KeyId()] = rpf
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadSharedGroups() (err error) {
+	tps, err := tpr.lr.GetTpSharedGroups(tpr.tpid, "")
+	if err != nil {
+		return err
+	}
+	storSgs, err := TpSharedGroups(tps).GetSharedGroups()
+	if err != nil {
+		return err
+	}
+	for tag, tpSgs := range storSgs {
+		sg, exists := tpr.sharedGroups[tag]
+		if !exists {
+			sg = &SharedGroup{
+				Id:                tag,
+				AccountParameters: make(map[string]*SharingParameters, len(tpSgs)),
+			}
+		}
+		for _, tpSg := range tpSgs {
+			sg.AccountParameters[tpSg.Account] = &SharingParameters{
+				Strategy:      tpSg.Strategy,
+				RatingSubject: tpSg.RatingSubject,
+			}
+		}
+		tpr.sharedGroups[tag] = sg
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadLCRs() (err error) {
+	tps, err := tpr.lr.GetTpLCRs(tpr.tpid, "")
+	if err != nil {
+		return err
+	}
+
+	for _, tpLcr := range tps {
+		tag := utils.LCRKey(tpLcr.Direction, tpLcr.Tenant, tpLcr.Category, tpLcr.Account, tpLcr.Subject)
+		activationTime, _ := utils.ParseTimeDetectLayout(tpLcr.ActivationTime)
+
+		lcr, found := tpr.lcrs[tag]
+		if !found {
+			lcr = &LCR{
+				Direction: tpLcr.Direction,
+				Tenant:    tpLcr.Tenant,
+				Category:  tpLcr.Category,
+				Account:   tpLcr.Account,
+				Subject:   tpLcr.Subject,
+			}
+		}
+		var act *LCRActivation
+		for _, existingAct := range lcr.Activations {
+			if existingAct.ActivationTime.Equal(activationTime) {
+				act = existingAct
+				break
+			}
+		}
+		if act == nil {
+			act = &LCRActivation{
+				ActivationTime: activationTime,
+			}
+			lcr.Activations = append(lcr.Activations, act)
+		}
+		act.Entries = append(act.Entries, &LCREntry{
+			DestinationId:  tpLcr.DestinationTag,
+			RPCategory:     tpLcr.Category,
+			Strategy:       tpLcr.Strategy,
+			StrategyParams: tpLcr.StrategyParams,
+			Weight:         tpLcr.Weight,
+		})
+		tpr.lcrs[tag] = lcr
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadActions() (err error) {
+	tps, err := tpr.lr.GetTpActions(tpr.tpid, "")
+	if err != nil {
+		return err
+	}
+
+	storActs, err := TpActions(tps).GetActions()
+	if err != nil {
+		return err
+	}
+	// map[string][]*Action
+	for tag, tpacts := range storActs {
+		acts := make([]*Action, len(tpacts))
+		for idx, tpact := range tpacts {
+			acts[idx] = &Action{
+				Id:               tag + strconv.Itoa(idx),
+				ActionType:       tpact.Identifier,
+				BalanceType:      tpact.BalanceType,
+				Direction:        tpact.Direction,
+				Weight:           tpact.Weight,
+				ExtraParameters:  tpact.ExtraParameters,
+				ExpirationString: tpact.ExpiryTime,
+				Balance: &Balance{
+					Uuid:           utils.GenUUID(),
+					Id:             tpact.BalanceId,
+					Value:          tpact.Units,
+					Weight:         tpact.BalanceWeight,
+					TimingIDs:      tpact.TimingTags,
+					RatingSubject:  tpact.RatingSubject,
+					Category:       tpact.Category,
+					DestinationIds: tpact.DestinationIds,
+				},
+			}
+			// load action timings from tags
+			if acts[idx].Balance.TimingIDs != "" {
+				timingIds := strings.Split(acts[idx].Balance.TimingIDs, utils.INFIELD_SEP)
+				for _, timingID := range timingIds {
+					if timing, found := tpr.timings[timingID]; found {
+						acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
+							Years:     timing.Years,
+							Months:    timing.Months,
+							MonthDays: timing.MonthDays,
+							WeekDays:  timing.WeekDays,
+							StartTime: timing.StartTime,
+							EndTime:   timing.EndTime,
+						})
+					} else {
+						return fmt.Errorf("could not find timing: %v", timingID)
+					}
+				}
+			}
+		}
+		tpr.actions[tag] = acts
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadActionPlans() (err error) {
+	tps, err := tpr.lr.GetTpActionPlans(tpr.tpid, "")
+	if err != nil {
+		return err
+	}
+
+	storAps, err := TpActionPlans(tps).GetActionPlans()
+	if err != nil {
+		return err
+	}
+	for atId, ats := range storAps {
+		for _, at := range ats {
+
+			_, exists := tpr.actions[at.ActionsId]
+			if !exists {
+				return fmt.Errorf("actionTiming: Could not load the action for tag: %v", at.ActionsId)
+			}
+			t, exists := tpr.timings[at.TimingId]
+			if !exists {
+				return fmt.Errorf("actionTiming: Could not load the timing for tag: %v", at.TimingId)
+			}
+			actTmg := &ActionTiming{
+				Uuid:   utils.GenUUID(),
+				Id:     atId,
+				Weight: at.Weight,
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     t.Years,
+						Months:    t.Months,
+						MonthDays: t.MonthDays,
+						WeekDays:  t.WeekDays,
+						StartTime: t.StartTime,
+					},
+				},
+				ActionsId: at.ActionsId,
+			}
+			tpr.actionsTimings[atId] = append(tpr.actionsTimings[atId], actTmg)
+		}
+	}
+
+	return nil
+}
+
+func (tpr *TpReader) LoadActionTriggers() (err error) {
+	tps, err := tpr.lr.GetTpActionTriggers(tpr.tpid, "")
+	if err != nil {
+		return err
+	}
+	storAts, err := TpActionTriggers(tps).GetActionTriggers()
+	if err != nil {
+		return err
+	}
+	for key, atrsLst := range storAts {
+		atrs := make([]*ActionTrigger, len(atrsLst))
+		for idx, atr := range atrsLst {
+			balanceExpirationDate, _ := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate)
+			id := atr.Id
+			if id == "" {
+				id = utils.GenUUID()
+			}
+			minSleep, err := utils.ParseDurationWithSecs(atr.MinSleep)
+			if err != nil {
+				return err
+			}
+			atrs[idx] = &ActionTrigger{
+				Id:                    id,
+				ThresholdType:         atr.ThresholdType,
+				ThresholdValue:        atr.ThresholdValue,
+				Recurrent:             atr.Recurrent,
+				MinSleep:              minSleep,
+				BalanceId:             atr.BalanceId,
+				BalanceType:           atr.BalanceType,
+				BalanceDirection:      atr.BalanceDirection,
+				BalanceDestinationIds: atr.BalanceDestinationIds,
+				BalanceWeight:         atr.BalanceWeight,
+				BalanceExpirationDate: balanceExpirationDate,
+				BalanceTimingTags:     atr.BalanceTimingTags,
+				BalanceRatingSubject:  atr.BalanceRatingSubject,
+				BalanceCategory:       atr.BalanceCategory,
+				BalanceSharedGroup:    atr.BalanceSharedGroup,
+				Weight:                atr.Weight,
+				ActionsId:             atr.ActionsId,
+				MinQueuedItems:        atr.MinQueuedItems,
+			}
+			if atrs[idx].Id == "" {
+				atrs[idx].Id = utils.GenUUID()
+			}
+		}
+		tpr.actionsTriggers[key] = atrs
+	}
+
+	return nil
+}
+
+func (tpr *TpReader) LoadAccountActions() (err error) {
+	tps, err := tpr.lr.GetTpAccountActions(nil)
+	if err != nil {
+		return err
+	}
+	storAts, err := TpAccountActions(tps).GetAccountActions()
+	if err != nil {
+		return err
+	}
+
+	for _, aa := range storAts {
+		if _, alreadyDefined := tpr.accountActions[aa.KeyId()]; alreadyDefined {
+			return fmt.Errorf("Duplicate account action found: %s", aa.KeyId())
+		}
+
+		// extract aliases from subject
+		aliases := strings.Split(aa.Account, ";")
+		tpr.dirtyAccAliases = append(tpr.dirtyAccAliases, &TenantAccount{Tenant: aa.Tenant, Account: aliases[0]})
+		if len(aliases) > 1 {
+			aa.Account = aliases[0]
+			for _, alias := range aliases[1:] {
+				tpr.accAliases[utils.AccountAliasKey(aa.Tenant, alias)] = aa.Account
+			}
+		}
+		aTriggers, exists := tpr.actionsTriggers[aa.ActionTriggersId]
+		if !exists {
+			return fmt.Errorf("Could not get action triggers for tag %v", aa.ActionTriggersId)
+		}
+		ub := &Account{
+			Id:             aa.KeyId(),
+			ActionTriggers: aTriggers,
+		}
+		tpr.accountActions[aa.KeyId()] = ub
+		aTimings, exists := tpr.actionsTimings[aa.ActionPlanId]
+		if !exists {
+			log.Printf("Could not get action timing for tag %v", aa.ActionPlanId)
+			// must not continue here
+		}
+		for _, at := range aTimings {
+			at.AccountIds = append(at.AccountIds, aa.KeyId())
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadDerivedChargers() (err error) {
+	tps, err := tpr.lr.GetTpDerivedChargers(nil)
+	if err != nil {
+		return err
+	}
+	storDcs, err := TpDerivedChargers(tps).GetDerivedChargers()
+	if err != nil {
+		return err
+	}
+	for _, tpDcs := range storDcs {
+		tag := tpDcs.GetDerivedChargersKey()
+		if _, hasIt := tpr.derivedChargers[tag]; !hasIt {
+			tpr.derivedChargers[tag] = make(utils.DerivedChargers, 0) // Load object map since we use this method also from LoadDerivedChargers
+		}
+		for _, tpDc := range tpDcs.DerivedChargers {
+			if dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
+				tpDc.AccountField, tpDc.SubjectField, tpDc.DestinationField, tpDc.SetupTimeField, tpDc.AnswerTimeField, tpDc.UsageField, tpDc.SupplierField,
+				tpDc.DisconnectCauseField); err != nil {
+				return err
+			} else {
+				tpr.derivedChargers[tag] = append(tpr.derivedChargers[tag], dc)
+			}
+		}
+	}
+	return nil
+}
+
+func (tpr *TpReader) LoadCdrStats() (err error) {
+	tps, err := tpr.lr.GetTpCdrStats(tpr.tpid, "")
+	if err != nil {
+		return err
+	}
+	storStats, err := TpCdrStats(tps).GetCdrStats()
+	if err != nil {
+		return err
+	}
+	for tag, tpStats := range storStats {
+		for _, tpStat := range tpStats {
+			var cs *CdrStats
+			var exists bool
+			if cs, exists = tpr.cdrStats[tag]; !exists {
+				cs = &CdrStats{Id: tag}
+			}
+			triggerTag := tpStat.ActionTriggers
+			triggers, exists := tpr.actionsTriggers[triggerTag]
+			if triggerTag != "" && !exists {
+				// only return error if there was something there for the tag
+				return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
+			}
+			UpdateCdrStats(cs, triggers, tpStat)
+			tpr.cdrStats[tag] = cs
+		}
 	}
 	return nil
 }
@@ -230,7 +556,7 @@ func (tpr *TpReader) LoadAll() error {
 	if err = tpr.LoadActions(); err != nil {
 		return err
 	}
-	if err = tpr.LoadActionTimings(); err != nil {
+	if err = tpr.LoadActionPlans(); err != nil {
 		return err
 	}
 	if err = tpr.LoadActionTriggers(); err != nil {
@@ -269,7 +595,7 @@ func (tpr *TpReader) IsValid() bool {
 
 func (tpr *TpReader) WriteToDatabase(dataStorage RatingStorage, accountingStorage AccountingStorage, flush, verbose bool) (err error) {
 	if dataStorage == nil {
-		return errors.New("No database connection!")
+		return errors.New("no database connection!")
 	}
 	if flush {
 		dataStorage.Flush("")

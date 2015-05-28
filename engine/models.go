@@ -117,12 +117,14 @@ type TpLcrRules struct {
 	Tpid           string
 	Direction      string
 	Tenant         string
-	Customer       string
-	DestinationTag string
 	Category       string
+	Account        string
+	Subject        string
+	DestinationTag string
+	RpCategory     string
 	Strategy       string
-	Suppliers      string
-	ActivatinTime  string
+	StrategyParams string
+	ActivationTime string
 	Weight         float64
 	CreatedAt      time.Time
 }

@@ -2,10 +2,12 @@ package engine
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -239,4 +241,311 @@ func (tps TpRatingProfiles) GetRatingProfiles() (map[string]*utils.TPRatingProfi
 
 	}
 	return rpfs, nil
+}
+
+type TpSharedGroups []*TpSharedGroup
+
+func (tps TpSharedGroups) GetSharedGroups() (map[string][]*utils.TPSharedGroup, error) {
+	sgs := make(map[string][]*utils.TPSharedGroup)
+	for _, tpSg := range tps {
+		sgs[tpSg.Tag] = append(sgs[tpSg.Tag], &utils.TPSharedGroup{
+			Account:       tpSg.Account,
+			Strategy:      tpSg.Strategy,
+			RatingSubject: tpSg.RatingSubject,
+		})
+	}
+	return sgs, nil
+}
+
+type TpActions []*TpAction
+
+func (tps TpActions) GetActions() (map[string][]*utils.TPAction, error) {
+	as := make(map[string][]*utils.TPAction)
+	for _, tpAc := range tps {
+		a := &utils.TPAction{
+			Identifier:      tpAc.Action,
+			BalanceId:       tpAc.BalanceTag,
+			BalanceType:     tpAc.BalanceType,
+			Direction:       tpAc.Direction,
+			Units:           tpAc.Units,
+			ExpiryTime:      tpAc.ExpiryTime,
+			TimingTags:      tpAc.TimingTags,
+			DestinationIds:  tpAc.DestinationTags,
+			RatingSubject:   tpAc.RatingSubject,
+			Category:        tpAc.Category,
+			SharedGroup:     tpAc.SharedGroup,
+			BalanceWeight:   tpAc.BalanceWeight,
+			ExtraParameters: tpAc.ExtraParameters,
+			Weight:          tpAc.Weight,
+		}
+		as[tpAc.Tag] = append(as[tpAc.Tag], a)
+	}
+
+	return as, nil
+}
+
+type TpActionPlans []*TpActionPlan
+
+func (tps TpActionPlans) GetActionPlans() (map[string][]*utils.TPActionTiming, error) {
+	ats := make(map[string][]*utils.TPActionTiming)
+	for _, tpAp := range tps {
+		ats[tpAp.Tag] = append(ats[tpAp.Tag], &utils.TPActionTiming{ActionsId: tpAp.ActionsTag, TimingId: tpAp.TimingTag, Weight: tpAp.Weight})
+	}
+	return ats, nil
+}
+
+type TpActionTriggers []*TpActionTrigger
+
+func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTrigger, error) {
+	ats := make(map[string][]*utils.TPActionTrigger)
+	for _, tpAt := range tps {
+		at := &utils.TPActionTrigger{
+			Id:                    tpAt.UniqueId,
+			ThresholdType:         tpAt.ThresholdType,
+			ThresholdValue:        tpAt.ThresholdValue,
+			Recurrent:             tpAt.Recurrent,
+			MinSleep:              tpAt.MinSleep,
+			BalanceId:             tpAt.BalanceTag,
+			BalanceType:           tpAt.BalanceType,
+			BalanceDirection:      tpAt.BalanceDirection,
+			BalanceDestinationIds: tpAt.BalanceDestinationTags,
+			BalanceWeight:         tpAt.BalanceWeight,
+			BalanceExpirationDate: tpAt.BalanceExpiryTime,
+			BalanceTimingTags:     tpAt.BalanceTimingTags,
+			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
+			BalanceCategory:       tpAt.BalanceCategory,
+			BalanceSharedGroup:    tpAt.BalanceSharedGroup,
+			Weight:                tpAt.Weight,
+			ActionsId:             tpAt.ActionsTag,
+			MinQueuedItems:        tpAt.MinQueuedItems,
+		}
+		ats[tpAt.Tag] = append(ats[tpAt.Tag], at)
+	}
+	return ats, nil
+}
+
+type TpAccountActions []*TpAccountAction
+
+func (tps TpAccountActions) GetAccountActions() (map[string]*utils.TPAccountActions, error) {
+	aas := make(map[string]*utils.TPAccountActions)
+	for _, tpAa := range tps {
+		aacts := &utils.TPAccountActions{
+			TPid:             tpAa.Tpid,
+			LoadId:           tpAa.Loadid,
+			Tenant:           tpAa.Tenant,
+			Account:          tpAa.Account,
+			Direction:        tpAa.Direction,
+			ActionPlanId:     tpAa.ActionPlanTag,
+			ActionTriggersId: tpAa.ActionTriggersTag,
+		}
+		aas[aacts.KeyId()] = aacts
+	}
+	return aas, nil
+}
+
+type TpDerivedChargers []*TpDerivedCharger
+
+func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedChargers, error) {
+	dcs := make(map[string]*utils.TPDerivedChargers)
+	for _, tpDcMdl := range tps {
+		tpDc := &utils.TPDerivedChargers{TPid: tpDcMdl.Tpid, Loadid: tpDcMdl.Loadid, Direction: tpDcMdl.Direction, Tenant: tpDcMdl.Tenant, Category: tpDcMdl.Category,
+			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject}
+		tag := tpDc.GetDerivedChargesId()
+		if _, hasIt := dcs[tag]; !hasIt {
+			dcs[tag] = tpDc
+		}
+		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, &utils.TPDerivedCharger{
+			RunId:                tpDcMdl.Runid,
+			RunFilters:           tpDcMdl.RunFilters,
+			ReqTypeField:         tpDcMdl.ReqTypeField,
+			DirectionField:       tpDcMdl.DirectionField,
+			TenantField:          tpDcMdl.TenantField,
+			CategoryField:        tpDcMdl.CategoryField,
+			AccountField:         tpDcMdl.AccountField,
+			SubjectField:         tpDcMdl.SubjectField,
+			DestinationField:     tpDcMdl.DestinationField,
+			SetupTimeField:       tpDcMdl.SetupTimeField,
+			AnswerTimeField:      tpDcMdl.AnswerTimeField,
+			UsageField:           tpDcMdl.UsageField,
+			SupplierField:        tpDcMdl.SupplierField,
+			DisconnectCauseField: tpDcMdl.DisconnectCauseField,
+		})
+	}
+	return dcs, nil
+}
+
+type TpCdrStats []*TpCdrStat
+
+func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
+	css := make(map[string][]*utils.TPCdrStat)
+	for _, tpCs := range tps {
+		css[tpCs.Tag] = append(css[tpCs.Tag], &utils.TPCdrStat{
+			QueueLength:         strconv.Itoa(tpCs.QueueLength),
+			TimeWindow:          tpCs.TimeWindow,
+			Metrics:             tpCs.Metrics,
+			SetupInterval:       tpCs.SetupInterval,
+			TORs:                tpCs.Tors,
+			CdrHosts:            tpCs.CdrHosts,
+			CdrSources:          tpCs.CdrSources,
+			ReqTypes:            tpCs.ReqTypes,
+			Directions:          tpCs.Directions,
+			Tenants:             tpCs.Tenants,
+			Categories:          tpCs.Categories,
+			Accounts:            tpCs.Accounts,
+			Subjects:            tpCs.Subjects,
+			DestinationPrefixes: tpCs.DestinationPrefixes,
+			UsageInterval:       tpCs.UsageInterval,
+			Suppliers:           tpCs.Suppliers,
+			DisconnectCauses:    tpCs.DisconnectCauses,
+			MediationRunIds:     tpCs.MediationRunids,
+			RatedAccounts:       tpCs.RatedAccounts,
+			RatedSubjects:       tpCs.RatedSubjects,
+			CostInterval:        tpCs.CostInterval,
+			ActionTriggers:      tpCs.ActionTriggers,
+		})
+	}
+	return css, nil
+}
+
+func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *utils.TPCdrStat) {
+	if tpCs.QueueLength != "" {
+		if qi, err := strconv.Atoi(tpCs.QueueLength); err == nil {
+			cs.QueueLength = qi
+		} else {
+			log.Printf("Error parsing QueuedLength %v for cdrs stats %v", tpCs.QueueLength, cs.Id)
+		}
+	}
+	if tpCs.TimeWindow != "" {
+		if d, err := time.ParseDuration(tpCs.TimeWindow); err == nil {
+			cs.TimeWindow = d
+		} else {
+			log.Printf("Error parsing TimeWindow %v for cdrs stats %v", tpCs.TimeWindow, cs.Id)
+		}
+	}
+	if tpCs.Metrics != "" {
+		cs.Metrics = append(cs.Metrics, tpCs.Metrics)
+	}
+	if tpCs.SetupInterval != "" {
+		times := strings.Split(tpCs.SetupInterval, utils.INFIELD_SEP)
+		if len(times) > 0 {
+			if sTime, err := utils.ParseTimeDetectLayout(times[0]); err == nil {
+				if len(cs.SetupInterval) < 1 {
+					cs.SetupInterval = append(cs.SetupInterval, sTime)
+				} else {
+					cs.SetupInterval[0] = sTime
+				}
+			} else {
+				log.Printf("Error parsing TimeWindow %v for cdrs stats %v", tpCs.SetupInterval, cs.Id)
+			}
+		}
+		if len(times) > 1 {
+			if eTime, err := utils.ParseTimeDetectLayout(times[1]); err == nil {
+				if len(cs.SetupInterval) < 2 {
+					cs.SetupInterval = append(cs.SetupInterval, eTime)
+				} else {
+					cs.SetupInterval[1] = eTime
+				}
+			} else {
+				log.Printf("Error parsing TimeWindow %v for cdrs stats %v", tpCs.SetupInterval, cs.Id)
+			}
+		}
+	}
+	if tpCs.TORs != "" {
+		cs.TOR = append(cs.TOR, tpCs.TORs)
+	}
+	if tpCs.CdrHosts != "" {
+		cs.CdrHost = append(cs.CdrHost, tpCs.CdrHosts)
+	}
+	if tpCs.CdrSources != "" {
+		cs.CdrSource = append(cs.CdrSource, tpCs.CdrSources)
+	}
+	if tpCs.ReqTypes != "" {
+		cs.ReqType = append(cs.ReqType, tpCs.ReqTypes)
+	}
+	if tpCs.Directions != "" {
+		cs.Direction = append(cs.Direction, tpCs.Directions)
+	}
+	if tpCs.Tenants != "" {
+		cs.Tenant = append(cs.Tenant, tpCs.Tenants)
+	}
+	if tpCs.Categories != "" {
+		cs.Category = append(cs.Category, tpCs.Categories)
+	}
+	if tpCs.Accounts != "" {
+		cs.Account = append(cs.Account, tpCs.Accounts)
+	}
+	if tpCs.Subjects != "" {
+		cs.Subject = append(cs.Subject, tpCs.Subjects)
+	}
+	if tpCs.DestinationPrefixes != "" {
+		cs.DestinationPrefix = append(cs.DestinationPrefix, tpCs.DestinationPrefixes)
+	}
+	if tpCs.UsageInterval != "" {
+		durations := strings.Split(tpCs.UsageInterval, utils.INFIELD_SEP)
+		if len(durations) > 0 {
+			if sDuration, err := time.ParseDuration(durations[0]); err == nil {
+				if len(cs.UsageInterval) < 1 {
+					cs.UsageInterval = append(cs.UsageInterval, sDuration)
+				} else {
+					cs.UsageInterval[0] = sDuration
+				}
+			} else {
+				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", tpCs.UsageInterval, cs.Id)
+			}
+		}
+		if len(durations) > 1 {
+			if eDuration, err := time.ParseDuration(durations[1]); err == nil {
+				if len(cs.UsageInterval) < 2 {
+					cs.UsageInterval = append(cs.UsageInterval, eDuration)
+				} else {
+					cs.UsageInterval[1] = eDuration
+				}
+			} else {
+				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", tpCs.UsageInterval, cs.Id)
+			}
+		}
+	}
+	if tpCs.Suppliers != "" {
+		cs.Supplier = append(cs.Supplier, tpCs.Suppliers)
+	}
+	if tpCs.DisconnectCauses != "" {
+		cs.DisconnectCause = append(cs.DisconnectCause, tpCs.DisconnectCauses)
+	}
+	if tpCs.MediationRunIds != "" {
+		cs.MediationRunIds = append(cs.MediationRunIds, tpCs.MediationRunIds)
+	}
+	if tpCs.RatedAccounts != "" {
+		cs.RatedAccount = append(cs.RatedAccount, tpCs.RatedAccounts)
+	}
+	if tpCs.RatedSubjects != "" {
+		cs.RatedSubject = append(cs.RatedSubject, tpCs.RatedSubjects)
+	}
+	if tpCs.CostInterval != "" {
+		costs := strings.Split(tpCs.CostInterval, utils.INFIELD_SEP)
+		if len(costs) > 0 {
+			if sCost, err := strconv.ParseFloat(costs[0], 64); err == nil {
+				if len(cs.CostInterval) < 1 {
+					cs.CostInterval = append(cs.CostInterval, sCost)
+				} else {
+					cs.CostInterval[0] = sCost
+				}
+			} else {
+				log.Printf("Error parsing CostInterval %v for cdrs stats %v", tpCs.CostInterval, cs.Id)
+			}
+		}
+		if len(costs) > 1 {
+			if eCost, err := strconv.ParseFloat(costs[1], 64); err == nil {
+				if len(cs.CostInterval) < 2 {
+					cs.CostInterval = append(cs.CostInterval, eCost)
+				} else {
+					cs.CostInterval[1] = eCost
+				}
+			} else {
+				log.Printf("Error parsing CostInterval %v for cdrs stats %v", tpCs.CostInterval, cs.Id)
+			}
+		}
+	}
+	if triggers != nil {
+		cs.Triggers = append(cs.Triggers, triggers...)
+	}
 }
