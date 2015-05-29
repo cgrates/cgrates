@@ -36,7 +36,7 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 	elem := reflect.New(st).Elem()
 	for fildName, fieldValue := range fieldValueMap {
 		field := elem.FieldByName(fildName)
-		if field.IsValid() && field.CanSet() {
+		if field.IsValid() {
 			switch field.Kind() {
 			case reflect.Float64:
 				value, err := strconv.ParseFloat(fieldValue, 64)
@@ -50,6 +50,32 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 		}
 	}
 	return elem.Interface(), nil
+}
+
+func csvDump(s interface{}, sep string) (string, error) {
+	fieldIndexMap := make(map[string]int)
+	st := reflect.TypeOf(s)
+	numFields := st.NumField()
+	for i := 0; i < numFields; i++ {
+		field := st.Field(i)
+		index := field.Tag.Get("index")
+		if index != "" {
+			if idx, err := strconv.Atoi(index); err != nil {
+				return "", fmt.Errorf("invalid %v.%v index %v", st.Name(), field.Name, index)
+			} else {
+				fieldIndexMap[field.Name] = idx
+			}
+		}
+	}
+	elem := reflect.ValueOf(s)
+	result := make([]string, len(fieldIndexMap))
+	for fieldName, fieldIndex := range fieldIndexMap {
+		field := elem.FieldByName(fieldName)
+		if field.IsValid() && fieldIndex < len(result) {
+			result[fieldIndex] = field.String()
+		}
+	}
+	return strings.Join(result, sep), nil
 }
 
 func getColumnCount(s interface{}) int {
