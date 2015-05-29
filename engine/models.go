@@ -32,12 +32,12 @@ import (
 type TpTiming struct {
 	Id        int64
 	Tpid      string
-	Tag       string
-	Years     string
-	Months    string
-	MonthDays string
-	WeekDays  string
-	Time      string
+	Tag       string `index:"0" re:""`
+	Years     string `index:"1" re:""`
+	Months    string `index:"2" re:""`
+	MonthDays string `index:"3" re:""`
+	WeekDays  string `index:"4" re:""`
+	Time      string `index:"5" re:""`
 	CreatedAt time.Time
 }
 
@@ -52,35 +52,35 @@ type TpDestination struct {
 type TpRate struct {
 	Id                 int64
 	Tpid               string
-	Tag                string
-	ConnectFee         float64
-	Rate               float64
-	RateUnit           string
-	RateIncrement      string
-	GroupIntervalStart string
+	Tag                string  `index:"0" re:""`
+	ConnectFee         float64 `index:"1" re:""`
+	Rate               float64 `index:"2" re:""`
+	RateUnit           string  `index:"3" re:""`
+	RateIncrement      string  `index:"4" re:""`
+	GroupIntervalStart string  `index:"5" re:""`
 	CreatedAt          time.Time
 }
 
 type TpDestinationRate struct {
 	Id               int64
 	Tpid             string
-	Tag              string
-	DestinationsTag  string
-	RatesTag         string
-	RoundingMethod   string
-	RoundingDecimals int
-	MaxCost          float64
-	MaxCostStrategy  string
+	Tag              string  `index:"0" re:""`
+	DestinationsTag  string  `index:"1" re:""`
+	RatesTag         string  `index:"2" re:""`
+	RoundingMethod   string  `index:"3" re:""`
+	RoundingDecimals int     `index:"4" re:""`
+	MaxCost          float64 `index:"5" re:""`
+	MaxCostStrategy  string  `index:"6" re:""`
 	CreatedAt        time.Time
 }
 
 type TpRatingPlan struct {
 	Id           int64
 	Tpid         string
-	Tag          string
-	DestratesTag string
-	TimingTag    string
-	Weight       float64
+	Tag          string  `index:"0" re:""`
+	DestratesTag string  `index:"1" re:""`
+	TimingTag    string  `index:"2" re:""`
+	Weight       float64 `index:"3" re:""`
 	CreatedAt    time.Time
 }
 
@@ -88,14 +88,14 @@ type TpRatingProfile struct {
 	Id               int64
 	Tpid             string
 	Loadid           string
-	Direction        string
-	Tenant           string
-	Category         string
-	Subject          string
-	ActivationTime   string
-	RatingPlanTag    string
-	FallbackSubjects string
-	CdrStatQueueIds  string
+	Direction        string `index:"0" re:""`
+	Tenant           string `index:"1" re:""`
+	Category         string `index:"2" re:""`
+	Subject          string `index:"3" re:""`
+	ActivationTime   string `index:"4" re:""`
+	RatingPlanTag    string `index:"5" re:""`
+	FallbackSubjects string `index:"6" re:""`
+	CdrStatQueueIds  string `index:"7" re:""`
 	CreatedAt        time.Time
 }
 
@@ -115,16 +115,16 @@ func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
 type TpLcrRules struct {
 	Id             int64
 	Tpid           string
-	Direction      string
-	Tenant         string
-	Category       string
-	Account        string
-	Subject        string
-	DestinationTag string
-	RpCategory     string
-	Strategy       string
-	StrategyParams string
-	ActivationTime string
+	Direction      string `index:"0" re:""`
+	Tenant         string `index:"1" re:""`
+	Category       string `index:"2" re:""`
+	Account        string `index:"3" re:""`
+	Subject        string `index:"4" re:""`
+	DestinationTag string `index:"5" re:""`
+	RpCategory     string `index:"6" re:""`
+	Strategy       string `index:"7" re:""`
+	StrategyParams string `index:"8" re:""`
+	ActivationTime string `index:"9" re:""`
 	Weight         float64
 	CreatedAt      time.Time
 }
@@ -132,56 +132,56 @@ type TpLcrRules struct {
 type TpAction struct {
 	Id              int64
 	Tpid            string
-	Tag             string
-	Action          string
-	BalanceTag      string
-	BalanceType     string
-	Direction       string
-	Units           float64
-	ExpiryTime      string
-	TimingTags      string
-	DestinationTags string
-	RatingSubject   string
-	Category        string
-	SharedGroup     string
-	BalanceWeight   float64
-	ExtraParameters string
-	Weight          float64
+	Tag             string  `index:"0" re:""`
+	Action          string  `index:"1" re:""`
+	BalanceTag      string  `index:"2" re:""`
+	BalanceType     string  `index:"3" re:""`
+	Direction       string  `index:"4" re:""`
+	Units           float64 `index:4" re:""`
+	ExpiryTime      string  `index:"5" re:""`
+	TimingTags      string  `index:"6" re:""`
+	DestinationTags string  `index:"7" re:""`
+	RatingSubject   string  `index:"8" re:""`
+	Category        string  `index:"9" re:""`
+	SharedGroup     string  `index:"10" re:""`
+	BalanceWeight   float64 `index:"11" re:""`
+	ExtraParameters string  `index:"12" re:""`
+	Weight          float64 `index:"13" re:""`
 	CreatedAt       time.Time
 }
 
 type TpActionPlan struct {
 	Id         int64
 	Tpid       string
-	Tag        string
-	ActionsTag string
-	TimingTag  string
-	Weight     float64
+	Tag        string  `index:"0" re:""`
+	ActionsTag string  `index:"1" re:""`
+	TimingTag  string  `index:"2" re:""`
+	Weight     float64 `index:"3" re:""`
 	CreatedAt  time.Time
 }
 
 type TpActionTrigger struct {
 	Id                     int64
 	Tpid                   string
-	Tag                    string
-	UniqueId               string
-	ThresholdType          string
-	ThresholdValue         float64
-	Recurrent              bool
-	MinSleep               string
-	BalanceTag             string
-	BalanceType            string
-	BalanceDirection       string
-	BalanceDestinationTags string
-	BalanceWeight          float64
-	BalanceExpiryTime      string
-	BalanceTimingTags      string
-	BalanceRatingSubject   string
-	BalanceCategory        string
-	BalanceSharedGroup     string
-	MinQueuedItems         int
-	ActionsTag             string
-	Weight                 float64
+	Tag                    string  `index:"0" re:""`
+	UniqueId               string  `index:"1" re:""`
+	ThresholdType          string  `index:"2" re:""`
+	ThresholdValue         float64 `index:"3" re:""`
+	Recurrent              bool    `index:"4" re:""`
+	MinSleep               string  `index:"5" re:""`
+	BalanceTag             string  `index:"6" re:""`
+	BalanceType            string  `index:"7" re:""`
+	BalanceDirection       string  `index:"8" re:""`
+	BalanceDestinationTags string  `index:"9" re:""`
+	BalanceWeight          float64 `index:"10" re:""`
+	BalanceExpiryTime      string  `index:"11" re:""`
+	BalanceTimingTags      string  `index:"12" re:""`
+	BalanceRatingSubject   string  `index:"13" re:""`
+	BalanceCategory        string  `index:"14" re:""`
+	BalanceSharedGroup     string  `index:"15" re:""`
+	MinQueuedItems         int     `index:"16" re:""`
+	ActionsTag             string  `index:"17" re:""`
+	Weight                 float64 `index:"18" re:""`
 	CreatedAt              time.Time
 }
 
@@ -189,11 +189,11 @@ type TpAccountAction struct {
 	Id                int64
 	Tpid              string
 	Loadid            string
-	Direction         string
-	Tenant            string
-	Account           string
-	ActionPlanTag     string
-	ActionTriggersTag string
+	Direction         string `index:"0" re:""`
+	Tenant            string `index:"1" re:""`
+	Account           string `index:"2" re:""`
+	ActionPlanTag     string `index:"3" re:""`
+	ActionTriggersTag string `index:"4" re:""`
 	CreatedAt         time.Time
 }
 
@@ -212,10 +212,10 @@ func (aa *TpAccountAction) SetAccountActionId(id string) error {
 type TpSharedGroup struct {
 	Id            int64
 	Tpid          string
-	Tag           string
-	Account       string
-	Strategy      string
-	RatingSubject string
+	Tag           string `index:"0" re:""`
+	Account       string `index:"0" re:""`
+	Strategy      string `index:"0" re:""`
+	RatingSubject string `index:"0" re:""`
 	CreatedAt     time.Time
 }
 
@@ -223,25 +223,25 @@ type TpDerivedCharger struct {
 	Id                   int64
 	Tpid                 string
 	Loadid               string
-	Direction            string
-	Tenant               string
-	Category             string
-	Account              string
-	Subject              string
-	Runid                string
-	RunFilters           string
-	ReqTypeField         string
-	DirectionField       string
-	TenantField          string
-	CategoryField        string
-	AccountField         string
-	SubjectField         string
-	DestinationField     string
-	SetupTimeField       string
-	AnswerTimeField      string
-	UsageField           string
-	SupplierField        string
-	DisconnectCauseField string
+	Direction            string `index:"0" re:""`
+	Tenant               string `index:"1" re:""`
+	Category             string `index:"2" re:""`
+	Account              string `index:"3" re:""`
+	Subject              string `index:"4" re:""`
+	Runid                string `index:"5" re:""`
+	RunFilters           string `index:"6" re:""`
+	ReqTypeField         string `index:"7" re:""`
+	DirectionField       string `index:"8" re:""`
+	TenantField          string `index:"9" re:""`
+	CategoryField        string `index:"10" re:""`
+	AccountField         string `index:"11" re:""`
+	SubjectField         string `index:"12" re:""`
+	DestinationField     string `index:"13" re:""`
+	SetupTimeField       string `index:"14" re:""`
+	AnswerTimeField      string `index:"15" re:""`
+	UsageField           string `index:"16" re:""`
+	SupplierField        string `index:"17" re:""`
+	DisconnectCauseField string `index:"18" re:""`
 	CreatedAt            time.Time
 }
 
@@ -262,29 +262,29 @@ func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
 type TpCdrStat struct {
 	Id                  int64
 	Tpid                string
-	Tag                 string
-	QueueLength         int
-	TimeWindow          string
-	Metrics             string
-	SetupInterval       string
-	Tors                string
-	CdrHosts            string
-	CdrSources          string
-	ReqTypes            string
-	Directions          string
-	Tenants             string
-	Categories          string
-	Accounts            string
-	Subjects            string
-	DestinationPrefixes string
-	UsageInterval       string
-	Suppliers           string
-	DisconnectCauses    string
-	MediationRunids     string
-	RatedAccounts       string
-	RatedSubjects       string
-	CostInterval        string
-	ActionTriggers      string
+	Tag                 string `index:"0" re:""`
+	QueueLength         int    `index:"1" re:""`
+	TimeWindow          string `index:"2" re:""`
+	Metrics             string `index:"3" re:""`
+	SetupInterval       string `index:"4" re:""`
+	Tors                string `index:"5" re:""`
+	CdrHosts            string `index:"6" re:""`
+	CdrSources          string `index:"7" re:""`
+	ReqTypes            string `index:"8" re:""`
+	Directions          string `index:"9" re:""`
+	Tenants             string `index:"10" re:""`
+	Categories          string `index:"11" re:""`
+	Accounts            string `index:"12" re:""`
+	Subjects            string `index:"13" re:""`
+	DestinationPrefixes string `index:"14" re:""`
+	UsageInterval       string `index:"15" re:""`
+	Suppliers           string `index:"16" re:""`
+	DisconnectCauses    string `index:"17" re:""`
+	MediationRunids     string `index:"18" re:""`
+	RatedAccounts       string `index:"19" re:""`
+	RatedSubjects       string `index:"20" re:""`
+	CostInterval        string `index:"21" re:""`
+	ActionTriggers      string `index:"22" re:""`
 	CreatedAt           time.Time
 }
 
