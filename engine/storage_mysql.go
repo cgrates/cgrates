@@ -62,17 +62,6 @@ func (self *MySQLStorage) Flush(scriptsPath string) (err error) {
 	return nil
 }
 
-func (self *MySQLStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
-	if tm == nil {
-		return nil //Nothing to set
-	}
-	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time, created_at) VALUES('%s','%s','%s','%s','%s','%s','%s', %d) ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
-		utils.TBL_TP_TIMINGS, tm.TPid, tm.TimingId, tm.Years, tm.Months, tm.MonthDays, tm.WeekDays, tm.Time, time.Now().Unix())); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (self *MySQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
 	if cc == nil {
 		return nil

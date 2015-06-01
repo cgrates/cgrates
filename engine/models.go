@@ -112,6 +112,10 @@ func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
 	return nil
 }
 
+func (rpf *TpRatingProfile) GetRatingProfileId() string {
+	return utils.ConcatenatedKey(rpf.Loadid, rpf.Direction, rpf.Tenant, rpf.Category, rpf.Subject)
+}
+
 type TpLcrRules struct {
 	Id             int64
 	Tpid           string
@@ -127,6 +131,23 @@ type TpLcrRules struct {
 	ActivationTime string `index:"9" re:""`
 	Weight         float64
 	CreatedAt      time.Time
+}
+
+func (lcr *TpLcrRules) SetLcrRulesId(id string) error {
+	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(ids) != 5 {
+		return fmt.Errorf("wrong LcrRules Id: %s", id)
+	}
+	lcr.Direction = ids[0]
+	lcr.Tenant = ids[2]
+	lcr.Category = ids[3]
+	lcr.Account = ids[3]
+	lcr.Subject = ids[5]
+	return nil
+}
+
+func (lcr *TpLcrRules) GetLcrRulesId() string {
+	return utils.LCRKey(lcr.Direction, lcr.Tenant, lcr.Category, lcr.Account, lcr.Subject)
 }
 
 type TpAction struct {
@@ -209,6 +230,10 @@ func (aa *TpAccountAction) SetAccountActionId(id string) error {
 	return nil
 }
 
+func (aa *TpAccountAction) GetAccountActionId() string {
+	return utils.AccountKey(aa.Tenant, aa.Account, aa.Direction)
+}
+
 type TpSharedGroup struct {
 	Id            int64
 	Tpid          string
@@ -257,6 +282,10 @@ func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
 	tpdc.Account = ids[4]
 	tpdc.Subject = ids[5]
 	return nil
+}
+
+func (tpdc *TpDerivedCharger) GetDerivedChargersId() string {
+	return utils.ConcatenatedKey(tpdc.Loadid, tpdc.Direction, tpdc.Tenant, tpdc.Category, tpdc.Account, tpdc.Subject)
 }
 
 type TpCdrStat struct {

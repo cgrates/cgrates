@@ -65,24 +65,6 @@ func (self *PostgresStorage) Flush(scriptsPath string) (err error) {
 	return nil
 }
 
-func (self *PostgresStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
-	if tm == nil {
-		return nil //Nothing to set
-	}
-	tx := self.db.Begin()
-	if err := tx.Save(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId, Years: tm.Years, Months: tm.Months, MonthDays: tm.MonthDays, WeekDays: tm.WeekDays, Time: tm.Time, CreatedAt: time.Now()}).Error; err != nil {
-		tx.Rollback()
-		tx = self.db.Begin()
-		updated := tx.Model(TpTiming{}).Where(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId}).Updates(&TpTiming{Years: tm.Years, Months: tm.Months, MonthDays: tm.MonthDays, WeekDays: tm.WeekDays, Time: tm.Time})
-		if updated.Error != nil {
-			tx.Rollback()
-			return updated.Error
-		}
-	}
-	tx.Commit()
-	return nil
-}
-
 func (self *PostgresStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
 	if cc == nil {
 		return nil

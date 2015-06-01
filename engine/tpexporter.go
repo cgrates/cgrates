@@ -34,8 +34,6 @@ import (
 
 var (
 	TPExportFormats = []string{utils.CSV}
-	exportedFiles   = []string{utils.TIMINGS_CSV, utils.DESTINATIONS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV,
-		utils.SHARED_GROUPS_CSV, utils.ACTIONS_CSV, utils.ACTION_PLANS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV, utils.DERIVED_CHARGERS_CSV, utils.CDR_STATS_CSV}
 )
 
 func NewTPExporter(storDb LoadStorage, tpID, expPath, fileFormat, sep string, compress bool) (*TPExporter, error) {
@@ -88,26 +86,103 @@ type TPExporter struct {
 
 func (self *TPExporter) Run() error {
 	self.removeFiles() // Make sure we clean the folder before starting with new one
-	for _, fHandler := range []func() error{
-		self.exportTimings,
-		self.exportDestinations,
-		self.exportRates,
-		self.exportDestinationRates,
-		self.exportRatingPlans,
-		self.exportRatingProfiles,
-		self.exportSharedGroups,
-		self.exportActions,
-		self.exportActionPlans,
-		self.exportActionTriggers,
-		self.exportAccountActions,
-		self.exportDerivedChargers,
-		self.exportCdrStats,
-	} {
-		if err := fHandler(); err != nil {
+	toExportMap := make(map[string]interface{})
+
+	storData, err := self.storDb.GetTpTimings(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.TIMINGS_CSV] = storData
+
+	storData, err := self.storDb.GetTpDestinations(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.DESTINATIONS_CSV] = storData
+
+	storData, err := self.storDb.GetTpRates(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.RATES_CSV] = storData
+
+	storData, err = self.storDb.GetTpRates(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.RATES_CSV] = storData
+
+	storData, err = self.storDb.GetTpDestinationRates(self.tpID, "", nil)
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.DESTINATION_RATES_CSV] = storData
+
+	storData, err = self.storDb.GetTpRatingPlans(self.tpID, "", nil)
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.RATING_PLANS_CSV] = storData
+
+	storData, err = self.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: self.tpID})
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.RATING_PROFILE_CSV] = storData
+
+	storData, err = self.storDb.GetTpSharedGroups(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.SHARED_GROUPS_CSV] = storData
+
+	storData, err = self.storDb.GetTpActions(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.ACTIONS_CSV] = storData
+
+	storData, err = self.storDb.GetTpActionPlans(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.ACTION_PLANS_CSV] = storData
+
+	storData, err = self.storDb.GetTpActionTriggers(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.ACTIONS_TRIGGERS_CSV] = storData
+
+	storData, err = self.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: self.tpID})
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.ACCOUNT_ACTIONS_CSV] = storData
+
+	storData, err = self.storDb.GetTpDerivedChargers(&utils.TPDerivedChargers{TPid: self.tpID})
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.DERIVED_CHARGERS_CSV] = storData
+
+	storData, err = self.storDb.GetTpCdrStats(self.tpID, "")
+	if err != nil {
+		return err
+	}
+	toExportMap[utils.CDR_STATS_CSV] = storData
+
+	for fileName, storData := range toExportMap {
+		for _, tpItem := range storData {
+			exportedData = append(exportedData, tpItem)
+		}
+		if err := self.writeOut(fileName, exportedData); err != nil {
 			self.removeFiles()
 			return err
 		}
+		self.exportedFiles = append(self.exportedFiles, fileName)
 	}
+
 	if self.compress {
 		if err := self.zipWritter.Close(); err != nil {
 			return err
@@ -128,7 +203,7 @@ func (self *TPExporter) removeFiles() error {
 }
 
 // General method to write the content out to a file on path or zip archive
-func (self *TPExporter) writeOut(fileName string, tpData []utils.ExportedData) error {
+func (self *TPExporter) writeOut(fileName string, tpData []interface{}) error {
 	if len(tpData) == 0 {
 		return nil
 	}
@@ -162,261 +237,15 @@ func (self *TPExporter) writeOut(fileName string, tpData []utils.ExportedData) e
 	}
 
 	for _, tpItem := range tpData {
-		for _, record := range tpItem.AsExportSlice() {
-			if err := writerOut.Write(record); err != nil {
-				return err
-			}
+		record, err := csvDump(tpItem)
+		if err != nil {
+			return err
+		}
+		if err := writerOut.Write(record); err != nil {
+			return err
 		}
 	}
 	writerOut.Flush() // In case of .csv will dump data on hdd
-	return nil
-}
-
-func (self *TPExporter) exportTimings() error {
-	fileName := exportedFiles[0] // Define it out of group so we make sure it is cleaned up by removeFiles
-	storData, err := self.storDb.GetTpTimings(self.tpID, "")
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for _, tpItem := range storData {
-		exportedData[idx] = tpItem
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportDestinations() error {
-	fileName := exportedFiles[1]
-	storData, err := self.storDb.GetTpDestinations(self.tpID, "")
-	dsts := TpDestinations(storData).GetDestinations()
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for _, dst := range dsts {
-		exportedData[idx] = &utils.TPDestination{TPid: self.tpID, DestinationId: dst.Id, Prefixes: dst.Prefixes}
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportRates() error {
-	fileName := exportedFiles[2]
-	storData, err := self.storDb.GetTpRates(self.tpID, "")
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for _, tpItem := range storData {
-		exportedData[idx] = tpItem
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportDestinationRates() error {
-	fileName := exportedFiles[3]
-	storData, err := self.storDb.GetTpDestinationRates(self.tpID, "", nil)
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for _, tpItem := range storData {
-		exportedData[idx] = tpItem
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportRatingPlans() error {
-	fileName := exportedFiles[4]
-	storData, err := self.storDb.GetTpRatingPlans(self.tpID, "", nil)
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for rpId, rpBinding := range storData {
-		exportedData[idx] = &utils.TPRatingPlan{TPid: self.tpID, RatingPlanId: rpId, RatingPlanBindings: rpBinding}
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportRatingProfiles() error {
-	fileName := exportedFiles[5]
-	storData, err := self.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: self.tpID})
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for _, tpItem := range storData {
-		exportedData[idx] = tpItem
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportSharedGroups() error {
-	fileName := exportedFiles[6]
-	storData, err := self.storDb.GetTpSharedGroups(self.tpID, "")
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for sgId, sg := range storData {
-		exportedData[idx] = &utils.TPSharedGroups{TPid: self.tpID, SharedGroupsId: sgId, SharedGroups: sg}
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportActions() error {
-	fileName := exportedFiles[7]
-	storData, err := self.storDb.GetTpActions(self.tpID, "")
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for actsId, acts := range storData {
-		exportedData[idx] = &utils.TPActions{TPid: self.tpID, ActionsId: actsId, Actions: acts}
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportActionPlans() error {
-	fileName := exportedFiles[8]
-	storData, err := self.storDb.GetTPActionTimings(self.tpID, "")
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for apId, ats := range storData {
-		exportedData[idx] = &utils.TPActionPlan{TPid: self.tpID, Id: apId, ActionPlan: ats}
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportActionTriggers() error {
-	fileName := exportedFiles[9]
-	storData, err := self.storDb.GetTpActionTriggers(self.tpID, "")
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for atId, ats := range storData {
-		exportedData[idx] = &utils.TPActionTriggers{TPid: self.tpID, ActionTriggersId: atId, ActionTriggers: ats}
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportAccountActions() error {
-	fileName := exportedFiles[10]
-	storData, err := self.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: self.tpID})
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for _, tpItem := range storData {
-		exportedData[idx] = tpItem
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportDerivedChargers() error {
-	fileName := exportedFiles[11]
-	storData, err := self.storDb.GetTpDerivedChargers(&utils.TPDerivedChargers{TPid: self.tpID})
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for _, tpItem := range storData {
-		exportedData[idx] = tpItem
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
-	return nil
-}
-
-func (self *TPExporter) exportCdrStats() error {
-	fileName := exportedFiles[12]
-	storData, err := self.storDb.GetTpCdrStats(self.tpID, "")
-	if err != nil {
-		return nil
-	}
-	exportedData := make([]utils.ExportedData, len(storData))
-	idx := 0
-	for cdrstId, cdrsts := range storData {
-		exportedData[idx] = &utils.TPCdrStats{TPid: self.tpID, CdrStatsId: cdrstId, CdrStats: cdrsts}
-		idx += 1
-	}
-	if err := self.writeOut(fileName, exportedData); err != nil {
-		return err
-	}
-	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 

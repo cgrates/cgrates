@@ -263,6 +263,7 @@ func ConcatenatedKey(keyVals ...string) string {
 
 func LCRKey(direction, tenant, category, account, subject string) string {
 	return ConcatenatedKey(direction, tenant, category, account, subject)
+
 }
 
 func RatingSubjectAliasKey(tenant, subject string) string {

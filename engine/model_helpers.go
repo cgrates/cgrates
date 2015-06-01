@@ -52,7 +52,7 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 	return elem.Interface(), nil
 }
 
-func csvDump(s interface{}, sep string) (string, error) {
+func csvDump(s interface{}) ([]string, error) {
 	fieldIndexMap := make(map[string]int)
 	st := reflect.TypeOf(s)
 	numFields := st.NumField()
@@ -61,7 +61,7 @@ func csvDump(s interface{}, sep string) (string, error) {
 		index := field.Tag.Get("index")
 		if index != "" {
 			if idx, err := strconv.Atoi(index); err != nil {
-				return "", fmt.Errorf("invalid %v.%v index %v", st.Name(), field.Name, index)
+				return nil, fmt.Errorf("invalid %v.%v index %v", st.Name(), field.Name, index)
 			} else {
 				fieldIndexMap[field.Name] = idx
 			}
@@ -75,7 +75,7 @@ func csvDump(s interface{}, sep string) (string, error) {
 			result[fieldIndex] = field.String()
 		}
 	}
-	return strings.Join(result, sep), nil
+	return result, nil
 }
 
 func getColumnCount(s interface{}) int {
@@ -92,7 +92,7 @@ func getColumnCount(s interface{}) int {
 	return count
 }
 
-type TpDestinations []*TpDestination
+type TpDestinations []TpDestination
 
 func (tps TpDestinations) GetDestinations() (map[string]*Destination, error) {
 	destinations := make(map[string]*Destination)
@@ -108,7 +108,7 @@ func (tps TpDestinations) GetDestinations() (map[string]*Destination, error) {
 	return destinations, nil
 }
 
-type TpTimings []*TpTiming
+type TpTimings []TpTiming
 
 func (tps TpTimings) GetTimings() (map[string]*utils.TPTiming, error) {
 	timings := make(map[string]*utils.TPTiming)
@@ -133,7 +133,7 @@ func (tps TpTimings) GetTimings() (map[string]*utils.TPTiming, error) {
 	return timings, nil
 }
 
-type TpRates []*TpRate
+type TpRates []TpRate
 
 func (tps TpRates) GetRates() (map[string]*utils.TPRate, error) {
 	rates := make(map[string]*utils.TPRate)
@@ -159,7 +159,7 @@ func (tps TpRates) GetRates() (map[string]*utils.TPRate, error) {
 	return rates, nil
 }
 
-type TpDestinationRates []*TpDestinationRate
+type TpDestinationRates []TpDestinationRate
 
 func (tps TpDestinationRates) GetDestinationRates() (map[string]*utils.TPDestinationRate, error) {
 	rts := make(map[string]*utils.TPDestinationRate)
@@ -189,7 +189,7 @@ func (tps TpDestinationRates) GetDestinationRates() (map[string]*utils.TPDestina
 	return rts, nil
 }
 
-type TpRatingPlans []*TpRatingPlan
+type TpRatingPlans []TpRatingPlan
 
 func (tps TpRatingPlans) GetRatingPlans() (map[string][]*utils.TPRatingPlanBinding, error) {
 	rpbns := make(map[string][]*utils.TPRatingPlanBinding)
@@ -238,7 +238,7 @@ func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) 
 	return
 }
 
-type TpRatingProfiles []*TpRatingProfile
+type TpRatingProfiles []TpRatingProfile
 
 func (tps TpRatingProfiles) GetRatingProfiles() (map[string]*utils.TPRatingProfile, error) {
 	rpfs := make(map[string]*utils.TPRatingProfile)
@@ -269,7 +269,7 @@ func (tps TpRatingProfiles) GetRatingProfiles() (map[string]*utils.TPRatingProfi
 	return rpfs, nil
 }
 
-type TpSharedGroups []*TpSharedGroup
+type TpSharedGroups []TpSharedGroup
 
 func (tps TpSharedGroups) GetSharedGroups() (map[string][]*utils.TPSharedGroup, error) {
 	sgs := make(map[string][]*utils.TPSharedGroup)
@@ -283,7 +283,7 @@ func (tps TpSharedGroups) GetSharedGroups() (map[string][]*utils.TPSharedGroup, 
 	return sgs, nil
 }
 
-type TpActions []*TpAction
+type TpActions []TpAction
 
 func (tps TpActions) GetActions() (map[string][]*utils.TPAction, error) {
 	as := make(map[string][]*utils.TPAction)
@@ -310,7 +310,7 @@ func (tps TpActions) GetActions() (map[string][]*utils.TPAction, error) {
 	return as, nil
 }
 
-type TpActionPlans []*TpActionPlan
+type TpActionPlans []TpActionPlan
 
 func (tps TpActionPlans) GetActionPlans() (map[string][]*utils.TPActionTiming, error) {
 	ats := make(map[string][]*utils.TPActionTiming)
@@ -320,7 +320,7 @@ func (tps TpActionPlans) GetActionPlans() (map[string][]*utils.TPActionTiming, e
 	return ats, nil
 }
 
-type TpActionTriggers []*TpActionTrigger
+type TpActionTriggers []TpActionTrigger
 
 func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTrigger, error) {
 	ats := make(map[string][]*utils.TPActionTrigger)
@@ -350,7 +350,7 @@ func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTri
 	return ats, nil
 }
 
-type TpAccountActions []*TpAccountAction
+type TpAccountActions []TpAccountAction
 
 func (tps TpAccountActions) GetAccountActions() (map[string]*utils.TPAccountActions, error) {
 	aas := make(map[string]*utils.TPAccountActions)
@@ -369,7 +369,7 @@ func (tps TpAccountActions) GetAccountActions() (map[string]*utils.TPAccountActi
 	return aas, nil
 }
 
-type TpDerivedChargers []*TpDerivedCharger
+type TpDerivedChargers []TpDerivedCharger
 
 func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedChargers, error) {
 	dcs := make(map[string]*utils.TPDerivedChargers)
@@ -400,7 +400,7 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 	return dcs, nil
 }
 
-type TpCdrStats []*TpCdrStat
+type TpCdrStats []TpCdrStat
 
 func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 	css := make(map[string][]*utils.TPCdrStat)

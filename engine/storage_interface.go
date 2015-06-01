@@ -137,38 +137,38 @@ type LoadStorage interface {
 type LoadReader interface {
 	GetTpIds() ([]string, error)
 	GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
-	GetTpTimings(string, string) ([]*TpTiming, error)
-	GetTpDestinations(string, string) ([]*TpDestination, error)
-	GetTpRates(string, string) ([]*TpRate, error)
-	GetTpDestinationRates(string, string, *utils.Paginator) ([]*TpDestinationRate, error)
-	GetTpRatingPlans(string, string, *utils.Paginator) ([]*TpRatingPlan, error)
-	GetTpRatingProfiles(*utils.TPRatingProfile) ([]*TpRatingProfile, error)
-	GetTpSharedGroups(string, string) ([]*TpSharedGroup, error)
-	GetTpCdrStats(string, string) ([]*TpCdrStat, error)
-	GetTpDerivedChargers(*utils.TPDerivedChargers) ([]*TpDerivedCharger, error)
-	GetTpLCRs(string, string) ([]*TpLcrRules, error)
-	GetTpActions(string, string) ([]*TpAction, error)
-	GetTpActionPlans(string, string) ([]*TpActionPlan, error)
-	GetTpActionTriggers(string, string) ([]*TpActionTrigger, error)
-	GetTpAccountActions(*utils.TPAccountActions) ([]*TpAccountAction, error)
+	GetTpTimings(string, string) ([]TpTiming, error)
+	GetTpDestinations(string, string) ([]TpDestination, error)
+	GetTpRates(string, string) ([]TpRate, error)
+	GetTpDestinationRates(string, string, *utils.Paginator) ([]TpDestinationRate, error)
+	GetTpRatingPlans(string, string, *utils.Paginator) ([]TpRatingPlan, error)
+	GetTpRatingProfiles(*utils.TPRatingProfile) ([]TpRatingProfile, error)
+	GetTpSharedGroups(string, string) ([]TpSharedGroup, error)
+	GetTpCdrStats(string, string) ([]TpCdrStat, error)
+	GetTpDerivedChargers(*utils.TPDerivedChargers) ([]TpDerivedCharger, error)
+	GetTpLCRs(string, string) ([]TpLcrRules, error)
+	GetTpActions(string, string) ([]TpAction, error)
+	GetTpActionPlans(string, string) ([]TpActionPlan, error)
+	GetTpActionTriggers(string, string) ([]TpActionTrigger, error)
+	GetTpAccountActions(*utils.TPAccountActions) ([]TpAccountAction, error)
 }
 
 type LoadWriter interface {
 	RemTpData(string, string, ...string) error
-	SetTpTiming(*utils.ApierTPTiming) error
-	SetTpDestination(string, *Destination) error
-	SetTpRates(string, map[string][]*utils.RateSlot) error
-	SetTpDestinationRates(string, map[string][]*utils.DestinationRate) error
-	SetTpRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
-	SetTpRatingProfiles(string, map[string]*utils.TPRatingProfile) error
-	SetTpSharedGroups(string, map[string][]*utils.TPSharedGroup) error
-	SetTpCdrStats(string, map[string][]*utils.TPCdrStat) error
-	SetTpDerivedChargers(string, map[string][]*utils.TPDerivedCharger) error
-	SetTpLCRs(string, map[string]*LCR) error
-	SetTpActions(string, map[string][]*utils.TPAction) error
-	SetTpActionTimings(string, map[string][]*utils.TPActionTiming) error
-	SetTpActionTriggers(string, map[string][]*utils.TPActionTrigger) error
-	SetTpAccountActions(string, map[string]*utils.TPAccountActions) error
+	SetTpTimings([]TpTiming) error
+	SetTpDestinations([]TpDestination) error
+	SetTpRates([]TpRate) error
+	SetTpDestinationRates([]TpDestinationRate) error
+	SetTpRatingPlans([]TpRatingPlan) error
+	SetTpRatingProfiles([]TpRatingProfile) error
+	SetTpSharedGroups([]TpSharedGroup) error
+	SetTpCdrStats([]TpCdrStat) error
+	SetTpDerivedChargers([]TpDerivedCharger) error
+	SetTpLCRs([]TpLcrRules) error
+	SetTpActions([]TpAction) error
+	SetTpActionTimings([]TpActionPlan) error
+	SetTpActionTriggers([]TpActionTrigger) error
+	SetTpAccountActions([]TpAccountActions) error
 }
 
 type Marshaler interface {
