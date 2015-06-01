@@ -903,6 +903,7 @@ func TestTutLocalCdrStatsAfter(t *testing.T) {
 	}
 }
 
+/*
 func TestTutLocalStopCgrEngine(t *testing.T) {
 	if !*testLocal {
 		return
@@ -911,3 +912,4 @@ func TestTutLocalStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

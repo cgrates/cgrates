@@ -140,23 +140,49 @@
 			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
 		],
 		"trailer_fields": [],							// template of the exported trailer fields
+	},
+	"customer_tpl": {
+		"cdr_format": "csv",							// exported CDRs format <csv>
+		"field_separator": ";",
+		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
+		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
+		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
+		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
+		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
+		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
+		"mask_length": 0,								// length of the destination suffix to be masked
+		"export_dir": "/tmp/cgr_kamevapi/cgrates/cdre",			// path where the exported CDRs will be placed
+		"header_fields": [],							// template of the exported header fields
+		"content_fields": [								// template of the exported content fields
+			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
+			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
+			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
+			{"tag":"Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "tenant"},
+			{"tag":"Category", "cdr_field_id": "category", "type": "cdrfield", "value": "category"},
+			{"tag":"Subject", "cdr_field_id": "account", "type": "cdrfield", "value": "account"},
+			{"tag":"Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "~destination:s/^1(\\d+)/+$1/:s/^\\+(\\d+)/00$1/"},
+			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
+			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
+			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
+		],
+		"trailer_fields": [],							// template of the exported trailer fields
 	}
 },
 
 
 //"cdrc": {
 //	"*default": {
-//		"enabled": false,							// enable CDR client functionality
-//		"cdrs_address": "internal",					// address where to reach CDR server. <internal|x.y.z.y:1234>
-//		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv>
-//		"field_separator": ",",						// separator used in case of csv files
-//		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-//		"data_usage_multiply_factor": 1024,			// conversion factor for data usage
-//		"cdr_in_dir": "/var/log/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
-//		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
-//		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
-//		"cdr_filter": "",							// Filter CDR records to import
-//		"cdr_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+//		"enabled": false,                                                       // enable CDR client functionality
+//		"cdrs_address": "internal",                                     // address where to reach CDR server. <internal|x.y.z.y:1234>
+//		"cdr_format": "csv",                                            // CDR file format <csv|freeswitch_csv|fwv>
+//		"field_separator": ",",                                         // separator used in case of csv files
+//		"run_delay": 0,                                                         // sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+//		"data_usage_multiply_factor": 1024,                     // conversion factor for data usage
+//		"cdr_in_dir": "/var/log/cgrates/cdrc/in",       // absolute path towards the directory where the CDRs are stored
+//		"cdr_out_dir": "/var/log/cgrates/cdrc/out",     // absolute path towards the directory where processed CDRs will be moved
+//		"cdr_source_id": "freeswitch_csv",                      // free form field, tag identifying the source of the CDRs within CDRS database
+//		"cdr_filter": "",                                                       // Filter CDR records to import
+//		"cdr_fields":[                                                          // import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 //			{"tag": "tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "2", "mandatory": true},
 //			{"tag": "accid", "cdr_field_id": "accid", "type": "cdrfield", "value": "3", "mandatory": true},
 //			{"tag": "reqtype", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "4", "mandatory": true},
@@ -170,7 +196,7 @@
 //			{"tag": "answer_time", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "12", "mandatory": true},
 //			{"tag": "usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "13", "mandatory": true},
 //		],
-//	}
+//	},
 //},
 
 
