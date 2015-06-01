@@ -76,7 +76,7 @@ func (csvs *CSVStorage) GetTpTimings(string, string) ([]*TpTiming, error) {
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in timings csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpTiming, err := csvLoad(TpTiming{}, record); err != nil {
 			return nil, err
@@ -102,7 +102,7 @@ func (csvs *CSVStorage) GetTpDestinations(tpid, tag string) ([]*TpDestination, e
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in destinations csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpDest, err := csvLoad(TpDestination{}, record); err != nil {
 			return nil, err
@@ -128,7 +128,7 @@ func (csvs *CSVStorage) GetTpRates(tpid, tag string) ([]*TpRate, error) {
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in rates csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpRate{}, record); err != nil {
 			return nil, err
@@ -154,7 +154,7 @@ func (csvs *CSVStorage) GetTpDestinationRates(tpid, tag string, p *utils.Paginat
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in destinationrates csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpDestinationRate{}, record); err != nil {
 			return nil, err
@@ -180,7 +180,7 @@ func (csvs *CSVStorage) GetTpRatingPlans(tpid, tag string, p *utils.Paginator) (
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in rating plans csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpRatingPlan{}, record); err != nil {
 			return nil, err
@@ -206,7 +206,7 @@ func (csvs *CSVStorage) GetTpRatingProfiles(filter *utils.TPRatingProfile) ([]*T
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line rating profiles csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpRatingProfile{}, record); err != nil {
 			return nil, err
@@ -233,7 +233,7 @@ func (csvs *CSVStorage) GetTpSharedGroups(tpid, tag string) ([]*TpSharedGroup, e
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in shared groups csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpSharedGroup{}, record); err != nil {
 			return nil, err
@@ -260,7 +260,7 @@ func (csvs *CSVStorage) GetTpLCRs(tpid, tag string) ([]*TpLcrRules, error) {
 		if tpRate, err := csvLoad(TpLcrRules{}, record); err != nil {
 			if err != nil {
 				log.Print("bad line in lcr rules csv: ", err)
-				continue
+				return nil, err
 			}
 			return nil, err
 		} else {
@@ -285,7 +285,7 @@ func (csvs *CSVStorage) GetTpActions(tpid, tag string) ([]*TpAction, error) {
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in actions csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpAction{}, record); err != nil {
 			return nil, err
@@ -333,7 +333,7 @@ func (csvs *CSVStorage) GetTpActionTriggers(tpid, tag string) ([]*TpActionTrigge
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in action triggers csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpActionTrigger{}, record); err != nil {
 			return nil, err
@@ -359,7 +359,7 @@ func (csvs *CSVStorage) GetTpAccountActions(filter []*TpAccountAction) ([]*TpAcc
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in account actions csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpAccountAction{}, record); err != nil {
 			return nil, err
@@ -385,7 +385,7 @@ func (csvs *CSVStorage) GetTpDerivedChargers(filter *utils.TPDerivedChargers) ([
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in derived chargers csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpDerivedCharger{}, record); err != nil {
 			return nil, err
@@ -411,7 +411,7 @@ func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]*TpCdrStat, error) {
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in cdr stats csv: ", err)
-			continue
+			return nil, err
 		}
 		if tpRate, err := csvLoad(TpCdrStat{}, record); err != nil {
 			return nil, err
