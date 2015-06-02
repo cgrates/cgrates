@@ -86,97 +86,122 @@ type TPExporter struct {
 
 func (self *TPExporter) Run() error {
 	self.removeFiles() // Make sure we clean the folder before starting with new one
-	toExportMap := make(map[string]interface{})
+	toExportMap := make(map[string][]interface{})
 
-	storData, err := self.storDb.GetTpTimings(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpTimings(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.TIMINGS_CSV] = append(toExportMap[utils.TIMINGS_CSV], sd)
+		}
 	}
-	toExportMap[utils.TIMINGS_CSV] = storData
 
-	storData, err := self.storDb.GetTpDestinations(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpDestinations(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.DESTINATIONS_CSV] = append(toExportMap[utils.DESTINATIONS_CSV], sd)
+		}
 	}
-	toExportMap[utils.DESTINATIONS_CSV] = storData
 
-	storData, err := self.storDb.GetTpRates(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpRates(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.RATES_CSV] = append(toExportMap[utils.RATES_CSV], sd)
+		}
 	}
-	toExportMap[utils.RATES_CSV] = storData
 
-	storData, err = self.storDb.GetTpRates(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpRates(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.RATES_CSV] = append(toExportMap[utils.RATES_CSV], sd)
+		}
 	}
-	toExportMap[utils.RATES_CSV] = storData
 
-	storData, err = self.storDb.GetTpDestinationRates(self.tpID, "", nil)
-	if err != nil {
+	if storData, err := self.storDb.GetTpDestinationRates(self.tpID, "", nil); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.DESTINATION_RATES_CSV] = append(toExportMap[utils.DESTINATION_RATES_CSV], sd)
+		}
 	}
-	toExportMap[utils.DESTINATION_RATES_CSV] = storData
 
-	storData, err = self.storDb.GetTpRatingPlans(self.tpID, "", nil)
-	if err != nil {
+	if storData, err := self.storDb.GetTpRatingPlans(self.tpID, "", nil); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.RATING_PLANS_CSV] = append(toExportMap[utils.RATING_PLANS_CSV], sd)
+		}
 	}
-	toExportMap[utils.RATING_PLANS_CSV] = storData
 
-	storData, err = self.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: self.tpID})
-	if err != nil {
+	if storData, err := self.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: self.tpID}); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.RATING_PROFILES_CSV] = append(toExportMap[utils.RATING_PROFILES_CSV], sd)
+		}
 	}
-	toExportMap[utils.RATING_PROFILE_CSV] = storData
 
-	storData, err = self.storDb.GetTpSharedGroups(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpSharedGroups(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.SHARED_GROUPS_CSV] = append(toExportMap[utils.SHARED_GROUPS_CSV], sd)
+		}
 	}
-	toExportMap[utils.SHARED_GROUPS_CSV] = storData
 
-	storData, err = self.storDb.GetTpActions(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpActions(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.ACTIONS_CSV] = append(toExportMap[utils.ACTIONS_CSV], sd)
+		}
 	}
-	toExportMap[utils.ACTIONS_CSV] = storData
 
-	storData, err = self.storDb.GetTpActionPlans(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpActionPlans(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.ACTION_PLANS_CSV] = append(toExportMap[utils.ACTION_PLANS_CSV], sd)
+		}
 	}
-	toExportMap[utils.ACTION_PLANS_CSV] = storData
 
-	storData, err = self.storDb.GetTpActionTriggers(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpActionTriggers(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.ACTION_TRIGGERS_CSV] = append(toExportMap[utils.ACTION_TRIGGERS_CSV], sd)
+		}
 	}
-	toExportMap[utils.ACTIONS_TRIGGERS_CSV] = storData
 
-	storData, err = self.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: self.tpID})
-	if err != nil {
+	if storData, err := self.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: self.tpID}); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.ACCOUNT_ACTIONS_CSV] = append(toExportMap[utils.ACCOUNT_ACTIONS_CSV], sd)
+		}
 	}
-	toExportMap[utils.ACCOUNT_ACTIONS_CSV] = storData
 
-	storData, err = self.storDb.GetTpDerivedChargers(&utils.TPDerivedChargers{TPid: self.tpID})
-	if err != nil {
+	if storData, err := self.storDb.GetTpDerivedChargers(&utils.TPDerivedChargers{TPid: self.tpID}); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.DERIVED_CHARGERS_CSV] = append(toExportMap[utils.DERIVED_CHARGERS_CSV], sd)
+		}
 	}
-	toExportMap[utils.DERIVED_CHARGERS_CSV] = storData
 
-	storData, err = self.storDb.GetTpCdrStats(self.tpID, "")
-	if err != nil {
+	if storData, err := self.storDb.GetTpCdrStats(self.tpID, ""); err != nil {
 		return err
+	} else {
+		for _, sd := range storData {
+			toExportMap[utils.CDR_STATS_CSV] = append(toExportMap[utils.CDR_STATS_CSV], sd)
+		}
 	}
-	toExportMap[utils.CDR_STATS_CSV] = storData
 
 	for fileName, storData := range toExportMap {
-		for _, tpItem := range storData {
-			exportedData = append(exportedData, tpItem)
-		}
-		if err := self.writeOut(fileName, exportedData); err != nil {
+		if err := self.writeOut(fileName, storData); err != nil {
 			self.removeFiles()
 			return err
 		}
@@ -196,7 +221,7 @@ func (self *TPExporter) removeFiles() error {
 	if len(self.exportPath) == 0 {
 		return nil
 	}
-	for _, fileName := range exportedFiles {
+	for _, fileName := range self.exportedFiles {
 		os.Remove(path.Join(self.exportPath, fileName))
 	}
 	return nil

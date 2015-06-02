@@ -193,7 +193,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args ...string) error {
 	return nil
 }
 
-func (self *PostgresStorage) SetTPTiming(timings []TpTiming) error {
+func (self *SQLStorage) SetTpTimings(timings []TpTiming) error {
 	if len(timings) == 0 {
 		return nil
 	}
@@ -218,7 +218,7 @@ func (self *PostgresStorage) SetTPTiming(timings []TpTiming) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTpDestination(dests []TpDestination) error {
+func (self *SQLStorage) SetTpDestinations(dests []TpDestination) error {
 	if len(dests) == 0 {
 		return nil
 	}
@@ -258,7 +258,7 @@ func (self *SQLStorage) SetTpRates(rs []TpRate) error {
 				return err
 			}
 		}
-		save := tx.Save(rPlan)
+		save := tx.Save(rate)
 		if save.Error != nil {
 			tx.Rollback()
 			return save.Error

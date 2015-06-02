@@ -60,24 +60,24 @@ func TestMySQLSetGetTPTiming(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	tm := &utils.ApierTPTiming{TPid: TEST_SQL, TimingId: "ALWAYS", Time: "00:00:00"}
-	if err := mysqlDb.SetTPTiming(tm); err != nil {
+	tm := TpTiming{Tpid: TEST_SQL, Tag: "ALWAYS", Time: "00:00:00"}
+	if err := mysqlDb.SetTpTimings([]TpTiming{tm}); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
+	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Tag); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
-		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
+	} else if !reflect.DeepEqual(tm, tmgs[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[0])
 	}
 	// Update
 	tm.Time = "00:00:01"
-	if err := mysqlDb.SetTPTiming(tm); err != nil {
+	if err := mysqlDb.SetTpTimings([]TpTiming{tm}); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
+	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Tag); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
-		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
+	} else if !reflect.DeepEqual(tm, tmgs[0]) {
+		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[0])
 	}
 }
 
@@ -85,15 +85,20 @@ func TestMySQLSetGetTPDestination(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	dst := &Destination{Id: TEST_SQL, Prefixes: []string{"+49", "+49151", "+49176"}}
-	if err := mysqlDb.SetTPDestination(TEST_SQL, dst); err != nil {
+	dst := []TpDestination{
+		TpDestination{Tag: TEST_SQL, Prefix: "+49"},
+		TpDestination{Tag: TEST_SQL, Prefix: "+49151"},
+		TpDestination{Tag: TEST_SQL, Prefix: "+49176"},
+	}
+	if err := mysqlDb.SetTpDestinations(dst); err != nil {
 		t.Error(err.Error())
 	}
 	storData, err := mysqlDb.GetTpDestinations(TEST_SQL, TEST_SQL)
-	dsts := TpDestinations(storData).GetDestinations()
+	dsts, err := TpDestinations(storData).GetDestinations()
+	expected := &Destination{Id: TEST_SQL, Prefixes: []string{"+49", "+49151", "+49176"}}
 	if err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(dst, dsts[TEST_SQL]) {
+	} else if !reflect.DeepEqual(expected, dsts[TEST_SQL]) {
 		t.Errorf("Expecting: %+v, received: %+v", dst, dsts[TEST_SQL])
 	}
 }
@@ -112,7 +117,7 @@ func TestMySQLSetGetTPRates(t *testing.T) {
 	}
 	mpRates := map[string][]*utils.RateSlot{RT_ID: rtSlots}
 	expectedTPRate := &utils.TPRate{TPid: TEST_SQL, RateId: RT_ID, RateSlots: rtSlots}
-	if err := mysqlDb.SetTPRates(TEST_SQL, mpRates); err != nil {
+	if err := mysqlDb.SetTpRates(TEST_SQL, mpRates); err != nil {
 		t.Error(err.Error())
 	}
 	if rts, err := mysqlDb.GetTpRates(TEST_SQL, RT_ID); err != nil {
@@ -130,7 +135,7 @@ func TestMySQLSetGetTPDestinationRates(t *testing.T) {
 	dr := &utils.DestinationRate{DestinationId: "DST_1", RateId: "RT_1", RoundingMethod: "*up", RoundingDecimals: 4}
 	drs := map[string][]*utils.DestinationRate{DR_ID: []*utils.DestinationRate{dr}}
 	eDrs := &utils.TPDestinationRate{TPid: TEST_SQL, DestinationRateId: DR_ID, DestinationRates: []*utils.DestinationRate{dr}}
-	if err := mysqlDb.SetTPDestinationRates(TEST_SQL, drs); err != nil {
+	if err := mysqlDb.SetTpDestinationRates(TEST_SQL, drs); err != nil {
 		t.Error(err.Error())
 	}
 	if drs, err := mysqlDb.GetTpDestinationRates(TEST_SQL, DR_ID, nil); err != nil {
@@ -147,7 +152,7 @@ func TestMySQLSetGetTPRatingPlans(t *testing.T) {
 	RP_ID := "RP_1"
 	rbBinding := &utils.TPRatingPlanBinding{DestinationRatesId: "DR_1", TimingId: "TM_1", Weight: 10.0}
 	drts := map[string][]*utils.TPRatingPlanBinding{RP_ID: []*utils.TPRatingPlanBinding{rbBinding}}
-	if err := mysqlDb.SetTPRatingPlans(TEST_SQL, drts); err != nil {
+	if err := mysqlDb.SetTpRatingPlans(TEST_SQL, drts); err != nil {
 		t.Error(err.Error())
 	}
 	if drps, err := mysqlDb.GetTpRatingPlans(TEST_SQL, RP_ID, nil); err != nil {
@@ -164,7 +169,7 @@ func TestMySQLSetGetTPRatingProfiles(t *testing.T) {
 	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RP_1"}}
 	rp := &utils.TPRatingProfile{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
 	setRps := map[string]*utils.TPRatingProfile{rp.KeyId(): rp}
-	if err := mysqlDb.SetTPRatingProfiles(TEST_SQL, setRps); err != nil {
+	if err := mysqlDb.SetTpRatingProfiles(TEST_SQL, setRps); err != nil {
 		t.Error(err.Error())
 	}
 	if rps, err := mysqlDb.GetTpRatingProfiles(rp); err != nil {
@@ -181,7 +186,7 @@ func TestMySQLSetGetTPSharedGroups(t *testing.T) {
 	}
 	SG_ID := "SG_1"
 	setSgs := map[string][]*utils.TPSharedGroup{SG_ID: []*utils.TPSharedGroup{&utils.TPSharedGroup{Account: "dan", Strategy: "*lowest_first", RatingSubject: "lowest_rates"}}}
-	if err := mysqlDb.SetTPSharedGroups(TEST_SQL, setSgs); err != nil {
+	if err := mysqlDb.SetTpSharedGroups(TEST_SQL, setSgs); err != nil {
 		t.Error(err.Error())
 	}
 	if sgs, err := mysqlDb.GetTpSharedGroups(TEST_SQL, SG_ID); err != nil {
@@ -199,7 +204,7 @@ func TestMySQLSetGetTPCdrStats(t *testing.T) {
 	setCS := map[string][]*utils.TPCdrStat{CS_ID: []*utils.TPCdrStat{
 		&utils.TPCdrStat{QueueLength: "10", TimeWindow: "10m", Metrics: "ASR", Tenants: "cgrates.org", Categories: "call"},
 	}}
-	if err := mysqlDb.SetTPCdrStats(TEST_SQL, setCS); err != nil {
+	if err := mysqlDb.SetTpCdrStats(TEST_SQL, setCS); err != nil {
 		t.Error(err.Error())
 	}
 	if cs, err := mysqlDb.GetTpCdrStats(TEST_SQL, CS_ID); err != nil {
@@ -218,7 +223,7 @@ func TestMySQLSetGetTPDerivedChargers(t *testing.T) {
 	dcs := &utils.TPDerivedChargers{TPid: TEST_SQL, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: []*utils.TPDerivedCharger{dc}}
 	DCS_ID := dcs.GetDerivedChargesId()
 	setDCs := map[string][]*utils.TPDerivedCharger{DCS_ID: []*utils.TPDerivedCharger{dc}}
-	if err := mysqlDb.SetTPDerivedChargers(TEST_SQL, setDCs); err != nil {
+	if err := mysqlDb.SetTpDerivedChargers(TEST_SQL, setDCs); err != nil {
 		t.Error(err.Error())
 	}
 	if rDCs, err := mysqlDb.GetTpDerivedChargers(dcs); err != nil {

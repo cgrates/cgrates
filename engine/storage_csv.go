@@ -288,7 +288,7 @@ func (csvs *CSVStorage) GetTpActions(tpid, tag string) ([]TpAction, error) {
 	return tpActions, nil
 }
 
-func (csvs *CSVStorage) GetTPActionPlans(tpid, tag string) ([]TpActionPlan, error) {
+func (csvs *CSVStorage) GetTpActionPlans(tpid, tag string) ([]TpActionPlan, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.actiontimingsFn, csvs.sep, getColumnCount(TpActionPlan{}))
 	if err != nil {
 		log.Print("Could not load action plans file: ", err)
@@ -334,7 +334,7 @@ func (csvs *CSVStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger
 	return tpActionTriggers, nil
 }
 
-func (csvs *CSVStorage) GetTpAccountActions(filter []TpAccountAction) ([]*TpAccountAction, error) {
+func (csvs *CSVStorage) GetTpAccountActions(filter *utils.TPAccountActions) ([]TpAccountAction, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.accountactionsFn, csvs.sep, getColumnCount(TpAccountAction{}))
 	if err != nil {
 		log.Print("Could not load account actions file: ", err)
@@ -409,10 +409,10 @@ func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrStat, error) {
 	return tpCdrStats, nil
 }
 
-func (csvs *CSVStorage) GetTPIds() ([]string, error) {
+func (csvs *CSVStorage) GetTpIds() ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (csvs *CSVStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, p *utils.Paginator) ([]string, error) {
+func (csvs *CSVStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, p *utils.Paginator) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }

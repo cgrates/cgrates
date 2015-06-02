@@ -166,9 +166,9 @@ type LoadWriter interface {
 	SetTpDerivedChargers([]TpDerivedCharger) error
 	SetTpLCRs([]TpLcrRules) error
 	SetTpActions([]TpAction) error
-	SetTpActionTimings([]TpActionPlan) error
+	SetTpActionPlans([]TpActionPlan) error
 	SetTpActionTriggers([]TpActionTrigger) error
-	SetTpAccountActions([]TpAccountActions) error
+	SetTpAccountActions([]TpAccountAction) error
 }
 
 type Marshaler interface {

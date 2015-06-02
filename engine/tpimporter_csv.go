@@ -30,11 +30,11 @@ import (
 type TPCSVImporter struct {
 	TPid     string     // Load data on this tpid
 	StorDb   LoadWriter // StorDb connection handle
+	DirPath  string     // Directory path to import from
+	Sep      rune       // Separator in the csv file
+	Verbose  bool       // If true will print a detailed information instead of silently discarding it
+	ImportId string     // Use this to differentiate between imports (eg: when autogenerating fields like RatingProfileId
 	csvr     LoadReader
-	DirPath  string // Directory path to import from
-	Sep      rune   // Separator in the csv file
-	Verbose  bool   // If true will print a detailed information instead of silently discarding it
-	ImportId string // Use this to differentiate between imports (eg: when autogenerating fields like RatingProfileId
 }
 
 // Maps csv file to handler which should process it. Defined like this since tests on 1.0.3 were failing on Travis.
@@ -56,7 +56,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 }
 
 func (self *TPCSVImporter) Run() error {
-	self.csvr = NewFileCSVStorage(self.sep, utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV, utils.SHARED_GROUPS_CSV, utils.LCRS_CSV, utils.ACTIONS_CSV, utils.ACTION_PLANS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV, utils.DERIVED_CHARGERS_CSV, utils.CDR_STATS_CSV)
+	self.csvr = NewFileCSVStorage(self.Sep, utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV, utils.SHARED_GROUPS_CSV, utils.LCRS_CSV, utils.ACTIONS_CSV, utils.ACTION_PLANS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV, utils.DERIVED_CHARGERS_CSV, utils.CDR_STATS_CSV)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
 		fHandler, hasName := fileHandlers[f.Name()]
@@ -80,7 +80,7 @@ func (self *TPCSVImporter) importTimings(fn string) error {
 		return err
 	}
 
-	return self.StorDb.SetTPTiming(tps)
+	return self.StorDb.SetTpTimings(tps)
 }
 
 func (self *TPCSVImporter) importDestinations(fn string) error {
@@ -135,7 +135,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTpRatingProfiles(self.TPid, "", nil)
+	tps, err := self.csvr.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: self.TPid})
 	if err != nil {
 		return err
 	}
@@ -207,7 +207,7 @@ func (self *TPCSVImporter) importDerivedChargers(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTpDerivedChargers(self.TPid, "")
+	tps, err := self.csvr.GetTpDerivedChargers(nil)
 	if err != nil {
 		return err
 	}
@@ -219,10 +219,10 @@ func (self *TPCSVImporter) importCdrStats(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTpDerivedChargers(self.TPid, "")
+	tps, err := self.csvr.GetTpCdrStats(self.TPid, "")
 	if err != nil {
 		return err
 	}
 
-	return self.StorDb.SetTpDerivedChargers(tps)
+	return self.StorDb.SetTpCdrStats(tps)
 }

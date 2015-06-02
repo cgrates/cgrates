@@ -142,6 +142,21 @@ type TPTiming struct {
 	EndTime   string
 }
 
+func NewTiming(timingInfo ...string) (rt *TPTiming) {
+	rt = &TPTiming{}
+	rt.Id = timingInfo[0]
+	rt.Years.Parse(timingInfo[1], INFIELD_SEP)
+	rt.Months.Parse(timingInfo[2], INFIELD_SEP)
+	rt.MonthDays.Parse(timingInfo[3], INFIELD_SEP)
+	rt.WeekDays.Parse(timingInfo[4], INFIELD_SEP)
+	times := strings.Split(timingInfo[5], INFIELD_SEP)
+	rt.StartTime = times[0]
+	if len(times) > 1 {
+		rt.EndTime = times[1]
+	}
+	return
+}
+
 type TPRatingPlan struct {
 	TPid               string                 // Tariff plan id
 	RatingPlanId       string                 // RatingPlan profile id
@@ -531,7 +546,7 @@ type CachedItemAge struct {
 }
 
 type AttrExpFileCdrs struct {
-	CdrFormat               *string  // Cdr output file format <utils.CdreCdrFormats>
+	CdrFormat               *string  // Cdr output file format <CdreCdrFormats>
 	FieldSeparator          *string  // Separator used between fields
 	ExportId                *string  // Optional exportid
 	ExportDir               *string  // If provided it overwrites the configured export directory

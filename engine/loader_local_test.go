@@ -110,13 +110,13 @@ func TestLoadFromCSV(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var err error
+	/*var err error
 	for fn, v := range FileValidators {
 		if err = ValidateCSVData(path.Join(*dataDir, "tariffplans", *tpCsvScenario, fn), v.Rule); err != nil {
 			t.Error("Failed validating data: ", err.Error())
 		}
-	}
-	loader := NewFileCSVReader(ratingDbCsv, accountDbCsv, utils.CSV_SEP,
+	}*/
+	loader := NewTpReader(ratingDbCsv, accountDbCsv, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
@@ -130,8 +130,7 @@ func TestLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
-	)
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV)), "")
 
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
@@ -154,7 +153,7 @@ func TestLoadFromCSV(t *testing.T) {
 	if err = loader.LoadActions(); err != nil {
 		t.Error("Failed loading actions: ", err.Error())
 	}
-	if err = loader.LoadActionTimings(); err != nil {
+	if err = loader.LoadActionPlans(); err != nil {
 		t.Error("Failed loading action timings: ", err.Error())
 	}
 	if err = loader.LoadActionTriggers(); err != nil {
@@ -176,11 +175,17 @@ func TestImportToStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	csvImporter := TPCSVImporter{TEST_SQL, storDb, path.Join(*dataDir, "tariffplans", *tpCsvScenario), utils.CSV_SEP, false, TEST_SQL}
+	csvImporter := TPCSVImporter{
+		TPid:     TEST_SQL,
+		StorDb:   storDb,
+		DirPath:  path.Join(*dataDir, "tariffplans", *tpCsvScenario),
+		Sep:      utils.CSV_SEP,
+		Verbose:  false,
+		ImportId: TEST_SQL}
 	if err := csvImporter.Run(); err != nil {
 		t.Error("Error when importing tpdata to storDb: ", err)
 	}
-	if tpids, err := storDb.GetTPIds(); err != nil {
+	if tpids, err := storDb.GetTpIds(); err != nil {
 		t.Error("Error when querying storDb for imported data: ", err)
 	} else if len(tpids) != 1 || tpids[0] != TEST_SQL {
 		t.Errorf("Data in storDb is different than expected %v", tpids)
@@ -192,7 +197,7 @@ func TestLoadFromStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewDbReader(storDb, ratingDbStor, accountDbStor, TEST_SQL)
+	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, TEST_SQL)
 	if err := loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -214,7 +219,7 @@ func TestLoadFromStorDb(t *testing.T) {
 	if err := loader.LoadActions(); err != nil {
 		t.Error("Failed loading actions: ", err.Error())
 	}
-	if err := loader.LoadActionTimings(); err != nil {
+	if err := loader.LoadActionPlans(); err != nil {
 		t.Error("Failed loading action timings: ", err.Error())
 	}
 	if err := loader.LoadActionTriggers(); err != nil {
@@ -235,13 +240,17 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewDbReader(storDb, ratingDbApier, accountDbApier, TEST_SQL)
+	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, TEST_SQL)
 	// Load ratingPlans. This will also set destination keys
 	if ratingPlans, err := storDb.GetTpRatingPlans(TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")
 	} else {
-		for tag := range ratingPlans {
-			if loaded, err := loader.LoadRatingPlanByTag(tag); err != nil {
+		rpls, err := TpRatingPlans(ratingPlans).GetRatingPlans()
+		if err != nil {
+			t.Fatal("Could not convert rating plans")
+		}
+		for tag := range rpls {
+			if loaded, err := loader.LoadRatingPlanFiltered(tag); err != nil {
 				t.Fatalf("Could not load ratingPlan for tag: %s, error: %s", tag, err.Error())
 			} else if !loaded {
 				t.Fatal("Cound not find ratingPLan with id:", tag)
@@ -255,7 +264,11 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	} else if len(ratingProfiles) == 0 {
 		t.Fatal("Could not retrieve rating profiles")
 	} else {
-		for rpId := range ratingProfiles {
+		rpfs, err := TpRatingProfiles(ratingProfiles).GetRatingProfiles()
+		if err != nil {
+			t.Fatal("Could not convert rating profiles")
+		}
+		for rpId := range rpfs {
 			rp, _ := utils.NewTPRatingProfileFromKeyId(TEST_SQL, loadId, rpId)
 			if err := loader.LoadRatingProfileFiltered(rp); err != nil {
 				t.Fatalf("Could not load ratingProfile with id: %s, error: %s", rpId, err.Error())
@@ -263,11 +276,15 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 	// Load account actions
-	if aas, err := storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: TEST_SQL, LoadId: loadId}); err != nil {
+	if accountActions, err := storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: TEST_SQL, LoadId: loadId}); err != nil {
 		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())
-	} else if len(aas) == 0 {
+	} else if len(accountActions) == 0 {
 		t.Error("No account actions")
 	} else {
+		aas, err := TpAccountActions(accountActions).GetAccountActions()
+		if err != nil {
+			t.Fatal("Could not convert account actions")
+		}
 		for aaId := range aas {
 			aa, _ := utils.NewTPAccountActionsFromKeyId(TEST_SQL, loadId, aaId)
 			if err := loader.LoadAccountActionsFiltered(aa); err != nil {

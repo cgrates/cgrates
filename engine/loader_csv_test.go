@@ -206,11 +206,11 @@ CDRST2,,,ACD,,,,,,,,,,,,,,,,,,,
 `
 )
 
-var csvr *CSVReader
+var csvr *TpReader
 
 func init() {
-	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats)
+	csvr = NewTpReader(dataStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats), "")
 	csvr.LoadDestinations()
 	csvr.LoadTimings()
 	csvr.LoadRates()
@@ -220,7 +220,7 @@ func init() {
 	csvr.LoadSharedGroups()
 	csvr.LoadLCRs()
 	csvr.LoadActions()
-	csvr.LoadActionTimings()
+	csvr.LoadActionPlans()
 	csvr.LoadActionTriggers()
 	csvr.LoadAccountActions()
 	csvr.LoadDerivedChargers()
@@ -231,10 +231,10 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.tp.destinations) != 11 {
-		t.Error("Failed to load destinations: ", len(csvr.tp.destinations))
+	if len(csvr.destinations) != 11 {
+		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
-	for _, d := range csvr.tp.destinations {
+	for _, d := range csvr.destinations {
 		switch d.Id {
 		case "NAT":
 			if !reflect.DeepEqual(d.Prefixes, []string{`0256`, `0257`, `0723`, `+49`}) {
@@ -277,10 +277,10 @@ func TestLoadDestinations(t *testing.T) {
 }
 
 func TestLoadTimimgs(t *testing.T) {
-	if len(csvr.tp.timings) != 6 {
-		t.Error("Failed to load timings: ", csvr.tp.timings)
+	if len(csvr.timings) != 6 {
+		t.Error("Failed to load timings: ", csvr.timings)
 	}
-	timing := csvr.tp.timings["WORKDAYS_00"]
+	timing := csvr.timings["WORKDAYS_00"]
 	if !reflect.DeepEqual(timing, &utils.TPTiming{
 		Id:        "WORKDAYS_00",
 		Years:     utils.Years{},
@@ -291,7 +291,7 @@ func TestLoadTimimgs(t *testing.T) {
 	}) {
 		t.Error("Error loading timing: ", timing)
 	}
-	timing = csvr.tp.timings["WORKDAYS_18"]
+	timing = csvr.timings["WORKDAYS_18"]
 	if !reflect.DeepEqual(timing, &utils.TPTiming{
 		Id:        "WORKDAYS_18",
 		Years:     utils.Years{},
@@ -302,7 +302,7 @@ func TestLoadTimimgs(t *testing.T) {
 	}) {
 		t.Error("Error loading timing: ", timing)
 	}
-	timing = csvr.tp.timings["WEEKENDS"]
+	timing = csvr.timings["WEEKENDS"]
 	if !reflect.DeepEqual(timing, &utils.TPTiming{
 		Id:        "WEEKENDS",
 		Years:     utils.Years{},
@@ -313,7 +313,7 @@ func TestLoadTimimgs(t *testing.T) {
 	}) {
 		t.Error("Error loading timing: ", timing)
 	}
-	timing = csvr.tp.timings["ONE_TIME_RUN"]
+	timing = csvr.timings["ONE_TIME_RUN"]
 	if !reflect.DeepEqual(timing, &utils.TPTiming{
 		Id:        "ONE_TIME_RUN",
 		Years:     utils.Years{2012},
@@ -327,10 +327,10 @@ func TestLoadTimimgs(t *testing.T) {
 }
 
 func TestLoadRates(t *testing.T) {
-	if len(csvr.tp.rates) != 13 {
-		t.Error("Failed to load rates: ", len(csvr.tp.rates))
+	if len(csvr.rates) != 13 {
+		t.Error("Failed to load rates: ", len(csvr.rates))
 	}
-	rate := csvr.tp.rates["R1"].RateSlots[0]
+	rate := csvr.rates["R1"].RateSlots[0]
 	expctRs, err := utils.NewRateSlot(0, 0.2, "60", "1", "0")
 	if err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
@@ -340,7 +340,7 @@ func TestLoadRates(t *testing.T) {
 		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
 		t.Error("Error loading rate: ", rate, expctRs)
 	}
-	rate = csvr.tp.rates["R2"].RateSlots[0]
+	rate = csvr.rates["R2"].RateSlots[0]
 	if expctRs, err = utils.NewRateSlot(0, 0.1, "60s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -349,7 +349,7 @@ func TestLoadRates(t *testing.T) {
 		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
 		t.Error("Error loading rate: ", rate)
 	}
-	rate = csvr.tp.rates["R3"].RateSlots[0]
+	rate = csvr.rates["R3"].RateSlots[0]
 	if expctRs, err = utils.NewRateSlot(0, 0.05, "60s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -358,7 +358,7 @@ func TestLoadRates(t *testing.T) {
 		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
 		t.Error("Error loading rate: ", rate)
 	}
-	rate = csvr.tp.rates["R4"].RateSlots[0]
+	rate = csvr.rates["R4"].RateSlots[0]
 	if expctRs, err = utils.NewRateSlot(1, 1.0, "1s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -367,7 +367,7 @@ func TestLoadRates(t *testing.T) {
 		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
 		t.Error("Error loading rate: ", rate)
 	}
-	rate = csvr.tp.rates["R5"].RateSlots[0]
+	rate = csvr.rates["R5"].RateSlots[0]
 	if expctRs, err = utils.NewRateSlot(0, 0.5, "1s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -376,7 +376,7 @@ func TestLoadRates(t *testing.T) {
 		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
 		t.Error("Error loading rate: ", rate)
 	}
-	rate = csvr.tp.rates["LANDLINE_OFFPEAK"].RateSlots[0]
+	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[0]
 	if expctRs, err = utils.NewRateSlot(0, 1, "1", "60", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -385,7 +385,7 @@ func TestLoadRates(t *testing.T) {
 		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
 		t.Error("Error loading rate: ", rate)
 	}
-	rate = csvr.tp.rates["LANDLINE_OFFPEAK"].RateSlots[1]
+	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[1]
 	if expctRs, err = utils.NewRateSlot(0, 1, "1", "1", "60"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -397,29 +397,29 @@ func TestLoadRates(t *testing.T) {
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.tp.destinationRates) != 13 {
-		t.Error("Failed to load destinationrates: ", len(csvr.tp.destinationRates))
+	if len(csvr.destinationRates) != 13 {
+		t.Error("Failed to load destinationrates: ", len(csvr.destinationRates))
 	}
-	drs := csvr.tp.destinationRates["RT_STANDARD"]
+	drs := csvr.destinationRates["RT_STANDARD"]
 	dr := &utils.TPDestinationRate{
 		TPid:              "",
 		DestinationRateId: "RT_STANDARD",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY",
-				Rate:             csvr.tp.rates["R1"],
+				Rate:             csvr.rates["R1"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_O2",
-				Rate:             csvr.tp.rates["R2"],
+				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_PREMIUM",
-				Rate:             csvr.tp.rates["R2"],
+				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
@@ -428,13 +428,13 @@ func TestLoadDestinationRates(t *testing.T) {
 	if !reflect.DeepEqual(drs, dr) {
 		t.Errorf("Error loading destination rate: \n%+v \n%+v", drs, dr)
 	}
-	drs = csvr.tp.destinationRates["RT_DEFAULT"]
+	drs = csvr.destinationRates["RT_DEFAULT"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
 		DestinationRateId: "RT_DEFAULT",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "ALL",
-				Rate:             csvr.tp.rates["R2"],
+				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
@@ -442,19 +442,19 @@ func TestLoadDestinationRates(t *testing.T) {
 	}) {
 		t.Errorf("Error loading destination rate: %+v", drs.DestinationRates[0])
 	}
-	drs = csvr.tp.destinationRates["RT_STD_WEEKEND"]
+	drs = csvr.destinationRates["RT_STD_WEEKEND"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
 		DestinationRateId: "RT_STD_WEEKEND",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY",
-				Rate:             csvr.tp.rates["R2"],
+				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_O2",
-				Rate:             csvr.tp.rates["R3"],
+				Rate:             csvr.rates["R3"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
@@ -462,13 +462,13 @@ func TestLoadDestinationRates(t *testing.T) {
 	}) {
 		t.Error("Error loading destination rate: ", drs)
 	}
-	drs = csvr.tp.destinationRates["P1"]
+	drs = csvr.destinationRates["P1"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
 		DestinationRateId: "P1",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "NAT",
-				Rate:             csvr.tp.rates["R4"],
+				Rate:             csvr.rates["R4"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
@@ -476,13 +476,13 @@ func TestLoadDestinationRates(t *testing.T) {
 	}) {
 		t.Error("Error loading destination rate: ", drs)
 	}
-	drs = csvr.tp.destinationRates["P2"]
+	drs = csvr.destinationRates["P2"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
 		DestinationRateId: "P2",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "NAT",
-				Rate:             csvr.tp.rates["R5"],
+				Rate:             csvr.rates["R5"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
@@ -490,13 +490,13 @@ func TestLoadDestinationRates(t *testing.T) {
 	}) {
 		t.Error("Error loading destination rate: ", drs)
 	}
-	drs = csvr.tp.destinationRates["T1"]
+	drs = csvr.destinationRates["T1"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
 		DestinationRateId: "T1",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "NAT",
-				Rate:             csvr.tp.rates["LANDLINE_OFFPEAK"],
+				Rate:             csvr.rates["LANDLINE_OFFPEAK"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
@@ -504,25 +504,25 @@ func TestLoadDestinationRates(t *testing.T) {
 	}) {
 		t.Error("Error loading destination rate: ", drs)
 	}
-	drs = csvr.tp.destinationRates["T2"]
+	drs = csvr.destinationRates["T2"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
 		DestinationRateId: "T2",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY",
-				Rate:             csvr.tp.rates["GBP_72"],
+				Rate:             csvr.rates["GBP_72"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_O2",
-				Rate:             csvr.tp.rates["GBP_70"],
+				Rate:             csvr.rates["GBP_70"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_PREMIUM",
-				Rate:             csvr.tp.rates["GBP_71"],
+				Rate:             csvr.rates["GBP_71"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
@@ -533,10 +533,10 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadRatingPlans(t *testing.T) {
-	if len(csvr.tp.ratingPlans) != 11 {
-		t.Error("Failed to load rating plans: ", len(csvr.tp.ratingPlans))
+	if len(csvr.ratingPlans) != 11 {
+		t.Error("Failed to load rating plans: ", len(csvr.ratingPlans))
 	}
-	rplan := csvr.tp.ratingPlans["STANDARD"]
+	rplan := csvr.ratingPlans["STANDARD"]
 	expected := &RatingPlan{
 		Id: "STANDARD",
 		Timings: map[string]*RITiming{
@@ -680,10 +680,10 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.tp.ratingProfiles) != 18 {
-		t.Error("Failed to load rating profiles: ", len(csvr.tp.ratingProfiles), csvr.tp.ratingProfiles)
+	if len(csvr.ratingProfiles) != 18 {
+		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
-	rp := csvr.tp.ratingProfiles["*out:test:0:trp"]
+	rp := csvr.ratingProfiles["*out:test:0:trp"]
 	expected := &RatingProfile{
 		Id: "*out:test:0:trp",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
@@ -699,10 +699,10 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.tp.actions) != 8 {
-		t.Error("Failed to load actions: ", csvr.tp.actions)
+	if len(csvr.actions) != 8 {
+		t.Error("Failed to load actions: ", csvr.actions)
 	}
-	as1 := csvr.tp.actions["MINI"]
+	as1 := csvr.actions["MINI"]
 	expected := []*Action{
 		&Action{
 			Id:               "MINI0",
@@ -738,7 +738,7 @@ func TestLoadActions(t *testing.T) {
 	if !reflect.DeepEqual(as1[1], expected[1]) {
 		t.Errorf("Error loading action1: %+v", as1[0].Balance)
 	}
-	as2 := csvr.tp.actions["SHARED"]
+	as2 := csvr.actions["SHARED"]
 	expected = []*Action{
 		&Action{
 			Id:               "SHARED0",
@@ -758,7 +758,7 @@ func TestLoadActions(t *testing.T) {
 	if !reflect.DeepEqual(as2, expected) {
 		t.Errorf("Error loading action: %+v", as2[0].Balance)
 	}
-	as3 := csvr.tp.actions["DEFEE"]
+	as3 := csvr.actions["DEFEE"]
 	expected = []*Action{
 		&Action{
 			Id:              "DEFEE0",
@@ -776,11 +776,11 @@ func TestLoadActions(t *testing.T) {
 }
 
 func TestLoadSharedGroups(t *testing.T) {
-	if len(csvr.tp.sharedGroups) != 3 {
-		t.Error("Failed to shared groups: ", csvr.tp.sharedGroups)
+	if len(csvr.sharedGroups) != 3 {
+		t.Error("Failed to shared groups: ", csvr.sharedGroups)
 	}
 
-	sg1 := csvr.tp.sharedGroups["SG1"]
+	sg1 := csvr.sharedGroups["SG1"]
 	expected := &SharedGroup{
 		Id: "SG1",
 		AccountParameters: map[string]*SharingParameters{
@@ -793,7 +793,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	if !reflect.DeepEqual(sg1, expected) {
 		t.Error("Error loading shared group: ", sg1.AccountParameters)
 	}
-	sg2 := csvr.tp.sharedGroups["SG2"]
+	sg2 := csvr.sharedGroups["SG2"]
 	expected = &SharedGroup{
 		Id: "SG2",
 		AccountParameters: map[string]*SharingParameters{
@@ -812,7 +812,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	  }
 
 	  // execute action timings to fill memebers
-	  atm := csvr.tp.actionsTimings["MORE_MINUTES"][1]
+	  atm := csvr.actionsTimings["MORE_MINUTES"][1]
 	  atm.Execute()
 	  atm.actions, atm.stCache = nil, time.Time{}
 
@@ -823,11 +823,11 @@ func TestLoadSharedGroups(t *testing.T) {
 }
 
 func TestLoadLCRs(t *testing.T) {
-	if len(csvr.tp.lcrs) != 1 {
-		t.Error("Failed to load LCRs: ", csvr.tp.lcrs)
+	if len(csvr.lcrs) != 1 {
+		t.Error("Failed to load LCRs: ", csvr.lcrs)
 	}
 
-	lcr := csvr.tp.lcrs["*in:cgrates.org:call:*any:*any"]
+	lcr := csvr.lcrs["*in:cgrates.org:call:*any:*any"]
 	expected := &LCR{
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -862,10 +862,10 @@ func TestLoadLCRs(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.tp.actionsTimings) != 5 {
-		t.Error("Failed to load action timings: ", csvr.tp.actionsTimings)
+	if len(csvr.actionsTimings) != 5 {
+		t.Error("Failed to load action timings: ", csvr.actionsTimings)
 	}
-	atm := csvr.tp.actionsTimings["MORE_MINUTES"][0]
+	atm := csvr.actionsTimings["MORE_MINUTES"][0]
 	expected := &ActionTiming{
 		Uuid:       atm.Uuid,
 		Id:         "MORE_MINUTES",
@@ -888,10 +888,10 @@ func TestLoadActionTimings(t *testing.T) {
 }
 
 func TestLoadActionTriggers(t *testing.T) {
-	if len(csvr.tp.actionsTriggers) != 7 {
-		t.Error("Failed to load action triggers: ", len(csvr.tp.actionsTriggers))
+	if len(csvr.actionsTriggers) != 7 {
+		t.Error("Failed to load action triggers: ", len(csvr.actionsTriggers))
 	}
-	atr := csvr.tp.actionsTriggers["STANDARD_TRIGGER"][0]
+	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
 		Id:                    "st0",
 		BalanceType:           utils.VOICE,
@@ -906,7 +906,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	if !reflect.DeepEqual(atr, expected) {
 		t.Error("Error loading action trigger: ", atr)
 	}
-	atr = csvr.tp.actionsTriggers["STANDARD_TRIGGER"][1]
+	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
 		Id:                    "st1",
 		BalanceType:           utils.VOICE,
@@ -924,13 +924,13 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.tp.accountActions) != 6 {
-		t.Error("Failed to load account actions: ", csvr.tp.accountActions)
+	if len(csvr.accountActions) != 6 {
+		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
-	aa := csvr.tp.accountActions["*out:vdf:minitsboy"]
+	aa := csvr.accountActions["*out:vdf:minitsboy"]
 	expected := &Account{
 		Id:             "*out:vdf:minitsboy",
-		ActionTriggers: csvr.tp.actionsTriggers["STANDARD_TRIGGER"],
+		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
 	}
 	if !reflect.DeepEqual(aa, expected) {
 		t.Error("Error loading account action: ", aa)
@@ -948,29 +948,29 @@ func TestLoadAccountActions(t *testing.T) {
 }
 
 func TestLoadRpAliases(t *testing.T) {
-	if len(csvr.tp.rpAliases) != 3 {
-		t.Error("Failed to load rp aliases: ", csvr.tp.rpAliases)
+	if len(csvr.rpAliases) != 3 {
+		t.Error("Failed to load rp aliases: ", csvr.rpAliases)
 	}
-	if csvr.tp.rpAliases[utils.RatingSubjectAliasKey("vdf", "a1")] != "minu" ||
-		csvr.tp.rpAliases[utils.RatingSubjectAliasKey("vdf", "a2")] != "minu" ||
-		csvr.tp.rpAliases[utils.RatingSubjectAliasKey("vdf", "a3")] != "minu" {
-		t.Error("Error loading rp aliases: ", csvr.tp.rpAliases)
+	if csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a1")] != "minu" ||
+		csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a2")] != "minu" ||
+		csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a3")] != "minu" {
+		t.Error("Error loading rp aliases: ", csvr.rpAliases)
 	}
 }
 
 func TestLoadAccAliases(t *testing.T) {
-	if len(csvr.tp.accAliases) != 2 {
-		t.Error("Failed to load acc aliases: ", csvr.tp.accAliases)
+	if len(csvr.accAliases) != 2 {
+		t.Error("Failed to load acc aliases: ", csvr.accAliases)
 	}
-	if csvr.tp.accAliases[utils.AccountAliasKey("vdf", "a1")] != "minitsboy" ||
-		csvr.tp.accAliases[utils.AccountAliasKey("vdf", "a2")] != "minitsboy" {
-		t.Error("Error loading acc aliases: ", csvr.tp.accAliases)
+	if csvr.accAliases[utils.AccountAliasKey("vdf", "a1")] != "minitsboy" ||
+		csvr.accAliases[utils.AccountAliasKey("vdf", "a2")] != "minitsboy" {
+		t.Error("Error loading acc aliases: ", csvr.accAliases)
 	}
 }
 
 func TestLoadDerivedChargers(t *testing.T) {
-	if len(csvr.tp.derivedChargers) != 2 {
-		t.Error("Failed to load derivedChargers: ", csvr.tp.derivedChargers)
+	if len(csvr.derivedChargers) != 2 {
+		t.Error("Failed to load derivedChargers: ", csvr.derivedChargers)
 	}
 	expCharger1 := utils.DerivedChargers{
 		&utils.DerivedCharger{RunId: "extra1", RunFilters: "^filteredHeader1/filterValue1/", ReqTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
@@ -983,13 +983,13 @@ func TestLoadDerivedChargers(t *testing.T) {
 			DisconnectCauseField: utils.META_DEFAULT},
 	}
 	keyCharger1 := utils.DerivedChargersKey("*out", "cgrates.org", "call", "dan", "dan")
-	if !reflect.DeepEqual(csvr.tp.derivedChargers[keyCharger1], expCharger1) {
-		t.Errorf("Unexpected charger %+v", csvr.tp.derivedChargers[keyCharger1][0])
+	if !reflect.DeepEqual(csvr.derivedChargers[keyCharger1], expCharger1) {
+		t.Errorf("Unexpected charger %+v", csvr.derivedChargers[keyCharger1][0])
 	}
 }
 func TestLoadCdrStats(t *testing.T) {
-	if len(csvr.tp.cdrStats) != 2 {
-		t.Error("Failed to load cdr stats: ", csvr.tp.cdrStats)
+	if len(csvr.cdrStats) != 2 {
+		t.Error("Failed to load cdr stats: ", csvr.cdrStats)
 	}
 	cdrStats1 := &CdrStats{
 		Id:          "CDRST1",
@@ -1018,9 +1018,9 @@ func TestLoadCdrStats(t *testing.T) {
 		RatedSubject:      []string{"rif"},
 		CostInterval:      []float64{0, 2},
 	}
-	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.tp.actionsTriggers["STANDARD_TRIGGERS"]...)
-	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.tp.actionsTriggers["STANDARD_TRIGGER"]...)
-	if !reflect.DeepEqual(csvr.tp.cdrStats[cdrStats1.Id], cdrStats1) {
-		t.Error("Unexpected stats", csvr.tp.cdrStats[cdrStats1.Id])
+	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers["STANDARD_TRIGGERS"]...)
+	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers["STANDARD_TRIGGER"]...)
+	if !reflect.DeepEqual(csvr.cdrStats[cdrStats1.Id], cdrStats1) {
+		t.Error("Unexpected stats", csvr.cdrStats[cdrStats1.Id])
 	}
 }
