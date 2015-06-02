@@ -1076,7 +1076,6 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, er
 }
 
 func (self *SQLStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
-	rts := make(map[string]*utils.TPRate)
 	var tpRates []TpRate
 	q := self.db.Where("tpid = ?", tpid).Order("id")
 	if len(tag) != 0 {

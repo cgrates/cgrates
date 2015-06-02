@@ -60,6 +60,17 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid str
 	}
 }
 
+func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
+	tpDests, err := tpr.lr.GetTpDestinations(tpr.tpid, tag)
+
+	dest := &Destination{Id: tag}
+	for _, tpDest := range tpDests {
+		dest.AddPrefix(tpDest.Prefix)
+	}
+	dataStorage.SetDestination(dest)
+	return len(tpDests) > 0, err
+}
+
 func (tpr *TpReader) LoadDestinations() (err error) {
 	tps, err := tpr.lr.GetTpDestinations(tpr.tpid, "")
 	if err != nil {
@@ -121,7 +132,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 }
 
 // Returns true, nil in case of load success, false, nil in case of RatingPlan  not found ratingStorage
-func (tpr *TpReader) LoadRatingPlanFiltered(tag string) (bool, error) {
+func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 	mpRpls, err := tpr.lr.GetTpRatingPlans(tpr.tpid, tag, nil)
 	if err != nil {
 		return false, err
@@ -229,7 +240,7 @@ func (tpr *TpReader) LoadRatingPlans() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) error {
+func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile) error {
 	var resultRatingProfile *RatingProfile
 	mpTpRpfs, err := tpr.lr.GetTpRatingProfiles(qriedRpf)
 	if err != nil {
