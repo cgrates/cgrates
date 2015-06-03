@@ -443,6 +443,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 					RatingSubject:  tpact.RatingSubject,
 					Category:       tpact.Category,
 					DestinationIds: tpact.DestinationIds,
+					SharedGroup:    tpact.SharedGroup,
 				},
 			}
 			// load action timings from tags

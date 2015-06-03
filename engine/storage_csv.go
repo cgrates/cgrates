@@ -84,7 +84,7 @@ func (csvs *CSVStorage) GetTpTimings(string, string) ([]TpTiming, error) {
 			tpTimings = append(tpTimings, tpTiming.(TpTiming))
 		}
 	}
-	return nil, nil
+	return tpTimings, nil
 }
 
 func (csvs *CSVStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, error) {
@@ -279,10 +279,11 @@ func (csvs *CSVStorage) GetTpActions(tpid, tag string) ([]TpAction, error) {
 			log.Print("bad line in actions csv: ", err)
 			return nil, err
 		}
-		if tpRate, err := csvLoad(TpAction{}, record); err != nil {
+		if tpAction, err := csvLoad(TpAction{}, record); err != nil {
+			log.Print("error loading action: ", err)
 			return nil, err
 		} else {
-			tpActions = append(tpActions, tpRate.(TpAction))
+			tpActions = append(tpActions, tpAction.(TpAction))
 		}
 	}
 	return tpActions, nil

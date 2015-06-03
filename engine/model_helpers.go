@@ -39,11 +39,23 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 		if field.IsValid() {
 			switch field.Kind() {
 			case reflect.Float64:
+				if fieldValue == "" {
+					fieldValue = "0"
+				}
 				value, err := strconv.ParseFloat(fieldValue, 64)
 				if err != nil {
 					return nil, fmt.Errorf(`invalid value "%s" for field %s.%s`, fieldValue, st.Name(), fildName)
 				}
 				field.SetFloat(value)
+			case reflect.Int:
+				if fieldValue == "" {
+					fieldValue = "0"
+				}
+				value, err := strconv.Atoi(fieldValue)
+				if err != nil {
+					return nil, fmt.Errorf(`invalid value "%s" for field %s.%s`, fieldValue, st.Name(), fildName)
+				}
+				field.SetInt(int64(value))
 			case reflect.String:
 				field.SetString(fieldValue)
 			}

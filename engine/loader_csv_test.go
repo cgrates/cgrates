@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -211,20 +212,48 @@ var csvr *TpReader
 func init() {
 	csvr = NewTpReader(dataStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats), "")
-	csvr.LoadDestinations()
-	csvr.LoadTimings()
-	csvr.LoadRates()
-	csvr.LoadDestinationRates()
-	csvr.LoadRatingPlans()
-	csvr.LoadRatingProfiles()
-	csvr.LoadSharedGroups()
-	csvr.LoadLCRs()
-	csvr.LoadActions()
-	csvr.LoadActionPlans()
-	csvr.LoadActionTriggers()
-	csvr.LoadAccountActions()
-	csvr.LoadDerivedChargers()
-	csvr.LoadCdrStats()
+	if err := csvr.LoadDestinations(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadTimings(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadRates(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadDestinationRates(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadRatingPlans(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadRatingProfiles(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadSharedGroups(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadLCRs(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadActions(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadActionPlans(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadActionTriggers(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadAccountActions(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadDerivedChargers(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadCdrStats(); err != nil {
+		log.Print("error in LoadCdrStats:", err)
+	}
 	csvr.WriteToDatabase(false, false)
 	dataStorage.CacheRating(nil, nil, nil, nil, nil)
 	accountingStorage.CacheAccounting(nil, nil, nil, nil)
@@ -407,18 +436,21 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY",
+				RateId:           "R1",
 				Rate:             csvr.rates["R1"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_O2",
+				RateId:           "R2",
 				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_PREMIUM",
+				RateId:           "R2",
 				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
@@ -426,7 +458,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(drs, dr) {
-		t.Errorf("Error loading destination rate: \n%+v \n%+v", drs, dr)
+		t.Errorf("Error loading destination rate: \n%+v \n%+v", drs.DestinationRates[0], dr.DestinationRates[0])
 	}
 	drs = csvr.destinationRates["RT_DEFAULT"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
@@ -434,6 +466,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "ALL",
+				RateId:           "R2",
 				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
@@ -448,12 +481,14 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY",
+				RateId:           "R2",
 				Rate:             csvr.rates["R2"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_O2",
+				RateId:           "R3",
 				Rate:             csvr.rates["R3"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
@@ -468,6 +503,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "NAT",
+				RateId:           "R4",
 				Rate:             csvr.rates["R4"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
@@ -482,6 +518,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "NAT",
+				RateId:           "R5",
 				Rate:             csvr.rates["R5"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
@@ -496,6 +533,7 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "NAT",
+				RateId:           "LANDLINE_OFFPEAK",
 				Rate:             csvr.rates["LANDLINE_OFFPEAK"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
@@ -510,18 +548,21 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY",
+				RateId:           "GBP_72",
 				Rate:             csvr.rates["GBP_72"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_O2",
+				RateId:           "GBP_70",
 				Rate:             csvr.rates["GBP_70"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
 				DestinationId:    "GERMANY_PREMIUM",
+				RateId:           "GBP_71",
 				Rate:             csvr.rates["GBP_71"],
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
@@ -791,7 +832,7 @@ func TestLoadSharedGroups(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(sg1, expected) {
-		t.Error("Error loading shared group: ", sg1.AccountParameters)
+		t.Error("Error loading shared group: ", sg1.AccountParameters["SG1"])
 	}
 	sg2 := csvr.sharedGroups["SG2"]
 	expected = &SharedGroup{

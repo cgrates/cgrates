@@ -155,19 +155,19 @@ type TpAction struct {
 	Tpid            string
 	Tag             string  `index:"0" re:""`
 	Action          string  `index:"1" re:""`
-	BalanceTag      string  `index:"2" re:""`
-	BalanceType     string  `index:"3" re:""`
-	Direction       string  `index:"4" re:""`
-	Units           float64 `index:4" re:""`
-	ExpiryTime      string  `index:"5" re:""`
-	TimingTags      string  `index:"6" re:""`
+	ExtraParameters string  `index:"2" re:""`
+	BalanceTag      string  `index:"3" re:""`
+	BalanceType     string  `index:"4" re:""`
+	Direction       string  `index:"5" re:""`
+	Category        string  `index:"6" re:""`
 	DestinationTags string  `index:"7" re:""`
 	RatingSubject   string  `index:"8" re:""`
-	Category        string  `index:"9" re:""`
-	SharedGroup     string  `index:"10" re:""`
-	BalanceWeight   float64 `index:"11" re:""`
-	ExtraParameters string  `index:"12" re:""`
-	Weight          float64 `index:"13" re:""`
+	SharedGroup     string  `index:"9" re:""`
+	ExpiryTime      string  `index:"10" re:""`
+	TimingTags      string  `index:"11" re:""`
+	Units           float64 `index:"12" re:""`
+	BalanceWeight   float64 `index:"13" re:""`
+	Weight          float64 `index:"14" re:""`
 	CreatedAt       time.Time
 }
 
