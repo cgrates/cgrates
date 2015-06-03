@@ -31,6 +31,8 @@ ENABLE=true
 DAEMON_OPTS="-config_dir=$TUTFOLDER/etc/cgrates"
 HISTDIR=$TMP_DIR/history
 CDREDIR=$TMP_DIR/cdre
+CDRCINDIR=$TMP_DIR/cdrc/in
+CDRCOUTDIR=$TMP_DIR/cdrc/out
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -53,6 +55,13 @@ if [ ! -d $RUNDIR ]; then
   mkdir -p $RUNDIR
   touch $STACKTRACE
   chown -R $USER:$GROUP $RUNDIR
+fi
+# Install the cdrc folder
+if [ ! -d $CDRCINDIR ]; then
+  mkdir -p $CDRCINDIR
+  chown $USER:$GROUP $CDRCINDIR
+  mkdir -p $CDRCOUTDIR
+  chown $USER:$GROUP $CDRCOUTDIR
 fi
 # Install the cdre folder
 if [ ! -d $CDREDIR ]; then

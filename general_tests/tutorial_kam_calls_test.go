@@ -99,7 +99,7 @@ func TestTutKamCallsRestartKam(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "kamailio", "etc", "init.d", "kamailio"), "restart", 1000); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "kamailio", "etc", "init.d", "kamailio"), "restart", 4000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -595,6 +595,7 @@ func TestTutKamCallsStopPjsuaListener(t *testing.T) {
 	time.Sleep(time.Duration(1) * time.Second)    // Allow pjsua to finish it's tasks, eg un-REGISTER
 }
 
+/*
 func TestTutKamCallsStopCgrEngine(t *testing.T) {
 	if !*testCalls {
 		return
@@ -610,3 +611,4 @@ func TestTutKamCallsStopKam(t *testing.T) {
 	}
 	engine.KillProcName("kamailio", 1000)
 }
+*/
