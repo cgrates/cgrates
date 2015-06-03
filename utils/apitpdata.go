@@ -301,15 +301,17 @@ type TPLcrRules struct {
 }
 
 type TPLcrRule struct {
-	Direction     string
-	Tenant        string
-	Customer      string
-	DestinationId string
-	Category      string
-	Strategy      string
-	Suppliers     string
-	ActivatinTime string
-	Weight        float64
+	Direction      string
+	Tenant         string
+	Category       string
+	Account        string
+	Subject        string
+	DestinationId  string
+	RpCategory     string
+	Strategy       string
+	StrategyParams string
+	ActivationTime string
+	Weight         float64
 }
 
 type TPCdrStats struct {
@@ -453,7 +455,7 @@ func NewTPAccountActionsFromKeyId(tpid, loadId, keyId string) (*TPAccountActions
 	if len(s) != 3 {
 		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
 	}
-	return &TPAccountActions{TPid: tpid, LoadId: loadId, Tenant: s[1], Account: s[2], Direction: s[0]}, nil
+	return &TPAccountActions{TPid: tpid, LoadId: loadId, Direction: s[0], Tenant: s[1], Account: s[2]}, nil
 }
 
 type TPAccountActions struct {

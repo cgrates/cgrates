@@ -61,23 +61,25 @@ func TestPSQLSetGetTPTiming(t *testing.T) {
 		return
 	}
 	tm := &utils.ApierTPTiming{TPid: TEST_SQL, TimingId: "ALWAYS", Time: "00:00:00"}
-	if err := psqlDb.SetTPTiming(tm); err != nil {
+	mtm := APItoModelTiming(tm)
+	mtms := []TpTiming{*mtm}
+	if err := psqlDb.SetTpTimings(mtms); err != nil {
 		t.Error(err.Error())
 	}
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
-		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
+	} else if !reflect.DeepEqual(mtms, tmgs) {
+		t.Errorf("Expecting: %+v, received: %+v", mtms, tmgs)
 	}
 	// Update
 	tm.Time = "00:00:01"
-	if err := psqlDb.SetTPTiming(tm); err != nil {
+	if err := psqlDb.SetTpTimings(mtms); err != nil {
 		t.Error(err.Error())
 	}
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
-		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
+	} else if !reflect.DeepEqual(mtms, tmgs) {
+		t.Errorf("Expecting: %+v, received: %+v", mtms, tmgs)
 	}
 }
 
@@ -85,12 +87,13 @@ func TestPSQLSetGetTPDestination(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	dst := &Destination{Id: TEST_SQL, Prefixes: []string{"+49", "+49151", "+49176"}}
-	if err := psqlDb.SetTPDestination(TEST_SQL, dst); err != nil {
+	dst := &utils.TPDestination{TPid: TEST_SQL, DestinationId: TEST_SQL, Prefixes: []string{"+49", "+49151", "+49176"}}
+	dests := APItoModelDestination(dst)
+	if err := psqlDb.SetTpDestinations(dests); err != nil {
 		t.Error(err.Error())
 	}
 	storData, err := psqlDb.GetTpDestinations(TEST_SQL, TEST_SQL)
-	dsts := TpDestinations(storData).GetDestinations()
+	dsts, err := TpDestinations(storData).GetDestinations()
 	if err != nil {
 		t.Error(err.Error())
 	} else if len(dst.Prefixes) != len(dsts[TEST_SQL].Prefixes) {
@@ -110,15 +113,17 @@ func TestPSQLSetGetTPRates(t *testing.T) {
 	for _, rs := range rtSlots {
 		rs.SetDurations()
 	}
-	mpRates := map[string][]*utils.RateSlot{RT_ID: rtSlots}
 	expectedTPRate := &utils.TPRate{TPid: TEST_SQL, RateId: RT_ID, RateSlots: rtSlots}
-	if err := psqlDb.SetTPRates(TEST_SQL, mpRates); err != nil {
+	mRates := APItoModelRate(expectedTPRate)
+	if err := psqlDb.SetTpRates(mRates); err != nil {
 		t.Error(err.Error())
 	}
-	if rts, err := psqlDb.GetTpRates(TEST_SQL, RT_ID); err != nil {
+	rts, err := psqlDb.GetTpRates(TEST_SQL, RT_ID)
+	trts, err := TpRates(rts).GetRates()
+	if err != nil {
 		t.Error(err.Error())
-	} else if len(expectedTPRate.RateSlots) != len(rts[RT_ID].RateSlots) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedTPRate, rts[RT_ID])
+	} else if len(expectedTPRate.RateSlots) != len(trts[RT_ID].RateSlots) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedTPRate, trts[RT_ID])
 	}
 }
 
@@ -128,15 +133,15 @@ func TestPSQLSetGetTPDestinationRates(t *testing.T) {
 	}
 	DR_ID := "DR_1"
 	dr := &utils.DestinationRate{DestinationId: "DST_1", RateId: "RT_1", RoundingMethod: "*up", RoundingDecimals: 4}
-	drs := map[string][]*utils.DestinationRate{DR_ID: []*utils.DestinationRate{dr}}
 	eDrs := &utils.TPDestinationRate{TPid: TEST_SQL, DestinationRateId: DR_ID, DestinationRates: []*utils.DestinationRate{dr}}
-	if err := psqlDb.SetTPDestinationRates(TEST_SQL, drs); err != nil {
+	mdrs := APItoModelDestinationRate(eDrs)
+	if err := psqlDb.SetTpDestinationRates(mdrs); err != nil {
 		t.Error(err.Error())
 	}
 	if drs, err := psqlDb.GetTpDestinationRates(TEST_SQL, DR_ID, nil); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(eDrs, drs[DR_ID]) {
-		t.Errorf("Expecting: %+v, received: %+v", eDrs, drs[DR_ID])
+	} else if !reflect.DeepEqual(mdrs, drs) {
+		t.Errorf("Expecting: %+v, received: %+v", mdrs, drs)
 	}
 }
 
@@ -146,14 +151,20 @@ func TestPSQLSetGetTPRatingPlans(t *testing.T) {
 	}
 	RP_ID := "RP_1"
 	rbBinding := &utils.TPRatingPlanBinding{DestinationRatesId: "DR_1", TimingId: "TM_1", Weight: 10.0}
-	drts := map[string][]*utils.TPRatingPlanBinding{RP_ID: []*utils.TPRatingPlanBinding{rbBinding}}
-	if err := psqlDb.SetTPRatingPlans(TEST_SQL, drts); err != nil {
+	rp := &utils.TPRatingPlan{
+		TPid:               TEST_SQL,
+		RatingPlanId:       RP_ID,
+		RatingPlanBindings: []*utils.TPRatingPlanBinding{rbBinding},
+	}
+	mrp := APItoModelRatingPlan(rp)
+
+	if err := psqlDb.SetTpRatingPlans(mrp); err != nil {
 		t.Error(err.Error())
 	}
 	if drps, err := psqlDb.GetTpRatingPlans(TEST_SQL, RP_ID, nil); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(drts, drps) {
-		t.Errorf("Expecting: %+v, received: %+v", drts, drps)
+	} else if !reflect.DeepEqual(mrp, drps) {
+		t.Errorf("Expecting: %+v, received: %+v", mrp, drps)
 	}
 }
 
@@ -163,14 +174,15 @@ func TestPSQLSetGetTPRatingProfiles(t *testing.T) {
 	}
 	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RP_1"}}
 	rp := &utils.TPRatingProfile{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
-	setRps := map[string]*utils.TPRatingProfile{rp.KeyId(): rp}
-	if err := psqlDb.SetTPRatingProfiles(TEST_SQL, setRps); err != nil {
+
+	mrp := APItoModelRatingProfile(rp)
+	if err := psqlDb.SetTpRatingProfiles(mrp); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := psqlDb.GetTpRatingProfiles(rp); err != nil {
+	if rps, err := psqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(setRps, rps) {
-		t.Errorf("Expecting: %+v, received: %+v", setRps, rps)
+	} else if !reflect.DeepEqual(mrp, rps) {
+		t.Errorf("Expecting: %+v, received: %+v", mrp, rps)
 	}
 }
 
@@ -179,14 +191,21 @@ func TestPSQLSetGetTPSharedGroups(t *testing.T) {
 		return
 	}
 	SG_ID := "SG_1"
-	setSgs := map[string][]*utils.TPSharedGroup{SG_ID: []*utils.TPSharedGroup{&utils.TPSharedGroup{Account: "dan", Strategy: "*lowest_first", RatingSubject: "lowest_rates"}}}
-	if err := psqlDb.SetTPSharedGroups(TEST_SQL, setSgs); err != nil {
+	tpSgs := &utils.TPSharedGroups{
+		TPid:           TEST_SQL,
+		SharedGroupsId: SG_ID,
+		SharedGroups: []*utils.TPSharedGroup{
+			&utils.TPSharedGroup{Account: "dan", Strategy: "*lowest_first", RatingSubject: "lowest_rates"},
+		},
+	}
+	mSgs := APItoModelSharedGroup(tpSgs)
+	if err := psqlDb.SetTpSharedGroups(mSgs); err != nil {
 		t.Error(err.Error())
 	}
 	if sgs, err := psqlDb.GetTpSharedGroups(TEST_SQL, SG_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(setSgs, sgs) {
-		t.Errorf("Expecting: %+v, received: %+v", setSgs, sgs)
+	} else if !reflect.DeepEqual(mSgs, sgs) {
+		t.Errorf("Expecting: %+v, received: %+v", mSgs, sgs)
 	}
 }
 
@@ -195,16 +214,21 @@ func TestPSQLSetGetTPCdrStats(t *testing.T) {
 		return
 	}
 	CS_ID := "CDRSTATS_1"
-	setCS := map[string][]*utils.TPCdrStat{CS_ID: []*utils.TPCdrStat{
-		&utils.TPCdrStat{QueueLength: "10", TimeWindow: "10m", Metrics: "ASR", Tenants: "cgrates.org", Categories: "call"},
-	}}
-	if err := psqlDb.SetTPCdrStats(TEST_SQL, setCS); err != nil {
+	setCS := &utils.TPCdrStats{
+		TPid:       TEST_SQL,
+		CdrStatsId: CS_ID,
+		CdrStats: []*utils.TPCdrStat{
+			&utils.TPCdrStat{QueueLength: "10", TimeWindow: "10m", Metrics: "ASR", Tenants: "cgrates.org", Categories: "call"},
+		},
+	}
+	mcs := APItoModelCdrStat(setCS)
+	if err := psqlDb.SetTpCdrStats(mcs); err != nil {
 		t.Error(err.Error())
 	}
 	if cs, err := psqlDb.GetTpCdrStats(TEST_SQL, CS_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(setCS, cs) {
-		t.Errorf("Expecting: %+v, received: %+v", setCS, cs)
+	} else if !reflect.DeepEqual(mcs, cs) {
+		t.Errorf("Expecting: %+v, received: %+v", mcs, cs)
 	}
 }
 
@@ -215,15 +239,14 @@ func TestPSQLSetGetTPDerivedChargers(t *testing.T) {
 	dc := &utils.TPDerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: "^" + utils.META_PREPAID, AccountField: "^rif", SubjectField: "^rif",
 		UsageField: "cgr_duration", SupplierField: "^supplier1"}
 	dcs := &utils.TPDerivedChargers{TPid: TEST_SQL, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: []*utils.TPDerivedCharger{dc}}
-	DCS_ID := dcs.GetDerivedChargesId()
-	setDCs := map[string][]*utils.TPDerivedCharger{DCS_ID: []*utils.TPDerivedCharger{dc}}
-	if err := psqlDb.SetTPDerivedChargers(TEST_SQL, setDCs); err != nil {
+	mdcs := APItoModelDerivedCharger(dcs)
+	if err := psqlDb.SetTpDerivedChargers(mdcs); err != nil {
 		t.Error(err.Error())
 	}
-	if rDCs, err := psqlDb.GetTpDerivedChargers(dcs); err != nil {
+	if rDCs, err := psqlDb.GetTpDerivedChargers(&mdcs[0]); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(dcs, rDCs[DCS_ID]) {
-		t.Errorf("Expecting: %+v, received: %+v", dcs, rDCs[DCS_ID])
+	} else if !reflect.DeepEqual(mdcs, rDCs) {
+		t.Errorf("Expecting: %+v, received: %+v", mdcs, rDCs)
 	}
 }
 
@@ -236,13 +259,14 @@ func TestPSQLSetGetTPActions(t *testing.T) {
 		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
 			DestinationIds: "*any", BalanceWeight: 10, Weight: 10}}
 	tpActions := &utils.TPActions{TPid: TEST_SQL, ActionsId: ACTS_ID, Actions: acts}
-	if err := psqlDb.SetTPActions(TEST_SQL, map[string][]*utils.TPAction{ACTS_ID: acts}); err != nil {
+	mas := APItoModelAction(tpActions)
+	if err := psqlDb.SetTpActions(mas); err != nil {
 		t.Error(err.Error())
 	}
-	if rTpActs, err := psqlDb.GetTPActions(TEST_SQL, ACTS_ID); err != nil {
+	if rTpActs, err := psqlDb.GetTpActions(TEST_SQL, ACTS_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(tpActions, rTpActs) {
-		t.Errorf("Expecting: %+v, received: %+v", tpActions, rTpActs)
+	} else if !reflect.DeepEqual(mas, rTpActs) {
+		t.Errorf("Expecting: %+v, received: %+v", mas, rTpActs)
 	}
 }
 
@@ -251,14 +275,19 @@ func TestPSQLTPActionTimings(t *testing.T) {
 		return
 	}
 	AP_ID := "AP_1"
-	ap := map[string][]*utils.TPActionTiming{AP_ID: []*utils.TPActionTiming{&utils.TPActionTiming{ActionsId: "ACTS_1", TimingId: "TM_1", Weight: 10.0}}}
-	if err := psqlDb.SetTPActionTimings(TEST_SQL, ap); err != nil {
+	ap := &utils.TPActionPlan{
+		TPid:       TEST_SQL,
+		Id:         AP_ID,
+		ActionPlan: []*utils.TPActionTiming{&utils.TPActionTiming{ActionsId: "ACTS_1", TimingId: "TM_1", Weight: 10.0}},
+	}
+	maps := APItoModelActionPlan(ap)
+	if err := psqlDb.SetTpActionPlans(maps); err != nil {
 		t.Error(err.Error())
 	}
-	if rAP, err := psqlDb.GetTPActionTimings(TEST_SQL, AP_ID); err != nil {
+	if rAP, err := psqlDb.GetTpActionPlans(TEST_SQL, AP_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(ap, rAP) {
-		t.Errorf("Expecting: %+v, received: %+v", ap, rAP)
+	} else if !reflect.DeepEqual(maps, rAP) {
+		t.Errorf("Expecting: %+v, received: %+v", maps, rAP)
 	}
 }
 
@@ -277,14 +306,19 @@ func TestPSQLSetGetTPActionTriggers(t *testing.T) {
 		Weight:                10.0,
 		ActionsId:             "LOG_BALANCE",
 	}
-	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
-	if err := psqlDb.SetTPActionTriggers(TEST_SQL, mpAtrgs); err != nil {
+	atrgs := &utils.TPActionTriggers{
+		TPid:             TEST_SQL,
+		ActionTriggersId: TEST_SQL,
+		ActionTriggers:   []*utils.TPActionTrigger{atrg},
+	}
+	matrg := APItoModelActionTrigger(atrgs)
+	if err := psqlDb.SetTpActionTriggers(matrg); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
 	if rcvMpAtrgs, err := psqlDb.GetTpActionTriggers(TEST_SQL, TEST_SQL); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if !reflect.DeepEqual(mpAtrgs, rcvMpAtrgs) {
-		t.Errorf("Expecting: %v, received: %v", mpAtrgs, rcvMpAtrgs)
+	} else if !reflect.DeepEqual(matrg, rcvMpAtrgs) {
+		t.Errorf("Expecting: %v, received: %v", matrg, rcvMpAtrgs)
 	}
 }
 
@@ -294,13 +328,14 @@ func TestPSQLSetGetTpAccountActions(t *testing.T) {
 	}
 	aa := &utils.TPAccountActions{TPid: TEST_SQL, Tenant: "cgrates.org", Account: "1001",
 		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	if err := psqlDb.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+	maa := APItoModelAccountAction(aa)
+	if err := psqlDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := psqlDb.GetTpAccountActions(aa); err != nil {
+	if aas, err := psqlDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(aa, aas[aa.KeyId()]) {
-		t.Errorf("Expecting: %+v, received: %+v", aa, aas[aa.KeyId()])
+	} else if !reflect.DeepEqual(maa, aas) {
+		t.Errorf("Expecting: %+v, received: %+v", maa, aas)
 	}
 }
 
@@ -309,7 +344,7 @@ func TestPSQLGetTPIds(t *testing.T) {
 		return
 	}
 	eTPIds := []string{TEST_SQL}
-	if tpIds, err := psqlDb.GetTPIds(); err != nil {
+	if tpIds, err := psqlDb.GetTpIds(); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(eTPIds, tpIds) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPIds, tpIds)
@@ -322,7 +357,8 @@ func TestPSQLRemoveTPData(t *testing.T) {
 	}
 	// Create Timings
 	tm := &utils.ApierTPTiming{TPid: TEST_SQL, TimingId: "ALWAYS", Time: "00:00:00"}
-	if err := psqlDb.SetTPTiming(tm); err != nil {
+	tms := APItoModelTiming(tm)
+	if err := psqlDb.SetTpTimings([]TpTiming{*tms}); err != nil {
 		t.Error(err.Error())
 	}
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
@@ -331,7 +367,7 @@ func TestPSQLRemoveTPData(t *testing.T) {
 		t.Error("Could not store TPTiming")
 	}
 	// Remove Timings
-	if err := psqlDb.RemTPData(utils.TBL_TP_TIMINGS, TEST_SQL, tm.TimingId); err != nil {
+	if err := psqlDb.RemTpData(utils.TBL_TP_TIMINGS, TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	}
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
@@ -342,19 +378,20 @@ func TestPSQLRemoveTPData(t *testing.T) {
 	// Create RatingProfile
 	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1"}}
 	rp := &utils.TPRatingProfile{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
-	if err := psqlDb.SetTPRatingProfiles(TEST_SQL, map[string]*utils.TPRatingProfile{rp.KeyId(): rp}); err != nil {
+	mrp := APItoModelRatingProfile(rp)
+	if err := psqlDb.SetTpRatingProfiles(mrp); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := psqlDb.GetTpRatingProfiles(rp); err != nil {
+	if rps, err := psqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err.Error())
 	} else if len(rps) == 0 {
 		t.Error("Could not store TPRatingProfile")
 	}
 	// Remove RatingProfile
-	if err := psqlDb.RemTPData(utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.LoadId, rp.Direction, rp.Tenant, rp.Category, rp.Subject); err != nil {
+	if err := psqlDb.RemTpData(utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.LoadId, rp.Direction, rp.Tenant, rp.Category, rp.Subject); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := psqlDb.GetTpRatingProfiles(rp); err != nil {
+	if rps, err := psqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err)
 	} else if len(rps) != 0 {
 		t.Errorf("RatingProfiles different than 0: %+v", rps)
@@ -362,25 +399,26 @@ func TestPSQLRemoveTPData(t *testing.T) {
 	// Create AccountActions
 	aa := &utils.TPAccountActions{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Account: "1001",
 		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	if err := psqlDb.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+	maa := APItoModelAccountAction(aa)
+	if err := psqlDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := psqlDb.GetTpAccountActions(aa); err != nil {
+	if aas, err := psqlDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err.Error())
 	} else if len(aas) == 0 {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove AccountActions
-	if err := psqlDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, aa.LoadId, aa.Direction, aa.Tenant, aa.Account); err != nil {
+	if err := psqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, aa.LoadId, aa.Direction, aa.Tenant, aa.Account); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := psqlDb.GetTpAccountActions(aa); err != nil {
+	if aas, err := psqlDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err)
 	} else if len(aas) != 0 {
 		t.Errorf("Non empty account actions: %+v", aas)
 	}
 	// Create again so we can test complete TP removal
-	if err := psqlDb.SetTPTiming(tm); err != nil {
+	if err := psqlDb.SetTpTimings([]TpTiming{*tms}); err != nil {
 		t.Error(err.Error())
 	}
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
@@ -389,25 +427,25 @@ func TestPSQLRemoveTPData(t *testing.T) {
 		t.Error("Could not store TPTiming")
 	}
 	// Create RatingProfile
-	if err := psqlDb.SetTPRatingProfiles(TEST_SQL, map[string]*utils.TPRatingProfile{rp.KeyId(): rp}); err != nil {
+	if err := psqlDb.SetTpRatingProfiles(mrp); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := psqlDb.GetTpRatingProfiles(rp); err != nil {
+	if rps, err := psqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err.Error())
 	} else if len(rps) == 0 {
 		t.Error("Could not store TPRatingProfile")
 	}
 	// Create AccountActions
-	if err := psqlDb.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+	if err := psqlDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := psqlDb.GetTpAccountActions(aa); err != nil {
+	if aas, err := psqlDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err.Error())
 	} else if len(aas) == 0 {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove TariffPlan completely
-	if err := psqlDb.RemTPData("", TEST_SQL); err != nil {
+	if err := psqlDb.RemTpData("", TEST_SQL); err != nil {
 		t.Error(err.Error())
 	}
 	// Make sure we have removed it
@@ -416,12 +454,12 @@ func TestPSQLRemoveTPData(t *testing.T) {
 	} else if len(tms) != 0 {
 		t.Errorf("Non empty timings: %+v", tms)
 	}
-	if rpfs, err := psqlDb.GetTpRatingProfiles(rp); err != nil {
+	if rpfs, err := psqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err)
 	} else if len(rpfs) != 0 {
 		t.Errorf("Non empty rpfs: %+v", rpfs)
 	}
-	if aas, err := psqlDb.GetTpAccountActions(aa); err != nil {
+	if aas, err := psqlDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err)
 	} else if len(aas) != 0 {
 		t.Errorf("Non empty account actions: %+v", aas)

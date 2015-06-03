@@ -427,7 +427,7 @@ func (self *SQLStorage) SetTpDerivedChargers(sgs []TpDerivedCharger) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTpLcrRules(sgs []TpLcrRules) error {
+func (self *SQLStorage) SetTpLCRs(sgs []TpLcrRule) error {
 	if len(sgs) == 0 {
 		return nil //Nothing to set
 	}
@@ -435,15 +435,15 @@ func (self *SQLStorage) SetTpLcrRules(sgs []TpLcrRules) error {
 
 	tx := self.db.Begin()
 	for _, lcr := range sgs {
-		if found, _ := m[lcr.GetLcrRulesId()]; !found {
-			m[lcr.GetLcrRulesId()] = true
-			tmpDc := &TpLcrRules{}
-			if err := tmpDc.SetLcrRulesId(lcr.GetLcrRulesId()); err != nil {
+		if found, _ := m[lcr.GetLcrRuleId()]; !found {
+			m[lcr.GetLcrRuleId()] = true
+			tmpDc := &TpLcrRule{}
+			if err := tmpDc.SetLcrRuleId(lcr.GetLcrRuleId()); err != nil {
 				tx.Rollback()
 				return err
 			}
 
-			if err := tx.Where(tmpDc).Delete(TpLcrRules{}).Error; err != nil {
+			if err := tx.Where(tmpDc).Delete(TpLcrRule{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -483,7 +483,7 @@ func (self *SQLStorage) SetTpActions(acts []TpAction) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTpActionPlan(ats []TpActionPlan) error {
+func (self *SQLStorage) SetTpActionPlans(ats []TpActionPlan) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
@@ -1141,23 +1141,23 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Pag
 	return tpRatingPlans, nil
 }
 
-func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) ([]TpRatingProfile, error) {
+func (self *SQLStorage) GetTpRatingProfiles(filter *TpRatingProfile) ([]TpRatingProfile, error) {
 	var tpRpfs []TpRatingProfile
-	q := self.db.Where("tpid = ?", qryRpf.TPid)
-	if len(qryRpf.Direction) != 0 {
-		q = q.Where("direction = ?", qryRpf.Direction)
+	q := self.db.Where("tpid = ?", filter.Tpid)
+	if len(filter.Direction) != 0 {
+		q = q.Where("direction = ?", filter.Direction)
 	}
-	if len(qryRpf.Tenant) != 0 {
-		q = q.Where("tenant = ?", qryRpf.Tenant)
+	if len(filter.Tenant) != 0 {
+		q = q.Where("tenant = ?", filter.Tenant)
 	}
-	if len(qryRpf.Category) != 0 {
-		q = q.Where("category = ?", qryRpf.Category)
+	if len(filter.Category) != 0 {
+		q = q.Where("category = ?", filter.Category)
 	}
-	if len(qryRpf.Subject) != 0 {
-		q = q.Where("subject = ?", qryRpf.Subject)
+	if len(filter.Subject) != 0 {
+		q = q.Where("subject = ?", filter.Subject)
 	}
-	if len(qryRpf.LoadId) != 0 {
-		q = q.Where("loadid = ?", qryRpf.LoadId)
+	if len(filter.Loadid) != 0 {
+		q = q.Where("loadid = ?", filter.Loadid)
 	}
 	if err := q.Find(&tpRpfs).Error; err != nil {
 		return nil, err
@@ -1179,17 +1179,17 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, er
 
 }
 
-func (self *SQLStorage) GetTpLCRs(tpid, tag string) ([]TpLcrRules, error) {
-	var tpLcrRules []TpLcrRules
+func (self *SQLStorage) GetTpLCRs(tpid, tag string) ([]TpLcrRule, error) {
+	var tpLcrRule []TpLcrRule
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)
 	}
-	if err := q.Find(&tpLcrRules).Error; err != nil {
+	if err := q.Find(&tpLcrRule).Error; err != nil {
 		return nil, err
 	}
 
-	return tpLcrRules, nil
+	return tpLcrRule, nil
 }
 
 func (self *SQLStorage) GetTpActions(tpid, tag string) ([]TpAction, error) {
@@ -1218,7 +1218,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger
 	return tpActionTriggers, nil
 }
 
-func (self *SQLStorage) GetTpActionPlan(tpid, tag string) ([]*TpActionPlan, error) {
+func (self *SQLStorage) GetTpActionPlans(tpid, tag string) ([]*TpActionPlan, error) {
 	var tpActionPlans []*TpActionPlan
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
@@ -1231,21 +1231,21 @@ func (self *SQLStorage) GetTpActionPlan(tpid, tag string) ([]*TpActionPlan, erro
 	return tpActionPlans, nil
 }
 
-func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) ([]TpAccountAction, error) {
+func (self *SQLStorage) GetTpAccountActions(filter *TpAccountAction) ([]TpAccountAction, error) {
 
 	var tpAccActs []TpAccountAction
-	q := self.db.Where("tpid = ?", aaFltr.TPid)
-	if len(aaFltr.Direction) != 0 {
-		q = q.Where("direction = ?", aaFltr.Direction)
+	q := self.db.Where("tpid = ?", filter.Tpid)
+	if len(filter.Direction) != 0 {
+		q = q.Where("direction = ?", filter.Direction)
 	}
-	if len(aaFltr.Tenant) != 0 {
-		q = q.Where("tenant = ?", aaFltr.Tenant)
+	if len(filter.Tenant) != 0 {
+		q = q.Where("tenant = ?", filter.Tenant)
 	}
-	if len(aaFltr.Account) != 0 {
-		q = q.Where("account = ?", aaFltr.Account)
+	if len(filter.Account) != 0 {
+		q = q.Where("account = ?", filter.Account)
 	}
-	if len(aaFltr.LoadId) != 0 {
-		q = q.Where("loadid = ?", aaFltr.LoadId)
+	if len(filter.Loadid) != 0 {
+		q = q.Where("loadid = ?", filter.Loadid)
 	}
 	if err := q.Find(&tpAccActs).Error; err != nil {
 		return nil, err
@@ -1253,26 +1253,26 @@ func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) ([]T
 	return tpAccActs, nil
 }
 
-func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) ([]TpDerivedCharger, error) {
+func (self *SQLStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDerivedCharger, error) {
 	var tpDerivedChargers []TpDerivedCharger
-	q := self.db.Where("tpid = ?", dc.TPid)
-	if len(dc.Direction) != 0 {
-		q = q.Where("direction = ?", dc.Direction)
+	q := self.db.Where("tpid = ?", filter.Tpid)
+	if len(filter.Direction) != 0 {
+		q = q.Where("direction = ?", filter.Direction)
 	}
-	if len(dc.Tenant) != 0 {
-		q = q.Where("tenant = ?", dc.Tenant)
+	if len(filter.Tenant) != 0 {
+		q = q.Where("tenant = ?", filter.Tenant)
 	}
-	if len(dc.Account) != 0 {
-		q = q.Where("account = ?", dc.Account)
+	if len(filter.Account) != 0 {
+		q = q.Where("account = ?", filter.Account)
 	}
-	if len(dc.Category) != 0 {
-		q = q.Where("category = ?", dc.Category)
+	if len(filter.Category) != 0 {
+		q = q.Where("category = ?", filter.Category)
 	}
-	if len(dc.Subject) != 0 {
-		q = q.Where("subject = ?", dc.Subject)
+	if len(filter.Subject) != 0 {
+		q = q.Where("subject = ?", filter.Subject)
 	}
-	if len(dc.Loadid) != 0 {
-		q = q.Where("loadid = ?", dc.Loadid)
+	if len(filter.Loadid) != 0 {
+		q = q.Where("loadid = ?", filter.Loadid)
 	}
 	if err := q.Find(&tpDerivedChargers).Error; err != nil {
 		return nil, err

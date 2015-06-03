@@ -135,7 +135,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: self.TPid})
+	tps, err := self.csvr.GetTpRatingProfiles(&TpRatingProfile{Tpid: self.TPid})
 	if err != nil {
 		return err
 	}
@@ -195,7 +195,7 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
 	}
-	tps, err := self.csvr.GetTpAccountActions(&utils.TPAccountActions{TPid: self.TPid})
+	tps, err := self.csvr.GetTpAccountActions(&TpAccountAction{Tpid: self.TPid})
 	if err != nil {
 		return err
 	}

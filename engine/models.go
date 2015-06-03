@@ -116,7 +116,7 @@ func (rpf *TpRatingProfile) GetRatingProfileId() string {
 	return utils.ConcatenatedKey(rpf.Loadid, rpf.Direction, rpf.Tenant, rpf.Category, rpf.Subject)
 }
 
-type TpLcrRules struct {
+type TpLcrRule struct {
 	Id             int64
 	Tpid           string
 	Direction      string `index:"0" re:""`
@@ -133,10 +133,10 @@ type TpLcrRules struct {
 	CreatedAt      time.Time
 }
 
-func (lcr *TpLcrRules) SetLcrRulesId(id string) error {
+func (lcr *TpLcrRule) SetLcrRuleId(id string) error {
 	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
 	if len(ids) != 5 {
-		return fmt.Errorf("wrong LcrRules Id: %s", id)
+		return fmt.Errorf("wrong LcrRule Id: %s", id)
 	}
 	lcr.Direction = ids[0]
 	lcr.Tenant = ids[2]
@@ -146,7 +146,7 @@ func (lcr *TpLcrRules) SetLcrRulesId(id string) error {
 	return nil
 }
 
-func (lcr *TpLcrRules) GetLcrRulesId() string {
+func (lcr *TpLcrRule) GetLcrRuleId() string {
 	return utils.LCRKey(lcr.Direction, lcr.Tenant, lcr.Category, lcr.Account, lcr.Subject)
 }
 

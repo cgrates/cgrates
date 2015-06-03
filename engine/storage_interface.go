@@ -142,15 +142,15 @@ type LoadReader interface {
 	GetTpRates(string, string) ([]TpRate, error)
 	GetTpDestinationRates(string, string, *utils.Paginator) ([]TpDestinationRate, error)
 	GetTpRatingPlans(string, string, *utils.Paginator) ([]TpRatingPlan, error)
-	GetTpRatingProfiles(*utils.TPRatingProfile) ([]TpRatingProfile, error)
+	GetTpRatingProfiles(*TpRatingProfile) ([]TpRatingProfile, error)
 	GetTpSharedGroups(string, string) ([]TpSharedGroup, error)
 	GetTpCdrStats(string, string) ([]TpCdrStat, error)
-	GetTpDerivedChargers(*utils.TPDerivedChargers) ([]TpDerivedCharger, error)
-	GetTpLCRs(string, string) ([]TpLcrRules, error)
+	GetTpDerivedChargers(*TpDerivedCharger) ([]TpDerivedCharger, error)
+	GetTpLCRs(string, string) ([]TpLcrRule, error)
 	GetTpActions(string, string) ([]TpAction, error)
 	GetTpActionPlans(string, string) ([]TpActionPlan, error)
 	GetTpActionTriggers(string, string) ([]TpActionTrigger, error)
-	GetTpAccountActions(*utils.TPAccountActions) ([]TpAccountAction, error)
+	GetTpAccountActions(*TpAccountAction) ([]TpAccountAction, error)
 }
 
 type LoadWriter interface {
@@ -164,7 +164,7 @@ type LoadWriter interface {
 	SetTpSharedGroups([]TpSharedGroup) error
 	SetTpCdrStats([]TpCdrStat) error
 	SetTpDerivedChargers([]TpDerivedCharger) error
-	SetTpLCRs([]TpLcrRules) error
+	SetTpLCRs([]TpLcrRule) error
 	SetTpActions([]TpAction) error
 	SetTpActionPlans([]TpActionPlan) error
 	SetTpActionTriggers([]TpActionTrigger) error

@@ -136,7 +136,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: self.tpID}); err != nil {
+	if storData, err := self.storDb.GetTpRatingProfiles(&TpRatingProfile{Tpid: self.tpID}); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -176,7 +176,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: self.tpID}); err != nil {
+	if storData, err := self.storDb.GetTpAccountActions(&TpAccountAction{Tpid: self.tpID}); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {
@@ -184,7 +184,7 @@ func (self *TPExporter) Run() error {
 		}
 	}
 
-	if storData, err := self.storDb.GetTpDerivedChargers(&utils.TPDerivedChargers{TPid: self.tpID}); err != nil {
+	if storData, err := self.storDb.GetTpDerivedChargers(&TpDerivedCharger{Tpid: self.tpID}); err != nil {
 		return err
 	} else {
 		for _, sd := range storData {

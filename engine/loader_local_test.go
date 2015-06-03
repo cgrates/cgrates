@@ -250,7 +250,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			t.Fatal("Could not convert rating plans")
 		}
 		for tag := range rpls {
-			if loaded, err := loader.LoadRatingPlanFiltered(tag); err != nil {
+			if loaded, err := loader.LoadRatingPlansFiltered(tag); err != nil {
 				t.Fatalf("Could not load ratingPlan for tag: %s, error: %s", tag, err.Error())
 			} else if !loaded {
 				t.Fatal("Cound not find ratingPLan with id:", tag)
@@ -259,7 +259,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	}
 	// Load rating profiles
 	loadId := utils.CSV_LOAD + "_" + TEST_SQL
-	if ratingProfiles, err := storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: TEST_SQL, LoadId: loadId}); err != nil {
+	if ratingProfiles, err := storDb.GetTpRatingProfiles(&TpRatingProfile{Tpid: TEST_SQL, Loadid: loadId}); err != nil {
 		t.Fatal("Could not retrieve rating profiles, error: ", err.Error())
 	} else if len(ratingProfiles) == 0 {
 		t.Fatal("Could not retrieve rating profiles")
@@ -270,13 +270,14 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 		for rpId := range rpfs {
 			rp, _ := utils.NewTPRatingProfileFromKeyId(TEST_SQL, loadId, rpId)
-			if err := loader.LoadRatingProfileFiltered(rp); err != nil {
+			mrp := APItoModelRatingProfile(rp)
+			if err := loader.LoadRatingProfilesFiltered(&mrp[0]); err != nil {
 				t.Fatalf("Could not load ratingProfile with id: %s, error: %s", rpId, err.Error())
 			}
 		}
 	}
 	// Load account actions
-	if accountActions, err := storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: TEST_SQL, LoadId: loadId}); err != nil {
+	if accountActions, err := storDb.GetTpAccountActions(&TpAccountAction{Tpid: TEST_SQL, Loadid: loadId}); err != nil {
 		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())
 	} else if len(accountActions) == 0 {
 		t.Error("No account actions")
@@ -287,7 +288,8 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 		for aaId := range aas {
 			aa, _ := utils.NewTPAccountActionsFromKeyId(TEST_SQL, loadId, aaId)
-			if err := loader.LoadAccountActionsFiltered(aa); err != nil {
+			maa := APItoModelAccountAction(aa)
+			if err := loader.LoadAccountActionsFiltered(maa); err != nil {
 				t.Fatalf("Could not load account actions with id: %s, error: %s", aaId, err.Error())
 			}
 		}

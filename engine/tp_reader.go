@@ -240,7 +240,7 @@ func (tpr *TpReader) LoadRatingPlans() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *utils.TPRatingProfile) error {
+func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile) error {
 	var resultRatingProfile *RatingProfile
 	mpTpRpfs, err := tpr.lr.GetTpRatingProfiles(qriedRpf)
 	if err != nil {
@@ -563,7 +563,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions) error {
+func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error {
 	accountActions, err := tpr.lr.GetTpAccountActions(qriedAA)
 	if err != nil {
 		return errors.New(err.Error() + ": " + fmt.Sprintf("%+v", qriedAA))
@@ -796,7 +796,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 	return nil
 }
 
-func (tpr *TpReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers, save bool) (err error) {
+func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save bool) (err error) {
 	tps, err := tpr.lr.GetTpDerivedChargers(filter)
 	if err != nil {
 		return err
