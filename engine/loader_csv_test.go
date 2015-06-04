@@ -898,7 +898,7 @@ func TestLoadLCRs(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(lcr, expected) {
-		t.Errorf("Error loading lcr %+v: ", lcr)
+		t.Errorf("Error loading lcr %+v: ", lcr.Activations[0].Entries[0])
 	}
 }
 
@@ -924,7 +924,7 @@ func TestLoadActionTimings(t *testing.T) {
 		ActionsId: "MINI",
 	}
 	if !reflect.DeepEqual(atm, expected) {
-		t.Errorf("Error loading action timing:\n%+v\n%+v", atm, expected)
+		t.Errorf("Error loading action timing:\n%+v", atm)
 	}
 }
 

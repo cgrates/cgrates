@@ -16,7 +16,7 @@ type TpReader struct {
 	accountingStorage AccountingStorage
 	lr                LoadReader
 	actions           map[string][]*Action
-	actionsTimings    map[string][]*ActionTiming
+	actionsTimings    map[string][]*ActionPlan
 	actionsTriggers   map[string][]*ActionTrigger
 	accountActions    map[string]*Account
 	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
@@ -42,7 +42,7 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid str
 		accountingStorage: as,
 		lr:                lr,
 		actions:           make(map[string][]*Action),
-		actionsTimings:    make(map[string][]*ActionTiming),
+		actionsTimings:    make(map[string][]*ActionPlan),
 		actionsTriggers:   make(map[string][]*ActionTrigger),
 		rates:             make(map[string]*utils.TPRate),
 		destinations:      make(map[string]*Destination),
@@ -402,7 +402,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 		}
 		act.Entries = append(act.Entries, &LCREntry{
 			DestinationId:  tpLcr.DestinationTag,
-			RPCategory:     tpLcr.Category,
+			RPCategory:     tpLcr.RpCategory,
 			Strategy:       tpLcr.Strategy,
 			StrategyParams: tpLcr.StrategyParams,
 			Weight:         tpLcr.Weight,
@@ -491,7 +491,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 			if !exists {
 				return fmt.Errorf("actionTiming: Could not load the timing for tag: %v", at.TimingId)
 			}
-			actTmg := &ActionTiming{
+			actTmg := &ActionPlan{
 				Uuid:   utils.GenUUID(),
 				Id:     atId,
 				Weight: at.Weight,
@@ -580,10 +580,10 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
 			var exitingAccountIds []string
-			existingActionTimings, err := tpr.accountingStorage.GetActionTimings(accountAction.ActionPlanId)
-			if err == nil && len(existingActionTimings) > 0 {
+			existingActionPlans, err := tpr.accountingStorage.GetActionPlans(accountAction.ActionPlanId)
+			if err == nil && len(existingActionPlans) > 0 {
 				// all action timings from a specific tag shuld have the same list of user balances from the first one
-				exitingAccountIds = existingActionTimings[0].AccountIds
+				exitingAccountIds = existingActionPlans[0].AccountIds
 			}
 
 			tpap, err := tpr.lr.GetTpActionPlans(tpr.tpid, accountAction.ActionPlanId)
@@ -596,7 +596,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			if err != nil {
 				return err
 			}
-			var actionTimings []*ActionTiming
+			var actionTimings []*ActionPlan
 			ats := aps[accountAction.ActionPlanId]
 			for _, at := range ats {
 				// Check action exists before saving it inside actionTiming key
@@ -617,7 +617,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					return err
 				}
 				t := tm[at.TimingId]
-				actTmg := &ActionTiming{
+				actTmg := &ActionPlan{
 					Uuid:   utils.GenUUID(),
 					Id:     accountAction.ActionPlanId,
 					Weight: at.Weight,
@@ -648,7 +648,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			}
 
 			// write action timings
-			err = tpr.accountingStorage.SetActionTimings(accountAction.ActionPlanId, actionTimings)
+			err = tpr.accountingStorage.SetActionPlans(accountAction.ActionPlanId, actionTimings)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
 			}
@@ -988,7 +988,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Action Plans:")
 	}
 	for k, ats := range tpr.actionsTimings {
-		err = tpr.accountingStorage.SetActionTimings(k, ats)
+		err = tpr.accountingStorage.SetActionPlans(k, ats)
 		if err != nil {
 			return err
 		}

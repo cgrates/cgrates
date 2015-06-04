@@ -774,7 +774,7 @@ func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	return
 }
 
-func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
+func (rs *RedisStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return

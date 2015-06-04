@@ -119,17 +119,17 @@ func (rpf *TpRatingProfile) GetRatingProfileId() string {
 type TpLcrRule struct {
 	Id             int64
 	Tpid           string
-	Direction      string `index:"0" re:""`
-	Tenant         string `index:"1" re:""`
-	Category       string `index:"2" re:""`
-	Account        string `index:"3" re:""`
-	Subject        string `index:"4" re:""`
-	DestinationTag string `index:"5" re:""`
-	RpCategory     string `index:"6" re:""`
-	Strategy       string `index:"7" re:""`
-	StrategyParams string `index:"8" re:""`
-	ActivationTime string `index:"9" re:""`
-	Weight         float64
+	Direction      string  `index:"0" re:""`
+	Tenant         string  `index:"1" re:""`
+	Category       string  `index:"2" re:""`
+	Account        string  `index:"3" re:""`
+	Subject        string  `index:"4" re:""`
+	DestinationTag string  `index:"5" re:""`
+	RpCategory     string  `index:"6" re:""`
+	Strategy       string  `index:"7" re:""`
+	StrategyParams string  `index:"8" re:""`
+	ActivationTime string  `index:"9" re:""`
+	Weight         float64 `index:"10" re:""`
 	CreatedAt      time.Time
 }
 
@@ -238,9 +238,9 @@ type TpSharedGroup struct {
 	Id            int64
 	Tpid          string
 	Tag           string `index:"0" re:""`
-	Account       string `index:"0" re:""`
-	Strategy      string `index:"0" re:""`
-	RatingSubject string `index:"0" re:""`
+	Account       string `index:"1" re:""`
+	Strategy      string `index:"2" re:""`
+	RatingSubject string `index:"3" re:""`
 	CreatedAt     time.Time
 }
 

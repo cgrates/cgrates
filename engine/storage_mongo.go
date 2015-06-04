@@ -113,10 +113,10 @@ type LogCostEntry struct {
 }
 
 type LogTimingEntry struct {
-	ActionTiming *ActionTiming
-	Actions      Actions
-	LogTime      time.Time
-	Source       string
+	ActionPlan *ActionPlan
+	Actions    Actions
+	LogTime    time.Time
+	Source     string
 }
 
 type LogTriggerEntry struct {
@@ -233,7 +233,7 @@ func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	return ms.db.C("actlog").Insert(&LogTriggerEntry{ubId, at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
+func (ms *MongoStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
 	return ms.db.C("actlog").Insert(&LogTimingEntry{at, as, time.Now(), source})
 }
 

@@ -33,7 +33,7 @@ const (
 	ASAP   = "*asap"
 )
 
-type ActionTiming struct {
+type ActionPlan struct {
 	Uuid       string // uniquely identify the timing
 	Id         string // informative purpose only
 	AccountIds []string
@@ -44,9 +44,9 @@ type ActionTiming struct {
 	stCache    time.Time // cached time of the next start
 }
 
-type ActionPlan []*ActionTiming
+type ActionPlans []*ActionPlan
 
-func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
+func (at *ActionPlan) GetNextStartTime(now time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
@@ -69,7 +69,7 @@ func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 }
 
 // To be deleted after the above solution proves reliable
-func (at *ActionTiming) GetNextStartTimeOld(now time.Time) (t time.Time) {
+func (at *ActionPlan) GetNextStartTimeOld(now time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
@@ -219,15 +219,15 @@ YEARS:
 	return
 }
 
-func (at *ActionTiming) resetStartTimeCache() {
+func (at *ActionPlan) resetStartTimeCache() {
 	at.stCache = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
-func (at *ActionTiming) SetActions(as Actions) {
+func (at *ActionPlan) SetActions(as Actions) {
 	at.actions = as
 }
 
-func (at *ActionTiming) getActions() (as []*Action, err error) {
+func (at *ActionPlan) getActions() (as []*Action, err error) {
 	if at.actions == nil {
 		at.actions, err = accountingStorage.GetActions(at.ActionsId, false)
 	}
@@ -235,7 +235,7 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 	return at.actions, err
 }
 
-func (at *ActionTiming) Execute() (err error) {
+func (at *ActionPlan) Execute() (err error) {
 	if len(at.AccountIds) == 0 { // nothing to do if no accounts set
 		return
 	}
@@ -276,26 +276,26 @@ func (at *ActionTiming) Execute() (err error) {
 			}
 		}
 	}
-	storageLogger.LogActionTiming(SCHED_SOURCE, at, aac)
+	storageLogger.LogActionPlan(SCHED_SOURCE, at, aac)
 	return
 }
 
-func (at *ActionTiming) IsASAP() bool {
+func (at *ActionPlan) IsASAP() bool {
 	return at.Timing.Timing.StartTime == ASAP
 }
 
 // Structure to store actions according to weight
-type ActionTimingPriotityList []*ActionTiming
+type ActionPlanPriotityList []*ActionPlan
 
-func (atpl ActionTimingPriotityList) Len() int {
+func (atpl ActionPlanPriotityList) Len() int {
 	return len(atpl)
 }
 
-func (atpl ActionTimingPriotityList) Swap(i, j int) {
+func (atpl ActionPlanPriotityList) Swap(i, j int) {
 	atpl[i], atpl[j] = atpl[j], atpl[i]
 }
 
-func (atpl ActionTimingPriotityList) Less(i, j int) bool {
+func (atpl ActionPlanPriotityList) Less(i, j int) bool {
 	if atpl[i].GetNextStartTime(time.Now()).Equal(atpl[j].GetNextStartTime(time.Now())) {
 		// higher weights earlyer in the list
 		return atpl[i].Weight > atpl[j].Weight
@@ -303,23 +303,23 @@ func (atpl ActionTimingPriotityList) Less(i, j int) bool {
 	return atpl[i].GetNextStartTime(time.Now()).Before(atpl[j].GetNextStartTime(time.Now()))
 }
 
-func (atpl ActionTimingPriotityList) Sort() {
+func (atpl ActionPlanPriotityList) Sort() {
 	sort.Sort(atpl)
 }
 
-func (at *ActionTiming) String_DISABLED() string {
+func (at *ActionPlan) String_DISABLED() string {
 	return at.Id + " " + at.GetNextStartTime(time.Now()).String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
 }
 
-// Helper to remove ActionTiming members based on specific filters, empty data means no always match
-func RemActionTiming(ats ActionPlan, actionTimingId, balanceId string) ActionPlan {
+// Helper to remove ActionPlan members based on specific filters, empty data means no always match
+func RemActionPlan(ats ActionPlans, actionTimingId, balanceId string) ActionPlans {
 	for idx, at := range ats {
-		if len(actionTimingId) != 0 && at.Uuid != actionTimingId { // No Match for ActionTimingId, no need to move further
+		if len(actionTimingId) != 0 && at.Uuid != actionTimingId { // No Match for ActionPlanId, no need to move further
 			continue
 		}
 		if len(balanceId) == 0 { // No account defined, considered match for complete removal
 			if len(ats) == 1 { // Removing last item, by init empty
-				return make([]*ActionTiming, 0)
+				return make([]*ActionPlan, 0)
 			}
 			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 			continue
@@ -328,7 +328,7 @@ func RemActionTiming(ats ActionPlan, actionTimingId, balanceId string) ActionPla
 			if blncId == balanceId {
 				if len(at.AccountIds) == 1 { // Only one balance, remove complete at
 					if len(ats) == 1 { // Removing last item, by init empty
-						return make([]*ActionTiming, 0)
+						return make([]*ActionPlan, 0)
 					}
 					ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 				} else {

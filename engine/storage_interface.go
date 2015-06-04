@@ -103,9 +103,9 @@ type AccountingStorage interface {
 	SetAccAlias(string, string) error
 	RemoveAccAliases([]*TenantAccount) error
 	GetAccountAliases(string, string, bool) ([]string, error)
-	GetActionTimings(string) (ActionPlan, error)
-	SetActionTimings(string, ActionPlan) error
-	GetAllActionTimings() (map[string]ActionPlan, error)
+	GetActionTimings(string) (ActionPlans, error)
+	SetActionTimings(string, ActionPlans) error
+	GetAllActionTimings() (map[string]ActionPlans, error)
 	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
 	SetDerivedChargers(string, utils.DerivedChargers) error
 }
@@ -125,7 +125,7 @@ type LogStorage interface {
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
 	LogError(uuid, source, runid, errstr string) error
 	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
-	LogActionTiming(source string, at *ActionTiming, as Actions) error
+	LogActionPlan(source string, at *ActionPlan, as Actions) error
 }
 
 type LoadStorage interface {

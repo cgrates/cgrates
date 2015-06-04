@@ -513,7 +513,7 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetActionTimings(key string) (ats ActionPlan, err error) {
+func (ms *MapStorage) GetActionTimings(key string) (ats ActionPlans, err error) {
 	if values, ok := ms.dict[ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
@@ -522,7 +522,7 @@ func (ms *MapStorage) GetActionTimings(key string) (ats ActionPlan, err error) {
 	return
 }
 
-func (ms *MapStorage) SetActionTimings(key string, ats ActionPlan) (err error) {
+func (ms *MapStorage) SetActionTimings(key string, ats ActionPlans) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		delete(ms.dict, ACTION_TIMING_PREFIX+key)
@@ -533,13 +533,13 @@ func (ms *MapStorage) SetActionTimings(key string, ats ActionPlan) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlan, err error) {
-	ats = make(map[string]ActionPlan)
+func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlans, err error) {
+	ats = make(map[string]ActionPlans)
 	for key, value := range ms.dict {
 		if !strings.HasPrefix(key, ACTION_TIMING_PREFIX) {
 			continue
 		}
-		var tempAts ActionPlan
+		var tempAts ActionPlans
 		err = ms.ms.Unmarshal(value, &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}
@@ -626,7 +626,7 @@ func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, a
 	return
 }
 
-func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
+func (ms *MapStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
 	mat, err := ms.ms.Marshal(at)
 	if err != nil {
 		return

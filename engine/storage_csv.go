@@ -326,10 +326,10 @@ func (csvs *CSVStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger
 			log.Print("bad line in action triggers csv: ", err)
 			return nil, err
 		}
-		if tpRate, err := csvLoad(TpActionTrigger{}, record); err != nil {
+		if tpAt, err := csvLoad(TpActionTrigger{}, record); err != nil {
 			return nil, err
 		} else {
-			tpActionTriggers = append(tpActionTriggers, tpRate.(TpActionTrigger))
+			tpActionTriggers = append(tpActionTriggers, tpAt.(TpActionTrigger))
 		}
 	}
 	return tpActionTriggers, nil
@@ -386,9 +386,9 @@ func (csvs *CSVStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 }
 
 func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrStat, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.derivedChargersFn, csvs.sep, getColumnCount(TpCdrStat{}))
+	csvReader, fp, err := csvs.readerFunc(csvs.cdrStatsFn, csvs.sep, getColumnCount(TpCdrStat{}))
 	if err != nil {
-		log.Print("Could not load derivedChargers file: ", err)
+		log.Print("Could not load cdr stats file: ", err)
 		// allow writing of the other values
 		return nil, nil
 	}
@@ -401,10 +401,10 @@ func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrStat, error) {
 			log.Print("bad line in cdr stats csv: ", err)
 			return nil, err
 		}
-		if tpRate, err := csvLoad(TpCdrStat{}, record); err != nil {
+		if tpCdrStat, err := csvLoad(TpCdrStat{}, record); err != nil {
 			return nil, err
 		} else {
-			tpCdrStats = append(tpCdrStats, tpRate.(TpCdrStat))
+			tpCdrStats = append(tpCdrStats, tpCdrStat.(TpCdrStat))
 		}
 	}
 	return tpCdrStats, nil
