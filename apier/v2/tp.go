@@ -34,7 +34,7 @@ func (self *ApierV2) RemTP(attrs AttrRemTp, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return fmt.Errorf("%s:TPid", utils.ERR_MANDATORY_IE_MISSING)
 	}
-	if err := self.StorDb.RemTPData("", attrs.TPid); err != nil {
+	if err := self.StorDb.RemTpData("", attrs.TPid); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

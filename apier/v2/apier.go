@@ -42,8 +42,9 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 	}
 	tpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
 	tpRpf.SetRatingProfilesId(attrs.RatingProfileId)
-	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-	if err := dbReader.LoadRatingProfileFiltered(tpRpf); err != nil {
+	rpf := engine.APItoModelRatingProfile(tpRpf)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	if err := dbReader.LoadRatingProfilesFiltered(&rpf[0]); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	//Automatic cache of the newly inserted rating profile
@@ -69,12 +70,12 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	if len(attrs.TPid) == 0 {
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
-	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
-
+	aa := engine.APItoModelAccountAction(tpAa)
 	if _, err := engine.AccLock.Guard(func() (interface{}, error) {
-		if err := dbReader.LoadAccountActionsFiltered(tpAa); err != nil {
+		if err := dbReader.LoadAccountActionsFiltered(aa); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -87,7 +88,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 		return err
 	}
 	if self.Sched != nil {
-		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.LoadActionPlans(self.AccountDb)
 		self.Sched.Restart()
 	}
 	*reply = v1.OK
@@ -106,9 +107,9 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	}
 	tpDc := &utils.TPDerivedChargers{TPid: attrs.TPid}
 	tpDc.SetDerivedChargersId(attrs.DerivedChargersId)
-
-	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-	if err := dbReader.LoadDerivedChargersFiltered(tpDc, true); err != nil {
+	dc := engine.APItoModelDerivedCharger(tpDc)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	//Automatic cache of the newly inserted rating plan

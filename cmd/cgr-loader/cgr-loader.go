@@ -84,7 +84,7 @@ func main() {
 	var accountDb engine.AccountingStorage
 	var storDb engine.LoadStorage
 	var rater, cdrstats *rpc.Client
-	var loader engine.TPLoader
+	var loader engine.LoadReader
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
@@ -132,15 +132,15 @@ func main() {
 		}
 	}
 	if *fromStorDb { // Load Tariff Plan from storDb into dataDb
-		loader = engine.NewDbReader(storDb, ratingDb, accountDb, *tpid)
+		loader = storDb
 	} else { // Default load from csv files to dataDb
-		for fn, v := range engine.FileValidators {
+		/*for fn, v := range engine.FileValidators {
 			err := engine.ValidateCSVData(path.Join(*dataPath, fn), v.Rule)
 			if err != nil {
 				log.Fatal(err, "\n\t", v.Message)
 			}
-		}
-		loader = engine.NewFileCSVReader(ratingDb, accountDb, ',',
+		}*/
+		loader = engine.NewFileCSVStorage(',',
 			path.Join(*dataPath, utils.DESTINATIONS_CSV),
 			path.Join(*dataPath, utils.TIMINGS_CSV),
 			path.Join(*dataPath, utils.RATES_CSV),
@@ -156,15 +156,16 @@ func main() {
 			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
 			path.Join(*dataPath, utils.CDR_STATS_CSV))
 	}
-	err = loader.LoadAll()
+	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid)
+	err = tpReader.LoadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
 	if *stats {
-		loader.ShowStatistics()
+		tpReader.ShowStatistics()
 	}
 	if *validate {
-		if !loader.IsDataValid() {
+		if !tpReader.IsValid() {
 			return
 		}
 	}
@@ -206,7 +207,7 @@ func main() {
 	}
 
 	// write maps to database
-	if err := loader.WriteToDatabase(*flush, *verbose); err != nil {
+	if err := tpReader.WriteToDatabase(*flush, *verbose); err != nil {
 		log.Fatal("Could not write to database: ", err)
 	}
 	if len(*historyServer) != 0 && *verbose {
@@ -215,15 +216,15 @@ func main() {
 	// Reload scheduler and cache
 	if rater != nil {
 		reply := ""
-		dstIds, _ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
-		rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
-		rpfIds, _ := loader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
-		actIds, _ := loader.GetLoadedIds(engine.ACTION_PREFIX)
-		shgIds, _ := loader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
-		rpAliases, _ := loader.GetLoadedIds(engine.RP_ALIAS_PREFIX)
-		accAliases, _ := loader.GetLoadedIds(engine.ACC_ALIAS_PREFIX)
-		lcrIds, _ := loader.GetLoadedIds(engine.LCR_PREFIX)
-		dcs, _ := loader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
+		dstIds, _ := tpReader.GetLoadedIds(engine.DESTINATION_PREFIX)
+		rplIds, _ := tpReader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
+		rpfIds, _ := tpReader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
+		actIds, _ := tpReader.GetLoadedIds(engine.ACTION_PREFIX)
+		shgIds, _ := tpReader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
+		rpAliases, _ := tpReader.GetLoadedIds(engine.RP_ALIAS_PREFIX)
+		accAliases, _ := tpReader.GetLoadedIds(engine.ACC_ALIAS_PREFIX)
+		lcrIds, _ := tpReader.GetLoadedIds(engine.LCR_PREFIX)
+		dcs, _ := tpReader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
@@ -244,7 +245,7 @@ func main() {
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
-		actTmgIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
+		actTmgIds, _ := tpReader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
 		if len(actTmgIds) != 0 {
 			if *verbose {
 				log.Print("Reloading scheduler")
@@ -256,7 +257,7 @@ func main() {
 
 	}
 	if cdrstats != nil {
-		statsQueueIds, _ := loader.GetLoadedIds(engine.CDR_STATS_PREFIX)
+		statsQueueIds, _ := tpReader.GetLoadedIds(engine.CDR_STATS_PREFIX)
 		if *flush {
 			statsQueueIds = []string{} // Force reload all
 		}

@@ -558,7 +558,7 @@ func main() {
 			go reloadSchedulerSingnalHandler(sched, accountDb)
 			apierRpcV1.Sched = sched
 			apierRpcV2.Sched = sched
-			sched.LoadActionTimings(accountDb)
+			sched.LoadActionPlans(accountDb)
 			sched.Loop()
 		}()
 	}
