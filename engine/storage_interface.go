@@ -103,9 +103,9 @@ type AccountingStorage interface {
 	SetAccAlias(string, string) error
 	RemoveAccAliases([]*TenantAccount) error
 	GetAccountAliases(string, string, bool) ([]string, error)
-	GetActionTimings(string) (ActionPlans, error)
-	SetActionTimings(string, ActionPlans) error
-	GetAllActionTimings() (map[string]ActionPlans, error)
+	GetActionPlans(string) (ActionPlans, error)
+	SetActionPlans(string, ActionPlans) error
+	GetAllActionPlans() (map[string]ActionPlans, error)
 	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
 	SetDerivedChargers(string, utils.DerivedChargers) error
 }

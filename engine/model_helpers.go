@@ -34,8 +34,8 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 		}
 	}
 	elem := reflect.New(st).Elem()
-	for fildName, fieldValue := range fieldValueMap {
-		field := elem.FieldByName(fildName)
+	for fieldName, fieldValue := range fieldValueMap {
+		field := elem.FieldByName(fieldName)
 		if field.IsValid() {
 			switch field.Kind() {
 			case reflect.Float64:
@@ -44,7 +44,7 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 				}
 				value, err := strconv.ParseFloat(fieldValue, 64)
 				if err != nil {
-					return nil, fmt.Errorf(`invalid value "%s" for field %s.%s`, fieldValue, st.Name(), fildName)
+					return nil, fmt.Errorf(`invalid value "%s" for field %s.%s`, fieldValue, st.Name(), fieldName)
 				}
 				field.SetFloat(value)
 			case reflect.Int:
@@ -53,9 +53,18 @@ func csvLoad(s interface{}, values []string) (interface{}, error) {
 				}
 				value, err := strconv.Atoi(fieldValue)
 				if err != nil {
-					return nil, fmt.Errorf(`invalid value "%s" for field %s.%s`, fieldValue, st.Name(), fildName)
+					return nil, fmt.Errorf(`invalid value "%s" for field %s.%s`, fieldValue, st.Name(), fieldName)
 				}
 				field.SetInt(int64(value))
+			case reflect.Bool:
+				if fieldValue == "" {
+					fieldValue = "false"
+				}
+				value, err := strconv.ParseBool(fieldValue)
+				if err != nil {
+					return nil, fmt.Errorf(`invalid value "%s" for field %s.%s`, fieldValue, st.Name(), fieldName)
+				}
+				field.SetBool(value)
 			case reflect.String:
 				field.SetString(fieldValue)
 			}
@@ -392,22 +401,23 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 		if _, hasIt := dcs[tag]; !hasIt {
 			dcs[tag] = tpDc
 		}
-		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, &utils.TPDerivedCharger{
-			RunId:                tpDcMdl.Runid,
+		nDc := &utils.TPDerivedCharger{
+			RunId:                ValueOrDefault(tpDcMdl.Runid, utils.META_DEFAULT),
 			RunFilters:           tpDcMdl.RunFilters,
-			ReqTypeField:         tpDcMdl.ReqTypeField,
-			DirectionField:       tpDcMdl.DirectionField,
-			TenantField:          tpDcMdl.TenantField,
-			CategoryField:        tpDcMdl.CategoryField,
-			AccountField:         tpDcMdl.AccountField,
-			SubjectField:         tpDcMdl.SubjectField,
-			DestinationField:     tpDcMdl.DestinationField,
-			SetupTimeField:       tpDcMdl.SetupTimeField,
-			AnswerTimeField:      tpDcMdl.AnswerTimeField,
-			UsageField:           tpDcMdl.UsageField,
-			SupplierField:        tpDcMdl.SupplierField,
-			DisconnectCauseField: tpDcMdl.DisconnectCauseField,
-		})
+			ReqTypeField:         ValueOrDefault(tpDcMdl.ReqTypeField, utils.META_DEFAULT),
+			DirectionField:       ValueOrDefault(tpDcMdl.DirectionField, utils.META_DEFAULT),
+			TenantField:          ValueOrDefault(tpDcMdl.TenantField, utils.META_DEFAULT),
+			CategoryField:        ValueOrDefault(tpDcMdl.CategoryField, utils.META_DEFAULT),
+			AccountField:         ValueOrDefault(tpDcMdl.AccountField, utils.META_DEFAULT),
+			SubjectField:         ValueOrDefault(tpDcMdl.SubjectField, utils.META_DEFAULT),
+			DestinationField:     ValueOrDefault(tpDcMdl.DestinationField, utils.META_DEFAULT),
+			SetupTimeField:       ValueOrDefault(tpDcMdl.SetupTimeField, utils.META_DEFAULT),
+			AnswerTimeField:      ValueOrDefault(tpDcMdl.AnswerTimeField, utils.META_DEFAULT),
+			UsageField:           ValueOrDefault(tpDcMdl.UsageField, utils.META_DEFAULT),
+			SupplierField:        ValueOrDefault(tpDcMdl.SupplierField, utils.META_DEFAULT),
+			DisconnectCauseField: ValueOrDefault(tpDcMdl.DisconnectCauseField, utils.META_DEFAULT),
+		}
+		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, nDc)
 	}
 	return dcs, nil
 }
@@ -446,7 +456,7 @@ func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 }
 
 func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *utils.TPCdrStat) {
-	if tpCs.QueueLength != "" {
+	if tpCs.QueueLength != "" && tpCs.QueueLength != "0" {
 		if qi, err := strconv.Atoi(tpCs.QueueLength); err == nil {
 			cs.QueueLength = qi
 		} else {
@@ -586,4 +596,12 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 	if triggers != nil {
 		cs.Triggers = append(cs.Triggers, triggers...)
 	}
+}
+
+// ValueOrDefault is used to populate empty values with *any or *default if value missing
+func ValueOrDefault(val string, deflt string) string {
+	if len(val) == 0 {
+		val = deflt
+	}
+	return val
 }

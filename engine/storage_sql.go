@@ -1218,8 +1218,8 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger
 	return tpActionTriggers, nil
 }
 
-func (self *SQLStorage) GetTpActionPlans(tpid, tag string) ([]*TpActionPlan, error) {
-	var tpActionPlans []*TpActionPlan
+func (self *SQLStorage) GetTpActionPlans(tpid, tag string) ([]TpActionPlan, error) {
+	var tpActionPlans []TpActionPlan
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)

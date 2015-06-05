@@ -213,43 +213,43 @@ func init() {
 	csvr = NewTpReader(dataStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats), "")
 	if err := csvr.LoadDestinations(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadDestinations:", err)
 	}
 	if err := csvr.LoadTimings(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadTimings:", err)
 	}
 	if err := csvr.LoadRates(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadRates:", err)
 	}
 	if err := csvr.LoadDestinationRates(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadDestRates:", err)
 	}
 	if err := csvr.LoadRatingPlans(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadRatingPlans:", err)
 	}
 	if err := csvr.LoadRatingProfiles(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadRatingProfiles:", err)
 	}
 	if err := csvr.LoadSharedGroups(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadSharedGroups:", err)
 	}
 	if err := csvr.LoadLCRs(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadLCR:", err)
 	}
 	if err := csvr.LoadActions(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadActions:", err)
 	}
 	if err := csvr.LoadActionPlans(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadActionPlans:", err)
 	}
 	if err := csvr.LoadActionTriggers(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadActionTriggers:", err)
 	}
 	if err := csvr.LoadAccountActions(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadAccountActions:", err)
 	}
 	if err := csvr.LoadDerivedChargers(); err != nil {
-		log.Print("error in LoadCdrStats:", err)
+		log.Print("error in LoadDerivedChargers:", err)
 	}
 	if err := csvr.LoadCdrStats(); err != nil {
 		log.Print("error in LoadCdrStats:", err)
@@ -907,7 +907,7 @@ func TestLoadActionTimings(t *testing.T) {
 		t.Error("Failed to load action timings: ", csvr.actionsTimings)
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
-	expected := &ActionTiming{
+	expected := &ActionPlan{
 		Uuid:       atm.Uuid,
 		Id:         "MORE_MINUTES",
 		AccountIds: []string{"*out:vdf:minitsboy"},
@@ -1024,7 +1024,8 @@ func TestLoadDerivedChargers(t *testing.T) {
 			DisconnectCauseField: utils.META_DEFAULT},
 	}
 	keyCharger1 := utils.DerivedChargersKey("*out", "cgrates.org", "call", "dan", "dan")
-	if !reflect.DeepEqual(csvr.derivedChargers[keyCharger1], expCharger1) {
+
+	if !csvr.derivedChargers[keyCharger1].Equal(expCharger1) {
 		t.Errorf("Unexpected charger %+v", csvr.derivedChargers[keyCharger1][0])
 	}
 }
@@ -1062,6 +1063,6 @@ func TestLoadCdrStats(t *testing.T) {
 	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers["STANDARD_TRIGGERS"]...)
 	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers["STANDARD_TRIGGER"]...)
 	if !reflect.DeepEqual(csvr.cdrStats[cdrStats1.Id], cdrStats1) {
-		t.Error("Unexpected stats", csvr.cdrStats[cdrStats1.Id])
+		t.Errorf("Unexpected stats %+v", csvr.cdrStats[cdrStats1.Id])
 	}
 }

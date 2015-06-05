@@ -193,13 +193,13 @@ type TpActionTrigger struct {
 	BalanceTag             string  `index:"6" re:""`
 	BalanceType            string  `index:"7" re:""`
 	BalanceDirection       string  `index:"8" re:""`
-	BalanceDestinationTags string  `index:"9" re:""`
-	BalanceWeight          float64 `index:"10" re:""`
-	BalanceExpiryTime      string  `index:"11" re:""`
-	BalanceTimingTags      string  `index:"12" re:""`
-	BalanceRatingSubject   string  `index:"13" re:""`
-	BalanceCategory        string  `index:"14" re:""`
-	BalanceSharedGroup     string  `index:"15" re:""`
+	BalanceCategory        string  `index:"9" re:""`
+	BalanceDestinationTags string  `index:"10" re:""`
+	BalanceRatingSubject   string  `index:"11" re:""`
+	BalanceSharedGroup     string  `index:"12" re:""`
+	BalanceExpiryTime      string  `index:"13" re:""`
+	BalanceTimingTags      string  `index:"14" re:""`
+	BalanceWeight          float64 `index:"15" re:""`
 	MinQueuedItems         int     `index:"16" re:""`
 	ActionsTag             string  `index:"17" re:""`
 	Weight                 float64 `index:"18" re:""`
@@ -210,9 +210,9 @@ type TpAccountAction struct {
 	Id                int64
 	Tpid              string
 	Loadid            string
-	Direction         string `index:"0" re:""`
-	Tenant            string `index:"1" re:""`
-	Account           string `index:"2" re:""`
+	Tenant            string `index:"0" re:""`
+	Account           string `index:"1" re:""`
+	Direction         string `index:"2" re:""`
 	ActionPlanTag     string `index:"3" re:""`
 	ActionTriggersTag string `index:"4" re:""`
 	CreatedAt         time.Time

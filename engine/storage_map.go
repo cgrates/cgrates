@@ -513,7 +513,7 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetActionTimings(key string) (ats ActionPlans, err error) {
+func (ms *MapStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 	if values, ok := ms.dict[ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
@@ -522,7 +522,7 @@ func (ms *MapStorage) GetActionTimings(key string) (ats ActionPlans, err error) 
 	return
 }
 
-func (ms *MapStorage) SetActionTimings(key string, ats ActionPlans) (err error) {
+func (ms *MapStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		delete(ms.dict, ACTION_TIMING_PREFIX+key)
@@ -533,7 +533,7 @@ func (ms *MapStorage) SetActionTimings(key string, ats ActionPlans) (err error) 
 	return
 }
 
-func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlans, err error) {
+func (ms *MapStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
 	ats = make(map[string]ActionPlans)
 	for key, value := range ms.dict {
 		if !strings.HasPrefix(key, ACTION_TIMING_PREFIX) {

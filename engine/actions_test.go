@@ -37,7 +37,7 @@ var (
 )
 
 func TestActionTimingAlways(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}}}
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}}}
 	st := at.GetNextStartTime(referenceDate)
 	y, m, d := referenceDate.Date()
 	expected := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
@@ -46,8 +46,8 @@ func TestActionTimingAlways(t *testing.T) {
 	}
 }
 
-func TestActionTimingNothing(t *testing.T) {
-	at := &ActionTiming{}
+func TestActionPlanNothing(t *testing.T) {
+	at := &ActionPlan{}
 	st := at.GetNextStartTime(referenceDate)
 	expected := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 	if !st.Equal(expected) {
@@ -55,8 +55,8 @@ func TestActionTimingNothing(t *testing.T) {
 	}
 }
 
-func TestActionTimingOnlyHour(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: "10:01:00"}}}
+func TestActionPlanOnlyHour(t *testing.T) {
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
 
 	y, m, d := now.Date()
@@ -69,8 +69,8 @@ func TestActionTimingOnlyHour(t *testing.T) {
 	}
 }
 
-func TestActionTimingHourYear(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2022}, StartTime: "10:01:00"}}}
+func TestActionPlanHourYear(t *testing.T) {
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2022}, StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
 	expected := time.Date(2022, 1, 1, 10, 1, 0, 0, time.Local)
 	if !st.Equal(expected) {
@@ -78,8 +78,8 @@ func TestActionTimingHourYear(t *testing.T) {
 	}
 }
 
-func TestActionTimingOnlyWeekdays(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday}}}}
+func TestActionPlanOnlyWeekdays(t *testing.T) {
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday}}}}
 	st := at.GetNextStartTime(referenceDate)
 
 	y, m, d := now.Date()
@@ -99,8 +99,8 @@ func TestActionTimingOnlyWeekdays(t *testing.T) {
 	}
 }
 
-func TestActionTimingHourWeekdays(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday}, StartTime: "10:01:00"}}}
+func TestActionPlanHourWeekdays(t *testing.T) {
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday}, StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
 
 	y, m, d := now.Date()
@@ -119,11 +119,11 @@ func TestActionTimingHourWeekdays(t *testing.T) {
 	}
 }
 
-func TestActionTimingOnlyMonthdays(t *testing.T) {
+func TestActionPlanOnlyMonthdays(t *testing.T) {
 
 	y, m, d := now.Date()
 	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{MonthDays: utils.MonthDays{1, 25, 2, tomorrow.Day()}}}}
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{MonthDays: utils.MonthDays{1, 25, 2, tomorrow.Day()}}}}
 	st := at.GetNextStartTime(referenceDate)
 	expected := tomorrow
 	if !st.Equal(expected) {
@@ -131,7 +131,7 @@ func TestActionTimingOnlyMonthdays(t *testing.T) {
 	}
 }
 
-func TestActionTimingHourMonthdays(t *testing.T) {
+func TestActionPlanHourMonthdays(t *testing.T) {
 
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
@@ -139,7 +139,7 @@ func TestActionTimingHourMonthdays(t *testing.T) {
 	if now.After(testTime) {
 		y, m, d = tomorrow.Date()
 	}
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{MonthDays: utils.MonthDays{now.Day(), tomorrow.Day()}, StartTime: "10:01:00"}}}
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{MonthDays: utils.MonthDays{now.Day(), tomorrow.Day()}, StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
 	expected := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
 	if !st.Equal(expected) {
@@ -147,11 +147,11 @@ func TestActionTimingHourMonthdays(t *testing.T) {
 	}
 }
 
-func TestActionTimingOnlyMonths(t *testing.T) {
+func TestActionPlanOnlyMonths(t *testing.T) {
 
 	y, m, _ := now.Date()
 	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Months: utils.Months{time.February, time.May, nextMonth.Month()}}}}
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{Months: utils.Months{time.February, time.May, nextMonth.Month()}}}}
 	st := at.GetNextStartTime(referenceDate)
 	expected := time.Date(nextMonth.Year(), nextMonth.Month(), 1, 0, 0, 0, 0, time.Local)
 	if !st.Equal(expected) {
@@ -160,7 +160,7 @@ func TestActionTimingOnlyMonths(t *testing.T) {
 	}
 }
 
-func TestActionTimingHourMonths(t *testing.T) {
+func TestActionPlanHourMonths(t *testing.T) {
 
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
@@ -174,7 +174,7 @@ func TestActionTimingHourMonths(t *testing.T) {
 		y = nextMonth.Year()
 
 	}
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{
 		Months:    utils.Months{now.Month(), nextMonth.Month()},
 		StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
@@ -187,7 +187,7 @@ func TestActionTimingHourMonths(t *testing.T) {
 	}
 }
 
-func TestActionTimingHourMonthdaysMonths(t *testing.T) {
+func TestActionPlanHourMonthdaysMonths(t *testing.T) {
 
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
@@ -204,7 +204,7 @@ func TestActionTimingHourMonthdaysMonths(t *testing.T) {
 			month = nextMonth.Month()
 		}
 	}
-	at := &ActionTiming{Timing: &RateInterval{
+	at := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			Months:    utils.Months{now.Month(), nextMonth.Month()},
 			MonthDays: utils.MonthDays{now.Day(), tomorrow.Day()},
@@ -218,11 +218,11 @@ func TestActionTimingHourMonthdaysMonths(t *testing.T) {
 	}
 }
 
-func TestActionTimingFirstOfTheMonth(t *testing.T) {
+func TestActionPlanFirstOfTheMonth(t *testing.T) {
 
 	y, m, _ := now.Date()
 	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
-	at := &ActionTiming{Timing: &RateInterval{
+	at := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			MonthDays: utils.MonthDays{1},
 		},
@@ -234,10 +234,10 @@ func TestActionTimingFirstOfTheMonth(t *testing.T) {
 	}
 }
 
-func TestActionTimingOnlyYears(t *testing.T) {
+func TestActionPlanOnlyYears(t *testing.T) {
 	y, _, _ := referenceDate.Date()
 	nextYear := time.Date(y, 1, 1, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{now.Year(), nextYear.Year()}}}}
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{now.Year(), nextYear.Year()}}}}
 	st := at.GetNextStartTime(referenceDate)
 	expected := nextYear
 	if !st.Equal(expected) {
@@ -245,8 +245,8 @@ func TestActionTimingOnlyYears(t *testing.T) {
 	}
 }
 
-func TestActionTimingPast(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2023}}}}
+func TestActionPlanPast(t *testing.T) {
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2023}}}}
 	st := at.GetNextStartTime(referenceDate)
 	expected := time.Date(2023, 1, 1, 0, 0, 0, 0, time.Local)
 	if !st.Equal(expected) {
@@ -254,8 +254,8 @@ func TestActionTimingPast(t *testing.T) {
 	}
 }
 
-func TestActionTimingHourYears(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{referenceDate.Year(), referenceDate.Year() + 1}, StartTime: "10:01:00"}}}
+func TestActionPlanHourYears(t *testing.T) {
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{referenceDate.Year(), referenceDate.Year() + 1}, StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
 	expected := time.Date(referenceDate.Year(), 1, 1, 10, 1, 0, 0, time.Local)
 	if referenceDate.After(expected) {
@@ -266,7 +266,7 @@ func TestActionTimingHourYears(t *testing.T) {
 	}
 }
 
-func TestActionTimingHourMonthdaysYear(t *testing.T) {
+func TestActionPlanHourMonthdaysYear(t *testing.T) {
 
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
@@ -280,7 +280,7 @@ func TestActionTimingHourMonthdaysYear(t *testing.T) {
 			expected = tomorrow
 		}
 	}
-	at := &ActionTiming{Timing: &RateInterval{
+	at := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			Years:     utils.Years{now.Year(), nextYear.Year()},
 			MonthDays: utils.MonthDays{now.Day(), tomorrow.Day()},
@@ -295,7 +295,7 @@ func TestActionTimingHourMonthdaysYear(t *testing.T) {
 	}
 }
 
-func TestActionTimingHourMonthdaysMonthYear(t *testing.T) {
+func TestActionPlanHourMonthdaysMonthYear(t *testing.T) {
 
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
@@ -320,7 +320,7 @@ func TestActionTimingHourMonthdaysMonthYear(t *testing.T) {
 			year = nextYear.Year()
 		}
 	}
-	at := &ActionTiming{Timing: &RateInterval{
+	at := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			Years:     utils.Years{now.Year(), nextYear.Year()},
 			Months:    utils.Months{now.Month(), nextMonth.Month()},
@@ -335,10 +335,10 @@ func TestActionTimingHourMonthdaysMonthYear(t *testing.T) {
 	}
 }
 
-func TestActionTimingFirstOfTheYear(t *testing.T) {
+func TestActionPlanFirstOfTheYear(t *testing.T) {
 	y, _, _ := now.Date()
 	nextYear := time.Date(y, 1, 1, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
-	at := &ActionTiming{Timing: &RateInterval{
+	at := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			Years:     utils.Years{nextYear.Year()},
 			Months:    utils.Months{time.January},
@@ -353,13 +353,13 @@ func TestActionTimingFirstOfTheYear(t *testing.T) {
 	}
 }
 
-func TestActionTimingFirstMonthOfTheYear(t *testing.T) {
+func TestActionPlanFirstMonthOfTheYear(t *testing.T) {
 	y, _, _ := now.Date()
 	expected := time.Date(y, 1, 1, 0, 0, 0, 0, time.Local)
 	if referenceDate.After(expected) {
 		expected = expected.AddDate(1, 0, 0)
 	}
-	at := &ActionTiming{Timing: &RateInterval{
+	at := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			Months: utils.Months{time.January},
 		},
@@ -370,13 +370,13 @@ func TestActionTimingFirstMonthOfTheYear(t *testing.T) {
 	}
 }
 
-func TestActionTimingFirstMonthOfTheYearSecondDay(t *testing.T) {
+func TestActionPlanFirstMonthOfTheYearSecondDay(t *testing.T) {
 	y, _, _ := now.Date()
 	expected := time.Date(y, 1, 2, 0, 0, 0, 0, time.Local)
 	if referenceDate.After(expected) {
 		expected = expected.AddDate(1, 0, 0)
 	}
-	at := &ActionTiming{Timing: &RateInterval{
+	at := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			Months:    utils.Months{time.January},
 			MonthDays: utils.MonthDays{2},
@@ -388,20 +388,20 @@ func TestActionTimingFirstMonthOfTheYearSecondDay(t *testing.T) {
 	}
 }
 
-func TestActionTimingCheckForASAP(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: ASAP}}}
+func TestActionPlanCheckForASAP(t *testing.T) {
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{StartTime: ASAP}}}
 	if !at.IsASAP() {
 		t.Errorf("%v should be asap!", at)
 	}
 }
 
-func TestActionTimingLogFunction(t *testing.T) {
+func TestActionPlanLogFunction(t *testing.T) {
 	a := &Action{
 		ActionType:  "*log",
 		BalanceType: "test",
 		Balance:     &Balance{Value: 1.1},
 	}
-	at := &ActionTiming{
+	at := &ActionPlan{
 		actions: []*Action{a},
 	}
 	err := at.Execute()
@@ -410,13 +410,13 @@ func TestActionTimingLogFunction(t *testing.T) {
 	}
 }
 
-func TestActionTimingFunctionNotAvailable(t *testing.T) {
+func TestActionPlanFunctionNotAvailable(t *testing.T) {
 	a := &Action{
 		ActionType:  "VALID_FUNCTION_TYPE",
 		BalanceType: "test",
 		Balance:     &Balance{Value: 1.1},
 	}
-	at := &ActionTiming{
+	at := &ActionPlan{
 		AccountIds: []string{"one", "two", "three"},
 		Timing:     &RateInterval{},
 		actions:    []*Action{a},
@@ -427,8 +427,8 @@ func TestActionTimingFunctionNotAvailable(t *testing.T) {
 	}
 }
 
-func TestActionTimingPriotityListSortByWeight(t *testing.T) {
-	at1 := &ActionTiming{Timing: &RateInterval{
+func TestActionPlanPriotityListSortByWeight(t *testing.T) {
+	at1 := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			Years:     utils.Years{2020},
 			Months:    utils.Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
@@ -437,7 +437,7 @@ func TestActionTimingPriotityListSortByWeight(t *testing.T) {
 		},
 		Weight: 20,
 	}}
-	at2 := &ActionTiming{Timing: &RateInterval{
+	at2 := &ActionPlan{Timing: &RateInterval{
 		Timing: &RITiming{
 			Years:     utils.Years{2020},
 			Months:    utils.Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
@@ -446,7 +446,7 @@ func TestActionTimingPriotityListSortByWeight(t *testing.T) {
 		},
 		Weight: 10,
 	}}
-	var atpl ActionTimingPriotityList
+	var atpl ActionPlanPriotityList
 	atpl = append(atpl, at2, at1)
 	atpl.Sort()
 	if atpl[0] != at1 || atpl[1] != at2 {
@@ -454,8 +454,8 @@ func TestActionTimingPriotityListSortByWeight(t *testing.T) {
 	}
 }
 
-func TestActionTimingPriotityListWeight(t *testing.T) {
-	at1 := &ActionTiming{
+func TestActionPlanPriotityListWeight(t *testing.T) {
+	at1 := &ActionPlan{
 		Timing: &RateInterval{
 			Timing: &RITiming{
 				Months:    utils.Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
@@ -465,7 +465,7 @@ func TestActionTimingPriotityListWeight(t *testing.T) {
 		},
 		Weight: 20,
 	}
-	at2 := &ActionTiming{
+	at2 := &ActionPlan{
 		Timing: &RateInterval{
 			Timing: &RITiming{
 				Months:    utils.Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
@@ -475,7 +475,7 @@ func TestActionTimingPriotityListWeight(t *testing.T) {
 		},
 		Weight: 10,
 	}
-	var atpl ActionTimingPriotityList
+	var atpl ActionPlanPriotityList
 	atpl = append(atpl, at2, at1)
 	atpl.Sort()
 	if atpl[0] != at1 || atpl[1] != at2 {
@@ -483,31 +483,31 @@ func TestActionTimingPriotityListWeight(t *testing.T) {
 	}
 }
 
-func TestActionTimingsRemoveMember(t *testing.T) {
-	at1 := &ActionTiming{
+func TestActionPlansRemoveMember(t *testing.T) {
+	at1 := &ActionPlan{
 		Uuid:       "some uuid",
 		Id:         "test",
 		AccountIds: []string{"one", "two", "three"},
 		ActionsId:  "TEST_ACTIONS",
 	}
-	at2 := &ActionTiming{
+	at2 := &ActionPlan{
 		Uuid:       "some uuid22",
 		Id:         "test2",
 		AccountIds: []string{"three", "four"},
 		ActionsId:  "TEST_ACTIONS2",
 	}
-	ats := ActionPlan{at1, at2}
-	if outAts := RemActionTiming(ats, "", "four"); len(outAts[1].AccountIds) != 1 {
+	ats := ActionPlans{at1, at2}
+	if outAts := RemActionPlan(ats, "", "four"); len(outAts[1].AccountIds) != 1 {
 		t.Error("Expecting fewer balance ids", outAts[1].AccountIds)
 	}
-	if ats = RemActionTiming(ats, "", "three"); len(ats) != 1 {
+	if ats = RemActionPlan(ats, "", "three"); len(ats) != 1 {
 		t.Error("Expecting fewer actionTimings", ats)
 	}
-	if ats = RemActionTiming(ats, "some_uuid22", ""); len(ats) != 1 {
+	if ats = RemActionPlan(ats, "some_uuid22", ""); len(ats) != 1 {
 		t.Error("Expecting fewer actionTimings members", ats)
 	}
-	ats2 := ActionPlan{at1, at2}
-	if ats2 = RemActionTiming(ats2, "", ""); len(ats2) != 0 {
+	ats2 := ActionPlans{at1, at2}
+	if ats2 = RemActionPlan(ats2, "", ""); len(ats2) != 0 {
 		t.Error("Should have no members anymore", ats2)
 	}
 }
@@ -995,7 +995,7 @@ func TestActionTriggerLogging(t *testing.T) {
 	storageLogger.LogActionTrigger("rif", RATER_SOURCE, at, as)
 	//expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"
 	var key string
-	atMap, _ := accountingStorage.GetAllActionTimings()
+	atMap, _ := accountingStorage.GetAllActionPlans()
 	for k, v := range atMap {
 		_ = k
 		_ = v
@@ -1009,7 +1009,7 @@ func TestActionTriggerLogging(t *testing.T) {
 	}
 }
 
-func TestActionTimingLogging(t *testing.T) {
+func TestActionPlanLogging(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
 			Months:    utils.Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
@@ -1024,7 +1024,7 @@ func TestActionTimingLogging(t *testing.T) {
 			Rates:      RateGroups{&Rate{0, 1.0, 1 * time.Second, 60 * time.Second}},
 		},
 	}
-	at := &ActionTiming{
+	at := &ActionPlan{
 		Uuid:       "some uuid",
 		Id:         "test",
 		AccountIds: []string{"one", "two", "three"},
@@ -1036,10 +1036,10 @@ func TestActionTimingLogging(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting actions for the action trigger: ", err)
 	}
-	storageLogger.LogActionTiming(SCHED_SOURCE, at, as)
+	storageLogger.LogActionPlan(SCHED_SOURCE, at, as)
 	//expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*|TOPUP|MONETARY|OUT|10|0"
 	var key string
-	atMap, _ := accountingStorage.GetAllActionTimings()
+	atMap, _ := accountingStorage.GetAllActionPlans()
 	for k, v := range atMap {
 		_ = k
 		_ = v
@@ -1073,7 +1073,7 @@ func TestTopupAction(t *testing.T) {
 		Balance:     &Balance{Value: 25, DestinationIds: "RET", Weight: 20},
 	}
 
-	at := &ActionTiming{
+	at := &ActionPlan{
 		AccountIds: []string{"*out:vdf:minu"},
 		actions:    Actions{a},
 	}
@@ -1096,7 +1096,7 @@ func TestTopupActionLoaded(t *testing.T) {
 		Balance:     &Balance{Value: 25, DestinationIds: "RET", Weight: 20},
 	}
 
-	at := &ActionTiming{
+	at := &ActionPlan{
 		AccountIds: []string{"*out:vdf:minitsboy"},
 		actions:    Actions{a},
 	}

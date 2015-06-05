@@ -764,7 +764,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 
 	for _, aa := range storAts {
 		if _, alreadyDefined := tpr.accountActions[aa.KeyId()]; alreadyDefined {
-			return fmt.Errorf("Duplicate account action found: %s", aa.KeyId())
+			return fmt.Errorf("duplicate account action found: %s", aa.KeyId())
 		}
 
 		// extract aliases from subject
@@ -776,9 +776,12 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 				tpr.accAliases[utils.AccountAliasKey(aa.Tenant, alias)] = aa.Account
 			}
 		}
-		aTriggers, exists := tpr.actionsTriggers[aa.ActionTriggersId]
-		if !exists {
-			return fmt.Errorf("Could not get action triggers for tag %v", aa.ActionTriggersId)
+		var aTriggers []*ActionTrigger
+		if aa.ActionTriggersId != "" {
+			var exists bool
+			if aTriggers, exists = tpr.actionsTriggers[aa.ActionTriggersId]; !exists {
+				return fmt.Errorf("could not get action triggers for tag %s", aa.ActionTriggersId)
+			}
 		}
 		ub := &Account{
 			Id:             aa.KeyId(),
@@ -787,7 +790,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 		tpr.accountActions[aa.KeyId()] = ub
 		aTimings, exists := tpr.actionsTimings[aa.ActionPlanId]
 		if !exists {
-			log.Printf("Could not get action timing for tag %v", aa.ActionPlanId)
+			log.Printf("could not get action plan for tag %v", aa.ActionPlanId)
 			// must not continue here
 		}
 		for _, at := range aTimings {
@@ -812,13 +815,13 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 			tpr.derivedChargers[tag] = make(utils.DerivedChargers, 0) // Load object map since we use this method also from LoadDerivedChargers
 		}
 		for _, tpDc := range tpDcs.DerivedChargers {
-			if dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
+			dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
 				tpDc.AccountField, tpDc.SubjectField, tpDc.DestinationField, tpDc.SetupTimeField, tpDc.AnswerTimeField, tpDc.UsageField, tpDc.SupplierField,
-				tpDc.DisconnectCauseField); err != nil {
+				tpDc.DisconnectCauseField)
+			if err != nil {
 				return err
-			} else {
-				tpr.derivedChargers[tag] = append(tpr.derivedChargers[tag], dc)
 			}
+			tpr.derivedChargers[tag] = append(tpr.derivedChargers[tag], dc)
 		}
 	}
 	if save {

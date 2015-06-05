@@ -79,6 +79,7 @@ func (csvs *CSVStorage) GetTpTimings(string, string) ([]TpTiming, error) {
 			return nil, err
 		}
 		if tpTiming, err := csvLoad(TpTiming{}, record); err != nil {
+			log.Print("error loading timing: ", err)
 			return nil, err
 		} else {
 			tpTimings = append(tpTimings, tpTiming.(TpTiming))
@@ -104,6 +105,7 @@ func (csvs *CSVStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, er
 			return nil, err
 		}
 		if tpDest, err := csvLoad(TpDestination{}, record); err != nil {
+			log.Print("error loading destination: ", err)
 			return nil, err
 		} else {
 			tpDests = append(tpDests, tpDest.(TpDestination))
@@ -129,6 +131,7 @@ func (csvs *CSVStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
 			return nil, err
 		}
 		if tpRate, err := csvLoad(TpRate{}, record); err != nil {
+			log.Print("error loading rate: ", err)
 			return nil, err
 		} else {
 			tpRates = append(tpRates, tpRate.(TpRate))
@@ -154,6 +157,7 @@ func (csvs *CSVStorage) GetTpDestinationRates(tpid, tag string, p *utils.Paginat
 			return nil, err
 		}
 		if tpRate, err := csvLoad(TpDestinationRate{}, record); err != nil {
+			log.Print("error loading destination rate: ", err)
 			return nil, err
 		} else {
 			tpDestinationRates = append(tpDestinationRates, tpRate.(TpDestinationRate))
@@ -179,6 +183,7 @@ func (csvs *CSVStorage) GetTpRatingPlans(tpid, tag string, p *utils.Paginator) (
 			return nil, err
 		}
 		if tpRate, err := csvLoad(TpRatingPlan{}, record); err != nil {
+			log.Print("error loading rating plan: ", err)
 			return nil, err
 		} else {
 			tpRatingPlans = append(tpRatingPlans, tpRate.(TpRatingPlan))
@@ -204,6 +209,7 @@ func (csvs *CSVStorage) GetTpRatingProfiles(filter *TpRatingProfile) ([]TpRating
 			return nil, err
 		}
 		if tpRate, err := csvLoad(TpRatingProfile{}, record); err != nil {
+			log.Print("error loading rating profile: ", err)
 			return nil, err
 		} else {
 			tpRatingProfiles = append(tpRatingProfiles, tpRate.(TpRatingProfile))
@@ -230,6 +236,7 @@ func (csvs *CSVStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, er
 			return nil, err
 		}
 		if tpRate, err := csvLoad(TpSharedGroup{}, record); err != nil {
+			log.Print("error loading shared group: ", err)
 			return nil, err
 		} else {
 			tpSharedGroups = append(tpSharedGroups, tpRate.(TpSharedGroup))
@@ -302,6 +309,7 @@ func (csvs *CSVStorage) GetTpActionPlans(tpid, tag string) ([]TpActionPlan, erro
 	var tpActionPlans []TpActionPlan
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if tpRate, err := csvLoad(TpActionPlan{}, record); err != nil {
+			log.Print("error loading action plan: ", err)
 			return nil, err
 		} else {
 			tpActionPlans = append(tpActionPlans, tpRate.(TpActionPlan))
@@ -327,6 +335,7 @@ func (csvs *CSVStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger
 			return nil, err
 		}
 		if tpAt, err := csvLoad(TpActionTrigger{}, record); err != nil {
+			log.Print("error loading action trigger: ", err)
 			return nil, err
 		} else {
 			tpActionTriggers = append(tpActionTriggers, tpAt.(TpActionTrigger))
@@ -351,10 +360,11 @@ func (csvs *CSVStorage) GetTpAccountActions(filter *TpAccountAction) ([]TpAccoun
 			log.Print("bad line in account actions csv: ", err)
 			return nil, err
 		}
-		if tpRate, err := csvLoad(TpAccountAction{}, record); err != nil {
+		if tpAa, err := csvLoad(TpAccountAction{}, record); err != nil {
+			log.Print("error loading account action: ", err)
 			return nil, err
 		} else {
-			tpAccountActions = append(tpAccountActions, tpRate.(TpAccountAction))
+			tpAccountActions = append(tpAccountActions, tpAa.(TpAccountAction))
 		}
 	}
 	return tpAccountActions, nil
@@ -377,6 +387,7 @@ func (csvs *CSVStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 			return nil, err
 		}
 		if tpRate, err := csvLoad(TpDerivedCharger{}, record); err != nil {
+			log.Print("error loading derived charger: ", err)
 			return nil, err
 		} else {
 			tpDerivedChargers = append(tpDerivedChargers, tpRate.(TpDerivedCharger))
@@ -402,6 +413,7 @@ func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrStat, error) {
 			return nil, err
 		}
 		if tpCdrStat, err := csvLoad(TpCdrStat{}, record); err != nil {
+			log.Print("error loading cdr stat: ", err)
 			return nil, err
 		} else {
 			tpCdrStats = append(tpCdrStats, tpCdrStat.(TpCdrStat))

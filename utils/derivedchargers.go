@@ -20,6 +20,7 @@ package utils
 
 import (
 	"errors"
+	"log"
 	"strings"
 )
 
@@ -163,4 +164,32 @@ func (dcs DerivedChargers) AppendDefaultRun() (DerivedChargers, error) {
 	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
 		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
 	return append(dcs, dcDf), nil
+}
+
+func (dcs DerivedChargers) Equal(other DerivedChargers) bool {
+	for i, dc := range dcs {
+		if !dc.Equal(other[i]) {
+			log.Printf("DC: %+v", dc)
+			log.Printf("OTHER: %+v", other[i])
+			return false
+		}
+	}
+	return true
+}
+
+func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
+	return dc.RunId == other.RunId &&
+		dc.RunFilters == other.RunFilters &&
+		dc.ReqTypeField == other.ReqTypeField &&
+		dc.DirectionField == other.DirectionField &&
+		dc.TenantField == other.TenantField &&
+		dc.CategoryField == other.CategoryField &&
+		dc.AccountField == other.AccountField &&
+		dc.SubjectField == other.SubjectField &&
+		dc.DestinationField == other.DestinationField &&
+		dc.SetupTimeField == other.SetupTimeField &&
+		dc.AnswerTimeField == other.AnswerTimeField &&
+		dc.UsageField == other.UsageField &&
+		dc.SupplierField == other.SupplierField &&
+		dc.DisconnectCauseField == other.DisconnectCauseField
 }
