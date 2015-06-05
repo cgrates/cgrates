@@ -157,28 +157,28 @@ func TestV2CdrsPsqlGetCdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 	// CDRs with errors
-	req = utils.RpcCdrsFilter{CostStart: utils.Float64Pointer(-1.0), CostEnd: utils.Float64Pointer(0.0)}
+	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
 	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// CDRs Rated
-	req = utils.RpcCdrsFilter{CostStart: utils.Float64Pointer(-1.0)}
+	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// CDRs non rated OR SkipRated
-	req = utils.RpcCdrsFilter{CostEnd: utils.Float64Pointer(-1.0)}
+	req = utils.RpcCdrsFilter{MaxCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// Skip Errors
-	req = utils.RpcCdrsFilter{CostStart: utils.Float64Pointer(0.0), CostEnd: utils.Float64Pointer(-1.0)}
+	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {

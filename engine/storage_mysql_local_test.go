@@ -761,7 +761,7 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 	}
 	// Filter on ignoreRated
 	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CostEnd: utils.Float64Pointer(0.0)}); err != nil {
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -799,6 +799,24 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on minPdd
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3)}); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on maxPdd
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MaxPdd: utils.Float64Pointer(3)}); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 5 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on minPdd, maxPdd
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3), MaxPdd: utils.Float64Pointer(5)}); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Combined filter

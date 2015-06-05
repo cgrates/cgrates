@@ -742,10 +742,10 @@ func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
 		}
 	}
 	if self.SkipRated {
-		cdrFltr.CostEnd = Float64Pointer(-1.0)
+		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	} else if self.SkipRated {
-		cdrFltr.CostStart = Float64Pointer(0.0)
-		cdrFltr.CostEnd = Float64Pointer(-1.0)
+		cdrFltr.MinCost = Float64Pointer(0.0)
+		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	}
 	return cdrFltr, nil
 }
@@ -818,10 +818,10 @@ func (self *AttrGetCdrs) AsCdrsFilter() (*CdrsFilter, error) {
 		}
 	}
 	if self.SkipRated {
-		cdrFltr.CostEnd = Float64Pointer(-1.0)
+		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	} else if self.SkipRated {
-		cdrFltr.CostStart = Float64Pointer(0.0)
-		cdrFltr.CostEnd = Float64Pointer(-1.0)
+		cdrFltr.MinCost = Float64Pointer(0.0)
+		cdrFltr.MaxCost = Float64Pointer(-1.0)
 	}
 	return cdrFltr, nil
 }
@@ -959,10 +959,12 @@ type CdrsFilter struct {
 	CreatedAtEnd        *time.Time        // End interval, smaller than
 	UpdatedAtStart      *time.Time        // Start of interval, bigger or equal than configured
 	UpdatedAtEnd        *time.Time        // End interval, smaller than
-	UsageStart          *float64          // Start of the usage interval (>=)
-	UsageEnd            *float64          // End of the usage interval (<)
-	CostStart           *float64          // Start of the cost interval (>=)
-	CostEnd             *float64          // End of the usage interval (<)
+	MinUsage            *float64          // Start of the usage interval (>=)
+	MaxUsage            *float64          // End of the usage interval (<)
+	MinPdd              *float64          // Start of the pdd interval (>=)
+	MaxPdd              *float64          // End of the pdd interval (<)
+	MinCost             *float64          // Start of the cost interval (>=)
+	MaxCost             *float64          // End of the usage interval (<)
 	FilterOnRated       bool              // Do not consider rated CDRs but raw one
 	Count               bool              // If true count the items instead of returning data
 	Paginator
@@ -1016,10 +1018,12 @@ type RpcCdrsFilter struct {
 	CreatedAtEnd        string            // End interval, smaller than
 	UpdatedAtStart      string            // Start of interval, bigger or equal than configured
 	UpdatedAtEnd        string            // End interval, smaller than
-	UsageStart          *float64          // Start of the usage interval (>=)
-	UsageEnd            *float64          // End of the usage interval (<)
-	CostStart           *float64          // Start of the cost interval (>=)
-	CostEnd             *float64          // End of the usage interval (<)
+	MinUsage            *float64          // Start of the usage interval (>=)
+	MaxUsage            *float64          // End of the usage interval (<)
+	MinPdd              *float64          // Start of the pdd interval (>=)
+	MaxPdd              *float64          // End of the pdd interval (<)
+	MinCost             *float64          // Start of the cost interval (>=)
+	MaxCost             *float64          // End of the usage interval (<)
 	FilterOnRated       bool              // Do not consider derived CDRs but original one
 	Paginator                             // Add pagination
 }
@@ -1064,10 +1068,12 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 		NotExtraFields:      self.NotExtraFields,
 		OrderIdStart:        self.OrderIdStart,
 		OrderIdEnd:          self.OrderIdEnd,
-		UsageStart:          self.UsageStart,
-		UsageEnd:            self.UsageEnd,
-		CostStart:           self.CostStart,
-		CostEnd:             self.CostEnd,
+		MinUsage:            self.MinUsage,
+		MaxUsage:            self.MaxUsage,
+		MinPdd:              self.MinPdd,
+		MaxPdd:              self.MaxPdd,
+		MinCost:             self.MinCost,
+		MaxCost:             self.MaxCost,
 		FilterOnRated:       self.FilterOnRated,
 		Paginator:           self.Paginator,
 	}

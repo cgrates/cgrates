@@ -1068,35 +1068,49 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		}
 		q = q.Where(tblName+".updated_at < ?", qryFltr.UpdatedAtEnd)
 	}
-	if qryFltr.UsageStart != nil {
+	if qryFltr.MinUsage != nil {
 		tblName := utils.TBL_CDRS_PRIMARY
 		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
-		q = q.Where(tblName+".usage >= ?", qryFltr.UsageStart)
+		q = q.Where(tblName+".usage >= ?", qryFltr.MinUsage)
 	}
-	if qryFltr.UsageEnd != nil {
+	if qryFltr.MaxUsage != nil {
 		tblName := utils.TBL_CDRS_PRIMARY
 		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
-		q = q.Where(tblName+".usage < ?", qryFltr.UsageEnd)
+		q = q.Where(tblName+".usage < ?", qryFltr.MaxUsage)
+	}
+	if qryFltr.MinPdd != nil {
+		tblName := utils.TBL_CDRS_PRIMARY
+		if qryFltr.FilterOnRated {
+			tblName = utils.TBL_RATED_CDRS
+		}
+		q = q.Where(tblName+".pdd >= ?", qryFltr.MinPdd)
+	}
+	if qryFltr.MaxPdd != nil {
+		tblName := utils.TBL_CDRS_PRIMARY
+		if qryFltr.FilterOnRated {
+			tblName = utils.TBL_RATED_CDRS
+		}
+		q = q.Where(tblName+".pdd < ?", qryFltr.MaxPdd)
 	}
 
-	if qryFltr.CostStart != nil {
-		if qryFltr.CostEnd == nil {
-			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.CostStart)
-		} else if *qryFltr.CostStart == 0.0 && *qryFltr.CostEnd == -1.0 { // Special case when we want to skip errors
+	if qryFltr.MinCost != nil {
+		if qryFltr.MaxCost == nil {
+			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.MinCost)
+		} else if *qryFltr.MinCost == 0.0 && *qryFltr.MaxCost == -1.0 { // Special case when we want to skip errors
 			q = q.Where(fmt.Sprintf("( %s.cost IS NULL OR %s.cost >= 0.0 )", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS))
 		} else {
-			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.CostStart)
-			q = q.Where(utils.TBL_RATED_CDRS+".cost < ?", *qryFltr.CostEnd)
+			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.MinCost)
+			q = q.Where(utils.TBL_RATED_CDRS+".cost < ?", *qryFltr.MaxCost)
 		}
-	} else if qryFltr.CostEnd != nil {
-		if *qryFltr.CostEnd == -1.0 { // Non-rated CDRs
+	} else if qryFltr.MaxCost != nil {
+		if *qryFltr.MaxCost == -1.0 { // Non-rated CDRs
 			q = q.Where(utils.TBL_RATED_CDRS + ".cost IS NULL") // Need to include it otherwise all CDRs will be returned
-		} else { // Above limited CDRs, since costStart is empty, make sure we query also NULL cost
-			q = q.Where(fmt.Sprintf("( %s.cost IS NULL OR %s.cost < %f )", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, *qryFltr.CostEnd))
+		} else { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
+			q = q.Where(fmt.Sprintf("( %s.cost IS NULL OR %s.cost < %f )", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, *qryFltr.MaxCost))
 		}
 	}
 	if qryFltr.Paginator.Limit != nil {
