@@ -94,6 +94,9 @@ func (self *TPCSVImporter) importTimings(fn string) error {
 	if err != nil {
 		return err
 	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+	}
 
 	return self.StorDb.SetTpTimings(tps)
 }
@@ -106,6 +109,9 @@ func (self *TPCSVImporter) importDestinations(fn string) error {
 	if err != nil {
 		return err
 	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+	}
 
 	return self.StorDb.SetTpDestinations(tps)
 }
@@ -117,6 +123,9 @@ func (self *TPCSVImporter) importRates(fn string) error {
 	tps, err := self.csvr.GetTpRates(self.TPid, "")
 	if err != nil {
 		return err
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
 	}
 
 	return self.StorDb.SetTpRates(tps)
@@ -131,6 +140,10 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 		return err
 	}
 
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+	}
+
 	return self.StorDb.SetTpDestinationRates(tps)
 }
 
@@ -141,6 +154,9 @@ func (self *TPCSVImporter) importRatingPlans(fn string) error {
 	tps, err := self.csvr.GetTpRatingPlans(self.TPid, "", nil)
 	if err != nil {
 		return err
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
 	}
 
 	return self.StorDb.SetTpRatingPlans(tps)
@@ -154,7 +170,16 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 	if err != nil {
 		return err
 	}
+	loadId := utils.CSV_LOAD //Autogenerate rating profile id
+	if self.ImportId != "" {
+		loadId += "_" + self.ImportId
+	}
 
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+		tps[i].Loadid = loadId
+
+	}
 	return self.StorDb.SetTpRatingProfiles(tps)
 }
 
@@ -166,10 +191,10 @@ func (self *TPCSVImporter) importSharedGroups(fn string) error {
 	if err != nil {
 		return err
 	}
-	loadId := utils.CSV_LOAD //Autogenerate rating profile id
-	if self.ImportId != "" {
-		loadId += "_" + self.ImportId
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
 	}
+
 	return self.StorDb.SetTpSharedGroups(tps)
 }
 
@@ -180,6 +205,9 @@ func (self *TPCSVImporter) importActions(fn string) error {
 	tps, err := self.csvr.GetTpActions(self.TPid, "")
 	if err != nil {
 		return err
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
 	}
 
 	return self.StorDb.SetTpActions(tps)
@@ -193,6 +221,9 @@ func (self *TPCSVImporter) importActionTimings(fn string) error {
 	if err != nil {
 		return err
 	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+	}
 
 	return self.StorDb.SetTpActionPlans(tps)
 }
@@ -204,6 +235,9 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 	tps, err := self.csvr.GetTpActionTriggers(self.TPid, "")
 	if err != nil {
 		return err
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
 	}
 
 	return self.StorDb.SetTpActionTriggers(tps)
@@ -217,7 +251,14 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 	if err != nil {
 		return err
 	}
-
+	loadId := utils.CSV_LOAD //Autogenerate rating profile id
+	if self.ImportId != "" {
+		loadId += "_" + self.ImportId
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+		tps[i].Loadid = loadId
+	}
 	return self.StorDb.SetTpAccountActions(tps)
 }
 
@@ -229,7 +270,14 @@ func (self *TPCSVImporter) importDerivedChargers(fn string) error {
 	if err != nil {
 		return err
 	}
-
+	loadId := utils.CSV_LOAD //Autogenerate rating profile id
+	if self.ImportId != "" {
+		loadId += "_" + self.ImportId
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+		tps[i].Loadid = loadId
+	}
 	return self.StorDb.SetTpDerivedChargers(tps)
 }
 
@@ -240,6 +288,9 @@ func (self *TPCSVImporter) importCdrStats(fn string) error {
 	tps, err := self.csvr.GetTpCdrStats(self.TPid, "")
 	if err != nil {
 		return err
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
 	}
 
 	return self.StorDb.SetTpCdrStats(tps)

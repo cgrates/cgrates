@@ -67,7 +67,7 @@ func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
 	for _, tpDest := range tpDests {
 		dest.AddPrefix(tpDest.Prefix)
 	}
-	dataStorage.SetDestination(dest)
+	tpr.ratingStorage.SetDestination(dest)
 	return len(tpDests) > 0, err
 }
 
@@ -186,7 +186,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				if err != nil {
 					return false, err
 				} else if len(dms) == 0 {
-					if dbExists, err := dataStorage.HasData(DESTINATION_PREFIX, drate.DestinationId); err != nil {
+					if dbExists, err := tpr.ratingStorage.HasData(DESTINATION_PREFIX, drate.DestinationId); err != nil {
 						return false, err
 					} else if !dbExists {
 						return false, fmt.Errorf("could not get destination for tag %v", drate.DestinationId)
@@ -194,11 +194,11 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 					continue
 				}
 				for _, destination := range dms {
-					dataStorage.SetDestination(destination)
+					tpr.ratingStorage.SetDestination(destination)
 				}
 			}
 		}
-		if err := dataStorage.SetRatingPlan(ratingPlan); err != nil {
+		if err := tpr.ratingStorage.SetRatingPlan(ratingPlan); err != nil {
 			return false, err
 		}
 	}
@@ -260,7 +260,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile) error
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists {
-				if dbExists, err := dataStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if dbExists, err := tpr.ratingStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				} else if !dbExists {
 					return fmt.Errorf("could not load rating plans for tag: %v", tpRa.RatingPlanId)
@@ -274,7 +274,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile) error
 					CdrStatQueueIds: strings.Split(tpRa.CdrStatQueueIds, utils.INFIELD_SEP),
 				})
 		}
-		if err := dataStorage.SetRatingProfile(resultRatingProfile); err != nil {
+		if err := tpr.ratingStorage.SetRatingProfile(resultRatingProfile); err != nil {
 			return err
 		}
 	}
@@ -945,17 +945,17 @@ func (tpr *TpReader) IsValid() bool {
 }
 
 func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
-	if dataStorage == nil {
+	if tpr.ratingStorage == nil || tpr.accountingStorage == nil {
 		return errors.New("no database connection")
 	}
 	if flush {
-		dataStorage.Flush("")
+		tpr.ratingStorage.Flush("")
 	}
 	if verbose {
 		log.Print("Destinations:")
 	}
 	for _, d := range tpr.destinations {
-		err = dataStorage.SetDestination(d)
+		err = tpr.ratingStorage.SetDestination(d)
 		if err != nil {
 			return err
 		}

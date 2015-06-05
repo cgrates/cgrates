@@ -25,6 +25,12 @@ func APItoModelDestination(dest *utils.TPDestination) (result []TpDestination) {
 			Prefix: p,
 		})
 	}
+	if len(dest.Prefixes) == 0 {
+		result = append(result, TpDestination{
+			Tpid: dest.TPid,
+			Tag:  dest.DestinationId,
+		})
+	}
 	return
 }
 
@@ -38,6 +44,12 @@ func APItoModelRate(r *utils.TPRate) (result []TpRate) {
 			RateUnit:           rs.RateUnit,
 			RateIncrement:      rs.RateIncrement,
 			GroupIntervalStart: rs.GroupIntervalStart,
+		})
+	}
+	if len(r.RateSlots) == 0 {
+		result = append(result, TpRate{
+			Tpid: r.TPid,
+			Tag:  r.RateId,
 		})
 	}
 	return
@@ -56,6 +68,12 @@ func APItoModelDestinationRate(drs *utils.TPDestinationRate) (result []TpDestina
 			MaxCostStrategy:  dr.MaxCostStrategy,
 		})
 	}
+	if len(drs.DestinationRates) == 0 {
+		result = append(result, TpDestinationRate{
+			Tpid: drs.TPid,
+			Tag:  drs.DestinationRateId,
+		})
+	}
 	return
 }
 
@@ -67,6 +85,12 @@ func APItoModelRatingPlan(rps *utils.TPRatingPlan) (result []TpRatingPlan) {
 			DestratesTag: rp.DestinationRatesId,
 			TimingTag:    rp.TimingId,
 			Weight:       rp.Weight,
+		})
+	}
+	if len(rps.RatingPlanBindings) == 0 {
+		result = append(result, TpRatingPlan{
+			Tpid: rps.TPid,
+			Tag:  rps.RatingPlanId,
 		})
 	}
 	return
@@ -87,6 +111,16 @@ func APItoModelRatingProfile(rpf *utils.TPRatingProfile) (result []TpRatingProfi
 			CdrStatQueueIds:  ra.CdrStatQueueIds,
 		})
 	}
+	if len(rpf.RatingPlanActivations) == 0 {
+		result = append(result, TpRatingProfile{
+			Tpid:      rpf.TPid,
+			Loadid:    rpf.LoadId,
+			Direction: rpf.Direction,
+			Tenant:    rpf.Tenant,
+			Category:  rpf.Category,
+			Subject:   rpf.Subject,
+		})
+	}
 	return
 }
 
@@ -104,6 +138,11 @@ func APItoModelLcrRule(lcrs *utils.TPLcrRules) (result []TpLcrRule) {
 			Strategy:       lcr.Strategy,
 			StrategyParams: lcr.StrategyParams,
 			ActivationTime: lcr.ActivationTime,
+		})
+	}
+	if len(lcrs.LcrRules) == 0 {
+		result = append(result, TpLcrRule{
+			Tpid: lcrs.TPid,
 		})
 	}
 	return
@@ -130,6 +169,12 @@ func APItoModelAction(as *utils.TPActions) (result []TpAction) {
 			Weight:          a.Weight,
 		})
 	}
+	if len(as.Actions) == 0 {
+		result = append(result, TpAction{
+			Tpid: as.TPid,
+			Tag:  as.ActionsId,
+		})
+	}
 	return
 }
 
@@ -141,6 +186,12 @@ func APItoModelActionPlan(aps *utils.TPActionPlan) (result []TpActionPlan) {
 			ActionsTag: ap.ActionsId,
 			TimingTag:  ap.TimingId,
 			Weight:     ap.Weight,
+		})
+	}
+	if len(aps.ActionPlan) == 0 {
+		result = append(result, TpActionPlan{
+			Tpid: aps.TPid,
+			Tag:  aps.Id,
 		})
 	}
 	return
@@ -171,6 +222,12 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result []TpActionTrig
 			Weight:                 at.Weight,
 		})
 	}
+	if len(ats.ActionTriggers) == 0 {
+		result = append(result, TpActionTrigger{
+			Tpid: ats.TPid,
+			Tag:  ats.ActionTriggersId,
+		})
+	}
 	return
 }
 
@@ -194,6 +251,12 @@ func APItoModelSharedGroup(sgs *utils.TPSharedGroups) (result []TpSharedGroup) {
 			Account:       sg.Account,
 			Strategy:      sg.Strategy,
 			RatingSubject: sg.RatingSubject,
+		})
+	}
+	if len(sgs.SharedGroups) == 0 {
+		result = append(result, TpSharedGroup{
+			Tpid: sgs.TPid,
+			Tag:  sgs.SharedGroupsId,
 		})
 	}
 	return
@@ -223,6 +286,17 @@ func APItoModelDerivedCharger(dcs *utils.TPDerivedChargers) (result []TpDerivedC
 			UsageField:           dc.UsageField,
 			SupplierField:        dc.SupplierField,
 			DisconnectCauseField: dc.DisconnectCauseField,
+		})
+	}
+	if len(dcs.DerivedChargers) == 0 {
+		result = append(result, TpDerivedCharger{
+			Tpid:      dcs.TPid,
+			Loadid:    dcs.Loadid,
+			Direction: dcs.Direction,
+			Tenant:    dcs.Tenant,
+			Category:  dcs.Category,
+			Account:   dcs.Account,
+			Subject:   dcs.Subject,
 		})
 	}
 	return
@@ -256,6 +330,12 @@ func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrStat) {
 			RatedSubjects:       st.RatedSubjects,
 			CostInterval:        st.CostInterval,
 			ActionTriggers:      st.ActionTriggers,
+		})
+	}
+	if len(stats.CdrStats) == 0 {
+		result = append(result, TpCdrStat{
+			Tpid: stats.TPid,
+			Tag:  stats.CdrStatsId,
 		})
 	}
 	return

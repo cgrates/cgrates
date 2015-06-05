@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) ITsysCOM GmbH
+Rating system designed to be used in VoIP Carriers World
+Copyright (C) 2012-2015 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ func TestMySQLSetGetTPTiming(t *testing.T) {
 	}
 	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Tag); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(tm, tmgs[0]) {
+	} else if !modelEqual(tm, tmgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[0])
 	}
 	// Update
@@ -76,7 +76,7 @@ func TestMySQLSetGetTPTiming(t *testing.T) {
 	}
 	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Tag); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(tm, tmgs[0]) {
+	} else if !modelEqual(tm, tmgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[0])
 	}
 }
@@ -86,9 +86,9 @@ func TestMySQLSetGetTPDestination(t *testing.T) {
 		return
 	}
 	dst := []TpDestination{
-		TpDestination{Tag: TEST_SQL, Prefix: "+49"},
-		TpDestination{Tag: TEST_SQL, Prefix: "+49151"},
-		TpDestination{Tag: TEST_SQL, Prefix: "+49176"},
+		TpDestination{Tpid: TEST_SQL, Tag: TEST_SQL, Prefix: "+49"},
+		TpDestination{Tpid: TEST_SQL, Tag: TEST_SQL, Prefix: "+49151"},
+		TpDestination{Tpid: TEST_SQL, Tag: TEST_SQL, Prefix: "+49176"},
 	}
 	if err := mysqlDb.SetTpDestinations(dst); err != nil {
 		t.Error(err.Error())
@@ -98,8 +98,8 @@ func TestMySQLSetGetTPDestination(t *testing.T) {
 	expected := &Destination{Id: TEST_SQL, Prefixes: []string{"+49", "+49151", "+49176"}}
 	if err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(expected, dsts[TEST_SQL]) {
-		t.Errorf("Expecting: %+v, received: %+v", dst, dsts[TEST_SQL])
+	} else if !modelEqual(*expected, *dsts[TEST_SQL]) {
+		t.Errorf("Expecting: %+v, received: %+v", expected, dsts[TEST_SQL])
 	}
 }
 
@@ -126,7 +126,7 @@ func TestMySQLSetGetTPRates(t *testing.T) {
 	}
 	if rts, err := mysqlDb.GetTpRates(TEST_SQL, RT_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mRates, rts) {
+	} else if !modelEqual(mRates[0], rts[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mRates, rts)
 	}
 }
@@ -145,7 +145,7 @@ func TestMySQLSetGetTPDestinationRates(t *testing.T) {
 	}
 	if drs, err := mysqlDb.GetTpDestinationRates(TEST_SQL, DR_ID, nil); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mdrs, drs) {
+	} else if !modelEqual(mdrs[0], drs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mdrs, drs)
 	}
 }
@@ -167,7 +167,7 @@ func TestMySQLSetGetTPRatingPlans(t *testing.T) {
 	}
 	if drps, err := mysqlDb.GetTpRatingPlans(TEST_SQL, RP_ID, nil); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mrp, drps) {
+	} else if !modelEqual(mrp[0], drps[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mrp, drps)
 	}
 }
@@ -184,7 +184,7 @@ func TestMySQLSetGetTPRatingProfiles(t *testing.T) {
 	}
 	if rps, err := mysqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mrp, rps) {
+	} else if !modelEqual(mrp[0], rps[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mrp, rps)
 	}
 
@@ -208,7 +208,7 @@ func TestMySQLSetGetTPSharedGroups(t *testing.T) {
 	}
 	if sgs, err := mysqlDb.GetTpSharedGroups(TEST_SQL, SG_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mSgs, sgs) {
+	} else if !modelEqual(mSgs[0], sgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mSgs, sgs)
 	}
 }
@@ -231,7 +231,7 @@ func TestMySQLSetGetTPCdrStats(t *testing.T) {
 	}
 	if cs, err := mysqlDb.GetTpCdrStats(TEST_SQL, CS_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mcs, cs) {
+	} else if !modelEqual(mcs[0], cs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mcs, cs)
 	}
 }
@@ -250,7 +250,7 @@ func TestMySQLSetGetTPDerivedChargers(t *testing.T) {
 	}
 	if rDCs, err := mysqlDb.GetTpDerivedChargers(&mdcs[0]); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mdcs, rDCs) {
+	} else if !modelEqual(mdcs[0], rDCs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mdcs, rDCs)
 	}
 }
@@ -270,7 +270,7 @@ func TestMySQLSetGetTPActions(t *testing.T) {
 	}
 	if rTpActs, err := mysqlDb.GetTpActions(TEST_SQL, ACTS_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mas, rTpActs) {
+	} else if !modelEqual(mas[0], rTpActs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mas, rTpActs)
 	}
 }
@@ -291,7 +291,7 @@ func TestMySQLTPActionTimings(t *testing.T) {
 	}
 	if rAP, err := mysqlDb.GetTpActionPlans(TEST_SQL, AP_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(maps, rAP) {
+	} else if !modelEqual(maps[0], rAP[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", maps, rAP)
 	}
 }
@@ -322,7 +322,7 @@ func TestMySQLSetGetTPActionTriggers(t *testing.T) {
 	}
 	if rcvMpAtrgs, err := mysqlDb.GetTpActionTriggers(TEST_SQL, TEST_SQL); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if !reflect.DeepEqual(matrg, rcvMpAtrgs) {
+	} else if !modelEqual(matrg[0], rcvMpAtrgs[0]) {
 		t.Errorf("Expecting: %v, received: %v", matrg, rcvMpAtrgs)
 	}
 }
@@ -339,7 +339,7 @@ func TestMySQLSetGetTpAccountActions(t *testing.T) {
 	}
 	if aas, err := mysqlDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(maa, aas) {
+	} else if !modelEqual(*maa, aas[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", maa, aas)
 	}
 }

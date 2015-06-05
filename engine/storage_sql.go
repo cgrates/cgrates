@@ -203,7 +203,7 @@ func (self *SQLStorage) SetTpTimings(timings []TpTiming) error {
 	for _, timing := range timings {
 		if found, _ := m[timing.Tag]; !found {
 			m[timing.Tag] = true
-			if err := tx.Where(&TpTiming{Tpid: timing.Tpid, Tag: timing.Tag}).Delete(TpDestination{}).Error; err != nil {
+			if err := tx.Where(&TpTiming{Tpid: timing.Tpid, Tag: timing.Tag}).Delete(TpTiming{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}

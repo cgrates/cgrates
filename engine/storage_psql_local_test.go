@@ -1,6 +1,6 @@
 /*
-Real-time Charging System for Telecom & ISP environments
-Copyright (C) ITsysCOM GmbH
+Rating system designed to be used in VoIP Carriers World
+Copyright (C) 2012-2015 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ func TestPSQLSetGetTPTiming(t *testing.T) {
 	}
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mtms, tmgs) {
+	} else if !modelEqual(mtms[0], tmgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mtms, tmgs)
 	}
 	// Update
@@ -78,7 +78,7 @@ func TestPSQLSetGetTPTiming(t *testing.T) {
 	}
 	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mtms, tmgs) {
+	} else if !modelEqual(mtms[0], tmgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mtms, tmgs)
 	}
 }
@@ -140,7 +140,7 @@ func TestPSQLSetGetTPDestinationRates(t *testing.T) {
 	}
 	if drs, err := psqlDb.GetTpDestinationRates(TEST_SQL, DR_ID, nil); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mdrs, drs) {
+	} else if !modelEqual(mdrs[0], drs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mdrs, drs)
 	}
 }
@@ -163,7 +163,7 @@ func TestPSQLSetGetTPRatingPlans(t *testing.T) {
 	}
 	if drps, err := psqlDb.GetTpRatingPlans(TEST_SQL, RP_ID, nil); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mrp, drps) {
+	} else if !modelEqual(mrp[0], drps[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mrp, drps)
 	}
 }
@@ -181,7 +181,7 @@ func TestPSQLSetGetTPRatingProfiles(t *testing.T) {
 	}
 	if rps, err := psqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mrp, rps) {
+	} else if !modelEqual(mrp[0], rps[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mrp, rps)
 	}
 }
@@ -204,7 +204,7 @@ func TestPSQLSetGetTPSharedGroups(t *testing.T) {
 	}
 	if sgs, err := psqlDb.GetTpSharedGroups(TEST_SQL, SG_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mSgs, sgs) {
+	} else if !modelEqual(mSgs[0], sgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mSgs, sgs)
 	}
 }
@@ -227,7 +227,7 @@ func TestPSQLSetGetTPCdrStats(t *testing.T) {
 	}
 	if cs, err := psqlDb.GetTpCdrStats(TEST_SQL, CS_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mcs, cs) {
+	} else if !modelEqual(mcs[0], cs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mcs, cs)
 	}
 }
@@ -245,7 +245,7 @@ func TestPSQLSetGetTPDerivedChargers(t *testing.T) {
 	}
 	if rDCs, err := psqlDb.GetTpDerivedChargers(&mdcs[0]); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mdcs, rDCs) {
+	} else if !modelEqual(mdcs[0], rDCs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mdcs, rDCs)
 	}
 }
@@ -265,7 +265,7 @@ func TestPSQLSetGetTPActions(t *testing.T) {
 	}
 	if rTpActs, err := psqlDb.GetTpActions(TEST_SQL, ACTS_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(mas, rTpActs) {
+	} else if !modelEqual(mas[0], rTpActs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mas, rTpActs)
 	}
 }
@@ -286,7 +286,7 @@ func TestPSQLTPActionTimings(t *testing.T) {
 	}
 	if rAP, err := psqlDb.GetTpActionPlans(TEST_SQL, AP_ID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(maps, rAP) {
+	} else if !modelEqual(maps[0], rAP[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", maps, rAP)
 	}
 }
@@ -317,7 +317,7 @@ func TestPSQLSetGetTPActionTriggers(t *testing.T) {
 	}
 	if rcvMpAtrgs, err := psqlDb.GetTpActionTriggers(TEST_SQL, TEST_SQL); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if !reflect.DeepEqual(matrg, rcvMpAtrgs) {
+	} else if !modelEqual(matrg[0], rcvMpAtrgs[0]) {
 		t.Errorf("Expecting: %v, received: %v", matrg, rcvMpAtrgs)
 	}
 }
@@ -334,7 +334,7 @@ func TestPSQLSetGetTpAccountActions(t *testing.T) {
 	}
 	if aas, err := psqlDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(maa, aas) {
+	} else if !modelEqual(*maa, aas[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", maa, aas)
 	}
 }

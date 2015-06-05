@@ -99,6 +99,33 @@ func csvDump(s interface{}) ([]string, error) {
 	return result, nil
 }
 
+func modelEqual(this interface{}, other interface{}) bool {
+	var fieldNames []string
+	st := reflect.TypeOf(this)
+	stO := reflect.TypeOf(other)
+	if st != stO {
+		return false
+	}
+	numFields := st.NumField()
+	for i := 0; i < numFields; i++ {
+		field := st.Field(i)
+		index := field.Tag.Get("index")
+		if index != "" {
+			fieldNames = append(fieldNames, field.Name)
+		}
+	}
+	thisElem := reflect.ValueOf(this)
+	otherElem := reflect.ValueOf(other)
+	for _, fieldName := range fieldNames {
+		thisField := thisElem.FieldByName(fieldName)
+		otherField := otherElem.FieldByName(fieldName)
+		if thisField.String() != otherField.String() {
+			return false
+		}
+	}
+	return true
+}
+
 func getColumnCount(s interface{}) int {
 	st := reflect.TypeOf(s)
 	numFields := st.NumField()
