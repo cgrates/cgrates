@@ -40,6 +40,7 @@ type Event interface {
 	GetAnswerTime(string) (time.Time, error)
 	GetEndTime() (time.Time, error)
 	GetDuration(string) (time.Duration, error)
+	GetPdd(string) (time.Duration, error)
 	GetSupplier(string) string
 	GetDisconnectCause(string) string
 	GetOriginatorIP(string) string

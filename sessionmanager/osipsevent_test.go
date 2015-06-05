@@ -34,7 +34,7 @@ var addr, _ = net.ResolveUDPAddr("udp", "172.16.254.77:42574")
 var osipsEv = &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_CDR",
 	AttrValues: map[string]string{"to_tag": "4ea9687f", "cgr_account": "dan", "setuptime": "7", "created": "1406370492", "method": "INVITE", "callid": "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ",
 		"sip_reason": "OK", "time": "1406370499", "cgr_reqtype": utils.META_PREPAID, "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com", "sip_code": "200",
-		"duration": "20", "from_tag": "eb082607", "extra1": "val1", "extra2": "val2", "cgr_supplier": "supplier3"}, OriginatorAddress: addr}}
+		"duration": "20", CGR_PDD: "3s", "from_tag": "eb082607", "extra1": "val1", "extra2": "val2", "cgr_supplier": "supplier3"}, OriginatorAddress: addr}}
 
 func TestOsipsEventInterface(t *testing.T) {
 	var _ engine.Event = engine.Event(osipsEv)
@@ -44,6 +44,7 @@ func TestOsipsEventParseStatic(t *testing.T) {
 	setupTime, _ := osipsEv.GetSetupTime("^2013-12-07 08:42:24")
 	answerTime, _ := osipsEv.GetAnswerTime("^2013-12-07 08:42:24")
 	dur, _ := osipsEv.GetDuration("^60s")
+	pdd, _ := osipsEv.GetPdd("^10s")
 	if osipsEv.GetReqType("^test") != "test" ||
 		osipsEv.GetDirection("^test") != "test" ||
 		osipsEv.GetTenant("^test") != "test" ||
@@ -54,6 +55,7 @@ func TestOsipsEventParseStatic(t *testing.T) {
 		setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
 		answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
 		dur != time.Duration(60)*time.Second ||
+		pdd != time.Duration(10)*time.Second ||
 		osipsEv.GetSupplier("^test") != "test" ||
 		osipsEv.GetDisconnectCause("^test") != "test" {
 		t.Error("Values out of static not matching",
@@ -67,6 +69,7 @@ func TestOsipsEventParseStatic(t *testing.T) {
 			setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 			answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 			dur != time.Duration(60)*time.Second,
+			pdd != time.Duration(10)*time.Second,
 			osipsEv.GetSupplier("^test") != "test",
 			osipsEv.GetDisconnectCause("^test") != "test")
 	}
@@ -80,6 +83,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 	answerTime, _ := osipsEv.GetAnswerTime(utils.META_DEFAULT)
 	eAnswerTime, _ := utils.ParseTimeDetectLayout("1406370499")
 	dur, _ := osipsEv.GetDuration(utils.META_DEFAULT)
+	pdd, _ := osipsEv.GetPdd(utils.META_DEFAULT)
 	endTime, _ := osipsEv.GetEndTime()
 	if osipsEv.GetName() != "E_ACC_CDR" ||
 		osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()) ||
@@ -96,6 +100,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 		!answerTime.Equal(eAnswerTime) ||
 		!endTime.Equal(eAnswerTime.Add(dur)) ||
 		dur != time.Duration(20*time.Second) ||
+		pdd != time.Duration(3)*time.Second ||
 		osipsEv.GetSupplier(utils.META_DEFAULT) != "supplier3" ||
 		osipsEv.GetDisconnectCause(utils.META_DEFAULT) != "200" ||
 		osipsEv.GetOriginatorIP(utils.META_DEFAULT) != "172.16.254.77" {
@@ -114,6 +119,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 			!answerTime.Equal(time.Date(2014, 7, 26, 12, 28, 19, 0, time.Local)),
 			!endTime.Equal(time.Date(2014, 7, 26, 12, 28, 39, 0, time.Local)),
 			dur != time.Duration(20*time.Second),
+			pdd != time.Duration(3)*time.Second,
 			osipsEv.GetSupplier(utils.META_DEFAULT) != "supplier3",
 			osipsEv.GetDisconnectCause(utils.META_DEFAULT) != "200",
 			osipsEv.GetOriginatorIP(utils.META_DEFAULT) != "172.16.254.77",
@@ -142,7 +148,7 @@ func TestOsipsEventAsStoredCdr(t *testing.T) {
 		ReqType:   utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "itsyscom.com", Category: "call", Account: "dan", Subject: "dan",
 		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime,
-		Usage: time.Duration(20) * time.Second, Supplier: "supplier3", DisconnectCause: "200", ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
+		Usage: time.Duration(20) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "supplier3", DisconnectCause: "200", ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
 	if storedCdr := osipsEv.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}

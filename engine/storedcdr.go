@@ -46,6 +46,9 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr) (*StoredCdr, error) {
 	if storedCdr.Usage, err = utils.ParseDurationWithSecs(extCdr.Usage); err != nil {
 		return nil, err
 	}
+	if storedCdr.Pdd, err = utils.ParseDurationWithSecs(extCdr.Pdd); err != nil {
+		return nil, err
+	}
 	if len(extCdr.CostDetails) != 0 {
 		if err = json.Unmarshal([]byte(extCdr.CostDetails), storedCdr.CostDetails); err != nil {
 			return nil, err
@@ -72,6 +75,7 @@ type StoredCdr struct {
 	SetupTime       time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
 	AnswerTime      time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
 	Usage           time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+	Pdd             time.Duration     // PDD value
 	Supplier        string            // Supplier information when available
 	DisconnectCause string            // Disconnect cause of the event
 	ExtraFields     map[string]string // Extra fields to be stored in CDR
@@ -157,6 +161,8 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(storedCdr.AnswerTime.Format(time.RFC3339))
 	case utils.USAGE:
 		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+	case utils.PDD:
+		return strconv.FormatFloat(utils.Round(storedCdr.Pdd.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(storedCdr.Supplier)
 	case utils.DISCONNECT_CAUSE:
@@ -220,6 +226,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v.Set(utils.SETUP_TIME, storedCdr.SetupTime.Format(time.RFC3339))
 	v.Set(utils.ANSWER_TIME, storedCdr.AnswerTime.Format(time.RFC3339))
 	v.Set(utils.USAGE, storedCdr.FormatUsage(utils.SECONDS))
+	v.Set(utils.PDD, storedCdr.FieldAsString(&utils.RSRField{Id: utils.PDD}))
 	v.Set(utils.SUPPLIER, storedCdr.Supplier)
 	v.Set(utils.DISCONNECT_CAUSE, storedCdr.DisconnectCause)
 	if storedCdr.CostDetails != nil {
@@ -230,7 +237,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
 func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld,
-	answerTimeFld, durationFld, supplierFld, disconnectCauseFld *utils.RSRField,
+	answerTimeFld, durationFld, pddFld, supplierFld, disconnectCauseFld *utils.RSRField,
 	extraFlds []*utils.RSRField, primaryMandatory bool) (*StoredCdr, error) {
 	if reqTypeFld == nil {
 		reqTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -291,6 +298,12 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	}
 	if durationFld.Id == utils.META_DEFAULT {
 		durationFld.Id = utils.USAGE
+	}
+	if pddFld == nil {
+		pddFld, _ = utils.NewRSRField(utils.META_DEFAULT)
+	}
+	if pddFld.Id == utils.META_DEFAULT {
+		pddFld.Id = utils.PDD
 	}
 	if supplierFld == nil {
 		supplierFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -359,6 +372,12 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	} else if frkStorCdr.Usage, err = utils.ParseDurationWithSecs(durStr); err != nil {
 		return nil, err
 	}
+	pddStr := storedCdr.FieldAsString(pddFld)
+	if primaryMandatory && len(pddStr) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.PDD, pddFld.Id))
+	} else if frkStorCdr.Pdd, err = utils.ParseDurationWithSecs(pddStr); err != nil {
+		return nil, err
+	}
 	frkStorCdr.Supplier = storedCdr.FieldAsString(supplierFld)
 	frkStorCdr.DisconnectCause = storedCdr.FieldAsString(disconnectCauseFld)
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
@@ -385,6 +404,7 @@ func (storedCdr *StoredCdr) AsExternalCdr() *ExternalCdr {
 		SetupTime:       storedCdr.SetupTime.Format(time.RFC3339),
 		AnswerTime:      storedCdr.AnswerTime.Format(time.RFC3339),
 		Usage:           storedCdr.FormatUsage(utils.SECONDS),
+		Pdd:             storedCdr.FieldAsString(&utils.RSRField{Id: utils.PDD}),
 		Supplier:        storedCdr.Supplier,
 		DisconnectCause: storedCdr.DisconnectCause,
 		ExtraFields:     storedCdr.ExtraFields,
@@ -523,6 +543,18 @@ func (storedCdr *StoredCdr) GetDuration(fieldName string) (time.Duration, error)
 	}
 	return utils.ParseDurationWithSecs(durVal)
 }
+func (storedCdr *StoredCdr) GetPdd(fieldName string) (time.Duration, error) {
+	if utils.IsSliceMember([]string{utils.PDD, utils.META_DEFAULT}, fieldName) {
+		return storedCdr.Pdd, nil
+	}
+	var pddVal string
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		pddVal = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	} else {
+		pddVal = storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
+	}
+	return utils.ParseDurationWithSecs(pddVal)
+}
 func (storedCdr *StoredCdr) GetSupplier(fieldName string) string {
 	if utils.IsSliceMember([]string{utils.SUPPLIER, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.Supplier
@@ -576,6 +608,7 @@ type ExternalCdr struct {
 	SetupTime       string
 	AnswerTime      string
 	Usage           string
+	Pdd             string
 	Supplier        string
 	DisconnectCause string
 	ExtraFields     map[string]string

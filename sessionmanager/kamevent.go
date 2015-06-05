@@ -43,6 +43,7 @@ const (
 	CGR_ANSWERTIME         = "cgr_answertime"
 	CGR_STOPTIME           = "cgr_stoptime"
 	CGR_DURATION           = "cgr_duration"
+	CGR_PDD                = "cgr_pdd"
 
 	KAM_TR_INDEX = "tr_index"
 	KAM_TR_LABEL = "tr_label"
@@ -51,7 +52,7 @@ const (
 )
 
 var primaryFields = []string{EVENT, CALLID, FROM_TAG, HASH_ENTRY, HASH_ID, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION,
-	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE}
+	CGR_CATEGORY, CGR_TENANT, CGR_REQTYPE, CGR_ANSWERTIME, CGR_SETUPTIME, CGR_STOPTIME, CGR_DURATION, CGR_PDD, utils.CGR_SUPPLIER, utils.CGR_DISCONNECT_CAUSE}
 
 type KamAuthReply struct {
 	Event            string // Kamailio will use this to differentiate between requests and replies
@@ -186,7 +187,17 @@ func (kev KamEvent) GetDuration(fieldName string) (time.Duration, error) {
 	}
 	return utils.ParseDurationWithSecs(durStr)
 }
-
+func (kev KamEvent) GetPdd(fieldName string) (time.Duration, error) {
+	var pddStr string
+	if utils.IsSliceMember([]string{utils.PDD, utils.META_DEFAULT}, fieldName) {
+		pddStr = kev[CGR_PDD]
+	} else if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		pddStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	} else {
+		pddStr = kev[fieldName]
+	}
+	return utils.ParseDurationWithSecs(pddStr)
+}
 func (kev KamEvent) GetSupplier(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
@@ -292,6 +303,8 @@ func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(aTime.String())
 	case utils.USAGE:
 		return rsrFld.ParseValue(strconv.FormatFloat(utils.Round(duration.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64))
+	case utils.PDD:
+		return rsrFld.ParseValue(strconv.FormatFloat(utils.Round(duration.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64))
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(kev.GetSupplier(utils.META_DEFAULT))
 	case utils.DISCONNECT_CAUSE:
@@ -325,6 +338,7 @@ func (kev KamEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.SetupTime, _ = kev.GetSetupTime(utils.META_DEFAULT)
 	storCdr.AnswerTime, _ = kev.GetAnswerTime(utils.META_DEFAULT)
 	storCdr.Usage, _ = kev.GetDuration(utils.META_DEFAULT)
+	storCdr.Pdd, _ = kev.GetPdd(utils.META_DEFAULT)
 	storCdr.Supplier = kev.GetSupplier(utils.META_DEFAULT)
 	storCdr.DisconnectCause = kev.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = kev.GetExtraFields()

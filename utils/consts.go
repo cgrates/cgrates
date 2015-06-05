@@ -106,6 +106,7 @@ const (
 	SETUP_TIME                   = "setup_time"
 	ANSWER_TIME                  = "answer_time"
 	USAGE                        = "usage"
+	PDD                          = "pdd"
 	SUPPLIER                     = "supplier"
 	MEDI_RUNID                   = "mediation_runid"
 	RATED_ACCOUNT                = "rated_account"

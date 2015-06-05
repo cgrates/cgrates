@@ -175,6 +175,17 @@ func (osipsev *OsipsEvent) GetDuration(fieldName string) (time.Duration, error) 
 	}
 	return utils.ParseDurationWithSecs(durStr)
 }
+func (osipsev *OsipsEvent) GetPdd(fieldName string) (time.Duration, error) {
+	var pddStr string
+	if utils.IsSliceMember([]string{utils.PDD, utils.META_DEFAULT}, fieldName) {
+		pddStr = osipsev.osipsEvent.AttrValues[CGR_PDD]
+	} else if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		pddStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	} else {
+		pddStr = osipsev.osipsEvent.AttrValues[fieldName]
+	}
+	return utils.ParseDurationWithSecs(pddStr)
+}
 func (osipsev *OsipsEvent) GetSupplier(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
@@ -236,7 +247,7 @@ func (osipsev *OsipsEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 }
 func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
 	primaryFields := []string{TO_TAG, SETUP_DURATION, OSIPS_SETUP_TIME, "method", "callid", "sip_reason", OSIPS_EVENT_TIME, "sip_code", "duration", "from_tag", "dialog_id",
-		CGR_TENANT, CGR_CATEGORY, CGR_REQTYPE, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION, utils.CGR_SUPPLIER}
+		CGR_TENANT, CGR_CATEGORY, CGR_REQTYPE, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION, utils.CGR_SUPPLIER, CGR_PDD}
 	extraFields := make(map[string]string)
 	for field, val := range osipsev.osipsEvent.AttrValues {
 		if !utils.IsSliceMember(primaryFields, field) {
@@ -267,6 +278,7 @@ func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.SetupTime, _ = osipsEv.GetSetupTime(utils.META_DEFAULT)
 	storCdr.AnswerTime, _ = osipsEv.GetAnswerTime(utils.META_DEFAULT)
 	storCdr.Usage, _ = osipsEv.GetDuration(utils.META_DEFAULT)
+	storCdr.Pdd, _ = osipsEv.GetPdd(utils.META_DEFAULT)
 	storCdr.Supplier = osipsEv.GetSupplier(utils.META_DEFAULT)
 	storCdr.DisconnectCause = osipsEv.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = osipsEv.GetExtraFields()

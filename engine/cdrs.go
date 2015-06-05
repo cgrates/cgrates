@@ -273,8 +273,9 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 		dcDurFld, _ := utils.NewRSRField(dc.UsageField)
 		dcSupplFld, _ := utils.NewRSRField(dc.SupplierField)
 		dcDCausseld, _ := utils.NewRSRField(dc.DisconnectCauseField)
+		dcPddFld, _ := utils.NewRSRField("0") // FixMe
 		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
-			dcSTimeFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCausseld, []*utils.RSRField{}, true)
+			dcSTimeFld, dcATimeFld, dcDurFld, dcPddFld, dcSupplFld, dcDCausseld, []*utils.RSRField{}, true)
 		if err != nil {
 			Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", storedCdr.CgrId, dc.RunId, err.Error()))
 			continue // do not add it to the forked CDR list

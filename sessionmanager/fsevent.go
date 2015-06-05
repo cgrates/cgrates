@@ -37,36 +37,39 @@ type FSEvent map[string]string
 
 const (
 	// Freswitch event proprities names
-	DIRECTION                = "Call-Direction"
-	SUBJECT                  = "variable_cgr_subject"
-	ACCOUNT                  = "variable_cgr_account"
-	DESTINATION              = "variable_cgr_destination"
-	REQTYPE                  = "variable_cgr_reqtype" //prepaid or postpaid
-	Category                 = "variable_cgr_category"
-	VAR_CGR_SUPPLIER         = "variable_" + utils.CGR_SUPPLIER
-	UUID                     = "Unique-ID" // -Unique ID for this call leg
-	CSTMID                   = "variable_cgr_tenant"
-	CALL_DEST_NR             = "Caller-Destination-Number"
-	SIP_REQ_USER             = "variable_sip_req_user"
-	PARK_TIME                = "Caller-Profile-Created-Time"
-	SETUP_TIME               = "Caller-Channel-Created-Time"
-	ANSWER_TIME              = "Caller-Channel-Answered-Time"
-	END_TIME                 = "Caller-Channel-Hangup-Time"
-	DURATION                 = "variable_billsec"
-	NAME                     = "Event-Name"
-	HEARTBEAT                = "HEARTBEAT"
-	ANSWER                   = "CHANNEL_ANSWER"
-	HANGUP                   = "CHANNEL_HANGUP_COMPLETE"
-	PARK                     = "CHANNEL_PARK"
-	AUTH_OK                  = "+AUTH_OK"
-	DISCONNECT               = "+SWITCH DISCONNECT"
-	INSUFFICIENT_FUNDS       = "-INSUFFICIENT_FUNDS"
-	MISSING_PARAMETER        = "-MISSING_PARAMETER"
-	SYSTEM_ERROR             = "-SYSTEM_ERROR"
-	MANAGER_REQUEST          = "+MANAGER_REQUEST"
-	USERNAME                 = "Caller-Username"
-	FS_IPv4                  = "FreeSWITCH-IPv4"
-	HANGUP_CAUSE             = "Hangup-Cause"
+	DIRECTION          = "Call-Direction"
+	SUBJECT            = "variable_cgr_subject"
+	ACCOUNT            = "variable_cgr_account"
+	DESTINATION        = "variable_cgr_destination"
+	REQTYPE            = "variable_cgr_reqtype" //prepaid or postpaid
+	Category           = "variable_cgr_category"
+	VAR_CGR_SUPPLIER   = "variable_" + utils.CGR_SUPPLIER
+	UUID               = "Unique-ID" // -Unique ID for this call leg
+	CSTMID             = "variable_cgr_tenant"
+	CALL_DEST_NR       = "Caller-Destination-Number"
+	SIP_REQ_USER       = "variable_sip_req_user"
+	PARK_TIME          = "Caller-Profile-Created-Time"
+	SETUP_TIME         = "Caller-Channel-Created-Time"
+	ANSWER_TIME        = "Caller-Channel-Answered-Time"
+	END_TIME           = "Caller-Channel-Hangup-Time"
+	DURATION           = "variable_billsec"
+	NAME               = "Event-Name"
+	HEARTBEAT          = "HEARTBEAT"
+	ANSWER             = "CHANNEL_ANSWER"
+	HANGUP             = "CHANNEL_HANGUP_COMPLETE"
+	PARK               = "CHANNEL_PARK"
+	AUTH_OK            = "+AUTH_OK"
+	DISCONNECT         = "+SWITCH DISCONNECT"
+	INSUFFICIENT_FUNDS = "-INSUFFICIENT_FUNDS"
+	MISSING_PARAMETER  = "-MISSING_PARAMETER"
+	SYSTEM_ERROR       = "-SYSTEM_ERROR"
+	MANAGER_REQUEST    = "+MANAGER_REQUEST"
+	USERNAME           = "Caller-Username"
+	FS_IPv4            = "FreeSWITCH-IPv4"
+	HANGUP_CAUSE       = "Hangup-Cause"
+	PDD_MEDIA_MS       = "variable_progress_mediamsec"
+	PDD_NOMEDIA_MS     = "variable_progressmsec"
+
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 )
 
@@ -206,12 +209,27 @@ func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
 	return utils.ParseTimeDetectLayout(fsev[END_TIME])
 }
 
-func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error) {
+func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {
 	durStr := utils.FirstNonEmpty(fsev[fieldName], fsev[DURATION])
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		durStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
 	return utils.ParseDurationWithSecs(durStr)
+}
+
+func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
+	var pddStr string
+	if utils.IsSliceMember([]string{utils.PDD, utils.META_DEFAULT}, fieldName) {
+		pddStr = utils.FirstNonEmpty(fsev[PDD_MEDIA_MS], fsev[PDD_MEDIA_MS])
+		if len(pddStr) != 0 {
+			pddStr = "0." + pddStr // PDD is in milliseconds and CGR expects it in seconds
+		}
+	} else if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		pddStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	} else {
+		pddStr = fsev[fieldName]
+	}
+	return utils.ParseDurationWithSecs(pddStr)
 }
 
 func (fsev FSEvent) GetSupplier(fieldName string) string {
@@ -281,6 +299,9 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 	case utils.USAGE:
 		dur, _ := fsev.GetDuration("")
 		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
+	case utils.PDD:
+		pdd, _ := fsev.GetPdd(utils.META_DEFAULT)
+		return rsrFld.ParseValue(strconv.FormatFloat(pdd.Seconds(), 'f', -1, 64))
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(fsev.GetSupplier(""))
 	case utils.DISCONNECT_CAUSE:
@@ -332,6 +353,7 @@ func (fsev FSEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT)
 	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT)
 	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
+	storCdr.Pdd, _ = fsev.GetPdd(utils.META_DEFAULT)
 	storCdr.ExtraFields = fsev.GetExtraFields()
 	storCdr.Cost = -1
 	storCdr.Supplier = fsev.GetSupplier(utils.META_DEFAULT)
