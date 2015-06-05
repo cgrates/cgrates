@@ -282,7 +282,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile) error
 }
 
 func (tpr *TpReader) LoadRatingProfiles() (err error) {
-	tps, err := tpr.lr.GetTpRatingProfiles(nil)
+	tps, err := tpr.lr.GetTpRatingProfiles(&TpRatingProfile{Tpid: tpr.tpid})
 	if err != nil {
 		return err
 	}
@@ -364,7 +364,7 @@ func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error)
 }
 
 func (tpr *TpReader) LoadSharedGroups() error {
-	return tpr.LoadSharedGroupsFiltered("", false)
+	return tpr.LoadSharedGroupsFiltered(tpr.tpid, false)
 }
 
 func (tpr *TpReader) LoadLCRs() (err error) {
@@ -753,7 +753,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 }
 
 func (tpr *TpReader) LoadAccountActions() (err error) {
-	tps, err := tpr.lr.GetTpAccountActions(nil)
+	tps, err := tpr.lr.GetTpAccountActions(&TpAccountAction{Tpid: tpr.tpid})
 	if err != nil {
 		return err
 	}
@@ -835,7 +835,7 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 }
 
 func (tpr *TpReader) LoadDerivedChargers() (err error) {
-	return tpr.LoadDerivedChargersFiltered(nil, false)
+	return tpr.LoadDerivedChargersFiltered(&TpDerivedCharger{Tpid: tpr.tpid}, false)
 }
 
 func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {

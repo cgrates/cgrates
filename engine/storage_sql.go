@@ -208,7 +208,7 @@ func (self *SQLStorage) SetTpTimings(timings []TpTiming) error {
 				return err
 			}
 		}
-		save := tx.Save(timing)
+		save := tx.Save(&timing)
 		if save.Error != nil {
 			tx.Rollback()
 			return save.Error
@@ -233,7 +233,7 @@ func (self *SQLStorage) SetTpDestinations(dests []TpDestination) error {
 				return err
 			}
 		}
-		save := tx.Save(dest)
+		save := tx.Save(&dest)
 		if save.Error != nil {
 			tx.Rollback()
 			return save.Error
@@ -258,7 +258,7 @@ func (self *SQLStorage) SetTpRates(rs []TpRate) error {
 				return err
 			}
 		}
-		save := tx.Save(rate)
+		save := tx.Save(&rate)
 		if save.Error != nil {
 			tx.Rollback()
 			return save.Error
@@ -285,7 +285,7 @@ func (self *SQLStorage) SetTpDestinationRates(drs []TpDestinationRate) error {
 			}
 		}
 
-		saved := tx.Save(dRate)
+		saved := tx.Save(&dRate)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error
@@ -311,7 +311,7 @@ func (self *SQLStorage) SetTpRatingPlans(drts []TpRatingPlan) error {
 				return err
 			}
 		}
-		saved := tx.Save(rPlan)
+		saved := tx.Save(&rPlan)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error
@@ -336,7 +336,7 @@ func (self *SQLStorage) SetTpRatingProfiles(rpfs []TpRatingProfile) error {
 				return err
 			}
 		}
-		saved := tx.Save(rpf)
+		saved := tx.Save(&rpf)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error
@@ -361,7 +361,7 @@ func (self *SQLStorage) SetTpSharedGroups(sgs []TpSharedGroup) error {
 				return err
 			}
 		}
-		saved := tx.Save(sGroup)
+		saved := tx.Save(&sGroup)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error
@@ -386,7 +386,7 @@ func (self *SQLStorage) SetTpCdrStats(css []TpCdrStat) error {
 				return err
 			}
 		}
-		saved := tx.Save(cStat)
+		saved := tx.Save(&cStat)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error
@@ -417,7 +417,7 @@ func (self *SQLStorage) SetTpDerivedChargers(sgs []TpDerivedCharger) error {
 				return err
 			}
 		}
-		if err := tx.Save(dCharger).Error; err != nil {
+		if err := tx.Save(&dCharger).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -448,7 +448,7 @@ func (self *SQLStorage) SetTpLCRs(sgs []TpLcrRule) error {
 				return err
 			}
 		}
-		if err := tx.Save(lcr).Error; err != nil {
+		if err := tx.Save(&lcr).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -473,7 +473,7 @@ func (self *SQLStorage) SetTpActions(acts []TpAction) error {
 				return err
 			}
 		}
-		saved := tx.Save(a)
+		saved := tx.Save(&a)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error
@@ -498,7 +498,7 @@ func (self *SQLStorage) SetTpActionPlans(ats []TpActionPlan) error {
 				return err
 			}
 		}
-		saved := tx.Save(aPlan)
+		saved := tx.Save(&aPlan)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error
@@ -523,7 +523,7 @@ func (self *SQLStorage) SetTpActionTriggers(ats []TpActionTrigger) error {
 				return err
 			}
 		}
-		saved := tx.Save(aTrigger)
+		saved := tx.Save(&aTrigger)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error
@@ -550,7 +550,7 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 				return err
 			}
 		}
-		saved := tx.Save(aa)
+		saved := tx.Save(&aa)
 		if saved.Error != nil {
 			tx.Rollback()
 			return saved.Error

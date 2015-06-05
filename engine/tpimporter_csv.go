@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -56,7 +57,21 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 }
 
 func (self *TPCSVImporter) Run() error {
-	self.csvr = NewFileCSVStorage(self.Sep, utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV, utils.SHARED_GROUPS_CSV, utils.LCRS_CSV, utils.ACTIONS_CSV, utils.ACTION_PLANS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV, utils.DERIVED_CHARGERS_CSV, utils.CDR_STATS_CSV)
+	self.csvr = NewFileCSVStorage(self.Sep,
+		path.Join(self.DirPath, utils.DESTINATIONS_CSV),
+		path.Join(self.DirPath, utils.TIMINGS_CSV),
+		path.Join(self.DirPath, utils.RATES_CSV),
+		path.Join(self.DirPath, utils.DESTINATION_RATES_CSV),
+		path.Join(self.DirPath, utils.RATING_PLANS_CSV),
+		path.Join(self.DirPath, utils.RATING_PROFILES_CSV),
+		path.Join(self.DirPath, utils.SHARED_GROUPS_CSV),
+		path.Join(self.DirPath, utils.LCRS_CSV),
+		path.Join(self.DirPath, utils.ACTIONS_CSV),
+		path.Join(self.DirPath, utils.ACTION_PLANS_CSV),
+		path.Join(self.DirPath, utils.ACTION_TRIGGERS_CSV),
+		path.Join(self.DirPath, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(self.DirPath, utils.DERIVED_CHARGERS_CSV),
+		path.Join(self.DirPath, utils.CDR_STATS_CSV))
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
 		fHandler, hasName := fileHandlers[f.Name()]
@@ -151,7 +166,10 @@ func (self *TPCSVImporter) importSharedGroups(fn string) error {
 	if err != nil {
 		return err
 	}
-
+	loadId := utils.CSV_LOAD //Autogenerate rating profile id
+	if self.ImportId != "" {
+		loadId += "_" + self.ImportId
+	}
 	return self.StorDb.SetTpSharedGroups(tps)
 }
 
