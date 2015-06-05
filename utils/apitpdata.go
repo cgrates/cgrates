@@ -963,7 +963,7 @@ type CdrsFilter struct {
 	UsageEnd            *float64          // End of the usage interval (<)
 	CostStart           *float64          // Start of the cost interval (>=)
 	CostEnd             *float64          // End of the usage interval (<)
-	FilterOnDerived     bool              // Do not consider derived CDRs but original one
+	FilterOnRated       bool              // Do not consider rated CDRs but raw one
 	Count               bool              // If true count the items instead of returning data
 	Paginator
 }
@@ -1020,7 +1020,7 @@ type RpcCdrsFilter struct {
 	UsageEnd            *float64          // End of the usage interval (<)
 	CostStart           *float64          // Start of the cost interval (>=)
 	CostEnd             *float64          // End of the usage interval (<)
-	FilterOnDerived     bool              // Do not consider derived CDRs but original one
+	FilterOnRated       bool              // Do not consider derived CDRs but original one
 	Paginator                             // Add pagination
 }
 
@@ -1068,7 +1068,7 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 		UsageEnd:            self.UsageEnd,
 		CostStart:           self.CostStart,
 		CostEnd:             self.CostEnd,
-		FilterOnDerived:     self.FilterOnDerived,
+		FilterOnRated:       self.FilterOnRated,
 		Paginator:           self.Paginator,
 	}
 	if len(self.SetupTimeStart) != 0 {

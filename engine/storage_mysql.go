@@ -106,7 +106,7 @@ func (self *MySQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost)
 }
 
 func (self *MySQLStorage) SetRatedCdr(storedCdr *StoredCdr) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,supplier,disconnect_cause,cost,extra_info,created_at) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%v,'%s','%s',%f,'%s','%s') ON DUPLICATE KEY UPDATE reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),cost=values(cost),supplier=values(supplier),disconnect_cause=values(disconnect_cause),extra_info=values(extra_info), updated_at='%s'",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,pdd,supplier,disconnect_cause,cost,extra_info,created_at) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%v,%v,'%s','%s',%f,'%s','%s') ON DUPLICATE KEY UPDATE reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),pdd=values(pdd),cost=values(cost),supplier=values(supplier),disconnect_cause=values(disconnect_cause),extra_info=values(extra_info), updated_at='%s'",
 		utils.TBL_RATED_CDRS,
 		storedCdr.CgrId,
 		storedCdr.MediationRunId,
@@ -120,6 +120,7 @@ func (self *MySQLStorage) SetRatedCdr(storedCdr *StoredCdr) (err error) {
 		storedCdr.SetupTime,
 		storedCdr.AnswerTime,
 		storedCdr.Usage.Seconds(),
+		storedCdr.Pdd.Seconds(),
 		storedCdr.Supplier,
 		storedCdr.DisconnectCause,
 		storedCdr.Cost,

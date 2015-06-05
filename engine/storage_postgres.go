@@ -138,6 +138,7 @@ func (self *PostgresStorage) SetRatedCdr(cdr *StoredCdr) (err error) {
 		SetupTime:       cdr.SetupTime,
 		AnswerTime:      cdr.AnswerTime,
 		Usage:           cdr.Usage.Seconds(),
+		Pdd:             cdr.Pdd.Seconds(),
 		Supplier:        cdr.Supplier,
 		DisconnectCause: cdr.DisconnectCause,
 		Cost:            cdr.Cost,
@@ -149,7 +150,8 @@ func (self *PostgresStorage) SetRatedCdr(cdr *StoredCdr) (err error) {
 		tx = self.db.Begin()
 		updated := tx.Model(TblRatedCdr{}).Where(&TblRatedCdr{Cgrid: cdr.CgrId, Runid: cdr.MediationRunId}).Updates(&TblRatedCdr{Reqtype: cdr.ReqType,
 			Direction: cdr.Direction, Tenant: cdr.Tenant, Category: cdr.Category, Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination,
-			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Supplier: cdr.Supplier, DisconnectCause: cdr.DisconnectCause, Cost: cdr.Cost, ExtraInfo: cdr.ExtraInfo,
+			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Pdd: cdr.Pdd.Seconds(), Supplier: cdr.Supplier, DisconnectCause: cdr.DisconnectCause,
+			Cost: cdr.Cost, ExtraInfo: cdr.ExtraInfo,
 			UpdatedAt: time.Now()})
 		if updated.Error != nil {
 			tx.Rollback()

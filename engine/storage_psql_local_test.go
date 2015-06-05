@@ -800,7 +800,7 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreDerived
-	if storedCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnDerived: true}); err != nil {
+	if storedCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnRated: true}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 { // ToDo: Recheck this value
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -840,5 +840,82 @@ func TestPSQLRemStoredCdrs(t *testing.T) {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+}
+
+// Make sure that what we get is what we set
+func TestPSQLStoreRestoreCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	strCdr := &StoredCdr{TOR: utils.VOICE, AccId: "ccc1", CdrHost: "192.168.1.1", CdrSource: "TEST_CDR", ReqType: utils.META_RATED,
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
+		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr.CgrId = utils.Sha1(strCdr.AccId, strCdr.SetupTime.String())
+	if err := psqlDb.SetCdr(strCdr); err != nil {
+		t.Error(err.Error())
+	}
+	if err := psqlDb.SetRatedCdr(strCdr); err != nil {
+		t.Error(err.Error())
+	}
+	// Check RawCdr
+	if rcvCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}}); err != nil {
+		t.Error(err.Error())
+	} else if len(rcvCdrs) != 1 {
+		t.Errorf("Unexpected cdrs returned: %+v", rcvCdrs)
+	} else {
+		rcvCdr := rcvCdrs[0]
+		if strCdr.CgrId != rcvCdr.CgrId ||
+			strCdr.TOR != rcvCdr.TOR ||
+			strCdr.AccId != rcvCdr.AccId ||
+			strCdr.CdrHost != rcvCdr.CdrHost ||
+			strCdr.ReqType != rcvCdr.ReqType ||
+			strCdr.Direction != rcvCdr.Direction ||
+			strCdr.Tenant != rcvCdr.Tenant ||
+			strCdr.Category != rcvCdr.Category ||
+			strCdr.Account != rcvCdr.Account ||
+			strCdr.Subject != rcvCdr.Subject ||
+			strCdr.Destination != rcvCdr.Destination ||
+			!strCdr.SetupTime.Equal(rcvCdr.SetupTime) ||
+			!strCdr.AnswerTime.Equal(rcvCdr.AnswerTime) ||
+			strCdr.Usage != rcvCdr.Usage ||
+			strCdr.Pdd != rcvCdr.Pdd ||
+			strCdr.Supplier != rcvCdr.Supplier ||
+			strCdr.DisconnectCause != rcvCdr.DisconnectCause ||
+			!reflect.DeepEqual(strCdr.ExtraFields, rcvCdr.ExtraFields) {
+			t.Errorf("Expecting: %+v, received: %+v", strCdr, rcvCdrs[0])
+		}
+	}
+	// Check RatedCdr
+	if rcvCdrs, _, err := psqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}, FilterOnRated: true}); err != nil {
+		t.Error(err.Error())
+	} else if len(rcvCdrs) != 1 {
+		t.Errorf("Unexpected cdrs returned: %+v", rcvCdrs)
+	} else {
+		rcvCdr := rcvCdrs[0]
+		if strCdr.CgrId != rcvCdr.CgrId ||
+			strCdr.TOR != rcvCdr.TOR ||
+			strCdr.AccId != rcvCdr.AccId ||
+			strCdr.CdrHost != rcvCdr.CdrHost ||
+			strCdr.ReqType != rcvCdr.ReqType ||
+			strCdr.Direction != rcvCdr.Direction ||
+			strCdr.Tenant != rcvCdr.Tenant ||
+			strCdr.Category != rcvCdr.Category ||
+			strCdr.Account != rcvCdr.Account ||
+			strCdr.Subject != rcvCdr.Subject ||
+			strCdr.Destination != rcvCdr.Destination ||
+			//!strCdr.SetupTime.Equal(rcvCdr.SetupTime) || // FixMe
+			//!strCdr.AnswerTime.Equal(rcvCdr.AnswerTime) || // FixMe
+			strCdr.Usage != rcvCdr.Usage ||
+			strCdr.Pdd != rcvCdr.Pdd ||
+			strCdr.Supplier != rcvCdr.Supplier ||
+			strCdr.DisconnectCause != rcvCdr.DisconnectCause ||
+			strCdr.Cost != rcvCdr.Cost ||
+			!reflect.DeepEqual(strCdr.ExtraFields, rcvCdr.ExtraFields) {
+			t.Errorf("Expecting: %+v, received: %+v", strCdr, rcvCdrs[0])
+		}
 	}
 }
