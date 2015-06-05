@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,8 @@ func (self *ApierV1) SetTPSharedGroups(attrs utils.TPSharedGroups, reply *string
 			return fmt.Errorf("%s:SharedGroup:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
 		}
 	}*/
-	if err := self.StorDb.SetTPSharedGroups(attrs.TPid, map[string][]*utils.TPSharedGroup{attrs.SharedGroupsId: attrs.SharedGroups}); err != nil {
+	sg := engine.APItoModelSharedGroup(&attrs)
+	if err := self.StorDb.SetTpSharedGroups(sg); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -61,7 +63,11 @@ func (self *ApierV1) GetTPSharedGroups(attrs AttrGetTPSharedGroups, reply *utils
 	} else if len(sgs) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = utils.TPSharedGroups{TPid: attrs.TPid, SharedGroupsId: attrs.SharedGroupsId, SharedGroups: sgs[attrs.SharedGroupsId]}
+		sgMap, err := engine.TpSharedGroups(sgs).GetSharedGroups()
+		if err != nil {
+			return err
+		}
+		*reply = utils.TPSharedGroups{TPid: attrs.TPid, SharedGroupsId: attrs.SharedGroupsId, SharedGroups: sgMap[attrs.SharedGroupsId]}
 	}
 	return nil
 }
@@ -76,7 +82,7 @@ func (self *ApierV1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_SHARED_GROUPS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_SHARED_GROUPS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -91,7 +97,7 @@ func (self *ApierV1) RemTPSharedGroups(attrs AttrGetTPSharedGroups, reply *strin
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, attrs.SharedGroupsId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, attrs.SharedGroupsId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

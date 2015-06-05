@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,7 +33,8 @@ func (self *ApierV1) SetTPRatingPlan(attrs utils.TPRatingPlan, reply *string) er
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId", "RatingPlanBindings"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.SetTPRatingPlans(attrs.TPid, map[string][]*utils.TPRatingPlanBinding{attrs.RatingPlanId: attrs.RatingPlanBindings}); err != nil {
+	rp := engine.APItoModelRatingPlan(&attrs)
+	if err := self.StorDb.SetTpRatingPlans(rp); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -55,7 +57,11 @@ func (self *ApierV1) GetTPRatingPlan(attrs AttrGetTPRatingPlan, reply *utils.TPR
 	} else if len(rps) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = utils.TPRatingPlan{TPid: attrs.TPid, RatingPlanId: attrs.RatingPlanId, RatingPlanBindings: rps[attrs.RatingPlanId]}
+		rpsMap, err := engine.TpRatingPlans(rps).GetRatingPlans()
+		if err != nil {
+			return err
+		}
+		*reply = utils.TPRatingPlan{TPid: attrs.TPid, RatingPlanId: attrs.RatingPlanId, RatingPlanBindings: rpsMap[attrs.RatingPlanId]}
 	}
 	return nil
 }
@@ -70,7 +76,7 @@ func (self *ApierV1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]s
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATING_PLANS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_RATING_PLANS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -85,7 +91,7 @@ func (self *ApierV1) RemTPRatingPlan(attrs AttrGetTPRatingPlan, reply *string) e
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_RATING_PLANS, attrs.TPid, attrs.RatingPlanId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_RATING_PLANS, attrs.TPid, attrs.RatingPlanId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

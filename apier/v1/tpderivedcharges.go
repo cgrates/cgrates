@@ -40,9 +40,8 @@ func (self *ApierV1) SetTPDerivedChargers(attrs utils.TPDerivedChargers, reply *
 			return fmt.Errorf("%s:DerivedCharge:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
 		}
 	}*/
-	if err := self.StorDb.SetTPDerivedChargers(attrs.TPid, map[string][]*utils.TPDerivedCharger{
-		attrs.GetDerivedChargesId(): attrs.DerivedChargers,
-	}); err != nil {
+	dc := engine.APItoModelDerivedCharger(&attrs)
+	if err := self.StorDb.SetTpDerivedChargers(dc); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -63,12 +62,17 @@ func (self *ApierV1) GetTPDerivedChargers(attrs AttrGetTPDerivedChargers, reply 
 	if err := tmpDc.SetDerivedChargersId(attrs.DerivedChargersId); err != nil {
 		return err
 	}
-	if sgs, err := self.StorDb.GetTpDerivedChargers(tmpDc); err != nil {
+	dcs := engine.APItoModelDerivedCharger(tmpDc)
+	if sgs, err := self.StorDb.GetTpDerivedChargers(&dcs[0]); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(sgs) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = *sgs[attrs.DerivedChargersId]
+		dcsMap, err := engine.TpDerivedChargers(dcs).GetDerivedChargers()
+		if err != nil {
+			return err
+		}
+		*reply = *dcsMap[attrs.DerivedChargersId]
 	}
 	return nil
 }
@@ -83,7 +87,7 @@ func (self *ApierV1) GetTPDerivedChargerIds(attrs AttrGetTPDerivedChargeIds, rep
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_DERIVED_CHARGERS, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "account", "subject"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_DERIVED_CHARGERS, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "account", "subject"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -102,7 +106,7 @@ func (self *ApierV1) RemTPDerivedChargers(attrs AttrGetTPDerivedChargers, reply 
 	if err := tmpDc.SetDerivedChargersId(attrs.DerivedChargersId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_DERIVED_CHARGERS, attrs.TPid, tmpDc.Loadid, tmpDc.Direction, tmpDc.Tenant, tmpDc.Category, tmpDc.Account, tmpDc.Subject); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_DERIVED_CHARGERS, attrs.TPid, tmpDc.Loadid, tmpDc.Direction, tmpDc.Tenant, tmpDc.Category, tmpDc.Account, tmpDc.Subject); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

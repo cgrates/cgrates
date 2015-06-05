@@ -28,7 +28,7 @@ import (
 )
 
 type Scheduler struct {
-	queue       engine.ActionTimingPriotityList
+	queue       engine.ActionPlanPriotityList
 	timer       *time.Timer
 	restartLoop chan bool
 	sync.Mutex
@@ -73,18 +73,18 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
-	actionTimings, err := storage.GetAllActionTimings()
+func (s *Scheduler) LoadActionPlans(storage engine.AccountingStorage) {
+	actionTimings, err := storage.GetAllActionPlans()
 	if err != nil {
 		engine.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
 	}
 	// recreate the queue
 	s.Lock()
-	s.queue = engine.ActionTimingPriotityList{}
+	s.queue = engine.ActionPlanPriotityList{}
 	for key, ats := range actionTimings {
 		toBeSaved := false
 		isAsap := false
-		newAts := make([]*engine.ActionTiming, 0) // will remove the one time runs from the database
+		newAts := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
 		for _, at := range ats {
 			isAsap = at.IsASAP()
 			toBeSaved = toBeSaved || isAsap
@@ -108,7 +108,7 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 		}
 		if toBeSaved {
 			engine.AccLock.Guard(func() (interface{}, error) {
-				storage.SetActionTimings(key, newAts)
+				storage.SetActionPlans(key, newAts)
 				return 0, nil
 			}, engine.ACTION_TIMING_PREFIX)
 		}
@@ -124,6 +124,6 @@ func (s *Scheduler) Restart() {
 	}
 }
 
-func (s *Scheduler) GetQueue() engine.ActionTimingPriotityList {
+func (s *Scheduler) GetQueue() engine.ActionPlanPriotityList {
 	return s.queue
 }

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +37,8 @@ func (self *ApierV1) SetTPActionPlan(attrs utils.TPActionPlan, reply *string) er
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.ActionsId, missing)
 		}
 	}
-	if err := self.StorDb.SetTPActionTimings(attrs.TPid, map[string][]*utils.TPActionTiming{attrs.Id: attrs.ActionPlan}); err != nil {
+	ap := engine.APItoModelActionPlan(&attrs)
+	if err := self.StorDb.SetTpActionPlans(ap); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -45,7 +47,7 @@ func (self *ApierV1) SetTPActionPlan(attrs utils.TPActionPlan, reply *string) er
 
 type AttrGetTPActionPlan struct {
 	TPid string // Tariff plan id
-	Id   string // ActionTimings id
+	Id   string // ActionPlans id
 }
 
 // Queries specific ActionPlan profile on tariff plan
@@ -53,15 +55,19 @@ func (self *ApierV1) GetTPActionPlan(attrs AttrGetTPActionPlan, reply *utils.TPA
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Id"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ats, err := self.StorDb.GetTPActionTimings(attrs.TPid, attrs.Id); err != nil {
+	if ats, err := self.StorDb.GetTpActionPlans(attrs.TPid, attrs.Id); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(ats) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else { // Got the data we need, convert it
+		aps, err := engine.TpActionPlans(ats).GetActionPlans()
+		if err != nil {
+			return err
+		}
 		atRply := &utils.TPActionPlan{
 			TPid:       attrs.TPid,
 			Id:         attrs.Id,
-			ActionPlan: ats[attrs.Id],
+			ActionPlan: aps[attrs.Id],
 		}
 		*reply = *atRply
 	}
@@ -78,7 +84,7 @@ func (self *ApierV1) GetTPActionPlanIds(attrs AttrGetTPActionPlanIds, reply *[]s
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACTION_PLANS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ACTION_PLANS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -93,7 +99,7 @@ func (self *ApierV1) RemTPActionPlan(attrs AttrGetTPActionPlan, reply *string) e
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Id"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTION_PLANS, attrs.TPid, attrs.Id); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_ACTION_PLANS, attrs.TPid, attrs.Id); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

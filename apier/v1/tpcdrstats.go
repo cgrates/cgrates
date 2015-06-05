@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,8 @@ func (self *ApierV1) SetTPCdrStats(attrs utils.TPCdrStats, reply *string) error 
 			return fmt.Errorf("%s:CdrStat:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
 		}
 	}*/
-	if err := self.StorDb.SetTPCdrStats(attrs.TPid, map[string][]*utils.TPCdrStat{attrs.CdrStatsId: attrs.CdrStats}); err != nil {
+	cs := engine.APItoModelCdrStat(&attrs)
+	if err := self.StorDb.SetTpCdrStats(cs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -61,7 +63,11 @@ func (self *ApierV1) GetTPCdrStats(attrs AttrGetTPCdrStats, reply *utils.TPCdrSt
 	} else if len(sgs) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = utils.TPCdrStats{TPid: attrs.TPid, CdrStatsId: attrs.CdrStatsId, CdrStats: sgs[attrs.CdrStatsId]}
+		csMap, err := engine.TpCdrStats(sgs).GetCdrStats()
+		if err != nil {
+			return err
+		}
+		*reply = utils.TPCdrStats{TPid: attrs.TPid, CdrStatsId: attrs.CdrStatsId, CdrStats: csMap[attrs.CdrStatsId]}
 	}
 	return nil
 }
@@ -76,7 +82,7 @@ func (self *ApierV1) GetTPCdrStatsIds(attrs AttrGetTPCdrStatIds, reply *[]string
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_CDR_STATS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_CDR_STATS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -91,7 +97,7 @@ func (self *ApierV1) RemTPCdrStats(attrs AttrGetTPCdrStats, reply *string) error
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "CdrStatsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, attrs.CdrStatsId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, attrs.CdrStatsId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

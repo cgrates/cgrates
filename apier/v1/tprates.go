@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,7 +33,8 @@ func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId", "RateSlots"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*utils.RateSlot{attrs.RateId: attrs.RateSlots}); err != nil {
+	r := engine.APItoModelRate(&attrs)
+	if err := self.StorDb.SetTpRates(r); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -54,7 +56,11 @@ func (self *ApierV1) GetTPRate(attrs AttrGetTPRate, reply *utils.TPRate) error {
 	} else if len(rts) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = *rts[attrs.RateId]
+		rtsMap, err := engine.TpRates(rts).GetRates()
+		if err != nil {
+			return err
+		}
+		*reply = *rtsMap[attrs.RateId]
 	}
 	return nil
 }
@@ -69,7 +75,7 @@ func (self *ApierV1) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATES, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_RATES, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -84,7 +90,7 @@ func (self *ApierV1) RemTPRate(attrs AttrGetTPRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_RATES, attrs.TPid, attrs.RateId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_RATES, attrs.TPid, attrs.RateId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,7 +40,8 @@ func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
 		}
 	}
-	if err := self.StorDb.SetTPActions(attrs.TPid, map[string][]*utils.TPAction{attrs.ActionsId: attrs.Actions}); err != nil {
+	as := engine.APItoModelAction(&attrs)
+	if err := self.StorDb.SetTpActions(as); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -61,7 +63,11 @@ func (self *ApierV1) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions
 	} else if len(acts) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = utils.TPActions{TPid: attrs.TPid, ActionsId: attrs.ActionsId, Actions: acts[attrs.ActionsId]}
+		as, err := engine.TpActions(acts).GetActions()
+		if err != nil {
+
+		}
+		*reply = utils.TPActions{TPid: attrs.TPid, ActionsId: attrs.ActionsId, Actions: as[attrs.ActionsId]}
 	}
 	return nil
 }
@@ -76,7 +82,7 @@ func (self *ApierV1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) e
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACTIONS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ACTIONS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -91,7 +97,7 @@ func (self *ApierV1) RemTPActions(attrs AttrGetTPActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTIONS, attrs.TPid, attrs.ActionsId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_ACTIONS, attrs.TPid, attrs.ActionsId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

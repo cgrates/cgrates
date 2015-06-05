@@ -128,7 +128,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			return err
 		}
 	}
-	at := &engine.ActionTiming{
+	at := &engine.ActionPlan{
 		AccountIds: []string{tag},
 	}
 	if attr.Direction == "" {
@@ -167,7 +167,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 
 func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	at := &engine.ActionTiming{
+	at := &engine.ActionPlan{
 		AccountIds: []string{tag},
 		ActionsId:  attr.ActionsId,
 	}
@@ -214,7 +214,8 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
-	if err := dbReader.LoadDerivedChargersFiltered(&attrs, true); err != nil {
+	dc := engine.APItoModelDerivedCharger(&attrs)
+	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	//Automatic cache of the newly inserted rating plan
@@ -265,7 +266,8 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
-	if err := dbReader.LoadRatingProfilesFiltered(&attrs); err != nil {
+	rp := engine.APItoModelRatingProfile(&attrs)
+	if err := dbReader.LoadRatingProfilesFiltered(&rp[0]); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	//Automatic cache of the newly inserted rating profile
@@ -411,7 +413,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	aps, _ := dbReader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
 	if len(aps) != 0 && self.Sched != nil {
 		engine.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
-		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.LoadActionPlans(self.AccountDb)
 		self.Sched.Restart()
 	}
 	cstKeys, _ := dbReader.GetLoadedIds(engine.CDR_STATS_PREFIX)
@@ -598,13 +600,13 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 }
 
 type AttrSetActionPlan struct {
-	Id              string             // Profile id
-	ActionPlan      []*ApiActionTiming // Set of actions this Actions profile will perform
-	Overwrite       bool               // If previously defined, will be overwritten
-	ReloadScheduler bool               // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
+	Id              string           // Profile id
+	ActionPlan      []*ApiActionPlan // Set of actions this Actions profile will perform
+	Overwrite       bool             // If previously defined, will be overwritten
+	ReloadScheduler bool             // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
 }
 
-type ApiActionTiming struct {
+type ApiActionPlan struct {
 	ActionsId string  // Actions id
 	Years     string  // semicolon separated list of years this timing is valid on, *any or empty supported
 	Months    string  // semicolon separated list of months this timing is valid on, *any or empty supported
@@ -631,7 +633,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 			return errors.New(utils.ERR_EXISTS)
 		}
 	}
-	storeAtms := make(engine.ActionPlan, len(attrs.ActionPlan))
+	storeAtms := make(engine.ActionPlans, len(attrs.ActionPlan))
 	for idx, apiAtm := range attrs.ActionPlan {
 		if exists, err := self.AccountDb.HasData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -644,7 +646,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		timing.MonthDays.Parse(apiAtm.MonthDays, ";")
 		timing.WeekDays.Parse(apiAtm.WeekDays, ";")
 		timing.StartTime = apiAtm.Time
-		at := &engine.ActionTiming{
+		at := &engine.ActionPlan{
 			Uuid:      utils.GenUUID(),
 			Id:        attrs.Id,
 			Weight:    apiAtm.Weight,
@@ -653,14 +655,14 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		}
 		storeAtms[idx] = at
 	}
-	if err := self.AccountDb.SetActionTimings(attrs.Id, storeAtms); err != nil {
+	if err := self.AccountDb.SetActionPlans(attrs.Id, storeAtms); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	if attrs.ReloadScheduler {
 		if self.Sched == nil {
 			return errors.New("SCHEDULER_NOT_ENABLED")
 		}
-		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.LoadActionPlans(self.AccountDb)
 		self.Sched.Restart()
 	}
 	*reply = OK
@@ -807,7 +809,8 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
 	if _, err := engine.AccLock.Guard(func() (interface{}, error) {
-		if err := dbReader.LoadAccountActionsFiltered(&attrs); err != nil {
+		aas := engine.APItoModelAccountAction(&attrs)
+		if err := dbReader.LoadAccountActionsFiltered(aas); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -820,7 +823,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return err
 	}
 	if self.Sched != nil {
-		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.LoadActionPlans(self.AccountDb)
 		self.Sched.Restart()
 	}
 	*reply = OK
@@ -831,7 +834,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	if self.Sched == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	}
-	self.Sched.LoadActionTimings(self.AccountDb)
+	self.Sched.LoadActionPlans(self.AccountDb)
 	self.Sched.Restart()
 	*reply = OK
 	return nil
@@ -1059,7 +1062,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 	if len(aps) != 0 && self.Sched != nil {
 		engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
-		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.LoadActionPlans(self.AccountDb)
 		self.Sched.Restart()
 	}
 	cstKeys, _ := loader.GetLoadedIds(engine.CDR_STATS_PREFIX)

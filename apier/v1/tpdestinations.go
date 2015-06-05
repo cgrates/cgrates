@@ -31,7 +31,8 @@ func (self *ApierV1) SetTPDestination(attrs utils.TPDestination, reply *string) 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.SetTPDestination(attrs.TPid, &engine.Destination{Id: attrs.DestinationId, Prefixes: attrs.Prefixes}); err != nil {
+	ds := engine.APItoModelDestination(&attrs)
+	if err := self.StorDb.SetTpDestinations(ds); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -54,7 +55,10 @@ func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.T
 	} else if len(storData) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		dsts := engine.TpDestinations(storData).GetDestinations()
+		dsts, err := engine.TpDestinations(storData).GetDestinations()
+		if err != nil {
+			return err
+		}
 		*reply = utils.TPDestination{
 			TPid:          attrs.TPid,
 			DestinationId: dsts[attrs.DestinationId].Id,
@@ -73,7 +77,7 @@ func (self *ApierV1) GetTPDestinationIds(attrs AttrGetTPDestinationIds, reply *[
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_DESTINATIONS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_DESTINATIONS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -87,7 +91,7 @@ func (self *ApierV1) RemTPDestination(attrs AttrGetTPDestination, reply *string)
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_DESTINATIONS, attrs.TPid, attrs.DestinationId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_DESTINATIONS, attrs.TPid, attrs.DestinationId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

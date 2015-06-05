@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,10 +32,9 @@ func (self *ApierV1) SetTPActionTriggers(attrs utils.TPActionTriggers, reply *st
 		[]string{"TPid", "ActionTriggersId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	ats := map[string][]*utils.TPActionTrigger{
-		attrs.ActionTriggersId: attrs.ActionTriggers}
 
-	if err := self.StorDb.SetTPActionTriggers(attrs.TPid, ats); err != nil {
+	ats := engine.APItoModelActionTrigger(&attrs)
+	if err := self.StorDb.SetTpActionTriggers(ats); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -51,11 +51,15 @@ func (self *ApierV1) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *u
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTriggersId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if atsMap, err := self.StorDb.GetTpActionTriggers(attrs.TPid, attrs.ActionTriggersId); err != nil {
+	if ats, err := self.StorDb.GetTpActionTriggers(attrs.TPid, attrs.ActionTriggersId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if len(atsMap) == 0 {
+	} else if len(ats) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
+		atsMap, err := engine.TpActionTriggers(ats).GetActionTriggers()
+		if err != nil {
+			return err
+		}
 		atRply := &utils.TPActionTriggers{
 			TPid:             attrs.TPid,
 			ActionTriggersId: attrs.ActionTriggersId,
@@ -76,7 +80,7 @@ func (self *ApierV1) GetTPActionTriggerIds(attrs AttrGetTPActionTriggerIds, repl
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACTION_TRIGGERS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ACTION_TRIGGERS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -91,7 +95,7 @@ func (self *ApierV1) RemTPActionTriggers(attrs AttrGetTPActionTriggers, reply *s
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTriggersId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTION_TRIGGERS, attrs.TPid, attrs.ActionTriggersId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_ACTION_TRIGGERS, attrs.TPid, attrs.ActionTriggersId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

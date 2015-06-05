@@ -154,6 +154,23 @@ func (tps TpTimings) GetTimings() (map[string]*utils.TPTiming, error) {
 	return timings, nil
 }
 
+func (tps TpTimings) GetApierTimings() (map[string]*utils.ApierTPTiming, error) {
+	timings := make(map[string]*utils.ApierTPTiming)
+	for _, tp := range tps {
+		rt := &utils.ApierTPTiming{
+			TPid:      tp.Tpid,
+			TimingId:  tp.Tag,
+			Years:     tp.Years,
+			Months:    tp.Months,
+			MonthDays: tp.MonthDays,
+			WeekDays:  tp.WeekDays,
+			Time:      tp.Time,
+		}
+		timings[tp.Tag] = rt
+	}
+	return timings, nil
+}
+
 type TpRates []TpRate
 
 func (tps TpRates) GetRates() (map[string]*utils.TPRate, error) {

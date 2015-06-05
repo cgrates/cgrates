@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,7 +33,8 @@ func (self *ApierV1) SetTPDestinationRate(attrs utils.TPDestinationRate, reply *
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationRateId", "DestinationRates"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.SetTPDestinationRates(attrs.TPid, map[string][]*utils.DestinationRate{attrs.DestinationRateId: attrs.DestinationRates}); err != nil {
+	drs := engine.APItoModelDestinationRate(&attrs)
+	if err := self.StorDb.SetTpDestinationRates(drs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -55,7 +57,11 @@ func (self *ApierV1) GetTPDestinationRate(attrs AttrGetTPDestinationRate, reply 
 	} else if len(drs) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = *drs[attrs.DestinationRateId]
+		drsMap, err := engine.TpDestinationRates(drs).GetDestinationRates()
+		if err != nil {
+			return err
+		}
+		*reply = *drsMap[attrs.DestinationRateId]
 	}
 	return nil
 }
@@ -70,7 +76,7 @@ func (self *ApierV1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]st
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_DESTINATION_RATES, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_DESTINATION_RATES, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -85,7 +91,7 @@ func (self *ApierV1) RemTPDestinationRate(attrs AttrGetTPDestinationRate, reply 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationRateId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_DESTINATION_RATES, attrs.TPid, attrs.DestinationRateId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_DESTINATION_RATES, attrs.TPid, attrs.DestinationRateId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

@@ -46,7 +46,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	accountATs := make([]*AccountActionTiming, 0)
-	allATs, err := self.AccountDb.GetAllActionTimings()
+	allATs, err := self.AccountDb.GetAllActionPlans()
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -81,14 +81,14 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		}
 	}
 	_, err := engine.AccLock.Guard(func() (interface{}, error) {
-		ats, err := self.AccountDb.GetActionTimings(attrs.ActionPlanId)
+		ats, err := self.AccountDb.GetActionPlans(attrs.ActionPlanId)
 		if err != nil {
 			return 0, err
 		} else if len(ats) == 0 {
 			return 0, errors.New(utils.ERR_NOT_FOUND)
 		}
-		ats = engine.RemActionTiming(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction))
-		if err := self.AccountDb.SetActionTimings(attrs.ActionPlanId, ats); err != nil {
+		ats = engine.RemActionPlan(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction))
+		if err := self.AccountDb.SetActionPlans(attrs.ActionPlanId, ats); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -97,7 +97,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	if attrs.ReloadScheduler && self.Sched != nil {
-		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.LoadActionPlans(self.AccountDb)
 		self.Sched.Restart()
 	}
 	*reply = OK
@@ -165,7 +165,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	}
 	balanceId := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
 	var ub *engine.Account
-	var ats engine.ActionPlan
+	var ats engine.ActionPlans
 	_, err := engine.AccLock.Guard(func() (interface{}, error) {
 		if bal, _ := self.AccountDb.GetAccount(balanceId); bal != nil {
 			ub = bal
@@ -178,7 +178,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 
 		if len(attr.ActionPlanId) != 0 {
 			var err error
-			ats, err = self.AccountDb.GetActionTimings(attr.ActionPlanId)
+			ats, err = self.AccountDb.GetActionPlans(attr.ActionPlanId)
 			if err != nil {
 				return 0, err
 			}
@@ -197,7 +197,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	}
 	if len(ats) != 0 {
 		_, err := engine.AccLock.Guard(func() (interface{}, error) { // ToDo: Try locking it above on read somehow
-			if err := self.AccountDb.SetActionTimings(attr.ActionPlanId, ats); err != nil {
+			if err := self.AccountDb.SetActionPlans(attr.ActionPlanId, ats); err != nil {
 				return 0, err
 			}
 			return 0, nil
@@ -206,7 +206,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		}
 		if self.Sched != nil {
-			self.Sched.LoadActionTimings(self.AccountDb)
+			self.Sched.LoadActionPlans(self.AccountDb)
 			self.Sched.Restart()
 		}
 	}
