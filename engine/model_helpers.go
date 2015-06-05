@@ -209,6 +209,7 @@ func (tps TpRates) GetRates() (map[string]*utils.TPRate, error) {
 			return nil, err
 		}
 		r := &utils.TPRate{
+			TPid:      tp.Tpid,
 			RateId:    tp.Tag,
 			RateSlots: []*utils.RateSlot{rs},
 		}

@@ -59,8 +59,8 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	accountActions := `cgrates.org,12346,*out,TOPUP10_AT,`
 	derivedCharges := ``
 	cdrStats := ``
-	csvr := engine.NewStringCSVReader(ratingDb3, acntDb3, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats)
+	csvr := engine.NewTpReader(ratingDb3, acntDb3, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats), "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	if err := csvr.LoadActions(); err != nil {
 		t.Fatal(err)
 	}
-	if err := csvr.LoadActionTimings(); err != nil {
+	if err := csvr.LoadActionPlans(); err != nil {
 		t.Fatal(err)
 	}
 	if err := csvr.LoadActionTriggers(); err != nil {
@@ -123,7 +123,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 }
 
 func TestExecuteActions3(t *testing.T) {
-	scheduler.NewScheduler().LoadActionTimings(acntDb3)
+	scheduler.NewScheduler().LoadActionPlans(acntDb3)
 	time.Sleep(time.Millisecond) // Give time to scheduler to topup the account
 	if acnt, err := acntDb3.GetAccount("*out:cgrates.org:12346"); err != nil {
 		t.Error(err)

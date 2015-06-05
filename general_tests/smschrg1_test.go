@@ -40,8 +40,8 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 	destinationRates := `DR_SMS_1,*any,RT_SMS_5c,*up,4,0,`
 	ratingPlans := `RP_SMS1,DR_SMS_1,ALWAYS,10`
 	ratingProfiles := `*out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,,`
-	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "")
+	csvr := engine.NewTpReader(ratingDb, acntDb, engine.NewStringCSVStorage(',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
+		"", "", "", "", "", "", "", ""), "")
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
 	}

@@ -298,7 +298,7 @@ func TestApierTPRate(t *testing.T) {
 	if err := rater.Call("ApierV1.GetTPRate", AttrGetTPRate{rt2.TPid, rt2.RateId}, &rplyRt2); err != nil {
 		t.Error("Calling ApierV1.GetTPRate, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rt2, rplyRt2) {
-		t.Errorf("Calling ApierV1.GetTPRate expected: %v, received: %v", rt2, rplyRt2)
+		t.Errorf("Calling ApierV1.GetTPRate expected: %+v, received: %+v", rt2, rplyRt2)
 	}
 	// Test remove
 	if err := rater.Call("ApierV1.RemTPRate", AttrGetTPRate{rt2.TPid, rt2.RateId}, &reply); err != nil {

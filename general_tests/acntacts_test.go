@@ -52,8 +52,8 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,10`
 	accountActions := `cgrates.org,1,*out,TOPUP10_AT,`
 	derivedCharges := ``
 	cdrStats := ``
-	csvr := engine.NewStringCSVReader(ratingDbAcntActs, acntDbAcntActs, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats)
+	csvr := engine.NewTpReader(ratingDbAcntActs, acntDbAcntActs, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats), "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,10`
 
 func TestAcntActsDisableAcnt(t *testing.T) {
 	acnt1Tag := "*out:cgrates.org:1"
-	at := &engine.ActionTiming{
+	at := &engine.ActionPlan{
 		AccountIds: []string{acnt1Tag},
 		ActionsId:  "DISABLE_ACNT",
 	}
@@ -89,7 +89,7 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 
 func TestAcntActsEnableAcnt(t *testing.T) {
 	acnt1Tag := "*out:cgrates.org:1"
-	at := &engine.ActionTiming{
+	at := &engine.ActionPlan{
 		AccountIds: []string{acnt1Tag},
 		ActionsId:  "ENABLE_ACNT",
 	}

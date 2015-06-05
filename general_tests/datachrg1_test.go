@@ -44,8 +44,8 @@ DR_DATA_2,*any,RT_DATA_1c,*up,4,0,`
 	ratingPlans := `RP_DATA1,DR_DATA_1,TM1,10
 RP_DATA1,DR_DATA_2,TM2,10`
 	ratingProfiles := `*out,cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,,`
-	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "")
+	csvr := engine.NewTpReader(ratingDb, acntDb, engine.NewStringCSVStorage(',', "", timings, rates, destinationRates, ratingPlans, ratingProfiles,
+		"", "", "", "", "", "", "", ""), "")
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
 	}
