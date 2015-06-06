@@ -32,55 +32,55 @@ import (
 type TpTiming struct {
 	Id        int64
 	Tpid      string
-	Tag       string `index:"0" re:""`
-	Years     string `index:"1" re:""`
-	Months    string `index:"2" re:""`
-	MonthDays string `index:"3" re:""`
-	WeekDays  string `index:"4" re:""`
-	Time      string `index:"5" re:""`
+	Tag       string `index:"0" re:"\w+\s*,\s*"`
+	Years     string `index:"1" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
+	Months    string `index:"2" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
+	MonthDays string `index:"3" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
+	WeekDays  string `index:"4" re:"\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*"`
+	Time      string `index:"5" re:"\d{2}:\d{2}:\d{2}|\*asap"`
 	CreatedAt time.Time
 }
 
 type TpDestination struct {
 	Id        int64
 	Tpid      string
-	Tag       string `index:"0" re:"(?:\w+\s*,\s*){1}"`
-	Prefix    string `index:"1" re:"(?:\+?\d+.?\d*){1}"`
+	Tag       string `index:"0" re:"\w+\s*,\s*"`
+	Prefix    string `index:"1" re:"\+?\d+.?\d*"`
 	CreatedAt time.Time
 }
 
 type TpRate struct {
 	Id                 int64
 	Tpid               string
-	Tag                string  `index:"0" re:""`
-	ConnectFee         float64 `index:"1" re:""`
-	Rate               float64 `index:"2" re:""`
-	RateUnit           string  `index:"3" re:""`
-	RateIncrement      string  `index:"4" re:""`
-	GroupIntervalStart string  `index:"5" re:""`
+	Tag                string  `index:"0" re:"\w+\s*"`
+	ConnectFee         float64 `index:"1" re:"\d+\.*\d*s*"`
+	Rate               float64 `index:"2" re:"\d+\.*\d*s*"`
+	RateUnit           string  `index:"3" re:"\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*"`
+	RateIncrement      string  `index:"4" re:"\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*"`
+	GroupIntervalStart string  `index:"5" re:"\d+\.*\d*(ns|us|µs|ms|s|m|h)*\s*"`
 	CreatedAt          time.Time
 }
 
 type TpDestinationRate struct {
 	Id               int64
 	Tpid             string
-	Tag              string  `index:"0" re:""`
-	DestinationsTag  string  `index:"1" re:""`
-	RatesTag         string  `index:"2" re:""`
-	RoundingMethod   string  `index:"3" re:""`
-	RoundingDecimals int     `index:"4" re:""`
-	MaxCost          float64 `index:"5" re:""`
-	MaxCostStrategy  string  `index:"6" re:""`
+	Tag              string  `index:"0" re:"\w+\s*"`
+	DestinationsTag  string  `index:"1" re:"\w+\s*|\*any"`
+	RatesTag         string  `index:"2" re:"\w+\s*"`
+	RoundingMethod   string  `index:"3" re:"\*up|\*down|\*middle"`
+	RoundingDecimals int     `index:"4" re:"\d+"`
+	MaxCost          float64 `index:"5" re:"\d+\.*\d*s*"`
+	MaxCostStrategy  string  `index:"6" re:"\*free|\*disconnect"`
 	CreatedAt        time.Time
 }
 
 type TpRatingPlan struct {
 	Id           int64
 	Tpid         string
-	Tag          string  `index:"0" re:""`
-	DestratesTag string  `index:"1" re:""`
-	TimingTag    string  `index:"2" re:""`
-	Weight       float64 `index:"3" re:""`
+	Tag          string  `index:"0" re:"\w+\s*,\s*"`
+	DestratesTag string  `index:"1" re:"\w+\s*,\s*"`
+	TimingTag    string  `index:"2" re:"\w+\s*,\s*"`
+	Weight       float64 `index:"3" re:"\d+.?\d*"`
 	CreatedAt    time.Time
 }
 
@@ -88,14 +88,14 @@ type TpRatingProfile struct {
 	Id               int64
 	Tpid             string
 	Loadid           string
-	Direction        string `index:"0" re:""`
-	Tenant           string `index:"1" re:""`
-	Category         string `index:"2" re:""`
-	Subject          string `index:"3" re:""`
-	ActivationTime   string `index:"4" re:""`
-	RatingPlanTag    string `index:"5" re:""`
-	FallbackSubjects string `index:"6" re:""`
-	CdrStatQueueIds  string `index:"7" re:""`
+	Direction        string `index:"0" re:"\*out\s*"`
+	Tenant           string `index:"1" re:"[0-9A-Za-z_\.]+\s*"`
+	Category         string `index:"2" re:"\w+\s*"`
+	Subject          string `index:"3" re:"\*any\s*|(\w+;?)+\s*"`
+	ActivationTime   string `index:"4" re:"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"`
+	RatingPlanTag    string `index:"5" re:"\w+\s*"`
+	FallbackSubjects string `index:"6" re:"\w+\s*"`
+	CdrStatQueueIds  string `index:"7" re:"\w+\s*"`
 	CreatedAt        time.Time
 }
 
@@ -153,56 +153,56 @@ func (lcr *TpLcrRule) GetLcrRuleId() string {
 type TpAction struct {
 	Id              int64
 	Tpid            string
-	Tag             string  `index:"0" re:""`
-	Action          string  `index:"1" re:""`
-	ExtraParameters string  `index:"2" re:""`
-	BalanceTag      string  `index:"3" re:""`
-	BalanceType     string  `index:"4" re:""`
-	Direction       string  `index:"5" re:""`
-	Category        string  `index:"6" re:""`
-	DestinationTags string  `index:"7" re:""`
-	RatingSubject   string  `index:"8" re:""`
-	SharedGroup     string  `index:"9" re:""`
-	ExpiryTime      string  `index:"10" re:""`
-	TimingTags      string  `index:"11" re:""`
-	Units           float64 `index:"12" re:""`
-	BalanceWeight   float64 `index:"13" re:""`
-	Weight          float64 `index:"14" re:""`
+	Tag             string  `index:"0" re:"\w+\s*"`
+	Action          string  `index:"1" re:"\*\w+\s*"`
+	ExtraParameters string  `index:"2" re:"\S+\s*"`
+	BalanceTag      string  `index:"3" re:"\w+\s*"`
+	BalanceType     string  `index:"4" re:"\*\w+\s*"`
+	Direction       string  `index:"5" re:"\*out\s*"`
+	Category        string  `index:"6" re:"\*?\w+\s*"`
+	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
+	RatingSubject   string  `index:"8" re:"\w+\s*"`
+	SharedGroup     string  `index:"9" re:"[0-9A-Za-z_;]*"`
+	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
+	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*"`
+	Units           float64 `index:"12" re:"\d+\s*"`
+	BalanceWeight   float64 `index:"13" re:"\d+\.?\d*\s*"`
+	Weight          float64 `index:"14" re:"\d+\.?\d*\s*"`
 	CreatedAt       time.Time
 }
 
 type TpActionPlan struct {
 	Id         int64
 	Tpid       string
-	Tag        string  `index:"0" re:""`
-	ActionsTag string  `index:"1" re:""`
-	TimingTag  string  `index:"2" re:""`
-	Weight     float64 `index:"3" re:""`
+	Tag        string  `index:"0" re:"\w+\s*,\s*"`
+	ActionsTag string  `index:"1" re:"\w+\s*,\s*"`
+	TimingTag  string  `index:"2" re:"\w+\s*,\s*"`
+	Weight     float64 `index:"3" re:"\d+\.?\d*"`
 	CreatedAt  time.Time
 }
 
 type TpActionTrigger struct {
 	Id                     int64
 	Tpid                   string
-	Tag                    string  `index:"0" re:""`
-	UniqueId               string  `index:"1" re:""`
-	ThresholdType          string  `index:"2" re:""`
-	ThresholdValue         float64 `index:"3" re:""`
-	Recurrent              bool    `index:"4" re:""`
-	MinSleep               string  `index:"5" re:""`
-	BalanceTag             string  `index:"6" re:""`
-	BalanceType            string  `index:"7" re:""`
-	BalanceDirection       string  `index:"8" re:""`
-	BalanceCategory        string  `index:"9" re:""`
-	BalanceDestinationTags string  `index:"10" re:""`
-	BalanceRatingSubject   string  `index:"11" re:""`
-	BalanceSharedGroup     string  `index:"12" re:""`
-	BalanceExpiryTime      string  `index:"13" re:""`
-	BalanceTimingTags      string  `index:"14" re:""`
-	BalanceWeight          float64 `index:"15" re:""`
-	MinQueuedItems         int     `index:"16" re:""`
-	ActionsTag             string  `index:"17" re:""`
-	Weight                 float64 `index:"18" re:""`
+	Tag                    string  `index:"0" re:"\w+"`
+	UniqueId               string  `index:"1" re:"\w+"`
+	ThresholdType          string  `index:"2" re:"\*\w+"`
+	ThresholdValue         float64 `index:"3" re:"\d+\.?\d*"`
+	Recurrent              bool    `index:"4" re:"true|false"`
+	MinSleep               string  `index:"5" re:"\d+[smh]?"`
+	BalanceTag             string  `index:"6" re:"\w+\s*"`
+	BalanceType            string  `index:"7" re:"\*\w+"`
+	BalanceDirection       string  `index:"8" re:"\*out"`
+	BalanceCategory        string  `index:"9" re:"\w+|\*any"`
+	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
+	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
+	BalanceSharedGroup     string  `index:"12" re:"\w+|\*any"`
+	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
+	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*"`
+	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
+	MinQueuedItems         int     `index:"16" re:"\d+"`
+	ActionsTag             string  `index:"17" re:"\w+"`
+	Weight                 float64 `index:"18" re:"\d+\.?\d*"`
 	CreatedAt              time.Time
 }
 
@@ -210,11 +210,11 @@ type TpAccountAction struct {
 	Id                int64
 	Tpid              string
 	Loadid            string
-	Tenant            string `index:"0" re:""`
-	Account           string `index:"1" re:""`
-	Direction         string `index:"2" re:""`
-	ActionPlanTag     string `index:"3" re:""`
-	ActionTriggersTag string `index:"4" re:""`
+	Tenant            string `index:"0" re:"\w+\s*"`
+	Account           string `index:"1" re:"(\w+;?)+\s*"`
+	Direction         string `index:"2" re:"\*out\s*"`
+	ActionPlanTag     string `index:"3" re:"\w+\s*"`
+	ActionTriggersTag string `index:"4" re:"\w+\s*"`
 	CreatedAt         time.Time
 }
 
@@ -237,10 +237,10 @@ func (aa *TpAccountAction) GetAccountActionId() string {
 type TpSharedGroup struct {
 	Id            int64
 	Tpid          string
-	Tag           string `index:"0" re:""`
-	Account       string `index:"1" re:""`
-	Strategy      string `index:"2" re:""`
-	RatingSubject string `index:"3" re:""`
+	Tag           string `index:"0" re:"\w+\s*"`
+	Account       string `index:"1" re:"\*?\w+\s*"`
+	Strategy      string `index:"2" re:"\*\w+\s*"`
+	RatingSubject string `index:"3" re:"\*?\w]+\s*"`
 	CreatedAt     time.Time
 }
 
@@ -248,25 +248,25 @@ type TpDerivedCharger struct {
 	Id                   int64
 	Tpid                 string
 	Loadid               string
-	Direction            string `index:"0" re:""`
-	Tenant               string `index:"1" re:""`
-	Category             string `index:"2" re:""`
-	Account              string `index:"3" re:""`
-	Subject              string `index:"4" re:""`
-	Runid                string `index:"5" re:""`
-	RunFilters           string `index:"6" re:""`
-	ReqTypeField         string `index:"7" re:""`
-	DirectionField       string `index:"8" re:""`
-	TenantField          string `index:"9" re:""`
-	CategoryField        string `index:"10" re:""`
-	AccountField         string `index:"11" re:""`
-	SubjectField         string `index:"12" re:""`
-	DestinationField     string `index:"13" re:""`
-	SetupTimeField       string `index:"14" re:""`
-	AnswerTimeField      string `index:"15" re:""`
-	UsageField           string `index:"16" re:""`
-	SupplierField        string `index:"17" re:""`
-	DisconnectCauseField string `index:"18" re:""`
+	Direction            string `index:"0" re:"\*out"`
+	Tenant               string `index:"1" re:"[0-9A-Za-z_\.]+\s*"`
+	Category             string `index:"2" re:"\w+\s*"`
+	Account              string `index:"3" re:"\w+\s*"`
+	Subject              string `index:"4" re:"\*any\s*|\w+\s*"`
+	Runid                string `index:"5" re:"\w+\s*"`
+	RunFilters           string `index:"6" re:"[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	ReqTypeField         string `index:"7" re:"\*default\s*|[~^*]*[0-9A-Za-z_/:().+]+\s*"`
+	DirectionField       string `index:"8" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	TenantField          string `index:"9" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	CategoryField        string `index:"10" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	AccountField         string `index:"11" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SubjectField         string `index:"12" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DestinationField     string `index:"13" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SetupTimeField       string `index:"14" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	AnswerTimeField      string `index:"15" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	UsageField           string `index:"16" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SupplierField        string `index:"17" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DisconnectCauseField string `index:"18" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	CreatedAt            time.Time
 }
 
