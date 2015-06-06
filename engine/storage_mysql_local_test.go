@@ -477,23 +477,23 @@ func TestMySQLSetCdr(t *testing.T) {
 	}
 	cgrCdr1 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa1", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:20Z",
-		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "10s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", utils.CDRSOURCE: TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "10s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", utils.CDRSOURCE: TEST_SQL}
 
 	cgrCdr2 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa2", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_PREPAID, utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:22Z",
-		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "20", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "20", utils.PDD: "7s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
 
 	cgrCdr3 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa3", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
 		utils.CATEGORY: "premium_call", utils.ACCOUNT: "1002", utils.SUBJECT: "1002", utils.DESTINATION: "1001", utils.SETUP_TIME: "2013-11-07T08:42:24Z",
-		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "60s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "60s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
 
 	cgrCdr4 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa4", utils.CDRHOST: "192.168.1.2", utils.REQTYPE: utils.META_PSEUDOPREPAID, utils.DIRECTION: "*out", utils.TENANT: "itsyscom.com",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "+4986517174964", utils.SETUP_TIME: "2013-11-07T08:42:21Z",
-		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "1m2s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "1m2s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
 
 	cgrCdr5 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa5", utils.CDRHOST: "192.168.1.2", utils.REQTYPE: utils.META_POSTPAID, utils.DIRECTION: "*out", utils.TENANT: "itsyscom.com",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1002", utils.SUBJECT: "1002", utils.DESTINATION: "+4986517174963", utils.SETUP_TIME: "2013-11-07T08:42:25Z",
-		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "15s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "15s", utils.PDD: "7s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
 
 	for _, cdr := range []*CgrCdr{cgrCdr1, cgrCdr2, cgrCdr3, cgrCdr4, cgrCdr5} {
 		if err := mysqlDb.SetCdr(cdr.AsStoredCdr()); err != nil {
@@ -503,21 +503,21 @@ func TestMySQLSetCdr(t *testing.T) {
 	strCdr1 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
 	strCdr1.CgrId = utils.Sha1(strCdr1.AccId, strCdr1.SetupTime.String())
 	strCdr2 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN2", ReqType: utils.META_PREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(12) * time.Second, Supplier: "SUPPL1",
+		Usage: time.Duration(12) * time.Second, Pdd: time.Duration(4) * time.Second, Supplier: "SUPPL1",
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
 	strCdr2.CgrId = utils.Sha1(strCdr2.AccId, strCdr2.SetupTime.String())
 	strCdr3 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1000", Destination: "+4986517174963",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
 	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
@@ -536,21 +536,21 @@ func TestMySQLSetRatedCdr(t *testing.T) {
 	strCdr1 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
 	strCdr1.CgrId = utils.Sha1(strCdr1.AccId, strCdr1.SetupTime.String())
 	strCdr2 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN", ReqType: utils.META_PREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(12) * time.Second, Supplier: "SUPPL1",
+		Usage: time.Duration(12) * time.Second, Pdd: time.Duration(7) * time.Second, Supplier: "SUPPL1",
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
 	strCdr2.CgrId = utils.Sha1(strCdr2.AccId, strCdr2.SetupTime.String())
 	strCdr3 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1002", Destination: "+4986517174964",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: "wholesale_run", Cost: 1.201}
 	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
@@ -805,7 +805,7 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 	}
 	// Filter on ignoreRated
 	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CostEnd: utils.Float64Pointer(0.0)}); err != nil {
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -845,6 +845,24 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on minPdd
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3)}); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on maxPdd
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MaxPdd: utils.Float64Pointer(3)}); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 5 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on minPdd, maxPdd
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3), MaxPdd: utils.Float64Pointer(5)}); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Combined filter
 	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
@@ -852,7 +870,7 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreDerived
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnDerived: true}); err != nil {
+	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnRated: true}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 { // ToDo: Recheck this value
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -892,5 +910,82 @@ func TestMySQLRemStoredCdrs(t *testing.T) {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+}
+
+// Make sure that what we get is what we set
+func TestMySQLStoreRestoreCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	strCdr := &StoredCdr{TOR: utils.VOICE, AccId: "ccc1", CdrHost: "192.168.1.1", CdrSource: "TEST_CDR", ReqType: utils.META_RATED,
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
+		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr.CgrId = utils.Sha1(strCdr.AccId, strCdr.SetupTime.String())
+	if err := mysqlDb.SetCdr(strCdr); err != nil {
+		t.Error(err.Error())
+	}
+	if err := mysqlDb.SetRatedCdr(strCdr); err != nil {
+		t.Error(err.Error())
+	}
+	// Check RawCdr
+	if rcvCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}}); err != nil {
+		t.Error(err.Error())
+	} else if len(rcvCdrs) != 1 {
+		t.Errorf("Unexpected cdrs returned: %+v", rcvCdrs)
+	} else {
+		rcvCdr := rcvCdrs[0]
+		if strCdr.CgrId != rcvCdr.CgrId ||
+			strCdr.TOR != rcvCdr.TOR ||
+			strCdr.AccId != rcvCdr.AccId ||
+			strCdr.CdrHost != rcvCdr.CdrHost ||
+			strCdr.ReqType != rcvCdr.ReqType ||
+			strCdr.Direction != rcvCdr.Direction ||
+			strCdr.Tenant != rcvCdr.Tenant ||
+			strCdr.Category != rcvCdr.Category ||
+			strCdr.Account != rcvCdr.Account ||
+			strCdr.Subject != rcvCdr.Subject ||
+			strCdr.Destination != rcvCdr.Destination ||
+			!strCdr.SetupTime.Equal(rcvCdr.SetupTime) ||
+			!strCdr.AnswerTime.Equal(rcvCdr.AnswerTime) ||
+			strCdr.Usage != rcvCdr.Usage ||
+			strCdr.Pdd != rcvCdr.Pdd ||
+			strCdr.Supplier != rcvCdr.Supplier ||
+			strCdr.DisconnectCause != rcvCdr.DisconnectCause ||
+			!reflect.DeepEqual(strCdr.ExtraFields, rcvCdr.ExtraFields) {
+			t.Errorf("Expecting: %+v, received: %+v", strCdr, rcvCdrs[0])
+		}
+	}
+	// Check RatedCdr
+	if rcvCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}, FilterOnRated: true}); err != nil {
+		t.Error(err.Error())
+	} else if len(rcvCdrs) != 1 {
+		t.Errorf("Unexpected cdrs returned: %+v", rcvCdrs)
+	} else {
+		rcvCdr := rcvCdrs[0]
+		if strCdr.CgrId != rcvCdr.CgrId ||
+			strCdr.TOR != rcvCdr.TOR ||
+			strCdr.AccId != rcvCdr.AccId ||
+			strCdr.CdrHost != rcvCdr.CdrHost ||
+			strCdr.ReqType != rcvCdr.ReqType ||
+			strCdr.Direction != rcvCdr.Direction ||
+			strCdr.Tenant != rcvCdr.Tenant ||
+			strCdr.Category != rcvCdr.Category ||
+			strCdr.Account != rcvCdr.Account ||
+			strCdr.Subject != rcvCdr.Subject ||
+			strCdr.Destination != rcvCdr.Destination ||
+			//!strCdr.SetupTime.Equal(rcvCdr.SetupTime) || // FixMe
+			//!strCdr.AnswerTime.Equal(rcvCdr.AnswerTime) || // FixMe
+			strCdr.Usage != rcvCdr.Usage ||
+			strCdr.Pdd != rcvCdr.Pdd ||
+			strCdr.Supplier != rcvCdr.Supplier ||
+			strCdr.DisconnectCause != rcvCdr.DisconnectCause ||
+			strCdr.Cost != rcvCdr.Cost ||
+			!reflect.DeepEqual(strCdr.ExtraFields, rcvCdr.ExtraFields) {
+			t.Errorf("Expecting: %+v, received: %+v", strCdr, rcvCdrs[0])
+		}
 	}
 }

@@ -618,6 +618,7 @@ func (self *SQLStorage) SetCdr(cdr *StoredCdr) error {
 		SetupTime:       cdr.SetupTime,
 		AnswerTime:      cdr.AnswerTime,
 		Usage:           cdr.Usage.Seconds(),
+		Pdd:             cdr.Pdd.Seconds(),
 		Supplier:        cdr.Supplier,
 		DisconnectCause: cdr.DisconnectCause,
 		CreatedAt:       time.Now()})
@@ -642,16 +643,16 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	var cdrs []*StoredCdr
 	// Select string
 	var selectStr string
-	if qryFltr.FilterOnDerived { // We use different tables to query account data in case of derived
-		selectStr = fmt.Sprintf("%s.cgrid,%s.id,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.usage,%s.supplier,%s.disconnect_cause,%s.extra_fields,%s.runid,%s.cost,%s.tor,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.cost,%s.timespans",
-			utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS,
+	if qryFltr.FilterOnRated { // We use different tables to query account data in case of derived
+		selectStr = fmt.Sprintf("%s.cgrid,%s.id,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.usage,%s.pdd,%s.supplier,%s.disconnect_cause,%s.extra_fields,%s.runid,%s.cost,%s.tor,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.cost,%s.timespans",
+			utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS,
 			utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS,
 			utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS,
 			utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS)
 	} else {
-		selectStr = fmt.Sprintf("%s.cgrid,%s.id,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.usage,%s.supplier,%s.disconnect_cause,%s.extra_fields,%s.runid,%s.cost,%s.tor,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.cost,%s.timespans",
-			utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY,
+		selectStr = fmt.Sprintf("%s.cgrid,%s.id,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.usage,%s.pdd,%s.supplier,%s.disconnect_cause,%s.extra_fields,%s.runid,%s.cost,%s.tor,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.cost,%s.timespans",
 			utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY,
 			utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS,
 			utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS)
 
@@ -697,91 +698,91 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	}
 	if len(qryFltr.ReqTypes) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".reqtype in (?)", qryFltr.ReqTypes)
 	}
 	if len(qryFltr.NotReqTypes) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".reqtype not in (?)", qryFltr.NotReqTypes)
 	}
 	if len(qryFltr.Directions) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".direction in (?)", qryFltr.Directions)
 	}
 	if len(qryFltr.NotDirections) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".direction not in (?)", qryFltr.NotDirections)
 	}
 	if len(qryFltr.Tenants) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".tenant in (?)", qryFltr.Tenants)
 	}
 	if len(qryFltr.NotTenants) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".tenant not in (?)", qryFltr.NotTenants)
 	}
 	if len(qryFltr.Categories) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".category in (?)", qryFltr.Categories)
 	}
 	if len(qryFltr.NotCategories) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".category not in (?)", qryFltr.NotCategories)
 	}
 	if len(qryFltr.Accounts) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".account in (?)", qryFltr.Accounts)
 	}
 	if len(qryFltr.NotAccounts) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".account not in (?)", qryFltr.NotAccounts)
 	}
 	if len(qryFltr.Subjects) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".subject in (?)", qryFltr.Subjects)
 	}
 	if len(qryFltr.NotSubjects) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".subject not in (?)", qryFltr.NotSubjects)
 	}
 	if len(qryFltr.DestPrefixes) != 0 { // A bit ugly but still more readable than scopes provided by gorm
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		qIds := bytes.NewBufferString("(")
@@ -796,7 +797,7 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	}
 	if len(qryFltr.NotDestPrefixes) != 0 { // A bit ugly but still more readable than scopes provided by gorm
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		qIds := bytes.NewBufferString("(")
@@ -811,28 +812,28 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	}
 	if len(qryFltr.Suppliers) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".supplier in (?)", qryFltr.Subjects)
 	}
 	if len(qryFltr.NotSuppliers) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".supplier not in (?)", qryFltr.NotSubjects)
 	}
 	if len(qryFltr.DisconnectCauses) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".disconnect_cause in (?)", qryFltr.DisconnectCauses)
 	}
 	if len(qryFltr.NotDisconnectCauses) != 0 {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".disconnect_cause not in (?)", qryFltr.NotDisconnectCauses)
@@ -889,89 +890,103 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	}
 	if qryFltr.SetupTimeStart != nil {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".setup_time >= ?", qryFltr.SetupTimeStart)
 	}
 	if qryFltr.SetupTimeEnd != nil {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".setup_time < ?", qryFltr.SetupTimeEnd)
 	}
 	if qryFltr.AnswerTimeStart != nil && !qryFltr.AnswerTimeStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".answer_time >= ?", qryFltr.AnswerTimeStart)
 	}
 	if qryFltr.AnswerTimeEnd != nil && !qryFltr.AnswerTimeEnd.IsZero() {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".answer_time < ?", qryFltr.AnswerTimeEnd)
 	}
 	if qryFltr.CreatedAtStart != nil && !qryFltr.CreatedAtStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".created_at >= ?", qryFltr.CreatedAtStart)
 	}
 	if qryFltr.CreatedAtEnd != nil && !qryFltr.CreatedAtEnd.IsZero() {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".created_at < ?", qryFltr.CreatedAtEnd)
 	}
 	if qryFltr.UpdatedAtStart != nil && !qryFltr.UpdatedAtStart.IsZero() { // With IsZero we keep backwards compatible with ApierV1
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".updated_at >= ?", qryFltr.UpdatedAtStart)
 	}
 	if qryFltr.UpdatedAtEnd != nil && !qryFltr.UpdatedAtEnd.IsZero() {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
 		q = q.Where(tblName+".updated_at < ?", qryFltr.UpdatedAtEnd)
 	}
-	if qryFltr.UsageStart != nil {
+	if qryFltr.MinUsage != nil {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
-		q = q.Where(tblName+".usage >= ?", qryFltr.UsageStart)
+		q = q.Where(tblName+".usage >= ?", qryFltr.MinUsage)
 	}
-	if qryFltr.UsageEnd != nil {
+	if qryFltr.MaxUsage != nil {
 		tblName := utils.TBL_CDRS_PRIMARY
-		if qryFltr.FilterOnDerived {
+		if qryFltr.FilterOnRated {
 			tblName = utils.TBL_RATED_CDRS
 		}
-		q = q.Where(tblName+".usage < ?", qryFltr.UsageEnd)
+		q = q.Where(tblName+".usage < ?", qryFltr.MaxUsage)
+	}
+	if qryFltr.MinPdd != nil {
+		tblName := utils.TBL_CDRS_PRIMARY
+		if qryFltr.FilterOnRated {
+			tblName = utils.TBL_RATED_CDRS
+		}
+		q = q.Where(tblName+".pdd >= ?", qryFltr.MinPdd)
+	}
+	if qryFltr.MaxPdd != nil {
+		tblName := utils.TBL_CDRS_PRIMARY
+		if qryFltr.FilterOnRated {
+			tblName = utils.TBL_RATED_CDRS
+		}
+		q = q.Where(tblName+".pdd < ?", qryFltr.MaxPdd)
 	}
 
-	if qryFltr.CostStart != nil {
-		if qryFltr.CostEnd == nil {
-			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.CostStart)
-		} else if *qryFltr.CostStart == 0.0 && *qryFltr.CostEnd == -1.0 { // Special case when we want to skip errors
+	if qryFltr.MinCost != nil {
+		if qryFltr.MaxCost == nil {
+			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.MinCost)
+		} else if *qryFltr.MinCost == 0.0 && *qryFltr.MaxCost == -1.0 { // Special case when we want to skip errors
 			q = q.Where(fmt.Sprintf("( %s.cost IS NULL OR %s.cost >= 0.0 )", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS))
 		} else {
-			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.CostStart)
-			q = q.Where(utils.TBL_RATED_CDRS+".cost < ?", *qryFltr.CostEnd)
+			q = q.Where(utils.TBL_RATED_CDRS+".cost >= ?", *qryFltr.MinCost)
+			q = q.Where(utils.TBL_RATED_CDRS+".cost < ?", *qryFltr.MaxCost)
 		}
-	} else if qryFltr.CostEnd != nil {
-		if *qryFltr.CostEnd == -1.0 { // Non-rated CDRs
+	} else if qryFltr.MaxCost != nil {
+		if *qryFltr.MaxCost == -1.0 { // Non-rated CDRs
 			q = q.Where(utils.TBL_RATED_CDRS + ".cost IS NULL") // Need to include it otherwise all CDRs will be returned
-		} else { // Above limited CDRs, since costStart is empty, make sure we query also NULL cost
-			q = q.Where(fmt.Sprintf("( %s.cost IS NULL OR %s.cost < %f )", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, *qryFltr.CostEnd))
+		} else { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
+			q = q.Where(fmt.Sprintf("( %s.cost IS NULL OR %s.cost < %f )", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, *qryFltr.MaxCost))
 		}
 	}
 	if qryFltr.Paginator.Limit != nil {
@@ -1000,11 +1015,11 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		var extraFields, ccTimespansBytes []byte
 		var setupTime, answerTime mysql.NullTime
 		var orderid int64
-		var usage, cost, ccCost sql.NullFloat64
+		var usage, pdd, cost, ccCost sql.NullFloat64
 		var extraFieldsMp map[string]string
 		var ccTimespans TimeSpans
 		if err := rows.Scan(&cgrid, &orderid, &tor, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination,
-			&setupTime, &answerTime, &usage, &ccSupplier, &ccDisconnectCause,
+			&setupTime, &answerTime, &usage, &pdd, &ccSupplier, &ccDisconnectCause,
 			&extraFields, &runid, &cost, &ccTor, &ccDirection, &ccTenant, &ccCategory, &ccAccount, &ccSubject, &ccDestination, &ccCost, &ccTimespansBytes); err != nil {
 			return nil, 0, err
 		}
@@ -1019,11 +1034,12 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 			}
 		}
 		usageDur, _ := time.ParseDuration(strconv.FormatFloat(usage.Float64, 'f', -1, 64) + "s")
+		pddDur, _ := time.ParseDuration(strconv.FormatFloat(pdd.Float64, 'f', -1, 64) + "s")
 		storCdr := &StoredCdr{
 			CgrId: cgrid.String, OrderId: orderid, TOR: tor.String, AccId: accid.String, CdrHost: cdrhost.String, CdrSource: cdrsrc.String, ReqType: reqtype.String,
 			Direction: direction.String, Tenant: tenant.String,
 			Category: category.String, Account: account.String, Subject: subject.String, Destination: destination.String,
-			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Usage: usageDur, Supplier: ccSupplier.String, DisconnectCause: ccDisconnectCause.String,
+			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Usage: usageDur, Pdd: pddDur, Supplier: ccSupplier.String, DisconnectCause: ccDisconnectCause.String,
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, RatedAccount: ccAccount.String, RatedSubject: ccSubject.String, Cost: cost.Float64,
 		}
 		if ccTimespans != nil {

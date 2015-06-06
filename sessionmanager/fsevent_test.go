@@ -566,6 +566,9 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.USAGE}); parsed != "5000000000" {
 		t.Error("Unexpected result parsed", parsed)
 	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.PDD}); parsed != "0.28" {
+		t.Error("Unexpected result parsed", parsed)
+	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUPPLIER}); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
@@ -639,7 +642,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 		TOR: utils.VOICE, AccId: "37e9b766-5256-4e4b-b1ed-3767b930fec8", CdrHost: "10.0.2.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.META_PSEUDOPREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003",
 		Destination: "1002", SetupTime: setupTime, AnswerTime: aTime,
-		Usage: time.Duration(5) * time.Second, Supplier: "supplier1", DisconnectCause: "NORMAL_CLEARING", ExtraFields: make(map[string]string), Cost: -1}
+		Usage: time.Duration(5) * time.Second, Pdd: time.Duration(280) * time.Millisecond, Supplier: "supplier1", DisconnectCause: "NORMAL_CLEARING", ExtraFields: make(map[string]string), Cost: -1}
 	if storedCdr := ev.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
