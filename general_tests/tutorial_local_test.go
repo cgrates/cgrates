@@ -638,7 +638,7 @@ func TestTutLocalLcrQos(t *testing.T) {
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
 	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) && !reflect.DeepEqual(eStLcr2.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[1], lcr.SupplierCosts[1])
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
 	}
 	testCdr3 := &engine.StoredCdr{CgrId: utils.Sha1("testcdr3", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		TOR: utils.VOICE, AccId: "testcdr3", CdrHost: "192.168.1.1", CdrSource: "TEST_QOS_LCR", ReqType: utils.META_RATED,

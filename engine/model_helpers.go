@@ -93,7 +93,16 @@ func csvDump(s interface{}) ([]string, error) {
 	for fieldName, fieldIndex := range fieldIndexMap {
 		field := elem.FieldByName(fieldName)
 		if field.IsValid() && fieldIndex < len(result) {
-			result[fieldIndex] = field.String()
+			switch field.Kind() {
+			case reflect.Float64:
+				result[fieldIndex] = strconv.FormatFloat(field.Float(), 'f', -1, 64)
+			case reflect.Int:
+				result[fieldIndex] = strconv.FormatInt(field.Int(), 10)
+			case reflect.Bool:
+				result[fieldIndex] = strconv.FormatBool(field.Bool())
+			case reflect.String:
+				result[fieldIndex] = field.String()
+			}
 		}
 	}
 	return result, nil
@@ -119,9 +128,25 @@ func modelEqual(this interface{}, other interface{}) bool {
 	for _, fieldName := range fieldNames {
 		thisField := thisElem.FieldByName(fieldName)
 		otherField := otherElem.FieldByName(fieldName)
-		if thisField.String() != otherField.String() {
-			return false
+		switch thisField.Kind() {
+		case reflect.Float64:
+			if thisField.Float() != otherField.Float() {
+				return false
+			}
+		case reflect.Int:
+			if thisField.Int() != otherField.Int() {
+				return false
+			}
+		case reflect.Bool:
+			if thisField.Bool() != otherField.Bool() {
+				return false
+			}
+		case reflect.String:
+			if thisField.String() != otherField.String() {
+				return false
+			}
 		}
+
 	}
 	return true
 }
@@ -263,6 +288,7 @@ func (tps TpRatingPlans) GetRatingPlans() (map[string][]*utils.TPRatingPlanBindi
 
 	for _, tpRp := range tps {
 		rpb := &utils.TPRatingPlanBinding{
+
 			DestinationRatesId: tpRp.DestratesTag,
 			TimingId:           tpRp.TimingTag,
 			Weight:             tpRp.Weight,

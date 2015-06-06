@@ -17,6 +17,19 @@ func APItoModelTiming(t *utils.ApierTPTiming) (result *TpTiming) {
 		Time:      t.Time,
 	}
 }
+
+func APItoModelApierTiming(t *utils.ApierTPTiming) (result *TpTiming) {
+	return &TpTiming{
+		Tpid:      t.TPid,
+		Tag:       t.TimingId,
+		Years:     t.Years,
+		Months:    t.Months,
+		MonthDays: t.MonthDays,
+		WeekDays:  t.WeekDays,
+		Time:      t.Time,
+	}
+}
+
 func APItoModelDestination(dest *utils.TPDestination) (result []TpDestination) {
 	for _, p := range dest.Prefixes {
 		result = append(result, TpDestination{
@@ -138,6 +151,7 @@ func APItoModelLcrRule(lcrs *utils.TPLcrRules) (result []TpLcrRule) {
 			Strategy:       lcr.Strategy,
 			StrategyParams: lcr.StrategyParams,
 			ActivationTime: lcr.ActivationTime,
+			Weight:         lcr.Weight,
 		})
 	}
 	if len(lcrs.LcrRules) == 0 {
