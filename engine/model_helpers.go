@@ -231,6 +231,7 @@ func (tps TpDestinationRates) GetDestinationRates() (map[string]*utils.TPDestina
 	rts := make(map[string]*utils.TPDestinationRate)
 	for _, tpDr := range tps {
 		dr := &utils.TPDestinationRate{
+			TPid:              tpDr.Tpid,
 			DestinationRateId: tpDr.Tag,
 			DestinationRates: []*utils.DestinationRate{
 				&utils.DestinationRate{
