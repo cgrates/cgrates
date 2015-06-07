@@ -293,11 +293,11 @@ CREATE INDEX tpderivedchargers_idx ON tp_derived_chargers (tpid,loadid,direction
 
 
 --
--- Table structure for table `tp_cdr_stats`
+-- Table structure for table `tp_cdrstats`
 --
 
-DROP TABLE IF EXISTS tp_cdr_stats;
-CREATE TABLE tp_cdr_stats (
+DROP TABLE IF EXISTS tp_cdrstats;
+CREATE TABLE tp_cdrstats (
   id SERIAL PRIMARY KEY,
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
@@ -325,5 +325,5 @@ CREATE TABLE tp_cdr_stats (
   action_triggers VARCHAR(64) NOT NULL,
   created_at TIMESTAMP
 );
-CREATE INDEX tpcdrstats_tpid_idx ON tp_cdr_stats (tpid);
-CREATE INDEX tpcdrstats_idx ON tp_cdr_stats (tpid,tag);
+CREATE INDEX tpcdrstats_tpid_idx ON tp_cdrstats (tpid);
+CREATE INDEX tpcdrstats_idx ON tp_cdrstats (tpid,tag);

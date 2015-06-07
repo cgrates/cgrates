@@ -383,13 +383,13 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 	}
 	tx := self.db.Begin()
 	for csId, cStats := range css {
-		if err := tx.Where(&TpCdrStat{Tpid: tpid, Tag: csId}).Delete(TpCdrStat{}).Error; err != nil {
+		if err := tx.Where(&TpCdrstat{Tpid: tpid, Tag: csId}).Delete(TpCdrstat{}).Error; err != nil {
 			tx.Rollback()
 			return err
 		}
 		for _, cs := range cStats {
 			ql, _ := strconv.Atoi(cs.QueueLength)
-			saved := tx.Save(&TpCdrStat{
+			saved := tx.Save(&TpCdrstat{
 				Tpid:                tpid,
 				Tag:                 csId,
 				QueueLength:         ql,
@@ -1430,7 +1430,7 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string][]*utils
 func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPCdrStat, error) {
 	css := make(map[string][]*utils.TPCdrStat)
 
-	var tpCdrStats []TpCdrStat
+	var tpCdrStats []TpCdrstat
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)

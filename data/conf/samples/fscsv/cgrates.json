@@ -21,7 +21,7 @@
 	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 },
 
-"cdr_stats": {
+"cdrstats": {
 	"enabled": true,					// starts the cdrstats service: <true|false>
 },
 

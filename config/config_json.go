@@ -36,7 +36,7 @@ const (
 	SCHEDULER_JSN    = "scheduler"
 	CDRS_JSN         = "cdrs"
 	MEDIATOR_JSN     = "mediator"
-	CDRSTATS_JSN     = "cdr_stats"
+	CDRSTATS_JSN     = "cdrstats"
 	CDRE_JSN         = "cdre"
 	CDRC_JSN         = "cdrc"
 	SMFS_JSN         = "sm_freeswitch"

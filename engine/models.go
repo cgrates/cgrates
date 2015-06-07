@@ -257,7 +257,7 @@ func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
 	return nil
 }
 
-type TpCdrStat struct {
+type TpCdrstat struct {
 	Id                  int64
 	Tpid                string
 	Tag                 string

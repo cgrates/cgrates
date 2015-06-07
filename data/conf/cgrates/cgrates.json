@@ -91,7 +91,7 @@
 //},
 
 
-//"cdr_stats": {
+//"cdrstats": {
 //	"enabled": false,						// starts the cdrstats service: <true|false>
 //	"queue_length": 50,						// number of items in the stats buffer
 //	"time_window": "1h",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
