@@ -569,7 +569,7 @@ func TestApierTPActionPlan(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPActionPlan", new(utils.TPActionPlan), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPActionPlan, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid Id ActionPlan]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionPlanId ActionPlan]" {
 		t.Error("Calling ApierV1.SetTPActionPlan got unexpected error: ", err.Error())
 	}
 	// Test get

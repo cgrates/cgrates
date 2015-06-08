@@ -28,7 +28,7 @@ import (
 
 // Creates a new ActionTimings profile within a tariff plan
 func (self *ApierV1) SetTPActionPlan(attrs utils.TPActionPlan, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Id", "ActionPlan"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionPlanId", "ActionPlan"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	for _, at := range attrs.ActionPlan {

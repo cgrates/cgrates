@@ -332,9 +332,9 @@ type TblCdrsPrimary struct {
 	Subject         string
 	Destination     string
 	SetupTime       time.Time
+	Pdd             float64
 	AnswerTime      time.Time
 	Usage           float64
-	Pdd             float64
 	Supplier        string
 	DisconnectCause string
 	CreatedAt       time.Time
@@ -392,9 +392,9 @@ type TblRatedCdr struct {
 	Subject         string
 	Destination     string
 	SetupTime       time.Time
+	Pdd             float64
 	AnswerTime      time.Time
 	Usage           float64
-	Pdd             float64
 	Supplier        string
 	DisconnectCause string
 	Cost            float64
