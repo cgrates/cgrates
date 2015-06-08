@@ -70,6 +70,7 @@ type CdrStats struct {
 	Subject           []string        // CDRFieldFilter on Subjects
 	DestinationPrefix []string        // CDRFieldFilter on DestinationPrefixes
 	UsageInterval     []time.Duration // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
+	PddInterval       []time.Duration // CDRFieldFilter on PddInterval, 2 or less items (>= Pdd, <Pdd)
 	Supplier          []string        // CDRFieldFilter on Suppliers
 	DisconnectCause   []string        // Filter on DisconnectCause
 	MediationRunIds   []string        // CDRFieldFilter on MediationRunIds
@@ -135,6 +136,14 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 			return false
 		}
 		if len(cs.UsageInterval) > 1 && cdr.Usage >= cs.UsageInterval[1] {
+			return false
+		}
+	}
+	if len(cs.PddInterval) > 0 {
+		if cdr.Pdd < cs.PddInterval[0] {
+			return false
+		}
+		if len(cs.PddInterval) > 1 && cdr.Pdd >= cs.PddInterval[1] {
 			return false
 		}
 	}

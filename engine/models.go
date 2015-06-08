@@ -284,11 +284,11 @@ func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
 	return nil
 }
 
-func (tpdc *TpDerivedCharger) GetDerivedChargersId() string {
+func (tpdc *TpDerivedCharger) GetDerivedChargersId1() string {
 	return utils.ConcatenatedKey(tpdc.Loadid, tpdc.Direction, tpdc.Tenant, tpdc.Category, tpdc.Account, tpdc.Subject)
 }
 
-type TpCdrStat struct {
+type TpCdrstat struct {
 	Id                  int64
 	Tpid                string
 	Tag                 string `index:"0" re:""`

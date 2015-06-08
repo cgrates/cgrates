@@ -163,11 +163,11 @@ func (lcr *LCR) Sort() {
 	sort.Sort(lcr)
 }
 
-func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minACD, maxACD, minTCD, maxTCD time.Duration, minACC, maxACC, minTCC, maxTCC float64) {
-	// MIN_ASR;MAX_ASR;MIN_ACD;MAX_ACD;MIN_TCD;MAX_TCD;MIN_ACC;MAX_ACC;MIN_TCC;MAX_TCC
-	minASR, maxASR, minACD, maxACD, minTCD, maxTCD, minACC, maxACC, minTCC, maxTCC = -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minPDD, maxPDD, minACD, maxACD, minTCD, maxTCD time.Duration, minACC, maxACC, minTCC, maxTCC float64) {
+	// MIN_ASR;MAX_ASR;MIN_PDD;MAX_PDD;MIN_ACD;MAX_ACD;MIN_TCD;MAX_TCD;MIN_ACC;MAX_ACC;MIN_TCC;MAX_TCC
+	minASR, maxASR, minPDD, maxPDD, minACD, maxACD, minTCD, maxTCD, minACC, maxACC, minTCC, maxTCC = -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 	params := strings.Split(le.StrategyParams, utils.INFIELD_SEP)
-	if len(params) == 10 {
+	if len(params) == 12 {
 		var err error
 		if minASR, err = strconv.ParseFloat(params[0], 64); err != nil {
 			minASR = -1
@@ -175,28 +175,34 @@ func (le *LCREntry) GetQOSLimits() (minASR, maxASR float64, minACD, maxACD, minT
 		if maxASR, err = strconv.ParseFloat(params[1], 64); err != nil {
 			maxASR = -1
 		}
-		if minACD, err = time.ParseDuration(params[2]); err != nil {
+		if minPDD, err = utils.ParseDurationWithSecs(params[2]); err != nil {
+			minPDD = -1
+		}
+		if maxPDD, err = utils.ParseDurationWithSecs(params[3]); err != nil {
+			maxPDD = -1
+		}
+		if minACD, err = utils.ParseDurationWithSecs(params[4]); err != nil {
 			minACD = -1
 		}
-		if maxACD, err = time.ParseDuration(params[3]); err != nil {
+		if maxACD, err = utils.ParseDurationWithSecs(params[5]); err != nil {
 			maxACD = -1
 		}
-		if minTCD, err = time.ParseDuration(params[4]); err != nil {
+		if minTCD, err = utils.ParseDurationWithSecs(params[6]); err != nil {
 			minTCD = -1
 		}
-		if maxTCD, err = time.ParseDuration(params[5]); err != nil {
+		if maxTCD, err = utils.ParseDurationWithSecs(params[7]); err != nil {
 			maxTCD = -1
 		}
-		if minACC, err = strconv.ParseFloat(params[6], 64); err != nil {
+		if minACC, err = strconv.ParseFloat(params[8], 64); err != nil {
 			minACC = -1
 		}
-		if maxACC, err = strconv.ParseFloat(params[7], 64); err != nil {
+		if maxACC, err = strconv.ParseFloat(params[9], 64); err != nil {
 			maxACC = -1
 		}
-		if minTCC, err = strconv.ParseFloat(params[8], 64); err != nil {
+		if minTCC, err = strconv.ParseFloat(params[10], 64); err != nil {
 			minTCC = -1
 		}
-		if maxTCC, err = strconv.ParseFloat(params[9], 64); err != nil {
+		if maxTCC, err = strconv.ParseFloat(params[11], 64); err != nil {
 			maxTCC = -1
 		}
 	}
@@ -215,7 +221,7 @@ func (le *LCREntry) GetParams() []string {
 		}
 	}
 	if len(cleanParams) == 0 && le.Strategy == LCR_STRATEGY_QOS {
-		return []string{ASR, ACD, TCD, ACC, TCC} // Default QoS stats if none configured
+		return []string{ASR, PDD, ACD, TCD, ACC, TCC} // Default QoS stats if none configured
 	}
 	return cleanParams
 }

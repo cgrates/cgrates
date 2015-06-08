@@ -378,10 +378,41 @@ func (self *SQLStorage) SetTpCdrStats(css []TpCdrStat) error {
 	m := make(map[string]bool)
 
 	tx := self.db.Begin()
-	for _, cStat := range css {
-		if found, _ := m[cStat.Tag]; !found {
-			m[cStat.Tag] = true
-			if err := tx.Where(&TpCdrStat{Tpid: cStat.Tpid, Tag: cStat.Tag}).Delete(TpCdrStat{}).Error; err != nil {
+	for csId, cStats := range css {
+		if err := tx.Where(&TpCdrstat{Tpid: tpid, Tag: csId}).Delete(TpCdrstat{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, cs := range cStats {
+			ql, _ := strconv.Atoi(cs.QueueLength)
+			saved := tx.Save(&TpCdrstat{
+				Tpid:                tpid,
+				Tag:                 csId,
+				QueueLength:         ql,
+				TimeWindow:          cs.TimeWindow,
+				Metrics:             cs.Metrics,
+				SetupInterval:       cs.SetupInterval,
+				Tors:                cs.TORs,
+				CdrHosts:            cs.CdrHosts,
+				CdrSources:          cs.CdrSources,
+				ReqTypes:            cs.ReqTypes,
+				Directions:          cs.Directions,
+				Tenants:             cs.Tenants,
+				Categories:          cs.Categories,
+				Accounts:            cs.Accounts,
+				Subjects:            cs.Subjects,
+				DestinationPrefixes: cs.DestinationPrefixes,
+				UsageInterval:       cs.UsageInterval,
+				Suppliers:           cs.Suppliers,
+				DisconnectCauses:    cs.DisconnectCauses,
+				MediationRunids:     cs.MediationRunIds,
+				RatedAccounts:       cs.RatedAccounts,
+				RatedSubjects:       cs.RatedSubjects,
+				CostInterval:        cs.CostInterval,
+				ActionTriggers:      cs.ActionTriggers,
+				CreatedAt:           time.Now(),
+			})
+			if saved.Error != nil {
 				tx.Rollback()
 				return err
 			}
@@ -1297,7 +1328,7 @@ func (self *SQLStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 }
 
 func (self *SQLStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrStat, error) {
-	var tpCdrStats []TpCdrStat
+	var tpCdrStats []TpCdrstat
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("tag = ?", tag)

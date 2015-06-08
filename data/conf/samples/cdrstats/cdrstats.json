@@ -15,7 +15,7 @@
 	"cdrstats": "internal",							// address where to reach the cdrstats service. Empty to disable stats gathering out of mediated CDRs <""|internal|x.y.z.y:1234>
 },
 
-"cdr_stats": {
+"cdrstats": {
 	"enabled": true,						// starts the cdrstats service: <true|false>
 	"queue_length": 5,						// number of items in the stats buffer
 	"time_window": "0",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow

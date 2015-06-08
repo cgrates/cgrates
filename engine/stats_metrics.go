@@ -35,12 +35,15 @@ const ACD = "ACD"
 const TCD = "TCD"
 const ACC = "ACC"
 const TCC = "TCC"
+const PDD = "PDD"
 const STATS_NA = -1
 
 func CreateMetric(metric string) Metric {
 	switch metric {
 	case ASR:
 		return &ASRMetric{}
+	case PDD:
+		return &PDDMetric{}
 	case ACD:
 		return &ACDMetric{}
 	case TCD:
@@ -79,6 +82,37 @@ func (asr *ASRMetric) GetValue() float64 {
 		return STATS_NA
 	}
 	val := asr.answered / asr.count * 100
+	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+}
+
+// PDD – Post Dial Delay (average)
+// the sum of PDD seconds of total calls divided by the number of these calls.
+type PDDMetric struct {
+	sum   time.Duration
+	count float64
+}
+
+func (PDD *PDDMetric) AddCdr(cdr *QCdr) {
+	if cdr.Pdd == 0 { // Pdd not defined
+		return
+	}
+	PDD.sum += cdr.Pdd
+	PDD.count += 1
+}
+
+func (PDD *PDDMetric) RemoveCdr(cdr *QCdr) {
+	if cdr.Pdd == 0 { // Pdd not defined
+		return
+	}
+	PDD.sum -= cdr.Pdd
+	PDD.count -= 1
+}
+
+func (PDD *PDDMetric) GetValue() float64 {
+	if PDD.count == 0 {
+		return STATS_NA
+	}
+	val := PDD.sum.Seconds() / PDD.count
 	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
 
