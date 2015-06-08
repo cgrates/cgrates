@@ -196,7 +196,7 @@ func APItoModelActionPlan(aps *utils.TPActionPlan) (result []TpActionPlan) {
 	for _, ap := range aps.ActionPlan {
 		result = append(result, TpActionPlan{
 			Tpid:       aps.TPid,
-			Tag:        aps.Id,
+			Tag:        aps.ActionPlanId,
 			ActionsTag: ap.ActionsId,
 			TimingTag:  ap.TimingId,
 			Weight:     ap.Weight,
@@ -205,7 +205,7 @@ func APItoModelActionPlan(aps *utils.TPActionPlan) (result []TpActionPlan) {
 	if len(aps.ActionPlan) == 0 {
 		result = append(result, TpActionPlan{
 			Tpid: aps.TPid,
-			Tag:  aps.Id,
+			Tag:  aps.ActionPlanId,
 		})
 	}
 	return

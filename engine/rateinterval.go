@@ -46,6 +46,7 @@ type RITiming struct {
 	WeekDays           utils.WeekDays
 	StartTime, EndTime string // ##:##:## format
 	cronString         string
+	tag                string // loading validation only
 }
 
 func (rit *RITiming) CronString() string {
@@ -192,6 +193,7 @@ type RIRate struct {
 	MaxCost          float64
 	MaxCostStrategy  string
 	Rates            RateGroups // GroupRateInterval (start time): Rate
+	tag              string     // loading validation only
 }
 
 func (rir *RIRate) Stringify() string {

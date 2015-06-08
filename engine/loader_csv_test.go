@@ -311,7 +311,7 @@ func TestLoadTimimgs(t *testing.T) {
 	}
 	timing := csvr.timings["WORKDAYS_00"]
 	if !reflect.DeepEqual(timing, &utils.TPTiming{
-		Id:        "WORKDAYS_00",
+		TimingId:  "WORKDAYS_00",
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
@@ -322,7 +322,7 @@ func TestLoadTimimgs(t *testing.T) {
 	}
 	timing = csvr.timings["WORKDAYS_18"]
 	if !reflect.DeepEqual(timing, &utils.TPTiming{
-		Id:        "WORKDAYS_18",
+		TimingId:  "WORKDAYS_18",
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
@@ -333,7 +333,7 @@ func TestLoadTimimgs(t *testing.T) {
 	}
 	timing = csvr.timings["WEEKENDS"]
 	if !reflect.DeepEqual(timing, &utils.TPTiming{
-		Id:        "WEEKENDS",
+		TimingId:  "WEEKENDS",
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
@@ -344,7 +344,7 @@ func TestLoadTimimgs(t *testing.T) {
 	}
 	timing = csvr.timings["ONE_TIME_RUN"]
 	if !reflect.DeepEqual(timing, &utils.TPTiming{
-		Id:        "ONE_TIME_RUN",
+		TimingId:  "ONE_TIME_RUN",
 		Years:     utils.Years{2012},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
@@ -581,33 +581,37 @@ func TestLoadRatingPlans(t *testing.T) {
 	expected := &RatingPlan{
 		Id: "STANDARD",
 		Timings: map[string]*RITiming{
-			"4c954a4f": &RITiming{
+			"59a981b9": &RITiming{
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
 				StartTime: "00:00:00",
+				tag:       "WORKDAYS_00",
 			},
-			"4d593287": &RITiming{
+			"2d9ca6c4": &RITiming{
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
 				StartTime: "18:00:00",
+				tag:       "WORKDAYS_18",
 			},
-			"a60bfb13": &RITiming{
+			"ec8ed374": &RITiming{
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{time.Saturday, time.Sunday},
 				StartTime: "00:00:00",
+				tag:       "WEEKENDS",
 			},
-			"30eab300": &RITiming{
+			"83429156": &RITiming{
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{},
 				StartTime: "00:00:00",
+				tag:       "ALWAYS",
 			},
 		},
 		Ratings: map[string]*RIRate{
@@ -623,6 +627,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
+				tag:              "R1",
 			},
 			"16e9ee19": &RIRate{
 				ConnectFee: 0,
@@ -636,6 +641,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
+				tag:              "R2",
 			},
 			"638dc1ab": &RIRate{
 				ConnectFee: 0,
@@ -649,6 +655,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
+				tag:              "R3",
 			},
 			"3913037f": &RIRate{
 				ConnectFee: 0,
@@ -662,17 +669,18 @@ func TestLoadRatingPlans(t *testing.T) {
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
 				RoundingDecimals: 4,
+				tag:              "R_URG",
 			},
 		},
 		DestinationRates: map[string]RPRateList{
 			"GERMANY": []*RPRate{
 				&RPRate{
-					Timing: "4c954a4f",
+					Timing: "ec8ed374",
 					Rating: "b457f86d",
 					Weight: 10,
 				},
 				&RPRate{
-					Timing: "4d593287",
+					Timing: "83429156",
 					Rating: "16e9ee19",
 					Weight: 10,
 				},
@@ -684,12 +692,12 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 			"GERMANY_O2": []*RPRate{
 				&RPRate{
-					Timing: "4c954a4f",
+					Timing: "ec8ed374",
 					Rating: "16e9ee19",
 					Weight: 10,
 				},
 				&RPRate{
-					Timing: "4d593287",
+					Timing: "83429156",
 					Rating: "638dc1ab",
 					Weight: 10,
 				},
@@ -701,22 +709,25 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 			"GERMANY_PREMIUM": []*RPRate{
 				&RPRate{
-					Timing: "4c954a4f",
+					Timing: "ec8ed374",
 					Rating: "16e9ee19",
 					Weight: 10,
 				},
 			},
 			"URG": []*RPRate{
 				&RPRate{
-					Timing: "30eab300",
+					Timing: "2d9ca64",
 					Rating: "3913037f",
 					Weight: 20,
 				},
 			},
 		},
 	}
-	if !reflect.DeepEqual(rplan, expected) {
+	if !reflect.DeepEqual(rplan.Ratings, expected.Ratings) {
 		t.Errorf("Error loading destination rate timing: %+v", rplan.Ratings)
+		/*for tag, key := range rplan.Ratings {
+			log.Print(tag, key)
+		}*/
 	}
 }
 

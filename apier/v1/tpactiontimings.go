@@ -65,9 +65,9 @@ func (self *ApierV1) GetTPActionPlan(attrs AttrGetTPActionPlan, reply *utils.TPA
 			return err
 		}
 		atRply := &utils.TPActionPlan{
-			TPid:       attrs.TPid,
-			Id:         attrs.Id,
-			ActionPlan: aps[attrs.Id],
+			TPid:         attrs.TPid,
+			ActionPlanId: attrs.Id,
+			ActionPlan:   aps[attrs.Id],
 		}
 		*reply = *atRply
 	}

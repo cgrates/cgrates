@@ -308,10 +308,10 @@ func TestRatingPlanIsContinousMissing(t *testing.T) {
 func TestRatingPlanSaneTimingsBad(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"one": &RITiming{Years: utils.Years{2015}, WeekDays: utils.WeekDays{time.Monday}},
+			"one": &RITiming{Years: utils.Years{2015}, WeekDays: utils.WeekDays{time.Monday}, tag: "first"},
 		},
 	}
-	if rpl.areTimingsSane() {
+	if crazyTiming := rpl.getFirstUnsaneTiming(); crazyTiming == "" {
 		t.Errorf("Error detecting bad timings in rating profile: %+v", rpl)
 	}
 }
@@ -319,11 +319,11 @@ func TestRatingPlanSaneTimingsBad(t *testing.T) {
 func TestRatingPlanSaneTimingsGood(t *testing.T) {
 	rpl := &RatingPlan{
 		Timings: map[string]*RITiming{
-			"one": &RITiming{Years: utils.Years{2015}},
-			"two": &RITiming{WeekDays: utils.WeekDays{0, 1, 2, 3, 4}, StartTime: "00:00:00"},
+			"one": &RITiming{Years: utils.Years{2015}, tag: "first"},
+			"two": &RITiming{WeekDays: utils.WeekDays{0, 1, 2, 3, 4}, StartTime: "00:00:00", tag: "second"},
 		},
 	}
-	if !rpl.areTimingsSane() {
+	if crazyTiming := rpl.getFirstUnsaneTiming(); crazyTiming != "" {
 		t.Errorf("Error detecting bad timings in rating profile: %+v", rpl)
 	}
 }
@@ -332,6 +332,7 @@ func TestRatingPlanSaneRatingsEqual(t *testing.T) {
 	rpl := &RatingPlan{
 		Ratings: map[string]*RIRate{
 			"one": &RIRate{
+				tag: "first",
 				Rates: RateGroups{
 					&Rate{
 						GroupIntervalStart: 0 * time.Second,
@@ -345,7 +346,7 @@ func TestRatingPlanSaneRatingsEqual(t *testing.T) {
 			},
 		},
 	}
-	if rpl.areRatesSane() {
+	if crazyRating := rpl.getFirstUnsaneRating(); crazyRating == "" {
 		t.Errorf("Error detecting bad rate groups in rating profile: %+v", rpl)
 	}
 }
@@ -354,6 +355,7 @@ func TestRatingPlanSaneRatingsNotMultiple(t *testing.T) {
 	rpl := &RatingPlan{
 		Ratings: map[string]*RIRate{
 			"one": &RIRate{
+				tag: "first",
 				Rates: RateGroups{
 					&Rate{
 						GroupIntervalStart: 0 * time.Second,
@@ -367,7 +369,7 @@ func TestRatingPlanSaneRatingsNotMultiple(t *testing.T) {
 			},
 		},
 	}
-	if rpl.areRatesSane() {
+	if crazyRating := rpl.getFirstUnsaneRating(); crazyRating == "" {
 		t.Errorf("Error detecting bad rate groups in rating profile: %+v", rpl)
 	}
 }
@@ -376,6 +378,7 @@ func TestRatingPlanSaneRatingsGoot(t *testing.T) {
 	rpl := &RatingPlan{
 		Ratings: map[string]*RIRate{
 			"one": &RIRate{
+				tag: "first",
 				Rates: RateGroups{
 					&Rate{
 						GroupIntervalStart: 60 * time.Second,
@@ -391,7 +394,7 @@ func TestRatingPlanSaneRatingsGoot(t *testing.T) {
 			},
 		},
 	}
-	if !rpl.areRatesSane() {
+	if crazyRating := rpl.getFirstUnsaneRating(); crazyRating != "" {
 		t.Errorf("Error detecting bad rate groups in rating profile: %+v", rpl)
 	}
 }

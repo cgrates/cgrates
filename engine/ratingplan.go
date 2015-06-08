@@ -148,33 +148,33 @@ func (rp *RatingPlan) isContinous() bool {
 	return false
 }
 
-func (rp *RatingPlan) areRatesSane() bool {
+func (rp *RatingPlan) getFirstUnsaneRating() string {
 	for _, rating := range rp.Ratings {
 		rating.Rates.Sort()
 		for i, rate := range rating.Rates {
 			if i < (len(rating.Rates) - 1) {
 				nextRate := rating.Rates[i+1]
 				if nextRate.GroupIntervalStart <= rate.GroupIntervalStart {
-					return false
+					return rating.tag
 				}
 				if math.Mod(nextRate.GroupIntervalStart.Seconds(), rate.RateIncrement.Seconds()) != 0 {
-					return false
+					return rating.tag
 				}
 				if rate.RateUnit == 0 || rate.RateIncrement == 0 {
-					return false
+					return rating.tag
 				}
 			}
 		}
 	}
-	return true
+	return ""
 }
 
-func (rp *RatingPlan) areTimingsSane() bool {
+func (rp *RatingPlan) getFirstUnsaneTiming() string {
 	for _, timing := range rp.Timings {
 		if (len(timing.Years) != 0 || len(timing.Months) != 0 || len(timing.MonthDays) != 0) &&
 			len(timing.WeekDays) != 0 {
-			return false
+			return timing.tag
 		}
 	}
-	return true
+	return ""
 }

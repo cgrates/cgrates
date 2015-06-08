@@ -281,9 +281,9 @@ func TestMySQLTPActionTimings(t *testing.T) {
 	}
 	AP_ID := "AP_1"
 	ap := &utils.TPActionPlan{
-		TPid:       TEST_SQL,
-		Id:         AP_ID,
-		ActionPlan: []*utils.TPActionTiming{&utils.TPActionTiming{ActionsId: "ACTS_1", TimingId: "TM_1", Weight: 10.0}},
+		TPid:         TEST_SQL,
+		ActionPlanId: AP_ID,
+		ActionPlan:   []*utils.TPActionTiming{&utils.TPActionTiming{ActionsId: "ACTS_1", TimingId: "TM_1", Weight: 10.0}},
 	}
 	maps := APItoModelActionPlan(ap)
 	if err := mysqlDb.SetTpActionPlans(maps); err != nil {

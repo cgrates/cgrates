@@ -80,6 +80,7 @@ type RateSlot struct {
 	rateUnitDur           time.Duration
 	rateIncrementDur      time.Duration
 	groupIntervalStartDur time.Duration
+	tag                   string // load validation only
 }
 
 // Used to set the durations we need out of strings
@@ -133,7 +134,7 @@ type ApierTPTiming struct {
 }
 
 type TPTiming struct {
-	Id        string
+	TimingId  string
 	Years     Years
 	Months    Months
 	MonthDays MonthDays
@@ -144,7 +145,7 @@ type TPTiming struct {
 
 func NewTiming(timingInfo ...string) (rt *TPTiming) {
 	rt = &TPTiming{}
-	rt.Id = timingInfo[0]
+	rt.TimingId = timingInfo[0]
 	rt.Years.Parse(timingInfo[1], INFIELD_SEP)
 	rt.Months.Parse(timingInfo[2], INFIELD_SEP)
 	rt.MonthDays.Parse(timingInfo[3], INFIELD_SEP)
@@ -408,9 +409,9 @@ type TPDerivedCharger struct {
 }
 
 type TPActionPlan struct {
-	TPid       string            // Tariff plan id
-	Id         string            // ActionPlan id
-	ActionPlan []*TPActionTiming // Set of ActionTiming bindings this profile will group
+	TPid         string            // Tariff plan id
+	ActionPlanId string            // ActionPlan id
+	ActionPlan   []*TPActionTiming // Set of ActionTiming bindings this profile will group
 }
 
 type TPActionTiming struct {

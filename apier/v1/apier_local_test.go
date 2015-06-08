@@ -547,12 +547,12 @@ func TestApierTPActionPlan(t *testing.T) {
 		return
 	}
 	reply := ""
-	at := &utils.TPActionPlan{TPid: engine.TEST_SQL, Id: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
+	at := &utils.TPActionPlan{TPid: engine.TEST_SQL, ActionPlanId: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
 		&utils.TPActionTiming{ActionsId: "PREPAID_10", TimingId: "ASAP", Weight: 10},
 	}}
 	atTst := new(utils.TPActionPlan)
 	*atTst = *at
-	atTst.Id = engine.TEST_SQL
+	atTst.ActionPlanId = engine.TEST_SQL
 	for _, act := range []*utils.TPActionPlan{at, atTst} {
 		if err := rater.Call("ApierV1.SetTPActionPlan", act, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActionPlan: ", err.Error())
@@ -574,13 +574,13 @@ func TestApierTPActionPlan(t *testing.T) {
 	}
 	// Test get
 	var rplyActs *utils.TPActionPlan
-	if err := rater.Call("ApierV1.GetTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, Id: atTst.Id}, &rplyActs); err != nil {
+	if err := rater.Call("ApierV1.GetTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, Id: atTst.ActionPlanId}, &rplyActs); err != nil {
 		t.Error("Calling ApierV1.GetTPActionPlan, got error: ", err.Error())
 	} else if !reflect.DeepEqual(atTst, rplyActs) {
 		t.Errorf("Calling ApierV1.GetTPActionPlan expected: %v, received: %v", atTst, rplyActs)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, Id: atTst.Id}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPActionPlan", AttrGetTPActionPlan{TPid: atTst.TPid, Id: atTst.ActionPlanId}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPActionPlan, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPActionPlan received: ", reply)

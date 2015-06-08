@@ -932,12 +932,12 @@ func (tpr *TpReader) IsValid() bool {
 			log.Printf("The rating plan %s is not covering all weekdays", rplTag)
 			valid = false
 		}
-		if !rpl.areRatesSane() {
-			log.Printf("The rating plan %s contains invalid rate groups", rplTag)
+		if crazyRate := rpl.getFirstUnsaneRating(); crazyRate != "" {
+			log.Printf("The rate %s is invalid", crazyRate)
 			valid = false
 		}
-		if !rpl.areTimingsSane() {
-			log.Printf("The rating plan %s contains invalid timings", rplTag)
+		if crazyTiming := rpl.getFirstUnsaneTiming(); crazyTiming != "" {
+			log.Printf("The timing %s is invalid", crazyTiming)
 			valid = false
 		}
 	}

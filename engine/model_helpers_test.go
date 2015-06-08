@@ -510,8 +510,8 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 
 func TestTPActionTriggersAsExportSlice(t *testing.T) {
 	ap := &utils.TPActionPlan{
-		TPid: "TEST_TPID",
-		Id:   "PACKAGE_10",
+		TPid:         "TEST_TPID",
+		ActionPlanId: "PACKAGE_10",
 		ActionPlan: []*utils.TPActionTiming{
 			&utils.TPActionTiming{
 				ActionsId: "TOPUP_RST_10",

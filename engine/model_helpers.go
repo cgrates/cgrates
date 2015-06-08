@@ -187,7 +187,7 @@ func (tps TpTimings) GetTimings() (map[string]*utils.TPTiming, error) {
 	timings := make(map[string]*utils.TPTiming)
 	for _, tp := range tps {
 		rt := &utils.TPTiming{}
-		rt.Id = tp.Tag
+		rt.TimingId = tp.Tag
 		rt.Years.Parse(tp.Years, utils.INFIELD_SEP)
 		rt.Months.Parse(tp.Months, utils.INFIELD_SEP)
 		rt.MonthDays.Parse(tp.MonthDays, utils.INFIELD_SEP)
@@ -310,6 +310,7 @@ func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) 
 			MonthDays: rpl.Timing().MonthDays,
 			WeekDays:  rpl.Timing().WeekDays,
 			StartTime: rpl.Timing().StartTime,
+			tag:       rpl.Timing().TimingId,
 		},
 		Weight: rpl.Weight,
 		Rating: &RIRate{
@@ -318,6 +319,7 @@ func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) 
 			RoundingDecimals: dr.RoundingDecimals,
 			MaxCost:          dr.MaxCost,
 			MaxCostStrategy:  dr.MaxCostStrategy,
+			tag:              dr.Rate.RateId,
 		},
 	}
 	for _, rl := range dr.Rate.RateSlots {
