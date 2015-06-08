@@ -287,6 +287,7 @@ CREATE TABLE tp_derived_chargers (
   `subject_field`  varchar(24) NOT NULL,
   `destination_field`  varchar(24) NOT NULL,
   `setup_time_field`  varchar(24) NOT NULL,
+  `pdd_field`  varchar(24) NOT NULL,
   `answer_time_field`  varchar(24) NOT NULL,
   `usage_field`  varchar(24) NOT NULL,
   `supplier_field`  varchar(24) NOT NULL,

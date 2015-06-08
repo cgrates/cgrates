@@ -20,12 +20,11 @@ package utils
 
 import (
 	"errors"
-	"log"
 	"strings"
 )
 
 // Wraps regexp compiling in case of rsr fields
-func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld, supplFld, dCauseFld string) (dc *DerivedCharger, err error) {
+func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, pddFld, aTimeFld, durFld, supplFld, dCauseFld string) (dc *DerivedCharger, err error) {
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
@@ -84,6 +83,12 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 			return nil, err
 		}
 	}
+	dc.PddField = pddFld
+	if strings.HasPrefix(dc.PddField, REGEXP_PREFIX) || strings.HasPrefix(dc.PddField, STATIC_VALUE_PREFIX) {
+		if dc.rsrPddField, err = NewRSRField(dc.PddField); err != nil {
+			return nil, err
+		}
+	}
 	dc.AnswerTimeField = aTimeFld
 	if strings.HasPrefix(dc.AnswerTimeField, REGEXP_PREFIX) || strings.HasPrefix(dc.AnswerTimeField, STATIC_VALUE_PREFIX) {
 		if dc.rsrAnswerTimeField, err = NewRSRField(dc.AnswerTimeField); err != nil {
@@ -122,6 +127,7 @@ type DerivedCharger struct {
 	SubjectField            string      // Field containing subject information
 	DestinationField        string      // Field containing destination information
 	SetupTimeField          string      // Field containing setup time information
+	PddField                string      // Field containing setup time information
 	AnswerTimeField         string      // Field containing answer time information
 	UsageField              string      // Field containing usage information
 	SupplierField           string      // Field containing supplier information
@@ -135,6 +141,7 @@ type DerivedCharger struct {
 	rsrSubjectField         *RSRField
 	rsrDestinationField     *RSRField
 	rsrSetupTimeField       *RSRField
+	rsrPddField             *RSRField
 	rsrAnswerTimeField      *RSRField
 	rsrUsageField           *RSRField
 	rsrSupplierField        *RSRField
@@ -162,15 +169,13 @@ func (dcs DerivedChargers) Append(dc *DerivedCharger) (DerivedChargers, error) {
 
 func (dcs DerivedChargers) AppendDefaultRun() (DerivedChargers, error) {
 	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
-		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
 	return append(dcs, dcDf), nil
 }
 
 func (dcs DerivedChargers) Equal(other DerivedChargers) bool {
 	for i, dc := range dcs {
 		if !dc.Equal(other[i]) {
-			log.Printf("DC: %+v", dc)
-			log.Printf("OTHER: %+v", other[i])
 			return false
 		}
 	}
@@ -188,6 +193,7 @@ func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
 		dc.SubjectField == other.SubjectField &&
 		dc.DestinationField == other.DestinationField &&
 		dc.SetupTimeField == other.SetupTimeField &&
+		dc.PddField == other.PddField &&
 		dc.AnswerTimeField == other.AnswerTimeField &&
 		dc.UsageField == other.UsageField &&
 		dc.SupplierField == other.SupplierField &&

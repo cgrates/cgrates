@@ -467,6 +467,7 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 				SubjectField:         "^1002",
 				DestinationField:     utils.META_DEFAULT,
 				SetupTimeField:       utils.META_DEFAULT,
+				PddField:             utils.META_DEFAULT,
 				AnswerTimeField:      utils.META_DEFAULT,
 				UsageField:           utils.META_DEFAULT,
 				SupplierField:        utils.META_DEFAULT,
@@ -483,6 +484,7 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 				SubjectField:         utils.META_DEFAULT,
 				DestinationField:     utils.META_DEFAULT,
 				SetupTimeField:       utils.META_DEFAULT,
+				PddField:             utils.META_DEFAULT,
 				AnswerTimeField:      utils.META_DEFAULT,
 				UsageField:           utils.META_DEFAULT,
 				SupplierField:        utils.META_DEFAULT,
@@ -492,9 +494,9 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 	}
 	expectedSlc := [][]string{
 		[]string{"*out", "cgrates.org", "call", "1001", "1001",
-			"derived_run1", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
+			"derived_run1", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
 		[]string{"*out", "cgrates.org", "call", "1001", "1001",
-			"derived_run2", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
+			"derived_run2", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
 	}
 	ms := APItoModelDerivedCharger(dcs)
 	var slc [][]string

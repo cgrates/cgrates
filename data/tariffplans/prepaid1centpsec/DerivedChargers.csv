@@ -1,5 +1,5 @@
-#Direction,Tenant,Tor,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,UsageField,SupplierField,DisconnectCause
-*out,cgrates.org,call,dan,dan,extra1,,^prepaid,,,,^rif,^rif,,,,^1s,*default,*default
-*out,cgrates.org,call,dan,dan,extra2,,,,,,^ivo,^ivo,,,,,*default,*default
-*out,cgrates.org,call,dan,dan,extra3,~filterhdr1:s/(.+)/special_run3/,,,,,^runusr3,^runusr3,,,,,*default,*default
-*out,cgrates.org,call,dan,*any,extra1,,,,,,^rif2,^rif2,,,,,*default,*default
+#Direction[0],Tenant[1],Category[2],Account[3],Subject[4],RunId[5],RunFilter[6],ReqTypeField[7],DirectionField[8],TenantField[9],CategoryField[10],AccountField[11],SubjectField[12],DestinationField[13],SetupTimeField[14],PddField[15],AnswerTimeField[16],UsageField[17],SupplierField[18],DisconnectCause[19]
+*out,cgrates.org,call,dan,dan,extra1,,^prepaid,,,,^rif,^rif,,,,,^1s,*default,*default
+*out,cgrates.org,call,dan,dan,extra2,,,,,,^ivo,^ivo,,,,,,*default,*default
+*out,cgrates.org,call,dan,dan,extra3,~filterhdr1:s/(.+)/special_run3/,,,,,^runusr3,^runusr3,,,,,,*default,*default
+*out,cgrates.org,call,dan,*any,extra1,,,,,,^rif2,^rif2,,,,,,*default,*default

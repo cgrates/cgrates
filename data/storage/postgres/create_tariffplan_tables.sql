@@ -282,6 +282,7 @@ CREATE TABLE tp_derived_chargers (
   subject_field  VARCHAR(24) NOT NULL,
   destination_field  VARCHAR(24) NOT NULL,
   setup_time_field  VARCHAR(24) NOT NULL,
+  pdd_field  VARCHAR(24) NOT NULL,
   answer_time_field  VARCHAR(24) NOT NULL,
   usage_field  VARCHAR(24) NOT NULL,
   supplier_field  VARCHAR(24) NOT NULL,

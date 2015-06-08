@@ -403,6 +403,7 @@ type TPDerivedCharger struct {
 	SubjectField         string
 	DestinationField     string
 	SetupTimeField       string
+	PddField             string
 	AnswerTimeField      string
 	UsageField           string
 	SupplierField        string

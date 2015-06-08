@@ -263,10 +263,11 @@ type TpDerivedCharger struct {
 	SubjectField         string `index:"12" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	DestinationField     string `index:"13" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	SetupTimeField       string `index:"14" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	AnswerTimeField      string `index:"15" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	UsageField           string `index:"16" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	SupplierField        string `index:"17" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	DisconnectCauseField string `index:"18" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	PddField             string `index:"15" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	AnswerTimeField      string `index:"16" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	UsageField           string `index:"17" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SupplierField        string `index:"18" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DisconnectCauseField string `index:"19" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	CreatedAt            time.Time
 }
 

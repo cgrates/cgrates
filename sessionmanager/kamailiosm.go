@@ -184,7 +184,6 @@ func (self *KamailioSessionManager) Connect() error {
 }
 
 func (self *KamailioSessionManager) DisconnectSession(ev engine.Event, connId, notify string) error {
-	engine.Logger.Debug(fmt.Sprintf("DisconnectSession, ev: %+v, connId: %s, notify: %s", ev, connId, notify))
 	sessionIds := ev.GetSessionIds()
 	disconnectEv := &KamSessionDisconnect{Event: CGR_SESSION_DISCONNECT, HashEntry: sessionIds[0], HashId: sessionIds[1], Reason: notify}
 	if err := self.conns[connId].Send(disconnectEv.String()); err != nil {

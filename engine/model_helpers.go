@@ -486,6 +486,7 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 			SubjectField:         ValueOrDefault(tpDcMdl.SubjectField, utils.META_DEFAULT),
 			DestinationField:     ValueOrDefault(tpDcMdl.DestinationField, utils.META_DEFAULT),
 			SetupTimeField:       ValueOrDefault(tpDcMdl.SetupTimeField, utils.META_DEFAULT),
+			PddField:             ValueOrDefault(tpDcMdl.PddField, utils.META_DEFAULT),
 			AnswerTimeField:      ValueOrDefault(tpDcMdl.AnswerTimeField, utils.META_DEFAULT),
 			UsageField:           ValueOrDefault(tpDcMdl.UsageField, utils.META_DEFAULT),
 			SupplierField:        ValueOrDefault(tpDcMdl.SupplierField, utils.META_DEFAULT),

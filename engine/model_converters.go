@@ -294,6 +294,7 @@ func APItoModelDerivedCharger(dcs *utils.TPDerivedChargers) (result []TpDerivedC
 			CategoryField:        dc.CategoryField,
 			AccountField:         dc.AccountField,
 			SubjectField:         dc.SubjectField,
+			PddField:             dc.PddField,
 			DestinationField:     dc.DestinationField,
 			SetupTimeField:       dc.SetupTimeField,
 			AnswerTimeField:      dc.AnswerTimeField,
