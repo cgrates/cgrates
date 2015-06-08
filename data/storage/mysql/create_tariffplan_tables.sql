@@ -320,6 +320,7 @@ CREATE TABLE tp_cdrstats (
   `accounts` varchar(24) NOT NULL,
   `subjects` varchar(64) NOT NULL,
   `destination_prefixes` varchar(64) NOT NULL,
+  `pdd_interval` varchar(64) NOT NULL,
   `usage_interval` varchar(64) NOT NULL,
   `suppliers` varchar(64) NOT NULL,
   `disconnect_causes` varchar(64) NOT NULL,

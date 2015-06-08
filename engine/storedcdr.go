@@ -73,9 +73,9 @@ type StoredCdr struct {
 	Subject         string            // rating subject (rating subsystem) this record should be attached to
 	Destination     string            // destination to be charged
 	SetupTime       time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	Pdd             time.Duration     // PDD value
 	AnswerTime      time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
 	Usage           time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
-	Pdd             time.Duration     // PDD value
 	Supplier        string            // Supplier information when available
 	DisconnectCause string            // Disconnect cause of the event
 	ExtraFields     map[string]string // Extra fields to be stored in CDR

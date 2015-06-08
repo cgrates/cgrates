@@ -516,6 +516,7 @@ func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 			Accounts:            tpCs.Accounts,
 			Subjects:            tpCs.Subjects,
 			DestinationPrefixes: tpCs.DestinationPrefixes,
+			PddInterval:         tpCs.PddInterval,
 			UsageInterval:       tpCs.UsageInterval,
 			Suppliers:           tpCs.Suppliers,
 			DisconnectCauses:    tpCs.DisconnectCauses,
@@ -601,6 +602,31 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 	}
 	if tpCs.DestinationPrefixes != "" {
 		cs.DestinationPrefix = append(cs.DestinationPrefix, tpCs.DestinationPrefixes)
+	}
+	if tpCs.PddInterval != "" {
+		pdds := strings.Split(tpCs.PddInterval, utils.INFIELD_SEP)
+		if len(pdds) > 0 {
+			if sPdd, err := time.ParseDuration(pdds[0]); err == nil {
+				if len(cs.PddInterval) < 1 {
+					cs.PddInterval = append(cs.PddInterval, sPdd)
+				} else {
+					cs.PddInterval[0] = sPdd
+				}
+			} else {
+				log.Printf("Error parsing PddInterval %v for cdrs stats %v", tpCs.PddInterval, cs.Id)
+			}
+		}
+		if len(pdds) > 1 {
+			if ePdd, err := time.ParseDuration(pdds[1]); err == nil {
+				if len(cs.PddInterval) < 2 {
+					cs.PddInterval = append(cs.PddInterval, ePdd)
+				} else {
+					cs.PddInterval[1] = ePdd
+				}
+			} else {
+				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", tpCs.PddInterval, cs.Id)
+			}
+		}
 	}
 	if tpCs.UsageInterval != "" {
 		durations := strings.Split(tpCs.UsageInterval, utils.INFIELD_SEP)

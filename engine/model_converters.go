@@ -336,6 +336,7 @@ func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrstat) {
 			Accounts:            st.Accounts,
 			Subjects:            st.Subjects,
 			DestinationPrefixes: st.DestinationPrefixes,
+			PddInterval:         st.PddInterval,
 			UsageInterval:       st.UsageInterval,
 			Suppliers:           st.Suppliers,
 			DisconnectCauses:    st.DisconnectCauses,

@@ -198,12 +198,12 @@ vdf,emptyY,*out,TOPUP_EMPTY_AT,
 *out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,,
 `
 	cdrStats = `
-#Id[0],QueueLength[1],TimeWindow[2],Metric[3],SetupInterval[4],TOR[5],CdrHost[6],CdrSource[7],ReqType[8],Direction[9],Tenant[10],Category[11],Account[12],Subject[13],DestinationPrefix[14],UsageInterval[15],Supplier[16],DisconnectCause[17],MediationRunIds[18],RatedAccount[19],RatedSubject[20],CostInterval[21],Triggers[22]
-CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,5m;10m,suppl1,NORMAL_CLEARING,default,rif,rif,0;2,STANDARD_TRIGGERS
-CDRST1,,,ACD,,,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
-CDRST1,,,ACC,,,,,,,,,,,,,,,,,,,
-CDRST2,10,10m,ASR,,,,,,,cgrates.org,call,,,,,,,,,,,
-CDRST2,,,ACD,,,,,,,,,,,,,,,,,,,
+#Id[0],QueueLength[1],TimeWindow[2],Metric[3],SetupInterval[4],TOR[5],CdrHost[6],CdrSource[7],ReqType[8],Direction[9],Tenant[10],Category[11],Account[12],Subject[13],DestinationPrefix[14],PddInterval[15],UsageInterval[16],Supplier[17],DisconnectCause[18],MediationRunIds[19],RatedAccount[20],RatedSubject[21],CostInterval[22],Triggers[23]CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,5m;10m,suppl1,NORMAL_CLEARING,default,rif,rif,0;2,STANDARD_TRIGGERS
+CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,3m;7m,5m;10m,suppl1,NORMAL_CLEARING,default,rif,rif,0;2,STANDARD_TRIGGERS
+CDRST1,,,ACD,,,,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
+CDRST1,,,ACC,,,,,,,,,,,,,,,,,,,,
+CDRST2,10,10m,ASR,,,,,,,cgrates.org,call,,,,,,,,,,,,
+CDRST2,,,ACD,,,,,,,,,,,,,,,,,,,,
 `
 )
 
@@ -1063,6 +1063,7 @@ func TestLoadCdrStats(t *testing.T) {
 		Account:           []string{"dan"},
 		Subject:           []string{"dan"},
 		DestinationPrefix: []string{"49"},
+		PddInterval:       []time.Duration{3 * time.Minute, 7 * time.Minute},
 		UsageInterval:     []time.Duration{5 * time.Minute, 10 * time.Minute},
 		Supplier:          []string{"suppl1"},
 		DisconnectCause:   []string{"NORMAL_CLEARING"},

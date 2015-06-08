@@ -9,16 +9,16 @@ import (
 
 func TestModelHelperCsvLoad(t *testing.T) {
 	l, err := csvLoad(TpDestination{}, []string{"TEST_DEST", "+492"})
-	tpd := l.(TpDestination)
-	if err != nil || tpd.Tag != "TEST_DEST" || tpd.Prefix != "+492" {
+	tpd, ok := l.(TpDestination)
+	if err != nil || !ok || tpd.Tag != "TEST_DEST" || tpd.Prefix != "+492" {
 		t.Errorf("model load failed: %+v", tpd)
 	}
 }
 
 func TestModelHelperCsvLoadInt(t *testing.T) {
-	l, err := csvLoad(TpCdrstat{}, []string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "*rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m", "suppl1", "NORMAL_CLEARING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"})
-	tpd := l.(TpCdrstat)
-	if err != nil || tpd.QueueLength != 5 {
+	l, err := csvLoad(TpCdrstat{}, []string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "*rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "3m;7m", "5m;10m", "suppl1", "NORMAL_CLEARING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"})
+	tpd, ok := l.(TpCdrstat)
+	if err != nil || !ok || tpd.QueueLength != 5 {
 		t.Errorf("model load failed: %+v", tpd)
 	}
 }
@@ -389,6 +389,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 				Accounts:            "dan",
 				Subjects:            "dan",
 				DestinationPrefixes: "49",
+				PddInterval:         "3m;7m",
 				UsageInterval:       "5m;10m",
 				Suppliers:           "supplier1",
 				DisconnectCauses:    "NORMAL_CLEARNING",
@@ -412,6 +413,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 				Accounts:            "dan",
 				Subjects:            "dan",
 				DestinationPrefixes: "49",
+				PddInterval:         "3m;7m",
 				UsageInterval:       "5m;10m",
 				Suppliers:           "supplier1",
 				DisconnectCauses:    "NORMAL_CLEARNING",
@@ -424,9 +426,9 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 	}
 	expectedSlc := [][]string{
 		[]string{"CDRST1", "5", "60m", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", utils.META_RATED, "*out", "cgrates.org", "call",
-			"dan", "dan", "49", "5m;10m", "supplier1", "NORMAL_CLEARNING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"},
+			"dan", "dan", "49", "3m;7m", "5m;10m", "supplier1", "NORMAL_CLEARNING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"},
 		[]string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", utils.META_RATED, "*out", "cgrates.org", "call",
-			"dan", "dan", "49", "5m;10m", "supplier1", "NORMAL_CLEARNING", "default", "dan", "dan", "0;2", "STANDARD_TRIGGERS"},
+			"dan", "dan", "49", "3m;7m", "5m;10m", "supplier1", "NORMAL_CLEARNING", "default", "dan", "dan", "0;2", "STANDARD_TRIGGERS"},
 	}
 	ms := APItoModelCdrStat(cdrStats)
 	var slc [][]string

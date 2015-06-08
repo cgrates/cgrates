@@ -336,6 +336,7 @@ type TPCdrStat struct {
 	Accounts            string
 	Subjects            string
 	DestinationPrefixes string
+	PddInterval         string
 	UsageInterval       string
 	Suppliers           string
 	DisconnectCauses    string

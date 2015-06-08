@@ -306,14 +306,15 @@ type TpCdrstat struct {
 	Accounts            string `index:"12" re:""`
 	Subjects            string `index:"13" re:""`
 	DestinationPrefixes string `index:"14" re:""`
-	UsageInterval       string `index:"15" re:""`
-	Suppliers           string `index:"16" re:""`
-	DisconnectCauses    string `index:"17" re:""`
-	MediationRunids     string `index:"18" re:""`
-	RatedAccounts       string `index:"19" re:""`
-	RatedSubjects       string `index:"20" re:""`
-	CostInterval        string `index:"21" re:""`
-	ActionTriggers      string `index:"22" re:""`
+	PddInterval         string `index:"15" re:""`
+	UsageInterval       string `index:"16" re:""`
+	Suppliers           string `index:"17" re:""`
+	DisconnectCauses    string `index:"18" re:""`
+	MediationRunids     string `index:"19" re:""`
+	RatedAccounts       string `index:"20" re:""`
+	RatedSubjects       string `index:"21" re:""`
+	CostInterval        string `index:"22" re:""`
+	ActionTriggers      string `index:"23" re:""`
 	CreatedAt           time.Time
 }
 
