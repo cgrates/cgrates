@@ -811,17 +811,19 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			lcrCD.Subject = supplier
 			var qosSortParams []string
 			var asrValues sort.Float64Slice
+			var pddValues sort.Float64Slice
 			var acdValues sort.Float64Slice
 			var tcdValues sort.Float64Slice
 			var accValues sort.Float64Slice
 			var tccValues sort.Float64Slice
 			// track if one value is never calculated
 			asrNeverConsidered := true
+			pddNeverConsidered := true
 			acdNeverConsidered := true
 			tcdNeverConsidered := true
 			accNeverConsidered := true
 			tccNeverConsidered := true
-			if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
+			if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD}, lcrCost.Entry.Strategy) {
 				if stats == nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
@@ -864,6 +866,12 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							}
 							asrNeverConsidered = false
 						}
+						if pdd, exists := statValues[PDD]; exists {
+							if pdd > STATS_NA {
+								pddValues = append(pddValues, pdd)
+							}
+							pddNeverConsidered = false
+						}
 						if acd, exists := statValues[ACD]; exists {
 							if acd > STATS_NA {
 								acdValues = append(acdValues, acd)
@@ -893,24 +901,31 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 						continue
 					}
 					asrValues.Sort()
+					pddValues.Sort()
 					acdValues.Sort()
 					tcdValues.Sort()
 					accValues.Sort()
 					tccValues.Sort()
 
 					//log.Print(asrValues, acdValues)
-					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD || lcrCost.Entry.Strategy == LCR_STRATEGY_QOS {
+					if utils.IsSliceMember([]string{LCR_STRATEGY_QOS_THRESHOLD, LCR_STRATEGY_QOS}, lcrCost.Entry.Strategy) {
 						qosSortParams = lcrCost.Entry.GetParams()
 					}
 					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 						// filter suppliers by qos thresholds
-						asrMin, asrMax, acdMin, acdMax, tcdMin, tcdMax, accMin, accMax, tccMin, tccMax := lcrCost.Entry.GetQOSLimits()
+						asrMin, asrMax, pddMin, pddMax, acdMin, acdMax, tcdMin, tcdMax, accMin, accMax, tccMin, tccMax := lcrCost.Entry.GetQOSLimits()
 						//log.Print(asrMin, asrMax, acdMin, acdMax)
 						// skip current supplier if off limits
 						if asrMin > 0 && len(asrValues) != 0 && asrValues[0] < asrMin {
 							continue
 						}
 						if asrMax > 0 && len(asrValues) != 0 && asrValues[len(asrValues)-1] > asrMax {
+							continue
+						}
+						if pddMin > 0 && len(pddValues) != 0 && pddValues[0] < pddMin.Seconds() {
+							continue
+						}
+						if pddMax > 0 && len(pddValues) != 0 && pddValues[len(pddValues)-1] > pddMax.Seconds() {
 							continue
 						}
 						if acdMin > 0 && len(acdValues) != 0 && acdValues[0] < acdMin.Seconds() {
@@ -975,6 +990,9 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				qos := make(map[string]float64, 5)
 				if !asrNeverConsidered {
 					qos[ASR] = utils.AvgNegative(asrValues)
+				}
+				if !pddNeverConsidered {
+					qos[PDD] = utils.AvgNegative(pddValues)
 				}
 				if !acdNeverConsidered {
 					qos[ACD] = utils.AvgNegative(acdValues)

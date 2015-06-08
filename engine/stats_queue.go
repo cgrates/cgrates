@@ -34,6 +34,8 @@ type StatsQueue struct {
 var METRIC_TRIGGER_MAP = map[string]string{
 	"*min_asr": ASR,
 	"*max_asr": ASR,
+	"*min_pdd": PDD,
+	"*max_pdd": PDD,
 	"*min_acd": ACD,
 	"*max_acd": ACD,
 	"*min_tcd": TCD,
@@ -48,6 +50,7 @@ var METRIC_TRIGGER_MAP = map[string]string{
 type QCdr struct {
 	SetupTime  time.Time
 	AnswerTime time.Time
+	Pdd        time.Duration
 	Usage      time.Duration
 	Cost       float64
 }
@@ -123,6 +126,7 @@ func (sq *StatsQueue) simplifyCdr(cdr *StoredCdr) *QCdr {
 	return &QCdr{
 		SetupTime:  cdr.SetupTime,
 		AnswerTime: cdr.AnswerTime,
+		Pdd:        cdr.Pdd,
 		Usage:      cdr.Usage,
 		Cost:       cdr.Cost,
 	}
