@@ -372,6 +372,10 @@ func (qoss QOSSorter) Less(i, j int) bool {
 		if _, exists := qoss[j].QOS[param]; !exists {
 			continue
 		}
+		// skip to next param
+		if qoss[i].QOS[param] == qoss[j].QOS[param] {
+			continue
+		}
 		// -1 is the best
 		if qoss[j].QOS[param] == -1 {
 			return false
@@ -379,10 +383,6 @@ func (qoss QOSSorter) Less(i, j int) bool {
 		// more is better
 		if qoss[i].QOS[param] == -1 || qoss[i].QOS[param] > qoss[j].QOS[param] {
 			return true
-		}
-		// skip to next param
-		if qoss[i].QOS[param] == qoss[j].QOS[param] {
-			continue
 		}
 	}
 	return false
