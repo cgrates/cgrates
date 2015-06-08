@@ -16,8 +16,8 @@ func TestModelHelperCsvLoad(t *testing.T) {
 }
 
 func TestModelHelperCsvLoadInt(t *testing.T) {
-	l, err := csvLoad(TpCdrStat{}, []string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "*rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m", "suppl1", "NORMAL_CLEARING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"})
-	tpd := l.(TpCdrStat)
+	l, err := csvLoad(TpCdrstat{}, []string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "*rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m", "suppl1", "NORMAL_CLEARING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"})
+	tpd := l.(TpCdrstat)
 	if err != nil || tpd.QueueLength != 5 {
 		t.Errorf("model load failed: %+v", tpd)
 	}

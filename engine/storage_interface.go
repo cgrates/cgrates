@@ -144,7 +144,7 @@ type LoadReader interface {
 	GetTpRatingPlans(string, string, *utils.Paginator) ([]TpRatingPlan, error)
 	GetTpRatingProfiles(*TpRatingProfile) ([]TpRatingProfile, error)
 	GetTpSharedGroups(string, string) ([]TpSharedGroup, error)
-	GetTpCdrStats(string, string) ([]TpCdrStat, error)
+	GetTpCdrStats(string, string) ([]TpCdrstat, error)
 	GetTpDerivedChargers(*TpDerivedCharger) ([]TpDerivedCharger, error)
 	GetTpLCRs(string, string) ([]TpLcrRule, error)
 	GetTpActions(string, string) ([]TpAction, error)
@@ -162,7 +162,7 @@ type LoadWriter interface {
 	SetTpRatingPlans([]TpRatingPlan) error
 	SetTpRatingProfiles([]TpRatingProfile) error
 	SetTpSharedGroups([]TpSharedGroup) error
-	SetTpCdrStats([]TpCdrStat) error
+	SetTpCdrStats([]TpCdrstat) error
 	SetTpDerivedChargers([]TpDerivedCharger) error
 	SetTpLCRs([]TpLcrRule) error
 	SetTpActions([]TpAction) error

@@ -371,48 +371,17 @@ func (self *SQLStorage) SetTpSharedGroups(sgs []TpSharedGroup) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTpCdrStats(css []TpCdrStat) error {
+func (self *SQLStorage) SetTpCdrStats(css []TpCdrstat) error {
 	if len(css) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
 
 	tx := self.db.Begin()
-	for csId, cStats := range css {
-		if err := tx.Where(&TpCdrstat{Tpid: tpid, Tag: csId}).Delete(TpCdrstat{}).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-		for _, cs := range cStats {
-			ql, _ := strconv.Atoi(cs.QueueLength)
-			saved := tx.Save(&TpCdrstat{
-				Tpid:                tpid,
-				Tag:                 csId,
-				QueueLength:         ql,
-				TimeWindow:          cs.TimeWindow,
-				Metrics:             cs.Metrics,
-				SetupInterval:       cs.SetupInterval,
-				Tors:                cs.TORs,
-				CdrHosts:            cs.CdrHosts,
-				CdrSources:          cs.CdrSources,
-				ReqTypes:            cs.ReqTypes,
-				Directions:          cs.Directions,
-				Tenants:             cs.Tenants,
-				Categories:          cs.Categories,
-				Accounts:            cs.Accounts,
-				Subjects:            cs.Subjects,
-				DestinationPrefixes: cs.DestinationPrefixes,
-				UsageInterval:       cs.UsageInterval,
-				Suppliers:           cs.Suppliers,
-				DisconnectCauses:    cs.DisconnectCauses,
-				MediationRunids:     cs.MediationRunIds,
-				RatedAccounts:       cs.RatedAccounts,
-				RatedSubjects:       cs.RatedSubjects,
-				CostInterval:        cs.CostInterval,
-				ActionTriggers:      cs.ActionTriggers,
-				CreatedAt:           time.Now(),
-			})
-			if saved.Error != nil {
+	for _, cStat := range css {
+		if found, _ := m[cStat.Tag]; !found {
+			m[cStat.Tag] = true
+			if err := tx.Where(&TpCdrstat{Tpid: cStat.Tpid, Tag: cStat.Tag}).Delete(TpCdrstat{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -1327,7 +1296,7 @@ func (self *SQLStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 	return tpDerivedChargers, nil
 }
 
-func (self *SQLStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrStat, error) {
+func (self *SQLStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrstat, error) {
 	var tpCdrStats []TpCdrstat
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {

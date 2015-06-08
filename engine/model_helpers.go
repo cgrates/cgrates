@@ -496,7 +496,7 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 	return dcs, nil
 }
 
-type TpCdrStats []TpCdrStat
+type TpCdrStats []TpCdrstat
 
 func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 	css := make(map[string][]*utils.TPCdrStat)

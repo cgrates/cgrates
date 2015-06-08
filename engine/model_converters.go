@@ -316,10 +316,10 @@ func APItoModelDerivedCharger(dcs *utils.TPDerivedChargers) (result []TpDerivedC
 	return
 }
 
-func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrStat) {
+func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrstat) {
 	for _, st := range stats.CdrStats {
 		ql, _ := strconv.Atoi(st.QueueLength)
-		result = append(result, TpCdrStat{
+		result = append(result, TpCdrstat{
 			Tpid:                stats.TPid,
 			Tag:                 stats.CdrStatsId,
 			QueueLength:         ql,
@@ -347,7 +347,7 @@ func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrStat) {
 		})
 	}
 	if len(stats.CdrStats) == 0 {
-		result = append(result, TpCdrStat{
+		result = append(result, TpCdrstat{
 			Tpid: stats.TPid,
 			Tag:  stats.CdrStatsId,
 		})

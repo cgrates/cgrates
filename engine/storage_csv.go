@@ -431,8 +431,8 @@ func (csvs *CSVStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 	return tpDerivedChargers, nil
 }
 
-func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrStat, error) {
-	csvReader, fp, err := csvs.readerFunc(csvs.cdrStatsFn, csvs.sep, getColumnCount(TpCdrStat{}))
+func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrstat, error) {
+	csvReader, fp, err := csvs.readerFunc(csvs.cdrStatsFn, csvs.sep, getColumnCount(TpCdrstat{}))
 	if err != nil {
 		log.Print("Could not load cdr stats file: ", err)
 		// allow writing of the other values
@@ -441,17 +441,17 @@ func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrStat, error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	var tpCdrStats []TpCdrStat
+	var tpCdrStats []TpCdrstat
 	for record, err := csvReader.Read(); err != io.EOF; record, err = csvReader.Read() {
 		if err != nil {
 			log.Print("bad line in cdr stats csv: ", err)
 			return nil, err
 		}
-		if tpCdrStat, err := csvLoad(TpCdrStat{}, record); err != nil {
+		if tpCdrStat, err := csvLoad(TpCdrstat{}, record); err != nil {
 			log.Print("error loading cdr stat: ", err)
 			return nil, err
 		} else {
-			cs := tpCdrStat.(TpCdrStat)
+			cs := tpCdrStat.(TpCdrstat)
 			cs.Tpid = tpid
 			tpCdrStats = append(tpCdrStats, cs)
 		}
