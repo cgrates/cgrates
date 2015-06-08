@@ -343,7 +343,7 @@ func TestStoredCdrForkCdr(t *testing.T) {
 		Cost: 1.01, RatedSubject: "dans"}
 	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.DIRECTION}, &utils.RSRField{Id: utils.TENANT},
 		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.ACCOUNT}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.DESTINATION},
-		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE}, &utils.RSRField{Id: utils.PDD},
+		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.PDD}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE},
 		&utils.RSRField{Id: utils.SUPPLIER}, &utils.RSRField{Id: utils.DISCONNECT_CAUSE},
 		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "field_extr2"}}, true)
 	if err != nil {
@@ -379,7 +379,7 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	rsrStDCause, _ := utils.NewRSRField("^HANGUP_COMPLETE")
 	rsrPdd, _ := utils.NewRSRField("^3")
 	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStIn, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: "destination"},
-		rsrStST, rsrStAT, rsrStDur, rsrPdd, rsrStSuppl, rsrStDCause, []*utils.RSRField{}, true)
+		rsrStST, rsrPdd, rsrStAT, rsrStDur, rsrStSuppl, rsrStDCause, []*utils.RSRField{}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
@@ -394,7 +394,7 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	}
 	_, err = storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: "dummy_header"}, &utils.RSRField{Id: "direction"}, &utils.RSRField{Id: "tenant"},
 		&utils.RSRField{Id: "tor"}, &utils.RSRField{Id: "account"}, &utils.RSRField{Id: "subject"}, &utils.RSRField{Id: "destination"},
-		&utils.RSRField{Id: "setup_time"}, &utils.RSRField{Id: "answer_time"}, &utils.RSRField{Id: "duration"}, &utils.RSRField{Id: utils.PDD}, &utils.RSRField{Id: utils.SUPPLIER},
+		&utils.RSRField{Id: "setup_time"}, &utils.RSRField{Id: utils.PDD}, &utils.RSRField{Id: "answer_time"}, &utils.RSRField{Id: "duration"}, &utils.RSRField{Id: utils.SUPPLIER},
 		&utils.RSRField{Id: utils.DISCONNECT_CAUSE}, []*utils.RSRField{}, true)
 	if err == nil {
 		t.Error("Failed to detect missing header")

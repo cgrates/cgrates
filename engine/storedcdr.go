@@ -157,12 +157,12 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(storedCdr.Destination)
 	case utils.SETUP_TIME:
 		return rsrFld.ParseValue(storedCdr.SetupTime.Format(time.RFC3339))
+	case utils.PDD:
+		return strconv.FormatFloat(utils.Round(storedCdr.Pdd.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	case utils.ANSWER_TIME:
 		return rsrFld.ParseValue(storedCdr.AnswerTime.Format(time.RFC3339))
 	case utils.USAGE:
 		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
-	case utils.PDD:
-		return strconv.FormatFloat(utils.Round(storedCdr.Pdd.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(storedCdr.Supplier)
 	case utils.DISCONNECT_CAUSE:
@@ -224,9 +224,9 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v.Set(utils.SUBJECT, storedCdr.Subject)
 	v.Set(utils.DESTINATION, storedCdr.Destination)
 	v.Set(utils.SETUP_TIME, storedCdr.SetupTime.Format(time.RFC3339))
+	v.Set(utils.PDD, storedCdr.FieldAsString(&utils.RSRField{Id: utils.PDD}))
 	v.Set(utils.ANSWER_TIME, storedCdr.AnswerTime.Format(time.RFC3339))
 	v.Set(utils.USAGE, storedCdr.FormatUsage(utils.SECONDS))
-	v.Set(utils.PDD, storedCdr.FieldAsString(&utils.RSRField{Id: utils.PDD}))
 	v.Set(utils.SUPPLIER, storedCdr.Supplier)
 	v.Set(utils.DISCONNECT_CAUSE, storedCdr.DisconnectCause)
 	if storedCdr.CostDetails != nil {
@@ -236,8 +236,8 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 }
 
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
-func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld,
-	answerTimeFld, durationFld, pddFld, supplierFld, disconnectCauseFld *utils.RSRField,
+func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, pddFld,
+	answerTimeFld, durationFld, supplierFld, disconnectCauseFld *utils.RSRField,
 	extraFlds []*utils.RSRField, primaryMandatory bool) (*StoredCdr, error) {
 	if reqTypeFld == nil {
 		reqTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
