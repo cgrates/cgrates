@@ -460,7 +460,7 @@ func TestTutFsCallsCdrStats(t *testing.T) {
 		return
 	}
 	var queueIds []string
-	eQueueIds := []string{"*default", "CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
+	eQueueIds := []string{"CDRST1", "CDRST_1001", "CDRST_1002", "CDRST_1003", "STATS_SUPPL1", "STATS_SUPPL2"}
 	if err := tutLocalRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
 		t.Error("Calling CDRStatsV1.GetQueueIds, got error: ", err.Error())
 	} else if len(eQueueIds) != len(queueIds) {
@@ -860,13 +860,7 @@ func TestTutLocalCdrStatsAfter(t *testing.T) {
 		return
 	}
 	var statMetrics map[string]float64
-	eMetrics := map[string]float64{engine.ACC: 0.3452380952, engine.ACD: 111.4761904762, engine.ASR: 100}
-	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: utils.META_DEFAULT}, &statMetrics); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-		//} else if !reflect.DeepEqual(eMetrics, statMetrics) {
-		//	t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
-	}
-	eMetrics = map[string]float64{engine.ACD: 90.2, engine.ASR: 100, engine.TCC: 1.675, engine.TCD: 451, engine.ACC: 0.335}
+	eMetrics := map[string]float64{engine.ACD: 90.2, engine.ASR: 100, engine.TCC: 1.675, engine.TCD: 451, engine.ACC: 0.335}
 	if err := tutLocalRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST1"}, &statMetrics); err != nil {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(eMetrics, statMetrics) {

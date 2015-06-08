@@ -86,28 +86,7 @@ type CdrReplicationJsonCfg struct {
 
 // Cdrstats config section
 type CdrStatsJsonCfg struct {
-	Enabled              *bool
-	Queue_length         *int
-	Time_window          *string
-	Metrics              *[]string
-	Setup_interval       *[]string
-	Tors                 *[]string
-	Cdr_hosts            *[]string
-	Cdr_sources          *[]string
-	Req_types            *[]string
-	Directions           *[]string
-	Tenants              *[]string
-	Categories           *[]string
-	Accounts             *[]string
-	Subjects             *[]string
-	Destination_prefixes *[]string
-	Usage_interval       *[]string
-	Suppliers            *[]string
-	Disconnect_causes    *[]string
-	Mediation_run_ids    *[]string
-	Rated_accounts       *[]string
-	Rated_subjects       *[]string
-	Cost_interval        *[]float64
+	Enabled *bool
 }
 
 // One cdr field config, used in cdre and cdrc

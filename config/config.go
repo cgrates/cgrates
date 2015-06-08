@@ -573,14 +573,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnCdrstatsCfg.Enabled != nil {
 			self.CDRStatsEnabled = *jsnCdrstatsCfg.Enabled
 		}
-		if jsnCdrstatsCfg != nil { // Have CDRStats config, load it in default object
-			if self.CDRStatConfig == nil {
-				self.CDRStatConfig = &CdrStatsConfig{Id: utils.META_DEFAULT}
-			}
-			if err = self.CDRStatConfig.loadFromJsonCfg(jsnCdrstatsCfg); err != nil {
-				return err
-			}
-		}
 	}
 
 	if jsnCdreCfg != nil {

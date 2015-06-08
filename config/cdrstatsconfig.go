@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"time"
 )
 
@@ -46,86 +45,4 @@ type CdrStatsConfig struct {
 	RatedAccounts       []string
 	RatedSubjects       []string
 	CostInterval        []float64 // 2 or less items, (>=Cost, <Cost)
-}
-
-func (self *CdrStatsConfig) loadFromJsonCfg(jsnCfg *CdrStatsJsonCfg) error {
-	var err error
-	if jsnCfg.Queue_length != nil {
-		self.QueueLength = *jsnCfg.Queue_length
-	}
-	if jsnCfg.Time_window != nil {
-		if self.TimeWindow, err = utils.ParseDurationWithSecs(*jsnCfg.Time_window); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Metrics != nil {
-		self.Metrics = *jsnCfg.Metrics
-	}
-	if jsnCfg.Setup_interval != nil {
-		for _, setupTimeStr := range *jsnCfg.Setup_interval {
-			if setupTime, err := utils.ParseTimeDetectLayout(setupTimeStr); err != nil {
-				return err
-			} else {
-				self.SetupInterval = append(self.SetupInterval, setupTime)
-			}
-		}
-	}
-	if jsnCfg.Tors != nil {
-		self.TORs = *jsnCfg.Tors
-	}
-	if jsnCfg.Cdr_hosts != nil {
-		self.CdrHosts = *jsnCfg.Cdr_hosts
-	}
-	if jsnCfg.Cdr_sources != nil {
-		self.CdrSources = *jsnCfg.Cdr_sources
-	}
-	if jsnCfg.Req_types != nil {
-		self.ReqTypes = *jsnCfg.Req_types
-	}
-	if jsnCfg.Directions != nil {
-		self.Directions = *jsnCfg.Directions
-	}
-	if jsnCfg.Tenants != nil {
-		self.Tenants = *jsnCfg.Tenants
-	}
-	if jsnCfg.Categories != nil {
-		self.Categories = *jsnCfg.Categories
-	}
-	if jsnCfg.Accounts != nil {
-		self.Accounts = *jsnCfg.Accounts
-	}
-	if jsnCfg.Subjects != nil {
-		self.Subjects = *jsnCfg.Subjects
-	}
-	if jsnCfg.Destination_prefixes != nil {
-		self.DestinationPrefixes = *jsnCfg.Destination_prefixes
-	}
-	if jsnCfg.Usage_interval != nil {
-		for _, usageDurStr := range *jsnCfg.Usage_interval {
-			if usageDur, err := utils.ParseDurationWithSecs(usageDurStr); err != nil {
-				return err
-			} else {
-				self.UsageInterval = append(self.UsageInterval, usageDur)
-			}
-		}
-	}
-	if jsnCfg.Suppliers != nil {
-		self.Suppliers = *jsnCfg.Suppliers
-	}
-	if jsnCfg.Disconnect_causes != nil {
-		self.DisconnectCauses = *jsnCfg.Disconnect_causes
-	}
-	if jsnCfg.Mediation_run_ids != nil {
-		self.MediationRunIds = *jsnCfg.Mediation_run_ids
-	}
-	if jsnCfg.Rated_accounts != nil {
-		self.RatedAccounts = *jsnCfg.Rated_accounts
-	}
-	if jsnCfg.Rated_subjects != nil {
-		self.RatedSubjects = *jsnCfg.Rated_subjects
-	}
-	if jsnCfg.Cost_interval != nil {
-		self.CostInterval = *jsnCfg.Cost_interval
-	}
-	return nil
 }

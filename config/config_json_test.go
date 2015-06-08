@@ -154,26 +154,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 
 func TestDfCdrStatsJsonCfg(t *testing.T) {
 	eCfg := &CdrStatsJsonCfg{
-		Enabled:              utils.BoolPointer(false),
-		Queue_length:         utils.IntPointer(50),
-		Time_window:          utils.StringPointer("1h"),
-		Metrics:              utils.StringSlicePointer([]string{"ASR", "ACD", "ACC"}),
-		Setup_interval:       utils.StringSlicePointer([]string{}),
-		Tors:                 utils.StringSlicePointer([]string{}),
-		Cdr_hosts:            utils.StringSlicePointer([]string{}),
-		Cdr_sources:          utils.StringSlicePointer([]string{}),
-		Req_types:            utils.StringSlicePointer([]string{}),
-		Directions:           utils.StringSlicePointer([]string{}),
-		Tenants:              utils.StringSlicePointer([]string{}),
-		Categories:           utils.StringSlicePointer([]string{}),
-		Accounts:             utils.StringSlicePointer([]string{}),
-		Subjects:             utils.StringSlicePointer([]string{}),
-		Destination_prefixes: utils.StringSlicePointer([]string{}),
-		Usage_interval:       utils.StringSlicePointer([]string{}),
-		Mediation_run_ids:    utils.StringSlicePointer([]string{}),
-		Rated_accounts:       utils.StringSlicePointer([]string{}),
-		Rated_subjects:       utils.StringSlicePointer([]string{}),
-		Cost_interval:        utils.Float64SlicePointer([]float64{}),
+		Enabled: utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.CdrStatsJsonCfg(); err != nil {
 		t.Error(err)

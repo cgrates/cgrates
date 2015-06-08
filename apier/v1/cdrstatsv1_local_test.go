@@ -77,19 +77,6 @@ func TestCDRStatsLclRpcConn(t *testing.T) {
 	}
 }
 
-func TestCDRStatsLclGetQueueIds(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var queueIds []string
-	eQueueIds := []string{"*default"}
-	if err := cdrstRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
-		t.Error("Calling CDRStatsV1.GetQueueIds, got error: ", err.Error())
-	} else if !reflect.DeepEqual(eQueueIds, queueIds) {
-		t.Errorf("Expecting: %v, received: %v", eQueueIds, queueIds)
-	}
-}
-
 func TestCDRStatsLclLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
@@ -110,7 +97,7 @@ func TestCDRStatsLclGetQueueIds2(t *testing.T) {
 		return
 	}
 	var queueIds []string
-	eQueueIds := []string{"*default", "CDRST3", "CDRST4"}
+	eQueueIds := []string{"CDRST3", "CDRST4"}
 	if err := cdrstRpc.Call("CDRStatsV1.GetQueueIds", "", &queueIds); err != nil {
 		t.Error("Calling CDRStatsV1.GetQueueIds, got error: ", err.Error())
 	} else if len(eQueueIds) != len(queueIds) {
@@ -163,13 +150,6 @@ func TestCDRStatsLclGetMetrics1(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var rcvMetrics1 map[string]float64
-	expectedMetrics1 := map[string]float64{"ASR": 75, "ACD": 15, "ACC": 15}
-	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "*default"}, &rcvMetrics1); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-	} else if !reflect.DeepEqual(expectedMetrics1, rcvMetrics1) {
-		t.Errorf("Expecting: %v, received: %v", expectedMetrics1, rcvMetrics1)
-	}
 	var rcvMetrics2 map[string]float64
 	expectedMetrics2 := map[string]float64{"ASR": 75, "ACD": 15}
 	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "CDRST4"}, &rcvMetrics2); err != nil {
@@ -190,13 +170,6 @@ func TestCDRStatsLclResetMetrics(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	var rcvMetrics1 map[string]float64
-	expectedMetrics1 := map[string]float64{"ASR": 75, "ACD": 15, "ACC": 15}
-	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "*default"}, &rcvMetrics1); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-	} else if !reflect.DeepEqual(expectedMetrics1, rcvMetrics1) {
-		t.Errorf("Expecting: %v, received: %v", expectedMetrics1, rcvMetrics1)
-	}
 	var rcvMetrics2 map[string]float64
 	expectedMetrics2 := map[string]float64{"ASR": -1, "ACD": -1}
 	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "CDRST4"}, &rcvMetrics2); err != nil {

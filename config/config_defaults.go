@@ -108,25 +108,6 @@ const CGRATES_CFG_JSON = `
 
 "cdrstats": {
 	"enabled": false,						// starts the cdrstats service: <true|false>
-	"queue_length": 50,						// number of items in the stats buffer
-	"time_window": "1h",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-	"metrics": ["ASR", "ACD", "ACC"],		// stat metric ids to build
-	"setup_interval": [],					// filter on CDR SetupTime
-	"tors":	[],								// filter on CDR TOR fields
-	"cdr_hosts": [],						// filter on CDR CdrHost fields
-	"cdr_sources": [], 						// filter on CDR CdrSource fields
-	"req_types": [],						// filter on CDR ReqType fields
-	"directions": [],						// filter on CDR Direction fields
-	"tenants": [],							// filter on CDR Tenant fields
-	"categories": [],						// filter on CDR Category fields
-	"accounts": [],							// filter on CDR Account fields
-	"subjects": [],							// filter on CDR Subject fields
-	"destination_prefixes": [],				// filter on CDR Destination prefixes
-	"usage_interval": [],					// filter on CDR Usage 
-	"mediation_run_ids": [],				// filter on CDR MediationRunId fields
-	"rated_accounts": [],					// filter on CDR RatedAccount fields
-	"rated_subjects": [],					// filter on CDR RatedSubject fields
-	"cost_interval": [],					// filter on CDR Cost
 },
 
 

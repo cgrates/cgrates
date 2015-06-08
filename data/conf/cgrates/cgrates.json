@@ -12,6 +12,25 @@
 // This file contains the default configuration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
 
+/*
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+
 //"general": {
 //	"http_skip_tls_veify": false,			// if enabled Http Client will accept any TLS certificate
 //	"rounding_decimals": 10,				// system level precision for floats
@@ -93,25 +112,6 @@
 
 //"cdrstats": {
 //	"enabled": false,						// starts the cdrstats service: <true|false>
-//	"queue_length": 50,						// number of items in the stats buffer
-//	"time_window": "1h",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-//	"metrics": ["ASR", "ACD", "ACC"],		// stat metric ids to build
-//	"setup_interval": [],					// filter on CDR SetupTime
-//	"tors":	[],								// filter on CDR TOR fields
-//	"cdr_hosts": [],						// filter on CDR CdrHost fields
-//	"cdr_sources": [], 						// filter on CDR CdrSource fields
-//	"req_types": [],						// filter on CDR ReqType fields
-//	"directions": [],						// filter on CDR Direction fields
-//	"tenants": [],							// filter on CDR Tenant fields
-//	"categories": [],						// filter on CDR Category fields
-//	"accounts": [],							// filter on CDR Account fields
-//	"subjects": [],							// filter on CDR Subject fields
-//	"destination_prefixes": [],				// filter on CDR Destination prefixes
-//	"usage_interval": [],					// filter on CDR Usage
-//	"mediation_run_ids": [],				// filter on CDR MediationRunId fields
-//	"rated_accounts": [],					// filter on CDR RatedAccount fields
-//	"rated_subjects": [],					// filter on CDR RatedSubject fields
-//	"cost_interval": [],					// filter on CDR Cost
 //},
 
 
@@ -143,7 +143,7 @@
 //			{"tag":"SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
 //			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
 //			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
-//			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},
+//			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
 //		],
 //		"trailer_fields": [],							// template of the exported trailer fields
 //	}
@@ -176,7 +176,7 @@
 //			{"tag": "answer_time", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "12", "mandatory": true},
 //			{"tag": "usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "13", "mandatory": true},
 //		],
-//	}
+//	},
 //},
 
 //"sm_freeswitch": {
@@ -241,7 +241,7 @@
 
 
 //"mailer": {
-//	"server": "localhost:25",								// the server to use when sending emails out
+//	"server": "localhost",								// the server to use when sending emails out
 //	"auth_user": "cgrates",								// authenticate to email server using this user
 //	"auth_passwd": "CGRateS.org",						// authenticate to email server with this password
 //	"from_address": "cgr-mailer@localhost.localdomain"	// from address used when sending emails out
