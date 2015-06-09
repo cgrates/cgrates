@@ -204,6 +204,14 @@ func (s *Session) SaveOperations() {
 		for _, cc := range sr.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		s.sessionManager.CdrDb().LogCallCost(s.eventStart.GetCgrId(), engine.SESSION_MANAGER_SOURCE, sr.DerivedCharger.RunId, firstCC)
+		var existingDuration int
+		s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
+			CgrId:    s.eventStart.GetCgrId(),
+			Source:   engine.SESSION_MANAGER_SOURCE,
+			RunId:    sr.DerivedCharger.RunId,
+			CallCost: firstCC,
+		}, &existingDuration)
+		// on duplicate error refound extra from existing database
+
 	}
 }

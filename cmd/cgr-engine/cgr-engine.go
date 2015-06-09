@@ -153,7 +153,7 @@ func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cac
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, cdrDb, raterConn, cdrsConn)
+	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, raterConn, cdrsConn)
 	if err = sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
@@ -203,7 +203,7 @@ func startSmKamailio(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn, cdrDb)
+	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn)
 	if err = sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
@@ -253,7 +253,7 @@ func startSmOpenSIPS(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn, cdrDb)
+	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn)
 	if err := sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
 	}

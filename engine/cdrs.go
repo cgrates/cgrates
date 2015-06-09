@@ -98,6 +98,18 @@ func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
 	return self.rateStoreStatsReplicate(storedCdr)
 }
 
+type CallCostLog struct {
+	CgrId    string
+	Source   string
+	RunId    string
+	CallCost *CallCost
+}
+
+// RPC method, used to log callcosts to db
+func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
+}
+
 // Called by rate/re-rate API
 func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
 	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
@@ -290,7 +302,20 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 	var errCost error
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
-		qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
+		delay := utils.Fib()
+		var err error
+		for i := 0; i < 4; i++ {
+			qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
+
+			if err == nil { //Connected so no need to reiterate
+				break
+			}
+			time.Sleep(delay())
+		}
+		if err != nil { //calculate CDR as for pseudoprepaid
+			qryCC, errCost = self.getCostFromRater(storedCdr)
+		}
+
 	} else {
 		qryCC, errCost = self.getCostFromRater(storedCdr)
 	}
