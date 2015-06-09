@@ -214,13 +214,15 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 		return
 	}
 	sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
-	if sm.cfg.ComputeLcr {
+
+	/*if sm.cfg.ComputeLcr { // Fix here out of channel variable
 		if err := sm.setCgrLcr(ev, connId); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not set LCR for %s, error: %s", ev.GetUUID(), err.Error()))
 			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
 			return
 		}
 	}
+	*/
 	sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
@@ -241,7 +243,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
-	if sm.cdrs != nil {
+	if sm.cfg.CreateCdr {
 		go sm.ProcessCdr(ev.AsStoredCdr())
 	}
 	var s *Session

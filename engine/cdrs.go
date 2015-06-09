@@ -314,11 +314,10 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 		var err error
 		for i := 0; i < 4; i++ {
 			qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
-
-			if err == nil { //Connected so no need to reiterate
+			if err == nil { // Got our cost, no need to continue
 				break
 			}
-			time.Sleep(delay())
+			time.Sleep(delay() * time.Millisecond)
 		}
 		if err != nil { //calculate CDR as for pseudoprepaid
 			qryCC, errCost = self.getCostFromRater(storedCdr)

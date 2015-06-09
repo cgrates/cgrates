@@ -60,7 +60,7 @@ type SmFsConfig struct {
 	Rater               string
 	Cdrs                string
 	Reconnects          int
-	ComputeLcr          bool
+	CreateCdr           bool
 	CdrExtraFields      []*utils.RSRField
 	DebitInterval       time.Duration
 	MinCallDuration     time.Duration
@@ -89,8 +89,8 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects
 	}
-	if jsnCfg.Compute_lcr != nil {
-		self.ComputeLcr = *jsnCfg.Compute_lcr
+	if jsnCfg.Create_cdr != nil {
+		self.CreateCdr = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Cdr_extra_fields != nil {
 		if self.CdrExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCfg.Cdr_extra_fields); err != nil {
@@ -170,6 +170,7 @@ type SmKamConfig struct {
 	Rater           string
 	Cdrs            string
 	Reconnects      int
+	CreateCdr       bool
 	DebitInterval   time.Duration
 	MinCallDuration time.Duration
 	MaxCallDuration time.Duration
@@ -192,6 +193,9 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 	}
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects
+	}
+	if jsnCfg.Create_cdr != nil {
+		self.CreateCdr = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Debit_interval != nil {
 		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
@@ -241,6 +245,7 @@ type SmOsipsConfig struct {
 	Rater                   string
 	Cdrs                    string
 	Reconnects              int
+	CreateCdr               bool
 	DebitInterval           time.Duration
 	MinCallDuration         time.Duration
 	MaxCallDuration         time.Duration
@@ -261,6 +266,12 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 	}
 	if jsnCfg.Cdrs != nil {
 		self.Cdrs = *jsnCfg.Cdrs
+	}
+	if jsnCfg.Reconnects != nil {
+		self.Reconnects = *jsnCfg.Reconnects
+	}
+	if jsnCfg.Create_cdr != nil {
+		self.CreateCdr = *jsnCfg.Create_cdr
 	}
 	if jsnCfg.Debit_interval != nil {
 		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
@@ -285,8 +296,6 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 	if jsnCfg.Mi_addr != nil {
 		self.MiAddr = *jsnCfg.Mi_addr
 	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
-	}
+
 	return nil
 }

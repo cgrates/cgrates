@@ -99,7 +99,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// start the CDR Server service:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
-	"rater": "",							// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
+	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
 	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 	"reconnects": 5,						// number of reconnect attempts to rater or cdrs
 	"cdr_replication":[],					// replicate the raw CDR to a number of servers
@@ -175,13 +175,14 @@ const CGRATES_CFG_JSON = `
 	}
 },
 
+
 "sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
 	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
-	"compute_lcr": false,			// when enabled it will compute and set cgr_lcr channel variable with least cost route ids
-	"cdr_extra_fields": [],			// extra fields to store in CDRs in case of processing them
+	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
+	"cdr_extra_fields": [],			// extra fields to store in CDRs when creating them
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
@@ -198,8 +199,9 @@ const CGRATES_CFG_JSON = `
 "sm_kamailio": {
 	"enabled": false,				// starts SessionManager service: <true|false>
 	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "",						// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
+	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
@@ -213,13 +215,15 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
 	"rater": "internal",				// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "",							// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"cdrs": "internal",					// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"reconnects": 5,					// number of reconnects if connection is lost
+	"create_cdr": false,				// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",			// interval to perform debits on.
 	"min_call_duration": "0s",			// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
-	"reconnects": 5,					// number of reconnects if connection is lost
+	
 },
 
 
