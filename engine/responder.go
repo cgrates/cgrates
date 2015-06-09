@@ -236,11 +236,12 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	return nil
 }
 
-func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *int) error {
+func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *int64) error {
 	if rs.CdrSrv == nil {
 		return errors.New("CDR_SERVER_NOT_RUNNING")
 	}
-	if err := rs.CdrSrv.LogCallCost(ccl); err != nil {
+	if duration, err := rs.CdrSrv.LogCallCost(ccl); err != nil {
+		*reply = int64(duration)
 		return err
 	}
 	*reply = 0
@@ -414,7 +415,7 @@ type Connector interface {
 	GetDerivedMaxSessionTime(StoredCdr, *float64) error
 	GetSessionRuns(StoredCdr, *[]*SessionRun) error
 	ProcessCdr(*StoredCdr, *string) error
-	LogCallCost(*CallCostLog, *int) error
+	LogCallCost(*CallCostLog, *int64) error
 	GetLCR(*CallDescriptor, *LCRCost) error
 }
 
@@ -458,7 +459,7 @@ func (rcc *RPCClientConnector) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	return rcc.Client.Call("CDRSV1.ProcessCdr", cdr, reply)
 }
 
-func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *int) error {
+func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *int64) error {
 	return rcc.Client.Call("CDRSV1.LogCallCost", ccl, reply)
 }
 
