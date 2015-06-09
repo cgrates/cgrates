@@ -306,7 +306,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 	eCfg := &SmFsJsonCfg{
 		Enabled:                utils.BoolPointer(false),
 		Rater:                  utils.StringPointer("internal"),
-		Cdrs:                   utils.StringPointer(""),
+		Cdrs:                   utils.StringPointer("internal"),
 		Reconnects:             utils.IntPointer(5),
 		Create_cdr:             utils.BoolPointer(false),
 		Cdr_extra_fields:       utils.StringSlicePointer([]string{}),
@@ -335,7 +335,7 @@ func TestSmKamJsonCfg(t *testing.T) {
 	eCfg := &SmKamJsonCfg{
 		Enabled:           utils.BoolPointer(false),
 		Rater:             utils.StringPointer("internal"),
-		Cdrs:              utils.StringPointer(""),
+		Cdrs:              utils.StringPointer("internal"),
 		Reconnects:        utils.IntPointer(5),
 		Create_cdr:        utils.BoolPointer(false),
 		Debit_interval:    utils.StringPointer("10s"),
@@ -360,7 +360,7 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 		Enabled:                   utils.BoolPointer(false),
 		Listen_udp:                utils.StringPointer("127.0.0.1:2020"),
 		Rater:                     utils.StringPointer("internal"),
-		Cdrs:                      utils.StringPointer(""),
+		Cdrs:                      utils.StringPointer("internal"),
 		Reconnects:                utils.IntPointer(5),
 		Create_cdr:                utils.BoolPointer(false),
 		Debit_interval:            utils.StringPointer("10s"),

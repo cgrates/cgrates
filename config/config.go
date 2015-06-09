@@ -271,6 +271,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SM-FreeSWITCH checks
 	if self.SmFsConfig.Enabled {
+		if self.SmFsConfig.Rater == "" {
+			return errors.New("Rater definition is mandatory!")
+		}
+		if self.SmFsConfig.Cdrs == "" {
+			return errors.New("Cdrs definition is mandatory!")
+		}
 		if self.SmFsConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-FreeSWITCH component.")
 		}
@@ -280,6 +286,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SM-Kamailio checks
 	if self.SmKamConfig.Enabled {
+		if self.SmKamConfig.Rater == "" {
+			return errors.New("Rater definition is mandatory!")
+		}
+		if self.SmKamConfig.Cdrs == "" {
+			return errors.New("Cdrs definition is mandatory!")
+		}
 		if self.SmKamConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-Kamailio component.")
 		}
@@ -289,6 +301,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SM-OpenSIPS checks
 	if self.SmOsipsConfig.Enabled {
+		if self.SmOsipsConfig.Rater == "" {
+			return errors.New("Rater definition is mandatory!")
+		}
+		if self.SmOsipsConfig.Cdrs == "" {
+			return errors.New("Cdrs definition is mandatory!")
+		}
 		if self.SmOsipsConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-OpenSIPS component.")
 		}
