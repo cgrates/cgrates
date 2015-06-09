@@ -12,7 +12,7 @@ go get -v -u github.com/ugorji/go/codec
 go get -v -u gopkg.in/mgo.v2
 go get -u -v github.com/go-sql-driver/mysql
 go get -u -v github.com/hoisie/redis
-go get -u -v github.com/howeyc/fsnotify
+go get -u -v gopkg.in/fsnotify.v1
 go get -u -v github.com/gorhill/cronexpr
 go get -u -v github.com/DisposaBoy/JsonConfigReader
 go get -u -v golang.org/x/net/websocket
