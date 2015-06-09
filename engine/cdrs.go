@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -99,14 +100,24 @@ func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
 }
 
 type CallCostLog struct {
-	CgrId    string
-	Source   string
-	RunId    string
-	CallCost *CallCost
+	CgrId          string
+	Source         string
+	RunId          string
+	CallCost       *CallCost
+	CheckDuplicate bool
 }
 
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	if ccl.CheckDuplicate {
+		cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
+		if err != nil {
+			return err
+		}
+		if cc != nil {
+			return errors.New(utils.ERR_EXISTS)
+		}
+	}
 	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
 }
 
