@@ -22,12 +22,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
-	"strings"
-	"time"
 )
 
 /*
@@ -79,8 +80,8 @@ duration::
 
 */
 
-func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector, cdrDb engine.CdrStorage) (*OsipsSessionManager, error) {
-	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv, cdrDb: cdrDb, cdrStartEvents: make(map[string]*OsipsEvent)}
+func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
+	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv, cdrStartEvents: make(map[string]*OsipsEvent)}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
 		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart}, // Raised when OpenSIPS starts so we can register our event handlers
 		"E_ACC_CDR":          []func(*osipsdagram.OsipsEvent){osm.onCdr},           // Raised if cdr_flag is configured
@@ -94,7 +95,6 @@ type OsipsSessionManager struct {
 	cfg             *config.SmOsipsConfig
 	rater           engine.Connector
 	cdrsrv          engine.Connector
-	cdrDb           engine.CdrStorage
 	eventHandlers   map[string][]func(*osipsdagram.OsipsEvent)
 	evSubscribeStop chan struct{}                         // Reference towards the channel controlling subscriptions, keep it as reference so we do not need to copy it
 	stopServing     chan struct{}                         // Stop serving datagrams
@@ -138,8 +138,8 @@ func (osm *OsipsSessionManager) DebitInterval() time.Duration {
 }
 
 // Returns the connection to local cdr database, used by session to log it's final costs
-func (osm *OsipsSessionManager) CdrDb() engine.CdrStorage {
-	return osm.cdrDb
+func (osm *OsipsSessionManager) CdrSrv() engine.Connector {
+	return osm.cdrsrv
 }
 
 // Returns connection to rater/controller

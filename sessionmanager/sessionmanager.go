@@ -25,8 +25,8 @@ import (
 )
 
 type SessionManager interface {
-	CdrDb() engine.CdrStorage
 	Rater() engine.Connector
+	CdrSrv() engine.Connector
 	DebitInterval() time.Duration
 	Connect() error
 	DisconnectSession(engine.Event, string, string) error
