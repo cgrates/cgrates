@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -212,21 +213,19 @@ func (s *Session) SaveOperations() {
 		for _, cc := range sr.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		var savedCallcostDuration int64
+		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
 			CgrId:    s.eventStart.GetCgrId(),
 			Source:   engine.SESSION_MANAGER_SOURCE,
 			RunId:    sr.DerivedCharger.RunId,
 			CallCost: firstCC,
-		}, &savedCallcostDuration)
-		// on duplicate error refound extra period compared to existing database callcost
+		}, &reply)
 		// this is a protection against the case when the close event is missed for some reason
 		// when the cdr arrives to cdrserver because our callcost is not there it will be rated
 		// as postpaid. When the close event finally arives we have to refund everything
 		if err != nil {
-			hangupTime := firstCC.Timespans[0].TimeStart.Add(time.Duration(savedCallcostDuration))
-			if savedCallcostDuration > 0 {
-				s.Refund(firstCC, hangupTime)
+			if err == errors.New("unique violation ") { //FIXME: find the right error
+				s.Refund(firstCC, firstCC.Timespans[0].TimeStart)
 			} else {
 				engine.Logger.Err(fmt.Sprintf("failed to log call cost: %v", err))
 			}

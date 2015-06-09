@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -107,15 +106,8 @@ type CallCostLog struct {
 }
 
 // RPC method, used to log callcosts to db
-func (self *CdrServer) LogCallCost(ccl *CallCostLog) (time.Duration, error) {
-	cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
-	if err != nil {
-		return 0, err
-	}
-	if cc != nil {
-		return cc.GetDuration(), errors.New("duplicate record")
-	}
-	return 0, self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
+func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
 }
 
 // Called by rate/re-rate API
