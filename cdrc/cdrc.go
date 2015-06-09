@@ -33,7 +33,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/howeyc/fsnotify"
+	"gopkg.in/fsnotify.v1"
 )
 
 const (
@@ -169,7 +169,7 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 		return
 	}
 	defer watcher.Close()
-	err = watcher.Watch(self.cdrInDir)
+	err = watcher.Add(self.cdrInDir)
 	if err != nil {
 		return
 	}
@@ -180,15 +180,15 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 			self.exitChan <- exitChan
 			engine.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
 			return nil
-		case ev := <-watcher.Event:
-			if ev.IsCreate() && (self.CdrFormat != FS_CSV || path.Ext(ev.Name) != ".csv") {
+		case ev := <-watcher.Events:
+			if ev.Op&fsnotify.Create == fsnotify.Create && (self.CdrFormat != FS_CSV || path.Ext(ev.Name) != ".csv") {
 				go func() { //Enable async processing here
 					if err = self.processFile(ev.Name); err != nil {
 						engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
 					}
 				}()
 			}
-		case err := <-watcher.Error:
+		case err := <-watcher.Errors:
 			engine.Logger.Err(fmt.Sprintf("Inotify error: %s", err.Error()))
 		}
 	}
