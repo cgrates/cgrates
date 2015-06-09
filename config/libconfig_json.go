@@ -141,7 +141,7 @@ type SmFsJsonCfg struct {
 	Rater                  *string
 	Cdrs                   *string
 	Reconnects             *int
-	Compute_lcr            *bool
+	Create_cdr             *bool
 	Cdr_extra_fields       *[]string
 	Debit_interval         *string
 	Min_call_duration      *string
@@ -166,6 +166,7 @@ type SmKamJsonCfg struct {
 	Rater             *string
 	Cdrs              *string
 	Reconnects        *int
+	Create_cdr        *bool
 	Debit_interval    *string
 	Min_call_duration *string
 	Max_call_duration *string
@@ -184,12 +185,13 @@ type SmOsipsJsonCfg struct {
 	Listen_udp                *string
 	Rater                     *string
 	Cdrs                      *string
+	Reconnects                *int
+	Create_cdr                *bool
 	Debit_interval            *string
 	Min_call_duration         *string
 	Max_call_duration         *string
 	Events_subscribe_interval *string
 	Mi_addr                   *string
-	Reconnects                *int
 }
 
 // Represents one connection instance towards OpenSIPS

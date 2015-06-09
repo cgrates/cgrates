@@ -221,7 +221,7 @@ func (self *KamailioSessionManager) Rater() engine.Connector {
 }
 
 func (self *KamailioSessionManager) ProcessCdr(cdr *engine.StoredCdr) error {
-	if self.cdrsrv == nil {
+	if !self.cfg.CreateCdr {
 		return nil
 	}
 	var reply string

@@ -302,7 +302,7 @@ func (osm *OsipsSessionManager) callEnd(osipsEv *OsipsEvent) error {
 
 // Records the event start in case of received so we can create CDR out of it
 func (osm *OsipsSessionManager) processCdrStart(osipsEv *OsipsEvent) error {
-	if osm.cdrsrv == nil {
+	if !osm.cfg.CreateCdr {
 		return nil
 	}
 	if dialogId := osipsEv.DialogId(); dialogId == "" {
