@@ -140,7 +140,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Enabled:         utils.BoolPointer(false),
 		Extra_fields:    utils.StringSlicePointer([]string{}),
 		Store_cdrs:      utils.BoolPointer(true),
-		Rater:           utils.StringPointer(""),
+		Rater:           utils.StringPointer("internal"),
 		Cdrstats:        utils.StringPointer(""),
 		Reconnects:      utils.IntPointer(5),
 		Cdr_replication: &[]*CdrReplicationJsonCfg{},
