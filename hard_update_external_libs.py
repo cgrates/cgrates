@@ -4,7 +4,7 @@ import os
 import os.path
 from subprocess import call
 
-libs = ('github.com/bmizerany/pq',
+libs = ('github.com/lib/pq',
         'github.com/ugorji/go/codec',
         'gopkg.in/mgo.v2',
         'github.com/cgrates/fsock',
@@ -20,9 +20,9 @@ libs = ('github.com/bmizerany/pq',
 
 if __name__ == "__main__":
     go_path = os.path.join(os.environ['GOPATH'], 'src')
-    for lib in libs:    
+    for lib in libs:
         app_dir = os.path.abspath(os.path.join(go_path,lib))
-        
+
         if os.path.islink(app_dir): continue
         git_path = os.path.join(app_dir, '.git')
         bzr_path = os.path.join(app_dir, '.bzr')
