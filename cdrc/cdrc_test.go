@@ -60,7 +60,8 @@ func TestRecordForkCdr(t *testing.T) {
 		SetupTime:   time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
 		Usage:       time.Duration(62) * time.Second,
-		ExtraFields: map[string]string{"supplier": "supplier1"},
+		Supplier:    "supplier1",
+		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
 	if !reflect.DeepEqual(expectedCdr, rtCdr) {

@@ -67,6 +67,10 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) err
 		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 		}
+	case utils.PDD:
+		if cdr.Pdd, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
+			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
+		}
 	case utils.ANSWER_TIME:
 		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
@@ -75,6 +79,10 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) err
 		if cdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
 			return fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
 		}
+	case utils.SUPPLIER:
+		cdr.Supplier = fieldVal
+	case utils.DISCONNECT_CAUSE:
+		cdr.DisconnectCause = fieldVal
 	default: // Extra fields will not match predefined so they all show up here
 		cdr.ExtraFields[fieldId] = fieldVal
 	}
