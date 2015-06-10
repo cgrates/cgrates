@@ -23,7 +23,7 @@ import (
 )
 
 // Handles retrieving of DerivedChargers profile based on longest match from AccountingDb
-func HandleGetDerivedChargers(acntStorage AccountingStorage, attrs utils.AttrDerivedChargers) (utils.DerivedChargers, error) {
+func HandleGetDerivedChargers(acntStorage AccountingStorage, attrs *utils.AttrDerivedChargers) (utils.DerivedChargers, error) {
 	var dcs utils.DerivedChargers
 	strictKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	anySubjKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, utils.ANY)

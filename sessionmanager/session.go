@@ -20,10 +20,12 @@ package sessionmanager
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Session type holding the call information fields, a session delegate for specific
@@ -57,7 +59,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 		sessionManager: sm,
 		connId:         connId,
 	}
-	if err := sm.Rater().GetSessionRuns(*ev.AsStoredCdr(), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
+	if err := sm.Rater().GetSessionRuns(ev.AsStoredCdr(), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
 	}
 	for runIdx := range s.sessionRuns {
@@ -68,7 +70,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 
 // the debit loop method (to be stoped by sending somenthing on stopDebit channel)
 func (s *Session) debitLoop(runIdx int) {
-	nextCd := *s.sessionRuns[runIdx].CallDescriptor
+	nextCd := s.sessionRuns[runIdx].CallDescriptor
 	index := 0.0
 	debitPeriod := s.sessionManager.DebitInterval()
 	for {
@@ -135,56 +137,70 @@ func (s *Session) Close(ev engine.Event) error {
 			return err
 		}
 		hangupTime := startTime.Add(duration)
-		end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
-		refundDuration := end.Sub(hangupTime)
-		var refundIncrements engine.Increments
-		for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
-			ts := lastCC.Timespans[i]
-			tsDuration := ts.GetDuration()
-			if refundDuration <= tsDuration {
-				lastRefundedIncrementIndex := 0
-				for j := len(ts.Increments) - 1; j >= 0; j-- {
-					increment := ts.Increments[j]
-					if increment.Duration <= refundDuration {
-						refundIncrements = append(refundIncrements, increment)
-						refundDuration -= increment.Duration
-						lastRefundedIncrementIndex = j
-					}
-				}
-				ts.SplitByIncrement(lastRefundedIncrementIndex)
-				break // do not go to other timespans
-			} else {
-				refundIncrements = append(refundIncrements, ts.Increments...)
-				// remove the timespan entirely
-				lastCC.Timespans[i] = nil
-				lastCC.Timespans = lastCC.Timespans[:i]
-				// continue to the next timespan with what is left to refund
-				refundDuration -= tsDuration
-			}
+		err = s.Refund(lastCC, hangupTime)
+		if err != nil {
+			return err
 		}
-		// show only what was actualy refunded (stopped in timespan)
-		// engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
-		if len(refundIncrements) > 0 {
-			cd := &engine.CallDescriptor{
-				Direction:   lastCC.Direction,
-				Tenant:      lastCC.Tenant,
-				Category:    lastCC.Category,
-				Subject:     lastCC.Subject,
-				Account:     lastCC.Account,
-				Destination: lastCC.Destination,
-				Increments:  refundIncrements,
-			}
-			var response float64
-			err := s.sessionManager.Rater().RefundIncrements(*cd, &response)
-			if err != nil {
-				return err
-			}
-		}
-		cost := refundIncrements.GetTotalCost()
-		lastCC.Cost -= cost
-		lastCC.Timespans.Compress()
 	}
 	go s.SaveOperations()
+	return nil
+}
+
+func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
+	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
+	refundDuration := end.Sub(hangupTime)
+	var refundIncrements engine.Increments
+	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
+		ts := lastCC.Timespans[i]
+		tsDuration := ts.GetDuration()
+		if refundDuration <= tsDuration {
+
+			lastRefundedIncrementIndex := 0
+			for j := len(ts.Increments) - 1; j >= 0; j-- {
+				increment := ts.Increments[j]
+				if increment.Duration <= refundDuration {
+					refundIncrements = append(refundIncrements, increment)
+					refundDuration -= increment.Duration
+					lastRefundedIncrementIndex = j
+				}
+			}
+			if lastRefundedIncrementIndex == 0 {
+				lastCC.Timespans[i] = nil
+				lastCC.Timespans = lastCC.Timespans[:i]
+			} else {
+				ts.SplitByIncrement(lastRefundedIncrementIndex)
+			}
+			break // do not go to other timespans
+		} else {
+			refundIncrements = append(refundIncrements, ts.Increments...)
+			// remove the timespan entirely
+			lastCC.Timespans[i] = nil
+			lastCC.Timespans = lastCC.Timespans[:i]
+			// continue to the next timespan with what is left to refund
+			refundDuration -= tsDuration
+		}
+	}
+	// show only what was actualy refunded (stopped in timespan)
+	// engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
+	if len(refundIncrements) > 0 {
+		cd := &engine.CallDescriptor{
+			Direction:   lastCC.Direction,
+			Tenant:      lastCC.Tenant,
+			Category:    lastCC.Category,
+			Subject:     lastCC.Subject,
+			Account:     lastCC.Account,
+			Destination: lastCC.Destination,
+			Increments:  refundIncrements,
+		}
+		var response float64
+		err := s.sessionManager.Rater().RefundIncrements(cd, &response)
+		if err != nil {
+			return err
+		}
+	}
+	cost := refundIncrements.GetTotalCost()
+	lastCC.Cost -= cost
+	lastCC.Timespans.Compress()
 	return nil
 }
 
@@ -204,14 +220,23 @@ func (s *Session) SaveOperations() {
 		for _, cc := range sr.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		var existingDuration int
-		s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
-			CgrId:    s.eventStart.GetCgrId(),
-			Source:   engine.SESSION_MANAGER_SOURCE,
-			RunId:    sr.DerivedCharger.RunId,
-			CallCost: firstCC,
-		}, &existingDuration)
-		// on duplicate error refound extra from existing database
-
+		var reply string
+		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
+			CgrId:          s.eventStart.GetCgrId(),
+			Source:         engine.SESSION_MANAGER_SOURCE,
+			RunId:          sr.DerivedCharger.RunId,
+			CallCost:       firstCC,
+			CheckDuplicate: true,
+		}, &reply)
+		// this is a protection against the case when the close event is missed for some reason
+		// when the cdr arrives to cdrserver because our callcost is not there it will be rated
+		// as postpaid. When the close event finally arives we have to refund everything
+		if err != nil {
+			if err == errors.New(utils.ERR_EXISTS) {
+				s.Refund(firstCC, firstCC.Timespans[0].TimeStart)
+			} else {
+				engine.Logger.Err(fmt.Sprintf("failed to log call cost: %v", err))
+			}
+		}
 	}
 }

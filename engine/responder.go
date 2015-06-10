@@ -50,9 +50,9 @@ type Responder struct {
 /*
 RPC method thet provides the external RPC interface for getting the rating information.
 */
-func (rs *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
+func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if rs.Bal != nil {
-		r, e := rs.getCallCost(&arg, "Responder.GetCost")
+		r, e := rs.getCallCost(arg, "Responder.GetCost")
 		*reply, err = *r, e
 	} else {
 		r, e := AccLock.Guard(func() (interface{}, error) {
@@ -67,9 +67,9 @@ func (rs *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
-func (rs *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
+func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if rs.Bal != nil {
-		r, e := rs.getCallCost(&arg, "Responder.Debit")
+		r, e := rs.getCallCost(arg, "Responder.Debit")
 		*reply, err = *r, e
 	} else {
 		r, e := arg.Debit()
@@ -82,9 +82,9 @@ func (rs *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
-func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
+func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if rs.Bal != nil {
-		r, e := rs.getCallCost(&arg, "Responder.MaxDebit")
+		r, e := rs.getCallCost(arg, "Responder.MaxDebit")
 		*reply, err = *r, e
 	} else {
 		r, e := arg.MaxDebit()
@@ -97,9 +97,9 @@ func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
-func (rs *Responder) RefundIncrements(arg CallDescriptor, reply *float64) (err error) {
+func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
 	if rs.Bal != nil {
-		*reply, err = rs.callMethod(&arg, "Responder.RefundIncrements")
+		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
 	} else {
 		r, e := AccLock.Guard(func() (interface{}, error) {
 			return arg.RefundIncrements()
@@ -109,9 +109,9 @@ func (rs *Responder) RefundIncrements(arg CallDescriptor, reply *float64) (err e
 	return
 }
 
-func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err error) {
+func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err error) {
 	if rs.Bal != nil {
-		*reply, err = rs.callMethod(&arg, "Responder.GetMaxSessionTime")
+		*reply, err = rs.callMethod(arg, "Responder.GetMaxSessionTime")
 	} else {
 		r, e := arg.GetMaxSessionDuration()
 		*reply, err = float64(r), e
@@ -120,12 +120,12 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 }
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
-func (rs *Responder) GetDerivedMaxSessionTime(ev StoredCdr, reply *float64) error {
+func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
 	if rs.Bal != nil {
 		return errors.New("unsupported method on the balancer")
 	}
 	maxCallDuration := -1.0
-	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := rs.GetDerivedChargers(attrsDC, &dcs); err != nil {
@@ -151,7 +151,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev StoredCdr, reply *float64) erro
 		if err != nil {
 			return err
 		}
-		cd := CallDescriptor{
+		cd := &CallDescriptor{
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
 			Category:    ev.GetCategory(dc.CategoryField),
@@ -179,11 +179,11 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev StoredCdr, reply *float64) erro
 }
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
-func (rs *Responder) GetSessionRuns(ev StoredCdr, sRuns *[]*SessionRun) error {
+func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
-	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := rs.GetDerivedChargers(attrsDC, &dcs); err != nil {
@@ -213,7 +213,7 @@ func (rs *Responder) GetSessionRuns(ev StoredCdr, sRuns *[]*SessionRun) error {
 	return nil
 }
 
-func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
+func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
 	if rs.Bal != nil {
 		return errors.New("BALANCER_UNSUPPORTED_METHOD")
 	}
@@ -236,14 +236,14 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	return nil
 }
 
-func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *int) error {
+func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
 	if rs.CdrSrv == nil {
 		return errors.New("CDR_SERVER_NOT_RUNNING")
 	}
 	if err := rs.CdrSrv.LogCallCost(ccl); err != nil {
 		return err
 	}
-	*reply = 0
+	*reply = utils.OK
 	return nil
 }
 
@@ -256,9 +256,9 @@ func (rs *Responder) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
 	return nil
 }
 
-func (rs *Responder) FlushCache(arg CallDescriptor, reply *float64) (err error) {
+func (rs *Responder) FlushCache(arg *CallDescriptor, reply *float64) (err error) {
 	if rs.Bal != nil {
-		*reply, err = rs.callMethod(&arg, "Responder.FlushCache")
+		*reply, err = rs.callMethod(arg, "Responder.FlushCache")
 	} else {
 		r, e := AccLock.Guard(func() (interface{}, error) {
 			return 0, arg.FlushCache()
@@ -405,16 +405,16 @@ func (rw *ResponderWorker) Close() error {
 }
 
 type Connector interface {
-	GetCost(CallDescriptor, *CallCost) error
-	Debit(CallDescriptor, *CallCost) error
-	MaxDebit(CallDescriptor, *CallCost) error
-	RefundIncrements(CallDescriptor, *float64) error
-	GetMaxSessionTime(CallDescriptor, *float64) error
-	GetDerivedChargers(utils.AttrDerivedChargers, *utils.DerivedChargers) error
-	GetDerivedMaxSessionTime(StoredCdr, *float64) error
-	GetSessionRuns(StoredCdr, *[]*SessionRun) error
+	GetCost(*CallDescriptor, *CallCost) error
+	Debit(*CallDescriptor, *CallCost) error
+	MaxDebit(*CallDescriptor, *CallCost) error
+	RefundIncrements(*CallDescriptor, *float64) error
+	GetMaxSessionTime(*CallDescriptor, *float64) error
+	GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error
+	GetDerivedMaxSessionTime(*StoredCdr, *float64) error
+	GetSessionRuns(*StoredCdr, *[]*SessionRun) error
 	ProcessCdr(*StoredCdr, *string) error
-	LogCallCost(*CallCostLog, *int) error
+	LogCallCost(*CallCostLog, *string) error
 	GetLCR(*CallDescriptor, *LCRCost) error
 }
 
@@ -422,35 +422,35 @@ type RPCClientConnector struct {
 	Client *rpcclient.RpcClient
 }
 
-func (rcc *RPCClientConnector) GetCost(cd CallDescriptor, cc *CallCost) error {
+func (rcc *RPCClientConnector) GetCost(cd *CallDescriptor, cc *CallCost) error {
 	return rcc.Client.Call("Responder.GetCost", cd, cc)
 }
 
-func (rcc *RPCClientConnector) Debit(cd CallDescriptor, cc *CallCost) error {
+func (rcc *RPCClientConnector) Debit(cd *CallDescriptor, cc *CallCost) error {
 	return rcc.Client.Call("Responder.Debit", cd, cc)
 }
 
-func (rcc *RPCClientConnector) MaxDebit(cd CallDescriptor, cc *CallCost) error {
+func (rcc *RPCClientConnector) MaxDebit(cd *CallDescriptor, cc *CallCost) error {
 	return rcc.Client.Call("Responder.MaxDebit", cd, cc)
 }
 
-func (rcc *RPCClientConnector) RefundIncrements(cd CallDescriptor, resp *float64) error {
+func (rcc *RPCClientConnector) RefundIncrements(cd *CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.RefundIncrements", cd, resp)
 }
 
-func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float64) error {
+func (rcc *RPCClientConnector) GetMaxSessionTime(cd *CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
 }
 
-func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev StoredCdr, reply *float64) error {
+func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
 	return rcc.Client.Call("Responder.GetDerivedMaxSessionTime", ev, reply)
 }
 
-func (rcc *RPCClientConnector) GetSessionRuns(ev StoredCdr, sRuns *[]*SessionRun) error {
+func (rcc *RPCClientConnector) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 	return rcc.Client.Call("Responder.GetSessionRuns", ev, sRuns)
 }
 
-func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
+func (rcc *RPCClientConnector) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
 	return rcc.Client.Call("ApierV1.GetDerivedChargers", attrs, dcs)
 }
 
@@ -458,7 +458,7 @@ func (rcc *RPCClientConnector) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	return rcc.Client.Call("CDRSV1.ProcessCdr", cdr, reply)
 }
 
-func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *int) error {
+func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *string) error {
 	return rcc.Client.Call("CDRSV1.LogCallCost", ccl, reply)
 }
 

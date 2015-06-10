@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -99,14 +100,24 @@ func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
 }
 
 type CallCostLog struct {
-	CgrId    string
-	Source   string
-	RunId    string
-	CallCost *CallCost
+	CgrId          string
+	Source         string
+	RunId          string
+	CallCost       *CallCost
+	CheckDuplicate bool
 }
 
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	if ccl.CheckDuplicate {
+		cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
+		if err != nil {
+			return err
+		}
+		if cc != nil {
+			return errors.New(utils.ERR_EXISTS)
+		}
+	}
 	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
 }
 
@@ -221,7 +232,7 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 	//}
 	cc := new(CallCost)
 	var err error
-	cd := CallDescriptor{
+	cd := &CallDescriptor{
 		TOR:           storedCdr.TOR,
 		Direction:     storedCdr.Direction,
 		Tenant:        storedCdr.Tenant,
@@ -254,7 +265,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 	if storedCdr.Rated { // Do not derive already rated CDRs since they should be already derived
 		return cdrRuns, nil
 	}
-	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
+	attrsDC := &utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
 		Account: storedCdr.Account, Subject: storedCdr.Subject}
 	var dcs utils.DerivedChargers
 	if err := self.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {

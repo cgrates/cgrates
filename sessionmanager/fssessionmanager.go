@@ -37,15 +37,15 @@ type FSSessionManager struct {
 	conns    map[string]*fsock.FSock // Keep the list here for connection management purposes
 	sessions []*Session
 	rater    engine.Connector
-	cdrs     engine.Connector
+	cdrsrv   engine.Connector
 }
 
 func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs engine.Connector) *FSSessionManager {
 	return &FSSessionManager{
-		cfg:   smFsConfig,
-		conns: make(map[string]*fsock.FSock),
-		rater: rater,
-		cdrs:  cdrs,
+		cfg:    smFsConfig,
+		conns:  make(map[string]*fsock.FSock),
+		rater:  rater,
+		cdrsrv: cdrs,
 	}
 }
 
@@ -204,7 +204,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 		return
 	}
 	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
-	if err := sm.rater.GetDerivedMaxSessionTime(*ev.AsStoredCdr(), &maxCallDuration); err != nil {
+	if err := sm.rater.GetDerivedMaxSessionTime(ev.AsStoredCdr(), &maxCallDuration); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
 	}
 	maxCallDur := time.Duration(maxCallDuration)
@@ -265,7 +265,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 
 func (sm *FSSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
 	var reply string
-	if err := sm.cdrs.ProcessCdr(storedCdr, &reply); err != nil {
+	if err := sm.cdrsrv.ProcessCdr(storedCdr, &reply); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
 	}
 	return nil
@@ -275,7 +275,7 @@ func (sm *FSSessionManager) DebitInterval() time.Duration {
 	return sm.cfg.DebitInterval
 }
 func (sm *FSSessionManager) CdrSrv() engine.Connector {
-	return sm.cdrs
+	return sm.cdrsrv
 }
 
 func (sm *FSSessionManager) Rater() engine.Connector {

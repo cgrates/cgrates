@@ -18,6 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessionmanager
 
+import (
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
 //"github.com/cgrates/cgrates/config"
 //"testing"
 
@@ -71,3 +79,64 @@ func TestSessionNilSession(t *testing.T) {
 	}
 }
 */
+
+type MockConnector struct {
+	refundCd *engine.CallDescriptor
+}
+
+func (mc *MockConnector) GetCost(*engine.CallDescriptor, *engine.CallCost) error  { return nil }
+func (mc *MockConnector) Debit(*engine.CallDescriptor, *engine.CallCost) error    { return nil }
+func (mc *MockConnector) MaxDebit(*engine.CallDescriptor, *engine.CallCost) error { return nil }
+func (mc *MockConnector) RefundIncrements(cd *engine.CallDescriptor, reply *float64) error {
+	mc.refundCd = cd
+	return nil
+}
+func (mc *MockConnector) GetMaxSessionTime(*engine.CallDescriptor, *float64) error { return nil }
+func (mc *MockConnector) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
+	return nil
+}
+func (mc *MockConnector) GetDerivedMaxSessionTime(*engine.StoredCdr, *float64) error    { return nil }
+func (mc *MockConnector) GetSessionRuns(*engine.StoredCdr, *[]*engine.SessionRun) error { return nil }
+func (mc *MockConnector) ProcessCdr(*engine.StoredCdr, *string) error                   { return nil }
+func (mc *MockConnector) LogCallCost(*engine.CallCostLog, *string) error                { return nil }
+func (mc *MockConnector) GetLCR(*engine.CallDescriptor, *engine.LCRCost) error          { return nil }
+
+func TestSessionRefund(t *testing.T) {
+	mc := &MockConnector{}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	ts := &engine.TimeSpan{
+		TimeStart: time.Date(2015, 6, 10, 14, 07, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 6, 10, 14, 07, 30, 0, time.UTC),
+	}
+	// add increments
+	for i := 0; i < 30; i++ {
+		ts.AddIncrement(&engine.Increment{Duration: time.Second, Cost: 1.0})
+	}
+
+	cc := &engine.CallCost{Timespans: engine.TimeSpans{ts}}
+	hangupTime := time.Date(2015, 6, 10, 14, 07, 20, 0, time.UTC)
+	s.Refund(cc, hangupTime)
+	if len(mc.refundCd.Increments) != 10 || len(cc.Timespans) != 1 || cc.Timespans[0].TimeEnd != hangupTime {
+		t.Errorf("Error refunding: %+v, %+v", mc.refundCd.Increments, cc.Timespans[0])
+	}
+}
+
+func TestSessionRefundAll(t *testing.T) {
+	mc := &MockConnector{}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	ts := &engine.TimeSpan{
+		TimeStart: time.Date(2015, 6, 10, 14, 07, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 6, 10, 14, 07, 30, 0, time.UTC),
+	}
+	// add increments
+	for i := 0; i < 30; i++ {
+		ts.AddIncrement(&engine.Increment{Duration: time.Second, Cost: 1.0})
+	}
+
+	cc := &engine.CallCost{Timespans: engine.TimeSpans{ts}}
+	hangupTime := time.Date(2015, 6, 10, 14, 07, 0, 0, time.UTC)
+	s.Refund(cc, hangupTime)
+	if len(mc.refundCd.Increments) != 30 || len(cc.Timespans) != 0 {
+		t.Errorf("Error refunding: %+v, %+v", len(mc.refundCd.Increments), cc.Timespans[0])
+	}
+}
