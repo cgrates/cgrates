@@ -59,7 +59,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 		sessionManager: sm,
 		connId:         connId,
 	}
-	if err := sm.Rater().GetSessionRuns(*ev.AsStoredCdr(), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
+	if err := sm.Rater().GetSessionRuns(ev.AsStoredCdr(), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
 	}
 	for runIdx := range s.sessionRuns {
@@ -70,7 +70,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 
 // the debit loop method (to be stoped by sending somenthing on stopDebit channel)
 func (s *Session) debitLoop(runIdx int) {
-	nextCd := *s.sessionRuns[runIdx].CallDescriptor
+	nextCd := s.sessionRuns[runIdx].CallDescriptor
 	index := 0.0
 	debitPeriod := s.sessionManager.DebitInterval()
 	for {
@@ -154,6 +154,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 		ts := lastCC.Timespans[i]
 		tsDuration := ts.GetDuration()
 		if refundDuration <= tsDuration {
+
 			lastRefundedIncrementIndex := 0
 			for j := len(ts.Increments) - 1; j >= 0; j-- {
 				increment := ts.Increments[j]
@@ -163,7 +164,12 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 					lastRefundedIncrementIndex = j
 				}
 			}
-			ts.SplitByIncrement(lastRefundedIncrementIndex)
+			if lastRefundedIncrementIndex == 0 {
+				lastCC.Timespans[i] = nil
+				lastCC.Timespans = lastCC.Timespans[:i]
+			} else {
+				ts.SplitByIncrement(lastRefundedIncrementIndex)
+			}
 			break // do not go to other timespans
 		} else {
 			refundIncrements = append(refundIncrements, ts.Increments...)
@@ -187,7 +193,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			Increments:  refundIncrements,
 		}
 		var response float64
-		err := s.sessionManager.Rater().RefundIncrements(*cd, &response)
+		err := s.sessionManager.Rater().RefundIncrements(cd, &response)
 		if err != nil {
 			return err
 		}

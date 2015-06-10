@@ -20,10 +20,11 @@ package v1
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"strconv"
 	"time"
+
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Returns MaxSessionTime in seconds, -1 for no limit
@@ -60,7 +61,7 @@ func (self *ApierV1) GetMaxSessionTime(auth engine.MaxUsageReq, maxSessionTime *
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	var maxDur float64
-	if err := self.Responder.GetDerivedMaxSessionTime(*storedCdr, &maxDur); err != nil {
+	if err := self.Responder.GetDerivedMaxSessionTime(storedCdr, &maxDur); err != nil {
 		return err
 	}
 	if maxDur == -1.0 {
