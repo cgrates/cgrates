@@ -374,6 +374,28 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 	}
 
 	for _, tpLcr := range tps {
+		// check the rating profiles
+		ratingProfileSearchKey := utils.ConcatenatedKey(tpLcr.Direction, tpLcr.Tenant, tpLcr.RpCategory)
+		found := false
+		for rpfKey := range tpr.ratingProfiles {
+			if strings.HasPrefix(rpfKey, ratingProfileSearchKey) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			if keys, err := tpr.ratingStorage.GetKeysForPrefix(RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil || len(keys) == 0 {
+				return fmt.Errorf("[LCR] could not find ratingProfiles with prefix %s", ratingProfileSearchKey)
+			}
+		}
+		// check destination tags
+		if tpLcr.DestinationTag != "" && tpLcr.DestinationTag != utils.ANY {
+			if _, found := tpr.destinations[tpLcr.DestinationTag]; !found {
+				if found, err := tpr.ratingStorage.HasData(DESTINATION_PREFIX, tpLcr.DestinationTag); err != nil || !found {
+					return fmt.Errorf("[LCR] could not find destination with tag %s", tpLcr.DestinationTag)
+				}
+			}
+		}
 		tag := utils.LCRKey(tpLcr.Direction, tpLcr.Tenant, tpLcr.Category, tpLcr.Account, tpLcr.Subject)
 		activationTime, _ := utils.ParseTimeDetectLayout(tpLcr.ActivationTime)
 
@@ -485,11 +507,14 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 
 			_, exists := tpr.actions[at.ActionsId]
 			if !exists {
-				return fmt.Errorf("actionTiming: Could not load the action for tag: %v", at.ActionsId)
+				if dbExists, err := tpr.ratingStorage.HasData(ACTION_PREFIX, at.ActionsId); err != nil || !dbExists {
+					return fmt.Errorf("[ActionPlans] Could not load the action for tag: %v",
+						at.ActionsId)
+				}
 			}
 			t, exists := tpr.timings[at.TimingId]
 			if !exists {
-				return fmt.Errorf("actionTiming: Could not load the timing for tag: %v", at.TimingId)
+				return fmt.Errorf("[ActionPlans] Could not load the timing for tag: %v", at.TimingId)
 			}
 			actTmg := &ActionPlan{
 				Uuid:   utils.GenUUID(),

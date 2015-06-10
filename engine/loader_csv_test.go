@@ -47,6 +47,7 @@ PSTN_72,+4972
 PSTN_70,+4970
 DST_UK_Mobile_BIG5,447956
 URG,112
+EU_LANDLINE,444
 `
 	timings = `
 WORKDAYS_00,*any,*any,*any,1;2;3;4;5,00:00:00
@@ -136,6 +137,7 @@ RP_MX,MX_FREE,WORKDAYS_18,10
 *out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,,
 *out,cgrates.org,data,rif,2013-01-06T00:00:00Z,RP_DATA,,
 *out,cgrates.org,call,max,2013-03-23T00:00:00Z,RP_MX,,
+*in,cgrates.org,LCR_STANDARD,max,2013-03-23T00:00:00Z,RP_MX,,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -260,7 +262,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 11 {
+	if len(csvr.destinations) != 12 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
@@ -732,7 +734,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 18 {
+	if len(csvr.ratingProfiles) != 19 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
