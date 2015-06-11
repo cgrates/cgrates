@@ -114,6 +114,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10
 RP_DATA,DATA_RATE,ALWAYS,10
 RP_MX,MX_DISC,WORKDAYS_00,10
 RP_MX,MX_FREE,WORKDAYS_18,10
+ANY_PLAN,DATA_RATE,*any,10
 `
 	ratingProfiles = `
 *out,CUSTOMER_1,0,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb,
@@ -576,7 +577,7 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadRatingPlans(t *testing.T) {
-	if len(csvr.ratingPlans) != 11 {
+	if len(csvr.ratingPlans) != 12 {
 		t.Error("Failed to load rating plans: ", len(csvr.ratingPlans))
 	}
 	rplan := csvr.ratingPlans["STANDARD"]
@@ -730,6 +731,20 @@ func TestLoadRatingPlans(t *testing.T) {
 		/*for tag, key := range rplan.Ratings {
 			log.Print(tag, key)
 		}*/
+	}
+	anyTiming := &RITiming{
+		Years:      utils.Years{},
+		Months:     utils.Months{},
+		MonthDays:  utils.MonthDays{},
+		WeekDays:   utils.WeekDays{},
+		StartTime:  "00:00:00",
+		EndTime:    "",
+		cronString: "",
+		tag:        utils.ANY,
+	}
+
+	if !reflect.DeepEqual(csvr.ratingPlans["ANY_PLAN"].Timings["1323e132"], anyTiming) {
+		t.Errorf("Error using *any timing in rating plans: %+v : %+v", csvr.ratingPlans["ANY_PLAN"].Timings["1323e132"], anyTiming)
 	}
 }
 

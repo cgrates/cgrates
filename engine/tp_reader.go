@@ -36,7 +36,7 @@ type TpReader struct {
 }
 
 func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid string) *TpReader {
-	return &TpReader{
+	tpr := &TpReader{
 		tpid:              tpid,
 		ratingStorage:     rs,
 		accountingStorage: as,
@@ -58,6 +58,17 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid str
 		cdrStats:          make(map[string]*CdrStats),
 		derivedChargers:   make(map[string]utils.DerivedChargers),
 	}
+	//add *any timing tag (in case of no timings file)
+	tpr.timings[utils.ANY] = &utils.TPTiming{
+		TimingId:  utils.ANY,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: "00:00:00",
+		EndTime:   "",
+	}
+	return tpr
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
