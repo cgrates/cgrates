@@ -389,7 +389,7 @@ func TestActionPlanFirstMonthOfTheYearSecondDay(t *testing.T) {
 }
 
 func TestActionPlanCheckForASAP(t *testing.T) {
-	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{StartTime: ASAP}}}
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{StartTime: utils.ASAP}}}
 	if !at.IsASAP() {
 		t.Errorf("%v should be asap!", at)
 	}

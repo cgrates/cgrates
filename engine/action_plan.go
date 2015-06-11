@@ -30,7 +30,6 @@ import (
 
 const (
 	FORMAT = "2006-1-2 15:04:05 MST"
-	ASAP   = "*asap"
 )
 
 type ActionPlan struct {
@@ -89,7 +88,7 @@ func (at *ActionPlan) GetNextStartTimeOld(now time.Time) (t time.Time) {
 	}
 	y, m, d := now.Date()
 	z, _ := now.Zone()
-	if i.Timing.StartTime != ASAP {
+	if i.Timing.StartTime != utils.ASAP {
 		l := fmt.Sprintf("%d-%d-%d %s %s", y, m, d, i.Timing.StartTime, z)
 		var err error
 		t, err = time.Parse(FORMAT, l)
@@ -281,7 +280,7 @@ func (at *ActionPlan) Execute() (err error) {
 }
 
 func (at *ActionPlan) IsASAP() bool {
-	return at.Timing.Timing.StartTime == ASAP
+	return at.Timing.Timing.StartTime == utils.ASAP
 }
 
 // Structure to store actions according to weight

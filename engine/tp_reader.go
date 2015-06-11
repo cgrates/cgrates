@@ -58,7 +58,7 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid str
 		cdrStats:          make(map[string]*CdrStats),
 		derivedChargers:   make(map[string]utils.DerivedChargers),
 	}
-	//add *any timing tag (in case of no timings file)
+	//add *any and *asap timing tag (in case of no timings file)
 	tpr.timings[utils.ANY] = &utils.TPTiming{
 		TimingId:  utils.ANY,
 		Years:     utils.Years{},
@@ -66,6 +66,15 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid str
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
 		StartTime: "00:00:00",
+		EndTime:   "",
+	}
+	tpr.timings[utils.ASAP] = &utils.TPTiming{
+		TimingId:  utils.ANY,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: utils.ASAP,
 		EndTime:   "",
 	}
 	return tpr
@@ -106,6 +115,15 @@ func (tpr *TpReader) LoadTimings() (err error) {
 		MonthDays: utils.MonthDays{},
 		WeekDays:  utils.WeekDays{},
 		StartTime: "00:00:00",
+		EndTime:   "",
+	}
+	tpr.timings[utils.ASAP] = &utils.TPTiming{
+		TimingId:  utils.ANY,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: utils.ASAP,
 		EndTime:   "",
 	}
 	return err

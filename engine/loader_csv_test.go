@@ -309,7 +309,7 @@ func TestLoadDestinations(t *testing.T) {
 }
 
 func TestLoadTimimgs(t *testing.T) {
-	if len(csvr.timings) != 7 {
+	if len(csvr.timings) != 8 {
 		t.Error("Failed to load timings: ", csvr.timings)
 	}
 	timing := csvr.timings["WORKDAYS_00"]
@@ -945,7 +945,7 @@ func TestLoadActionTimings(t *testing.T) {
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{},
-				StartTime: ASAP,
+				StartTime: utils.ASAP,
 			},
 		},
 		Weight:    10,
