@@ -78,8 +78,8 @@ type TpRatingPlan struct {
 	Id           int64
 	Tpid         string
 	Tag          string  `index:"0" re:"\w+\s*,\s*"`
-	DestratesTag string  `index:"1" re:"\w+\s*,\s*"`
-	TimingTag    string  `index:"2" re:"\w+\s*,\s*"`
+	DestratesTag string  `index:"1" re:"\w+\s*,\s*|\*any"`
+	TimingTag    string  `index:"2" re:"\w+\s*,\s*|\*any"`
 	Weight       float64 `index:"3" re:"\d+.?\d*"`
 	CreatedAt    time.Time
 }
@@ -164,7 +164,7 @@ type TpAction struct {
 	RatingSubject   string  `index:"8" re:"\w+\s*"`
 	SharedGroup     string  `index:"9" re:"[0-9A-Za-z_;]*"`
 	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
-	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*"`
+	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
 	Units           float64 `index:"12" re:"\d+\s*"`
 	BalanceWeight   float64 `index:"13" re:"\d+\.?\d*\s*"`
 	Weight          float64 `index:"14" re:"\d+\.?\d*\s*"`
@@ -176,7 +176,7 @@ type TpActionPlan struct {
 	Tpid       string
 	Tag        string  `index:"0" re:"\w+\s*,\s*"`
 	ActionsTag string  `index:"1" re:"\w+\s*,\s*"`
-	TimingTag  string  `index:"2" re:"\w+\s*,\s*"`
+	TimingTag  string  `index:"2" re:"\w+\s*,\s*"|\*any`
 	Weight     float64 `index:"3" re:"\d+\.?\d*"`
 	CreatedAt  time.Time
 }
@@ -198,7 +198,7 @@ type TpActionTrigger struct {
 	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
 	BalanceSharedGroup     string  `index:"12" re:"\w+|\*any"`
 	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
-	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*"`
+	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*|\*any"`
 	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
 	MinQueuedItems         int     `index:"16" re:"\d+"`
 	ActionsTag             string  `index:"17" re:"\w+"`

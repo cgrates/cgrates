@@ -87,6 +87,16 @@ func (tpr *TpReader) LoadTimings() (err error) {
 	}
 
 	tpr.timings, err = TpTimings(tps).GetTimings()
+	// add *any timing tag
+	tpr.timings[utils.ANY] = &utils.TPTiming{
+		TimingId:  utils.ANY,
+		Years:     utils.Years{},
+		Months:    utils.Months{},
+		MonthDays: utils.MonthDays{},
+		WeekDays:  utils.WeekDays{},
+		StartTime: "00:00:00",
+		EndTime:   "",
+	}
 	return err
 }
 

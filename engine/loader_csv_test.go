@@ -308,7 +308,7 @@ func TestLoadDestinations(t *testing.T) {
 }
 
 func TestLoadTimimgs(t *testing.T) {
-	if len(csvr.timings) != 6 {
+	if len(csvr.timings) != 7 {
 		t.Error("Failed to load timings: ", csvr.timings)
 	}
 	timing := csvr.timings["WORKDAYS_00"]
