@@ -69,7 +69,7 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid str
 		EndTime:   "",
 	}
 	tpr.timings[utils.ASAP] = &utils.TPTiming{
-		TimingId:  utils.ANY,
+		TimingId:  utils.ASAP,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},
@@ -118,7 +118,7 @@ func (tpr *TpReader) LoadTimings() (err error) {
 		EndTime:   "",
 	}
 	tpr.timings[utils.ASAP] = &utils.TPTiming{
-		TimingId:  utils.ANY,
+		TimingId:  utils.ASAP,
 		Years:     utils.Years{},
 		Months:    utils.Months{},
 		MonthDays: utils.MonthDays{},

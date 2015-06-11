@@ -54,8 +54,6 @@ WORKDAYS_00,*any,*any,*any,1;2;3;4;5,00:00:00
 WORKDAYS_18,*any,*any,*any,1;2;3;4;5,18:00:00
 WEEKENDS,*any,*any,*any,6;7,00:00:00
 ONE_TIME_RUN,2012,,,,*asap
-ALWAYS,*any,*any,*any,*any,00:00:00
-ASAP,*any,*any,*any,*any,*asap
 `
 	rates = `
 R1,0,0.2,60,1,0
@@ -97,7 +95,7 @@ MX_DISC,RET,MX,*middle,4,10,*disconnect
 STANDARD,RT_STANDARD,WORKDAYS_00,10
 STANDARD,RT_STD_WEEKEND,WORKDAYS_18,10
 STANDARD,RT_STD_WEEKEND,WEEKENDS,10
-STANDARD,RT_URG,ALWAYS,20
+STANDARD,RT_URG,*any,20
 PREMIUM,RT_STANDARD,WORKDAYS_00,10
 PREMIUM,RT_STD_WEEKEND,WORKDAYS_18,10
 PREMIUM,RT_STD_WEEKEND,WEEKENDS,10
@@ -109,9 +107,9 @@ TDRT,T1,WORKDAYS_00,10
 TDRT,T2,WORKDAYS_00,10
 G,RT_STANDARD,WORKDAYS_00,10
 R,P1,WORKDAYS_00,10
-RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,ALWAYS,10
-RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10
-RP_DATA,DATA_RATE,ALWAYS,10
+RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,*any,10
+RP_UK,DR_UK_Mobile_BIG5,*any,10
+RP_DATA,DATA_RATE,*any,10
 RP_MX,MX_DISC,WORKDAYS_00,10
 RP_MX,MX_FREE,WORKDAYS_18,10
 ANY_PLAN,DATA_RATE,*any,10
@@ -166,11 +164,11 @@ DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 MORE_MINUTES,SHARED,ONE_TIME_RUN,10
-TOPUP10_AT,TOPUP10_AC,ASAP,10
-TOPUP10_AT,TOPUP10_AC1,ASAP,10
-TOPUP_SHARED0_AT,SE0,ASAP,10
-TOPUP_SHARED10_AT,SE10,ASAP,10
-TOPUP_EMPTY_AT,EE0,ASAP,10
+TOPUP10_AT,TOPUP10_AC,*asap,10
+TOPUP10_AT,TOPUP10_AC1,*asap,10
+TOPUP_SHARED0_AT,SE0,*asap,10
+TOPUP_SHARED10_AT,SE10,*asap,10
+TOPUP_EMPTY_AT,EE0,*asap,10
 `
 
 	actionTriggers = `
@@ -309,7 +307,7 @@ func TestLoadDestinations(t *testing.T) {
 }
 
 func TestLoadTimimgs(t *testing.T) {
-	if len(csvr.timings) != 8 {
+	if len(csvr.timings) != 6 {
 		t.Error("Failed to load timings: ", csvr.timings)
 	}
 	timing := csvr.timings["WORKDAYS_00"]
@@ -614,7 +612,7 @@ func TestLoadRatingPlans(t *testing.T) {
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{},
 				StartTime: "00:00:00",
-				tag:       "ALWAYS",
+				tag:       "*any",
 			},
 		},
 		Ratings: map[string]*RIRate{
