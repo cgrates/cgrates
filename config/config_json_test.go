@@ -319,6 +319,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 		Low_balance_ann_file:   utils.StringPointer(""),
 		Empty_balance_context:  utils.StringPointer(""),
 		Empty_balance_ann_file: utils.StringPointer(""),
+		Subscribe_park:         utils.BoolPointer(true),
 		Connections: &[]*FsConnJsonCfg{
 			&FsConnJsonCfg{
 				Server:     utils.StringPointer("127.0.0.1:8021"),

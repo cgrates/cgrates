@@ -32,6 +32,8 @@ func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcProfiles["/var/log/cgrates/cdrc/in"][utils.META_DEFAULT]
 	cdrcConfig.CdrFields = append(cdrcConfig.CdrFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.CDRFIELD, CdrFieldId: "supplier", Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
+	cdrcConfig.CdrFields = append(cdrcConfig.CdrFields, &config.CfgCdrField{Tag: "DisconnectCauseTest", Type: utils.CDRFIELD, CdrFieldId: utils.DISCONNECT_CAUSE,
+		Value: []*utils.RSRField{&utils.RSRField{Id: "16"}}})
 	cdrc := &Cdrc{CdrFormat: CSV, cdrSourceIds: []string{"TEST_CDRC"}, cdrFields: [][]*config.CfgCdrField{cdrcConfig.CdrFields}}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := cdrc.recordToStoredCdr(cdrRow, 0)
@@ -39,30 +41,31 @@ func TestRecordForkCdr(t *testing.T) {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
-		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
+		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
 	rtCdr, err := cdrc.recordToStoredCdr(cdrRow, 0)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	expectedCdr := &engine.StoredCdr{
-		CgrId:       utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
-		TOR:         cdrRow[2],
-		AccId:       cdrRow[3],
-		CdrHost:     "0.0.0.0", // Got it over internal interface
-		CdrSource:   "TEST_CDRC",
-		ReqType:     cdrRow[4],
-		Direction:   cdrRow[5],
-		Tenant:      cdrRow[6],
-		Category:    cdrRow[7],
-		Account:     cdrRow[8],
-		Subject:     cdrRow[9],
-		Destination: cdrRow[10],
-		SetupTime:   time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC),
-		AnswerTime:  time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
-		Usage:       time.Duration(62) * time.Second,
-		Supplier:    "supplier1",
-		ExtraFields: map[string]string{},
-		Cost:        -1,
+		CgrId:           utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
+		TOR:             cdrRow[2],
+		AccId:           cdrRow[3],
+		CdrHost:         "0.0.0.0", // Got it over internal interface
+		CdrSource:       "TEST_CDRC",
+		ReqType:         cdrRow[4],
+		Direction:       cdrRow[5],
+		Tenant:          cdrRow[6],
+		Category:        cdrRow[7],
+		Account:         cdrRow[8],
+		Subject:         cdrRow[9],
+		Destination:     cdrRow[10],
+		SetupTime:       time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC),
+		AnswerTime:      time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
+		Usage:           time.Duration(62) * time.Second,
+		Supplier:        "supplier1",
+		DisconnectCause: "NORMAL_DISCONNECT",
+		ExtraFields:     map[string]string{},
+		Cost:            -1,
 	}
 	if !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)

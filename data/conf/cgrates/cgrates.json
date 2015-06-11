@@ -171,6 +171,7 @@
 //	"low_balance_ann_file": "",		// file to be played when low balance is reached for prepaid calls
 //	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance
 //	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
+//  "subscribe_park": true,			// subscribe via fsock to receive park events
 //	"connections":[					// instantiate connections to multiple FreeSWITCH servers
 //		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
 //	],

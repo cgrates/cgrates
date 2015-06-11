@@ -151,6 +151,7 @@ type SmFsJsonCfg struct {
 	Low_balance_ann_file   *string
 	Empty_balance_context  *string
 	Empty_balance_ann_file *string
+	Subscribe_park         *bool
 	Connections            *[]*FsConnJsonCfg
 }
 

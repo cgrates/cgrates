@@ -74,11 +74,7 @@ func (sm *FSSessionManager) Connect() error {
 	return err
 }
 
-func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string, string)) {
-	cp := func(body, connId string) {
-		ev := new(FSEvent).AsEvent(body)
-		sm.onChannelPark(ev, connId)
-	}
+func (sm *FSSessionManager) createHandlers() map[string][]func(string, string) {
 	ca := func(body, connId string) {
 		ev := new(FSEvent).AsEvent(body)
 		sm.onChannelAnswer(ev, connId)
@@ -87,11 +83,18 @@ func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string,
 		ev := new(FSEvent).AsEvent(body)
 		sm.onChannelHangupComplete(ev)
 	}
-	return map[string][]func(string, string){
-		"CHANNEL_PARK":            []func(string, string){cp},
+	handlers := map[string][]func(string, string){
 		"CHANNEL_ANSWER":          []func(string, string){ca},
 		"CHANNEL_HANGUP_COMPLETE": []func(string, string){ch},
 	}
+	if sm.cfg.SubscribePark {
+		cp := func(body, connId string) {
+			ev := new(FSEvent).AsEvent(body)
+			sm.onChannelPark(ev, connId)
+		}
+		handlers["CHANNEL_PARK"] = []func(string, string){cp}
+	}
+	return handlers
 }
 
 // Searches and return the session with the specifed uuid

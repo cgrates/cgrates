@@ -69,6 +69,7 @@ type SmFsConfig struct {
 	LowBalanceAnnFile   string
 	EmptyBalanceContext string
 	EmptyBalanceAnnFile string
+	SubscribePark       bool
 	Connections         []*FsConnConfig
 }
 
@@ -125,6 +126,9 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	}
 	if jsnCfg.Empty_balance_ann_file != nil {
 		self.EmptyBalanceAnnFile = *jsnCfg.Empty_balance_ann_file
+	}
+	if jsnCfg.Subscribe_park != nil {
+		self.SubscribePark = *jsnCfg.Subscribe_park
 	}
 	if jsnCfg.Connections != nil {
 		self.Connections = make([]*FsConnConfig, len(*jsnCfg.Connections))
