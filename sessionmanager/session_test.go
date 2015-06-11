@@ -105,8 +105,8 @@ func TestSessionRefund(t *testing.T) {
 	mc := &MockConnector{}
 	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
 	ts := &engine.TimeSpan{
-		TimeStart: time.Date(2015, 6, 10, 14, 07, 0, 0, time.UTC),
-		TimeEnd:   time.Date(2015, 6, 10, 14, 07, 30, 0, time.UTC),
+		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
 	}
 	// add increments
 	for i := 0; i < 30; i++ {
@@ -114,7 +114,7 @@ func TestSessionRefund(t *testing.T) {
 	}
 
 	cc := &engine.CallCost{Timespans: engine.TimeSpans{ts}}
-	hangupTime := time.Date(2015, 6, 10, 14, 07, 20, 0, time.UTC)
+	hangupTime := time.Date(2015, 6, 10, 14, 7, 20, 0, time.UTC)
 	s.Refund(cc, hangupTime)
 	if len(mc.refundCd.Increments) != 10 || len(cc.Timespans) != 1 || cc.Timespans[0].TimeEnd != hangupTime {
 		t.Errorf("Error refunding: %+v, %+v", mc.refundCd.Increments, cc.Timespans[0])
@@ -125,8 +125,8 @@ func TestSessionRefundAll(t *testing.T) {
 	mc := &MockConnector{}
 	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
 	ts := &engine.TimeSpan{
-		TimeStart: time.Date(2015, 6, 10, 14, 07, 0, 0, time.UTC),
-		TimeEnd:   time.Date(2015, 6, 10, 14, 07, 30, 0, time.UTC),
+		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
 	}
 	// add increments
 	for i := 0; i < 30; i++ {
@@ -134,9 +134,38 @@ func TestSessionRefundAll(t *testing.T) {
 	}
 
 	cc := &engine.CallCost{Timespans: engine.TimeSpans{ts}}
-	hangupTime := time.Date(2015, 6, 10, 14, 07, 0, 0, time.UTC)
+	hangupTime := time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC)
 	s.Refund(cc, hangupTime)
 	if len(mc.refundCd.Increments) != 30 || len(cc.Timespans) != 0 {
-		t.Errorf("Error refunding: %+v, %+v", len(mc.refundCd.Increments), cc.Timespans[0])
+		t.Errorf("Error refunding: %+v, %+v", len(mc.refundCd.Increments), cc.Timespans)
+	}
+}
+
+func TestSessionRefundManyAll(t *testing.T) {
+	mc := &MockConnector{}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	ts1 := &engine.TimeSpan{
+		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
+	}
+	// add increments
+	for i := 0; i < int(ts1.GetDuration().Seconds()); i++ {
+		ts1.AddIncrement(&engine.Increment{Duration: time.Second, Cost: 1.0})
+	}
+
+	ts2 := &engine.TimeSpan{
+		TimeStart: time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
+		TimeEnd:   time.Date(2015, 6, 10, 14, 8, 0, 0, time.UTC),
+	}
+	// add increments
+	for i := 0; i < int(ts2.GetDuration().Seconds()); i++ {
+		ts2.AddIncrement(&engine.Increment{Duration: time.Second, Cost: 1.0})
+	}
+
+	cc := &engine.CallCost{Timespans: engine.TimeSpans{ts1, ts2}}
+	hangupTime := time.Date(2015, 6, 10, 14, 07, 0, 0, time.UTC)
+	s.Refund(cc, hangupTime)
+	if len(mc.refundCd.Increments) != 60 || len(cc.Timespans) != 0 {
+		t.Errorf("Error refunding: %+v, %+v", len(mc.refundCd.Increments), cc.Timespans)
 	}
 }
