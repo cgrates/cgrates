@@ -551,40 +551,41 @@ type CachedItemAge struct {
 }
 
 type AttrExpFileCdrs struct {
-	CdrFormat               *string  // Cdr output file format <CdreCdrFormats>
-	FieldSeparator          *string  // Separator used between fields
-	ExportId                *string  // Optional exportid
-	ExportDir               *string  // If provided it overwrites the configured export directory
-	ExportFileName          *string  // If provided the output filename will be set to this
-	ExportTemplate          *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	DataUsageMultiplyFactor *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
-	SmsUsageMultiplyFactor  *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
-	CostMultiplyFactor      *float64 // Multiply the cost before export, eg: apply VAT
-	CostShiftDigits         *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
-	RoundDecimals           *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
-	MaskDestinationId       *string  // Overwrite configured MaskDestId
-	MaskLength              *int     // Overwrite configured MaskLength, -1 to use general config ones
-	CgrIds                  []string // If provided, it will filter based on the cgrids present in list
-	MediationRunIds         []string // If provided, it will filter on mediation runid
-	TORs                    []string // If provided, filter on TypeOfRecord
-	CdrHosts                []string // If provided, it will filter cdrhost
-	CdrSources              []string // If provided, it will filter cdrsource
-	ReqTypes                []string // If provided, it will fiter reqtype
-	Directions              []string // If provided, it will fiter direction
-	Tenants                 []string // If provided, it will filter tenant
-	Categories              []string // If provided, it will filter çategory
-	Accounts                []string // If provided, it will filter account
-	Subjects                []string // If provided, it will filter the rating subject
-	DestinationPrefixes     []string // If provided, it will filter on destination prefix
-	RatedAccounts           []string // If provided, it will filter ratedaccount
-	RatedSubjects           []string // If provided, it will filter the ratedsubject
-	OrderIdStart            int64    // Export from this order identifier
-	OrderIdEnd              int64    // Export smaller than this order identifier
-	TimeStart               string   // If provided, it will represent the starting of the CDRs interval (>=)
-	TimeEnd                 string   // If provided, it will represent the end of the CDRs interval (<)
-	SkipErrors              bool     // Do not export errored CDRs
-	SkipRated               bool     // Do not export rated CDRs
-	SuppressCgrIds          bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	CdrFormat                  *string  // Cdr output file format <CdreCdrFormats>
+	FieldSeparator             *string  // Separator used between fields
+	ExportId                   *string  // Optional exportid
+	ExportDir                  *string  // If provided it overwrites the configured export directory
+	ExportFileName             *string  // If provided the output filename will be set to this
+	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
+	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
+	SmsUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
+	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
+	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
+	RoundDecimals              *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
+	MaskDestinationId          *string  // Overwrite configured MaskDestId
+	MaskLength                 *int     // Overwrite configured MaskLength, -1 to use general config ones
+	CgrIds                     []string // If provided, it will filter based on the cgrids present in list
+	MediationRunIds            []string // If provided, it will filter on mediation runid
+	TORs                       []string // If provided, filter on TypeOfRecord
+	CdrHosts                   []string // If provided, it will filter cdrhost
+	CdrSources                 []string // If provided, it will filter cdrsource
+	ReqTypes                   []string // If provided, it will fiter reqtype
+	Directions                 []string // If provided, it will fiter direction
+	Tenants                    []string // If provided, it will filter tenant
+	Categories                 []string // If provided, it will filter çategory
+	Accounts                   []string // If provided, it will filter account
+	Subjects                   []string // If provided, it will filter the rating subject
+	DestinationPrefixes        []string // If provided, it will filter on destination prefix
+	RatedAccounts              []string // If provided, it will filter ratedaccount
+	RatedSubjects              []string // If provided, it will filter the ratedsubject
+	OrderIdStart               int64    // Export from this order identifier
+	OrderIdEnd                 int64    // Export smaller than this order identifier
+	TimeStart                  string   // If provided, it will represent the starting of the CDRs interval (>=)
+	TimeEnd                    string   // If provided, it will represent the end of the CDRs interval (<)
+	SkipErrors                 bool     // Do not export errored CDRs
+	SkipRated                  bool     // Do not export rated CDRs
+	SuppressCgrIds             bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
 	Paginator
 }
 
@@ -1018,21 +1019,22 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 }
 
 type AttrExportCdrsToFile struct {
-	CdrFormat               *string  // Cdr output file format <utils.CdreCdrFormats>
-	FieldSeparator          *string  // Separator used between fields
-	ExportId                *string  // Optional exportid
-	ExportDir               *string  // If provided it overwrites the configured export directory
-	ExportFileName          *string  // If provided the output filename will be set to this
-	ExportTemplate          *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	DataUsageMultiplyFactor *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
-	SmsUsageMultiplyFactor  *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
-	CostMultiplyFactor      *float64 // Multiply the cost before export, eg: apply VAT
-	CostShiftDigits         *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
-	RoundDecimals           *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
-	MaskDestinationId       *string  // Overwrite configured MaskDestId
-	MaskLength              *int     // Overwrite configured MaskLength, -1 to use general config ones
-	SuppressCgrIds          bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
-	RpcCdrsFilter                    // Inherit the CDR filter attributes
+	CdrFormat                  *string  // Cdr output file format <utils.CdreCdrFormats>
+	FieldSeparator             *string  // Separator used between fields
+	ExportId                   *string  // Optional exportid
+	ExportDir                  *string  // If provided it overwrites the configured export directory
+	ExportFileName             *string  // If provided the output filename will be set to this
+	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
+	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
+	SmsUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
+	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
+	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
+	RoundDecimals              *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
+	MaskDestinationId          *string  // Overwrite configured MaskDestId
+	MaskLength                 *int     // Overwrite configured MaskLength, -1 to use general config ones
+	SuppressCgrIds             bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	RpcCdrsFilter                       // Inherit the CDR filter attributes
 }
 
 type AttrSetActions struct {

@@ -42,6 +42,7 @@ const (
 	META_NRCDRS          = "*cdrs_number"
 	META_DURCDRS         = "*cdrs_duration"
 	META_SMSUSAGE        = "*sms_usage"
+	META_GENERICUSAGE    = "*generic_usage"
 	META_DATAUSAGE       = "*data_usage"
 	META_COSTCDRS        = "*cdrs_cost"
 	META_MASKDESTINATION = "*mask_destination"
@@ -51,7 +52,7 @@ const (
 var err error
 
 func NewCdrExporter(cdrs []*engine.StoredCdr, cdrDb engine.CdrStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
-	dataUsageMultiplyFactor, smsUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
+	dataUsageMultiplyFactor, smsUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -88,16 +89,17 @@ type CdrExporter struct {
 	exportId       string // Unique identifier or this export
 	dataUsageMultiplyFactor,
 	smsUsageMultiplyFactor, // Multiply the SMS usage (eg: some billing systems billing them as minutes)
+	genericUsageMultiplyFactor,
 	costMultiplyFactor float64
-	costShiftDigits, roundDecimals, cgrPrecision int
-	maskDestId                                   string
-	maskLen                                      int
-	httpSkipTlsCheck                             bool
-	header, trailer                              []string   // Header and Trailer fields
-	content                                      [][]string // Rows of cdr fields
-	firstCdrATime, lastCdrATime                  time.Time
-	numberOfRecords                              int
-	totalDuration, totalDataUsage, totalSmsUsage time.Duration
+	costShiftDigits, roundDecimals, cgrPrecision                    int
+	maskDestId                                                      string
+	maskLen                                                         int
+	httpSkipTlsCheck                                                bool
+	header, trailer                                                 []string   // Header and Trailer fields
+	content                                                         [][]string // Rows of cdr fields
+	firstCdrATime, lastCdrATime                                     time.Time
+	numberOfRecords                                                 int
+	totalDuration, totalDataUsage, totalSmsUsage, totalGenericUsage time.Duration
 
 	totalCost                       float64
 	firstExpOrderId, lastExpOrderId int64
@@ -228,6 +230,9 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	case META_SMSUSAGE:
 		emulatedCdr := &engine.StoredCdr{TOR: utils.SMS, Usage: cdre.totalSmsUsage}
 		return emulatedCdr.FormatUsage(arg), nil
+	case META_GENERICUSAGE:
+		emulatedCdr := &engine.StoredCdr{TOR: utils.GENERIC, Usage: cdre.totalGenericUsage}
+		return emulatedCdr.FormatUsage(arg), nil
 	case META_DATAUSAGE:
 		emulatedCdr := &engine.StoredCdr{TOR: utils.DATA, Usage: cdre.totalDataUsage}
 		return emulatedCdr.FormatUsage(arg), nil
@@ -311,6 +316,8 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 		cdr.UsageMultiply(cdre.dataUsageMultiplyFactor, cdre.cgrPrecision)
 	} else if cdre.smsUsageMultiplyFactor != 0 && cdr.TOR == utils.SMS {
 		cdr.UsageMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
+	} else if cdre.genericUsageMultiplyFactor != 0 && cdr.TOR == utils.GENERIC {
+		cdr.UsageMultiply(cdre.genericUsageMultiplyFactor, cdre.cgrPrecision)
 	} else if cdre.costMultiplyFactor != 0.0 {
 		cdr.CostMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
 	}
@@ -378,7 +385,10 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 	if cdr.TOR == utils.SMS { // Count usage for SMS
 		cdre.totalSmsUsage += cdr.Usage
 	}
-	if cdr.TOR == utils.DATA { // Count usage for SMS
+	if cdr.TOR == utils.GENERIC { // Count usage for GENERIC
+		cdre.totalGenericUsage += cdr.Usage
+	}
+	if cdr.TOR == utils.DATA { // Count usage for DATA
 		cdre.totalDataUsage += cdr.Usage
 	}
 	if cdr.Cost != -1 {

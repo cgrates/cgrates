@@ -61,7 +61,7 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr) (*StoredCdr, error) {
 type StoredCdr struct {
 	CgrId           string
 	OrderId         int64             // Stor order id used as export order id
-	TOR             string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
+	TOR             string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
 	AccId           string            // represents the unique accounting id given by the telecom switch generating the CDR
 	CdrHost         string            // represents the IP address of the host generating the CDR (automatically populated by the server)
 	CdrSource       string            // formally identifies the source of the CDR (free form field)
@@ -117,7 +117,7 @@ func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string 
 
 // Formats usage on export
 func (storedCdr *StoredCdr) FormatUsage(layout string) string {
-	if utils.IsSliceMember([]string{utils.DATA, utils.SMS}, storedCdr.TOR) {
+	if utils.IsSliceMember([]string{utils.DATA, utils.SMS, utils.GENERIC}, storedCdr.TOR) {
 		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	}
 	switch layout {

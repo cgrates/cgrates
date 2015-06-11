@@ -101,7 +101,7 @@
 //	"accounts": [],							// filter on CDR Account fields
 //	"subjects": [],							// filter on CDR Subject fields
 //	"destination_prefixes": [],				// filter on CDR Destination prefixes
-//	"usage_interval": [],					// filter on CDR Usage 
+//	"usage_interval": [],					// filter on CDR Usage
 //	"mediation_run_ids": [],				// filter on CDR MediationRunId fields
 //	"rated_accounts": [],					// filter on CDR RatedAccount fields
 //	"rated_subjects": [],					// filter on CDR RatedSubject fields
@@ -115,6 +115,7 @@
 		"field_separator": ",",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
+        "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENRIC unit to call duration in some billing systems)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
@@ -137,7 +138,7 @@
 			{"tag":"SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
 			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
 			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
-			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
+			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},
 		],
 		"trailer_fields": [],							// template of the exported trailer fields
 	},
@@ -146,6 +147,7 @@
 		"field_separator": ";",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
+        "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
@@ -163,7 +165,7 @@
 			{"tag":"Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "~destination:s/^1(\\d+)/+$1/:s/^\\+(\\d+)/00$1/"},
 			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
 			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
-			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
+			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},
 		],
 		"trailer_fields": [],							// template of the exported trailer fields
 	}
@@ -270,4 +272,3 @@
 //},
 
 }
-

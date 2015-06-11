@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 var dfCgrJsonCfg *CgrJsonCfg
@@ -231,19 +232,20 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 	}
 	eCfg := map[string]*CdreJsonCfg{
 		utils.META_DEFAULT: &CdreJsonCfg{
-			Cdr_format:                 utils.StringPointer("csv"),
-			Field_separator:            utils.StringPointer(","),
-			Data_usage_multiply_factor: utils.Float64Pointer(1.0),
-			Sms_usage_multiply_factor:  utils.Float64Pointer(1.0),
-			Cost_multiply_factor:       utils.Float64Pointer(1.0),
-			Cost_rounding_decimals:     utils.IntPointer(-1),
-			Cost_shift_digits:          utils.IntPointer(0),
-			Mask_destination_id:        utils.StringPointer("MASKED_DESTINATIONS"),
-			Mask_length:                utils.IntPointer(0),
-			Export_dir:                 utils.StringPointer("/var/log/cgrates/cdre"),
-			Header_fields:              &eFields,
-			Content_fields:             &eContentFlds,
-			Trailer_fields:             &eFields,
+			Cdr_format:                    utils.StringPointer("csv"),
+			Field_separator:               utils.StringPointer(","),
+			Data_usage_multiply_factor:    utils.Float64Pointer(1.0),
+			Sms_usage_multiply_factor:     utils.Float64Pointer(1.0),
+			Generic_usage_multiply_factor: utils.Float64Pointer(1.0),
+			Cost_multiply_factor:          utils.Float64Pointer(1.0),
+			Cost_rounding_decimals:        utils.IntPointer(-1),
+			Cost_shift_digits:             utils.IntPointer(0),
+			Mask_destination_id:           utils.StringPointer("MASKED_DESTINATIONS"),
+			Mask_length:                   utils.IntPointer(0),
+			Export_dir:                    utils.StringPointer("/var/log/cgrates/cdre"),
+			Header_fields:                 &eFields,
+			Content_fields:                &eContentFlds,
+			Trailer_fields:                &eFields,
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.CdreJsonCfgs(); err != nil {
@@ -445,7 +447,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 		}
 	*/
 	cdrFields := []*CdrFieldJsonCfg{
-		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("tor"), Value: utils.StringPointer("~7:s/^(voice|data|sms)$/*$1/")},
+		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("tor"), Value: utils.StringPointer("~7:s/^(voice|data|sms|generic)$/*$1/")},
 		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("answer_time"), Value: utils.StringPointer("1")},
 		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("usage"), Value: utils.StringPointer(`~9:s/^(\d+)$/${1}s/`)},
 	}

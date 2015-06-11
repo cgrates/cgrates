@@ -20,19 +20,20 @@ package config
 
 // One instance of CdrExporter
 type CdreConfig struct {
-	CdrFormat               string
-	FieldSeparator          rune
-	DataUsageMultiplyFactor float64
-	SmsUsageMultiplyFactor  float64
-	CostMultiplyFactor      float64
-	CostRoundingDecimals    int
-	CostShiftDigits         int
-	MaskDestId              string
-	MaskLength              int
-	ExportDir               string
-	HeaderFields            []*CfgCdrField
-	ContentFields           []*CfgCdrField
-	TrailerFields           []*CfgCdrField
+	CdrFormat                  string
+	FieldSeparator             rune
+	DataUsageMultiplyFactor    float64
+	SmsUsageMultiplyFactor     float64
+	GenericUsageMultiplyFactor float64
+	CostMultiplyFactor         float64
+	CostRoundingDecimals       int
+	CostShiftDigits            int
+	MaskDestId                 string
+	MaskLength                 int
+	ExportDir                  string
+	HeaderFields               []*CfgCdrField
+	ContentFields              []*CfgCdrField
+	TrailerFields              []*CfgCdrField
 }
 
 func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
@@ -52,6 +53,9 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 	}
 	if jsnCfg.Sms_usage_multiply_factor != nil {
 		self.SmsUsageMultiplyFactor = *jsnCfg.Sms_usage_multiply_factor
+	}
+	if jsnCfg.Generic_usage_multiply_factor != nil {
+		self.GenericUsageMultiplyFactor = *jsnCfg.Generic_usage_multiply_factor
 	}
 	if jsnCfg.Cost_multiply_factor != nil {
 		self.CostMultiplyFactor = *jsnCfg.Cost_multiply_factor
@@ -96,6 +100,7 @@ func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre.FieldSeparator = self.FieldSeparator
 	clnCdre.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor
 	clnCdre.SmsUsageMultiplyFactor = self.SmsUsageMultiplyFactor
+	clnCdre.GenericUsageMultiplyFactor = self.GenericUsageMultiplyFactor
 	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
 	clnCdre.CostRoundingDecimals = self.CostRoundingDecimals
 	clnCdre.CostShiftDigits = self.CostShiftDigits

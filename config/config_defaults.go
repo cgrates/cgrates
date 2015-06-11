@@ -117,6 +117,7 @@ const CGRATES_CFG_JSON = `
 		"field_separator": ",",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
+        "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
@@ -139,7 +140,7 @@ const CGRATES_CFG_JSON = `
 			{"tag":"SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "setup_time", "layout": "2006-01-02T15:04:05Z07:00"},
 			{"tag":"AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "answer_time", "layout": "2006-01-02T15:04:05Z07:00"},
 			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
-			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},			
+			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},
 		],
 		"trailer_fields": [],							// template of the exported trailer fields
 	}
@@ -223,7 +224,7 @@ const CGRATES_CFG_JSON = `
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
-	
+
 },
 
 

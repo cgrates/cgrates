@@ -105,19 +105,20 @@ type CdrFieldJsonCfg struct {
 
 // Cdre config section
 type CdreJsonCfg struct {
-	Cdr_format                 *string
-	Field_separator            *string
-	Data_usage_multiply_factor *float64
-	Sms_usage_multiply_factor  *float64
-	Cost_multiply_factor       *float64
-	Cost_rounding_decimals     *int
-	Cost_shift_digits          *int
-	Mask_destination_id        *string
-	Mask_length                *int
-	Export_dir                 *string
-	Header_fields              *[]*CdrFieldJsonCfg
-	Content_fields             *[]*CdrFieldJsonCfg
-	Trailer_fields             *[]*CdrFieldJsonCfg
+	Cdr_format                    *string
+	Field_separator               *string
+	Data_usage_multiply_factor    *float64
+	Sms_usage_multiply_factor     *float64
+	Generic_usage_multiply_factor *float64
+	Cost_multiply_factor          *float64
+	Cost_rounding_decimals        *int
+	Cost_shift_digits             *int
+	Mask_destination_id           *string
+	Mask_length                   *int
+	Export_dir                    *string
+	Header_fields                 *[]*CdrFieldJsonCfg
+	Content_fields                *[]*CdrFieldJsonCfg
+	Trailer_fields                *[]*CdrFieldJsonCfg
 }
 
 // Cdrc config section

@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
@@ -125,7 +126,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 			CdrSourceId:             "csv2",
 			CdrFilter:               utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 			CdrFields: []*CfgCdrField{
-				&CfgCdrField{Tag: "", Type: "", CdrFieldId: "tor", Value: utils.ParseRSRFieldsMustCompile("~7:s/^(voice|data|sms)$/*$1/", utils.INFIELD_SEP),
+				&CfgCdrField{Tag: "", Type: "", CdrFieldId: "tor", Value: utils.ParseRSRFieldsMustCompile("~7:s/^(voice|data|sms|generic)$/*$1/", utils.INFIELD_SEP),
 					FieldFilter: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP), Width: 0, Strip: "", Padding: "", Layout: "", Mandatory: false},
 				&CfgCdrField{Tag: "", Type: "", CdrFieldId: "answer_time", Value: utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP),
 					FieldFilter: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP), Width: 0, Strip: "", Padding: "", Layout: "", Mandatory: false},
