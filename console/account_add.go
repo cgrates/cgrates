@@ -49,7 +49,7 @@ func (self *CmdAddAccount) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrSetAccount{Direction: utils.OUT}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdAddAccount) PostprocessRpcParams() error {

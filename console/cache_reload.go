@@ -50,7 +50,7 @@ func (self *CmdReloadCache) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.ApiReloadCache{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdReloadCache) PostprocessRpcParams() error {

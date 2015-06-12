@@ -49,7 +49,7 @@ func (self *CmdRemCdrs) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrRemCdrs{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdRemCdrs) PostprocessRpcParams() error {

@@ -49,7 +49,7 @@ func (self *CmdCdrStatsMetrics) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetMetrics{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdCdrStatsMetrics) PostprocessRpcParams() error {

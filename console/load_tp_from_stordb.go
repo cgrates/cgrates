@@ -50,7 +50,7 @@ func (self *LoadTpFromStorDb) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &v1.AttrLoadTpFromStorDb{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *LoadTpFromStorDb) PostprocessRpcParams() error {

@@ -49,7 +49,7 @@ func (self *CmdGetLcr) RpcMethod() string {
 }
 
 func (self *CmdGetLcr) RpcParams() interface{} {
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdGetLcr) PostprocessRpcParams() error {

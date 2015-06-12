@@ -52,7 +52,7 @@ func (self *CmdAddBalance) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MONETARY, Overwrite: false}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdAddBalance) PostprocessRpcParams() error {

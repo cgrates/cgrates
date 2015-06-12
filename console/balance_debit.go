@@ -52,7 +52,7 @@ func (self *CmdDebitBalance) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdDebitBalance) PostprocessRpcParams() error {

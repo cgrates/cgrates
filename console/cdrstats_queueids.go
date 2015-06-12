@@ -46,7 +46,7 @@ func (self *CmdCdrStatsQueueIds) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdCdrStatsQueueIds) PostprocessRpcParams() error {

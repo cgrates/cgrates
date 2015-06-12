@@ -52,7 +52,7 @@ func (self *CmdExecuteAction) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrExecuteAction{Direction: utils.OUT}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdExecuteAction) PostprocessRpcParams() error {

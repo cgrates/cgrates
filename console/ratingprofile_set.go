@@ -50,7 +50,7 @@ func (self *CmdSetRatingProfile) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.TPRatingProfile{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdSetRatingProfile) PostprocessRpcParams() error {
