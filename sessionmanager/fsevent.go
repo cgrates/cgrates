@@ -69,6 +69,7 @@ const (
 	HANGUP_CAUSE       = "Hangup-Cause"
 	PDD_MEDIA_MS       = "variable_progress_mediamsec"
 	PDD_NOMEDIA_MS     = "variable_progressmsec"
+	IGNOREPARK         = "variable_cgr_ignorepark"
 
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 )
