@@ -62,7 +62,7 @@ RP_DATA1,DR_DATA_2,TM2,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDb.CacheRating(nil, nil, nil, nil, nil)
+	ratingDb.CacheRating(nil, nil, nil, nil, nil, nil)
 
 	if cachedRPlans := cache2go.CountEntries(engine.RATING_PLAN_PREFIX); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)

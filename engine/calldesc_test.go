@@ -34,6 +34,8 @@ var (
 
 func init() {
 	historyScribe, _ = history.NewMockScribe()
+	ratingStorage.Flush("")
+	accountingStorage.Flush("")
 	populateDB()
 }
 
@@ -900,7 +902,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 	acc, _ := cd.getAccount()
 	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
 	if len(balanceMap) != 2 || balanceMap[0].Value != 0 || balanceMap[1].Value != -2.5 {
-		t.Errorf("Error debiting from empty share: %+v", balanceMap)
+		t.Errorf("Error debiting from empty share: %+v", balanceMap[1].Value)
 	}
 }
 

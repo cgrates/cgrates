@@ -44,7 +44,7 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
 		t.Error(err)
 	}
-	if err := accountingStorage.CacheAccounting(nil, []string{}, []string{}); err != nil {
+	if err := ratingStorage.CacheRating([]string{}, []string{}, []string{}, []string{}, []string{}, nil); err != nil {
 		t.Error(err)
 	}
 	var dcs utils.DerivedChargers
@@ -149,7 +149,7 @@ func TestGetSessionRuns(t *testing.T) {
 	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	accountingStorage.CacheAccounting(nil, nil, nil)
+	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
@@ -392,7 +392,7 @@ func TestGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
 	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[2], lcr.SupplierCosts[2])
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
 	}
 	// Test *least_cost strategy here
 	cdLowestCost := &CallDescriptor{

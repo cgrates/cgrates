@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"reflect"
+	"testing"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"reflect"
-	"testing"
 )
 
 var apierDcT *ApierV1
@@ -31,7 +32,7 @@ var apierDcT *ApierV1
 func init() {
 	dataStorage, _ := engine.NewMapStorage()
 	cfg, _ := config.NewDefaultCGRConfig()
-	apierDcT = &ApierV1{AccountDb: engine.AccountingStorage(dataStorage), Config: cfg}
+	apierDcT = &ApierV1{RatingDb: engine.RatingStorage(dataStorage), Config: cfg}
 }
 
 /*

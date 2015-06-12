@@ -108,8 +108,8 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
-	ratingDb2.CacheRating(nil, nil, nil, nil, nil)
-	acntDb2.CacheAccounting(nil, nil, nil, nil)
+	ratingDb2.CacheRating(nil, nil, nil, nil, nil, nil)
+	acntDb2.CacheAccounting(nil, nil, nil)
 	if cachedDests := cache2go.CountEntries(engine.DESTINATION_PREFIX); cachedDests != 2 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}

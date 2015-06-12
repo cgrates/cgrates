@@ -276,6 +276,25 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			}
 		}
 	}
+	// Load derived chargers
+	loadId = utils.CSV_LOAD + "_" + TEST_SQL
+	if derivedChargers, err := storDb.GetTpDerivedChargers(&TpDerivedCharger{Tpid: TEST_SQL, Loadid: loadId}); err != nil {
+		t.Fatal("Could not retrieve derived chargers, error: ", err.Error())
+	} else if len(derivedChargers) == 0 {
+		t.Fatal("Could not retrieve derived chargers")
+	} else {
+		dcs, err := TpDerivedChargers(derivedChargers).GetDerivedChargers()
+		if err != nil {
+			t.Fatal("Could not convert derived chargers")
+		}
+		for dcId := range dcs {
+			mdc := &TpDerivedCharger{Tpid: TEST_SQL, Loadid: loadId}
+			mdc.SetDerivedChargersId(dcId)
+			if err := loader.LoadDerivedChargersFiltered(mdc, true); err != nil {
+				t.Fatalf("Could not load derived charger with id: %s, error: %s", dcId, err.Error())
+			}
+		}
+	}
 	// Load account actions
 	if accountActions, err := storDb.GetTpAccountActions(&TpAccountAction{Tpid: TEST_SQL, Loadid: loadId}); err != nil {
 		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())

@@ -53,7 +53,7 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 	if tpRpf.KeyId() != ":::" { // if has some filters
 		ratingProfile = []string{engine.RATING_PROFILE_PREFIX + tpRpf.KeyId()}
 	}
-	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, ratingProfile, didNotChange, didNotChange); err != nil {
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, ratingProfile, didNotChange, didNotChange, didNotChange); err != nil {
 		return err
 	}
 	*reply = v1.OK
@@ -84,7 +84,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.AccountDb.CacheAccounting(nil, nil, nil, []string{}); err != nil {
+	if err := self.AccountDb.CacheAccounting(nil, nil, nil); err != nil {
 		return err
 	}
 	if self.Sched != nil {
@@ -118,7 +118,7 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	if len(attrs.DerivedChargersId) != 0 {
 		dcsChanged = []string{engine.DERIVEDCHARGERS_PREFIX + attrs.DerivedChargersId}
 	}
-	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, didNotChange, dcsChanged); err != nil {
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, didNotChange, didNotChange, dcsChanged); err != nil {
 		return err
 	}
 	*reply = v1.OK

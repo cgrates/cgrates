@@ -106,8 +106,8 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
-	ratingDb3.CacheRating(nil, nil, nil, nil, nil)
-	acntDb3.CacheAccounting(nil, nil, nil, nil)
+	ratingDb3.CacheRating(nil, nil, nil, nil, nil, nil)
+	acntDb3.CacheAccounting(nil, nil, nil)
 	if cachedDests := cache2go.CountEntries(engine.DESTINATION_PREFIX); cachedDests != 2 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}

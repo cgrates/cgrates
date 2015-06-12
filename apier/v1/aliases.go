@@ -49,7 +49,7 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 		aliasesChanged = append(aliasesChanged, engine.RP_ALIAS_PREFIX+utils.RatingSubjectAliasKey(attrs.Tenant, alias))
 	}
 	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, aliasesChanged, didNotChange); err != nil {
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, aliasesChanged, didNotChange, didNotChange); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK
@@ -80,7 +80,7 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 		return fmt.Errorf("%s:% s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, nil, didNotChange); err != nil {
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, nil, didNotChange, didNotChange); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK
@@ -99,7 +99,7 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 		aliasesChanged = append(aliasesChanged, engine.ACC_ALIAS_PREFIX+utils.AccountAliasKey(attrs.Tenant, alias))
 	}
 	didNotChange := []string{}
-	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, aliasesChanged, didNotChange); err != nil {
+	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, aliasesChanged); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK
@@ -130,7 +130,7 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	didNotChange := []string{}
-	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, nil, didNotChange); err != nil {
+	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, nil); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK

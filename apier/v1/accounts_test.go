@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"testing"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"testing"
 )
 
 var (
@@ -56,7 +57,7 @@ func TestSetAccounts(t *testing.T) {
 		}
 	}
 	noReload := []string{}
-	apierAcntsAcntStorage.CacheAccounting(nil, noReload, noReload, noReload)
+	apierAcntsAcntStorage.CacheAccounting(nil, noReload, noReload)
 }
 
 /*
