@@ -56,13 +56,24 @@ func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
 	return nil
 }
 
-func (ce *CommandExecuter) ClientArgs() (args []string) {
-	val := reflect.ValueOf(ce.command.RpcParams()).Elem()
-	for i := 0; i < val.NumField(); i++ {
-		typeField := val.Type().Field(i)
-		args = append(args, typeField.Name)
+func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
+	val := reflect.ValueOf(iface)
+	typ := reflect.TypeOf(iface)
+	for i := 0; i < typ.NumField(); i++ {
+		valField := val.Field(i)
+		typeField := typ.Field(i)
+		switch valField.Kind() {
+		case reflect.Struct:
+			args = append(args, ce.clientArgs(valField.Interface())...)
+		default:
+			args = append(args, typeField.Name)
+		}
 	}
 	return
+}
+
+func (ce *CommandExecuter) ClientArgs() (args []string) {
+	return ce.clientArgs(ce.command.RpcParams())
 }
 
 // To be overwritten by commands that do not need a rpc call

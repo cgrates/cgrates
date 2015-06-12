@@ -51,7 +51,7 @@ func (self *CmdCdrReloadQueues) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrCDRStatsReloadQueues{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdCdrReloadQueues) PostprocessRpcParams() error {

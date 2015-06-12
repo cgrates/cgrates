@@ -49,7 +49,7 @@ func (self *CmdExportCdrs) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrExportCdrsToFile{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdExportCdrs) PostprocessRpcParams() error {

@@ -49,7 +49,7 @@ func (self *CmdGetCacheStats) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrCacheStats{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdGetCacheStats) PostprocessRpcParams() error {

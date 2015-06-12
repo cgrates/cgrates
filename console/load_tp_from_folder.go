@@ -50,7 +50,7 @@ func (self *LoadTpFromFolder) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrLoadTpFromFolder{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *LoadTpFromFolder) PostprocessRpcParams() error {

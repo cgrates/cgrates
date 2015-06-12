@@ -54,7 +54,7 @@ func (self *CmdGetCostDetails) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetCallCost{RunId: utils.DEFAULT_RUNID}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdGetCostDetails) PostprocessRpcParams() error {

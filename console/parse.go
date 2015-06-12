@@ -53,7 +53,7 @@ func (self *CmdParse) RpcParams() interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &AttrParse{}
 	}
-	return self.rpcParams
+	return *self.rpcParams
 }
 
 func (self *CmdParse) RpcResult() interface{} {
