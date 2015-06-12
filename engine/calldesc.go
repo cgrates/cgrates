@@ -49,19 +49,19 @@ func init() {
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 	}
 	if DEBUG {
-		dataStorage, _ = NewMapStorage()
+		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	} else {
-		//dataStorage, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-		dataStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
+		//ratingStorage, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
+		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
 		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
 	}
-	storageLogger = dataStorage.(LogStorage)
+	storageLogger = ratingStorage.(LogStorage)
 }
 
 var (
 	Logger                 utils.LoggerInterface
-	dataStorage            RatingStorage
+	ratingStorage          RatingStorage
 	accountingStorage      AccountingStorage
 	storageLogger          LogStorage
 	cdrStorage             CdrStorage
@@ -73,7 +73,7 @@ var (
 
 // Exported method to set the storage getter.
 func SetRatingStorage(sg RatingStorage) {
-	dataStorage = sg
+	ratingStorage = sg
 }
 
 func SetAccountingStorage(ag AccountingStorage) {
@@ -176,7 +176,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
-	rpf, err := dataStorage.GetRatingProfile(key, false)
+	rpf, err := ratingStorage.GetRatingProfile(key, false)
 	if err != nil || rpf == nil {
 		return err
 	}
@@ -667,8 +667,8 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.Flush()
-	dataStorage.CacheRating(nil, nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil, nil)
+	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil)
 	return nil
 
 }
@@ -719,7 +719,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		utils.LCRKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
 	}
 	for _, key := range keyVariants {
-		if lcr, err := dataStorage.GetLCR(key, false); err != nil && err.Error() != utils.ERR_NOT_FOUND {
+		if lcr, err := ratingStorage.GetLCR(key, false); err != nil && err.Error() != utils.ERR_NOT_FOUND {
 			return nil, err
 		} else if err == nil {
 			return lcr, nil
@@ -832,7 +832,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					continue
 				}
 				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
-				if rpf, err := dataStorage.GetRatingProfile(rpfKey, false); err != nil {
+				if rpf, err := ratingStorage.GetRatingProfile(rpfKey, false); err != nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
 						Error:    fmt.Sprintf("Rating plan error: %s", err.Error()),

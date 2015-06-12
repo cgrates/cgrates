@@ -203,7 +203,7 @@ func TestAcceptCdr(t *testing.T) {
 }
 
 func TestStatsQueueIds(t *testing.T) {
-	cdrStats := NewStats(dataStorage)
+	cdrStats := NewStats(ratingStorage)
 	ids := []string{}
 	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
 		t.Error("Errorf getting queue ids: ", err)
@@ -216,7 +216,7 @@ func TestStatsQueueIds(t *testing.T) {
 }
 
 func TestStatsAppendCdr(t *testing.T) {
-	cdrStats := NewStats(dataStorage)
+	cdrStats := NewStats(ratingStorage)
 	cdr := &StoredCdr{
 		Tenant:          "cgrates.org",
 		Category:        "call",
@@ -238,7 +238,7 @@ func TestStatsAppendCdr(t *testing.T) {
 }
 
 func TestStatsGetValues(t *testing.T) {
-	cdrStats := NewStats(dataStorage)
+	cdrStats := NewStats(ratingStorage)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -267,7 +267,7 @@ func TestStatsGetValues(t *testing.T) {
 }
 
 func TestStatsReloadQueues(t *testing.T) {
-	cdrStats := NewStats(dataStorage)
+	cdrStats := NewStats(ratingStorage)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -299,7 +299,7 @@ func TestStatsReloadQueues(t *testing.T) {
 }
 
 func TestStatsReloadQueuesWithDefault(t *testing.T) {
-	cdrStats := NewStats(dataStorage)
+	cdrStats := NewStats(ratingStorage)
 	cdrStats.AddQueue(&CdrStats{
 		Id: utils.META_DEFAULT,
 	}, nil)
@@ -335,7 +335,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 }
 
 func TestStatsReloadQueuesWithIds(t *testing.T) {
-	cdrStats := NewStats(dataStorage)
+	cdrStats := NewStats(ratingStorage)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -367,7 +367,7 @@ func TestStatsReloadQueuesWithIds(t *testing.T) {
 }
 
 func TestStatsResetQueues(t *testing.T) {
-	cdrStats := NewStats(dataStorage)
+	cdrStats := NewStats(ratingStorage)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -399,7 +399,7 @@ func TestStatsResetQueues(t *testing.T) {
 }
 
 func TestStatsResetQueuesWithIds(t *testing.T) {
-	cdrStats := NewStats(dataStorage)
+	cdrStats := NewStats(ratingStorage)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",

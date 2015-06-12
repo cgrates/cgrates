@@ -39,11 +39,11 @@ func TestDestinationStoreRestore(t *testing.T) {
 
 func TestDestinationStorageStore(t *testing.T) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	err := dataStorage.SetDestination(nationale)
+	err := ratingStorage.SetDestination(nationale)
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
-	result, err := dataStorage.GetDestination(nationale.Id)
+	result, err := ratingStorage.GetDestination(nationale.Id)
 	if nationale.containsPrefix("0257") == 0 || nationale.containsPrefix("0256") == 0 || nationale.containsPrefix("0723") == 0 {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
@@ -74,28 +74,28 @@ func TestDestinationContainsPrefixWrong(t *testing.T) {
 }
 
 func TestDestinationGetExists(t *testing.T) {
-	d, err := dataStorage.GetDestination("NAT")
+	d, err := ratingStorage.GetDestination("NAT")
 	if err != nil || d == nil {
 		t.Error("Could not get destination: ", d)
 	}
 }
 
 func TestDestinationGetExistsCache(t *testing.T) {
-	dataStorage.GetDestination("NAT")
+	ratingStorage.GetDestination("NAT")
 	if _, err := cache2go.GetCached(DESTINATION_PREFIX + "0256"); err != nil {
 		t.Error("Destination not cached:", err)
 	}
 }
 
 func TestDestinationGetNotExists(t *testing.T) {
-	d, err := dataStorage.GetDestination("not existing")
+	d, err := ratingStorage.GetDestination("not existing")
 	if d != nil {
 		t.Error("Got false destination: ", d, err)
 	}
 }
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
-	dataStorage.GetDestination("not existing")
+	ratingStorage.GetDestination("not existing")
 	if d, err := cache2go.GetCached("not existing"); err == nil {
 		t.Error("Bad destination cached: ", d)
 	}
@@ -147,7 +147,7 @@ func TestCleanStalePrefixes(t *testing.T) {
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
-		dataStorage.SetDestination(nationale)
-		dataStorage.GetDestination(nationale.Id)
+		ratingStorage.SetDestination(nationale)
+		ratingStorage.GetDestination(nationale.Id)
 	}
 }

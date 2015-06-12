@@ -211,7 +211,7 @@ CDRST2,,,ACD,,,,,,,,,,,,,,,,,,,,
 var csvr *TpReader
 
 func init() {
-	csvr = NewTpReader(dataStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats), "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
@@ -256,8 +256,8 @@ func init() {
 		log.Print("error in LoadCdrStats:", err)
 	}
 	csvr.WriteToDatabase(false, false)
-	dataStorage.CacheRating(nil, nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil, nil)
+	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

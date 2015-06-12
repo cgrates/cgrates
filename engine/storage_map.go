@@ -62,7 +62,7 @@ func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return keysForPrefix, nil
 }
 
-func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) error {
+func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys, dcsKeys []string) error {
 	cache2go.BeginTransaction()
 	if dKeys == nil || (float64(cache2go.CountEntries(DESTINATION_PREFIX))*DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		cache2go.RemPrefixKey(DESTINATION_PREFIX)
@@ -80,6 +80,9 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []str
 	}
 	if lcrKeys == nil {
 		cache2go.RemPrefixKey(LCR_PREFIX)
+	}
+	if dcsKeys == nil {
+		cache2go.RemPrefixKey(DERIVEDCHARGERS_PREFIX)
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
@@ -116,12 +119,19 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []str
 				return err
 			}
 		}
+		if strings.HasPrefix(k, DERIVEDCHARGERS_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetDerivedChargers(k[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
+				return err
+			}
+		}
 	}
 	cache2go.CommitTransaction()
 	return nil
 }
 
-func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) error {
+func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) error {
 	cache2go.BeginTransaction()
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX) // Forced until we can fine tune it
@@ -131,9 +141,6 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []strin
 	}
 	if alsKeys == nil {
 		cache2go.RemPrefixKey(ACC_ALIAS_PREFIX)
-	}
-	if dcsKeys == nil {
-		cache2go.RemPrefixKey(DERIVEDCHARGERS_PREFIX)
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, ACTION_PREFIX) {
@@ -153,13 +160,6 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []strin
 		if strings.HasPrefix(k, ACC_ALIAS_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetAccAlias(k[len(ACC_ALIAS_PREFIX):], true); err != nil {
-				cache2go.RollbackTransaction()
-				return err
-			}
-		}
-		if strings.HasPrefix(k, DERIVEDCHARGERS_PREFIX) {
-			cache2go.RemKey(k)
-			if _, err := ms.GetDerivedChargers(k[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
 				cache2go.RollbackTransaction()
 				return err
 			}

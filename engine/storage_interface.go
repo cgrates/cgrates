@@ -70,7 +70,7 @@ type Storage interface {
 // Interface for storage providers.
 type RatingStorage interface {
 	Storage
-	CacheRating([]string, []string, []string, []string, []string) error
+	CacheRating([]string, []string, []string, []string, []string, []string) error
 	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
@@ -87,12 +87,14 @@ type RatingStorage interface {
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
+	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
+	SetDerivedChargers(string, utils.DerivedChargers) error
 }
 
 type AccountingStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
-	CacheAccounting([]string, []string, []string, []string) error
+	CacheAccounting([]string, []string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
@@ -106,8 +108,6 @@ type AccountingStorage interface {
 	GetActionPlans(string) (ActionPlans, error)
 	SetActionPlans(string, ActionPlans) error
 	GetAllActionPlans() (map[string]ActionPlans, error)
-	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
-	SetDerivedChargers(string, utils.DerivedChargers) error
 }
 
 type CdrStorage interface {

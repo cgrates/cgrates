@@ -71,7 +71,7 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return rs.db.Keys(prefix + "*")
 }
 
-func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) (err error) {
+func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys, dcsKeys []string) (err error) {
 	cache2go.BeginTransaction()
 	if dKeys == nil || (float64(cache2go.CountEntries(DESTINATION_PREFIX))*DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		// if need to load more than a half of exiting keys load them all
@@ -178,11 +178,32 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []s
 	if len(alsKeys) != 0 {
 		Logger.Info("Finished rating profile aliases caching.")
 	}
+	// DerivedChargers caching
+	if dcsKeys == nil {
+		Logger.Info("Caching all derived chargers")
+		if dcsKeys, err = rs.db.Keys(DERIVEDCHARGERS_PREFIX + "*"); err != nil {
+			cache2go.RollbackTransaction()
+			return err
+		}
+		cache2go.RemPrefixKey(DERIVEDCHARGERS_PREFIX)
+	} else if len(dcsKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching derived chargers: %v", dcsKeys))
+	}
+	for _, key := range dcsKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetDerivedChargers(key[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
+			cache2go.RollbackTransaction()
+			return err
+		}
+	}
+	if len(dcsKeys) != 0 {
+		Logger.Info("Finished derived chargers caching.")
+	}
 	cache2go.CommitTransaction()
 	return nil
 }
 
-func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) (err error) {
+func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) (err error) {
 	cache2go.BeginTransaction()
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX)
@@ -247,27 +268,6 @@ func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []str
 	}
 	if len(alsKeys) != 0 {
 		Logger.Info("Finished account aliases caching.")
-	}
-	// DerivedChargers caching
-	if dcsKeys == nil {
-		Logger.Info("Caching all derived chargers")
-		if dcsKeys, err = rs.db.Keys(DERIVEDCHARGERS_PREFIX + "*"); err != nil {
-			cache2go.RollbackTransaction()
-			return err
-		}
-		cache2go.RemPrefixKey(DERIVEDCHARGERS_PREFIX)
-	} else if len(dcsKeys) != 0 {
-		Logger.Info(fmt.Sprintf("Caching derived chargers: %v", dcsKeys))
-	}
-	for _, key := range dcsKeys {
-		cache2go.RemKey(key)
-		if _, err = rs.GetDerivedChargers(key[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
-			return err
-		}
-	}
-	if len(dcsKeys) != 0 {
-		Logger.Info("Finished derived chargers caching.")
 	}
 	cache2go.CommitTransaction()
 	return nil

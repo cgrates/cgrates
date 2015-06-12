@@ -41,10 +41,10 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
 	rsponder = &Responder{}
 	attrs := &utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "responder_test", Subject: "responder_test"}
-	if err := accountingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
+	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
 		t.Error(err)
 	}
-	if err := accountingStorage.CacheAccounting(nil, []string{}, []string{}, []string{}); err != nil {
+	if err := accountingStorage.CacheAccounting(nil, []string{}, []string{}); err != nil {
 		t.Error(err)
 	}
 	var dcs utils.DerivedChargers
@@ -69,7 +69,7 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 		t.Error("Unexpected maxSessionTime received: ", maxSessionTime)
 	}
 	deTMobile := &Destination{Id: "DE_TMOBILE", Prefixes: []string{"+49151", "+49160", "+49170", "+49171", "+49175"}}
-	if err := dataStorage.SetDestination(deTMobile); err != nil {
+	if err := ratingStorage.SetDestination(deTMobile); err != nil {
 		t.Error(err)
 	}
 	b10 := &Balance{Value: 10, Weight: 10, DestinationIds: "DE_TMOBILE"}
@@ -91,11 +91,11 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 		&utils.DerivedCharger{RunId: "extra3", ReqTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^rif", SubjectField: "^rif", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}
-	if err := accountingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
+	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	dataStorage.CacheRating(nil, nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil, nil)
+	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil)
 	if rifStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(utils.OUT, testTenant, "rif")); err != nil {
 		t.Error(err)
 		//} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND].Equal(rifsAccount.BalanceMap[utils.VOICE+OUTBOUND]) {
@@ -146,10 +146,10 @@ func TestGetSessionRuns(t *testing.T) {
 		SetupTimeField: utils.META_DEFAULT, PddField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
 		DisconnectCauseField: utils.META_DEFAULT}
 	charger1 := utils.DerivedChargers{extra1DC, extra2DC, extra3DC}
-	if err := accountingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
+	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	accountingStorage.CacheAccounting(nil, nil, nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil)
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
@@ -166,9 +166,9 @@ func TestGetSessionRuns(t *testing.T) {
 }
 
 func TestGetLCR(t *testing.T) {
-	rsponder.Stats = NewStats(dataStorage) // Load stats instance
+	rsponder.Stats = NewStats(ratingStorage) // Load stats instance
 	dstDe := &Destination{Id: "GERMANY", Prefixes: []string{"+49"}}
-	if err := dataStorage.SetDestination(dstDe); err != nil {
+	if err := ratingStorage.SetDestination(dstDe); err != nil {
 		t.Error(err)
 	}
 	rp1 := &RatingPlan{
@@ -280,7 +280,7 @@ func TestGetLCR(t *testing.T) {
 		},
 	}
 	for _, rpf := range []*RatingPlan{rp1, rp2, rp3} {
-		if err := dataStorage.SetRatingPlan(rpf); err != nil {
+		if err := ratingStorage.SetRatingPlan(rpf); err != nil {
 			t.Error(err)
 		}
 	}
@@ -315,7 +315,7 @@ func TestGetLCR(t *testing.T) {
 		}},
 	}
 	for _, rpfl := range []*RatingProfile{danRpfl, rifRpfl, ivoRpfl} {
-		if err := dataStorage.SetRatingProfile(rpfl); err != nil {
+		if err := ratingStorage.SetRatingProfile(rpfl); err != nil {
 			t.Error(err)
 		}
 	}
@@ -356,15 +356,16 @@ func TestGetLCR(t *testing.T) {
 		},
 	}
 	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost, lcrQosThreshold, lcrQos} {
-		if err := dataStorage.SetLCR(lcr); err != nil {
+		if err := ratingStorage.SetLCR(lcr); err != nil {
 			t.Error(err)
 		}
 	}
-	if err := dataStorage.CacheRating([]string{DESTINATION_PREFIX + dstDe.Id},
+	if err := ratingStorage.CacheRating([]string{DESTINATION_PREFIX + dstDe.Id},
 		[]string{RATING_PLAN_PREFIX + rp1.Id, RATING_PLAN_PREFIX + rp2.Id},
 		[]string{RATING_PROFILE_PREFIX + danRpfl.Id, RATING_PROFILE_PREFIX + rifRpfl.Id},
 		[]string{},
-		[]string{LCR_PREFIX + lcrStatic.GetId(), LCR_PREFIX + lcrLowestCost.GetId()}); err != nil {
+		[]string{LCR_PREFIX + lcrStatic.GetId(), LCR_PREFIX + lcrLowestCost.GetId()},
+		[]string{}); err != nil {
 		t.Error(err)
 	}
 	cdStatic := &CallDescriptor{

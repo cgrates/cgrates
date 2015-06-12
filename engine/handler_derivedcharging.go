@@ -23,7 +23,7 @@ import (
 )
 
 // Handles retrieving of DerivedChargers profile based on longest match from AccountingDb
-func HandleGetDerivedChargers(acntStorage AccountingStorage, attrs *utils.AttrDerivedChargers) (utils.DerivedChargers, error) {
+func HandleGetDerivedChargers(ratingStorage RatingStorage, attrs *utils.AttrDerivedChargers) (utils.DerivedChargers, error) {
 	var dcs utils.DerivedChargers
 	strictKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	anySubjKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, utils.ANY)
@@ -31,7 +31,7 @@ func HandleGetDerivedChargers(acntStorage AccountingStorage, attrs *utils.AttrDe
 	anyCategKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, utils.ANY, utils.ANY, utils.ANY)
 	anyTenantKey := utils.DerivedChargersKey(attrs.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY)
 	for _, dcKey := range []string{strictKey, anySubjKey, anyAcntKey, anyCategKey, anyTenantKey} {
-		if dcsDb, err := acntStorage.GetDerivedChargers(dcKey, false); err != nil && err.Error() != utils.ERR_NOT_FOUND {
+		if dcsDb, err := ratingStorage.GetDerivedChargers(dcKey, false); err != nil && err.Error() != utils.ERR_NOT_FOUND {
 			return nil, err
 		} else if dcsDb != nil {
 			dcs = dcsDb

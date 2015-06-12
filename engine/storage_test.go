@@ -77,7 +77,7 @@ func TestMsgpackTime(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixShort(t *testing.T) {
-	dest, err := dataStorage.GetDestination("NAT")
+	dest, err := ratingStorage.GetDestination("NAT")
 	precision := dest.containsPrefix("0723")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -85,7 +85,7 @@ func TestStorageDestinationContainsPrefixShort(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixLong(t *testing.T) {
-	dest, err := dataStorage.GetDestination("NAT")
+	dest, err := ratingStorage.GetDestination("NAT")
 	precision := dest.containsPrefix("0723045326")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -93,7 +93,7 @@ func TestStorageDestinationContainsPrefixLong(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
-	dest, err := dataStorage.GetDestination("NAT")
+	dest, err := ratingStorage.GetDestination("NAT")
 	precision := dest.containsPrefix("072")
 	if err != nil || precision != 0 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -101,12 +101,12 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 }
 
 func TestCacheRefresh(t *testing.T) {
-	dataStorage.SetDestination(&Destination{"T11", []string{"0"}})
-	dataStorage.GetDestination("T11")
-	dataStorage.SetDestination(&Destination{"T11", []string{"1"}})
+	ratingStorage.SetDestination(&Destination{"T11", []string{"0"}})
+	ratingStorage.GetDestination("T11")
+	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}})
 	t.Log("Test cache refresh")
-	dataStorage.CacheRating(nil, nil, nil, nil, nil)
-	d, err := dataStorage.GetDestination("T11")
+	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
+	d, err := ratingStorage.GetDestination("T11")
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
 		t.Error("Error refreshing cache:", d)
@@ -130,18 +130,18 @@ func TestStoreInterfaces(t *testing.T) {
 }
 
 func TestGetRPAliases(t *testing.T) {
-	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
+	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
+	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
+	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
 		t.Error(err)
 	}
 	expectAliases := sort.StringSlice([]string{"2001", "2002"})
 	expectAliases.Sort()
-	if aliases, err := dataStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
+	if aliases, err := ratingStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
 		t.Error(err)
 	} else {
 		aliases := sort.StringSlice(aliases)
@@ -153,24 +153,24 @@ func TestGetRPAliases(t *testing.T) {
 }
 
 func TestRemRSubjAliases(t *testing.T) {
-	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
+	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
+	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
+	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}); err != nil {
+	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}); err != nil {
 		t.Error(err)
 	}
-	if cgrAliases, err := dataStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
+	if cgrAliases, err := ratingStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
 		t.Error(err)
 	} else if len(cgrAliases) != 0 {
 		t.Error("Subject aliases not removed: ", cgrAliases)
 	}
-	if iscAliases, err := dataStorage.GetRPAliases("itsyscom.com", "1001", true); err != nil { // Make sure the aliases were removed at tenant level
+	if iscAliases, err := ratingStorage.GetRPAliases("itsyscom.com", "1001", true); err != nil { // Make sure the aliases were removed at tenant level
 		t.Error(err)
 	} else if !reflect.DeepEqual(iscAliases, []string{"2003"}) {
 		t.Errorf("Unexpected aliases: %v", iscAliases)

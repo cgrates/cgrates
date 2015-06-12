@@ -890,7 +890,7 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 	}
 	if save {
 		for dcsKey, dcs := range tpr.derivedChargers {
-			if err := tpr.accountingStorage.SetDerivedChargers(dcsKey, dcs); err != nil {
+			if err := tpr.ratingStorage.SetDerivedChargers(dcsKey, dcs); err != nil {
 				return err
 			}
 		}
@@ -1145,7 +1145,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Derived Chargers:")
 	}
 	for key, dcs := range tpr.derivedChargers {
-		err = tpr.accountingStorage.SetDerivedChargers(key, dcs)
+		err = tpr.ratingStorage.SetDerivedChargers(key, dcs)
 		if err != nil {
 			return err
 		}
