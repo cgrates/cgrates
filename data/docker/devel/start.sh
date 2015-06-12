@@ -25,9 +25,12 @@ go install github.com/cgrates/cgrates
 ln -s /root/code/bin/cgr-engine /usr/bin/cgr-engine
 
 # expand freeswitch conf
-cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_conf.tar.gz       
+cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_conf.tar.gz
 
 cd /root/cgr
 echo "for cgradmin run: cgr-engine -config_dir data/conf/samples/cgradmin"
 echo 'export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH'>>/root/.zshrc
+
+upgrade_oh_my_zsh
+
 zsh

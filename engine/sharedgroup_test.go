@@ -18,7 +18,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
+
+func TestSharedSetGet(t *testing.T) {
+	id := "TEST_SG100"
+	sg := &SharedGroup{
+		Id: id,
+		AccountParameters: map[string]*SharingParameters{
+			"test": &SharingParameters{Strategy: STRATEGY_HIGHEST},
+		},
+		MemberIds: []string{"1", "2", "3"},
+	}
+	err := accountingStorage.SetSharedGroup(sg)
+	if err != nil {
+		t.Error("Error storing Shared groudp: ", err)
+	}
+	received, err := accountingStorage.GetSharedGroup(id, true)
+	if err != nil || received == nil || !reflect.DeepEqual(sg, received) {
+		t.Error("Error getting shared group: ", err, received)
+	}
+	received, err = accountingStorage.GetSharedGroup(id, false)
+	if err != nil || received == nil || !reflect.DeepEqual(sg, received) {
+		t.Error("Error getting cached shared group: ", err, received)
+	}
+
+}
 
 func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 	bc := BalanceChain{
