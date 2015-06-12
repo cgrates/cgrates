@@ -158,12 +158,13 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 			if !destinationExists {
 				_, destinationExists = tpr.destinations[dr.DestinationId]
 			}
-			if !destinationExists {
-				if dbExists, err := tpr.ratingStorage.HasData(DESTINATION_PREFIX, dr.DestinationId); err != nil {
+			if !destinationExists && tpr.ratingStorage != nil {
+				if destinationExists, err = tpr.ratingStorage.HasData(DESTINATION_PREFIX, dr.DestinationId); err != nil {
 					return err
-				} else if !dbExists {
-					return fmt.Errorf("could not get destination for tag %v", dr.DestinationId)
 				}
+			}
+			if !destinationExists {
+				return fmt.Errorf("could not get destination for tag %v", dr.DestinationId)
 			}
 		}
 	}
@@ -224,13 +225,18 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				dms, err := TpDestinations(tpDests).GetDestinations()
 				if err != nil {
 					return false, err
-				} else if len(dms) == 0 {
+				}
+				destsExist := len(dms) != 0
+				if !destsExist && tpr.ratingStorage != nil {
 					if dbExists, err := tpr.ratingStorage.HasData(DESTINATION_PREFIX, drate.DestinationId); err != nil {
 						return false, err
-					} else if !dbExists {
-						return false, fmt.Errorf("could not get destination for tag %v", drate.DestinationId)
+					} else if dbExists {
+						destsExist = true
 					}
 					continue
+				}
+				if !destsExist {
+					return false, fmt.Errorf("could not get destination for tag %v", drate.DestinationId)
 				}
 				for _, destination := range dms {
 					tpr.ratingStorage.SetDestination(destination)
@@ -298,12 +304,13 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile) error
 				return fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
-			if !exists {
-				if dbExists, err := tpr.ratingStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+			if !exists && tpr.ratingStorage != nil {
+				if exists, err = tpr.ratingStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
-				} else if !dbExists {
-					return fmt.Errorf("could not load rating plans for tag: %v", tpRa.RatingPlanId)
 				}
+			}
+			if !exists {
+				return fmt.Errorf("could not load rating plans for tag: %v", tpRa.RatingPlanId)
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,
 				&RatingPlanActivation{
@@ -347,12 +354,13 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 				return fmt.Errorf("cannot parse activation time from %v", tpRa.ActivationTime)
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
-			if !exists {
-				if dbExists, err := tpr.ratingStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+			if !exists && tpr.ratingStorage != nil { // Only query if there is a connection, eg on dry run there is none
+				if exists, err = tpr.ratingStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
-				} else if !dbExists {
-					return fmt.Errorf("could not load rating plans for tag: %v", tpRa.RatingPlanId)
 				}
+			}
+			if !exists {
+				return fmt.Errorf("could not load rating plans for tag: %v", tpRa.RatingPlanId)
 			}
 			rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
 				&RatingPlanActivation{
@@ -422,17 +430,27 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 				break
 			}
 		}
-		if !found {
-			if keys, err := tpr.ratingStorage.GetKeysForPrefix(RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil || len(keys) == 0 {
-				return fmt.Errorf("[LCR] could not find ratingProfiles with prefix %s", ratingProfileSearchKey)
+		if !found && tpr.ratingStorage != nil {
+			if keys, err := tpr.ratingStorage.GetKeysForPrefix(RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil {
+				return fmt.Errorf("[LCR] error querying ratingDb %s", err.Error())
+			} else if len(keys) != 0 {
+				found = true
 			}
 		}
+		if !found {
+			return fmt.Errorf("[LCR] could not find ratingProfiles with prefix %s", ratingProfileSearchKey)
+		}
+
 		// check destination tags
 		if tpLcr.DestinationTag != "" && tpLcr.DestinationTag != utils.ANY {
-			if _, found := tpr.destinations[tpLcr.DestinationTag]; !found {
-				if found, err := tpr.ratingStorage.HasData(DESTINATION_PREFIX, tpLcr.DestinationTag); err != nil || !found {
-					return fmt.Errorf("[LCR] could not find destination with tag %s", tpLcr.DestinationTag)
+			_, found := tpr.destinations[tpLcr.DestinationTag]
+			if !found && tpr.ratingStorage != nil {
+				if found, err = tpr.ratingStorage.HasData(DESTINATION_PREFIX, tpLcr.DestinationTag); err != nil {
+					return fmt.Errorf("[LCR] error querying ratingDb %s", err.Error())
 				}
+			}
+			if !found {
+				return fmt.Errorf("[LCR] could not find destination with tag %s", tpLcr.DestinationTag)
 			}
 		}
 		tag := utils.LCRKey(tpLcr.Direction, tpLcr.Tenant, tpLcr.Category, tpLcr.Account, tpLcr.Subject)
@@ -545,11 +563,13 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 		for _, at := range ats {
 
 			_, exists := tpr.actions[at.ActionsId]
-			if !exists {
-				if dbExists, err := tpr.ratingStorage.HasData(ACTION_PREFIX, at.ActionsId); err != nil || !dbExists {
-					return fmt.Errorf("[ActionPlans] Could not load the action for tag: %v",
-						at.ActionsId)
+			if !exists && tpr.ratingStorage != nil {
+				if exists, err = tpr.ratingStorage.HasData(ACTION_PREFIX, at.ActionsId); err != nil {
+					return fmt.Errorf("[ActionPlans] Error querying actions: %v - %s", at.ActionsId, err.Error())
 				}
+			}
+			if !exists {
+				return fmt.Errorf("[ActionPlans] Could not load the action for tag: %v", at.ActionsId)
 			}
 			t, exists := tpr.timings[at.TimingId]
 			if !exists {
