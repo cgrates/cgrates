@@ -26,8 +26,9 @@ import (
 
 func TesSmFsConfigLoadFromJsonCfg(t *testing.T) {
 	smFsJsnCfg := &SmFsJsonCfg{
-		Enabled:    utils.BoolPointer(true),
-		Create_cdr: utils.BoolPointer(true),
+		Enabled:        utils.BoolPointer(true),
+		Create_cdr:     utils.BoolPointer(true),
+		Subscribe_park: utils.BoolPointer(true),
 		Connections: &[]*FsConnJsonCfg{
 			&FsConnJsonCfg{
 				Server:     utils.StringPointer("1.2.3.4:8021"),
@@ -42,7 +43,8 @@ func TesSmFsConfigLoadFromJsonCfg(t *testing.T) {
 		},
 	}
 	eSmFsConfig := &SmFsConfig{Enabled: true,
-		CreateCdr: true,
+		CreateCdr:     true,
+		SubscribePark: true,
 		Connections: []*FsConnConfig{
 			&FsConnConfig{Server: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5},
 			&FsConnConfig{Server: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 5},

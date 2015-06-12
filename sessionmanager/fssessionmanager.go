@@ -74,11 +74,7 @@ func (sm *FSSessionManager) Connect() error {
 	return err
 }
 
-func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string, string)) {
-	cp := func(body, connId string) {
-		ev := new(FSEvent).AsEvent(body)
-		sm.onChannelPark(ev, connId)
-	}
+func (sm *FSSessionManager) createHandlers() map[string][]func(string, string) {
 	ca := func(body, connId string) {
 		ev := new(FSEvent).AsEvent(body)
 		sm.onChannelAnswer(ev, connId)
@@ -87,11 +83,18 @@ func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string,
 		ev := new(FSEvent).AsEvent(body)
 		sm.onChannelHangupComplete(ev)
 	}
-	return map[string][]func(string, string){
-		"CHANNEL_PARK":            []func(string, string){cp},
+	handlers := map[string][]func(string, string){
 		"CHANNEL_ANSWER":          []func(string, string){ca},
 		"CHANNEL_HANGUP_COMPLETE": []func(string, string){ch},
 	}
+	if sm.cfg.SubscribePark {
+		cp := func(body, connId string) {
+			ev := new(FSEvent).AsEvent(body)
+			sm.onChannelPark(ev, connId)
+		}
+		handlers["CHANNEL_PARK"] = []func(string, string){cp}
+	}
+	return handlers
 }
 
 // Searches and return the session with the specifed uuid
@@ -188,19 +191,9 @@ func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 	return nil
 }
 
-// Sends the transfer command to unpark the call to freeswitch
-func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string) {
-	_, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
-	if err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send unpark api notification to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
-	}
-	if _, err = sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb)); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send unpark api call to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
-	}
-}
-
 func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
-	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
+	fsev := ev.(FSEvent)
+	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE || fsev[IGNOREPARK] == "true" { // Do not process this request
 		return
 	}
 	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
@@ -224,6 +217,17 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	}
 	*/
 	sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
+}
+
+// Sends the transfer command to unpark the call to freeswitch
+func (sm *FSSessionManager) unparkCall(uuid, connId, call_dest_nb, notify string) {
+	_, err := sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
+	if err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send unpark api notification to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
+	}
+	if _, err = sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb)); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not send unpark api call to freeswitch, error: <%s>, connId: %s", err.Error(), connId))
+	}
 }
 
 func (sm *FSSessionManager) onChannelAnswer(ev engine.Event, connId string) {
