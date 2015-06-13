@@ -20,7 +20,6 @@ package sessionmanager
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
@@ -232,7 +231,7 @@ func (s *Session) SaveOperations() {
 		// when the cdr arrives to cdrserver because our callcost is not there it will be rated
 		// as postpaid. When the close event finally arives we have to refund everything
 		if err != nil {
-			if err == errors.New(utils.ERR_EXISTS) {
+			if err == utils.ErrExists {
 				s.Refund(firstCC, firstCC.Timespans[0].TimeStart)
 			} else {
 				engine.Logger.Err(fmt.Sprintf("failed to log call cost: %v", err))

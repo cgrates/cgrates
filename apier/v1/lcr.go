@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
@@ -34,21 +33,21 @@ func (self *ApierV1) GetLcr(lcrReq engine.LcrRequest, lcrReply *engine.LcrReply)
 	}
 	var lcrQried engine.LCRCost
 	if err := self.Responder.GetLCR(cd, &lcrQried); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if lcrQried.Entry == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	}
 	if lcrQried.HasErrors() {
 		lcrQried.LogErrors()
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "LCR_COMPUTE_ERRORS")
+		return fmt.Errorf("%s:%s", utils.ErrServerError.Error(), "LCR_COMPUTE_ERRORS")
 	}
 	lcrReply.DestinationId = lcrQried.Entry.DestinationId
 	lcrReply.RPCategory = lcrQried.Entry.RPCategory
 	lcrReply.Strategy = lcrQried.Entry.Strategy
 	for _, qriedSuppl := range lcrQried.SupplierCosts {
 		if dtcs, err := utils.NewDTCSFromRPKey(qriedSuppl.Supplier); err != nil {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+			return utils.NewErrServerError(err)
 		} else {
 			lcrReply.Suppliers = append(lcrReply.Suppliers, &engine.LcrSupplier{Supplier: dtcs.Subject, Cost: qriedSuppl.Cost, QOS: qriedSuppl.QOS})
 		}
@@ -64,14 +63,14 @@ func (self *ApierV1) GetLcrSuppliers(lcrReq engine.LcrRequest, suppliers *string
 	}
 	var lcrQried engine.LCRCost
 	if err := self.Responder.GetLCR(cd, &lcrQried); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if lcrQried.HasErrors() {
 		lcrQried.LogErrors()
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "LCR_ERRORS")
+		return fmt.Errorf("%s:%s", utils.ErrServerError.Error(), "LCR_ERRORS")
 	}
 	if suppliersStr, err := lcrQried.SuppliersString(); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*suppliers = suppliersStr
 	}

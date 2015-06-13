@@ -1,5 +1,29 @@
 package utils
 
+import (
+	"errors"
+	"fmt"
+)
+
+func NewErrMandatoryIeMissing(fields ...string) error {
+	return fmt.Errorf("MANDATORY_IE_MISSING:%v", fields)
+}
+
+func NewErrServerError(err error) error {
+	return fmt.Errorf("SERVER_ERROR: %s", err)
+}
+
+var (
+	ErrNotImplemented     = errors.New("NOT_IMPLEMENTED")
+	ErrNotFound           = errors.New("NOT_FOUND")
+	ErrServerError        = errors.New("SERVER_ERROR")
+	ErrMandatoryIeMissing = errors.New("MANDATORY_IE_MISSING")
+	ErrExists             = errors.New("EXISTS")
+	ErrBrokenReference    = errors.New("BROKEN_REFERENCE")
+	ErrParserError        = errors.New("PARSER_ERROR")
+	ErrInvalidPath        = errors.New("INVALID_PATH")
+)
+
 const (
 	VERSION                      = "0.9.1rc6"
 	POSTGRES                     = "postgres"
@@ -20,14 +44,6 @@ const (
 	META_RATED                   = "*rated"
 	META_NONE                    = "*none"
 	META_NOW                     = "*now"
-	ERR_NOT_IMPLEMENTED          = "NOT_IMPLEMENTED"
-	ERR_SERVER_ERROR             = "SERVER_ERROR"
-	ERR_NOT_FOUND                = "NOT_FOUND"
-	ERR_MANDATORY_IE_MISSING     = "MANDATORY_IE_MISSING"
-	ERR_EXISTS                   = "EXISTS"
-	ERR_BROKEN_REFERENCE         = "BROKEN_REFERENCE"
-	ERR_PARSER_ERROR             = "PARSER_ERROR"
-	ERR_INVALID_PATH             = "INVALID_PATH"
 	TBL_TP_TIMINGS               = "tp_timings"
 	TBL_TP_DESTINATIONS          = "tp_destinations"
 	TBL_TP_RATES                 = "tp_rates"

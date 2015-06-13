@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -58,7 +57,7 @@ func (self *ApierV1) GetMaxSessionTime(auth engine.MaxUsageReq, maxSessionTime *
 	}
 	storedCdr, err := auth.AsStoredCdr()
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	var maxDur float64
 	if err := self.Responder.GetDerivedMaxSessionTime(storedCdr, &maxDur); err != nil {

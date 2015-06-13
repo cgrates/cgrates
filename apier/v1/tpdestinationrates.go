@@ -21,9 +21,6 @@ package v1
 // This file deals with tp_destination_rates management over APIs
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -31,11 +28,11 @@ import (
 // Creates a new DestinationRate profile within a tariff plan
 func (self *ApierV1) SetTPDestinationRate(attrs utils.TPDestinationRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationRateId", "DestinationRates"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	drs := engine.APItoModelDestinationRate(&attrs)
 	if err := self.StorDb.SetTpDestinationRates(drs); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = "OK"
 	return nil
@@ -50,12 +47,12 @@ type AttrGetTPDestinationRate struct {
 // Queries specific DestinationRate profile on tariff plan
 func (self *ApierV1) GetTPDestinationRate(attrs AttrGetTPDestinationRate, reply *utils.TPDestinationRate) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationRateId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if drs, err := self.StorDb.GetTpDestinationRates(attrs.TPid, attrs.DestinationRateId, &attrs.Paginator); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if len(drs) == 0 {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		drsMap, err := engine.TpDestinationRates(drs).GetDestinationRates()
 		if err != nil {
@@ -74,12 +71,12 @@ type AttrTPDestinationRateIds struct {
 // Queries DestinationRate identities on specific tariff plan.
 func (self *ApierV1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_DESTINATION_RATES, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if ids == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = ids
 	}
@@ -89,10 +86,10 @@ func (self *ApierV1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]st
 // Removes specific DestinationRate on Tariff plan
 func (self *ApierV1) RemTPDestinationRate(attrs AttrGetTPDestinationRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationRateId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.RemTpData(utils.TBL_TP_DESTINATION_RATES, attrs.TPid, attrs.DestinationRateId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"
 	}

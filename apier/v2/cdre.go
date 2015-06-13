@@ -37,7 +37,7 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
 		if exportTemplate, hasIt = self.Config.CdreProfiles[*attr.ExportTemplate]; !hasIt {
-			return fmt.Errorf("%s:ExportTemplate", utils.ERR_NOT_FOUND)
+			return fmt.Errorf("%s:ExportTemplate", utils.ErrNotFound)
 		}
 	}
 	cdrFormat := exportTemplate.CdrFormat
@@ -45,13 +45,13 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 		cdrFormat = strings.ToLower(*attr.CdrFormat)
 	}
 	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
-		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
+		return utils.NewErrMandatoryIeMissing("CdrFormat")
 	}
 	fieldSep := exportTemplate.FieldSeparator
 	if attr.FieldSeparator != nil && len(*attr.FieldSeparator) != 0 {
 		fieldSep, _ = utf8.DecodeRuneInString(*attr.FieldSeparator)
 		if fieldSep == utf8.RuneError {
-			return fmt.Errorf("%s:FieldSeparator:%s", utils.ERR_SERVER_ERROR, "Invalid")
+			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError, "Invalid")
 		}
 	}
 	exportDir := exportTemplate.ExportDir
@@ -104,7 +104,7 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	}
 	cdrsFltr, err := attr.RpcCdrsFilter.AsCdrsFilter()
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	cdrs, _, err := self.CdrDb.GetStoredCdrs(cdrsFltr)
 	if err != nil {
@@ -116,14 +116,14 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, exportId, dataUsageMultiplyFactor, smsUsageMultiplyFactor, genericUsageMultiplyFactor,
 		costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify)
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if cdrexp.TotalExportedCdrs() == 0 {
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
 	if err := cdrexp.WriteToFile(filePath); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
 	if !attr.SuppressCgrIds {

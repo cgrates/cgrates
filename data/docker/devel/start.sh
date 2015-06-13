@@ -31,6 +31,5 @@ cd /root/cgr
 echo "for cgradmin run: cgr-engine -config_dir data/conf/samples/cgradmin"
 echo 'export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH'>>/root/.zshrc
 
-upgrade_oh_my_zsh
-
+/bin/sh /root/.oh-my-zsh/tools/upgrade.sh
 zsh

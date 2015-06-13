@@ -2,7 +2,6 @@
 package cache2go
 
 import (
-	"errors"
 	"strings"
 	"time"
 
@@ -54,7 +53,7 @@ func (cs cacheDoubleStore) Get(key string) (interface{}, error) {
 			return ti.value, nil
 		}
 	}
-	return nil, errors.New(utils.ERR_NOT_FOUND)
+	return nil, utils.ErrNotFound
 }
 
 func (cs cacheDoubleStore) GetAge(key string) (time.Duration, error) {
@@ -64,7 +63,7 @@ func (cs cacheDoubleStore) GetAge(key string) (time.Duration, error) {
 			return time.Since(ti.timestamp), nil
 		}
 	}
-	return -1, errors.New(utils.ERR_NOT_FOUND)
+	return -1, utils.ErrNotFound
 }
 
 func (cs cacheDoubleStore) Delete(key string) {
@@ -89,7 +88,7 @@ func (cs cacheDoubleStore) GetAllForPrefix(prefix string) (map[string]timestampe
 	if keyMap, ok := cs[prefix]; ok {
 		return keyMap, nil
 	}
-	return nil, errors.New(utils.ERR_NOT_FOUND)
+	return nil, utils.ErrNotFound
 }
 
 func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
@@ -140,7 +139,7 @@ func (cs cacheSimpleStore) Get(key string) (interface{}, error) {
 	if ti, exists := cs.cache[key]; exists {
 		return ti.value, nil
 	}
-	return nil, errors.New(utils.ERR_NOT_FOUND)
+	return nil, utils.ErrNotFound
 }
 
 func (cs cacheSimpleStore) GetAge(key string) (time.Duration, error) {
@@ -148,7 +147,7 @@ func (cs cacheSimpleStore) GetAge(key string) (time.Duration, error) {
 		return time.Since(ti.timestamp), nil
 	}
 
-	return -1, errors.New(utils.ERR_NOT_FOUND)
+	return -1, utils.ErrNotFound
 }
 
 func (cs cacheSimpleStore) Delete(key string) {
@@ -209,7 +208,7 @@ func (cs cacheSimpleStore) GetAllForPrefix(prefix string) (map[string]timestampe
 		}
 	}
 	if !found {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
+		return nil, utils.ErrNotFound
 	}
 	return result, nil
 }

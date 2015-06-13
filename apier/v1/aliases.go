@@ -19,9 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -39,18 +36,18 @@ type AttrAddAccountAliases struct {
 // Retrieve aliases configured for a rating profile subject
 func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Subject", "Aliases"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	aliasesChanged := []string{}
 	for _, alias := range attrs.Aliases {
 		if err := self.RatingDb.SetRpAlias(utils.RatingSubjectAliasKey(attrs.Tenant, alias), attrs.Subject); err != nil {
-			return fmt.Errorf("%s:%s:%s", utils.ERR_SERVER_ERROR, alias, err.Error())
+			return utils.NewErrServerError(err)
 		}
 		aliasesChanged = append(aliasesChanged, engine.RP_ALIAS_PREFIX+utils.RatingSubjectAliasKey(attrs.Tenant, alias))
 	}
 	didNotChange := []string{}
 	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, aliasesChanged, didNotChange, didNotChange); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
@@ -59,12 +56,12 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 // Retrieve aliases configured for a rating profile subject
 func (self *ApierV1) GetRatingSubjectAliases(attrs engine.TenantRatingSubject, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Subject"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if aliases, err := self.RatingDb.GetRPAliases(attrs.Tenant, attrs.Subject, false); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if len(aliases) == 0 { // Need it since otherwise we get some unexpected errrors in the client
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = aliases
 	}
@@ -74,14 +71,14 @@ func (self *ApierV1) GetRatingSubjectAliases(attrs engine.TenantRatingSubject, r
 // Retrieve aliases configured for a rating profile subject
 func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRatingSubject, reply *string) error {
 	if missing := utils.MissingStructFields(&tenantRatingSubject, []string{"Tenant", "Subject"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.RatingDb.RemoveRpAliases([]*engine.TenantRatingSubject{&tenantRatingSubject}); err != nil {
-		return fmt.Errorf("%s:% s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	didNotChange := []string{}
 	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, nil, didNotChange, didNotChange); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
@@ -89,18 +86,18 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 
 func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Aliases"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	aliasesChanged := []string{}
 	for _, alias := range attrs.Aliases {
 		if err := self.AccountDb.SetAccAlias(utils.AccountAliasKey(attrs.Tenant, alias), attrs.Account); err != nil {
-			return fmt.Errorf("%s:%s:%s", utils.ERR_SERVER_ERROR, alias, err.Error())
+			return utils.NewErrServerError(err)
 		}
 		aliasesChanged = append(aliasesChanged, engine.ACC_ALIAS_PREFIX+utils.AccountAliasKey(attrs.Tenant, alias))
 	}
 	didNotChange := []string{}
 	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, aliasesChanged); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
@@ -109,12 +106,12 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 // Retrieve aliases configured for an account
 func (self *ApierV1) GetAccountAliases(attrs engine.TenantAccount, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if aliases, err := self.AccountDb.GetAccountAliases(attrs.Tenant, attrs.Account, false); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if len(aliases) == 0 {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = aliases
 	}
@@ -124,14 +121,14 @@ func (self *ApierV1) GetAccountAliases(attrs engine.TenantAccount, reply *[]stri
 // Retrieve aliases configured for a rating profile subject
 func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&tenantAccount, []string{"Tenant", "Account"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.AccountDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	didNotChange := []string{}
 	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, nil); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil

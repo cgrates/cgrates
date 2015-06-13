@@ -92,7 +92,7 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, Direction: attrsSetAccount.Direction, Units: 5.0, ExpiryTime: UNLIMITED, Weight: 20.0},
 		&utils.TPAction{Identifier: CDRLOG},
 	}}
-	if err := actsLclRpc.Call("ApierV1.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ERR_EXISTS {
+	if err := actsLclRpc.Call("ApierV1.SetActions", attrsAA, &reply); err != nil && err != utils.ErrExists {
 		t.Error("Got error on ApierV1.SetActions: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetActions received: %s", reply)

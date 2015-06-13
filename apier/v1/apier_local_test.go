@@ -1238,11 +1238,11 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	}
 	reply := ""
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: ""}
-	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
+	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ErrMandatoryIeMissing.Error()) {
 		t.Error(err)
 	}
 	attrs = &utils.AttrLoadTpFromFolder{FolderPath: "/INVALID/"}
-	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err == nil || err.Error() != utils.ERR_INVALID_PATH {
+	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err == nil || err.Error() != utils.ErrInvalidPath.Error() {
 		t.Error(err)
 	}
 	// Simple test that command is executed without errors
@@ -1332,8 +1332,8 @@ func TestApierGetCallCostLog(t *testing.T) {
 	}
 	attrs.CgrId = "dummyid"
 	attrs.RunId = "default"
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != "SERVER_ERROR:record not found" {
-		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got: %v", err)
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != "SERVER_ERROR: record not found" {
+		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got:", err)
 	}
 }
 
@@ -1515,7 +1515,7 @@ func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
 	var subjAliases []string
 	if err := rater.Call("ApierV1.GetRatingSubjectAliases", engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}, &subjAliases); err == nil {
 		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ERR_NOT_FOUND {
+	} else if err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error", err.Error())
 	}
 }
@@ -1559,7 +1559,7 @@ func TestApierLocalRemRatingSubjectAliases(t *testing.T) {
 	var subjAliases []string
 	if err := rater.Call("ApierV1.GetRatingSubjectAliases", engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}, &subjAliases); err == nil {
 		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ERR_NOT_FOUND {
+	} else if err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error", err.Error())
 	}
 }
@@ -1572,7 +1572,7 @@ func TestApierLocalGetAccountAliases(t *testing.T) {
 	var acntAliases []string
 	if err := rater.Call("ApierV1.GetAccountAliases", tenantAcnt, &acntAliases); err == nil {
 		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ERR_NOT_FOUND {
+	} else if err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error", err.Error())
 	}
 }
@@ -1616,7 +1616,7 @@ func TestApierLocalRemAccountAliases(t *testing.T) {
 	var acntAliases []string
 	if err := rater.Call("ApierV1.GetAccountAliases", engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAliases); err == nil {
 		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ERR_NOT_FOUND {
+	} else if err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error", err.Error())
 	}
 }

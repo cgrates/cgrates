@@ -20,8 +20,6 @@ package engine
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"math"
 	"net/url"
 	"strconv"
@@ -328,53 +326,53 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	frkStorCdr.CdrSource = storedCdr.CdrSource
 	frkStorCdr.ReqType = storedCdr.FieldAsString(reqTypeFld)
 	if primaryMandatory && len(frkStorCdr.ReqType) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.REQTYPE, reqTypeFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.REQTYPE, reqTypeFld.Id)
 	}
 	frkStorCdr.Direction = storedCdr.FieldAsString(directionFld)
 	if primaryMandatory && len(frkStorCdr.Direction) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.DIRECTION, directionFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.DIRECTION, directionFld.Id)
 	}
 	frkStorCdr.Tenant = storedCdr.FieldAsString(tenantFld)
 	if primaryMandatory && len(frkStorCdr.Tenant) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.TENANT, tenantFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.TENANT, tenantFld.Id)
 	}
 	frkStorCdr.Category = storedCdr.FieldAsString(categFld)
 	if primaryMandatory && len(frkStorCdr.Category) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.CATEGORY, categFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.CATEGORY, categFld.Id)
 	}
 	frkStorCdr.Account = storedCdr.FieldAsString(accountFld)
 	if primaryMandatory && len(frkStorCdr.Account) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.ACCOUNT, accountFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.ACCOUNT, accountFld.Id)
 	}
 	frkStorCdr.Subject = storedCdr.FieldAsString(subjectFld)
 	if primaryMandatory && len(frkStorCdr.Subject) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.SUBJECT, subjectFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.SUBJECT, subjectFld.Id)
 	}
 	frkStorCdr.Destination = storedCdr.FieldAsString(destFld)
 	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.TOR == utils.VOICE {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.DESTINATION, destFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.DESTINATION, destFld.Id)
 	}
 	sTimeStr := storedCdr.FieldAsString(setupTimeFld)
 	if primaryMandatory && len(sTimeStr) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.SETUP_TIME, setupTimeFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.SETUP_TIME, setupTimeFld.Id)
 	} else if frkStorCdr.SetupTime, err = utils.ParseTimeDetectLayout(sTimeStr); err != nil {
 		return nil, err
 	}
 	aTimeStr := storedCdr.FieldAsString(answerTimeFld)
 	if primaryMandatory && len(aTimeStr) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.ANSWER_TIME, answerTimeFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.ANSWER_TIME, answerTimeFld.Id)
 	} else if frkStorCdr.AnswerTime, err = utils.ParseTimeDetectLayout(aTimeStr); err != nil {
 		return nil, err
 	}
 	durStr := storedCdr.FieldAsString(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.USAGE, durationFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.USAGE, durationFld.Id)
 	} else if frkStorCdr.Usage, err = utils.ParseDurationWithSecs(durStr); err != nil {
 		return nil, err
 	}
 	pddStr := storedCdr.FieldAsString(pddFld)
 	if primaryMandatory && len(pddStr) == 0 {
-		return nil, errors.New(fmt.Sprintf("%s:%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.PDD, pddFld.Id))
+		return nil, utils.NewErrMandatoryIeMissing(utils.PDD, pddFld.Id)
 	} else if frkStorCdr.Pdd, err = utils.ParseDurationWithSecs(pddStr); err != nil {
 		return nil, err
 	}

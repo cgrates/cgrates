@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -115,7 +114,7 @@ func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 			return err
 		}
 		if cc != nil {
-			return errors.New(utils.ERR_EXISTS)
+			return utils.ErrExists
 		}
 	}
 	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)

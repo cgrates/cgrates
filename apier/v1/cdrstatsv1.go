@@ -36,7 +36,7 @@ type AttrGetMetrics struct {
 
 func (sts *CDRStatsV1) GetMetrics(attr AttrGetMetrics, reply *map[string]float64) error {
 	if len(attr.StatsQueueId) == 0 {
-		return fmt.Errorf("%s:StatsQueueId", utils.ERR_MANDATORY_IE_MISSING)
+		return fmt.Errorf("%s:StatsQueueId", utils.ErrMandatoryIeMissing.Error())
 	}
 	return sts.CdrStats.GetValues(attr.StatsQueueId, reply)
 }

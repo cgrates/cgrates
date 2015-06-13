@@ -54,7 +54,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 		return
 	}
 	if kev.MissingParameter() {
-		if kar, err := kev.AsKamAuthReply(0.0, "", errors.New(utils.ERR_MANDATORY_IE_MISSING)); err != nil {
+		if kar, err := kev.AsKamAuthReply(0.0, "", utils.ErrMandatoryIeMissing); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
 		} else if err = self.conns[connId].Send(kar.String()); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed sending auth reply %s", err.Error()))
@@ -127,7 +127,7 @@ func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
 		return
 	}
 	if kamEv.MissingParameter() {
-		self.DisconnectSession(kamEv, connId, utils.ERR_MANDATORY_IE_MISSING)
+		self.DisconnectSession(kamEv, connId, utils.ErrMandatoryIeMissing.Error())
 		return
 	}
 	s := NewSession(kamEv, connId, self)

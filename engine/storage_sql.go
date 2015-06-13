@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strconv"
@@ -46,7 +45,7 @@ func (self *SQLStorage) Close() {
 }
 
 func (self *SQLStorage) Flush(placeholder string) (err error) {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return utils.ErrNotImplemented
 }
 
 func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
@@ -562,7 +561,7 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 }
 
 func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return utils.ErrNotImplemented
 }
 
 func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (*CallCost, error) {
@@ -636,7 +635,7 @@ func (self *SQLStorage) SetCdr(cdr *StoredCdr) error {
 }
 
 func (self *SQLStorage) SetRatedCdr(storedCdr *StoredCdr) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return utils.ErrNotImplemented
 }
 
 func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, int64, error) {

@@ -20,7 +20,6 @@ package sessionmanager
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -359,13 +358,13 @@ func (kev KamEvent) AsKamAuthReply(maxSessionTime float64, suppliers string, res
 		kar.Error = resErr.Error()
 	}
 	if _, hasIt := kev[KAM_TR_INDEX]; !hasIt {
-		return nil, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, KAM_TR_INDEX)
+		return nil, utils.NewErrMandatoryIeMissing(KAM_TR_INDEX, "")
 	}
 	if kar.TransactionIndex, err = strconv.Atoi(kev[KAM_TR_INDEX]); err != nil {
 		return nil, err
 	}
 	if _, hasIt := kev[KAM_TR_LABEL]; !hasIt {
-		return nil, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, KAM_TR_LABEL)
+		return nil, utils.NewErrMandatoryIeMissing(KAM_TR_LABEL, "")
 	}
 	if kar.TransactionLabel, err = strconv.Atoi(kev[KAM_TR_LABEL]); err != nil {
 		return nil, err

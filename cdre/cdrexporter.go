@@ -487,12 +487,12 @@ func (cdre *CdrExporter) WriteToFile(filePath string) error {
 		return nil
 	case utils.CDRE_FIXED_WIDTH:
 		if err := cdre.writeOut(fileOut); err != nil {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+			return utils.NewErrServerError(err)
 		}
 	case utils.CSV:
 		csvWriter := csv.NewWriter(fileOut)
 		if err := cdre.writeCsv(csvWriter); err != nil {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+			return utils.NewErrServerError(err)
 		}
 	}
 	return nil

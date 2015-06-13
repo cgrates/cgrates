@@ -22,7 +22,7 @@ package v1
 // Creates a new LcrRules profile within a tariff plan
 func (self *ApierV1) SetTPLcrRules(attrs utils.TPLcrRules, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrRulesId", "LcrRules"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, action := range attrs.LcrRules {
 		requiredFields := []string{"Identifier", "Weight"}
@@ -32,7 +32,7 @@ func (self *ApierV1) SetTPLcrRules(attrs utils.TPLcrRules, reply *string) error 
 		}
 	}
 	if err := self.StorDb.SetTPLcrRules(attrs.TPid, map[string][]*utils.TPLcrRule{attrs.LcrRulesId: attrs.LcrRules}); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = "OK"
 	return nil
@@ -46,12 +46,12 @@ type AttrGetTPLcrRules struct {
 // Queries specific LcrRules profile on tariff plan
 func (self *ApierV1) GetTPLcrRules(attrs AttrGetTPLcrRules, reply *utils.TPLcrRules) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if lcrs, err := self.StorDb.GetTpLCRs(attrs.TPid, attrs.LcrId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if len(acts) == 0 {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = utils.TPLcrRules{TPid: attrs.TPid, LcrRulesId: attrs.LcrRulesId, LcrRules: lcrs[attrs.LcrRulesId]}
 	}
@@ -65,12 +65,12 @@ type AttrGetTPLcrActionIds struct {
 // Queries LcrRules identities on specific tariff plan.
 func (self *ApierV1) GetTPLcrActionIds(attrs AttrGetTPLcrActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_LCRS, "id", nil); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if ids == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = ids
 	}
@@ -80,10 +80,10 @@ func (self *ApierV1) GetTPLcrActionIds(attrs AttrGetTPLcrActionIds, reply *[]str
 // Removes specific LcrRules on Tariff plan
 func (self *ApierV1) RemTPLcrRules(attrs AttrGetTPLcrRules, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrRulesId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.RemTPData(utils.TBL_TP_LCRS, attrs.TPid, attrs.LcrRulesId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"
 	}

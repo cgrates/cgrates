@@ -28,10 +28,10 @@ import (
 // Get DerivedChargers applying to our call, appends general configured to account specific ones if that is configured
 func (self *ApierV1) GetDerivedChargers(attrs utils.AttrDerivedChargers, reply *utils.DerivedChargers) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Direction", "Account", "Subject"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if hDc, err := engine.HandleGetDerivedChargers(self.RatingDb, &attrs); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if hDc != nil {
 		*reply = hDc
 	}
@@ -61,15 +61,15 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	}
 	for _, dc := range attrs.DerivedChargers {
 		if _, err = utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP); err != nil { // Make sure rules are OK before loading in db
-			return fmt.Errorf("%s:%s", utils.ERR_PARSER_ERROR, err.Error())
+			return fmt.Errorf("%s:%s", utils.ErrParserError.Error(), err.Error())
 		}
 	}
 	dcKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	if err := self.RatingDb.SetDerivedChargers(dcKey, attrs.DerivedChargers); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if err := self.RatingDb.CacheRating([]string{}, []string{}, []string{}, []string{}, []string{}, []string{engine.DERIVEDCHARGERS_PREFIX + dcKey}); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
@@ -96,12 +96,12 @@ func (self *ApierV1) RemDerivedChargers(attrs AttrRemDerivedChargers, reply *str
 		attrs.Subject = utils.ANY
 	}
 	if err := self.RatingDb.SetDerivedChargers(utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject), nil); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"
 	}
 	if err := self.RatingDb.CacheRating([]string{}, []string{}, []string{}, []string{}, []string{}, nil); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	return nil
 }

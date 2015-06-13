@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/csv"
-	"errors"
 	"io"
 	"log"
 	"os"
@@ -460,9 +459,9 @@ func (csvs *CSVStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrstat, error) {
 }
 
 func (csvs *CSVStorage) GetTpIds() ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return nil, utils.ErrNotImplemented
 }
 
 func (csvs *CSVStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, p *utils.Paginator) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return nil, utils.ErrNotImplemented
 }

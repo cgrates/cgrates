@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -53,7 +52,7 @@ type LcrRequest struct {
 
 func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
 	if len(self.Account) == 0 || len(self.Destination) == 0 {
-		return nil, errors.New(utils.ERR_MANDATORY_IE_MISSING)
+		return nil, utils.ErrMandatoryIeMissing
 	}
 	// Set defaults
 	if len(self.Direction) == 0 {
@@ -310,7 +309,7 @@ func (lc *LCRCost) LogErrors() {
 func (lc *LCRCost) SuppliersString() (string, error) {
 	supplStr := ""
 	if lc.Entry == nil {
-		return "", errors.New(utils.ERR_NOT_FOUND)
+		return "", utils.ErrNotFound
 	}
 	for idx, supplCost := range lc.SupplierCosts {
 		if dtcs, err := utils.NewDTCSFromRPKey(supplCost.Supplier); err != nil {

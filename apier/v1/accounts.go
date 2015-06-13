@@ -19,9 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"errors"
-	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -43,12 +42,12 @@ type AccountActionTiming struct {
 
 func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*AccountActionTiming) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	accountATs := make([]*AccountActionTiming, 0)
 	allATs, err := self.AccountDb.GetAllActionPlans()
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	for _, ats := range allATs {
 		for _, at := range ats {
@@ -73,11 +72,11 @@ type AttrRemActionTiming struct {
 // Removes an ActionTimings or parts of it depending on filters being set
 func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if len(attrs.Account) != 0 { // Presence of Account requires complete account details to be provided
 		if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
-			return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 	}
 	_, err := engine.AccLock.Guard(func() (interface{}, error) {
@@ -85,7 +84,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		if err != nil {
 			return 0, err
 		} else if len(ats) == 0 {
-			return 0, errors.New(utils.ERR_NOT_FOUND)
+			return 0, utils.ErrNotFound
 		}
 		ats = engine.RemActionPlan(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction))
 		if err := self.AccountDb.SetActionPlans(attrs.ActionPlanId, ats); err != nil {
@@ -94,7 +93,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		return 0, nil
 	}, engine.ACTION_TIMING_PREFIX)
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler && self.Sched != nil {
 		self.Sched.LoadActionPlans(self.AccountDb)
@@ -107,10 +106,10 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 // Returns a list of ActionTriggers on an account
 func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engine.ActionTriggerPriotityList) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if balance, err := self.AccountDb.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*reply = balance.ActionTriggers
 	}
@@ -127,7 +126,7 @@ type AttrRemAcntActionTriggers struct {
 // Returns a list of ActionTriggers on an account
 func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	balanceId := utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)
 	_, err := engine.AccLock.Guard(func() (interface{}, error) {
@@ -152,7 +151,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 		return 0, nil
 	}, balanceId)
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = OK
 	return nil
@@ -161,7 +160,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 // Ads a new account into dataDb. If already defined, returns success.
 func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	balanceId := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
 	var ub *engine.Account
@@ -193,7 +192,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		return 0, nil
 	}, balanceId)
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if len(ats) != 0 {
 		_, err := engine.AccLock.Guard(func() (interface{}, error) { // ToDo: Try locking it above on read somehow
@@ -203,7 +202,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			return 0, nil
 		}, engine.ACTION_TIMING_PREFIX)
 		if err != nil {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+			return utils.NewErrServerError(err)
 		}
 		if self.Sched != nil {
 			self.Sched.LoadActionPlans(self.AccountDb)
@@ -224,7 +223,7 @@ type AttrGetAccounts struct {
 
 func (self *ApierV1) GetAccounts(attr AttrGetAccounts, reply *[]*engine.Account) error {
 	if len(attr.Tenant) == 0 {
-		return fmt.Errorf("%s:Tenant", utils.ERR_MANDATORY_IE_MISSING)
+		return utils.NewErrMandatoryIeMissing("Tenanat")
 	}
 	if len(attr.Direction) == 0 {
 		attr.Direction = utils.OUT
@@ -254,7 +253,7 @@ func (self *ApierV1) GetAccounts(attr AttrGetAccounts, reply *[]*engine.Account)
 	}
 	retAccounts := make([]*engine.Account, 0)
 	for _, acntKey := range limitedAccounts {
-		if acnt, err := self.AccountDb.GetAccount(acntKey[len(engine.ACCOUNT_PREFIX):]); err != nil && err.Error() != utils.ERR_NOT_FOUND { // Not found is not an error here
+		if acnt, err := self.AccountDb.GetAccount(acntKey[len(engine.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
 			retAccounts = append(retAccounts, acnt)

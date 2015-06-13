@@ -21,9 +21,6 @@ package v1
 // This file deals with tp_rate_profiles management over APIs
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -31,11 +28,11 @@ import (
 // Creates a new RatingProfile within a tariff plan
 func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Category", "Direction", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	rpf := engine.APItoModelRatingProfile(&attrs)
 	if err := self.StorDb.SetTpRatingProfiles(rpf); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = "OK"
 	return nil
@@ -53,13 +50,13 @@ func (self *ApierV1) GetTPRatingProfilesByLoadId(attrs utils.TPRatingProfile, re
 		mndtryFlds = append(mndtryFlds, "Tenant", "TOR", "Direction", "Subject")
 	}
 	if missing := utils.MissingStructFields(&attrs, mndtryFlds); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	rpf := engine.APItoModelRatingProfile(&attrs)
 	if dr, err := self.StorDb.GetTpRatingProfiles(&rpf[0]); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if dr == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		rpfMap, err := engine.TpRatingProfiles(dr).GetRatingProfiles()
 		if err != nil {
@@ -81,7 +78,7 @@ func (self *ApierV1) GetTPRatingProfilesByLoadId(attrs utils.TPRatingProfile, re
 // Queries RatingProfile identities on specific tariff plan.
 func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, utils.TPDistinctIds{"loadid"}, map[string]string{
 		"tenant":    attrs.Tenant,
@@ -89,9 +86,9 @@ func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileId
 		"direction": attrs.Direction,
 		"subject":   attrs.Subject,
 	}, new(utils.Paginator)); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if ids == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = ids
 	}
@@ -106,7 +103,7 @@ type AttrGetTPRatingProfile struct {
 // Queries specific RatingProfile on tariff plan
 func (self *ApierV1) GetTPRatingProfile(attrs AttrGetTPRatingProfile, reply *utils.TPRatingProfile) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tmpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
 	if err := tmpRpf.SetRatingProfilesId(attrs.RatingProfileId); err != nil {
@@ -114,9 +111,9 @@ func (self *ApierV1) GetTPRatingProfile(attrs AttrGetTPRatingProfile, reply *uti
 	}
 	rpf := engine.APItoModelRatingProfile(tmpRpf)
 	if rpfs, err := self.StorDb.GetTpRatingProfiles(&rpf[0]); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if len(rpfs) == 0 {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		rpfMap, err := engine.TpRatingProfiles(rpfs).GetRatingProfiles()
 		if err != nil {
@@ -143,12 +140,12 @@ type AttrGetTPRatingProfileIds struct {
 // Queries RatingProfiles identities on specific tariff plan.
 func (self *ApierV1) GetTPRatingProfileIds(attrs AttrGetTPRatingProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"}, nil, &attrs.Paginator); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if ids == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = ids
 	}
@@ -158,14 +155,14 @@ func (self *ApierV1) GetTPRatingProfileIds(attrs AttrGetTPRatingProfileIds, repl
 // Removes specific RatingProfiles on Tariff plan
 func (self *ApierV1) RemTPRatingProfile(attrs AttrGetTPRatingProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tmpRpf := engine.TpRatingProfile{}
 	if err := tmpRpf.SetRatingProfileId(attrs.RatingProfileId); err != nil {
 		return err
 	}
 	if err := self.StorDb.RemTpData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, tmpRpf.Loadid, tmpRpf.Direction, tmpRpf.Tenant, tmpRpf.Category, tmpRpf.Subject); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"
 	}

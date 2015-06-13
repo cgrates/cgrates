@@ -20,7 +20,6 @@ package v2
 
 import (
 	"encoding/base64"
-	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -32,10 +31,10 @@ type AttrRemTp struct {
 
 func (self *ApierV2) RemTP(attrs AttrRemTp, reply *string) error {
 	if len(attrs.TPid) == 0 {
-		return fmt.Errorf("%s:TPid", utils.ERR_MANDATORY_IE_MISSING)
+		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	if err := self.StorDb.RemTpData("", attrs.TPid); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"
 	}
@@ -44,7 +43,7 @@ func (self *ApierV2) RemTP(attrs AttrRemTp, reply *string) error {
 
 func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *utils.ExportedTPStats) error {
 	if len(*attrs.TPid) == 0 {
-		return fmt.Errorf("%s:TPid", utils.ERR_MANDATORY_IE_MISSING)
+		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dir := self.Config.TpExportPath
 	if attrs.ExportPath != nil {
@@ -64,10 +63,10 @@ func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *uti
 	}
 	tpExporter, err := engine.NewTPExporter(self.StorDb, *attrs.TPid, dir, fileFormat, sep, compress)
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if err := tpExporter.Run(); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*exported = *tpExporter.ExportStats()
 	}
@@ -77,7 +76,7 @@ func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *uti
 
 func (self *ApierV2) ExportTPToZipString(attrs utils.AttrDirExportTP, reply *string) error {
 	if len(*attrs.TPid) == 0 {
-		return fmt.Errorf("%s:TPid", utils.ERR_MANDATORY_IE_MISSING)
+		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dir := ""
 	fileFormat := utils.CSV
@@ -90,10 +89,10 @@ func (self *ApierV2) ExportTPToZipString(attrs utils.AttrDirExportTP, reply *str
 	}
 	tpExporter, err := engine.NewTPExporter(self.StorDb, *attrs.TPid, dir, fileFormat, sep, true)
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if err := tpExporter.Run(); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = base64.StdEncoding.EncodeToString(tpExporter.GetCacheBuffer().Bytes())
 	return nil

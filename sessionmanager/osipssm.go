@@ -268,10 +268,10 @@ func (osm *OsipsSessionManager) onAccEvent(osipsDgram *osipsdagram.OsipsEvent) {
 // Handler of call start event. Mostly starts a session if needed
 func (osm *OsipsSessionManager) callStart(osipsEv *OsipsEvent) error {
 	if osipsEv.MissingParameter() {
-		if err := osm.DisconnectSession(osipsEv, "", utils.ERR_MANDATORY_IE_MISSING); err != nil {
+		if err := osm.DisconnectSession(osipsEv, "", utils.ErrMandatoryIeMissing.Error()); err != nil {
 			return err
 		}
-		return errors.New(utils.ERR_MANDATORY_IE_MISSING)
+		return utils.ErrMandatoryIeMissing
 	}
 	s := NewSession(osipsEv, "", osm)
 	if s != nil {
@@ -292,7 +292,7 @@ func (osm *OsipsSessionManager) callEnd(osipsEv *OsipsEvent) error {
 		return err
 	}
 	if origEvent.MissingParameter() {
-		return errors.New(utils.ERR_MANDATORY_IE_MISSING)
+		return utils.ErrMandatoryIeMissing
 	}
 	if err := s.Close(origEvent); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
 		return err

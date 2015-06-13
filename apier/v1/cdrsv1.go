@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"time"
 )
 
 // Receive CDRs via RPC methods
@@ -33,7 +33,7 @@ type CdrsV1 struct {
 // Designed for CGR internal usage
 func (self *CdrsV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
 	if err := self.CdrSrv.ProcessCdr(cdr); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
@@ -42,7 +42,7 @@ func (self *CdrsV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
 // Designed for external programs feeding CDRs to CGRateS
 func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCdr, reply *string) error {
 	if err := self.CdrSrv.ProcessExternalCdr(cdr); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
@@ -67,7 +67,7 @@ func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
 	if err := self.CdrSrv.RateCdrs(attrs.CgrIds, attrs.MediationRunIds, attrs.TORs, attrs.CdrHosts, attrs.CdrSources, attrs.ReqTypes, attrs.Directions,
 		attrs.Tenants, attrs.Categories, attrs.Accounts, attrs.Subjects, attrs.DestinationPrefixes, attrs.RatedAccounts, attrs.RatedSubjects,
 		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.RerateErrors, attrs.RerateRated, attrs.SendToStats); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -49,10 +48,10 @@ func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost)
 	}
 	var cc engine.CallCost
 	if err := apier.Responder.GetCost(cd, &cc); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if dc, err := cc.ToDataCost(); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if dc != nil {
 		*reply = *dc
 	}

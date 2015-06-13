@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -33,12 +31,12 @@ type AttrGetCallCost struct {
 // Retrieves the callCost out of CGR logDb
 func (apier *ApierV1) GetCallCostLog(attrs AttrGetCallCost, reply *engine.CallCost) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"CgrId", "RunId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, "", attrs.RunId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if cc == nil {
-		return fmt.Errorf("NOT_FOUND")
+		return utils.ErrNotFound
 	} else {
 		*reply = *cc
 	}
@@ -49,10 +47,10 @@ func (apier *ApierV1) GetCallCostLog(attrs AttrGetCallCost, reply *engine.CallCo
 func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCdr) error {
 	cdrsFltr, err := attrs.AsCdrsFilter()
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if cdrs, _, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if len(cdrs) == 0 {
 		*reply = make([]*engine.ExternalCdr, 0)
 	} else {

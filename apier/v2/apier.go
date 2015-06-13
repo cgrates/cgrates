@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,14 +36,14 @@ type AttrLoadRatingProfile struct {
 // Process dependencies and load a specific rating profile from storDb into dataDb.
 func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *string) error {
 	if len(attrs.TPid) == 0 {
-		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
+		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	tpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
 	tpRpf.SetRatingProfilesId(attrs.RatingProfileId)
 	rpf := engine.APItoModelRatingProfile(tpRpf)
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
 	if err := dbReader.LoadRatingProfilesFiltered(&rpf[0]); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	//Automatic cache of the newly inserted rating profile
 	didNotChange := []string{}
@@ -68,7 +66,7 @@ type AttrLoadAccountActions struct {
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
 func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *string) error {
 	if len(attrs.TPid) == 0 {
-		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
+		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
@@ -80,7 +78,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 		}
 		return 0, nil
 	}, attrs.AccountActionsId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
@@ -103,14 +101,14 @@ type AttrLoadDerivedChargers struct {
 // Load derived chargers from storDb into dataDb.
 func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *string) error {
 	if len(attrs.TPid) == 0 {
-		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "TPid")
+		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	tpDc := &utils.TPDerivedChargers{TPid: attrs.TPid}
 	tpDc.SetDerivedChargersId(attrs.DerivedChargersId)
 	dc := engine.APItoModelDerivedCharger(tpDc)
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
 	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	//Automatic cache of the newly inserted rating plan
 	didNotChange := []string{}

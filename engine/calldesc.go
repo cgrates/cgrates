@@ -719,13 +719,13 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		utils.LCRKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
 	}
 	for _, key := range keyVariants {
-		if lcr, err := ratingStorage.GetLCR(key, false); err != nil && err.Error() != utils.ERR_NOT_FOUND {
+		if lcr, err := ratingStorage.GetLCR(key, false); err != nil && err != utils.ErrNotFound {
 			return nil, err
 		} else if err == nil {
 			return lcr, nil
 		}
 	}
-	return nil, errors.New(utils.ERR_NOT_FOUND)
+	return nil, utils.ErrNotFound
 }
 
 func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {

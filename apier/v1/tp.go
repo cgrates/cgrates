@@ -21,8 +21,6 @@ package v1
 // Tariff plan related APIs
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -37,9 +35,9 @@ type AttrGetTPIds struct {
 // Queries tarrif plan identities gathered from all tables.
 func (self *ApierV1) GetTPIds(attrs AttrGetTPIds, reply *[]string) error {
 	if ids, err := self.StorDb.GetTpIds(); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if ids == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = ids
 	}

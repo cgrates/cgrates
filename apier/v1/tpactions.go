@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
@@ -29,7 +28,7 @@ import (
 // Creates a new Actions profile within a tariff plan
 func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId", "Actions"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	for _, action := range attrs.Actions {
 		requiredFields := []string{"Identifier", "Weight"}
@@ -37,12 +36,12 @@ func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 			requiredFields = append(requiredFields, "Direction", "Units")
 		}
 		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
+			return fmt.Errorf("%s:Action:%s:%v", utils.ErrMandatoryIeMissing.Error(), action.Identifier, missing)
 		}
 	}
 	as := engine.APItoModelAction(&attrs)
 	if err := self.StorDb.SetTpActions(as); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	*reply = "OK"
 	return nil
@@ -56,12 +55,12 @@ type AttrGetTPActions struct {
 // Queries specific Actions profile on tariff plan
 func (self *ApierV1) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if acts, err := self.StorDb.GetTpActions(attrs.TPid, attrs.ActionsId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if len(acts) == 0 {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		as, err := engine.TpActions(acts).GetActions()
 		if err != nil {
@@ -80,12 +79,12 @@ type AttrGetTPActionIds struct {
 // Queries Actions identities on specific tariff plan.
 func (self *ApierV1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ACTIONS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if ids == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
+		return utils.ErrNotFound
 	} else {
 		*reply = ids
 	}
@@ -95,10 +94,10 @@ func (self *ApierV1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) e
 // Removes specific Actions on Tariff plan
 func (self *ApierV1) RemTPActions(attrs AttrGetTPActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.StorDb.RemTpData(utils.TBL_TP_ACTIONS, attrs.TPid, attrs.ActionsId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"
 	}

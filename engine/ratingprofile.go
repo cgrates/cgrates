@@ -20,7 +20,6 @@ package engine
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"sort"
 	"time"
@@ -196,7 +195,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		return
 	}
 
-	return errors.New(utils.ERR_NOT_FOUND)
+	return utils.ErrNotFound
 }
 
 // history record method

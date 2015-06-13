@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"fmt"
 	"github.com/cgrates/cgrates/apier/v1"
 
 	"github.com/cgrates/cgrates/engine"
@@ -30,10 +29,10 @@ import (
 func (apier *ApierV2) GetCdrs(attrs utils.RpcCdrsFilter, reply *[]*engine.ExternalCdr) error {
 	cdrsFltr, err := attrs.AsCdrsFilter()
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	if cdrs, _, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else if len(cdrs) == 0 {
 		*reply = make([]*engine.ExternalCdr, 0)
 	} else {
@@ -47,11 +46,11 @@ func (apier *ApierV2) GetCdrs(attrs utils.RpcCdrsFilter, reply *[]*engine.Extern
 func (apier *ApierV2) CountCdrs(attrs utils.RpcCdrsFilter, reply *int64) error {
 	cdrsFltr, err := attrs.AsCdrsFilter()
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	}
 	cdrsFltr.Count = true
 	if _, count, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		return utils.NewErrServerError(err)
 	} else {
 		*reply = count
 	}
