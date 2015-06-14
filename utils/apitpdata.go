@@ -848,6 +848,7 @@ type CdrsFilter struct {
 	MinCost             *float64          // Start of the cost interval (>=)
 	MaxCost             *float64          // End of the usage interval (<)
 	FilterOnRated       bool              // Do not consider rated CDRs but raw one
+	Unscoped            bool              // Include soft-deleted records in results
 	Count               bool              // If true count the items instead of returning data
 	Paginator
 }
