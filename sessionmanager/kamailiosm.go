@@ -236,3 +236,7 @@ func (sm *KamailioSessionManager) WarnSessionMinDuration(sessionUuid, connId str
 func (self *KamailioSessionManager) Shutdown() error {
 	return nil
 }
+
+func (self *KamailioSessionManager) Sessions() []*Session {
+	return self.sessions
+}

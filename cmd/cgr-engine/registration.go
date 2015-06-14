@@ -125,7 +125,7 @@ func shutdownSessionmanagerSingnalHandler() {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-c
 
-	if sm != nil {
+	for _, sm := range sms {
 		if err := sm.Shutdown(); err != nil {
 			engine.Logger.Warning(fmt.Sprintf("<SessionManager> %s", err))
 		}

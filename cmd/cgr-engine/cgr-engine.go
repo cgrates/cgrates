@@ -69,8 +69,9 @@ var (
 	scribeServer history.Scribe
 	cdrServer    *engine.CdrServer
 	cdrStats     *engine.Stats
-	sm           sessionmanager.SessionManager
 	cfg          *config.CGRConfig
+	sms          []sessionmanager.SessionManager
+	smRpc        *v1.SessionManagerV1
 	err          error
 )
 
@@ -154,6 +155,8 @@ func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cac
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
 	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, raterConn, cdrsConn)
+	sms = append(sms, sm)
+	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
@@ -204,6 +207,8 @@ func startSmKamailio(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
 	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn)
+	sms = append(sms, sm)
+	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
@@ -254,6 +259,8 @@ func startSmOpenSIPS(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
 	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn)
+	sms = append(sms, sm)
+	smRpc.SMs = append(smRpc.SMs, sm)
 	if err := sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
 	}
@@ -496,6 +503,12 @@ func main() {
 		}
 		server.RpcRegister(cdrStats)
 		server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
+	}
+
+	// Register session manager service // FixMe: make sure this is thread safe
+	if cfg.SmFsConfig.Enabled || cfg.SmKamConfig.Enabled || cfg.SmOsipsConfig.Enabled { // Register SessionManagerV1 service
+		smRpc = new(v1.SessionManagerV1)
+		server.RpcRegister(smRpc)
 	}
 
 	responder := &engine.Responder{ExitChan: exitChan}

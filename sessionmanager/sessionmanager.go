@@ -34,4 +34,5 @@ type SessionManager interface {
 	RemoveSession(string)
 	ProcessCdr(*engine.StoredCdr) error
 	Shutdown() error
+	Sessions() []*Session
 }

@@ -331,3 +331,7 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	}
 	return nil
 }
+
+func (sm *FSSessionManager) Sessions() []*Session {
+	return sm.sessions
+}

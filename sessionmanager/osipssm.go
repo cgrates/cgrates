@@ -342,3 +342,7 @@ func (osm *OsipsSessionManager) getSession(uuid string) *Session {
 	}
 	return nil
 }
+
+func (osm *OsipsSessionManager) Sessions() []*Session {
+	return osm.sessions
+}

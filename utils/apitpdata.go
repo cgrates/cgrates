@@ -1058,3 +1058,8 @@ type AttrSetAccount struct {
 	ActionPlanId  string
 	AllowNegative bool
 }
+
+type AttrGetSMASessions struct {
+	SessionManagerIndex int // Index of the session manager queried, defaults to first in the list
+
+}
