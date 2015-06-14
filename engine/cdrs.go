@@ -108,9 +108,10 @@ type CallCostLog struct {
 
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	Logger.Debug(fmt.Sprintf("LogCallCost, callCostLog: %+v, cost: %+v", ccl, ccl.CallCost))
 	if ccl.CheckDuplicate {
 		cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
-		if err != nil {
+		if err != nil && err.Error() != "record not found" {
 			return err
 		}
 		if cc != nil {
@@ -245,7 +246,7 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.PSEUDOPREPAID, utils.POSTPAID}, storedCdr.ReqType) {
 		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
-			self.cdrDb.LogCallCost(storedCdr.CgrId, MEDIATOR_SOURCE, storedCdr.MediationRunId, cc)
+			self.cdrDb.LogCallCost(storedCdr.CgrId, utils.CDRS_SOURCE, storedCdr.MediationRunId, cc)
 		}
 	} else {
 		err = self.rater.GetCost(cd, cc)

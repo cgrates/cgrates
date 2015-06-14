@@ -228,11 +228,6 @@ func (kev KamEvent) GetCdrSource() string {
 	return "KAMAILIO_" + kev.GetName()
 }
 
-func (kev KamEvent) ComputeLcr() bool {
-	compute, _ := strconv.ParseBool(kev[utils.CGR_COMPUTELCR])
-	return compute
-}
-
 func (kev KamEvent) MissingParameter() bool {
 	var nullTime time.Time
 	switch kev.GetName() {
@@ -390,4 +385,12 @@ func (kev KamEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 		Duration:    kev[CGR_DURATION],
 	}
 	return lcrReq.AsCallDescriptor()
+}
+
+func (kev KamEvent) ComputeLcr() bool {
+	if computeLcr, err := strconv.ParseBool(kev[utils.CGR_COMPUTELCR]); err != nil {
+		return false
+	} else {
+		return computeLcr
+	}
 }

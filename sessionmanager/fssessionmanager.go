@@ -207,15 +207,36 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 		return
 	}
 	sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
-
-	/*if sm.cfg.ComputeLcr { // Fix here out of channel variable
-		if err := sm.setCgrLcr(ev, connId); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not set LCR for %s, error: %s", ev.GetUUID(), err.Error()))
+	// ComputeLcr
+	if ev.ComputeLcr() {
+		cd, err := fsev.AsCallDescriptor()
+		if err != nil {
+			engine.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_PREPROCESS_ERROR: %s", err.Error()))
 			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
 			return
 		}
+		var lcr engine.LCRCost
+		if err = sm.Rater().GetLCR(cd, &lcr); err != nil {
+			engine.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_API_ERROR: %s", err.Error()))
+			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+		}
+		if lcr.HasErrors() {
+			lcr.LogErrors()
+			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+			return
+		}
+		if supps, err := lcr.SuppliersSlice(); err != nil {
+			engine.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_ERROR: %s", err.Error()))
+			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+			return
+		} else {
+			fsArray := SliceAsFsArray(supps)
+			if _, err = sm.conns[connId].SendApiCmd(fmt.Sprintf("uuid_setvar %s %s %s\n\n", ev.GetUUID(), utils.CGR_SUPPLIERS, fsArray)); err != nil {
+				engine.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_ERROR: %s", err.Error()))
+				sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
+			}
+		}
 	}
-	*/
 	sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 

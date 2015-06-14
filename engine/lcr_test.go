@@ -234,6 +234,27 @@ func TestLcrRequestAsCallDescriptor(t *testing.T) {
 	}
 }
 
+func TestLCRCostSuppliersSlice(t *testing.T) {
+	lcrCost := new(LCRCost)
+	if _, err := lcrCost.SuppliersString(); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Unexpected error received: %v", err)
+	}
+	lcrCost = &LCRCost{
+		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_STATIC, StrategyParams: "ivo12;dan12;rif12", Weight: 10.0},
+		SupplierCosts: []*LCRSupplierCost{
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:ivo12", Cost: 1.8, Duration: 60 * time.Second},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
+			&LCRSupplierCost{Supplier: "*out:tenant12:call:rif12", Cost: 1.2, Duration: 60 * time.Second},
+		},
+	}
+	eSuppls := []string{"ivo12", "dan12", "rif12"}
+	if suppls, err := lcrCost.SuppliersSlice(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSuppls, suppls) {
+		t.Errorf("Expecting: %+v, received: %+v", eSuppls, suppls)
+	}
+}
+
 func TestLCRCostSuppliersString(t *testing.T) {
 	lcrCost := new(LCRCost)
 	if _, err := lcrCost.SuppliersString(); err == nil || err != utils.ErrNotFound {

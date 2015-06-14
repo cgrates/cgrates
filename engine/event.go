@@ -51,4 +51,5 @@ type Event interface {
 	AsStoredCdr() *StoredCdr
 	String() string
 	AsEvent(string) Event
+	ComputeLcr() bool
 }

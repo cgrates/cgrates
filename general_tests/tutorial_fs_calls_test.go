@@ -291,6 +291,9 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		if reply[0].Usage != "67" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
+		if reply[0].Cost == -1.0 { // Cost was not calculated
+			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
+		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnRated: true}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -380,6 +383,9 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		if reply[0].Usage != "64" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
+		if reply[0].Cost == -1.0 { // Cost was not calculated
+			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
+		}
 	}
 	req = utils.RpcCdrsFilter{Accounts: []string{"1007"}, RunIds: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
@@ -398,6 +404,9 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		}
 		if reply[0].Usage != "66" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
+		}
+		if reply[0].Cost == -1.0 { // Cost was not calculated
+			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
 		}
 	}
 }

@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 	"time"
 
@@ -297,4 +298,12 @@ func (osipsEv *OsipsEvent) updateDurationFromEvent(updatedOsipsEv *OsipsEvent) e
 	osipsEv.osipsEvent.AttrValues["method"] = "UPDATE" // So we can know it is an end event
 	osipsEv.osipsEvent.AttrValues[OSIPS_SIPCODE] = updatedOsipsEv.osipsEvent.AttrValues[OSIPS_SIPCODE]
 	return nil
+}
+
+func (osipsEv *OsipsEvent) ComputeLcr() bool {
+	if computeLcr, err := strconv.ParseBool(osipsEv.osipsEvent.AttrValues[utils.CGR_COMPUTELCR]); err != nil {
+		return false
+	} else {
+		return computeLcr
+	}
 }

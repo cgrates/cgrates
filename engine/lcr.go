@@ -305,21 +305,36 @@ func (lc *LCRCost) LogErrors() {
 	}
 }
 
+func (lc *LCRCost) SuppliersSlice() ([]string, error) {
+	if lc.Entry == nil {
+		return nil, utils.ErrNotFound
+	}
+	supps := []string{}
+	for _, supplCost := range lc.SupplierCosts {
+		if dtcs, err := utils.NewDTCSFromRPKey(supplCost.Supplier); err != nil {
+			return nil, err
+		} else if len(dtcs.Subject) != 0 {
+			supps = append(supps, dtcs.Subject)
+		}
+	}
+	if len(supps) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return supps, nil
+}
+
 // Returns a list of suppliers separated via
 func (lc *LCRCost) SuppliersString() (string, error) {
-	supplStr := ""
-	if lc.Entry == nil {
-		return "", utils.ErrNotFound
+	supps, err := lc.SuppliersSlice()
+	if err != nil {
+		return "", err
 	}
-	for idx, supplCost := range lc.SupplierCosts {
-		if dtcs, err := utils.NewDTCSFromRPKey(supplCost.Supplier); err != nil {
-			return "", err
-		} else {
-			if idx != 0 {
-				supplStr += utils.FIELDS_SEP
-			}
-			supplStr += dtcs.Subject
+	supplStr := ""
+	for idx, suppl := range supps {
+		if idx != 0 {
+			supplStr += utils.FIELDS_SEP
 		}
+		supplStr += suppl
 	}
 	return supplStr, nil
 }

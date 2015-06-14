@@ -665,7 +665,7 @@ func TestSliceAsFsArray(t *testing.T) {
 		t.Error(fsArray)
 	}
 	items = []string{"item1", "item2", "item3"}
-	if fsArray := SliceAsFsArray(items); fsArray != "ARRAY::item1|:item2|:item3" {
+	if fsArray := SliceAsFsArray(items); fsArray != "ARRAY::3|:item1|:item2|:item3" {
 		t.Error(fsArray)
 	}
 }

@@ -72,6 +72,7 @@ const (
 	IGNOREPARK         = "variable_cgr_ignorepark"
 
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
+	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
 )
 
 // Nice printing for the event object.
@@ -362,7 +363,30 @@ func (fsev FSEvent) AsStoredCdr() *engine.StoredCdr {
 	return storCdr
 }
 
-// Converts a slice of strings into a FS array string
+func (fsev FSEvent) ComputeLcr() bool {
+	if computeLcr, err := strconv.ParseBool(fsev[VAR_CGR_CMPUTELCR]); err != nil {
+		return false
+	} else {
+		return computeLcr
+	}
+}
+
+// Converts into CallDescriptor due to responder interface needs
+func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
+	lcrReq := &engine.LcrRequest{
+		Direction:   fsev.GetDirection(utils.META_DEFAULT),
+		Tenant:      fsev.GetTenant(utils.META_DEFAULT),
+		Category:    fsev.GetCategory(utils.META_DEFAULT),
+		Account:     fsev.GetAccount(utils.META_DEFAULT),
+		Subject:     fsev.GetSubject(utils.META_DEFAULT),
+		Destination: fsev.GetDestination(utils.META_DEFAULT),
+		StartTime:   utils.FirstNonEmpty(fsev[SETUP_TIME], fsev[ANSWER_TIME]),
+		Duration:    fsev[DURATION],
+	}
+	return lcrReq.AsCallDescriptor()
+}
+
+// Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now
 func SliceAsFsArray(slc []string) string {
 	arry := ""
 	if len(slc) == 0 {
@@ -370,7 +394,7 @@ func SliceAsFsArray(slc []string) string {
 	}
 	for idx, itm := range slc {
 		if idx == 0 {
-			arry += "ARRAY::" + itm
+			arry = fmt.Sprintf("ARRAY::%d|:%s", len(slc), itm)
 		} else {
 			arry += "|:" + itm
 		}

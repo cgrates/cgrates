@@ -418,6 +418,9 @@ func (storedCdr *StoredCdr) AsExternalCdr() *ExternalCdr {
 func (storedCdr *StoredCdr) AsEvent(ignored string) Event {
 	return Event(storedCdr)
 }
+func (storedCdr *StoredCdr) ComputeLcr() bool {
+	return false
+}
 func (storedCdr *StoredCdr) GetName() string {
 	return storedCdr.CdrSource
 }
