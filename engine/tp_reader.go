@@ -1087,7 +1087,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Shared Groups:")
 	}
 	for k, sg := range tpr.sharedGroups {
-		err = accountingStorage.SetSharedGroup(sg)
+		err = tpr.accountingStorage.SetSharedGroup(sg)
 		if err != nil {
 			return err
 		}
