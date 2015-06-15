@@ -39,12 +39,7 @@ type RedisStorage struct {
 }
 
 func NewRedisStorage(address string, db int, pass, mrshlerStr string) (*RedisStorage, error) {
-	ndb := &redis.Client{Addr: address, Db: db}
-	if pass != "" {
-		if err := ndb.Auth(pass); err != nil {
-			return nil, err
-		}
-	}
+	ndb := &redis.Client{Addr: address, Db: db, Password: pass}
 
 	var mrshler Marshaler
 	if mrshlerStr == utils.MSGPACK {
