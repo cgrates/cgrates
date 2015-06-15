@@ -48,9 +48,12 @@ func (self *CmdActiveSessions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdActiveSessions) RpcParams() interface{} {
+func (self *CmdActiveSessions) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrGetSMASessions{}
+	}
+	if ptr {
+		return self.rpcParams
 	}
 	return *self.rpcParams
 }
