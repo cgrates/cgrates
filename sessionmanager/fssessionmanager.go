@@ -388,19 +388,20 @@ func (sm *FSSessionManager) SyncSessions() error {
 					break
 				}
 			}
-			if !stillActive {
-				engine.Logger.Warning(fmt.Sprintf("<SM-FreeSWITCH> Sync active channels, stale session detected, uuid: %s", session.eventStart.GetUUID()))
-				sm.RemoveSession(session.eventStart.GetUUID()) // Unreference it early so we avoid concurrency
-				fsev := session.eventStart.(FSEvent)
-				now := time.Now()
-				aTime, _ := fsev.GetAnswerTime("")
-				dur := now.Sub(aTime)
-				fsev[END_TIME] = now.String()
-				fsev[DURATION] = strconv.FormatFloat(dur.Seconds(), 'f', -1, 64)
-				if err := session.Close(fsev); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
-					engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on removing stale session with uuid: %s, error: %s", session.eventStart.GetUUID(), err.Error()))
-					continue
-				}
+			if stillActive { // No need to do anything since the channel was closed already
+				continue
+			}
+			engine.Logger.Warning(fmt.Sprintf("<SM-FreeSWITCH> Sync active channels, stale session detected, uuid: %s", session.eventStart.GetUUID()))
+			sm.RemoveSession(session.eventStart.GetUUID()) // Unreference it early so we avoid concurrency
+			fsev := session.eventStart.(FSEvent)
+			now := time.Now()
+			aTime, _ := fsev.GetAnswerTime("")
+			dur := now.Sub(aTime)
+			fsev[END_TIME] = now.String()
+			fsev[DURATION] = strconv.FormatFloat(dur.Seconds(), 'f', -1, 64)
+			if err := session.Close(fsev); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
+				engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on removing stale session with uuid: %s, error: %s", session.eventStart.GetUUID(), err.Error()))
+				continue
 			}
 		}
 	}
