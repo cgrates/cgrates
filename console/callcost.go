@@ -50,9 +50,12 @@ func (self *CmdGetCostDetails) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCostDetails) RpcParams() interface{} {
+func (self *CmdGetCostDetails) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetCallCost{RunId: utils.DEFAULT_RUNID}
+	}
+	if ptr {
+		return self.rpcParams
 	}
 	return *self.rpcParams
 }

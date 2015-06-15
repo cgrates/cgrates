@@ -47,9 +47,12 @@ func (self *CmdGetMaxDuration) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetMaxDuration) RpcParams() interface{} {
+func (self *CmdGetMaxDuration) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
+	}
+	if ptr {
+		return self.rpcParams
 	}
 	return *self.rpcParams
 }

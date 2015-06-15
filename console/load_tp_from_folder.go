@@ -46,9 +46,12 @@ func (self *LoadTpFromFolder) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *LoadTpFromFolder) RpcParams() interface{} {
+func (self *LoadTpFromFolder) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrLoadTpFromFolder{}
+	}
+	if ptr {
+		return self.rpcParams
 	}
 	return *self.rpcParams
 }

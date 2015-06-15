@@ -47,9 +47,12 @@ func (self *CmdCdrReloadQueues) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCdrReloadQueues) RpcParams() interface{} {
+func (self *CmdCdrReloadQueues) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrCDRStatsReloadQueues{}
+	}
+	if ptr {
+		return self.rpcParams
 	}
 	return *self.rpcParams
 }
