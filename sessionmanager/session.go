@@ -239,3 +239,76 @@ func (s *Session) SaveOperations() {
 		}
 	}
 }
+
+func (s *Session) AsActiveSessions() []*ActiveSession {
+	var aSessions []*ActiveSession
+	sTime, _ := s.eventStart.GetSetupTime(utils.META_DEFAULT)
+	aTime, _ := s.eventStart.GetAnswerTime(utils.META_DEFAULT)
+	usage, _ := s.eventStart.GetDuration(utils.META_DEFAULT)
+	pdd, _ := s.eventStart.GetPdd(utils.META_DEFAULT)
+	for _, sessionRun := range s.sessionRuns {
+		aSession := &ActiveSession{
+			CgrId:       s.eventStart.GetCgrId(),
+			TOR:         utils.VOICE,
+			AccId:       s.eventStart.GetUUID(),
+			CdrHost:     s.eventStart.GetOriginatorIP(utils.META_DEFAULT),
+			CdrSource:   "FS_" + s.eventStart.GetName(),
+			ReqType:     s.eventStart.GetReqType(utils.META_DEFAULT),
+			Direction:   s.eventStart.GetDirection(utils.META_DEFAULT),
+			Tenant:      s.eventStart.GetTenant(utils.META_DEFAULT),
+			Category:    s.eventStart.GetCategory(utils.META_DEFAULT),
+			Account:     s.eventStart.GetAccount(utils.META_DEFAULT),
+			Subject:     s.eventStart.GetSubject(utils.META_DEFAULT),
+			Destination: s.eventStart.GetDestination(utils.META_DEFAULT),
+			SetupTime:   sTime,
+			AnswerTime:  aTime,
+			Usage:       usage,
+			Pdd:         pdd,
+			ExtraFields: s.eventStart.GetExtraFields(),
+			Supplier:    s.eventStart.GetSupplier(utils.META_DEFAULT),
+			SMId:        "UNKNOWN",
+		}
+		if sessionRun.DerivedCharger != nil {
+			aSession.RunId = sessionRun.DerivedCharger.RunId
+		}
+		if sessionRun.CallDescriptor != nil {
+			aSession.LoopIndex = sessionRun.CallDescriptor.LoopIndex
+			aSession.DurationIndex = sessionRun.CallDescriptor.DurationIndex
+			aSession.MaxRate = sessionRun.CallDescriptor.MaxRate
+			aSession.MaxRateUnit = sessionRun.CallDescriptor.MaxRateUnit
+			aSession.MaxCostSoFar = sessionRun.CallDescriptor.MaxCostSoFar
+		}
+		aSessions = append(aSessions, aSession)
+	}
+	return aSessions
+}
+
+// Will be used when displaying active sessions via RPC
+type ActiveSession struct {
+	CgrId         string
+	TOR           string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
+	AccId         string            // represents the unique accounting id given by the telecom switch generating the CDR
+	CdrHost       string            // represents the IP address of the host generating the CDR (automatically populated by the server)
+	CdrSource     string            // formally identifies the source of the CDR (free form field)
+	ReqType       string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
+	Direction     string            // matching the supported direction identifiers of the CGRateS <*out>
+	Tenant        string            // tenant whom this record belongs
+	Category      string            // free-form filter for this record, matching the category defined in rating profiles.
+	Account       string            // account id (accounting subsystem) the record should be attached to
+	Subject       string            // rating subject (rating subsystem) this record should be attached to
+	Destination   string            // destination to be charged
+	SetupTime     time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	Pdd           time.Duration     // PDD value
+	AnswerTime    time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	Usage         time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+	Supplier      string            // Supplier information when available
+	ExtraFields   map[string]string // Extra fields to be stored in CDR
+	SMId          string
+	SMConnId      string
+	RunId         string
+	LoopIndex     float64       // indicates the position of this segment in a cost request loop
+	DurationIndex time.Duration // the call duration so far (till TimeEnd)
+	MaxRate       float64
+	MaxRateUnit   time.Duration
+	MaxCostSoFar  float64
+}

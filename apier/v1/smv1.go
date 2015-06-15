@@ -36,10 +36,12 @@ func (self *SessionManagerV1) ActiveSessionMangers(ignored string, reply *[]sess
 	return nil
 }
 
-func (self *SessionManagerV1) ActiveSessions(attrs utils.AttrGetSMASessions, reply *[]*sessionmanager.Session) error {
+func (self *SessionManagerV1) ActiveSessions(attrs utils.AttrGetSMASessions, reply *[]*sessionmanager.ActiveSession) error {
 	if attrs.SessionManagerIndex > len(self.SMs)-1 {
 		return utils.ErrNotFound
 	}
-	*reply = self.SMs[attrs.SessionManagerIndex].Sessions()
+	for _, session := range self.SMs[attrs.SessionManagerIndex].Sessions() {
+		*reply = append(*reply, session.AsActiveSessions()...)
+	}
 	return nil
 }
