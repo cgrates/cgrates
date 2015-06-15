@@ -49,9 +49,12 @@ func (self *CmdGetAccount) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccount) RpcParams() interface{} {
+func (self *CmdGetAccount) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.AttrGetAccount{Direction: "*out"}
+	}
+	if ptr {
+		return self.rpcParams
 	}
 	return *self.rpcParams
 }

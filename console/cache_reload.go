@@ -46,9 +46,12 @@ func (self *CmdReloadCache) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdReloadCache) RpcParams() interface{} {
+func (self *CmdReloadCache) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
 		self.rpcParams = &utils.ApiReloadCache{}
+	}
+	if ptr {
+		return self.rpcParams
 	}
 	return *self.rpcParams
 }
