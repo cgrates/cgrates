@@ -35,4 +35,5 @@ type SessionManager interface {
 	ProcessCdr(*engine.StoredCdr) error
 	Shutdown() error
 	Sessions() []*Session
+	SyncSessions() error
 }

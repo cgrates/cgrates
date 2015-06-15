@@ -240,3 +240,7 @@ func (self *KamailioSessionManager) Shutdown() error {
 func (self *KamailioSessionManager) Sessions() []*Session {
 	return self.sessions
 }
+
+func (self *KamailioSessionManager) SyncSessions() error {
+	return nil
+}

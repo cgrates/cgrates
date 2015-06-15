@@ -346,3 +346,8 @@ func (osm *OsipsSessionManager) getSession(uuid string) *Session {
 func (osm *OsipsSessionManager) Sessions() []*Session {
 	return osm.sessions
 }
+
+// Sync sessions with FS
+func (osm *OsipsSessionManager) SyncSessions() error {
+	return nil
+}

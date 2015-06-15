@@ -70,6 +70,7 @@ type SmFsConfig struct {
 	EmptyBalanceContext string
 	EmptyBalanceAnnFile string
 	SubscribePark       bool
+	ChannelSyncInterval time.Duration
 	Connections         []*FsConnConfig
 }
 
@@ -129,6 +130,11 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	}
 	if jsnCfg.Subscribe_park != nil {
 		self.SubscribePark = *jsnCfg.Subscribe_park
+	}
+	if jsnCfg.Channel_sync_interval != nil {
+		if self.ChannelSyncInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Channel_sync_interval); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Connections != nil {
 		self.Connections = make([]*FsConnConfig, len(*jsnCfg.Connections))

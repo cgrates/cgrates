@@ -108,7 +108,6 @@ type CallCostLog struct {
 
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
-	Logger.Debug(fmt.Sprintf("LogCallCost, callCostLog: %+v, cost: %+v", ccl, ccl.CallCost))
 	if ccl.CheckDuplicate {
 		cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
 		if err != nil && err.Error() != "record not found" {
