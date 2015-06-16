@@ -825,7 +825,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.RatingDb.CachePrefixes(utils.DERIVED_CHARGERS_CSV, utils.ACTION_PREFIX, utils.SHARED_GROUP_PREFIX, utils.ACC_ALIAS_PREFIX); err != nil {
+	if err := self.RatingDb.CachePrefixes(utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.SHARED_GROUP_PREFIX, utils.ACC_ALIAS_PREFIX); err != nil {
 		return err
 	}
 	if self.Sched != nil {

@@ -814,7 +814,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				acts[tag] = enacts
 			}
 		}
-		// writee actions
+		// write actions
 		for k, as := range acts {
 			err = tpr.ratingStorage.SetActions(k, as)
 			if err != nil {
