@@ -212,18 +212,6 @@ func (self *CdrServer) deriveAndRateCdr(storedCdr *StoredCdr) ([]*StoredCdr, err
 	return cdrRuns, nil
 }
 
-// Retrive the cost from logging database, nil in case of no log
-func (self *CdrServer) getCostsFromDB(cgrid, runId string) (cc *CallCost, err error) {
-	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
-		cc, err = self.cdrDb.GetCallCostLog(cgrid, SESSION_MANAGER_SOURCE, runId)
-		if cc != nil {
-			break
-		}
-		time.Sleep(time.Duration((i+1)*10) * time.Millisecond)
-	}
-	return
-}
-
 // Retrive the cost from engine
 func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error) {
 	//if storedCdr.Usage == time.Duration(0) { // failed call,  nil cost
@@ -309,27 +297,26 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 
 func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 	var qryCC *CallCost
-	var errCost error
+	var err error
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
-		var err error
 		for i := 0; i < 4; i++ {
-			qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
-			if err == nil { // Got our cost, no need to continue
+			qryCC, err = self.cdrDb.GetCallCostLog(storedCdr.CgrId, SESSION_MANAGER_SOURCE, storedCdr.MediationRunId)
+			if err == nil {
 				break
 			}
-			time.Sleep(delay() * time.Millisecond)
+			time.Sleep(delay())
 		}
 		if err != nil { //calculate CDR as for pseudoprepaid
-			qryCC, errCost = self.getCostFromRater(storedCdr)
+			qryCC, err = self.getCostFromRater(storedCdr)
 		}
 
 	} else {
-		qryCC, errCost = self.getCostFromRater(storedCdr)
+		qryCC, err = self.getCostFromRater(storedCdr)
 	}
-	if errCost != nil {
-		return errCost
+	if err != nil {
+		return err
 	} else if qryCC != nil {
 		storedCdr.Cost = qryCC.Cost
 		storedCdr.CostDetails = qryCC

@@ -388,7 +388,7 @@ func (sm *FSSessionManager) SyncSessions() error {
 					break
 				}
 			}
-			if stillActive { // No need to do anything since the channel was closed already
+			if stillActive { // No need to do anything since the channel is still there
 				continue
 			}
 			engine.Logger.Warning(fmt.Sprintf("<SM-FreeSWITCH> Sync active channels, stale session detected, uuid: %s", session.eventStart.GetUUID()))
