@@ -98,10 +98,9 @@ func (rs *RedisStorage) CachePrefixValues(prefixes map[string][]string) error {
 		utils.RATING_PROFILE_PREFIX:  []string{},
 		utils.RP_ALIAS_PREFIX:        []string{},
 		utils.LCR_PREFIX:             []string{},
-		utils.DERIVEDCHARGERS_PREFIX: []string{},
-		utils.ACTION_PREFIX:          []string{},
-		utils.SHARED_GROUP_PREFIX:    []string{},
-		utils.ACC_ALIAS_PREFIX:       []string{},
+		utils.DERIVEDCHARGERS_PREFIX: []string{}, utils.ACTION_PREFIX: []string{},
+		utils.SHARED_GROUP_PREFIX: []string{},
+		utils.ACC_ALIAS_PREFIX:    []string{},
 	}
 	for prefix, ids := range prefixes {
 		if _, found := pm[prefix]; !found {

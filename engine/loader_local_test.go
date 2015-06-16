@@ -308,6 +308,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		for aaId := range aas {
 			aa, _ := utils.NewTPAccountActionsFromKeyId(utils.TEST_SQL, loadId, aaId)
 			maa := APItoModelAccountAction(aa)
+
 			if err := loader.LoadAccountActionsFiltered(maa); err != nil {
 				t.Fatalf("Could not load account actions with id: %s, error: %s", aaId, err.Error())
 			}
