@@ -94,9 +94,9 @@ func populateDB() {
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
-	if accountingStorage != nil {
-		accountingStorage.SetActions("TEST_ACTIONS", ats)
-		accountingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
+	if accountingStorage != nil && ratingStorage != nil {
+		ratingStorage.SetActions("TEST_ACTIONS", ats)
+		ratingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
 		accountingStorage.SetAccount(broker)
 		accountingStorage.SetAccount(minu)
 		accountingStorage.SetAccount(minitsboy)
@@ -468,7 +468,7 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxRate(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -492,7 +492,7 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxCost(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -515,7 +515,7 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 }
 
 func TestGetCostWithMaxCost(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -538,7 +538,7 @@ func TestGetCostWithMaxCost(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -561,7 +561,7 @@ func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 }
 
 func TestMaxDebitWithMaxCostFree(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -584,7 +584,7 @@ func TestMaxDebitWithMaxCostFree(t *testing.T) {
 }
 
 func TestGetCostWithMaxCostFree(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -626,11 +626,11 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithAccountShared(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP_SHARED0_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP_SHARED0_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
-	ap, _ = accountingStorage.GetActionPlans("TOPUP_SHARED10_AT")
+	ap, _ = ratingStorage.GetActionPlans("TOPUP_SHARED10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -665,11 +665,11 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 }
 
 func TestMaxDebitWithAccountShared(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP_SHARED0_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP_SHARED0_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
-	ap, _ = accountingStorage.GetActionPlans("TOPUP_SHARED10_AT")
+	ap, _ = ratingStorage.GetActionPlans("TOPUP_SHARED10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -851,7 +851,7 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 }
 
 func TestDebitFromShareAndNormal(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP_SHARED10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP_SHARED10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -879,7 +879,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 }
 
 func TestDebitFromEmptyShare(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP_EMPTY_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP_EMPTY_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -907,7 +907,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRate(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -935,7 +935,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -963,7 +963,7 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 }
 
 func TestMaxDebitConsumesMinutes(t *testing.T) {
-	ap, _ := accountingStorage.GetActionPlans("TOPUP10_AT")
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}

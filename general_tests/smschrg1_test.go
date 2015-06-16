@@ -58,12 +58,12 @@ func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDb.CacheRating(nil, nil, nil, nil, nil, nil)
+	ratingDb.CacheAll()
 
-	if cachedRPlans := cache2go.CountEntries(engine.RATING_PLAN_PREFIX); cachedRPlans != 1 {
+	if cachedRPlans := cache2go.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 1 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := cache2go.CountEntries(engine.RATING_PROFILE_PREFIX); cachedRProfiles != 1 {
+	if cachedRProfiles := cache2go.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 1 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
 }

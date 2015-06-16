@@ -222,7 +222,7 @@ func (s *Session) SaveOperations() {
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
 			CgrId:          s.eventStart.GetCgrId(),
-			Source:         engine.SESSION_MANAGER_SOURCE,
+			Source:         utils.SESSION_MANAGER_SOURCE,
 			RunId:          sr.DerivedCharger.RunId,
 			CallCost:       firstCC,
 			CheckDuplicate: true,
