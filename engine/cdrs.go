@@ -216,7 +216,7 @@ func (self *CdrServer) deriveAndRateCdr(storedCdr *StoredCdr) ([]*StoredCdr, err
 // Retrive the cost from logging database, nil in case of no log
 func (self *CdrServer) getCostsFromDB(cgrid, runId string) (cc *CallCost, err error) {
 	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
-		cc, err = self.cdrDb.GetCallCostLog(cgrid, SESSION_MANAGER_SOURCE, runId)
+		cc, err = self.cdrDb.GetCallCostLog(cgrid, utils.SESSION_MANAGER_SOURCE, runId)
 		if cc != nil {
 			break
 		}

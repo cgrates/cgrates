@@ -281,7 +281,7 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	// check if subject is alias
-	if rs, err := cache2go.GetCached(RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey(cd.Tenant, subject)); err == nil {
+	if rs, err := cache2go.GetCached(utils.RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey(cd.Tenant, subject)); err == nil {
 		realSubject := rs.(string)
 		subject = realSubject
 		cd.Subject = realSubject
@@ -294,7 +294,7 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
 		// check if subject is alias
-		if realSubject, err := cache2go.GetCached(ACC_ALIAS_PREFIX + utils.AccountAliasKey(cd.Tenant, subj)); err == nil {
+		if realSubject, err := cache2go.GetCached(utils.ACC_ALIAS_PREFIX + utils.AccountAliasKey(cd.Tenant, subj)); err == nil {
 			cd.Account = realSubject.(string)
 		}
 		subj = cd.Account
@@ -667,8 +667,7 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.Flush()
-	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil)
+	ratingStorage.CacheAll()
 	return nil
 
 }
@@ -800,7 +799,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 		}
 		ratingProfileSearchKey := utils.ConcatenatedKey(lcr.Direction, lcr.Tenant, lcrCost.Entry.RPCategory)
 		//log.Print("KEY: ", ratingProfileSearchKey)
-		suppliers := cache2go.GetEntriesKeys(RATING_PROFILE_PREFIX + ratingProfileSearchKey)
+		suppliers := cache2go.GetEntriesKeys(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey)
 		for _, supplier := range suppliers {
 			//log.Print("Supplier: ", supplier)
 			split := strings.Split(supplier, ":")

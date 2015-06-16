@@ -146,7 +146,7 @@ func TestApierTPTiming(t *testing.T) {
 		return
 	}
 	// ALWAYS,*any,*any,*any,*any,00:00:00
-	tmAlways := &utils.ApierTPTiming{TPid: engine.TEST_SQL,
+	tmAlways := &utils.ApierTPTiming{TPid: utils.TEST_SQL,
 		TimingId:  "ALWAYS",
 		Years:     "*any",
 		Months:    "*any",
@@ -157,7 +157,7 @@ func TestApierTPTiming(t *testing.T) {
 	tmAlways2 := new(utils.ApierTPTiming)
 	*tmAlways2 = *tmAlways
 	tmAlways2.TimingId = "ALWAYS2"
-	tmAsap := &utils.ApierTPTiming{TPid: engine.TEST_SQL,
+	tmAsap := &utils.ApierTPTiming{TPid: utils.TEST_SQL,
 		TimingId:  "ASAP",
 		Years:     "*any",
 		Months:    "*any",
@@ -214,9 +214,9 @@ func TestApierTPDestination(t *testing.T) {
 		return
 	}
 	reply := ""
-	dstDe := &utils.TPDestination{TPid: engine.TEST_SQL, DestinationId: "GERMANY", Prefixes: []string{"+49"}}
-	dstDeMobile := &utils.TPDestination{TPid: engine.TEST_SQL, DestinationId: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
-	dstFs := &utils.TPDestination{TPid: engine.TEST_SQL, DestinationId: "FS_USERS", Prefixes: []string{"10"}}
+	dstDe := &utils.TPDestination{TPid: utils.TEST_SQL, DestinationId: "GERMANY", Prefixes: []string{"+49"}}
+	dstDeMobile := &utils.TPDestination{TPid: utils.TEST_SQL, DestinationId: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
+	dstFs := &utils.TPDestination{TPid: utils.TEST_SQL, DestinationId: "FS_USERS", Prefixes: []string{"10"}}
 	dstDe2 := new(utils.TPDestination)
 	*dstDe2 = *dstDe // Data which we use for remove, still keeping the sample data to check proper loading
 	dstDe2.DestinationId = "GERMANY2"
@@ -268,7 +268,7 @@ func TestApierTPRate(t *testing.T) {
 		return
 	}
 	reply := ""
-	rt := &utils.TPRate{TPid: engine.TEST_SQL, RateId: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
+	rt := &utils.TPRate{TPid: utils.TEST_SQL, RateId: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
 		&utils.RateSlot{ConnectFee: 0, Rate: 0, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s"},
 	}}
 	rt2 := new(utils.TPRate)
@@ -322,15 +322,15 @@ func TestApierTPDestinationRate(t *testing.T) {
 		return
 	}
 	reply := ""
-	dr := &utils.TPDestinationRate{TPid: engine.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
+	dr := &utils.TPDestinationRate{TPid: utils.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
 		&utils.DestinationRate{DestinationId: "FS_USERS", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
-	drDe := &utils.TPDestinationRate{TPid: engine.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
+	drDe := &utils.TPDestinationRate{TPid: utils.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
 		&utils.DestinationRate{DestinationId: "GERMANY_MOBILE", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
 	dr2 := new(utils.TPDestinationRate)
 	*dr2 = *dr
-	dr2.DestinationRateId = engine.TEST_SQL
+	dr2.DestinationRateId = utils.TEST_SQL
 	for _, d := range []*utils.TPDestinationRate{dr, dr2, drDe} {
 		if err := rater.Call("ApierV1.SetTPDestinationRate", d, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPDestinationRate: ", err.Error())
@@ -379,12 +379,12 @@ func TestApierTPRatingPlan(t *testing.T) {
 		return
 	}
 	reply := ""
-	rp := &utils.TPRatingPlan{TPid: engine.TEST_SQL, RatingPlanId: "RETAIL1", RatingPlanBindings: []*utils.TPRatingPlanBinding{
+	rp := &utils.TPRatingPlan{TPid: utils.TEST_SQL, RatingPlanId: "RETAIL1", RatingPlanBindings: []*utils.TPRatingPlanBinding{
 		&utils.TPRatingPlanBinding{DestinationRatesId: "DR_FREESWITCH_USERS", TimingId: "ALWAYS", Weight: 10},
 	}}
 	rpTst := new(utils.TPRatingPlan)
 	*rpTst = *rp
-	rpTst.RatingPlanId = engine.TEST_SQL
+	rpTst.RatingPlanId = utils.TEST_SQL
 	for _, rpl := range []*utils.TPRatingPlan{rp, rpTst} {
 		if err := rater.Call("ApierV1.SetTPRatingPlan", rpl, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPRatingPlan: ", err.Error())
@@ -433,13 +433,13 @@ func TestApierTPRatingProfile(t *testing.T) {
 		return
 	}
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any",
+	rpf := &utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: ""},
 		}}
 	rpfTst := new(utils.TPRatingProfile)
 	*rpfTst = *rpf
-	rpfTst.Subject = engine.TEST_SQL
+	rpfTst.Subject = utils.TEST_SQL
 	for _, rp := range []*utils.TPRatingProfile{rpf, rpfTst} {
 		if err := rater.Call("ApierV1.SetTPRatingProfile", rp, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPRatingProfile: ", err.Error())
@@ -474,7 +474,7 @@ func TestApierTPRatingProfile(t *testing.T) {
 	}
 	// Test getLoadIds
 	var rplyRpIds []string
-	expectedRpIds := []string{engine.TEST_SQL}
+	expectedRpIds := []string{utils.TEST_SQL}
 	if err := rater.Call("ApierV1.GetTPRatingProfileLoadIds", utils.AttrTPRatingProfileIds{TPid: rpf.TPid}, &rplyRpIds); err != nil {
 		t.Error("Calling ApierV1.GetTPRatingProfileLoadIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
@@ -487,19 +487,19 @@ func TestApierTPActions(t *testing.T) {
 		return
 	}
 	reply := ""
-	act := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
+	act := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
 			DestinationIds: "*any", BalanceWeight: 10, Weight: 10},
 	}}
-	actWarn := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
+	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
 	}}
-	actLog := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "LOG_BALANCE", Actions: []*utils.TPAction{
+	actLog := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "LOG_BALANCE", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*log", Weight: 10},
 	}}
 	actTst := new(utils.TPActions)
 	*actTst = *act
-	actTst.ActionsId = engine.TEST_SQL
+	actTst.ActionsId = utils.TEST_SQL
 	for _, ac := range []*utils.TPActions{act, actWarn, actTst, actLog} {
 		if err := rater.Call("ApierV1.SetTPActions", ac, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActions: ", err.Error())
@@ -547,12 +547,12 @@ func TestApierTPActionPlan(t *testing.T) {
 		return
 	}
 	reply := ""
-	at := &utils.TPActionPlan{TPid: engine.TEST_SQL, ActionPlanId: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
+	at := &utils.TPActionPlan{TPid: utils.TEST_SQL, ActionPlanId: "PREPAID_10", ActionPlan: []*utils.TPActionTiming{
 		&utils.TPActionTiming{ActionsId: "PREPAID_10", TimingId: "ASAP", Weight: 10},
 	}}
 	atTst := new(utils.TPActionPlan)
 	*atTst = *at
-	atTst.ActionPlanId = engine.TEST_SQL
+	atTst.ActionPlanId = utils.TEST_SQL
 	for _, act := range []*utils.TPActionPlan{at, atTst} {
 		if err := rater.Call("ApierV1.SetTPActionPlan", act, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActionPlan: ", err.Error())
@@ -600,12 +600,12 @@ func TestApierTPActionTriggers(t *testing.T) {
 		return
 	}
 	reply := ""
-	at := &utils.TPActionTriggers{TPid: engine.TEST_SQL, ActionTriggersId: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
+	at := &utils.TPActionTriggers{TPid: utils.TEST_SQL, ActionTriggersId: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
 		&utils.TPActionTrigger{Id: "MYFIRSTTRIGGER", BalanceType: "*monetary", BalanceDirection: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
 	}}
 	atTst := new(utils.TPActionTriggers)
 	*atTst = *at
-	atTst.ActionTriggersId = engine.TEST_SQL
+	atTst.ActionTriggersId = utils.TEST_SQL
 	for _, act := range []*utils.TPActionTriggers{at, atTst} {
 		if err := rater.Call("ApierV1.SetTPActionTriggers", act, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActionTriggers: ", err.Error())
@@ -654,19 +654,19 @@ func TestApierTPAccountActions(t *testing.T) {
 		return
 	}
 	reply := ""
-	aa1 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org",
+	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
 		Account: "1001", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	aa2 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org",
+	aa2 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
 		Account: "1002", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	aa3 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org",
+	aa3 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
 		Account: "1003", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	aa4 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org",
+	aa4 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
 		Account: "1004", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	aa5 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org",
+	aa5 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
 		Account: "1005", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aaTst := new(utils.TPAccountActions)
 	*aaTst = *aa1
-	aaTst.Account = engine.TEST_SQL
+	aaTst.Account = utils.TEST_SQL
 	for _, aact := range []*utils.TPAccountActions{aa1, aa2, aa3, aa4, aa5, aaTst} {
 		if err := rater.Call("ApierV1.SetTPAccountActions", aact, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPAccountActions: ", err.Error())
@@ -701,7 +701,7 @@ func TestApierTPAccountActions(t *testing.T) {
 	}
 	// Test getLoadIds
 	var rplyRpIds []string
-	expectedRpIds := []string{engine.TEST_SQL}
+	expectedRpIds := []string{utils.TEST_SQL}
 	if err := rater.Call("ApierV1.GetTPAccountActionLoadIds", AttrGetTPAccountActionIds{TPid: aaTst.TPid}, &rplyRpIds); err != nil {
 		t.Error("Calling ApierV1.GetTPAccountActionLoadIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
@@ -715,7 +715,7 @@ func TestApierLoadRatingPlan(t *testing.T) {
 		return
 	}
 	reply := ""
-	if err := rater.Call("ApierV1.LoadRatingPlan", AttrLoadRatingPlan{TPid: engine.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
+	if err := rater.Call("ApierV1.LoadRatingPlan", AttrLoadRatingPlan{TPid: utils.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadRatingPlan: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadRatingPlan got reply: ", reply)
@@ -770,7 +770,7 @@ func TestApierLoadRatingProfile(t *testing.T) {
 		return
 	}
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any"}
+	rpf := &utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any"}
 	if err := rater.Call("ApierV1.LoadRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadRatingProfile: ", err.Error())
 	} else if reply != "OK" {
@@ -784,7 +784,7 @@ func TestApierLoadAccountActions(t *testing.T) {
 		return
 	}
 	reply := ""
-	aa1 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.LoadAccountActions", aa1, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadAccountActions: ", err.Error())
 	} else if reply != "OK" {
@@ -1375,7 +1375,7 @@ func TestApierCdrServer(t *testing.T) {
 		"setup_time":  []string{"2013-11-07T08:42:23Z"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
-		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
+		cdrForm.Set(utils.CDRSOURCE, utils.TEST_SQL)
 		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", "127.0.0.1:2080"), cdrForm); err != nil {
 			t.Error(err.Error())
 		}

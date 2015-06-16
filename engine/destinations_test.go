@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/utils"
 
 	"testing"
 )
@@ -82,7 +83,7 @@ func TestDestinationGetExists(t *testing.T) {
 
 func TestDestinationGetExistsCache(t *testing.T) {
 	ratingStorage.GetDestination("NAT")
-	if _, err := cache2go.GetCached(DESTINATION_PREFIX + "0256"); err != nil {
+	if _, err := cache2go.GetCached(utils.DESTINATION_PREFIX + "0256"); err != nil {
 		t.Error("Destination not cached:", err)
 	}
 }
@@ -127,17 +128,17 @@ func TestNonCachedDestWrongPrefix(t *testing.T) {
 
 func TestCleanStalePrefixes(t *testing.T) {
 	x := struct{}{}
-	cache2go.Cache(DESTINATION_PREFIX+"1", map[interface{}]struct{}{"D1": x, "D2": x})
-	cache2go.Cache(DESTINATION_PREFIX+"2", map[interface{}]struct{}{"D1": x})
-	cache2go.Cache(DESTINATION_PREFIX+"3", map[interface{}]struct{}{"D2": x})
+	cache2go.Cache(utils.DESTINATION_PREFIX+"1", map[interface{}]struct{}{"D1": x, "D2": x})
+	cache2go.Cache(utils.DESTINATION_PREFIX+"2", map[interface{}]struct{}{"D1": x})
+	cache2go.Cache(utils.DESTINATION_PREFIX+"3", map[interface{}]struct{}{"D2": x})
 	CleanStalePrefixes([]string{"D1"})
-	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "1"); err != nil || len(r.(map[interface{}]struct{})) != 1 {
+	if r, err := cache2go.GetCached(utils.DESTINATION_PREFIX + "1"); err != nil || len(r.(map[interface{}]struct{})) != 1 {
 		t.Error("Error cleaning stale destination ids", r)
 	}
-	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "2"); err == nil {
+	if r, err := cache2go.GetCached(utils.DESTINATION_PREFIX + "2"); err == nil {
 		t.Error("Error removing stale prefix: ", r)
 	}
-	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "3"); err != nil || len(r.(map[interface{}]struct{})) != 1 {
+	if r, err := cache2go.GetCached(utils.DESTINATION_PREFIX + "3"); err != nil || len(r.(map[interface{}]struct{})) != 1 {
 		t.Error("Error performing stale cleaning: ", r)
 	}
 }

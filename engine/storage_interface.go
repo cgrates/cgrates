@@ -29,38 +29,6 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-const (
-	ACTION_TIMING_PREFIX      = "apl_"
-	RATING_PLAN_PREFIX        = "rpl_"
-	RATING_PROFILE_PREFIX     = "rpf_"
-	RP_ALIAS_PREFIX           = "ral_"
-	ACC_ALIAS_PREFIX          = "aal_"
-	ACTION_PREFIX             = "act_"
-	SHARED_GROUP_PREFIX       = "shg_"
-	ACCOUNT_PREFIX            = "ubl_"
-	DESTINATION_PREFIX        = "dst_"
-	LCR_PREFIX                = "lcr_"
-	DERIVEDCHARGERS_PREFIX    = "dcs_"
-	CDR_STATS_PREFIX          = "cst_"
-	TEMP_DESTINATION_PREFIX   = "tmp_"
-	LOG_CALL_COST_PREFIX      = "cco_"
-	LOG_ACTION_TIMMING_PREFIX = "ltm_"
-	LOG_ACTION_TRIGGER_PREFIX = "ltr_"
-	LOG_ERR                   = "ler_"
-	LOG_CDR                   = "cdr_"
-	LOG_MEDIATED_CDR          = "mcd_"
-	// sources
-	SESSION_MANAGER_SOURCE       = "SMR"
-	MEDIATOR_SOURCE              = "MED"
-	SCHED_SOURCE                 = "SCH"
-	RATER_SOURCE                 = "RAT"
-	CREATE_CDRS_TABLES_SQL       = "create_cdrs_tables.sql"
-	CREATE_TARIFFPLAN_TABLES_SQL = "create_tariffplan_tables.sql"
-	TEST_SQL                     = "TEST_SQL"
-
-	DESTINATIONS_LOAD_THRESHOLD = 0.1
-)
-
 type Storage interface {
 	Close()
 	Flush(string) error
@@ -70,7 +38,10 @@ type Storage interface {
 // Interface for storage providers.
 type RatingStorage interface {
 	Storage
-	CacheRating([]string, []string, []string, []string, []string, []string) error
+	CacheAll() error
+	CachePrefixes(...string) error
+	CachePrefixValues(map[string][]string) error
+	Cache([]string, []string, []string, []string, []string, []string, []string, []string, []string) error
 	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
@@ -89,25 +60,23 @@ type RatingStorage interface {
 	GetAllCdrStats() ([]*CdrStats, error)
 	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
 	SetDerivedChargers(string, utils.DerivedChargers) error
-}
-
-type AccountingStorage interface {
-	Storage
-	HasData(string, string) (bool, error)
-	CacheAccounting([]string, []string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
 	SetSharedGroup(*SharedGroup) error
-	GetAccount(string) (*Account, error)
-	SetAccount(*Account) error
+	GetActionPlans(string) (ActionPlans, error)
+	SetActionPlans(string, ActionPlans) error
+	GetAllActionPlans() (map[string]ActionPlans, error)
 	GetAccAlias(string, bool) (string, error)
 	SetAccAlias(string, string) error
 	RemoveAccAliases([]*TenantAccount) error
 	GetAccountAliases(string, string, bool) ([]string, error)
-	GetActionPlans(string) (ActionPlans, error)
-	SetActionPlans(string, ActionPlans) error
-	GetAllActionPlans() (map[string]ActionPlans, error)
+}
+
+type AccountingStorage interface {
+	Storage
+	GetAccount(string) (*Account, error)
+	SetAccount(*Account) error
 }
 
 type CdrStorage interface {

@@ -76,13 +76,8 @@ var (
 )
 
 func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, doneChan chan struct{}) {
-	if err := ratingDb.CacheRating(nil, nil, nil, nil, nil, nil); err != nil {
+	if err := ratingDb.CacheAll(); err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	if err := accountDb.CacheAccounting(nil, nil, nil); err != nil {
-		engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
@@ -568,10 +563,10 @@ func main() {
 		engine.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
-			go reloadSchedulerSingnalHandler(sched, accountDb)
+			go reloadSchedulerSingnalHandler(sched, ratingDb)
 			apierRpcV1.Sched = sched
 			apierRpcV2.Sched = sched
-			sched.LoadActionPlans(accountDb)
+			sched.LoadActionPlans(ratingDb)
 			sched.Loop()
 		}()
 	}

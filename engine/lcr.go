@@ -249,7 +249,7 @@ func (es LCREntriesSorter) Sort() {
 func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 	var potentials LCREntriesSorter
 	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
-		if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
+		if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
 
 			destIds := x.(map[interface{}]struct{})
 			for idId := range destIds {

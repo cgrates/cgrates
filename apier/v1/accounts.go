@@ -45,7 +45,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	accountATs := make([]*AccountActionTiming, 0)
-	allATs, err := self.AccountDb.GetAllActionPlans()
+	allATs, err := self.RatingDb.GetAllActionPlans()
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -80,23 +80,23 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		}
 	}
 	_, err := engine.AccLock.Guard(func() (interface{}, error) {
-		ats, err := self.AccountDb.GetActionPlans(attrs.ActionPlanId)
+		ats, err := self.RatingDb.GetActionPlans(attrs.ActionPlanId)
 		if err != nil {
 			return 0, err
 		} else if len(ats) == 0 {
 			return 0, utils.ErrNotFound
 		}
 		ats = engine.RemActionPlan(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction))
-		if err := self.AccountDb.SetActionPlans(attrs.ActionPlanId, ats); err != nil {
+		if err := self.RatingDb.SetActionPlans(attrs.ActionPlanId, ats); err != nil {
 			return 0, err
 		}
 		return 0, nil
-	}, engine.ACTION_TIMING_PREFIX)
+	}, utils.ACTION_TIMING_PREFIX)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler && self.Sched != nil {
-		self.Sched.LoadActionPlans(self.AccountDb)
+		self.Sched.LoadActionPlans(self.RatingDb)
 		self.Sched.Restart()
 	}
 	*reply = OK
@@ -177,7 +177,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 
 		if len(attr.ActionPlanId) != 0 {
 			var err error
-			ats, err = self.AccountDb.GetActionPlans(attr.ActionPlanId)
+			ats, err = self.RatingDb.GetActionPlans(attr.ActionPlanId)
 			if err != nil {
 				return 0, err
 			}
@@ -196,16 +196,16 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	}
 	if len(ats) != 0 {
 		_, err := engine.AccLock.Guard(func() (interface{}, error) { // ToDo: Try locking it above on read somehow
-			if err := self.AccountDb.SetActionPlans(attr.ActionPlanId, ats); err != nil {
+			if err := self.RatingDb.SetActionPlans(attr.ActionPlanId, ats); err != nil {
 				return 0, err
 			}
 			return 0, nil
-		}, engine.ACTION_TIMING_PREFIX)
+		}, utils.ACTION_TIMING_PREFIX)
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}
 		if self.Sched != nil {
-			self.Sched.LoadActionPlans(self.AccountDb)
+			self.Sched.LoadActionPlans(self.RatingDb)
 			self.Sched.Restart()
 		}
 	}
@@ -253,7 +253,7 @@ func (self *ApierV1) GetAccounts(attr AttrGetAccounts, reply *[]*engine.Account)
 	}
 	retAccounts := make([]*engine.Account, 0)
 	for _, acntKey := range limitedAccounts {
-		if acnt, err := self.AccountDb.GetAccount(acntKey[len(engine.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
+		if acnt, err := self.AccountDb.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
 			retAccounts = append(retAccounts, acnt)
