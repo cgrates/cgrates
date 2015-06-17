@@ -115,7 +115,7 @@ type CallCostLog struct {
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 	if ccl.CheckDuplicate {
 		cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
-		if err != nil && err.Error() != "record not found" {
+		if err != nil && err != gorm.RecordNotFound {
 			return err
 		}
 		if cc != nil {
