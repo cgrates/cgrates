@@ -295,6 +295,23 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			}
 		}
 	}
+	// Load cdr stats
+	//loadId = utils.CSV_LOAD + "_" + utils.TEST_SQL
+	if cdrStats, err := storDb.GetTpCdrStats(utils.TEST_SQL, ""); err != nil {
+		t.Fatal("Could not retrieve cdr stats, error: ", err.Error())
+	} else if len(cdrStats) == 0 {
+		t.Fatal("Could not retrieve cdr stats")
+	} else {
+		cds, err := TpCdrStats(cdrStats).GetCdrStats()
+		if err != nil {
+			t.Fatal("Could not convert cdr stats")
+		}
+		for id := range cds {
+			if err := loader.LoadCdrStatsFiltered(id, true); err != nil {
+				t.Fatalf("Could not load cdr stats with id: %s, error: %s", id, err.Error())
+			}
+		}
+	}
 	// Load account actions
 	if accountActions, err := storDb.GetTpAccountActions(&TpAccountAction{Tpid: utils.TEST_SQL, Loadid: loadId}); err != nil {
 		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())

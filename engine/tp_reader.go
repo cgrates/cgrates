@@ -808,6 +808,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 							Weight:         tpact.BalanceWeight,
 							RatingSubject:  tpact.RatingSubject,
 							DestinationIds: tpact.DestinationIds,
+							SharedGroup:    tpact.SharedGroup,
 						},
 					}
 				}
@@ -931,6 +932,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 	if err != nil {
 		return err
 	}
+	var actionsIds []string // collect action ids
 	for tag, tpStats := range storStats {
 		for _, tpStat := range tpStats {
 			var cs *CdrStats
@@ -938,7 +940,48 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 			if cs, exists = tpr.cdrStats[tag]; !exists {
 				cs = &CdrStats{Id: tag}
 			}
+			// action triggers
 			triggerTag := tpStat.ActionTriggers
+			if triggerTag != "" {
+				_, exists := tpr.actionsTriggers[triggerTag]
+				if !exists {
+					tpatrs, err := tpr.lr.GetTpActionTriggers(tpr.tpid, triggerTag)
+					if err != nil {
+						return errors.New(err.Error() + " (ActionTriggers): " + triggerTag)
+					}
+					atrsM, err := TpActionTriggers(tpatrs).GetActionTriggers()
+					if err != nil {
+						return err
+					}
+
+					for _, atrsLst := range atrsM {
+						atrs := make([]*ActionTrigger, len(atrsLst))
+						for idx, apiAtr := range atrsLst {
+							expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+							atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
+								ThresholdType:         apiAtr.ThresholdType,
+								ThresholdValue:        apiAtr.ThresholdValue,
+								BalanceId:             apiAtr.BalanceId,
+								BalanceType:           apiAtr.BalanceType,
+								BalanceDirection:      apiAtr.BalanceDirection,
+								BalanceDestinationIds: apiAtr.BalanceDestinationIds,
+								BalanceWeight:         apiAtr.BalanceWeight,
+								BalanceExpirationDate: expTime,
+								BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
+								BalanceCategory:       apiAtr.BalanceCategory,
+								BalanceSharedGroup:    apiAtr.BalanceSharedGroup,
+								Weight:                apiAtr.Weight,
+								ActionsId:             apiAtr.ActionsId,
+							}
+						}
+						tpr.actionsTriggers[triggerTag] = atrs
+					}
+				}
+				// collect action ids from triggers
+				for _, atr := range tpr.actionsTriggers[triggerTag] {
+					actionsIds = append(actionsIds, atr.ActionsId)
+				}
+			}
 			triggers, exists := tpr.actionsTriggers[triggerTag]
 			if triggerTag != "" && !exists {
 				// only return error if there was something there for the tag
@@ -948,7 +991,52 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 			tpr.cdrStats[tag] = cs
 		}
 	}
+	// actions
+	for _, actId := range actionsIds {
+		_, exists := tpr.actions[actId]
+		if !exists {
+			tpas, err := tpr.lr.GetTpActions(tpr.tpid, actId)
+			if err != nil {
+				return err
+			}
+			as, err := TpActions(tpas).GetActions()
+			if err != nil {
+				return err
+			}
+			for tag, tpacts := range as {
+				enacts := make([]*Action, len(tpacts))
+				for idx, tpact := range tpacts {
+					enacts[idx] = &Action{
+						Id:               tag + strconv.Itoa(idx),
+						ActionType:       tpact.Identifier,
+						BalanceType:      tpact.BalanceType,
+						Direction:        tpact.Direction,
+						Weight:           tpact.Weight,
+						ExtraParameters:  tpact.ExtraParameters,
+						ExpirationString: tpact.ExpiryTime,
+						Balance: &Balance{
+							Uuid:           utils.GenUUID(),
+							Value:          tpact.Units,
+							Weight:         tpact.BalanceWeight,
+							RatingSubject:  tpact.RatingSubject,
+							DestinationIds: tpact.DestinationIds,
+							SharedGroup:    tpact.SharedGroup,
+						},
+					}
+				}
+				tpr.actions[tag] = enacts
+			}
+		}
+	}
+
 	if save {
+		// write actions
+		for k, as := range tpr.actions {
+			err = tpr.ratingStorage.SetActions(k, as)
+			if err != nil {
+				return err
+			}
+		}
 		for _, stat := range tpr.cdrStats {
 			if err := tpr.ratingStorage.SetCdrStats(stat); err != nil {
 				return err
