@@ -236,7 +236,7 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Usage),
 		DurationIndex: storedCdr.Usage,
 	}
-	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.PSEUDOPREPAID, utils.POSTPAID}, storedCdr.ReqType) {
+	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, storedCdr.ReqType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
 			self.cdrDb.LogCallCost(storedCdr.CgrId, utils.CDRS_SOURCE, storedCdr.MediationRunId, cc)
 		}
@@ -314,6 +314,7 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 			time.Sleep(delay())
 		}
 		if err != nil && err == gorm.RecordNotFound { //calculate CDR as for pseudoprepaid
+			Logger.Warning(fmt.Sprintf("CDRS_WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId))
 			qryCC, err = self.getCostFromRater(storedCdr)
 		}
 
