@@ -227,6 +227,7 @@ func (s *Session) SaveOperations() {
 			CallCost:       firstCC,
 			CheckDuplicate: true,
 		}, &reply)
+		engine.Logger.Debug(fmt.Sprintf("<SM> DEBUG: LogCallCost error: %v, time: %v", err, time.Now()))
 		// this is a protection against the case when the close event is missed for some reason
 		// when the cdr arrives to cdrserver because our callcost is not there it will be rated
 		// as postpaid. When the close event finally arives we have to refund everything
@@ -234,7 +235,7 @@ func (s *Session) SaveOperations() {
 			if err == utils.ErrExists {
 				s.Refund(firstCC, firstCC.Timespans[0].TimeStart)
 			} else {
-				engine.Logger.Err(fmt.Sprintf("failed to log call cost: %v", err))
+				engine.Logger.Err(fmt.Sprintf("<SM> ERROR failed to log call cost: %v", err))
 			}
 		}
 	}

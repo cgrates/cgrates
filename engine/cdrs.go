@@ -113,8 +113,10 @@ type CallCostLog struct {
 
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	Logger.Debug(fmt.Sprintf("<Cdrs> DEBUG: LogCallCost, callCostLog: %+v, time: %v", ccl, time.Now()))
 	if ccl.CheckDuplicate {
 		cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
+		Logger.Debug(fmt.Sprintf("<Cdrs> DEBUG: GetCallCostLog, cgrId: %s, source: %s: runId: %s - received: cc: %v, error: %v, time: %v", ccl.CgrId, ccl.Source, ccl.RunId, cc, err, time.Now()))
 		if err != nil && err != gorm.RecordNotFound {
 			return err
 		}
@@ -308,7 +310,7 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 		delay := utils.Fib()
 		for i := 0; i < 4; i++ {
 			qryCC, err = self.cdrDb.GetCallCostLog(storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId)
-			Logger.Warning(fmt.Sprintf("<Cdrs> DEBUG: GetCallCostLog, storedCdr: %+v, callCost: %+v, error: %+v, run: %d, time: %v", storedCdr, qryCC, err, i, time.Now()))
+			Logger.Debug(fmt.Sprintf("<Cdrs> DEBUG: GetCallCostLog, storedCdr: %+v, callCost: %+v, error: %+v, run: %d, time: %v", storedCdr, qryCC, err, i, time.Now()))
 			if err == nil {
 				break
 			}
