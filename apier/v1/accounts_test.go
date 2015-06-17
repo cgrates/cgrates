@@ -56,8 +56,7 @@ func TestSetAccounts(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	noReload := []string{}
-	apierAcntsAcntStorage.CacheAccounting(nil, noReload, noReload)
+	apierAcntsAcntStorage.CachePrefixes(utils.ACTION_PREFIX)
 }
 
 /*

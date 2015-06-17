@@ -43,10 +43,9 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 		if err := self.RatingDb.SetRpAlias(utils.RatingSubjectAliasKey(attrs.Tenant, alias), attrs.Subject); err != nil {
 			return utils.NewErrServerError(err)
 		}
-		aliasesChanged = append(aliasesChanged, engine.RP_ALIAS_PREFIX+utils.RatingSubjectAliasKey(attrs.Tenant, alias))
+		aliasesChanged = append(aliasesChanged, utils.RP_ALIAS_PREFIX+utils.RatingSubjectAliasKey(attrs.Tenant, alias))
 	}
-	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, aliasesChanged, didNotChange, didNotChange); err != nil {
+	if err := self.RatingDb.CachePrefixes(utils.RP_ALIAS_PREFIX); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -76,8 +75,8 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 	if err := self.RatingDb.RemoveRpAliases([]*engine.TenantRatingSubject{&tenantRatingSubject}); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, nil, didNotChange, didNotChange); err != nil {
+
+	if err := self.RatingDb.CachePrefixes(utils.RP_ALIAS_PREFIX); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -90,13 +89,12 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 	}
 	aliasesChanged := []string{}
 	for _, alias := range attrs.Aliases {
-		if err := self.AccountDb.SetAccAlias(utils.AccountAliasKey(attrs.Tenant, alias), attrs.Account); err != nil {
+		if err := self.RatingDb.SetAccAlias(utils.AccountAliasKey(attrs.Tenant, alias), attrs.Account); err != nil {
 			return utils.NewErrServerError(err)
 		}
-		aliasesChanged = append(aliasesChanged, engine.ACC_ALIAS_PREFIX+utils.AccountAliasKey(attrs.Tenant, alias))
+		aliasesChanged = append(aliasesChanged, utils.ACC_ALIAS_PREFIX+utils.AccountAliasKey(attrs.Tenant, alias))
 	}
-	didNotChange := []string{}
-	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, aliasesChanged); err != nil {
+	if err := self.RatingDb.CachePrefixes(utils.ACC_ALIAS_PREFIX); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -108,7 +106,7 @@ func (self *ApierV1) GetAccountAliases(attrs engine.TenantAccount, reply *[]stri
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if aliases, err := self.AccountDb.GetAccountAliases(attrs.Tenant, attrs.Account, false); err != nil {
+	if aliases, err := self.RatingDb.GetAccountAliases(attrs.Tenant, attrs.Account, false); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(aliases) == 0 {
 		return utils.ErrNotFound
@@ -123,11 +121,10 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 	if missing := utils.MissingStructFields(&tenantAccount, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.AccountDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}); err != nil {
+	if err := self.RatingDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	didNotChange := []string{}
-	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, nil); err != nil {
+	if err := self.RatingDb.CachePrefixes(utils.ACC_ALIAS_PREFIX); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

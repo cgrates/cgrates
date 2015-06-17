@@ -42,7 +42,7 @@ func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 			// only get actions fo counter type action triggers
 			continue
 		}
-		acs, err := accountingStorage.GetActions(at.ActionsId, false)
+		acs, err := ratingStorage.GetActions(at.ActionsId, false)
 		if err != nil {
 			continue
 		}
@@ -77,7 +77,7 @@ func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
 				continue
 			}
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
+				if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					if _, found := destIds[mb.DestinationIds]; found {
 						mb.Value += amount

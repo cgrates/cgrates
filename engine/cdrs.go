@@ -307,7 +307,7 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		for i := 0; i < 4; i++ {
-			qryCC, err = self.cdrDb.GetCallCostLog(storedCdr.CgrId, SESSION_MANAGER_SOURCE, storedCdr.MediationRunId)
+			qryCC, err = self.cdrDb.GetCallCostLog(storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId)
 			if err == nil {
 				break
 			}

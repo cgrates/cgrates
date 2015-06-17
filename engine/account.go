@@ -61,7 +61,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
 		if cb.SharedGroup != "" {
-			if sharedGroup, _ := accountingStorage.GetSharedGroup(cb.SharedGroup, false); sharedGroup != nil {
+			if sharedGroup, _ := ratingStorage.GetSharedGroup(cb.SharedGroup, false); sharedGroup != nil {
 				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, utils.MONETARY+cd.Direction, ub)
 				sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
 				extendedCreditBalances = append(extendedCreditBalances, sgb...)
@@ -73,7 +73,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	var extendedMinuteBalances BalanceChain
 	for _, mb := range unitBalances {
 		if mb.SharedGroup != "" {
-			if sharedGroup, _ := accountingStorage.GetSharedGroup(mb.SharedGroup, false); sharedGroup != nil {
+			if sharedGroup, _ := ratingStorage.GetSharedGroup(mb.SharedGroup, false); sharedGroup != nil {
 				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.TOR+cd.Direction, ub)
 				sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 				extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
@@ -131,7 +131,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	}
 	if a.Balance.SharedGroup != "" {
 		// add shared group member
-		sg, err := accountingStorage.GetSharedGroup(a.Balance.SharedGroup, false)
+		sg, err := ratingStorage.GetSharedGroup(a.Balance.SharedGroup, false)
 		if err != nil || sg == nil {
 			//than problem
 			Logger.Warning(fmt.Sprintf("Could not get shared group: %v", a.Balance.SharedGroup))
@@ -139,7 +139,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			if !utils.IsSliceMember(sg.MemberIds, ub.Id) {
 				// add member and save
 				sg.MemberIds = append(sg.MemberIds, ub.Id)
-				accountingStorage.SetSharedGroup(sg)
+				ratingStorage.SetSharedGroup(sg)
 			}
 		}
 	}
@@ -162,7 +162,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, balances Balanc
 		b.account = ub
 		if b.DestinationIds != "" && b.DestinationIds != utils.ANY {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
+				if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
 						balDestIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
@@ -200,7 +200,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, balanceT
 	balances := account.getBalancesForPrefix(destination, category, account.BalanceMap[balanceType], "")
 	for _, b := range balances {
 		if b.SharedGroup != "" {
-			sharedGroup, err := accountingStorage.GetSharedGroup(b.SharedGroup, false)
+			sharedGroup, err := ratingStorage.GetSharedGroup(b.SharedGroup, false)
 			if err != nil {
 				Logger.Warning(fmt.Sprintf("Could not get shared group: %v", b.SharedGroup))
 				continue
@@ -516,7 +516,7 @@ func (ub *Account) countUnits(a *Action) {
 func (ub *Account) initCounters() {
 	ucTempMap := make(map[string]*UnitsCounter, 2)
 	for _, at := range ub.ActionTriggers {
-		acs, err := accountingStorage.GetActions(at.ActionsId, false)
+		acs, err := ratingStorage.GetActions(at.ActionsId, false)
 		if err != nil {
 			continue
 		}
@@ -590,7 +590,7 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]strin
 	}
 	var memberIds []string
 	for _, sgID := range sharedGroupIds {
-		sharedGroup, err := accountingStorage.GetSharedGroup(sgID, false)
+		sharedGroup, err := ratingStorage.GetSharedGroup(sgID, false)
 		if err != nil {
 			Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 			return nil, err

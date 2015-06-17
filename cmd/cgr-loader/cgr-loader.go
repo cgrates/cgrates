@@ -216,15 +216,15 @@ func main() {
 	// Reload scheduler and cache
 	if rater != nil {
 		reply := ""
-		dstIds, _ := tpReader.GetLoadedIds(engine.DESTINATION_PREFIX)
-		rplIds, _ := tpReader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
-		rpfIds, _ := tpReader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
-		actIds, _ := tpReader.GetLoadedIds(engine.ACTION_PREFIX)
-		shgIds, _ := tpReader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
-		rpAliases, _ := tpReader.GetLoadedIds(engine.RP_ALIAS_PREFIX)
-		accAliases, _ := tpReader.GetLoadedIds(engine.ACC_ALIAS_PREFIX)
-		lcrIds, _ := tpReader.GetLoadedIds(engine.LCR_PREFIX)
-		dcs, _ := tpReader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
+		dstIds, _ := tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
+		rplIds, _ := tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
+		rpfIds, _ := tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
+		actIds, _ := tpReader.GetLoadedIds(utils.ACTION_PREFIX)
+		shgIds, _ := tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
+		rpAliases, _ := tpReader.GetLoadedIds(utils.RP_ALIAS_PREFIX)
+		accAliases, _ := tpReader.GetLoadedIds(utils.ACC_ALIAS_PREFIX)
+		lcrIds, _ := tpReader.GetLoadedIds(utils.LCR_PREFIX)
+		dcs, _ := tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
@@ -245,7 +245,7 @@ func main() {
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
-		actTmgIds, _ := tpReader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
+		actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
 		if len(actTmgIds) != 0 {
 			if *verbose {
 				log.Print("Reloading scheduler")
@@ -257,7 +257,7 @@ func main() {
 
 	}
 	if cdrstats != nil {
-		statsQueueIds, _ := tpReader.GetLoadedIds(engine.CDR_STATS_PREFIX)
+		statsQueueIds, _ := tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 		if *flush {
 			statsQueueIds = []string{} // Force reload all
 		}

@@ -58,8 +58,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDbAcntActs.CacheRating(nil, nil, nil, nil, nil, nil)
-	acntDbAcntActs.CacheAccounting(nil, nil, nil)
+	ratingDbAcntActs.CacheAll()
 	expectAcnt := &engine.Account{Id: "*out:cgrates.org:1"}
 	if acnt, err := acntDbAcntActs.GetAccount("*out:cgrates.org:1"); err != nil {
 		t.Error(err)

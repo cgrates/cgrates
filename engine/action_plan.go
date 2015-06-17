@@ -228,7 +228,7 @@ func (at *ActionPlan) SetActions(as Actions) {
 
 func (at *ActionPlan) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		at.actions, err = accountingStorage.GetActions(at.ActionsId, false)
+		at.actions, err = ratingStorage.GetActions(at.ActionsId, false)
 	}
 	at.actions.Sort()
 	return at.actions, err
@@ -275,7 +275,7 @@ func (at *ActionPlan) Execute() (err error) {
 			}
 		}
 	}
-	storageLogger.LogActionPlan(SCHED_SOURCE, at, aac)
+	storageLogger.LogActionPlan(utils.SCHED_SOURCE, at, aac)
 	return
 }
 

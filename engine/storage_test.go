@@ -105,7 +105,7 @@ func TestCacheRefresh(t *testing.T) {
 	ratingStorage.GetDestination("T11")
 	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}})
 	t.Log("Test cache refresh")
-	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
+	ratingStorage.CacheAll()
 	d, err := ratingStorage.GetDestination("T11")
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
@@ -114,7 +114,7 @@ func TestCacheRefresh(t *testing.T) {
 }
 
 func TestCacheAliases(t *testing.T) {
-	if subj, err := cache2go.GetCached(RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey("vdf", "a3")); err == nil && subj != "minu" {
+	if subj, err := cache2go.GetCached(utils.RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey("vdf", "a3")); err == nil && subj != "minu" {
 		t.Error("Error caching alias: ", subj, err)
 	}
 }
@@ -178,18 +178,18 @@ func TestRemRSubjAliases(t *testing.T) {
 }
 
 func TestGetAccountAliases(t *testing.T) {
-	if err := accountingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2001"), "1001"); err != nil {
+	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2001"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := accountingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2002"), "1001"); err != nil {
+	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2002"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := accountingStorage.SetAccAlias(utils.AccountAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
+	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
 		t.Error(err)
 	}
 	expectAliases := sort.StringSlice([]string{"2001", "2002"})
 	expectAliases.Sort()
-	if aliases, err := accountingStorage.GetAccountAliases("cgrates.org", "1001", true); err != nil {
+	if aliases, err := ratingStorage.GetAccountAliases("cgrates.org", "1001", true); err != nil {
 		t.Error(err)
 	} else {
 		aliases := sort.StringSlice(aliases)

@@ -256,8 +256,7 @@ func init() {
 		log.Print("error in LoadCdrStats:", err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil)
+	ratingStorage.CacheAll()
 }
 
 func TestLoadDestinations(t *testing.T) {

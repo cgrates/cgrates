@@ -159,7 +159,7 @@ func (tpr *TpReader) LoadDestinationRates() (err error) {
 				_, destinationExists = tpr.destinations[dr.DestinationId]
 			}
 			if !destinationExists && tpr.ratingStorage != nil {
-				if destinationExists, err = tpr.ratingStorage.HasData(DESTINATION_PREFIX, dr.DestinationId); err != nil {
+				if destinationExists, err = tpr.ratingStorage.HasData(utils.DESTINATION_PREFIX, dr.DestinationId); err != nil {
 					return err
 				}
 			}
@@ -228,7 +228,7 @@ func (tpr *TpReader) LoadRatingPlansFiltered(tag string) (bool, error) {
 				}
 				destsExist := len(dms) != 0
 				if !destsExist && tpr.ratingStorage != nil {
-					if dbExists, err := tpr.ratingStorage.HasData(DESTINATION_PREFIX, drate.DestinationId); err != nil {
+					if dbExists, err := tpr.ratingStorage.HasData(utils.DESTINATION_PREFIX, drate.DestinationId); err != nil {
 						return false, err
 					} else if dbExists {
 						destsExist = true
@@ -305,7 +305,7 @@ func (tpr *TpReader) LoadRatingProfilesFiltered(qriedRpf *TpRatingProfile) error
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.ratingStorage != nil {
-				if exists, err = tpr.ratingStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if exists, err = tpr.ratingStorage.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				}
 			}
@@ -355,7 +355,7 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 			}
 			_, exists := tpr.ratingPlans[tpRa.RatingPlanId]
 			if !exists && tpr.ratingStorage != nil { // Only query if there is a connection, eg on dry run there is none
-				if exists, err = tpr.ratingStorage.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if exists, err = tpr.ratingStorage.HasData(utils.RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				}
 			}
@@ -402,7 +402,7 @@ func (tpr *TpReader) LoadSharedGroupsFiltered(tag string, save bool) (err error)
 	}
 	if save {
 		for _, sg := range tpr.sharedGroups {
-			if err := tpr.accountingStorage.SetSharedGroup(sg); err != nil {
+			if err := tpr.ratingStorage.SetSharedGroup(sg); err != nil {
 				return err
 			}
 		}
@@ -431,7 +431,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 			}
 		}
 		if !found && tpr.ratingStorage != nil {
-			if keys, err := tpr.ratingStorage.GetKeysForPrefix(RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil {
+			if keys, err := tpr.ratingStorage.GetKeysForPrefix(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil {
 				return fmt.Errorf("[LCR] error querying ratingDb %s", err.Error())
 			} else if len(keys) != 0 {
 				found = true
@@ -445,7 +445,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 		if tpLcr.DestinationTag != "" && tpLcr.DestinationTag != utils.ANY {
 			_, found := tpr.destinations[tpLcr.DestinationTag]
 			if !found && tpr.ratingStorage != nil {
-				if found, err = tpr.ratingStorage.HasData(DESTINATION_PREFIX, tpLcr.DestinationTag); err != nil {
+				if found, err = tpr.ratingStorage.HasData(utils.DESTINATION_PREFIX, tpLcr.DestinationTag); err != nil {
 					return fmt.Errorf("[LCR] error querying ratingDb %s", err.Error())
 				}
 			}
@@ -564,7 +564,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 
 			_, exists := tpr.actions[at.ActionsId]
 			if !exists && tpr.ratingStorage != nil {
-				if exists, err = tpr.ratingStorage.HasData(ACTION_PREFIX, at.ActionsId); err != nil {
+				if exists, err = tpr.ratingStorage.HasData(utils.ACTION_PREFIX, at.ActionsId); err != nil {
 					return fmt.Errorf("[ActionPlans] Error querying actions: %v - %s", at.ActionsId, err.Error())
 				}
 			}
@@ -664,7 +664,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
 			var exitingAccountIds []string
-			existingActionPlans, err := tpr.accountingStorage.GetActionPlans(accountAction.ActionPlanId)
+			existingActionPlans, err := tpr.ratingStorage.GetActionPlans(accountAction.ActionPlanId)
 			if err == nil && len(existingActionPlans) > 0 {
 				// all action timings from a specific tag shuld have the same list of user balances from the first one
 				exitingAccountIds = existingActionPlans[0].AccountIds
@@ -732,7 +732,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			}
 
 			// write action timings
-			err = tpr.accountingStorage.SetActionPlans(accountAction.ActionPlanId, actionTimings)
+			err = tpr.ratingStorage.SetActionPlans(accountAction.ActionPlanId, actionTimings)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
 			}
@@ -814,9 +814,9 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				acts[tag] = enacts
 			}
 		}
-		// writee actions
+		// write actions
 		for k, as := range acts {
-			err = tpr.accountingStorage.SetActions(k, as)
+			err = tpr.ratingStorage.SetActions(k, as)
 			if err != nil {
 				return err
 			}
@@ -1075,7 +1075,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Action Plans:")
 	}
 	for k, ats := range tpr.actionsTimings {
-		err = tpr.accountingStorage.SetActionPlans(k, ats)
+		err = tpr.ratingStorage.SetActionPlans(k, ats)
 		if err != nil {
 			return err
 		}
@@ -1087,7 +1087,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Shared Groups:")
 	}
 	for k, sg := range tpr.sharedGroups {
-		err = tpr.accountingStorage.SetSharedGroup(sg)
+		err = tpr.ratingStorage.SetSharedGroup(sg)
 		if err != nil {
 			return err
 		}
@@ -1111,7 +1111,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Actions:")
 	}
 	for k, as := range tpr.actions {
-		err = tpr.accountingStorage.SetActions(k, as)
+		err = tpr.ratingStorage.SetActions(k, as)
 		if err != nil {
 			return err
 		}
@@ -1149,11 +1149,11 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Account Aliases:")
 	}
-	if err := tpr.accountingStorage.RemoveAccAliases(tpr.dirtyAccAliases); err != nil {
+	if err := tpr.ratingStorage.RemoveAccAliases(tpr.dirtyAccAliases); err != nil {
 		return err
 	}
 	for key, alias := range tpr.accAliases {
-		err = tpr.accountingStorage.SetAccAlias(key, alias)
+		err = tpr.ratingStorage.SetAccAlias(key, alias)
 		if err != nil {
 			return err
 		}
@@ -1250,7 +1250,7 @@ func (tpr *TpReader) ShowStatistics() {
 // Returns the identities loaded for a specific category, useful for cache reloads
 func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
-	case DESTINATION_PREFIX:
+	case utils.DESTINATION_PREFIX:
 		keys := make([]string, len(tpr.destinations))
 		i := 0
 		for k := range tpr.destinations {
@@ -1258,7 +1258,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case RATING_PLAN_PREFIX:
+	case utils.RATING_PLAN_PREFIX:
 		keys := make([]string, len(tpr.ratingPlans))
 		i := 0
 		for k := range tpr.ratingPlans {
@@ -1266,7 +1266,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case RATING_PROFILE_PREFIX:
+	case utils.RATING_PROFILE_PREFIX:
 		keys := make([]string, len(tpr.ratingProfiles))
 		i := 0
 		for k := range tpr.ratingProfiles {
@@ -1274,7 +1274,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case ACTION_PREFIX: // actionsTimings
+	case utils.ACTION_PREFIX: // actionsTimings
 		keys := make([]string, len(tpr.actions))
 		i := 0
 		for k := range tpr.actions {
@@ -1282,7 +1282,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case ACTION_TIMING_PREFIX: // actionsTimings
+	case utils.ACTION_TIMING_PREFIX: // actionsTimings
 		keys := make([]string, len(tpr.actionsTimings))
 		i := 0
 		for k := range tpr.actionsTimings {
@@ -1290,7 +1290,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case RP_ALIAS_PREFIX: // aliases
+	case utils.RP_ALIAS_PREFIX: // aliases
 		keys := make([]string, len(tpr.rpAliases))
 		i := 0
 		for k := range tpr.rpAliases {
@@ -1298,7 +1298,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case ACC_ALIAS_PREFIX: // aliases
+	case utils.ACC_ALIAS_PREFIX: // aliases
 		keys := make([]string, len(tpr.accAliases))
 		i := 0
 		for k := range tpr.accAliases {
@@ -1306,7 +1306,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case DERIVEDCHARGERS_PREFIX: // derived chargers
+	case utils.DERIVEDCHARGERS_PREFIX: // derived chargers
 		keys := make([]string, len(tpr.derivedChargers))
 		i := 0
 		for k := range tpr.derivedChargers {
@@ -1314,7 +1314,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case CDR_STATS_PREFIX: // cdr stats
+	case utils.CDR_STATS_PREFIX: // cdr stats
 		keys := make([]string, len(tpr.cdrStats))
 		i := 0
 		for k := range tpr.cdrStats {
@@ -1322,7 +1322,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case SHARED_GROUP_PREFIX:
+	case utils.SHARED_GROUP_PREFIX:
 		keys := make([]string, len(tpr.sharedGroups))
 		i := 0
 		for k := range tpr.sharedGroups {

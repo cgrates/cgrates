@@ -99,7 +99,7 @@ func TestCreateStorTpTables(t *testing.T) {
 		storDb = d.(LoadStorage)
 	}
 	// Creating the table serves also as reset since there is a drop prior to create
-	if err := db.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", CREATE_TARIFFPLAN_TABLES_SQL)); err != nil {
+	if err := db.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", utils.CREATE_TARIFFPLAN_TABLES_SQL)); err != nil {
 		t.Error("Error on db creation: ", err.Error())
 		return // No point in going further
 	}
@@ -176,18 +176,18 @@ func TestImportToStorDb(t *testing.T) {
 		return
 	}
 	csvImporter := TPCSVImporter{
-		TPid:     TEST_SQL,
+		TPid:     utils.TEST_SQL,
 		StorDb:   storDb,
 		DirPath:  path.Join(*dataDir, "tariffplans", *tpCsvScenario),
 		Sep:      utils.CSV_SEP,
 		Verbose:  false,
-		ImportId: TEST_SQL}
+		ImportId: utils.TEST_SQL}
 	if err := csvImporter.Run(); err != nil {
 		t.Error("Error when importing tpdata to storDb: ", err)
 	}
 	if tpids, err := storDb.GetTpIds(); err != nil {
 		t.Error("Error when querying storDb for imported data: ", err)
-	} else if len(tpids) != 1 || tpids[0] != TEST_SQL {
+	} else if len(tpids) != 1 || tpids[0] != utils.TEST_SQL {
 		t.Errorf("Data in storDb is different than expected %v", tpids)
 	}
 }
@@ -197,7 +197,7 @@ func TestLoadFromStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, TEST_SQL)
+	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, utils.TEST_SQL)
 	if err := loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -240,9 +240,9 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, TEST_SQL)
+	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, utils.TEST_SQL)
 	// Load ratingPlans. This will also set destination keys
-	if ratingPlans, err := storDb.GetTpRatingPlans(TEST_SQL, "", nil); err != nil {
+	if ratingPlans, err := storDb.GetTpRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")
 	} else {
 		rpls, err := TpRatingPlans(ratingPlans).GetRatingPlans()
@@ -258,8 +258,8 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 	// Load rating profiles
-	loadId := utils.CSV_LOAD + "_" + TEST_SQL
-	if ratingProfiles, err := storDb.GetTpRatingProfiles(&TpRatingProfile{Tpid: TEST_SQL, Loadid: loadId}); err != nil {
+	loadId := utils.CSV_LOAD + "_" + utils.TEST_SQL
+	if ratingProfiles, err := storDb.GetTpRatingProfiles(&TpRatingProfile{Tpid: utils.TEST_SQL, Loadid: loadId}); err != nil {
 		t.Fatal("Could not retrieve rating profiles, error: ", err.Error())
 	} else if len(ratingProfiles) == 0 {
 		t.Fatal("Could not retrieve rating profiles")
@@ -269,7 +269,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			t.Fatal("Could not convert rating profiles")
 		}
 		for rpId := range rpfs {
-			rp, _ := utils.NewTPRatingProfileFromKeyId(TEST_SQL, loadId, rpId)
+			rp, _ := utils.NewTPRatingProfileFromKeyId(utils.TEST_SQL, loadId, rpId)
 			mrp := APItoModelRatingProfile(rp)
 			if err := loader.LoadRatingProfilesFiltered(&mrp[0]); err != nil {
 				t.Fatalf("Could not load ratingProfile with id: %s, error: %s", rpId, err.Error())
@@ -277,8 +277,8 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 	// Load derived chargers
-	loadId = utils.CSV_LOAD + "_" + TEST_SQL
-	if derivedChargers, err := storDb.GetTpDerivedChargers(&TpDerivedCharger{Tpid: TEST_SQL, Loadid: loadId}); err != nil {
+	loadId = utils.CSV_LOAD + "_" + utils.TEST_SQL
+	if derivedChargers, err := storDb.GetTpDerivedChargers(&TpDerivedCharger{Tpid: utils.TEST_SQL, Loadid: loadId}); err != nil {
 		t.Fatal("Could not retrieve derived chargers, error: ", err.Error())
 	} else if len(derivedChargers) == 0 {
 		t.Fatal("Could not retrieve derived chargers")
@@ -288,7 +288,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			t.Fatal("Could not convert derived chargers")
 		}
 		for dcId := range dcs {
-			mdc := &TpDerivedCharger{Tpid: TEST_SQL, Loadid: loadId}
+			mdc := &TpDerivedCharger{Tpid: utils.TEST_SQL, Loadid: loadId}
 			mdc.SetDerivedChargersId(dcId)
 			if err := loader.LoadDerivedChargersFiltered(mdc, true); err != nil {
 				t.Fatalf("Could not load derived charger with id: %s, error: %s", dcId, err.Error())
@@ -296,7 +296,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 	// Load account actions
-	if accountActions, err := storDb.GetTpAccountActions(&TpAccountAction{Tpid: TEST_SQL, Loadid: loadId}); err != nil {
+	if accountActions, err := storDb.GetTpAccountActions(&TpAccountAction{Tpid: utils.TEST_SQL, Loadid: loadId}); err != nil {
 		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())
 	} else if len(accountActions) == 0 {
 		t.Error("No account actions")
@@ -306,8 +306,9 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			t.Fatal("Could not convert account actions")
 		}
 		for aaId := range aas {
-			aa, _ := utils.NewTPAccountActionsFromKeyId(TEST_SQL, loadId, aaId)
+			aa, _ := utils.NewTPAccountActionsFromKeyId(utils.TEST_SQL, loadId, aaId)
 			maa := APItoModelAccountAction(aa)
+
 			if err := loader.LoadAccountActionsFiltered(maa); err != nil {
 				t.Fatalf("Could not load account actions with id: %s, error: %s", aaId, err.Error())
 			}

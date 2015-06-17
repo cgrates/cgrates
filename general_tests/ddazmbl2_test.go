@@ -108,24 +108,24 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
-	ratingDb2.CacheRating(nil, nil, nil, nil, nil, nil)
-	acntDb2.CacheAccounting(nil, nil, nil)
-	if cachedDests := cache2go.CountEntries(engine.DESTINATION_PREFIX); cachedDests != 2 {
+	ratingDb2.CacheAll()
+
+	if cachedDests := cache2go.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 2 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}
-	if cachedRPlans := cache2go.CountEntries(engine.RATING_PLAN_PREFIX); cachedRPlans != 2 {
+	if cachedRPlans := cache2go.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 2 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
 	}
-	if cachedRProfiles := cache2go.CountEntries(engine.RATING_PROFILE_PREFIX); cachedRProfiles != 2 {
+	if cachedRProfiles := cache2go.CountEntries(utils.RATING_PROFILE_PREFIX); cachedRProfiles != 2 {
 		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
 	}
-	if cachedActions := cache2go.CountEntries(engine.ACTION_PREFIX); cachedActions != 2 {
+	if cachedActions := cache2go.CountEntries(utils.ACTION_PREFIX); cachedActions != 2 {
 		t.Error("Wrong number of cached actions found", cachedActions)
 	}
 }
 
 func TestExecuteActions2(t *testing.T) {
-	scheduler.NewScheduler().LoadActionPlans(acntDb2)
+	scheduler.NewScheduler().LoadActionPlans(ratingDb2)
 	time.Sleep(time.Millisecond) // Give time to scheduler to topup the account
 	if acnt, err := acntDb2.GetAccount("*out:cgrates.org:12345"); err != nil {
 		t.Error(err)

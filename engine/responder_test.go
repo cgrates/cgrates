@@ -44,7 +44,7 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
 		t.Error(err)
 	}
-	if err := ratingStorage.CacheRating([]string{}, []string{}, []string{}, []string{}, []string{}, nil); err != nil {
+	if err := ratingStorage.CachePrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
 		t.Error(err)
 	}
 	var dcs utils.DerivedChargers
@@ -94,8 +94,7 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil)
+	ratingStorage.CacheAll()
 	if rifStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(utils.OUT, testTenant, "rif")); err != nil {
 		t.Error(err)
 		//} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND].Equal(rifsAccount.BalanceMap[utils.VOICE+OUTBOUND]) {
@@ -149,7 +148,7 @@ func TestGetSessionRuns(t *testing.T) {
 	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	ratingStorage.CacheRating(nil, nil, nil, nil, nil, nil)
+	ratingStorage.CacheAll()
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
@@ -360,12 +359,12 @@ func TestGetLCR(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if err := ratingStorage.CacheRating([]string{DESTINATION_PREFIX + dstDe.Id},
-		[]string{RATING_PLAN_PREFIX + rp1.Id, RATING_PLAN_PREFIX + rp2.Id},
-		[]string{RATING_PROFILE_PREFIX + danRpfl.Id, RATING_PROFILE_PREFIX + rifRpfl.Id},
-		[]string{},
-		[]string{LCR_PREFIX + lcrStatic.GetId(), LCR_PREFIX + lcrLowestCost.GetId()},
-		[]string{}); err != nil {
+	if err := ratingStorage.CachePrefixValues(map[string][]string{
+		utils.DESTINATION_PREFIX:    []string{utils.DESTINATION_PREFIX + dstDe.Id},
+		utils.RATING_PLAN_PREFIX:    []string{utils.RATING_PLAN_PREFIX + rp1.Id, utils.RATING_PLAN_PREFIX + rp2.Id},
+		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + danRpfl.Id, utils.RATING_PROFILE_PREFIX + rifRpfl.Id},
+		utils.LCR_PREFIX:            []string{utils.LCR_PREFIX + lcrStatic.GetId(), utils.LCR_PREFIX + lcrLowestCost.GetId()},
+	}); err != nil {
 		t.Error(err)
 	}
 	cdStatic := &CallDescriptor{

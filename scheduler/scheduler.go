@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type Scheduler struct {
@@ -73,7 +74,7 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) LoadActionPlans(storage engine.AccountingStorage) {
+func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	actionTimings, err := storage.GetAllActionPlans()
 	if err != nil {
 		engine.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
@@ -110,7 +111,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.AccountingStorage) {
 			engine.AccLock.Guard(func() (interface{}, error) {
 				storage.SetActionPlans(key, newAts)
 				return 0, nil
-			}, engine.ACTION_TIMING_PREFIX)
+			}, utils.ACTION_TIMING_PREFIX)
 		}
 	}
 	sort.Sort(s.queue)

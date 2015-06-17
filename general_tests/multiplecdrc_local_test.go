@@ -90,7 +90,7 @@ func TestEmptyTables(t *testing.T) {
 	} else {
 		mysql = d.(*engine.MySQLStorage)
 	}
-	if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, engine.CREATE_CDRS_TABLES_SQL)); err != nil {
+	if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, utils.CREATE_CDRS_TABLES_SQL)); err != nil {
 		t.Fatal("Error on mysql creation: ", err.Error())
 		return // No point in going further
 	}

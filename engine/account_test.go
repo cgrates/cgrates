@@ -1172,8 +1172,8 @@ func TestDebitShared(t *testing.T) {
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
-	accountingStorage.SetSharedGroup(sg)
-	cache2go.Cache(SHARED_GROUP_PREFIX+"SG_TEST", sg)
+	ratingStorage.SetSharedGroup(sg)
+	cache2go.Cache(utils.SHARED_GROUP_PREFIX+"SG_TEST", sg)
 	cc, err := rif.debitCreditBalance(cd, false, false, true)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
@@ -1242,8 +1242,8 @@ func TestMaxDurationShared(t *testing.T) {
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
-	accountingStorage.SetSharedGroup(sg)
-	cache2go.Cache(SHARED_GROUP_PREFIX+"SG_TEST", sg)
+	ratingStorage.SetSharedGroup(sg)
+	cache2go.Cache(utils.SHARED_GROUP_PREFIX+"SG_TEST", sg)
 	duration, err := cd.getMaxSessionDuration(rif)
 	if err != nil {
 		t.Error("Error getting max session duration from shared group: ", err)
