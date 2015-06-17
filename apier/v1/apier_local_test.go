@@ -1380,6 +1380,7 @@ func TestApierCdrServer(t *testing.T) {
 			t.Error(err.Error())
 		}
 	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
 
 /*
