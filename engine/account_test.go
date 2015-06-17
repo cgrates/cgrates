@@ -1377,15 +1377,20 @@ func TestDebitDataUnits(t *testing.T) {
 	}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	// test rating information
+	ts := cc.Timespans[0]
+	if ts.MatchedSubject != "testm" || ts.MatchedPrefix != "0723" || ts.MatchedDestId != "NAT" || ts.RatingPlanId != utils.META_NONE {
+		t.Errorf("Error setting rating info: %+v", ts.ratingInfo)
+	}
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
-		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	if ts.Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
+		t.Error("Error setting balance id to increment: ", ts.Increments[0])
 	}
 	if rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].Value != 20 ||
 		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 21 {
-		t.Log(cc.Timespans[0].Increments)
+		t.Log(ts.Increments)
 		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
 	}
 }
