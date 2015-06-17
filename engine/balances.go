@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -184,6 +185,26 @@ func (b *Balance) Clone() *Balance {
 	}
 }
 
+func (b *Balance) getMatchingPrefixAndDestId(dest string) (prefix, destId string) {
+	if b.DestinationIds != "" && b.DestinationIds != utils.ANY {
+		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
+			if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
+				destIds := x.(map[interface{}]struct{})
+				for dId, _ := range destIds {
+					balDestIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
+					for _, balDestID := range balDestIds {
+						if dId == balDestID {
+							return p, balDestID
+						}
+					}
+
+				}
+			}
+		}
+	}
+	return
+}
+
 // Returns the available number of seconds for a specified credit
 func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit float64) (duration time.Duration, credit float64) {
 	cd := origCD.Clone()
@@ -292,6 +313,13 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				},
 			},
 		}
+		prefix, destid := b.getMatchingPrefixAndDestId(cd.Destination)
+		ts.setRatingInfo(&RatingInfo{
+			MatchedSubject: b.Uuid,
+			MatchedPrefix:  prefix,
+			MatchedDestId:  destid,
+			RatingPlanId:   utils.META_NONE,
+		})
 		ts.createIncrementsSlice()
 		//log.Printf("CC: %+v", ts)
 		for incIndex, inc := range ts.Increments {
