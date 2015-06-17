@@ -308,13 +308,14 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 		delay := utils.Fib()
 		for i := 0; i < 4; i++ {
 			qryCC, err = self.cdrDb.GetCallCostLog(storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId)
+			Logger.Warning(fmt.Sprintf("<Cdrs> DEBUG: GetCallCostLog, storedCdr: %+v, callCost: %+v, error: %+v, run: %d, time: %v", storedCdr, qryCC, err, i, time.Now()))
 			if err == nil {
 				break
 			}
 			time.Sleep(delay())
 		}
 		if err != nil && err == gorm.RecordNotFound { //calculate CDR as for pseudoprepaid
-			Logger.Warning(fmt.Sprintf("CDRS_WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId))
+			Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId))
 			qryCC, err = self.getCostFromRater(storedCdr)
 		}
 
