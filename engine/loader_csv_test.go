@@ -1086,8 +1086,16 @@ func TestLoadCdrStats(t *testing.T) {
 		RatedSubject:      []string{"rif"},
 		CostInterval:      []float64{0, 2},
 	}
-	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers["STANDARD_TRIGGERS"]...)
-	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers["STANDARD_TRIGGER"]...)
+	for _, triggerKey := range []string{"STANDARD_TRIGGER", "STANDARD_TRIGGERS"} {
+		cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers[triggerKey]...)
+	}
+	// compare trigger lengths
+	if len(csvr.cdrStats[cdrStats1.Id].Triggers) != len(cdrStats1.Triggers) {
+		t.Error("Wrong trigger length: ", len(csvr.cdrStats[cdrStats1.Id].Triggers), len(cdrStats1.Triggers))
+	}
+	// cannot deepequal triggers
+	csvr.cdrStats[cdrStats1.Id].Triggers = nil
+	cdrStats1.Triggers = nil
 	if !reflect.DeepEqual(csvr.cdrStats[cdrStats1.Id], cdrStats1) {
 		t.Errorf("Unexpected stats %+v", csvr.cdrStats[cdrStats1.Id])
 	}
