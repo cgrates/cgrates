@@ -307,14 +307,15 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 	var err error
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
-		delay := utils.Fib()
+		//delay := utils.Fib()
 		for i := 0; i < 4; i++ {
 			qryCC, err = self.cdrDb.GetCallCostLog(storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId)
 			Logger.Debug(fmt.Sprintf("<Cdrs> DEBUG: GetCallCostLog, storedCdr: %+v, callCost: %+v, error: %+v, run: %d, time: %v", storedCdr, qryCC, err, i, time.Now()))
 			if err == nil {
 				break
 			}
-			time.Sleep(delay())
+			//time.Sleep(delay())
+			time.Sleep(time.Duration(i+1) * time.Second)
 		}
 		if err != nil && err == gorm.RecordNotFound { //calculate CDR as for pseudoprepaid
 			Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId))
