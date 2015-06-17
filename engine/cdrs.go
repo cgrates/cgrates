@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/gorm"
 )
 
 var cdrServer *CdrServer // Share the server so we can use it in http handlers
@@ -35,9 +36,11 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 	cgrCdr, err := NewCgrCdrFromHttpReq(r)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
+		return
 	}
 	if err := cdrServer.rateStoreStatsReplicate(cgrCdr.AsStoredCdr()); err != nil {
 		Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
+		return
 	}
 }
 
@@ -47,9 +50,11 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	fsCdr, err := NewFSCdr(body, cdrServer.cgrCfg)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
+		return
 	}
 	if err := cdrServer.rateStoreStatsReplicate(fsCdr.AsStoredCdr()); err != nil {
 		Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
+		return
 	}
 }
 
@@ -308,7 +313,7 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 			}
 			time.Sleep(delay())
 		}
-		if err != nil { //calculate CDR as for pseudoprepaid
+		if err != nil && err == gorm.RecordNotFound { //calculate CDR as for pseudoprepaid
 			qryCC, err = self.getCostFromRater(storedCdr)
 		}
 

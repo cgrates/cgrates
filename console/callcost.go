@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -37,7 +36,7 @@ func init() {
 type CmdGetCostDetails struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrGetCallCost
+	rpcParams *utils.AttrGetCallCost
 	rpcResult string
 	*CommandExecuter
 }
@@ -52,7 +51,7 @@ func (self *CmdGetCostDetails) RpcMethod() string {
 
 func (self *CmdGetCostDetails) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &v1.AttrGetCallCost{RunId: utils.DEFAULT_RUNID}
+		self.rpcParams = &utils.AttrGetCallCost{RunId: utils.DEFAULT_RUNID}
 	}
 	if ptr {
 		return self.rpcParams

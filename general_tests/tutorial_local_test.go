@@ -116,7 +116,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1,
 		DerivedChargers: 1, LcrProfiles: 4}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
@@ -381,6 +381,22 @@ func TestTutLocalMaxDebit(t *testing.T) {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.GetDuration() == 20 {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
+	}
+	cd = engine.CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "1003",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(time.Duration(200) * time.Second),
+	}
+	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
+		t.Error("Got error on Responder.MaxDebit: ", err.Error())
+	} else if cc.GetDuration() == 200 {
+		t.Errorf("Calling Responder.MaxDebit got duration: %v", cc.GetDuration())
 	}
 	cd = engine.CallDescriptor{
 		Direction:     "*out",

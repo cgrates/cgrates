@@ -1,5 +1,5 @@
 #Tenant,Account,Direction,ActionPlanTag,ActionTriggersTag
-cgrates.org,1001,*out,PACKAGE_10_SHARED_A_5,STANDARD_TRIGGERS
+cgrates.org,1001,*out,PACKAGE_1001,STANDARD_TRIGGERS
 cgrates.org,1002;1006,*out,PACKAGE_10,STANDARD_TRIGGERS
 cgrates.org,1003,*out,PACKAGE_10,STANDARD_TRIGGERS
 cgrates.org,1004,*out,PACKAGE_10,STANDARD_TRIGGERS

@@ -203,12 +203,23 @@ func TestTutFsCallsCall1001To1002(t *testing.T) {
 	}
 }
 
+// Call from 1001 (prepaid) to 1003
+func TestTutFsCallsCall1001To1003(t *testing.T) {
+	if !*testCalls {
+		return
+	}
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*"}, "sip:1003@127.0.0.1",
+		"sip:127.0.0.1:25060", time.Duration(65)*time.Second, 5072); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestTutFsCallsCall1002To1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
-		"sip:127.0.0.1:25060", time.Duration(61)*time.Second, 5072); err != nil {
+		"sip:127.0.0.1:25060", time.Duration(61)*time.Second, 5073); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -218,7 +229,7 @@ func TestTutFsCallsCall1003To1001(t *testing.T) {
 		return
 	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
-		"sip:127.0.0.1:25060", time.Duration(63)*time.Second, 5073); err != nil {
+		"sip:127.0.0.1:25060", time.Duration(63)*time.Second, 5074); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -228,7 +239,7 @@ func TestTutFsCallsCall1004To1001(t *testing.T) {
 		return
 	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
-		"sip:127.0.0.1:25060", time.Duration(62)*time.Second, 5074); err != nil {
+		"sip:127.0.0.1:25060", time.Duration(62)*time.Second, 5075); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -238,7 +249,7 @@ func TestTutFsCallsCall1006To1002(t *testing.T) {
 		return
 	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
-		"sip:127.0.0.1:25060", time.Duration(64)*time.Second, 5075); err != nil {
+		"sip:127.0.0.1:25060", time.Duration(64)*time.Second, 5076); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -248,7 +259,7 @@ func TestTutFsCallsCall1007To1002(t *testing.T) {
 		return
 	}
 	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
-		"sip:127.0.0.1:25060", time.Duration(66)*time.Second, 5076); err != nil {
+		"sip:127.0.0.1:25060", time.Duration(66)*time.Second, 5077); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -276,12 +287,15 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		return
 	}
 	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{utils.META_DEFAULT}}
+	var cgrId string // Share  with getCostDetails
+	var cCost engine.CallCost
+	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestPrefixes: []string{"1002"}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
+		cgrId = reply[0].CgrId
 		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
@@ -295,10 +309,40 @@ func TestTutFsCallsCdrs(t *testing.T) {
 			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
 		}
 	}
-	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnRated: true}
+	// Make sure call cost contains the matched information
+	if err := tutFsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
+		t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
+	}
+
+	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestPrefixes: []string{"1003"}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		cgrId = reply[0].CgrId
+		if reply[0].ReqType != utils.META_PREPAID {
+			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		}
+		if reply[0].Usage != "65" { // Usage as seconds
+			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
+		}
+		if reply[0].Cost != 0 { // Cost was not calculated
+			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
+		}
+	}
+	// Make sure call cost contains the matched information
+	if err := tutFsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
+		t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
+	}
+	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnRated: true}
+	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		if reply[0].ReqType != utils.META_RATED {

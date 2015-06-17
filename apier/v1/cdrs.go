@@ -23,15 +23,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AttrGetCallCost struct {
-	CgrId string // Unique id of the CDR
-	RunId string // Run Id
-}
-
 // Retrieves the callCost out of CGR logDb
-func (apier *ApierV1) GetCallCostLog(attrs AttrGetCallCost, reply *engine.CallCost) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"CgrId", "RunId"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
+func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.CallCost) error {
+	if attrs.CgrId == "" {
+		return utils.NewErrMandatoryIeMissing("CgrId")
+	}
+	if attrs.RunId == "" {
+		attrs.RunId = utils.META_DEFAULT
 	}
 	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, "", attrs.RunId); err != nil {
 		return utils.NewErrServerError(err)

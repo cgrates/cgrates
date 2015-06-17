@@ -1325,7 +1325,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 		return
 	}
 	var cc engine.CallCost
-	var attrs AttrGetCallCost
+	var attrs utils.AttrGetCallCost
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil {
 		t.Error("Failed to detect missing fields in ApierV1.GetCallCostLog")
@@ -1745,7 +1745,7 @@ func TestApierGetCacheStats3(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 6, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())

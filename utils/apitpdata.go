@@ -1061,5 +1061,9 @@ type AttrSetAccount struct {
 
 type AttrGetSMASessions struct {
 	SessionManagerIndex int // Index of the session manager queried, defaults to first in the list
+}
 
+type AttrGetCallCost struct {
+	CgrId string // Unique id of the CDR
+	RunId string // Run Id
 }
