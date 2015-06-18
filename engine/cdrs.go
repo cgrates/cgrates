@@ -100,15 +100,17 @@ func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 	if ccl.CheckDuplicate {
-		self.callCostMutex.Lock() // Avoid writing between checkDuplicate and logCallCost, FixMe: add the mutex per CgrId
-		defer self.callCostMutex.Unlock()
-		cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
-		if err != nil && err != gorm.RecordNotFound {
-			return err
-		}
-		if cc != nil {
-			return utils.ErrExists
-		}
+		_, err := self.guard.Guard(func() (interface{}, error) {
+			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
+			if err != nil && err != gorm.RecordNotFound {
+				return nil, err
+			}
+			if cc != nil {
+				return nil, utils.ErrExists
+			}
+			return nil, self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
+		}, ccl.CgrId)
+		return err
 	}
 	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
 }
