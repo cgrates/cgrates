@@ -86,7 +86,8 @@ type CdrReplicationJsonCfg struct {
 
 // Cdrstats config section
 type CdrStatsJsonCfg struct {
-	Enabled *bool
+	Enabled       *bool
+	Save_Interval *string
 }
 
 // One cdr field config, used in cdre and cdrc

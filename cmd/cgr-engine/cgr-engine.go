@@ -492,7 +492,7 @@ func main() {
 	}
 
 	if cfg.CDRStatsEnabled { // Init it here so we make it availabe to the Apier
-		cdrStats = engine.NewStats(ratingDb)
+		cdrStats = engine.NewStats(ratingDb, accountDb, cfg.CDRStatsSaveInterval)
 		if cfg.CDRStatConfig != nil && len(cfg.CDRStatConfig.Metrics) != 0 {
 			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), nil)
 		}

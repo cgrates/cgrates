@@ -202,6 +202,7 @@ type CGRConfig struct {
 	CDRSReconnects       int                  // number of reconnects to remote services before giving up
 	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
 	CDRStatsEnabled      bool                 // Enable CDR Stats service
+	CDRStatsSaveInterval time.Duration        // Save interval duration
 	CDRStatConfig        *CdrStatsConfig      // Active cdr stats configuration instances, platform level
 	CdreProfiles         map[string]*CdreConfig
 	CdrcProfiles         map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
@@ -590,6 +591,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnCdrstatsCfg != nil {
 		if jsnCdrstatsCfg.Enabled != nil {
 			self.CDRStatsEnabled = *jsnCdrstatsCfg.Enabled
+			if self.CDRStatsSaveInterval, err = utils.ParseDurationWithSecs(*jsnCdrstatsCfg.Save_Interval); err != nil {
+				return err
+			}
 		}
 	}
 

@@ -165,7 +165,7 @@ func TestGetSessionRuns(t *testing.T) {
 }
 
 func TestGetLCR(t *testing.T) {
-	rsponder.Stats = NewStats(ratingStorage) // Load stats instance
+	rsponder.Stats = NewStats(ratingStorage, accountingStorage, 0) // Load stats instance
 	dstDe := &Destination{Id: "GERMANY", Prefixes: []string{"+49"}}
 	if err := ratingStorage.SetDestination(dstDe); err != nil {
 		t.Error(err)

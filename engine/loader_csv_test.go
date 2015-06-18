@@ -202,12 +202,12 @@ vdf,post,*out,POST_AT,
 *out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,,,
 `
 	cdrStats = `
-#Id[0],QueueLength[1],TimeWindow[2],Metric[3],SetupInterval[4],TOR[5],CdrHost[6],CdrSource[7],ReqType[8],Direction[9],Tenant[10],Category[11],Account[12],Subject[13],DestinationPrefix[14],PddInterval[15],UsageInterval[16],Supplier[17],DisconnectCause[18],MediationRunIds[19],RatedAccount[20],RatedSubject[21],CostInterval[22],Triggers[23]CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,5m;10m,suppl1,NORMAL_CLEARING,default,rif,rif,0;2,STANDARD_TRIGGERS
-CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,3m;7m,5m;10m,suppl1,NORMAL_CLEARING,default,rif,rif,0;2,STANDARD_TRIGGERS
-CDRST1,,,ACD,,,,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
-CDRST1,,,ACC,,,,,,,,,,,,,,,,,,,,
-CDRST2,10,10m,ASR,,,,,,,cgrates.org,call,,,,,,,,,,,,
-CDRST2,,,ACD,,,,,,,,,,,,,,,,,,,,
+#Id[0],QueueLength[1],TimeWindow[2],SaveInterval[3],Metric[4],SetupInterval[5],TOR[6],CdrHost[7],CdrSource[8],ReqType[9],Direction[10],Tenant[11],Category[12],Account[13],Subject[14],DestinationPrefix[15],PddInterval[16],UsageInterval[17],Supplier[18],DisconnectCause[19],MediationRunIds[20],RatedAccount[21],RatedSubject[22],CostInterval[23],Triggers[24]
+CDRST1,5,60m,10s,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,*rated,*out,cgrates.org,call,dan,dan,49,3m;7m,5m;10m,suppl1,NORMAL_CLEARING,default,rif,rif,0;2,STANDARD_TRIGGERS
+CDRST1,,,,ACD,,,,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
+CDRST1,,,,ACC,,,,,,,,,,,,,,,,,,,,
+CDRST2,10,10m,,ASR,,,,,,,cgrates.org,call,,,,,,,,,,,,
+CDRST2,,,,ACD,,,,,,,,,,,,,,,,,,,,
 `
 )
 
@@ -1062,10 +1062,11 @@ func TestLoadCdrStats(t *testing.T) {
 		t.Error("Failed to load cdr stats: ", csvr.cdrStats)
 	}
 	cdrStats1 := &CdrStats{
-		Id:          "CDRST1",
-		QueueLength: 5,
-		TimeWindow:  60 * time.Minute,
-		Metrics:     []string{"ASR", "ACD", "ACC"},
+		Id:           "CDRST1",
+		QueueLength:  5,
+		TimeWindow:   60 * time.Minute,
+		SaveInterval: 10 * time.Second,
+		Metrics:      []string{"ASR", "ACD", "ACC"},
 		SetupInterval: []time.Time{
 			time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 			time.Date(2014, 7, 29, 16, 0, 0, 0, time.UTC),

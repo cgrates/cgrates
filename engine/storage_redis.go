@@ -355,7 +355,6 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 		response := 0
 		go historyScribe.Record(rp.GetHistoryRecord(), &response)
 	}
-	//cache2go.Cache(utils.RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -385,7 +384,6 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 		response := 0
 		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
 	}
-	//cache2go.Cache(utils.RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
 
@@ -506,7 +504,6 @@ func (rs *RedisStorage) GetAccAlias(key string, skipCache bool) (alias string, e
 // Adds one alias for one account
 func (rs *RedisStorage) SetAccAlias(key, alias string) (err error) {
 	err = rs.db.Set(utils.ACC_ALIAS_PREFIX+key, []byte(alias))
-	//cache2go.Cache(ALIAS_PREFIX+key, alias)
 	return
 }
 
@@ -600,7 +597,6 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 		response := 0
 		go historyScribe.Record(dest.GetHistoryRecord(), &response)
 	}
-	//cache2go.Cache(utils.DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 
@@ -624,7 +620,6 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err 
 func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.db.Set(utils.ACTION_PREFIX+key, result)
-	// cache2go.Cache(utils.ACTION_PREFIX+key, as)
 	return
 }
 
@@ -648,7 +643,6 @@ func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGr
 func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 	result, err := rs.ms.Marshal(sg)
 	err = rs.db.Set(utils.SHARED_GROUP_PREFIX+sg.Id, result)
-	//cache2go.Cache(utils.SHARED_GROUP_PREFIX+sg.Id, sg)
 	return
 }
 
@@ -677,6 +671,22 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	}
 	result, err := rs.ms.Marshal(ub)
 	err = rs.db.Set(utils.ACCOUNT_PREFIX+ub.Id, result)
+	return
+}
+
+func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
+	var values []byte
+	if values, err = rs.db.Get(utils.CDR_STATS_QUEUE_PREFIX + key); err == nil {
+		sq = &StatsQueue{}
+		err = rs.ms.Unmarshal(values, sq)
+	}
+
+	return
+}
+
+func (rs *RedisStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
+	result, err := rs.ms.Marshal(sq)
+	err = rs.db.Set(utils.CDR_STATS_QUEUE_PREFIX+sq.GetId(), result)
 	return
 }
 

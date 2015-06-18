@@ -506,6 +506,7 @@ func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 			QueueLength:         strconv.Itoa(tpCs.QueueLength),
 			TimeWindow:          tpCs.TimeWindow,
 			Metrics:             tpCs.Metrics,
+			SaveInterval:        tpCs.SaveInterval,
 			SetupInterval:       tpCs.SetupInterval,
 			TORs:                tpCs.Tors,
 			CdrHosts:            tpCs.CdrHosts,
@@ -544,6 +545,13 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 			cs.TimeWindow = d
 		} else {
 			log.Printf("Error parsing TimeWindow %v for cdrs stats %v", tpCs.TimeWindow, cs.Id)
+		}
+	}
+	if tpCs.SaveInterval != "" {
+		if si, err := time.ParseDuration(tpCs.SaveInterval); err == nil {
+			cs.SaveInterval = si
+		} else {
+			log.Printf("Error parsing SaveInterval %v for cdr stats %v", tpCs.SaveInterval, cs.Id)
 		}
 	}
 	if tpCs.Metrics != "" {

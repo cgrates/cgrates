@@ -164,6 +164,8 @@ const (
 	DESTINATION_PREFIX         = "dst_"
 	LCR_PREFIX                 = "lcr_"
 	DERIVEDCHARGERS_PREFIX     = "dcs_"
+	CDR_STATS_QUEUE_PREFIX     = "csq_"
+	CDR_STATS_PREFIX           = "cst_"
 	TEMP_DESTINATION_PREFIX    = "tmp_"
 	LOG_CALL_COST_PREFIX       = "cco_"
 	LOG_ACTION_TIMMING_PREFIX  = "ltm_"
@@ -180,7 +182,6 @@ const (
 	CREATE_CDRS_TABLES_SQL       = "create_cdrs_tables.sql"
 	CREATE_TARIFFPLAN_TABLES_SQL = "create_tariffplan_tables.sql"
 	TEST_SQL                     = "TEST_SQL"
-	CDR_STATS_PREFIX             = "cst_"
 	DESTINATIONS_LOAD_THRESHOLD  = 0.1
 	CONSTANT                     = "constant"
 	FILLER                       = "filler"

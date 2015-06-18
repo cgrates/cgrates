@@ -27,8 +27,8 @@ import (
 
 func TestStatsQueueInit(t *testing.T) {
 	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACC}})
-	if len(sq.metrics) != 2 {
-		t.Error("Expected 2 metrics got ", len(sq.metrics))
+	if len(sq.Metrics) != 2 {
+		t.Error("Expected 2 metrics got ", len(sq.Metrics))
 	}
 }
 
@@ -104,106 +104,106 @@ func TestAcceptCdr(t *testing.T) {
 		MediationRunId:  "mri",
 		Cost:            10,
 	}
-	sq.conf = &CdrStats{}
-	if sq.conf.AcceptCdr(cdr) != true {
+	sq.Conf = &CdrStats{}
+	if sq.Conf.AcceptCdr(cdr) != true {
 		t.Errorf("Should have accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{TOR: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{TOR: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{CdrHost: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{CdrHost: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{CdrSource: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{CdrSource: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{Direction: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{Direction: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{Tenant: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{Tenant: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{Category: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{Category: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{Account: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{Account: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{Subject: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{Subject: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{Supplier: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{Supplier: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{DisconnectCause: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{DisconnectCause: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{RatedAccount: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{RatedAccount: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{RatedSubject: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{RatedSubject: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{DestinationPrefix: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{DestinationPrefix: []string{"test"}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{DestinationPrefix: []string{"test", "123"}}
-	if sq.conf.AcceptCdr(cdr) != true {
+	sq.Conf = &CdrStats{DestinationPrefix: []string{"test", "123"}}
+	if sq.Conf.AcceptCdr(cdr) != true {
 		t.Errorf("Should have accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC)}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC)}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC)}}
-	if sq.conf.AcceptCdr(cdr) != true {
+	sq.Conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC)}}
+	if sq.Conf.AcceptCdr(cdr) != true {
 		t.Errorf("Should have accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
-	if sq.conf.AcceptCdr(cdr) != true {
+	sq.Conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
+	if sq.Conf.AcceptCdr(cdr) != true {
 		t.Errorf("Should have accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{UsageInterval: []time.Duration{11 * time.Second}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{UsageInterval: []time.Duration{11 * time.Second}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{UsageInterval: []time.Duration{1 * time.Second, 10 * time.Second}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{UsageInterval: []time.Duration{1 * time.Second, 10 * time.Second}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{PddInterval: []time.Duration{8 * time.Second}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{PddInterval: []time.Duration{8 * time.Second}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{PddInterval: []time.Duration{3 * time.Second, 7 * time.Second}}
-	if sq.conf.AcceptCdr(cdr) == true {
+	sq.Conf = &CdrStats{PddInterval: []time.Duration{3 * time.Second, 7 * time.Second}}
+	if sq.Conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{PddInterval: []time.Duration{3 * time.Second, 8 * time.Second}}
-	if sq.conf.AcceptCdr(cdr) != true {
+	sq.Conf = &CdrStats{PddInterval: []time.Duration{3 * time.Second, 8 * time.Second}}
+	if sq.Conf.AcceptCdr(cdr) != true {
 		t.Errorf("Should have accepted this CDR: %+v", cdr)
 	}
 }
 
 func TestStatsQueueIds(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	ids := []string{}
 	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
 		t.Error("Errorf getting queue ids: ", err)
@@ -216,7 +216,7 @@ func TestStatsQueueIds(t *testing.T) {
 }
 
 func TestStatsAppendCdr(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:          "cgrates.org",
 		Category:        "call",
@@ -231,14 +231,14 @@ func TestStatsAppendCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Error appending cdr to stats: ", err)
 	}
-	if len(cdrStats.queues["CDRST1"].cdrs) != 0 ||
-		len(cdrStats.queues["CDRST2"].cdrs) != 1 {
-		t.Error("Error appending cdr to queue: ", len(cdrStats.queues["CDRST2"].cdrs))
+	if len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
+		len(cdrStats.queues["CDRST2"].Cdrs) != 1 {
+		t.Error("Error appending cdr to queue: ", len(cdrStats.queues["CDRST2"].Cdrs))
 	}
 }
 
 func TestStatsGetValues(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -267,7 +267,7 @@ func TestStatsGetValues(t *testing.T) {
 }
 
 func TestStatsReloadQueues(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -299,7 +299,7 @@ func TestStatsReloadQueues(t *testing.T) {
 }
 
 func TestStatsReloadQueuesWithDefault(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdrStats.AddQueue(&CdrStats{
 		Id: utils.META_DEFAULT,
 	}, nil)
@@ -335,7 +335,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 }
 
 func TestStatsReloadQueuesWithIds(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -367,7 +367,7 @@ func TestStatsReloadQueuesWithIds(t *testing.T) {
 }
 
 func TestStatsResetQueues(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -399,7 +399,7 @@ func TestStatsResetQueues(t *testing.T) {
 }
 
 func TestStatsResetQueuesWithIds(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",

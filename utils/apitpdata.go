@@ -324,6 +324,7 @@ type TPCdrStats struct {
 type TPCdrStat struct {
 	QueueLength         string
 	TimeWindow          string
+	SaveInterval        string
 	Metrics             string
 	SetupInterval       string
 	TORs                string
