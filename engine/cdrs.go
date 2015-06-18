@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -66,15 +65,15 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, stats StatsInterface) (*CdrServer, error) {
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, stats: stats, callCostMutex: new(sync.RWMutex)}, nil
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, stats: stats, guard: &AccountLock{queue: make(map[string]chan bool)}}, nil
 }
 
 type CdrServer struct {
-	cgrCfg        *config.CGRConfig
-	cdrDb         CdrStorage
-	rater         Connector
-	stats         StatsInterface
-	callCostMutex *sync.RWMutex
+	cgrCfg *config.CGRConfig
+	cdrDb  CdrStorage
+	rater  Connector
+	stats  StatsInterface
+	guard  *AccountLock
 }
 
 func (self *CdrServer) RegisterHanlersToServer(server *Server) {
