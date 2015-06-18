@@ -828,7 +828,7 @@ func TestMaxSesionTimeEmptyBalance(t *testing.T) {
 	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != 0 {
-		t.Error("Error get max session for 0 acount")
+		t.Error("Error get max session for 0 acount", err)
 	}
 }
 
@@ -846,7 +846,7 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime == 0 {
-		t.Error("Error get max session for 0 acount")
+		t.Error("Error get max session for 0 acount", err)
 	}
 }
 
@@ -906,7 +906,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 	}
 }
 
-func TestDebitNegative(t *testing.T) {
+func TestDebitNegatve(t *testing.T) {
 	ap, _ := ratingStorage.GetActionPlans("POST_AT")
 	for _, at := range ap {
 		at.Execute()
@@ -922,7 +922,6 @@ func TestDebitNegative(t *testing.T) {
 		Account:     "post",
 		Destination: "0723",
 	}
-
 	cc, err := cd.MaxDebit()
 	//utils.PrintFull(cc)
 	if err != nil || cc.Cost != 2.5 {
