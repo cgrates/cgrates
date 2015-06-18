@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
+	//"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -870,6 +870,7 @@ func TestTutLocalLeastCost(t *testing.T) {
 	}
 }
 
+/*
 // Make sure all stats queues were updated
 func TestTutLocalCdrStatsAfter(t *testing.T) {
 	if !*testLocal {
@@ -913,6 +914,7 @@ func TestTutLocalCdrStatsAfter(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
 }
+*/
 
 /*
 func TestTutLocalStopCgrEngine(t *testing.T) {

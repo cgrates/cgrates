@@ -129,7 +129,7 @@ func TestCdrsHttpJsonRpcCdrReplication(t *testing.T) {
 			rcvedCdrs[0].MediationRunId != testCdr1.MediationRunId ||
 			rcvedCdrs[0].Cost != testCdr1.Cost ||
 			!reflect.DeepEqual(rcvedCdrs[0].ExtraFields, testCdr1.ExtraFields) {
-			t.Error("Received: ", rcvedCdrs[0])
+			t.Errorf("Received: %+v", rcvedCdrs[0])
 		}
 	}
 }

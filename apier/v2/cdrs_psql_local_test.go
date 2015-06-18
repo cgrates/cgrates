@@ -199,6 +199,45 @@ func TestV2CdrsPsqlCountCdrs(t *testing.T) {
 	}
 }
 
+// Test Prepaid CDRs without previous costs being calculated
+func TestV2CdrsPsqlProcessPrepaidCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply string
+	cdrs := []*engine.StoredCdr{
+		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+			RatedAccount: "dan", RatedSubject: "dans", Rated: true,
+		},
+		&engine.StoredCdr{CgrId: utils.Sha1("abcdeftg2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+			RatedAccount: "dan", RatedSubject: "dans",
+		},
+		&engine.StoredCdr{CgrId: utils.Sha1("aererfddf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
+			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+			RatedAccount: "dan", RatedSubject: "dans",
+		},
+	}
+	tStart := time.Now()
+	for _, cdr := range cdrs {
+		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received: ", reply)
+		}
+	}
+	if processDur := time.Now().Sub(tStart); processDur > 1*time.Second {
+		t.Error("Unexpected processing time", processDur)
+	}
+}
+
 func TestV2CdrsPsqlKillEngine(t *testing.T) {
 	if !*testLocal {
 		return
