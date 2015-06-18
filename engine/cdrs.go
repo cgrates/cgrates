@@ -85,7 +85,6 @@ func (self *CdrServer) RegisterHanlersToServer(server *Server) {
 
 // RPC method, used to internally process CDR
 func (self *CdrServer) ProcessCdr(cdr *StoredCdr) error {
-	Logger.Debug(fmt.Sprintf("ProcessCdr, cdr: %+v", cdr))
 	return self.processCdr(cdr)
 }
 
@@ -144,7 +143,6 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
-	Logger.Debug(fmt.Sprintf("processCdr, cdr: %+v", storedCdr))
 	if storedCdr.ReqType == utils.META_NONE {
 		return nil
 	}
@@ -198,7 +196,6 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(storedCdr *StoredCdr) error
 }
 
 func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
-	Logger.Debug(fmt.Sprintf("deriveCdrs, cdr: %+v", storedCdr))
 	if len(storedCdr.MediationRunId) == 0 {
 		storedCdr.MediationRunId = utils.META_DEFAULT
 	}
@@ -282,21 +279,18 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 }
 
 func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
-	Logger.Debug(fmt.Sprintf("rateCDR, cdr: %+v", storedCdr))
 	var qryCC *CallCost
 	var err error
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		for i := 0; i < 4; i++ {
-			Logger.Debug(fmt.Sprintf("rateCDR, cdr: %+v, loopIndex: %d", storedCdr, i))
 			qryCC, err = self.cdrDb.GetCallCostLog(storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId)
 			if err == nil {
 				break
 			}
 			time.Sleep(delay())
 		}
-		Logger.Debug(fmt.Sprintf("rateCDR, cdr: %+v, out of loop", storedCdr))
 		if err != nil && err == gorm.RecordNotFound { //calculate CDR as for pseudoprepaid
 			Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId))
 			qryCC, err = self.getCostFromRater(storedCdr)
