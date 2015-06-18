@@ -134,17 +134,14 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 		if err != nil {
 			return 0, err
 		}
-		for idx, actr := range ub.ActionTriggers {
+		nactrs := make(engine.ActionTriggerPriotityList, 0)
+		for _, actr := range ub.ActionTriggers {
 			match, _ := regexp.MatchString(attrs.ActionTriggersId, actr.Id)
 			if len(attrs.ActionTriggersId) != 0 && !match {
-				continue
-			}
-			if len(ub.ActionTriggers) != 1 { // Remove by index
-				ub.ActionTriggers[idx], ub.ActionTriggers = ub.ActionTriggers[len(ub.ActionTriggers)-1], ub.ActionTriggers[:len(ub.ActionTriggers)-1]
-			} else { // For last item, simply reinit the slice
-				ub.ActionTriggers = make(engine.ActionTriggerPriotityList, 0)
+				nactrs = append(nactrs, actr)
 			}
 		}
+		ub.ActionTriggers = nactrs
 		if err := self.AccountDb.SetAccount(ub); err != nil {
 			return 0, err
 		}
