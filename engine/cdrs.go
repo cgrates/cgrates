@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -62,7 +61,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, stats StatsInterface) (*CdrServer, error) {
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, stats: stats, callCostMutex: new(sync.RWMutex)}, nil
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, stats: stats, guard: &AccountLock{queue: make(map[string]chan bool)}}, nil
 	/*
 		if cfg.CDRSStats != "" {
 			if cfg.CDRSStats != utils.INTERNAL {
@@ -80,11 +79,11 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, s
 }
 
 type CdrServer struct {
-	cgrCfg        *config.CGRConfig
-	cdrDb         CdrStorage
-	rater         Connector
-	stats         StatsInterface
-	callCostMutex *sync.RWMutex
+	cgrCfg *config.CGRConfig
+	cdrDb  CdrStorage
+	rater  Connector
+	stats  StatsInterface
+	guard  *AccountLock
 }
 
 func (self *CdrServer) RegisterHanlersToServer(server *Server) {
@@ -118,15 +117,17 @@ type CallCostLog struct {
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 	if ccl.CheckDuplicate {
-		self.callCostMutex.Lock() // Avoid writing between checkDuplicate and logCallCost
-		defer self.callCostMutex.Unlock()
-		cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
-		if err != nil && err != gorm.RecordNotFound {
-			return err
-		}
-		if cc != nil {
-			return utils.ErrExists
-		}
+		_, err := self.guard.Guard(func() (interface{}, error) {
+			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
+			if err != nil && err != gorm.RecordNotFound {
+				return nil, err
+			}
+			if cc != nil {
+				return nil, utils.ErrExists
+			}
+			return nil, self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
+		}, ccl.RunId)
+		return err
 	}
 	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
 }
