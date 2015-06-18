@@ -828,7 +828,7 @@ func TestMaxSesionTimeEmptyBalance(t *testing.T) {
 	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != 0 {
-		t.Error("Error get max session for 0 acount")
+		t.Error("Error get max session for 0 acount", err)
 	}
 }
 
@@ -846,7 +846,7 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime == 0 {
-		t.Error("Error get max session for 0 acount")
+		t.Error("Error get max session for 0 acount", err)
 	}
 }
 
@@ -903,6 +903,43 @@ func TestDebitFromEmptyShare(t *testing.T) {
 	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
 	if len(balanceMap) != 2 || balanceMap[0].Value != 0 || balanceMap[1].Value != -2.5 {
 		t.Errorf("Error debiting from empty share: %+v", balanceMap[1].Value)
+	}
+}
+
+func TestDebitNegatve(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlans("POST_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 5, 0, time.UTC),
+		Direction:   "*out",
+		Category:    "0",
+		Tenant:      "vdf",
+		Subject:     "rif",
+		Account:     "post",
+		Destination: "0723",
+	}
+	cc, err := cd.MaxDebit()
+	//utils.PrintFull(cc)
+	if err != nil || cc.Cost != 2.5 {
+		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
+	}
+	acc, _ := cd.getAccount()
+	//utils.PrintFull(acc)
+	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
+	if len(balanceMap) != 1 || balanceMap[0].Value != -2.5 {
+		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].Value)
+	}
+	cc, err = cd.MaxDebit()
+	//utils.PrintFull(cc)
+	if err != nil || cc.Cost != 2.5 {
+		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
+	}
+	if len(balanceMap) != 1 || balanceMap[0].Value != -5 {
+		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].Value)
 	}
 }
 

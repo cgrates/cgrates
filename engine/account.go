@@ -150,7 +150,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 func (ub *Account) getBalancesForPrefix(prefix, category string, balances BalanceChain, sharedGroup string) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
-		if b.IsExpired() || (ub.AllowNegative == false && b.SharedGroup == "" && b.Value <= 0) {
+		if b.IsExpired() || (b.SharedGroup == "" && b.Value <= 0) {
 			continue
 		}
 		if sharedGroup != "" && b.SharedGroup != sharedGroup {
@@ -320,18 +320,23 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 	}
-	initialLength = len(cc.Timespans)
-	cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
-	if initialLength == 0 {
-		// this is the first add, debit the connect fee
-		ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
+	if leftCC.Cost == 0 && len(leftCC.Timespans) > 0 {
+		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
 	}
-	if leftCC.Cost == 0 || goNegative {
-		//log.Printf("Left CC: %+v", leftCC)
+
+	//log.Printf("HERE: %+v %d", leftCC)
+	if leftCC.Cost > 0 && goNegative {
+		initialLength = len(cc.Timespans)
+		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
+		if initialLength == 0 {
+			// this is the first add, debit the connect fee
+			ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
+		}
+		//log.Printf("Left CC: %+v ", leftCC)
 		// get the default money balanance
 		// and go negative on it with the amount still unpaid
-		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !ub.AllowNegative {
-			err = errors.New("not enough credit")
+		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !ub.AllowNegative && !dryRun {
+			Logger.Err(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
 		}
 		for _, ts := range leftCC.Timespans {
 			if ts.Increments == nil {

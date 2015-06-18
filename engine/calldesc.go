@@ -525,6 +525,9 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 				return utils.MinDuration(initialDuration, totalDuration), nil
 			}
 		}
+		if ts.Increments == nil {
+			ts.createIncrementsSlice()
+		}
 		for _, incr := range ts.Increments {
 			totalCost += incr.Cost
 			if defaultBalance.Value < 0 && incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {

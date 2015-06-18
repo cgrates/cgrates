@@ -160,6 +160,7 @@ SE10,*topup,,,*monetary,*out,,,,,*unlimited,,10,10,10
 EE0,*topup_reset,,,*monetary,*out,,,,SG3,*unlimited,,0,10,10
 EE0,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,10
 DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,10
+NEG,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -169,6 +170,7 @@ TOPUP10_AT,TOPUP10_AC1,*asap,10
 TOPUP_SHARED0_AT,SE0,*asap,10
 TOPUP_SHARED10_AT,SE10,*asap,10
 TOPUP_EMPTY_AT,EE0,*asap,10
+POST_AT,NEG,*asap,10
 `
 
 	actionTriggers = `
@@ -190,6 +192,7 @@ vdf,empty0,*out,TOPUP_SHARED0_AT,
 vdf,empty10,*out,TOPUP_SHARED10_AT,
 vdf,emptyX,*out,TOPUP_EMPTY_AT,
 vdf,emptyY,*out,TOPUP_EMPTY_AT,
+vdf,post,*out,POST_AT,
 `
 
 	derivedCharges = `
@@ -765,8 +768,8 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 8 {
-		t.Error("Failed to load actions: ", csvr.actions)
+	if len(csvr.actions) != 9 {
+		t.Error("Failed to load actions: ", len(csvr.actions))
 	}
 	as1 := csvr.actions["MINI"]
 	expected := []*Action{
@@ -928,8 +931,8 @@ func TestLoadLCRs(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionsTimings) != 5 {
-		t.Error("Failed to load action timings: ", csvr.actionsTimings)
+	if len(csvr.actionsTimings) != 6 {
+		t.Error("Failed to load action timings: ", len(csvr.actionsTimings))
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
 	expected := &ActionPlan{
@@ -990,8 +993,8 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 6 {
-		t.Error("Failed to load account actions: ", csvr.accountActions)
+	if len(csvr.accountActions) != 7 {
+		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["*out:vdf:minitsboy"]
 	expected := &Account{

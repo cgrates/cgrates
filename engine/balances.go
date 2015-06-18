@@ -314,6 +314,12 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			},
 		}
 		prefix, destid := b.getMatchingPrefixAndDestId(cd.Destination)
+		if prefix == "" {
+			prefix = cd.Destination
+		}
+		if destid == "" {
+			destid = utils.ANY
+		}
 		ts.setRatingInfo(&RatingInfo{
 			MatchedSubject: b.Uuid,
 			MatchedPrefix:  prefix,

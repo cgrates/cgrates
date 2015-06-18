@@ -135,7 +135,7 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 	return nil
 }
 
-// change the xisting ones
+// change the existing ones
 // add new ones
 // delete the ones missing from the new list
 func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
