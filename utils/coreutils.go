@@ -377,7 +377,16 @@ func ReflectFuncLocation(handler interface{}) (file string, line int) {
 	return f.FileLine(entry)
 }
 
-func PrintFull(v interface{}) {
+func ToIJSON(v interface{}) string {
 	b, _ := json.MarshalIndent(v, "", " ")
-	log.Print(string(b))
+	return string(b)
+}
+
+func ToJSON(v interface{}) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
+
+func LogFull(v interface{}) {
+	log.Print(ToIJSON(v))
 }

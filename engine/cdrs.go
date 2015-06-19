@@ -267,9 +267,9 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 		DurationIndex: storedCdr.Usage,
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, storedCdr.ReqType) { // Prepaid - Cost can be recalculated in case of missing records from SM
-		Logger.Debug(fmt.Sprintf("CD: %+v", cd))
+		Logger.Debug(utils.ToJSON(cd))
 		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
-			Logger.Debug(fmt.Sprintf("CC: %+v", cc))
+			Logger.Debug(utils.ToJSON(cc))
 			self.cdrDb.LogCallCost(storedCdr.CgrId, utils.CDRS_SOURCE, storedCdr.MediationRunId, cc)
 		}
 	} else {
