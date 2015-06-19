@@ -60,7 +60,7 @@ func newQueueSaver(id string, saveInterval time.Duration, sq *StatsQueue, adb Ac
 			select {
 			case <-c:
 				if sq.IsDirty() {
-					if err := accountDb.SetCdrStatsQueue(id, sq); err != nil {
+					if err := accountDb.SetCdrStatsQueue(sq); err != nil {
 						Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", id, err))
 					}
 				}
@@ -147,8 +147,8 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 	if len(ids) == 0 {
 		for _, sq := range s.queues {
 			sq.Cdrs = make([]*QCdr, 0)
-			sq.Metrics = make(map[string]Metric, len(sq.Conf.Metrics))
-			for _, m := range sq.Conf.Metrics {
+			sq.Metrics = make(map[string]Metric, len(sq.conf.Metrics))
+			for _, m := range sq.conf.Metrics {
 				if metric := CreateMetric(m); metric != nil {
 					sq.Metrics[m] = metric
 				}
@@ -162,8 +162,8 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 				continue
 			}
 			sq.Cdrs = make([]*QCdr, 0)
-			sq.Metrics = make(map[string]Metric, len(sq.Conf.Metrics))
-			for _, m := range sq.Conf.Metrics {
+			sq.Metrics = make(map[string]Metric, len(sq.conf.Metrics))
+			for _, m := range sq.conf.Metrics {
 				if metric := CreateMetric(m); metric != nil {
 					sq.Metrics[m] = metric
 				}
@@ -181,9 +181,8 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	defer s.mux.Unlock()
 	oldQueues := s.queues
 	s.queues = make(map[string]*StatsQueue, len(css))
-	s.queueSavers = make(map[string]*queueSaver)
 	if def, exists := oldQueues[utils.META_DEFAULT]; exists {
-		def.UpdateConf(def.Conf) // for reset
+		def.UpdateConf(def.conf) // for reset
 		s.queues[utils.META_DEFAULT] = def
 	}
 	for _, cs := range css {
@@ -196,14 +195,23 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		}
 		if sq == nil {
 			sq = NewStatsQueue(cs)
-		}
-
-		si := cs.SaveInterval
-		if si == 0 {
-			si = s.defaultSaveInterval
-		}
-		if si > 0 {
-			s.queueSavers[cs.Id] = newQueueSaver(cs.Id, si, sq, s.accountingDb)
+			// load queue from storage if exists
+			if saved, err := s.accountingDb.GetCdrStatsQueue(sq.GetId()); err == nil {
+				sq.Load(saved)
+			} else {
+				Logger.Info(err.Error())
+			}
+			// setup queue saver
+			if s.queueSavers == nil {
+				s.queueSavers = make(map[string]*queueSaver)
+			}
+			si := cs.SaveInterval
+			if si == 0 {
+				si = s.defaultSaveInterval
+			}
+			if si > 0 {
+				s.queueSavers[cs.Id] = newQueueSaver(cs.Id, si, sq, s.accountingDb)
+			}
 		}
 		s.queues[cs.Id] = sq
 	}

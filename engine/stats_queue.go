@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -26,7 +27,7 @@ import (
 
 type StatsQueue struct {
 	Cdrs    []*QCdr
-	Conf    *CdrStats
+	conf    *CdrStats
 	Metrics map[string]Metric
 	mux     sync.Mutex
 	dirty   bool
@@ -68,7 +69,7 @@ func NewStatsQueue(conf *CdrStats) *StatsQueue {
 func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
-	sq.Conf = conf
+	sq.conf = conf
 	sq.Cdrs = make([]*QCdr, 0)
 	sq.Metrics = make(map[string]Metric, len(conf.Metrics))
 	sq.dirty = true
@@ -79,10 +80,20 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	}
 }
 
+func (sq *StatsQueue) Load(saved *StatsQueue) {
+	sq.Cdrs = saved.Cdrs
+	for key, metric := range saved.Metrics {
+		if _, exists := sq.Metrics[key]; exists {
+			sq.Metrics[key] = metric
+		}
+	}
+}
+
 func (sq *StatsQueue) IsDirty() bool {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	v := sq.dirty
+	log.Print(v)
 	// take advantage of the locking to set it to flip it
 	sq.dirty = false
 	return v
@@ -91,7 +102,7 @@ func (sq *StatsQueue) IsDirty() bool {
 func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
-	if sq.Conf.AcceptCdr(cdr) {
+	if sq.conf.AcceptCdr(cdr) {
 		qcdr := sq.simplifyCdr(cdr)
 		sq.Cdrs = append(sq.Cdrs, qcdr)
 		sq.addToMetrics(qcdr)
@@ -99,8 +110,8 @@ func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 		sq.dirty = true
 		// check for trigger
 		stats := sq.getStats()
-		sq.Conf.Triggers.Sort()
-		for _, at := range sq.Conf.Triggers {
+		sq.conf.Triggers.Sort()
+		for _, at := range sq.conf.Triggers {
 			if at.MinQueuedItems > 0 && len(sq.Cdrs) < at.MinQueuedItems {
 				continue
 			}
@@ -123,14 +134,12 @@ func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 }
 
 func (sq *StatsQueue) addToMetrics(cdr *QCdr) {
-	sq.dirty = true
 	for _, metric := range sq.Metrics {
 		metric.AddCdr(cdr)
 	}
 }
 
 func (sq *StatsQueue) removeFromMetrics(cdr *QCdr) {
-	sq.dirty = true
 	for _, metric := range sq.Metrics {
 		metric.RemoveCdr(cdr)
 	}
@@ -147,18 +156,18 @@ func (sq *StatsQueue) simplifyCdr(cdr *StoredCdr) *QCdr {
 }
 
 func (sq *StatsQueue) purgeObsoleteCdrs() {
-	if sq.Conf.QueueLength > 0 {
+	if sq.conf.QueueLength > 0 {
 		currentLength := len(sq.Cdrs)
-		if currentLength > sq.Conf.QueueLength {
-			for _, cdr := range sq.Cdrs[:currentLength-sq.Conf.QueueLength] {
+		if currentLength > sq.conf.QueueLength {
+			for _, cdr := range sq.Cdrs[:currentLength-sq.conf.QueueLength] {
 				sq.removeFromMetrics(cdr)
 			}
-			sq.Cdrs = sq.Cdrs[currentLength-sq.Conf.QueueLength:]
+			sq.Cdrs = sq.Cdrs[currentLength-sq.conf.QueueLength:]
 		}
 	}
-	if sq.Conf.TimeWindow > 0 {
+	if sq.conf.TimeWindow > 0 {
 		for i, cdr := range sq.Cdrs {
-			if time.Now().Sub(cdr.SetupTime) > sq.Conf.TimeWindow {
+			if time.Now().Sub(cdr.SetupTime) > sq.conf.TimeWindow {
 				sq.removeFromMetrics(cdr)
 				continue
 			} else {
@@ -187,12 +196,12 @@ func (sq *StatsQueue) getStats() map[string]float64 {
 }
 
 func (sq *StatsQueue) GetId() string {
-	return sq.Conf.Id
+	return sq.conf.Id
 }
 
 // Convert data into a struct which can be used in actions based on triggers hit
 func (sq *StatsQueue) Triggered(at *ActionTrigger) *StatsQueueTriggered {
-	return &StatsQueueTriggered{Id: sq.Conf.Id, Metrics: sq.getStats(), Trigger: at}
+	return &StatsQueueTriggered{Id: sq.conf.Id, Metrics: sq.getStats(), Trigger: at}
 }
 
 // Struct to be passed to triggered actions
