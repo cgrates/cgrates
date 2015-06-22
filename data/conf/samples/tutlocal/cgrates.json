@@ -17,6 +17,7 @@
 
 "scheduler": {
 	"enabled": true,					// start Scheduler service: <true|false>
+    "save_interval": "5s",
 },
 
 "cdrs": {

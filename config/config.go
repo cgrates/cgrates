@@ -591,8 +591,10 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnCdrstatsCfg != nil {
 		if jsnCdrstatsCfg.Enabled != nil {
 			self.CDRStatsEnabled = *jsnCdrstatsCfg.Enabled
-			if self.CDRStatsSaveInterval, err = utils.ParseDurationWithSecs(*jsnCdrstatsCfg.Save_Interval); err != nil {
-				return err
+			if jsnCdrstatsCfg.Save_Interval != nil {
+				if self.CDRStatsSaveInterval, err = utils.ParseDurationWithSecs(*jsnCdrstatsCfg.Save_Interval); err != nil {
+					return err
+				}
 			}
 		}
 	}
