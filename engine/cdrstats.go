@@ -54,9 +54,10 @@ func NewCdrStatsFromCdrStatsCfg(csCfg *config.CdrStatsConfig) *CdrStats {
 }
 
 type CdrStats struct {
-	Id                string          // Config id, unique per config instance
-	QueueLength       int             // Number of items in the stats buffer
-	TimeWindow        time.Duration   // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+	Id                string        // Config id, unique per config instance
+	QueueLength       int           // Number of items in the stats buffer
+	TimeWindow        time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+	SaveInterval      time.Duration
 	Metrics           []string        // ASR, ACD, ACC
 	SetupInterval     []time.Time     // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
 	TOR               []string        // CDRFieldFilter on TORs

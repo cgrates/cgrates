@@ -309,6 +309,7 @@ CREATE TABLE tp_cdrstats (
   `tag` varchar(64) NOT NULL,
   `queue_length` int(11) NOT NULL,
   `time_window` varchar(8) NOT NULL,
+  `save_interval` varchar(8) NOT NULL,
   `metrics` varchar(64) NOT NULL,
   `setup_interval` varchar(64) NOT NULL,
   `tors` varchar(64) NOT NULL,

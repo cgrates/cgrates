@@ -16,7 +16,7 @@ func TestModelHelperCsvLoad(t *testing.T) {
 }
 
 func TestModelHelperCsvLoadInt(t *testing.T) {
-	l, err := csvLoad(TpCdrstat{}, []string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "*rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "3m;7m", "5m;10m", "suppl1", "NORMAL_CLEARING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"})
+	l, err := csvLoad(TpCdrstat{}, []string{"CDRST1", "5", "60m", "10s", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "*rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "3m;7m", "5m;10m", "suppl1", "NORMAL_CLEARING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"})
 	tpd, ok := l.(TpCdrstat)
 	if err != nil || !ok || tpd.QueueLength != 5 {
 		t.Errorf("model load failed: %+v", tpd)
@@ -377,6 +377,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 			&utils.TPCdrStat{
 				QueueLength:         "5",
 				TimeWindow:          "60m",
+				SaveInterval:        "10s",
 				Metrics:             "ASR;ACD",
 				SetupInterval:       "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z",
 				TORs:                "*voice",
@@ -401,6 +402,7 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 			&utils.TPCdrStat{
 				QueueLength:         "5",
 				TimeWindow:          "60m",
+				SaveInterval:        "9s",
 				Metrics:             "ASR",
 				SetupInterval:       "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z",
 				TORs:                "*voice",
@@ -425,9 +427,9 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"CDRST1", "5", "60m", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", utils.META_RATED, "*out", "cgrates.org", "call",
+		[]string{"CDRST1", "5", "60m", "10s", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", utils.META_RATED, "*out", "cgrates.org", "call",
 			"dan", "dan", "49", "3m;7m", "5m;10m", "supplier1", "NORMAL_CLEARNING", "default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"},
-		[]string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", utils.META_RATED, "*out", "cgrates.org", "call",
+		[]string{"CDRST1", "5", "60m", "9s", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", utils.META_RATED, "*out", "cgrates.org", "call",
 			"dan", "dan", "49", "3m;7m", "5m;10m", "supplier1", "NORMAL_CLEARNING", "default", "dan", "dan", "0;2", "STANDARD_TRIGGERS"},
 	}
 	ms := APItoModelCdrStat(cdrStats)

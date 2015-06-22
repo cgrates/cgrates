@@ -19,16 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"log"
 	"strings"
 	"sync"
 	"time"
 )
 
 type StatsQueue struct {
-	cdrs    []*QCdr
+	Cdrs    []*QCdr
 	conf    *CdrStats
-	metrics map[string]Metric
+	Metrics map[string]Metric
 	mux     sync.Mutex
+	dirty   bool
 }
 
 var METRIC_TRIGGER_MAP = map[string]string{
@@ -57,7 +59,7 @@ type QCdr struct {
 
 func NewStatsQueue(conf *CdrStats) *StatsQueue {
 	if conf == nil {
-		return &StatsQueue{metrics: make(map[string]Metric)}
+		return &StatsQueue{Metrics: make(map[string]Metric)}
 	}
 	sq := &StatsQueue{}
 	sq.UpdateConf(conf)
@@ -68,13 +70,33 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	sq.conf = conf
-	sq.cdrs = make([]*QCdr, 0)
-	sq.metrics = make(map[string]Metric, len(conf.Metrics))
+	sq.Cdrs = make([]*QCdr, 0)
+	sq.Metrics = make(map[string]Metric, len(conf.Metrics))
+	sq.dirty = true
 	for _, m := range conf.Metrics {
 		if metric := CreateMetric(m); metric != nil {
-			sq.metrics[m] = metric
+			sq.Metrics[m] = metric
 		}
 	}
+}
+
+func (sq *StatsQueue) Load(saved *StatsQueue) {
+	sq.Cdrs = saved.Cdrs
+	for key, metric := range saved.Metrics {
+		if _, exists := sq.Metrics[key]; exists {
+			sq.Metrics[key] = metric
+		}
+	}
+}
+
+func (sq *StatsQueue) IsDirty() bool {
+	sq.mux.Lock()
+	defer sq.mux.Unlock()
+	v := sq.dirty
+	log.Print(v)
+	// take advantage of the locking to set it to flip it
+	sq.dirty = false
+	return v
 }
 
 func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
@@ -82,14 +104,15 @@ func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 	defer sq.mux.Unlock()
 	if sq.conf.AcceptCdr(cdr) {
 		qcdr := sq.simplifyCdr(cdr)
-		sq.cdrs = append(sq.cdrs, qcdr)
+		sq.Cdrs = append(sq.Cdrs, qcdr)
 		sq.addToMetrics(qcdr)
 		sq.purgeObsoleteCdrs()
+		sq.dirty = true
 		// check for trigger
 		stats := sq.getStats()
 		sq.conf.Triggers.Sort()
 		for _, at := range sq.conf.Triggers {
-			if at.MinQueuedItems > 0 && len(sq.cdrs) < at.MinQueuedItems {
+			if at.MinQueuedItems > 0 && len(sq.Cdrs) < at.MinQueuedItems {
 				continue
 			}
 			if strings.HasPrefix(at.ThresholdType, "*min_") {
@@ -111,13 +134,13 @@ func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 }
 
 func (sq *StatsQueue) addToMetrics(cdr *QCdr) {
-	for _, metric := range sq.metrics {
+	for _, metric := range sq.Metrics {
 		metric.AddCdr(cdr)
 	}
 }
 
 func (sq *StatsQueue) removeFromMetrics(cdr *QCdr) {
-	for _, metric := range sq.metrics {
+	for _, metric := range sq.Metrics {
 		metric.RemoveCdr(cdr)
 	}
 }
@@ -134,22 +157,22 @@ func (sq *StatsQueue) simplifyCdr(cdr *StoredCdr) *QCdr {
 
 func (sq *StatsQueue) purgeObsoleteCdrs() {
 	if sq.conf.QueueLength > 0 {
-		currentLength := len(sq.cdrs)
+		currentLength := len(sq.Cdrs)
 		if currentLength > sq.conf.QueueLength {
-			for _, cdr := range sq.cdrs[:currentLength-sq.conf.QueueLength] {
+			for _, cdr := range sq.Cdrs[:currentLength-sq.conf.QueueLength] {
 				sq.removeFromMetrics(cdr)
 			}
-			sq.cdrs = sq.cdrs[currentLength-sq.conf.QueueLength:]
+			sq.Cdrs = sq.Cdrs[currentLength-sq.conf.QueueLength:]
 		}
 	}
 	if sq.conf.TimeWindow > 0 {
-		for i, cdr := range sq.cdrs {
+		for i, cdr := range sq.Cdrs {
 			if time.Now().Sub(cdr.SetupTime) > sq.conf.TimeWindow {
 				sq.removeFromMetrics(cdr)
 				continue
 			} else {
 				if i > 0 {
-					sq.cdrs = sq.cdrs[i:]
+					sq.Cdrs = sq.Cdrs[i:]
 				}
 				break
 			}
@@ -165,8 +188,8 @@ func (sq *StatsQueue) GetStats() map[string]float64 {
 }
 
 func (sq *StatsQueue) getStats() map[string]float64 {
-	stat := make(map[string]float64, len(sq.metrics))
-	for key, metric := range sq.metrics {
+	stat := make(map[string]float64, len(sq.Metrics))
+	for key, metric := range sq.Metrics {
 		stat[key] = metric.GetValue()
 	}
 	return stat

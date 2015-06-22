@@ -304,6 +304,7 @@ CREATE TABLE tp_cdrstats (
   tag VARCHAR(64) NOT NULL,
   queue_length INTEGER NOT NULL,
   time_window VARCHAR(8) NOT NULL,
+  save_interval VARCHAR(8) NOT NULL,
   metrics VARCHAR(64) NOT NULL,
   setup_interval VARCHAR(64) NOT NULL,
   tors VARCHAR(64) NOT NULL,

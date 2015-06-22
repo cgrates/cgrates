@@ -23,6 +23,7 @@
 
 "cdrstats": {
 	"enabled": true,					// starts the cdrstats service: <true|false>
+    "save_interval": "5s"
 },
 
 }

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -37,13 +38,47 @@ type StatsInterface interface {
 }
 
 type Stats struct {
-	queues   map[string]*StatsQueue
-	mux      sync.RWMutex
-	ratingDb RatingStorage
+	queues              map[string]*StatsQueue
+	queueSavers         map[string]*queueSaver
+	mux                 sync.RWMutex
+	ratingDb            RatingStorage
+	accountingDb        AccountingStorage
+	defaultSaveInterval time.Duration
+}
+type queueSaver struct {
+	ticker  *time.Ticker
+	stopper chan bool
 }
 
-func NewStats(ratingDb RatingStorage) *Stats {
-	cdrStats := &Stats{ratingDb: ratingDb}
+func newQueueSaver(id string, saveInterval time.Duration, sq *StatsQueue, adb AccountingStorage) *queueSaver {
+	svr := &queueSaver{
+		ticker:  time.NewTicker(saveInterval),
+		stopper: make(chan bool),
+	}
+	go func(id string, c <-chan time.Time, s <-chan bool, sq *StatsQueue, accountDb AccountingStorage) {
+		for {
+			select {
+			case <-c:
+				if sq.IsDirty() {
+					if err := accountDb.SetCdrStatsQueue(sq); err != nil {
+						Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", id, err))
+					}
+				}
+			case <-s:
+				break
+			}
+		}
+	}(id, svr.ticker.C, svr.stopper, sq, adb)
+	return svr
+}
+
+func (svr *queueSaver) stop() {
+	svr.ticker.Stop()
+	svr.stopper <- true
+}
+
+func NewStats(ratingDb RatingStorage, accountingDb AccountingStorage, saveInterval time.Duration) *Stats {
+	cdrStats := &Stats{ratingDb: ratingDb, accountingDb: accountingDb, defaultSaveInterval: saveInterval}
 	if css, err := ratingDb.GetAllCdrStats(); err == nil {
 		cdrStats.UpdateQueues(css, nil)
 	} else {
@@ -79,6 +114,9 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 	if s.queues == nil {
 		s.queues = make(map[string]*StatsQueue)
 	}
+	if s.queueSavers == nil {
+		s.queueSavers = make(map[string]*queueSaver)
+	}
 	if sq, exists := s.queues[cs.Id]; exists {
 		sq.UpdateConf(cs)
 	} else {
@@ -108,11 +146,11 @@ func (s *Stats) ReloadQueues(ids []string, out *int) error {
 func (s *Stats) ResetQueues(ids []string, out *int) error {
 	if len(ids) == 0 {
 		for _, sq := range s.queues {
-			sq.cdrs = make([]*QCdr, 0)
-			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
+			sq.Cdrs = make([]*QCdr, 0)
+			sq.Metrics = make(map[string]Metric, len(sq.conf.Metrics))
 			for _, m := range sq.conf.Metrics {
 				if metric := CreateMetric(m); metric != nil {
-					sq.metrics[m] = metric
+					sq.Metrics[m] = metric
 				}
 			}
 		}
@@ -123,11 +161,11 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 				Logger.Warning(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
 				continue
 			}
-			sq.cdrs = make([]*QCdr, 0)
-			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
+			sq.Cdrs = make([]*QCdr, 0)
+			sq.Metrics = make(map[string]Metric, len(sq.conf.Metrics))
 			for _, m := range sq.conf.Metrics {
 				if metric := CreateMetric(m); metric != nil {
-					sq.metrics[m] = metric
+					sq.Metrics[m] = metric
 				}
 			}
 		}
@@ -157,6 +195,23 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		}
 		if sq == nil {
 			sq = NewStatsQueue(cs)
+			// load queue from storage if exists
+			if saved, err := s.accountingDb.GetCdrStatsQueue(sq.GetId()); err == nil {
+				sq.Load(saved)
+			} else {
+				Logger.Info(err.Error())
+			}
+			// setup queue saver
+			if s.queueSavers == nil {
+				s.queueSavers = make(map[string]*queueSaver)
+			}
+			si := cs.SaveInterval
+			if si == 0 {
+				si = s.defaultSaveInterval
+			}
+			if si > 0 {
+				s.queueSavers[cs.Id] = newQueueSaver(cs.Id, si, sq, s.accountingDb)
+			}
 		}
 		s.queues[cs.Id] = sq
 	}

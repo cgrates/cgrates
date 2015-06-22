@@ -295,27 +295,28 @@ type TpCdrstat struct {
 	Tag                 string `index:"0" re:""`
 	QueueLength         int    `index:"1" re:""`
 	TimeWindow          string `index:"2" re:""`
-	Metrics             string `index:"3" re:""`
-	SetupInterval       string `index:"4" re:""`
-	Tors                string `index:"5" re:""`
-	CdrHosts            string `index:"6" re:""`
-	CdrSources          string `index:"7" re:""`
-	ReqTypes            string `index:"8" re:""`
-	Directions          string `index:"9" re:""`
-	Tenants             string `index:"10" re:""`
-	Categories          string `index:"11" re:""`
-	Accounts            string `index:"12" re:""`
-	Subjects            string `index:"13" re:""`
-	DestinationPrefixes string `index:"14" re:""`
-	PddInterval         string `index:"15" re:""`
-	UsageInterval       string `index:"16" re:""`
-	Suppliers           string `index:"17" re:""`
-	DisconnectCauses    string `index:"18" re:""`
-	MediationRunids     string `index:"19" re:""`
-	RatedAccounts       string `index:"20" re:""`
-	RatedSubjects       string `index:"21" re:""`
-	CostInterval        string `index:"22" re:""`
-	ActionTriggers      string `index:"23" re:""`
+	SaveInterval        string `index:"3" re:""`
+	Metrics             string `index:"4" re:""`
+	SetupInterval       string `index:"5" re:""`
+	Tors                string `index:"6" re:""`
+	CdrHosts            string `index:"7" re:""`
+	CdrSources          string `index:"8" re:""`
+	ReqTypes            string `index:"9" re:""`
+	Directions          string `index:"10" re:""`
+	Tenants             string `index:"11" re:""`
+	Categories          string `index:"12" re:""`
+	Accounts            string `index:"13" re:""`
+	Subjects            string `index:"14" re:""`
+	DestinationPrefixes string `index:"15" re:""`
+	PddInterval         string `index:"16" re:""`
+	UsageInterval       string `index:"17" re:""`
+	Suppliers           string `index:"18" re:""`
+	DisconnectCauses    string `index:"19" re:""`
+	MediationRunids     string `index:"20" re:""`
+	RatedAccounts       string `index:"21" re:""`
+	RatedSubjects       string `index:"22" re:""`
+	CostInterval        string `index:"23" re:""`
+	ActionTriggers      string `index:"24" re:""`
 	CreatedAt           time.Time
 }
 

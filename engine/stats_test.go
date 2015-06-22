@@ -27,8 +27,8 @@ import (
 
 func TestStatsQueueInit(t *testing.T) {
 	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACC}})
-	if len(sq.metrics) != 2 {
-		t.Error("Expected 2 metrics got ", len(sq.metrics))
+	if len(sq.Metrics) != 2 {
+		t.Error("Expected 2 metrics got ", len(sq.Metrics))
 	}
 }
 
@@ -203,7 +203,7 @@ func TestAcceptCdr(t *testing.T) {
 }
 
 func TestStatsQueueIds(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	ids := []string{}
 	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
 		t.Error("Errorf getting queue ids: ", err)
@@ -216,7 +216,7 @@ func TestStatsQueueIds(t *testing.T) {
 }
 
 func TestStatsAppendCdr(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:          "cgrates.org",
 		Category:        "call",
@@ -231,14 +231,14 @@ func TestStatsAppendCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Error appending cdr to stats: ", err)
 	}
-	if len(cdrStats.queues["CDRST1"].cdrs) != 0 ||
-		len(cdrStats.queues["CDRST2"].cdrs) != 1 {
-		t.Error("Error appending cdr to queue: ", len(cdrStats.queues["CDRST2"].cdrs))
+	if len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
+		len(cdrStats.queues["CDRST2"].Cdrs) != 1 {
+		t.Error("Error appending cdr to queue: ", len(cdrStats.queues["CDRST2"].Cdrs))
 	}
 }
 
 func TestStatsGetValues(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -267,7 +267,7 @@ func TestStatsGetValues(t *testing.T) {
 }
 
 func TestStatsReloadQueues(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -287,7 +287,7 @@ func TestStatsReloadQueues(t *testing.T) {
 	result := len(ids)
 	expected := 2
 	if result != expected {
-		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+		t.Errorf("Error loading stats queues. Expected %v was %v: %v", expected, result, ids)
 	}
 	valMap := make(map[string]float64)
 	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
@@ -299,7 +299,7 @@ func TestStatsReloadQueues(t *testing.T) {
 }
 
 func TestStatsReloadQueuesWithDefault(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdrStats.AddQueue(&CdrStats{
 		Id: utils.META_DEFAULT,
 	}, nil)
@@ -335,7 +335,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 }
 
 func TestStatsReloadQueuesWithIds(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -366,8 +366,26 @@ func TestStatsReloadQueuesWithIds(t *testing.T) {
 	}
 }
 
+func TestStatsSaveQueues(t *testing.T) {
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
+	cdr := &StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	ids := []string{}
+	cdrStats.GetQueueIds(0, &ids)
+	if _, found := cdrStats.queueSavers["CDRST1"]; !found {
+		t.Error("Error creating queue savers: ", cdrStats.queueSavers)
+	}
+}
+
 func TestStatsResetQueues(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",
@@ -399,7 +417,7 @@ func TestStatsResetQueues(t *testing.T) {
 }
 
 func TestStatsResetQueuesWithIds(t *testing.T) {
-	cdrStats := NewStats(ratingStorage)
+	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
 	cdr := &StoredCdr{
 		Tenant:     "cgrates.org",
 		Category:   "call",

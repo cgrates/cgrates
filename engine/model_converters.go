@@ -325,6 +325,7 @@ func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrstat) {
 			Tag:                 stats.CdrStatsId,
 			QueueLength:         ql,
 			TimeWindow:          st.TimeWindow,
+			SaveInterval:        st.SaveInterval,
 			Metrics:             st.Metrics,
 			SetupInterval:       st.SetupInterval,
 			Tors:                st.TORs,

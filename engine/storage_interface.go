@@ -77,6 +77,8 @@ type AccountingStorage interface {
 	Storage
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
+	GetCdrStatsQueue(string) (*StatsQueue, error)
+	SetCdrStatsQueue(*StatsQueue) error
 }
 
 type CdrStorage interface {

@@ -262,7 +262,6 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	if historyScribe != nil {
 		go historyScribe.Record(rp.GetHistoryRecord(), &response)
 	}
-	//cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -293,7 +292,6 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	if historyScribe != nil {
 		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
 	}
-	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
 
@@ -318,7 +316,6 @@ func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 func (ms *MapStorage) SetLCR(lcr *LCR) (err error) {
 	result, err := ms.ms.Marshal(lcr)
 	ms.dict[utils.LCR_PREFIX+lcr.GetId()] = result
-	//cache2go.Cache(LCR_PREFIX+key, lcr)
 	return
 }
 
@@ -342,7 +339,6 @@ func (ms *MapStorage) GetRpAlias(key string, skipCache bool) (alias string, err 
 
 func (ms *MapStorage) SetRpAlias(key, alias string) (err error) {
 	ms.dict[utils.RP_ALIAS_PREFIX+key] = []byte(alias)
-	//cache2go.Cache(ALIAS_PREFIX+key, alias)
 	return
 }
 
@@ -409,7 +405,6 @@ func (ms *MapStorage) GetAccAlias(key string, skipCache bool) (alias string, err
 
 func (ms *MapStorage) SetAccAlias(key, alias string) (err error) {
 	ms.dict[utils.ACC_ALIAS_PREFIX+key] = []byte(alias)
-	//cache2go.Cache(ALIAS_PREFIX+key, alias)
 	return
 }
 
@@ -471,7 +466,6 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	if historyScribe != nil {
 		go historyScribe.Record(dest.GetHistoryRecord(), &response)
 	}
-	//cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 
@@ -496,7 +490,6 @@ func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err er
 func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[utils.ACTION_PREFIX+key] = result
-	//cache2go.Cache(ACTION_PREFIX+key, as)
 	return
 }
 
@@ -521,7 +514,6 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGrou
 func (ms *MapStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 	result, err := ms.ms.Marshal(sg)
 	ms.dict[utils.SHARED_GROUP_PREFIX+sg.Id] = result
-	//cache2go.Cache(SHARED_GROUP_PREFIX+key, sg)
 	return
 }
 
@@ -550,6 +542,22 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	}
 	result, err := ms.ms.Marshal(ub)
 	ms.dict[utils.ACCOUNT_PREFIX+ub.Id] = result
+	return
+}
+
+func (ms *MapStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
+	if values, ok := ms.dict[utils.CDR_STATS_QUEUE_PREFIX+key]; ok {
+		sq = &StatsQueue{}
+		err = ms.ms.Unmarshal(values, sq)
+	} else {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+func (ms *MapStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
+	result, err := ms.ms.Marshal(sq)
+	ms.dict[utils.CDR_STATS_QUEUE_PREFIX+sq.GetId()] = result
 	return
 }
 

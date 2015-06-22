@@ -155,12 +155,13 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 
 func TestDfCdrStatsJsonCfg(t *testing.T) {
 	eCfg := &CdrStatsJsonCfg{
-		Enabled: utils.BoolPointer(false),
+		Enabled:       utils.BoolPointer(false),
+		Save_Interval: utils.StringPointer("5s"),
 	}
 	if cfg, err := dfCgrJsonCfg.CdrStatsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Error("Received: ", *cfg)
 	}
 }
 

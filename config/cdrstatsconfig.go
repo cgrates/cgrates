@@ -26,8 +26,9 @@ type CdrStatsConfig struct {
 	Id                  string        // Config id, unique per config instance
 	QueueLength         int           // Number of items in the stats buffer
 	TimeWindow          time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-	Metrics             []string      // ASR, ACD, ACC
-	SetupInterval       []time.Time   // 2 or less items (>= start interval,< stop_interval)
+	SaveInterval        time.Duration
+	Metrics             []string    // ASR, ACD, ACC
+	SetupInterval       []time.Time // 2 or less items (>= start interval,< stop_interval)
 	TORs                []string
 	CdrHosts            []string
 	CdrSources          []string
