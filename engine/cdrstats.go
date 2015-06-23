@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
 	"strings"
 	"time"
 
@@ -172,4 +173,37 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 		return false
 	}
 	return true
+}
+
+func (cs *CdrStats) hasGeneralConfigs() bool {
+	return cs.QueueLength == 0 &&
+		cs.TimeWindow == 0 &&
+		cs.SaveInterval == 0 &&
+		len(cs.Metrics) == 0
+}
+
+func (cs *CdrStats) equalExceptTriggers(other *CdrStats) bool {
+	return cs.QueueLength == other.QueueLength &&
+		cs.TimeWindow == other.TimeWindow &&
+		cs.SaveInterval == other.SaveInterval &&
+		reflect.DeepEqual(cs.Metrics, other.Metrics) &&
+		reflect.DeepEqual(cs.SetupInterval, other.SetupInterval) &&
+		reflect.DeepEqual(cs.TOR, other.TOR) &&
+		reflect.DeepEqual(cs.CdrHost, other.CdrHost) &&
+		reflect.DeepEqual(cs.CdrSource, other.CdrSource) &&
+		reflect.DeepEqual(cs.ReqType, other.ReqType) &&
+		reflect.DeepEqual(cs.Direction, other.Direction) &&
+		reflect.DeepEqual(cs.Tenant, other.Tenant) &&
+		reflect.DeepEqual(cs.Category, other.Category) &&
+		reflect.DeepEqual(cs.Account, other.Account) &&
+		reflect.DeepEqual(cs.Subject, other.Subject) &&
+		reflect.DeepEqual(cs.DestinationPrefix, other.DestinationPrefix) &&
+		reflect.DeepEqual(cs.UsageInterval, other.UsageInterval) &&
+		reflect.DeepEqual(cs.PddInterval, other.PddInterval) &&
+		reflect.DeepEqual(cs.Supplier, other.Supplier) &&
+		reflect.DeepEqual(cs.DisconnectCause, other.DisconnectCause) &&
+		reflect.DeepEqual(cs.MediationRunIds, other.MediationRunIds) &&
+		reflect.DeepEqual(cs.RatedAccount, other.RatedAccount) &&
+		reflect.DeepEqual(cs.RatedSubject, other.RatedSubject) &&
+		reflect.DeepEqual(cs.CostInterval, other.CostInterval)
 }

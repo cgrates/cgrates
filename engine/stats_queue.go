@@ -69,6 +69,11 @@ func NewStatsQueue(conf *CdrStats) *StatsQueue {
 func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
+	// check if new conf asks for action trigger reset only
+	if sq.conf != nil && (!conf.hasGeneralConfigs() || sq.conf.equalExceptTriggers(conf)) {
+		sq.conf.Triggers = conf.Triggers
+		return
+	}
 	sq.conf = conf
 	sq.Cdrs = make([]*QCdr, 0)
 	sq.Metrics = make(map[string]Metric, len(conf.Metrics))

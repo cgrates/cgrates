@@ -293,7 +293,7 @@ func TestStatsReloadQueues(t *testing.T) {
 	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
 		t.Error("Error getting metric values: ", err)
 	}
-	if len(valMap) != 2 || valMap["ACD"] != STATS_NA || valMap["ASR"] != STATS_NA {
+	if len(valMap) != 2 || valMap["ACD"] != 10 || valMap["ASR"] != 100 {
 		t.Error("Error on metric map: ", valMap)
 	}
 }
@@ -329,7 +329,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
 		t.Error("Error getting metric values: ", err)
 	}
-	if len(valMap) != 2 || valMap["ACD"] != STATS_NA || valMap["ASR"] != STATS_NA {
+	if len(valMap) != 2 || valMap["ACD"] != 10 || valMap["ASR"] != 100 {
 		t.Error("Error on metric map: ", valMap)
 	}
 }

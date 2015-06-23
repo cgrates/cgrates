@@ -121,6 +121,7 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 		sq.UpdateConf(cs)
 	} else {
 		s.queues[cs.Id] = NewStatsQueue(cs)
+		s.setupQueueSaver(sq)
 	}
 	return nil
 }
@@ -180,10 +181,14 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	oldQueues := s.queues
+	oldSavers := s.queueSavers
 	s.queues = make(map[string]*StatsQueue, len(css))
+	s.queueSavers = make(map[string]*queueSaver, len(css))
 	if def, exists := oldQueues[utils.META_DEFAULT]; exists {
 		def.UpdateConf(def.conf) // for reset
 		s.queues[utils.META_DEFAULT] = def
+		s.queueSavers[utils.META_DEFAULT] = oldSavers[utils.META_DEFAULT]
+		delete(oldSavers, utils.META_DEFAULT)
 	}
 	for _, cs := range css {
 		var sq *StatsQueue
@@ -191,6 +196,8 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		if oldQueues != nil {
 			if sq, existing = oldQueues[cs.Id]; existing {
 				sq.UpdateConf(cs)
+				s.queueSavers[cs.Id] = oldSavers[cs.Id]
+				delete(oldSavers, cs.Id)
 			}
 		}
 		if sq == nil {
@@ -201,21 +208,35 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 			} else {
 				Logger.Info(err.Error())
 			}
-			// setup queue saver
-			if s.queueSavers == nil {
-				s.queueSavers = make(map[string]*queueSaver)
-			}
-			si := cs.SaveInterval
-			if si == 0 {
-				si = s.defaultSaveInterval
-			}
-			if si > 0 {
-				s.queueSavers[cs.Id] = newQueueSaver(cs.Id, si, sq, s.accountingDb)
-			}
+			s.setupQueueSaver(sq)
 		}
 		s.queues[cs.Id] = sq
 	}
+	// stop obsolete savers
+	for _, saver := range oldSavers {
+		saver.stop()
+	}
 	return nil
+}
+
+func (s *Stats) setupQueueSaver(sq *StatsQueue) {
+	if sq == nil {
+		return
+	}
+	// setup queue saver
+	if s.queueSavers == nil {
+		s.queueSavers = make(map[string]*queueSaver)
+	}
+	var si time.Duration
+	if sq.conf != nil {
+		si = sq.conf.SaveInterval
+	}
+	if si == 0 {
+		si = s.defaultSaveInterval
+	}
+	if si > 0 {
+		s.queueSavers[sq.GetId()] = newQueueSaver(sq.GetId(), si, sq, s.accountingDb)
+	}
 }
 
 func (s *Stats) AppendCDR(cdr *StoredCdr, out *int) error {
