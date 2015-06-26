@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -98,7 +97,6 @@ func (sq *StatsQueue) IsDirty() bool {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	v := sq.dirty
-	log.Print(v)
 	// take advantage of the locking to set it to flip it
 	sq.dirty = false
 	return v
