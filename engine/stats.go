@@ -73,9 +73,11 @@ func newQueueSaver(id string, saveInterval time.Duration, sq *StatsQueue, adb Ac
 			select {
 			case <-svr.ticker.C:
 				if svr.sq.IsDirty() {
+					svr.sq.mux.Lock()
 					if err := svr.adb.SetCdrStatsQueue(svr.sq); err != nil {
 						Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", id, err))
 					}
+					svr.sq.mux.Unlock()
 				}
 			case <-svr.stopper:
 				break

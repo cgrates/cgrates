@@ -85,6 +85,8 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 }
 
 func (sq *StatsQueue) Load(saved *StatsQueue) {
+	sq.mux.Lock()
+	defer sq.mux.Unlock()
 	sq.Cdrs = saved.Cdrs
 	for key, metric := range saved.Metrics {
 		if _, exists := sq.Metrics[key]; exists {
