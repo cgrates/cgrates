@@ -159,6 +159,29 @@ func TestCDRStatsLclGetMetrics1(t *testing.T) {
 	}
 }
 
+// Test stats persistence
+func TestCDRStatsLclStatsPersistence(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	time.Sleep(time.Duration(2) * time.Second) // Allow stats to be updated in dataDb
+	if _, err := engine.StopStartEngine(cdrstCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+	var err error
+	cdrstRpc, err = jsonrpc.Dial("tcp", cdrstCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+	var rcvMetrics map[string]float64
+	expectedMetrics := map[string]float64{"ASR": 75, "ACD": 15}
+	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "CDRST4"}, &rcvMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedMetrics, rcvMetrics) {
+		t.Errorf("Expecting: %v, received: %v", expectedMetrics, rcvMetrics)
+	}
+}
+
 func TestCDRStatsLclResetMetrics(t *testing.T) {
 	if !*testLocal {
 		return

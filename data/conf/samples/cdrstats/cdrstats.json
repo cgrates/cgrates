@@ -7,8 +7,7 @@
 "rater": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
-
-"cdrs": {
+ "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
 	"store_cdrs": false,						// store cdrs in storDb
 	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
@@ -17,9 +16,7 @@
 
 "cdrstats": {
 	"enabled": true,						// starts the cdrstats service: <true|false>
-	"queue_length": 5,						// number of items in the stats buffer
-	"time_window": "0",					// will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-    "save_interval": "5s",
+    "save_interval": "1s",
 },
 
 }
