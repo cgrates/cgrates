@@ -20,9 +20,6 @@ package v1
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -30,6 +27,10 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var cdrstCfgPath string

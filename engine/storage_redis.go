@@ -680,7 +680,6 @@ func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error)
 		sq = &StatsQueue{Metrics: make(map[string]Metric)}
 		err = rs.ms.Unmarshal(values, sq)
 	}
-
 	return
 }
 

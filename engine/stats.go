@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -47,51 +46,38 @@ type Stats struct {
 	defaultSaveInterval time.Duration
 }
 
-type saveFunc func(*queueSaver)
-
 type queueSaver struct {
 	ticker       *time.Ticker
 	stopper      chan bool
-	save         saveFunc
-	id           string
-	saveInterval time.Duration
+	save         func(*queueSaver)
 	sq           *StatsQueue
-	adb          AccountingStorage
+	accountingDb AccountingStorage
 }
 
-func newQueueSaver(id string, saveInterval time.Duration, sq *StatsQueue, adb AccountingStorage) *queueSaver {
+func newQueueSaver(saveInterval time.Duration, sq *StatsQueue, adb AccountingStorage) *queueSaver {
 	svr := &queueSaver{
 		ticker:       time.NewTicker(saveInterval),
 		stopper:      make(chan bool),
-		id:           id,
-		saveInterval: saveInterval,
 		sq:           sq,
-		adb:          adb,
+		accountingDb: adb,
 	}
-	svr.save = func(svr *queueSaver) {
+	go func(saveInterval time.Duration, sq *StatsQueue, adb AccountingStorage) {
 		for {
 			select {
 			case <-svr.ticker.C:
-				if svr.sq.IsDirty() {
-					svr.sq.mux.Lock()
-					if err := svr.adb.SetCdrStatsQueue(svr.sq); err != nil {
-						Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", id, err))
-					}
-					svr.sq.mux.Unlock()
-				}
+				sq.Save(adb)
 			case <-svr.stopper:
 				break
 			}
 		}
-	}
-	go svr.save(svr)
+	}(saveInterval, sq, adb)
 	return svr
 }
 
 func (svr *queueSaver) stop() {
-	svr.save(svr)
 	svr.ticker.Stop()
 	svr.stopper <- true
+	svr.sq.Save(svr.accountingDb)
 }
 
 func NewStats(ratingDb RatingStorage, accountingDb AccountingStorage, saveInterval time.Duration) *Stats {
@@ -122,7 +108,7 @@ func (s *Stats) GetValues(sqID string, values *map[string]float64) error {
 		*values = sq.GetStats()
 		return nil
 	}
-	return errors.New("Not Found")
+	return utils.ErrNotFound
 }
 
 func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
@@ -252,7 +238,7 @@ func (s *Stats) setupQueueSaver(sq *StatsQueue) {
 		si = s.defaultSaveInterval
 	}
 	if si > 0 {
-		s.queueSavers[sq.GetId()] = newQueueSaver(sq.GetId(), si, sq, s.accountingDb)
+		s.queueSavers[sq.GetId()] = newQueueSaver(si, sq, s.accountingDb)
 	}
 }
 
