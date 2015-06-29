@@ -108,7 +108,7 @@ const CGRATES_CFG_JSON = `
 
 "cdrstats": {
 	"enabled": false,						// starts the cdrstats service: <true|false>
-    "save_interval": "5s",
+    "save_interval": "1m",					// interval to save changed stats into dataDb storage
 },
 
 

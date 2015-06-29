@@ -156,7 +156,7 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 func TestDfCdrStatsJsonCfg(t *testing.T) {
 	eCfg := &CdrStatsJsonCfg{
 		Enabled:       utils.BoolPointer(false),
-		Save_Interval: utils.StringPointer("5s"),
+		Save_Interval: utils.StringPointer("1m"),
 	}
 	if cfg, err := dfCgrJsonCfg.CdrStatsJsonCfg(); err != nil {
 		t.Error(err)
@@ -431,24 +431,6 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
 		t.Error("Received: ", gCfg)
 	}
-	/*
-		eCfgMedi := &MediatorJsonCfg{
-			Enabled:       utils.BoolPointer(true),
-			Reconnects:    utils.IntPointer(5),
-			Rater:         utils.StringPointer("internal"),
-			Cdrstats:      utils.StringPointer(""),
-			Store_disable: utils.BoolPointer(false),
-			Cdr_replication: &[]*CdrReplicationJsonCfg{
-				&CdrReplicationJsonCfg{Transport: utils.StringPointer(utils.META_HTTP_POST), Server: utils.StringPointer("1.2.3.4:2080/cdr_post")},
-				&CdrReplicationJsonCfg{Transport: utils.StringPointer(utils.META_HTTP_JSONRPC), Server: utils.StringPointer("2.3.4.5:2080/jsonrpc"), Synchronous: utils.BoolPointer(true), Cdr_filter: utils.StringPointer("~account:s/(.+)/1001/")},
-			},
-		}
-		if mediCfg, err := cgrJsonCfg.MediatorJsonCfg(); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(eCfgMedi, mediCfg) {
-			t.Error("Received: ", mediCfg)
-		}
-	*/
 	cdrFields := []*CdrFieldJsonCfg{
 		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("tor"), Value: utils.StringPointer("~7:s/^(voice|data|sms|generic)$/*$1/")},
 		&CdrFieldJsonCfg{Cdr_field_id: utils.StringPointer("answer_time"), Value: utils.StringPointer("1")},
