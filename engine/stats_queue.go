@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -84,6 +85,16 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	}
 }
 
+func (sq *StatsQueue) Save(adb AccountingStorage) {
+	sq.mux.Lock()
+	defer sq.mux.Unlock()
+	if sq.dirty {
+		if err := adb.SetCdrStatsQueue(sq); err != nil {
+			Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
+		}
+	}
+}
+
 func (sq *StatsQueue) Load(saved *StatsQueue) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
@@ -93,15 +104,6 @@ func (sq *StatsQueue) Load(saved *StatsQueue) {
 			sq.Metrics[key] = metric
 		}
 	}
-}
-
-func (sq *StatsQueue) IsDirty() bool {
-	sq.mux.Lock()
-	defer sq.mux.Unlock()
-	v := sq.dirty
-	// take advantage of the locking to set it to flip it
-	sq.dirty = false
-	return v
 }
 
 func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
