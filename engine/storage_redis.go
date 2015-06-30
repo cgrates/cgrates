@@ -677,8 +677,8 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
 	var values []byte
 	if values, err = rs.db.Get(utils.CDR_STATS_QUEUE_PREFIX + key); err == nil {
-		sq = &StatsQueue{Metrics: make(map[string]Metric)}
-		err = rs.ms.Unmarshal(values, sq)
+		sq = &StatsQueue{}
+		err = rs.ms.Unmarshal(values, &sq)
 	}
 	return
 }

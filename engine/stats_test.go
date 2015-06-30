@@ -27,8 +27,8 @@ import (
 
 func TestStatsQueueInit(t *testing.T) {
 	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACC}})
-	if len(sq.Metrics) != 2 {
-		t.Error("Expected 2 metrics got ", len(sq.Metrics))
+	if len(sq.metrics) != 2 {
+		t.Error("Expected 2 metrics got ", len(sq.metrics))
 	}
 }
 
@@ -445,5 +445,22 @@ func TestStatsResetQueuesWithIds(t *testing.T) {
 	}
 	if len(valMap) != 2 || valMap["ACD"] != 10 || valMap["ASR"] != 100 {
 		t.Error("Error on metric map: ", valMap)
+	}
+}
+
+func TestStatsSaveRestoreQeue(t *testing.T) {
+	sq := &StatsQueue{
+		conf: &CdrStats{Id: "TTT"},
+		Cdrs: []*QCdr{&QCdr{Cost: 9.0}},
+	}
+	if err := accountingStorage.SetCdrStatsQueue(sq); err != nil {
+		t.Error("Error saving metric: ", err)
+	}
+	recovered, err := accountingStorage.GetCdrStatsQueue(sq.GetId())
+	if err != nil {
+		t.Error("Error loading metric: ", err)
+	}
+	if len(recovered.Cdrs) != 1 || recovered.Cdrs[0].Cost != sq.Cdrs[0].Cost {
+		t.Errorf("Expecting %+v got: %+v", sq.Cdrs[0], recovered.Cdrs[0])
 	}
 }

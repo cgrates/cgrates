@@ -28,7 +28,7 @@ import (
 type StatsQueue struct {
 	Cdrs    []*QCdr
 	conf    *CdrStats
-	Metrics map[string]Metric
+	metrics map[string]Metric
 	mux     sync.Mutex
 	dirty   bool
 }
@@ -59,7 +59,7 @@ type QCdr struct {
 
 func NewStatsQueue(conf *CdrStats) *StatsQueue {
 	if conf == nil {
-		return &StatsQueue{Metrics: make(map[string]Metric)}
+		return &StatsQueue{metrics: make(map[string]Metric)}
 	}
 	sq := &StatsQueue{}
 	sq.UpdateConf(conf)
@@ -76,11 +76,11 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	}
 	sq.conf = conf
 	sq.Cdrs = make([]*QCdr, 0)
-	sq.Metrics = make(map[string]Metric, len(conf.Metrics))
+	sq.metrics = make(map[string]Metric, len(conf.Metrics))
 	sq.dirty = true
 	for _, m := range conf.Metrics {
 		if metric := CreateMetric(m); metric != nil {
-			sq.Metrics[m] = metric
+			sq.metrics[m] = metric
 		}
 	}
 }
@@ -88,21 +88,23 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 func (sq *StatsQueue) Save(adb AccountingStorage) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
-	if sq.dirty {
-		if err := adb.SetCdrStatsQueue(sq); err != nil {
-			Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
-		}
+	//if sq.dirty {
+	Logger.Debug(fmt.Sprintf("SAVED: %+v", sq))
+	if err := adb.SetCdrStatsQueue(sq); err != nil {
+		Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
+		return
 	}
+	sq.dirty = false
+	//}
 }
 
 func (sq *StatsQueue) Load(saved *StatsQueue) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
+	Logger.Debug(fmt.Sprintf("LOADED: %+v", saved))
 	sq.Cdrs = saved.Cdrs
-	for key, metric := range saved.Metrics {
-		if _, exists := sq.Metrics[key]; exists {
-			sq.Metrics[key] = metric
-		}
+	for _, qcdr := range saved.Cdrs {
+		sq.appendQcdr(qcdr)
 	}
 }
 
@@ -110,30 +112,33 @@ func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	if sq.conf.AcceptCdr(cdr) {
-		qcdr := sq.simplifyCdr(cdr)
-		sq.Cdrs = append(sq.Cdrs, qcdr)
-		sq.addToMetrics(qcdr)
-		sq.purgeObsoleteCdrs()
-		sq.dirty = true
-		// check for trigger
-		stats := sq.getStats()
-		sq.conf.Triggers.Sort()
-		for _, at := range sq.conf.Triggers {
-			if at.MinQueuedItems > 0 && len(sq.Cdrs) < at.MinQueuedItems {
-				continue
-			}
-			if strings.HasPrefix(at.ThresholdType, "*min_") {
-				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
-					if value > STATS_NA && value <= at.ThresholdValue {
-						at.Execute(nil, sq.Triggered(at))
-					}
+		sq.appendQcdr(sq.simplifyCdr(cdr))
+	}
+}
+
+func (sq *StatsQueue) appendQcdr(qcdr *QCdr) {
+	sq.Cdrs = append(sq.Cdrs, qcdr)
+	sq.addToMetrics(qcdr)
+	sq.purgeObsoleteCdrs()
+	sq.dirty = true
+	// check for trigger
+	stats := sq.getStats()
+	sq.conf.Triggers.Sort()
+	for _, at := range sq.conf.Triggers {
+		if at.MinQueuedItems > 0 && len(sq.Cdrs) < at.MinQueuedItems {
+			continue
+		}
+		if strings.HasPrefix(at.ThresholdType, "*min_") {
+			if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
+				if value > STATS_NA && value <= at.ThresholdValue {
+					at.Execute(nil, sq.Triggered(at))
 				}
 			}
-			if strings.HasPrefix(at.ThresholdType, "*max_") {
-				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
-					if value > STATS_NA && value >= at.ThresholdValue {
-						at.Execute(nil, sq.Triggered(at))
-					}
+		}
+		if strings.HasPrefix(at.ThresholdType, "*max_") {
+			if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
+				if value > STATS_NA && value >= at.ThresholdValue {
+					at.Execute(nil, sq.Triggered(at))
 				}
 			}
 		}
@@ -141,13 +146,13 @@ func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 }
 
 func (sq *StatsQueue) addToMetrics(cdr *QCdr) {
-	for _, metric := range sq.Metrics {
+	for _, metric := range sq.metrics {
 		metric.AddCdr(cdr)
 	}
 }
 
 func (sq *StatsQueue) removeFromMetrics(cdr *QCdr) {
-	for _, metric := range sq.Metrics {
+	for _, metric := range sq.metrics {
 		metric.RemoveCdr(cdr)
 	}
 }
@@ -195,8 +200,8 @@ func (sq *StatsQueue) GetStats() map[string]float64 {
 }
 
 func (sq *StatsQueue) getStats() map[string]float64 {
-	stat := make(map[string]float64, len(sq.Metrics))
-	for key, metric := range sq.Metrics {
+	stat := make(map[string]float64, len(sq.metrics))
+	for key, metric := range sq.metrics {
 		stat[key] = metric.GetValue()
 	}
 	return stat
@@ -208,12 +213,12 @@ func (sq *StatsQueue) GetId() string {
 
 // Convert data into a struct which can be used in actions based on triggers hit
 func (sq *StatsQueue) Triggered(at *ActionTrigger) *StatsQueueTriggered {
-	return &StatsQueueTriggered{Id: sq.conf.Id, Metrics: sq.getStats(), Trigger: at}
+	return &StatsQueueTriggered{Id: sq.conf.Id, metrics: sq.getStats(), Trigger: at}
 }
 
 // Struct to be passed to triggered actions
 type StatsQueueTriggered struct {
 	Id      string // StatsQueueId
-	Metrics map[string]float64
+	metrics map[string]float64
 	Trigger *ActionTrigger
 }

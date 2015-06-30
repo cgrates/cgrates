@@ -151,10 +151,10 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 	if len(ids) == 0 {
 		for _, sq := range s.queues {
 			sq.Cdrs = make([]*QCdr, 0)
-			sq.Metrics = make(map[string]Metric, len(sq.conf.Metrics))
+			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
 			for _, m := range sq.conf.Metrics {
 				if metric := CreateMetric(m); metric != nil {
-					sq.Metrics[m] = metric
+					sq.metrics[m] = metric
 				}
 			}
 		}
@@ -166,10 +166,10 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 				continue
 			}
 			sq.Cdrs = make([]*QCdr, 0)
-			sq.Metrics = make(map[string]Metric, len(sq.conf.Metrics))
+			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
 			for _, m := range sq.conf.Metrics {
 				if metric := CreateMetric(m); metric != nil {
-					sq.Metrics[m] = metric
+					sq.metrics[m] = metric
 				}
 			}
 		}
@@ -200,10 +200,11 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		if sq == nil {
 			sq = NewStatsQueue(cs)
 			// load queue from storage if exists
+
 			if saved, err := s.accountingDb.GetCdrStatsQueue(sq.GetId()); err == nil {
 				sq.Load(saved)
 			} else {
-				Logger.Info(err.Error())
+				Logger.Debug(fmt.Sprintf("XXXXXXXXXXX: %v", err))
 			}
 			s.setupQueueSaver(sq)
 		}
