@@ -11,6 +11,7 @@ go test -i github.com/cgrates/cgrates/cdrc
 go test -i github.com/cgrates/cgrates/utils
 go test -i github.com/cgrates/cgrates/history
 go test -i github.com/cgrates/cgrates/cdre
+go test -i github.com/cgrates/cgrates/pubsub
 
 go test github.com/cgrates/cgrates/apier/v1
 v1=$?
@@ -36,6 +37,7 @@ go test github.com/cgrates/cgrates/cache2go
 c2g=$?
 go test github.com/cgrates/cgrates/cdre
 cdre=$?
+go test github.com/cgrates/cgrates/pubsub
+ps=$?
 
-exit $v1 && $v2 && $en && $gt && $sm && $cfg && $bl && $cr && $cdrc && $ut && $hs && $c2g && $cdre
-
+exit $v1 && $v2 && $en && $gt && $sm && $cfg && $bl && $cr && $cdrc && $ut && $hs && $c2g && $cdre && $ps
