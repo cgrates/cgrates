@@ -69,10 +69,13 @@ func newQueueSaver(id string, saveInterval time.Duration, sq *StatsQueue, adb Ac
 		adb:          adb,
 	}
 	svr.save = func(svr *queueSaver) {
+		//Logger.Debug(fmt.Sprintf("svr.save, statsQueue: %+v", sq))
 		for {
 			select {
 			case <-svr.ticker.C:
+				//Logger.Debug(fmt.Sprintf("svr.ticket.C, statsQueue: %+v", sq))
 				if svr.sq.IsDirty() {
+					//Logger.Debug("svr.sq.IsDirty")
 					svr.sq.mux.Lock()
 					if err := svr.adb.SetCdrStatsQueue(svr.sq); err != nil {
 						Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", id, err))
@@ -201,12 +204,6 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	oldSavers := s.queueSavers
 	s.queues = make(map[string]*StatsQueue, len(css))
 	s.queueSavers = make(map[string]*queueSaver, len(css))
-	if def, exists := oldQueues[utils.META_DEFAULT]; exists {
-		def.UpdateConf(def.conf) // for reset
-		s.queues[utils.META_DEFAULT] = def
-		s.queueSavers[utils.META_DEFAULT] = oldSavers[utils.META_DEFAULT]
-		delete(oldSavers, utils.META_DEFAULT)
-	}
 	for _, cs := range css {
 		var sq *StatsQueue
 		var existing bool

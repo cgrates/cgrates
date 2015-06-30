@@ -490,12 +490,8 @@ func main() {
 		go stopRaterSignalHandler()
 		stopHandled = true
 	}
-
 	if cfg.CDRStatsEnabled { // Init it here so we make it availabe to the Apier
 		cdrStats = engine.NewStats(ratingDb, accountDb, cfg.CDRStatsSaveInterval)
-		if cfg.CDRStatConfig != nil && len(cfg.CDRStatConfig.Metrics) != 0 {
-			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), nil)
-		}
 		server.RpcRegister(cdrStats)
 		server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
 	}
