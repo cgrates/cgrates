@@ -126,6 +126,7 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 		s.queues[cs.Id] = NewStatsQueue(cs)
 		s.setupQueueSaver(sq)
 	}
+	Logger.Debug(fmt.Sprintf("AddQueue, queueSavers: %+v", s.queueSavers))
 	return nil
 }
 
@@ -247,11 +248,13 @@ func (s *Stats) AppendCDR(cdr *StoredCdr, out *int) error {
 }
 
 func (s *Stats) Stop(int, *int) error {
+	Logger.Debug(fmt.Sprintf("Stop, queueSavers: %+v", s.queueSavers))
 	s.mux.RLock()
 	defer s.mux.RUnlock()
 	for _, saver := range s.queueSavers {
 		saver.stop()
 	}
+	Logger.Debug("End of Stop()")
 	return nil
 }
 
