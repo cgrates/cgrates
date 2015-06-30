@@ -321,7 +321,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 3
+	expected := 2
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
