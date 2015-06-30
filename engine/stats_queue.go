@@ -88,14 +88,14 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 func (sq *StatsQueue) Save(adb AccountingStorage) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
-	//if sq.dirty {
-	Logger.Debug(fmt.Sprintf("SAVED: %+v", sq))
-	if err := adb.SetCdrStatsQueue(sq); err != nil {
-		Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
-		return
+	if sq.dirty {
+		Logger.Debug(fmt.Sprintf("SAVED: %+v", sq))
+		if err := adb.SetCdrStatsQueue(sq); err != nil {
+			Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
+			return
+		}
+		sq.dirty = false
 	}
-	sq.dirty = false
-	//}
 }
 
 func (sq *StatsQueue) Load(saved *StatsQueue) {
