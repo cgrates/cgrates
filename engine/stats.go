@@ -75,9 +75,9 @@ func newQueueSaver(saveInterval time.Duration, sq *StatsQueue, adb AccountingSto
 }
 
 func (svr *queueSaver) stop() {
-	svr.sq.Save(svr.accountingDb)
 	svr.ticker.Stop()
 	svr.stopper <- true
+	svr.sq.Save(svr.accountingDb)
 }
 
 func NewStats(ratingDb RatingStorage, accountingDb AccountingStorage, saveInterval time.Duration) *Stats {
@@ -120,18 +120,12 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 	if s.queueSavers == nil {
 		s.queueSavers = make(map[string]*queueSaver)
 	}
-	var sq *StatsQueue
-	var exists bool
-	if sq, exists = s.queues[cs.Id]; exists {
+	if sq, exists := s.queues[cs.Id]; exists {
 		sq.UpdateConf(cs)
 	} else {
-		sq = NewStatsQueue(cs)
-		s.queues[cs.Id] = sq
-	}
-	if _, exists = s.queueSavers[sq.GetId()]; !exists {
+		s.queues[cs.Id] = NewStatsQueue(cs)
 		s.setupQueueSaver(sq)
 	}
-	Logger.Debug(fmt.Sprintf("AddQueue, queueSavers: %+v", s.queueSavers))
 	return nil
 }
 
@@ -251,13 +245,11 @@ func (s *Stats) AppendCDR(cdr *StoredCdr, out *int) error {
 }
 
 func (s *Stats) Stop(int, *int) error {
-	Logger.Debug(fmt.Sprintf("Stop, queueSavers: %+v", s.queueSavers))
 	s.mux.RLock()
 	defer s.mux.RUnlock()
 	for _, saver := range s.queueSavers {
 		saver.stop()
 	}
-	Logger.Debug("End of Stop()")
 	return nil
 }
 

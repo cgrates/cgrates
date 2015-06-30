@@ -89,7 +89,6 @@ func (sq *StatsQueue) Save(adb AccountingStorage) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	if sq.dirty {
-		Logger.Debug(fmt.Sprintf("SAVED: %+v", sq))
 		if err := adb.SetCdrStatsQueue(sq); err != nil {
 			Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
 			return
@@ -101,7 +100,6 @@ func (sq *StatsQueue) Save(adb AccountingStorage) {
 func (sq *StatsQueue) Load(saved *StatsQueue) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
-	Logger.Debug(fmt.Sprintf("LOADED: %+v", saved))
 	sq.Cdrs = saved.Cdrs
 	for _, qcdr := range saved.Cdrs {
 		sq.appendQcdr(qcdr)
