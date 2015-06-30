@@ -75,9 +75,9 @@ func newQueueSaver(saveInterval time.Duration, sq *StatsQueue, adb AccountingSto
 }
 
 func (svr *queueSaver) stop() {
+	svr.sq.Save(svr.accountingDb)
 	svr.ticker.Stop()
 	svr.stopper <- true
-	svr.sq.Save(svr.accountingDb)
 }
 
 func NewStats(ratingDb RatingStorage, accountingDb AccountingStorage, saveInterval time.Duration) *Stats {
@@ -120,10 +120,15 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 	if s.queueSavers == nil {
 		s.queueSavers = make(map[string]*queueSaver)
 	}
-	if sq, exists := s.queues[cs.Id]; exists {
+	var sq *StatsQueue
+	var exists bool
+	if sq, exists = s.queues[cs.Id]; exists {
 		sq.UpdateConf(cs)
 	} else {
-		s.queues[cs.Id] = NewStatsQueue(cs)
+		sq = NewStatsQueue(cs)
+		s.queues[cs.Id] = sq
+	}
+	if _, exists = s.queueSavers[sq.GetId()]; !exists {
 		s.setupQueueSaver(sq)
 	}
 	return nil
@@ -203,8 +208,6 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 
 			if saved, err := s.accountingDb.GetCdrStatsQueue(sq.GetId()); err == nil {
 				sq.Load(saved)
-			} else {
-				Logger.Debug(fmt.Sprintf("XXXXXXXXXXX: %v", err))
 			}
 			s.setupQueueSaver(sq)
 		}

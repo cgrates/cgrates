@@ -48,6 +48,8 @@ func generalSignalHandler() {
 
 	sig := <-c
 	engine.Logger.Info(fmt.Sprintf("Caught signal %v, shuting down cgr-engine\n", sig))
+	var dummyInt int
+	cdrStats.Stop(dummyInt, &dummyInt)
 	exitChan <- true
 }
 
@@ -61,6 +63,8 @@ func stopRaterSignalHandler() {
 
 	engine.Logger.Info(fmt.Sprintf("Caught signal %v, unregistering from balancer\n", sig))
 	unregisterFromBalancer()
+	var dummyInt int
+	cdrStats.Stop(dummyInt, &dummyInt)
 	exitChan <- true
 }
 
