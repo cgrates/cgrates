@@ -258,7 +258,7 @@ func (self CgrJsonCfg) HistAgentJsonCfg() (*HistAgentJsonCfg, error) {
 }
 
 func (self CgrJsonCfg) PubSubServJsonCfg() (*PubSubServJsonCfg, error) {
-	rawCfg, hasKey := self[HISTSERV_JSN]
+	rawCfg, hasKey := self[PUBSUBSERV_JSN]
 	if !hasKey {
 		return nil, nil
 	}
@@ -270,7 +270,7 @@ func (self CgrJsonCfg) PubSubServJsonCfg() (*PubSubServJsonCfg, error) {
 }
 
 func (self CgrJsonCfg) PubSubAgentJsonCfg() (*PubSubAgentJsonCfg, error) {
-	rawCfg, hasKey := self[HISTAGENT_JSN]
+	rawCfg, hasKey := self[PUBSUBAGENT_JSN]
 	if !hasKey {
 		return nil, nil
 	}

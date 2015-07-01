@@ -371,7 +371,7 @@ func startPubSubServer(chanDone chan struct{}) {
 		exitChan <- true
 		return
 	}
-	server.RpcRegisterName("PubSub", pubSubServer)
+	server.RpcRegisterName("PubSubV1", pubSubServer)
 	close(chanDone)
 }
 
