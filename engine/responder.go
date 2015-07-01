@@ -151,6 +151,13 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 		if err != nil {
 			return err
 		}
+		usage, err := ev.GetDuration(utils.META_DEFAULT)
+		if err != nil {
+			return err
+		}
+		if usage == 0 {
+			usage = config.CgrConfig().MaxCallDuration
+		}
 		cd := &CallDescriptor{
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
@@ -159,7 +166,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime,
-			TimeEnd:     startTime.Add(config.CgrConfig().MaxCallDuration),
+			TimeEnd:     startTime.Add(usage),
 		}
 		var remainingDuration float64
 		err = rs.GetMaxSessionTime(cd, &remainingDuration)

@@ -470,6 +470,23 @@ func TestTutLocalDerivedMaxSessionTime(t *testing.T) {
 	}
 }
 
+// Check MaxUsage
+func TestTutLocalMaxUsage(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	setupReq := &engine.UsageRecord{TOR: utils.VOICE, ReqType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+		Account: "1003", Subject: "1003", Destination: "1001",
+		SetupTime: "2014-08-04T13:00:00Z", Usage: "1",
+	}
+	var maxTime float64
+	if err := tutLocalRpc.Call("ApierV1.GetMaxUsage", setupReq, &maxTime); err != nil {
+		t.Error(err)
+	} else if maxTime != 1 {
+		t.Errorf("Calling ApierV1.MaxUsage got maxTime: %f", maxTime)
+	}
+}
+
 // Make sure queueids were created
 func TestTutFsCallsCdrStats(t *testing.T) {
 	if !*testLocal {
