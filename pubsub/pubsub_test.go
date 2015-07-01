@@ -5,20 +5,35 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestSubscribe(t *testing.T) {
 	ps := NewPubSub(nil)
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
-		EventType:    "test",
-		PostUrl:      "url",
-		LiveDuration: time.Second,
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+		LifeSpan:  time.Second,
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	if expTime, exists := ps.subscribers["test"]["url"]; !exists || expTime.IsZero() {
+	if expTime, exists := ps.subscribers["test"][utils.InfieldJoin(utils.META_HTTP_POST, "url")]; !exists || expTime.IsZero() {
 		t.Error("Error adding subscriber: ", ps.subscribers)
+	}
+}
+
+func TestSubscribeNoTransport(t *testing.T) {
+	ps := NewPubSub(nil)
+	var r string
+	if err := ps.Subscribe(SubscribeInfo{
+		EventName: "test",
+		Transport: "test",
+		Address:   "url",
+		LifeSpan:  time.Second,
+	}, &r); err == nil {
+		t.Error("Error subscribing error: ", err)
 	}
 }
 
@@ -26,13 +41,14 @@ func TestSubscribeNoExpire(t *testing.T) {
 	ps := NewPubSub(nil)
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
-		EventType:    "test",
-		PostUrl:      "url",
-		LiveDuration: 0,
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+		LifeSpan:  0,
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	if expTime, exists := ps.subscribers["test"]["url"]; !exists || !expTime.IsZero() {
+	if expTime, exists := ps.subscribers["test"][utils.InfieldJoin(utils.META_HTTP_POST, "url")]; !exists || !expTime.IsZero() {
 		t.Error("Error adding no expire subscriber: ", ps.subscribers)
 	}
 }
@@ -41,15 +57,17 @@ func TestUnsubscribe(t *testing.T) {
 	ps := NewPubSub(nil)
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
-		EventType:    "test",
-		PostUrl:      "url",
-		LiveDuration: time.Second,
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+		LifeSpan:  time.Second,
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
 	if err := ps.Unsubscribe(SubscribeInfo{
-		EventType: "test",
-		PostUrl:   "url",
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
 	}, &r); err != nil {
 		t.Error("Error unsubscribing: ", err)
 	}
@@ -61,32 +79,33 @@ func TestUnsubscribe(t *testing.T) {
 func TestPublish(t *testing.T) {
 	ps := NewPubSub(&config.CGRConfig{HttpSkipTlsVerify: true})
 	ps.pubFunc = func(url string, ttl bool, obj interface{}) ([]byte, error) {
-		obj.(map[string]string)["called"] = "yes"
+		obj.(map[string]string)["called"] = url
 		return nil, nil
 	}
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
-		EventType:    "test",
-		PostUrl:      "url",
-		LiveDuration: time.Second,
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+		LifeSpan:  time.Second,
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
 	m := make(map[string]string)
+	m["EventName"] = "test"
 	if err := ps.Publish(PublishInfo{
-		EventType: "test",
-		Event:     m,
+		Event: m,
 	}, &r); err != nil {
 		t.Error("Error publishing: ", err)
 	}
 	for i := 0; i < 1000; i++ { // wait for the theread to populate map
-		if len(m) == 0 {
+		if len(m) == 1 {
 			time.Sleep(time.Microsecond)
 		} else {
 			break
 		}
 	}
-	if r, exists := m["called"]; !exists || r != "yes" {
+	if r, exists := m["called"]; !exists || r != "url" {
 		t.Error("Error calling publish function: ", m)
 	}
 }
@@ -100,15 +119,15 @@ func TestPublishExpired(t *testing.T) {
 	}
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
-		EventType:    "test",
-		PostUrl:      "url",
-		LiveDuration: 1,
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+		LifeSpan:  1,
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
 	if err := ps.Publish(PublishInfo{
-		EventType: "test",
-		Event:     nil,
+		Event: map[string]string{"EventName": "test"},
 	}, &r); err != nil {
 		t.Error("Error publishing: ", err)
 	}
