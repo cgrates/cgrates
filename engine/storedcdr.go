@@ -621,8 +621,8 @@ type ExternalCdr struct {
 	Rated           bool // Mark the CDR as rated so we do not process it during mediation
 }
 
-// Used when authorizing requests from outside, eg ApierV1.GetMaxSessionTime
-type MaxUsageReq struct {
+// Used when authorizing requests from outside, eg ApierV1.GetMaxUsage
+type UsageRecord struct {
 	TOR         string
 	ReqType     string
 	Direction   string
@@ -636,7 +636,7 @@ type MaxUsageReq struct {
 	Usage       string
 }
 
-func (self *MaxUsageReq) AsStoredCdr() (*StoredCdr, error) {
+func (self *UsageRecord) AsStoredCdr() (*StoredCdr, error) {
 	var err error
 	storedCdr := &StoredCdr{TOR: self.TOR, ReqType: self.ReqType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
 		Account: self.Account, Subject: self.Subject, Destination: self.Destination}
@@ -650,4 +650,31 @@ func (self *MaxUsageReq) AsStoredCdr() (*StoredCdr, error) {
 		return nil, err
 	}
 	return storedCdr, nil
+}
+
+func (self *UsageRecord) AsCallDescriptor() (*CallDescriptor, error) {
+	var err error
+	timeStr := self.AnswerTime
+	if len(timeStr) == 0 { // In case of auth, answer time will not be defined, so take it out of setup one
+		timeStr = self.SetupTime
+	}
+	startTime, err := utils.ParseTimeDetectLayout(timeStr)
+	if err != nil {
+		return nil, err
+	}
+	usage, err := utils.ParseDurationWithSecs(self.Usage)
+	if err != nil {
+		return nil, err
+	}
+	return &CallDescriptor{
+		TOR:         self.TOR,
+		Direction:   self.Direction,
+		Tenant:      self.Tenant,
+		Category:    self.Category,
+		Subject:     self.Subject,
+		Account:     self.Account,
+		Destination: self.Destination,
+		TimeStart:   startTime,
+		TimeEnd:     startTime.Add(usage),
+	}, nil
 }

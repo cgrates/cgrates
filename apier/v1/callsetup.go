@@ -26,36 +26,33 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Returns MaxSessionTime in seconds, -1 for no limit
-func (self *ApierV1) GetMaxSessionTime(auth engine.MaxUsageReq, maxSessionTime *float64) error {
-	if auth.TOR == "" {
-		auth.TOR = utils.VOICE
+// Returns MaxUsage (for calls in seconds), -1 for no limit
+func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float64) error {
+	if usageRecord.TOR == "" {
+		usageRecord.TOR = utils.VOICE
 	}
-	if auth.ReqType == "" {
-		auth.ReqType = self.Config.DefaultReqType
+	if usageRecord.ReqType == "" {
+		usageRecord.ReqType = self.Config.DefaultReqType
 	}
-	if auth.Direction == "" {
-		auth.Direction = utils.OUT
+	if usageRecord.Direction == "" {
+		usageRecord.Direction = utils.OUT
 	}
-	if auth.Tenant == "" {
-		auth.Tenant = self.Config.DefaultTenant
+	if usageRecord.Tenant == "" {
+		usageRecord.Tenant = self.Config.DefaultTenant
 	}
-	if auth.Category == "" {
-		auth.Category = self.Config.DefaultCategory
+	if usageRecord.Category == "" {
+		usageRecord.Category = self.Config.DefaultCategory
 	}
-	if auth.Subject == "" {
-		auth.Subject = auth.Account
+	if usageRecord.Subject == "" {
+		usageRecord.Subject = usageRecord.Account
 	}
-	if auth.Subject == "" {
-		auth.Subject = auth.Account
+	if usageRecord.SetupTime == "" {
+		usageRecord.SetupTime = utils.META_NOW
 	}
-	if auth.SetupTime == "" {
-		auth.SetupTime = utils.META_NOW
+	if usageRecord.Usage == "" {
+		usageRecord.Usage = strconv.FormatFloat(self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
 	}
-	if auth.Usage == "" {
-		auth.Usage = strconv.FormatFloat(self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
-	}
-	storedCdr, err := auth.AsStoredCdr()
+	storedCdr, err := usageRecord.AsStoredCdr()
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -64,9 +61,9 @@ func (self *ApierV1) GetMaxSessionTime(auth engine.MaxUsageReq, maxSessionTime *
 		return err
 	}
 	if maxDur == -1.0 {
-		*maxSessionTime = -1.0
+		*maxUsage = -1.0
 		return nil
 	}
-	*maxSessionTime = time.Duration(maxDur).Seconds()
+	*maxUsage = time.Duration(maxDur).Seconds()
 	return nil
 }
