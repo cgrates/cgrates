@@ -23,7 +23,6 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -697,7 +696,6 @@ func (rs *RedisStorage) GetPubSubSubscribers() (result map[string]map[string]tim
 	}
 	result = make(map[string]map[string]time.Time)
 	for _, key := range keys {
-		log.Print("KEY: ", key)
 		if values, err := rs.db.Get(key); err == nil {
 			subs := make(map[string]time.Time)
 			err = rs.ms.Unmarshal(values, subs)
@@ -706,7 +704,6 @@ func (rs *RedisStorage) GetPubSubSubscribers() (result map[string]map[string]tim
 			return nil, utils.ErrNotFound
 		}
 	}
-	log.Print("XXX: ", result)
 	return
 }
 
