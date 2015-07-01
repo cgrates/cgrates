@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"os"
 	"runtime"
 	"runtime/pprof"
@@ -58,6 +59,7 @@ var (
 	tenant          = flag.String("tenant", "cgrates.org", "The type of record to use in queries.")
 	subject         = flag.String("subject", "1001", "The rating subject to use in queries.")
 	destination     = flag.String("destination", "1002", "The destination to use in queries.")
+	json            = flag.Bool("json", false, "Use JSON RPC")
 
 	nilDuration = time.Duration(0)
 )
@@ -107,7 +109,14 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 
 func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	result := engine.CallCost{}
-	client, err := rpc.Dial("tcp", *raterAddress)
+	var client *rpc.Client
+	var err error
+	if *json {
+		client, err = jsonrpc.Dial("tcp", *raterAddress)
+	} else {
+		client, err = rpc.Dial("tcp", *raterAddress)
+	}
+
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to engine: %s", err.Error())
 	}
