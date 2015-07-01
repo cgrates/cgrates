@@ -2,12 +2,9 @@ package pubsub
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -32,14 +29,14 @@ type PublisherSubscriber interface {
 
 type PubSub struct {
 	subscribers map[string]map[string]time.Time
-	conf        *config.CGRConfig
+	ttlVerify   bool
 	pubFunc     func(string, bool, interface{}) ([]byte, error)
 	mux         *sync.Mutex
 }
 
-func NewPubSub(conf *config.CGRConfig) *PubSub {
+func NewPubSub(ttlVerify bool) *PubSub {
 	return &PubSub{
-		conf:        conf,
+		ttlVerify:   ttlVerify,
 		subscribers: make(map[string]map[string]time.Time),
 		pubFunc:     utils.HttpJsonPost,
 		mux:         &sync.Mutex{},
@@ -84,7 +81,6 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 	for transport_address, expTime := range subs {
 		split := utils.InfieldSplit(transport_address)
 		if len(split) != 2 {
-			engine.Logger.Warning("<PubSub> Wrong transport;address pair: " + transport_address)
 			continue
 		}
 		transport := split[0]
@@ -98,11 +94,8 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 			go func() {
 				delay := utils.Fib()
 				for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-					if _, err := ps.pubFunc(address, ps.conf.HttpSkipTlsVerify, pi.Event); err == nil {
+					if _, err := ps.pubFunc(address, ps.ttlVerify, pi.Event); err == nil {
 						break // Success, no need to reinterate
-					} else if i == 4 { // Last iteration, syslog the warning
-						engine.Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), pi.Event["EventName"]))
-						break
 					}
 					time.Sleep(delay())
 				}

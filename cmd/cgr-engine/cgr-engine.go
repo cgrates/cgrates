@@ -35,6 +35,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
+	"github.com/cgrates/cgrates/pubsub"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -67,6 +68,7 @@ var (
 	exitChan     = make(chan bool)
 	server       = &engine.Server{}
 	scribeServer history.Scribe
+	pubSubServer pubsub.PublisherSubscriber
 	cdrServer    *engine.CdrServer
 	cdrStats     *engine.Stats
 	cfg          *config.CGRConfig
@@ -363,6 +365,46 @@ func startHistoryAgent(chanServerStarted chan struct{}) {
 	return
 }
 
+func startPubSubServer(chanDone chan struct{}) {
+	if pubSubServer = pubsub.NewPubSub(cfg.HttpSkipTlsVerify); err != nil {
+		engine.Logger.Crit(fmt.Sprintf("<PubSubServer> Could not start, error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	server.RpcRegisterName("PubSub", pubSubServer)
+	close(chanDone)
+}
+
+// chanStartServer will report when server is up, useful for internal requests
+func startPubSubAgent(chanServerStarted chan struct{}) {
+	if cfg.PubSubServer == utils.INTERNAL { // For internal requests, wait for server to come online before connecting
+		engine.Logger.Crit(fmt.Sprintf("<PubSubAgent> Connecting internally to PubSubServer"))
+		select {
+		case <-time.After(1 * time.Minute):
+			engine.Logger.Crit(fmt.Sprintf("<PubSubAgent> Timeout waiting for server to start."))
+			exitChan <- true
+			return
+		case <-chanServerStarted:
+		}
+		//<-chanServerStarted // If server is not enabled, will have deadlock here
+	} else { // Connect in iteration since there are chances of concurrency here
+		delay := utils.Fib()
+		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
+			//engine.Logger.Crit(fmt.Sprintf("<PubSubAgent> Trying to connect, iteration: %d, time %s", i, time.Now()))
+			if pubSubServer = pubsub.NewPubSub(cfg.HttpSkipTlsVerify); err == nil {
+				break //Connected so no need to reiterate
+			} else if i == 2 && err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<PubSubAgent> Could not connect to the server, error: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			time.Sleep(delay())
+		}
+	}
+	engine.SetPubSub(pubSubServer) // scribeServer comes from global variable
+	return
+}
+
 // Starts the rpc server, waiting for the necessary components to finish their tasks
 func serveRpc(rpcWaitChans []chan struct{}) {
 	for _, chn := range rpcWaitChans {
@@ -577,6 +619,18 @@ func main() {
 	if cfg.HistoryAgentEnabled {
 		engine.Logger.Info("Starting CGRateS History Agent.")
 		go startHistoryAgent(histServChan)
+	}
+
+	var pubsubServChan chan struct{} // Will be initialized only if the server starts
+	if cfg.PubSubServerEnabled {
+		pubsubServChan = make(chan struct{})
+		rpcWait = append(rpcWait, pubsubServChan)
+		go startPubSubServer(pubsubServChan)
+	}
+
+	if cfg.PubSubAgentEnabled {
+		engine.Logger.Info("Starting CGRateS PubSub Agent.")
+		go startPubSubAgent(pubsubServChan)
 	}
 
 	var cdrsChan chan struct{}

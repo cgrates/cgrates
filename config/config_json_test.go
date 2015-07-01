@@ -406,6 +406,30 @@ func TestDfHistAgentJsonCfg(t *testing.T) {
 	}
 }
 
+func TestDfPubSubServJsonCfg(t *testing.T) {
+	eCfg := &PubSubServJsonCfg{
+		Enabled:       utils.BoolPointer(false),
+		Save_interval: utils.StringPointer("1s"),
+	}
+	if cfg, err := dfCgrJsonCfg.PubSubServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestDfPubSubAgentJsonCfg(t *testing.T) {
+	eCfg := &PubSubAgentJsonCfg{
+		Enabled: utils.BoolPointer(false),
+		Server:  utils.StringPointer("internal"),
+	}
+	if cfg, err := dfCgrJsonCfg.PubSubAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
 func TestDfMailerJsonCfg(t *testing.T) {
 	eCfg := &MailerJsonCfg{
 		Server:       utils.StringPointer("localhost"),
@@ -459,6 +483,11 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 		t.Error("Received: ", cfg)
 	}
 	if cfg, err := cgrJsonCfg.HistAgentJsonCfg(); err != nil {
+		t.Error(err)
+	} else if cfg != nil {
+		t.Error("Received: ", cfg)
+	}
+	if cfg, err := cgrJsonCfg.PubSubAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if cfg != nil {
 		t.Error("Received: ", cfg)
