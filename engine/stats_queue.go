@@ -102,7 +102,7 @@ func (sq *StatsQueue) Load(saved *StatsQueue) {
 	defer sq.mux.Unlock()
 	sq.Cdrs = saved.Cdrs
 	for _, qcdr := range saved.Cdrs {
-		sq.appendQcdr(qcdr)
+		sq.appendQcdr(qcdr, false)
 	}
 }
 
@@ -110,33 +110,35 @@ func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	if sq.conf.AcceptCdr(cdr) {
-		sq.appendQcdr(sq.simplifyCdr(cdr))
+		sq.appendQcdr(sq.simplifyCdr(cdr), true)
 	}
 }
 
-func (sq *StatsQueue) appendQcdr(qcdr *QCdr) {
+func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 	sq.Cdrs = append(sq.Cdrs, qcdr)
 	sq.addToMetrics(qcdr)
 	sq.purgeObsoleteCdrs()
 	sq.dirty = true
 	// check for trigger
-	stats := sq.getStats()
-	sq.conf.Triggers.Sort()
-	for _, at := range sq.conf.Triggers {
-		if at.MinQueuedItems > 0 && len(sq.Cdrs) < at.MinQueuedItems {
-			continue
-		}
-		if strings.HasPrefix(at.ThresholdType, "*min_") {
-			if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
-				if value > STATS_NA && value <= at.ThresholdValue {
-					at.Execute(nil, sq.Triggered(at))
+	if runTrigger {
+		stats := sq.getStats()
+		sq.conf.Triggers.Sort()
+		for _, at := range sq.conf.Triggers {
+			if at.MinQueuedItems > 0 && len(sq.Cdrs) < at.MinQueuedItems {
+				continue
+			}
+			if strings.HasPrefix(at.ThresholdType, "*min_") {
+				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
+					if value > STATS_NA && value <= at.ThresholdValue {
+						at.Execute(nil, sq.Triggered(at))
+					}
 				}
 			}
-		}
-		if strings.HasPrefix(at.ThresholdType, "*max_") {
-			if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
-				if value > STATS_NA && value >= at.ThresholdValue {
-					at.Execute(nil, sq.Triggered(at))
+			if strings.HasPrefix(at.ThresholdType, "*max_") {
+				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
+					if value > STATS_NA && value >= at.ThresholdValue {
+						at.Execute(nil, sq.Triggered(at))
+					}
 				}
 			}
 		}
