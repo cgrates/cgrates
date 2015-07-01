@@ -1,4 +1,4 @@
-package pubsub
+package engine
 
 import (
 	"testing"
@@ -8,7 +8,7 @@ import (
 )
 
 func TestSubscribe(t *testing.T) {
-	ps := NewPubSub(false)
+	ps := NewPubSub(accountingStorage, false)
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventName: "test",
@@ -24,7 +24,7 @@ func TestSubscribe(t *testing.T) {
 }
 
 func TestSubscribeNoTransport(t *testing.T) {
-	ps := NewPubSub(false)
+	ps := NewPubSub(accountingStorage, false)
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventName: "test",
@@ -37,7 +37,7 @@ func TestSubscribeNoTransport(t *testing.T) {
 }
 
 func TestSubscribeNoExpire(t *testing.T) {
-	ps := NewPubSub(false)
+	ps := NewPubSub(accountingStorage, false)
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventName: "test",
@@ -53,7 +53,7 @@ func TestSubscribeNoExpire(t *testing.T) {
 }
 
 func TestUnsubscribe(t *testing.T) {
-	ps := NewPubSub(false)
+	ps := NewPubSub(accountingStorage, false)
 	var r string
 	if err := ps.Subscribe(SubscribeInfo{
 		EventName: "test",
@@ -76,7 +76,7 @@ func TestUnsubscribe(t *testing.T) {
 }
 
 func TestPublish(t *testing.T) {
-	ps := NewPubSub(true)
+	ps := NewPubSub(accountingStorage, true)
 	ps.pubFunc = func(url string, ttl bool, obj interface{}) ([]byte, error) {
 		obj.(map[string]string)["called"] = url
 		return nil, nil
@@ -110,7 +110,7 @@ func TestPublish(t *testing.T) {
 }
 
 func TestPublishExpired(t *testing.T) {
-	ps := NewPubSub(true)
+	ps := NewPubSub(accountingStorage, true)
 	ps.pubFunc = func(url string, ttl bool, obj interface{}) ([]byte, error) {
 		m := obj.(map[string]string)
 		m["called"] = "yes"

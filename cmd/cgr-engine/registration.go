@@ -49,7 +49,9 @@ func generalSignalHandler() {
 	sig := <-c
 	engine.Logger.Info(fmt.Sprintf("Caught signal %v, shuting down cgr-engine\n", sig))
 	var dummyInt int
-	cdrStats.Stop(dummyInt, &dummyInt)
+	if cdrStats != nil {
+		cdrStats.Stop(dummyInt, &dummyInt)
+	}
 	exitChan <- true
 }
 

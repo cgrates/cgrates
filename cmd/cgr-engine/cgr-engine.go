@@ -35,7 +35,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
-	"github.com/cgrates/cgrates/pubsub"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -68,7 +67,7 @@ var (
 	exitChan     = make(chan bool)
 	server       = &engine.Server{}
 	scribeServer history.Scribe
-	pubSubServer pubsub.PublisherSubscriber
+	pubSubServer engine.PublisherSubscriber
 	cdrServer    *engine.CdrServer
 	cdrStats     *engine.Stats
 	cfg          *config.CGRConfig
@@ -338,7 +337,7 @@ func startHistoryServer(chanDone chan struct{}) {
 // chanStartServer will report when server is up, useful for internal requests
 func startHistoryAgent(chanServerStarted chan struct{}) {
 	if cfg.HistoryServer == utils.INTERNAL { // For internal requests, wait for server to come online before connecting
-		engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Connecting internally to HistoryServer"))
+		//engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Connecting internally to HistoryServer"))
 		select {
 		case <-time.After(1 * time.Minute):
 			engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Timeout waiting for server to start."))
@@ -365,8 +364,8 @@ func startHistoryAgent(chanServerStarted chan struct{}) {
 	return
 }
 
-func startPubSubServer(chanDone chan struct{}) {
-	if pubSubServer = pubsub.NewPubSub(cfg.HttpSkipTlsVerify); err != nil {
+func startPubSubServer(chanDone chan struct{}, accountDb engine.AccountingStorage) {
+	if pubSubServer = engine.NewPubSub(accountDb, cfg.HttpSkipTlsVerify); err != nil {
 		engine.Logger.Crit(fmt.Sprintf("<PubSubServer> Could not start, error: %s", err.Error()))
 		exitChan <- true
 		return
@@ -376,9 +375,8 @@ func startPubSubServer(chanDone chan struct{}) {
 }
 
 // chanStartServer will report when server is up, useful for internal requests
-func startPubSubAgent(chanServerStarted chan struct{}) {
+func startPubSubAgent(chanServerStarted chan struct{}, accountDb engine.AccountingStorage) {
 	if cfg.PubSubServer == utils.INTERNAL { // For internal requests, wait for server to come online before connecting
-		engine.Logger.Crit(fmt.Sprintf("<PubSubAgent> Connecting internally to PubSubServer"))
 		select {
 		case <-time.After(1 * time.Minute):
 			engine.Logger.Crit(fmt.Sprintf("<PubSubAgent> Timeout waiting for server to start."))
@@ -391,7 +389,7 @@ func startPubSubAgent(chanServerStarted chan struct{}) {
 		delay := utils.Fib()
 		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
 			//engine.Logger.Crit(fmt.Sprintf("<PubSubAgent> Trying to connect, iteration: %d, time %s", i, time.Now()))
-			if pubSubServer = pubsub.NewPubSub(cfg.HttpSkipTlsVerify); err == nil {
+			if pubSubServer = engine.NewPubSub(accountDb, cfg.HttpSkipTlsVerify); err == nil {
 				break //Connected so no need to reiterate
 			} else if i == 2 && err != nil {
 				engine.Logger.Crit(fmt.Sprintf("<PubSubAgent> Could not connect to the server, error: %s", err.Error()))
@@ -625,12 +623,12 @@ func main() {
 	if cfg.PubSubServerEnabled {
 		pubsubServChan = make(chan struct{})
 		rpcWait = append(rpcWait, pubsubServChan)
-		go startPubSubServer(pubsubServChan)
+		go startPubSubServer(pubsubServChan, accountDb)
 	}
 
 	if cfg.PubSubAgentEnabled {
 		engine.Logger.Info("Starting CGRateS PubSub Agent.")
-		go startPubSubAgent(pubsubServChan)
+		go startPubSubAgent(pubsubServChan, accountDb)
 	}
 
 	var cdrsChan chan struct{}

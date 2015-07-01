@@ -29,7 +29,6 @@ import (
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
-	"github.com/cgrates/cgrates/pubsub"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -68,7 +67,7 @@ var (
 	debitPeriod            = 10 * time.Second
 	globalRoundingDecimals = 10
 	historyScribe          history.Scribe
-	pubSubServer           pubsub.PublisherSubscriber
+	pubSubServer           PublisherSubscriber
 	//historyScribe, _ = history.NewMockScribe()
 )
 
@@ -105,7 +104,7 @@ func SetHistoryScribe(scribe history.Scribe) {
 	historyScribe = scribe
 }
 
-func SetPubSub(ps pubsub.PublisherSubscriber) {
+func SetPubSub(ps PublisherSubscriber) {
 	pubSubServer = ps
 }
 

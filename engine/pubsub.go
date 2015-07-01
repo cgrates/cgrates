@@ -1,7 +1,8 @@
-package pubsub
+package engine
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -32,14 +33,38 @@ type PubSub struct {
 	ttlVerify   bool
 	pubFunc     func(string, bool, interface{}) ([]byte, error)
 	mux         *sync.Mutex
+	accountDb   AccountingStorage
 }
 
-func NewPubSub(ttlVerify bool) *PubSub {
-	return &PubSub{
+func NewPubSub(accountDb AccountingStorage, ttlVerify bool) *PubSub {
+	ps := &PubSub{
 		ttlVerify:   ttlVerify,
 		subscribers: make(map[string]map[string]time.Time),
 		pubFunc:     utils.HttpJsonPost,
 		mux:         &sync.Mutex{},
+		accountDb:   accountDb,
+	}
+	// load subscribers
+	if subs, err := accountDb.GetPubSubSubscribers(); err == nil {
+		ps.subscribers = subs
+	}
+	return ps
+}
+
+func (ps *PubSub) saveSubscribers(key string) {
+	if key != "" {
+		if _, found := ps.subscribers[key]; !found {
+			return
+		}
+		if err := accountingStorage.SetPubSubSubscribers(key, ps.subscribers[key]); err != nil {
+			Logger.Err("<PubSub> Error saving subscribers: " + err.Error())
+		}
+	} else { // save all
+		for key, valueMap := range ps.subscribers {
+			if err := accountingStorage.SetPubSubSubscribers(key, valueMap); err != nil {
+				Logger.Err("<PubSub> Error saving subscribers: " + err.Error())
+			}
+		}
 	}
 }
 
@@ -58,6 +83,7 @@ func (ps *PubSub) Subscribe(si SubscribeInfo, reply *string) error {
 		expTime = time.Now().Add(si.LifeSpan)
 	}
 	ps.subscribers[si.EventName][utils.InfieldJoin(si.Transport, si.Address)] = expTime
+	ps.saveSubscribers(si.EventName)
 	*reply = utils.OK
 	return nil
 }
@@ -70,6 +96,7 @@ func (ps *PubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
 		return errors.New(*reply)
 	}
 	delete(ps.subscribers[si.EventName], utils.InfieldJoin(si.Transport, si.Address))
+	ps.saveSubscribers(si.EventName)
 	*reply = utils.OK
 	return nil
 }
@@ -78,15 +105,17 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 	ps.mux.Lock()
 	defer ps.mux.Unlock()
 	subs := ps.subscribers[pi.Event["EventName"]]
-	for transport_address, expTime := range subs {
-		split := utils.InfieldSplit(transport_address)
+	for transportAddress, expTime := range subs {
+		split := utils.InfieldSplit(transportAddress)
 		if len(split) != 2 {
+			Logger.Warning("<PubSub> Wrong transport;address pair: " + transportAddress)
 			continue
 		}
 		transport := split[0]
 		address := split[1]
 		if !expTime.IsZero() && expTime.Before(time.Now()) {
-			delete(subs, transport_address)
+			delete(subs, transportAddress)
+			ps.saveSubscribers(pi.Event["EventName"])
 			continue // subscription expired, do not send event
 		}
 		switch transport {
@@ -96,6 +125,9 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 				for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
 					if _, err := ps.pubFunc(address, ps.ttlVerify, pi.Event); err == nil {
 						break // Success, no need to reinterate
+					} else if i == 4 { // Last iteration, syslog the warning
+						Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), pi.Event["EventName"]))
+						break
 					}
 					time.Sleep(delay())
 				}
