@@ -243,6 +243,17 @@ const CGRATES_CFG_JSON = `
 	"server": "internal",		// address where to reach the master history server: <internal|x.y.z.y:1234>
 },
 
+"pubsub_server": {
+	"enabled": false,							// starts History service: <true|false>.
+	"save_interval": "1s",						// interval to save changed cache into .git archive
+},
+
+
+"pubsub_agent": {
+	"enabled": false,			// starts PubSub as a client: <true|false>.
+	"server": "internal",		// address where to reach the master pubsub server: <internal|x.y.z.y:1234>
+},
+
 
 "mailer": {
 	"server": "localhost",								// the server to use when sending emails out

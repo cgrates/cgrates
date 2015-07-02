@@ -21,13 +21,12 @@ package engine
 import (
 	"errors"
 	"fmt"
-	//"log"
 
 	"log/syslog"
 	"sort"
 	"strings"
 	"time"
-	//"encoding/json"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
@@ -68,6 +67,7 @@ var (
 	debitPeriod            = 10 * time.Second
 	globalRoundingDecimals = 10
 	historyScribe          history.Scribe
+	pubSubServer           PublisherSubscriber
 	//historyScribe, _ = history.NewMockScribe()
 )
 
@@ -102,6 +102,10 @@ func SetCdrStorage(cStorage CdrStorage) {
 // Exported method to set the history scribe.
 func SetHistoryScribe(scribe history.Scribe) {
 	historyScribe = scribe
+}
+
+func SetPubSub(ps PublisherSubscriber) {
+	pubSubServer = ps
 }
 
 /*

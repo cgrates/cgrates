@@ -165,6 +165,7 @@ const (
 	LCR_PREFIX                 = "lcr_"
 	DERIVEDCHARGERS_PREFIX     = "dcs_"
 	CDR_STATS_QUEUE_PREFIX     = "csq_"
+	PUBSUB_SUBSCRIBERS_PREFIX  = "pss_"
 	CDR_STATS_PREFIX           = "cst_"
 	TEMP_DESTINATION_PREFIX    = "tmp_"
 	LOG_CALL_COST_PREFIX       = "cco_"
