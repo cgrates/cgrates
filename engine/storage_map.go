@@ -561,21 +561,26 @@ func (ms *MapStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetPubSubSubscribers() (result map[string]map[string]*SubscriberData, err error) {
-	result = make(map[string]map[string]*SubscriberData)
+func (ms *MapStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
+	result = make(map[string]*SubscriberData)
 	for key, value := range ms.dict {
 		if strings.HasPrefix(key, utils.PUBSUB_SUBSCRIBERS_PREFIX) {
-			subs := make(map[string]*SubscriberData)
-			if err = ms.ms.Unmarshal(value, &subs); err == nil {
-				result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = subs
+			sub := &SubscriberData{}
+			if err = ms.ms.Unmarshal(value, sub); err == nil {
+				result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = sub
 			}
 		}
 	}
 	return
 }
-func (ms *MapStorage) SetPubSubSubscribers(key string, subs map[string]*SubscriberData) (err error) {
-	result, err := ms.ms.Marshal(subs)
+func (ms *MapStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+	result, err := ms.ms.Marshal(sub)
 	ms.dict[utils.PUBSUB_SUBSCRIBERS_PREFIX+key] = result
+	return
+}
+
+func (ms *MapStorage) RemoveSubscriber(key string) (err error) {
+	delete(ms.dict, utils.PUBSUB_SUBSCRIBERS_PREFIX+key)
 	return
 }
 

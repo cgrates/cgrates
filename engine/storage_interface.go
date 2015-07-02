@@ -79,8 +79,9 @@ type AccountingStorage interface {
 	SetAccount(*Account) error
 	GetCdrStatsQueue(string) (*StatsQueue, error)
 	SetCdrStatsQueue(*StatsQueue) error
-	GetPubSubSubscribers() (map[string]map[string]*SubscriberData, error)
-	SetPubSubSubscribers(string, map[string]*SubscriberData) error
+	GetSubscribers() (map[string]*SubscriberData, error)
+	SetSubscriber(string, *SubscriberData) error
+	RemoveSubscriber(string) error
 }
 
 type CdrStorage interface {

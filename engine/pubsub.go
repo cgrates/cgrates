@@ -11,22 +11,27 @@ import (
 )
 
 type SubscribeInfo struct {
-	EventName   string
 	EventFilter string
 	Transport   string
 	Address     string
 	LifeSpan    time.Duration
 }
 
+type CgrEvent map[string]string
+
+func (ce CgrEvent) Match(rsrFields utils.RSRFields) bool {
+	return true
+}
+
 type PublishInfo struct {
-	Event map[string]string
+	Event CgrEvent
 }
 
 type PublisherSubscriber interface {
 	Subscribe(SubscribeInfo, *string) error
 	Unsubscribe(SubscribeInfo, *string) error
 	Publish(PublishInfo, *string) error
-	ShowSubscribers(string, *map[string]map[string]*SubscriberData) error
+	ShowSubscribers(string, *map[string]*SubscriberData) error
 }
 
 type SubscriberData struct {
@@ -35,7 +40,7 @@ type SubscriberData struct {
 }
 
 type PubSub struct {
-	subscribers map[string]map[string]*SubscriberData
+	subscribers map[string]*SubscriberData
 	ttlVerify   bool
 	pubFunc     func(string, bool, interface{}) ([]byte, error)
 	mux         *sync.Mutex
@@ -45,32 +50,31 @@ type PubSub struct {
 func NewPubSub(accountDb AccountingStorage, ttlVerify bool) *PubSub {
 	ps := &PubSub{
 		ttlVerify:   ttlVerify,
-		subscribers: make(map[string]map[string]*SubscriberData),
+		subscribers: make(map[string]*SubscriberData),
 		pubFunc:     utils.HttpJsonPost,
 		mux:         &sync.Mutex{},
 		accountDb:   accountDb,
 	}
 	// load subscribers
-	if subs, err := accountDb.GetPubSubSubscribers(); err == nil {
+	if subs, err := accountDb.GetSubscribers(); err == nil {
 		ps.subscribers = subs
 	}
 	return ps
 }
 
-func (ps *PubSub) saveSubscribers(key string) {
-	if key != "" {
-		if _, found := ps.subscribers[key]; !found {
-			return
-		}
-		if err := accountingStorage.SetPubSubSubscribers(key, ps.subscribers[key]); err != nil {
-			Logger.Err("<PubSub> Error saving subscribers: " + err.Error())
-		}
-	} else { // save all
-		for key, valueMap := range ps.subscribers {
-			if err := accountingStorage.SetPubSubSubscribers(key, valueMap); err != nil {
-				Logger.Err("<PubSub> Error saving subscribers: " + err.Error())
-			}
-		}
+func (ps *PubSub) saveSubscriber(key string) {
+	subData, found := ps.subscribers[key]
+	if !found {
+		return
+	}
+	if err := accountingStorage.SetSubscriber(key, subData); err != nil {
+		Logger.Err("<PubSub> Error saving subscriber: " + err.Error())
+	}
+}
+
+func (ps *PubSub) removeSubscriber(key string) {
+	if err := accountingStorage.RemoveSubscriber(key); err != nil {
+		Logger.Err("<PubSub> Error removing subscriber: " + err.Error())
 	}
 }
 
@@ -81,9 +85,6 @@ func (ps *PubSub) Subscribe(si SubscribeInfo, reply *string) error {
 		*reply = "Unsupported transport type"
 		return errors.New(*reply)
 	}
-	if ps.subscribers[si.EventName] == nil {
-		ps.subscribers[si.EventName] = make(map[string]*SubscriberData)
-	}
 	var expTime time.Time
 	if si.LifeSpan > 0 {
 		expTime = time.Now().Add(si.LifeSpan)
@@ -93,11 +94,12 @@ func (ps *PubSub) Subscribe(si SubscribeInfo, reply *string) error {
 		*reply = err.Error()
 		return err
 	}
-	ps.subscribers[si.EventName][utils.InfieldJoin(si.Transport, si.Address)] = &SubscriberData{
+	key := utils.InfieldJoin(si.Transport, si.Address)
+	ps.subscribers[key] = &SubscriberData{
 		ExpTime: expTime,
 		Filters: rsr,
 	}
-	ps.saveSubscribers(si.EventName)
+	ps.saveSubscriber(key)
 	*reply = utils.OK
 	return nil
 }
@@ -109,8 +111,9 @@ func (ps *PubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
 		*reply = "Unsupported transport type"
 		return errors.New(*reply)
 	}
-	delete(ps.subscribers[si.EventName], utils.InfieldJoin(si.Transport, si.Address))
-	ps.saveSubscribers(si.EventName)
+	key := utils.InfieldJoin(si.Transport, si.Address)
+	delete(ps.subscribers, key)
+	ps.removeSubscriber(key)
 	*reply = utils.OK
 	return nil
 }
@@ -118,20 +121,23 @@ func (ps *PubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
 func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 	ps.mux.Lock()
 	defer ps.mux.Unlock()
-	subs := ps.subscribers[pi.Event["EventName"]]
-	for transportAddress, subData := range subs {
-		split := utils.InfieldSplit(transportAddress)
+	for key, subData := range ps.subscribers {
+		if !subData.ExpTime.IsZero() && subData.ExpTime.Before(time.Now()) {
+			delete(ps.subscribers, key)
+			ps.removeSubscriber(key)
+			continue // subscription expired, do not send event
+		}
+		if !pi.Event.Match(subData.Filters) {
+			continue // the event does not match the filters
+		}
+		split := utils.InfieldSplit(key)
 		if len(split) != 2 {
-			Logger.Warning("<PubSub> Wrong transport;address pair: " + transportAddress)
+			Logger.Warning("<PubSub> Wrong transport;address pair: " + key)
 			continue
 		}
 		transport := split[0]
 		address := split[1]
-		if !subData.ExpTime.IsZero() && subData.ExpTime.Before(time.Now()) {
-			delete(subs, transportAddress)
-			ps.saveSubscribers(pi.Event["EventName"])
-			continue // subscription expired, do not send event
-		}
+
 		switch transport {
 		case utils.META_HTTP_POST:
 			go func() {
@@ -152,7 +158,7 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 	return nil
 }
 
-func (ps *PubSub) ShowSubscribers(in string, out *map[string]map[string]*SubscriberData) error {
+func (ps *PubSub) ShowSubscribers(in string, out *map[string]*SubscriberData) error {
 	*out = ps.subscribers
 	return nil
 }
@@ -179,6 +185,6 @@ func (ps *ProxyPubSub) Publish(pi PublishInfo, reply *string) error {
 	return ps.Client.Call("PubSubV1.Publish", pi, reply)
 }
 
-func (ps *ProxyPubSub) ShowSubscribers(in string, reply *map[string]map[string]*SubscriberData) error {
+func (ps *ProxyPubSub) ShowSubscribers(in string, reply *map[string]*SubscriberData) error {
 	return ps.Client.Call("PubSubV1.ShowSubscribers", in, reply)
 }
