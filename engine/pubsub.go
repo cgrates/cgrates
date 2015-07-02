@@ -26,6 +26,7 @@ type PublisherSubscriber interface {
 	Subscribe(SubscribeInfo, *string) error
 	Unsubscribe(SubscribeInfo, *string) error
 	Publish(PublishInfo, *string) error
+	ShowSubscribers(string, *map[string]map[string]time.Time) error
 }
 
 type PubSub struct {
@@ -138,6 +139,11 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 	return nil
 }
 
+func (ps *PubSub) ShowSubscribers(in string, out *map[string]map[string]time.Time) error {
+	*out = ps.subscribers
+	return nil
+}
+
 type ProxyPubSub struct {
 	Client *rpcclient.RpcClient
 }
@@ -151,11 +157,15 @@ func NewProxyPubSub(addr string, reconnects int) (*ProxyPubSub, error) {
 }
 
 func (ps *ProxyPubSub) Subscribe(si SubscribeInfo, reply *string) error {
-	return ps.Client.Call("PubSub.Subscribe", si, reply)
+	return ps.Client.Call("PubSubV1.Subscribe", si, reply)
 }
 func (ps *ProxyPubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
-	return ps.Client.Call("PubSub.Unsubscribe", si, reply)
+	return ps.Client.Call("PubSubV1.Unsubscribe", si, reply)
 }
 func (ps *ProxyPubSub) Publish(pi PublishInfo, reply *string) error {
-	return ps.Client.Call("PubSub.Publish", pi, reply)
+	return ps.Client.Call("PubSubV1.Publish", pi, reply)
+}
+
+func (ps *ProxyPubSub) ShowSubscribers(in string, reply *map[string]map[string]time.Time) error {
+	return ps.Client.Call("PubSubV1.ShowSubscribers", in, reply)
 }
