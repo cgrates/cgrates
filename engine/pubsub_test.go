@@ -206,3 +206,37 @@ func TestPublishExpiredSave(t *testing.T) {
 		t.Error("Error saving subscribers: ", err, subs)
 	}
 }
+
+func TestCgrEventPassFilters(t *testing.T) {
+	ev := CgrEvent{"EventName": "TEST_EVENT", "Header1": "Value1", "Header2": "Value2"}
+	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("EventName(TEST_EVENT)", utils.INFIELD_SEP)) {
+		t.Error("Not passing filter")
+	}
+	if ev.PassFilters(utils.ParseRSRFieldsMustCompile("EventName(DUMMY_EVENT)", utils.INFIELD_SEP)) {
+		t.Error("Passing filter")
+	}
+	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("^EventName::TEST_EVENT(TEST_EVENT)", utils.INFIELD_SEP)) {
+		t.Error("Not passing filter")
+	}
+	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("^EventName::DUMMY", utils.INFIELD_SEP)) { // Should pass since we have no filter defined
+		t.Error("Not passing no filter")
+	}
+	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("~EventName:s/^(\\w*)_/$1/(TEST)", utils.INFIELD_SEP)) {
+		t.Error("Not passing filter")
+	}
+	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("~EventName:s/^(\\w*)_/$1/:s/^(\\w)(\\w)(\\w)(\\w)/$1$3$4/(TST)", utils.INFIELD_SEP)) {
+		t.Error("Not passing filter")
+	}
+	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("EventName(TEST_EVENT);Header1(Value1)", utils.INFIELD_SEP)) {
+		t.Error("Not passing filter")
+	}
+	if ev.PassFilters(utils.ParseRSRFieldsMustCompile("EventName(TEST_EVENT);Header1(Value2)", utils.INFIELD_SEP)) {
+		t.Error("Passing filter")
+	}
+	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("EventName(TEST_EVENT);~Header1:s/(\\d)/$1/(1)", utils.INFIELD_SEP)) {
+		t.Error("Not passing filter")
+	}
+	if ev.PassFilters(utils.ParseRSRFieldsMustCompile("EventName(TEST_EVENT);~Header1:s/(\\d)/$1/(2)", utils.INFIELD_SEP)) {
+		t.Error("Passing filter")
+	}
+}

@@ -19,7 +19,12 @@ type SubscribeInfo struct {
 
 type CgrEvent map[string]string
 
-func (ce CgrEvent) Match(rsrFields utils.RSRFields) bool {
+func (ce CgrEvent) PassFilters(rsrFields utils.RSRFields) bool {
+	for _, rsrFld := range rsrFields {
+		if !rsrFld.FilterPasses(ce[rsrFld.Id]) {
+			return false
+		}
+	}
 	return true
 }
 
@@ -127,7 +132,7 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 			ps.removeSubscriber(key)
 			continue // subscription expired, do not send event
 		}
-		if !pi.Event.Match(subData.Filters) {
+		if !pi.Event.PassFilters(subData.Filters) {
 			continue // the event does not match the filters
 		}
 		split := utils.InfieldSplit(key)
