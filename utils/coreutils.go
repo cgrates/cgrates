@@ -137,6 +137,7 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 	unixTimestampRule := regexp.MustCompile(`^\d{10}$`)
 	oneLineTimestampRule := regexp.MustCompile(`^\d{14}$`)
 	oneSpaceTimestampRule := regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
+	eamonTimestampRule := regexp.MustCompile(`^\d{2}/\d{2}/\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
 	switch {
 	case rfc3339Rule.MatchString(tmStr):
 		return time.Parse(time.RFC3339, tmStr)
@@ -162,6 +163,8 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 		return time.Parse("20060102150405", tmStr)
 	case oneSpaceTimestampRule.MatchString(tmStr):
 		return time.Parse("02.01.2006  15:04:05", tmStr)
+	case eamonTimestampRule.MatchString(tmStr):
+		return time.Parse("02/01/2006 15:04:05", tmStr)
 	case tmStr == "*now":
 		return time.Now(), nil
 	}

@@ -224,6 +224,14 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if time.Now().Sub(nowTm) > time.Duration(1)*time.Millisecond {
 		t.Errorf("Unexpected time parsed: %v", nowTm)
 	}
+	eamonTmStr := "31/05/2015 14:46:00"
+	eamonTmS, err := ParseTimeDetectLayout(eamonTmStr)
+	expectedTime = time.Date(2015, 5, 31, 14, 46, 0, 0, time.UTC)
+	if err != nil {
+		t.Error(err)
+	} else if !eamonTmS.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", eamonTmS, expectedTime)
+	}
 }
 
 func TestParseDateUnix(t *testing.T) {
