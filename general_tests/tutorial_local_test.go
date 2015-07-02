@@ -480,10 +480,46 @@ func TestTutLocalMaxUsage(t *testing.T) {
 		SetupTime: "2014-08-04T13:00:00Z", Usage: "1",
 	}
 	var maxTime float64
-	if err := tutLocalRpc.Call("ApierV1.GetMaxUsage", setupReq, &maxTime); err != nil {
+	if err := tutLocalRpc.Call("ApierV2.GetMaxUsage", setupReq, &maxTime); err != nil {
 		t.Error(err)
 	} else if maxTime != 1 {
-		t.Errorf("Calling ApierV1.MaxUsage got maxTime: %f", maxTime)
+		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
+	}
+}
+
+// Check MaxUsage
+func TestTutLocalDebitUsage(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	setupReq := &engine.UsageRecord{TOR: utils.VOICE, ReqType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+		Account: "1003", Subject: "1003", Destination: "1001",
+		AnswerTime: "2014-08-04T13:00:00Z", Usage: "1",
+	}
+	var reply string
+	if err := tutLocalRpc.Call("ApierV2.DebitUsage", setupReq, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Error("Calling ApierV2.DebitUsage reply: ", reply)
+	}
+}
+
+// Test CDR from external sources
+func TestTutLocalProcessExternalCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "testextcdr1", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "1", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var reply string
+	if err := tutLocalRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
 	}
 }
 

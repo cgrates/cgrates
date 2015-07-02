@@ -38,6 +38,9 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr) (*StoredCdr, error) {
 	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime); err != nil {
 		return nil, err
 	}
+	if len(storedCdr.CgrId) == 0 { // Populate CgrId if not present
+		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+	}
 	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime); err != nil {
 		return nil, err
 	}
