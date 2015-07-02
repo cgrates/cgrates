@@ -20,9 +20,10 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/DisposaBoy/JsonConfigReader"
 	"io"
 	"os"
+
+	"github.com/DisposaBoy/JsonConfigReader"
 )
 
 const (
@@ -48,6 +49,8 @@ const (
 	OSIPS_JSN        = "opensips"
 	HISTSERV_JSN     = "history_server"
 	HISTAGENT_JSN    = "history_agent"
+	PUBSUBSERV_JSN   = "pubsub_server"
+	PUBSUBAGENT_JSN  = "pubsub_agent"
 	MAILER_JSN       = "mailer"
 )
 
@@ -248,6 +251,30 @@ func (self CgrJsonCfg) HistAgentJsonCfg() (*HistAgentJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(HistAgentJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) PubSubServJsonCfg() (*PubSubServJsonCfg, error) {
+	rawCfg, hasKey := self[PUBSUBSERV_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(PubSubServJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) PubSubAgentJsonCfg() (*PubSubAgentJsonCfg, error) {
+	rawCfg, hasKey := self[PUBSUBAGENT_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(PubSubAgentJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

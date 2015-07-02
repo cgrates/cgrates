@@ -213,7 +213,10 @@ type CGRConfig struct {
 	HistoryServer        string                            // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled bool                              // Starts History as server: <true|false>.
 	HistoryDir           string                            // Location on disk where to store history files.
-	HistorySaveInterval  time.Duration                     // The timout duration between history writes
+	HistorySaveInterval  time.Duration                     // The timout duration between pubsub writes
+	PubSubAgentEnabled   bool                              // Starts PubSub as an agent: <true|false>.
+	PubSubServer         string                            // Address where to reach the master pubsub server: <internal|x.y.z.y:1234>
+	PubSubServerEnabled  bool                              // Starts PubSub as server: <true|false>.
 	MailerServer         string                            // The server to use when sending emails out
 	MailerAuthUser       string                            // Authenticate to email server using this user
 	MailerAuthPass       string                            // Authenticate to email server with this password
@@ -319,6 +322,10 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.HistoryAgentEnabled && !self.HistoryServerEnabled {
 		return errors.New("HistoryServer not enabled but referenced by HistoryAgent component")
 	}
+	// PubSubAgent
+	if self.PubSubAgentEnabled && !self.PubSubServerEnabled {
+		return errors.New("PubSubServer not enabled but referenced by PubSubAgent component")
+	}
 	return nil
 }
 
@@ -407,6 +414,16 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnHistAgentCfg, err := jsnCfg.HistAgentJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnPubSubServCfg, err := jsnCfg.PubSubServJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnPubSubAgentCfg, err := jsnCfg.PubSubAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -675,6 +692,21 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 			if self.HistorySaveInterval, err = utils.ParseDurationWithSecs(*jsnHistServCfg.Save_interval); err != nil {
 				return err
 			}
+		}
+	}
+
+	if jsnPubSubAgentCfg != nil {
+		if jsnPubSubAgentCfg.Enabled != nil {
+			self.PubSubAgentEnabled = *jsnPubSubAgentCfg.Enabled
+		}
+		if jsnPubSubAgentCfg.Server != nil {
+			self.PubSubServer = *jsnPubSubAgentCfg.Server
+		}
+	}
+
+	if jsnPubSubServCfg != nil {
+		if jsnPubSubServCfg.Enabled != nil {
+			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
 		}
 	}
 

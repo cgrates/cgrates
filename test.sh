@@ -38,4 +38,3 @@ go test github.com/cgrates/cgrates/cdre
 cdre=$?
 
 exit $v1 && $v2 && $en && $gt && $sm && $cfg && $bl && $cr && $cdrc && $ut && $hs && $c2g && $cdre
-

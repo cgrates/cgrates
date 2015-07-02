@@ -274,6 +274,14 @@ func AccountAliasKey(tenant, account string) string {
 	return ConcatenatedKey(tenant, account)
 }
 
+func InfieldJoin(vals ...string) string {
+	return strings.Join(vals, INFIELD_SEP)
+}
+
+func InfieldSplit(val string) []string {
+	return strings.Split(val, INFIELD_SEP)
+}
+
 func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, error) {
 	body, err := json.Marshal(content)
 	if err != nil {

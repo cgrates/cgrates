@@ -222,6 +222,15 @@
 //	"server": "internal",		// address where to reach the master history server: <internal|x.y.z.y:1234>
 //},
 
+//"pubsub_server": {
+//	"enabled": false,							// starts pubsub service: <true|false>.
+//},
+
+
+//"pubsub_agent": {
+//	"enabled": false,			// starts pubsub as a client: <true|false>.
+//	"server": "internal",		// address where to reach the master pubsub server: <internal|x.y.z.y:1234>
+//},
 
 //"mailer": {
 //	"server": "localhost",								// the server to use when sending emails out

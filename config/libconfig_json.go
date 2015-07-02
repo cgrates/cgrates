@@ -217,6 +217,17 @@ type HistAgentJsonCfg struct {
 	Server  *string
 }
 
+// PubSub server config section
+type PubSubServJsonCfg struct {
+	Enabled *bool
+}
+
+// PubSub agent config section
+type PubSubAgentJsonCfg struct {
+	Enabled *bool
+	Server  *string
+}
+
 // Mailer config section
 type MailerJsonCfg struct {
 	Server       *string

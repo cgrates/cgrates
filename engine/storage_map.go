@@ -561,6 +561,24 @@ func (ms *MapStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
 	return
 }
 
+func (ms *MapStorage) GetPubSubSubscribers() (result map[string]map[string]*SubscriberData, err error) {
+	result = make(map[string]map[string]*SubscriberData)
+	for key, value := range ms.dict {
+		if strings.HasPrefix(key, utils.PUBSUB_SUBSCRIBERS_PREFIX) {
+			subs := make(map[string]*SubscriberData)
+			if err = ms.ms.Unmarshal(value, &subs); err == nil {
+				result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = subs
+			}
+		}
+	}
+	return
+}
+func (ms *MapStorage) SetPubSubSubscribers(key string, subs map[string]*SubscriberData) (err error) {
+	result, err := ms.ms.Marshal(subs)
+	ms.dict[utils.PUBSUB_SUBSCRIBERS_PREFIX+key] = result
+	return
+}
+
 func (ms *MapStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 	if values, ok := ms.dict[utils.ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)

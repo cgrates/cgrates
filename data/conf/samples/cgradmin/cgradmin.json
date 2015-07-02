@@ -17,4 +17,14 @@
 "scheduler": {
 	"enabled": true,						// start Scheduler service: <true|false>
 },
+
+"pubsub_server": {
+	"enabled": true,							// starts pubsub service: <true|false>.
+},
+
+
+"pubsub_agent": {
+	"enabled": true,			// starts pubsub as a client: <true|false>.
+	"server": "internal",		// address where to reach the master pubsub server: <internal|x.y.z.y:1234>
+},
 }
