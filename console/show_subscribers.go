@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "time"
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
 	c := &CmdShowSubscribers{
@@ -59,6 +59,6 @@ func (self *CmdShowSubscribers) PostprocessRpcParams() error {
 }
 
 func (self *CmdShowSubscribers) RpcResult() interface{} {
-	var s map[string]map[string]time.Time
+	var s map[string]map[string]*engine.SubscriberData
 	return &s
 }

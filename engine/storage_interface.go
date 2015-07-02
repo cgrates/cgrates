@@ -23,7 +23,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"reflect"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
@@ -80,8 +79,8 @@ type AccountingStorage interface {
 	SetAccount(*Account) error
 	GetCdrStatsQueue(string) (*StatsQueue, error)
 	SetCdrStatsQueue(*StatsQueue) error
-	GetPubSubSubscribers() (map[string]map[string]time.Time, error)
-	SetPubSubSubscribers(string, map[string]time.Time) error
+	GetPubSubSubscribers() (map[string]map[string]*SubscriberData, error)
+	SetPubSubSubscribers(string, map[string]*SubscriberData) error
 }
 
 type CdrStorage interface {

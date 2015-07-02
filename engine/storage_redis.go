@@ -689,16 +689,16 @@ func (rs *RedisStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetPubSubSubscribers() (result map[string]map[string]time.Time, err error) {
+func (rs *RedisStorage) GetPubSubSubscribers() (result map[string]map[string]*SubscriberData, err error) {
 	keys, err := rs.db.Keys(utils.PUBSUB_SUBSCRIBERS_PREFIX + "*")
 	if err != nil {
 		return nil, err
 	}
-	result = make(map[string]map[string]time.Time)
+	result = make(map[string]map[string]*SubscriberData)
 	for _, key := range keys {
 		if values, err := rs.db.Get(key); err == nil {
-			subs := make(map[string]time.Time)
-			err = rs.ms.Unmarshal(values, subs)
+			subs := make(map[string]*SubscriberData)
+			err = rs.ms.Unmarshal(values, &subs)
 			result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = subs
 		} else {
 			return nil, utils.ErrNotFound
@@ -707,7 +707,7 @@ func (rs *RedisStorage) GetPubSubSubscribers() (result map[string]map[string]tim
 	return
 }
 
-func (rs *RedisStorage) SetPubSubSubscribers(key string, subs map[string]time.Time) (err error) {
+func (rs *RedisStorage) SetPubSubSubscribers(key string, subs map[string]*SubscriberData) (err error) {
 	result, err := rs.ms.Marshal(subs)
 	rs.db.Set(utils.PUBSUB_SUBSCRIBERS_PREFIX+key, result)
 	return

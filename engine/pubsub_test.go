@@ -18,7 +18,7 @@ func TestSubscribe(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	if expTime, exists := ps.subscribers["test"][utils.InfieldJoin(utils.META_HTTP_POST, "url")]; !exists || expTime.IsZero() {
+	if subData, exists := ps.subscribers["test"][utils.InfieldJoin(utils.META_HTTP_POST, "url")]; !exists || subData.ExpTime.IsZero() {
 		t.Error("Error adding subscriber: ", ps.subscribers)
 	}
 }
@@ -64,7 +64,7 @@ func TestSubscribeNoExpire(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	if expTime, exists := ps.subscribers["test"][utils.InfieldJoin(utils.META_HTTP_POST, "url")]; !exists || !expTime.IsZero() {
+	if subData, exists := ps.subscribers["test"][utils.InfieldJoin(utils.META_HTTP_POST, "url")]; !exists || !subData.ExpTime.IsZero() {
 		t.Error("Error adding no expire subscriber: ", ps.subscribers)
 	}
 }
