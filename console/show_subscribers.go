@@ -59,6 +59,6 @@ func (self *CmdShowSubscribers) PostprocessRpcParams() error {
 }
 
 func (self *CmdShowSubscribers) RpcResult() interface{} {
-	var s map[string]map[string]*engine.SubscriberData
+	var s map[string]*engine.SubscriberData
 	return &s
 }
