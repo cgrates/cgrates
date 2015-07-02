@@ -20,7 +20,6 @@
 
 "pubsub_server": {
 	"enabled": true,							// starts pubsub service: <true|false>.
-	"save_interval": "1m",						// interval to save subscribers
 },
 
 

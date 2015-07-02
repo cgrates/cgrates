@@ -217,7 +217,6 @@ type CGRConfig struct {
 	PubSubAgentEnabled   bool                              // Starts PubSub as an agent: <true|false>.
 	PubSubServer         string                            // Address where to reach the master pubsub server: <internal|x.y.z.y:1234>
 	PubSubServerEnabled  bool                              // Starts PubSub as server: <true|false>.
-	PubSubSaveInterval   time.Duration                     // The timout duration between pubsub writes
 	MailerServer         string                            // The server to use when sending emails out
 	MailerAuthUser       string                            // Authenticate to email server using this user
 	MailerAuthPass       string                            // Authenticate to email server with this password
@@ -708,11 +707,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnPubSubServCfg != nil {
 		if jsnPubSubServCfg.Enabled != nil {
 			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
-		}
-		if jsnPubSubServCfg.Save_interval != nil {
-			if self.PubSubSaveInterval, err = utils.ParseDurationWithSecs(*jsnPubSubServCfg.Save_interval); err != nil {
-				return err
-			}
 		}
 	}
 

@@ -219,8 +219,7 @@ type HistAgentJsonCfg struct {
 
 // PubSub server config section
 type PubSubServJsonCfg struct {
-	Enabled       *bool
-	Save_interval *string
+	Enabled *bool
 }
 
 // PubSub agent config section

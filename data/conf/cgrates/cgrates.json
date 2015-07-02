@@ -224,7 +224,6 @@
 
 //"pubsub_server": {
 //	"enabled": false,							// starts pubsub service: <true|false>.
-//	"save_interval": "1s",						// interval to save subscribers
 //},
 
 

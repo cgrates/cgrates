@@ -408,8 +408,7 @@ func TestDfHistAgentJsonCfg(t *testing.T) {
 
 func TestDfPubSubServJsonCfg(t *testing.T) {
 	eCfg := &PubSubServJsonCfg{
-		Enabled:       utils.BoolPointer(false),
-		Save_interval: utils.StringPointer("1s"),
+		Enabled: utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.PubSubServJsonCfg(); err != nil {
 		t.Error(err)
