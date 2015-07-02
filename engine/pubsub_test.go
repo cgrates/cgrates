@@ -23,6 +23,23 @@ func TestSubscribe(t *testing.T) {
 	}
 }
 
+func TestSubscribeSave(t *testing.T) {
+	ps := NewPubSub(accountingStorage, false)
+	var r string
+	if err := ps.Subscribe(SubscribeInfo{
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+		LifeSpan:  time.Second,
+	}, &r); err != nil {
+		t.Error("Error subscribing: ", err)
+	}
+	subs, err := accountingStorage.GetPubSubSubscribers()
+	if err != nil || len(subs["test"]) != 1 {
+		t.Error("Error saving subscribers: ", err, subs)
+	}
+}
+
 func TestSubscribeNoTransport(t *testing.T) {
 	ps := NewPubSub(accountingStorage, false)
 	var r string
@@ -72,6 +89,30 @@ func TestUnsubscribe(t *testing.T) {
 	}
 	if _, exists := ps.subscribers["test"]["url"]; exists {
 		t.Error("Error adding subscriber: ", ps.subscribers)
+	}
+}
+
+func TestUnsubscribeSave(t *testing.T) {
+	ps := NewPubSub(accountingStorage, false)
+	var r string
+	if err := ps.Subscribe(SubscribeInfo{
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+		LifeSpan:  time.Second,
+	}, &r); err != nil {
+		t.Error("Error subscribing: ", err)
+	}
+	if err := ps.Unsubscribe(SubscribeInfo{
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+	}, &r); err != nil {
+		t.Error("Error unsubscribing: ", err)
+	}
+	subs, err := accountingStorage.GetPubSubSubscribers()
+	if err != nil || len(subs["test"]) != 0 {
+		t.Error("Error saving subscribers: ", err, subs)
 	}
 }
 
@@ -132,5 +173,36 @@ func TestPublishExpired(t *testing.T) {
 	}
 	if len(ps.subscribers["test"]) != 0 {
 		t.Error("Error removing expired subscribers: ", ps.subscribers)
+	}
+}
+
+func TestPublishExpiredSave(t *testing.T) {
+	ps := NewPubSub(accountingStorage, true)
+	ps.pubFunc = func(url string, ttl bool, obj interface{}) ([]byte, error) {
+		m := obj.(map[string]string)
+		m["called"] = "yes"
+		return nil, nil
+	}
+	var r string
+	if err := ps.Subscribe(SubscribeInfo{
+		EventName: "test",
+		Transport: utils.META_HTTP_POST,
+		Address:   "url",
+		LifeSpan:  1,
+	}, &r); err != nil {
+		t.Error("Error subscribing: ", err)
+	}
+	subs, err := accountingStorage.GetPubSubSubscribers()
+	if err != nil || len(subs["test"]) != 1 {
+		t.Error("Error saving subscribers: ", err, subs)
+	}
+	if err := ps.Publish(PublishInfo{
+		Event: map[string]string{"EventName": "test"},
+	}, &r); err != nil {
+		t.Error("Error publishing: ", err)
+	}
+	subs, err = accountingStorage.GetPubSubSubscribers()
+	if err != nil || len(subs["test"]) != 0 {
+		t.Error("Error saving subscribers: ", err, subs)
 	}
 }

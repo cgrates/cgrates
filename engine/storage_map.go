@@ -575,7 +575,7 @@ func (ms *MapStorage) GetPubSubSubscribers() (result map[string]map[string]time.
 }
 func (ms *MapStorage) SetPubSubSubscribers(key string, subs map[string]time.Time) (err error) {
 	result, err := ms.ms.Marshal(subs)
-	ms.dict[utils.CDR_STATS_QUEUE_PREFIX+key] = result
+	ms.dict[utils.PUBSUB_SUBSCRIBERS_PREFIX+key] = result
 	return
 }
 
