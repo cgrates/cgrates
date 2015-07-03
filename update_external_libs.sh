@@ -5,7 +5,6 @@ go get -v -u github.com/cgrates/osipsdagram
 go get -u -v github.com/cgrates/liner
 go get -u -v github.com/cgrates/rpcclient
 go get -u -v github.com/cgrates/gorm
-go get -u -v github.com/cgrates/kamevapi
 
 go get -v -u github.com/lib/pq
 go get -v -u github.com/ugorji/go/codec
