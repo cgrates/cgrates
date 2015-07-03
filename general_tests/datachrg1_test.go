@@ -135,6 +135,9 @@ func TestGetDataBetweenCostDtChrg1(t *testing.T) {
 		t.Error(err)
 	} else if cc.Cost != 0.004 {
 		//t.Logf("%+v", cc.Timespans[1].RateInterval.Timing)
+		for _, ts := range cc.Timespans {
+			t.Logf("TS: %+v", ts)
+		}
 		t.Error("Wrong cost returned: ", cc.Cost)
 	}
 }

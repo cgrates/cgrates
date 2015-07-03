@@ -30,6 +30,8 @@ import (
 type StatsInterface interface {
 	GetValues(string, *map[string]float64) error
 	GetQueueIds(int, *[]string) error
+	GetQueue(string, *StatsQueue) error
+	GetQueueTriggers(string, *ActionTriggerPriotityList) error
 	AppendCDR(*StoredCdr, *int) error
 	AddQueue(*CdrStats, *int) error
 	ReloadQueues([]string, *int) error
@@ -98,6 +100,32 @@ func (s *Stats) GetQueueIds(in int, ids *[]string) error {
 		result = append(result, id)
 	}
 	*ids = result
+	return nil
+}
+
+func (s *Stats) GetQueue(id string, sq *StatsQueue) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	q, found := s.queues[id]
+	if !found {
+		return utils.ErrNotFound
+	}
+	*sq = *q
+	return nil
+}
+
+func (s *Stats) GetQueueTriggers(id string, ats *ActionTriggerPriotityList) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	q, found := s.queues[id]
+	if !found {
+		return utils.ErrNotFound
+	}
+	if q.conf.Triggers != nil {
+		*ats = q.conf.Triggers
+	} else {
+		*ats = ActionTriggerPriotityList{}
+	}
 	return nil
 }
 
@@ -280,6 +308,14 @@ func (ps *ProxyStats) AppendCDR(cdr *StoredCdr, out *int) error {
 
 func (ps *ProxyStats) GetQueueIds(in int, ids *[]string) error {
 	return ps.Client.Call("Stats.GetQueueIds", in, ids)
+}
+
+func (ps *ProxyStats) GetQueue(id string, sq *StatsQueue) error {
+	return ps.Client.Call("Stats.GetQueue", id, sq)
+}
+
+func (ps *ProxyStats) GetQueueTriggers(id string, ats *ActionTriggerPriotityList) error {
+	return ps.Client.Call("Stats.GetQueueTriggers", id, ats)
 }
 
 func (ps *ProxyStats) AddQueue(cs *CdrStats, out *int) error {

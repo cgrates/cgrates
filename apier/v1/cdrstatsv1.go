@@ -45,6 +45,14 @@ func (sts *CDRStatsV1) GetQueueIds(empty string, reply *[]string) error {
 	return sts.CdrStats.GetQueueIds(0, reply)
 }
 
+func (sts *CDRStatsV1) GetQueue(id string, sq *engine.StatsQueue) error {
+	return sts.CdrStats.GetQueue(id, sq)
+}
+
+func (sts *CDRStatsV1) GetQueueTriggers(id string, ats *engine.ActionTriggerPriotityList) error {
+	return sts.CdrStats.GetQueueTriggers(id, ats)
+}
+
 func (sts *CDRStatsV1) ReloadQueues(attr utils.AttrCDRStatsReloadQueues, reply *string) error {
 	if err := sts.CdrStats.ReloadQueues(attr.StatsQueueIds, nil); err != nil {
 		return err
