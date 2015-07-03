@@ -55,6 +55,7 @@ type QCdr struct {
 	Pdd        time.Duration
 	Usage      time.Duration
 	Cost       float64
+	Dest       string
 }
 
 func NewStatsQueue(conf *CdrStats) *StatsQueue {
@@ -164,6 +165,7 @@ func (sq *StatsQueue) simplifyCdr(cdr *StoredCdr) *QCdr {
 		Pdd:        cdr.Pdd,
 		Usage:      cdr.Usage,
 		Cost:       cdr.Cost,
+		Dest:       cdr.Destination,
 	}
 }
 

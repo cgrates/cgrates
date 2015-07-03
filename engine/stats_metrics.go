@@ -229,3 +229,36 @@ func (tcc *TCCMetric) GetValue() float64 {
 	}
 	return utils.Round(tcc.sum, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
+
+// DIA - Destination ID Archive
+//
+type DIAMetric struct {
+	destinations map[string]int64
+}
+
+func (dia *DIAMetric) AddCdr(cdr *QCdr) {
+	if dia.destinations == nil {
+		dia.destinations = make(map[string]int64)
+	}
+	if count, exists := dia.destinations[cdr.Dest]; exists {
+		dia.destinations[cdr.Dest] = count + 1
+	}
+}
+
+func (dia *DIAMetric) RemoveCdr(cdr *QCdr) {
+	if dia.destinations == nil {
+		dia.destinations = make(map[string]int64)
+	}
+	if count, exists := dia.destinations[cdr.Dest]; exists && count > 1 {
+		dia.destinations[cdr.Dest] = count - 1
+	} else {
+		dia.destinations[cdr.Dest] = 0
+	}
+}
+
+func (dia *DIAMetric) GetValue() float64 {
+	if len(dia.destinations) == 0 {
+		return STATS_NA
+	}
+	return len(dia.destinations)
+}
