@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -280,6 +281,24 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCos
 }
 
 func (b *Balance) SubstractAmount(amount float64) {
+	accountId := ""
+	if b.account != nil {
+		accountId = b.account.Id
+	}
+	Publish(CgrEvent{
+		"EventName":      utils.EVT_ACCOUNT_BALANCE_MODIFIED,
+		"Uuid":           b.Uuid,
+		"Id":             b.Id,
+		"Value":          strconv.FormatFloat(b.Value, 'f', -1, 64),
+		"ExpirationDate": b.ExpirationDate.String(),
+		"Weight":         strconv.FormatFloat(b.Weight, 'f', -1, 64),
+		"DestinationIds": b.DestinationIds,
+		"RatingSubject":  b.RatingSubject,
+		"Category":       b.Category,
+		"SharedGroup":    b.SharedGroup,
+		"TimingIDs":      b.TimingIDs,
+		"Account":        accountId,
+	})
 	b.Value -= amount
 	b.Value = utils.Round(b.Value, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	b.dirty = true

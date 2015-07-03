@@ -132,7 +132,7 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 			ps.removeSubscriber(key)
 			continue // subscription expired, do not send event
 		}
-		if !pi.Event.PassFilters(subData.Filters) {
+		if subData.Filters == nil || !pi.Event.PassFilters(subData.Filters) {
 			continue // the event does not match the filters
 		}
 		split := utils.InfieldSplit(key)

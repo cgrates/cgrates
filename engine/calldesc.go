@@ -108,6 +108,13 @@ func SetPubSub(ps PublisherSubscriber) {
 	pubSubServer = ps
 }
 
+func Publish(event CgrEvent) {
+	if pubSubServer != nil {
+		var s string
+		pubSubServer.Publish(PublishInfo{Event: event}, &s)
+	}
+}
+
 /*
 The input stucture that contains call information.
 */

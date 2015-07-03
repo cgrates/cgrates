@@ -1,0 +1,5 @@
+package utils
+
+const (
+	EVT_ACCOUNT_BALANCE_MODIFIED = "ACCOUNT_BALANCE_MODIFIED"
+)
