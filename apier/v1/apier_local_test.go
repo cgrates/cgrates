@@ -1509,6 +1509,35 @@ func TestApierLocalRemDC(t *testing.T) {
 	}
 }
 
+func TestApierLocalSetDestination(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	attrs := utils.AttrSetDestination{Id: "TEST_SET_DESTINATION", Prefixes: []string{"+4986517174963", "+4986517174960"}}
+	var reply string
+	if err := rater.Call("ApierV1.SetDestination", attrs, &reply); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	if err := rater.Call("ApierV1.SetDestination", attrs, &reply); err == nil || err.Error() != "EXISTS" { // Second time without overwrite should generate error
+		t.Error("Unexpected error", err.Error())
+	}
+	attrs = utils.AttrSetDestination{Id: "TEST_SET_DESTINATION", Prefixes: []string{"+4986517174963", "+4986517174964"}, Overwrite: true}
+	if err := rater.Call("ApierV1.SetDestination", attrs, &reply); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+	eDestination := engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
+	var rcvDestination engine.Destination
+	if err := rater.Call("ApierV1.GetDestination", attrs.Id, &rcvDestination); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if !reflect.DeepEqual(eDestination, rcvDestination) {
+		t.Error("Expecting: %+v, received: %+v", eDestination, rcvDestination)
+	}
+}
+
 func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return

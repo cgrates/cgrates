@@ -103,6 +103,7 @@ func TestCdrsHttpJsonRpcCdrReplication(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
+	time.Sleep(time.Duration(waitRater) * time.Millisecond)
 	var rcvedCdrs []*ExternalCdr
 	if err := cdrsHttpJsonRpc.Call("ApierV2.GetCdrs", utils.RpcCdrsFilter{CgrIds: []string{testCdr1.CgrId}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())

@@ -41,6 +41,7 @@ func (self *ApierV1) GetDerivedChargers(attrs utils.AttrDerivedChargers, reply *
 type AttrSetDerivedChargers struct {
 	Direction, Tenant, Category, Account, Subject string
 	DerivedChargers                               utils.DerivedChargers
+	Overwrite                                     bool // Do not overwrite if present in redis
 }
 
 func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *string) (err error) {
@@ -65,6 +66,13 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 		}
 	}
 	dcKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
+	if !attrs.Overwrite {
+		if exists, err := self.RatingDb.HasData(utils.DESTINATION_PREFIX, dcKey); err != nil {
+			return utils.NewErrServerError(err)
+		} else if exists {
+			return utils.ErrExists
+		}
+	}
 	if err := self.RatingDb.SetDerivedChargers(dcKey, attrs.DerivedChargers); err != nil {
 		return utils.NewErrServerError(err)
 	}
