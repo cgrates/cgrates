@@ -46,27 +46,27 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"rating_db": {
-	"db_type": "redis",						// rating subsystem database type: <redis>
-	"db_host": "127.0.0.1",					// rating subsystem database host address
-	"db_port": 6379, 						// rating subsystem port to reach the database
-	"db_name": "10", 						// rating subsystem database name to connect to
-	"db_user": "", 							// rating subsystem username to use when connecting to database
-	"db_passwd": "", 						// rating subsystem password to use when connecting to database
+"tariffplan_db": {							// database used to store active tariff plan configuration
+	"db_type": "redis",						// tariffplan_db type: <redis>
+	"db_host": "127.0.0.1",					// tariffplan_db host address
+	"db_port": 6379, 						// port to reach the tariffplan_db
+	"db_name": "10", 						// tariffplan_db name to connect to
+	"db_user": "", 							// sername to use when connecting to tariffplan_db
+	"db_passwd": "", 						// password to use when connecting to tariffplan_db
 },
 
 
-"accounting_db": {
-	"db_type": "redis",						// accounting subsystem database: <redis>
-	"db_host": "127.0.0.1",					// accounting subsystem database host address
-	"db_port": 6379, 						// accounting subsystem port to reach the database
-	"db_name": "11", 						// accounting subsystem database name to connect to
-	"db_user": "", 							// accounting subsystem username to use when connecting to database
-	"db_passwd": "", 						// accounting subsystem password to use when connecting to database
+"data_db": {								// database used to store runtime data (eg: accounts, cdr stats)
+	"db_type": "redis",						// data_db type: <redis>
+	"db_host": "127.0.0.1",					// data_db host address
+	"db_port": 6379, 						// data_db port to reach the database
+	"db_name": "11", 						// data_db database name to connect to
+	"db_user": "", 							// username to use when connecting to data_db
+	"db_passwd": "", 						// password to use when connecting to data_db
 },
 
 
-"stor_db": {
+"stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_type": "mysql",						// stor database type to use: <mysql|postgres>
 	"db_host": "127.0.0.1",					// the host to connect to
 	"db_port": 3306, 						// the port to reach the stordb

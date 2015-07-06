@@ -29,8 +29,8 @@ import (
 const (
 	GENERAL_JSN      = "general"
 	LISTEN_JSN       = "listen"
-	RATINGDB_JSN     = "rating_db"
-	ACCOUNTINGDB_JSN = "accounting_db"
+	RATINGDB_JSN     = "tariffplan_db"
+	ACCOUNTINGDB_JSN = "data_db"
 	STORDB_JSN       = "stor_db"
 	BALANCER_JSN     = "balancer"
 	RATER_JSN        = "rater"
