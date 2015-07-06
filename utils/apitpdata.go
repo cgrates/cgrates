@@ -511,6 +511,14 @@ type AttrGetAccount struct {
 	Direction string
 }
 
+type AttrGetAccounts struct {
+	Tenant     string
+	Direction  string
+	AccountIds []string
+	Offset     int // Set the item offset
+	Limit      int // Limit number of items retrieved
+}
+
 // Data used to do remote cache reloads via api
 type ApiReloadCache struct {
 	DestinationIds   []string
