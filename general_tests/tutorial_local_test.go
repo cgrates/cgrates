@@ -648,18 +648,18 @@ func TestTutLocalLcrQos(t *testing.T) {
 		Entry: &engine.LCREntry{DestinationId: utils.ANY, RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_QOS, StrategyParams: "", Weight: 10.0},
 		SupplierCosts: []*engine.LCRSupplierCost{
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second,
-				QOS: map[string]float64{engine.TCD: -1, engine.ACC: -1, engine.TCC: -1, engine.ASR: -1, engine.ACD: -1}},
+				QOS: map[string]float64{engine.TCD: -1, engine.ACC: -1, engine.TCC: -1, engine.ASR: -1, engine.ACD: -1, engine.DDC: -1}},
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second,
-				QOS: map[string]float64{engine.TCD: -1, engine.ACC: -1, engine.TCC: -1, engine.ASR: -1, engine.ACD: -1}},
+				QOS: map[string]float64{engine.TCD: -1, engine.ACC: -1, engine.TCC: -1, engine.ASR: -1, engine.ACD: -1, engine.DDC: -1}},
 		},
 	}
 	eStLcr2 := &engine.LCRCost{
 		Entry: &engine.LCREntry{DestinationId: utils.ANY, RPCategory: "lcr_profile1", Strategy: engine.LCR_STRATEGY_QOS, StrategyParams: "", Weight: 10.0},
 		SupplierCosts: []*engine.LCRSupplierCost{
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second,
-				QOS: map[string]float64{engine.TCD: -1, engine.ACC: -1, engine.TCC: -1, engine.ASR: -1, engine.ACD: -1}},
+				QOS: map[string]float64{engine.TCD: -1, engine.ACC: -1, engine.TCC: -1, engine.ASR: -1, engine.ACD: -1, engine.DDC: -1}},
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second,
-				QOS: map[string]float64{engine.TCD: -1, engine.ACC: -1, engine.TCC: -1, engine.ASR: -1, engine.ACD: -1}},
+				QOS: map[string]float64{engine.TCD: -1, engine.ACC: -1, engine.TCC: -1, engine.ASR: -1, engine.ACD: -1, engine.DDC: -1}},
 		},
 	}
 	var lcr engine.LCRCost
