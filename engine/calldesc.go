@@ -829,6 +829,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			var tcdValues sort.Float64Slice
 			var accValues sort.Float64Slice
 			var tccValues sort.Float64Slice
+			var ddcValues sort.Float64Slice
 			// track if one value is never calculated
 			asrNeverConsidered := true
 			pddNeverConsidered := true
@@ -836,6 +837,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			tcdNeverConsidered := true
 			accNeverConsidered := true
 			tccNeverConsidered := true
+			ddcNeverConsidered := true
 			if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD}, lcrCost.Entry.Strategy) {
 				if stats == nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
@@ -909,6 +911,12 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							}
 							tccNeverConsidered = false
 						}
+						if ddc, exists := statValues[TCC]; exists {
+							if ddc > STATS_NA {
+								ddcValues = append(ddcValues, ddc)
+							}
+							ddcNeverConsidered = false
+						}
 					}
 					if statsErr { // Stats error in loop, to go next supplier
 						continue
@@ -919,6 +927,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					tcdValues.Sort()
 					accValues.Sort()
 					tccValues.Sort()
+					ddcValues.Sort()
 
 					//log.Print(asrValues, acdValues)
 					if utils.IsSliceMember([]string{LCR_STRATEGY_QOS_THRESHOLD, LCR_STRATEGY_QOS}, lcrCost.Entry.Strategy) {
@@ -926,7 +935,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					}
 					if lcrCost.Entry.Strategy == LCR_STRATEGY_QOS_THRESHOLD {
 						// filter suppliers by qos thresholds
-						asrMin, asrMax, pddMin, pddMax, acdMin, acdMax, tcdMin, tcdMax, accMin, accMax, tccMin, tccMax := lcrCost.Entry.GetQOSLimits()
+						asrMin, asrMax, pddMin, pddMax, acdMin, acdMax, tcdMin, tcdMax, accMin, accMax, tccMin, tccMax, ddcMin, ddcMax := lcrCost.Entry.GetQOSLimits()
 						//log.Print(asrMin, asrMax, acdMin, acdMax)
 						// skip current supplier if off limits
 						if asrMin > 0 && len(asrValues) != 0 && asrValues[0] < asrMin {
@@ -963,6 +972,12 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							continue
 						}
 						if tccMax > 0 && len(tccValues) != 0 && tccValues[len(tccValues)-1] > tccMax {
+							continue
+						}
+						if ddcMin > 0 && len(ddcValues) != 0 && ddcValues[0] < ddcMin {
+							continue
+						}
+						if ddcMax > 0 && len(ddcValues) != 0 && ddcValues[len(ddcValues)-1] > ddcMax {
 							continue
 						}
 					}
@@ -1018,6 +1033,9 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				}
 				if !tccNeverConsidered {
 					qos[TCC] = utils.AvgNegative(tccValues)
+				}
+				if !ddcNeverConsidered {
+					qos[DDC] = utils.AvgNegative(ddcValues)
 				}
 				if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD}, lcrCost.Entry.Strategy) {
 					supplCost.QOS = qos
