@@ -74,7 +74,7 @@ func TestDfDbJsonCfg(t *testing.T) {
 		Db_user:   utils.StringPointer(""),
 		Db_passwd: utils.StringPointer(""),
 	}
-	if cfg, err := dfCgrJsonCfg.DbJsonCfg(RATINGDB_JSN); err != nil {
+	if cfg, err := dfCgrJsonCfg.DbJsonCfg(TPDB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -87,7 +87,7 @@ func TestDfDbJsonCfg(t *testing.T) {
 		Db_user:   utils.StringPointer(""),
 		Db_passwd: utils.StringPointer(""),
 	}
-	if cfg, err := dfCgrJsonCfg.DbJsonCfg(ACCOUNTINGDB_JSN); err != nil {
+	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

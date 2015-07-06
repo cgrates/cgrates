@@ -33,12 +33,12 @@ import (
 )
 
 func InitDataDb(cfg *config.CGRConfig) error {
-	ratingDb, err := ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
+	ratingDb, err := ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort, cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding)
 	if err != nil {
 		return err
 	}
-	accountDb, err := ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, cfg.AccountDBName,
-		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
+	accountDb, err := ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort, cfg.DataDbName,
+		cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding)
 	if err != nil {
 		return err
 	}

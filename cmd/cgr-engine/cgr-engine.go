@@ -474,16 +474,16 @@ func main() {
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
 	if cfg.RaterEnabled || cfg.SchedulerEnabled { // Only connect to dataDb if required
-		ratingDb, err = engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort,
-			cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
+		ratingDb, err = engine.ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort,
+			cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding)
 		if err != nil { // Cannot configure getter database, show stopper
 			engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
 		}
 		defer ratingDb.Close()
 		engine.SetRatingStorage(ratingDb)
-		accountDb, err = engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort,
-			cfg.AccountDBName, cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
+		accountDb, err = engine.ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
+			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding)
 		if err != nil { // Cannot configure getter database, show stopper
 			engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return

@@ -157,18 +157,18 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	RatingDBType         string
-	RatingDBHost         string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	RatingDBPort         string // The port to bind to.
-	RatingDBName         string // The name of the database to connect to.
-	RatingDBUser         string // The user to sign in as.
-	RatingDBPass         string // The user's password.
-	AccountDBType        string
-	AccountDBHost        string        // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort        string        // The port to bind to.
-	AccountDBName        string        // The name of the database to connect to.
-	AccountDBUser        string        // The user to sign in as.
-	AccountDBPass        string        // The user's password.
+	TpDbType             string
+	TpDbHost             string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	TpDbPort             string // The port to bind to.
+	TpDbName             string // The name of the database to connect to.
+	TpDbUser             string // The user to sign in as.
+	TpDbPass             string // The user's password.
+	DataDbType           string
+	DataDbHost           string        // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDbPort           string        // The port to bind to.
+	DataDbName           string        // The name of the database to connect to.
+	DataDbUser           string        // The user to sign in as.
+	DataDbPass           string        // The user's password.
 	StorDBType           string        // Should reflect the database type used to store logs
 	StorDBHost           string        // The host to connect to. Values that start with / are for UNIX domain sockets.
 	StorDBPort           string        // Th e port to bind to.
@@ -343,12 +343,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
-	jsnRatingDbCfg, err := jsnCfg.DbJsonCfg(RATINGDB_JSN)
+	jsnTpDbCfg, err := jsnCfg.DbJsonCfg(TPDB_JSN)
 	if err != nil {
 		return err
 	}
 
-	jsnAccountingDbCfg, err := jsnCfg.DbJsonCfg(ACCOUNTINGDB_JSN)
+	jsnDataDbCfg, err := jsnCfg.DbJsonCfg(DATADB_JSN)
 	if err != nil {
 		return err
 	}
@@ -434,45 +434,45 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	// All good, start populating config variables
-	if jsnRatingDbCfg != nil {
-		if jsnRatingDbCfg.Db_type != nil {
-			self.RatingDBType = *jsnRatingDbCfg.Db_type
+	if jsnTpDbCfg != nil {
+		if jsnTpDbCfg.Db_type != nil {
+			self.TpDbType = *jsnTpDbCfg.Db_type
 		}
-		if jsnRatingDbCfg.Db_host != nil {
-			self.RatingDBHost = *jsnRatingDbCfg.Db_host
+		if jsnTpDbCfg.Db_host != nil {
+			self.TpDbHost = *jsnTpDbCfg.Db_host
 		}
-		if jsnRatingDbCfg.Db_port != nil {
-			self.RatingDBPort = strconv.Itoa(*jsnRatingDbCfg.Db_port)
+		if jsnTpDbCfg.Db_port != nil {
+			self.TpDbPort = strconv.Itoa(*jsnTpDbCfg.Db_port)
 		}
-		if jsnRatingDbCfg.Db_name != nil {
-			self.RatingDBName = *jsnRatingDbCfg.Db_name
+		if jsnTpDbCfg.Db_name != nil {
+			self.TpDbName = *jsnTpDbCfg.Db_name
 		}
-		if jsnRatingDbCfg.Db_user != nil {
-			self.RatingDBUser = *jsnRatingDbCfg.Db_user
+		if jsnTpDbCfg.Db_user != nil {
+			self.TpDbUser = *jsnTpDbCfg.Db_user
 		}
-		if jsnRatingDbCfg.Db_passwd != nil {
-			self.RatingDBPass = *jsnRatingDbCfg.Db_passwd
+		if jsnTpDbCfg.Db_passwd != nil {
+			self.TpDbPass = *jsnTpDbCfg.Db_passwd
 		}
 	}
 
-	if jsnAccountingDbCfg != nil {
-		if jsnAccountingDbCfg.Db_type != nil {
-			self.AccountDBType = *jsnAccountingDbCfg.Db_type
+	if jsnDataDbCfg != nil {
+		if jsnDataDbCfg.Db_type != nil {
+			self.DataDbType = *jsnDataDbCfg.Db_type
 		}
-		if jsnAccountingDbCfg.Db_host != nil {
-			self.AccountDBHost = *jsnAccountingDbCfg.Db_host
+		if jsnDataDbCfg.Db_host != nil {
+			self.DataDbHost = *jsnDataDbCfg.Db_host
 		}
-		if jsnAccountingDbCfg.Db_port != nil {
-			self.AccountDBPort = strconv.Itoa(*jsnAccountingDbCfg.Db_port)
+		if jsnDataDbCfg.Db_port != nil {
+			self.DataDbPort = strconv.Itoa(*jsnDataDbCfg.Db_port)
 		}
-		if jsnAccountingDbCfg.Db_name != nil {
-			self.AccountDBName = *jsnAccountingDbCfg.Db_name
+		if jsnDataDbCfg.Db_name != nil {
+			self.DataDbName = *jsnDataDbCfg.Db_name
 		}
-		if jsnAccountingDbCfg.Db_user != nil {
-			self.AccountDBUser = *jsnAccountingDbCfg.Db_user
+		if jsnDataDbCfg.Db_user != nil {
+			self.DataDbUser = *jsnDataDbCfg.Db_user
 		}
-		if jsnAccountingDbCfg.Db_passwd != nil {
-			self.AccountDBPass = *jsnAccountingDbCfg.Db_passwd
+		if jsnDataDbCfg.Db_passwd != nil {
+			self.DataDbPass = *jsnDataDbCfg.Db_passwd
 		}
 	}
 

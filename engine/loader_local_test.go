@@ -56,25 +56,25 @@ func TestConnDataDbs(t *testing.T) {
 	}
 	lCfg, _ = config.NewDefaultCGRConfig()
 	var err error
-	if ratingDbCsv, err = ConfigureRatingStorage(lCfg.RatingDBType, lCfg.RatingDBHost, lCfg.RatingDBPort, "4", lCfg.RatingDBUser, lCfg.RatingDBPass, lCfg.DBDataEncoding); err != nil {
+	if ratingDbCsv, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "4", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if ratingDbStor, err = ConfigureRatingStorage(lCfg.RatingDBType, lCfg.RatingDBHost, lCfg.RatingDBPort, "5", lCfg.RatingDBUser, lCfg.RatingDBPass, lCfg.DBDataEncoding); err != nil {
+	if ratingDbStor, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "5", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if ratingDbApier, err = ConfigureRatingStorage(lCfg.RatingDBType, lCfg.RatingDBHost, lCfg.RatingDBPort, "6", lCfg.RatingDBUser, lCfg.RatingDBPass, lCfg.DBDataEncoding); err != nil {
+	if ratingDbApier, err = ConfigureRatingStorage(lCfg.TpDbType, lCfg.TpDbHost, lCfg.TpDbPort, "6", lCfg.TpDbUser, lCfg.TpDbPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if accountDbCsv, err = ConfigureAccountingStorage(lCfg.AccountDBType, lCfg.AccountDBHost, lCfg.AccountDBPort, "7",
-		lCfg.AccountDBUser, lCfg.AccountDBPass, lCfg.DBDataEncoding); err != nil {
+	if accountDbCsv, err = ConfigureAccountingStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "7",
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if accountDbStor, err = ConfigureAccountingStorage(lCfg.AccountDBType, lCfg.AccountDBHost, lCfg.AccountDBPort, "8",
-		lCfg.AccountDBUser, lCfg.AccountDBPass, lCfg.DBDataEncoding); err != nil {
+	if accountDbStor, err = ConfigureAccountingStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "8",
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if accountDbApier, err = ConfigureAccountingStorage(lCfg.AccountDBType, lCfg.AccountDBHost, lCfg.AccountDBPort, "9",
-		lCfg.AccountDBUser, lCfg.AccountDBPass, lCfg.DBDataEncoding); err != nil {
+	if accountDbApier, err = ConfigureAccountingStorage(lCfg.DataDbType, lCfg.DataDbHost, lCfg.DataDbPort, "9",
+		lCfg.DataDbUser, lCfg.DataDbPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
 	for _, db := range []Storage{ratingDbCsv, ratingDbStor, ratingDbApier, accountDbCsv, accountDbStor, accountDbApier} {
