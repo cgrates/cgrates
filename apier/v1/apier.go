@@ -69,10 +69,25 @@ func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) err
 	return nil
 }
 
-type AttrSetDestination struct { //ToDo
-	Id        string
-	Prefixes  []string
-	Overwrite bool
+func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Id", "Prefixes"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+
+	if !attrs.Overwrite {
+		if exists, err := self.RatingDb.HasData(utils.DESTINATION_PREFIX, attrs.Id); err != nil {
+			return utils.NewErrServerError(err)
+		} else if exists {
+			return utils.ErrExists
+		}
+	}
+	dest := &engine.Destination{Id: attrs.Id, Prefixes: attrs.Prefixes}
+	if err := self.RatingDb.SetDestination(dest); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	self.RatingDb.CachePrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{dest.Id}})
+	*reply = OK
+	return nil
 }
 
 func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) error {

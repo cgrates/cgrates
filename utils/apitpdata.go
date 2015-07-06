@@ -252,6 +252,12 @@ func FallbackSubjKeys(direction, tenant, tor, fallbackSubjects string) []string 
 	return sslice
 }
 
+type AttrSetDestination struct { //ToDo
+	Id        string
+	Prefixes  []string
+	Overwrite bool
+}
+
 type AttrTPRatingProfileIds struct {
 	TPid      string // Tariff plan id
 	Tenant    string // Tenant's Id
