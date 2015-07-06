@@ -36,6 +36,7 @@ const TCD = "TCD"
 const ACC = "ACC"
 const TCC = "TCC"
 const PDD = "PDD"
+const DDC = "DDC"
 const STATS_NA = -1
 
 func CreateMetric(metric string) Metric {
@@ -52,6 +53,8 @@ func CreateMetric(metric string) Metric {
 		return &ACCMetric{}
 	case TCC:
 		return &TCCMetric{}
+	case DDC:
+		return NewDccMetric()
 	}
 	return nil
 }
@@ -230,37 +233,37 @@ func (tcc *TCCMetric) GetValue() float64 {
 	return utils.Round(tcc.sum, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
 
-// DIC - Destination ID Counter
+// DDC - Destination Distinct Count
 //
-type DICMetric struct {
+type DCCMetric struct {
 	destinations map[string]int64
 }
 
-func (dic *DICMetric) AddCdr(cdr *QCdr) {
-	if dic.destinations == nil {
-		dic.destinations = make(map[string]int64)
-	}
-	if count, exists := dic.destinations[cdr.Dest]; exists {
-		dic.destinations[cdr.Dest] = count + 1
-	} else {
-		dic.destinations[cdr.Dest] = 0
+func NewDccMetric() *DCCMetric {
+	return &DCCMetric{
+		destinations: make(map[string]int64),
 	}
 }
 
-func (dic *DICMetric) RemoveCdr(cdr *QCdr) {
-	if dic.destinations == nil {
-		dic.destinations = make(map[string]int64)
-	}
-	if count, exists := dic.destinations[cdr.Dest]; exists && count > 1 {
-		dic.destinations[cdr.Dest] = count - 1
+func (dcc *DCCMetric) AddCdr(cdr *QCdr) {
+	if count, exists := dcc.destinations[cdr.Dest]; exists {
+		dcc.destinations[cdr.Dest] = count + 1
 	} else {
-		dic.destinations[cdr.Dest] = 0
+		dcc.destinations[cdr.Dest] = 0
 	}
 }
 
-func (dic *DICMetric) GetValue() float64 {
-	if len(dic.destinations) == 0 {
+func (dcc *DCCMetric) RemoveCdr(cdr *QCdr) {
+	if count, exists := dcc.destinations[cdr.Dest]; exists && count > 1 {
+		dcc.destinations[cdr.Dest] = count - 1
+	} else {
+		dcc.destinations[cdr.Dest] = 0
+	}
+}
+
+func (dcc *DCCMetric) GetValue() float64 {
+	if len(dcc.destinations) == 0 {
 		return STATS_NA
 	}
-	return float64(len(dic.destinations))
+	return float64(len(dcc.destinations))
 }

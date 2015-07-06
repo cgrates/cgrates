@@ -94,46 +94,49 @@ func TestLcrQOSSorterOACD(t *testing.T) {
 
 func TestLcrGetQosLimitsAll(t *testing.T) {
 	le := &LCREntry{
-		StrategyParams: "1.2;2.3;4;7;45s;67m;16s;17m;8.9;10.11;12.13;14.15",
+		StrategyParams: "1.2;2.3;4;7;45s;67m;16s;17m;8.9;10.11;12.13;14.15;2;3",
 	}
-	minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc := le.GetQOSLimits()
+	minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc, minDdc, maxDdc := le.GetQOSLimits()
 	if minAsr != 1.2 || maxAsr != 2.3 ||
 		minPdd != 4*time.Second || maxPdd != 7*time.Second ||
 		minAcd != 45*time.Second || maxAcd != 67*time.Minute ||
 		minTcd != 16*time.Second || maxTcd != 17*time.Minute ||
 		minAcc != 8.9 || maxAcc != 10.11 ||
-		minTcc != 12.13 || maxTcc != 14.15 {
-		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc)
+		minTcc != 12.13 || maxTcc != 14.15 ||
+		minDdc != 2 || maxDdc != 3 {
+		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc, minDdc, maxDdc)
 	}
 }
 
 func TestLcrGetQosLimitsSome(t *testing.T) {
 	le := &LCREntry{
-		StrategyParams: "1.2;;3;;;67m;;30m;1;;3;",
+		StrategyParams: "1.2;;3;;;67m;;30m;1;;3;;;2",
 	}
-	minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc := le.GetQOSLimits()
+	minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc, minDdc, maxDdc := le.GetQOSLimits()
 	if minAsr != 1.2 || maxAsr != -1 ||
 		minPdd != 3*time.Second || maxPdd != -1 ||
 		minAcd != -1 || maxAcd != 67*time.Minute ||
 		minTcd != -1 || maxTcd != 30*time.Minute ||
 		minAcc != 1 || maxAcc != -1 ||
-		minTcc != 3 || maxTcc != -1 {
-		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd, minTcd, maxTcd)
+		minTcc != 3 || maxTcc != -1 ||
+		minDdc != -1 || maxDdc != 2 {
+		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd, minTcd, maxTcd, minTcc, maxTcc, minDdc, maxDdc)
 	}
 }
 
 func TestLcrGetQosLimitsNone(t *testing.T) {
 	le := &LCREntry{
-		StrategyParams: ";;;;;;;;;",
+		StrategyParams: ";;;;;;;;;;;",
 	}
-	minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc := le.GetQOSLimits()
+	minAsr, maxAsr, minPdd, maxPdd, minAcd, maxAcd, minTcd, maxTcd, minAcc, maxAcc, minTcc, maxTcc, minDdc, maxDdc := le.GetQOSLimits()
 	if minAsr != -1 || maxAsr != -1 ||
 		minPdd != -1 || maxPdd != -1 ||
 		minAcd != -1 || maxAcd != -1 ||
 		minTcd != -1 || maxTcd != -1 ||
 		minAcc != -1 || maxAcc != -1 ||
-		minTcc != -1 || maxTcc != -1 {
-		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd)
+		minTcc != -1 || maxTcc != -1 ||
+		minDdc != -1 || maxDdc != -1 {
+		t.Error("Wrong qos limits parsed: ", minAsr, maxAsr, minAcd, maxAcd, minDdc, maxDdc)
 	}
 }
 
