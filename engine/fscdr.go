@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -30,25 +31,27 @@ import (
 
 const (
 	// Freswitch event property names
-	FS_CDR_MAP      = "variables"
-	FS_DIRECTION    = "direction"
-	FS_SUBJECT      = "cgr_subject"
-	FS_ACCOUNT      = "cgr_account"
-	FS_DESTINATION  = "cgr_destination"
-	FS_REQTYPE      = "cgr_reqtype" //prepaid or postpaid
-	FS_CATEGORY     = "cgr_category"
-	FS_UUID         = "uuid" // -Unique ID for this call leg
-	FS_CSTMID       = "cgr_tenant"
-	FS_CALL_DEST_NR = "dialed_extension"
-	FS_PARK_TIME    = "start_epoch"
-	FS_SETUP_TIME   = "start_epoch"
-	FS_ANSWER_TIME  = "answer_epoch"
-	FS_HANGUP_TIME  = "end_epoch"
-	FS_DURATION     = "billsec"
-	FS_USERNAME     = "user_name"
-	FS_IP           = "sip_local_network_addr"
-	FS_CDR_SOURCE   = "freeswitch_json"
-	FS_SIP_REQUSER  = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
+	FS_CDR_MAP            = "variables"
+	FS_DIRECTION          = "direction"
+	FS_SUBJECT            = "cgr_subject"
+	FS_ACCOUNT            = "cgr_account"
+	FS_DESTINATION        = "cgr_destination"
+	FS_REQTYPE            = "cgr_reqtype" //prepaid or postpaid
+	FS_CATEGORY           = "cgr_category"
+	FS_UUID               = "uuid" // -Unique ID for this call leg
+	FS_CSTMID             = "cgr_tenant"
+	FS_CALL_DEST_NR       = "dialed_extension"
+	FS_PARK_TIME          = "start_epoch"
+	FS_SETUP_TIME         = "start_epoch"
+	FS_ANSWER_TIME        = "answer_epoch"
+	FS_HANGUP_TIME        = "end_epoch"
+	FS_DURATION           = "billsec"
+	FS_USERNAME           = "user_name"
+	FS_IP                 = "sip_local_network_addr"
+	FS_CDR_SOURCE         = "freeswitch_json"
+	FS_SIP_REQUSER        = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
+	FS_PROGRESS_MEDIAMSEC = "progress_mediamsec"
+	FS_PROGRESSMS         = "progressmsec"
 )
 
 func NewFSCdr(body []byte, cgrCfg *config.CGRConfig) (*FSCdr, error) {
@@ -122,6 +125,7 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 }
 
 func (fsCdr FSCdr) AsStoredCdr() *StoredCdr {
+
 	storCdr := new(StoredCdr)
 	storCdr.CgrId = fsCdr.getCgrId()
 	storCdr.TOR = utils.VOICE
@@ -136,8 +140,13 @@ func (fsCdr FSCdr) AsStoredCdr() *StoredCdr {
 	storCdr.Subject = utils.FirstNonEmpty(fsCdr.vars[FS_SUBJECT], fsCdr.vars[FS_USERNAME])
 	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[FS_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
+	pddStr := utils.FirstNonEmpty(fsCdr.vars[FS_PROGRESS_MEDIAMSEC], fsCdr.vars[FS_PROGRESSMS])
+	pddStr = pddStr + "ms"
+	storCdr.Pdd, _ = time.ParseDuration(pddStr)
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME])
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
+	storCdr.Supplier = fsCdr.vars[utils.CGR_SUPPLIER]
+	storCdr.DisconnectCause = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DISCONNECT_CAUSE], fsCdr.vars["hangup_cause"])
 	storCdr.ExtraFields = fsCdr.getExtraFields()
 	storCdr.Cost = -1
 	return storCdr

@@ -38,14 +38,14 @@ type FSEvent map[string]string
 const (
 	// Freswitch event proprities names
 	DIRECTION          = "Call-Direction"
-	SUBJECT            = "variable_cgr_subject"
-	ACCOUNT            = "variable_cgr_account"
-	DESTINATION        = "variable_cgr_destination"
-	REQTYPE            = "variable_cgr_reqtype" //prepaid or postpaid
-	Category           = "variable_cgr_category"
+	SUBJECT            = "variable_" + utils.CGR_SUBJECT
+	ACCOUNT            = "variable_" + utils.CGR_ACCOUNT
+	DESTINATION        = "variable_" + utils.CGR_DESTINATION
+	REQTYPE            = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
+	Category           = "variable_" + utils.CGR_CATEGORY
 	VAR_CGR_SUPPLIER   = "variable_" + utils.CGR_SUPPLIER
 	UUID               = "Unique-ID" // -Unique ID for this call leg
-	CSTMID             = "variable_cgr_tenant"
+	CSTMID             = "variable_" + utils.CGR_TENANT
 	CALL_DEST_NR       = "Caller-Destination-Number"
 	SIP_REQ_USER       = "variable_sip_req_user"
 	PARK_TIME          = "Caller-Profile-Created-Time"
@@ -222,9 +222,9 @@ func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {
 func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
 	var pddStr string
 	if utils.IsSliceMember([]string{utils.PDD, utils.META_DEFAULT}, fieldName) {
-		pddStr = utils.FirstNonEmpty(fsev[PDD_MEDIA_MS], fsev[PDD_MEDIA_MS])
+		pddStr = utils.FirstNonEmpty(fsev[PDD_MEDIA_MS], fsev[PDD_NOMEDIA_MS])
 		if len(pddStr) != 0 {
-			pddStr = "0." + pddStr // PDD is in milliseconds and CGR expects it in seconds
+			pddStr = pddStr + "ms" // PDD is in milliseconds and CGR expects it in seconds
 		}
 	} else if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		pddStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]

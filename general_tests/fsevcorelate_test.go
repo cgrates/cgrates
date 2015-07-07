@@ -230,3 +230,380 @@ func TestEvCorelate(t *testing.T) {
 	}
 
 }
+
+var hangupEv string = `Event-Name: CHANNEL_HANGUP_COMPLETE
+Core-UUID: 651a8db2-4f67-4cf8-b622-169e8a482e50
+FreeSWITCH-Hostname: CgrDev1
+FreeSWITCH-Switchname: CgrDev1
+FreeSWITCH-IPv4: 10.0.3.15
+FreeSWITCH-IPv6: %3A%3A1
+Event-Date-Local: 2015-07-07%2016%3A53%3A14
+Event-Date-GMT: Tue,%2007%20Jul%202015%2014%3A53%3A14%20GMT
+Event-Date-Timestamp: 1436280794030635
+Event-Calling-File: switch_core_state_machine.c
+Event-Calling-Function: switch_core_session_reporting_state
+Event-Calling-Line-Number: 834
+Event-Sequence: 1035
+Hangup-Cause: NORMAL_CLEARING
+Channel-State: CS_REPORTING
+Channel-Call-State: HANGUP
+Channel-State-Number: 11
+Channel-Name: sofia/cgrtest/1001%40127.0.0.1
+Unique-ID: e3133bf7-dcde-4daf-9663-9a79ffcef5ad
+Call-Direction: inbound
+Presence-Call-Direction: inbound
+Channel-HIT-Dialplan: true
+Channel-Call-UUID: e3133bf7-dcde-4daf-9663-9a79ffcef5ad
+Answer-State: hangup
+Hangup-Cause: NORMAL_CLEARING
+Channel-Read-Codec-Name: SPEEX
+Channel-Read-Codec-Rate: 32000
+Channel-Read-Codec-Bit-Rate: 44000
+Channel-Write-Codec-Name: SPEEX
+Channel-Write-Codec-Rate: 32000
+Channel-Write-Codec-Bit-Rate: 44000
+Caller-Direction: inbound
+Caller-Logical-Direction: inbound
+Caller-Username: 1001
+Caller-Dialplan: XML
+Caller-Caller-ID-Name: 1001
+Caller-Caller-ID-Number: 1001
+Caller-Orig-Caller-ID-Name: 1001
+Caller-Orig-Caller-ID-Number: 1001
+Caller-Callee-ID-Name: Outbound%20Call
+Caller-Callee-ID-Number: 1003
+Caller-Network-Addr: 127.0.0.1
+Caller-ANI: 1001
+Caller-Destination-Number: 1003
+Caller-Unique-ID: e3133bf7-dcde-4daf-9663-9a79ffcef5ad
+Caller-Source: mod_sofia
+Caller-Transfer-Source: 1436280728%3Ae7c250e8-6ad7-4bd4-8962-318e0b0da728%3Abl_xfer%3A1003/default/XML
+Caller-Context: default
+Caller-RDNIS: 1003
+Caller-Channel-Name: sofia/cgrtest/1001%40127.0.0.1
+Caller-Profile-Index: 2
+Caller-Profile-Created-Time: 1436280728930693
+Caller-Channel-Created-Time: 1436280728471153
+Caller-Channel-Answered-Time: 1436280728971147
+Caller-Channel-Progress-Time: 0
+Caller-Channel-Progress-Media-Time: 0
+Caller-Channel-Hangup-Time: 1436280794010851
+Caller-Channel-Transfer-Time: 0
+Caller-Channel-Resurrect-Time: 0
+Caller-Channel-Bridged-Time: 1436280728971147
+Caller-Channel-Last-Hold: 0
+Caller-Channel-Hold-Accum: 0
+Caller-Screen-Bit: true
+Caller-Privacy-Hide-Name: false
+Caller-Privacy-Hide-Number: false
+Other-Type: originatee
+Other-Leg-Direction: outbound
+Other-Leg-Logical-Direction: inbound
+Other-Leg-Username: 1001
+Other-Leg-Dialplan: XML
+Other-Leg-Caller-ID-Name: Extension%201001
+Other-Leg-Caller-ID-Number: 1001
+Other-Leg-Orig-Caller-ID-Name: 1001
+Other-Leg-Orig-Caller-ID-Number: 1001
+Other-Leg-Callee-ID-Name: Outbound%20Call
+Other-Leg-Callee-ID-Number: 1003
+Other-Leg-Network-Addr: 127.0.0.1
+Other-Leg-ANI: 1001
+Other-Leg-Destination-Number: 1003
+Other-Leg-Unique-ID: 0a30dd7c-c222-482f-a322-b1218a15f8cd
+Other-Leg-Source: mod_sofia
+Other-Leg-Context: default
+Other-Leg-RDNIS: 1003
+Other-Leg-Channel-Name: sofia/cgrtest/1003%40127.0.0.1%3A5070
+Other-Leg-Profile-Created-Time: 1436280728950627
+Other-Leg-Channel-Created-Time: 1436280728950627
+Other-Leg-Channel-Answered-Time: 1436280728950627
+Other-Leg-Channel-Progress-Time: 0
+Other-Leg-Channel-Progress-Media-Time: 0
+Other-Leg-Channel-Hangup-Time: 0
+Other-Leg-Channel-Transfer-Time: 0
+Other-Leg-Channel-Resurrect-Time: 0
+Other-Leg-Channel-Bridged-Time: 0
+Other-Leg-Channel-Last-Hold: 0
+Other-Leg-Channel-Hold-Accum: 0
+Other-Leg-Screen-Bit: true
+Other-Leg-Privacy-Hide-Name: false
+Other-Leg-Privacy-Hide-Number: false
+variable_direction: inbound
+variable_uuid: e3133bf7-dcde-4daf-9663-9a79ffcef5ad
+variable_session_id: 4
+variable_sip_from_user: 1001
+variable_sip_from_uri: 1001%40127.0.0.1
+variable_sip_from_host: 127.0.0.1
+variable_channel_name: sofia/cgrtest/1001%40127.0.0.1
+variable_ep_codec_string: speex%4016000h%4020i,speex%408000h%4020i,speex%4032000h%4020i,GSM%408000h%4020i%4013200b,PCMU%408000h%4020i%4064000b,PCMA%408000h%4020i%4064000b,G722%408000h%4020i%4064000b
+variable_sip_local_network_addr: 127.0.0.1
+variable_sip_network_ip: 127.0.0.1
+variable_sip_network_port: 46615
+variable_sip_received_ip: 127.0.0.1
+variable_sip_received_port: 46615
+variable_sip_via_protocol: tcp
+variable_sip_authorized: true
+variable_Event-Name: REQUEST_PARAMS
+variable_Core-UUID: 651a8db2-4f67-4cf8-b622-169e8a482e50
+variable_FreeSWITCH-Hostname: CgrDev1
+variable_FreeSWITCH-Switchname: CgrDev1
+variable_FreeSWITCH-IPv4: 10.0.3.15
+variable_FreeSWITCH-IPv6: %3A%3A1
+variable_Event-Date-Local: 2015-07-07%2016%3A52%3A08
+variable_Event-Date-GMT: Tue,%2007%20Jul%202015%2014%3A52%3A08%20GMT
+variable_Event-Date-Timestamp: 1436280728471153
+variable_Event-Calling-File: sofia.c
+variable_Event-Calling-Function: sofia_handle_sip_i_invite
+variable_Event-Calling-Line-Number: 9056
+variable_Event-Sequence: 515
+variable_sip_number_alias: 1001
+variable_sip_auth_username: 1001
+variable_sip_auth_realm: 127.0.0.1
+variable_number_alias: 1001
+variable_requested_domain_name: cgrates.org
+variable_record_stereo: true
+variable_transfer_fallback_extension: operator
+variable_toll_allow: domestic,international,local
+variable_accountcode: 1001
+variable_user_context: default
+variable_effective_caller_id_name: Extension%201001
+variable_effective_caller_id_number: 1001
+variable_outbound_caller_id_name: FreeSWITCH
+variable_outbound_caller_id_number: 0000000000
+variable_callgroup: techsupport
+variable_cgr_reqtype: *prepaid
+variable_cgr_supplier: supplier1
+variable_user_name: 1001
+variable_domain_name: cgrates.org
+variable_sip_from_user_stripped: 1001
+variable_sofia_profile_name: cgrtest
+variable_recovery_profile_name: cgrtest
+variable_sip_full_route: %3Csip%3A127.0.0.1%3A25060%3Blr%3E
+variable_sip_recover_via: SIP/2.0/TCP%20127.0.0.1%3A46615%3Brport%3D46615%3Bbranch%3Dz9hG4bKPjGj7AlihmVwAVz9McwVeI64NeBHlPmXAN%3Balias
+variable_sip_req_user: 1003
+variable_sip_req_uri: 1003%40127.0.0.1
+variable_sip_req_host: 127.0.0.1
+variable_sip_to_user: 1003
+variable_sip_to_uri: 1003%40127.0.0.1
+variable_sip_to_host: 127.0.0.1
+variable_sip_contact_params: ob
+variable_sip_contact_user: 1001
+variable_sip_contact_port: 5072
+variable_sip_contact_uri: 1001%40127.0.0.1%3A5072
+variable_sip_contact_host: 127.0.0.1
+variable_sip_via_host: 127.0.0.1
+variable_sip_via_port: 46615
+variable_sip_via_rport: 46615
+variable_switch_r_sdp: v%3D0%0D%0Ao%3D-%203645269528%203645269528%20IN%20IP4%2010.0.3.15%0D%0As%3Dpjmedia%0D%0Ab%3DAS%3A84%0D%0At%3D0%200%0D%0Aa%3DX-nat%3A0%0D%0Am%3Daudio%204006%20RTP/AVP%2098%2097%2099%20104%203%200%208%209%2096%0D%0Ac%3DIN%20IP4%2010.0.3.15%0D%0Ab%3DAS%3A64000%0D%0Aa%3Drtpmap%3A98%20speex/16000%0D%0Aa%3Drtpmap%3A97%20speex/8000%0D%0Aa%3Drtpmap%3A99%20speex/32000%0D%0Aa%3Drtpmap%3A104%20iLBC/8000%0D%0Aa%3Dfmtp%3A104%20mode%3D30%0D%0Aa%3Drtpmap%3A3%20GSM/8000%0D%0Aa%3Drtpmap%3A0%20PCMU/8000%0D%0Aa%3Drtpmap%3A8%20PCMA/8000%0D%0Aa%3Drtpmap%3A9%20G722/8000%0D%0Aa%3Drtpmap%3A96%20telephone-event/8000%0D%0Aa%3Dfmtp%3A96%200-16%0D%0Aa%3Drtcp%3A4007%20IN%20IP4%2010.0.3.15%0D%0A
+variable_rtp_remote_audio_rtcp_port: 4007%20IN%20IP4%2010.0.3.15
+variable_rtp_audio_recv_pt: 99
+variable_rtp_use_codec_name: SPEEX
+variable_rtp_use_codec_rate: 32000
+variable_rtp_use_codec_ptime: 20
+variable_rtp_use_codec_channels: 1
+variable_rtp_last_audio_codec_string: SPEEX%4032000h%4020i%401c
+variable_read_codec: SPEEX
+variable_original_read_codec: SPEEX
+variable_read_rate: 32000
+variable_original_read_rate: 32000
+variable_write_codec: SPEEX
+variable_write_rate: 32000
+variable_dtmf_type: rfc2833
+variable_execute_on_answer: sched_hangup%20%2B3120%20alloted_timeout
+variable_cgr_notify: %2BAUTH_OK
+variable_max_forwards: 69
+variable_transfer_history: 1436280728%3Ae7c250e8-6ad7-4bd4-8962-318e0b0da728%3Abl_xfer%3A1003/default/XML
+variable_transfer_source: 1436280728%3Ae7c250e8-6ad7-4bd4-8962-318e0b0da728%3Abl_xfer%3A1003/default/XML
+variable_DP_MATCH: ARRAY%3A%3A1003%7C%3A1003
+variable_call_uuid: e3133bf7-dcde-4daf-9663-9a79ffcef5ad
+variable_ringback: %25(2000,4000,440,480)
+variable_call_timeout: 30
+variable_dialed_user: 1003
+variable_dialed_domain: cgrates.org
+variable_originated_legs: ARRAY%3A%3A0a30dd7c-c222-482f-a322-b1218a15f8cd%3BOutbound%20Call%3B1003%7C%3A0a30dd7c-c222-482f-a322-b1218a15f8cd%3BOutbound%20Call%3B1003
+variable_switch_m_sdp: v%3D0%0D%0Ao%3D-%203645269528%203645269529%20IN%20IP4%2010.0.3.15%0D%0As%3Dpjmedia%0D%0Ab%3DAS%3A84%0D%0At%3D0%200%0D%0Aa%3DX-nat%3A0%0D%0Am%3Daudio%204018%20RTP/AVP%2099%20101%0D%0Ac%3DIN%20IP4%2010.0.3.15%0D%0Ab%3DAS%3A64000%0D%0Aa%3Drtpmap%3A99%20speex/32000%0D%0Aa%3Drtpmap%3A101%20telephone-event/8000%0D%0Aa%3Dfmtp%3A101%200-16%0D%0Aa%3Drtcp%3A4019%20IN%20IP4%2010.0.3.15%0D%0A
+variable_rtp_local_sdp_str: v%3D0%0Ao%3DFreeSWITCH%201436250882%201436250883%20IN%20IP4%2010.0.3.15%0As%3DFreeSWITCH%0Ac%3DIN%20IP4%2010.0.3.15%0At%3D0%200%0Am%3Daudio%2029846%20RTP/AVP%2099%2096%0Aa%3Drtpmap%3A99%20speex/32000%0Aa%3Drtpmap%3A96%20telephone-event/8000%0Aa%3Dfmtp%3A96%200-16%0Aa%3Dptime%3A20%0Aa%3Dsendrecv%0Aa%3Drtcp%3A29847%20IN%20IP4%2010.0.3.15%0A
+variable_local_media_ip: 10.0.3.15
+variable_local_media_port: 29846
+variable_advertised_media_ip: 10.0.3.15
+variable_rtp_use_pt: 99
+variable_rtp_use_ssrc: 1470667272
+variable_rtp_2833_send_payload: 96
+variable_rtp_2833_recv_payload: 96
+variable_remote_media_ip: 10.0.3.15
+variable_remote_media_port: 4006
+variable_endpoint_disposition: ANSWER
+variable_current_application_data: %2B3120%20alloted_timeout
+variable_current_application: sched_hangup
+variable_originate_causes: ARRAY%3A%3A0a30dd7c-c222-482f-a322-b1218a15f8cd%3BNONE%7C%3A0a30dd7c-c222-482f-a322-b1218a15f8cd%3BNONE
+variable_originate_disposition: SUCCESS
+variable_DIALSTATUS: SUCCESS
+variable_last_bridge_to: 0a30dd7c-c222-482f-a322-b1218a15f8cd
+variable_bridge_channel: sofia/cgrtest/1003%40127.0.0.1%3A5070
+variable_bridge_uuid: 0a30dd7c-c222-482f-a322-b1218a15f8cd
+variable_signal_bond: 0a30dd7c-c222-482f-a322-b1218a15f8cd
+variable_sip_to_tag: 5Qt4ecvreSHZN
+variable_sip_from_tag: YwuG8U3rRbqIn.xYTnU8NrI3giyxDBHJ
+variable_sip_cseq: 4178
+variable_sip_call_id: r3xaJ8CLpyTAIHWUZG7gtZQYgAPEGf9S
+variable_sip_full_via: SIP/2.0/UDP%2010.0.3.15%3A5072%3Brport%3D5072%3Bbranch%3Dz9hG4bKPjPqma7vnLxDkBqcCH3eXLmLYZoPS.6MDc%3Breceived%3D127.0.0.1
+variable_sip_full_from: sip%3A1001%40127.0.0.1%3Btag%3DYwuG8U3rRbqIn.xYTnU8NrI3giyxDBHJ
+variable_sip_full_to: sip%3A1003%40127.0.0.1%3Btag%3D5Qt4ecvreSHZN
+variable_last_sent_callee_id_name: Outbound%20Call
+variable_last_sent_callee_id_number: 1003
+variable_sip_term_status: 200
+variable_proto_specific_hangup_cause: sip%3A200
+variable_sip_term_cause: 16
+variable_last_bridge_role: originator
+variable_sip_user_agent: PJSUA%20v2.3%20Linux-3.2.0.4/x86_64/glibc-2.13
+variable_sip_hangup_disposition: recv_bye
+variable_bridge_hangup_cause: NORMAL_CLEARING
+variable_hangup_cause: NORMAL_CLEARING
+variable_hangup_cause_q850: 16
+variable_digits_dialed: none
+variable_start_stamp: 2015-07-07%2016%3A52%3A08
+variable_profile_start_stamp: 2015-07-07%2016%3A52%3A08
+variable_answer_stamp: 2015-07-07%2016%3A52%3A08
+variable_bridge_stamp: 2015-07-07%2016%3A52%3A08
+variable_end_stamp: 2015-07-07%2016%3A53%3A14
+variable_start_epoch: 1436280728
+variable_start_uepoch: 1436280728471153
+variable_profile_start_epoch: 1436280728
+variable_profile_start_uepoch: 1436280728930693
+variable_answer_epoch: 1436280728
+variable_answer_uepoch: 1436280728971147
+variable_bridge_epoch: 1436280728
+variable_bridge_uepoch: 1436280728971147
+variable_last_hold_epoch: 0
+variable_last_hold_uepoch: 0
+variable_hold_accum_seconds: 0
+variable_hold_accum_usec: 0
+variable_hold_accum_ms: 0
+variable_resurrect_epoch: 0
+variable_resurrect_uepoch: 0
+variable_progress_epoch: 0
+variable_progress_uepoch: 0
+variable_progress_media_epoch: 0
+variable_progress_media_uepoch: 0
+variable_end_epoch: 1436280794
+variable_end_uepoch: 1436280794010851
+variable_last_app: sched_hangup
+variable_last_arg: %2B3120%20alloted_timeout
+variable_caller_id: %221001%22%20%3C1001%3E
+variable_duration: 66
+variable_billsec: 66
+variable_progresssec: 0
+variable_answersec: 0
+variable_waitsec: 0
+variable_progress_mediasec: 0
+variable_flow_billsec: 66
+variable_mduration: 65539
+variable_billmsec: 65039
+variable_progressmsec: 28
+variable_answermsec: 500
+variable_waitmsec: 500
+variable_progress_mediamsec: 28
+variable_flow_billmsec: 65539
+variable_uduration: 65539698
+variable_billusec: 65039704
+variable_progressusec: 0
+variable_answerusec: 499994
+variable_waitusec: 499994
+variable_progress_mediausec: 0
+variable_flow_billusec: 65539698
+variable_rtp_audio_in_raw_bytes: 6770
+variable_rtp_audio_in_media_bytes: 6762
+variable_rtp_audio_in_packet_count: 192
+variable_rtp_audio_in_media_packet_count: 190
+variable_rtp_audio_in_skip_packet_count: 6
+variable_rtp_audio_in_jitter_packet_count: 0
+variable_rtp_audio_in_dtmf_packet_count: 0
+variable_rtp_audio_in_cng_packet_count: 0
+variable_rtp_audio_in_flush_packet_count: 2
+variable_rtp_audio_in_largest_jb_size: 0
+variable_rtp_audio_in_jitter_min_variance: 26.73
+variable_rtp_audio_in_jitter_max_variance: 6716.71
+variable_rtp_audio_in_jitter_loss_rate: 0.00
+variable_rtp_audio_in_jitter_burst_rate: 0.00
+variable_rtp_audio_in_mean_interval: 36.67
+variable_rtp_audio_in_flaw_total: 0
+variable_rtp_audio_in_quality_percentage: 100.00
+variable_rtp_audio_in_mos: 4.50
+variable_rtp_audio_out_raw_bytes: 4686
+variable_rtp_audio_out_media_bytes: 4686
+variable_rtp_audio_out_packet_count: 108
+variable_rtp_audio_out_media_packet_count: 108
+variable_rtp_audio_out_skip_packet_count: 0
+variable_rtp_audio_out_dtmf_packet_count: 0
+variable_rtp_audio_out_cng_packet_count: 0
+variable_rtp_audio_rtcp_packet_count: 1450
+variable_rtp_audio_rtcp_octet_count: 45940`
+
+var jsonCdr2 = []byte(`{"core-uuid":"651a8db2-4f67-4cf8-b622-169e8a482e50","switchname":"CgrDev1","channel_data":{"state":"CS_REPORTING","direction":"inbound","state_number":"11","flags":"0=1;1=1;37=1;38=1;40=1;43=1;48=1;53=1;105=1;111=1;112=1;116=1;118=1","caps":"1=1;2=1;3=1;4=1;5=1;6=1"},"variables":{"direction":"inbound","uuid":"e3133bf7-dcde-4daf-9663-9a79ffcef5ad","session_id":"4","sip_from_user":"1001","sip_from_uri":"1001@127.0.0.1","sip_from_host":"127.0.0.1","channel_name":"sofia/cgrtest/1001@127.0.0.1","ep_codec_string":"speex@16000h@20i,speex@8000h@20i,speex@32000h@20i,GSM@8000h@20i@13200b,PCMU@8000h@20i@64000b,PCMA@8000h@20i@64000b,G722@8000h@20i@64000b","sip_local_network_addr":"127.0.0.1","sip_network_ip":"127.0.0.1","sip_network_port":"46615","sip_received_ip":"127.0.0.1","sip_received_port":"46615","sip_via_protocol":"tcp","sip_authorized":"true","Event-Name":"REQUEST_PARAMS","Core-UUID":"651a8db2-4f67-4cf8-b622-169e8a482e50","FreeSWITCH-Hostname":"CgrDev1","FreeSWITCH-Switchname":"CgrDev1","FreeSWITCH-IPv4":"10.0.3.15","FreeSWITCH-IPv6":"::1","Event-Date-Local":"2015-07-07 16:52:08","Event-Date-GMT":"Tue, 07 Jul 2015 14:52:08 GMT","Event-Date-Timestamp":"1436280728471153","Event-Calling-File":"sofia.c","Event-Calling-Function":"sofia_handle_sip_i_invite","Event-Calling-Line-Number":"9056","Event-Sequence":"515","sip_number_alias":"1001","sip_auth_username":"1001","sip_auth_realm":"127.0.0.1","number_alias":"1001","requested_domain_name":"cgrates.org","record_stereo":"true","transfer_fallback_extension":"operator","toll_allow":"domestic,international,local","accountcode":"1001","user_context":"default","effective_caller_id_name":"Extension 1001","effective_caller_id_number":"1001","outbound_caller_id_name":"FreeSWITCH","outbound_caller_id_number":"0000000000","callgroup":"techsupport","cgr_reqtype":"*prepaid","cgr_supplier":"supplier1","user_name":"1001","domain_name":"cgrates.org","sip_from_user_stripped":"1001","sofia_profile_name":"cgrtest","recovery_profile_name":"cgrtest","sip_full_route":"<sip:127.0.0.1:25060;lr>","sip_recover_via":"SIP/2.0/TCP 127.0.0.1:46615;rport=46615;branch=z9hG4bKPjGj7AlihmVwAVz9McwVeI64NeBHlPmXAN;alias","sip_req_user":"1003","sip_req_uri":"1003@127.0.0.1","sip_req_host":"127.0.0.1","sip_to_user":"1003","sip_to_uri":"1003@127.0.0.1","sip_to_host":"127.0.0.1","sip_contact_params":"ob","sip_contact_user":"1001","sip_contact_port":"5072","sip_contact_uri":"1001@127.0.0.1:5072","sip_contact_host":"127.0.0.1","sip_via_host":"127.0.0.1","sip_via_port":"46615","sip_via_rport":"46615","switch_r_sdp":"v=0\r\no=- 3645269528 3645269528 IN IP4 10.0.3.15\r\ns=pjmedia\r\nb=AS:84\r\nt=0 0\r\na=X-nat:0\r\nm=audio 4006 RTP/AVP 98 97 99 104 3 0 8 9 96\r\nc=IN IP4 10.0.3.15\r\nb=AS:64000\r\na=rtpmap:98 speex/16000\r\na=rtpmap:97 speex/8000\r\na=rtpmap:99 speex/32000\r\na=rtpmap:104 iLBC/8000\r\na=fmtp:104 mode=30\r\na=rtpmap:3 GSM/8000\r\na=rtpmap:0 PCMU/8000\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:9 G722/8000\r\na=rtpmap:96 telephone-event/8000\r\na=fmtp:96 0-16\r\na=rtcp:4007 IN IP4 10.0.3.15\r\n","rtp_remote_audio_rtcp_port":"4007 IN IP4 10.0.3.15","rtp_audio_recv_pt":"99","rtp_use_codec_name":"SPEEX","rtp_use_codec_rate":"32000","rtp_use_codec_ptime":"20","rtp_use_codec_channels":"1","rtp_last_audio_codec_string":"SPEEX@32000h@20i@1c","read_codec":"SPEEX","original_read_codec":"SPEEX","read_rate":"32000","original_read_rate":"32000","write_codec":"SPEEX","write_rate":"32000","dtmf_type":"rfc2833","execute_on_answer":"sched_hangup +3120 alloted_timeout","cgr_notify":"+AUTH_OK","max_forwards":"69","transfer_history":"1436280728:e7c250e8-6ad7-4bd4-8962-318e0b0da728:bl_xfer:1003/default/XML","transfer_source":"1436280728:e7c250e8-6ad7-4bd4-8962-318e0b0da728:bl_xfer:1003/default/XML","DP_MATCH":"ARRAY::1003|:1003","call_uuid":"e3133bf7-dcde-4daf-9663-9a79ffcef5ad","ringback":"%(2000,4000,440,480)","call_timeout":"30","dialed_user":"1003","dialed_domain":"cgrates.org","originated_legs":"ARRAY::0a30dd7c-c222-482f-a322-b1218a15f8cd;Outbound Call;1003|:0a30dd7c-c222-482f-a322-b1218a15f8cd;Outbound Call;1003","switch_m_sdp":"v=0\r\no=- 3645269528 3645269529 IN IP4 10.0.3.15\r\ns=pjmedia\r\nb=AS:84\r\nt=0 0\r\na=X-nat:0\r\nm=audio 4018 RTP/AVP 99 101\r\nc=IN IP4 10.0.3.15\r\nb=AS:64000\r\na=rtpmap:99 speex/32000\r\na=rtpmap:101 telephone-event/8000\r\na=fmtp:101 0-16\r\na=rtcp:4019 IN IP4 10.0.3.15\r\n","rtp_local_sdp_str":"v=0\no=FreeSWITCH 1436250882 1436250883 IN IP4 10.0.3.15\ns=FreeSWITCH\nc=IN IP4 10.0.3.15\nt=0 0\nm=audio 29846 RTP/AVP 99 96\na=rtpmap:99 speex/32000\na=rtpmap:96 telephone-event/8000\na=fmtp:96 0-16\na=ptime:20\na=sendrecv\na=rtcp:29847 IN IP4 10.0.3.15\n","local_media_ip":"10.0.3.15","local_media_port":"29846","advertised_media_ip":"10.0.3.15","rtp_use_pt":"99","rtp_use_ssrc":"1470667272","rtp_2833_send_payload":"96","rtp_2833_recv_payload":"96","remote_media_ip":"10.0.3.15","remote_media_port":"4006","endpoint_disposition":"ANSWER","current_application_data":"+3120 alloted_timeout","current_application":"sched_hangup","originate_causes":"ARRAY::0a30dd7c-c222-482f-a322-b1218a15f8cd;NONE|:0a30dd7c-c222-482f-a322-b1218a15f8cd;NONE","originate_disposition":"SUCCESS","DIALSTATUS":"SUCCESS","last_bridge_to":"0a30dd7c-c222-482f-a322-b1218a15f8cd","bridge_channel":"sofia/cgrtest/1003@127.0.0.1:5070","bridge_uuid":"0a30dd7c-c222-482f-a322-b1218a15f8cd","signal_bond":"0a30dd7c-c222-482f-a322-b1218a15f8cd","sip_to_tag":"5Qt4ecvreSHZN","sip_from_tag":"YwuG8U3rRbqIn.xYTnU8NrI3giyxDBHJ","sip_cseq":"4178","sip_call_id":"r3xaJ8CLpyTAIHWUZG7gtZQYgAPEGf9S","sip_full_via":"SIP/2.0/UDP 10.0.3.15:5072;rport=5072;branch=z9hG4bKPjPqma7vnLxDkBqcCH3eXLmLYZoPS.6MDc;received=127.0.0.1","sip_full_from":"sip:1001@127.0.0.1;tag=YwuG8U3rRbqIn.xYTnU8NrI3giyxDBHJ","sip_full_to":"sip:1003@127.0.0.1;tag=5Qt4ecvreSHZN","last_sent_callee_id_name":"Outbound Call","last_sent_callee_id_number":"1003","sip_term_status":"200","proto_specific_hangup_cause":"sip:200","sip_term_cause":"16","last_bridge_role":"originator","sip_user_agent":"PJSUA v2.3 Linux-3.2.0.4/x86_64/glibc-2.13","sip_hangup_disposition":"recv_bye","bridge_hangup_cause":"NORMAL_CLEARING","hangup_cause":"NORMAL_CLEARING","hangup_cause_q850":"16","digits_dialed":"none","start_stamp":"2015-07-07 16:52:08","profile_start_stamp":"2015-07-07 16:52:08","answer_stamp":"2015-07-07 16:52:08","bridge_stamp":"2015-07-07 16:52:08","end_stamp":"2015-07-07 16:53:14","start_epoch":"1436280728","start_uepoch":"1436280728471153","profile_start_epoch":"1436280728","profile_start_uepoch":"1436280728930693","answer_epoch":"1436280728","answer_uepoch":"1436280728971147","bridge_epoch":"1436280728","bridge_uepoch":"1436280728971147","last_hold_epoch":"0","last_hold_uepoch":"0","hold_accum_seconds":"0","hold_accum_usec":"0","hold_accum_ms":"0","resurrect_epoch":"0","resurrect_uepoch":"0","progress_epoch":"0","progress_uepoch":"0","progress_media_epoch":"0","progress_media_uepoch":"0","end_epoch":"1436280794","end_uepoch":"1436280794010851","last_app":"sched_hangup","last_arg":"+3120 alloted_timeout","caller_id":"\"1001\" <1001>","duration":"66","billsec":"66","progresssec":"0","answersec":"0","waitsec":"0","progress_mediasec":"0","flow_billsec":"66","mduration":"65539","billmsec":"65039","progressmsec":"28","answermsec":"500","waitmsec":"500","progress_mediamsec":"28","flow_billmsec":"65539","uduration":"65539698","billusec":"65039704","progressusec":"0","answerusec":"499994","waitusec":"499994","progress_mediausec":"0","flow_billusec":"65539698","rtp_audio_in_raw_bytes":"6770","rtp_audio_in_media_bytes":"6762","rtp_audio_in_packet_count":"192","rtp_audio_in_media_packet_count":"190","rtp_audio_in_skip_packet_count":"6","rtp_audio_in_jitter_packet_count":"0","rtp_audio_in_dtmf_packet_count":"0","rtp_audio_in_cng_packet_count":"0","rtp_audio_in_flush_packet_count":"2","rtp_audio_in_largest_jb_size":"0","rtp_audio_in_jitter_min_variance":"26.73","rtp_audio_in_jitter_max_variance":"6716.71","rtp_audio_in_jitter_loss_rate":"0.00","rtp_audio_in_jitter_burst_rate":"0.00","rtp_audio_in_mean_interval":"36.67","rtp_audio_in_flaw_total":"0","rtp_audio_in_quality_percentage":"100.00","rtp_audio_in_mos":"4.50","rtp_audio_out_raw_bytes":"4686","rtp_audio_out_media_bytes":"4686","rtp_audio_out_packet_count":"108","rtp_audio_out_media_packet_count":"108","rtp_audio_out_skip_packet_count":"0","rtp_audio_out_dtmf_packet_count":"0","rtp_audio_out_cng_packet_count":"0","rtp_audio_rtcp_packet_count":"1450","rtp_audio_rtcp_octet_count":"45940"},"app_log":{"applications":[{"app_name":"info","app_data":""},{"app_name":"park","app_data":""},{"app_name":"info","app_data":""},{"app_name":"set","app_data":"ringback=%(2000,4000,440,480)"},{"app_name":"set","app_data":"call_timeout=30"},{"app_name":"bridge","app_data":"user/1003@cgrates.org"},{"app_name":"sched_hangup","app_data":"+3120 alloted_timeout"}]},"callflow":{"dialplan":"XML","profile_index":"2","extension":{"name":"call_debug","number":"1003","applications":[{"app_name":"info","app_data":""},{"app_name":"set","app_data":"ringback=${us-ring}"},{"app_name":"set","app_data":"call_timeout=30"},{"app_name":"bridge","app_data":"user/${destination_number}@${domain_name}"}]},"caller_profile":{"username":"1001","dialplan":"XML","caller_id_name":"1001","ani":"1001","aniii":"","caller_id_number":"1001","network_addr":"127.0.0.1","rdnis":"1003","destination_number":"1003","uuid":"e3133bf7-dcde-4daf-9663-9a79ffcef5ad","source":"mod_sofia","context":"default","chan_name":"sofia/cgrtest/1001@127.0.0.1","originatee":{"originatee_caller_profiles":[{"username":"1001","dialplan":"XML","caller_id_name":"Extension 1001","ani":"1001","aniii":"","caller_id_number":"1001","network_addr":"127.0.0.1","rdnis":"1003","destination_number":"1003","uuid":"0a30dd7c-c222-482f-a322-b1218a15f8cd","source":"mod_sofia","context":"default","chan_name":"sofia/cgrtest/1003@127.0.0.1:5070"},{"username":"1001","dialplan":"XML","caller_id_name":"Extension 1001","ani":"1001","aniii":"","caller_id_number":"1001","network_addr":"127.0.0.1","rdnis":"1003","destination_number":"1003","uuid":"0a30dd7c-c222-482f-a322-b1218a15f8cd","source":"mod_sofia","context":"default","chan_name":"sofia/cgrtest/1003@127.0.0.1:5070"}]}},"times":{"created_time":"1436280728471153","profile_created_time":"1436280728930693","progress_time":"0","progress_media_time":"0","answered_time":"1436280728971147","bridged_time":"1436280728971147","last_hold_time":"0","hold_accum_time":"0","hangup_time":"1436280794010851","resurrect_time":"0","transfer_time":"0"}},"callflow":{"dialplan":"XML","profile_index":"1","extension":{"name":"call_debug","number":"1003","applications":[{"app_name":"info","app_data":""},{"app_name":"park","app_data":""}]},"caller_profile":{"username":"1001","dialplan":"XML","caller_id_name":"1001","ani":"1001","aniii":"","caller_id_number":"1001","network_addr":"127.0.0.1","rdnis":"","destination_number":"1003","uuid":"e3133bf7-dcde-4daf-9663-9a79ffcef5ad","source":"mod_sofia","context":"default","chan_name":"sofia/cgrtest/1001@127.0.0.1"},"times":{"created_time":"1436280728471153","profile_created_time":"1436280728471153","progress_time":"0","progress_media_time":"0","answered_time":"0","bridged_time":"0","last_hold_time":"0","hold_accum_time":"0","hangup_time":"0","resurrect_time":"0","transfer_time":"1436280728930693"}}}`)
+
+// Make sure that both hangup and json cdr produce the same CGR primary fields
+func TestEvCdrCorelate(t *testing.T) {
+	hangupEv := new(sessionmanager.FSEvent).AsEvent(hangupEv)
+	if hangupEv.GetName() != "CHANNEL_HANGUP_COMPLETE" {
+		t.Error("Event not parsed correctly: ", hangupEv)
+	}
+	cfg, _ := config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+	evStoredCdr := hangupEv.AsStoredCdr()
+	cdrEv, err := engine.NewFSCdr(jsonCdr2, cfg)
+	if err != nil {
+		t.Errorf("Error loading cdr: %v", err.Error())
+	} else if cdrEv.AsStoredCdr().AccId != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+		t.Error("Unexpected acntId received", cdrEv.AsStoredCdr().AccId)
+	}
+	jsnStoredCdr := cdrEv.AsStoredCdr()
+	if evStoredCdr.CgrId != jsnStoredCdr.CgrId {
+		t.Errorf("evStoredCdr.CgrId: %s, jsnStoredCdr.CgrId: %s", evStoredCdr.CgrId, jsnStoredCdr.CgrId)
+	}
+	if evStoredCdr.TOR != jsnStoredCdr.TOR {
+		t.Errorf("evStoredCdr.TOR: %s, jsnStoredCdr.TOR: %s", evStoredCdr.TOR, jsnStoredCdr.TOR)
+	}
+	if evStoredCdr.AccId != jsnStoredCdr.AccId {
+		t.Errorf("evStoredCdr.AccId: %s, jsnStoredCdr.AccId: %s", evStoredCdr.AccId, jsnStoredCdr.AccId)
+	}
+	if evStoredCdr.ReqType != jsnStoredCdr.ReqType {
+		t.Errorf("evStoredCdr.ReqType: %s, jsnStoredCdr.ReqType: %s", evStoredCdr.ReqType, jsnStoredCdr.ReqType)
+	}
+	if evStoredCdr.Direction != jsnStoredCdr.Direction {
+		t.Errorf("evStoredCdr.Direction: %s, jsnStoredCdr.Direction: %s", evStoredCdr.Direction, jsnStoredCdr.Direction)
+	}
+	if evStoredCdr.Tenant != jsnStoredCdr.Tenant {
+		t.Errorf("evStoredCdr.Tenant: %s, jsnStoredCdr.Tenant: %s", evStoredCdr.Tenant, jsnStoredCdr.Tenant)
+	}
+	if evStoredCdr.Category != jsnStoredCdr.Category {
+		t.Errorf("evStoredCdr.Category: %s, jsnStoredCdr.Category: %s", evStoredCdr.Category, jsnStoredCdr.Category)
+	}
+	if evStoredCdr.Account != jsnStoredCdr.Account {
+		t.Errorf("evStoredCdr.Account: %s, jsnStoredCdr.Account: %s", evStoredCdr.Account, jsnStoredCdr.Account)
+	}
+	if evStoredCdr.Subject != jsnStoredCdr.Subject {
+		t.Errorf("evStoredCdr.Subject: %s, jsnStoredCdr.Subject: %s", evStoredCdr.Subject, jsnStoredCdr.Subject)
+	}
+	if evStoredCdr.Destination != jsnStoredCdr.Destination {
+		t.Errorf("evStoredCdr.Destination: %s, jsnStoredCdr.Destination: %s", evStoredCdr.Destination, jsnStoredCdr.Destination)
+	}
+	if evStoredCdr.SetupTime != jsnStoredCdr.SetupTime {
+		t.Errorf("evStoredCdr.SetupTime: %v, jsnStoredCdr.SetupTime: %v", evStoredCdr.SetupTime, jsnStoredCdr.SetupTime)
+	}
+	if evStoredCdr.Pdd != jsnStoredCdr.Pdd {
+		t.Errorf("evStoredCdr.Pdd: %v, jsnStoredCdr.Pdd: %v", evStoredCdr.Pdd, jsnStoredCdr.Pdd)
+	}
+	if evStoredCdr.AnswerTime != jsnStoredCdr.AnswerTime {
+		t.Errorf("evStoredCdr.AnswerTime: %v, jsnStoredCdr.AnswerTime: %v", evStoredCdr.AnswerTime, jsnStoredCdr.AnswerTime)
+	}
+	if evStoredCdr.Usage != jsnStoredCdr.Usage {
+		t.Errorf("evStoredCdr.Usage: %v, jsnStoredCdr.Usage: %v", evStoredCdr.Usage, jsnStoredCdr.Usage)
+	}
+	if evStoredCdr.Supplier != jsnStoredCdr.Supplier {
+		t.Errorf("evStoredCdr.Supplier: %s, jsnStoredCdr.Supplier: %s", evStoredCdr.Supplier, jsnStoredCdr.Supplier)
+	}
+	if evStoredCdr.DisconnectCause != jsnStoredCdr.DisconnectCause {
+		t.Errorf("evStoredCdr.DisconnectCause: %s, jsnStoredCdr.DisconnectCause: %s", evStoredCdr.DisconnectCause, jsnStoredCdr.DisconnectCause)
+	}
+}

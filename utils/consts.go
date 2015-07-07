@@ -193,11 +193,21 @@ const (
 	NANO_MULTIPLIER              = 1000000000
 	CGR_AUTHORIZE                = "CGR_AUTHORIZE"
 	CONFIG_DIR                   = "/etc/cgrates/"
+	CGR_ACCOUNT                  = "cgr_account"
 	CGR_SUPPLIER                 = "cgr_supplier"
-	CGR_SUPPLIERS                = "cgr_suppliers"
+	CGR_DESTINATION              = "cgr_destination"
+	CGR_SUBJECT                  = "cgr_subject"
+	CGR_CATEGORY                 = "cgr_category"
+	CGR_REQTYPE                  = "cgr_reqtype"
+	CGR_TENANT                   = "cgr_tenant"
+	CGR_TOR                      = "cgr_tor"
+	CGR_ACCID                    = "cgr_accid"
+	CGR_HOST                     = "cgr_host"
+	CGR_PDD                      = "cgr_pdd"
 	DISCONNECT_CAUSE             = "disconnect_cause"
 	CGR_DISCONNECT_CAUSE         = "cgr_disconnectcause"
 	CGR_COMPUTELCR               = "cgr_computelcr"
+	CGR_SUPPLIERS                = "cgr_suppliers"
 )
 
 var (
