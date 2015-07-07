@@ -24,34 +24,34 @@ import (
 )
 
 func init() {
-	c := &CmdGetAccount{
-		name:      "account",
-		rpcMethod: "ApierV1.GetAccount",
-		rpcParams: &utils.AttrGetAccount{Direction: "*out"},
+	c := &CmdGetAccounts{
+		name:      "accounts",
+		rpcMethod: "ApierV1.GetAccounts",
+		rpcParams: &utils.AttrGetAccounts{Direction: "*out"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetAccount struct {
+type CmdGetAccounts struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrGetAccount
+	rpcParams *utils.AttrGetAccounts
 	*CommandExecuter
 }
 
-func (self *CmdGetAccount) Name() string {
+func (self *CmdGetAccounts) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAccount) RpcMethod() string {
+func (self *CmdGetAccounts) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccount) RpcParams(ptr bool) interface{} {
+func (self *CmdGetAccounts) RpcParams(ptr bool) interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.AttrGetAccount{Direction: "*out"}
+		self.rpcParams = &utils.AttrGetAccounts{Direction: "*out"}
 	}
 	if ptr {
 		return self.rpcParams
@@ -59,10 +59,11 @@ func (self *CmdGetAccount) RpcParams(ptr bool) interface{} {
 	return *self.rpcParams
 }
 
-func (self *CmdGetAccount) PostprocessRpcParams() error {
+func (self *CmdGetAccounts) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAccount) RpcResult() interface{} {
-	return &engine.Account{}
+func (self *CmdGetAccounts) RpcResult() interface{} {
+	a := make([]engine.Account, 0)
+	return &a
 }

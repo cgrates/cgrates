@@ -210,15 +210,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	return nil
 }
 
-type AttrGetAccounts struct {
-	Tenant     string
-	Direction  string
-	AccountIds []string
-	Offset     int // Set the item offset
-	Limit      int // Limit number of items retrieved
-}
-
-func (self *ApierV1) GetAccounts(attr AttrGetAccounts, reply *[]*engine.Account) error {
+func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Account) error {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenanat")
 	}
