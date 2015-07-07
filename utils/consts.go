@@ -22,6 +22,7 @@ var (
 	ErrBrokenReference    = errors.New("BROKEN_REFERENCE")
 	ErrParserError        = errors.New("PARSER_ERROR")
 	ErrInvalidPath        = errors.New("INVALID_PATH")
+	ErrInvalidKey         = errors.New("INVALID_KEY")
 )
 
 const (
