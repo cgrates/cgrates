@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS cdrs_primary;
 CREATE TABLE cdrs_primary (
   id SERIAL PRIMARY KEY,
   cgrid CHAR(40) NOT NULL,
-  tor  VARCHAR(16) NOT NULL, 
+  tor  VARCHAR(16) NOT NULL,
   accid VARCHAR(64) NOT NULL,
   cdrhost VARCHAR(64) NOT NULL,
   cdrsource VARCHAR(64) NOT NULL,
@@ -39,7 +39,7 @@ DROP TABLE IF EXISTS cdrs_extra;
 CREATE TABLE cdrs_extra (
   id SERIAL PRIMARY KEY,
   cgrid CHAR(40) NOT NULL,
-  extra_fields text NOT NULL,
+  extra_fields jsonb NOT NULL,
   created_at TIMESTAMP,
   deleted_at TIMESTAMP,
   UNIQUE (cgrid)
