@@ -328,5 +328,5 @@ CREATE TABLE tp_cdr_stats (
   action_triggers VARCHAR(64) NOT NULL,
   created_at TIMESTAMP
 );
-CREATE INDEX tpcdrstats_tpid_idx ON tp_cdrstats (tpid);
-CREATE INDEX tpcdrstats_idx ON tp_cdrstats (tpid,tag);
+CREATE INDEX tpcdrstats_tpid_idx ON tp_cdr_stats (tpid);
+CREATE INDEX tpcdrstats_idx ON tp_cdr_stats (tpid,tag);
