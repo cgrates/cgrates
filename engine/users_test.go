@@ -7,17 +7,17 @@ import (
 )
 
 var testMap = UserMap{
-	Table: map[string]map[string]string{
+	table: map[string]map[string]string{
 		"test:user":   map[string]string{"t": "v"},
 		":user":       map[string]string{"t": "v"},
 		"test:":       map[string]string{"t": "v"},
 		"test1:user1": map[string]string{"t": "v", "x": "y"},
 	},
-	Index: make(map[string][]string),
+	index: make(map[string][]string),
 }
 
 func TestUsersAdd(t *testing.T) {
-	tm := NewUserMap()
+	tm := NewUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -27,18 +27,18 @@ func TestUsersAdd(t *testing.T) {
 		},
 	}
 	tm.SetUser(up, &r)
-	p, found := tm.Table[up.GetId()]
+	p, found := tm.table[up.GetId()]
 	if r != utils.OK ||
 		!found ||
 		p["t"] != "v" ||
-		len(tm.Table) != 1 ||
+		len(tm.table) != 1 ||
 		len(p) != 1 {
 		t.Error("Error setting user: ", tm)
 	}
 }
 
 func TestUsersUpdate(t *testing.T) {
-	tm := NewUserMap()
+	tm := NewUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -48,28 +48,28 @@ func TestUsersUpdate(t *testing.T) {
 		},
 	}
 	tm.SetUser(up, &r)
-	p, found := tm.Table[up.GetId()]
+	p, found := tm.table[up.GetId()]
 	if r != utils.OK ||
 		!found ||
 		p["t"] != "v" ||
-		len(tm.Table) != 1 ||
+		len(tm.table) != 1 ||
 		len(p) != 1 {
 		t.Error("Error setting user: ", tm)
 	}
 	up.Profile["x"] = "y"
 	tm.UpdateUser(up, &r)
-	p, found = tm.Table[up.GetId()]
+	p, found = tm.table[up.GetId()]
 	if r != utils.OK ||
 		!found ||
 		p["x"] != "y" ||
-		len(tm.Table) != 1 ||
+		len(tm.table) != 1 ||
 		len(p) != 2 {
 		t.Error("Error updating user: ", tm)
 	}
 }
 
 func TestUsersUpdateNotFound(t *testing.T) {
-	tm := NewUserMap()
+	tm := NewUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -87,7 +87,7 @@ func TestUsersUpdateNotFound(t *testing.T) {
 }
 
 func TestUsersUpdateInit(t *testing.T) {
-	tm := NewUserMap()
+	tm := NewUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -102,18 +102,18 @@ func TestUsersUpdateInit(t *testing.T) {
 		},
 	}
 	tm.UpdateUser(up, &r)
-	p, found := tm.Table[up.GetId()]
+	p, found := tm.table[up.GetId()]
 	if r != utils.OK ||
 		!found ||
 		p["t"] != "v" ||
-		len(tm.Table) != 1 ||
+		len(tm.table) != 1 ||
 		len(p) != 1 {
 		t.Error("Error updating user: ", tm)
 	}
 }
 
 func TestUsersRemove(t *testing.T) {
-	tm := NewUserMap()
+	tm := NewUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -123,19 +123,19 @@ func TestUsersRemove(t *testing.T) {
 		},
 	}
 	tm.SetUser(up, &r)
-	p, found := tm.Table[up.GetId()]
+	p, found := tm.table[up.GetId()]
 	if r != utils.OK ||
 		!found ||
 		p["t"] != "v" ||
-		len(tm.Table) != 1 ||
+		len(tm.table) != 1 ||
 		len(p) != 1 {
 		t.Error("Error setting user: ", tm)
 	}
 	tm.RemoveUser(up, &r)
-	p, found = tm.Table[up.GetId()]
+	p, found = tm.table[up.GetId()]
 	if r != utils.OK ||
 		found ||
-		len(tm.Table) != 0 {
+		len(tm.table) != 0 {
 		t.Error("Error removing user: ", tm)
 	}
 }
@@ -259,36 +259,36 @@ func TestUsersAddIndex(t *testing.T) {
 	var r string
 	testMap.AddIndex([]string{"t"}, &r)
 	if r != utils.OK ||
-		len(testMap.Index) != 1 ||
-		len(testMap.Index[utils.ConcatenatedKey("t", "v")]) != 4 {
-		t.Error("error adding index: ", testMap.Index)
+		len(testMap.index) != 1 ||
+		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 4 {
+		t.Error("error adding index: ", testMap.index)
 	}
 }
 
 func TestUsersAddIndexFull(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	if r != utils.OK ||
-		len(testMap.Index) != 6 ||
-		len(testMap.Index[utils.ConcatenatedKey("t", "v")]) != 4 {
-		t.Error("error adding index: ", testMap.Index)
+		len(testMap.index) != 6 ||
+		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 4 {
+		t.Error("error adding index: ", testMap.index)
 	}
 }
 
 func TestUsersAddIndexNone(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"test"}, &r)
 	if r != utils.OK ||
-		len(testMap.Index) != 0 {
-		t.Error("error adding index: ", testMap.Index)
+		len(testMap.index) != 0 {
+		t.Error("error adding index: ", testMap.index)
 	}
 }
 
-func TestUsersGetFullIndex(t *testing.T) {
+func TestUsersGetFullindex(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	up := UserProfile{
 		Tenant:   "test",
@@ -304,9 +304,9 @@ func TestUsersGetFullIndex(t *testing.T) {
 	}
 }
 
-func TestUsersGetTenantIndex(t *testing.T) {
+func TestUsersGetTenantindex(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	up := UserProfile{
 		Tenant:   "testX",
@@ -322,9 +322,9 @@ func TestUsersGetTenantIndex(t *testing.T) {
 	}
 }
 
-func TestUsersGetUserNameIndex(t *testing.T) {
+func TestUsersGetUserNameindex(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	up := UserProfile{
 		Tenant:   "test",
@@ -340,9 +340,9 @@ func TestUsersGetUserNameIndex(t *testing.T) {
 	}
 }
 
-func TestUsersGetNotFoundProfileIndex(t *testing.T) {
+func TestUsersGetNotFoundProfileindex(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	up := UserProfile{
 		Tenant:   "test",
@@ -358,9 +358,9 @@ func TestUsersGetNotFoundProfileIndex(t *testing.T) {
 	}
 }
 
-func TestUsersGetMissingTenantIndex(t *testing.T) {
+func TestUsersGetMissingTenantindex(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	up := UserProfile{
 		UserName: "user",
@@ -375,9 +375,9 @@ func TestUsersGetMissingTenantIndex(t *testing.T) {
 	}
 }
 
-func TestUsersGetMissingUserNameIndex(t *testing.T) {
+func TestUsersGetMissingUserNameindex(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	up := UserProfile{
 		Tenant: "test",
@@ -392,9 +392,9 @@ func TestUsersGetMissingUserNameIndex(t *testing.T) {
 	}
 }
 
-func TestUsersGetMissingIdIndex(t *testing.T) {
+func TestUsersGetMissingIdindex(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	up := UserProfile{
 		Profile: map[string]string{
@@ -410,7 +410,7 @@ func TestUsersGetMissingIdIndex(t *testing.T) {
 
 func TestUsersGetMissingIdTwoINdex(t *testing.T) {
 	var r string
-	testMap.Index = make(map[string][]string) // reset index
+	testMap.index = make(map[string][]string) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	up := UserProfile{
 		Profile: map[string]string{

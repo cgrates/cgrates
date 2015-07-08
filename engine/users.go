@@ -36,66 +36,85 @@ type UserService interface {
 }
 
 type UserMap struct {
-	Table map[string]map[string]string
-	Index map[string][]string
+	table    map[string]map[string]string
+	index    map[string][]string
+	ratingDb RatingStorage
 }
 
-func NewUserMap() *UserMap {
+func NewUserMap(ratingDb RatingStorage) *UserMap {
 	return &UserMap{
-		Table: make(map[string]map[string]string),
-		Index: make(map[string][]string),
+		table:    make(map[string]map[string]string),
+		index:    make(map[string][]string),
+		ratingDb: ratingDb,
 	}
 }
 
 func (um *UserMap) SetUser(up UserProfile, reply *string) error {
-	um.Table[up.GetId()] = up.Profile
+	um.table[up.GetId()] = up.Profile
+	if err := um.ratingDb.SetUser(&up); err != nil {
+		*reply = err.Error()
+		return err
+	}
 	*reply = utils.OK
 	return nil
 }
 
 func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
-	delete(um.Table, up.GetId())
+	delete(um.table, up.GetId())
+	if err := um.ratingDb.RemoveUser(up.GetId()); err != nil {
+		*reply = err.Error()
+		return err
+	}
 	*reply = utils.OK
 	return nil
 }
 
 func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
-	m, found := um.Table[up.GetId()]
+	m, found := um.table[up.GetId()]
 	if !found {
 		*reply = utils.ErrNotFound.Error()
 		return utils.ErrNotFound
 	}
 	if m == nil {
-		um.Table[up.GetId()] = make(map[string]string, 0)
+		um.table[up.GetId()] = make(map[string]string, 0)
 	}
 	for key, value := range up.Profile {
-		um.Table[up.GetId()][key] = value
+		um.table[up.GetId()][key] = value
+	}
+	finalUp := &UserProfile{
+		Tenant:   up.Tenant,
+		UserName: up.UserName,
+		Profile:  um.table[up.GetId()],
+	}
+	if err := um.ratingDb.SetUser(finalUp); err != nil {
+		*reply = err.Error()
+		return err
 	}
 	*reply = utils.OK
 	return nil
 }
 
 func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
-	table := um.Table // no index
+	table := um.table // no index
 
 	indexUnionKeys := make(map[string]bool)
 	// search index
 	if up.Tenant != "" {
-		if keys, found := um.Index[utils.ConcatenatedKey("Tenant", up.Tenant)]; found {
+		if keys, found := um.index[utils.ConcatenatedKey("Tenant", up.Tenant)]; found {
 			for _, key := range keys {
 				indexUnionKeys[key] = true
 			}
 		}
 	}
 	if up.UserName != "" {
-		if keys, found := um.Index[utils.ConcatenatedKey("UserName", up.UserName)]; found {
+		if keys, found := um.index[utils.ConcatenatedKey("UserName", up.UserName)]; found {
 			for _, key := range keys {
 				indexUnionKeys[key] = true
 			}
 		}
 	}
 	for k, v := range up.Profile {
-		if keys, found := um.Index[utils.ConcatenatedKey(k, v)]; found {
+		if keys, found := um.index[utils.ConcatenatedKey(k, v)]; found {
 			for _, key := range keys {
 				indexUnionKeys[key] = true
 			}
@@ -104,7 +123,7 @@ func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
 	if len(indexUnionKeys) != 0 {
 		table = make(map[string]map[string]string)
 		for key := range indexUnionKeys {
-			table[key] = um.Table[key]
+			table[key] = um.table[key]
 		}
 	}
 
@@ -139,26 +158,26 @@ func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
 }
 
 func (um *UserMap) AddIndex(indexes []string, reply *string) error {
-	for key, values := range um.Table {
+	for key, values := range um.table {
 		ud := &UserProfile{Profile: values}
 		ud.SetId(key)
 		for _, index := range indexes {
 			if index == "Tenant" {
 				if ud.Tenant != "" {
-					um.Index[utils.ConcatenatedKey(index, ud.Tenant)] = append(um.Index[utils.ConcatenatedKey(index, ud.Tenant)], key)
+					um.index[utils.ConcatenatedKey(index, ud.Tenant)] = append(um.index[utils.ConcatenatedKey(index, ud.Tenant)], key)
 				}
 				continue
 			}
 			if index == "UserName" {
 				if ud.UserName != "" {
-					um.Index[utils.ConcatenatedKey(index, ud.UserName)] = append(um.Index[utils.ConcatenatedKey(index, ud.UserName)], key)
+					um.index[utils.ConcatenatedKey(index, ud.UserName)] = append(um.index[utils.ConcatenatedKey(index, ud.UserName)], key)
 				}
 				continue
 			}
 
 			for k, v := range ud.Profile {
 				if k == index && v != "" {
-					um.Index[utils.ConcatenatedKey(k, v)] = append(um.Index[utils.ConcatenatedKey(k, v)], key)
+					um.index[utils.ConcatenatedKey(k, v)] = append(um.index[utils.ConcatenatedKey(k, v)], key)
 				}
 			}
 		}
