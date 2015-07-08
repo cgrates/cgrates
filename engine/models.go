@@ -320,6 +320,10 @@ type TpCdrstat struct {
 	CreatedAt           time.Time
 }
 
+func (t TpCdrstat) TableName() string {
+	return utils.TBL_TP_CDR_STATS
+}
+
 type TblCdrsPrimary struct {
 	Id              int64
 	Cgrid           string
