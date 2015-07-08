@@ -134,6 +134,7 @@ type CdrcJsonCfg struct {
 	Cdr_out_dir                *string
 	Cdr_source_id              *string
 	Cdr_filter                 *string
+	Max_open_files             *int
 	Cdr_fields                 *[]*CdrFieldJsonCfg
 }
 

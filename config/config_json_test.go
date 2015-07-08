@@ -290,6 +290,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Cdr_format:                 utils.StringPointer("csv"),
 			Field_separator:            utils.StringPointer(","),
 			Run_delay:                  utils.IntPointer(0),
+			Max_open_files:             utils.IntPointer(1024),
 			Data_usage_multiply_factor: utils.Float64Pointer(1024.0),
 			Cdr_in_dir:                 utils.StringPointer("/var/log/cgrates/cdrc/in"),
 			Cdr_out_dir:                utils.StringPointer("/var/log/cgrates/cdrc/out"),

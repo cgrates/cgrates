@@ -103,7 +103,11 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrS
 	}
 	cdrc := &Cdrc{cdrsAddress: cdrcCfg.Cdrs, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator,
-		httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer, exitChan: exitChan}
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer, exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles)}
+	var processFile struct{}
+	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
+		cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
+	}
 	cdrc.cdrSourceIds = make([]string, len(cdrcCfgs))
 	cdrc.duMultiplyFactors = make([]float64, len(cdrcCfgs))
 	cdrc.cdrFilters = make([]utils.RSRFields, len(cdrcCfgs))
@@ -141,6 +145,7 @@ type Cdrc struct {
 	cdrServer         *engine.CdrServer // Reference towards internal cdrServer if that is the case
 	httpClient        *http.Client
 	exitChan          chan struct{}
+	maxOpenFiles      chan struct{} // Maximum number of simultaneous files processed
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -212,6 +217,8 @@ func (self *Cdrc) processCdrDir() error {
 
 // Processe file at filePath and posts the valid cdr rows out of it
 func (self *Cdrc) processFile(filePath string) error {
+	processFile := <-self.maxOpenFiles // Queue here for maxOpenFiles
+	defer func() { self.maxOpenFiles <- processFile }()
 	_, fn := path.Split(filePath)
 	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing: %s", filePath))
 	file, err := os.Open(filePath)

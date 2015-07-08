@@ -31,6 +31,7 @@ type CdrcConfig struct {
 	FieldSeparator          rune            // The separator to use when reading csvs
 	DataUsageMultiplyFactor float64         // Conversion factor for data usage
 	RunDelay                time.Duration   // Delay between runs, 0 for inotify driven requests
+	MaxOpenFiles            int             // Maximum number of files opened simultaneously
 	CdrInDir                string          // Folder to process CDRs from
 	CdrOutDir               string          // Folder to move processed CDRs to
 	CdrSourceId             string          // Source identifier for the processed CDRs
@@ -61,6 +62,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	}
 	if jsnCfg.Run_delay != nil {
 		self.RunDelay = time.Duration(*jsnCfg.Run_delay) * time.Second
+	}
+	if jsnCfg.Max_open_files != nil {
+		self.MaxOpenFiles = *jsnCfg.Max_open_files
 	}
 	if jsnCfg.Cdr_in_dir != nil {
 		self.CdrInDir = *jsnCfg.Cdr_in_dir
@@ -93,6 +97,7 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc.FieldSeparator = self.FieldSeparator
 	clnCdrc.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor
 	clnCdrc.RunDelay = self.RunDelay
+	clnCdrc.MaxOpenFiles = self.MaxOpenFiles
 	clnCdrc.CdrInDir = self.CdrInDir
 	clnCdrc.CdrOutDir = self.CdrOutDir
 	clnCdrc.CdrSourceId = self.CdrSourceId
