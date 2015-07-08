@@ -51,6 +51,9 @@ type Responder struct {
 RPC method thet provides the external RPC interface for getting the rating information.
 */
 func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.GetCost")
 		*reply, err = *r, e
@@ -68,6 +71,9 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 }
 
 func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.Debit")
 		*reply, err = *r, e
@@ -83,6 +89,9 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 }
 
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.MaxDebit")
 		*reply, err = *r, e
@@ -98,6 +107,9 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 }
 
 func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
 	} else {
@@ -110,6 +122,9 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 }
 
 func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err error) {
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.GetMaxSessionTime")
 	} else {
@@ -121,6 +136,9 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
 func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
+	if ev.Subject == "" {
+		ev.Subject = ev.Account
+	}
 	if rs.Bal != nil {
 		return errors.New("unsupported method on the balancer")
 	}
@@ -187,6 +205,9 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
 func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
+	if ev.Subject == "" {
+		ev.Subject = ev.Account
+	}
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
@@ -255,6 +276,9 @@ func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
 }
 
 func (rs *Responder) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
+	if cd.Subject == "" {
+		cd.Subject = cd.Account
+	}
 	lcrCost, err := cd.GetLCR(rs.Stats)
 	if err != nil {
 		return err

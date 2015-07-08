@@ -89,6 +89,9 @@ func (self *CdrServer) ProcessCdr(cdr *StoredCdr) error {
 
 // RPC method, used to process external CDRs
 func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
+	if cdr.Subject == "" { // Use account information as rating subject if missing
+		cdr.Subject = cdr.Account
+	}
 	storedCdr, err := NewStoredCdrFromExternalCdr(cdr)
 	if err != nil {
 		return err
