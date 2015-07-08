@@ -154,7 +154,8 @@ func main() {
 			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
-			path.Join(*dataPath, utils.CDR_STATS_CSV))
+			path.Join(*dataPath, utils.CDR_STATS_CSV),
+			path.Join(*dataPath, utils.USERS_CSV))
 	}
 	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid)
 	err = tpReader.LoadAll()

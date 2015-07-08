@@ -330,3 +330,20 @@ CREATE TABLE tp_cdrstats (
 );
 CREATE INDEX tpcdrstats_tpid_idx ON tp_cdrstats (tpid);
 CREATE INDEX tpcdrstats_idx ON tp_cdrstats (tpid,tag);
+
+--
+-- Table structure for table `tp_users`
+--
+
+DROP TABLE IF EXISTS tp_users;
+CREATE TABLE tp_users (
+  id SERIAL PRIMARY KEY,
+  tpid VARCHAR(64) NOT NULL,
+  tenant VARCHAR(64) NOT NULL,
+  user_name VARCHAR(64) NOT NULL,
+  attribute VARCHAR(64) NOT NULL,
+  `value` VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP
+);
+CREATE INDEX tpusers_tpid_idx ON tp_users (tpid);
+CREATE INDEX tpusers_idx ON tp_users (tpid,tenant,user_name);

@@ -1311,3 +1311,44 @@ func (self *SQLStorage) GetTpCdrStats(tpid, tag string) ([]TpCdrstat, error) {
 
 	return tpCdrStats, nil
 }
+
+func (self *SQLStorage) SetTpUsers(users []TpUser) error {
+	if len(users) == 0 {
+		return nil
+	}
+	m := make(map[string]bool)
+
+	tx := self.db.Begin()
+	for _, user := range users {
+		if found, _ := m[user.GetId()]; !found {
+			m[user.GetId()] = true
+			if err := tx.Where(&TpUser{Tpid: user.Tpid, Tenant: user.Tenant, UserName: user.UserName}).Delete(TpUser{}).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+		save := tx.Save(&user)
+		if save.Error != nil {
+			tx.Rollback()
+			return save.Error
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func (self *SQLStorage) GetTpUsers(filter *TpUser) ([]TpUser, error) {
+	var tpUsers []TpUser
+	q := self.db.Where("tpid = ?", filter.Tpid)
+	if len(filter.Tenant) != 0 {
+		q = q.Where("tenant = ?", filter.Tenant)
+	}
+	if len(filter.UserName) != 0 {
+		q = q.Where("user_name = ?", filter.UserName)
+	}
+	if err := q.Find(&tpUsers).Error; err != nil {
+		return nil, err
+	}
+
+	return tpUsers, nil
+}
