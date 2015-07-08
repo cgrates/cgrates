@@ -32,39 +32,84 @@ type UserService interface {
 	RemoveUser(UserProfile, *string) error
 	UpdateUser(UserProfile, *string) error
 	GetUsers(UserProfile, *[]*UserProfile) error
+	AddIndex([]string, *string) error
 }
 
-type UserMap map[string]map[string]string
+type UserMap struct {
+	Table map[string]map[string]string
+	Index map[string][]string
+}
 
-func (um UserMap) SetUser(up UserProfile, reply *string) error {
-	um[up.GetId()] = up.Profile
+func NewUserMap() *UserMap {
+	return &UserMap{
+		Table: make(map[string]map[string]string),
+		Index: make(map[string][]string),
+	}
+}
+
+func (um *UserMap) SetUser(up UserProfile, reply *string) error {
+	um.Table[up.GetId()] = up.Profile
 	*reply = utils.OK
 	return nil
 }
-func (um UserMap) RemoveUser(up UserProfile, reply *string) error {
-	delete(um, up.GetId())
+
+func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
+	delete(um.Table, up.GetId())
 	*reply = utils.OK
 	return nil
 }
-func (um UserMap) UpdateUser(up UserProfile, reply *string) error {
-	m, found := um[up.GetId()]
+
+func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
+	m, found := um.Table[up.GetId()]
 	if !found {
 		*reply = utils.ErrNotFound.Error()
 		return utils.ErrNotFound
 	}
 	if m == nil {
-		um[up.GetId()] = make(map[string]string, 0)
+		um.Table[up.GetId()] = make(map[string]string, 0)
 	}
 	for key, value := range up.Profile {
-		um[up.GetId()][key] = value
+		um.Table[up.GetId()][key] = value
 	}
 	*reply = utils.OK
 	return nil
 }
-func (um UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
-	// no index
+
+func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
+	table := um.Table // no index
+
+	indexUnionKeys := make(map[string]bool)
+	// search index
+	if up.Tenant != "" {
+		if keys, found := um.Index[utils.ConcatenatedKey("Tenant", up.Tenant)]; found {
+			for _, key := range keys {
+				indexUnionKeys[key] = true
+			}
+		}
+	}
+	if up.UserName != "" {
+		if keys, found := um.Index[utils.ConcatenatedKey("UserName", up.UserName)]; found {
+			for _, key := range keys {
+				indexUnionKeys[key] = true
+			}
+		}
+	}
+	for k, v := range up.Profile {
+		if keys, found := um.Index[utils.ConcatenatedKey(k, v)]; found {
+			for _, key := range keys {
+				indexUnionKeys[key] = true
+			}
+		}
+	}
+	if len(indexUnionKeys) != 0 {
+		table = make(map[string]map[string]string)
+		for key := range indexUnionKeys {
+			table[key] = um.Table[key]
+		}
+	}
+
 	var candidates []*UserProfile
-	for key, values := range um {
+	for key, values := range table {
 		if up.Tenant != "" && !strings.HasPrefix(key, up.Tenant+utils.CONCATENATED_KEY_SEP) {
 			continue
 		}
@@ -88,8 +133,37 @@ func (um UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
 			nup.Profile[k] = v
 		}
 		candidates = append(candidates, nup)
-		*results = candidates
 	}
+	*results = candidates
+	return nil
+}
+
+func (um *UserMap) AddIndex(indexes []string, reply *string) error {
+	for key, values := range um.Table {
+		ud := &UserProfile{Profile: values}
+		ud.SetId(key)
+		for _, index := range indexes {
+			if index == "Tenant" {
+				if ud.Tenant != "" {
+					um.Index[utils.ConcatenatedKey(index, ud.Tenant)] = append(um.Index[utils.ConcatenatedKey(index, ud.Tenant)], key)
+				}
+				continue
+			}
+			if index == "UserName" {
+				if ud.UserName != "" {
+					um.Index[utils.ConcatenatedKey(index, ud.UserName)] = append(um.Index[utils.ConcatenatedKey(index, ud.UserName)], key)
+				}
+				continue
+			}
+
+			for k, v := range ud.Profile {
+				if k == index && v != "" {
+					um.Index[utils.ConcatenatedKey(k, v)] = append(um.Index[utils.ConcatenatedKey(k, v)], key)
+				}
+			}
+		}
+	}
+	*reply = utils.OK
 	return nil
 }
 
@@ -117,4 +191,8 @@ func (ps *ProxyUserService) RemoveUser(ud UserProfile, reply *string) error {
 
 func (ps *ProxyUserService) GetUsers(ud UserProfile, users *[]*UserProfile) error {
 	return ps.Client.Call("UserService.GetUsers", ud, users)
+}
+
+func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
+	return ps.Client.Call("UserService.AddIndex", indexes, reply)
 }
