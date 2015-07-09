@@ -318,8 +318,9 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 		cdr.UsageMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
 	} else if cdre.genericUsageMultiplyFactor != 0 && cdr.TOR == utils.GENERIC {
 		cdr.UsageMultiply(cdre.genericUsageMultiplyFactor, cdre.cgrPrecision)
-	} else if cdre.costMultiplyFactor != 0.0 {
-		cdr.CostMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
+	}
+	if cdre.costMultiplyFactor != 0.0 {
+		cdr.CostMultiply(cdre.costMultiplyFactor, cdre.cgrPrecision)
 	}
 	var err error
 	cdrRow := make([]string, len(cdre.exportTemplate.ContentFields))
