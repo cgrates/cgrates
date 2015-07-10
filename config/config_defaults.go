@@ -152,15 +152,17 @@ const CGRATES_CFG_JSON = `
 	"*default": {
 		"enabled": false,							// enable CDR client functionality
 		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
-		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv>
+		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": ",",						// separator used in case of csv files
 		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"max_open_files": 1024,						// maximum simultaneous files to process
 		"data_usage_multiply_factor": 1024,			// conversion factor for data usage
 		"cdr_in_dir": "/var/log/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
+		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",							// filter CDR records to import
+		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
 		"cdr_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "2", "mandatory": true},
 			{"tag": "accid", "cdr_field_id": "accid", "type": "cdrfield", "value": "3", "mandatory": true},

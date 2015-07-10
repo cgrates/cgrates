@@ -21,6 +21,7 @@ package cdrc
 import (
 	"bufio"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -104,9 +105,9 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrS
 	cdrc := &Cdrc{cdrsAddress: cdrcCfg.Cdrs, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer, exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles)}
-	var processFile struct{}
+	var processCsvFile struct{}
 	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
-		cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
+		cdrc.maxOpenFiles <- processCsvFile // Empty initiate so we do not need to wait later when we pop
 	}
 	cdrc.cdrSourceIds = make([]string, len(cdrcCfgs))
 	cdrc.duMultiplyFactors = make([]float64, len(cdrcCfgs))
@@ -130,6 +131,64 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrS
 	return cdrc, nil
 }
 
+func NewPartialFlatstoreRecord(record []string) (*PartialFlatstoreRecord, error) {
+	if len(record) < 7 {
+		return nil, errors.New("MISSING_IE")
+	}
+	pr := &PartialFlatstoreRecord{Method: record[0], AccId: record[3] + record[1] + record[2], Values: record}
+	var err error
+	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6]); err != nil {
+		return nil, err
+	}
+	return pr, nil
+}
+
+// This is a partial record received from Flatstore, can be INVITE or BYE and it needs to be paired in order to produce duration
+type PartialFlatstoreRecord struct {
+	Method    string    // INVITE or BYE
+	AccId     string    // Copute here the AccId
+	Timestamp time.Time // Timestamp of the event, as written by db_flastore module
+	Values    []string  // Can contain original values or updated via UpdateValues
+}
+
+// Pairs INVITE and BYE into final record containing as last element the duration
+func pairToRecord(part1, part2 *PartialFlatstoreRecord) ([]string, error) {
+	var invite, bye *PartialFlatstoreRecord
+	if part1.Method == "INVITE" {
+		invite = part1
+	} else if part2.Method == "INVITE" {
+		invite = part2
+	} else {
+		return nil, errors.New("MISSING_INVITE")
+	}
+	if part1.Method == "BYE" {
+		bye = part1
+	} else if part2.Method == "BYE" {
+		bye = part2
+	} else {
+		return nil, errors.New("MISSING_BYE")
+	}
+	if len(invite.Values) != len(bye.Values) {
+		return nil, errors.New("INCONSISTENT_VALUES_LENGTH")
+	}
+	record := invite.Values
+	for idx := range record {
+		switch idx {
+		case 0, 1, 2, 3, 6: // Leave these values as they are
+		case 4, 5:
+			record[idx] = bye.Values[idx] // Update record with status from bye
+		default:
+			if bye.Values[idx] != "" { // Any value higher than 6 is dynamically inserted, overwrite if non empty
+				record[idx] = bye.Values[idx]
+			}
+
+		}
+	}
+	callDur := bye.Timestamp.Sub(invite.Timestamp)
+	record = append(record, strconv.FormatFloat(callDur.Seconds(), 'f', -1, 64))
+	return record, nil
+}
+
 type Cdrc struct {
 	cdrsAddress,
 	CdrFormat,
@@ -145,7 +204,8 @@ type Cdrc struct {
 	cdrServer         *engine.CdrServer // Reference towards internal cdrServer if that is the case
 	httpClient        *http.Client
 	exitChan          chan struct{}
-	maxOpenFiles      chan struct{} // Maximum number of simultaneous files processed
+	maxOpenFiles      chan struct{}                                 // Maximum number of simultaneous files processed
+	partialRecords    map[string]map[string]*PartialFlatstoreRecord // [FileName"][AccId]*PartialRecord
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -188,7 +248,7 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 		case ev := <-watcher.Events:
 			if ev.Op&fsnotify.Create == fsnotify.Create && (self.CdrFormat != FS_CSV || path.Ext(ev.Name) != ".csv") {
 				go func() { //Enable async processing here
-					if err = self.processFile(ev.Name); err != nil {
+					if err = self.processCsvFile(ev.Name); err != nil {
 						engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
 					}
 				}()
@@ -206,7 +266,7 @@ func (self *Cdrc) processCdrDir() error {
 	for _, file := range filesInDir {
 		if self.CdrFormat != FS_CSV || path.Ext(file.Name()) != ".csv" {
 			go func() { //Enable async processing here
-				if err := self.processFile(path.Join(self.cdrInDir, file.Name())); err != nil {
+				if err := self.processCsvFile(path.Join(self.cdrInDir, file.Name())); err != nil {
 					engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", file, err.Error()))
 				}
 			}()
@@ -216,9 +276,9 @@ func (self *Cdrc) processCdrDir() error {
 }
 
 // Processe file at filePath and posts the valid cdr rows out of it
-func (self *Cdrc) processFile(filePath string) error {
-	processFile := <-self.maxOpenFiles // Queue here for maxOpenFiles
-	defer func() { self.maxOpenFiles <- processFile }()
+func (self *Cdrc) processCsvFile(filePath string) error {
+	processCsvFile := <-self.maxOpenFiles // Queue here for maxOpenFiles
+	defer func() { self.maxOpenFiles <- processCsvFile }()
 	_, fn := path.Split(filePath)
 	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing: %s", filePath))
 	file, err := os.Open(filePath)
@@ -241,43 +301,18 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - csv error: %s", procRowNr, err.Error()))
 			continue // Other csv related errors, ignore
 		}
-		recordCdrs := make([]*engine.StoredCdr, 0) // More CDRs based on the number of filters and field templates
-		for idx := range self.cdrFields {
-			// Make sure filters are matching
-			filterBreak := false
-			for _, rsrFilter := range self.cdrFilters[idx] {
-				if rsrFilter == nil { // Nil filter does not need to match anything
-					continue
-				}
-				if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
-					return fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
-				} else if !rsrFilter.FilterPasses(record[cfgFieldIdx]) {
-					filterBreak = true
-					break
-				}
-			}
-			if filterBreak { // Stop importing cdrc fields profile due to non matching filter
+		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.CdrFormat) { // partial records for flatstore CDRs
+			if record, err = self.processPartialRecord(record, fn); err != nil {
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed processing partial record, row: %d, error: %s", procRowNr, err.Error()))
+				continue
+			} else if record == nil {
 				continue
 			}
-			if storedCdr, err := self.recordToStoredCdr(record, idx); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - failed converting to StoredCdr, error: %s", procRowNr, err.Error()))
-				continue
-			} else {
-				recordCdrs = append(recordCdrs, storedCdr)
-			}
+			// Record was overwriten with complete information out of cache
 		}
-		for _, storedCdr := range recordCdrs {
-			if self.cdrsAddress == utils.INTERNAL {
-				if err := self.cdrServer.ProcessCdr(storedCdr); err != nil {
-					engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
-					continue
-				}
-			} else { // CDRs listening on IP
-				if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", self.cdrsAddress), storedCdr.AsHttpForm()); err != nil {
-					engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
-					continue
-				}
-			}
+		if err := self.processRecord(record, procRowNr); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed processing CDR, row: %d, error: %s", procRowNr, err.Error()))
+			continue
 		}
 	}
 	// Finished with file, move it to processed folder
@@ -291,14 +326,85 @@ func (self *Cdrc) processFile(filePath string) error {
 	return nil
 }
 
+// Processes a single partial record for flatstore CDRs, in case of failed calls it will emulate the BYE by copying the INVITE
+func (self *Cdrc) processPartialRecord(record []string, fileName string) ([]string, error) {
+	pr, err := NewPartialFlatstoreRecord(record)
+	if err != nil {
+		return nil, err
+	}
+	// ToDo: cache locking
+	// ToDo: schedule dumping of the .unpaired files
+	if fileMp, hasFile := self.partialRecords[fileName]; !hasFile {
+		self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.AccId: pr}
+		return nil, nil
+	} else if _, hasAccId := fileMp[pr.AccId]; !hasAccId {
+		self.partialRecords[fileName][pr.AccId] = pr
+		return nil, nil
+	}
+	// The paired is already in cache, build up the final record
+	return pairToRecord(self.partialRecords[fileName][pr.AccId], pr)
+}
+
+// Takes the record from a slice and turns it into StoredCdrs, posting them to the cdrServer
+func (self *Cdrc) processRecord(record []string, srcRowNr int) error {
+	recordCdrs := make([]*engine.StoredCdr, 0) // More CDRs based on the number of filters and field templates
+	for idx := range self.cdrFields {          // cdrFields coming from more templates will produce individual storCdr records
+		// Make sure filters are matching
+		filterBreak := false
+		for _, rsrFilter := range self.cdrFilters[idx] {
+			if rsrFilter == nil { // Nil filter does not need to match anything
+				continue
+			}
+			if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+				return fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
+			} else if !rsrFilter.FilterPasses(record[cfgFieldIdx]) {
+				filterBreak = true
+				break
+			}
+		}
+		if filterBreak { // Stop importing cdrc fields profile due to non matching filter
+			continue
+		}
+		if storedCdr, err := self.recordToStoredCdr(record, idx); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - failed converting to StoredCdr, error: %s", srcRowNr, err.Error()))
+			continue
+		} else {
+			recordCdrs = append(recordCdrs, storedCdr)
+		}
+	}
+	for _, storedCdr := range recordCdrs {
+		if self.cdrsAddress == utils.INTERNAL {
+			if err := self.cdrServer.ProcessCdr(storedCdr); err != nil {
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", srcRowNr, err.Error()))
+				continue
+			}
+		} else { // CDRs listening on IP
+			if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", self.cdrsAddress), storedCdr.AsHttpForm()); err != nil {
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", srcRowNr, err.Error()))
+				continue
+			}
+		}
+	}
+	return nil
+}
+
 // Takes the record out of csv and turns it into storedCdr which can be processed by CDRS
 func (self *Cdrc) recordToStoredCdr(record []string, cfgIdx int) (*engine.StoredCdr, error) {
 	storedCdr := &engine.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceIds[cfgIdx], ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range self.cdrFields[cfgIdx] {
+		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.CdrFormat) { // Hardcode some values in case of flatstore
+			switch cdrFldCfg.CdrFieldId {
+			case utils.ACCID:
+				cdrFldCfg.Value = utils.ParseRSRFieldsMustCompile("3;1;2", utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
+			case utils.USAGE:
+				cdrFldCfg.Value = utils.ParseRSRFieldsMustCompile(strconv.Itoa(len(record)-1), utils.INFIELD_SEP) // in case of flatstore, last element will be the duration computed by us
+			}
+
+		}
 		var fieldVal string
-		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.CdrFormat) {
+		if utils.IsSliceMember([]string{CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.CdrFormat) {
 			if cdrFldCfg.Type == utils.CDRFIELD {
 				for _, cfgFieldRSR := range cdrFldCfg.Value {
 					if cfgFieldRSR.IsStatic() {

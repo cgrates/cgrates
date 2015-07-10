@@ -44,6 +44,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 			MaxOpenFiles:            1024,
 			CdrInDir:                "/var/log/cgrates/cdrc/in",
 			CdrOutDir:               "/var/log/cgrates/cdrc/out",
+			FailedCallsPrefix:       "missed_calls",
 			CdrSourceId:             "freeswitch_csv",
 			CdrFilter:               utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 			CdrFields: []*CfgCdrField{

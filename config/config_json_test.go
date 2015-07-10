@@ -294,6 +294,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Data_usage_multiply_factor: utils.Float64Pointer(1024.0),
 			Cdr_in_dir:                 utils.StringPointer("/var/log/cgrates/cdrc/in"),
 			Cdr_out_dir:                utils.StringPointer("/var/log/cgrates/cdrc/out"),
+			Failed_calls_prefix:        utils.StringPointer("missed_calls"),
 			Cdr_source_id:              utils.StringPointer("freeswitch_csv"),
 			Cdr_filter:                 utils.StringPointer(""),
 			Cdr_fields:                 &cdrFields,

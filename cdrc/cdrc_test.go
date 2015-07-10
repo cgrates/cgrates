@@ -19,6 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
+	"bytes"
+	"encoding/csv"
+	"io"
 	"reflect"
 	"testing"
 	"time"
@@ -236,5 +239,199 @@ func TestDnTdmCdrs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eCdrs, cdrs)
 	}
 
+}
+*/
+
+func TestNewPartialFlatstoreRecord(t *testing.T) {
+	ePr := &PartialFlatstoreRecord{Method: "INVITE", AccId: "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:02daec40c548625ac", Timestamp: time.Date(2015, 7, 9, 17, 6, 48, 0, time.Local),
+		Values: []string{"INVITE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454408", "*prepaid", "1001", "1002", "", "3401:2069362475"}}
+	if pr, err := NewPartialFlatstoreRecord(ePr.Values); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(ePr, pr) {
+		t.Errorf("Expecting: %+v, received: %+v", ePr, pr)
+	}
+	if _, err := NewPartialFlatstoreRecord([]string{"INVITE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK"}); err == nil || err.Error() != "MISSING_IE" {
+		t.Error(err)
+	}
+}
+
+func TestPairToRecord(t *testing.T) {
+	eRecord := []string{"INVITE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454408", "*prepaid", "1001", "1002", "", "3401:2069362475", "2"}
+	invPr := &PartialFlatstoreRecord{Method: "INVITE", Timestamp: time.Date(2015, 7, 9, 17, 6, 48, 0, time.Local),
+		Values: []string{"INVITE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454408", "*prepaid", "1001", "1002", "", "3401:2069362475"}}
+	byePr := &PartialFlatstoreRecord{Method: "BYE", Timestamp: time.Date(2015, 7, 9, 17, 6, 50, 0, time.Local),
+		Values: []string{"BYE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454410", "", "", "", "", "3401:2069362475"}}
+	if rec, err := pairToRecord(invPr, byePr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRecord, rec) {
+		t.Errorf("Expected: %+v, received: %+v", eRecord, rec)
+	}
+	if rec, err := pairToRecord(byePr, invPr); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eRecord, rec) {
+		t.Errorf("Expected: %+v, received: %+v", eRecord, rec)
+	}
+	if _, err := pairToRecord(byePr, byePr); err == nil || err.Error() != "MISSING_INVITE" {
+		t.Error(err)
+	}
+	if _, err := pairToRecord(invPr, invPr); err == nil || err.Error() != "MISSING_BYE" {
+		t.Error(err)
+	}
+	byePr.Values = []string{"BYE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454410", "", "", "", "3401:2069362475"} // Took one value out
+	if _, err := pairToRecord(invPr, byePr); err == nil || err.Error() != "INCONSISTENT_VALUES_LENGTH" {
+		t.Error(err)
+	}
+}
+
+func TestOsipsFlatstoreCdrs(t *testing.T) {
+	osipsCdrs := `
+INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475
+BYE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454410|||||3401:2069362475
+INVITE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0|200|OK|1436454647|*postpaid|1002|1001||1877:893549741
+BYE|f9d3d5c3|c863a6e3|214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0|200|OK|1436454651|||||1877:893549741
+INVITE|36e39a5|42d996f9|3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:0|200|OK|1436454657|*prepaid|1001|1002||2407:1884881533
+BYE|36e39a5|42d996f9|3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:0|200|OK|1436454661|||||2407:1884881533
+INVITE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454690|*prepaid|1001|1002||3099:1909036290
+BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454692|||||3099:1909036290
+`
+	/*
+		eCdrs := []*engine.StoredCdr{
+			&engine.StoredCdr{
+				CgrId:       utils.Sha1("dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:02daec40c548625ac", time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC).String()),
+				TOR:         utils.VOICE,
+				AccId:       "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:02daec40c548625ac",
+				CdrHost:     "0.0.0.0",
+				CdrSource:   "TEST_CDRC",
+				ReqType:     utils.META_PREPAID,
+				Direction:   "*out",
+				Tenant:      "sip.test.deanconnect.nl",
+				Category:    "call",
+				Account:     "1001",
+				Subject:     "1001",
+				Destination: "1002",
+				SetupTime:   time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC),
+				AnswerTime:  time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC),
+				Usage:       time.Duration(25) * time.Second,
+				Cost:        -1,
+			},
+			&engine.StoredCdr{
+				CgrId:       utils.Sha1("214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0f9d3d5c3c863a6e3", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
+				TOR:         utils.VOICE,
+				AccId:       "214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0f9d3d5c3c863a6e3",
+				CdrHost:     "0.0.0.0",
+				CdrSource:   "TEST_CDRC",
+				ReqType:     utils.META_PREPAID,
+				Direction:   "*out",
+				Tenant:      "sip.test.deanconnect.nl",
+				Category:    "call",
+				Account:     "1002",
+				Subject:     "1002",
+				Destination: "1001",
+				SetupTime:   time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
+				AnswerTime:  time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
+				Usage:       time.Duration(8) * time.Second,
+				Cost:        -1,
+			},
+			&engine.StoredCdr{
+				CgrId:       utils.Sha1("3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:036e39a542d996f9", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
+				TOR:         utils.VOICE,
+				AccId:       "3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:036e39a542d996f9",
+				CdrHost:     "0.0.0.0",
+				CdrSource:   "TEST_CDRC",
+				ReqType:     utils.META_PREPAID,
+				Direction:   "*out",
+				Tenant:      "sip.test.deanconnect.nl",
+				Category:    "call",
+				Account:     "1001",
+				Subject:     "1001",
+				Destination: "1002",
+				SetupTime:   time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
+				AnswerTime:  time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
+				Usage:       time.Duration(8) * time.Second,
+				Cost:        -1,
+			},
+			&engine.StoredCdr{
+				CgrId:       utils.Sha1("a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:03111f3c949ca4c42", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
+				TOR:         utils.VOICE,
+				AccId:       "a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:03111f3c949ca4c42",
+				CdrHost:     "0.0.0.0",
+				CdrSource:   "TEST_CDRC",
+				ReqType:     utils.META_PREPAID,
+				Direction:   "*out",
+				Tenant:      "sip.test.deanconnect.nl",
+				Category:    "call",
+				Account:     "1001",
+				Subject:     "1001",
+				Destination: "1002",
+				SetupTime:   time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
+				AnswerTime:  time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
+				Usage:       time.Duration(8) * time.Second,
+				Cost:        -1,
+			},
+		}
+	*/
+	//cgrConfig, _ := config.NewDefaultCGRConfig()
+	cdrFields := [][]*config.CfgCdrField{[]*config.CfgCdrField{
+		&config.CfgCdrField{Tag: "Tor", Type: utils.CDRFIELD, CdrFieldId: utils.TOR, Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "AccId", Type: utils.CDRFIELD, CdrFieldId: utils.ACCID, Mandatory: true},
+		&config.CfgCdrField{Tag: "ReqType", Type: utils.CDRFIELD, CdrFieldId: utils.REQTYPE, Value: utils.ParseRSRFieldsMustCompile("7", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Direction", Type: utils.CDRFIELD, CdrFieldId: utils.DIRECTION, Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Direction", Type: utils.CDRFIELD, CdrFieldId: utils.DIRECTION, Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Tenant", Type: utils.CDRFIELD, CdrFieldId: utils.TENANT, Value: utils.ParseRSRFieldsMustCompile("^cgrates.org", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Category", Type: utils.CDRFIELD, CdrFieldId: utils.CATEGORY, Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Account", Type: utils.CDRFIELD, CdrFieldId: utils.ACCOUNT, Value: utils.ParseRSRFieldsMustCompile("8", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Subject", Type: utils.CDRFIELD, CdrFieldId: utils.SUBJECT, Value: utils.ParseRSRFieldsMustCompile("8", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Destination", Type: utils.CDRFIELD, CdrFieldId: utils.DESTINATION, Value: utils.ParseRSRFieldsMustCompile("9", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "SetupTime", Type: utils.CDRFIELD, CdrFieldId: utils.SETUP_TIME, Value: utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "AnswerTime", Type: utils.CDRFIELD, CdrFieldId: utils.ANSWER_TIME, Value: utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "Duration", Type: utils.CDRFIELD, CdrFieldId: utils.ANSWER_TIME, Mandatory: true},
+		&config.CfgCdrField{Tag: "DialogId", Type: utils.CDRFIELD, CdrFieldId: "DialogIdentifier", Value: utils.ParseRSRFieldsMustCompile("11", utils.INFIELD_SEP)},
+	}}
+	cdrc := &Cdrc{CdrFormat: utils.OSIPS_FLATSTORE, cdrSourceIds: []string{"TEST_CDRC"}, cdrFields: cdrFields, partialRecords: make(map[string]map[string]*PartialFlatstoreRecord)}
+	cdrsContent := bytes.NewReader([]byte(osipsCdrs))
+	csvReader := csv.NewReader(cdrsContent)
+	csvReader.Comma = '|'
+	cdrs := make([]*engine.StoredCdr, 0)
+	recNrs := 0
+	for {
+		recNrs++
+		cdrCsv, err := csvReader.Read()
+		if err != nil && err == io.EOF {
+			break // End of file
+		} else if err != nil {
+			t.Error("Unexpected error:", err)
+		}
+		record, err := cdrc.processPartialRecord(cdrCsv, "dummyfilename")
+		if err != nil {
+			t.Error(err)
+		}
+		if record == nil {
+			continue // Partial record
+		}
+		if storedCdr, err := cdrc.recordToStoredCdr(record, 0); err != nil {
+			t.Error(err)
+		} else if storedCdr != nil {
+			cdrs = append(cdrs, storedCdr)
+		}
+	}
+	/*
+		if !reflect.DeepEqual(eCdrs, cdrs) {
+			t.Errorf("Expecting: %+v, received: %+v", eCdrs, cdrs)
+		}
+	*/
+
+}
+
+/*
+func TestOsipsFlatstoreMissedCdrs(t *testing.T) {
+	osipsCdrs := `
+INVITE|ef6c6256|da501581|0bfdd176d1b93e7df3de5c6f4873ee04@0:0:0:0:0:0:0:0|487|Request Terminated|1436454643|*prepaid|1001|1002||1224:339382783
+INVITE|7905e511||81880da80a94bda81b425b09009e055c@0:0:0:0:0:0:0:0|404|Not Found|1436454668|*prepaid|1001|1002||1980:1216490844
+INVITE|25f7def5||9984b9ec535a7d317b542744d48d0ed6@0:0:0:0:0:0:0:0|404|Not Found|1436454669|*prepaid|1001|1002||14:1595110662
+INVITE|ae0a7f6c||02f7fa9334db7aa4130bbf7627370621@0:0:0:0:0:0:0:0|404|Not Found|1436454670|*prepaid|1001|1002||176:1975670970
+INVITE|32b97104||3154c2a80294f538991a88d86f4e1085@0:0:0:0:0:0:0:0|404|Not Found|1436454678|*prepaid|1001|1002||2607:1024337552
+INVITE|324cb497|d4af7023|8deaadf2ae9a17809a391f05af31afb0@0:0:0:0:0:0:0:0|486|Busy here|1436454687|*postpaid|1002|1002||474:130115066
+INVITE|167ac4db|c53c85e5|4b3885cb78dde44dc7936abd2fa281e1@0:0:0:0:0:0:0:0|487|Request Terminated|1436454695|*postpaid|1002|1002||1922:549002535
+`
 }
 */

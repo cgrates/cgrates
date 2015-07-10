@@ -43,7 +43,7 @@ func TestTutOsipsCallsInitCfg(t *testing.T) {
 	}
 	// Init config first
 	var err error
-	tutOsipsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "kamevapi", "cgrates", "etc", "cgrates"))
+	tutOsipsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "osips_async", "cgrates", "etc", "cgrates"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -71,6 +71,7 @@ func TestTutOsipsCallsResetStorDb(t *testing.T) {
 	}
 }
 
+/*
 // start Kam server
 func TestTutOsipsCallsStartOsips(t *testing.T) {
 	if !*testCalls {
@@ -81,6 +82,7 @@ func TestTutOsipsCallsStartOsips(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+*/
 
 // Start CGR Engine
 func TestTutOsipsCallsStartEngine(t *testing.T) {
@@ -446,9 +448,11 @@ func TestTutOsipsCallsStopCgrEngine(t *testing.T) {
 	}
 }
 
+/*
 func TestTutOsipsCallsStopOpensips(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	engine.KillProcName("opensips", 100)
 }
+*/

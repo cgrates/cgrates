@@ -208,6 +208,8 @@ const (
 	CGR_DISCONNECT_CAUSE         = "cgr_disconnectcause"
 	CGR_COMPUTELCR               = "cgr_computelcr"
 	CGR_SUPPLIERS                = "cgr_suppliers"
+	KAM_FLATSTORE                = "kamailio_flatstore"
+	OSIPS_FLATSTORE              = "opensips_flatstore"
 )
 
 var (

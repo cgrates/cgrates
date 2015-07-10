@@ -132,9 +132,11 @@ type CdrcJsonCfg struct {
 	Data_usage_multiply_factor *float64
 	Cdr_in_dir                 *string
 	Cdr_out_dir                *string
+	Failed_calls_prefix        *string
 	Cdr_source_id              *string
 	Cdr_filter                 *string
 	Max_open_files             *int
+	PartialRecordCache         *string
 	Cdr_fields                 *[]*CdrFieldJsonCfg
 }
 

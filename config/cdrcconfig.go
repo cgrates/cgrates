@@ -27,15 +27,17 @@ import (
 type CdrcConfig struct {
 	Enabled                 bool            // Enable/Disable the profile
 	Cdrs                    string          // The address where CDRs can be reached
-	CdrFormat               string          // The type of CDR file to process <csv>
+	CdrFormat               string          // The type of CDR file to process <csv|opensips_flatstore>
 	FieldSeparator          rune            // The separator to use when reading csvs
 	DataUsageMultiplyFactor float64         // Conversion factor for data usage
 	RunDelay                time.Duration   // Delay between runs, 0 for inotify driven requests
 	MaxOpenFiles            int             // Maximum number of files opened simultaneously
 	CdrInDir                string          // Folder to process CDRs from
 	CdrOutDir               string          // Folder to move processed CDRs to
+	FailedCallsPrefix       string          // Used in case of flatstore CDRs to avoid searching for BYE records
 	CdrSourceId             string          // Source identifier for the processed CDRs
 	CdrFilter               utils.RSRFields // Filter CDR records to import
+	PartialRecordCache      time.Duration   // Duration to cache partial records when not pairing
 	CdrFields               []*CfgCdrField  // List of fields to be processed
 }
 
@@ -71,6 +73,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	}
 	if jsnCfg.Cdr_out_dir != nil {
 		self.CdrOutDir = *jsnCfg.Cdr_out_dir
+	}
+	if jsnCfg.Failed_calls_prefix != nil {
+		self.FailedCallsPrefix = *jsnCfg.Failed_calls_prefix
 	}
 	if jsnCfg.Cdr_source_id != nil {
 		self.CdrSourceId = *jsnCfg.Cdr_source_id
