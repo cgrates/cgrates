@@ -335,3 +335,20 @@ CREATE TABLE tp_cdr_stats (
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );
+
+    --
+-- Table structure for table `tp_users`
+--
+
+DROP TABLE IF EXISTS tp_users;
+CREATE TABLE tp_users (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `user_name` varchar(64) NOT NULL,
+  `attribute_name` varchar(64) NOT NULL,
+  `attribute_value` varchar(64) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`)
+);

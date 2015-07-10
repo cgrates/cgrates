@@ -52,8 +52,9 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,10`
 	accountActions := `cgrates.org,1,*out,TOPUP10_AT,`
 	derivedCharges := ``
 	cdrStats := ``
+	users := ``
 	csvr := engine.NewTpReader(ratingDbAcntActs, acntDbAcntActs, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats), "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}

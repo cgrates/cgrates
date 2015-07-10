@@ -584,6 +584,28 @@ func (ms *MapStorage) RemoveSubscriber(key string) (err error) {
 	return
 }
 
+func (ms *MapStorage) SetUser(up *UserProfile) error {
+	result, err := ms.ms.Marshal(up)
+	if err != nil {
+		return err
+	}
+	ms.dict[utils.USERS_PREFIX+up.GetId()] = result
+	return nil
+}
+func (ms *MapStorage) GetUser(key string) (up *UserProfile, err error) {
+	up = &UserProfile{}
+	if values, ok := ms.dict[utils.USERS_PREFIX+key]; ok {
+		err = ms.ms.Unmarshal(values, &up)
+	} else {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+func (ms *MapStorage) RemoveUser(key string) error {
+	delete(ms.dict, utils.USERS_PREFIX+key)
+	return nil
+}
+
 func (ms *MapStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 	if values, ok := ms.dict[utils.ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)

@@ -185,6 +185,8 @@ type CGRConfig struct {
 	DefaultCategory      string        // set default type of record
 	DefaultTenant        string        // set default tenant
 	DefaultSubject       string        // set default rating subject, useful in case of fallback
+	Reconnects           int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
+	ConnectAttempts      int           // number of initial connection attempts before giving up
 	RoundingDecimals     int           // Number of decimals to round end prices at
 	HttpSkipTlsVerify    bool          // If enabled Http Client will accept any TLS certificate
 	TpExportPath         string        // Path towards export folder for offline Tariff Plans
@@ -192,6 +194,9 @@ type CGRConfig struct {
 	RaterEnabled         bool          // start standalone server (no balancer)
 	RaterBalancer        string        // balancer address host:port
 	RaterCdrStats        string        // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	RaterHistoryServer   string
+	RaterPubSubServer    string
+	RaterUserServer      string
 	BalancerEnabled      bool
 	SchedulerEnabled     bool
 	CDRSEnabled          bool                 // Enable CDR Server service
@@ -203,20 +208,22 @@ type CGRConfig struct {
 	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
 	CDRStatsEnabled      bool                 // Enable CDR Stats service
 	CDRStatsSaveInterval time.Duration        // Save interval duration
-	CDRStatConfig        *CdrStatsConfig      // Active cdr stats configuration instances, platform level
+	PubSubEnabled        bool
+	HistoryEnabled       bool
+	//CDRStatConfig        *CdrStatsConfig // Active cdr stats configuration instances, platform level
 	CdreProfiles         map[string]*CdreConfig
 	CdrcProfiles         map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
 	SmFsConfig           *SmFsConfig                       // SM-FreeSWITCH configuration
 	SmKamConfig          *SmKamConfig                      // SM-Kamailio Configuration
 	SmOsipsConfig        *SmOsipsConfig                    // SM-OpenSIPS Configuration
-	HistoryAgentEnabled  bool                              // Starts History as an agent: <true|false>.
 	HistoryServer        string                            // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled bool                              // Starts History as server: <true|false>.
 	HistoryDir           string                            // Location on disk where to store history files.
 	HistorySaveInterval  time.Duration                     // The timout duration between pubsub writes
-	PubSubAgentEnabled   bool                              // Starts PubSub as an agent: <true|false>.
 	PubSubServer         string                            // Address where to reach the master pubsub server: <internal|x.y.z.y:1234>
 	PubSubServerEnabled  bool                              // Starts PubSub as server: <true|false>.
+	UserServerEnabled    bool                              // Starts User as server: <true|false>
+	UserServerIndexes    []string                          // List of user profile field indexes
 	MailerServer         string                            // The server to use when sending emails out
 	MailerAuthUser       string                            // Authenticate to email server using this user
 	MailerAuthPass       string                            // Authenticate to email server with this password
@@ -237,6 +244,15 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 		if self.RaterCdrStats == utils.INTERNAL && !self.CDRStatsEnabled {
 			return errors.New("CDRStats not enabled but requested by Rater component.")
+		}
+		if self.RaterHistoryServer == utils.INTERNAL && !self.HistoryServerEnabled {
+			return errors.New("History server not enabled but requested by Rater component.")
+		}
+		if self.RaterPubSubServer == utils.INTERNAL && !self.PubSubServerEnabled {
+			return errors.New("PubSub server not enabled but requested by Rater component.")
+		}
+		if self.RaterUserServer == utils.INTERNAL && !self.UserServerEnabled {
+			return errors.New("Users service not enabled but requested by Rater component.")
 		}
 	}
 	// CDRServer checks
@@ -317,14 +333,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if self.SmOsipsConfig.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but referenced by SM-OpenSIPS component")
 		}
-	}
-	// HistoryAgent
-	if self.HistoryAgentEnabled && !self.HistoryServerEnabled {
-		return errors.New("HistoryServer not enabled but referenced by HistoryAgent component")
-	}
-	// PubSubAgent
-	if self.PubSubAgentEnabled && !self.PubSubServerEnabled {
-		return errors.New("PubSubServer not enabled but referenced by PubSubAgent component")
 	}
 	return nil
 }
@@ -413,17 +421,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
-	jsnHistAgentCfg, err := jsnCfg.HistAgentJsonCfg()
-	if err != nil {
-		return err
-	}
-
 	jsnPubSubServCfg, err := jsnCfg.PubSubServJsonCfg()
 	if err != nil {
 		return err
 	}
 
-	jsnPubSubAgentCfg, err := jsnCfg.PubSubAgentJsonCfg()
+	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -518,6 +521,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnGeneralCfg.Default_subject != nil {
 			self.DefaultSubject = *jsnGeneralCfg.Default_subject
+		}
+		if jsnGeneralCfg.Connect_attempts != nil {
+			self.ConnectAttempts = *jsnGeneralCfg.Connect_attempts
+		}
+		if jsnGeneralCfg.Reconnects != nil {
+			self.Reconnects = *jsnGeneralCfg.Reconnects
 		}
 		if jsnGeneralCfg.Rounding_decimals != nil {
 			self.RoundingDecimals = *jsnGeneralCfg.Rounding_decimals
@@ -672,15 +681,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
-	if jsnHistAgentCfg != nil {
-		if jsnHistAgentCfg.Enabled != nil {
-			self.HistoryAgentEnabled = *jsnHistAgentCfg.Enabled
-		}
-		if jsnHistAgentCfg.Server != nil {
-			self.HistoryServer = *jsnHistAgentCfg.Server
-		}
-	}
-
 	if jsnHistServCfg != nil {
 		if jsnHistServCfg.Enabled != nil {
 			self.HistoryServerEnabled = *jsnHistServCfg.Enabled
@@ -695,18 +695,18 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
-	if jsnPubSubAgentCfg != nil {
-		if jsnPubSubAgentCfg.Enabled != nil {
-			self.PubSubAgentEnabled = *jsnPubSubAgentCfg.Enabled
-		}
-		if jsnPubSubAgentCfg.Server != nil {
-			self.PubSubServer = *jsnPubSubAgentCfg.Server
-		}
-	}
-
 	if jsnPubSubServCfg != nil {
 		if jsnPubSubServCfg.Enabled != nil {
 			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
+		}
+	}
+
+	if jsnUserServCfg != nil {
+		if jsnUserServCfg.Enabled != nil {
+			self.UserServerEnabled = *jsnUserServCfg.Enabled
+		}
+		if jsnUserServCfg.Indexes != nil {
+			self.UserServerIndexes = *jsnUserServCfg.Indexes
 		}
 	}
 

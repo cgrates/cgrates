@@ -105,7 +105,8 @@ func LoadTariffPlanFromFolder(tpPath string, ratingDb RatingStorage, accountingD
 		path.Join(tpPath, utils.ACTION_TRIGGERS_CSV),
 		path.Join(tpPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(tpPath, utils.DERIVED_CHARGERS_CSV),
-		path.Join(tpPath, utils.CDR_STATS_CSV)), "")
+		path.Join(tpPath, utils.CDR_STATS_CSV),
+		path.Join(tpPath, utils.USERS_CSV)), "")
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

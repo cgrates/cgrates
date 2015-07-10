@@ -46,7 +46,7 @@ type ApierV1 struct {
 	Sched       *scheduler.Scheduler
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
-	CdrStatsSrv *engine.Stats
+	CdrStatsSrv engine.StatsInterface
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -1015,7 +1015,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
-		path.Join(attrs.FolderPath, utils.CDR_STATS_CSV)), "")
+		path.Join(attrs.FolderPath, utils.CDR_STATS_CSV),
+		path.Join(attrs.FolderPath, utils.USERS_CSV)), "")
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

@@ -172,8 +172,8 @@ type ProxyPubSub struct {
 	Client *rpcclient.RpcClient
 }
 
-func NewProxyPubSub(addr string, reconnects int) (*ProxyPubSub, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, reconnects, utils.GOB)
+func NewProxyPubSub(addr string, attempts, reconnects int) (*ProxyPubSub, error) {
+	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
 	if err != nil {
 		return nil, err
 	}

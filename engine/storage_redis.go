@@ -707,6 +707,15 @@ func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err
 	return
 }
 
+func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
+	var values []byte
+	if values, err = rs.db.Get(utils.USERS_PREFIX + key); err == nil {
+		up = &UserProfile{}
+		err = rs.ms.Unmarshal(values, &up)
+	}
+	return
+}
+
 func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
 	result, err := rs.ms.Marshal(sub)
 	rs.db.Set(utils.PUBSUB_SUBSCRIBERS_PREFIX+key, result)
@@ -715,6 +724,17 @@ func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err erro
 
 func (rs *RedisStorage) RemoveSubscriber(key string) (err error) {
 	rs.db.Del(utils.PUBSUB_SUBSCRIBERS_PREFIX + key)
+	return
+}
+
+func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
+	result, err := rs.ms.Marshal(up)
+	rs.db.Set(utils.USERS_PREFIX+up.GetId(), result)
+	return
+}
+
+func (rs *RedisStorage) RemoveUser(key string) (err error) {
+	rs.db.Del(utils.USERS_PREFIX + key)
 	return
 }
 

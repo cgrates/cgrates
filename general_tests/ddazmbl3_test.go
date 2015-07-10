@@ -59,8 +59,9 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	accountActions := `cgrates.org,12346,*out,TOPUP10_AT,`
 	derivedCharges := ``
 	cdrStats := ``
+	users := ``
 	csvr := engine.NewTpReader(ratingDb3, acntDb3, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats), "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

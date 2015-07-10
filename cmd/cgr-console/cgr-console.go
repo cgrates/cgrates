@@ -103,7 +103,7 @@ func main() {
 		return
 	}
 	var err error
-	client, err = rpcclient.NewRpcClient("tcp", *server, 3, *rpc_encoding)
+	client, err = rpcclient.NewRpcClient("tcp", *server, 3, 3, *rpc_encoding)
 	if err != nil {
 		flag.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)
