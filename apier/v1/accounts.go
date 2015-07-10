@@ -79,7 +79,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 	}
-	_, err := engine.AccLock.Guard(func() (interface{}, error) {
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		ats, err := self.RatingDb.GetActionPlans(attrs.ActionPlanId)
 		if err != nil {
 			return 0, err
@@ -129,7 +129,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	balanceId := utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)
-	_, err := engine.AccLock.Guard(func() (interface{}, error) {
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		ub, err := self.AccountDb.GetAccount(balanceId)
 		if err != nil {
 			return 0, err
@@ -162,7 +162,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	balanceId := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
 	var ub *engine.Account
 	var ats engine.ActionPlans
-	_, err := engine.AccLock.Guard(func() (interface{}, error) {
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		if bal, _ := self.AccountDb.GetAccount(balanceId); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
@@ -192,7 +192,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		return utils.NewErrServerError(err)
 	}
 	if len(ats) != 0 {
-		_, err := engine.AccLock.Guard(func() (interface{}, error) { // ToDo: Try locking it above on read somehow
+		_, err := engine.Guardian.Guard(func() (interface{}, error) { // ToDo: Try locking it above on read somehow
 			if err := self.RatingDb.SetActionPlans(attr.ActionPlanId, ats); err != nil {
 				return 0, err
 			}
