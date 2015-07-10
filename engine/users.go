@@ -201,21 +201,21 @@ func NewProxyUserService(addr string, attempts, reconnects int) (*ProxyUserServi
 }
 
 func (ps *ProxyUserService) SetUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UserService.SetUser", ud, reply)
+	return ps.Client.Call("UsersV1.SetUser", ud, reply)
 }
 
 func (ps *ProxyUserService) RemoveUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UserService.RemoveUser", ud, reply)
+	return ps.Client.Call("UsersV1.RemoveUser", ud, reply)
 }
 
 func (ps *ProxyUserService) UpdateUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UserService.UpdateUser", ud, reply)
+	return ps.Client.Call("UsersV1.UpdateUser", ud, reply)
 }
 
 func (ps *ProxyUserService) GetUsers(ud UserProfile, users *[]*UserProfile) error {
-	return ps.Client.Call("UserService.GetUsers", ud, users)
+	return ps.Client.Call("UsersV1.GetUsers", ud, users)
 }
 
 func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
-	return ps.Client.Call("UserService.AddIndex", indexes, reply)
+	return ps.Client.Call("UsersV1.AddIndex", indexes, reply)
 }
