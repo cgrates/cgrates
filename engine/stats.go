@@ -290,8 +290,8 @@ type ProxyStats struct {
 	Client *rpcclient.RpcClient
 }
 
-func NewProxyStats(addr string, reconnects int) (*ProxyStats, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, reconnects, utils.GOB)
+func NewProxyStats(addr string, attempts, reconnects int) (*ProxyStats, error) {
+	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
 	if err != nil {
 		return nil, err
 	}

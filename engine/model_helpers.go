@@ -730,7 +730,7 @@ func (tps TpUsers) GetUsers() (map[string]*UserProfile, error) {
 			}
 			users[tp.GetId()] = user
 		}
-		user.Profile[tp.Attribute] = tp.Value
+		user.Profile[tp.AttributeName] = tp.AttributeValue
 	}
 	return users, nil
 }

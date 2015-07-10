@@ -36,6 +36,8 @@ const CGRATES_CFG_JSON = `
 	"default_category": "call",				// default Type of Record to consider when missing from requests
 	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
+    "connect_attempts": 3,                  // initial server connect attempts
+    "reconnects": -1,                       // number of retries in case of connection lost
 },
 
 
@@ -87,6 +89,9 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// enable Rater service: <true|false>
 	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
 	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+    "historys": "",							// address where to reach the history service, empty to disable history functionality<""|internal|x.y.z.y:1234>
+    "pubusubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality<""|internal|x.y.z.y:1234>
+    "users": "",							// address where to reach the user service, empty to disable user profile functionality<""|internal|x.y.z.y:1234>
 },
 
 
@@ -231,29 +236,21 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"history_server": {
+"historys": {
 	"enabled": false,							// starts History service: <true|false>.
 	"history_dir": "/var/log/cgrates/history",	// location on disk where to store history files.
 	"save_interval": "1s",						// interval to save changed cache into .git archive
 },
 
 
-"history_agent": {
-	"enabled": false,			// starts History as a client: <true|false>.
-	"server": "internal",		// address where to reach the master history server: <internal|x.y.z.y:1234>
-},
-
-"pubsub_server": {
+"pubsubs": {
 	"enabled": false,							// starts History service: <true|false>.
-	"save_interval": "1s",						// interval to save changed cache into .git archive
 },
 
-
-"pubsub_agent": {
-	"enabled": false,			// starts PubSub as a client: <true|false>.
-	"server": "internal",		// address where to reach the master pubsub server: <internal|x.y.z.y:1234>
+"users": {
+	"enabled": false,							// starts Users service: <true|false>.
+	"indexes": [],                  			// user profile field indexes
 },
-
 
 "mailer": {
 	"server": "localhost",								// the server to use when sending emails out

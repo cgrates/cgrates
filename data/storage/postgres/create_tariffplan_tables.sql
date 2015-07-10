@@ -341,8 +341,8 @@ CREATE TABLE tp_users (
   tpid VARCHAR(64) NOT NULL,
   tenant VARCHAR(64) NOT NULL,
   user_name VARCHAR(64) NOT NULL,
-  attribute VARCHAR(64) NOT NULL,
-  `value` VARCHAR(64) NOT NULL,
+  attribute_name VARCHAR(64) NOT NULL,
+  attribute_value VARCHAR(64) NOT NULL,
   created_at TIMESTAMP
 );
 CREATE INDEX tpusers_tpid_idx ON tp_users (tpid);

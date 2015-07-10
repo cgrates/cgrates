@@ -321,12 +321,12 @@ type TpCdrstat struct {
 }
 
 type TpUser struct {
-	Id        int64
-	Tpid      string
-	Tenant    string `index:"0" re:""`
-	UserName  string `index:"1" re:""`
-	Attribute string `index:"2" re:""`
-	Value     string `index:"3" re:""`
+	Id             int64
+	Tpid           string
+	Tenant         string `index:"0" re:""`
+	UserName       string `index:"1" re:""`
+	AttributeName  string `index:"2" re:""`
+	AttributeValue string `index:"3" re:""`
 }
 
 func (tu *TpUser) GetId() string {

@@ -28,6 +28,8 @@ type GeneralJsonCfg struct {
 	Default_category    *string
 	Default_tenant      *string
 	Default_subject     *string
+	Reconnects          *int
+	Connect_attempts    *int
 }
 
 // Listen config section
@@ -211,21 +213,15 @@ type HistServJsonCfg struct {
 	Save_interval *string
 }
 
-// History agent config section
-type HistAgentJsonCfg struct {
-	Enabled *bool
-	Server  *string
-}
-
 // PubSub server config section
 type PubSubServJsonCfg struct {
 	Enabled *bool
 }
 
-// PubSub agent config section
-type PubSubAgentJsonCfg struct {
+// PubSub server config section
+type UserServJsonCfg struct {
 	Enabled *bool
-	Server  *string
+	Indexes *[]string
 }
 
 // Mailer config section

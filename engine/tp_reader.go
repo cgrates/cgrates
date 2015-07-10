@@ -1061,7 +1061,7 @@ func (tpr *TpReader) LoadUsersFiltered(filter *TpUser) (bool, error) {
 		Profile:  make(map[string]string),
 	}
 	for _, tpUser := range tpUsers {
-		user.Profile[tpUser.Attribute] = tpUser.Value
+		user.Profile[tpUser.AttributeName] = tpUser.AttributeValue
 	}
 	tpr.ratingStorage.SetUser(user)
 	return len(tpUsers) > 0, err

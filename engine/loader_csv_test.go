@@ -210,7 +210,7 @@ CDRST2,10,10m,,ASR,,,,,,,cgrates.org,call,,,,,,,,,,,,
 CDRST2,,,,ACD,,,,,,,,,,,,,,,,,,,,
 `
 	users = `
-#Tenant[0],UserName[1],Attribute[2],Value[3]
+#Tenant[0],UserName[1],AttributeName[2],AttributeValue[3]
 cgrates.org,rif,test0,val0
 cgrates.org,rif,test1,val1
 cgrates.org,dan,another,value

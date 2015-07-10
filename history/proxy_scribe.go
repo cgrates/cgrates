@@ -18,15 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package history
 
-import "net/rpc"
+import (
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+)
 
 type ProxyScribe struct {
-	Client *rpc.Client
+	Client *rpcclient.RpcClient
 }
 
-func NewProxyScribe(addr string) (*ProxyScribe, error) {
-	client, err := rpc.Dial("tcp", addr)
-
+func NewProxyScribe(addr string, attempts, reconnects int) (*ProxyScribe, error) {
+	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
 	if err != nil {
 		return nil, err
 	}

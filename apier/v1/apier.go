@@ -46,7 +46,7 @@ type ApierV1 struct {
 	Sched       *scheduler.Scheduler
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
-	CdrStatsSrv *engine.Stats
+	CdrStatsSrv engine.StatsInterface
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {

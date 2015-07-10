@@ -45,7 +45,9 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_reqtype:     utils.StringPointer(utils.META_RATED),
 		Default_category:    utils.StringPointer("call"),
 		Default_tenant:      utils.StringPointer("cgrates.org"),
-		Default_subject:     utils.StringPointer("cgrates")}
+		Default_subject:     utils.StringPointer("cgrates"),
+		Connect_attempts:    utils.IntPointer(3),
+		Reconnects:          utils.IntPointer(-1)}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
@@ -394,18 +396,6 @@ func TestDfHistServJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfHistAgentJsonCfg(t *testing.T) {
-	eCfg := &HistAgentJsonCfg{
-		Enabled: utils.BoolPointer(false),
-		Server:  utils.StringPointer("internal"),
-	}
-	if cfg, err := dfCgrJsonCfg.HistAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
-	}
-}
-
 func TestDfPubSubServJsonCfg(t *testing.T) {
 	eCfg := &PubSubServJsonCfg{
 		Enabled: utils.BoolPointer(false),
@@ -417,12 +407,12 @@ func TestDfPubSubServJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfPubSubAgentJsonCfg(t *testing.T) {
-	eCfg := &PubSubAgentJsonCfg{
+func TestDfUserServJsonCfg(t *testing.T) {
+	eCfg := &UserServJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Server:  utils.StringPointer("internal"),
+		Indexes: utils.StringSlicePointer([]string{}),
 	}
-	if cfg, err := dfCgrJsonCfg.PubSubAgentJsonCfg(); err != nil {
+	if cfg, err := dfCgrJsonCfg.UserServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)
@@ -481,16 +471,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	} else if !reflect.DeepEqual(eCfgCdrc, cfg) {
 		t.Error("Received: ", cfg)
 	}
-	if cfg, err := cgrJsonCfg.HistAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if cfg != nil {
-		t.Error("Received: ", cfg)
-	}
-	if cfg, err := cgrJsonCfg.PubSubAgentJsonCfg(); err != nil {
-		t.Error(err)
-	} else if cfg != nil {
-		t.Error("Received: ", cfg)
-	}
+
 	eCfgSmFs := &SmFsJsonCfg{
 		Enabled: utils.BoolPointer(true),
 		Connections: &[]*FsConnJsonCfg{

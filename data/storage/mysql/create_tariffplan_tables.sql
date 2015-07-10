@@ -337,17 +337,17 @@ CREATE TABLE tp_cdrstats (
 );
 
     --
--- Table structure for table `tp_cdrstats`
+-- Table structure for table `tp_users`
 --
 
-DROP TABLE IF EXISTS tp_cdrstats;
-CREATE TABLE tp_cdrstats (
+DROP TABLE IF EXISTS tp_users;
+CREATE TABLE tp_users (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `user_name` varchar(64) NOT NULL,
-  `attribute` varchar(64) NOT NULL,
-  `value` varchar(64) NOT NULL,
+  `attribute_name` varchar(64) NOT NULL,
+  `attribute_value` varchar(64) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)

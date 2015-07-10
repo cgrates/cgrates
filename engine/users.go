@@ -192,8 +192,8 @@ type ProxyUserService struct {
 	Client *rpcclient.RpcClient
 }
 
-func NewProxyUserService(addr string, reconnects int) (*ProxyUserService, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, reconnects, utils.GOB)
+func NewProxyUserService(addr string, attempts, reconnects int) (*ProxyUserService, error) {
+	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
 	if err != nil {
 		return nil, err
 	}
@@ -206,6 +206,10 @@ func (ps *ProxyUserService) SetUser(ud UserProfile, reply *string) error {
 
 func (ps *ProxyUserService) RemoveUser(ud UserProfile, reply *string) error {
 	return ps.Client.Call("UserService.RemoveUser", ud, reply)
+}
+
+func (ps *ProxyUserService) UpdateUser(ud UserProfile, reply *string) error {
+	return ps.Client.Call("UserService.UpdateUser", ud, reply)
 }
 
 func (ps *ProxyUserService) GetUsers(ud UserProfile, users *[]*UserProfile) error {

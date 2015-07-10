@@ -27,7 +27,7 @@ import (
 
 // Interact with Stats server
 type CDRStatsV1 struct {
-	CdrStats *engine.Stats
+	CdrStats engine.StatsInterface
 }
 
 type AttrGetMetrics struct {
