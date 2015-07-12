@@ -256,7 +256,7 @@ func (at *ActionPlan) Execute() (err error) {
 			return
 		}
 		for _, ubId := range at.AccountIds {
-			_, err := AccLock.Guard(func() (interface{}, error) {
+			_, err := Guardian.Guard(func() (interface{}, error) {
 				ub, err := accountingStorage.GetAccount(ubId)
 				if err != nil {
 					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))

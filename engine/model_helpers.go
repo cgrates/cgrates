@@ -714,3 +714,23 @@ func ValueOrDefault(val string, deflt string) string {
 	}
 	return val
 }
+
+type TpUsers []TpUser
+
+func (tps TpUsers) GetUsers() (map[string]*UserProfile, error) {
+	users := make(map[string]*UserProfile)
+	for _, tp := range tps {
+		var user *UserProfile
+		var found bool
+		if user, found = users[tp.GetId()]; !found {
+			user = &UserProfile{
+				Tenant:   tp.Tenant,
+				UserName: tp.UserName,
+				Profile:  make(map[string]string),
+			}
+			users[tp.GetId()] = user
+		}
+		user.Profile[tp.AttributeName] = tp.AttributeValue
+	}
+	return users, nil
+}

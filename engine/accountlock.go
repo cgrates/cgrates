@@ -23,27 +23,27 @@ import (
 )
 
 // global package variable
-var AccLock = &AccountLock{queue: make(map[string]chan bool)}
+var Guardian = &GuardianLock{queue: make(map[string]chan bool)}
 
-type AccountLock struct {
+type GuardianLock struct {
 	queue map[string]chan bool
 	mu    sync.Mutex
 }
 
-func (cm *AccountLock) Guard(handler func() (interface{}, error), names ...string) (reply interface{}, err error) {
+func (cm *GuardianLock) Guard(handler func() (interface{}, error), names ...string) (reply interface{}, err error) {
 	cm.mu.Lock()
 	for _, name := range names {
-		lock, exists := AccLock.queue[name]
+		lock, exists := Guardian.queue[name]
 		if !exists {
 			lock = make(chan bool, 1)
-			AccLock.queue[name] = lock
+			Guardian.queue[name] = lock
 		}
 		lock <- true
 	}
 	cm.mu.Unlock()
 	reply, err = handler()
 	for _, name := range names {
-		lock := AccLock.queue[name]
+		lock := Guardian.queue[name]
 		<-lock
 	}
 	return

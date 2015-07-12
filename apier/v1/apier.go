@@ -46,7 +46,7 @@ type ApierV1 struct {
 	Sched       *scheduler.Scheduler
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
-	CdrStatsSrv *engine.Stats
+	CdrStatsSrv engine.StatsInterface
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -732,7 +732,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	}
 
 	tag := utils.AccountKey(attr.Tenant, attr.Account, attr.BalanceDirection)
-	_, err = engine.AccLock.Guard(func() (interface{}, error) {
+	_, err = engine.Guardian.Guard(func() (interface{}, error) {
 		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {
 			return 0, err
@@ -802,7 +802,7 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 		}
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
-	_, err := engine.AccLock.Guard(func() (interface{}, error) {
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		acc, err := self.AccountDb.GetAccount(accID)
 		if err != nil {
 			return 0, err
@@ -829,7 +829,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
 	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
-	if _, err := engine.AccLock.Guard(func() (interface{}, error) {
+	if _, err := engine.Guardian.Guard(func() (interface{}, error) {
 		aas := engine.APItoModelAccountAction(&attrs)
 		if err := dbReader.LoadAccountActionsFiltered(aas); err != nil {
 			return 0, err
@@ -1015,7 +1015,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
-		path.Join(attrs.FolderPath, utils.CDR_STATS_CSV)), "")
+		path.Join(attrs.FolderPath, utils.CDR_STATS_CSV),
+		path.Join(attrs.FolderPath, utils.USERS_CSV)), "")
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

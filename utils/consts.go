@@ -22,6 +22,7 @@ var (
 	ErrBrokenReference    = errors.New("BROKEN_REFERENCE")
 	ErrParserError        = errors.New("PARSER_ERROR")
 	ErrInvalidPath        = errors.New("INVALID_PATH")
+	ErrInvalidKey         = errors.New("INVALID_KEY")
 )
 
 const (
@@ -76,6 +77,7 @@ const (
 	ACCOUNT_ACTIONS_CSV        = "AccountActions.csv"
 	DERIVED_CHARGERS_CSV       = "DerivedChargers.csv"
 	CDR_STATS_CSV              = "CdrStats.csv"
+	USERS_CSV                  = "Users.csv"
 	ROUNDING_UP                = "*up"
 	ROUNDING_MIDDLE            = "*middle"
 	ROUNDING_DOWN              = "*down"
@@ -166,6 +168,7 @@ const (
 	DERIVEDCHARGERS_PREFIX     = "dcs_"
 	CDR_STATS_QUEUE_PREFIX     = "csq_"
 	PUBSUB_SUBSCRIBERS_PREFIX  = "pss_"
+	USERS_PREFIX               = "usr_"
 	CDR_STATS_PREFIX           = "cst_"
 	TEMP_DESTINATION_PREFIX    = "tmp_"
 	LOG_CALL_COST_PREFIX       = "cco_"

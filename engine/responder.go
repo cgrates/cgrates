@@ -58,7 +58,7 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 		r, e := rs.getCallCost(arg, "Responder.GetCost")
 		*reply, err = *r, e
 	} else {
-		r, e := AccLock.Guard(func() (interface{}, error) {
+		r, e := Guardian.Guard(func() (interface{}, error) {
 			return arg.GetCost()
 		}, arg.GetAccountKey())
 		if e != nil {
@@ -113,7 +113,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
 	} else {
-		r, e := AccLock.Guard(func() (interface{}, error) {
+		r, e := Guardian.Guard(func() (interface{}, error) {
 			return arg.RefundIncrements()
 		}, arg.GetAccountKey())
 		*reply, err = r.(float64), e
@@ -291,7 +291,7 @@ func (rs *Responder) FlushCache(arg *CallDescriptor, reply *float64) (err error)
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.FlushCache")
 	} else {
-		r, e := AccLock.Guard(func() (interface{}, error) {
+		r, e := Guardian.Guard(func() (interface{}, error) {
 			return 0, arg.FlushCache()
 		}, arg.GetAccountKey())
 		*reply, err = r.(float64), e
@@ -336,7 +336,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 			Logger.Info("<Balancer> Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
-			_, err = AccLock.Guard(func() (interface{}, error) {
+			_, err = Guardian.Guard(func() (interface{}, error) {
 				err = client.Call(method, *key, reply)
 				return reply, err
 			}, key.GetAccountKey())
@@ -359,7 +359,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 			Logger.Info("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
-			_, err = AccLock.Guard(func() (interface{}, error) {
+			_, err = Guardian.Guard(func() (interface{}, error) {
 				err = client.Call(method, *key, &reply)
 				return reply, err
 			}, key.GetAccountKey())

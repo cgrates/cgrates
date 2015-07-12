@@ -324,6 +324,19 @@ func (t TpCdrstat) TableName() string {
 	return utils.TBL_TP_CDR_STATS
 }
 
+type TpUser struct {
+	Id             int64
+	Tpid           string
+	Tenant         string `index:"0" re:""`
+	UserName       string `index:"1" re:""`
+	AttributeName  string `index:"2" re:""`
+	AttributeValue string `index:"3" re:""`
+}
+
+func (tu *TpUser) GetId() string {
+	return utils.ConcatenatedKey(tu.Tenant, tu.UserName)
+}
+
 type TblCdrsPrimary struct {
 	Id              int64
 	Cgrid           string

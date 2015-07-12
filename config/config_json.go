@@ -27,31 +27,30 @@ import (
 )
 
 const (
-	GENERAL_JSN     = "general"
-	LISTEN_JSN      = "listen"
-	TPDB_JSN        = "tariffplan_db"
-	DATADB_JSN      = "data_db"
-	STORDB_JSN      = "stor_db"
-	BALANCER_JSN    = "balancer"
-	RATER_JSN       = "rater"
-	SCHEDULER_JSN   = "scheduler"
-	CDRS_JSN        = "cdrs"
-	MEDIATOR_JSN    = "mediator"
-	CDRSTATS_JSN    = "cdrstats"
-	CDRE_JSN        = "cdre"
-	CDRC_JSN        = "cdrc"
-	SMFS_JSN        = "sm_freeswitch"
-	SMKAM_JSN       = "sm_kamailio"
-	SMOSIPS_JSN     = "sm_opensips"
-	SM_JSN          = "session_manager"
-	FS_JSN          = "freeswitch"
-	KAMAILIO_JSN    = "kamailio"
-	OSIPS_JSN       = "opensips"
-	HISTSERV_JSN    = "history_server"
-	HISTAGENT_JSN   = "history_agent"
-	PUBSUBSERV_JSN  = "pubsub_server"
-	PUBSUBAGENT_JSN = "pubsub_agent"
-	MAILER_JSN      = "mailer"
+	GENERAL_JSN    = "general"
+	LISTEN_JSN     = "listen"
+	TPDB_JSN       = "tariffplan_db"
+	DATADB_JSN     = "data_db"
+	STORDB_JSN     = "stor_db"
+	BALANCER_JSN   = "balancer"
+	RATER_JSN      = "rater"
+	SCHEDULER_JSN  = "scheduler"
+	CDRS_JSN       = "cdrs"
+	MEDIATOR_JSN   = "mediator"
+	CDRSTATS_JSN   = "cdrstats"
+	CDRE_JSN       = "cdre"
+	CDRC_JSN       = "cdrc"
+	SMFS_JSN       = "sm_freeswitch"
+	SMKAM_JSN      = "sm_kamailio"
+	SMOSIPS_JSN    = "sm_opensips"
+	SM_JSN         = "session_manager"
+	FS_JSN         = "freeswitch"
+	KAMAILIO_JSN   = "kamailio"
+	OSIPS_JSN      = "opensips"
+	HISTSERV_JSN   = "historys"
+	PUBSUBSERV_JSN = "pubsubs"
+	USERSERV_JSN   = "users"
+	MAILER_JSN     = "mailer"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -245,18 +244,6 @@ func (self CgrJsonCfg) HistServJsonCfg() (*HistServJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) HistAgentJsonCfg() (*HistAgentJsonCfg, error) {
-	rawCfg, hasKey := self[HISTAGENT_JSN]
-	if !hasKey {
-		return nil, nil
-	}
-	cfg := new(HistAgentJsonCfg)
-	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
 func (self CgrJsonCfg) PubSubServJsonCfg() (*PubSubServJsonCfg, error) {
 	rawCfg, hasKey := self[PUBSUBSERV_JSN]
 	if !hasKey {
@@ -269,12 +256,12 @@ func (self CgrJsonCfg) PubSubServJsonCfg() (*PubSubServJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) PubSubAgentJsonCfg() (*PubSubAgentJsonCfg, error) {
-	rawCfg, hasKey := self[PUBSUBAGENT_JSN]
+func (self CgrJsonCfg) UserServJsonCfg() (*UserServJsonCfg, error) {
+	rawCfg, hasKey := self[USERSERV_JSN]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(PubSubAgentJsonCfg)
+	cfg := new(UserServJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

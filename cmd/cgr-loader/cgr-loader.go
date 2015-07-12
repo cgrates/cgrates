@@ -154,7 +154,8 @@ func main() {
 			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
 			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
-			path.Join(*dataPath, utils.CDR_STATS_CSV))
+			path.Join(*dataPath, utils.CDR_STATS_CSV),
+			path.Join(*dataPath, utils.USERS_CSV))
 	}
 	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid)
 	err = tpReader.LoadAll()
@@ -173,12 +174,12 @@ func main() {
 		return
 	}
 	if *historyServer != "" { // Init scribeAgent so we can store the differences
-		if scribeAgent, err := history.NewProxyScribe(*historyServer); err != nil {
+		if scribeAgent, err := history.NewProxyScribe(*historyServer, 3, 3); err != nil {
 			log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
 			return
 		} else {
 			engine.SetHistoryScribe(scribeAgent)
-			defer scribeAgent.Client.Close()
+			//defer scribeAgent.Client.Close()
 		}
 	} else {
 		log.Print("WARNING: Rates history archiving is disabled!")

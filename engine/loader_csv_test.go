@@ -209,13 +209,19 @@ CDRST1,,,,ACC,,,,,,,,,,,,,,,,,,,,
 CDRST2,10,10m,,ASR,,,,,,,cgrates.org,call,,,,,,,,,,,,
 CDRST2,,,,ACD,,,,,,,,,,,,,,,,,,,,
 `
+	users = `
+#Tenant[0],UserName[1],AttributeName[2],AttributeValue[3]
+cgrates.org,rif,test0,val0
+cgrates.org,rif,test1,val1
+cgrates.org,dan,another,value
+`
 )
 
 var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats), "")
+		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -257,6 +263,9 @@ func init() {
 	}
 	if err := csvr.LoadCdrStats(); err != nil {
 		log.Print("error in LoadCdrStats:", err)
+	}
+	if err := csvr.LoadUsers(); err != nil {
+		log.Print("error in LoadUsers:", err)
 	}
 	csvr.WriteToDatabase(false, false)
 	ratingStorage.CacheAll()
@@ -1102,5 +1111,23 @@ func TestLoadCdrStats(t *testing.T) {
 	cdrStats1.Triggers = nil
 	if !reflect.DeepEqual(csvr.cdrStats[cdrStats1.Id], cdrStats1) {
 		t.Errorf("Unexpected stats %+v", csvr.cdrStats[cdrStats1.Id])
+	}
+}
+
+func TestLoadUsers(t *testing.T) {
+	if len(csvr.users) != 2 {
+		t.Error("Failed to load users: ", csvr.users)
+	}
+	user1 := &UserProfile{
+		Tenant:   "cgrates.org",
+		UserName: "rif",
+		Profile: map[string]string{
+			"test0": "val0",
+			"test1": "val1",
+		},
+	}
+
+	if !reflect.DeepEqual(csvr.users[user1.GetId()], user1) {
+		t.Errorf("Unexpected user %+v", csvr.users[user1.GetId()])
 	}
 }

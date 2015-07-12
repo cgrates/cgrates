@@ -87,7 +87,7 @@ func TestCdrsHttpJsonRpcCdrReplication(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cdrsHttpJsonRpc, err := rpcclient.NewRpcClient("tcp", cdrsMasterCfg.CDRSCdrReplication[0].Server, 3, cdrsMasterCfg.CDRSCdrReplication[0].Transport[1:])
+	cdrsHttpJsonRpc, err := rpcclient.NewRpcClient("tcp", cdrsMasterCfg.CDRSCdrReplication[0].Server, 3, 3, cdrsMasterCfg.CDRSCdrReplication[0].Transport[1:])
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

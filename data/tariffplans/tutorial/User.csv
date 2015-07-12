@@ -1,0 +1,4 @@
+#Tenant[0],UserName[1],AttributeName[2],AttributeValue[3]
+cgrates.org,1001,test0,val0
+cgrates.org,1001,test1,val1
+cgrates.org,1002,another,value

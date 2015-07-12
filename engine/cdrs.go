@@ -65,7 +65,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, stats StatsInterface) (*CdrServer, error) {
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, stats: stats, guard: &AccountLock{queue: make(map[string]chan bool)}}, nil
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, stats: stats, guard: &GuardianLock{queue: make(map[string]chan bool)}}, nil
 }
 
 type CdrServer struct {
@@ -73,7 +73,7 @@ type CdrServer struct {
 	cdrDb  CdrStorage
 	rater  Connector
 	stats  StatsInterface
-	guard  *AccountLock
+	guard  *GuardianLock
 }
 
 func (self *CdrServer) RegisterHanlersToServer(server *Server) {

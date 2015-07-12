@@ -108,7 +108,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 			newAts = append(newAts, at)
 		}
 		if toBeSaved {
-			engine.AccLock.Guard(func() (interface{}, error) {
+			engine.Guardian.Guard(func() (interface{}, error) {
 				storage.SetActionPlans(key, newAts)
 				return 0, nil
 			}, utils.ACTION_TIMING_PREFIX)

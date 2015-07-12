@@ -71,6 +71,9 @@ type RatingStorage interface {
 	SetAccAlias(string, string) error
 	RemoveAccAliases([]*TenantAccount) error
 	GetAccountAliases(string, string, bool) ([]string, error)
+	SetUser(*UserProfile) error
+	GetUser(string) (*UserProfile, error)
+	RemoveUser(string) error
 }
 
 type AccountingStorage interface {
@@ -119,6 +122,7 @@ type LoadReader interface {
 	GetTpRatingProfiles(*TpRatingProfile) ([]TpRatingProfile, error)
 	GetTpSharedGroups(string, string) ([]TpSharedGroup, error)
 	GetTpCdrStats(string, string) ([]TpCdrstat, error)
+	GetTpUsers(*TpUser) ([]TpUser, error)
 	GetTpDerivedChargers(*TpDerivedCharger) ([]TpDerivedCharger, error)
 	GetTpLCRs(string, string) ([]TpLcrRule, error)
 	GetTpActions(string, string) ([]TpAction, error)
@@ -137,6 +141,7 @@ type LoadWriter interface {
 	SetTpRatingProfiles([]TpRatingProfile) error
 	SetTpSharedGroups([]TpSharedGroup) error
 	SetTpCdrStats([]TpCdrstat) error
+	SetTpUsers([]TpUser) error
 	SetTpDerivedChargers([]TpDerivedCharger) error
 	SetTpLCRs([]TpLcrRule) error
 	SetTpActions([]TpAction) error
