@@ -29,6 +29,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -174,6 +175,9 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrS
 	cdrc.cdrFields = make([][]*config.CfgCdrField, len(cdrcCfgs))
 	idx := 0
 	for _, cfg := range cdrcCfgs {
+		if idx == 0 { // Steal the config from just one instance since it should be the same for all
+			cdrc.failedCallsPrefix = cfg.FailedCallsPrefix
+		}
 		cdrc.cdrSourceIds[idx] = cfg.CdrSourceId
 		cdrc.duMultiplyFactors[idx] = cfg.DataUsageMultiplyFactor
 		cdrc.cdrFilters[idx] = cfg.CdrFilter
@@ -195,6 +199,7 @@ type Cdrc struct {
 	CdrFormat,
 	cdrInDir,
 	cdrOutDir string
+	failedCallsPrefix string   // Configured failedCallsPrefix, used in case of flatstore CDRs
 	cdrSourceIds      []string // Should be in sync with cdrFields on indexes
 	runDelay          time.Duration
 	csvSep            rune
@@ -330,6 +335,10 @@ func (self *Cdrc) processCsvFile(filePath string) error {
 
 // Processes a single partial record for flatstore CDRs, in case of failed calls it will emulate the BYE by copying the INVITE
 func (self *Cdrc) processPartialRecord(record []string, fileName string) ([]string, error) {
+	if strings.HasPrefix(fileName, self.failedCallsPrefix) { // Use the first index since they should be the same in all configs
+		record = append(record, "0") // Append duration 0 for failed calls flatstore CDR and do not process it further
+		return record, nil
+	}
 	pr, err := NewPartialFlatstoreRecord(record)
 	if err != nil {
 		return nil, err
