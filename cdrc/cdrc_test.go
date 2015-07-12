@@ -142,7 +142,7 @@ func TestDnTdmCdrs(t *testing.T) {
 			CdrSource:   cgrConfig.CdrcSourceId,
 			ReqType:     utils.META_RATED,
 			Direction:   "*out",
-			Tenant:      "sip.test.deanconnect.nl",
+			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "+49773280254",
 			Subject:     "+49773280254",
@@ -160,7 +160,7 @@ func TestDnTdmCdrs(t *testing.T) {
 			CdrSource:   cgrConfig.CdrcSourceId,
 			ReqType:     utils.META_RATED,
 			Direction:   "*out",
-			Tenant:      "sip.test.deanconnect.nl",
+			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "+49893252121",
 			Subject:     "+49893252121",
@@ -178,7 +178,7 @@ func TestDnTdmCdrs(t *testing.T) {
 			CdrSource:   cgrConfig.CdrcSourceId,
 			ReqType:     utils.META_RATED,
 			Direction:   "*out",
-			Tenant:      "sip.test.deanconnect.nl",
+			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "+49497361022",
 			Subject:     "+49497361022",
@@ -193,7 +193,7 @@ func TestDnTdmCdrs(t *testing.T) {
 	acntFld, _ := utils.NewRSRField(`~0:s/^([1-9]\d+)$/+$1/`)
 	reqTypeFld, _ := utils.NewRSRField("^rated")
 	dirFld, _ := utils.NewRSRField("^*out")
-	tenantFld, _ := utils.NewRSRField("^sip.test.deanconnect.nl")
+	tenantFld, _ := utils.NewRSRField("^cgrates.org")
 	categFld, _ := utils.NewRSRField("^call")
 	dstFld, _ := utils.NewRSRField(`~1:s/^00(\d+)(?:[a-zA-Z].{3})*0*([1-9]\d+)$/+$1$2/`)
 	usageFld, _ := utils.NewRSRField(`~6:s/^(\d+)$/${1}s/`)
@@ -294,83 +294,94 @@ BYE|36e39a5|42d996f9|3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:0|200|OK|143
 INVITE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454690|*prepaid|1001|1002||3099:1909036290
 BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|1436454692|||||3099:1909036290
 `
-	/*
-		eCdrs := []*engine.StoredCdr{
-			&engine.StoredCdr{
-				CgrId:       utils.Sha1("dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:02daec40c548625ac", time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC).String()),
-				TOR:         utils.VOICE,
-				AccId:       "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:02daec40c548625ac",
-				CdrHost:     "0.0.0.0",
-				CdrSource:   "TEST_CDRC",
-				ReqType:     utils.META_PREPAID,
-				Direction:   "*out",
-				Tenant:      "sip.test.deanconnect.nl",
-				Category:    "call",
-				Account:     "1001",
-				Subject:     "1001",
-				Destination: "1002",
-				SetupTime:   time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC),
-				AnswerTime:  time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC),
-				Usage:       time.Duration(25) * time.Second,
-				Cost:        -1,
+
+	eCdrs := []*engine.StoredCdr{
+		&engine.StoredCdr{
+			CgrId:       "e61034c34148a7c4f40623e00ca5e551d1408bf3",
+			TOR:         utils.VOICE,
+			AccId:       "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:02daec40c548625ac",
+			CdrHost:     "0.0.0.0",
+			CdrSource:   "TEST_CDRC",
+			ReqType:     utils.META_PREPAID,
+			Direction:   "*out",
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1002",
+			SetupTime:   time.Date(2015, 7, 9, 17, 06, 48, 0, time.Local),
+			AnswerTime:  time.Date(2015, 7, 9, 17, 06, 48, 0, time.Local),
+			Usage:       time.Duration(2) * time.Second,
+			ExtraFields: map[string]string{
+				"DialogIdentifier": "3401:2069362475",
 			},
-			&engine.StoredCdr{
-				CgrId:       utils.Sha1("214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0f9d3d5c3c863a6e3", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
-				TOR:         utils.VOICE,
-				AccId:       "214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0f9d3d5c3c863a6e3",
-				CdrHost:     "0.0.0.0",
-				CdrSource:   "TEST_CDRC",
-				ReqType:     utils.META_PREPAID,
-				Direction:   "*out",
-				Tenant:      "sip.test.deanconnect.nl",
-				Category:    "call",
-				Account:     "1002",
-				Subject:     "1002",
-				Destination: "1001",
-				SetupTime:   time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-				AnswerTime:  time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-				Usage:       time.Duration(8) * time.Second,
-				Cost:        -1,
+			Cost: -1,
+		},
+		&engine.StoredCdr{
+			CgrId:       "3ed64a28190e20ac8a6fd8fd48cb23efbfeb7a17",
+			TOR:         utils.VOICE,
+			AccId:       "214d8f52b566e33a9349b184e72a4cca@0:0:0:0:0:0:0:0f9d3d5c3c863a6e3",
+			CdrHost:     "0.0.0.0",
+			CdrSource:   "TEST_CDRC",
+			ReqType:     utils.META_POSTPAID,
+			Direction:   "*out",
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1002",
+			Subject:     "1002",
+			Destination: "1001",
+			SetupTime:   time.Date(2015, 7, 9, 17, 10, 47, 0, time.Local),
+			AnswerTime:  time.Date(2015, 7, 9, 17, 10, 47, 0, time.Local),
+			Usage:       time.Duration(4) * time.Second,
+			ExtraFields: map[string]string{
+				"DialogIdentifier": "1877:893549741",
 			},
-			&engine.StoredCdr{
-				CgrId:       utils.Sha1("3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:036e39a542d996f9", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
-				TOR:         utils.VOICE,
-				AccId:       "3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:036e39a542d996f9",
-				CdrHost:     "0.0.0.0",
-				CdrSource:   "TEST_CDRC",
-				ReqType:     utils.META_PREPAID,
-				Direction:   "*out",
-				Tenant:      "sip.test.deanconnect.nl",
-				Category:    "call",
-				Account:     "1001",
-				Subject:     "1001",
-				Destination: "1002",
-				SetupTime:   time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-				AnswerTime:  time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-				Usage:       time.Duration(8) * time.Second,
-				Cost:        -1,
+			Cost: -1,
+		},
+		&engine.StoredCdr{
+			CgrId:       "f2f8d9341adfbbe1836b22f75182142061ef3d20",
+			TOR:         utils.VOICE,
+			AccId:       "3a63321dd3b325eec688dc2aefb6ac2d@0:0:0:0:0:0:0:036e39a542d996f9",
+			CdrHost:     "0.0.0.0",
+			CdrSource:   "TEST_CDRC",
+			ReqType:     utils.META_PREPAID,
+			Direction:   "*out",
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1002",
+			SetupTime:   time.Date(2015, 7, 9, 17, 10, 57, 0, time.Local),
+			AnswerTime:  time.Date(2015, 7, 9, 17, 10, 57, 0, time.Local),
+			Usage:       time.Duration(4) * time.Second,
+			ExtraFields: map[string]string{
+				"DialogIdentifier": "2407:1884881533",
 			},
-			&engine.StoredCdr{
-				CgrId:       utils.Sha1("a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:03111f3c949ca4c42", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
-				TOR:         utils.VOICE,
-				AccId:       "a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:03111f3c949ca4c42",
-				CdrHost:     "0.0.0.0",
-				CdrSource:   "TEST_CDRC",
-				ReqType:     utils.META_PREPAID,
-				Direction:   "*out",
-				Tenant:      "sip.test.deanconnect.nl",
-				Category:    "call",
-				Account:     "1001",
-				Subject:     "1001",
-				Destination: "1002",
-				SetupTime:   time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-				AnswerTime:  time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-				Usage:       time.Duration(8) * time.Second,
-				Cost:        -1,
+			Cost: -1,
+		},
+		&engine.StoredCdr{
+			CgrId:       "ccf05e7e3b9db9d2370bcbe316817447dba7df54",
+			TOR:         utils.VOICE,
+			AccId:       "a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:03111f3c949ca4c42",
+			CdrHost:     "0.0.0.0",
+			CdrSource:   "TEST_CDRC",
+			ReqType:     utils.META_PREPAID,
+			Direction:   "*out",
+			Tenant:      "cgrates.org",
+			Category:    "call",
+			Account:     "1001",
+			Subject:     "1001",
+			Destination: "1002",
+			SetupTime:   time.Date(2015, 7, 9, 17, 11, 30, 0, time.Local), //2015-07-09T17:11:30+02:00
+			AnswerTime:  time.Date(2015, 7, 9, 17, 11, 30, 0, time.Local),
+			Usage:       time.Duration(2) * time.Second,
+			ExtraFields: map[string]string{
+				"DialogIdentifier": "3099:1909036290",
 			},
-		}
-	*/
-	//cgrConfig, _ := config.NewDefaultCGRConfig()
+			Cost: -1,
+		},
+	}
+
 	cdrFields := [][]*config.CfgCdrField{[]*config.CfgCdrField{
 		&config.CfgCdrField{Tag: "Tor", Type: utils.CDRFIELD, CdrFieldId: utils.TOR, Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "AccId", Type: utils.CDRFIELD, CdrFieldId: utils.ACCID, Mandatory: true},
@@ -384,7 +395,7 @@ BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|14
 		&config.CfgCdrField{Tag: "Destination", Type: utils.CDRFIELD, CdrFieldId: utils.DESTINATION, Value: utils.ParseRSRFieldsMustCompile("9", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "SetupTime", Type: utils.CDRFIELD, CdrFieldId: utils.SETUP_TIME, Value: utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "AnswerTime", Type: utils.CDRFIELD, CdrFieldId: utils.ANSWER_TIME, Value: utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP), Mandatory: true},
-		&config.CfgCdrField{Tag: "Duration", Type: utils.CDRFIELD, CdrFieldId: utils.ANSWER_TIME, Mandatory: true},
+		&config.CfgCdrField{Tag: "Duration", Type: utils.CDRFIELD, CdrFieldId: utils.USAGE, Mandatory: true},
 		&config.CfgCdrField{Tag: "DialogId", Type: utils.CDRFIELD, CdrFieldId: "DialogIdentifier", Value: utils.ParseRSRFieldsMustCompile("11", utils.INFIELD_SEP)},
 	}}
 	cdrc := &Cdrc{CdrFormat: utils.OSIPS_FLATSTORE, cdrSourceIds: []string{"TEST_CDRC"}, cdrFields: cdrFields, partialRecords: make(map[string]map[string]*PartialFlatstoreRecord)}
@@ -414,11 +425,9 @@ BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|14
 			cdrs = append(cdrs, storedCdr)
 		}
 	}
-	/*
-		if !reflect.DeepEqual(eCdrs, cdrs) {
-			t.Errorf("Expecting: %+v, received: %+v", eCdrs, cdrs)
-		}
-	*/
+	if !reflect.DeepEqual(eCdrs, cdrs) {
+		t.Errorf("Expecting: %+v, received: %+v", eCdrs, cdrs)
+	}
 
 }
 
