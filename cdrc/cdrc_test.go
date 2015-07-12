@@ -125,123 +125,6 @@ func TestDataMultiplyFactor(t *testing.T) {
 	}
 }
 
-/*
-func TestDnTdmCdrs(t *testing.T) {
-	tdmCdrs := `
-49773280254,0049LN130676000285,N_IP_0676_00-Internet 0676 WRAP 13,02.07.2014 15:24:40,02.07.2014 15:24:40,1,25,Peak,0.000000,49DE13
-49893252121,0049651515477,N_MO_MRAP_00-WRAP Mobile,02.07.2014 15:24:41,02.07.2014 15:24:41,1,8,Peak,0.003920,49651
-49497361022,0049LM0409005226,N_MO_MTMB_00-RW-Mobile,02.07.2014 15:24:41,02.07.2014 15:24:41,1,43,Peak,0.021050,49MTMB
-`
-	cgrConfig, _ := config.NewDefaultCGRConfig()
-	eCdrs := []*engine.StoredCdr{
-		&engine.StoredCdr{
-			CgrId:       utils.Sha1("49773280254", time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC).String()),
-			TOR:         utils.VOICE,
-			AccId:       "49773280254",
-			CdrHost:     "0.0.0.0",
-			CdrSource:   cgrConfig.CdrcSourceId,
-			ReqType:     utils.META_RATED,
-			Direction:   "*out",
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "+49773280254",
-			Subject:     "+49773280254",
-			Destination: "+49676000285",
-			SetupTime:   time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC),
-			AnswerTime:  time.Date(2014, 7, 2, 15, 24, 40, 0, time.UTC),
-			Usage:       time.Duration(25) * time.Second,
-			Cost:        -1,
-		},
-		&engine.StoredCdr{
-			CgrId:       utils.Sha1("49893252121", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
-			TOR:         utils.VOICE,
-			AccId:       "49893252121",
-			CdrHost:     "0.0.0.0",
-			CdrSource:   cgrConfig.CdrcSourceId,
-			ReqType:     utils.META_RATED,
-			Direction:   "*out",
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "+49893252121",
-			Subject:     "+49893252121",
-			Destination: "+49651515477",
-			SetupTime:   time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-			AnswerTime:  time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-			Usage:       time.Duration(8) * time.Second,
-			Cost:        -1,
-		},
-		&engine.StoredCdr{
-			CgrId:       utils.Sha1("49497361022", time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC).String()),
-			TOR:         utils.VOICE,
-			AccId:       "49497361022",
-			CdrHost:     "0.0.0.0",
-			CdrSource:   cgrConfig.CdrcSourceId,
-			ReqType:     utils.META_RATED,
-			Direction:   "*out",
-			Tenant:      "cgrates.org",
-			Category:    "call",
-			Account:     "+49497361022",
-			Subject:     "+49497361022",
-			Destination: "+499005226",
-			SetupTime:   time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-			AnswerTime:  time.Date(2014, 7, 2, 15, 24, 41, 0, time.UTC),
-			Usage:       time.Duration(43) * time.Second,
-			Cost:        -1,
-		},
-	}
-	torFld, _ := utils.NewRSRField("^*voice")
-	acntFld, _ := utils.NewRSRField(`~0:s/^([1-9]\d+)$/+$1/`)
-	reqTypeFld, _ := utils.NewRSRField("^rated")
-	dirFld, _ := utils.NewRSRField("^*out")
-	tenantFld, _ := utils.NewRSRField("^cgrates.org")
-	categFld, _ := utils.NewRSRField("^call")
-	dstFld, _ := utils.NewRSRField(`~1:s/^00(\d+)(?:[a-zA-Z].{3})*0*([1-9]\d+)$/+$1$2/`)
-	usageFld, _ := utils.NewRSRField(`~6:s/^(\d+)$/${1}s/`)
-	cgrConfig.CdrcCdrFields = map[string]*utils.RSRField{
-		utils.TOR:         torFld,
-		utils.ACCID:       &utils.RSRField{Id: "0"},
-		utils.REQTYPE:     reqTypeFld,
-		utils.DIRECTION:   dirFld,
-		utils.TENANT:      tenantFld,
-		utils.CATEGORY:    categFld,
-		utils.ACCOUNT:     acntFld,
-		utils.SUBJECT:     acntFld,
-		utils.DESTINATION: dstFld,
-		utils.SETUP_TIME:  &utils.RSRField{Id: "4"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "4"},
-		utils.USAGE:       usageFld,
-	}
-	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrFormat, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay, ',',
-		cgrConfig.CdrcCdrFields, new(cdrs.CDRS), nil}
-	cdrsContent := bytes.NewReader([]byte(tdmCdrs))
-	csvReader := csv.NewReader(cdrsContent)
-	cdrs := make([]*engine.StoredCdr, 0)
-	for {
-		cdrCsv, err := csvReader.Read()
-		if err != nil && err == io.EOF {
-			break // End of file
-		} else if err != nil {
-			t.Error("Unexpected error:", err)
-		}
-		if cdr, err := cdrc.recordToStoredCdr(cdrCsv); err != nil {
-			t.Error("Unexpected error: ", err)
-		} else {
-			cdrs = append(cdrs, cdr)
-		}
-	}
-	if !reflect.DeepEqual(eCdrs, cdrs) {
-		for _, ecdr := range eCdrs {
-			fmt.Printf("Cdr expected: %+v\n", ecdr)
-		}
-		for _, cdr := range cdrs {
-			fmt.Printf("Cdr processed: %+v\n", cdr)
-		}
-		t.Errorf("Expecting: %+v, received: %+v", eCdrs, cdrs)
-	}
-
-}
-*/
-
 func TestNewPartialFlatstoreRecord(t *testing.T) {
 	ePr := &PartialFlatstoreRecord{Method: "INVITE", AccId: "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:02daec40c548625ac", Timestamp: time.Date(2015, 7, 9, 17, 6, 48, 0, time.Local),
 		Values: []string{"INVITE", "2daec40c", "548625ac", "dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0", "200", "OK", "1436454408", "*prepaid", "1001", "1002", "", "3401:2069362475"}}
@@ -526,7 +409,7 @@ INVITE|324cb497|d4af7023|8deaadf2ae9a17809a391f05af31afb0@0:0:0:0:0:0:0:0|486|Bu
 		&config.CfgCdrField{Tag: "Destination", Type: utils.CDRFIELD, CdrFieldId: utils.DESTINATION, Value: utils.ParseRSRFieldsMustCompile("9", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "SetupTime", Type: utils.CDRFIELD, CdrFieldId: utils.SETUP_TIME, Value: utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "AnswerTime", Type: utils.CDRFIELD, CdrFieldId: utils.ANSWER_TIME, Value: utils.ParseRSRFieldsMustCompile("6", utils.INFIELD_SEP), Mandatory: true},
-		&config.CfgCdrField{Tag: "Duration", Type: utils.CDRFIELD, CdrFieldId: utils.USAGE, Mandatory: true},
+		&config.CfgCdrField{Tag: "Usage", Type: utils.CDRFIELD, CdrFieldId: utils.USAGE, Mandatory: true},
 		&config.CfgCdrField{Tag: "DisconnectCause", Type: utils.CDRFIELD, CdrFieldId: utils.DISCONNECT_CAUSE, Value: utils.ParseRSRFieldsMustCompile("4;^ ;5", utils.INFIELD_SEP), Mandatory: true},
 		&config.CfgCdrField{Tag: "DialogId", Type: utils.CDRFIELD, CdrFieldId: "DialogIdentifier", Value: utils.ParseRSRFieldsMustCompile("11", utils.INFIELD_SEP)},
 	}}

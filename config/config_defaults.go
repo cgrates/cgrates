@@ -88,10 +88,10 @@ const CGRATES_CFG_JSON = `
 "rater": {
 	"enabled": false,						// enable Rater service: <true|false>
 	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
-	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-    "historys": "",							// address where to reach the history service, empty to disable history functionality<""|internal|x.y.z.y:1234>
-    "pubusubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality<""|internal|x.y.z.y:1234>
-    "users": "",							// address where to reach the user service, empty to disable user profile functionality<""|internal|x.y.z.y:1234>
+	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality: <""|internal|x.y.z.y:1234>
+    "historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
+    "pubusubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
+    "users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
 },
 
 
@@ -247,13 +247,15 @@ const CGRATES_CFG_JSON = `
 
 
 "pubsubs": {
-	"enabled": false,							// starts History service: <true|false>.
+	"enabled": false,							// starts PubSub service: <true|false>.
 },
 
+
 "users": {
-	"enabled": false,							// starts Users service: <true|false>.
+	"enabled": false,							// starts User service: <true|false>.
 	"indexes": [],                  			// user profile field indexes
 },
+
 
 "mailer": {
 	"server": "localhost",								// the server to use when sending emails out
