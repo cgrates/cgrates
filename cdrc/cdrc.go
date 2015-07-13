@@ -287,8 +287,10 @@ func (self *Cdrc) processCdrDir() error {
 
 // Processe file at filePath and posts the valid cdr rows out of it
 func (self *Cdrc) processCsvFile(filePath string) error {
-	processCsvFile := <-self.maxOpenFiles // Queue here for maxOpenFiles
-	defer func() { self.maxOpenFiles <- processCsvFile }()
+	if cap(self.maxOpenFiles) != 0 { // 0 goes for no limit
+		processCsvFile := <-self.maxOpenFiles // Queue here for maxOpenFiles
+		defer func() { self.maxOpenFiles <- processCsvFile }()
+	}
 	_, fn := path.Split(filePath)
 	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing: %s", filePath))
 	file, err := os.Open(filePath)

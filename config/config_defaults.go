@@ -160,7 +160,7 @@ const CGRATES_CFG_JSON = `
 		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": ",",						// separator used in case of csv files
 		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
-		"max_open_files": 1024,						// maximum simultaneous files to process
+		"max_open_files": 1024,						// maximum simultaneous files to process, 0 for unlimited
 		"data_usage_multiply_factor": 1024,			// conversion factor for data usage
 		"cdr_in_dir": "/var/log/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
