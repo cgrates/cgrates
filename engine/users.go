@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"log"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -235,7 +234,6 @@ func (um *UserMap) addIndex(up *UserProfile) {
 }
 
 func (um *UserMap) deleteIndex(up *UserProfile) {
-	log.Printf("Delete index: %s: %v", up.GetId(), up.Profile)
 	key := up.GetId()
 	for _, index := range um.indexKeys {
 		if index == "Tenant" {
