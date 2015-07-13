@@ -22,7 +22,7 @@ import "github.com/cgrates/cgrates/engine"
 
 func init() {
 	c := &CmdShowSubscribers{
-		name:      "show_subscribers",
+		name:      "subscribers",
 		rpcMethod: "PubSubV1.ShowSubscribers",
 	}
 	commands[c.Name()] = c
@@ -44,8 +44,8 @@ func (self *CmdShowSubscribers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdShowSubscribers) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdShowSubscribers) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
 	if ptr {

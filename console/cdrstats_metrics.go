@@ -45,8 +45,8 @@ func (self *CmdCdrStatsMetrics) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCdrStatsMetrics) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdCdrStatsMetrics) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetMetrics{}
 	}
 	if ptr {

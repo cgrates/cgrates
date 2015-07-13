@@ -601,6 +601,19 @@ func (ms *MapStorage) GetUser(key string) (up *UserProfile, err error) {
 	}
 	return
 }
+
+func (ms *MapStorage) GetUsers() (result []*UserProfile, err error) {
+	for key, value := range ms.dict {
+		if strings.HasPrefix(key, utils.USERS_PREFIX) {
+			up := &UserProfile{}
+			if err = ms.ms.Unmarshal(value, up); err == nil {
+				result = append(result, up)
+			}
+		}
+	}
+	return
+}
+
 func (ms *MapStorage) RemoveUser(key string) error {
 	delete(ms.dict, utils.USERS_PREFIX+key)
 	return nil

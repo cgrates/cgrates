@@ -48,8 +48,8 @@ func (self *CmdGetLcr) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetLcr) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdGetLcr) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.LcrRequest{}
 	}
 	if ptr {

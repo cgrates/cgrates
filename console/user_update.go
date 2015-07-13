@@ -45,8 +45,8 @@ func (self *CmdUpdateUser) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUpdateUser) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdUpdateUser) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.UserProfile{}
 	}
 	if ptr {

@@ -45,8 +45,8 @@ func (self *CmdGetDestination) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDestination) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdGetDestination) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
 	if ptr {

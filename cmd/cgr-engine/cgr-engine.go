@@ -459,12 +459,12 @@ func main() {
 		server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
 	}
 
-	if cfg.PubSubEnabled {
+	if cfg.PubSubServerEnabled {
 		pubSubServer = engine.NewPubSub(accountDb, cfg.HttpSkipTlsVerify)
 		server.RpcRegisterName("PubSubV1", pubSubServer)
 	}
 
-	if cfg.HistoryEnabled {
+	if cfg.HistoryServerEnabled {
 		scribeServer, err = history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
@@ -474,7 +474,11 @@ func main() {
 	}
 
 	if cfg.UserServerEnabled {
-		userServer = engine.NewUserMap(ratingDb)
+		userServer, err = engine.NewUserMap(ratingDb)
+		if err != nil {
+			engine.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
+			exitChan <- true
+		}
 		server.RpcRegisterName("UsersV1", userServer)
 		if len(cfg.UserServerIndexes) != 0 {
 			var s string

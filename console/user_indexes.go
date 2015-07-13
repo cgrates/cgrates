@@ -18,33 +18,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
-
 func init() {
-	c := &CmdCdrStatsQueueTriggers{
-		name:      "cdrstats_queue_triggers",
-		rpcMethod: "CDRStatsV1.GetQueueTriggers",
+	c := &CmdUserShowIndexes{
+		name:      "user_indexes",
+		rpcMethod: "UsersV1.GetIndexes",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-type CmdCdrStatsQueueTriggers struct {
+// Commander implementation
+type CmdUserShowIndexes struct {
 	name      string
 	rpcMethod string
 	rpcParams *StringWrapper
 	*CommandExecuter
 }
 
-func (self *CmdCdrStatsQueueTriggers) Name() string {
+func (self *CmdUserShowIndexes) Name() string {
 	return self.name
 }
 
-func (self *CmdCdrStatsQueueTriggers) RpcMethod() string {
+func (self *CmdUserShowIndexes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCdrStatsQueueTriggers) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdUserShowIndexes) RpcParams(ptr, reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
@@ -54,10 +53,11 @@ func (self *CmdCdrStatsQueueTriggers) RpcParams(ptr, reset bool) interface{} {
 	return *self.rpcParams
 }
 
-func (self *CmdCdrStatsQueueTriggers) PostprocessRpcParams() error {
+func (self *CmdUserShowIndexes) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdCdrStatsQueueTriggers) RpcResult() interface{} {
-	return &engine.ActionTriggerPriotityList{}
+func (self *CmdUserShowIndexes) RpcResult() interface{} {
+	s := map[string][]string{}
+	return &s
 }

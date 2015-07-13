@@ -42,8 +42,8 @@ func (self *CmdStatus) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdStatus) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdStatus) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
 	if ptr {

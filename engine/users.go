@@ -33,38 +33,55 @@ type UserService interface {
 	UpdateUser(UserProfile, *string) error
 	GetUsers(UserProfile, *[]*UserProfile) error
 	AddIndex([]string, *string) error
+	GetIndexes(string, *map[string][]string) error
 }
 
 type UserMap struct {
-	table    map[string]map[string]string
-	index    map[string][]string
-	ratingDb RatingStorage
+	table     map[string]map[string]string
+	index     map[string]map[string]bool
+	indexKeys []string
+	ratingDb  RatingStorage
 }
 
-func NewUserMap(ratingDb RatingStorage) *UserMap {
+func NewUserMap(ratingDb RatingStorage) (*UserMap, error) {
+	um := newUserMap(ratingDb)
+	// load from rating db
+	if ups, err := um.ratingDb.GetUsers(); err == nil {
+		for _, up := range ups {
+			um.table[up.GetId()] = up.Profile
+		}
+	} else {
+		return nil, err
+	}
+	return um, nil
+}
+
+func newUserMap(ratingDb RatingStorage) *UserMap {
 	return &UserMap{
 		table:    make(map[string]map[string]string),
-		index:    make(map[string][]string),
+		index:    make(map[string]map[string]bool),
 		ratingDb: ratingDb,
 	}
 }
 
 func (um *UserMap) SetUser(up UserProfile, reply *string) error {
-	um.table[up.GetId()] = up.Profile
 	if err := um.ratingDb.SetUser(&up); err != nil {
 		*reply = err.Error()
 		return err
 	}
+	um.table[up.GetId()] = up.Profile
+	um.addIndex(&up)
 	*reply = utils.OK
 	return nil
 }
 
 func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
-	delete(um.table, up.GetId())
 	if err := um.ratingDb.RemoveUser(up.GetId()); err != nil {
 		*reply = err.Error()
 		return err
 	}
+	delete(um.table, up.GetId())
+	um.deleteIndex(&up)
 	*reply = utils.OK
 	return nil
 }
@@ -76,20 +93,32 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 		return utils.ErrNotFound
 	}
 	if m == nil {
-		um.table[up.GetId()] = make(map[string]string, 0)
+		m = make(map[string]string)
+	}
+	oldM := make(map[string]string, len(m))
+	for k, v := range m {
+		oldM[k] = v
+	}
+	oldUp := &UserProfile{
+		Tenant:   up.Tenant,
+		UserName: up.UserName,
+		Profile:  oldM,
 	}
 	for key, value := range up.Profile {
-		um.table[up.GetId()][key] = value
+		m[key] = value
 	}
 	finalUp := &UserProfile{
 		Tenant:   up.Tenant,
 		UserName: up.UserName,
-		Profile:  um.table[up.GetId()],
+		Profile:  m,
 	}
 	if err := um.ratingDb.SetUser(finalUp); err != nil {
 		*reply = err.Error()
 		return err
 	}
+	um.table[up.GetId()] = m
+	um.deleteIndex(oldUp)
+	um.addIndex(finalUp)
 	*reply = utils.OK
 	return nil
 }
@@ -101,21 +130,21 @@ func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
 	// search index
 	if up.Tenant != "" {
 		if keys, found := um.index[utils.ConcatenatedKey("Tenant", up.Tenant)]; found {
-			for _, key := range keys {
+			for key := range keys {
 				indexUnionKeys[key] = true
 			}
 		}
 	}
 	if up.UserName != "" {
 		if keys, found := um.index[utils.ConcatenatedKey("UserName", up.UserName)]; found {
-			for _, key := range keys {
+			for key := range keys {
 				indexUnionKeys[key] = true
 			}
 		}
 	}
 	for k, v := range up.Profile {
 		if keys, found := um.index[utils.ConcatenatedKey(k, v)]; found {
-			for _, key := range keys {
+			for key := range keys {
 				indexUnionKeys[key] = true
 			}
 		}
@@ -158,31 +187,98 @@ func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
 }
 
 func (um *UserMap) AddIndex(indexes []string, reply *string) error {
+	um.indexKeys = indexes
 	for key, values := range um.table {
-		ud := &UserProfile{Profile: values}
-		ud.SetId(key)
-		for _, index := range indexes {
-			if index == "Tenant" {
-				if ud.Tenant != "" {
-					um.index[utils.ConcatenatedKey(index, ud.Tenant)] = append(um.index[utils.ConcatenatedKey(index, ud.Tenant)], key)
-				}
-				continue
-			}
-			if index == "UserName" {
-				if ud.UserName != "" {
-					um.index[utils.ConcatenatedKey(index, ud.UserName)] = append(um.index[utils.ConcatenatedKey(index, ud.UserName)], key)
-				}
-				continue
-			}
+		up := &UserProfile{Profile: values}
+		up.SetId(key)
+		um.addIndex(up)
+	}
+	*reply = utils.OK
+	return nil
+}
 
-			for k, v := range ud.Profile {
-				if k == index && v != "" {
-					um.index[utils.ConcatenatedKey(k, v)] = append(um.index[utils.ConcatenatedKey(k, v)], key)
+func (um *UserMap) addIndex(up *UserProfile) {
+	key := up.GetId()
+	for _, index := range um.indexKeys {
+		if index == "Tenant" {
+			if up.Tenant != "" {
+				indexKey := utils.ConcatenatedKey(index, up.Tenant)
+				if um.index[indexKey] == nil {
+					um.index[indexKey] = make(map[string]bool)
+				}
+				um.index[indexKey][key] = true
+			}
+			continue
+		}
+		if index == "UserName" {
+			if up.UserName != "" {
+				indexKey := utils.ConcatenatedKey(index, up.UserName)
+				if um.index[indexKey] == nil {
+					um.index[indexKey] = make(map[string]bool)
+				}
+				um.index[indexKey][key] = true
+			}
+			continue
+		}
+
+		for k, v := range up.Profile {
+			if k == index && v != "" {
+				indexKey := utils.ConcatenatedKey(k, v)
+				if um.index[indexKey] == nil {
+					um.index[indexKey] = make(map[string]bool)
+				}
+				um.index[indexKey][key] = true
+			}
+		}
+	}
+}
+
+func (um *UserMap) deleteIndex(up *UserProfile) {
+	key := up.GetId()
+	for _, index := range um.indexKeys {
+		if index == "Tenant" {
+			if up.Tenant != "" {
+				indexKey := utils.ConcatenatedKey(index, up.Tenant)
+				delete(um.index[indexKey], key)
+				if len(um.index[indexKey]) == 0 {
+					delete(um.index, indexKey)
+				}
+			}
+			continue
+		}
+		if index == "UserName" {
+			if up.UserName != "" {
+				indexKey := utils.ConcatenatedKey(index, up.UserName)
+				delete(um.index[indexKey], key)
+				if len(um.index[indexKey]) == 0 {
+					delete(um.index, indexKey)
+				}
+			}
+			continue
+		}
+
+		for k, v := range up.Profile {
+			if k == index && v != "" {
+				indexKey := utils.ConcatenatedKey(k, v)
+				delete(um.index[indexKey], key)
+				if len(um.index[indexKey]) == 0 {
+					delete(um.index, indexKey)
 				}
 			}
 		}
 	}
-	*reply = utils.OK
+}
+
+func (um *UserMap) GetIndexes(in string, reply *map[string][]string) error {
+	indexes := make(map[string][]string)
+	for key, values := range um.index {
+		var vs []string
+		for val := range values {
+			vs = append(vs, val)
+		}
+		indexes[key] = vs
+	}
+	*reply = indexes
 	return nil
 }
 
@@ -218,4 +314,8 @@ func (ps *ProxyUserService) GetUsers(ud UserProfile, users *[]*UserProfile) erro
 
 func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
 	return ps.Client.Call("UsersV1.AddIndex", indexes, reply)
+}
+
+func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) error {
+	return ps.Client.Call("UsersV1.AddIndex", in, reply)
 }

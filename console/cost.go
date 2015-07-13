@@ -47,8 +47,8 @@ func (self *CmdGetCost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCost) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdGetCost) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
 	if ptr {
