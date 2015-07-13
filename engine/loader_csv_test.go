@@ -188,6 +188,7 @@ CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
 cgrates.org,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
+cgrates.org,remo,*out,TOPUP10_AT,
 vdf,empty0,*out,TOPUP_SHARED0_AT,
 vdf,empty10,*out,TOPUP_SHARED10_AT,
 vdf,emptyX,*out,TOPUP_EMPTY_AT,
@@ -1002,7 +1003,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 7 {
+	if len(csvr.accountActions) != 8 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["*out:vdf:minitsboy"]

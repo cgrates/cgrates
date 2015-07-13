@@ -245,7 +245,7 @@ func (at *ActionPlan) Execute() (err error) {
 		return
 	}
 	for _, a := range aac {
-		if expDate, parseErr := utils.ParseDate(a.ExpirationString); a.Balance.ExpirationDate.IsZero() && parseErr == nil && !expDate.IsZero() {
+		if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
 			a.Balance.ExpirationDate = expDate
 		}
 		// handle remove action
