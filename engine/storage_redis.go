@@ -674,6 +674,12 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	return
 }
 
+func (rs *RedisStorage) RemoveAccount(key string) (err error) {
+	_, err = rs.db.Del(utils.ACCOUNT_PREFIX + key)
+	return
+
+}
+
 func (rs *RedisStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
 	var values []byte
 	if values, err = rs.db.Get(utils.CDR_STATS_QUEUE_PREFIX + key); err == nil {
@@ -740,7 +746,7 @@ func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err erro
 }
 
 func (rs *RedisStorage) RemoveSubscriber(key string) (err error) {
-	rs.db.Del(utils.PUBSUB_SUBSCRIBERS_PREFIX + key)
+	_, err = rs.db.Del(utils.PUBSUB_SUBSCRIBERS_PREFIX + key)
 	return
 }
 
@@ -751,7 +757,7 @@ func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
 }
 
 func (rs *RedisStorage) RemoveUser(key string) (err error) {
-	rs.db.Del(utils.USERS_PREFIX + key)
+	_, err = rs.db.Del(utils.USERS_PREFIX + key)
 	return
 }
 

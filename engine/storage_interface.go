@@ -81,6 +81,7 @@ type AccountingStorage interface {
 	Storage
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
+	RemoveAccount(string) error
 	GetCdrStatsQueue(string) (*StatsQueue, error)
 	SetCdrStatsQueue(*StatsQueue) error
 	GetSubscribers() (map[string]*SubscriberData, error)

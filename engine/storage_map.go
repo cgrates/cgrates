@@ -545,6 +545,11 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	return
 }
 
+func (ms *MapStorage) RemoveAccount(key string) (err error) {
+	delete(ms.dict, utils.ACCOUNT_PREFIX+key)
+	return
+}
+
 func (ms *MapStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
 	if values, ok := ms.dict[utils.CDR_STATS_QUEUE_PREFIX+key]; ok {
 		sq = &StatsQueue{}
