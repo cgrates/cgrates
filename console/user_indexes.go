@@ -58,6 +58,6 @@ func (self *CmdUserShowIndexes) PostprocessRpcParams() error {
 }
 
 func (self *CmdUserShowIndexes) RpcResult() interface{} {
-	s := []string{}
+	s := map[string][]string{}
 	return &s
 }

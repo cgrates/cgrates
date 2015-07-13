@@ -32,6 +32,14 @@ func IsSliceMember(ss []string, s string) bool {
 	return false
 }
 
+func SliceWithoutMember(ss []string, s string) []string {
+	sort.Strings(ss)
+	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
+		ss[i], ss = ss[len(ss)-1], ss[:len(ss)-1]
+	}
+	return ss
+}
+
 //Iterates over slice members and returns true if one starts with prefix
 func SliceMemberHasPrefix(ss []string, prfx string) bool {
 	for _, mbr := range ss {
