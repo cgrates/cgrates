@@ -44,8 +44,8 @@ func (self *CmdPublish) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdPublish) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdPublish) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.PublishInfo{}
 	}
 	if ptr {

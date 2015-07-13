@@ -48,8 +48,8 @@ func (self *CmdExecuteAction) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdExecuteAction) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdExecuteAction) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrExecuteAction{Direction: utils.OUT}
 	}
 	if ptr {

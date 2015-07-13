@@ -12,19 +12,20 @@
 
 "rater": {
 	"enabled": true,						// enable Rater service: <true|false>
+    "pubsubs": "internal",
+    "users": "internal",
 },
 
 "scheduler": {
 	"enabled": true,						// start Scheduler service: <true|false>
 },
 
-"pubsub_server": {
+"pubsubs": {
 	"enabled": true,							// starts pubsub service: <true|false>.
 },
 
-
-"pubsub_agent": {
-	"enabled": true,			// starts pubsub as a client: <true|false>.
-	"server": "internal",		// address where to reach the master pubsub server: <internal|x.y.z.y:1234>
+"users": {
+	"enabled": true,							// starts users service: <true|false>.
 },
+
 }

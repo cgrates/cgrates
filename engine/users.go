@@ -33,6 +33,7 @@ type UserService interface {
 	UpdateUser(UserProfile, *string) error
 	GetUsers(UserProfile, *[]*UserProfile) error
 	AddIndex([]string, *string) error
+	GetIndexes(string, *[]string) error
 }
 
 type UserMap struct {
@@ -41,7 +42,20 @@ type UserMap struct {
 	ratingDb RatingStorage
 }
 
-func NewUserMap(ratingDb RatingStorage) *UserMap {
+func NewUserMap(ratingDb RatingStorage) (*UserMap, error) {
+	um := newUserMap(ratingDb)
+	// load from rating db
+	if ups, err := um.ratingDb.GetUsers(); err == nil {
+		for _, up := range ups {
+			um.table[up.GetId()] = up.Profile
+		}
+	} else {
+		return nil, err
+	}
+	return um, nil
+}
+
+func newUserMap(ratingDb RatingStorage) *UserMap {
 	return &UserMap{
 		table:    make(map[string]map[string]string),
 		index:    make(map[string][]string),
@@ -186,6 +200,15 @@ func (um *UserMap) AddIndex(indexes []string, reply *string) error {
 	return nil
 }
 
+func (um *UserMap) GetIndexes(in string, reply *[]string) error {
+	var indexes []string
+	for key := range um.index {
+		indexes = append(indexes, key)
+	}
+	*reply = indexes
+	return nil
+}
+
 type UserProxy struct{}
 
 type ProxyUserService struct {
@@ -218,4 +241,8 @@ func (ps *ProxyUserService) GetUsers(ud UserProfile, users *[]*UserProfile) erro
 
 func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
 	return ps.Client.Call("UsersV1.AddIndex", indexes, reply)
+}
+
+func (ps *ProxyUserService) GetIndexes(in string, reply *[]string) error {
+	return ps.Client.Call("UsersV1.AddIndex", in, reply)
 }

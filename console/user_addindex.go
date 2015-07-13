@@ -31,7 +31,7 @@ func init() {
 type CmdUserAddIndex struct {
 	name      string
 	rpcMethod string
-	rpcParams *[]string
+	rpcParams *StringSliceWrapper
 	*CommandExecuter
 }
 
@@ -43,9 +43,9 @@ func (self *CmdUserAddIndex) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUserAddIndex) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
-		self.rpcParams = &[]string{}
+func (self *CmdUserAddIndex) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
+		self.rpcParams = &StringSliceWrapper{}
 	}
 	if ptr {
 		return self.rpcParams

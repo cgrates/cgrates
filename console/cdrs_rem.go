@@ -45,8 +45,8 @@ func (self *CmdRemCdrs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemCdrs) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdRemCdrs) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrRemCdrs{}
 	}
 	if ptr {

@@ -45,8 +45,8 @@ func (self *CmdGetCacheStats) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCacheStats) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdGetCacheStats) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrCacheStats{}
 	}
 	if ptr {

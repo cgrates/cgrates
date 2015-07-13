@@ -46,8 +46,8 @@ func (self *CmdGetUsers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetUsers) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdGetUsers) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.UserProfile{}
 	}
 	if ptr {

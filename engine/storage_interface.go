@@ -73,6 +73,7 @@ type RatingStorage interface {
 	GetAccountAliases(string, string, bool) ([]string, error)
 	SetUser(*UserProfile) error
 	GetUser(string) (*UserProfile, error)
+	GetUsers() ([]*UserProfile, error)
 	RemoveUser(string) error
 }
 

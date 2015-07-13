@@ -51,8 +51,8 @@ func (self *CmdGetDataCost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDataCost) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdGetDataCost) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetDataCost{Direction: utils.OUT}
 	}
 	if ptr {

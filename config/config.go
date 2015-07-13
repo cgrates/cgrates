@@ -208,8 +208,7 @@ type CGRConfig struct {
 	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
 	CDRStatsEnabled      bool                 // Enable CDR Stats service
 	CDRStatsSaveInterval time.Duration        // Save interval duration
-	PubSubEnabled        bool
-	HistoryEnabled       bool
+	//CDRStatConfig        *CdrStatsConfig // Active cdr stats configuration instances, platform level
 	CdreProfiles         map[string]*CdreConfig
 	CdrcProfiles         map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
 	SmFsConfig           *SmFsConfig                       // SM-FreeSWITCH configuration

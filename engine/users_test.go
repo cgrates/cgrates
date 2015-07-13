@@ -17,7 +17,7 @@ var testMap = UserMap{
 }
 
 func TestUsersAdd(t *testing.T) {
-	tm := NewUserMap(ratingStorage)
+	tm := newUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -33,12 +33,12 @@ func TestUsersAdd(t *testing.T) {
 		p["t"] != "v" ||
 		len(tm.table) != 1 ||
 		len(p) != 1 {
-		t.Error("Error setting user: ", tm)
+		t.Error("Error setting user: ", tm, len(tm.table))
 	}
 }
 
 func TestUsersUpdate(t *testing.T) {
-	tm := NewUserMap(ratingStorage)
+	tm := newUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -69,7 +69,7 @@ func TestUsersUpdate(t *testing.T) {
 }
 
 func TestUsersUpdateNotFound(t *testing.T) {
-	tm := NewUserMap(ratingStorage)
+	tm := newUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -80,14 +80,14 @@ func TestUsersUpdateNotFound(t *testing.T) {
 	}
 	tm.SetUser(up, &r)
 	up.UserName = "test1"
-	err := tm.UpdateUser(up, &r)
+	err = tm.UpdateUser(up, &r)
 	if err != utils.ErrNotFound {
 		t.Error("Error detecting user not found on update: ", err)
 	}
 }
 
 func TestUsersUpdateInit(t *testing.T) {
-	tm := NewUserMap(ratingStorage)
+	tm := newUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -113,7 +113,7 @@ func TestUsersUpdateInit(t *testing.T) {
 }
 
 func TestUsersRemove(t *testing.T) {
-	tm := NewUserMap(ratingStorage)
+	tm := newUserMap(ratingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",

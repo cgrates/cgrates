@@ -716,6 +716,23 @@ func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
 	return
 }
 
+func (rs *RedisStorage) GetUsers() (result []*UserProfile, err error) {
+	keys, err := rs.db.Keys(utils.USERS_PREFIX + "*")
+	if err != nil {
+		return nil, err
+	}
+	for _, key := range keys {
+		if values, err := rs.db.Get(key); err == nil {
+			up := &UserProfile{}
+			err = rs.ms.Unmarshal(values, up)
+			result = append(result, up)
+		} else {
+			return nil, utils.ErrNotFound
+		}
+	}
+	return
+}
+
 func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
 	result, err := rs.ms.Marshal(sub)
 	rs.db.Set(utils.PUBSUB_SUBSCRIBERS_PREFIX+key, result)

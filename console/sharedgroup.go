@@ -45,8 +45,8 @@ func (self *CmdGetSharedGroup) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetSharedGroup) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdGetSharedGroup) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
 	if ptr {

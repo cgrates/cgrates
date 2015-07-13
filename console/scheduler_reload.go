@@ -43,8 +43,8 @@ func (self *CmdReloadScheduler) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdReloadScheduler) RpcParams(ptr bool) interface{} {
-	if self.rpcParams == nil {
+func (self *CmdReloadScheduler) RpcParams(ptr, reset bool) interface{} {
+	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
 	if ptr {
