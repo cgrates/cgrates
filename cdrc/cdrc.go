@@ -165,7 +165,7 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrS
 	cdrc := &Cdrc{cdrsAddress: cdrcCfg.Cdrs, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer, exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
-		guard: engine.NewGuardianLock()}
+		partialRecords: make(map[string]map[string]*PartialFlatstoreRecord), guard: engine.NewGuardianLock()}
 	var processCsvFile struct{}
 	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
 		cdrc.maxOpenFiles <- processCsvFile // Empty initiate so we do not need to wait later when we pop
@@ -349,7 +349,6 @@ func (self *Cdrc) processPartialRecord(record []string, fileName string) ([]stri
 		return nil, err
 	}
 	doneCaching, _ := self.guard.Guard(func() (interface{}, error) { // Lock caching on fileName
-		// ToDo: schedule dumping of the .unpaired files
 		if fileMp, hasFile := self.partialRecords[fileName]; !hasFile {
 			self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.AccId: pr}
 			if self.partialRecordCache != 0 { // Schedule expiry/dump of the just created entry in cache
