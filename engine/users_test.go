@@ -424,3 +424,80 @@ func TestUsersGetMissingIdTwoINdex(t *testing.T) {
 		t.Error("error getting users: ", results)
 	}
 }
+
+func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
+	tm := newUserMap(ratingStorage)
+	var r string
+	tm.AddIndex([]string{"t"}, &r)
+	if len(tm.index) != 0 {
+		t.Error("error adding indexes: ", tm.index)
+	}
+	tm.SetUser(UserProfile{
+		Tenant:   "test",
+		UserName: "user",
+		Profile: map[string]string{
+			"t": "v",
+		},
+	}, &r)
+	if len(tm.index) != 1 || !tm.index["t:v"]["test:user"] {
+		t.Error("error adding indexes: ", tm.index)
+	}
+	tm.SetUser(UserProfile{
+		Tenant:   "test",
+		UserName: "best",
+		Profile: map[string]string{
+			"t": "v",
+		},
+	}, &r)
+	if len(tm.index) != 1 ||
+		!tm.index["t:v"]["test:user"] ||
+		!tm.index["t:v"]["test:best"] {
+		t.Error("error adding indexes: ", tm.index)
+	}
+	tm.UpdateUser(UserProfile{
+		Tenant:   "test",
+		UserName: "best",
+		Profile: map[string]string{
+			"t": "v1",
+		},
+	}, &r)
+	if len(tm.index) != 2 ||
+		!tm.index["t:v"]["test:user"] ||
+		!tm.index["t:v1"]["test:best"] {
+		t.Error("error adding indexes: ", tm.index)
+	}
+	tm.UpdateUser(UserProfile{
+		Tenant:   "test",
+		UserName: "best",
+		Profile: map[string]string{
+			"t": "v",
+		},
+	}, &r)
+	if len(tm.index) != 1 ||
+		!tm.index["t:v"]["test:user"] ||
+		!tm.index["t:v"]["test:best"] {
+		t.Error("error adding indexes: ", tm.index)
+	}
+	tm.RemoveUser(UserProfile{
+		Tenant:   "test",
+		UserName: "best",
+		Profile: map[string]string{
+			"t": "v",
+		},
+	}, &r)
+	if len(tm.index) != 1 ||
+		!tm.index["t:v"]["test:user"] ||
+		tm.index["t:v"]["test:best"] {
+		t.Error("error adding indexes: ", tm.index)
+	}
+	tm.RemoveUser(UserProfile{
+		Tenant:   "test",
+		UserName: "user",
+		Profile: map[string]string{
+			"t": "v",
+		},
+	}, &r)
+	if len(tm.index) != 0 {
+		t.Error("error adding indexes: ", tm.index)
+	}
+}

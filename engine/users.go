@@ -256,7 +256,6 @@ func (um *UserMap) deleteIndex(up *UserProfile) {
 			}
 			continue
 		}
-
 		for k, v := range up.Profile {
 			if k == index && v != "" {
 				indexKey := utils.ConcatenatedKey(k, v)
