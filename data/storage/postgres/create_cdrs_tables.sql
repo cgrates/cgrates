@@ -63,7 +63,7 @@ CREATE TABLE cost_details (
   subject VARCHAR(128) NOT NULL,
   destination VARCHAR(128) NOT NULL,
   cost NUMERIC(20,4) NOT NULL,
-  timespans text,
+  timespans jsonb,
   cost_source VARCHAR(64) NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
