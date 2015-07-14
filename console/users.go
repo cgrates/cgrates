@@ -58,6 +58,6 @@ func (self *CmdGetUsers) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetUsers) RpcResult() interface{} {
-	s := []*engine.UserProfile{}
+	s := engine.UserProfiles{}
 	return &s
 }

@@ -149,9 +149,9 @@ func TestUsersGetFull(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 1 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -164,9 +164,9 @@ func TestUsersGetTenant(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 1 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -179,9 +179,9 @@ func TestUsersGetUserName(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 1 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -194,9 +194,9 @@ func TestUsersGetNotFoundProfile(t *testing.T) {
 			"o": "p",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -208,9 +208,9 @@ func TestUsersGetMissingTenant(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 2 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -222,9 +222,9 @@ func TestUsersGetMissingUserName(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 2 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -235,7 +235,7 @@ func TestUsersGetMissingId(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
 	if len(results) != 4 {
 		t.Error("error getting users: ", results)
@@ -249,10 +249,27 @@ func TestUsersGetMissingIdTwo(t *testing.T) {
 			"x": "y",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 1 {
+	if len(results) != 4 {
 		t.Error("error getting users: ", results)
+	}
+}
+
+func TestUsersGetMissingIdTwoSort(t *testing.T) {
+	up := UserProfile{
+		Profile: map[string]string{
+			"t": "v",
+			"x": "y",
+		},
+	}
+	results := UserProfiles{}
+	testMap.GetUsers(up, &results)
+	if len(results) != 4 {
+		t.Error("error getting users: ", results)
+	}
+	if results[0].GetId() != "test1:user1" {
+		t.Errorf("Error sorting profiles: %+v", results[0])
 	}
 }
 
@@ -298,9 +315,9 @@ func TestUsersGetFullindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 1 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -316,9 +333,9 @@ func TestUsersGetTenantindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 1 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -334,9 +351,9 @@ func TestUsersGetUserNameindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 1 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -352,9 +369,9 @@ func TestUsersGetNotFoundProfileindex(t *testing.T) {
 			"o": "p",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -369,9 +386,9 @@ func TestUsersGetMissingTenantindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 2 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -386,9 +403,9 @@ func TestUsersGetMissingUserNameindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 2 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -402,7 +419,7 @@ func TestUsersGetMissingIdindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
 	if len(results) != 4 {
 		t.Error("error getting users: ", results)
@@ -419,9 +436,9 @@ func TestUsersGetMissingIdTwoINdex(t *testing.T) {
 			"x": "y",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 1 {
+	if len(results) != 4 {
 		t.Error("error getting users: ", results)
 	}
 }
