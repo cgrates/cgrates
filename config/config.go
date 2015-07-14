@@ -529,8 +529,8 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnGeneralCfg.Rounding_decimals != nil {
 			self.RoundingDecimals = *jsnGeneralCfg.Rounding_decimals
 		}
-		if jsnGeneralCfg.Http_skip_tls_veify != nil {
-			self.HttpSkipTlsVerify = *jsnGeneralCfg.Http_skip_tls_veify
+		if jsnGeneralCfg.Http_skip_tls_verify != nil {
+			self.HttpSkipTlsVerify = *jsnGeneralCfg.Http_skip_tls_verify
 		}
 		if jsnGeneralCfg.Tpexport_dir != nil {
 			self.TpExportPath = *jsnGeneralCfg.Tpexport_dir

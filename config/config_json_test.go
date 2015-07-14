@@ -38,16 +38,16 @@ func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
 
 func TestDfGeneralJsonCfg(t *testing.T) {
 	eCfg := &GeneralJsonCfg{
-		Http_skip_tls_veify: utils.BoolPointer(false),
-		Rounding_decimals:   utils.IntPointer(10),
-		Dbdata_encoding:     utils.StringPointer("msgpack"),
-		Tpexport_dir:        utils.StringPointer("/var/log/cgrates/tpe"),
-		Default_reqtype:     utils.StringPointer(utils.META_RATED),
-		Default_category:    utils.StringPointer("call"),
-		Default_tenant:      utils.StringPointer("cgrates.org"),
-		Default_subject:     utils.StringPointer("cgrates"),
-		Connect_attempts:    utils.IntPointer(3),
-		Reconnects:          utils.IntPointer(-1)}
+		Http_skip_tls_verify: utils.BoolPointer(false),
+		Rounding_decimals:    utils.IntPointer(10),
+		Dbdata_encoding:      utils.StringPointer("msgpack"),
+		Tpexport_dir:         utils.StringPointer("/var/log/cgrates/tpe"),
+		Default_reqtype:      utils.StringPointer(utils.META_RATED),
+		Default_category:     utils.StringPointer("call"),
+		Default_tenant:       utils.StringPointer("cgrates.org"),
+		Default_subject:      utils.StringPointer("cgrates"),
+		Connect_attempts:     utils.IntPointer(3),
+		Reconnects:           utils.IntPointer(-1)}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
@@ -299,6 +299,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Failed_calls_prefix:        utils.StringPointer("missed_calls"),
 			Cdr_source_id:              utils.StringPointer("freeswitch_csv"),
 			Cdr_filter:                 utils.StringPointer(""),
+			Partial_record_cache:       utils.StringPointer("10s"),
 			Cdr_fields:                 &cdrFields,
 		},
 	}

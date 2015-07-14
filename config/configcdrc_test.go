@@ -21,6 +21,7 @@ package config
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -47,6 +48,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 			FailedCallsPrefix:       "missed_calls",
 			CdrSourceId:             "freeswitch_csv",
 			CdrFilter:               utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
+			PartialRecordCache:      time.Duration(10) * time.Second,
 			CdrFields: []*CfgCdrField{
 				&CfgCdrField{Tag: "tor", Type: "cdrfield", CdrFieldId: "tor", Value: utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP),
 					FieldFilter: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP), Width: 0, Strip: "", Padding: "", Layout: "", Mandatory: true},

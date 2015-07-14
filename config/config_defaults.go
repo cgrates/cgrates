@@ -28,7 +28,7 @@ const CGRATES_CFG_JSON = `
 // This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
-	"http_skip_tls_veify": false,			// if enabled Http Client will accept any TLS certificate
+	"http_skip_tls_verify": false,			// if enabled Http Client will accept any TLS certificate
 	"rounding_decimals": 10,				// system level precision for floats
 	"dbdata_encoding": "msgpack",			// encoding used to store object data in strings: <msgpack|json>
 	"tpexport_dir": "/var/log/cgrates/tpe",	// path towards export folder for offline Tariff Plans
@@ -90,7 +90,7 @@ const CGRATES_CFG_JSON = `
 	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
 	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality: <""|internal|x.y.z.y:1234>
     "historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
-    "pubusubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
+    "pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
     "users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
 },
 

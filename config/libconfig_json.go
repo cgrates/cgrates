@@ -20,16 +20,16 @@ package config
 
 // General config section
 type GeneralJsonCfg struct {
-	Http_skip_tls_veify *bool
-	Rounding_decimals   *int
-	Dbdata_encoding     *string
-	Tpexport_dir        *string
-	Default_reqtype     *string
-	Default_category    *string
-	Default_tenant      *string
-	Default_subject     *string
-	Reconnects          *int
-	Connect_attempts    *int
+	Http_skip_tls_verify *bool
+	Rounding_decimals    *int
+	Dbdata_encoding      *string
+	Tpexport_dir         *string
+	Default_reqtype      *string
+	Default_category     *string
+	Default_tenant       *string
+	Default_subject      *string
+	Reconnects           *int
+	Connect_attempts     *int
 }
 
 // Listen config section
