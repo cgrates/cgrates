@@ -85,6 +85,11 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 			return err
 		}
 	}
+	if jsnCfg.Partial_record_cache != nil {
+		if self.PartialRecordCache, err = utils.ParseDurationWithSecs(*jsnCfg.Partial_record_cache); err != nil {
+			return err
+		}
+	}
 	if jsnCfg.Cdr_fields != nil {
 		if self.CdrFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Cdr_fields); err != nil {
 			return err

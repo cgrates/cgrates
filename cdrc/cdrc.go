@@ -338,7 +338,7 @@ func (self *Cdrc) processCsvFile(filePath string) error {
 	return nil
 }
 
-// Processes a single partial record for flatstore CDRs, in case of failed calls it will emulate the BYE by copying the INVITE
+// Processes a single partial record for flatstore CDRs
 func (self *Cdrc) processPartialRecord(record []string, fileName string) ([]string, error) {
 	if strings.HasPrefix(fileName, self.failedCallsPrefix) { // Use the first index since they should be the same in all configs
 		record = append(record, "0") // Append duration 0 for failed calls flatstore CDR and do not process it further
@@ -348,45 +348,76 @@ func (self *Cdrc) processPartialRecord(record []string, fileName string) ([]stri
 	if err != nil {
 		return nil, err
 	}
-	doneCaching, _ := self.guard.Guard(func() (interface{}, error) { // Lock caching on fileName
-		if fileMp, hasFile := self.partialRecords[fileName]; !hasFile {
-			self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.AccId: pr}
-			if self.partialRecordCache != 0 { // Schedule expiry/dump of the just created entry in cache
-				go func() {
-					time.Sleep(self.partialRecordCache)
-					self.dumpUnpairedRecords(fileName)
-				}()
-			}
-			return true, nil
-		} else if _, hasAccId := fileMp[pr.AccId]; !hasAccId {
-			self.partialRecords[fileName][pr.AccId] = pr
-			return true, nil
+	// Retrieve and complete the record from cache
+	var cachedFilename string
+	var cachedPartial *PartialFlatstoreRecord
+	cachedFNames := []string{fileName} // Higher probability to match as firstFileName
+	for fName := range self.partialRecords {
+		if fName != fileName {
+			cachedFNames = append(cachedFNames, fName)
 		}
-		return nil, nil // No caching done
-	}, fileName)
-	if doneCaching != nil {
-		return nil, nil // Have cached the record, do not proceed with pairing
 	}
-	// The paired is already in cache, build up the final record
-	return pairToRecord(self.partialRecords[fileName][pr.AccId], pr)
+	for _, fName := range cachedFNames { // Need to lock them individually
+		self.guard.Guard(func() (interface{}, error) {
+			var hasPartial bool
+			if cachedPartial, hasPartial = self.partialRecords[fName][pr.AccId]; hasPartial {
+				cachedFilename = fName
+			}
+			return nil, nil
+		}, fName)
+		if cachedPartial != nil {
+			break
+		}
+	}
+
+	if cachedPartial == nil { // Not cached, do it here and stop processing
+		self.guard.Guard(func() (interface{}, error) {
+			if fileMp, hasFile := self.partialRecords[fileName]; !hasFile {
+				self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.AccId: pr}
+				if self.partialRecordCache != 0 { // Schedule expiry/dump of the just created entry in cache
+					go func() {
+						time.Sleep(self.partialRecordCache)
+						self.dumpUnpairedRecords(fileName)
+					}()
+				}
+			} else if _, hasAccId := fileMp[pr.AccId]; !hasAccId {
+				self.partialRecords[fileName][pr.AccId] = pr
+			}
+			return nil, nil
+		}, fileName)
+		return nil, nil
+	}
+
+	pairedRecord, err := pairToRecord(cachedPartial, pr)
+	if err != nil {
+		return nil, err
+	}
+	self.guard.Guard(func() (interface{}, error) {
+		delete(self.partialRecords[cachedFilename], pr.AccId) // Remove the record out of cache
+		return nil, nil
+	}, fileName)
+	return pairedRecord, nil
 }
 
 // Dumps the cache into a .unpaired file in the outdir and cleans cache after
 func (self *Cdrc) dumpUnpairedRecords(fileName string) error {
 	_, err := self.guard.Guard(func() (interface{}, error) {
-		unpairedFilePath := path.Join(self.cdrOutDir, fileName+UNPAIRED_SUFFIX)
-		fileOut, err := os.Create(unpairedFilePath)
-		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed creating %s, error: %s", unpairedFilePath, err.Error()))
-			return nil, err
-		}
-		csvWriter := csv.NewWriter(fileOut)
-		csvWriter.Comma = self.csvSep
-		for _, pr := range self.partialRecords[fileName] {
-			if err := csvWriter.Write(pr.Values); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing unpaired record %v to file: %s, error: %s", pr, unpairedFilePath, err.Error()))
+		if len(self.partialRecords[fileName]) != 0 { // Only write the file if there are records in the cache
+			unpairedFilePath := path.Join(self.cdrOutDir, fileName+UNPAIRED_SUFFIX)
+			fileOut, err := os.Create(unpairedFilePath)
+			if err != nil {
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed creating %s, error: %s", unpairedFilePath, err.Error()))
 				return nil, err
 			}
+			csvWriter := csv.NewWriter(fileOut)
+			csvWriter.Comma = self.csvSep
+			for _, pr := range self.partialRecords[fileName] {
+				if err := csvWriter.Write(pr.Values); err != nil {
+					engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing unpaired record %v to file: %s, error: %s", pr, unpairedFilePath, err.Error()))
+					return nil, err
+				}
+			}
+			csvWriter.Flush()
 		}
 		delete(self.partialRecords, fileName)
 		return nil, nil

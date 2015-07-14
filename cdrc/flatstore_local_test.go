@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -141,5 +142,20 @@ func TestFlatstoreLclProcessFiles(t *testing.T) {
 		if err := os.Rename(path.Join("/tmp", fileName), path.Join(flatstoreCdrcCfg.CdrInDir, fileName)); err != nil {
 			t.Fatal(err)
 		}
+	}
+	time.Sleep(time.Duration(2) * time.Second) // Give time for processing to happen and the .unparired file to be written
+	filesInDir, _ := ioutil.ReadDir(flatstoreCdrcCfg.CdrInDir)
+	if len(filesInDir) != 0 {
+		t.Errorf("Files in cdrcInDir: %+v", filesInDir)
+	}
+	filesOutDir, _ := ioutil.ReadDir(flatstoreCdrcCfg.CdrOutDir)
+	if len(filesOutDir) != 5 {
+		t.Errorf("In CdrcOutDir, expecting 5 files, got: %d", len(filesOutDir))
+	}
+	ePartContent := "INVITE|2daec40c|548625ac|dd0c4c617a9919d29a6175cdff223a9e@0:0:0:0:0:0:0:0|200|OK|1436454408|*prepaid|1001|1002||3401:2069362475\n"
+	if partContent, err := ioutil.ReadFile(path.Join(flatstoreCdrcCfg.CdrOutDir, "acc_3.log.unpaired")); err != nil {
+		t.Error(err)
+	} else if ePartContent != string(partContent) {
+		t.Errorf("Expecting: %s, received: %s", ePartContent, string(partContent))
 	}
 }
