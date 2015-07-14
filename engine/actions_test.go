@@ -1064,10 +1064,30 @@ func TestActionMakeNegative(t *testing.T) {
 	}
 }
 
+func TestRemoveAction(t *testing.T) {
+	if _, err := accountingStorage.GetAccount("*out:cgrates.org:remo"); err != nil {
+		t.Errorf("account to be removed not found: %v", err)
+	}
+	a := &Action{
+		ActionType: REMOVE_ACCOUNT,
+	}
+
+	at := &ActionPlan{
+		AccountIds: []string{"*out:cgrates.org:remo"},
+		actions:    Actions{a},
+	}
+
+	at.Execute()
+	afterUb, err := accountingStorage.GetAccount("*out:cgrates.org:remo")
+	if err != utils.ErrNotFound || afterUb != nil {
+		t.Error("error removing account: ", err)
+	}
+}
+
 func TestTopupAction(t *testing.T) {
 	initialUb, _ := accountingStorage.GetAccount("*out:vdf:minu")
 	a := &Action{
-		ActionType:  "*topup",
+		ActionType:  TOPUP,
 		BalanceType: utils.MONETARY,
 		Direction:   OUTBOUND,
 		Balance:     &Balance{Value: 25, DestinationIds: "RET", Weight: 20},
@@ -1090,7 +1110,7 @@ func TestTopupAction(t *testing.T) {
 func TestTopupActionLoaded(t *testing.T) {
 	initialUb, _ := accountingStorage.GetAccount("*out:vdf:minitsboy")
 	a := &Action{
-		ActionType:  "*topup",
+		ActionType:  TOPUP,
 		BalanceType: utils.MONETARY,
 		Direction:   OUTBOUND,
 		Balance:     &Balance{Value: 25, DestinationIds: "RET", Weight: 20},

@@ -245,9 +245,25 @@ func (at *ActionPlan) Execute() (err error) {
 		return
 	}
 	for _, a := range aac {
-		if expDate, parseErr := utils.ParseDate(a.ExpirationString); a.Balance.ExpirationDate.IsZero() && parseErr == nil && !expDate.IsZero() {
+		if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
 			a.Balance.ExpirationDate = expDate
 		}
+		// handle remove action
+		if a.ActionType == REMOVE_ACCOUNT {
+			for _, accId := range at.AccountIds {
+				_, err := Guardian.Guard(func() (interface{}, error) {
+					if err := accountingStorage.RemoveAccount(accId); err != nil {
+						Logger.Warning(fmt.Sprintf("Could not remove account Id: %s: %d", accId, err))
+					}
+					return 0, nil
+				}, accId)
+				if err != nil {
+					Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
+				}
+			}
+			continue // do not go to getActionFunc
+		}
+
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			// do not allow the action timing to be rescheduled
@@ -255,21 +271,21 @@ func (at *ActionPlan) Execute() (err error) {
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
-		for _, ubId := range at.AccountIds {
+		for _, accId := range at.AccountIds {
 			_, err := Guardian.Guard(func() (interface{}, error) {
-				ub, err := accountingStorage.GetAccount(ubId)
+				ub, err := accountingStorage.GetAccount(accId)
 				if err != nil {
-					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
+					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", accId))
 					return 0, err
 				} else if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
-					return 0, fmt.Errorf("Account %s is disabled", ubId)
+					return 0, fmt.Errorf("Account %s is disabled", accId)
 				}
 				//Logger.Info(fmt.Sprintf("Executing %v on %+v", a.ActionType, ub))
 				err = actionFunction(ub, nil, a, aac)
 				//Logger.Info(fmt.Sprintf("After execute, account: %+v", ub))
 				accountingStorage.SetAccount(ub)
 				return 0, nil
-			}, ubId)
+			}, accId)
 			if err != nil {
 				Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
 			}

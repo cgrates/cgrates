@@ -210,6 +210,25 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	return nil
 }
 
+func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) error {
+	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	accountId := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+		if err := self.AccountDb.RemoveAccount(accountId); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	}, accountId)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+
+	*reply = OK
+	return nil
+}
+
 func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Account) error {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenanat")

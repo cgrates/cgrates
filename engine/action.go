@@ -55,6 +55,7 @@ const (
 	ALLOW_NEGATIVE  = "*allow_negative"
 	DENY_NEGATIVE   = "*deny_negative"
 	RESET_ACCOUNT   = "*reset_account"
+	REMOVE_ACCOUNT  = "*remove_account"
 	TOPUP_RESET     = "*topup_reset"
 	TOPUP           = "*topup"
 	DEBIT_RESET     = "*debit_reset"

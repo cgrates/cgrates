@@ -1074,6 +1074,12 @@ type AttrSetAccount struct {
 	AllowNegative bool
 }
 
+type AttrRemoveAccount struct {
+	Tenant    string
+	Direction string
+	Account   string
+}
+
 type AttrGetSMASessions struct {
 	SessionManagerIndex int // Index of the session manager queried, defaults to first in the list
 }
