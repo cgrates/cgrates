@@ -42,14 +42,11 @@ func (self *CmdCdrStatsQueueIds) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCdrStatsQueueIds) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdCdrStatsQueueIds) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdCdrStatsQueueIds) PostprocessRpcParams() error {

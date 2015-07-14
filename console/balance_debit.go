@@ -48,14 +48,11 @@ func (self *CmdDebitBalance) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdDebitBalance) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdDebitBalance) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdDebitBalance) PostprocessRpcParams() error {

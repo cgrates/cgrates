@@ -45,14 +45,11 @@ func (self *CmdExportCdrs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdExportCdrs) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdExportCdrs) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrExportCdrsToFile{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdExportCdrs) PostprocessRpcParams() error {

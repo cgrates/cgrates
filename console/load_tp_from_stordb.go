@@ -46,14 +46,11 @@ func (self *LoadTpFromStorDb) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *LoadTpFromStorDb) RpcParams(ptr, reset bool) interface{} {
+func (self *LoadTpFromStorDb) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrLoadTpFromStorDb{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *LoadTpFromStorDb) PostprocessRpcParams() error {

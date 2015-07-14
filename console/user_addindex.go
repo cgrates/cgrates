@@ -43,14 +43,11 @@ func (self *CmdUserAddIndex) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUserAddIndex) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdUserAddIndex) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringSliceWrapper{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdUserAddIndex) PostprocessRpcParams() error {

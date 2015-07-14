@@ -45,14 +45,11 @@ func (self *CmdCdrStatsMetrics) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCdrStatsMetrics) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdCdrStatsMetrics) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrGetMetrics{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdCdrStatsMetrics) PostprocessRpcParams() error {

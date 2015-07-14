@@ -44,14 +44,11 @@ func (self *CmdUnsubscribe) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUnsubscribe) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdUnsubscribe) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.SubscribeInfo{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdUnsubscribe) PostprocessRpcParams() error {

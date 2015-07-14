@@ -49,14 +49,11 @@ func (self *CmdGetAccounts) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccounts) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdGetAccounts) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrGetAccounts{Direction: "*out"}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdGetAccounts) PostprocessRpcParams() error {

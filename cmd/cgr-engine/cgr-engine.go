@@ -541,7 +541,7 @@ func main() {
 				return
 			}
 		}
-		engine.SetUserService(users)
+		engine.SetUserService(userServer)
 	}()
 	wg.Wait()
 

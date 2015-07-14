@@ -45,14 +45,11 @@ func (self *CmdUpdateUser) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUpdateUser) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdUpdateUser) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.UserProfile{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdUpdateUser) PostprocessRpcParams() error {

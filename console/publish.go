@@ -44,14 +44,11 @@ func (self *CmdPublish) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdPublish) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdPublish) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.PublishInfo{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdPublish) PostprocessRpcParams() error {

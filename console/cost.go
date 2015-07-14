@@ -47,14 +47,11 @@ func (self *CmdGetCost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCost) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdGetCost) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdGetCost) PostprocessRpcParams() error {

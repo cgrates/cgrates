@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"reflect"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -317,4 +318,28 @@ func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
 
 func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) error {
 	return ps.Client.Call("UsersV1.AddIndex", in, reply)
+}
+
+func ToMapStringString(in interface{}) (map[string]string, error) {
+	out := make(map[string]string)
+
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+		in = v.Interface()
+	}
+	typ := reflect.TypeOf(in)
+	for i := 0; i < v.NumField(); i++ {
+		// gets us a StructField
+		field := typ.Field(i)
+		typField := v.Field(i)
+		switch typField.Kind() {
+		case reflect.String:
+			val := v.Field(i).String()
+			if val != "" {
+				out[field.Name] = val
+			}
+		}
+	}
+	return out, nil
 }

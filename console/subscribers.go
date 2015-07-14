@@ -44,14 +44,11 @@ func (self *CmdShowSubscribers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdShowSubscribers) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdShowSubscribers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdShowSubscribers) PostprocessRpcParams() error {

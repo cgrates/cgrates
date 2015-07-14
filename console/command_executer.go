@@ -40,13 +40,13 @@ type CommandExecuter struct {
 }
 
 func (ce *CommandExecuter) Usage() string {
-	jsn, _ := json.Marshal(ce.command.RpcParams(true, true))
+	jsn, _ := json.Marshal(ce.command.RpcParams(true))
 	return fmt.Sprintf("\n\tUsage: %s %s \n", ce.command.Name(), FromJSON(jsn, ce.command.ClientArgs()))
 }
 
 // Parses command line args and builds CmdBalance value
 func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
-	params := ce.command.RpcParams(true, true)
+	params := ce.command.RpcParams(true)
 	if err := json.Unmarshal(ToJSON(args), params); err != nil {
 		return err
 	}
@@ -59,6 +59,10 @@ func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
 
 func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 	val := reflect.ValueOf(iface)
+	if val.Kind() == reflect.Ptr {
+		val = val.Elem()
+		iface = val.Interface()
+	}
 	typ := reflect.TypeOf(iface)
 	for i := 0; i < typ.NumField(); i++ {
 		valField := val.Field(i)
@@ -74,7 +78,7 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 }
 
 func (ce *CommandExecuter) ClientArgs() (args []string) {
-	return ce.clientArgs(ce.command.RpcParams(false, true))
+	return ce.clientArgs(ce.command.RpcParams(true))
 }
 
 // To be overwritten by commands that do not need a rpc call
