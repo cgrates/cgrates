@@ -61,7 +61,7 @@ func NonemptyStructFields(s interface{}) map[string]interface{} {
 }
 
 // Converts a struct to map
-func StrucToMap(s interface{}) map[string]interface{} {
+/*func StrucToMap(s interface{}) map[string]interface{} {
 	mp := make(map[string]interface{})
 	for i := 0; i < reflect.ValueOf(s).Elem().NumField(); i++ {
 		fld := reflect.ValueOf(s).Elem().Field(i)
@@ -75,6 +75,46 @@ func StrucToMap(s interface{}) map[string]interface{} {
 		}
 	}
 	return mp
+}*/
+
+// Converts a struct to map[string]interface{}
+func ToMapMapStringInterface(in interface{}) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	typ := reflect.TypeOf(in)
+	for i := 0; i < v.NumField(); i++ {
+		out[typ.Field(i).Name] = v.Field(i).Interface()
+	}
+	return out, nil
+}
+
+// Converts a struct to map[string]string
+func ToMapStringInterface(in interface{}) (map[string]string, error) {
+	out := make(map[string]string)
+
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+		in = v.Interface()
+	}
+	typ := reflect.TypeOf(in)
+	for i := 0; i < v.NumField(); i++ {
+		// gets us a StructField
+		typField := typ.Field(i)
+		field := v.Field(i)
+		switch field.Kind() {
+		case reflect.String:
+			val := field.String()
+			if val != "" {
+				out[typField.Name] = val
+			}
+		}
+	}
+	return out, nil
 }
 
 // Update struct with map fields, returns not matching map keys, s is a struct to be updated
