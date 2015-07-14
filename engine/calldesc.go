@@ -68,7 +68,7 @@ var (
 	globalRoundingDecimals = 10
 	historyScribe          history.Scribe
 	pubSubServer           PublisherSubscriber
-	//historyScribe, _ = history.NewMockScribe()
+	userService            UserService
 )
 
 // Exported method to set the storage getter.
@@ -106,6 +106,10 @@ func SetHistoryScribe(scribe history.Scribe) {
 
 func SetPubSub(ps PublisherSubscriber) {
 	pubSubServer = ps
+}
+
+func SetUserService(us UserService) {
+	userService = us
 }
 
 func Publish(event CgrEvent) {

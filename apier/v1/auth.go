@@ -28,6 +28,9 @@ import (
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float64) error {
+	if err := usageRecord.LoadUserProfile(); err != nil {
+		return err
+	}
 	if usageRecord.TOR == "" {
 		usageRecord.TOR = utils.VOICE
 	}

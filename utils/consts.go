@@ -83,6 +83,7 @@ const (
 	ROUNDING_DOWN              = "*down"
 	ANY                        = "*any"
 	ASAP                       = "*asap"
+	USERS                      = "*users"
 	COMMENT_CHAR               = '#'
 	CSV_SEP                    = ','
 	FALLBACK_SEP               = ';'

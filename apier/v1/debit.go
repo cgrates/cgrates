@@ -27,6 +27,10 @@ func (self *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) e
 	if missing := utils.MissingStructFields(&usageRecord, []string{"Account", "Destination", "Usage"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	if err := usageRecord.LoadUserProfile(); err != nil {
+		*reply = err.Error()
+		return err
+	}
 	if usageRecord.TOR == "" {
 		usageRecord.TOR = utils.VOICE
 	}
