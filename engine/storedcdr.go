@@ -20,7 +20,6 @@ package engine
 
 import (
 	"encoding/json"
-	"log"
 	"math"
 	"net/url"
 	"strconv"
@@ -681,54 +680,4 @@ func (self *UsageRecord) AsCallDescriptor() (*CallDescriptor, error) {
 		TimeStart:   startTime,
 		TimeEnd:     startTime.Add(usage),
 	}, nil
-}
-
-func (self *UsageRecord) LoadUserProfile() error {
-	up := &UserProfile{
-		Tenant: self.Tenant,
-		Profile: map[string]string{
-			"TOR":         self.TOR,
-			"ReqType":     self.ReqType,
-			"Direction":   self.Direction,
-			"Tenant":      self.Tenant,
-			"Category":    self.Category,
-			"Account":     self.Account,
-			"Subject":     self.SetupTime,
-			"Destination": self.Destination,
-			"SetupTime":   self.SetupTime,
-			"AnswerTime":  self.AnswerTime,
-			"Usage":       self.Usage,
-		},
-	}
-	// clean *user fields
-	if up.Tenant == utils.USERS {
-		up.Tenant = ""
-	}
-	for key, value := range up.Profile {
-		if value == utils.USERS {
-			delete(up.Profile, key)
-		}
-	}
-	log.Print("UP: ", up.Profile)
-	ups := make([]*UserProfile, 0)
-	if err := userService.GetUsers(*up, &ups); err != nil {
-		return err
-	}
-	if len(ups) > 0 {
-		up = ups[0] // take the first matched user profile
-		self.TOR = up.Profile["TOR"]
-		self.ReqType = up.Profile["ReqType"]
-		self.Direction = up.Profile["Direction"]
-		self.Tenant = up.Tenant
-		self.Category = up.Profile["Category"]
-		self.Account = up.Profile["Account"]
-		self.Subject = up.Profile["Subject"]
-		self.Destination = up.Profile["Destination"]
-		self.SetupTime = up.Profile["SetupTime"]
-		self.AnswerTime = up.Profile["AnswerTime"]
-		self.Usage = up.Profile["Usage"]
-	} else {
-		return utils.ErrNotFound
-	}
-	return nil
 }

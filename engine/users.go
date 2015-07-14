@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"reflect"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -320,26 +319,39 @@ func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) er
 	return ps.Client.Call("UsersV1.AddIndex", in, reply)
 }
 
-func ToMapStringString(in interface{}) (map[string]string, error) {
-	out := make(map[string]string)
-
-	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-		in = v.Interface()
+func LoadUserProfile(in interface{}) (interface{}, error) {
+	m, err := utils.ToMapStringString(in)
+	if err != nil {
+		return nil, err
 	}
-	typ := reflect.TypeOf(in)
-	for i := 0; i < v.NumField(); i++ {
-		// gets us a StructField
-		field := typ.Field(i)
-		typField := v.Field(i)
-		switch typField.Kind() {
-		case reflect.String:
-			val := v.Field(i).String()
-			if val != "" {
-				out[field.Name] = val
-			}
+
+	up := &UserProfile{
+		Profile: make(map[string]string),
+	}
+	tenant := m["Tenant"]
+	if tenant != "" && tenant != utils.USERS {
+		up.Tenant = tenant
+	}
+	delete(m, "Tenant")
+
+	// clean empty and *user fields
+	for key, val := range m {
+		if val != "" && val != utils.USERS {
+			up.Profile[key] = val
 		}
 	}
-	return out, nil
+
+	//TODO: add extra fields
+
+	ups := make([]*UserProfile, 0)
+	if err := userService.GetUsers(*up, &ups); err != nil {
+		return nil, err
+	}
+	if len(ups) > 0 {
+		up = ups[0]
+		m := up.Profile
+		m["Tenant"] = up.Tenant
+		return utils.FromMapStringString(m, in)
+	}
+	return nil, utils.ErrNotFound
 }

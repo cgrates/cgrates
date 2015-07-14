@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -499,5 +500,53 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 	}, &r)
 	if len(tm.index) != 0 {
 		t.Error("error adding indexes: ", tm.index)
+	}
+}
+
+func TestUsersStoredCDRGetLoadUserProfile(t *testing.T) {
+	userService = &UserMap{
+		table: map[string]map[string]string{
+			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13"},
+		},
+		index: make(map[string]map[string]bool),
+	}
+
+	ur := &UsageRecord{
+		TOR:         utils.USERS,
+		ReqType:     utils.USERS,
+		Direction:   "*out",
+		Tenant:      "",
+		Category:    "call",
+		Account:     utils.USERS,
+		Subject:     utils.USERS,
+		Destination: utils.USERS,
+		SetupTime:   utils.USERS,
+		AnswerTime:  utils.USERS,
+		Usage:       "13",
+	}
+
+	out, err := LoadUserProfile(ur)
+	if err != nil {
+		t.Error("Error loading user profile: ", err)
+	}
+	expected := &UsageRecord{
+		TOR:         "04",
+		ReqType:     "4",
+		Direction:   "*out",
+		Tenant:      "test1",
+		Category:    "call",
+		Account:     "rif",
+		Subject:     "0726",
+		Destination: "+404",
+		SetupTime:   "s4",
+		AnswerTime:  "t4",
+		Usage:       "13",
+	}
+	*ur = out.(UsageRecord)
+	if !reflect.DeepEqual(ur, expected) {
+		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
 }

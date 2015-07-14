@@ -93,7 +93,7 @@ func ToMapMapStringInterface(in interface{}) (map[string]interface{}, error) {
 }
 
 // Converts a struct to map[string]string
-func ToMapStringInterface(in interface{}) (map[string]string, error) {
+func ToMapStringString(in interface{}) (map[string]string, error) {
 	out := make(map[string]string)
 
 	v := reflect.ValueOf(in)
@@ -108,13 +108,30 @@ func ToMapStringInterface(in interface{}) (map[string]string, error) {
 		field := v.Field(i)
 		switch field.Kind() {
 		case reflect.String:
-			val := field.String()
-			if val != "" {
-				out[typField.Name] = val
-			}
+			out[typField.Name] = field.String()
 		}
 	}
 	return out, nil
+}
+
+func FromMapStringString(m map[string]string, in interface{}) (interface{}, error) {
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+		in = v.Interface()
+	}
+	st := reflect.TypeOf(in)
+	elem := reflect.New(st).Elem()
+	for fieldName, fieldValue := range m {
+		field := elem.FieldByName(fieldName)
+		if field.IsValid() {
+
+			if field.Kind() == reflect.String {
+				field.SetString(fieldValue)
+			}
+		}
+	}
+	return elem.Interface(), nil
 }
 
 // Update struct with map fields, returns not matching map keys, s is a struct to be updated
