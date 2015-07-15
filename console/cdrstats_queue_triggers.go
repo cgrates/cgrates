@@ -44,14 +44,11 @@ func (self *CmdCdrStatsQueueTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdCdrStatsQueueTriggers) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdCdrStatsQueueTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdCdrStatsQueueTriggers) PostprocessRpcParams() error {

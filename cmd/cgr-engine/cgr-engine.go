@@ -541,7 +541,7 @@ func main() {
 				return
 			}
 		}
-		//engine.SetPubSub(users)
+		engine.SetUserService(userServer)
 	}()
 	wg.Wait()
 

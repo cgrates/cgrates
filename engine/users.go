@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -11,6 +12,25 @@ type UserProfile struct {
 	Tenant   string
 	UserName string
 	Profile  map[string]string
+	ponder   int
+}
+
+type UserProfiles []*UserProfile
+
+func (ups UserProfiles) Len() int {
+	return len(ups)
+}
+
+func (ups UserProfiles) Swap(i, j int) {
+	ups[i], ups[j] = ups[j], ups[i]
+}
+
+func (ups UserProfiles) Less(j, i int) bool { // get higher ponder in front
+	return ups[i].ponder < ups[j].ponder
+}
+
+func (ups UserProfiles) Sort() {
+	sort.Sort(ups)
 }
 
 func (ud *UserProfile) GetId() string {
@@ -31,7 +51,7 @@ type UserService interface {
 	SetUser(UserProfile, *string) error
 	RemoveUser(UserProfile, *string) error
 	UpdateUser(UserProfile, *string) error
-	GetUsers(UserProfile, *[]*UserProfile) error
+	GetUsers(UserProfile, *UserProfiles) error
 	AddIndex([]string, *string) error
 	GetIndexes(string, *map[string][]string) error
 }
@@ -123,7 +143,7 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 	return nil
 }
 
-func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
+func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
 	table := um.table // no index
 
 	indexUnionKeys := make(map[string]bool)
@@ -156,19 +176,33 @@ func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
 		}
 	}
 
-	var candidates []*UserProfile
+	var candidates UserProfiles
 	for key, values := range table {
-		if up.Tenant != "" && !strings.HasPrefix(key, up.Tenant+utils.CONCATENATED_KEY_SEP) {
+		ponder := 0
+		tableUP := &UserProfile{
+			Profile: values,
+		}
+		tableUP.SetId(key)
+		if up.Tenant != "" && tableUP.Tenant != "" && up.Tenant != tableUP.Tenant {
 			continue
 		}
-		if up.UserName != "" && !strings.HasSuffix(key, utils.CONCATENATED_KEY_SEP+up.UserName) {
+		if tableUP.Tenant != "" {
+			ponder += 1
+		}
+		if up.UserName != "" && tableUP.UserName != "" && up.UserName != tableUP.UserName {
 			continue
+		}
+		if tableUP.UserName != "" {
+			ponder += 1
 		}
 		valid := true
 		for k, v := range up.Profile {
-			if values[k] != v {
+			if tableUP.Profile[k] != "" && tableUP.Profile[k] != v {
 				valid = false
 				break
+			}
+			if tableUP.Profile[k] != "" {
+				ponder += 1
 			}
 		}
 		if !valid {
@@ -177,11 +211,13 @@ func (um *UserMap) GetUsers(up UserProfile, results *[]*UserProfile) error {
 		// all filters passed, add to candidates
 		nup := &UserProfile{Profile: make(map[string]string)}
 		nup.SetId(key)
-		for k, v := range values {
+		nup.ponder = ponder
+		for k, v := range tableUP.Profile {
 			nup.Profile[k] = v
 		}
 		candidates = append(candidates, nup)
 	}
+	candidates.Sort()
 	*results = candidates
 	return nil
 }
@@ -307,7 +343,7 @@ func (ps *ProxyUserService) UpdateUser(ud UserProfile, reply *string) error {
 	return ps.Client.Call("UsersV1.UpdateUser", ud, reply)
 }
 
-func (ps *ProxyUserService) GetUsers(ud UserProfile, users *[]*UserProfile) error {
+func (ps *ProxyUserService) GetUsers(ud UserProfile, users *UserProfiles) error {
 	return ps.Client.Call("UsersV1.GetUsers", ud, users)
 }
 
@@ -317,4 +353,51 @@ func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
 
 func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) error {
 	return ps.Client.Call("UsersV1.AddIndex", in, reply)
+}
+
+func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
+	m, err := utils.ToMapStringString(in)
+	if err != nil {
+		return nil, err
+	}
+
+	up := &UserProfile{
+		Profile: make(map[string]string),
+	}
+	tenant := m["Tenant"]
+	if tenant != "" && tenant != utils.USERS {
+		up.Tenant = tenant
+	}
+	delete(m, "Tenant")
+
+	// clean empty and *user fields
+	for key, val := range m {
+		if val != "" && val != utils.USERS {
+			up.Profile[key] = val
+		}
+	}
+
+	// add extra fields
+	if extraFields != "" {
+		extra, err := utils.GetMapExtraFields(in, extraFields)
+		if err != nil {
+			return nil, err
+		}
+		for key, val := range extra {
+			if val != "" {
+				up.Profile[key] = val
+			}
+		}
+	}
+	ups := UserProfiles{}
+	if err := userService.GetUsers(*up, &ups); err != nil {
+		return nil, err
+	}
+	if len(ups) > 0 {
+		up = ups[0]
+		m := up.Profile
+		m["Tenant"] = up.Tenant
+		return utils.FromMapStringString(m, in)
+	}
+	return nil, utils.ErrNotFound
 }

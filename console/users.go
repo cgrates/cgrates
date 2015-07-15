@@ -46,14 +46,11 @@ func (self *CmdGetUsers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetUsers) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdGetUsers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.UserProfile{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdGetUsers) PostprocessRpcParams() error {
@@ -61,6 +58,6 @@ func (self *CmdGetUsers) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetUsers) RpcResult() interface{} {
-	s := []*engine.UserProfile{}
+	s := engine.UserProfiles{}
 	return &s
 }

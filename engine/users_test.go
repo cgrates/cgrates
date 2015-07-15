@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -148,9 +149,9 @@ func TestUsersGetFull(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 1 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -163,9 +164,9 @@ func TestUsersGetTenant(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 1 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -178,9 +179,9 @@ func TestUsersGetUserName(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 1 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -193,9 +194,9 @@ func TestUsersGetNotFoundProfile(t *testing.T) {
 			"o": "p",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -207,9 +208,9 @@ func TestUsersGetMissingTenant(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 2 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -221,9 +222,9 @@ func TestUsersGetMissingUserName(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 2 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -234,7 +235,7 @@ func TestUsersGetMissingId(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
 	if len(results) != 4 {
 		t.Error("error getting users: ", results)
@@ -248,10 +249,27 @@ func TestUsersGetMissingIdTwo(t *testing.T) {
 			"x": "y",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 1 {
+	if len(results) != 4 {
 		t.Error("error getting users: ", results)
+	}
+}
+
+func TestUsersGetMissingIdTwoSort(t *testing.T) {
+	up := UserProfile{
+		Profile: map[string]string{
+			"t": "v",
+			"x": "y",
+		},
+	}
+	results := UserProfiles{}
+	testMap.GetUsers(up, &results)
+	if len(results) != 4 {
+		t.Error("error getting users: ", results)
+	}
+	if results[0].GetId() != "test1:user1" {
+		t.Errorf("Error sorting profiles: %+v", results[0])
 	}
 }
 
@@ -297,9 +315,9 @@ func TestUsersGetFullindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 1 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -315,9 +333,9 @@ func TestUsersGetTenantindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 1 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -333,9 +351,9 @@ func TestUsersGetUserNameindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 1 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -351,9 +369,9 @@ func TestUsersGetNotFoundProfileindex(t *testing.T) {
 			"o": "p",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 0 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -368,9 +386,9 @@ func TestUsersGetMissingTenantindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 2 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -385,9 +403,9 @@ func TestUsersGetMissingUserNameindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 2 {
+	if len(results) != 3 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -401,7 +419,7 @@ func TestUsersGetMissingIdindex(t *testing.T) {
 			"t": "v",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
 	if len(results) != 4 {
 		t.Error("error getting users: ", results)
@@ -418,9 +436,9 @@ func TestUsersGetMissingIdTwoINdex(t *testing.T) {
 			"x": "y",
 		},
 	}
-	results := make([]*UserProfile, 0)
+	results := UserProfiles{}
 	testMap.GetUsers(up, &results)
-	if len(results) != 1 {
+	if len(results) != 4 {
 		t.Error("error getting users: ", results)
 	}
 }
@@ -499,5 +517,138 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 	}, &r)
 	if len(tm.index) != 0 {
 		t.Error("error adding indexes: ", tm.index)
+	}
+}
+
+func TestUsersStoredCDRGetLoadUserProfile(t *testing.T) {
+	userService = &UserMap{
+		table: map[string]map[string]string{
+			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13"},
+		},
+		index: make(map[string]map[string]bool),
+	}
+
+	ur := &UsageRecord{
+		TOR:         utils.USERS,
+		ReqType:     utils.USERS,
+		Direction:   "*out",
+		Tenant:      "",
+		Category:    "call",
+		Account:     utils.USERS,
+		Subject:     utils.USERS,
+		Destination: utils.USERS,
+		SetupTime:   utils.USERS,
+		AnswerTime:  utils.USERS,
+		Usage:       "13",
+	}
+
+	out, err := LoadUserProfile(ur, "")
+	if err != nil {
+		t.Error("Error loading user profile: ", err)
+	}
+	expected := &UsageRecord{
+		TOR:         "04",
+		ReqType:     "4",
+		Direction:   "*out",
+		Tenant:      "",
+		Category:    "call",
+		Account:     "rif",
+		Subject:     "0726",
+		Destination: "+404",
+		SetupTime:   "s4",
+		AnswerTime:  "t4",
+		Usage:       "13",
+	}
+	*ur = out.(UsageRecord)
+	if !reflect.DeepEqual(ur, expected) {
+		t.Errorf("Expected: %+v got: %+v", expected, ur)
+	}
+}
+
+func TestUsersStoredCDRGetLoadUserProfileExtraFields(t *testing.T) {
+	userService = &UserMap{
+		table: map[string]map[string]string{
+			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1"},
+		},
+		index: make(map[string]map[string]bool),
+	}
+
+	ur := &ExternalCdr{
+		TOR:         utils.USERS,
+		ReqType:     utils.USERS,
+		Direction:   "*out",
+		Tenant:      "",
+		Category:    "call",
+		Account:     utils.USERS,
+		Subject:     utils.USERS,
+		Destination: utils.USERS,
+		SetupTime:   utils.USERS,
+		AnswerTime:  utils.USERS,
+		Usage:       "13",
+		ExtraFields: map[string]string{
+			"Test": "1",
+		},
+	}
+
+	out, err := LoadUserProfile(ur, "ExtraFields")
+	if err != nil {
+		t.Error("Error loading user profile: ", err)
+	}
+	expected := &ExternalCdr{
+		TOR:         "04",
+		ReqType:     "4",
+		Direction:   "*out",
+		Tenant:      "",
+		Category:    "call",
+		Account:     "rif",
+		Subject:     "0726",
+		Destination: "+404",
+		SetupTime:   "s4",
+		AnswerTime:  "t4",
+		Usage:       "13",
+	}
+	*ur = out.(ExternalCdr)
+	if !reflect.DeepEqual(ur, expected) {
+		t.Errorf("Expected: %+v got: %+v", expected, ur)
+	}
+}
+
+func TestUsersStoredCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
+	userService = &UserMap{
+		table: map[string]map[string]string{
+			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "2"},
+		},
+		index: make(map[string]map[string]bool),
+	}
+
+	ur := &ExternalCdr{
+		TOR:         utils.USERS,
+		ReqType:     utils.USERS,
+		Direction:   "*out",
+		Tenant:      "",
+		Category:    "call",
+		Account:     utils.USERS,
+		Subject:     utils.USERS,
+		Destination: utils.USERS,
+		SetupTime:   utils.USERS,
+		AnswerTime:  utils.USERS,
+		Usage:       "13",
+		ExtraFields: map[string]string{
+			"Test": "1",
+		},
+	}
+
+	_, err := LoadUserProfile(ur, "ExtraFields")
+	if err != utils.ErrNotFound {
+		t.Error("Error detecting err in loading user profile: ", err)
 	}
 }

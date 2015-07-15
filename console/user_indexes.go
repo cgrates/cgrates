@@ -31,7 +31,7 @@ func init() {
 type CmdUserShowIndexes struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringWrapper
+	rpcParams *EmptyWrapper
 	*CommandExecuter
 }
 
@@ -43,14 +43,11 @@ func (self *CmdUserShowIndexes) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUserShowIndexes) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdUserShowIndexes) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &StringWrapper{}
+		self.rpcParams = &EmptyWrapper{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdUserShowIndexes) PostprocessRpcParams() error {

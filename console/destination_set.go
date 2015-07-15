@@ -46,14 +46,11 @@ func (self *CmdSetDestination) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetDestination) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdSetDestination) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.AttrSetDestination{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdSetDestination) PostprocessRpcParams() error {

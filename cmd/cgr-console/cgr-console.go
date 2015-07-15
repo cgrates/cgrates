@@ -77,9 +77,11 @@ func executeCommand(command string) {
 	}
 	if cmd.RpcMethod() != "" {
 		res := cmd.RpcResult()
-		param := cmd.RpcParams(true, false)
+		param := cmd.RpcParams(false)
 		//log.Print(reflect.TypeOf(param))
 		switch param.(type) {
+		case *console.EmptyWrapper:
+			param = ""
 		case *console.StringWrapper:
 			param = param.(*console.StringWrapper).Item
 		case *console.StringSliceWrapper:

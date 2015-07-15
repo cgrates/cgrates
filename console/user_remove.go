@@ -45,14 +45,11 @@ func (self *CmdUserRemove) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUserRemove) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdUserRemove) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &engine.UserProfile{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdUserRemove) PostprocessRpcParams() error {

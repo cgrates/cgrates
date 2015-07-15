@@ -46,14 +46,11 @@ func (self *CmdSetRatingProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetRatingProfile) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdSetRatingProfile) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TPRatingProfile{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdSetRatingProfile) PostprocessRpcParams() error {

@@ -45,14 +45,11 @@ func (self *CmdGetCacheAge) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCacheAge) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdGetCacheAge) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdGetCacheAge) PostprocessRpcParams() error {

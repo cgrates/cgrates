@@ -45,14 +45,11 @@ func (self *CmdSetAccountActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetAccountActions) RpcParams(ptr, reset bool) interface{} {
+func (self *CmdSetAccountActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &utils.TPAccountActions{}
 	}
-	if ptr {
-		return self.rpcParams
-	}
-	return *self.rpcParams
+	return self.rpcParams
 }
 
 func (self *CmdSetAccountActions) PostprocessRpcParams() error {
