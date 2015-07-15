@@ -355,7 +355,7 @@ func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) er
 	return ps.Client.Call("UsersV1.AddIndex", in, reply)
 }
 
-func LoadUserProfile(in interface{}) (interface{}, error) {
+func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 	m, err := utils.ToMapStringString(in)
 	if err != nil {
 		return nil, err
@@ -377,8 +377,18 @@ func LoadUserProfile(in interface{}) (interface{}, error) {
 		}
 	}
 
-	//TODO: add extra fields
-
+	// add extra fields
+	if extraFields != "" {
+		extra, err := utils.GetMapExtraFields(in, extraFields)
+		if err != nil {
+			return nil, err
+		}
+		for key, val := range extra {
+			if val != "" {
+				up.Profile[key] = val
+			}
+		}
+	}
 	ups := UserProfiles{}
 	if err := userService.GetUsers(*up, &ups); err != nil {
 		return nil, err

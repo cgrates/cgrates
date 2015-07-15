@@ -106,9 +106,26 @@ func ToMapStringString(in interface{}) (map[string]string, error) {
 		// gets us a StructField
 		typField := typ.Field(i)
 		field := v.Field(i)
-		switch field.Kind() {
-		case reflect.String:
+		if field.Kind() == reflect.String {
 			out[typField.Name] = field.String()
+		}
+	}
+	return out, nil
+}
+
+// Converts a struct to map[string]string
+func GetMapExtraFields(in interface{}, extraFields string) (map[string]string, error) {
+	out := make(map[string]string)
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+		in = v.Interface()
+	}
+	field := v.FieldByName(extraFields)
+	if field.Kind() == reflect.Map {
+		keys := field.MapKeys()
+		for _, key := range keys {
+			out[key.String()] = field.MapIndex(key).String()
 		}
 	}
 	return out, nil
@@ -127,7 +144,9 @@ func FromMapStringString(m map[string]string, in interface{}) (interface{}, erro
 		if field.IsValid() {
 
 			if field.Kind() == reflect.String {
-				field.SetString(fieldValue)
+				if v.FieldByName(fieldName).String() != "" {
+					field.SetString(fieldValue)
+				}
 			}
 		}
 	}

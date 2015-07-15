@@ -41,7 +41,7 @@ func (self *CdrsV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
 
 // Designed for external programs feeding CDRs to CGRateS
 func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCdr, reply *string) error {
-	out, err := engine.LoadUserProfile(cdr)
+	out, err := engine.LoadUserProfile(cdr, "ExtraFields")
 	if err != nil {
 		*reply = err.Error()
 		return err
