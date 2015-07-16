@@ -165,12 +165,18 @@ func (fsev FSEvent) GetTenant(fieldName string) string {
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID], config.CgrConfig().DefaultTenant)
 }
 func (fsev FSEvent) GetReqType(fieldName string) string {
+	var reqTypeDetected = ""                     // Used to automatically disable processing of the request
+	if fsev["variable_process_cdr"] == "false" { // FS will not generated CDR here
+		reqTypeDetected = utils.NONE
+	} else if fsev["Caller-Dialplan"] == "inline" { // Used for internally generated dialplan, eg refer coming from another box, not in our control
+		reqTypeDetected = utils.NONE
+	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[REQTYPE], config.CgrConfig().DefaultReqType)
+		return utils.FirstNonEmpty(fsev[REQTYPE], reqTypeDetected, config.CgrConfig().DefaultReqType)
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], config.CgrConfig().DefaultReqType)
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], reqTypeDetected, config.CgrConfig().DefaultReqType)
 }
 func (fsev FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" ||
