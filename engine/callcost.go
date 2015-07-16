@@ -20,7 +20,6 @@ package engine
 import (
 	"encoding/json"
 	"errors"
-	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -37,21 +36,7 @@ type CallCost struct {
 
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.
 func (cc *CallCost) Merge(other *CallCost) {
-	if len(cc.Timespans)-1 < 0 || len(other.Timespans) == 0 {
-		return
-	}
-	ts := cc.Timespans[len(cc.Timespans)-1]
-	otherTs := other.Timespans[0]
-	if reflect.DeepEqual(ts.ratingInfo, otherTs.ratingInfo) &&
-		reflect.DeepEqual(ts.RateInterval, otherTs.RateInterval) {
-		// extend the last timespan with
-		ts.TimeEnd = ts.TimeEnd.Add(otherTs.GetDuration())
-		// add the rest of the timspans
-		cc.Timespans = append(cc.Timespans, other.Timespans[1:]...)
-	} else {
-		// just add all timespans
-		cc.Timespans = append(cc.Timespans, other.Timespans...)
-	}
+	cc.Timespans = append(cc.Timespans, other.Timespans...)
 	cc.Cost += other.Cost
 }
 

@@ -217,8 +217,11 @@ func (s *Session) SaveOperations() {
 		}
 		firstCC := sr.CallCosts[0]
 		for _, cc := range sr.CallCosts[1:] {
+			engine.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %+v", firstCC))
 			firstCC.Merge(cc)
+			engine.Logger.Debug(fmt.Sprintf("AFTER MERGE: %+v", firstCC))
 		}
+
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
 			CgrId:          s.eventStart.GetCgrId(),
