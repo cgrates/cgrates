@@ -83,6 +83,7 @@ func (s *Session) debitLoop(runIdx int) {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
 		nextCd.LoopIndex = index
+		engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s", utils.ToJSON(nextCd)))
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
 		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
@@ -98,6 +99,8 @@ func (s *Session) debitLoop(runIdx int) {
 			s.sessionManager.WarnSessionMinDuration(s.eventStart.GetUUID(), s.connId)
 		}
 		s.sessionRuns[runIdx].CallCosts = append(s.sessionRuns[runIdx].CallCosts, cc)
+		engine.Logger.Debug(fmt.Sprintf("CALLCOST: %s", utils.ToJSON(cc)))
+		engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s DURATION: %s", utils.ToJSON(cc), nextCd.GetDuration().String()))
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 		// update call duration with real debited duration
 		nextCd.DurationIndex -= debitPeriod
@@ -152,6 +155,7 @@ func (s *Session) Close(ev engine.Event) error {
 func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refundDuration := end.Sub(hangupTime)
+	engine.Logger.Debug(fmt.Sprintf("HANGUPTIME: %s REFUNDDURATION: %s", hangupTime.String(), refundDuration.String()))
 	var refundIncrements engine.Increments
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
@@ -201,8 +205,8 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			return err
 		}
 	}
-	cost := refundIncrements.GetTotalCost()
-	lastCC.Cost -= cost
+	engine.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
+	lastCC.Cost -= refundIncrements.GetTotalCost()
 	lastCC.Timespans.Compress()
 	return nil
 }
