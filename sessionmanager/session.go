@@ -100,7 +100,7 @@ func (s *Session) debitLoop(runIdx int) {
 		}
 		s.sessionRuns[runIdx].CallCosts = append(s.sessionRuns[runIdx].CallCosts, cc)
 		engine.Logger.Debug(fmt.Sprintf("CALLCOST: %s", utils.ToJSON(cc)))
-		engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s DURATION: %s", utils.ToJSON(cd), nextCd.GetDuration().String()))
+		engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s DURATION: %s", utils.ToJSON(nextCd), nextCd.GetDuration().String()))
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 		// update call duration with real debited duration
 		nextCd.DurationIndex -= debitPeriod
@@ -162,7 +162,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 		tsDuration := ts.GetDuration()
 		if refundDuration <= tsDuration {
 
-			lastRefundedIncrementIndex := 0
+			lastRefundedIncrementIndex := -1
 			for j := len(ts.Increments) - 1; j >= 0; j-- {
 				increment := ts.Increments[j]
 				if increment.Duration <= refundDuration {
