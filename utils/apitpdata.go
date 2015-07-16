@@ -758,6 +758,13 @@ type AttrLoadTpFromFolder struct {
 	Validate   bool   // Run structural checks on data
 }
 
+type AttrImportTPFromFolder struct {
+	TPid         string
+	FolderPath   string
+	RunId        string
+	CsvSeparator string
+}
+
 type AttrGetDestination struct {
 	Id string
 }

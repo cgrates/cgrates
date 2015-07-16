@@ -1725,7 +1725,7 @@ func TestApierImportTPFromFolderPath(t *testing.T) {
 		return
 	}
 	var reply string
-	if err := rater.Call("ApierV1.ImportTariffPlanFromFolder", AttrImportTPFromFolder{TPid: "TEST_TPID2", FolderPath: "/usr/share/cgrates/tariffplans/tutorial"}, &reply); err != nil {
+	if err := rater.Call("ApierV1.ImportTariffPlanFromFolder", utils.AttrImportTPFromFolder{TPid: "TEST_TPID2", FolderPath: "/usr/share/cgrates/tariffplans/tutorial"}, &reply); err != nil {
 		t.Error("Got error on ApierV1.ImportTarrifPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.ImportTarrifPlanFromFolder got reply: ", reply)
