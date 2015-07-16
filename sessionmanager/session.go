@@ -217,9 +217,10 @@ func (s *Session) SaveOperations() {
 		}
 		firstCC := sr.CallCosts[0]
 		for _, cc := range sr.CallCosts[1:] {
-			engine.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %+v", firstCC))
+			engine.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %+v", utils.ToJSON(firstCC)))
+			engine.Logger.Debug(fmt.Sprintf("OTHER MERGE: %+v", utils.ToJSON(cc)))
 			firstCC.Merge(cc)
-			engine.Logger.Debug(fmt.Sprintf("AFTER MERGE: %+v", firstCC))
+			engine.Logger.Debug(fmt.Sprintf("AFTER MERGE: %+v", utils.ToJSON(firstCC)))
 		}
 
 		var reply string

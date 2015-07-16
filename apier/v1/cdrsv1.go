@@ -46,7 +46,9 @@ func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCdr, reply *string) e
 		*reply = err.Error()
 		return err
 	}
-	*cdr = out.(engine.ExternalCdr)
+	if upcdr, ok := out.(engine.ExternalCdr); ok {
+		*cdr = upcdr
+	}
 	if err := self.CdrSrv.ProcessExternalCdr(cdr); err != nil {
 		return utils.NewErrServerError(err)
 	}

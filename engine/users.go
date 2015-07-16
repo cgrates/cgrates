@@ -356,6 +356,9 @@ func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) er
 }
 
 func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
+	if userService == nil { // no user service => no fun
+		return in, nil
+	}
 	m, err := utils.ToMapStringString(in)
 	if err != nil {
 		return nil, err
@@ -376,7 +379,6 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 			up.Profile[key] = val
 		}
 	}
-
 	// add extra fields
 	if extraFields != "" {
 		extra, err := utils.GetMapExtraFields(in, extraFields)

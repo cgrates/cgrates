@@ -447,14 +447,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	return nil
 }
 
-type AttrImportTPFromFolder struct {
-	TPid         string
-	FolderPath   string
-	RunId        string
-	CsvSeparator string
-}
-
-func (self *ApierV1) ImportTariffPlanFromFolder(attrs AttrImportTPFromFolder, reply *string) error {
+func (self *ApierV1) ImportTariffPlanFromFolder(attrs utils.AttrImportTPFromFolder, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "FolderPath"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

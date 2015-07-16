@@ -479,7 +479,9 @@ func (csvs *CSVStorage) GetTpUsers(filter *TpUser) ([]TpUser, error) {
 			return nil, err
 		} else {
 			u := tpUser.(TpUser)
-			u.Tpid = filter.Tpid
+			if filter != nil {
+				u.Tpid = filter.Tpid
+			}
 			tpUsers = append(tpUsers, u)
 		}
 	}
