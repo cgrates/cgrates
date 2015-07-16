@@ -117,11 +117,13 @@ func (s *Session) Close(ev engine.Event) error {
 			s.sessionRuns[idx].CallDescriptor.TimeEnd = s.sessionRuns[idx].CallDescriptor.TimeStart.Add(s.sessionRuns[idx].CallDescriptor.DurationIndex)
 		}
 	}
+
 	// Costs refunds
 	for _, sr := range s.SessionRuns() {
 		if len(sr.CallCosts) == 0 {
 			continue // why would we have 0 callcosts
 		}
+		engine.Logger.Debug(fmt.Sprintf("ALL CALLCOSTS: %s", utils.ToJSON(sr.CallCosts)))
 		lastCC := sr.CallCosts[len(sr.CallCosts)-1]
 		lastCC.Timespans.Decompress()
 		// put credit back
@@ -136,7 +138,9 @@ func (s *Session) Close(ev engine.Event) error {
 			return err
 		}
 		hangupTime := startTime.Add(duration)
+		engine.Logger.Debug(fmt.Sprintf("BEFORE REFUND: %s", utils.ToJSON(lastCC)))
 		err = s.Refund(lastCC, hangupTime)
+		engine.Logger.Debug(fmt.Sprintf("AFTER REFUND: %s", utils.ToJSON(lastCC)))
 		if err != nil {
 			return err
 		}
@@ -217,10 +221,10 @@ func (s *Session) SaveOperations() {
 		}
 		firstCC := sr.CallCosts[0]
 		for _, cc := range sr.CallCosts[1:] {
-			engine.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %+v", utils.ToJSON(firstCC)))
-			engine.Logger.Debug(fmt.Sprintf("OTHER MERGE: %+v", utils.ToJSON(cc)))
+			engine.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %s", utils.ToJSON(firstCC)))
+			engine.Logger.Debug(fmt.Sprintf("OTHER MERGE: %s", utils.ToJSON(cc)))
 			firstCC.Merge(cc)
-			engine.Logger.Debug(fmt.Sprintf("AFTER MERGE: %+v", utils.ToJSON(firstCC)))
+			engine.Logger.Debug(fmt.Sprintf("AFTER MERGE: %s", utils.ToJSON(firstCC)))
 		}
 
 		var reply string
