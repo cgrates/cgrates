@@ -78,7 +78,7 @@ type CdrServer struct {
 
 func (self *CdrServer) RegisterHanlersToServer(server *Server) {
 	cdrServer = self // Share the server object for handlers
-	server.RegisterHttpFunc("/cdr_post", cgrCdrHandler)
+	server.RegisterHttpFunc("/cdr_http", cgrCdrHandler)
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
 }
 
@@ -191,7 +191,7 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(storedCdr *StoredCdr) error
 				Logger.Err(fmt.Sprintf("<CDRS> Could not append cdr to stats: %s", err.Error()))
 			}
 		}
-		if self.cgrCfg.CDRSCdrReplication != nil {
+		if len(self.cgrCfg.CDRSCdrReplication) != 0 {
 			self.replicateCdr(cdr)
 		}
 	}
@@ -316,7 +316,9 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 
 // ToDo: Add websocket support
 func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
+	Logger.Debug(fmt.Sprintf("replicateCdr cdr: %+v, configuration: %+v", cdr, self.cgrCfg.CDRSCdrReplication))
 	for _, rplCfg := range self.cgrCfg.CDRSCdrReplication {
+		Logger.Debug(fmt.Sprintf("Replicating CDR with configuration: %+v", rplCfg))
 		passesFilters := true
 		for _, cdfFltr := range rplCfg.CdrFilter {
 			if fltrPass, _ := cdr.PassesFieldFilter(cdfFltr); !fltrPass {
@@ -332,7 +334,7 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 			httpClient := new(http.Client)
 			errChan := make(chan error)
 			go func(cdr *StoredCdr, rplCfg *config.CdrReplicationCfg, errChan chan error) {
-				if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_post", rplCfg.Server), cdr.AsHttpForm()); err != nil {
+				if _, err := httpClient.PostForm(fmt.Sprintf("%s", rplCfg.Server), cdr.AsHttpForm()); err != nil {
 					Logger.Err(fmt.Sprintf("<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
 					errChan <- err
 				}
