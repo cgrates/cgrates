@@ -13,6 +13,8 @@
 	"store_cdrs": false,		// store cdrs in storDb
 	"cdr_replication":[			// replicate the rated CDR to a number of servers
 			{"transport": "*http_jsonrpc", "server": "http://127.0.0.1:12080/jsonrpc"},
+			//{"transport": "*http_post", "server": "http://127.0.0.1:8000/mycdr"},
+			
 	],
 },
 
