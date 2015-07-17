@@ -16,6 +16,7 @@ func NewErrServerError(err error) error {
 var (
 	ErrNotImplemented     = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound           = errors.New("NOT_FOUND")
+	ErrTimedOut           = errors.New("TIMED_OUT")
 	ErrServerError        = errors.New("SERVER_ERROR")
 	ErrMandatoryIeMissing = errors.New("MANDATORY_IE_MISSING")
 	ErrExists             = errors.New("EXISTS")

@@ -137,6 +137,7 @@ type CallDescriptor struct {
 	MaxRate      float64
 	MaxRateUnit  time.Duration
 	MaxCostSoFar float64
+	CgrId        string
 	account      *Account
 	testCallcost *CallCost // testing purpose only!
 }

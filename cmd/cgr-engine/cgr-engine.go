@@ -152,7 +152,9 @@ func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cac
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, raterConn, cdrsConn)
+	rcp := engine.ConnectorPool{raterConn}
+	ccp := engine.ConnectorPool{cdrsConn}
+	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, rcp, ccp)
 	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
