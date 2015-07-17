@@ -69,7 +69,6 @@
 	"enabled": true,				// starts SessionManager service: <true|false>
 	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"create_cdr": true,				// create CDR out of events and sends them to CDRS component
 	"debit_interval": "5s",			// interval to perform debits on.
 	"channel_sync_interval": "10s",
 	"connections":[					// instantiate connections to multiple FreeSWITCH servers

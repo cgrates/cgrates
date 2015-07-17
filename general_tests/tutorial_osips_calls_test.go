@@ -187,7 +187,7 @@ func TestTutOsipsCallsStartPjsuaListener(t *testing.T) {
 		&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
 		&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
 		&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"}}
-	if tutOsipsCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, *waitRater); err != nil {
+	if tutOsipsCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, 5070, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -187,7 +187,7 @@ func TestTutFsCallsStartPjsuaListener(t *testing.T) {
 		&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:25060"},
 		&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:25060"},
 		&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:25060"}}
-	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, *waitRater); err != nil {
+	if tutFsCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, 5070, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -296,7 +296,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		cgrId = reply[0].CgrId
-		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
+		if reply[0].CdrSource != "freeswitch_json" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
@@ -358,7 +358,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
+		if reply[0].CdrSource != "freeswitch_json" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_POSTPAID {
@@ -377,7 +377,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
+		if reply[0].CdrSource != "freeswitch_json" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PSEUDOPREPAID {
@@ -396,7 +396,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
+		if reply[0].CdrSource != "freeswitch_json" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_RATED {
@@ -415,7 +415,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
+		if reply[0].CdrSource != "freeswitch_json" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
@@ -437,7 +437,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "FS_CHANNEL_HANGUP_COMPLETE" {
+		if reply[0].CdrSource != "freeswitch_json" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
