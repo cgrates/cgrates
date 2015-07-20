@@ -45,6 +45,7 @@ var (
 	maxDebitResponseCache         = cache2go.NewResponseCache(5 * time.Second)
 	refundIncrementsResponseCache = cache2go.NewResponseCache(5 * time.Second)
 	getSessionRunsResponseCache   = cache2go.NewResponseCache(5 * time.Second)
+	logCallCostResponseCache      = cache2go.NewResponseCache(5 * time.Second)
 )
 
 type Responder struct {
@@ -304,13 +305,27 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 }
 
 func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
+	if item, err := logCallCostResponseCache.Get(ccl.CgrId); err == nil && item != nil {
+		*reply = item.Value.(string)
+		return item.Err
+	}
 	if rs.CdrSrv == nil {
-		return errors.New("CDR_SERVER_NOT_RUNNING")
+		err := errors.New("CDR_SERVER_NOT_RUNNING")
+		logCallCostResponseCache.Cache(ccl.CgrId, &cache2go.CacheItem{
+			Err: err,
+		})
+		return err
 	}
 	if err := rs.CdrSrv.LogCallCost(ccl); err != nil {
+		logCallCostResponseCache.Cache(ccl.CgrId, &cache2go.CacheItem{
+			Err: err,
+		})
 		return err
 	}
 	*reply = utils.OK
+	logCallCostResponseCache.Cache(ccl.CgrId, &cache2go.CacheItem{
+		Value: utils.OK,
+	})
 	return nil
 }
 
