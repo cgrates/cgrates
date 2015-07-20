@@ -21,6 +21,7 @@ package engine
 import (
 	"github.com/cgrates/cgrates/utils"
 	"net/http"
+	"strconv"
 )
 
 func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
@@ -40,6 +41,9 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 type CgrCdr map[string]string
 
 func (cgrCdr CgrCdr) getCgrId() string {
+	if cgrId, hasIt := cgrCdr[utils.CGRID]; hasIt {
+		return cgrId
+	}
 	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME])
 	return utils.Sha1(cgrCdr[utils.ACCID], setupTime.UTC().String())
 }
@@ -69,10 +73,18 @@ func (cgrCdr CgrCdr) AsStoredCdr() *StoredCdr {
 	storCdr.Subject = cgrCdr[utils.SUBJECT]
 	storCdr.Destination = cgrCdr[utils.DESTINATION]
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
+	storCdr.Pdd, _ = utils.ParseDurationWithSecs(cgrCdr[utils.PDD])
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.ANSWER_TIME])
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(cgrCdr[utils.USAGE])
 	storCdr.Supplier = cgrCdr[utils.SUPPLIER]
+	storCdr.DisconnectCause = cgrCdr[utils.DISCONNECT_CAUSE]
 	storCdr.ExtraFields = cgrCdr.getExtraFields()
 	storCdr.Cost = -1
+	if costStr, hasIt := cgrCdr[utils.COST]; hasIt {
+		storCdr.Cost, _ = strconv.ParseFloat(costStr, 64)
+	}
+	if ratedStr, hasIt := cgrCdr[utils.RATED]; hasIt {
+		storCdr.Rated, _ = strconv.ParseBool(ratedStr)
+	}
 	return storCdr
 }
