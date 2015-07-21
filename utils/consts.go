@@ -215,6 +215,10 @@ const (
 	CGR_SUPPLIERS                = "cgr_suppliers"
 	KAM_FLATSTORE                = "kamailio_flatstore"
 	OSIPS_FLATSTORE              = "opensips_flatstore"
+	MAX_DEBIT_CACHE_PREFIX       = "MAX_DEBIT_"
+	REFUND_INCR_CACHE_PREFIX     = "REFUND_INCR_"
+	GET_SESS_RUNS_CACHE_PREFIX   = "GET_SESS_RUNS_"
+	LOG_CALL_COST_CACHE_PREFIX   = "LOG_CALL_COSTS_"
 )
 
 var (
