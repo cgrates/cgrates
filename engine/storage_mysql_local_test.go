@@ -517,7 +517,7 @@ func TestMySQLSetCdr(t *testing.T) {
 	strCdr3 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: utils.TEST_SQL, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1000", Destination: "+4986517174963",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(2) * time.Second, Supplier: "SUPPL1",
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
 	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
@@ -550,7 +550,7 @@ func TestMySQLSetRatedCdr(t *testing.T) {
 	strCdr3 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: utils.TEST_SQL, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1002", Destination: "+4986517174964",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(2) * time.Second, Supplier: "SUPPL1",
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: "wholesale_run", Cost: 1.201}
 	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
@@ -848,20 +848,20 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 	// Filter on minPdd
 	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3)}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 3 {
-		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	} else if len(storedCdrs) != 7 {
+		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on maxPdd
 	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MaxPdd: utils.Float64Pointer(3)}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 5 {
-		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on minPdd, maxPdd
 	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3), MaxPdd: utils.Float64Pointer(5)}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 3 {
-		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	} else if len(storedCdrs) != 5 {
+		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Combined filter
 	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
