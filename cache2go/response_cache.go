@@ -14,21 +14,27 @@ type CacheItem struct {
 }
 
 type ResponseCache struct {
-	ttl   time.Duration
-	cache map[string]*CacheItem
-	mu    sync.RWMutex
+	ttl       time.Duration
+	cache     map[string]*CacheItem
+	semaphore map[string]chan bool
+	mu        sync.RWMutex
 }
 
 func NewResponseCache(ttl time.Duration) *ResponseCache {
 	return &ResponseCache{
-		ttl:   ttl,
-		cache: make(map[string]*CacheItem),
+		ttl:       ttl,
+		cache:     make(map[string]*CacheItem),
+		semaphore: make(map[string]chan bool),
 	}
 }
 
 func (rc *ResponseCache) Cache(key string, item *CacheItem) {
 	rc.mu.Lock()
 	rc.cache[key] = item
+	if _, found := rc.semaphore[key]; found {
+		close(rc.semaphore[key])  // send release signal
+		delete(rc.semaphore, key) // delete key
+	}
 	rc.mu.Unlock()
 	go func() {
 		time.Sleep(rc.ttl)
@@ -39,6 +45,7 @@ func (rc *ResponseCache) Cache(key string, item *CacheItem) {
 }
 
 func (rc *ResponseCache) Get(key string) (*CacheItem, error) {
+	rc.wait(key) // wait for other goroutine processsing this key
 	rc.mu.RLock()
 	defer rc.mu.RUnlock()
 	item, ok := rc.cache[key]
@@ -46,4 +53,17 @@ func (rc *ResponseCache) Get(key string) (*CacheItem, error) {
 		return nil, ErrNotFound
 	}
 	return item, nil
+}
+
+func (rc *ResponseCache) wait(key string) {
+	rc.mu.RLock()
+	lockChan, found := rc.semaphore[key]
+	rc.mu.RUnlock()
+	if found {
+		<-lockChan
+	} else {
+		rc.mu.Lock()
+		rc.semaphore[key] = make(chan bool)
+		rc.mu.Unlock()
+	}
 }
