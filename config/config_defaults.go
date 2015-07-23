@@ -36,8 +36,8 @@ const CGRATES_CFG_JSON = `
 	"default_category": "call",				// default Type of Record to consider when missing from requests
 	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
-    "connect_attempts": 3,                  // initial server connect attempts
-    "reconnects": -1,                       // number of retries in case of connection lost
+	"connect_attempts": 3,                  // initial server connect attempts
+	"reconnects": -1,                       // number of retries in case of connection lost
 },
 
 
@@ -89,9 +89,9 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// enable Rater service: <true|false>
 	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
 	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality: <""|internal|x.y.z.y:1234>
-    "historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
-    "pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-    "users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+	"historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
+	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
+	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
 },
 
 
@@ -113,7 +113,7 @@ const CGRATES_CFG_JSON = `
 
 "cdrstats": {
 	"enabled": false,						// starts the cdrstats service: <true|false>
-    "save_interval": "1m",					// interval to save changed stats into dataDb storage
+	"save_interval": "1m",					// interval to save changed stats into dataDb storage
 },
 
 
@@ -235,7 +235,6 @@ const CGRATES_CFG_JSON = `
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
-
 },
 
 
