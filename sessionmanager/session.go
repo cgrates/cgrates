@@ -83,7 +83,7 @@ func (s *Session) debitLoop(runIdx int) {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
 		nextCd.LoopIndex = index
-		engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s", utils.ToJSON(nextCd)))
+		//engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s", utils.ToJSON(nextCd)))
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
 		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
