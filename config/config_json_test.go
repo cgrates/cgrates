@@ -312,9 +312,19 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 
 func TestSmFsJsonCfg(t *testing.T) {
 	eCfg := &SmFsJsonCfg{
-		Enabled:                utils.BoolPointer(false),
-		Rater:                  utils.StringPointer("internal"),
-		Cdrs:                   utils.StringPointer("internal"),
+		Enabled: utils.BoolPointer(false),
+		Ha_rater: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server:       utils.StringPointer("internal"),
+				Timeout:      utils.StringPointer("100ms"),
+				Time_to_live: utils.StringPointer("3s"),
+			}},
+		Ha_cdrs: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server:       utils.StringPointer("internal"),
+				Timeout:      utils.StringPointer("100ms"),
+				Time_to_live: utils.StringPointer("3s"),
+			}},
 		Reconnects:             utils.IntPointer(5),
 		Create_cdr:             utils.BoolPointer(false),
 		Cdr_extra_fields:       utils.StringSlicePointer([]string{}),
@@ -343,9 +353,19 @@ func TestSmFsJsonCfg(t *testing.T) {
 
 func TestSmKamJsonCfg(t *testing.T) {
 	eCfg := &SmKamJsonCfg{
-		Enabled:           utils.BoolPointer(false),
-		Rater:             utils.StringPointer("internal"),
-		Cdrs:              utils.StringPointer("internal"),
+		Enabled: utils.BoolPointer(false),
+		Ha_rater: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server:       utils.StringPointer("internal"),
+				Timeout:      utils.StringPointer("100ms"),
+				Time_to_live: utils.StringPointer("3s"),
+			}},
+		Ha_cdrs: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server:       utils.StringPointer("internal"),
+				Timeout:      utils.StringPointer("100ms"),
+				Time_to_live: utils.StringPointer("3s"),
+			}},
 		Reconnects:        utils.IntPointer(5),
 		Create_cdr:        utils.BoolPointer(false),
 		Debit_interval:    utils.StringPointer("10s"),
@@ -367,10 +387,20 @@ func TestSmKamJsonCfg(t *testing.T) {
 
 func TestSmOsipsJsonCfg(t *testing.T) {
 	eCfg := &SmOsipsJsonCfg{
-		Enabled:                   utils.BoolPointer(false),
-		Listen_udp:                utils.StringPointer("127.0.0.1:2020"),
-		Rater:                     utils.StringPointer("internal"),
-		Cdrs:                      utils.StringPointer("internal"),
+		Enabled:    utils.BoolPointer(false),
+		Listen_udp: utils.StringPointer("127.0.0.1:2020"),
+		Ha_rater: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server:       utils.StringPointer("internal"),
+				Timeout:      utils.StringPointer("100ms"),
+				Time_to_live: utils.StringPointer("3s"),
+			}},
+		Ha_cdrs: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server:       utils.StringPointer("internal"),
+				Timeout:      utils.StringPointer("100ms"),
+				Time_to_live: utils.StringPointer("3s"),
+			}},
 		Reconnects:                utils.IntPointer(5),
 		Create_cdr:                utils.BoolPointer(false),
 		Debit_interval:            utils.StringPointer("10s"),

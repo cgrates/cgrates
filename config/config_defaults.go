@@ -188,8 +188,12 @@ const CGRATES_CFG_JSON = `
 
 "sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"ha_rater": [
+        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+    ],
+	"ha_cdrs": [
+        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+    ],
 	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 	"cdr_extra_fields": [],			// extra fields to store in CDRs when creating them
@@ -210,8 +214,12 @@ const CGRATES_CFG_JSON = `
 
 "sm_kamailio": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"ha_rater": [
+        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+    ],
+	"ha_cdrs": [
+        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+    ],
 	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",		// interval to perform debits on.
@@ -226,8 +234,12 @@ const CGRATES_CFG_JSON = `
 "sm_opensips": {
 	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
-	"rater": "internal",				// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",					// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"ha_rater": [
+        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+    ],
+	"ha_cdrs": [
+        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+    ],
 	"reconnects": 5,					// number of reconnects if connection is lost
 	"create_cdr": false,				// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",			// interval to perform debits on.

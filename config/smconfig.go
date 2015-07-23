@@ -19,9 +19,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
+
+// Returns the first cached default value for a SM-FreeSWITCH connection
+func NewDfltHaPoolConfig() *HaPoolConfig {
+	if dfltHaPoolConfig == nil {
+		return new(HaPoolConfig) // No defaults, most probably we are building the defaults now
+	}
+	dfltVal := *dfltHaPoolConfig // Copy the value instead of it's pointer
+	return &dfltVal
+}
+
+// One connection to FreeSWITCH server
+type HaPoolConfig struct {
+	Server     string
+	Timeout    time.Duration
+	TimeToLive time.Duration
+}
+
+func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
+	var err error
+	if jsnCfg == nil {
+		return nil
+	}
+	if jsnCfg.Server != nil {
+		self.Server = *jsnCfg.Server
+	}
+	if jsnCfg.Timeout != nil {
+		if self.Timeout, err = utils.ParseDurationWithSecs(*jsnCfg.Timeout); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Time_to_live != nil {
+		if self.TimeToLive, err = utils.ParseDurationWithSecs(*jsnCfg.Time_to_live); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // Returns the first cached default value for a SM-FreeSWITCH connection
 func NewDfltFsConnConfig() *FsConnConfig {
@@ -57,8 +95,8 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 
 type SmFsConfig struct {
 	Enabled             bool
-	Rater               string
-	Cdrs                string
+	HaRater             []*HaPoolConfig
+	HaCdrs              []*HaPoolConfig
 	Reconnects          int
 	CreateCdr           bool
 	CdrExtraFields      []*utils.RSRField
@@ -82,11 +120,19 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Rater != nil {
-		self.Rater = *jsnCfg.Rater
+	if jsnCfg.Ha_rater != nil {
+		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
+		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
+			self.HaRater[idx] = NewDfltHaPoolConfig()
+			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
-	if jsnCfg.Cdrs != nil {
-		self.Cdrs = *jsnCfg.Cdrs
+	if jsnCfg.Ha_cdrs != nil {
+		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
+		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
+			self.HaCdrs[idx] = NewDfltHaPoolConfig()
+			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects
@@ -177,8 +223,8 @@ func (self *KamConnConfig) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 // SM-Kamailio config section
 type SmKamConfig struct {
 	Enabled         bool
-	Rater           string
-	Cdrs            string
+	HaRater         []*HaPoolConfig
+	HaCdrs          []*HaPoolConfig
 	Reconnects      int
 	CreateCdr       bool
 	DebitInterval   time.Duration
@@ -195,11 +241,19 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Rater != nil {
-		self.Rater = *jsnCfg.Rater
+	if jsnCfg.Ha_rater != nil {
+		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
+		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
+			self.HaRater[idx] = NewDfltHaPoolConfig()
+			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
-	if jsnCfg.Cdrs != nil {
-		self.Cdrs = *jsnCfg.Cdrs
+	if jsnCfg.Ha_cdrs != nil {
+		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
+		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
+			self.HaCdrs[idx] = NewDfltHaPoolConfig()
+			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects
@@ -252,8 +306,8 @@ func (self *OsipsConnConfig) loadFromJsonCfg(jsnCfg *OsipsConnJsonCfg) error {
 type SmOsipsConfig struct {
 	Enabled                 bool
 	ListenUdp               string
-	Rater                   string
-	Cdrs                    string
+	HaRater                 []*HaPoolConfig
+	HaCdrs                  []*HaPoolConfig
 	Reconnects              int
 	CreateCdr               bool
 	DebitInterval           time.Duration
@@ -271,11 +325,19 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 	if jsnCfg.Listen_udp != nil {
 		self.ListenUdp = *jsnCfg.Listen_udp
 	}
-	if jsnCfg.Rater != nil {
-		self.Rater = *jsnCfg.Rater
+	if jsnCfg.Ha_rater != nil {
+		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
+		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
+			self.HaRater[idx] = NewDfltHaPoolConfig()
+			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
-	if jsnCfg.Cdrs != nil {
-		self.Cdrs = *jsnCfg.Cdrs
+	if jsnCfg.Ha_cdrs != nil {
+		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
+		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
+			self.HaCdrs[idx] = NewDfltHaPoolConfig()
+			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
 	if jsnCfg.Reconnects != nil {
 		self.Reconnects = *jsnCfg.Reconnects

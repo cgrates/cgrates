@@ -45,6 +45,7 @@ var (
 	cgrCfg            *CGRConfig     // will be shared
 	dfltFsConnConfig  *FsConnConfig  // Default FreeSWITCH Connection configuration, built out of json default configuration
 	dfltKamConnConfig *KamConnConfig // Default Kamailio Connection configuration
+	dfltHaPoolConfig  *HaPoolConfig
 )
 
 // Used to retrieve system configuration from other packages
@@ -289,46 +290,46 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SM-FreeSWITCH checks
 	if self.SmFsConfig.Enabled {
-		if self.SmFsConfig.Rater == "" {
+		if len(self.SmFsConfig.HaRater) == 0 {
 			return errors.New("Rater definition is mandatory!")
 		}
-		if self.SmFsConfig.Cdrs == "" {
+		if len(self.SmFsConfig.HaCdrs) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmFsConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
+		if self.SmFsConfig.HaRater[0].Server == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-FreeSWITCH component.")
 		}
-		if self.SmFsConfig.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
+		if self.SmFsConfig.HaCdrs[0].Server == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but referenced by SM-FreeSWITCH component")
 		}
 	}
 	// SM-Kamailio checks
 	if self.SmKamConfig.Enabled {
-		if self.SmKamConfig.Rater == "" {
+		if len(self.SmKamConfig.HaRater) == 0 {
 			return errors.New("Rater definition is mandatory!")
 		}
-		if self.SmKamConfig.Cdrs == "" {
+		if len(self.SmKamConfig.HaCdrs) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmKamConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
+		if self.SmKamConfig.HaRater[0].Server == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-Kamailio component.")
 		}
-		if self.SmKamConfig.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
+		if self.SmKamConfig.HaCdrs[0].Server == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
 		}
 	}
 	// SM-OpenSIPS checks
 	if self.SmOsipsConfig.Enabled {
-		if self.SmOsipsConfig.Rater == "" {
+		if len(self.SmOsipsConfig.HaRater) == 0 {
 			return errors.New("Rater definition is mandatory!")
 		}
-		if self.SmOsipsConfig.Cdrs == "" {
+		if len(self.SmOsipsConfig.HaCdrs) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmOsipsConfig.Rater == utils.INTERNAL && !self.RaterEnabled {
+		if self.SmOsipsConfig.HaRater[0].Server == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-OpenSIPS component.")
 		}
-		if self.SmOsipsConfig.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
+		if self.SmOsipsConfig.HaCdrs[0].Server == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but referenced by SM-OpenSIPS component")
 		}
 	}

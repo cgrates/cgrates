@@ -42,7 +42,6 @@ type SessionRun struct {
 }
 
 var (
-	timeout       = 100 * time.Millisecond
 	timeToLive    = 5 * time.Second
 	responseCache = cache2go.NewResponseCache(timeToLive)
 )
@@ -52,6 +51,7 @@ type Responder struct {
 	ExitChan chan bool
 	CdrSrv   *CdrServer
 	Stats    StatsInterface
+	Timeout  time.Duration
 }
 
 /*
@@ -455,6 +455,10 @@ func (rs *Responder) UnRegisterRater(clientAddress string, replay *int) error {
 	return nil
 }
 
+func (rs *Responder) GetTimeout() time.Duration {
+	return rs.Timeout
+}
+
 // Reflection worker type for not standalone balancer
 type ResponderWorker struct{}
 
@@ -503,10 +507,12 @@ type Connector interface {
 	ProcessCdr(*StoredCdr, *string) error
 	LogCallCost(*CallCostLog, *string) error
 	GetLCR(*CallDescriptor, *LCRCost) error
+	GetTimeout() time.Duration
 }
 
 type RPCClientConnector struct {
-	Client *rpcclient.RpcClient
+	Client  *rpcclient.RpcClient
+	Timeout time.Duration
 }
 
 func (rcc *RPCClientConnector) GetCost(cd *CallDescriptor, cc *CallCost) error {
@@ -553,6 +559,10 @@ func (rcc *RPCClientConnector) GetLCR(cd *CallDescriptor, reply *LCRCost) error 
 	return rcc.Client.Call("Responder.GetLCR", cd, reply)
 }
 
+func (rcc *RPCClientConnector) GetTimeout() time.Duration {
+	return rcc.Timeout
+}
+
 type ConnectorPool []Connector
 
 func (cp ConnectorPool) GetCost(cd *CallDescriptor, cc *CallCost) error {
@@ -564,7 +574,7 @@ func (cp ConnectorPool) GetCost(cd *CallDescriptor, cc *CallCost) error {
 		case err := <-c:
 			*cc = *callCost
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -580,7 +590,7 @@ func (cp ConnectorPool) Debit(cd *CallDescriptor, cc *CallCost) error {
 		case err := <-c:
 			*cc = *callCost
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -596,7 +606,7 @@ func (cp ConnectorPool) MaxDebit(cd *CallDescriptor, cc *CallCost) error {
 		case err := <-c:
 			*cc = *callCost
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -612,7 +622,7 @@ func (cp ConnectorPool) RefundIncrements(cd *CallDescriptor, resp *float64) erro
 		case err := <-c:
 			*resp = r
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -628,7 +638,7 @@ func (cp ConnectorPool) GetMaxSessionTime(cd *CallDescriptor, resp *float64) err
 		case err := <-c:
 			*resp = r
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -644,7 +654,7 @@ func (cp ConnectorPool) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) 
 		case err := <-c:
 			*reply = r
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -660,7 +670,7 @@ func (cp ConnectorPool) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) erro
 		case err := <-c:
 			*sRuns = sr
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -676,7 +686,7 @@ func (cp ConnectorPool) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs
 		case err := <-c:
 			*dcs = derivedChargers
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -692,7 +702,7 @@ func (cp ConnectorPool) ProcessCdr(cdr *StoredCdr, reply *string) error {
 		case err := <-c:
 			*reply = r
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -708,7 +718,7 @@ func (cp ConnectorPool) LogCallCost(ccl *CallCostLog, reply *string) error {
 		case err := <-c:
 			*reply = r
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
@@ -724,9 +734,13 @@ func (cp ConnectorPool) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
 		case err := <-c:
 			*reply = *lcrCost
 			return err
-		case <-time.After(timeout):
+		case <-time.After(con.GetTimeout()):
 			// call timed out, continue
 		}
 	}
 	return utils.ErrTimedOut
+}
+
+func (cp ConnectorPool) GetTimeout() time.Duration {
+	return 0
 }
