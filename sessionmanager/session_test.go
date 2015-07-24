@@ -100,6 +100,7 @@ func (mc *MockConnector) GetSessionRuns(*engine.StoredCdr, *[]*engine.SessionRun
 func (mc *MockConnector) ProcessCdr(*engine.StoredCdr, *string) error                   { return nil }
 func (mc *MockConnector) LogCallCost(*engine.CallCostLog, *string) error                { return nil }
 func (mc *MockConnector) GetLCR(*engine.CallDescriptor, *engine.LCRCost) error          { return nil }
+func (mc *MockConnector) GetTimeout() time.Duration                                     { return 0 }
 
 func TestSessionRefund(t *testing.T) {
 	mc := &MockConnector{}

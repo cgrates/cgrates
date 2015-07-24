@@ -30,6 +30,7 @@ type GeneralJsonCfg struct {
 	Default_subject      *string
 	Reconnects           *int
 	Connect_attempts     *int
+	Response_cache_ttl   *string
 }
 
 // Listen config section
@@ -164,9 +165,8 @@ type SmFsJsonCfg struct {
 
 // Represents one connection instance towards a rater/cdrs server
 type HaPoolJsonCfg struct {
-	Server       *string
-	Timeout      *string
-	Time_to_live *string
+	Server  *string
+	Timeout *string
 }
 
 // Represents one connection instance towards FreeSWITCH

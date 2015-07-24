@@ -567,7 +567,7 @@ func main() {
 	}()
 	wg.Wait()
 
-	responder := &engine.Responder{ExitChan: exitChan, Stats: cdrStats, Timeout: 10 * time.Minute}
+	responder := engine.NewResponder(exitChan, nil, cdrStats, 10*time.Minute, cfg.ResponseCacheTTL)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder, CdrStatsSrv: cdrStats}
 	apierRpcV2 := &v2.ApierV2{ApierV1: v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder, CdrStatsSrv: cdrStats}}
 

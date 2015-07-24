@@ -188,6 +188,7 @@ type CGRConfig struct {
 	DefaultSubject       string        // set default rating subject, useful in case of fallback
 	Reconnects           int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
 	ConnectAttempts      int           // number of initial connection attempts before giving up
+	ResponseCacheTTL     time.Duration // the life span of a cached response
 	RoundingDecimals     int           // Number of decimals to round end prices at
 	HttpSkipTlsVerify    bool          // If enabled Http Client will accept any TLS certificate
 	TpExportPath         string        // Path towards export folder for offline Tariff Plans
@@ -523,6 +524,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnGeneralCfg.Connect_attempts != nil {
 			self.ConnectAttempts = *jsnGeneralCfg.Connect_attempts
+		}
+		if jsnGeneralCfg.Response_cache_ttl != nil {
+			if self.ResponseCacheTTL, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Response_cache_ttl); err != nil {
+				return err
+			}
 		}
 		if jsnGeneralCfg.Reconnects != nil {
 			self.Reconnects = *jsnGeneralCfg.Reconnects

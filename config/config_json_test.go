@@ -47,7 +47,8 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_tenant:       utils.StringPointer("cgrates.org"),
 		Default_subject:      utils.StringPointer("cgrates"),
 		Connect_attempts:     utils.IntPointer(3),
-		Reconnects:           utils.IntPointer(-1)}
+		Reconnects:           utils.IntPointer(-1),
+		Response_cache_ttl:   utils.StringPointer("3s")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
@@ -315,15 +316,13 @@ func TestSmFsJsonCfg(t *testing.T) {
 		Enabled: utils.BoolPointer(false),
 		Ha_rater: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
-				Server:       utils.StringPointer("internal"),
-				Timeout:      utils.StringPointer("100ms"),
-				Time_to_live: utils.StringPointer("3s"),
+				Server:  utils.StringPointer("internal"),
+				Timeout: utils.StringPointer("100ms"),
 			}},
 		Ha_cdrs: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
-				Server:       utils.StringPointer("internal"),
-				Timeout:      utils.StringPointer("100ms"),
-				Time_to_live: utils.StringPointer("3s"),
+				Server:  utils.StringPointer("internal"),
+				Timeout: utils.StringPointer("100ms"),
 			}},
 		Reconnects:             utils.IntPointer(5),
 		Create_cdr:             utils.BoolPointer(false),
@@ -356,15 +355,13 @@ func TestSmKamJsonCfg(t *testing.T) {
 		Enabled: utils.BoolPointer(false),
 		Ha_rater: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
-				Server:       utils.StringPointer("internal"),
-				Timeout:      utils.StringPointer("100ms"),
-				Time_to_live: utils.StringPointer("3s"),
+				Server:  utils.StringPointer("internal"),
+				Timeout: utils.StringPointer("100ms"),
 			}},
 		Ha_cdrs: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
-				Server:       utils.StringPointer("internal"),
-				Timeout:      utils.StringPointer("100ms"),
-				Time_to_live: utils.StringPointer("3s"),
+				Server:  utils.StringPointer("internal"),
+				Timeout: utils.StringPointer("100ms"),
 			}},
 		Reconnects:        utils.IntPointer(5),
 		Create_cdr:        utils.BoolPointer(false),
@@ -391,15 +388,13 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 		Listen_udp: utils.StringPointer("127.0.0.1:2020"),
 		Ha_rater: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
-				Server:       utils.StringPointer("internal"),
-				Timeout:      utils.StringPointer("100ms"),
-				Time_to_live: utils.StringPointer("3s"),
+				Server:  utils.StringPointer("internal"),
+				Timeout: utils.StringPointer("100ms"),
 			}},
 		Ha_cdrs: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
-				Server:       utils.StringPointer("internal"),
-				Timeout:      utils.StringPointer("100ms"),
-				Time_to_live: utils.StringPointer("3s"),
+				Server:  utils.StringPointer("internal"),
+				Timeout: utils.StringPointer("100ms"),
 			}},
 		Reconnects:                utils.IntPointer(5),
 		Create_cdr:                utils.BoolPointer(false),

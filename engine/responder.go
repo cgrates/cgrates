@@ -41,17 +41,29 @@ type SessionRun struct {
 	CallCosts      []*CallCost
 }
 
-var (
-	timeToLive    = 5 * time.Second
-	responseCache = cache2go.NewResponseCache(timeToLive)
-)
-
 type Responder struct {
-	Bal      *balancer2go.Balancer
-	ExitChan chan bool
-	CdrSrv   *CdrServer
-	Stats    StatsInterface
-	Timeout  time.Duration
+	Bal           *balancer2go.Balancer
+	ExitChan      chan bool
+	CdrSrv        *CdrServer
+	Stats         StatsInterface
+	Timeout       time.Duration
+	responseCache *cache2go.ResponseCache
+}
+
+func NewResponder(exitChan chan bool, cdrSrv *CdrServer, stats StatsInterface, timeout, timeToLive time.Duration) *Responder {
+	return &Responder{
+		ExitChan:      exitChan,
+		Stats:         stats,
+		Timeout:       timeToLive,
+		responseCache: cache2go.NewResponseCache(timeToLive),
+	}
+}
+
+func (rs *Responder) getCache() *cache2go.ResponseCache {
+	if rs.responseCache == nil {
+		rs.responseCache = cache2go.NewResponseCache(0)
+	}
+	return rs.responseCache
 }
 
 /*
@@ -96,7 +108,7 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 }
 
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
-	if item, err := responseCache.Get(utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrId); err == nil && item != nil {
+	if item, err := rs.getCache().Get(utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrId); err == nil && item != nil {
 		*reply = *(item.Value.(*CallCost))
 		return item.Err
 	}
@@ -109,7 +121,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	} else {
 		r, e := arg.MaxDebit()
 		if e != nil {
-			responseCache.Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
+			rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
 				Err: e,
 			})
 			return e
@@ -117,7 +129,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 			*reply = *r
 		}
 	}
-	responseCache.Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -125,7 +137,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 }
 
 func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
-	if item, err := responseCache.Get(utils.REFUND_INCR_CACHE_PREFIX + arg.CgrId); err == nil && item != nil {
+	if item, err := rs.getCache().Get(utils.REFUND_INCR_CACHE_PREFIX + arg.CgrId); err == nil && item != nil {
 		*reply = *(item.Value.(*float64))
 		return item.Err
 	}
@@ -140,7 +152,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 		}, arg.GetAccountKey())
 		*reply, err = r.(float64), e
 	}
-	responseCache.Cache(utils.REFUND_INCR_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.REFUND_INCR_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -231,7 +243,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
 func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
-	if item, err := responseCache.Get(utils.GET_SESS_RUNS_CACHE_PREFIX + ev.CgrId); err == nil && item != nil {
+	if item, err := rs.getCache().Get(utils.GET_SESS_RUNS_CACHE_PREFIX + ev.CgrId); err == nil && item != nil {
 		*sRuns = *(item.Value.(*[]*SessionRun))
 		return item.Err
 	}
@@ -245,7 +257,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := rs.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		responseCache.Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
+		rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
@@ -258,7 +270,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
 		if err != nil {
-			responseCache.Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
+			rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
 				Err: err,
 			})
 			return errors.New("Error parsing answer event start time")
@@ -274,7 +286,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
 	*sRuns = sesRuns
-	responseCache.Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
 		Value: sRuns,
 	})
 	return nil
@@ -304,25 +316,25 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 }
 
 func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
-	if item, err := responseCache.Get(utils.LOG_CALL_COST_CACHE_PREFIX + ccl.CgrId); err == nil && item != nil {
+	if item, err := rs.getCache().Get(utils.LOG_CALL_COST_CACHE_PREFIX + ccl.CgrId); err == nil && item != nil {
 		*reply = item.Value.(string)
 		return item.Err
 	}
 	if rs.CdrSrv == nil {
 		err := errors.New("CDR_SERVER_NOT_RUNNING")
-		responseCache.Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
+		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
 	}
 	if err := rs.CdrSrv.LogCallCost(ccl); err != nil {
-		responseCache.Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
+		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
 	}
 	*reply = utils.OK
-	responseCache.Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
 		Value: utils.OK,
 	})
 	return nil

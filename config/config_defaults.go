@@ -37,6 +37,7 @@ const CGRATES_CFG_JSON = `
 	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
     "connect_attempts": 3,                  // initial server connect attempts
+    "response_cache_ttl": "3s",              // the life span of a cached response
     "reconnects": -1,                       // number of retries in case of connection lost
 },
 
@@ -189,10 +190,10 @@ const CGRATES_CFG_JSON = `
 "sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
 	"ha_rater": [
-        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+        {"server": "internal",	"timeout": "100ms"}
     ],
 	"ha_cdrs": [
-        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+        {"server": "internal",	"timeout": "100ms"}
     ],
 	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
@@ -215,10 +216,10 @@ const CGRATES_CFG_JSON = `
 "sm_kamailio": {
 	"enabled": false,				// starts SessionManager service: <true|false>
 	"ha_rater": [
-        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+        {"server": "internal",	"timeout": "100ms"}
     ],
 	"ha_cdrs": [
-        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+        {"server": "internal",	"timeout": "100ms"}
     ],
 	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
@@ -235,10 +236,10 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
 	"ha_rater": [
-        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+        {"server": "internal",	"timeout": "100ms"}
     ],
 	"ha_cdrs": [
-        {"server": "internal",	"timeout": "100ms", "time_to_live": "3s"}
+        {"server": "internal",	"timeout": "100ms"}
     ],
 	"reconnects": 5,					// number of reconnects if connection is lost
 	"create_cdr": false,				// create CDR out of events and sends them to CDRS component

@@ -35,9 +35,8 @@ func NewDfltHaPoolConfig() *HaPoolConfig {
 
 // One connection to FreeSWITCH server
 type HaPoolConfig struct {
-	Server     string
-	Timeout    time.Duration
-	TimeToLive time.Duration
+	Server  string
+	Timeout time.Duration
 }
 
 func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
@@ -50,11 +49,6 @@ func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
 	}
 	if jsnCfg.Timeout != nil {
 		if self.Timeout, err = utils.ParseDurationWithSecs(*jsnCfg.Timeout); err != nil {
-			return err
-		}
-	}
-	if jsnCfg.Time_to_live != nil {
-		if self.TimeToLive, err = utils.ParseDurationWithSecs(*jsnCfg.Time_to_live); err != nil {
 			return err
 		}
 	}

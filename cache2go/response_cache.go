@@ -4,6 +4,8 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 var ErrNotFound = errors.New("NOT_FOUND")
@@ -25,10 +27,14 @@ func NewResponseCache(ttl time.Duration) *ResponseCache {
 		ttl:       ttl,
 		cache:     make(map[string]*CacheItem),
 		semaphore: make(map[string]chan bool),
+		mu:        sync.RWMutex{},
 	}
 }
 
 func (rc *ResponseCache) Cache(key string, item *CacheItem) {
+	if rc.ttl == 0 {
+		return
+	}
 	rc.mu.Lock()
 	rc.cache[key] = item
 	if _, found := rc.semaphore[key]; found {
@@ -45,6 +51,9 @@ func (rc *ResponseCache) Cache(key string, item *CacheItem) {
 }
 
 func (rc *ResponseCache) Get(key string) (*CacheItem, error) {
+	if rc.ttl == 0 {
+		return nil, utils.ErrNotImplemented
+	}
 	rc.wait(key) // wait for other goroutine processsing this key
 	rc.mu.RLock()
 	defer rc.mu.RUnlock()
