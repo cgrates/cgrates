@@ -516,9 +516,13 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	if origCD.TOR == "" {
 		origCD.TOR = utils.VOICE
 	}
+	Logger.Debug("ORIG: " + utils.ToJSON(origCD))
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
+	Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
 	cc, err := cd.debit(account, true, false)
+	Logger.Debug("CC: " + utils.ToJSON(cc))
+	Logger.Debug(fmt.Sprintf("ERR: %v", err))
 	if err != nil {
 		return 0, err
 	}
@@ -528,6 +532,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	var totalCost float64
 	var totalDuration time.Duration
 	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
+	Logger.Debug("ORIG: " + utils.ToJSON(defaultBalance))
 	cc.Timespans.Decompress()
 	//log.Printf("ACC: %+v", account)
 	for _, ts := range cc.Timespans {
@@ -558,6 +563,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			}
 		}
 	}
+	Logger.Debug(fmt.Sprintf("INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 	return utils.MinDuration(initialDuration, totalDuration), nil
 }
 
