@@ -520,6 +520,15 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
 	Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
+	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
+
+	//use this to check what increment was payed with debt
+	initialDefaultBalanceValue := defaultBalance.Value
+
+	Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
+	Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
+
+	//
 	cc, err := cd.debit(account, true, false)
 	Logger.Debug("CC: " + utils.ToJSON(cc))
 	Logger.Debug(fmt.Sprintf("ERR: %v", err))
@@ -531,9 +540,6 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 
 	var totalCost float64
 	var totalDuration time.Duration
-	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
-	Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
-	Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
 	cc.Timespans.Decompress()
 	//log.Printf("ACC: %+v", account)
 	for _, ts := range cc.Timespans {
@@ -554,12 +560,15 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 		for _, incr := range ts.Increments {
 			Logger.Debug("INCR: " + utils.ToJSON(incr))
 			totalCost += incr.Cost
-			if defaultBalance.Value < 0 && incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
-				// this increment was payed with debt
-				// TODO: improve this check
-				Logger.Debug(fmt.Sprintf("1_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
-				return utils.MinDuration(initialDuration, totalDuration), nil
+			if incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
+				initialDefaultBalanceValue -= incr.Cost
+				if initialDefaultBalanceValue < 0 {
+					// this increment was payed with debt
+					// TODO: improve this check
+					Logger.Debug(fmt.Sprintf("1_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
+					return utils.MinDuration(initialDuration, totalDuration), nil
 
+				}
 			}
 			totalDuration += incr.Duration
 			if totalDuration >= initialDuration {
