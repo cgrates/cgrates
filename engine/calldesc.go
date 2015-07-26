@@ -532,6 +532,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	var totalCost float64
 	var totalDuration time.Duration
 	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
+	Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
 	Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
 	cc.Timespans.Decompress()
 	//log.Printf("ACC: %+v", account)
