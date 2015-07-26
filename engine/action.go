@@ -424,12 +424,12 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err 
 	if sq != nil {
 		o = sq
 	}
-	jsn, err := json.Marshal(o)
-	if err != nil {
-		return err
-	}
+	//jsn, err := json.Marshal(o)
+	//if err != nil {
+	//	return err
+	//}
 	cfg := config.CgrConfig()
-	_, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn)
+	_, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, o)
 	return err
 }
 
@@ -442,17 +442,17 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 	if sq != nil {
 		o = sq
 	}
-	jsn, err := json.Marshal(o)
-	if err != nil {
-		return err
-	}
+	//jsn, err := json.Marshal(o)
+	//if err != nil {
+	//	return err
+	//}
 	cfg := config.CgrConfig()
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-			if _, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, o); err == nil {
+			if _, err := utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, o); err == nil {
 				break // Success, no need to reinterate
 			} else if i == 4 { // Last iteration, syslog the warning
-				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], triggered: %s", a.ExtraParameters, err.Error(), jsn))
+				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], triggered: %s", a.ExtraParameters, err.Error(), o))
 				break
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
