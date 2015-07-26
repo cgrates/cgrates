@@ -94,6 +94,13 @@ func populateDB() {
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
+	money := &Account{
+		Id: "*out:cgrates.org:money",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY + OUTBOUND: BalanceChain{
+				&Balance{Value: 10000, Weight: 10},
+			}},
+	}
 	if accountingStorage != nil && ratingStorage != nil {
 		ratingStorage.SetActions("TEST_ACTIONS", ats)
 		ratingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
@@ -102,6 +109,7 @@ func populateDB() {
 		accountingStorage.SetAccount(minitsboy)
 		accountingStorage.SetAccount(luna)
 		accountingStorage.SetAccount(max)
+		accountingStorage.SetAccount(money)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}
@@ -847,6 +855,41 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime == 0 {
 		t.Error("Error get max session for 0 acount", err)
+	}
+}
+
+func TestMaxSesionTimeLong(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2015, 07, 26, 13, 37, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 07, 26, 16, 37, 0, 0, time.UTC),
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "money",
+		Destination: "0723",
+	}
+	acc, _ := accountingStorage.GetAccount("*out:cgrates.org:money")
+	allowedTime, err := cd.getMaxSessionDuration(acc)
+	if err != nil || allowedTime != cd.TimeEnd.Sub(cd.TimeStart) {
+		t.Error("Error get max session for acount:", allowedTime, err)
+	}
+}
+
+func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2015, 07, 26, 13, 37, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 07, 26, 19, 37, 0, 0, time.UTC),
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "money",
+		Destination: "0723",
+	}
+	acc, _ := accountingStorage.GetAccount("*out:cgrates.org:money")
+	allowedTime, err := cd.getMaxSessionDuration(acc)
+	expected, err := time.ParseDuration("5h33m20s")
+	if err != nil || allowedTime != expected {
+		t.Errorf("Expected: %v got %v", expected, allowedTime)
 	}
 }
 
