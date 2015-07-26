@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -53,9 +52,6 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float
 	}
 	if usageRecord.SetupTime == "" {
 		usageRecord.SetupTime = utils.META_NOW
-	}
-	if usageRecord.Usage == "" {
-		usageRecord.Usage = strconv.FormatFloat(self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
 	}
 	storedCdr, err := usageRecord.AsStoredCdr()
 	if err != nil {

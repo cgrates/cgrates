@@ -88,15 +88,25 @@ func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage
 }
 
 // Fires up a cdrc instance
-func startCdrc(cdrsChan chan struct{}, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, closeChan chan struct{}) {
+func startCdrc(responder *engine.Responder, cdrsChan chan struct{}, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, closeChan chan struct{}) {
+	var cdrsConn engine.Connector
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
 	}
 	if cdrcCfg.Cdrs == utils.INTERNAL {
 		<-cdrsChan // Wait for CDRServer to come up before start processing
+		cdrsConn = responder
+	} else {
+		conn, err := rpcclient.NewRpcClient("tcp", cdrcCfg.Cdrs, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+		if err != nil {
+			engine.Logger.Crit(fmt.Sprintf("<CDRC> Could not connect to CDRS via RPC: %v", err))
+			exitChan <- true
+			return
+		}
+		cdrsConn = &engine.RPCClientConnector{Client: conn}
 	}
-	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrServer, closeChan)
+	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -619,7 +629,7 @@ func main() {
 		} else if !cdrcEnabled {
 			cdrcEnabled = true // Mark that at least one cdrc service is active
 		}
-		go startCdrc(cdrsChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cfg.ConfigReloads[utils.CDRC])
+		go startCdrc(responder, cdrsChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cfg.ConfigReloads[utils.CDRC])
 	}
 	if cdrcEnabled {
 		engine.Logger.Info("Starting CGRateS CDR client.")
