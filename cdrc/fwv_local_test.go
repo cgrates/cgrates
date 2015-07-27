@@ -18,14 +18,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package cdrc
 
-import ()
+import (
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"io/ioutil"
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"os"
+	"path"
+	"testing"
+	"time"
+)
 
-/*
 var fwvCfgPath string
 var fwvCfg *config.CGRConfig
 var fwvRpc *rpc.Client
 var fwvCdrcCfg *config.CdrcConfig
-*/
+
 var FW_CDR_FILE1 = `HDR0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         00030920120711100255                                                                    
 CDR0000010  0 20120708181506000123451234         0040123123120                  004                                            000018009980010001ISDN  ABC   10Buiten uw regio                         EHV 00000009190000000009
 CDR0000020  0 20120708190945000123451234         0040123123120                  004                                            000016009980010001ISDN  ABC   10Buiten uw regio                         EHV 00000009190000000009
@@ -60,4 +69,82 @@ CDR0000300  0 20120709073707000123123459         0040123234531                  
 CDR0000310  0 20120709085451000123451237         0040012323453100               001                                            000744009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
 CDR0000320  0 20120709091756000123451237         0040012323453100               001                                            000050009980030001ISDN  ABD   20Internationaal                          NLB 00000000190000000000
 CDR0000330  0 20120710070434000123123458         0040123232350                  004                                            000012002760000001PSTN  276   10Buiten uw regio                         TB  00000009190000000009
-TRL0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         0003090000003300000030550000000001000000000100Y                                         `
+TRL0001DDB     ABC                                     Some Connect A.B.                       DDB-Some-10022-20120711-309.CDR         0003090000003300000030550000000001000000000100Y                                         
+`
+
+func TestFwvLclInitCfg(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var err error
+	fwvCfgPath = path.Join(*dataDir, "conf", "samples", "cdrcfwv")
+	if fwvCfg, err = config.NewCGRConfigFromFolder(fwvCfgPath); err != nil {
+		t.Fatal("Got config error: ", err.Error())
+	}
+}
+
+// Creates cdr files and moves them into processing folder
+func TestFwvLclCreateCdrFiles(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if fwvCfg == nil {
+		t.Fatal("Empty default cdrc configuration")
+	}
+	fwvCdrcCfg = fwvCfg.CdrcProfiles["/tmp/cgr_fwv/cdrc/in"]["FWV1"]
+	if err := os.RemoveAll(fwvCdrcCfg.CdrInDir); err != nil {
+		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrInDir, err)
+	}
+	if err := os.MkdirAll(fwvCdrcCfg.CdrInDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrInDir, err)
+	}
+	if err := os.RemoveAll(fwvCdrcCfg.CdrOutDir); err != nil {
+		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrOutDir, err)
+	}
+	if err := os.MkdirAll(fwvCdrcCfg.CdrOutDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", fwvCdrcCfg.CdrOutDir, err)
+	}
+}
+
+func TestFwvLclStartEngine(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if _, err := engine.StopStartEngine(fwvCfgPath, *waitRater); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Connect rpc client to rater
+func TestFwvLclRpcConn(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var err error
+	fwvRpc, err = jsonrpc.Dial("tcp", fwvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+func TestFwvLclProcessFiles(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	fileName := "test1.fwv"
+	if err := ioutil.WriteFile(path.Join("/tmp", fileName), []byte(FW_CDR_FILE1), 0644); err != nil {
+		t.Fatal(err.Error)
+	}
+	if err := os.Rename(path.Join("/tmp", fileName), path.Join(fwvCdrcCfg.CdrInDir, fileName)); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(time.Duration(1) * time.Second)
+	filesInDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrInDir)
+	if len(filesInDir) != 0 {
+		t.Errorf("Files in cdrcInDir: %d", len(filesInDir))
+	}
+	filesOutDir, _ := ioutil.ReadDir(fwvCdrcCfg.CdrOutDir)
+	if len(filesOutDir) != 1 {
+		t.Errorf("In CdrcOutDir, expecting 1 files, got: %d", len(filesOutDir))
+	}
+}

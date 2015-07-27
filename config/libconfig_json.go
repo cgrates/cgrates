@@ -97,6 +97,7 @@ type CdrFieldJsonCfg struct {
 	Tag          *string
 	Type         *string
 	Cdr_field_id *string
+	Metatag_id   *string
 	Value        *string
 	Width        *int
 	Strip        *string

@@ -108,7 +108,7 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs
 	}
 	cdrc := &Cdrc{cdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator,
-		httpSkipTlsCheck: httpSkipTlsCheck, cdrs: cdrs, exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, cdrs: cdrs, exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
 	}
 	var processFile struct{}
 	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
@@ -155,6 +155,7 @@ type Cdrc struct {
 	cdrFilters          []utils.RSRFields       // Should be in sync with cdrFields on indexes
 	cdrFields           [][]*config.CfgCdrField // Profiles directly connected with cdrFilters
 	httpSkipTlsCheck    bool
+	cdrcCfgs            map[string]*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
 	cdrs                engine.Connector
 	httpClient          *http.Client
 	exitChan            chan struct{}
@@ -250,7 +251,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.cdrFormat, fn, self.failedCallsPrefix,
 			self.cdrSourceIds, self.duMultiplyFactors, self.cdrFilters, self.cdrFields, self.httpSkipTlsCheck, self.partialRecordsCache)
 	} else if self.cdrFormat == utils.FWV {
-		recordsProcessor = NewFwvRecordsProcessor(file)
+		recordsProcessor = NewFwvRecordsProcessor(file, self.cdrcCfgs)
 	}
 	procRowNr := 0
 	timeStart := time.Now()
