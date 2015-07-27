@@ -153,9 +153,6 @@ func TestGetRPAliases(t *testing.T) {
 }
 
 func TestRemRSubjAliases(t *testing.T) {
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
-		t.Error(err)
-	}
 	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
 		t.Error(err)
 	}
@@ -174,6 +171,24 @@ func TestRemRSubjAliases(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(iscAliases, []string{"2003"}) {
 		t.Errorf("Unexpected aliases: %v", iscAliases)
+	}
+}
+
+func TestStorageRpAliases(t *testing.T) {
+	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err == nil {
+		t.Error("Found alias before setting")
+	}
+	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "1991"), "1991"); err != nil {
+		t.Error(err)
+	}
+	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err != nil {
+		t.Error("Alias not found after setting")
+	}
+	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1991"}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err == nil {
+		t.Error("Found alias after removing")
 	}
 }
 
@@ -197,6 +212,24 @@ func TestGetAccountAliases(t *testing.T) {
 		if !reflect.DeepEqual(aliases, expectAliases) {
 			t.Errorf("Expecting: %v, received: %v", expectAliases, aliases)
 		}
+	}
+}
+
+func TestStorageAccAliases(t *testing.T) {
+	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err == nil {
+		t.Error("Found alias before setting")
+	}
+	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "1991"), "1991"); err != nil {
+		t.Error(err)
+	}
+	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err != nil {
+		t.Error("Alias not found after setting")
+	}
+	if err := ratingStorage.RemoveAccAliases([]*TenantAccount{&TenantAccount{Tenant: "cgrates.org", Account: "1991"}}); err != nil {
+		t.Error(err)
+	}
+	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err == nil {
+		t.Error("Found alias after removing")
 	}
 }
 

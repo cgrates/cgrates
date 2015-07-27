@@ -45,7 +45,7 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 		}
 		aliasesChanged = append(aliasesChanged, utils.RP_ALIAS_PREFIX+utils.RatingSubjectAliasKey(attrs.Tenant, alias))
 	}
-	if err := self.RatingDb.CachePrefixes(utils.RP_ALIAS_PREFIX); err != nil {
+	if err := self.RatingDb.CachePrefixValues(map[string][]string{utils.RP_ALIAS_PREFIX: aliasesChanged}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -73,12 +73,16 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.RatingDb.RemoveRpAliases([]*engine.TenantRatingSubject{&tenantRatingSubject}); err != nil {
+		if err == utils.ErrNotFound {
+			return err
+		}
 		return utils.NewErrServerError(err)
 	}
 
-	if err := self.RatingDb.CachePrefixes(utils.RP_ALIAS_PREFIX); err != nil {
+	// cache refresh not needed, synched in RemoveRpAliases
+	/*if err := self.RatingDb.CachePrefixes(utils.RP_ALIAS_PREFIX); err != nil {
 		return utils.NewErrServerError(err)
-	}
+	}*/
 	*reply = utils.OK
 	return nil
 }
@@ -94,7 +98,7 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 		}
 		aliasesChanged = append(aliasesChanged, utils.ACC_ALIAS_PREFIX+utils.AccountAliasKey(attrs.Tenant, alias))
 	}
-	if err := self.RatingDb.CachePrefixes(utils.ACC_ALIAS_PREFIX); err != nil {
+	if err := self.RatingDb.CachePrefixValues(map[string][]string{utils.ACC_ALIAS_PREFIX: aliasesChanged}); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -122,11 +126,15 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.RatingDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}); err != nil {
+		if err == utils.ErrNotFound {
+			return err
+		}
 		return utils.NewErrServerError(err)
 	}
-	if err := self.RatingDb.CachePrefixes(utils.ACC_ALIAS_PREFIX); err != nil {
+	// cache refresh not needed, synched in RemoveRpAliases
+	/*if err := self.RatingDb.CachePrefixes(utils.ACC_ALIAS_PREFIX); err != nil {
 		return utils.NewErrServerError(err)
-	}
+	}*/
 	*reply = utils.OK
 	return nil
 }

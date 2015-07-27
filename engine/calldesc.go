@@ -531,6 +531,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	//
 	cc, err := cd.debit(account, true, false)
 	//Logger.Debug("CC: " + utils.ToJSON(cc))
+	//log.Print("CC: ", utils.ToIJSON(cc))
 	//Logger.Debug(fmt.Sprintf("ERR: %v", err))
 	if err != nil {
 		return 0, err

@@ -860,8 +860,8 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 
 func TestMaxSesionTimeLong(t *testing.T) {
 	cd := &CallDescriptor{
-		TimeStart:   time.Date(2015, 07, 26, 13, 37, 0, 0, time.UTC),
-		TimeEnd:     time.Date(2015, 07, 26, 16, 37, 0, 0, time.UTC),
+		TimeStart:   time.Date(2015, 07, 24, 13, 37, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 07, 24, 15, 37, 0, 0, time.UTC),
 		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
@@ -877,8 +877,8 @@ func TestMaxSesionTimeLong(t *testing.T) {
 
 func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 	cd := &CallDescriptor{
-		TimeStart:   time.Date(2015, 07, 26, 13, 37, 0, 0, time.UTC),
-		TimeEnd:     time.Date(2015, 07, 26, 19, 37, 0, 0, time.UTC),
+		TimeStart:   time.Date(2015, 07, 24, 13, 37, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 07, 24, 16, 37, 0, 0, time.UTC),
 		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
@@ -887,7 +887,7 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 	}
 	acc, _ := accountingStorage.GetAccount("*out:cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
-	expected, err := time.ParseDuration("5h33m20s")
+	expected, err := time.ParseDuration("2h46m40s")
 	if err != nil || allowedTime != expected {
 		t.Errorf("Expected: %v got %v", expected, allowedTime)
 	}
