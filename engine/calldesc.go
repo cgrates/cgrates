@@ -115,7 +115,7 @@ func SetUserService(us UserService) {
 func Publish(event CgrEvent) {
 	if pubSubServer != nil {
 		var s string
-		pubSubServer.Publish(PublishInfo{Event: event}, &s)
+		pubSubServer.Publish(event, &s)
 	}
 }
 

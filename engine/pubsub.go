@@ -28,14 +28,10 @@ func (ce CgrEvent) PassFilters(rsrFields utils.RSRFields) bool {
 	return true
 }
 
-type PublishInfo struct {
-	Event CgrEvent
-}
-
 type PublisherSubscriber interface {
 	Subscribe(SubscribeInfo, *string) error
 	Unsubscribe(SubscribeInfo, *string) error
-	Publish(PublishInfo, *string) error
+	Publish(CgrEvent, *string) error
 	ShowSubscribers(string, *map[string]*SubscriberData) error
 }
 
@@ -123,16 +119,16 @@ func (ps *PubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
 	return nil
 }
 
-func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
+func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 	ps.mux.Lock()
 	defer ps.mux.Unlock()
 	for key, subData := range ps.subscribers {
 		if !subData.ExpTime.IsZero() && subData.ExpTime.Before(time.Now()) {
 			delete(ps.subscribers, key)
 			ps.removeSubscriber(key)
-			continue // subscription expired, do not send event
+			continue // subscription exevtred, do not send event
 		}
-		if subData.Filters == nil || !pi.Event.PassFilters(subData.Filters) {
+		if subData.Filters == nil || !evt.PassFilters(subData.Filters) {
 			continue // the event does not match the filters
 		}
 		split := utils.InfieldSplit(key)
@@ -148,10 +144,10 @@ func (ps *PubSub) Publish(pi PublishInfo, reply *string) error {
 			go func() {
 				delay := utils.Fib()
 				for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-					if _, err := ps.pubFunc(address, ps.ttlVerify, pi.Event); err == nil {
+					if _, err := ps.pubFunc(address, ps.ttlVerify, evt); err == nil {
 						break // Success, no need to reinterate
 					} else if i == 4 { // Last iteration, syslog the warning
-						Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), pi.Event["EventName"]))
+						Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), evt["EventName"]))
 						break
 					}
 					time.Sleep(delay())
@@ -186,8 +182,8 @@ func (ps *ProxyPubSub) Subscribe(si SubscribeInfo, reply *string) error {
 func (ps *ProxyPubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
 	return ps.Client.Call("PubSubV1.Unsubscribe", si, reply)
 }
-func (ps *ProxyPubSub) Publish(pi PublishInfo, reply *string) error {
-	return ps.Client.Call("PubSubV1.Publish", pi, reply)
+func (ps *ProxyPubSub) Publish(evt CgrEvent, reply *string) error {
+	return ps.Client.Call("PubSubV1.Publish", evt, reply)
 }
 
 func (ps *ProxyPubSub) ShowSubscribers(in string, reply *map[string]*SubscriberData) error {

@@ -89,4 +89,8 @@ type StringSliceWrapper struct {
 	Items []string
 }
 
+type StringMapWrapper struct {
+	Items map[string]string
+}
+
 type EmptyWrapper struct{}

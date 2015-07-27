@@ -133,9 +133,7 @@ func TestPublish(t *testing.T) {
 	}
 	m := make(map[string]string)
 	m["EventFilter"] = "test"
-	if err := ps.Publish(PublishInfo{
-		Event: m,
-	}, &r); err != nil {
+	if err := ps.Publish(m, &r); err != nil {
 		t.Error("Error publishing: ", err)
 	}
 	for i := 0; i < 1000; i++ { // wait for the theread to populate map
@@ -166,9 +164,7 @@ func TestPublishExpired(t *testing.T) {
 	}, &r); err != nil {
 		t.Error("Error subscribing: ", err)
 	}
-	if err := ps.Publish(PublishInfo{
-		Event: map[string]string{"EventFilter": "test"},
-	}, &r); err != nil {
+	if err := ps.Publish(map[string]string{"EventFilter": "test"}, &r); err != nil {
 		t.Error("Error publishing: ", err)
 	}
 	if len(ps.subscribers) != 0 {
@@ -196,9 +192,7 @@ func TestPublishExpiredSave(t *testing.T) {
 	if err != nil || len(subs) != 1 {
 		t.Error("Error saving subscribers: ", err, subs)
 	}
-	if err := ps.Publish(PublishInfo{
-		Event: map[string]string{"EventFilter": "test"},
-	}, &r); err != nil {
+	if err := ps.Publish(map[string]string{"EventFilter": "test"}, &r); err != nil {
 		t.Error("Error publishing: ", err)
 	}
 	subs, err = accountingStorage.GetSubscribers()
