@@ -130,7 +130,7 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs
 		cdrc.cdrSourceIds[idx] = cfg.CdrSourceId
 		cdrc.duMultiplyFactors[idx] = cfg.DataUsageMultiplyFactor
 		cdrc.cdrFilters[idx] = cfg.CdrFilter
-		cdrc.cdrFields[idx] = cfg.CdrFields
+		cdrc.cdrFields[idx] = cfg.ContentFields
 		idx += 1
 	}
 	// Before processing, make sure in and out folders exist
@@ -249,6 +249,8 @@ func (self *Cdrc) processFile(filePath string) error {
 		csvReader.Comma = self.csvSep
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.cdrFormat, fn, self.failedCallsPrefix,
 			self.cdrSourceIds, self.duMultiplyFactors, self.cdrFilters, self.cdrFields, self.httpSkipTlsCheck, self.partialRecordsCache)
+	} else if self.cdrFormat == utils.FWV {
+		recordsProcessor = NewFwvRecordsProcessor(file)
 	}
 	procRowNr := 0
 	timeStart := time.Now()

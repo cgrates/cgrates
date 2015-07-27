@@ -7,7 +7,7 @@
                 "cdr_in_dir": "/tmp/cgr_fsevsock/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
                 "cdr_out_dir": "/tmp/cgr_fsevsock/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
                 "cdr_source_id": "fs_csv",			      	// free form field, tag identifying the source of the CDRs within CDRS database
-                "cdr_fields":[						// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+                "content_fields":[					// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
                         {"tag": "tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "^*voice", "mandatory": true},
                         {"tag": "accid", "cdr_field_id": "accid", "type": "cdrfield", "value": "10", "mandatory": true},
                         {"tag": "reqtype", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "^*pseudoprepaid", "mandatory": true},
