@@ -23,6 +23,8 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -419,14 +421,14 @@ func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject)
 	for key, aliasInterface := range alsMap {
 		alias := aliasInterface.Value().(string)
 		for _, tntRSubj := range tenantRtSubjects {
-			tenantPrfx := utils.RP_ALIAS_PREFIX + tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
-			if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
+			tenantPrfx := tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
+			if len(key) < len(tenantPrfx) || !strings.HasPrefix(key, tenantPrfx) { // filter out the tenant for accounts
 				continue
 			}
 			if tntRSubj.Subject != alias {
 				continue
 			}
-			if _, err = rs.db.Del(key); err != nil {
+			if _, err = rs.db.Del(utils.RP_ALIAS_PREFIX + key); err != nil {
 				return err
 			}
 			cache2go.RemKey(key)
@@ -513,22 +515,22 @@ func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err e
 
 	for key, aliasInterface := range alsMap {
 		alias := aliasInterface.Value().(string)
-		alias, err := rs.GetAccAlias(key[len(utils.ACC_ALIAS_PREFIX):], true)
-		if err != nil {
-			return err
-		}
+		log.Print("Key: ", key)
+		log.Print("Alias: ", alias)
 		for _, tntAcnt := range tenantAccounts {
-			tenantPrfx := utils.ACC_ALIAS_PREFIX + tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
-			if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
+			tenantPrfx := tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
+			log.Print("Tenant: ", tenantPrfx)
+			if len(key) < len(tenantPrfx) || !strings.HasPrefix(key, tenantPrfx) { // filter out the tenant for accounts
 				continue
 			}
 			if tntAcnt.Account != alias {
 				continue
 			}
-			cache2go.RemKey(key)
-			if _, err = rs.db.Del(key); err != nil {
+			log.Print("DelKey: ", key)
+			if _, err = rs.db.Del(utils.ACC_ALIAS_PREFIX + key); err != nil {
 				return err
 			}
+			cache2go.RemKey(key)
 		}
 	}
 	return
