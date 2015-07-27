@@ -411,15 +411,13 @@ func (rs *RedisStorage) SetRpAlias(key, alias string) (err error) {
 
 // Removes the aliases of a specific account, on a tenant
 func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject) (err error) {
-	alsKeys, err := rs.db.Keys(utils.RP_ALIAS_PREFIX + "*")
+	alsMap, err := cache2go.GetAllEntries(utils.RP_ALIAS_PREFIX)
 	if err != nil {
 		return err
 	}
-	for _, key := range alsKeys {
-		alias, err := rs.GetRpAlias(key[len(utils.RP_ALIAS_PREFIX):], true)
-		if err != nil {
-			return err
-		}
+
+	for key, aliasInterface := range alsMap {
+		alias := aliasInterface.Value().(string)
 		for _, tntRSubj := range tenantRtSubjects {
 			tenantPrfx := utils.RP_ALIAS_PREFIX + tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
 			if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
@@ -428,10 +426,10 @@ func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject)
 			if tntRSubj.Subject != alias {
 				continue
 			}
-			cache2go.RemKey(key)
 			if _, err = rs.db.Del(key); err != nil {
 				return err
 			}
+			cache2go.RemKey(key)
 			break
 		}
 	}
@@ -508,11 +506,13 @@ func (rs *RedisStorage) SetAccAlias(key, alias string) (err error) {
 }
 
 func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err error) {
-	alsKeys, err := rs.db.Keys(utils.ACC_ALIAS_PREFIX + "*")
+	alsMap, err := cache2go.GetAllEntries(utils.ACC_ALIAS_PREFIX)
 	if err != nil {
 		return err
 	}
-	for _, key := range alsKeys {
+
+	for key, aliasInterface := range alsMap {
+		alias := aliasInterface.Value().(string)
 		alias, err := rs.GetAccAlias(key[len(utils.ACC_ALIAS_PREFIX):], true)
 		if err != nil {
 			return err
