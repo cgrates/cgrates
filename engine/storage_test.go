@@ -159,7 +159,7 @@ func TestRemRSubjAliases(t *testing.T) {
 	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}); err != nil {
+	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}, true); err != nil {
 		t.Error(err)
 	}
 	if cgrAliases, err := ratingStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
@@ -184,7 +184,7 @@ func TestStorageRpAliases(t *testing.T) {
 	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err != nil {
 		t.Error("Alias not found after setting")
 	}
-	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1991"}}); err != nil {
+	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1991"}}, true); err != nil {
 		t.Error(err)
 	}
 	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err == nil {
@@ -225,7 +225,7 @@ func TestStorageAccAliases(t *testing.T) {
 	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err != nil {
 		t.Error("Alias not found after setting")
 	}
-	if err := ratingStorage.RemoveAccAliases([]*TenantAccount{&TenantAccount{Tenant: "cgrates.org", Account: "1991"}}); err != nil {
+	if err := ratingStorage.RemoveAccAliases([]*TenantAccount{&TenantAccount{Tenant: "cgrates.org", Account: "1991"}}, true); err != nil {
 		t.Error(err)
 	}
 	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err == nil {

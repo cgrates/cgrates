@@ -72,7 +72,7 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 	if missing := utils.MissingStructFields(&tenantRatingSubject, []string{"Tenant", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.RatingDb.RemoveRpAliases([]*engine.TenantRatingSubject{&tenantRatingSubject}); err != nil {
+	if err := self.RatingDb.RemoveRpAliases([]*engine.TenantRatingSubject{&tenantRatingSubject}, false); err != nil {
 		if err == utils.ErrNotFound {
 			return err
 		}
@@ -125,7 +125,7 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 	if missing := utils.MissingStructFields(&tenantAccount, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.RatingDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}); err != nil {
+	if err := self.RatingDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}, false); err != nil {
 		if err == utils.ErrNotFound {
 			return err
 		}
