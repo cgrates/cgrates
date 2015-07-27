@@ -73,6 +73,9 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.RatingDb.RemoveRpAliases([]*engine.TenantRatingSubject{&tenantRatingSubject}); err != nil {
+		if err == utils.ErrNotFound {
+			return err
+		}
 		return utils.NewErrServerError(err)
 	}
 
@@ -123,6 +126,9 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if err := self.RatingDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}); err != nil {
+		if err == utils.ErrNotFound {
+			return err
+		}
 		return utils.NewErrServerError(err)
 	}
 	// cache refresh not needed, synched in RemoveRpAliases
