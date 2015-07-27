@@ -124,6 +124,7 @@ const (
 	META_DEFAULT               = "*default"
 	STATIC_VALUE_PREFIX        = "^"
 	CSV                        = "csv"
+	FWV                        = "fwv"
 	DRYRUN                     = "dry_run"
 	COMBIMED                   = "combimed"
 	INTERNAL                   = "internal"

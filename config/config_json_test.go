@@ -260,6 +260,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 }
 
 func TestDfCdrcJsonCfg(t *testing.T) {
+	eFields := []*CdrFieldJsonCfg{}
 	cdrFields := []*CdrFieldJsonCfg{
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("tor"), Cdr_field_id: utils.StringPointer("tor"), Type: utils.StringPointer(utils.CDRFIELD),
 			Value: utils.StringPointer("2"), Mandatory: utils.BoolPointer(true)},
@@ -301,13 +302,15 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Cdr_source_id:              utils.StringPointer("freeswitch_csv"),
 			Cdr_filter:                 utils.StringPointer(""),
 			Partial_record_cache:       utils.StringPointer("10s"),
-			Cdr_fields:                 &cdrFields,
+			Header_fields:              &eFields,
+			Content_fields:             &cdrFields,
+			Trailer_fields:             &eFields,
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Error("Received: ", cfg["*default"])
 	}
 }
 
@@ -448,6 +451,7 @@ func TestDfUserServJsonCfg(t *testing.T) {
 }
 
 func TestDfMailerJsonCfg(t *testing.T) {
+
 	eCfg := &MailerJsonCfg{
 		Server:       utils.StringPointer("localhost"),
 		Auth_user:    utils.StringPointer("cgrates"),
@@ -491,15 +495,14 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 			Cdr_in_dir:                 utils.StringPointer("/tmp/cgrates/cdrc2/in"),
 			Cdr_out_dir:                utils.StringPointer("/tmp/cgrates/cdrc2/out"),
 			Cdr_source_id:              utils.StringPointer("csv2"),
-			Cdr_fields:                 &cdrFields,
+			Content_fields:             &cdrFields,
 		},
 	}
 	if cfg, err := cgrJsonCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfgCdrc, cfg) {
-		t.Error("Received: ", cfg)
+		t.Error("Received: ", cfg["CDRC-CSV2"])
 	}
-
 	eCfgSmFs := &SmFsJsonCfg{
 		Enabled: utils.BoolPointer(true),
 		Connections: &[]*FsConnJsonCfg{

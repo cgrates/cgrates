@@ -140,7 +140,9 @@ type CdrcJsonCfg struct {
 	Cdr_filter                 *string
 	Max_open_files             *int
 	Partial_record_cache       *string
-	Cdr_fields                 *[]*CdrFieldJsonCfg
+	Header_fields              *[]*CdrFieldJsonCfg
+	Content_fields             *[]*CdrFieldJsonCfg
+	Trailer_fields             *[]*CdrFieldJsonCfg
 }
 
 // SM-FreeSWITCH config section

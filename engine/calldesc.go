@@ -517,9 +517,22 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	if origCD.TOR == "" {
 		origCD.TOR = utils.VOICE
 	}
+	//Logger.Debug("ORIG: " + utils.ToJSON(origCD))
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
+	//Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
+	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
+
+	//use this to check what increment was payed with debt
+	initialDefaultBalanceValue := defaultBalance.Value
+
+	//Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
+	//Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
+
+	//
 	cc, err := cd.debit(account, true, false)
+	//Logger.Debug("CC: " + utils.ToJSON(cc))
+	//Logger.Debug(fmt.Sprintf("ERR: %v", err))
 	if err != nil {
 		return 0, err
 	}
@@ -528,16 +541,17 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 
 	var totalCost float64
 	var totalDuration time.Duration
-	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
 	cc.Timespans.Decompress()
 	//log.Printf("ACC: %+v", account)
 	for _, ts := range cc.Timespans {
 		//if ts.RateInterval != nil {
 		//log.Printf("TS: %+v", ts)
+		//Logger.Debug("TS: " + utils.ToJSON(ts))
 		//}
 		if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
 			rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
+				//Logger.Debug(fmt.Sprintf("0_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 				return utils.MinDuration(initialDuration, totalDuration), nil
 			}
 		}
@@ -545,20 +559,27 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			ts.createIncrementsSlice()
 		}
 		for _, incr := range ts.Increments {
+			//Logger.Debug("INCR: " + utils.ToJSON(incr))
 			totalCost += incr.Cost
-			if defaultBalance.Value < 0 && incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
-				// this increment was payed with debt
-				// TODO: improve this check
-				return utils.MinDuration(initialDuration, totalDuration), nil
+			if incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
+				initialDefaultBalanceValue -= incr.Cost
+				if initialDefaultBalanceValue < 0 {
+					// this increment was payed with debt
+					// TODO: improve this check
+					//Logger.Debug(fmt.Sprintf("1_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
+					return utils.MinDuration(initialDuration, totalDuration), nil
 
+				}
 			}
 			totalDuration += incr.Duration
 			if totalDuration >= initialDuration {
 				// we have enough, return
+				//Logger.Debug(fmt.Sprintf("2_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 				return initialDuration, nil
 			}
 		}
 	}
+	//Logger.Debug(fmt.Sprintf("3_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 	return utils.MinDuration(initialDuration, totalDuration), nil
 }
 

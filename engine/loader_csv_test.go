@@ -137,6 +137,7 @@ ANY_PLAN,DATA_RATE,*any,10
 *out,cgrates.org,data,rif,2013-01-06T00:00:00Z,RP_DATA,,
 *out,cgrates.org,call,max,2013-03-23T00:00:00Z,RP_MX,,
 *in,cgrates.org,LCR_STANDARD,max,2013-03-23T00:00:00Z,RP_MX,,
+*out,cgrates.org,call,money,2015-02-28T00:00:00Z,EVENING,,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -759,7 +760,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 19 {
+	if len(csvr.ratingProfiles) != 20 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]

@@ -90,9 +90,9 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// enable Rater service: <true|false>
 	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
 	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality: <""|internal|x.y.z.y:1234>
-    "historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
-    "pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-    "users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+	"historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
+	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
+	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
 },
 
 
@@ -114,7 +114,7 @@ const CGRATES_CFG_JSON = `
 
 "cdrstats": {
 	"enabled": false,						// starts the cdrstats service: <true|false>
-    "save_interval": "1m",					// interval to save changed stats into dataDb storage
+	"save_interval": "1m",					// interval to save changed stats into dataDb storage
 },
 
 
@@ -169,7 +169,8 @@ const CGRATES_CFG_JSON = `
 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",							// filter CDR records to import
 		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
-		"cdr_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+		"header_fields": [],						// template of the import header fields
+		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "2", "mandatory": true},
 			{"tag": "accid", "cdr_field_id": "accid", "type": "cdrfield", "value": "3", "mandatory": true},
 			{"tag": "reqtype", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "4", "mandatory": true},
@@ -183,6 +184,7 @@ const CGRATES_CFG_JSON = `
 			{"tag": "answer_time", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "12", "mandatory": true},
 			{"tag": "usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "13", "mandatory": true},
 		],
+		"trailer_fields": [],							// template of the import trailer fields
 	}
 },
 
@@ -248,7 +250,6 @@ const CGRATES_CFG_JSON = `
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
-
 },
 
 

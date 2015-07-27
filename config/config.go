@@ -275,11 +275,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 			} else if cdrcInst.Cdrs == utils.INTERNAL && !self.CDRSEnabled {
 				return errors.New("CDRS not enabled but referenced from CDRC")
 			}
-			if len(cdrcInst.CdrFields) == 0 {
+			if len(cdrcInst.ContentFields) == 0 {
 				return errors.New("CdrC enabled but no fields to be processed defined!")
 			}
 			if cdrcInst.CdrFormat == utils.CSV {
-				for _, cdrFld := range cdrcInst.CdrFields {
+				for _, cdrFld := range cdrcInst.ContentFields {
 					for _, rsrFld := range cdrFld.Value {
 						if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil && !rsrFld.IsStatic() {
 							return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
