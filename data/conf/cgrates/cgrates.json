@@ -136,6 +136,7 @@
 //"cdrc": {
 //	"*default": {
 //		"enabled": false,							// enable CDR client functionality
+//		"dry_run": false,							// do not send the CDRs to CDRS, just parse them
 //		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
 //		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 //		"field_separator": ",",						// separator used in case of csv files

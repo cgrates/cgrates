@@ -23,37 +23,44 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"io"
+	"net/http"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
-/*file, _ := os.Open(path.Join("/tmp", "acc_1.log"))
-defer file.Close()
-fs, _ := file.Stat()
-fmt.Printf("FileSize: %d, content size: %d, %q", fs.Size(), len([]byte(fullSuccessfull)), fullSuccessfull)
-buf := make([]byte, 109)
-_, err := file.ReadAt(buf, fs.Size()-int64(len(buf)))
-if err != nil {
-	t.Error(err)
-}
-fmt.Printf("Have read in buffer: <%q>, len: %d", string(buf), len(string(buf)))
-*/
-
-func NewFwvRecordsProcessor(file *os.File, cdrcCfgs map[string]*config.CdrcConfig) *FwvRecordsProcessor {
-	frp := &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs}
-	for _, frp.dfltCfg = range cdrcCfgs { // Set the first available instance to be used for common parameters
-		break
+func fwvValue(cdrLine string, indexStart, width int, padding string) string {
+	rawVal := cdrLine[indexStart : indexStart+width]
+	switch padding {
+	case "left":
+		rawVal = strings.TrimLeft(rawVal, " ")
+	case "right":
+		rawVal = strings.TrimRight(rawVal, " ")
+	case "zeroleft":
+		rawVal = strings.TrimLeft(rawVal, "0 ")
+	case "zeroright":
+		rawVal = strings.TrimRight(rawVal, "0 ")
 	}
-	return frp
+	return rawVal
+}
+
+func NewFwvRecordsProcessor(file *os.File, cdrcCfgs map[string]*config.CdrcConfig, dfltCfg *config.CdrcConfig, httpClient *http.Client, httpSkipTlsCheck bool) *FwvRecordsProcessor {
+	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg, httpSkipTlsCheck: httpSkipTlsCheck}
 }
 
 type FwvRecordsProcessor struct {
-	file          *os.File
-	cdrcCfgs      map[string]*config.CdrcConfig
-	dfltCfg       *config.CdrcConfig // General parameters
-	lineLen       int64              // Length of the line in the file
-	offset        int64              // Index of the next byte to process
-	trailerOffset int64              // Index where trailer starts, to be used as boundary when reading cdrs
+	file             *os.File
+	cdrcCfgs         map[string]*config.CdrcConfig
+	dfltCfg          *config.CdrcConfig // General parameters
+	httpClient       *http.Client
+	httpSkipTlsCheck bool
+	lineLen          int64             // Length of the line in the file
+	offset           int64             // Index of the next byte to process
+	trailerOffset    int64             // Index where trailer starts, to be used as boundary when reading cdrs
+	headerCdr        *engine.StoredCdr // Cache here the general purpose stored CDR
 }
 
 // Sets the line length based on first line, sets offset back to initial after reading
@@ -116,16 +123,84 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 		}
 		if storedCdr, err := self.recordToStoredCdr(string(buf), cfgKey); err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
-		} else if storedCdr != nil {
+		} else {
 			recordCdrs = append(recordCdrs, storedCdr)
 		}
 	}
 	return recordCdrs, nil
 }
 
+// Converts a record (header or normal) to StoredCdr
 func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string) (*engine.StoredCdr, error) {
-	//engine.Logger.Debug(fmt.Sprintf("RecordToStoredCdr: <%q>, cfgKey: %s, offset: %d, trailerOffset: %d, lineLen: %d", record, cfgKey, self.offset, self.trailerOffset, self.lineLen))
-	return nil, nil
+	var err error
+	var lazyHttpFields []*config.CfgCdrField
+	var cfgFields []*config.CfgCdrField
+	var duMultiplyFactor float64
+	var storedCdr *engine.StoredCdr
+	if self.headerCdr != nil { // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
+		storedCdr = self.headerCdr.Clone()
+	} else {
+		storedCdr = &engine.StoredCdr{CdrHost: "0.0.0.0", ExtraFields: make(map[string]string), Cost: -1}
+	}
+	if cfgKey == "*header" {
+		cfgFields = self.dfltCfg.HeaderFields
+		storedCdr.CdrSource = self.dfltCfg.CdrSourceId
+		duMultiplyFactor = self.dfltCfg.DataUsageMultiplyFactor
+	} else {
+		cfgFields = self.cdrcCfgs[cfgKey].ContentFields
+		storedCdr.CdrSource = self.cdrcCfgs[cfgKey].CdrSourceId
+		duMultiplyFactor = self.cdrcCfgs[cfgKey].DataUsageMultiplyFactor
+	}
+	for _, cdrFldCfg := range cfgFields {
+		var fieldVal string
+		switch cdrFldCfg.Type {
+		case utils.CDRFIELD:
+			for _, cfgFieldRSR := range cdrFldCfg.Value {
+				if cfgFieldRSR.IsStatic() {
+					fieldVal += cfgFieldRSR.ParseValue("")
+				} else { // Dynamic value extracted using index
+					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
+					} else {
+						fieldVal += cfgFieldRSR.ParseValue(fwvValue(record, cfgFieldIdx, cdrFldCfg.Width, cdrFldCfg.Padding))
+					}
+				}
+			}
+		case utils.HTTP_POST:
+			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
+		default:
+			//return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
+			continue // Don't do anything for unsupported fields
+		}
+		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal); err != nil {
+			return nil, err
+		}
+	}
+	if storedCdr.CgrId == "" && storedCdr.AccId != "" && cfgKey != "*header" {
+		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+	}
+	if storedCdr.TOR == utils.DATA && duMultiplyFactor != 0 {
+		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * duMultiplyFactor)
+	}
+	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields
+		var outValByte []byte
+		var fieldVal, httpAddr string
+		for _, rsrFld := range httpFieldCfg.Value {
+			httpAddr += rsrFld.ParseValue("")
+		}
+		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, storedCdr); err != nil && httpFieldCfg.Mandatory {
+			return nil, err
+		} else {
+			fieldVal = string(outValByte)
+			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
+				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
+			}
+			if err := populateStoredCdrField(storedCdr, httpFieldCfg.CdrFieldId, fieldVal); err != nil {
+				return nil, err
+			}
+		}
+	}
+	return storedCdr, nil
 }
 
 func (self *FwvRecordsProcessor) processHeader() error {
@@ -135,7 +210,10 @@ func (self *FwvRecordsProcessor) processHeader() error {
 	} else if nRead != len(buf) {
 		return fmt.Errorf("In header, line len: %d, have read: %d", self.lineLen, nRead)
 	}
-	//engine.Logger.Debug(fmt.Sprintf("Have read header: <%q>", string(buf)))
+	var err error
+	if self.headerCdr, err = self.recordToStoredCdr(string(buf), "*header"); err != nil {
+		return err
+	}
 	return nil
 }
 

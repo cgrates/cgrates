@@ -46,23 +46,23 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) err
 	var err error
 	switch fieldId {
 	case utils.TOR:
-		cdr.TOR = fieldVal
+		cdr.TOR += fieldVal
 	case utils.ACCID:
-		cdr.AccId = fieldVal
+		cdr.AccId += fieldVal
 	case utils.REQTYPE:
-		cdr.ReqType = fieldVal
+		cdr.ReqType += fieldVal
 	case utils.DIRECTION:
-		cdr.Direction = fieldVal
+		cdr.Direction += fieldVal
 	case utils.TENANT:
-		cdr.Tenant = fieldVal
+		cdr.Tenant += fieldVal
 	case utils.CATEGORY:
-		cdr.Category = fieldVal
+		cdr.Category += fieldVal
 	case utils.ACCOUNT:
-		cdr.Account = fieldVal
+		cdr.Account += fieldVal
 	case utils.SUBJECT:
-		cdr.Subject = fieldVal
+		cdr.Subject += fieldVal
 	case utils.DESTINATION:
-		cdr.Destination = fieldVal
+		cdr.Destination += fieldVal
 	case utils.SETUP_TIME:
 		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
@@ -80,11 +80,11 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) err
 			return fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
 		}
 	case utils.SUPPLIER:
-		cdr.Supplier = fieldVal
+		cdr.Supplier += fieldVal
 	case utils.DISCONNECT_CAUSE:
-		cdr.DisconnectCause = fieldVal
+		cdr.DisconnectCause += fieldVal
 	default: // Extra fields will not match predefined so they all show up here
-		cdr.ExtraFields[fieldId] = fieldVal
+		cdr.ExtraFields[fieldId] += fieldVal
 	}
 	return nil
 }
@@ -108,7 +108,7 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs
 	}
 	cdrc := &Cdrc{cdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator,
-		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, cdrs: cdrs, exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, dfltCdrcCfg: cdrcCfg, cdrs: cdrs, exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
 	}
 	var processFile struct{}
 	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
@@ -156,6 +156,7 @@ type Cdrc struct {
 	cdrFields           [][]*config.CfgCdrField // Profiles directly connected with cdrFilters
 	httpSkipTlsCheck    bool
 	cdrcCfgs            map[string]*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
+	dfltCdrcCfg         *config.CdrcConfig
 	cdrs                engine.Connector
 	httpClient          *http.Client
 	exitChan            chan struct{}
@@ -245,28 +246,35 @@ func (self *Cdrc) processFile(filePath string) error {
 		return err
 	}
 	var recordsProcessor RecordsProcessor
-	if utils.IsSliceMember([]string{CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.cdrFormat) {
+	switch self.cdrFormat {
+	case CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE:
 		csvReader := csv.NewReader(bufio.NewReader(file))
 		csvReader.Comma = self.csvSep
 		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.cdrFormat, fn, self.failedCallsPrefix,
 			self.cdrSourceIds, self.duMultiplyFactors, self.cdrFilters, self.cdrFields, self.httpSkipTlsCheck, self.partialRecordsCache)
-	} else if self.cdrFormat == utils.FWV {
-		recordsProcessor = NewFwvRecordsProcessor(file, self.cdrcCfgs)
+	case utils.FWV:
+		recordsProcessor = NewFwvRecordsProcessor(file, self.cdrcCfgs, self.dfltCdrcCfg, self.httpClient, self.httpSkipTlsCheck)
+	default:
+		return fmt.Errorf("Unsupported CDR format: %s", self.cdrFormat)
 	}
 	procRowNr := 0
 	timeStart := time.Now()
 	for {
 		cdrs, err := recordsProcessor.ProcessNextRecord()
+		if err != nil && err == io.EOF {
+			break
+		}
+		procRowNr += 1
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d, error: %s", procRowNr, err.Error()))
 			continue
 		}
-		procRowNr += 1
 		for _, storedCdr := range cdrs { // Send CDRs to CDRS
 			var reply string
+			if self.dfltCdrcCfg.DryRun {
+				engine.Logger.Info(fmt.Sprintf("<Cdrc> DryRun CDR: %+v", storedCdr))
+				continue
+			}
 			if err := self.cdrs.ProcessCdr(storedCdr, &reply); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {

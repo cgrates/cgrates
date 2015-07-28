@@ -285,26 +285,22 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cfgIdx int) 
 
 		}
 		var fieldVal string
-		if utils.IsSliceMember([]string{CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.cdrFormat) {
-			if cdrFldCfg.Type == utils.CDRFIELD {
-				for _, cfgFieldRSR := range cdrFldCfg.Value {
-					if cfgFieldRSR.IsStatic() {
-						fieldVal += cfgFieldRSR.ParseValue("")
-					} else { // Dynamic value extracted using index
-						if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
-							return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
-						} else {
-							fieldVal += cfgFieldRSR.ParseValue(record[cfgFieldIdx])
-						}
+		if cdrFldCfg.Type == utils.CDRFIELD {
+			for _, cfgFieldRSR := range cdrFldCfg.Value {
+				if cfgFieldRSR.IsStatic() {
+					fieldVal += cfgFieldRSR.ParseValue("")
+				} else { // Dynamic value extracted using index
+					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
+					} else {
+						fieldVal += cfgFieldRSR.ParseValue(record[cfgFieldIdx])
 					}
 				}
-			} else if cdrFldCfg.Type == utils.HTTP_POST {
-				lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
-			} else {
-				return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			}
-		} else { // Modify here when we add more supported cdr formats
-			return nil, fmt.Errorf("Unsupported CDR file format: %s", self.cdrFormat)
+		} else if cdrFldCfg.Type == utils.HTTP_POST {
+			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
+		} else {
+			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
 		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal); err != nil {
 			return nil, err

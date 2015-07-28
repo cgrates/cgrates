@@ -25,6 +25,7 @@
 "cdrc": {
 	"FWV1": {
 		"enabled": true,							// enable CDR client functionality
+		"dry_run": true,
 		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
 		"cdr_format": "fwv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"cdr_in_dir": "/tmp/cgr_fwv/cdrc/in",		// absolute path towards the directory where the CDRs are stored
@@ -32,26 +33,27 @@
 		"cdr_source_id": "fwv_localtest",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",							// filter CDR records to import
 		"header_fields": [
-			{"tag": "FileName", "cdr_field_id": "CdrFileName", "type": "cdrfield", "value": "96", "width": 40},
-			{"tag": "FileSeqNr", "cdr_field_id": "FileSeqNr", "type": "cdrfield", "value": "136", "width": 6},	
+			{"tag": "FileName", "cdr_field_id": "CdrFileName", "type": "cdrfield", "value": "95", "width": 40, "padding":"right"},
+			{"tag": "FileSeqNr", "cdr_field_id": "FileSeqNr", "type": "cdrfield", "value": "135", "width": 6, "padding":"zeroleft"},
+			{"tag": "AccId1", "cdr_field_id": "accid", "type": "cdrfield", "value": "135", "width": 6, "padding":"zeroleft"},
 		],
 		"content_fields": [							// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "Tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "^*voice", "mandatory": true},
-			{"tag": "AccId1", "cdr_field_id": "accid", "type": "cdrfield", "value": "4", "width": 3, "mandatory": true},
-			{"tag": "AccId2", "cdr_field_id": "accid", "type": "cdrfield", "value": "15", "width": 16, "mandatory": true},
-			{"tag": "ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "7", "mandatory": true},
+			{"tag": "AccId1", "cdr_field_id": "accid", "type": "cdrfield", "value": "3", "width": 3, "padding":"zeroleft", "mandatory": true},
+			{"tag": "AccId2", "cdr_field_id": "accid", "type": "cdrfield", "value": "14", "width": 16, "padding":"right", "mandatory": true},
+			{"tag": "ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "^rated", "mandatory": true},
 			{"tag": "Direction", "cdr_field_id": "direction", "type": "cdrfield", "value": "^*out", "mandatory": true},
 			{"tag": "Tenant", "cdr_field_id": "tenant", "type": "cdrfield", "value": "^cgrates.org", "mandatory": true},
 			{"tag": "Category", "cdr_field_id": "category", "type": "cdrfield", "value": "^call", "mandatory": true},
-			{"tag": "Account", "cdr_field_id": "account", "type": "cdrfield", "value": "31", "width": 19, "mandatory": true},
-			{"tag": "Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "31", "width": 19, "mandatory": true},
-			{"tag": "Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "53", "width": 28, "mandatory": true},
-			{"tag": "SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "15", "width": 16, "mandatory": true},
-			{"tag": "AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "15", "width": 16, "mandatory": true},
-			{"tag": "Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "128", "width": 8, "mandatory": true},
-			{"tag": "DisconnectCause", "cdr_field_id": "disconnect_cause", "type": "cdrfield", "value": "139", "width": 1, "mandatory": true},
-			{"tag": "RetailAmount", "cdr_field_id": "RetailAmount", "type": "cdrfield", "value": "204", "width": 8},
-			{"tag": "WholesaleAmount", "cdr_field_id": "RetailAmount", "type": "cdrfield", "value": "216", "width": 8},
+			{"tag": "Account", "cdr_field_id": "account", "type": "cdrfield", "value": "30", "width": 19, "padding":"right", "mandatory": true},
+			{"tag": "Subject", "cdr_field_id": "subject", "type": "cdrfield", "value": "30", "width": 19, "padding":"right", "mandatory": true},
+			{"tag": "Destination", "cdr_field_id": "destination", "type": "cdrfield", "value": "52", "width": 28, "padding":"right", "mandatory": true},
+			{"tag": "SetupTime", "cdr_field_id": "setup_time", "type": "cdrfield", "value": "~14:s/(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2})/${1}-${2}-${3} ${4}:${5}:${6}/", "width": 16, "mandatory": true},
+			{"tag": "AnswerTime", "cdr_field_id": "answer_time", "type": "cdrfield", "value": "~14:s/(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2})/${1}-${2}-${3} ${4}:${5}:${6}/", "width": 16, "mandatory": true},
+			{"tag": "Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "~127:s/(\\d{2})(\\d{2})(\\d{2})(\\d{2})/${1}h${2}m${3}s/", "width": 8, "mandatory": true},
+			{"tag": "DisconnectCause", "cdr_field_id": "disconnect_cause", "type": "cdrfield", "value": "138", "width": 1, "mandatory": true},
+			{"tag": "RetailAmount", "cdr_field_id": "RetailAmount", "type": "cdrfield", "value": "203", "padding":"zeroleft", "width": 8},
+			{"tag": "WholesaleAmount", "cdr_field_id": "RetailAmount", "type": "cdrfield", "value": "215", "padding":"zeroleft", "width": 8},
 		],
 		"trailer_fields": [
 			{"tag": "NrOfCdrs", "type": "metatag", "metatag_id":"total_cdrs", "value": "142", "width": 8},

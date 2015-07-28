@@ -207,6 +207,20 @@ func (storedCdr *StoredCdr) AsStoredCdr() *StoredCdr {
 	return storedCdr
 }
 
+func (storedCdr *StoredCdr) Clone() *StoredCdr {
+	clnCdr := *storedCdr
+	clnCdr.ExtraFields = make(map[string]string)
+	clnCdr.CostDetails = nil // Clean old reference
+	for k, v := range storedCdr.ExtraFields {
+		clnCdr.ExtraFields[k] = v
+	}
+	if storedCdr.CostDetails != nil {
+		cDetails := *storedCdr.CostDetails
+		clnCdr.CostDetails = &cDetails
+	}
+	return &clnCdr
+}
+
 // Ability to send the CgrCdr remotely to another CDR server, we do not include rating variables for now
 func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v := url.Values{}

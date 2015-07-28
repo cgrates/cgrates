@@ -128,6 +128,7 @@ type CdreJsonCfg struct {
 // Cdrc config section
 type CdrcJsonCfg struct {
 	Enabled                    *bool
+	Dry_run                    *bool
 	Cdrs                       *string
 	Cdr_format                 *string
 	Field_separator            *string
