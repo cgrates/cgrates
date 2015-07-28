@@ -209,7 +209,7 @@ func (b *Balance) getMatchingPrefixAndDestId(dest string) (prefix, destId string
 // Returns the available number of seconds for a specified credit
 func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit float64) (duration time.Duration, credit float64) {
 	cd := origCD.Clone()
-	availableDuration := time.Duration(b.Value) * time.Second
+	availableDuration := time.Duration(b.GetValue()) * time.Second
 	duration = availableDuration
 	credit = initialCredit
 	cc, err := b.GetCost(cd, false)
@@ -280,32 +280,52 @@ func (b *Balance) GetCost(cd *CallDescriptor, getStandardIfEmpty bool) (*CallCos
 	}
 }
 
-func (b *Balance) SubstractAmount(amount float64) {
+func (b *Balance) GetValue() float64 {
+	return b.Value
+}
+
+func (b *Balance) AddValue(amount float64) {
+	b.SetValue(b.Value + amount)
+}
+
+func (b *Balance) SubstractValue(amount float64) {
+	b.SetValue(b.Value - amount)
+}
+
+func (b *Balance) SetValue(amount float64) {
+	b.Value = amount
+	b.Value = utils.Round(b.GetValue(), globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+	b.dirty = true
+
+	// publish event
 	accountId := ""
+	allowNegative := ""
+	disabled := ""
 	if b.account != nil {
 		accountId = b.account.Id
+		allowNegative = strconv.FormatBool(b.account.AllowNegative)
+		disabled = strconv.FormatBool(b.account.Disabled)
 	}
 	Publish(CgrEvent{
-		"EventName":      utils.EVT_ACCOUNT_BALANCE_MODIFIED,
-		"Uuid":           b.Uuid,
-		"Id":             b.Id,
-		"Value":          strconv.FormatFloat(b.Value, 'f', -1, 64),
-		"ExpirationDate": b.ExpirationDate.String(),
-		"Weight":         strconv.FormatFloat(b.Weight, 'f', -1, 64),
-		"DestinationIds": b.DestinationIds,
-		"RatingSubject":  b.RatingSubject,
-		"Category":       b.Category,
-		"SharedGroup":    b.SharedGroup,
-		"TimingIDs":      b.TimingIDs,
-		"Account":        accountId,
+		"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
+		"Uuid":                 b.Uuid,
+		"Id":                   b.Id,
+		"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
+		"ExpirationDate":       b.ExpirationDate.String(),
+		"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
+		"DestinationIds":       b.DestinationIds,
+		"RatingSubject":        b.RatingSubject,
+		"Category":             b.Category,
+		"SharedGroup":          b.SharedGroup,
+		"TimingIDs":            b.TimingIDs,
+		"Account":              accountId,
+		"AccountAllowNegative": allowNegative,
+		"AccountDisabled":      disabled,
 	})
-	b.Value -= amount
-	b.Value = utils.Round(b.Value, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
-	b.dirty = true
 }
 
 func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun bool) (cc *CallCost, err error) {
-	if !b.IsActiveAt(cd.TimeStart) || b.Value <= 0 {
+	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
 	if duration, err := utils.ParseZeroRatingSubject(b.RatingSubject); err == nil {
@@ -352,8 +372,8 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if seconds == 1 {
 				amount = inc.Duration.Seconds()
 			}
-			if b.Value >= amount {
-				b.SubstractAmount(amount)
+			if b.GetValue() >= amount {
+				b.SubstractValue(amount)
 				inc.BalanceInfo.UnitBalanceUuid = b.Uuid
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
@@ -429,19 +449,19 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 				var moneyBal *Balance
 				for _, mb := range moneyBalances {
-					if mb.Value >= cost {
+					if mb.GetValue() >= cost {
 						moneyBal = mb
 						break
 					}
 				}
-				if (cost == 0 || moneyBal != nil) && b.Value >= seconds {
-					b.SubstractAmount(seconds)
+				if (cost == 0 || moneyBal != nil) && b.GetValue() >= seconds {
+					b.SubstractValue(seconds)
 					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
 					inc.BalanceInfo.AccountId = ub.Id
 					inc.UnitInfo = &UnitInfo{cc.Destination, seconds, cc.TOR}
 					if cost != 0 {
 						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
-						moneyBal.SubstractAmount(cost)
+						moneyBal.SubstractValue(cost)
 						cd.MaxCostSoFar += cost
 					}
 					inc.paid = true
@@ -473,7 +493,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 }
 
 func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun bool) (cc *CallCost, err error) {
-	if !b.IsActiveAt(cd.TimeStart) || b.Value <= 0 {
+	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
@@ -531,8 +551,8 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				continue
 			}
 
-			if b.Value >= amount {
-				b.SubstractAmount(amount)
+			if b.GetValue() >= amount {
+				b.SubstractValue(amount)
 				cd.MaxCostSoFar += amount
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 				inc.BalanceInfo.AccountId = ub.Id
@@ -591,7 +611,7 @@ func (bc BalanceChain) Sort() {
 func (bc BalanceChain) GetTotalValue() (total float64) {
 	for _, b := range bc {
 		if !b.IsExpired() && b.IsActive() {
-			total += b.Value
+			total += b.GetValue()
 		}
 	}
 	return
@@ -603,12 +623,12 @@ func (bc BalanceChain) Debit(amount float64) float64 {
 		if b.IsExpired() {
 			continue
 		}
-		if b.Value >= amount || i == len(bc)-1 { // if last one go negative
-			b.SubstractAmount(amount)
+		if b.GetValue() >= amount || i == len(bc)-1 { // if last one go negative
+			b.SubstractValue(amount)
 			break
 		}
-		b.Value = 0
-		amount -= b.Value
+		b.SetValue(0)
+		amount -= b.GetValue()
 	}
 	return bc.GetTotalValue()
 }

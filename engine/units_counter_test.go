@@ -43,7 +43,7 @@ func TestUnitsCounterAddBalanceExists(t *testing.T) {
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Value: 10, Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
 	}
 	uc.addUnits(5, "0723")
-	if len(uc.Balances) != 3 || uc.Balances[1].Value != 15 {
+	if len(uc.Balances) != 3 || uc.Balances[1].GetValue() != 15 {
 		t.Error("Error adding minute bucket!")
 	}
 }

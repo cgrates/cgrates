@@ -170,7 +170,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "balance_id":
 			parsedValue += rsrFld.ParseValue(action.Balance.Id)
 		case "balance_value":
-			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.Value, 'f', -1, 64))
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.GetValue(), 'f', -1, 64))
 		case "destination_id":
 			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds)
 		case "extra_params":
@@ -375,8 +375,8 @@ func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Balance != nil && a.Balance.Value >= 0 { // only apply if not allready negative
-		a.Balance.Value = -a.Balance.Value
+	if a.Balance != nil && a.Balance.GetValue() >= 0 { // only apply if not allready negative
+		a.Balance.SetValue(-a.Balance.GetValue())
 	}
 }
 

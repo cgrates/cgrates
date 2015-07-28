@@ -126,7 +126,7 @@ func (lbcs LowestBalanceChainSorter) Swap(i, j int) {
 }
 
 func (lbcs LowestBalanceChainSorter) Less(i, j int) bool {
-	return lbcs[i].Value < lbcs[j].Value
+	return lbcs[i].GetValue() < lbcs[j].GetValue()
 }
 
 type HighestBalanceChainSorter []*Balance
@@ -140,7 +140,7 @@ func (hbcs HighestBalanceChainSorter) Swap(i, j int) {
 }
 
 func (hbcs HighestBalanceChainSorter) Less(i, j int) bool {
-	return hbcs[i].Value > hbcs[j].Value
+	return hbcs[i].GetValue() > hbcs[j].GetValue()
 }
 
 type RandomBalanceChainSorter []*Balance

@@ -601,7 +601,7 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 			Weight:          engAct.Weight,
 		}
 		if engAct.Balance != nil {
-			act.Units = engAct.Balance.Value
+			act.Units = engAct.Balance.GetValue()
 			act.DestinationIds = engAct.Balance.DestinationIds
 			act.RatingSubject = engAct.Balance.RatingSubject
 			act.SharedGroup = engAct.Balance.SharedGroup

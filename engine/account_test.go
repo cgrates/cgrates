@@ -194,8 +194,8 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 		t.Logf("%+v", cc.Timespans[0])
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 21 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 0 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 21 {
 		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0])
 	}
 }
@@ -238,8 +238,8 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 10 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 21 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 10 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 21 {
 		t.Error("Error extracting minutes from balance: ",
 			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0])
 	}
@@ -284,9 +284,9 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 		cc.Timespans[1].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans)
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][1].Value != 0 ||
-		rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 10 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 21 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][1].GetValue() != 0 ||
+		rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 10 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 21 {
 		t.Logf("TS0: %+v", cc.Timespans[0])
 		t.Logf("TS1: %+v", cc.Timespans[1])
 		t.Errorf("Error extracting minutes from balance: %+v", rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][1])
@@ -335,7 +335,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 10 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 10 {
 		t.Error("Error extracting minutes from balance: ",
 			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0])
 	}
@@ -387,10 +387,10 @@ func TestDebitCreditHasCredit(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 10 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 30 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 10 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 30 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
-			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 	if len(cc.Timespans) != 3 || cc.Timespans[0].GetDuration() != time.Minute {
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
@@ -435,10 +435,10 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != 1*time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0].Duration)
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 30 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 0 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 30 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
-			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != 10*time.Second || cc.Timespans[1].GetDuration() != 20*time.Second {
 		t.Error("Error truncating extra timespans: ", cc.Timespans[1].GetDuration())
@@ -487,7 +487,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 30 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 30 {
 		t.Error("Error extracting minutes from balance: ",
 			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0])
 	}
@@ -536,8 +536,8 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 10 ||
-		rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][1].Value != 130 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 10 ||
+		rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][1].GetValue() != 130 {
 		t.Error("Error extracting minutes from balance: ",
 			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][1], cc.Timespans[1])
 	}
@@ -631,7 +631,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 		t.Logf("%+v", cc.Timespans[0].Increments)
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0].BalanceInfo)
 	}
-	if rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 0 {
+	if rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 0 {
 		t.Error("Error extracting minutes from balance: ",
 			rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0])
 	}
@@ -685,10 +685,10 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
 		t.Errorf("Error setting balance id to increment: %+v", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 180 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 280 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 180 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 280 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
-			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != 70*time.Second {
 		for _, ts := range cc.Timespans {
@@ -738,9 +738,9 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 5 {
+	if rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 5 {
 		t.Errorf("Error extracting minutes from balance: %+v",
-			rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+			rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != 70*time.Second {
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
@@ -790,10 +790,10 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 7 {
+	if rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 0 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 7 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
-			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+			rifsBalance.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != 40*time.Second {
 		for _, ts := range cc.Timespans {
@@ -827,7 +827,7 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 	newMb := &Balance{Value: -10, Weight: 20, DestinationIds: "NAT"}
 	a := &Action{BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: newMb}
 	ub.debitBalanceAction(a, false)
-	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 2 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 25 {
+	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 2 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 25 {
 		t.Error("Error adding minute bucket!")
 	}
 }
@@ -856,7 +856,7 @@ func TestAccountAddMinutBucketEmpty(t *testing.T) {
 	}
 	a = &Action{BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: mb2}
 	ub.debitBalanceAction(a, false)
-	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 1 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 20 {
+	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 1 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 20 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.VOICE+OUTBOUND])
 	}
 	a = &Action{BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: mb3}
@@ -874,19 +874,19 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirection: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: 1}})
-	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 110 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 20 {
-		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value, ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
+	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 110 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 20 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue(), ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
 	}
 	// are set to executed
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 1}})
-	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 110 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 20 {
-		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value, ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
+	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 110 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 20 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue(), ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
 	}
 	// we can reset them
 	ub.ResetActionTriggers(nil)
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 120 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 30 {
-		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value, ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
+	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 120 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 30 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue(), ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
 	}
 }
 
@@ -898,8 +898,8 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirection: OUTBOUND, ThresholdValue: 100, ThresholdType: TRIGGER_MIN_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: 1}})
-	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 110 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 20 {
-		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value, ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
+	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 110 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 20 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue(), ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
 	}
 }
 
@@ -911,8 +911,8 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirection: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 1}})
-	if len(ub.BalanceMap[utils.MONETARY+OUTBOUND]) != 1 || ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 10 {
-		t.Error("Error executing triggered actions in order", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+	if len(ub.BalanceMap[utils.MONETARY+OUTBOUND]) != 1 || ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 10 {
+		t.Error("Error executing triggered actions in order", ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 }
 
@@ -939,11 +939,11 @@ func TestCleanExpired(t *testing.T) {
 func TestAccountUnitCounting(t *testing.T) {
 	ub := &Account{}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].Value != 10 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].Value != 20 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
 		t.Error("Error counting units")
 	}
 }
@@ -951,15 +951,15 @@ func TestAccountUnitCounting(t *testing.T) {
 func TestAccountUnitCountingOutbound(t *testing.T) {
 	ub := &Account{}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].Value != 10 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].Value != 20 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].Value != 30 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 30 {
 		t.Error("Error counting units")
 	}
 }
@@ -967,15 +967,15 @@ func TestAccountUnitCountingOutbound(t *testing.T) {
 func TestAccountUnitCountingOutboundInbound(t *testing.T) {
 	ub := &Account{}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].Value != 10 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
 		t.Errorf("Error counting units: %+v", ub.UnitCounters[0])
 	}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].Value != 20 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: INBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 2 && ub.UnitCounters[1].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].Value != 20 || ub.UnitCounters[1].Balances[0].Value != 10 {
+	if len(ub.UnitCounters) != 2 && ub.UnitCounters[1].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 || ub.UnitCounters[1].Balances[0].GetValue() != 10 {
 		t.Error("Error counting units")
 	}
 }
@@ -1000,10 +1000,10 @@ func TestAccountRefund(t *testing.T) {
 	for _, increment := range increments {
 		ub.refundIncrement(increment, OUTBOUND, utils.VOICE, false)
 	}
-	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 104 ||
-		ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 13 ||
-		ub.BalanceMap[utils.VOICE+OUTBOUND][1].Value != 14 {
-		t.Error("Error refounding money: ", ub.BalanceMap[utils.VOICE+OUTBOUND][1].Value)
+	if ub.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 104 ||
+		ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 13 ||
+		ub.BalanceMap[utils.VOICE+OUTBOUND][1].GetValue() != 14 {
+		t.Error("Error refounding money: ", ub.BalanceMap[utils.VOICE+OUTBOUND][1].GetValue())
 	}
 }
 
@@ -1050,11 +1050,11 @@ func TestDebitShared(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if rif.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 0 {
+	if rif.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 0 {
 		t.Errorf("Error debiting from shared group: %+v", rif.BalanceMap[utils.MONETARY+OUTBOUND][0])
 	}
 	groupie, _ = accountingStorage.GetAccount("groupie")
-	if groupie.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 10 {
+	if groupie.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 10 {
 		t.Errorf("Error debiting from shared group: %+v", groupie.BalanceMap[utils.MONETARY+OUTBOUND][0])
 	}
 
@@ -1162,10 +1162,10 @@ func TestDebitSMS(t *testing.T) {
 	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.SMS+OUTBOUND][0].Value != 99 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 21 {
+	if rifsBalance.BalanceMap[utils.SMS+OUTBOUND][0].GetValue() != 99 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 21 {
 		t.Log(cc.Timespans[0].Increments)
-		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.SMS+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.SMS+OUTBOUND][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 }
 
@@ -1205,10 +1205,10 @@ func TestDebitGeneric(t *testing.T) {
 	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.GENERIC+OUTBOUND][0].Value != 99 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 21 {
+	if rifsBalance.BalanceMap[utils.GENERIC+OUTBOUND][0].GetValue() != 99 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 21 {
 		t.Log(cc.Timespans[0].Increments)
-		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.GENERIC+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.GENERIC+OUTBOUND][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 }
 
@@ -1260,10 +1260,10 @@ func TestDebitDataUnits(t *testing.T) {
 	if ts.Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
 		t.Error("Error setting balance id to increment: ", ts.Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].Value != 20 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 21 {
+	if rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].GetValue() != 20 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 21 {
 		t.Log(ts.Increments)
-		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 }
 
@@ -1306,9 +1306,9 @@ func TestDebitDataMoney(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 0 {
-		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].Value, rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].Value)
+	if rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].GetValue() != 0 ||
+		rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 0 {
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.DATA+OUTBOUND][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue())
 	}
 }
 
