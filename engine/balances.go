@@ -285,11 +285,11 @@ func (b *Balance) GetValue() float64 {
 }
 
 func (b *Balance) AddValue(amount float64) {
-	b.SetValue(b.Value + amount)
+	b.SetValue(b.GetValue() + amount)
 }
 
 func (b *Balance) SubstractValue(amount float64) {
-	b.SetValue(b.Value - amount)
+	b.SetValue(b.GetValue() - amount)
 }
 
 func (b *Balance) SetValue(amount float64) {
