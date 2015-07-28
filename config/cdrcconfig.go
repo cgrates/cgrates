@@ -26,6 +26,7 @@ import (
 
 type CdrcConfig struct {
 	Enabled                 bool            // Enable/Disable the profile
+	DryRun                  bool            // Do not post CDRs to the server
 	Cdrs                    string          // The address where CDRs can be reached
 	CdrFormat               string          // The type of CDR file to process <csv|opensips_flatstore>
 	FieldSeparator          rune            // The separator to use when reading csvs
@@ -50,6 +51,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	var err error
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Dry_run != nil {
+		self.DryRun = *jsnCfg.Dry_run
 	}
 	if jsnCfg.Cdrs != nil {
 		self.Cdrs = *jsnCfg.Cdrs

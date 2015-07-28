@@ -75,8 +75,8 @@ const CGRATES_CFG_JSON = `
 	"db_name": "cgrates", 					// stor database name
 	"db_user": "cgrates", 					// username to use when connecting to stordb
 	"db_passwd": "CGRateS.org", 			// password to use when connecting to stordb
-	"max_open_conns": 0,					// maximum database connections opened
-	"max_idle_conns": -1,					// maximum database connections idle
+	"max_open_conns": 100,					// maximum database connections opened
+	"max_idle_conns": 10,					// maximum database connections idle
 },
 
 
@@ -156,6 +156,7 @@ const CGRATES_CFG_JSON = `
 "cdrc": {
 	"*default": {
 		"enabled": false,							// enable CDR client functionality
+		"dry_run": false,							// do not send the CDRs to CDRS, just parse them
 		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
 		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": ",",						// separator used in case of csv files
