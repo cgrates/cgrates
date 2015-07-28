@@ -411,28 +411,56 @@ func (rs *RedisStorage) SetRpAlias(key, alias string) (err error) {
 }
 
 // Removes the aliases of a specific account, on a tenant
-func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject) (err error) {
-	alsMap, err := cache2go.GetAllEntries(utils.RP_ALIAS_PREFIX)
-	if err != nil {
-		return err
-	}
-
-	for key, aliasInterface := range alsMap {
-		alias := aliasInterface.Value().(string)
-		for _, tntRSubj := range tenantRtSubjects {
-			tenantPrfx := tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
-			if len(key) < len(tenantPrfx) || !strings.HasPrefix(key, tenantPrfx) { // filter out the tenant for accounts
-				continue
-			}
-			if tntRSubj.Subject != alias {
-				continue
-			}
-			if _, err = rs.db.Del(utils.RP_ALIAS_PREFIX + key); err != nil {
-				return err
-			}
-			cache2go.RemKey(utils.RP_ALIAS_PREFIX + key)
-			break
+func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject, skipCache bool) (err error) {
+	if skipCache {
+		alsKeys, err := rs.db.Keys(utils.RP_ALIAS_PREFIX + "*")
+		if err != nil {
+			return err
 		}
+		for _, key := range alsKeys {
+			for _, tntRSubj := range tenantRtSubjects {
+				tenantPrfx := utils.RP_ALIAS_PREFIX + tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
+				if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
+					continue
+				}
+				alias, err := rs.GetRpAlias(key[len(utils.RP_ALIAS_PREFIX):], true)
+				if err != nil {
+					return err
+				}
+				if tntRSubj.Subject != alias {
+					continue
+				}
+				cache2go.RemKey(key)
+				if _, err = rs.db.Del(key); err != nil {
+					return err
+				}
+				break
+			}
+		}
+	} else {
+		alsMap, err := cache2go.GetAllEntries(utils.RP_ALIAS_PREFIX)
+		if err != nil {
+			return err
+		}
+
+		for key, aliasInterface := range alsMap {
+			alias := aliasInterface.Value().(string)
+			for _, tntRSubj := range tenantRtSubjects {
+				tenantPrfx := tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
+				if len(key) < len(tenantPrfx) || !strings.HasPrefix(key, tenantPrfx) { // filter out the tenant for accounts
+					continue
+				}
+				if tntRSubj.Subject != alias {
+					continue
+				}
+				if _, err = rs.db.Del(utils.RP_ALIAS_PREFIX + key); err != nil {
+					return err
+				}
+				cache2go.RemKey(utils.RP_ALIAS_PREFIX + key)
+				break
+			}
+		}
+
 	}
 	return
 }
@@ -506,26 +534,53 @@ func (rs *RedisStorage) SetAccAlias(key, alias string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err error) {
-	alsMap, err := cache2go.GetAllEntries(utils.ACC_ALIAS_PREFIX)
-	if err != nil {
-		return err
-	}
+func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount, skipCache bool) (err error) {
+	if skipCache {
+		alsKeys, err := rs.db.Keys(utils.ACC_ALIAS_PREFIX + "*")
+		if err != nil {
+			return err
+		}
+		for _, key := range alsKeys {
+			for _, tntAcnt := range tenantAccounts {
+				tenantPrfx := utils.ACC_ALIAS_PREFIX + tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
+				if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
+					continue
+				}
+				alias, err := rs.GetAccAlias(key[len(utils.ACC_ALIAS_PREFIX):], true)
+				if err != nil {
+					return err
+				}
+				if tntAcnt.Account != alias {
+					continue
+				}
+				cache2go.RemKey(key)
+				if _, err = rs.db.Del(key); err != nil {
+					return err
+				}
+			}
+		}
 
-	for key, aliasInterface := range alsMap {
-		alias := aliasInterface.Value().(string)
-		for _, tntAcnt := range tenantAccounts {
-			tenantPrfx := tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
-			if len(key) < len(tenantPrfx) || !strings.HasPrefix(key, tenantPrfx) { // filter out the tenant for accounts
-				continue
+	} else {
+		alsMap, err := cache2go.GetAllEntries(utils.ACC_ALIAS_PREFIX)
+		if err != nil {
+			return err
+		}
+
+		for key, aliasInterface := range alsMap {
+			alias := aliasInterface.Value().(string)
+			for _, tntAcnt := range tenantAccounts {
+				tenantPrfx := tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
+				if len(key) < len(tenantPrfx) || !strings.HasPrefix(key, tenantPrfx) { // filter out the tenant for accounts
+					continue
+				}
+				if tntAcnt.Account != alias {
+					continue
+				}
+				if _, err = rs.db.Del(utils.ACC_ALIAS_PREFIX + key); err != nil {
+					return err
+				}
+				cache2go.RemKey(utils.ACC_ALIAS_PREFIX + key)
 			}
-			if tntAcnt.Account != alias {
-				continue
-			}
-			if _, err = rs.db.Del(utils.ACC_ALIAS_PREFIX + key); err != nil {
-				return err
-			}
-			cache2go.RemKey(utils.ACC_ALIAS_PREFIX + key)
 		}
 	}
 	return

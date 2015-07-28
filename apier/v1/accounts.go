@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"math"
 	"regexp"
 	"strings"
 	"time"
@@ -255,7 +256,8 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	}
 	var limitedAccounts []string
 	if attr.Limit != 0 {
-		limitedAccounts = accountKeys[attr.Offset : attr.Offset+attr.Limit]
+		max := math.Min(float64(attr.Offset+attr.Limit), float64(len(accountKeys)))
+		limitedAccounts = accountKeys[attr.Offset:int(max)]
 	} else {
 		limitedAccounts = accountKeys[attr.Offset:]
 	}

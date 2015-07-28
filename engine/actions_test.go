@@ -666,7 +666,7 @@ func TestActionResetTriggresExecutesThem(t *testing.T) {
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetTriggersAction(ub, nil, nil, nil)
-	if ub.ActionTriggers[0].Executed == true || ub.BalanceMap[utils.MONETARY][0].Value == 12 {
+	if ub.ActionTriggers[0].Executed == true || ub.BalanceMap[utils.MONETARY][0].GetValue() == 12 {
 		t.Error("Reset triggers action failed!")
 	}
 }
@@ -723,7 +723,7 @@ func TestActionResetPrepaid(t *testing.T) {
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
-		ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 0 ||
+		ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 0 ||
 		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
 		t.Log(ub.BalanceMap)
 		t.Error("Reset prepaid action failed!")
@@ -740,7 +740,7 @@ func TestActionResetPostpaid(t *testing.T) {
 	resetAccountAction(ub, nil, nil, nil)
 	if ub.BalanceMap[utils.MONETARY].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
-		ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 0 ||
+		ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 0 ||
 		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
 		t.Error("Reset postpaid action failed!")
 	}
@@ -888,7 +888,7 @@ func TestActionDebitMinutes(t *testing.T) {
 	a := &Action{BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: &Balance{Value: 5, Weight: 20, DestinationIds: "NAT"}}
 	debitAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
-		ub.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 5 ||
+		ub.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 5 ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
 		len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 2 ||
@@ -922,7 +922,7 @@ func TestActionResetAllCounters(t *testing.T) {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[0].Balances[0]
-	if mb.Weight != 20 || mb.Value != 0 || mb.DestinationIds != "NAT" {
+	if mb.Weight != 20 || mb.GetValue() != 0 || mb.DestinationIds != "NAT" {
 		t.Errorf("Balance cloned incorrectly: %v!", mb)
 	}
 }
@@ -954,7 +954,7 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[1].Balances[0]
-	if mb.Weight != 20 || mb.Value != 0 || mb.DestinationIds != "NAT" {
+	if mb.Weight != 20 || mb.GetValue() != 0 || mb.DestinationIds != "NAT" {
 		t.Errorf("Balance cloned incorrectly: %+v!", mb)
 	}
 }
@@ -1055,11 +1055,11 @@ func TestActionPlanLogging(t *testing.T) {
 func TestActionMakeNegative(t *testing.T) {
 	a := &Action{Balance: &Balance{Value: 10}}
 	genericMakeNegative(a)
-	if a.Balance.Value > 0 {
+	if a.Balance.GetValue() > 0 {
 		t.Error("Failed to make negative: ", a)
 	}
 	genericMakeNegative(a)
-	if a.Balance.Value > 0 {
+	if a.Balance.GetValue() > 0 {
 		t.Error("Failed to preserve negative: ", a)
 	}
 }

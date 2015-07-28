@@ -699,11 +699,11 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 	}
 	acc, _ := cd.getAccount()
 	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
-	if len(balanceMap) != 1 || balanceMap[0].Value != 0 {
+	if len(balanceMap) != 1 || balanceMap[0].GetValue() != 0 {
 		t.Errorf("Wrong shared balance debited: %+v", balanceMap[0])
 	}
 	other, err := accountingStorage.GetAccount("*out:vdf:empty10")
-	if err != nil || other.BalanceMap[utils.MONETARY+OUTBOUND][0].Value != 7.5 {
+	if err != nil || other.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 7.5 {
 		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MONETARY+OUTBOUND][0])
 	}
 }
@@ -916,8 +916,8 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 		t.Errorf("Debit from share and normal error: %+v, %v", cc, err)
 	}
 
-	if balanceMap[0].Value != 10 || balanceMap[1].Value != 27.5 {
-		t.Errorf("Error debiting from right balance: %v %v", balanceMap[0].Value, balanceMap[1].Value)
+	if balanceMap[0].GetValue() != 10 || balanceMap[1].GetValue() != 27.5 {
+		t.Errorf("Error debiting from right balance: %v %v", balanceMap[0].GetValue(), balanceMap[1].GetValue())
 	}
 }
 
@@ -944,8 +944,8 @@ func TestDebitFromEmptyShare(t *testing.T) {
 	}
 	acc, _ := cd.getAccount()
 	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
-	if len(balanceMap) != 2 || balanceMap[0].Value != 0 || balanceMap[1].Value != -2.5 {
-		t.Errorf("Error debiting from empty share: %+v", balanceMap[1].Value)
+	if len(balanceMap) != 2 || balanceMap[0].GetValue() != 0 || balanceMap[1].GetValue() != -2.5 {
+		t.Errorf("Error debiting from empty share: %+v", balanceMap[1].GetValue())
 	}
 }
 
@@ -973,16 +973,16 @@ func TestDebitNegatve(t *testing.T) {
 	acc, _ := cd.getAccount()
 	//utils.PrintFull(acc)
 	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
-	if len(balanceMap) != 1 || balanceMap[0].Value != -2.5 {
-		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].Value)
+	if len(balanceMap) != 1 || balanceMap[0].GetValue() != -2.5 {
+		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].GetValue())
 	}
 	cc, err = cd.MaxDebit()
 	//utils.PrintFull(cc)
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
 	}
-	if len(balanceMap) != 1 || balanceMap[0].Value != -5 {
-		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].Value)
+	if len(balanceMap) != 1 || balanceMap[0].GetValue() != -5 {
+		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].GetValue())
 	}
 }
 
@@ -1059,8 +1059,8 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 		LoopIndex:     0,
 		DurationIndex: 0}
 	cd1.MaxDebit()
-	if cd1.account.BalanceMap[utils.VOICE+OUTBOUND][0].Value != 20 {
-		t.Error("Error using minutes: ", cd1.account.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
+	if cd1.account.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 20 {
+		t.Error("Error using minutes: ", cd1.account.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
 	}
 }
 

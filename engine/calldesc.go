@@ -115,7 +115,7 @@ func SetUserService(us UserService) {
 func Publish(event CgrEvent) {
 	if pubSubServer != nil {
 		var s string
-		pubSubServer.Publish(PublishInfo{Event: event}, &s)
+		pubSubServer.Publish(event, &s)
 	}
 }
 
@@ -523,7 +523,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
 
 	//use this to check what increment was payed with debt
-	initialDefaultBalanceValue := defaultBalance.Value
+	initialDefaultBalanceValue := defaultBalance.GetValue()
 
 	//Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
 	//Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))

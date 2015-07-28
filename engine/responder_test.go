@@ -99,13 +99,13 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 		t.Error(err)
 		//} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND].Equal(rifsAccount.BalanceMap[utils.VOICE+OUTBOUND]) {
 		//	t.Errorf("Expected: %+v, received: %+v", rifsAccount.BalanceMap[utils.VOICE+OUTBOUND][0], rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0])
-	} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].Value != rifsAccount.BalanceMap[utils.VOICE+OUTBOUND][0].Value {
-		t.Error("BalanceValue: ", rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
+	} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != rifsAccount.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() {
+		t.Error("BalanceValue: ", rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
 	}
 	if danStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(utils.OUT, testTenant, "dan")); err != nil {
 		t.Error(err)
-	} else if danStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].Value != dansAccount.BalanceMap[utils.VOICE+OUTBOUND][0].Value {
-		t.Error("BalanceValue: ", danStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].Value)
+	} else if danStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != dansAccount.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() {
+		t.Error("BalanceValue: ", danStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
 	}
 	var dcs utils.DerivedChargers
 	attrs := &utils.AttrDerivedChargers{Tenant: testTenant, Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}

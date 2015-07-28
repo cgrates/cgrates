@@ -49,7 +49,7 @@ func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 		for _, a := range acs {
 			if a.Balance != nil {
 				b := a.Balance.Clone()
-				b.Value = 0
+				b.SetValue(0)
 				if !uc.Balances.HasBalance(b) {
 					uc.Balances = append(uc.Balances, b)
 				}
@@ -80,7 +80,7 @@ func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
 				if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					if _, found := destIds[mb.DestinationIds]; found {
-						mb.Value += amount
+						mb.AddValue(amount)
 						counted = true
 						break
 					}
@@ -94,7 +94,7 @@ func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
 	if !counted {
 		// use general balance
 		b := uc.GetGeneralBalance()
-		b.Value += amount
+		b.AddValue(amount)
 	}
 }
 
