@@ -207,10 +207,12 @@ func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 	if err != nil {
 		return nil, err
 	}
-	if record, err = self.processPartialRecord(record); err != nil {
-		return nil, err
-	} else if record == nil {
-		return nil, nil // Due to partial, none returned
+	if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.cdrFormat) {
+		if record, err = self.processPartialRecord(record); err != nil {
+			return nil, err
+		} else if record == nil {
+			return nil, nil // Due to partial, none returned
+		}
 	}
 	// Record was overwriten with complete information out of cache
 	return self.processRecord(record)
