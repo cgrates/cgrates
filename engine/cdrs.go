@@ -147,6 +147,11 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
+	if upData, err := LoadUserProfile(storedCdr, "ExtraFields"); err != nil {
+		return err
+	} else {
+		*storedCdr = upData.(StoredCdr)
+	}
 	if storedCdr.ReqType == utils.META_NONE {
 		return nil
 	}
