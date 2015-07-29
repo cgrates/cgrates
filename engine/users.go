@@ -355,6 +355,7 @@ func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) er
 	return ps.Client.Call("UsersV1.AddIndex", in, reply)
 }
 
+// extraFields - Field name in the interface containing extraFields information
 func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 	if userService == nil { // no user service => no fun
 		return in, nil
@@ -363,7 +364,16 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	var needsUsers bool
+	for _, val := range m {
+		if val == utils.USERS {
+			needsUsers = true
+			break
+		}
+	}
+	if !needsUsers { // Do not process further if user profile is not needed
+		return in, nil
+	}
 	up := &UserProfile{
 		Profile: make(map[string]string),
 	}
