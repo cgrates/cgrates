@@ -4,9 +4,11 @@
 Loading **CGRateS** Tariff Plans
 --------------------------------
 
-Before proceeding to this step, you should have **CGRateS** installed and started with custom configuration, depending on the tutorial you have followed.
+Before proceeding to this step, you should have **CGRateS** installed and
+started with custom configuration, depending on the tutorial you have followed.
 
-For our tutorial we load again prepared data out of shared folder, containing following rules:
+For our tutorial we load again prepared data out of shared folder, containing
+following rules:
 
 - Create the necessary timings (always, asap, peak, offpeak).
 - Configure 3 destinations (1002, 1003 and 10 used as catch all rule).
@@ -68,11 +70,11 @@ To verify that all actions successfully performed, we use following *cgr-console
 
  ::
 
-  cgr-console 'account Tenant="cgrates.org" Account="1001"'
-  cgr-console 'account Tenant="cgrates.org" Account="1002"'
-  cgr-console 'account Tenant="cgrates.org" Account="1003"'
-  cgr-console 'account Tenant="cgrates.org" Account="1004"'
-  cgr-console 'account Tenant="cgrates.org" Account="1005"'
+  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1001"]'
+  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1002"]'
+  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1003"]'
+  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1004"]'
+  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1005"]'
 
 - Query call costs so we can see our calls will have expected costs (final cost will result as sum of *ConnectFee* and *Cost* fields):
 
@@ -108,7 +110,7 @@ Check that 1001 balance is properly deducted, during the call, and moreover cons
 
 ::
 
- cgr-console 'account Tenant="cgrates.org" Account="1001"'
+ cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1001"]'
 
 
 1002 -> 1001
@@ -120,7 +122,7 @@ To check that we had debits we use again console command, this time not during t
 
 ::
 
- cgr-console 'account Tenant="cgrates.org" Account="1002"'
+ cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1002"]'
 
 
 1003 -> 1001
@@ -132,7 +134,7 @@ To check that there are no debits during or by the end of the call, but when the
 
 ::
 
- cgr-console 'account Tenant="cgrates.org" Account="1003"'
+ cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1003"]'
 
 
 1004 -> 1001
@@ -150,8 +152,8 @@ Check that 1001 balance is properly debitted, during the call, and moreover cons
 
 ::
 
- cgr-console 'account Tenant="cgrates.org" Account="1006"'
- cgr-console 'account Tenant="cgrates.org" Account="1001"'
+ cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1006"]'
+ cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1001"]'
 
 
 1007 -> 1002
@@ -163,8 +165,8 @@ Check that call can proceed even if 1007 has no units left into his own balances
 
 ::
 
- cgr-console 'account Tenant="cgrates.org" Account="1007"'
- cgr-console 'account Tenant="cgrates.org" Account="1001"'
+ cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1007"]'
+ cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1001"]'
 
 
 CDR Exporting
