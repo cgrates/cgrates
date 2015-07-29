@@ -18,14 +18,9 @@ func TestStructMapStruct(t *testing.T) {
 		Address: "3",
 		Other:   "",
 	}
-	m, err := ToMapStringString(ts)
-	if err != nil {
-		t.Error("Error converting to map: ", err)
-	}
-	out, err := FromMapStringString(m, ts)
-	if err != nil {
-		t.Error("Error converting to struct: ", err)
-	}
+	m := ToMapStringString(ts)
+
+	out := FromMapStringString(m, ts)
 	nts := out.(TestStruct)
 	if !reflect.DeepEqual(ts, &nts) {
 		t.Log(m)
@@ -46,15 +41,10 @@ func TestMapStructAddStructs(t *testing.T) {
 		Address: "3",
 		Other:   "",
 	}
-	m, err := ToMapStringString(ts)
-	if err != nil {
-		t.Error("Error converting to map: ", err)
-	}
+	m := ToMapStringString(ts)
 	m["Test"] = "4"
-	out, err := FromMapStringString(m, ts)
-	if err != nil {
-		t.Error("Error converting to struct: ", err)
-	}
+	out := FromMapStringString(m, ts)
+
 	nts := out.(TestStruct)
 	if !reflect.DeepEqual(ts, &nts) {
 		t.Log(m)
@@ -78,10 +68,7 @@ func TestStructExtraFields(t *testing.T) {
 			"k3": "v3",
 		},
 	}
-	efMap, err := GetMapExtraFields(ts, "ExtraFields")
-	if err != nil {
-		t.Error("Error getting extra fields: ", err)
-	}
+	efMap := GetMapExtraFields(ts, "ExtraFields")
 
 	if !reflect.DeepEqual(efMap, ts.ExtraFields) {
 		t.Errorf("expected: %v got: %v", ts.ExtraFields, efMap)

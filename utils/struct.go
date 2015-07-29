@@ -78,7 +78,7 @@ func NonemptyStructFields(s interface{}) map[string]interface{} {
 }*/
 
 // Converts a struct to map[string]interface{}
-func ToMapMapStringInterface(in interface{}) (map[string]interface{}, error) {
+func ToMapMapStringInterface(in interface{}) map[string]interface{} {
 	out := make(map[string]interface{})
 
 	v := reflect.ValueOf(in)
@@ -89,11 +89,11 @@ func ToMapMapStringInterface(in interface{}) (map[string]interface{}, error) {
 	for i := 0; i < v.NumField(); i++ {
 		out[typ.Field(i).Name] = v.Field(i).Interface()
 	}
-	return out, nil
+	return out
 }
 
 // Converts a struct to map[string]string
-func ToMapStringString(in interface{}) (map[string]string, error) {
+func ToMapStringString(in interface{}) map[string]string {
 	out := make(map[string]string)
 
 	v := reflect.ValueOf(in)
@@ -110,11 +110,10 @@ func ToMapStringString(in interface{}) (map[string]string, error) {
 			out[typField.Name] = field.String()
 		}
 	}
-	return out, nil
+	return out
 }
 
-// Converts a struct to map[string]string
-func GetMapExtraFields(in interface{}, extraFields string) (map[string]string, error) {
+func GetMapExtraFields(in interface{}, extraFields string) map[string]string {
 	out := make(map[string]string)
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
@@ -128,21 +127,38 @@ func GetMapExtraFields(in interface{}, extraFields string) (map[string]string, e
 			out[key.String()] = field.MapIndex(key).String()
 		}
 	}
-	return out, nil
+	return out
 }
 
-func FromMapStringString(m map[string]string, in interface{}) (interface{}, error) {
+func SetMapExtraFields(in interface{}, values map[string]string, extraFields string) {
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 		in = v.Interface()
 	}
-	st := reflect.TypeOf(in)
-	elem := reflect.New(st).Elem()
-	for fieldName, fieldValue := range m {
-		field := elem.FieldByName(fieldName)
-		if field.IsValid() {
+	efField := v.FieldByName(extraFields)
+	if efField.Kind() == reflect.Map {
+		keys := efField.MapKeys()
+		for _, key := range keys {
+			if efField.MapIndex(key).String() != "" {
+				if val, found := values[key.String()]; found {
+					efField.SetMapIndex(key, reflect.ValueOf(val))
+				}
+			}
+		}
+	}
+	return
+}
 
+func FromMapStringString(m map[string]string, in interface{}) {
+	v := reflect.ValueOf(in)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+		in = v.Interface()
+	}
+	for fieldName, fieldValue := range m {
+		field := v.FieldByName(fieldName)
+		if field.IsValid() {
 			if field.Kind() == reflect.String {
 				if v.FieldByName(fieldName).String() != "" {
 					field.SetString(fieldValue)
@@ -150,7 +166,7 @@ func FromMapStringString(m map[string]string, in interface{}) (interface{}, erro
 			}
 		}
 	}
-	return elem.Interface(), nil
+	return
 }
 
 // Update struct with map fields, returns not matching map keys, s is a struct to be updated
