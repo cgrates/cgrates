@@ -3,6 +3,7 @@ package engine
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -520,7 +521,7 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 	}
 }
 
-func TestUsersStoredCDRGetLoadUserProfile(t *testing.T) {
+func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
@@ -562,13 +563,13 @@ func TestUsersStoredCDRGetLoadUserProfile(t *testing.T) {
 		AnswerTime:  "t4",
 		Usage:       "13",
 	}
-	*ur = out.(UsageRecord)
+	ur = out.(*UsageRecord)
 	if !reflect.DeepEqual(ur, expected) {
 		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
 }
 
-func TestUsersStoredCDRGetLoadUserProfileExtraFields(t *testing.T) {
+func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
@@ -612,14 +613,17 @@ func TestUsersStoredCDRGetLoadUserProfileExtraFields(t *testing.T) {
 		SetupTime:   "s4",
 		AnswerTime:  "t4",
 		Usage:       "13",
+		ExtraFields: map[string]string{
+			"Test": "1",
+		},
 	}
-	*ur = out.(ExternalCdr)
+	ur = out.(*ExternalCdr)
 	if !reflect.DeepEqual(ur, expected) {
 		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
 }
 
-func TestUsersStoredCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
+func TestUsersExternalCdrGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
@@ -650,5 +654,149 @@ func TestUsersStoredCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 	_, err := LoadUserProfile(ur, "ExtraFields")
 	if err != utils.ErrNotFound {
 		t.Error("Error detecting err in loading user profile: ", err)
+	}
+}
+
+func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
+	userService = &UserMap{
+		table: map[string]map[string]string{
+			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1", "Best": "BestValue"},
+		},
+		index: make(map[string]map[string]bool),
+	}
+
+	ur := &ExternalCdr{
+		TOR:         utils.USERS,
+		ReqType:     utils.USERS,
+		Direction:   "*out",
+		Tenant:      "",
+		Category:    "call",
+		Account:     utils.USERS,
+		Subject:     utils.USERS,
+		Destination: utils.USERS,
+		SetupTime:   utils.USERS,
+		AnswerTime:  utils.USERS,
+		Usage:       "13",
+		ExtraFields: map[string]string{
+			"Test": "1",
+			"Best": utils.USERS,
+		},
+	}
+
+	out, err := LoadUserProfile(ur, "ExtraFields")
+	if err != nil {
+		t.Error("Error loading user profile: ", err)
+	}
+	expected := &ExternalCdr{
+		TOR:         "04",
+		ReqType:     "4",
+		Direction:   "*out",
+		Tenant:      "",
+		Category:    "call",
+		Account:     "rif",
+		Subject:     "0726",
+		Destination: "+404",
+		SetupTime:   "s4",
+		AnswerTime:  "t4",
+		Usage:       "13",
+		ExtraFields: map[string]string{
+			"Test": "1",
+			"Best": "BestValue",
+		},
+	}
+	ur = out.(*ExternalCdr)
+	if !reflect.DeepEqual(ur, expected) {
+		t.Errorf("Expected: %+v got: %+v", expected, ur)
+	}
+}
+
+func TestUsersCallDescLoadUserProfile(t *testing.T) {
+	userService = &UserMap{
+		table: map[string]map[string]string{
+			"cgrates.org:dan":      map[string]string{"ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
+			"cgrates.org:danvoice": map[string]string{"TOR": "*voice", "ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
+			"cgrates:rif":          map[string]string{"ReqType": "*postpaid", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726"},
+		},
+		index: make(map[string]map[string]bool),
+	}
+	startTime := time.Now()
+	cd := &CallDescriptor{
+		TOR:         "*sms",
+		Tenant:      utils.USERS,
+		Category:    utils.USERS,
+		Subject:     utils.USERS,
+		Account:     utils.USERS,
+		Destination: "+4986517174963",
+		TimeStart:   startTime,
+		TimeEnd:     startTime.Add(time.Duration(1) * time.Minute),
+		ExtraFields: map[string]string{"Cli": "+4986517174963"},
+	}
+	expected := &CallDescriptor{
+		TOR:         "*sms",
+		Tenant:      "cgrates.org",
+		Category:    "call1",
+		Account:     "dan",
+		Subject:     "dan",
+		Destination: "+4986517174963",
+		TimeStart:   startTime,
+		TimeEnd:     startTime.Add(time.Duration(1) * time.Minute),
+		ExtraFields: map[string]string{"Cli": "+4986517174963"},
+	}
+	out, err := LoadUserProfile(cd, "ExtraFields")
+	if err != nil {
+		t.Error("Error loading user profile: ", err)
+	}
+	cdRcv := out.(*CallDescriptor)
+	if !reflect.DeepEqual(expected, cdRcv) {
+		t.Errorf("Expected: %+v got: %+v", expected, cdRcv)
+	}
+}
+
+func TestUsersStoredCdrLoadUserProfile(t *testing.T) {
+	userService = &UserMap{
+		table: map[string]map[string]string{
+			"cgrates.org:dan":      map[string]string{"ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
+			"cgrates.org:danvoice": map[string]string{"TOR": "*voice", "ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
+			"cgrates:rif":          map[string]string{"ReqType": "*postpaid", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726"},
+		},
+		index: make(map[string]map[string]bool),
+	}
+	startTime := time.Now()
+	cdr := &StoredCdr{
+		TOR:         "*sms",
+		ReqType:     utils.USERS,
+		Tenant:      utils.USERS,
+		Category:    utils.USERS,
+		Account:     utils.USERS,
+		Subject:     utils.USERS,
+		Destination: "+4986517174963",
+		SetupTime:   startTime,
+		AnswerTime:  startTime,
+		Usage:       time.Duration(1) * time.Minute,
+		ExtraFields: map[string]string{"Cli": "+4986517174963"},
+	}
+	expected := &StoredCdr{
+		TOR:         "*sms",
+		ReqType:     "*prepaid",
+		Tenant:      "cgrates.org",
+		Category:    "call1",
+		Account:     "dan",
+		Subject:     "dan",
+		Destination: "+4986517174963",
+		SetupTime:   startTime,
+		AnswerTime:  startTime,
+		Usage:       time.Duration(1) * time.Minute,
+		ExtraFields: map[string]string{"Cli": "+4986517174963"},
+	}
+	out, err := LoadUserProfile(cdr, "ExtraFields")
+	if err != nil {
+		t.Error("Error loading user profile: ", err)
+	}
+	cdRcv := out.(*StoredCdr)
+	if !reflect.DeepEqual(expected, cdRcv) {
+		t.Errorf("Expected: %+v got: %+v", expected, cdRcv)
 	}
 }

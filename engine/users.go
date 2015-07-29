@@ -360,10 +360,7 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 	if userService == nil { // no user service => no fun
 		return in, nil
 	}
-	m, err := utils.ToMapStringString(in)
-	if err != nil {
-		return nil, err
-	}
+	m := utils.ToMapStringString(in)
 	var needsUsers bool
 	for _, val := range m {
 		if val == utils.USERS {
@@ -391,12 +388,9 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 	}
 	// add extra fields
 	if extraFields != "" {
-		extra, err := utils.GetMapExtraFields(in, extraFields)
-		if err != nil {
-			return nil, err
-		}
+		extra := utils.GetMapExtraFields(in, extraFields)
 		for key, val := range extra {
-			if val != "" {
+			if val != "" && val != utils.USERS {
 				up.Profile[key] = val
 			}
 		}
@@ -409,7 +403,9 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 		up = ups[0]
 		m := up.Profile
 		m["Tenant"] = up.Tenant
-		return utils.FromMapStringString(m, in)
+		utils.FromMapStringString(m, in)
+		utils.SetMapExtraFields(in, m, extraFields)
+		return in, nil
 	}
 	return nil, utils.ErrNotFound
 }

@@ -18,16 +18,16 @@ func TestStructMapStruct(t *testing.T) {
 		Address: "3",
 		Other:   "",
 	}
-	m, err := ToMapStringString(ts)
-	if err != nil {
-		t.Error("Error converting to map: ", err)
+	nts := &TestStruct{
+		Name:    "1",
+		Surname: "2",
+		Address: "3",
+		Other:   "",
 	}
-	out, err := FromMapStringString(m, ts)
-	if err != nil {
-		t.Error("Error converting to struct: ", err)
-	}
-	nts := out.(TestStruct)
-	if !reflect.DeepEqual(ts, &nts) {
+	m := ToMapStringString(ts)
+
+	FromMapStringString(m, ts)
+	if !reflect.DeepEqual(ts, nts) {
 		t.Log(m)
 		t.Errorf("Expected: %+v got: %+v", ts, nts)
 	}
@@ -46,17 +46,17 @@ func TestMapStructAddStructs(t *testing.T) {
 		Address: "3",
 		Other:   "",
 	}
-	m, err := ToMapStringString(ts)
-	if err != nil {
-		t.Error("Error converting to map: ", err)
+	nts := &TestStruct{
+		Name:    "1",
+		Surname: "2",
+		Address: "3",
+		Other:   "",
 	}
+	m := ToMapStringString(ts)
 	m["Test"] = "4"
-	out, err := FromMapStringString(m, ts)
-	if err != nil {
-		t.Error("Error converting to struct: ", err)
-	}
-	nts := out.(TestStruct)
-	if !reflect.DeepEqual(ts, &nts) {
+	FromMapStringString(m, ts)
+
+	if !reflect.DeepEqual(ts, nts) {
 		t.Log(m)
 		t.Errorf("Expected: %+v got: %+v", ts, nts)
 	}
@@ -78,10 +78,7 @@ func TestStructExtraFields(t *testing.T) {
 			"k3": "v3",
 		},
 	}
-	efMap, err := GetMapExtraFields(ts, "ExtraFields")
-	if err != nil {
-		t.Error("Error getting extra fields: ", err)
-	}
+	efMap := GetMapExtraFields(ts, "ExtraFields")
 
 	if !reflect.DeepEqual(efMap, ts.ExtraFields) {
 		t.Errorf("expected: %v got: %v", ts.ExtraFields, efMap)
