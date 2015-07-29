@@ -132,7 +132,8 @@ type CallDescriptor struct {
 	FallbackSubject                       string        // the subject to check for destination if not found on primary subject
 	RatingInfos                           RatingInfos
 	Increments                            Increments
-	TOR                                   string // used unit balances selector
+	TOR                                   string            // used unit balances selector
+	ExtraFields                           map[string]string // Extra fields, mostly used for user profile matching
 	// session limits
 	MaxRate      float64
 	MaxRateUnit  time.Duration
