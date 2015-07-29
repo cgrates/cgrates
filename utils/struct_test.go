@@ -18,11 +18,16 @@ func TestStructMapStruct(t *testing.T) {
 		Address: "3",
 		Other:   "",
 	}
+	nts := &TestStruct{
+		Name:    "1",
+		Surname: "2",
+		Address: "3",
+		Other:   "",
+	}
 	m := ToMapStringString(ts)
 
-	out := FromMapStringString(m, ts)
-	nts := out.(TestStruct)
-	if !reflect.DeepEqual(ts, &nts) {
+	FromMapStringString(m, ts)
+	if !reflect.DeepEqual(ts, nts) {
 		t.Log(m)
 		t.Errorf("Expected: %+v got: %+v", ts, nts)
 	}
@@ -41,12 +46,17 @@ func TestMapStructAddStructs(t *testing.T) {
 		Address: "3",
 		Other:   "",
 	}
+	nts := &TestStruct{
+		Name:    "1",
+		Surname: "2",
+		Address: "3",
+		Other:   "",
+	}
 	m := ToMapStringString(ts)
 	m["Test"] = "4"
-	out := FromMapStringString(m, ts)
+	FromMapStringString(m, ts)
 
-	nts := out.(TestStruct)
-	if !reflect.DeepEqual(ts, &nts) {
+	if !reflect.DeepEqual(ts, nts) {
 		t.Log(m)
 		t.Errorf("Expected: %+v got: %+v", ts, nts)
 	}
