@@ -1251,7 +1251,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Rating Profile Aliases:")
 	}
-	if err := tpr.ratingStorage.RemoveRpAliases(tpr.dirtyRpAliases); err != nil {
+	if err := tpr.ratingStorage.RemoveRpAliases(tpr.dirtyRpAliases, true); err != nil {
 		return err
 	}
 	for key, alias := range tpr.rpAliases {
@@ -1266,7 +1266,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Account Aliases:")
 	}
-	if err := tpr.ratingStorage.RemoveAccAliases(tpr.dirtyAccAliases); err != nil {
+	if err := tpr.ratingStorage.RemoveAccAliases(tpr.dirtyAccAliases, true); err != nil {
 		return err
 	}
 	for key, alias := range tpr.accAliases {

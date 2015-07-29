@@ -102,8 +102,8 @@ func TestDfDbJsonCfg(t *testing.T) {
 		Db_name:        utils.StringPointer("cgrates"),
 		Db_user:        utils.StringPointer("cgrates"),
 		Db_passwd:      utils.StringPointer("CGRateS.org"),
-		Max_open_conns: utils.IntPointer(0),
-		Max_idle_conns: utils.IntPointer(-1),
+		Max_open_conns: utils.IntPointer(100),
+		Max_idle_conns: utils.IntPointer(10),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)
@@ -290,6 +290,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 	eCfg := map[string]*CdrcJsonCfg{
 		"*default": &CdrcJsonCfg{
 			Enabled:                    utils.BoolPointer(false),
+			Dry_run:                    utils.BoolPointer(false),
 			Cdrs:                       utils.StringPointer("internal"),
 			Cdr_format:                 utils.StringPointer("csv"),
 			Field_separator:            utils.StringPointer(","),

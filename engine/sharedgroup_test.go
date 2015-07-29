@@ -60,7 +60,7 @@ func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 	if len(sbc) != 3 ||
 		sbc[0].Value != 1.0 ||
 		sbc[1].Value != 2.0 {
-		t.Error("Error sorting balance chain: ", sbc[0].Value)
+		t.Error("Error sorting balance chain: ", sbc[0].GetValue())
 	}
 }
 

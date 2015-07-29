@@ -98,6 +98,7 @@ type CdrFieldJsonCfg struct {
 	Tag          *string
 	Type         *string
 	Cdr_field_id *string
+	Metatag_id   *string
 	Value        *string
 	Width        *int
 	Strip        *string
@@ -128,6 +129,7 @@ type CdreJsonCfg struct {
 // Cdrc config section
 type CdrcJsonCfg struct {
 	Enabled                    *bool
+	Dry_run                    *bool
 	Cdrs                       *string
 	Cdr_format                 *string
 	Field_separator            *string

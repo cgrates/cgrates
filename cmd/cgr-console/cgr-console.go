@@ -86,6 +86,8 @@ func executeCommand(command string) {
 			param = param.(*console.StringWrapper).Item
 		case *console.StringSliceWrapper:
 			param = param.(*console.StringSliceWrapper).Items
+		case *console.StringMapWrapper:
+			param = param.(*console.StringMapWrapper).Items
 		}
 		//log.Printf("Param: %+v", param)
 
