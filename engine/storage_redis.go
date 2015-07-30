@@ -23,6 +23,7 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -430,10 +431,10 @@ func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject,
 				if tntRSubj.Subject != alias {
 					continue
 				}
-				cache2go.RemKey(key)
 				if _, err = rs.db.Del(key); err != nil {
 					return err
 				}
+				cache2go.RemKey(key)
 				break
 			}
 		}
@@ -553,10 +554,12 @@ func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount, skipCa
 				if tntAcnt.Account != alias {
 					continue
 				}
-				cache2go.RemKey(key)
 				if _, err = rs.db.Del(key); err != nil {
+					log.Print("")
 					return err
 				}
+				cache2go.RemKey(key)
+				break
 			}
 		}
 
@@ -580,6 +583,7 @@ func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount, skipCa
 					return err
 				}
 				cache2go.RemKey(utils.ACC_ALIAS_PREFIX + key)
+				break
 			}
 		}
 	}
