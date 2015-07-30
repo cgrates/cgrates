@@ -13,6 +13,7 @@
 "rater": {
 	"enabled": true,					// enable Rater service: <true|false>
 	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+	"users": "internal",
 },
 
 "scheduler": {
@@ -28,6 +29,10 @@
 
 "cdrstats": {
 	"enabled": true,					// starts the cdrstats service: <true|false>
+},
+
+"users": {
+	"enabled": true,
 },
 
 }

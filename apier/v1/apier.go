@@ -47,6 +47,7 @@ type ApierV1 struct {
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
 	CdrStatsSrv engine.StatsInterface
+	Users       engine.UserService
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -940,6 +941,20 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.AccountAliases = cache2go.CountEntries(utils.ACC_ALIAS_PREFIX)
 	cs.DerivedChargers = cache2go.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
 	cs.LcrProfiles = cache2go.CountEntries(utils.LCR_PREFIX)
+	if self.CdrStatsSrv != nil && self.Config.CDRStatsEnabled {
+		var queueIds []string
+		if err := self.CdrStatsSrv.GetQueueIds(0, &queueIds); err != nil {
+			return utils.NewErrServerError(err)
+		}
+		cs.CdrStats = len(queueIds)
+	}
+	if self.Config.RaterUserServer == utils.INTERNAL {
+		var ups engine.UserProfiles
+		if err := self.Users.GetUsers(engine.UserProfile{}, &ups); err != nil {
+			return utils.NewErrServerError(err)
+		}
+		cs.Users = len(ups)
+	}
 	*reply = *cs
 	return nil
 }
