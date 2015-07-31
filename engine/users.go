@@ -88,12 +88,23 @@ func newUserMap(accountingDb AccountingStorage, indexes []string) *UserMap {
 func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
+
+	// backup old data
+	oldTable := um.table
+	oldIndex := um.index
+	um.table = make(map[string]map[string]string)
+	um.index = make(map[string]map[string]bool)
+
 	// load from rating db
 	if ups, err := um.accountingDb.GetUsers(); err == nil {
 		for _, up := range ups {
 			um.table[up.GetId()] = up.Profile
 		}
 	} else {
+		// restore old data before return
+		um.table = oldTable
+		um.index = oldIndex
+
 		*reply = err.Error()
 		return err
 	}

@@ -215,11 +215,11 @@ func TestLcrGet(t *testing.T) {
 func TestLcrRequestAsCallDescriptor(t *testing.T) {
 	sTime := time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC)
 	callDur := time.Duration(1) * time.Minute
-	lcrReq := &LcrRequest{Account: "1001", StartTime: sTime.String()}
+	lcrReq := &LcrRequest{Account: "2001", StartTime: sTime.String()}
 	if _, err := lcrReq.AsCallDescriptor(); err == nil || err != utils.ErrMandatoryIeMissing {
 		t.Error("Unexpected error received: %v", err)
 	}
-	lcrReq = &LcrRequest{Account: "1001", Destination: "1002", StartTime: sTime.String()}
+	lcrReq = &LcrRequest{Account: "2001", Destination: "2002", StartTime: sTime.String()}
 	eCd := &CallDescriptor{
 		Direction:   utils.OUT,
 		Tenant:      config.CgrConfig().DefaultTenant,
@@ -412,7 +412,7 @@ func TestLCRCostSuppliersLoadAllRounded(t *testing.T) {
 				Supplier: "*out:tenant12:call:dan12",
 				supplierQueues: []*StatsQueue{
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(100 * time.Minute)}},
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(200 * time.Minute)}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
@@ -452,7 +452,7 @@ func TestLCRCostSuppliersLoadAllRounded(t *testing.T) {
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{SetupTime: setupTime.Add(300 * time.Minute)}},
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{SetupTime: setupTime.Add(400 * time.Minute)}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
@@ -512,7 +512,7 @@ func TestLCRCostSuppliersLoadAllOver(t *testing.T) {
 				Supplier: "*out:tenant12:call:dan12",
 				supplierQueues: []*StatsQueue{
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(100 * time.Minute)}},
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(200 * time.Minute)}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
@@ -552,7 +552,7 @@ func TestLCRCostSuppliersLoadAllOver(t *testing.T) {
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(300 * time.Minute)}},
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(400 * time.Minute)}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
@@ -612,7 +612,7 @@ func TestLCRCostSuppliersLoadAllOverMisingDefault(t *testing.T) {
 				Supplier: "*out:tenant12:call:dan12",
 				supplierQueues: []*StatsQueue{
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(100 * time.Minute)}},
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(200 * time.Minute)}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
@@ -652,7 +652,7 @@ func TestLCRCostSuppliersLoadAllOverMisingDefault(t *testing.T) {
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(300 * time.Minute)}},
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{SetupTime: setupTime.Add(400 * time.Minute)}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
