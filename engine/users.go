@@ -87,7 +87,6 @@ func newUserMap(accountingDb AccountingStorage, indexes []string) *UserMap {
 
 func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	um.mu.Lock()
-	defer um.mu.Unlock()
 
 	// backup old data
 	oldTable := um.table
@@ -108,11 +107,17 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 		*reply = err.Error()
 		return err
 	}
+	um.mu.Unlock()
 
 	if len(um.indexKeys) != 0 {
 		var s string
 		if err := um.AddIndex(um.indexKeys, &s); err != nil {
 			Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", um.indexKeys, err))
+			um.table = oldTable
+			um.index = oldIndex
+
+			*reply = err.Error()
+			return err
 		}
 	}
 	*reply = utils.OK
