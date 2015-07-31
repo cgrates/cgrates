@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 	"sync"
@@ -55,6 +56,7 @@ type UserService interface {
 	GetUsers(UserProfile, *UserProfiles) error
 	AddIndex([]string, *string) error
 	GetIndexes(string, *map[string][]string) error
+	ReloadUsers(string, *string) error
 }
 
 type UserMap struct {
@@ -65,25 +67,45 @@ type UserMap struct {
 	mu           sync.RWMutex
 }
 
-func NewUserMap(accountingDb AccountingStorage) (*UserMap, error) {
-	um := newUserMap(accountingDb)
+func NewUserMap(accountingDb AccountingStorage, indexes []string) (*UserMap, error) {
+	um := newUserMap(accountingDb, indexes)
+	var reply string
+	if err := um.ReloadUsers("", &reply); err != nil {
+		return nil, err
+	}
+	return um, nil
+}
+
+func newUserMap(accountingDb AccountingStorage, indexes []string) *UserMap {
+	return &UserMap{
+		table:        make(map[string]map[string]string),
+		index:        make(map[string]map[string]bool),
+		indexKeys:    indexes,
+		accountingDb: accountingDb,
+	}
+}
+
+func (um *UserMap) ReloadUsers(in string, reply *string) error {
+	um.mu.Lock()
+	defer um.mu.Unlock()
 	// load from rating db
 	if ups, err := um.accountingDb.GetUsers(); err == nil {
 		for _, up := range ups {
 			um.table[up.GetId()] = up.Profile
 		}
 	} else {
-		return nil, err
+		*reply = err.Error()
+		return err
 	}
-	return um, nil
-}
 
-func newUserMap(accountingDb AccountingStorage) *UserMap {
-	return &UserMap{
-		table:        make(map[string]map[string]string),
-		index:        make(map[string]map[string]bool),
-		accountingDb: accountingDb,
+	if len(um.indexKeys) != 0 {
+		var s string
+		if err := um.AddIndex(um.indexKeys, &s); err != nil {
+			Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", um.indexKeys, err))
+		}
 	}
+	*reply = utils.OK
+	return nil
 }
 
 func (um *UserMap) SetUser(up UserProfile, reply *string) error {
@@ -94,7 +116,7 @@ func (um *UserMap) SetUser(up UserProfile, reply *string) error {
 		return err
 	}
 	um.table[up.GetId()] = up.Profile
-	um.addIndex(&up)
+	um.addIndex(&up, um.indexKeys)
 	*reply = utils.OK
 	return nil
 }
@@ -146,7 +168,7 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 	}
 	um.table[up.GetId()] = m
 	um.deleteIndex(oldUp)
-	um.addIndex(finalUp)
+	um.addIndex(finalUp, um.indexKeys)
 	*reply = utils.OK
 	return nil
 }
@@ -235,19 +257,19 @@ func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
 func (um *UserMap) AddIndex(indexes []string, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
-	um.indexKeys = indexes
+	um.indexKeys = append(um.indexKeys, indexes...)
 	for key, values := range um.table {
 		up := &UserProfile{Profile: values}
 		up.SetId(key)
-		um.addIndex(up)
+		um.addIndex(up, indexes)
 	}
 	*reply = utils.OK
 	return nil
 }
 
-func (um *UserMap) addIndex(up *UserProfile) {
+func (um *UserMap) addIndex(up *UserProfile, indexes []string) {
 	key := up.GetId()
-	for _, index := range um.indexKeys {
+	for _, index := range indexes {
 		if index == "Tenant" {
 			if up.Tenant != "" {
 				indexKey := utils.ConcatenatedKey(index, up.Tenant)
@@ -367,6 +389,10 @@ func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
 
 func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) error {
 	return ps.Client.Call("UsersV1.AddIndex", in, reply)
+}
+
+func (ps *ProxyUserService) ReloadUsers(in string, reply *string) error {
+	return ps.Client.Call("UsersV1.ReloadUsers", in, reply)
 }
 
 // extraFields - Field name in the interface containing extraFields information

@@ -483,18 +483,12 @@ func main() {
 		server.RpcRegisterName("ScribeV1", scribeServer)
 	}
 	if cfg.UserServerEnabled {
-		userServer, err = engine.NewUserMap(accountDb)
+		userServer, err = engine.NewUserMap(accountDb, cfg.UserServerIndexes)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
 			exitChan <- true
 		}
 		server.RpcRegisterName("UsersV1", userServer)
-		if len(cfg.UserServerIndexes) != 0 {
-			var s string
-			if err := userServer.AddIndex(cfg.UserServerIndexes, &s); err != nil {
-				engine.Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", cfg.UserServerIndexes, err))
-			}
-		}
 	}
 
 	// Register session manager service // FixMe: make sure this is thread safe
