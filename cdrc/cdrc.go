@@ -258,6 +258,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		return fmt.Errorf("Unsupported CDR format: %s", self.cdrFormat)
 	}
 	procRowNr := 0
+	cdrsPosted := 0
 	timeStart := time.Now()
 	for {
 		cdrs, err := recordsProcessor.ProcessNextRecord()
@@ -279,6 +280,8 @@ func (self *Cdrc) processFile(filePath string) error {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", storedCdr, reply))
+			} else {
+				cdrsPosted += 1
 			}
 		}
 	}
@@ -288,7 +291,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		engine.Logger.Err(err.Error())
 		return err
 	}
-	engine.Logger.Info(fmt.Sprintf("Finished processing %s, moved to %s. Total records processed: %d, run duration: %s",
-		fn, newPath, procRowNr, time.Now().Sub(timeStart)))
+	engine.Logger.Info(fmt.Sprintf("Finished processing %s, moved to %s. Total records processed: %d, CDRs posted: %d, run duration: %s",
+		fn, newPath, procRowNr, cdrsPosted, time.Now().Sub(timeStart)))
 	return nil
 }
