@@ -56,14 +56,12 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	Logger.Debug(fmt.Sprintf("CD before load user profile: %+v, count: %d", arg, rs.cnt))
 	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
 		return err
 	} else {
 		udRcv := upData.(*CallDescriptor)
 		*arg = *udRcv
 	}
-	Logger.Debug(fmt.Sprintf("CD after load user profile: %+v, count: %d", arg, rs.cnt))
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.GetCost")
 		*reply, err = *r, e
