@@ -220,13 +220,15 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	if err := sm.rater.GetDerivedMaxSessionTime(ev.AsStoredCdr(), &maxCallDuration); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
 	}
-	maxCallDur := time.Duration(maxCallDuration)
-	if maxCallDur <= sm.cfg.MinCallDuration {
-		//engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
-		sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
-		return
+	if maxCallDuration != -1 { // For calls different than unlimited, set limits
+		maxCallDur := time.Duration(maxCallDuration)
+		if maxCallDur <= sm.cfg.MinCallDuration {
+			//engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
+			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
+			return
+		}
+		sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
 	}
-	sm.setMaxCallDuration(ev.GetUUID(), connId, maxCallDur)
 	// ComputeLcr
 	if ev.ComputeLcr() {
 		cd, err := fsev.AsCallDescriptor()
@@ -341,7 +343,7 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 			continue
 		}
 		engine.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> Shutting down all sessions on connection id: %s", connId))
-		if _, err = fSock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid"); err != nil {
+		if _, err = fSock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype *prepaid"); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on calls shutdown: %s, connection id: %s", err.Error(), connId))
 		}
 	}

@@ -324,7 +324,6 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 	Logger.Debug(fmt.Sprintf("replicateCdr cdr: %+v, configuration: %+v", cdr, self.cgrCfg.CDRSCdrReplication))
 	for _, rplCfg := range self.cgrCfg.CDRSCdrReplication {
-		Logger.Debug(fmt.Sprintf("Replicating CDR with configuration: %+v", rplCfg))
 		passesFilters := true
 		for _, cdfFltr := range rplCfg.CdrFilter {
 			if fltrPass, _ := cdr.PassesFieldFilter(cdfFltr); !fltrPass {

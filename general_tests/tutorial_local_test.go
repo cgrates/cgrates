@@ -182,6 +182,18 @@ func TestTutLocalGetCachedItemAge(t *testing.T) {
 	*/
 }
 
+func TestTutLocalGetUsers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var users engine.UserProfiles
+	if err := tutLocalRpc.Call("UsersV1.GetUsers", engine.UserProfile{}, &users); err != nil {
+		t.Error("Got error on UsersV1.GetUsers: ", err.Error())
+	} else if len(users) != 2 {
+		t.Error("Calling UsersV1.GetUsers got users:", len(users))
+	}
+}
+
 // Check call costs
 func TestTutLocalGetCosts(t *testing.T) {
 	if !*testLocal {
@@ -201,6 +213,24 @@ func TestTutLocalGetCosts(t *testing.T) {
 		TimeEnd:       tEnd,
 	}
 	var cc engine.CallCost
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.6 {
+		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
+	}
+	// Make sure that the same cost is returned via users aliasing
+	cd = engine.CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        utils.USERS,
+		Subject:       utils.USERS,
+		Account:       utils.USERS,
+		Destination:   "1002",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
+		ExtraFields:   map[string]string{"Uuid": "388539dfd4f5cefee8f488b78c6c244b9e19138e"},
+	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.Cost != 0.6 {

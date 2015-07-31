@@ -186,7 +186,7 @@ func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
 		}
 	}
 
-	var candidates UserProfiles
+	candidates := make(UserProfiles, 0) // It should not return nil in case of no users but []
 	for key, values := range table {
 		ponder := 0
 		tableUP := &UserProfile{

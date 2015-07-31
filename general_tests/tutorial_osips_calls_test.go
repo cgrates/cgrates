@@ -71,7 +71,6 @@ func TestTutOsipsCallsResetStorDb(t *testing.T) {
 	}
 }
 
-/*
 // start Kam server
 func TestTutOsipsCallsStartOsips(t *testing.T) {
 	if !*testCalls {
@@ -82,7 +81,6 @@ func TestTutOsipsCallsStartOsips(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-*/
 
 // Start CGR Engine
 func TestTutOsipsCallsStartEngine(t *testing.T) {
@@ -358,7 +356,7 @@ func TestTutOsipsCallsCdrs(t *testing.T) {
 		if reply[0].Destination != "1001" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
 		}
-		if reply[0].Usage != "62" { // Usage as seconds
+		if reply[0].Usage != "62" && reply[0].Usage != "63" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 	}
@@ -448,11 +446,9 @@ func TestTutOsipsCallsStopCgrEngine(t *testing.T) {
 	}
 }
 
-/*
 func TestTutOsipsCallsStopOpensips(t *testing.T) {
 	if !*testCalls {
 		return
 	}
 	engine.KillProcName("opensips", 100)
 }
-*/

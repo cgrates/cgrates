@@ -13,12 +13,12 @@
 "rater": {
 	"enabled": true,					// enable Rater service: <true|false>
 	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-	"users": "internal",
+	"pubsubs": "internal",					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
+	"users": "internal",					// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
 },
 
 "scheduler": {
 	"enabled": true,					// start Scheduler service: <true|false>
-    "save_interval": "5s",
 },
 
 "cdrs": {
@@ -31,8 +31,15 @@
 	"enabled": true,					// starts the cdrstats service: <true|false>
 },
 
-"users": {
-	"enabled": true,
+"pubsubs": {
+	"enabled": true,				// starts PubSub service: <true|false>.
 },
+
+
+"users": {
+	"enabled": true,				// starts User service: <true|false>.
+	"indexes": ["Uuid"],			// user profile field indexes
+},
+
 
 }
