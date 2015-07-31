@@ -37,10 +37,10 @@ Strategy indicates supplier selection algorithm and StrategyParams will be speci
 
 \*load_distribution (sorting/filter)
   The system will sort the suppliers in order to achieve the specified load distribution.
-  - if all have less than share return random order
-  - if some have a cdr count not divisible by share return them first and all ordered by cdr times, oldest first
-  - if all have a multiple of share return in the order of cdr times, oldest first
-  StrategyParams: supplier1:share;supplier2:share;*default:share
+  - if all have less than ratio return random order
+  - if some have a cdr count not divisible by ratio return them first and all ordered by cdr times, oldest first
+  - if all have a multiple of ratio return in the order of cdr times, oldest first
+  StrategyParams: supplier1:ratio;supplier2:ratio;*default:ratio
 
 ActivationTime is the date/time when the LCR entry starts to be active.
 
