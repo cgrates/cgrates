@@ -70,6 +70,7 @@ var (
 	historyServer   = flag.String("history_server", cgrConfig.RPCGOBListen, "The history server address:port, empty to disable automaticautomatic  history archiving")
 	raterAddress    = flag.String("rater_address", cgrConfig.RPCGOBListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
 	cdrstatsAddress = flag.String("cdrstats_address", cgrConfig.RPCGOBListen, "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
+	usersAddress    = flag.String("users_address", cgrConfig.RPCGOBListen, "Users service to contact for data reloads, empty to disable automatic data reloads")
 	runId           = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )
 
@@ -83,7 +84,7 @@ func main() {
 	var ratingDb engine.RatingStorage
 	var accountDb engine.AccountingStorage
 	var storDb engine.LoadStorage
-	var rater, cdrstats *rpc.Client
+	var rater, cdrstats, users *rpc.Client
 	var loader engine.LoadReader
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
@@ -206,6 +207,19 @@ func main() {
 	} else {
 		log.Print("WARNING: CDRStats automatic data reload is disabled!")
 	}
+	if *usersAddress != "" { // Init connection to rater so we can reload it's data
+		if *usersAddress == *raterAddress {
+			users = rater
+		} else {
+			users, err = rpc.Dial("tcp", *usersAddress)
+			if err != nil {
+				log.Fatalf("Could not connect to Users API: %s", err.Error())
+				return
+			}
+		}
+	} else {
+		log.Print("WARNING: Users automatic data reload is disabled!")
+	}
 
 	// write maps to database
 	if err := tpReader.WriteToDatabase(*flush, *verbose); err != nil {
@@ -270,6 +284,16 @@ func main() {
 			if err := cdrstats.Call("CDRStatsV1.ReloadQueues", utils.AttrCDRStatsReloadQueues{StatsQueueIds: statsQueueIds}, &reply); err != nil {
 				log.Printf("WARNING: Failed reloading stat queues, error: %s\n", err.Error())
 			}
+		}
+	}
+
+	if users != nil {
+		if *verbose {
+			log.Print("Reloading Users data")
+		}
+		var reply string
+		if err := cdrstats.Call("UsersV1.ReloadUsers", "", &reply); err != nil {
+			log.Printf("WARNING: Failed reloading users data, error: %s\n", err.Error())
 		}
 	}
 }

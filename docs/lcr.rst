@@ -18,7 +18,7 @@ Strategy indicates supplier selection algorithm and StrategyParams will be speci
 \*static (filter)
   Will use the suppliers provided as params.
   StrategyParams: suppier1;supplier2;etc
-  
+
 \*lowest_cost (sorting)
   Matching suppliers will be sorted by ascending cost.
   StrategyParams: None
@@ -35,6 +35,13 @@ Strategy indicates supplier selection algorithm and StrategyParams will be speci
   The system will sort by metrics in the order of appearance.
   StrategyParams: metric1;metric2;etc
 
+\*load_distribution (sorting/filter)
+  The system will sort the suppliers in order to achieve the specified load distribution.
+  - if all have less than ratio return random order
+  - if some have a cdr count not divisible by ratio return them first and all ordered by cdr times, oldest first
+  - if all have a multiple of ratio return in the order of cdr times, oldest first
+  StrategyParams: supplier1:ratio;supplier2:ratio;*default:ratio
+
 ActivationTime is the date/time when the LCR entry starts to be active.
 
 Weight is used to sort the rules with the same activation time.
@@ -43,7 +50,7 @@ Example
 +++++++
 
 ::
-   
+
      *in, cgrates.org,call,*any,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
 
 Code implementation
@@ -63,7 +70,7 @@ For the QOS strategies the suppliers are searched using call descriptor paramete
 For the lowest/highest cost strategies the matched suppliers are sorted ascending/descending on cost.
 
 ::
-   
+
   {
    "Entry": {
         "DestinationId": "*any",
