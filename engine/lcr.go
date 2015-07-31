@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
@@ -37,6 +38,12 @@ const (
 	LCR_STRATEGY_QOS_THRESHOLD = "*qos_threshold"
 	LCR_STRATEGY_QOS           = "*qos"
 	LCR_STRATEGY_LOAD          = "*load_distribution"
+
+	// used for load distribution sorting
+	RAND_LIMIT          = 99
+	LOW_PRIORITY_LIMIT  = 100
+	MED_PRIORITY_LIMIT  = 200
+	HIGH_PRIORITY_LIMIT = 300
 )
 
 // A request for LCR, used in APIer and SM where we need to expose it
@@ -295,6 +302,7 @@ func (lc *LCRCost) Sort() {
 		sort.Sort(QOSSorter(lc.SupplierCosts))
 	case LCR_STRATEGY_LOAD:
 		lc.SortLoadDistribution()
+		sort.Sort(HighestSupplierCostSorter(lc.SupplierCosts))
 	}
 }
 
@@ -317,11 +325,11 @@ func (lc *LCRCost) SortLoadDistribution() {
 			}
 		}
 	}
-	supplierQueues := make(map[string]*StatsQueue)
+	supplierQueues := make(map[*LCRSupplierCost]*StatsQueue)
 	for _, supCost := range lc.SupplierCosts {
 		for _, sq := range supCost.supplierQueues {
 			if sq.conf.TimeWindow == winnerTimeWindow {
-				supplierQueues[supCost.Supplier] = sq
+				supplierQueues[supCost] = sq
 				break
 			}
 		}
@@ -333,13 +341,29 @@ func (lc *LCRCost) SortLoadDistribution() {
 	// if some have a cdr count not divisible by ponder return them first and all ordered by cdr times, oldest first
 	// if all have a multiple of ponder return in the order of cdr times, oldest first
 
+	// first put them in one of the above categories
+	for supCost, sq := range supplierQueues {
+		ponder := lc.GetSupplierPonder(supCost.Supplier)
+		cdrCount := len(sq.Cdrs)
+		if cdrCount < ponder {
+			supCost.Cost = float64(LOW_PRIORITY_LIMIT + rand.Intn(RAND_LIMIT))
+			continue
+		}
+		if cdrCount%ponder == 0 {
+			supCost.Cost = float64(MED_PRIORITY_LIMIT+rand.Intn(RAND_LIMIT)) + time.Now().Sub(sq.Cdrs[len(sq.Cdrs)-1].SetupTime).Seconds()
+			continue
+		} else {
+			supCost.Cost = float64(HIGH_PRIORITY_LIMIT+rand.Intn(RAND_LIMIT)) + time.Now().Sub(sq.Cdrs[len(sq.Cdrs)-1].SetupTime).Seconds()
+			continue
+		}
+	}
 }
 
 // used in load distribution strategy only
 // receives a long supplier id and will return the ponder found in strategy params
-func (lc *LCRCost) GetSupplierPonder(supplier string) float64 {
+func (lc *LCRCost) GetSupplierPonder(supplier string) int {
 	// parse strategy params
-	ponders := make(map[string]float64)
+	ponders := make(map[string]int)
 	params := strings.Split(lc.Entry.StrategyParams, utils.INFIELD_SEP)
 	for _, param := range params {
 		ponderSlice := strings.Split(param, utils.CONCATENATED_KEY_SEP)
@@ -347,7 +371,7 @@ func (lc *LCRCost) GetSupplierPonder(supplier string) float64 {
 			Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
 			continue
 		}
-		p, err := strconv.ParseFloat(ponderSlice[1], 64)
+		p, err := strconv.Atoi(ponderSlice[1])
 		if err != nil {
 			Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
 			continue

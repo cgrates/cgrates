@@ -280,6 +280,7 @@ func TestLCRCostSuppliersString(t *testing.T) {
 }
 
 func TestLCRCostSuppliersLoad(t *testing.T) {
+	setupTime := time.Date(2015, 7, 31, 6, 43, 0, 0, time.UTC)
 	lcrCost := &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOAD, StrategyParams: "ivo12:10;dan12:3;*default:7", Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{
@@ -287,21 +288,21 @@ func TestLCRCostSuppliersLoad(t *testing.T) {
 				Supplier: "*out:tenant12:call:ivo12",
 				supplierQueues: []*StatsQueue{
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  3 * time.Minute,
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  1 * time.Minute,
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
@@ -313,21 +314,21 @@ func TestLCRCostSuppliersLoad(t *testing.T) {
 				Supplier: "*out:tenant12:call:dan12",
 				supplierQueues: []*StatsQueue{
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  7 * time.Minute,
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  7 * time.Minute,
@@ -339,28 +340,28 @@ func TestLCRCostSuppliersLoad(t *testing.T) {
 				Supplier: "*out:tenant12:call:rif12",
 				supplierQueues: []*StatsQueue{
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  7 * time.Minute,
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  7 * time.Minute,
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  10 * time.Minute,
 						},
 					},
 					&StatsQueue{
-						Cdrs: []*QCdr{&QCdr{}, &QCdr{}},
+						Cdrs: []*QCdr{&QCdr{SetupTime: setupTime}, &QCdr{SetupTime: setupTime}},
 						conf: &CdrStats{
 							QueueLength: 0,
 							TimeWindow:  1 * time.Minute,
@@ -374,6 +375,6 @@ func TestLCRCostSuppliersLoad(t *testing.T) {
 	if lcrCost.SupplierCosts[0].Supplier != "" ||
 		lcrCost.SupplierCosts[1].Supplier != "" ||
 		lcrCost.SupplierCosts[2].Supplier != "" {
-		//t.Error("Error soring on load distribution: ", utils.ToIJSON(lcrCost))
+		t.Error("Error soring on load distribution: ", utils.ToIJSON(lcrCost))
 	}
 }
