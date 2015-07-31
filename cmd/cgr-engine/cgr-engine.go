@@ -483,7 +483,7 @@ func main() {
 		server.RpcRegisterName("ScribeV1", scribeServer)
 	}
 	if cfg.UserServerEnabled {
-		userServer, err = engine.NewUserMap(ratingDb)
+		userServer, err = engine.NewUserMap(accountDb)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
 			exitChan <- true

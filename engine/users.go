@@ -58,17 +58,17 @@ type UserService interface {
 }
 
 type UserMap struct {
-	table     map[string]map[string]string
-	index     map[string]map[string]bool
-	indexKeys []string
-	ratingDb  RatingStorage
-	mu        sync.RWMutex
+	table        map[string]map[string]string
+	index        map[string]map[string]bool
+	indexKeys    []string
+	accountingDb AccountingStorage
+	mu           sync.RWMutex
 }
 
-func NewUserMap(ratingDb RatingStorage) (*UserMap, error) {
-	um := newUserMap(ratingDb)
+func NewUserMap(accountingDb AccountingStorage) (*UserMap, error) {
+	um := newUserMap(accountingDb)
 	// load from rating db
-	if ups, err := um.ratingDb.GetUsers(); err == nil {
+	if ups, err := um.accountingDb.GetUsers(); err == nil {
 		for _, up := range ups {
 			um.table[up.GetId()] = up.Profile
 		}
@@ -78,18 +78,18 @@ func NewUserMap(ratingDb RatingStorage) (*UserMap, error) {
 	return um, nil
 }
 
-func newUserMap(ratingDb RatingStorage) *UserMap {
+func newUserMap(accountingDb AccountingStorage) *UserMap {
 	return &UserMap{
-		table:    make(map[string]map[string]string),
-		index:    make(map[string]map[string]bool),
-		ratingDb: ratingDb,
+		table:        make(map[string]map[string]string),
+		index:        make(map[string]map[string]bool),
+		accountingDb: accountingDb,
 	}
 }
 
 func (um *UserMap) SetUser(up UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
-	if err := um.ratingDb.SetUser(&up); err != nil {
+	if err := um.accountingDb.SetUser(&up); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -102,7 +102,7 @@ func (um *UserMap) SetUser(up UserProfile, reply *string) error {
 func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
-	if err := um.ratingDb.RemoveUser(up.GetId()); err != nil {
+	if err := um.accountingDb.RemoveUser(up.GetId()); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -140,7 +140,7 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 		UserName: up.UserName,
 		Profile:  m,
 	}
-	if err := um.ratingDb.SetUser(finalUp); err != nil {
+	if err := um.accountingDb.SetUser(finalUp); err != nil {
 		*reply = err.Error()
 		return err
 	}

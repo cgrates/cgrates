@@ -19,7 +19,7 @@ var testMap = UserMap{
 }
 
 func TestUsersAdd(t *testing.T) {
-	tm := newUserMap(ratingStorage)
+	tm := newUserMap(accountingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -40,7 +40,7 @@ func TestUsersAdd(t *testing.T) {
 }
 
 func TestUsersUpdate(t *testing.T) {
-	tm := newUserMap(ratingStorage)
+	tm := newUserMap(accountingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -71,7 +71,7 @@ func TestUsersUpdate(t *testing.T) {
 }
 
 func TestUsersUpdateNotFound(t *testing.T) {
-	tm := newUserMap(ratingStorage)
+	tm := newUserMap(accountingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -89,7 +89,7 @@ func TestUsersUpdateNotFound(t *testing.T) {
 }
 
 func TestUsersUpdateInit(t *testing.T) {
-	tm := newUserMap(ratingStorage)
+	tm := newUserMap(accountingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -115,7 +115,7 @@ func TestUsersUpdateInit(t *testing.T) {
 }
 
 func TestUsersRemove(t *testing.T) {
-	tm := newUserMap(ratingStorage)
+	tm := newUserMap(accountingStorage)
 	var r string
 	up := UserProfile{
 		Tenant:   "test",
@@ -445,7 +445,7 @@ func TestUsersGetMissingIdTwoINdex(t *testing.T) {
 }
 
 func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
-	tm := newUserMap(ratingStorage)
+	tm := newUserMap(accountingStorage)
 	var r string
 	tm.AddIndex([]string{"t"}, &r)
 	if len(tm.index) != 0 {

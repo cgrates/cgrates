@@ -71,10 +71,6 @@ type RatingStorage interface {
 	SetAccAlias(string, string) error
 	RemoveAccAliases([]*TenantAccount, bool) error
 	GetAccountAliases(string, string, bool) ([]string, error)
-	SetUser(*UserProfile) error
-	GetUser(string) (*UserProfile, error)
-	GetUsers() ([]*UserProfile, error)
-	RemoveUser(string) error
 }
 
 type AccountingStorage interface {
@@ -87,6 +83,10 @@ type AccountingStorage interface {
 	GetSubscribers() (map[string]*SubscriberData, error)
 	SetSubscriber(string, *SubscriberData) error
 	RemoveSubscriber(string) error
+	SetUser(*UserProfile) error
+	GetUser(string) (*UserProfile, error)
+	GetUsers() ([]*UserProfile, error)
+	RemoveUser(string) error
 }
 
 type CdrStorage interface {

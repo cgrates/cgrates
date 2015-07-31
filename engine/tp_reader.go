@@ -1063,7 +1063,7 @@ func (tpr *TpReader) LoadUsersFiltered(filter *TpUser) (bool, error) {
 	for _, tpUser := range tpUsers {
 		user.Profile[tpUser.AttributeName] = tpUser.AttributeValue
 	}
-	tpr.ratingStorage.SetUser(user)
+	tpr.accountingStorage.SetUser(user)
 	return len(tpUsers) > 0, err
 }
 
@@ -1306,7 +1306,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Users:")
 	}
 	for _, u := range tpr.users {
-		err = tpr.ratingStorage.SetUser(u)
+		err = tpr.accountingStorage.SetUser(u)
 		if err != nil {
 			return err
 		}
