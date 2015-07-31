@@ -1459,6 +1459,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
+	case utils.USERS_PREFIX:
+		keys := make([]string, len(tpr.users))
+		i := 0
+		for k := range tpr.users {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
 	}
 	return nil, errors.New("Unsupported category")
 }

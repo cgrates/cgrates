@@ -1117,7 +1117,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		}
 	}
 
-	userKeys, _ := loader.GetLoadedIds(utils.USERS)
+	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
 		if err := self.Users.ReloadUsers("", &r); err != nil {
