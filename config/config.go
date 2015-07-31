@@ -566,6 +566,15 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnRaterCfg.Cdrstats != nil {
 			self.RaterCdrStats = *jsnRaterCfg.Cdrstats
 		}
+		if jsnRaterCfg.Historys != nil {
+			self.RaterHistoryServer = *jsnRaterCfg.Historys
+		}
+		if jsnRaterCfg.Pubsubs != nil {
+			self.RaterPubSubServer = *jsnRaterCfg.Pubsubs
+		}
+		if jsnRaterCfg.Users != nil {
+			self.RaterUserServer = *jsnRaterCfg.Users
+		}
 	}
 
 	if jsnBalancerCfg != nil && jsnBalancerCfg.Enabled != nil {

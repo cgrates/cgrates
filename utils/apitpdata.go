@@ -546,6 +546,8 @@ type CacheStats struct {
 	AccountAliases  int
 	DerivedChargers int
 	LcrProfiles     int
+	CdrStats        int
+	Users           int
 }
 
 type AttrCachedItemAge struct {

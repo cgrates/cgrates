@@ -115,19 +115,36 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 		engine.Logger.Err(fmt.Sprintf("<Cdrc> Could not read complete line, have instead: %s", string(buf)))
 		return nil, io.EOF
 	}
+	record := string(buf)
 	for cfgKey := range self.cdrcCfgs {
-		filterBreak := false
-		// ToDo: Field filters
-		if filterBreak { // Stop importing cdrc fields profile due to non matching filter
+		if passes := self.recordPassesCfgFilter(record, cfgKey); !passes {
 			continue
 		}
-		if storedCdr, err := self.recordToStoredCdr(string(buf), cfgKey); err != nil {
+		if storedCdr, err := self.recordToStoredCdr(record, cfgKey); err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
 		} else {
 			recordCdrs = append(recordCdrs, storedCdr)
 		}
 	}
 	return recordCdrs, nil
+}
+
+func (self *FwvRecordsProcessor) recordPassesCfgFilter(record, configKey string) bool {
+	filterPasses := true
+	for _, rsrFilter := range self.cdrcCfgs[configKey].CdrFilter {
+		if rsrFilter == nil { // Nil filter does not need to match anything
+			continue
+		}
+		if cfgFieldIdx, _ := strconv.Atoi(rsrFilter.Id); len(record) <= cfgFieldIdx {
+			fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
+			return false
+		} else if !rsrFilter.FilterPasses(record[cfgFieldIdx:]) {
+			fmt.Printf("Record content to test: %s\n", record[cfgFieldIdx:])
+			filterPasses = false
+			break
+		}
+	}
+	return filterPasses
 }
 
 // Converts a record (header or normal) to StoredCdr

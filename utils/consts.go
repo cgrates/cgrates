@@ -27,7 +27,7 @@ var (
 )
 
 const (
-	VERSION                    = "0.9.1rc6"
+	VERSION                    = "0.9.1~rc6"
 	POSTGRES                   = "postgres"
 	MYSQL                      = "mysql"
 	MONGO                      = "mongo"

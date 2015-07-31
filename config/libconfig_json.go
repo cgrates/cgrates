@@ -62,6 +62,9 @@ type RaterJsonCfg struct {
 	Enabled  *bool
 	Balancer *string
 	Cdrstats *string
+	Historys *string
+	Pubsubs  *string
+	Users    *string
 }
 
 // Scheduler config section

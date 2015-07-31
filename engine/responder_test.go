@@ -354,7 +354,16 @@ func TestGetLCR(t *testing.T) {
 			},
 		},
 	}
-	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost, lcrQosThreshold, lcrQos} {
+	lcrLoad := &LCR{Direction: utils.OUT, Tenant: "tenant12", Category: "call_load", Account: utils.ANY, Subject: utils.ANY,
+		Activations: []*LCRActivation{
+			&LCRActivation{
+				ActivationTime: time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
+				Entries: []*LCREntry{
+					&LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOAD, StrategyParams: "ivo12:10;dan12:3", Weight: 10.0}},
+			},
+		},
+	}
+	for _, lcr := range []*LCR{lcrStatic, lcrLowestCost, lcrQosThreshold, lcrQos, lcrLoad} {
 		if err := ratingStorage.SetLCR(lcr); err != nil {
 			t.Error(err)
 		}

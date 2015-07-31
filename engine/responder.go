@@ -73,6 +73,12 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*CallDescriptor)
+		*arg = *udRcv
+	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.GetCost")
 		*reply, err = *r, e
@@ -92,6 +98,12 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
+	}
+	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*CallDescriptor)
+		*arg = *udRcv
 	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.Debit")
@@ -114,6 +126,12 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
+	}
+	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*CallDescriptor)
+		*arg = *udRcv
 	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.MaxDebit")
@@ -144,6 +162,12 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*CallDescriptor)
+		*arg = *udRcv
+	}
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
 	} else {
@@ -163,6 +187,12 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*CallDescriptor)
+		*arg = *udRcv
+	}
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.GetMaxSessionTime")
 	} else {
@@ -174,11 +204,17 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
 func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
+	if rs.Bal != nil {
+		return errors.New("unsupported method on the balancer")
+	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
 	}
-	if rs.Bal != nil {
-		return errors.New("unsupported method on the balancer")
+	if upData, err := LoadUserProfile(ev, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*StoredCdr)
+		*ev = *udRcv
 	}
 	maxCallDuration := -1.0
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
@@ -243,15 +279,17 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
 func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
-	if item, err := rs.getCache().Get(utils.GET_SESS_RUNS_CACHE_PREFIX + ev.CgrId); err == nil && item != nil {
-		*sRuns = *(item.Value.(*[]*SessionRun))
-		return item.Err
+	if rs.Bal != nil {
+		return errors.New("Unsupported method on the balancer")
 	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
 	}
-	if rs.Bal != nil {
-		return errors.New("Unsupported method on the balancer")
+	if upData, err := LoadUserProfile(ev, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*StoredCdr)
+		*ev = *udRcv
 	}
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
@@ -308,6 +346,12 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	if rs.CdrSrv == nil {
 		return errors.New("CDR_SERVER_NOT_RUNNING")
 	}
+	if upData, err := LoadUserProfile(cdr, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*StoredCdr)
+		*cdr = *udRcv
+	}
 	if err := rs.CdrSrv.ProcessCdr(cdr); err != nil {
 		return err
 	}
@@ -343,6 +387,12 @@ func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
 func (rs *Responder) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
 	if cd.Subject == "" {
 		cd.Subject = cd.Account
+	}
+	if upData, err := LoadUserProfile(cd, "ExtraFields"); err != nil {
+		return err
+	} else {
+		udRcv := upData.(*CallDescriptor)
+		*cd = *udRcv
 	}
 	lcrCost, err := cd.GetLCR(rs.Stats)
 	if err != nil {

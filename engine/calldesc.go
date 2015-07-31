@@ -132,7 +132,8 @@ type CallDescriptor struct {
 	FallbackSubject                       string        // the subject to check for destination if not found on primary subject
 	RatingInfos                           RatingInfos
 	Increments                            Increments
-	TOR                                   string // used unit balances selector
+	TOR                                   string            // used unit balances selector
+	ExtraFields                           map[string]string // Extra fields, mostly used for user profile matching
 	// session limits
 	MaxRate      float64
 	MaxRateUnit  time.Duration
@@ -795,6 +796,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 	if lcrCost.Entry == nil {
 		return lcrCost, nil
 	}
+
 	//log.Printf("Entry: %+v", lcrCost.Entry)
 	if lcrCost.Entry.Strategy == LCR_STRATEGY_STATIC {
 		for _, supplier := range lcrCost.Entry.GetParams() {
@@ -865,7 +867,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			accNeverConsidered := true
 			tccNeverConsidered := true
 			ddcNeverConsidered := true
-			if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD}, lcrCost.Entry.Strategy) {
+			if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD, LCR_STRATEGY_LOAD}, lcrCost.Entry.Strategy) {
 				if stats == nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: supplier,
@@ -891,60 +893,84 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							}
 						}
 					}
+
 					statsErr := false
+					var supplierQueues []*StatsQueue
 					for _, qId := range cdrStatsQueueIds {
-						statValues := make(map[string]float64)
-						if err := stats.GetValues(qId, &statValues); err != nil {
-							lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-								Supplier: supplier,
-								Error:    fmt.Sprintf("Get stats values for queue id %s, error %s", qId, err.Error()),
-							})
-							statsErr = true
-							break
-						}
-						if asr, exists := statValues[ASR]; exists {
-							if asr > STATS_NA {
-								asrValues = append(asrValues, asr)
+						if lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
+							for _, qId := range cdrStatsQueueIds {
+								sq := &StatsQueue{}
+								if err := stats.GetQueue(qId, sq); err == nil {
+									if sq.conf.QueueLength == 0 { //only add qeues that don't have fixed length
+										supplierQueues = append(supplierQueues, sq)
+									}
+								}
 							}
-							asrNeverConsidered = false
-						}
-						if pdd, exists := statValues[PDD]; exists {
-							if pdd > STATS_NA {
-								pddValues = append(pddValues, pdd)
+						} else {
+							statValues := make(map[string]float64)
+							if err := stats.GetValues(qId, &statValues); err != nil {
+								lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+									Supplier: supplier,
+									Error:    fmt.Sprintf("Get stats values for queue id %s, error %s", qId, err.Error()),
+								})
+								statsErr = true
+								break
 							}
-							pddNeverConsidered = false
-						}
-						if acd, exists := statValues[ACD]; exists {
-							if acd > STATS_NA {
-								acdValues = append(acdValues, acd)
+							if asr, exists := statValues[ASR]; exists {
+								if asr > STATS_NA {
+									asrValues = append(asrValues, asr)
+								}
+								asrNeverConsidered = false
 							}
-							acdNeverConsidered = false
-						}
-						if tcd, exists := statValues[TCD]; exists {
-							if tcd > STATS_NA {
-								tcdValues = append(tcdValues, tcd)
+							if pdd, exists := statValues[PDD]; exists {
+								if pdd > STATS_NA {
+									pddValues = append(pddValues, pdd)
+								}
+								pddNeverConsidered = false
 							}
-							tcdNeverConsidered = false
-						}
-						if acc, exists := statValues[ACC]; exists {
-							if acc > STATS_NA {
-								accValues = append(accValues, acc)
+							if acd, exists := statValues[ACD]; exists {
+								if acd > STATS_NA {
+									acdValues = append(acdValues, acd)
+								}
+								acdNeverConsidered = false
 							}
-							accNeverConsidered = false
-						}
-						if tcc, exists := statValues[TCC]; exists {
-							if tcc > STATS_NA {
-								tccValues = append(tccValues, tcc)
+							if tcd, exists := statValues[TCD]; exists {
+								if tcd > STATS_NA {
+									tcdValues = append(tcdValues, tcd)
+								}
+								tcdNeverConsidered = false
 							}
-							tccNeverConsidered = false
-						}
-						if ddc, exists := statValues[TCC]; exists {
-							if ddc > STATS_NA {
-								ddcValues = append(ddcValues, ddc)
+							if acc, exists := statValues[ACC]; exists {
+								if acc > STATS_NA {
+									accValues = append(accValues, acc)
+								}
+								accNeverConsidered = false
 							}
-							ddcNeverConsidered = false
+							if tcc, exists := statValues[TCC]; exists {
+								if tcc > STATS_NA {
+									tccValues = append(tccValues, tcc)
+								}
+								tccNeverConsidered = false
+							}
+							if ddc, exists := statValues[TCC]; exists {
+								if ddc > STATS_NA {
+									ddcValues = append(ddcValues, ddc)
+								}
+								ddcNeverConsidered = false
+							}
+
 						}
 					}
+					if lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
+						if len(supplierQueues) > 0 {
+							lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
+								Supplier:       supplier,
+								supplierQueues: supplierQueues,
+							})
+						}
+						continue // next supplier
+					}
+
 					if statsErr { // Stats error in loop, to go next supplier
 						continue
 					}

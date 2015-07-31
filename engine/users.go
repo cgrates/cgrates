@@ -3,6 +3,7 @@ package engine
 import (
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -61,6 +62,7 @@ type UserMap struct {
 	index     map[string]map[string]bool
 	indexKeys []string
 	ratingDb  RatingStorage
+	mu        sync.RWMutex
 }
 
 func NewUserMap(ratingDb RatingStorage) (*UserMap, error) {
@@ -85,6 +87,8 @@ func newUserMap(ratingDb RatingStorage) *UserMap {
 }
 
 func (um *UserMap) SetUser(up UserProfile, reply *string) error {
+	um.mu.Lock()
+	defer um.mu.Unlock()
 	if err := um.ratingDb.SetUser(&up); err != nil {
 		*reply = err.Error()
 		return err
@@ -96,6 +100,8 @@ func (um *UserMap) SetUser(up UserProfile, reply *string) error {
 }
 
 func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
+	um.mu.Lock()
+	defer um.mu.Unlock()
 	if err := um.ratingDb.RemoveUser(up.GetId()); err != nil {
 		*reply = err.Error()
 		return err
@@ -107,6 +113,8 @@ func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
 }
 
 func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
+	um.mu.Lock()
+	defer um.mu.Unlock()
 	m, found := um.table[up.GetId()]
 	if !found {
 		*reply = utils.ErrNotFound.Error()
@@ -144,6 +152,8 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 }
 
 func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
+	um.mu.RLock()
+	defer um.mu.RUnlock()
 	table := um.table // no index
 
 	indexUnionKeys := make(map[string]bool)
@@ -223,6 +233,8 @@ func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
 }
 
 func (um *UserMap) AddIndex(indexes []string, reply *string) error {
+	um.mu.Lock()
+	defer um.mu.Unlock()
 	um.indexKeys = indexes
 	for key, values := range um.table {
 		up := &UserProfile{Profile: values}
@@ -305,6 +317,8 @@ func (um *UserMap) deleteIndex(up *UserProfile) {
 }
 
 func (um *UserMap) GetIndexes(in string, reply *map[string][]string) error {
+	um.mu.RLock()
+	defer um.mu.RUnlock()
 	indexes := make(map[string][]string)
 	for key, values := range um.index {
 		var vs []string
@@ -355,12 +369,22 @@ func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) er
 	return ps.Client.Call("UsersV1.AddIndex", in, reply)
 }
 
+// extraFields - Field name in the interface containing extraFields information
 func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 	if userService == nil { // no user service => no fun
 		return in, nil
 	}
 	m := utils.ToMapStringString(in)
-
+	var needsUsers bool
+	for _, val := range m {
+		if val == utils.USERS {
+			needsUsers = true
+			break
+		}
+	}
+	if !needsUsers { // Do not process further if user profile is not needed
+		return in, nil
+	}
 	up := &UserProfile{
 		Profile: make(map[string]string),
 	}
