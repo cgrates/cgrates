@@ -342,8 +342,14 @@ func (lc *LCRCost) SortLoadDistribution() {
 	// if all have a multiple of ponder return in the order of cdr times, oldest first
 
 	// first put them in one of the above categories
+	havePonderlessSuppliers := false
 	for supCost, sq := range supplierQueues {
 		ponder := lc.GetSupplierPonder(supCost.Supplier)
+		if ponder == -1 {
+			supCost.Cost = -1
+			havePonderlessSuppliers = true
+			continue
+		}
 		cdrCount := len(sq.Cdrs)
 		if cdrCount < ponder {
 			supCost.Cost = float64(LOW_PRIORITY_LIMIT + rand.Intn(RAND_LIMIT))
@@ -356,6 +362,15 @@ func (lc *LCRCost) SortLoadDistribution() {
 			supCost.Cost = float64(HIGH_PRIORITY_LIMIT+rand.Intn(RAND_LIMIT)) + (time.Now().Sub(sq.Cdrs[len(sq.Cdrs)-1].SetupTime).Seconds() / RAND_LIMIT)
 			continue
 		}
+	}
+	if havePonderlessSuppliers {
+		var filteredSupplierCost []*LCRSupplierCost
+		for _, supCost := range lc.SupplierCosts {
+			if supCost.Cost != -1 {
+				filteredSupplierCost = append(filteredSupplierCost, supCost)
+			}
+		}
+		lc.SupplierCosts = filteredSupplierCost
 	}
 }
 
@@ -388,8 +403,10 @@ func (lc *LCRCost) GetSupplierPonder(supplier string) int {
 			return ponder
 		}
 	}
-
-	return 1
+	if len(ponders) == 0 {
+		return 1 // use random/last cdr date sorting
+	}
+	return -1 // exclude missing suppliers
 }
 
 func (lc *LCRCost) HasErrors() bool {
