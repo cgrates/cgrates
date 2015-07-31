@@ -288,12 +288,16 @@ func main() {
 	}
 
 	if users != nil {
-		if *verbose {
-			log.Print("Reloading Users data")
-		}
-		var reply string
-		if err := cdrstats.Call("UsersV1.ReloadUsers", "", &reply); err != nil {
-			log.Printf("WARNING: Failed reloading users data, error: %s\n", err.Error())
+		userIds, _ := tpReader.GetLoadedIds(utils.USERS_PREFIX)
+		if len(userIds) > 0 {
+			if *verbose {
+				log.Print("Reloading Users data")
+			}
+			var reply string
+			if err := cdrstats.Call("UsersV1.ReloadUsers", "", &reply); err != nil {
+				log.Printf("WARNING: Failed reloading users data, error: %s\n", err.Error())
+			}
+
 		}
 	}
 }
