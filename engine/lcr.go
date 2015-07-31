@@ -350,10 +350,10 @@ func (lc *LCRCost) SortLoadDistribution() {
 			continue
 		}
 		if cdrCount%ponder == 0 {
-			supCost.Cost = float64(MED_PRIORITY_LIMIT+rand.Intn(RAND_LIMIT)) + time.Now().Sub(sq.Cdrs[len(sq.Cdrs)-1].SetupTime).Seconds()
+			supCost.Cost = float64(MED_PRIORITY_LIMIT+rand.Intn(RAND_LIMIT)) + (time.Now().Sub(sq.Cdrs[len(sq.Cdrs)-1].SetupTime).Seconds() / RAND_LIMIT)
 			continue
 		} else {
-			supCost.Cost = float64(HIGH_PRIORITY_LIMIT+rand.Intn(RAND_LIMIT)) + time.Now().Sub(sq.Cdrs[len(sq.Cdrs)-1].SetupTime).Seconds()
+			supCost.Cost = float64(HIGH_PRIORITY_LIMIT+rand.Intn(RAND_LIMIT)) + (time.Now().Sub(sq.Cdrs[len(sq.Cdrs)-1].SetupTime).Seconds() / RAND_LIMIT)
 			continue
 		}
 	}
