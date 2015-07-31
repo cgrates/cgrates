@@ -278,3 +278,102 @@ func TestLCRCostSuppliersString(t *testing.T) {
 		t.Errorf("Expecting: %s, received: %s", eSupplStr, supplStr)
 	}
 }
+
+func TestLCRCostSuppliersLoad(t *testing.T) {
+	lcrCost := &LCRCost{
+		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_LOAD, StrategyParams: "ivo12:10;dan12:3;*default:7", Weight: 10.0},
+		SupplierCosts: []*LCRSupplierCost{
+			&LCRSupplierCost{
+				Supplier: "*out:tenant12:call:ivo12",
+				supplierQueues: []*StatsQueue{
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  3 * time.Minute,
+						},
+					},
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  1 * time.Minute,
+						},
+					},
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  10 * time.Minute,
+						},
+					},
+				},
+			},
+			&LCRSupplierCost{
+				Supplier: "*out:tenant12:call:dan12",
+				supplierQueues: []*StatsQueue{
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  10 * time.Minute,
+						},
+					},
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  7 * time.Minute,
+						},
+					},
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  7 * time.Minute,
+						},
+					},
+				},
+			},
+			&LCRSupplierCost{
+				Supplier: "*out:tenant12:call:rif12",
+				supplierQueues: []*StatsQueue{
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  7 * time.Minute,
+						},
+					},
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  7 * time.Minute,
+						},
+					},
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  10 * time.Minute,
+						},
+					},
+					&StatsQueue{
+						Cdrs: []*QCdr{&QCdr{}, &QCdr{}},
+						conf: &CdrStats{
+							QueueLength: 0,
+							TimeWindow:  1 * time.Minute,
+						},
+					},
+				},
+			},
+		},
+	}
+	lcrCost.Sort()
+	if lcrCost.SupplierCosts[0].Supplier != "" ||
+		lcrCost.SupplierCosts[1].Supplier != "" ||
+		lcrCost.SupplierCosts[2].Supplier != "" {
+		//t.Error("Error soring on load distribution: ", utils.ToIJSON(lcrCost))
+	}
+}
