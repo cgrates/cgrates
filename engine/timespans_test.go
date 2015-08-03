@@ -217,7 +217,12 @@ func TestTimespanGetCost(t *testing.T) {
 	if ts1.getCost() != 0 {
 		t.Error("No interval and still kicking")
 	}
-	ts1.SetRateInterval(&RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}}})
+	ts1.SetRateInterval(
+		&RateInterval{
+			Timing: &RITiming{},
+			Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}},
+		},
+	)
 	if ts1.getCost() != 600 {
 		t.Error("Expected 10 got ", ts1.Cost)
 	}
@@ -240,10 +245,18 @@ func TestTimespanGetCostIntervals(t *testing.T) {
 }
 
 func TestSetRateInterval(t *testing.T) {
-	i1 := &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}}}
+	i1 := &RateInterval{
+		Timing: &RITiming{},
+		Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}},
+	}
 	ts1 := TimeSpan{RateInterval: i1}
-	i2 := &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 2.0, 1 * time.Second, 1 * time.Second}}}}
-	ts1.SetRateInterval(i2)
+	i2 := &RateInterval{
+		Timing: &RITiming{},
+		Rating: &RIRate{Rates: RateGroups{&Rate{0, 2.0, 1 * time.Second, 1 * time.Second}}},
+	}
+	if !ts1.hasBetterRateIntervalThan(i2) {
+		ts1.SetRateInterval(i2)
+	}
 	if ts1.RateInterval != i1 {
 		t.Error("Smaller price interval should win")
 	}

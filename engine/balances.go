@@ -109,7 +109,7 @@ func (b *Balance) IsActiveAt(t time.Time) bool {
 		return true
 	}
 	for _, tim := range b.Timings {
-		if tim.IsActiveAt(t, false) {
+		if tim.IsActiveAt(t) {
 			return true
 		}
 	}
