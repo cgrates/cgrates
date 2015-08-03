@@ -337,25 +337,25 @@ func (lc *LCRCost) SortLoadDistribution() {
 	/*for supplier, sq := range supplierQueues {
 		log.Printf("Useful supplier qeues: %s %v", supplier, sq.conf.TimeWindow)
 	}*/
-	// if all have less than ponder return random order
-	// if some have a cdr count not divisible by ponder return them first and all ordered by cdr times, oldest first
-	// if all have a multiple of ponder return in the order of cdr times, oldest first
+	// if all have less than ratio return random order
+	// if some have a cdr count not divisible by ratio return them first and all ordered by cdr times, oldest first
+	// if all have a multiple of ratio return in the order of cdr times, oldest first
 
 	// first put them in one of the above categories
-	havePonderlessSuppliers := false
+	haveRatiolessSuppliers := false
 	for supCost, sq := range supplierQueues {
-		ponder := lc.GetSupplierPonder(supCost.Supplier)
-		if ponder == -1 {
+		ratio := lc.GetSupplierRatio(supCost.Supplier)
+		if ratio == -1 {
 			supCost.Cost = -1
-			havePonderlessSuppliers = true
+			haveRatiolessSuppliers = true
 			continue
 		}
 		cdrCount := len(sq.Cdrs)
-		if cdrCount < ponder {
+		if cdrCount < ratio {
 			supCost.Cost = float64(LOW_PRIORITY_LIMIT + rand.Intn(RAND_LIMIT))
 			continue
 		}
-		if cdrCount%ponder == 0 {
+		if cdrCount%ratio == 0 {
 			supCost.Cost = float64(MED_PRIORITY_LIMIT+rand.Intn(RAND_LIMIT)) + (time.Now().Sub(sq.Cdrs[len(sq.Cdrs)-1].SetupTime).Seconds() / RAND_LIMIT)
 			continue
 		} else {
@@ -363,7 +363,7 @@ func (lc *LCRCost) SortLoadDistribution() {
 			continue
 		}
 	}
-	if havePonderlessSuppliers {
+	if haveRatiolessSuppliers {
 		var filteredSupplierCost []*LCRSupplierCost
 		for _, supCost := range lc.SupplierCosts {
 			if supCost.Cost != -1 {
@@ -375,35 +375,35 @@ func (lc *LCRCost) SortLoadDistribution() {
 }
 
 // used in load distribution strategy only
-// receives a long supplier id and will return the ponder found in strategy params
-func (lc *LCRCost) GetSupplierPonder(supplier string) int {
+// receives a long supplier id and will return the ratio found in strategy params
+func (lc *LCRCost) GetSupplierRatio(supplier string) int {
 	// parse strategy params
-	ponders := make(map[string]int)
+	ratios := make(map[string]int)
 	params := strings.Split(lc.Entry.StrategyParams, utils.INFIELD_SEP)
 	for _, param := range params {
-		ponderSlice := strings.Split(param, utils.CONCATENATED_KEY_SEP)
-		if len(ponderSlice) != 2 {
+		ratioSlice := strings.Split(param, utils.CONCATENATED_KEY_SEP)
+		if len(ratioSlice) != 2 {
 			Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
 			continue
 		}
-		p, err := strconv.Atoi(ponderSlice[1])
+		p, err := strconv.Atoi(ratioSlice[1])
 		if err != nil {
 			Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
 			continue
 		}
-		ponders[ponderSlice[0]] = p
+		ratios[ratioSlice[0]] = p
 	}
 	parts := strings.Split(supplier, utils.CONCATENATED_KEY_SEP)
 	if len(parts) > 0 {
 		supplierSubject := parts[len(parts)-1]
-		if ponder, found := ponders[supplierSubject]; found {
-			return ponder
+		if ratio, found := ratios[supplierSubject]; found {
+			return ratio
 		}
-		if ponder, found := ponders[utils.META_DEFAULT]; found {
-			return ponder
+		if ratio, found := ratios[utils.META_DEFAULT]; found {
+			return ratio
 		}
 	}
-	if len(ponders) == 0 {
+	if len(ratios) == 0 {
 		return 1 // use random/last cdr date sorting
 	}
 	return -1 // exclude missing suppliers

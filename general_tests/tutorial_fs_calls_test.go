@@ -326,7 +326,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		if reply[0].ReqType != utils.META_PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
 		}
-		if reply[0].Usage != "65" { // Usage as seconds
+		if reply[0].Usage != "65" && reply[0].Usage != "66" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Cost != 0 { // Cost was not calculated
@@ -386,7 +386,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		if reply[0].Destination != "1001" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
 		}
-		if reply[0].Usage != "63" { // Usage as seconds
+		if reply[0].Usage != "63" && reply[0].Usage != "64" { // Usage as seconds, sometimes takes a second longer to disconnect
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 	}
@@ -405,7 +405,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		if reply[0].Destination != "1001" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
 		}
-		if reply[0].Usage != "62" { // Usage as seconds
+		if reply[0].Usage != "62" && reply[0].Usage != "63" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 	}
@@ -424,7 +424,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		if reply[0].Destination != "1002" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
 		}
-		if reply[0].Usage != "64" { // Usage as seconds
+		if reply[0].Usage != "64" && reply[0].Usage != "65" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Cost == -1.0 { // Cost was not calculated
@@ -446,7 +446,7 @@ func TestTutFsCallsCdrs(t *testing.T) {
 		if reply[0].Destination != "1002" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
 		}
-		if reply[0].Usage != "66" { // Usage as seconds
+		if reply[0].Usage != "66" && reply[0].Usage != "67" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Cost == -1.0 { // Cost was not calculated

@@ -2,5 +2,11 @@
 cgrates.org,1001,SysUserName,danb
 cgrates.org,1001,SysPassword,hisPass321
 cgrates.org,1001,Cli,+4986517174963
+cgrates.org,1001,Account,1001
+cgrates.org,1001,Subject,1001
+cgrates.org,1001,Uuid,388539dfd4f5cefee8f488b78c6c244b9e19138e
 cgrates.org,1002,SysUserName,rif
 cgrates.org,1002,RifAttr,RifVal
+cgrates.org,1002,Account,1002
+cgrates.org,1002,Subject,1002
+cgrates.org,1002,Uuid,27f37edec0670fa34cf79076b80ef5021e39c5b5

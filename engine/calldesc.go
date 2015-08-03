@@ -339,6 +339,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				for i := 0; i < len(timespans); i++ {
 					newTs := timespans[i].SplitByRatingPlan(rp)
 					if newTs != nil {
+						//log.Print("NEW TS", newTs.TimeStart)
 						timespans = append(timespans, newTs)
 					} else {
 						afterEnd = true
@@ -347,8 +348,23 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				}
 			}
 		}
-
 	}
+	// split on days
+	/*for i := 0; i < len(timespans); i++ {
+		if timespans[i].TimeStart.Day() != timespans[i].TimeEnd.Day() {
+			//log.Print("TS: ", timespans[i].TimeStart, timespans[i].TimeEnd)
+			start := timespans[i].TimeStart
+			newTs := timespans[i].SplitByTime(time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, start.Location()).Add(24 * time.Hour))
+			if newTs != nil {
+				//log.Print("NEW TS: ", newTs.TimeStart, newTs.TimeEnd)
+				// insert the new timespan
+				index := i + 1
+				timespans = append(timespans, nil)
+				copy(timespans[index+1:], timespans[index:])
+				timespans[index] = newTs
+			}
+		}
+	}*/
 	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on rate intervals
 	for i := 0; i < len(timespans); i++ {
@@ -358,16 +374,20 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		// Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rp.RateIntervals.Sort()
+		/*for _, interval := range rp.RateIntervals {
+			if !timespans[i].hasBetterRateIntervalThan(interval) {
+				timespans[i].SetRateInterval(interval)
+			}
+		}*/
+		//log.Print("ORIG TS: ", timespans[i].TimeStart, timespans[i].TimeEnd)
+		//log.Print(timespans[i].RateInterval)
 		for _, interval := range rp.RateIntervals {
 			//log.Printf("\tINTERVAL: %+v", interval.Timing)
-			if timespans[i].hasBetterRateIntervalThan(interval) {
-				//log.Print("continue")
-				continue // if the timespan has an interval than it already has a heigher weight
-			}
 			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != utils.VOICE)
 			//utils.PrintFull(timespans[i])
 			//utils.PrintFull(newTs)
 			if newTs != nil {
+				//log.Print("NEW TS: ", newTs.TimeStart, newTs.TimeEnd)
 				newTs.setRatingInfo(rp)
 				// insert the new timespan
 				index := i + 1
@@ -379,6 +399,8 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				}
 			}
 		}
+		//log.Print("TS: ", timespans[i].TimeStart, timespans[i].TimeEnd)
+		//log.Print(timespans[i].RateInterval.Timing)
 	}
 
 	//Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
@@ -422,6 +444,7 @@ func (cd *CallDescriptor) GetDuration() time.Duration {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
+	cd.account = nil // make sure it's not cached
 	cc, err := cd.getCost()
 	if err != nil {
 		return nil, err
@@ -586,6 +609,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 }
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
+	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
@@ -639,6 +663,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 }
 
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+	cd.account = nil // make sure it's not cached
 	// lock all group members
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
@@ -661,6 +686,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
+	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
@@ -692,6 +718,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 }
 
 func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
+	cd.account = nil // make sure it's not cached
 	accountsCache := make(map[string]*Account)
 	for _, increment := range cd.Increments {
 		account, found := accountsCache[increment.BalanceInfo.AccountId]
@@ -770,6 +797,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 }
 
 func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
+	cd.account = nil // make sure it's not cached
 	lcr, err := cd.GetLCRFromStorage()
 	if err != nil {
 		return nil, err

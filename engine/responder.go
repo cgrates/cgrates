@@ -46,7 +46,7 @@ type Responder struct {
 	ExitChan      chan bool
 	CdrSrv        *CdrServer
 	Stats         StatsInterface
-	Timeout       time.Duration
+	cnt           int64
 	responseCache *cache2go.ResponseCache
 }
 
@@ -70,6 +70,7 @@ func (rs *Responder) getCache() *cache2go.ResponseCache {
 RPC method thet provides the external RPC interface for getting the rating information.
 */
 func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
+	rs.cnt += 1
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}

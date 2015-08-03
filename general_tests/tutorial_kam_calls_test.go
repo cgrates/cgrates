@@ -595,7 +595,6 @@ func TestTutKamCallsStopPjsuaListener(t *testing.T) {
 	time.Sleep(time.Duration(1) * time.Second)    // Allow pjsua to finish it's tasks, eg un-REGISTER
 }
 
-/*
 func TestTutKamCallsStopCgrEngine(t *testing.T) {
 	if !*testCalls {
 		return
@@ -611,4 +610,3 @@ func TestTutKamCallsStopKam(t *testing.T) {
 	}
 	engine.KillProcName("kamailio", 1000)
 }
-*/
