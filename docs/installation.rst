@@ -7,8 +7,8 @@ We recommend using source installs for advanced users familiar with Go programmi
 3.1. Using packages
 -------------------
 
-3.1.2. Debian Wheezy
-~~~~~~~~~~~~~~~~~~~~
+3.1.2. Debian Jessie/Wheezy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This is for the moment the only packaged and the most recommended to use method to install CGRateS.
 
@@ -22,7 +22,7 @@ On the server you want to install CGRateS, simply execute the following commands
    apt-get install cgrates
 
 Once the installation is completed, one should perform the post-install section in order to have the CGRateS properly set and ready to run.
-After post-install actions are performed, CGRateS will be configured in */etc/cgrates/cgrates.cfg* and enabled in */etc/default/cgrates*.
+After post-install actions are performed, CGRateS will be configured in */etc/cgrates/cgrates.json* and enabled in */etc/default/cgrates*.
 
 3.2. Using source
 -----------------
@@ -64,8 +64,18 @@ Once database is installed, CGRateS database needs to be set-up out of provided 
   cd /usr/share/cgrates/storage/mysql/
   ./setup_cgr_db.sh root CGRateS.org localhost
 
+- PostgreSQL_
+
+Once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
+
+ ::
+   
+  cd /usr/share/cgrates/storage/postgres/
+  ./setup_cgr_db.sh root CGRateS.org localhost
+
 .. _Redis: http://redis.io/
 .. _MySQL: http://www.mysql.org/
+.. _PostgreSQL: http://www.postgresql.org/
 
 
 Git
