@@ -86,7 +86,7 @@ func (s *Session) debitLoop(runIdx int) {
 		//engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s", utils.ToJSON(nextCd)))
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
-		nextCd.account = nil // make sure it is not cached
+		nextCd.ResetAccount() // make sure it is not cached
 		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 			s.sessionManager.DisconnectSession(s.eventStart, s.connId, SYSTEM_ERROR)

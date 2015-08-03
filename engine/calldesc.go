@@ -168,6 +168,10 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 	return cd.account, err
 }
 
+func (cd *CallDescriptor) ResetAccount() {
+	cd.account = nil
+}
+
 /*
 Restores the activation periods for the specified prefix from storage.
 */
