@@ -168,10 +168,6 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 	return cd.account, err
 }
 
-func (cd *CallDescriptor) ResetAccount() {
-	cd.account = nil
-}
-
 /*
 Restores the activation periods for the specified prefix from storage.
 */
@@ -425,6 +421,7 @@ func (cd *CallDescriptor) GetDuration() time.Duration {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
+	cd.account = nil // make sure it's not cached
 	cc, err := cd.getCost()
 	if err != nil {
 		return nil, err
@@ -589,6 +586,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 }
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
+	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
@@ -642,6 +640,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 }
 
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+	cd.account = nil // make sure it's not cached
 	// lock all group members
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
@@ -664,6 +663,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
+	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
@@ -695,6 +695,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 }
 
 func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
+	cd.account = nil // make sure it's not cached
 	accountsCache := make(map[string]*Account)
 	for _, increment := range cd.Increments {
 		account, found := accountsCache[increment.BalanceInfo.AccountId]
@@ -773,6 +774,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 }
 
 func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
+	cd.account = nil // make sure it's not cached
 	lcr, err := cd.GetLCRFromStorage()
 	if err != nil {
 		return nil, err
