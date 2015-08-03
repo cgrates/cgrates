@@ -46,6 +46,7 @@ type Responder struct {
 	ExitChan      chan bool
 	CdrSrv        *CdrServer
 	Stats         StatsInterface
+	Timeout       time.Duration
 	cnt           int64
 	responseCache *cache2go.ResponseCache
 }
