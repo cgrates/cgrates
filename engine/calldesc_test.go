@@ -195,7 +195,6 @@ func TestSplitSpansWeekend(t *testing.T) {
 		},
 	}
 
-	//log.Print("=============================")
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Log(cd.RatingInfos)
@@ -404,9 +403,10 @@ func TestSpansMultipleRatingPlans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 7, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 0, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost()
-	if result.Cost != 1200 || result.GetConnectFee() != 0 {
-		t.Errorf("Expected %v was %v", 1200, result)
+	cc, _ := cd.GetCost()
+	if cc.Cost != 2100 || cc.GetConnectFee() != 0 {
+		utils.LogFull(cc)
+		t.Errorf("Expected %v was %v (%v)", 2100, cc, cc.GetConnectFee())
 	}
 }
 
@@ -977,7 +977,9 @@ func TestDebitNegatve(t *testing.T) {
 		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].GetValue())
 	}
 	cc, err = cd.MaxDebit()
-	//utils.PrintFull(cc)
+	acc, _ = cd.getAccount()
+	balanceMap = acc.BalanceMap[utils.MONETARY+OUTBOUND]
+	//utils.LogFull(balanceMap)
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
 	}

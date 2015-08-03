@@ -242,24 +242,13 @@ func (ts *TimeSpan) Contains(t time.Time) bool {
 	return t.After(ts.TimeStart) && t.Before(ts.TimeEnd)
 }
 
-/*
-Will set the interval as spans's interval if new Weight is lower then span's interval Weight
-or if the Weights are equal and new price is lower then spans's interval price
-*/
-func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
-	//log.Printf("SETRATEINTERVAL: %+v", i.Timing)
-	// higher weights are better
-	if ts.RateInterval == nil || ts.RateInterval.Weight < i.Weight {
-		ts.RateInterval = i
-		//log.Printf("RET TS: %+v", ts.RateInterval.Timing)
+func (ts *TimeSpan) SetRateInterval(interval *RateInterval) {
+	if interval == nil {
 		return
 	}
-	iPrice, _, _ := i.GetRateParameters(ts.GetGroupStart())
-	tsPrice, _, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	if ts.RateInterval.Weight == i.Weight && iPrice <= tsPrice {
-		ts.RateInterval = i
+	if !ts.hasBetterRateIntervalThan(interval) {
+		ts.RateInterval = interval
 	}
-	//log.Printf("END TS: %+v", ts.RateInterval.Timing)
 }
 
 // Returns the cost of the timespan according to the relevant cost interval.
@@ -354,7 +343,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		for _, rate := range i.Rating.Rates {
 			//Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
 			if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
-				// Logger.Debug(fmt.Sprintf("Splitting"))
+				//log.Print("Splitting")
 				ts.SetRateInterval(i)
 				splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
 				nts = &TimeSpan{
@@ -387,8 +376,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 	// if only the start time is in the interval split the interval to the right
 	if i.Contains(ts.TimeStart, false) {
 		//log.Print("Start in interval")
-		splitTime := i.getRightMargin(ts.TimeStart)
-
+		splitTime := i.Timing.getRightMargin(ts.TimeStart)
 		ts.SetRateInterval(i)
 		if splitTime == ts.TimeStart || splitTime.Equal(ts.TimeEnd) {
 			return
@@ -408,7 +396,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 	if i.Contains(ts.TimeEnd, true) {
 		//log.Print("End in interval")
 		//tmpTime := time.Date(ts.TimeStart.)
-		splitTime := i.getLeftMargin(ts.TimeEnd)
+		splitTime := i.Timing.getLeftMargin(ts.TimeEnd)
 		splitTime = utils.CopyHour(splitTime, ts.TimeStart)
 		if splitTime.Equal(ts.TimeEnd) {
 			return
@@ -419,7 +407,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 		}
 		nts.copyRatingInfo(ts)
 		ts.TimeEnd = splitTime
-
 		nts.SetRateInterval(i)
 		nts.DurationIndex = ts.DurationIndex
 		ts.SetNewDurationIndex(nts)
@@ -428,6 +415,22 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 	}
 	return
 }
+
+/*func (ts *TimeSpan) SplitByTime(splitTime time.Time) (nts *TimeSpan) {
+	if splitTime.Equal(ts.TimeEnd) {
+		return
+	}
+	nts = &TimeSpan{
+		TimeStart: splitTime,
+		TimeEnd:   ts.TimeEnd,
+	}
+	nts.copyRatingInfo(ts)
+	ts.TimeEnd = splitTime
+	nts.SetRateInterval(ts.RateInterval)
+	nts.DurationIndex = ts.DurationIndex
+	ts.SetNewDurationIndex(nts)
+	return
+}*/
 
 // Split the timespan at the given increment start
 func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
@@ -552,30 +555,46 @@ func (ts *TimeSpan) AddIncrement(inc *Increment) {
 }
 
 func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
+	if interval.Timing == nil {
+		return false
+	}
+	otherLeftMargin := interval.Timing.getLeftMargin(ts.TimeStart)
+	otherDistance := ts.TimeStart.Sub(otherLeftMargin)
+	//log.Print("OTHER LEFT: ", otherLeftMargin)
+	//log.Print("OTHER DISTANCE: ", otherDistance)
+	// if the distance is negative it's not usable
+	if otherDistance < 0 {
+		return true
+	}
+	//log.Print("RI: ", ts.RateInterval)
 	if ts.RateInterval == nil {
 		return false
 	}
-	//log.Print("StartTime: ", ts.TimeStart)
-	//log.Printf("OWN: %+v", ts.RateInterval)
-	//log.Printf("OTHER: %+v", interval)
+
 	// the higher the weight the better
 	if ts.RateInterval != nil &&
-		ts.RateInterval.Weight > interval.Weight {
-		return true
+		ts.RateInterval.Weight < interval.Weight {
+		return false
 	}
 	// check interval is closer than the new one
-	ownLeftMargin := ts.RateInterval.getLeftMargin(ts.TimeStart)
-	otherLeftMargin := interval.getLeftMargin(ts.TimeStart)
+	ownLeftMargin := ts.RateInterval.Timing.getLeftMargin(ts.TimeStart)
 	ownDistance := ts.TimeStart.Sub(ownLeftMargin)
-	otherDistance := ts.TimeStart.Sub(otherLeftMargin)
-	endOtherDistance := ts.TimeEnd.Sub(otherLeftMargin)
-	// if thr distance is negative relative to both ends it's not usable
-	if otherDistance < 0 && endOtherDistance < 0 {
-		return true
-	}
+
+	//log.Print("OWN LEFT: ", otherLeftMargin)
+	//log.Print("OWN DISTANCE: ", otherDistance)
+	//endOtherDistance := ts.TimeEnd.Sub(otherLeftMargin)
+
 	// if own interval is closer than its better
-	if ownDistance <= otherDistance {
+	//log.Print(ownDistance)
+	if ownDistance > otherDistance {
+		return false
+	}
+	ownPrice, _, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+	otherPrice, _, _ := interval.GetRateParameters(ts.GetGroupStart())
+	// if own price is smaller than it's better
+	//log.Print(ownPrice, otherPrice)
+	if ownPrice < otherPrice {
 		return true
 	}
-	return false
+	return true
 }

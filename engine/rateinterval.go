@@ -116,13 +116,44 @@ func (rit *RITiming) CronString() string {
 	return rit.cronString
 }
 
-// Returns wheter the Timing is active at the specified time
-func (rit *RITiming) IsActiveAt(t time.Time, endTime bool) bool {
-	// if the received time represents an endtime consider it 24 instead of 0
-	hour := t.Hour()
-	if endTime && hour == 0 {
-		hour = 24
+/*
+Returns a time object that represents the end of the interval realtive to the received time
+*/
+func (rit *RITiming) getRightMargin(t time.Time) (rigthtTime time.Time) {
+	year, month, day := t.Year(), t.Month(), t.Day()
+	hour, min, sec, nsec := 23, 59, 59, 0
+	loc := t.Location()
+	if rit.EndTime != "" {
+		split := strings.Split(rit.EndTime, ":")
+		hour, _ = strconv.Atoi(split[0])
+		min, _ = strconv.Atoi(split[1])
+		sec, _ = strconv.Atoi(split[2])
+		//log.Print("RIGHT1: ", time.Date(year, month, day, hour, min, sec, nsec, loc))
+		return time.Date(year, month, day, hour, min, sec, nsec, loc)
 	}
+	//log.Print("RIGHT2: ", time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second))
+	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
+}
+
+/*
+Returns a time object that represents the start of the interval realtive to the received time
+*/
+func (rit *RITiming) getLeftMargin(t time.Time) (rigthtTime time.Time) {
+	year, month, day := t.Year(), t.Month(), t.Day()
+	hour, min, sec, nsec := 0, 0, 0, 0
+	loc := t.Location()
+	if rit.StartTime != "" {
+		split := strings.Split(rit.StartTime, ":")
+		hour, _ = strconv.Atoi(split[0])
+		min, _ = strconv.Atoi(split[1])
+		sec, _ = strconv.Atoi(split[2])
+	}
+	//log.Print("LEFT: ", time.Date(year, month, day, hour, min, sec, nsec, loc))
+	return time.Date(year, month, day, hour, min, sec, nsec, loc)
+}
+
+// Returns wheter the Timing is active at the specified time
+func (rit *RITiming) IsActiveAt(t time.Time) bool {
 	// check for years
 	if len(rit.Years) > 0 && !rit.Years.Contains(t.Year()) {
 		return false
@@ -139,38 +170,25 @@ func (rit *RITiming) IsActiveAt(t time.Time, endTime bool) bool {
 	if len(rit.WeekDays) > 0 && !rit.WeekDays.Contains(t.Weekday()) {
 		return false
 	}
+	//log.Print("Time: ", t)
+
+	//log.Print("Left Margin: ", rit.getLeftMargin(t))
 	// check for start hour
-	if rit.StartTime != "" {
-		split := strings.Split(rit.StartTime, ":")
-		sh, _ := strconv.Atoi(split[0])
-		sm, _ := strconv.Atoi(split[1])
-		ss, _ := strconv.Atoi(split[2])
-		// if the hour result before or result the same hour but the minute result before
-		if hour < sh ||
-			(hour == sh && t.Minute() < sm) ||
-			(hour == sh && t.Minute() == sm && t.Second() < ss) {
-			return false
-		}
+	if t.Before(rit.getLeftMargin(t)) {
+		return false
 	}
+
+	//log.Print("Right Margin: ", rit.getRightMargin(t))
 	// check for end hour
-	if rit.EndTime != "" {
-		split := strings.Split(rit.EndTime, ":")
-		eh, _ := strconv.Atoi(split[0])
-		em, _ := strconv.Atoi(split[1])
-		es, _ := strconv.Atoi(split[2])
-		// if the hour result after or result the same hour but the minute result after
-		if hour > eh ||
-			(hour == eh && t.Minute() > em) ||
-			(hour == eh && t.Minute() == em && t.Second() > es) {
-			return false
-		}
+	if t.After(rit.getRightMargin(t)) {
+		return false
 	}
 	return true
 }
 
 // IsActive returns wheter the Timing is active now
 func (rit *RITiming) IsActive() bool {
-	return rit.IsActiveAt(time.Now(), false)
+	return rit.IsActiveAt(time.Now())
 }
 
 func (rit *RITiming) IsBlank() bool {
@@ -271,43 +289,12 @@ func (pg *RateGroups) AddRate(ps ...*Rate) {
 Returns true if the received time result inside the interval
 */
 func (i *RateInterval) Contains(t time.Time, endTime bool) bool {
-	return i.Timing.IsActiveAt(t, endTime)
-}
-
-/*
-Returns a time object that represents the end of the interval realtive to the received time
-*/
-func (i *RateInterval) getRightMargin(t time.Time) (rigthtTime time.Time) {
-	year, month, day := t.Year(), t.Month(), t.Day()
-	hour, min, sec, nsec := 23, 59, 59, 0
-	loc := t.Location()
-	if i.Timing.EndTime != "" {
-		split := strings.Split(i.Timing.EndTime, ":")
-		hour, _ = strconv.Atoi(split[0])
-		min, _ = strconv.Atoi(split[1])
-		sec, _ = strconv.Atoi(split[2])
-		//log.Print("RIGHT1: ", time.Date(year, month, day, hour, min, sec, nsec, loc))
-		return time.Date(year, month, day, hour, min, sec, nsec, loc)
+	if endTime {
+		if t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0 { // back one second to 23:59:59
+			t = t.Add(-1 * time.Second)
+		}
 	}
-	//log.Print("RIGHT2: ", time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second))
-	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
-}
-
-/*
-Returns a time object that represents the start of the interval realtive to the received time
-*/
-func (i *RateInterval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
-	year, month, day := t.Year(), t.Month(), t.Day()
-	hour, min, sec, nsec := 0, 0, 0, 0
-	loc := t.Location()
-	if i.Timing.StartTime != "" {
-		split := strings.Split(i.Timing.StartTime, ":")
-		hour, _ = strconv.Atoi(split[0])
-		min, _ = strconv.Atoi(split[1])
-		sec, _ = strconv.Atoi(split[2])
-	}
-	//log.Print("LEFT: ", time.Date(year, month, day, hour, min, sec, nsec, loc))
-	return time.Date(year, month, day, hour, min, sec, nsec, loc)
+	return i.Timing.IsActiveAt(t)
 }
 
 func (i *RateInterval) String_DISABLED() string {
