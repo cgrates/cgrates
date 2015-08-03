@@ -376,8 +376,7 @@ func (il RateIntervalList) Swap(i, j int) {
 
 // we need higher weights earlyer in the list
 func (il RateIntervalList) Less(j, i int) bool {
-	return il[i].Weight < il[j].Weight ||
-		il[i].Timing.StartTime > il[j].Timing.StartTime
+	return il[i].Weight < il[j].Weight //|| il[i].Timing.StartTime > il[j].Timing.StartTime
 }
 
 func (il RateIntervalList) Sort() {
