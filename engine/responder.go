@@ -40,6 +40,11 @@ type SessionRun struct {
 	CallCosts      []*CallCost
 }
 
+type AttrGetLcr struct {
+	*CallDescriptor
+	*utils.Paginator
+}
+
 type Responder struct {
 	Bal      *balancer2go.Balancer
 	ExitChan chan bool
@@ -325,17 +330,17 @@ func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
 	return nil
 }
 
-func (rs *Responder) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
-	if cd.Subject == "" {
-		cd.Subject = cd.Account
+func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
+	if attrs.CallDescriptor.Subject == "" {
+		attrs.CallDescriptor.Subject = attrs.CallDescriptor.Account
 	}
-	if upData, err := LoadUserProfile(cd, "ExtraFields"); err != nil {
+	if upData, err := LoadUserProfile(attrs.CallDescriptor, "ExtraFields"); err != nil {
 		return err
 	} else {
 		udRcv := upData.(*CallDescriptor)
-		*cd = *udRcv
+		*attrs.CallDescriptor = *udRcv
 	}
-	lcrCost, err := cd.GetLCR(rs.Stats, nil)
+	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.Stats, attrs.Paginator)
 	if err != nil {
 		return err
 	}
@@ -505,7 +510,7 @@ type Connector interface {
 	GetSessionRuns(*StoredCdr, *[]*SessionRun) error
 	ProcessCdr(*StoredCdr, *string) error
 	LogCallCost(*CallCostLog, *string) error
-	GetLCR(*CallDescriptor, *LCRCost) error
+	GetLCR(*AttrGetLcr, *LCRCost) error
 }
 
 type RPCClientConnector struct {
@@ -552,6 +557,6 @@ func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *string) erro
 	return rcc.Client.Call("CDRSV1.LogCallCost", ccl, reply)
 }
 
-func (rcc *RPCClientConnector) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
-	return rcc.Client.Call("Responder.GetLCR", cd, reply)
+func (rcc *RPCClientConnector) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
+	return rcc.Client.Call("Responder.GetLCR", attrs, reply)
 }

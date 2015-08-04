@@ -56,6 +56,7 @@ type LcrRequest struct {
 	Destination string
 	StartTime   string
 	Duration    string
+	*utils.Paginator
 }
 
 func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
