@@ -348,22 +348,6 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			}
 		}
 	}
-	// split on days
-	/*for i := 0; i < len(timespans); i++ {
-		if timespans[i].TimeStart.Day() != timespans[i].TimeEnd.Day() {
-			//log.Print("TS: ", timespans[i].TimeStart, timespans[i].TimeEnd)
-			start := timespans[i].TimeStart
-			newTs := timespans[i].SplitByTime(time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, start.Location()).Add(24 * time.Hour))
-			if newTs != nil {
-				//log.Print("NEW TS: ", newTs.TimeStart, newTs.TimeEnd)
-				// insert the new timespan
-				index := i + 1
-				timespans = append(timespans, nil)
-				copy(timespans[index+1:], timespans[index:])
-				timespans[index] = newTs
-			}
-		}
-	}*/
 	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on rate intervals
 	for i := 0; i < len(timespans); i++ {
