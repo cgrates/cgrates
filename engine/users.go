@@ -369,8 +369,6 @@ func (um *UserMap) GetIndexes(in string, reply *map[string][]string) error {
 	return nil
 }
 
-type UserProxy struct{}
-
 type ProxyUserService struct {
 	Client *rpcclient.RpcClient
 }

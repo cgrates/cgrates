@@ -215,6 +215,8 @@ const (
 	CGR_SUPPLIERS                = "cgr_suppliers"
 	KAM_FLATSTORE                = "kamailio_flatstore"
 	OSIPS_FLATSTORE              = "opensips_flatstore"
+	ALIAS_GROUP_RP               = "*rating_profile"
+	ALIAS_GROUP_ACC              = "*account"
 )
 
 var (
