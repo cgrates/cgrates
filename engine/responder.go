@@ -335,7 +335,7 @@ func (rs *Responder) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
 		udRcv := upData.(*CallDescriptor)
 		*cd = *udRcv
 	}
-	lcrCost, err := cd.GetLCR(rs.Stats)
+	lcrCost, err := cd.GetLCR(rs.Stats, nil)
 	if err != nil {
 		return err
 	}

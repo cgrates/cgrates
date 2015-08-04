@@ -779,7 +779,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 	return nil, utils.ErrNotFound
 }
 
-func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
+func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCRCost, error) {
 	cd.account = nil // make sure it's not cached
 	lcr, err := cd.GetLCRFromStorage()
 	if err != nil {
@@ -1110,6 +1110,14 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 		}
 		// sort according to strategy
 		lcrCost.Sort()
+	}
+	if p != nil {
+		if p.Offset != nil && *p.Offset > 0 && *p.Offset < len(lcrCost.SupplierCosts)-1 {
+			lcrCost.SupplierCosts = lcrCost.SupplierCosts[*p.Offset:]
+		}
+		if p.Limit != nil && *p.Limit > 0 && *p.Limit < len(lcrCost.SupplierCosts)-1 {
+			lcrCost.SupplierCosts = lcrCost.SupplierCosts[:*p.Limit]
+		}
 	}
 	return lcrCost, nil
 }
