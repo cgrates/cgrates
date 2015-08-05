@@ -215,12 +215,12 @@ func (sq *StatsQueue) GetId() string {
 
 // Convert data into a struct which can be used in actions based on triggers hit
 func (sq *StatsQueue) Triggered(at *ActionTrigger) *StatsQueueTriggered {
-	return &StatsQueueTriggered{Id: sq.conf.Id, metrics: sq.getStats(), Trigger: at}
+	return &StatsQueueTriggered{Id: sq.conf.Id, Metrics: sq.getStats(), Trigger: at}
 }
 
 // Struct to be passed to triggered actions
 type StatsQueueTriggered struct {
 	Id      string // StatsQueueId
-	metrics map[string]float64
+	Metrics map[string]float64
 	Trigger *ActionTrigger
 }
