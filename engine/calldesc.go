@@ -297,11 +297,11 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	// check if subject is alias
-	if rs, err := cache2go.GetCached(utils.RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey(cd.Tenant, subject)); err == nil {
+	/*if rs, err := cache2go.GetCached(utils.RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey(cd.Tenant, subject)); err == nil {
 		realSubject := rs.(string)
 		subject = realSubject
 		cd.Subject = realSubject
-	}
+	}*/
 	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, subject)
 }
 
@@ -310,9 +310,9 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
 		// check if subject is alias
-		if realSubject, err := cache2go.GetCached(utils.ACC_ALIAS_PREFIX + utils.AccountAliasKey(cd.Tenant, subj)); err == nil {
+		/*if realSubject, err := cache2go.GetCached(utils.ACC_ALIAS_PREFIX + utils.AccountAliasKey(cd.Tenant, subj)); err == nil {
 			cd.Account = realSubject.(string)
-		}
+		}*/
 		subj = cd.Account
 	}
 	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, subj)

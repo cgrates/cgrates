@@ -217,13 +217,20 @@ cgrates.org,rif,test0,val0
 cgrates.org,rif,test1,val1
 cgrates.org,dan,another,value
 `
+	aliases = `
+#Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Group[6],Alias[7],Weight[8]
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,dan1,10
+*out,cgrates.org,call,dan,dan,GLOBAL1,*rating_profile,dan2,20
+*any,*any,*any,*any,*any,*any,*rating_profile,rif1,20
+*any,*any,*any,*any,*any,*any,*account,dan1,10
+`
 )
 
 var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
+		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -268,6 +275,9 @@ func init() {
 	}
 	if err := csvr.LoadUsers(); err != nil {
 		log.Print("error in LoadUsers:", err)
+	}
+	if err := csvr.LoadAliases(); err != nil {
+		log.Print("error in LoadAliases:", err)
 	}
 	csvr.WriteToDatabase(false, false)
 	ratingStorage.CacheAll()
@@ -1027,27 +1037,6 @@ func TestLoadAccountActions(t *testing.T) {
 	}
 }
 
-func TestLoadRpAliases(t *testing.T) {
-	if len(csvr.rpAliases) != 3 {
-		t.Error("Failed to load rp aliases: ", csvr.rpAliases)
-	}
-	if csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a1")] != "minu" ||
-		csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a2")] != "minu" ||
-		csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a3")] != "minu" {
-		t.Error("Error loading rp aliases: ", csvr.rpAliases)
-	}
-}
-
-func TestLoadAccAliases(t *testing.T) {
-	if len(csvr.accAliases) != 2 {
-		t.Error("Failed to load acc aliases: ", csvr.accAliases)
-	}
-	if csvr.accAliases[utils.AccountAliasKey("vdf", "a1")] != "minitsboy" ||
-		csvr.accAliases[utils.AccountAliasKey("vdf", "a2")] != "minitsboy" {
-		t.Error("Error loading acc aliases: ", csvr.accAliases)
-	}
-}
-
 func TestLoadDerivedChargers(t *testing.T) {
 	if len(csvr.derivedChargers) != 2 {
 		t.Error("Failed to load derivedChargers: ", csvr.derivedChargers)
@@ -1131,5 +1120,30 @@ func TestLoadUsers(t *testing.T) {
 
 	if !reflect.DeepEqual(csvr.users[user1.GetId()], user1) {
 		t.Errorf("Unexpected user %+v", csvr.users[user1.GetId()])
+	}
+}
+
+func TestLoadAliases(t *testing.T) {
+	if len(csvr.aliases) != 2 {
+		t.Error("Failed to load aliases: ", csvr.aliases)
+	}
+	alias1 := &Alias{
+		Direction: "*out",
+		Tenant:    "cgrates.org",
+		Category:  "call",
+		Account:   "dan",
+		Subject:   "dan",
+		Group:     "*rating_profile",
+		Values: AliasValues{
+			&AliasValue{
+				DestinationId: "EU_LANDLINE",
+				Alias:         "dan1",
+				Weight:        10,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(csvr.users[alias1.GetId()], alias1) {
+		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
 	}
 }

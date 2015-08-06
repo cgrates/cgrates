@@ -1352,3 +1352,65 @@ func (self *SQLStorage) GetTpUsers(filter *TpUser) ([]TpUser, error) {
 
 	return tpUsers, nil
 }
+
+func (self *SQLStorage) SetTpAliases(aliases []TpAlias) error {
+	if len(aliases) == 0 {
+		return nil
+	}
+	m := make(map[string]bool)
+
+	tx := self.db.Begin()
+	for _, alias := range aliases {
+		if found, _ := m[alias.GetId()]; !found {
+			m[alias.GetId()] = true
+			if err := tx.Where(&TpAlias{
+				Tpid:      alias.Tpid,
+				Direction: alias.Direction,
+				Tenant:    alias.Tenant,
+				Category:  alias.Category,
+				Account:   alias.Account,
+				Subject:   alias.Subject,
+				Group:     alias.Group,
+			}).Delete(TpAlias{}).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+		save := tx.Save(&alias)
+		if save.Error != nil {
+			tx.Rollback()
+			return save.Error
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
+	var tpAliases []TpAlias
+	q := self.db.Where("tpid = ?", filter.Tpid)
+	if len(filter.Direction) != 0 {
+		q = q.Where("direction = ?", filter.Direction)
+	}
+	if len(filter.Tenant) != 0 {
+		q = q.Where("tenant = ?", filter.Tenant)
+	}
+	if len(filter.Category) != 0 {
+		q = q.Where("category = ?", filter.Category)
+	}
+	if len(filter.Account) != 0 {
+		q = q.Where("account = ?", filter.Account)
+	}
+	if len(filter.Subject) != 0 {
+		q = q.Where("subject = ?", filter.Subject)
+	}
+	if len(filter.Group) != 0 {
+		q = q.Where("group = ?", filter.Group)
+	}
+
+	if err := q.Find(&tpAliases).Error; err != nil {
+		return nil, err
+	}
+
+	return tpAliases, nil
+}

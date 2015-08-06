@@ -337,6 +337,24 @@ func (tu *TpUser) GetId() string {
 	return utils.ConcatenatedKey(tu.Tenant, tu.UserName)
 }
 
+type TpAlias struct {
+	Id            int64
+	Tpid          string
+	Direction     string  `index:"0" re:""`
+	Tenant        string  `index:"1" re:""`
+	Category      string  `index:"2" re:""`
+	Account       string  `index:"3" re:""`
+	Subject       string  `index:"4" re:""`
+	Group         string  `index:"5" re:""`
+	DestinationId string  `index:"6" re:""`
+	Alias         string  `index:"7" re:""`
+	Weight        float64 `index:"8" re:""`
+}
+
+func (ta *TpAlias) GetId() string {
+	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Group)
+}
+
 type TblCdrsPrimary struct {
 	Id              int64
 	Cgrid           string

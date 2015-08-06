@@ -73,7 +73,9 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(self.DirPath, utils.DERIVED_CHARGERS_CSV),
 		path.Join(self.DirPath, utils.CDR_STATS_CSV),
-		path.Join(self.DirPath, utils.USERS_CSV))
+		path.Join(self.DirPath, utils.USERS_CSV),
+		path.Join(self.DirPath, utils.ALIASES_CSV),
+	)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
 		fHandler, hasName := fileHandlers[f.Name()]

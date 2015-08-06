@@ -734,3 +734,31 @@ func (tps TpUsers) GetUsers() (map[string]*UserProfile, error) {
 	}
 	return users, nil
 }
+
+type TpAliases []TpAlias
+
+func (tps TpAliases) GetAliases() (map[string]*Alias, error) {
+	als := make(map[string]*Alias)
+	for _, tp := range tps {
+		var al *Alias
+		var found bool
+		if al, found = als[tp.GetId()]; !found {
+			al = &Alias{
+				Direction: tp.Direction,
+				Tenant:    tp.Tenant,
+				Category:  tp.Category,
+				Account:   tp.Account,
+				Subject:   tp.Subject,
+				Group:     tp.Group,
+				Values:    make(AliasValues, 0),
+			}
+			als[tp.GetId()] = al
+		}
+		al.Values = append(al.Values, &AliasValue{
+			DestinationId: tp.DestinationId,
+			Alias:         tp.Alias,
+			Weight:        tp.Weight,
+		})
+	}
+	return als, nil
+}

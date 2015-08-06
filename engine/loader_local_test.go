@@ -131,7 +131,9 @@ func TestLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV)), "")
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
+	), "")
 
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
@@ -168,6 +170,9 @@ func TestLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadUsers(); err != nil {
 		t.Error("Failed loading users: ", err.Error())
+	}
+	if err = loader.LoadAliases(); err != nil {
+		t.Error("Failed loading aliases: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
 		t.Error("Could not write data into ratingDb: ", err.Error())

@@ -94,7 +94,7 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	um.table = make(map[string]map[string]string)
 	um.index = make(map[string]map[string]bool)
 
-	// load from rating db
+	// load from db
 	if ups, err := um.accountingDb.GetUsers(); err == nil {
 		for _, up := range ups {
 			um.table[up.GetId()] = up.Profile
