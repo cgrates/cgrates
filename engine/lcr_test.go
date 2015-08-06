@@ -204,7 +204,7 @@ func TestLcrGet(t *testing.T) {
 		Account:     "rif",
 		Subject:     "rif",
 	}
-	lcr, err := cd.GetLCR(nil)
+	lcr, err := cd.GetLCR(nil, nil)
 	//jsn, _ := json.Marshal(lcr)
 	//log.Print("LCR: ", string(jsn))
 	if err != nil || lcr == nil {

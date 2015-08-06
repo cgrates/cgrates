@@ -67,8 +67,17 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 	for i := 0; i < typ.NumField(); i++ {
 		valField := val.Field(i)
 		typeField := typ.Field(i)
+		//log.Printf("%v (%v)", typeField.Name, valField.Kind())
 		switch valField.Kind() {
-		case reflect.Struct:
+		case reflect.Ptr, reflect.Struct:
+			if valField.Kind() == reflect.Ptr {
+				valField = reflect.New(valField.Type().Elem()).Elem()
+				if valField.Kind() != reflect.Struct {
+					//log.Printf("Here: %v (%v)", typeField.Name, valField.Kind())
+					args = append(args, typeField.Name)
+					continue
+				}
+			}
 			args = append(args, ce.clientArgs(valField.Interface())...)
 		default:
 			args = append(args, typeField.Name)

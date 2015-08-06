@@ -106,7 +106,7 @@ func (self *KamailioSessionManager) getSuppliers(kev KamEvent) (string, error) {
 		return "", errors.New("LCR_PREPROCESS_ERROR")
 	}
 	var lcr engine.LCRCost
-	if err = self.Rater().GetLCR(cd, &lcr); err != nil {
+	if err = self.Rater().GetLCR(&engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
 		engine.Logger.Info(fmt.Sprintf("<SM-Kamailio> LCR_API_ERROR error: %s", err.Error()))
 		return "", errors.New("LCR_API_ERROR")
 	}

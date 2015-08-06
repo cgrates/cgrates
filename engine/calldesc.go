@@ -348,22 +348,6 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			}
 		}
 	}
-	// split on days
-	/*for i := 0; i < len(timespans); i++ {
-		if timespans[i].TimeStart.Day() != timespans[i].TimeEnd.Day() {
-			//log.Print("TS: ", timespans[i].TimeStart, timespans[i].TimeEnd)
-			start := timespans[i].TimeStart
-			newTs := timespans[i].SplitByTime(time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, start.Location()).Add(24 * time.Hour))
-			if newTs != nil {
-				//log.Print("NEW TS: ", newTs.TimeStart, newTs.TimeEnd)
-				// insert the new timespan
-				index := i + 1
-				timespans = append(timespans, nil)
-				copy(timespans[index+1:], timespans[index:])
-				timespans[index] = newTs
-			}
-		}
-	}*/
 	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on rate intervals
 	for i := 0; i < len(timespans); i++ {
@@ -795,7 +779,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 	return nil, utils.ErrNotFound
 }
 
-func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
+func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCRCost, error) {
 	cd.account = nil // make sure it's not cached
 	lcr, err := cd.GetLCRFromStorage()
 	if err != nil {
@@ -831,12 +815,13 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			lcrCD.Account = supplier
 			lcrCD.Subject = supplier
 			lcrCD.Category = lcrCost.Entry.RPCategory
+			fullSupplier := utils.ConcatenatedKey(lcrCD.Direction, lcrCD.Tenant, lcrCD.Category, lcrCD.Subject)
 			var cc *CallCost
 			var err error
 			if cd.account, err = accountingStorage.GetAccount(lcrCD.GetAccountKey()); err == nil {
 				if cd.account.Disabled {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-						Supplier: supplier,
+						Supplier: fullSupplier,
 						Error:    fmt.Sprintf("supplier %s is disabled", supplier),
 					})
 					continue
@@ -846,16 +831,15 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				cc, err = lcrCD.GetCost()
 
 			}
-			supplier = utils.ConcatenatedKey(lcrCD.Direction, lcrCD.Tenant, lcrCD.Category, lcrCD.Subject)
 			//log.Printf("CC: %+v", cc.Timespans[0].ratingInfo.RateIntervals[0].Rating.Rates[0])
 			if err != nil || cc == nil {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-					Supplier: supplier,
+					Supplier: fullSupplier,
 					Error:    err.Error(),
 				})
 			} else {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-					Supplier: supplier,
+					Supplier: fullSupplier,
 					Cost:     cc.Cost,
 					Duration: cc.GetDuration(),
 				})
@@ -878,6 +862,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			lcrCD.Category = category
 			lcrCD.Account = supplier
 			lcrCD.Subject = supplier
+			fullSupplier := utils.ConcatenatedKey(lcrCD.Direction, lcrCD.Tenant, lcrCD.Category, lcrCD.Subject)
 			var qosSortParams []string
 			var asrValues sort.Float64Slice
 			var pddValues sort.Float64Slice
@@ -897,7 +882,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 			if utils.IsSliceMember([]string{LCR_STRATEGY_QOS, LCR_STRATEGY_QOS_THRESHOLD, LCR_STRATEGY_LOAD}, lcrCost.Entry.Strategy) {
 				if stats == nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-						Supplier: supplier,
+						Supplier: fullSupplier,
 						Error:    fmt.Sprintf("Cdr stats service not configured"),
 					})
 					continue
@@ -905,7 +890,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
 				if rpf, err := ratingStorage.GetRatingProfile(rpfKey, false); err != nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-						Supplier: supplier,
+						Supplier: fullSupplier,
 						Error:    fmt.Sprintf("Rating plan error: %s", err.Error()),
 					})
 					continue
@@ -937,7 +922,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 							statValues := make(map[string]float64)
 							if err := stats.GetValues(qId, &statValues); err != nil {
 								lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-									Supplier: supplier,
+									Supplier: fullSupplier,
 									Error:    fmt.Sprintf("Get stats values for queue id %s, error %s", qId, err.Error()),
 								})
 								statsErr = true
@@ -991,7 +976,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 					if lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
 						if len(supplierQueues) > 0 {
 							lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-								Supplier:       supplier,
+								Supplier:       fullSupplier,
 								supplierQueues: supplierQueues,
 							})
 						}
@@ -1071,7 +1056,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				//log.Print("ACCCOUNT")
 				if cd.account.Disabled {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-						Supplier: supplier,
+						Supplier: fullSupplier,
 						Error:    fmt.Sprintf("supplier %s is disabled", supplier),
 					})
 					continue
@@ -1082,16 +1067,15 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 				cc, err = lcrCD.GetCost()
 			}
 			//log.Printf("CC: %+v", cc)
-			supplier = utils.ConcatenatedKey(lcrCD.Direction, lcrCD.Tenant, lcrCD.Category, lcrCD.Subject)
 			if err != nil || cc == nil {
 				lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
-					Supplier: supplier,
+					Supplier: fullSupplier,
 					Error:    err.Error(),
 				})
 				continue
 			} else {
 				supplCost := &LCRSupplierCost{
-					Supplier: supplier,
+					Supplier: fullSupplier,
 					Cost:     cc.Cost,
 					Duration: cc.GetDuration(),
 				}
@@ -1126,6 +1110,14 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface) (*LCRCost, error) {
 		}
 		// sort according to strategy
 		lcrCost.Sort()
+	}
+	if p != nil {
+		if p.Offset != nil && *p.Offset > 0 && *p.Offset < len(lcrCost.SupplierCosts) {
+			lcrCost.SupplierCosts = lcrCost.SupplierCosts[*p.Offset:]
+		}
+		if p.Limit != nil && *p.Limit > 0 && *p.Limit < len(lcrCost.SupplierCosts) {
+			lcrCost.SupplierCosts = lcrCost.SupplierCosts[:*p.Limit]
+		}
 	}
 	return lcrCost, nil
 }
