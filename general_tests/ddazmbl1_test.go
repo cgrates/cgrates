@@ -62,8 +62,9 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``
+	aliases := ``
 	csvr := engine.NewTpReader(ratingDb, acntDb, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +111,8 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		t.Error("No account saved")
 	}
 
-	ratingDb.CacheAll()
+	ratingDb.CacheRatingAll()
+	acntDb.CacheAccountingAll()
 
 	if cachedDests := cache2go.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 2 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

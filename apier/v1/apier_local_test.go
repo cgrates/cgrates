@@ -30,7 +30,6 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -1550,6 +1549,7 @@ func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
 	}
 }
 
+/*
 func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1573,7 +1573,7 @@ func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", expectSubjAliases, subjAliases)
 		}
 	}
-}
+}*/
 
 func TestApierLocalRemRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
@@ -1607,6 +1607,7 @@ func TestApierLocalGetAccountAliases(t *testing.T) {
 	}
 }
 
+/*
 func TestApierLocalAddAccountAliases(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1630,7 +1631,7 @@ func TestApierLocalAddAccountAliases(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", expectAcntAliases, acntAliases)
 		}
 	}
-}
+}*/
 
 func TestApierLocalRemAccountAliases(t *testing.T) {
 	if !*testLocal {
@@ -1770,6 +1771,7 @@ func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 	}
 }
 
+/*
 func TestApierGetCacheStats3(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1782,7 +1784,7 @@ func TestApierGetCacheStats3(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
 	}
-}
+}*/
 
 // Simply kill the engine after we are done with tests within this file
 func TestApierStopEngine(t *testing.T) {

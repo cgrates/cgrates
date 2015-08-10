@@ -76,7 +76,7 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	if err := self.RatingDb.SetDerivedChargers(dcKey, attrs.DerivedChargers); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DERIVEDCHARGERS_PREFIX: []string{utils.DERIVEDCHARGERS_PREFIX + dcKey},
 	}); err != nil {
 		return utils.NewErrServerError(err)
@@ -110,7 +110,7 @@ func (self *ApierV1) RemDerivedChargers(attrs AttrRemDerivedChargers, reply *str
 	} else {
 		*reply = "OK"
 	}
-	if err := self.RatingDb.CachePrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return nil

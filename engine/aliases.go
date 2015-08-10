@@ -111,9 +111,15 @@ func NewAliasHandler(accountingDb AccountingStorage) *AliasHandler {
 func (am *AliasHandler) SetAlias(al Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
+	// TODO: get previous from cache
+
 	if err := am.accountingDb.SetAlias(&al); err != nil {
 		*reply = err.Error()
 		return err
+	} //add to cache
+	aliasesChanged := []string{utils.ALIASES_PREFIX + al.GetId()}
+	if err := am.accountingDb.CacheAccountingPrefixValues(map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
@@ -126,6 +132,7 @@ func (am *AliasHandler) RemoveAlias(al Alias, reply *string) error {
 		*reply = err.Error()
 		return err
 	}
+	// remove from cache
 	*reply = utils.OK
 	return nil
 }

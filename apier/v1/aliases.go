@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
+/*
 import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -80,9 +81,6 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 	}
 
 	// cache refresh not needed, synched in RemoveRpAliases
-	/*if err := self.RatingDb.CachePrefixes(utils.RP_ALIAS_PREFIX); err != nil {
-		return utils.NewErrServerError(err)
-	}*/
 	*reply = utils.OK
 	return nil
 }
@@ -131,10 +129,7 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 		}
 		return utils.NewErrServerError(err)
 	}
-	// cache refresh not needed, synched in RemoveRpAliases
-	/*if err := self.RatingDb.CachePrefixes(utils.ACC_ALIAS_PREFIX); err != nil {
-		return utils.NewErrServerError(err)
-	}*/
 	*reply = utils.OK
 	return nil
 }
+*/

@@ -526,11 +526,10 @@ type ApiReloadCache struct {
 	RatingProfileIds []string
 	ActionIds        []string
 	SharedGroupIds   []string
-	RpAliases        []string
-	AccAliases       []string
 	LCRIds           []string
 	DerivedChargers  []string
 	LcrProfiles      []string
+	Aliases          []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
@@ -542,12 +541,11 @@ type CacheStats struct {
 	RatingProfiles  int
 	Actions         int
 	SharedGroups    int
-	RatingAliases   int
-	AccountAliases  int
 	DerivedChargers int
 	LcrProfiles     int
 	CdrStats        int
 	Users           int
+	Aliases         int
 }
 
 type AttrCachedItemAge struct {
