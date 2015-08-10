@@ -662,7 +662,11 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 }
 
 func (rs *RedisStorage) RemoveAlias(key string) (err error) {
-	_, err = rs.db.Del(utils.ALIASES_PREFIX + key)
+	key = utils.ALIASES_PREFIX + key
+	_, err = rs.db.Del(key)
+	if err == nil {
+		cache2go.RemKey(key)
+	}
 	return
 }
 

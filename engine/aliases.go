@@ -26,6 +26,12 @@ type AliasValue struct {
 	Weight        float64
 }
 
+func (av *AliasValue) Equals(other *AliasValue) bool {
+	return av.DestinationId == other.DestinationId &&
+		av.Alias == other.Alias &&
+		av.Weight == other.Weight
+}
+
 type AliasValues []*AliasValue
 
 func (avs AliasValues) Len() int {
@@ -93,6 +99,7 @@ func (al *Alias) SetId(id string) error {
 
 type AliasService interface {
 	SetAlias(Alias, *string) error
+	UpdateAlias(Alias, *string) error
 	RemoveAlias(Alias, *string) error
 	GetAlias(Alias, *Alias) error
 }
@@ -111,12 +118,47 @@ func NewAliasHandler(accountingDb AccountingStorage) *AliasHandler {
 func (am *AliasHandler) SetAlias(al Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-	// TODO: get previous from cache
 
 	if err := am.accountingDb.SetAlias(&al); err != nil {
 		*reply = err.Error()
 		return err
 	} //add to cache
+
+	aliasesChanged := []string{utils.ALIASES_PREFIX + al.GetId()}
+	if err := am.accountingDb.CacheAccountingPrefixValues(map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+func (am *AliasHandler) UpdateAlias(al Alias, reply *string) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	// get previous value
+	oldAlias := &Alias{}
+	if err := am.GetAlias(al, oldAlias); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	for _, oldValue := range oldAlias.Values {
+		found := false
+		for _, value := range al.Values {
+			if oldValue.Equals(value) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			al.Values = append(al.Values, oldValue)
+		}
+	}
+
+	if err := am.accountingDb.SetAlias(&al); err != nil {
+		*reply = err.Error()
+		return err
+	} //add to cache
+
 	aliasesChanged := []string{utils.ALIASES_PREFIX + al.GetId()}
 	if err := am.accountingDb.CacheAccountingPrefixValues(map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
 		return utils.NewErrServerError(err)
@@ -132,7 +174,6 @@ func (am *AliasHandler) RemoveAlias(al Alias, reply *string) error {
 		*reply = err.Error()
 		return err
 	}
-	// remove from cache
 	*reply = utils.OK
 	return nil
 }
@@ -164,6 +205,10 @@ func NewProxyAliasService(addr string, attempts, reconnects int) (*ProxyAliasSer
 
 func (ps *ProxyAliasService) SetAlias(al Alias, reply *string) error {
 	return ps.Client.Call("AliasV1.SetAlias", al, reply)
+}
+
+func (ps *ProxyAliasService) UpdateAlias(al Alias, reply *string) error {
+	return ps.Client.Call("AliasV1.UpdateAlias", al, reply)
 }
 
 func (ps *ProxyAliasService) RemoveAlias(al Alias, reply *string) error {
