@@ -117,7 +117,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1,
-		DerivedChargers: 1, LcrProfiles: 4, CdrStats: 6, Users: 2}
+		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 2}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -898,8 +898,8 @@ func TestTutLocalLeastCost(t *testing.T) {
 		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
-		Subject:     "1004",
-		Account:     "1004",
+		Subject:     "1005",
+		Account:     "1005",
 		Destination: "1002",
 		TimeStart:   tStart,
 		TimeEnd:     tEnd,
@@ -924,8 +924,8 @@ func TestTutLocalLeastCost(t *testing.T) {
 		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
-		Subject:     "1004",
-		Account:     "1004",
+		Subject:     "1005",
+		Account:     "1005",
 		Destination: "1003",
 		TimeStart:   tStart,
 		TimeEnd:     tEnd,

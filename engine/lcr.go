@@ -48,14 +48,15 @@ const (
 
 // A request for LCR, used in APIer and SM where we need to expose it
 type LcrRequest struct {
-	Direction   string
-	Tenant      string
-	Category    string
-	Account     string
-	Subject     string
-	Destination string
-	StartTime   string
-	Duration    string
+	Direction    string
+	Tenant       string
+	Category     string
+	Account      string
+	Subject      string
+	Destination  string
+	StartTime    string
+	Duration     string
+	IgnoreErrors bool
 	*utils.Paginator
 }
 
@@ -434,6 +435,9 @@ func (lc *LCRCost) SuppliersSlice() ([]string, error) {
 	}
 	supps := []string{}
 	for _, supplCost := range lc.SupplierCosts {
+		if supplCost.Error != "" {
+			continue // Do not add the supplier with cost errors to list of suppliers available
+		}
 		if dtcs, err := utils.NewDTCSFromRPKey(supplCost.Supplier); err != nil {
 			return nil, err
 		} else if len(dtcs.Subject) != 0 {
