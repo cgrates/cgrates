@@ -501,7 +501,8 @@ func (ms *MapStorage) SetAlias(al *Alias) error {
 func (ms *MapStorage) GetAlias(key string) (al *Alias, err error) {
 	if values, ok := ms.dict[utils.ALIASES_PREFIX+key]; ok {
 		al = &Alias{Values: make(AliasValues, 0)}
-		err = ms.ms.Unmarshal(values, al.Values)
+		err = ms.ms.Unmarshal(values, &al.Values)
+		al.SetId(key[len(utils.ALIASES_PREFIX):])
 	} else {
 		return nil, utils.ErrNotFound
 	}
@@ -512,8 +513,8 @@ func (ms *MapStorage) GetAliases() (als []*Alias, err error) {
 	for key, value := range ms.dict {
 		if strings.HasPrefix(key, utils.ALIASES_PREFIX) {
 			al := &Alias{Values: make(AliasValues, 0)}
-			if err = ms.ms.Unmarshal(value, al.Values); err == nil {
-				al.SetId(key)
+			if err = ms.ms.Unmarshal(value, &al.Values); err == nil {
+				al.SetId(key[len(utils.ALIASES_PREFIX):])
 				als = append(als, al)
 			}
 		}

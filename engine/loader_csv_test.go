@@ -122,7 +122,7 @@ ANY_PLAN,DATA_RATE,*any,10
 *out,vdf,0,rif,2012-01-01T00:00:00Z,EVENING,,
 *out,vdf,call,rif,2012-02-28T00:00:00Z,EVENING,,
 *out,vdf,call,dan,2012-01-01T00:00:00Z,EVENING,,
-*out,vdf,0,minu;a1;a2;a3,2012-01-01T00:00:00Z,EVENING,,
+*out,vdf,0,minu,2012-01-01T00:00:00Z,EVENING,,
 *out,vdf,0,*any,2012-02-28T00:00:00Z,EVENING,,
 *out,vdf,0,one,2012-02-28T00:00:00Z,STANDARD,,
 *out,vdf,0,inf,2012-02-28T00:00:00Z,STANDARD,inf,
@@ -187,7 +187,7 @@ CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
-vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
+vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
 cgrates.org,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
 cgrates.org,remo,*out,TOPUP10_AT,
 vdf,empty0,*out,TOPUP_SHARED0_AT,
@@ -223,6 +223,8 @@ cgrates.org,dan,another,value
 *out,cgrates.org,call,dan,dan,GLOBAL1,*rating_profile,dan2,20
 *any,*any,*any,*any,*any,*any,*rating_profile,rif1,20
 *any,*any,*any,*any,*any,*any,*account,dan1,10
+*out,vdf,0,a1,a1,*any,*rating_profile,minu,10
+*out,vdf,0,a1,a1,*any,*account,minu,10
 `
 )
 
@@ -1124,7 +1126,7 @@ func TestLoadUsers(t *testing.T) {
 }
 
 func TestLoadAliases(t *testing.T) {
-	if len(csvr.aliases) != 2 {
+	if len(csvr.aliases) != 5 {
 		t.Error("Failed to load aliases: ", csvr.aliases)
 	}
 	alias1 := &Alias{
@@ -1140,10 +1142,15 @@ func TestLoadAliases(t *testing.T) {
 				Alias:         "dan1",
 				Weight:        10,
 			},
+			&AliasValue{
+				DestinationId: "GLOBAL1",
+				Alias:         "dan2",
+				Weight:        20,
+			},
 		},
 	}
 
-	if !reflect.DeepEqual(csvr.users[alias1.GetId()], alias1) {
+	if !reflect.DeepEqual(csvr.aliases[alias1.GetId()], alias1) {
 		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
 	}
 }

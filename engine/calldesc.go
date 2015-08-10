@@ -69,6 +69,7 @@ var (
 	historyScribe          history.Scribe
 	pubSubServer           PublisherSubscriber
 	userService            UserService
+	aliasService           AliasService
 )
 
 // Exported method to set the storage getter.
@@ -110,6 +111,10 @@ func SetPubSub(ps PublisherSubscriber) {
 
 func SetUserService(us UserService) {
 	userService = us
+}
+
+func SetAliasService(as AliasService) {
+	aliasService = as
 }
 
 func Publish(event CgrEvent) {
@@ -297,11 +302,10 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	// check if subject is alias
-	/*if rs, err := cache2go.GetCached(utils.RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey(cd.Tenant, subject)); err == nil {
-		realSubject := rs.(string)
-		subject = realSubject
-		cd.Subject = realSubject
-	}*/
+	if alias, err := GetBestAlias(cd.Destination, cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject, utils.ALIAS_GROUP_RP); err == nil && alias != "" {
+		subject = alias
+		cd.Subject = alias
+	}
 	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, subject)
 }
 
@@ -310,9 +314,10 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
 		// check if subject is alias
-		/*if realSubject, err := cache2go.GetCached(utils.ACC_ALIAS_PREFIX + utils.AccountAliasKey(cd.Tenant, subj)); err == nil {
-			cd.Account = realSubject.(string)
-		}*/
+		alias, err := GetBestAlias(cd.Destination, cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject, utils.ALIAS_GROUP_ACC)
+		if err == nil && alias != "" {
+			cd.Account = alias
+		}
 		subj = cd.Account
 	}
 	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, subj)

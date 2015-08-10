@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -35,12 +36,30 @@ func (avs AliasValues) Swap(i, j int) {
 	avs[i], avs[j] = avs[j], avs[i]
 }
 
-func (avs AliasValues) Less(j, i int) bool { // get higher ponder in front
+func (avs AliasValues) Less(j, i int) bool { // get higher weight in front
 	return avs[i].Weight < avs[j].Weight
 }
 
 func (avs AliasValues) Sort() {
 	sort.Sort(avs)
+}
+
+// returns a mapping between aliases and destination ids in a slice sorted by weights
+func (avs AliasValues) GetWeightSlice() (result []map[string][]string) {
+	avs.Sort()
+	prevWeight := -1.0
+	for _, value := range avs {
+		var m map[string][]string
+		if value.Weight != prevWeight {
+			// start a new map
+			m = make(map[string][]string)
+			result = append(result, m)
+		} else {
+			m = result[len(result)-1]
+		}
+		m[value.Alias] = append(m[value.Alias], value.DestinationId)
+	}
+	return
 }
 
 func (al *Alias) GetId() string {
@@ -75,7 +94,7 @@ func (al *Alias) SetId(id string) error {
 type AliasService interface {
 	SetAlias(Alias, *string) error
 	RemoveAlias(Alias, *string) error
-	GetAliases(Alias, *[]*Alias) error
+	GetAlias(Alias, *Alias) error
 	ReloadAliases(string, *string) error
 }
 
@@ -104,7 +123,6 @@ func newAliasMap(accountingDb AccountingStorage) *AliasMap {
 func (am *AliasMap) ReloadAliases(in string, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-
 	// backup old data
 	oldTable := am.table
 	am.table = make(map[string]AliasValues)
@@ -154,7 +172,9 @@ func (am *AliasMap) GetAlias(al Alias, result *Alias) error {
 	am.mu.RLock()
 	defer am.mu.RUnlock()
 	variants := al.GenerateIds()
+	//log.Print("TABLE: ", am.table)
 	for _, variant := range variants {
+		//log.Printf("AL %+v", variant)
 		if r, ok := am.table[variant]; ok {
 			al.Values = r
 			*result = al
@@ -184,10 +204,49 @@ func (ps *ProxyAliasService) RemoveAlias(al Alias, reply *string) error {
 	return ps.Client.Call("AliasV1.RemoveAlias", al, reply)
 }
 
-func (ps *ProxyAliasService) GetAlias(al Alias, aliases *Alias) error {
-	return ps.Client.Call("AliasV1.GetAliases", al, aliases)
+func (ps *ProxyAliasService) GetAlias(al Alias, alias *Alias) error {
+	return ps.Client.Call("AliasV1.GetAliases", al, alias)
 }
 
 func (ps *ProxyAliasService) ReloadAliases(in string, reply *string) error {
 	return ps.Client.Call("AliasV1.ReloadAliases", in, reply)
+}
+
+func GetBestAlias(destination, direction, tenant, category, account, subject, group string) (string, error) {
+	if aliasService == nil {
+		return "", nil
+	}
+	response := Alias{}
+	if err := aliasService.GetAlias(Alias{
+		Direction: direction,
+		Tenant:    tenant,
+		Category:  category,
+		Account:   account,
+		Subject:   subject,
+		Group:     group,
+	}, &response); err != nil {
+		return "", err
+	}
+	// sort according to weight
+	values := response.Values.GetWeightSlice()
+	// check destination ids
+
+	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
+		if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
+			for _, aliasMap := range values {
+				for alias, aliasDestIds := range aliasMap {
+					destIds := x.(map[interface{}]struct{})
+					for idId := range destIds {
+						dId := idId.(string)
+						for _, aliasDestId := range aliasDestIds {
+							if aliasDestId == utils.ANY || aliasDestId == dId {
+								return alias, nil
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return "", utils.ErrNotFound
 }

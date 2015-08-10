@@ -582,8 +582,8 @@ func (rs *RedisStorage) GetAlias(key string) (al *Alias, err error) {
 	var values []byte
 	if values, err = rs.db.Get(utils.ALIASES_PREFIX + key); err == nil {
 		al = &Alias{Values: make(AliasValues, 0)}
-		al.SetId(key)
-		err = rs.ms.Unmarshal(values, al.Values)
+		al.SetId(key[len(utils.ALIASES_PREFIX):])
+		err = rs.ms.Unmarshal(values, &al.Values)
 	}
 	return
 }
@@ -596,7 +596,8 @@ func (rs *RedisStorage) GetAliases() (result []*Alias, err error) {
 	for _, key := range keys {
 		if values, err := rs.db.Get(key); err == nil {
 			al := &Alias{Values: make(AliasValues, 0)}
-			err = rs.ms.Unmarshal(values, al.Values)
+			err = rs.ms.Unmarshal(values, &al.Values)
+			al.SetId(key[len(utils.ALIASES_PREFIX):])
 			result = append(result, al)
 		} else {
 			return nil, utils.ErrNotFound

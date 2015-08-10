@@ -345,8 +345,8 @@ type TpAlias struct {
 	Category      string  `index:"2" re:""`
 	Account       string  `index:"3" re:""`
 	Subject       string  `index:"4" re:""`
-	Group         string  `index:"5" re:""`
-	DestinationId string  `index:"6" re:""`
+	DestinationId string  `index:"5" re:""`
+	Group         string  `index:"6" re:""`
 	Alias         string  `index:"7" re:""`
 	Weight        float64 `index:"8" re:""`
 }
