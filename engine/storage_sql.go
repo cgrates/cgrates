@@ -49,7 +49,7 @@ func (self *SQLStorage) Flush(placeholder string) (err error) {
 }
 
 func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
-	return nil, nil
+	return nil, utils.ErrNotImplemented
 }
 
 func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {

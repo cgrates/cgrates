@@ -282,7 +282,8 @@ func init() {
 		log.Print("error in LoadAliases:", err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingStorage.CacheAll()
+	ratingStorage.CacheRatingAll()
+	accountingStorage.CacheAccountingAll()
 }
 
 func TestLoadDestinations(t *testing.T) {

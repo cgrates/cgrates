@@ -724,7 +724,8 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.Flush()
-	ratingStorage.CacheAll()
+	ratingStorage.CacheRatingAll()
+	accountingStorage.CacheAccountingAll()
 	return nil
 
 }

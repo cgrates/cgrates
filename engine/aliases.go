@@ -95,89 +95,48 @@ type AliasService interface {
 	SetAlias(Alias, *string) error
 	RemoveAlias(Alias, *string) error
 	GetAlias(Alias, *Alias) error
-	ReloadAliases(string, *string) error
 }
 
-type AliasMap struct {
-	table        map[string]AliasValues
+type AliasHandler struct {
 	accountingDb AccountingStorage
 	mu           sync.RWMutex
 }
 
-func NewAliasMap(accountingDb AccountingStorage) (*AliasMap, error) {
-	um := newAliasMap(accountingDb)
-	var reply string
-	if err := um.ReloadAliases("", &reply); err != nil {
-		return nil, err
-	}
-	return um, nil
-}
-
-func newAliasMap(accountingDb AccountingStorage) *AliasMap {
-	return &AliasMap{
-		table:        make(map[string]AliasValues),
+func NewAliasHandler(accountingDb AccountingStorage) *AliasHandler {
+	return &AliasHandler{
 		accountingDb: accountingDb,
 	}
 }
 
-func (am *AliasMap) ReloadAliases(in string, reply *string) error {
-	am.mu.Lock()
-	defer am.mu.Unlock()
-	// backup old data
-	oldTable := am.table
-	am.table = make(map[string]AliasValues)
-
-	// load from db
-	if ups, err := am.accountingDb.GetAliases(); err == nil {
-		for _, up := range ups {
-			am.table[up.GetId()] = up.Values
-		}
-	} else {
-		// restore old data before return
-		am.table = oldTable
-
-		*reply = err.Error()
-		return err
-	}
-
-	*reply = utils.OK
-	return nil
-}
-
-func (am *AliasMap) SetAlias(al Alias, reply *string) error {
+func (am *AliasHandler) SetAlias(al Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	if err := am.accountingDb.SetAlias(&al); err != nil {
 		*reply = err.Error()
 		return err
 	}
-	am.table[al.GetId()] = al.Values
 	*reply = utils.OK
 	return nil
 }
 
-func (am *AliasMap) RemoveAlias(al Alias, reply *string) error {
+func (am *AliasHandler) RemoveAlias(al Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	if err := am.accountingDb.RemoveAlias(al.GetId()); err != nil {
 		*reply = err.Error()
 		return err
 	}
-	delete(am.table, al.GetId())
 	*reply = utils.OK
 	return nil
 }
 
-func (am *AliasMap) GetAlias(al Alias, result *Alias) error {
+func (am *AliasHandler) GetAlias(al Alias, result *Alias) error {
 	am.mu.RLock()
 	defer am.mu.RUnlock()
 	variants := al.GenerateIds()
-	//log.Print("TABLE: ", am.table)
 	for _, variant := range variants {
-		//log.Printf("AL %+v", variant)
-		if r, ok := am.table[variant]; ok {
-			al.Values = r
-			*result = al
+		if r, err := am.accountingDb.GetAlias(variant, false); err == nil {
+			*result = *r
 			return nil
 		}
 	}
@@ -205,7 +164,7 @@ func (ps *ProxyAliasService) RemoveAlias(al Alias, reply *string) error {
 }
 
 func (ps *ProxyAliasService) GetAlias(al Alias, alias *Alias) error {
-	return ps.Client.Call("AliasV1.GetAliases", al, alias)
+	return ps.Client.Call("AliasV1.GetAlias", al, alias)
 }
 
 func (ps *ProxyAliasService) ReloadAliases(in string, reply *string) error {
@@ -233,8 +192,8 @@ func GetBestAlias(destination, direction, tenant, category, account, subject, gr
 
 	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
 		if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
-			for _, aliasMap := range values {
-				for alias, aliasDestIds := range aliasMap {
+			for _, aliasHandler := range values {
+				for alias, aliasDestIds := range aliasHandler {
 					destIds := x.(map[interface{}]struct{})
 					for idId := range destIds {
 						dId := idId.(string)

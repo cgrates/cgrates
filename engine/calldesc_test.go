@@ -616,7 +616,7 @@ func TestGetCostWithMaxCostFree(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
-	aliasService, _ = NewAliasMap(accountingStorage)
+	aliasService = NewAliasHandler(accountingStorage)
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),

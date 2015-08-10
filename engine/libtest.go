@@ -47,7 +47,7 @@ func InitDataDb(cfg *config.CGRConfig) error {
 			return err
 		}
 	}
-	ratingDb.CacheAll()
+	ratingDb.CacheRatingAll()
 	return nil
 }
 
