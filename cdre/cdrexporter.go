@@ -310,6 +310,8 @@ func (cdre *CdrExporter) composeTrailer() error {
 func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 	if cdr == nil || len(cdr.CgrId) == 0 { // We do not export empty CDRs
 		return nil
+	} else if cdr.ExtraFields == nil { // Avoid assignment in nil map if not initialized
+		cdr.ExtraFields = make(map[string]string)
 	}
 	// Cost multiply
 	if cdre.dataUsageMultiplyFactor != 0.0 && cdr.TOR == utils.DATA {

@@ -116,6 +116,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
+
 	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 3,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 2}
 	var args utils.AttrCacheStats
@@ -898,8 +899,8 @@ func TestTutLocalLeastCost(t *testing.T) {
 		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
-		Subject:     "1004",
-		Account:     "1004",
+		Subject:     "1005",
+		Account:     "1005",
 		Destination: "1002",
 		TimeStart:   tStart,
 		TimeEnd:     tEnd,
@@ -924,8 +925,8 @@ func TestTutLocalLeastCost(t *testing.T) {
 		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
-		Subject:     "1004",
-		Account:     "1004",
+		Subject:     "1005",
+		Account:     "1005",
 		Destination: "1003",
 		TimeStart:   tStart,
 		TimeEnd:     tEnd,

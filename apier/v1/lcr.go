@@ -38,14 +38,17 @@ func (self *ApierV1) GetLcr(lcrReq engine.LcrRequest, lcrReply *engine.LcrReply)
 	if lcrQried.Entry == nil {
 		return utils.ErrNotFound
 	}
-	if lcrQried.HasErrors() {
-		lcrQried.LogErrors()
-		return fmt.Errorf("%s:%s", utils.ErrServerError.Error(), "LCR_COMPUTE_ERRORS")
-	}
 	lcrReply.DestinationId = lcrQried.Entry.DestinationId
 	lcrReply.RPCategory = lcrQried.Entry.RPCategory
 	lcrReply.Strategy = lcrQried.Entry.Strategy
 	for _, qriedSuppl := range lcrQried.SupplierCosts {
+		if qriedSuppl.Error != "" {
+			engine.Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", qriedSuppl.Supplier, qriedSuppl.Error))
+			if !lcrReq.IgnoreErrors {
+				return fmt.Errorf("%s:%s", utils.ErrServerError.Error(), "LCR_COMPUTE_ERRORS")
+			}
+			continue
+		}
 		if dtcs, err := utils.NewDTCSFromRPKey(qriedSuppl.Supplier); err != nil {
 			return utils.NewErrServerError(err)
 		} else {
@@ -65,7 +68,7 @@ func (self *ApierV1) GetLcrSuppliers(lcrReq engine.LcrRequest, suppliers *string
 	if err := self.Responder.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd, Paginator: lcrReq.Paginator}, &lcrQried); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if lcrQried.HasErrors() {
+	if lcrQried.HasErrors() && !lcrReq.IgnoreErrors {
 		lcrQried.LogErrors()
 		return fmt.Errorf("%s:%s", utils.ErrServerError.Error(), "LCR_ERRORS")
 	}
