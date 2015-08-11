@@ -156,7 +156,9 @@ func main() {
 			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
 			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV),
 			path.Join(*dataPath, utils.CDR_STATS_CSV),
-			path.Join(*dataPath, utils.USERS_CSV))
+			path.Join(*dataPath, utils.USERS_CSV),
+			path.Join(*dataPath, utils.ALIASES_CSV),
+		)
 	}
 	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid)
 	err = tpReader.LoadAll()
@@ -236,8 +238,7 @@ func main() {
 		rpfIds, _ := tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
 		actIds, _ := tpReader.GetLoadedIds(utils.ACTION_PREFIX)
 		shgIds, _ := tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-		rpAliases, _ := tpReader.GetLoadedIds(utils.RP_ALIAS_PREFIX)
-		accAliases, _ := tpReader.GetLoadedIds(utils.ACC_ALIAS_PREFIX)
+		aliases, _ := tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
 		lcrIds, _ := tpReader.GetLoadedIds(utils.LCR_PREFIX)
 		dcs, _ := tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
 		// Reload cache first since actions could be calling info from within
@@ -245,7 +246,7 @@ func main() {
 			log.Print("Reloading cache")
 		}
 		if *flush {
-			dstIds, rplIds, rpfIds, rpAliases, lcrIds = nil, nil, nil, nil, nil // Should reload all these on flush
+			dstIds, rplIds, rpfIds, lcrIds = nil, nil, nil, nil // Should reload all these on flush
 		}
 		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{
 			DestinationIds:   dstIds,
@@ -253,8 +254,7 @@ func main() {
 			RatingProfileIds: rpfIds,
 			ActionIds:        actIds,
 			SharedGroupIds:   shgIds,
-			RpAliases:        rpAliases,
-			AccAliases:       accAliases,
+			Aliases:          aliases,
 			LCRIds:           lcrIds,
 			DerivedChargers:  dcs,
 		}, &reply); err != nil {

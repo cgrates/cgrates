@@ -142,7 +142,7 @@ type LoadWriter interface {
 	SetTpSharedGroups([]TpSharedGroup) error
 	SetTpCdrStats([]TpCdrstat) error
 	SetTpUsers([]TpUser) error
-	SetTpAlias([]TpAlias) error
+	SetTpAliases([]TpAlias) error
 	SetTpDerivedChargers([]TpDerivedCharger) error
 	SetTpLCRs([]TpLcrRule) error
 	SetTpActions([]TpAction) error

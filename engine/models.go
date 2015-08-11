@@ -351,6 +351,10 @@ type TpAlias struct {
 	Weight        float64 `index:"8" re:""`
 }
 
+func (ta *TpAlias) TableName() string {
+	return "tp_aliases"
+}
+
 func (ta *TpAlias) GetId() string {
 	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Group)
 }
