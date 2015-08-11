@@ -1537,6 +1537,7 @@ func TestApierLocalSetDestination(t *testing.T) {
 	}
 }
 
+/*
 func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1549,7 +1550,6 @@ func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
 	}
 }
 
-/*
 func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1573,7 +1573,7 @@ func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", expectSubjAliases, subjAliases)
 		}
 	}
-}*/
+}
 
 func TestApierLocalRemRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
@@ -1607,7 +1607,7 @@ func TestApierLocalGetAccountAliases(t *testing.T) {
 	}
 }
 
-/*
+
 func TestApierLocalAddAccountAliases(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1631,7 +1631,7 @@ func TestApierLocalAddAccountAliases(t *testing.T) {
 			t.Errorf("Expecting: %v, received: %v", expectAcntAliases, acntAliases)
 		}
 	}
-}*/
+}
 
 func TestApierLocalRemAccountAliases(t *testing.T) {
 	if !*testLocal {
@@ -1651,6 +1651,7 @@ func TestApierLocalRemAccountAliases(t *testing.T) {
 		t.Error("Unexpected error", err.Error())
 	}
 }
+*/
 
 func TestApierLocalGetScheduledActions(t *testing.T) {
 	if !*testLocal {

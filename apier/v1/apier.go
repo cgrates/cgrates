@@ -916,7 +916,7 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 	}); err != nil {
 		return err
 	}
-	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
 		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
