@@ -681,17 +681,22 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				} else if len(actions) == 0 {
 					return fmt.Errorf("no action with id <%s>", at.ActionsId)
 				}
-				tptm, err := tpr.lr.GetTpTimings(tpr.tpid, at.TimingId)
-				if err != nil {
-					return errors.New(err.Error() + " (Timing): " + at.TimingId)
-				} else if len(tptm) == 0 {
-					return fmt.Errorf("no timing with id <%s>", at.TimingId)
+				var t *utils.TPTiming
+				if at.TimingId != utils.ASAP {
+					tptm, err := tpr.lr.GetTpTimings(tpr.tpid, at.TimingId)
+					if err != nil {
+						return errors.New(err.Error() + " (Timing): " + at.TimingId)
+					} else if len(tptm) == 0 {
+						return fmt.Errorf("no timing with id <%s>", at.TimingId)
+					}
+					tm, err := TpTimings(tptm).GetTimings()
+					if err != nil {
+						return err
+					}
+					t = tm[at.TimingId]
+				} else {
+					t = tpr.timings[at.TimingId] // *asap
 				}
-				tm, err := TpTimings(tptm).GetTimings()
-				if err != nil {
-					return err
-				}
-				t := tm[at.TimingId]
 				actTmg := &ActionPlan{
 					Uuid:   utils.GenUUID(),
 					Id:     accountAction.ActionPlanId,

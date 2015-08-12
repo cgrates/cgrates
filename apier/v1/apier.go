@@ -265,7 +265,11 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	//Automatic cache of the newly inserted rating plan
 	var changedRPlKeys []string
 	if len(attrs.TPid) != 0 {
-		changedRPlKeys = []string{utils.RATING_PLAN_PREFIX + attrs.RatingPlanId}
+		if attrs.RatingPlanId != "" {
+			changedRPlKeys = []string{utils.RATING_PLAN_PREFIX + attrs.RatingPlanId}
+		} else {
+			changedRPlKeys = nil
+		}
 	}
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX: nil,
