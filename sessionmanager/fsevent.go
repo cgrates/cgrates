@@ -386,7 +386,7 @@ func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 		Account:     fsev.GetAccount(utils.META_DEFAULT),
 		Subject:     fsev.GetSubject(utils.META_DEFAULT),
 		Destination: fsev.GetDestination(utils.META_DEFAULT),
-		StartTime:   utils.FirstNonEmpty(fsev[SETUP_TIME], fsev[ANSWER_TIME]),
+		SetupTime:   utils.FirstNonEmpty(fsev[SETUP_TIME], fsev[ANSWER_TIME]),
 		Duration:    fsev[DURATION],
 	}
 	return lcrReq.AsCallDescriptor()

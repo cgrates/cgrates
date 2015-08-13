@@ -508,6 +508,7 @@ func TestTutKamCallsCdrs(t *testing.T) {
 	}
 }
 
+/*
 // Make sure all stats queues were updated
 func TestTutKamCallsCdrStatsAfter(t *testing.T) {
 	if !*testCalls {
@@ -557,6 +558,7 @@ func TestTutKamCallsCdrStatsAfter(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
 	}
 }
+*/
 
 // Make sure account was debited properly
 func TestTutKamCallsAccountFraud1001(t *testing.T) {
