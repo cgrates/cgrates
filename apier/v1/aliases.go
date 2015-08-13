@@ -24,6 +24,92 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+type AttrGetTPAlias struct {
+	TPid      string
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Group     string
+}
+
+// Creates a new alias within a tariff plan
+func (self *ApierV1) SetTPAlias(attrs AttrGetTPAlias, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Direction", "Tenant", "Category", "Account", "Subject", "Group"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tm := engine.APItoModelTiming(&attrs)
+	if err := self.StorDb.SetTpAliases([]engine.TpAlias{*tm}); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = "OK"
+	return nil
+}
+
+type AttrGetTPAlias struct {
+	TPid    string // Tariff plan id
+	AliasId string // Alias id
+}
+
+// Queries specific Alias on Tariff plan
+func (self *ApierV1) GetTPAlias(attrs AttrGetTPAlias, reply *utils.ApierTPAlias) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AliasId"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if tms, err := self.StorDb.GetTpAliases(attrs.TPid, attrs.AliasId); err != nil {
+		return utils.NewErrServerError(err)
+	} else if len(tms) == 0 {
+		return utils.ErrNotFound
+	} else {
+		tmMap, err := engine.TpAliases(tms).GetApierAliases()
+		if err != nil {
+			return err
+		}
+		*reply = *tmMap[attrs.AliasId]
+	}
+	return nil
+}
+
+type AttrGetTPAliasIds struct {
+	TPid string // Tariff plan id
+	utils.Paginator
+}
+
+// Queries alias identities on specific tariff plan.
+func (self *ApierV1) GetTPAliasIds(attrs AttrGetTPAliasIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_TIMINGS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+		return utils.NewErrServerError(err)
+	} else if ids == nil {
+		return utils.ErrNotFound
+	} else {
+		*reply = ids
+	}
+	return nil
+}
+
+// Removes specific Alias on Tariff plan
+func (self *ApierV1) RemTPAlias(attrs AttrGetTPAlias, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AliasId"}); len(missing) != 0 { //Params missing
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if err := self.StorDb.RemTpData(utils.TBL_TP_TIMINGS, attrs.TPid, attrs.AliasId); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		*reply = "OK"
+	}
+	return nil
+}
+*/
+/*
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
 type AttrAddRatingSubjectAliases struct {
 	Tenant, Subject string
 	Aliases         []string
