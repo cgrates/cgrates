@@ -1078,7 +1078,8 @@ type AttrSetAccount struct {
 	Direction     string
 	Account       string
 	ActionPlanId  string
-	AllowNegative bool
+	AllowNegative *bool
+	Disabled      *bool
 }
 
 type AttrRemoveAccount struct {

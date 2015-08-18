@@ -168,8 +168,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
-				Id:            balanceId,
-				AllowNegative: attr.AllowNegative,
+				Id: balanceId,
 			}
 		}
 
@@ -182,6 +181,12 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			for _, at := range ats {
 				at.AccountIds = append(at.AccountIds, balanceId)
 			}
+		}
+		if attr.AllowNegative != nil {
+			ub.AllowNegative = *attr.AllowNegative
+		}
+		if attr.Disabled != nil {
+			ub.Disabled = *attr.Disabled
 		}
 		// All prepared, save account
 		if err := self.AccountDb.SetAccount(ub); err != nil {

@@ -45,18 +45,20 @@ Database setup
 ~~~~~~~~~~~~~~
 
 For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary. 
+
 At present we support the following databases:
 
-As DataDB types (rating and accounting subsystems):
+
 
 - Redis_
 
-As StorDB (persistent storage for CDRs and tariff plan versions).
-
+Used as DataDb, optimized for real-time information access.
 Once installed there should be no special requirements in terms of setup since no schema is necessary.
+
 
 - MySQL_
 
+Used as StorDb, optimized for CDR archiving and offline Tariff Plan versioning.
 Once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
 
  ::
@@ -66,12 +68,13 @@ Once database is installed, CGRateS database needs to be set-up out of provided 
 
 - PostgreSQL_
 
+Used as StorDb, optimized for CDR archiving and offline Tariff Plan versioning.
 Once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
 
  ::
    
   cd /usr/share/cgrates/storage/postgres/
-  ./setup_cgr_db.sh root CGRateS.org localhost
+  ./setup_cgr_db.sh
 
 .. _Redis: http://redis.io/
 .. _MySQL: http://www.mysql.org/

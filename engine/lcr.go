@@ -54,7 +54,7 @@ type LcrRequest struct {
 	Account      string
 	Subject      string
 	Destination  string
-	StartTime    string
+	SetupTime    string
 	Duration     string
 	IgnoreErrors bool
 	*utils.Paginator
@@ -79,9 +79,9 @@ func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
 	}
 	var timeStart time.Time
 	var err error
-	if len(self.StartTime) == 0 {
+	if len(self.SetupTime) == 0 {
 		timeStart = time.Now()
-	} else if timeStart, err = utils.ParseTimeDetectLayout(self.StartTime); err != nil {
+	} else if timeStart, err = utils.ParseTimeDetectLayout(self.SetupTime); err != nil {
 		return nil, err
 	}
 	var callDur time.Duration

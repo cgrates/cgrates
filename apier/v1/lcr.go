@@ -68,9 +68,11 @@ func (self *ApierV1) GetLcrSuppliers(lcrReq engine.LcrRequest, suppliers *string
 	if err := self.Responder.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd, Paginator: lcrReq.Paginator}, &lcrQried); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if lcrQried.HasErrors() && !lcrReq.IgnoreErrors {
+	if lcrQried.HasErrors() {
 		lcrQried.LogErrors()
-		return fmt.Errorf("%s:%s", utils.ErrServerError.Error(), "LCR_ERRORS")
+		if !lcrReq.IgnoreErrors {
+			return fmt.Errorf("%s:%s", utils.ErrServerError.Error(), "LCR_COMPUTE_ERRORS")
+		}
 	}
 	if suppliersStr, err := lcrQried.SuppliersString(); err != nil {
 		return utils.NewErrServerError(err)
