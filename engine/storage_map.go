@@ -312,7 +312,22 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	ms.dict[utils.RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
 	if historyScribe != nil {
-		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
+		go historyScribe.Record(rpf.GetHistoryRecord(false), &response)
+	}
+	return
+}
+
+func (ms *MapStorage) RemoveRatingProfile(key string) (err error) {
+	for k := range ms.dict {
+		if strings.HasPrefix(k, key) {
+			delete(ms.dict, key)
+			cache2go.RemKey(k)
+			response := 0
+			rpf := &RatingProfile{Id: key}
+			if historyScribe != nil {
+				go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
+			}
+		}
 	}
 	return
 }

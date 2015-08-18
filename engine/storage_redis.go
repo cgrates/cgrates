@@ -399,9 +399,29 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	err = rs.db.Set(utils.RATING_PROFILE_PREFIX+rpf.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
+		go historyScribe.Record(rpf.GetHistoryRecord(false), &response)
 	}
 	return
+}
+
+func (rs *RedisStorage) RemoveRatingProfile(key string) error {
+	keys, err := rs.db.Keys(utils.RATING_PROFILE_PREFIX + key + "*")
+	if err != nil {
+		return err
+	}
+	for _, key := range keys {
+		_, err = rs.db.Del(key)
+		if err != nil {
+			return err
+		}
+		cache2go.RemKey(key)
+		rpf := &RatingProfile{Id: key}
+		if err == nil && historyScribe != nil {
+			response := 0
+			go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
+		}
+	}
+	return nil
 }
 
 func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {

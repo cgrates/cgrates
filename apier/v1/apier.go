@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	OK = "OK"
+	OK = utils.OK
 )
 
 type ApierV1 struct {
@@ -925,7 +925,7 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 	}); err != nil {
 		return err
 	}
-	*reply = "OK"
+	*reply = utils.OK
 	return nil
 }
 
@@ -1122,6 +1122,49 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return err
 		}
 	}
-	*reply = "OK"
+	*reply = utils.OK
+	return nil
+}
+
+type AttrRemoveRatingProfile struct {
+	Direction string
+	Tennat    string
+	Category  string
+	Subject   string
+}
+
+func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
+	if arrp.Direction != "" && arrp.Direction != utils.ANY {
+		result += arrp.Direction
+		result += utils.CONCATENATED_KEY_SEP
+	} else {
+		return
+	}
+	if arrp.Tennat != "" && arrp.Tennat != utils.ANY {
+		result += arrp.Tennat
+		result += utils.CONCATENATED_KEY_SEP
+	} else {
+		return
+	}
+
+	if arrp.Category != "" && arrp.Category != utils.ANY {
+		result += arrp.Category
+		result += utils.CONCATENATED_KEY_SEP
+	} else {
+		return
+	}
+	if arrp.Subject != "" && arrp.Subject != utils.ANY {
+		result += arrp.Subject
+	}
+	return
+}
+
+func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
+	err := self.RatingDb.RemoveRatingProfile(attr.GetId())
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = utils.OK
 	return nil
 }

@@ -199,12 +199,13 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 }
 
 // history record method
-func (rpf *RatingProfile) GetHistoryRecord() history.Record {
+func (rpf *RatingProfile) GetHistoryRecord(deleted bool) history.Record {
 	js, _ := json.Marshal(rpf)
 	return history.Record{
 		Id:       rpf.Id,
 		Filename: history.RATING_PROFILES_FN,
 		Payload:  js,
+		Deleted:  deleted,
 	}
 }
 
