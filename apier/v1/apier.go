@@ -1160,6 +1160,15 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 }
 
 func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
+	if attr.Subject != "" && attr.Category == "" {
+		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Category")
+	}
+	if attr.Category != "" && attr.Tennat == "" {
+		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Tenant")
+	}
+	if attr.Tennat != "" && attr.Direction == "" {
+		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Direction")
+	}
 	err := self.RatingDb.RemoveRatingProfile(attr.GetId())
 	if err != nil {
 		*reply = err.Error()
