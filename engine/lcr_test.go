@@ -204,7 +204,7 @@ func TestLcrGet(t *testing.T) {
 		Account:     "rif",
 		Subject:     "rif",
 	}
-	lcr, err := cd.GetLCR(nil)
+	lcr, err := cd.GetLCR(nil, nil)
 	//jsn, _ := json.Marshal(lcr)
 	//log.Print("LCR: ", string(jsn))
 	if err != nil || lcr == nil {
@@ -215,11 +215,11 @@ func TestLcrGet(t *testing.T) {
 func TestLcrRequestAsCallDescriptor(t *testing.T) {
 	sTime := time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC)
 	callDur := time.Duration(1) * time.Minute
-	lcrReq := &LcrRequest{Account: "2001", StartTime: sTime.String()}
+	lcrReq := &LcrRequest{Account: "2001", SetupTime: sTime.String()}
 	if _, err := lcrReq.AsCallDescriptor(); err == nil || err != utils.ErrMandatoryIeMissing {
 		t.Error("Unexpected error received: %v", err)
 	}
-	lcrReq = &LcrRequest{Account: "2001", Destination: "2002", StartTime: sTime.String()}
+	lcrReq = &LcrRequest{Account: "2001", Destination: "2002", SetupTime: sTime.String()}
 	eCd := &CallDescriptor{
 		Direction:   utils.OUT,
 		Tenant:      config.CgrConfig().DefaultTenant,

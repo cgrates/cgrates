@@ -3,14 +3,14 @@ Configuration
 
 The behaviour of **CGRateS** can be externally influenced by following means:
 
-- Engine configuration file, ussually located at */etc/cgrates/cgrates.cfg*
-- Tariff Plans: set of files used to import customer rating and accounting data into CGRateS.
+- Engine configuration files, usually located at */etc/cgrates/*. There can be one or multiple file/folder hierarchies behind configuration folder with support for automatic includes. The folders/files will be imported in alphabetical order into final configuration object.
+- Tariff Plans: set of files used to import various data used in CGRateS subsystems (eg: Rating, Accounting, LCR, DerivedCharging, etc).
 - RPC APIs: set of JSON/GOB encoded APIs remotely available for various operational/administrative tasks.
 
 .. toctree::
    :maxdepth: 2
 
-   cgrates_cfg
+   cgrates_json
    tariff_plans
 
 

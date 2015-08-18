@@ -395,7 +395,7 @@ func TestGetLCR(t *testing.T) {
 		},
 	}
 	var lcr LCRCost
-	if err := rsponder.GetLCR(cdStatic, &lcr); err != nil {
+	if err := rsponder.GetLCR(&AttrGetLcr{CallDescriptor: cdStatic}, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
@@ -422,7 +422,7 @@ func TestGetLCR(t *testing.T) {
 		},
 	}
 	var lcrLc LCRCost
-	if err := rsponder.GetLCR(cdLowestCost, &lcrLc); err != nil {
+	if err := rsponder.GetLCR(&AttrGetLcr{CallDescriptor: cdLowestCost}, &lcrLc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcLcr.Entry, lcrLc.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.Entry, lcrLc.Entry)
@@ -447,7 +447,7 @@ func TestGetLCR(t *testing.T) {
 			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second},
 		},
 	}
-	if err := rsponder.GetLCR(cdLowestCost, &lcrLc); err != nil {
+	if err := rsponder.GetLCR(&AttrGetLcr{CallDescriptor: cdLowestCost}, &lcrLc); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcLcr.Entry, lcrLc.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.Entry, lcrLc.Entry)
@@ -476,7 +476,7 @@ func TestGetLCR(t *testing.T) {
 		},
 	}
 	var lcrQT LCRCost
-	if err := rsponder.GetLCR(cdQosThreshold, &lcrQT); err != nil {
+	if err := rsponder.GetLCR(&AttrGetLcr{CallDescriptor: cdQosThreshold}, &lcrQT); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eQTLcr.Entry, lcrQT.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
@@ -495,7 +495,7 @@ func TestGetLCR(t *testing.T) {
 			&LCRSupplierCost{Supplier: "*out:tenant12:call:dan12", Cost: 0.6, Duration: 60 * time.Second, QOS: map[string]float64{PDD: -1, ACD: 300, TCD: 300, ASR: 100, ACC: 2, TCC: 2, DDC: 2}, qosSortParams: []string{"35", "4m"}},
 		},
 	}
-	if err := rsponder.GetLCR(cdQosThreshold, &lcrQT); err != nil {
+	if err := rsponder.GetLCR(&AttrGetLcr{CallDescriptor: cdQosThreshold}, &lcrQT); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eQTLcr.Entry, lcrQT.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
@@ -524,7 +524,7 @@ func TestGetLCR(t *testing.T) {
 		},
 	}
 	var lcrQ LCRCost
-	if err := rsponder.GetLCR(cdQos, &lcrQ); err != nil {
+	if err := rsponder.GetLCR(&AttrGetLcr{CallDescriptor: cdQos}, &lcrQ); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eQosLcr.Entry, lcrQ.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eQosLcr.Entry, lcrQ.Entry)

@@ -20,13 +20,14 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
 	c := &CmdGetLcr{
 		name:      "lcr",
 		rpcMethod: "ApierV1.GetLcr",
-		rpcParams: &engine.LcrRequest{},
+		rpcParams: &engine.LcrRequest{Paginator: &utils.Paginator{}},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -50,7 +51,7 @@ func (self *CmdGetLcr) RpcMethod() string {
 
 func (self *CmdGetLcr) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.LcrRequest{}
+		self.rpcParams = &engine.LcrRequest{Paginator: &utils.Paginator{}}
 	}
 	return self.rpcParams
 }

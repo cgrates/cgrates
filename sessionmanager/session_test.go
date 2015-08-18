@@ -99,7 +99,7 @@ func (mc *MockConnector) GetDerivedMaxSessionTime(*engine.StoredCdr, *float64) e
 func (mc *MockConnector) GetSessionRuns(*engine.StoredCdr, *[]*engine.SessionRun) error { return nil }
 func (mc *MockConnector) ProcessCdr(*engine.StoredCdr, *string) error                   { return nil }
 func (mc *MockConnector) LogCallCost(*engine.CallCostLog, *string) error                { return nil }
-func (mc *MockConnector) GetLCR(*engine.CallDescriptor, *engine.LCRCost) error          { return nil }
+func (mc *MockConnector) GetLCR(*engine.AttrGetLcr, *engine.LCRCost) error              { return nil }
 func (mc *MockConnector) GetTimeout() time.Duration                                     { return 0 }
 
 func TestSessionRefund(t *testing.T) {

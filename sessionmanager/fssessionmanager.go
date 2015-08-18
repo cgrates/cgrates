@@ -193,7 +193,7 @@ func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 		TimeStart:   startTime,
 		TimeEnd:     startTime.Add(config.CgrConfig().MaxCallDuration),
 	}
-	if err := sm.rater.GetLCR(cd, &lcrCost); err != nil {
+	if err := sm.rater.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd}, &lcrCost); err != nil {
 		return err
 	}
 	supps := []string{}
@@ -238,7 +238,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 			return
 		}
 		var lcr engine.LCRCost
-		if err = sm.Rater().GetLCR(cd, &lcr); err != nil {
+		if err = sm.Rater().GetLCR(&engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
 			engine.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_API_ERROR: %s", err.Error()))
 			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
 		}

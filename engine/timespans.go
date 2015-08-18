@@ -416,22 +416,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSp
 	return
 }
 
-/*func (ts *TimeSpan) SplitByTime(splitTime time.Time) (nts *TimeSpan) {
-	if splitTime.Equal(ts.TimeEnd) {
-		return
-	}
-	nts = &TimeSpan{
-		TimeStart: splitTime,
-		TimeEnd:   ts.TimeEnd,
-	}
-	nts.copyRatingInfo(ts)
-	ts.TimeEnd = splitTime
-	nts.SetRateInterval(ts.RateInterval)
-	nts.DurationIndex = ts.DurationIndex
-	ts.SetNewDurationIndex(nts)
-	return
-}*/
-
 // Split the timespan at the given increment start
 func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
 	if index <= 0 || index >= len(ts.Increments) {

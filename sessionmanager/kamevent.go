@@ -381,7 +381,7 @@ func (kev KamEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 		Account:     kev.GetAccount(utils.META_DEFAULT),
 		Subject:     kev.GetSubject(utils.META_DEFAULT),
 		Destination: kev.GetDestination(utils.META_DEFAULT),
-		StartTime:   utils.FirstNonEmpty(kev[CGR_SETUPTIME], kev[CGR_ANSWERTIME]),
+		SetupTime:   utils.FirstNonEmpty(kev[CGR_SETUPTIME], kev[CGR_ANSWERTIME]),
 		Duration:    kev[CGR_DURATION],
 	}
 	return lcrReq.AsCallDescriptor()
