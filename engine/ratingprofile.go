@@ -179,17 +179,18 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 				FallbackKeys:   rpa.FallbackKeys})
 		} else {
 			// add for fallback information
-			ris = append(ris, &RatingInfo{
-				MatchedSubject: "",
-				MatchedPrefix:  "",
-				MatchedDestId:  "",
-				ActivationTime: rpa.ActivationTime,
-				RateIntervals:  nil,
-				FallbackKeys:   rpa.FallbackKeys,
-			})
+			if len(rpa.FallbackKeys) > 0 {
+				ris = append(ris, &RatingInfo{
+					MatchedSubject: "",
+					MatchedPrefix:  "",
+					MatchedDestId:  "",
+					ActivationTime: rpa.ActivationTime,
+					RateIntervals:  nil,
+					FallbackKeys:   rpa.FallbackKeys,
+				})
+			}
 		}
 	}
-
 	if len(ris) > 0 {
 		cd.addRatingInfos(ris)
 		return

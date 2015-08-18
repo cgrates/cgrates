@@ -84,6 +84,7 @@ T1,NAT,LANDLINE_OFFPEAK,*middle,4,0,
 T2,GERMANY,GBP_72,*middle,4,0,
 T2,GERMANY_O2,GBP_70,*middle,4,0,
 T2,GERMANY_PREMIUM,GBP_71,*middle,4,0,
+GER,GERMANY,R4,*middle,4,0,
 DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG,*middle,4,,
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5,*middle,4,,
 DATA_RATE,*any,LANDLINE_OFFPEAK,*middle,4,0,
@@ -112,6 +113,7 @@ RP_UK,DR_UK_Mobile_BIG5,*any,10
 RP_DATA,DATA_RATE,*any,10
 RP_MX,MX_DISC,WORKDAYS_00,10
 RP_MX,MX_FREE,WORKDAYS_18,10
+GER_ONLY,GER,*any,10
 ANY_PLAN,DATA_RATE,*any,10
 `
 	ratingProfiles = `
@@ -136,6 +138,7 @@ ANY_PLAN,DATA_RATE,*any,10
 *out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,,
 *out,cgrates.org,data,rif,2013-01-06T00:00:00Z,RP_DATA,,
 *out,cgrates.org,call,max,2013-03-23T00:00:00Z,RP_MX,,
+*out,cgrates.org,call,nt,2012-02-28T00:00:00Z,GER_ONLY,,
 *in,cgrates.org,LCR_STANDARD,max,2013-03-23T00:00:00Z,RP_MX,,
 *out,cgrates.org,call,money,2015-02-28T00:00:00Z,EVENING,,
 `
@@ -453,7 +456,7 @@ func TestLoadRates(t *testing.T) {
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.destinationRates) != 13 {
+	if len(csvr.destinationRates) != 14 {
 		t.Error("Failed to load destinationrates: ", len(csvr.destinationRates))
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
@@ -601,7 +604,7 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadRatingPlans(t *testing.T) {
-	if len(csvr.ratingPlans) != 12 {
+	if len(csvr.ratingPlans) != 13 {
 		t.Error("Failed to load rating plans: ", len(csvr.ratingPlans))
 	}
 	rplan := csvr.ratingPlans["STANDARD"]
@@ -773,7 +776,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 20 {
+	if len(csvr.ratingProfiles) != 21 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]

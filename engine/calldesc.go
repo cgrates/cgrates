@@ -177,10 +177,12 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 Restores the activation periods for the specified prefix from storage.
 */
 func (cd *CallDescriptor) LoadRatingPlans() (err error) {
-	err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
-	if err != nil || !cd.continousRatingInfos() {
-		// use the default subject
-		err = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
+	var rec int
+	err, rec = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
+	if err == utils.ErrNotFound && rec == 1 {
+		//if err != nil || !cd.continousRatingInfos() {
+		// use the default subject only if the initial one was not found
+		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
 	if err != nil || !cd.continousRatingInfos() {
@@ -192,14 +194,13 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 
 // FIXME: this method is not exhaustive but will cover 99% of cases just good
 // it will not cover very long calls with very short activation periods for rates
-func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (err error) {
+func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (error, int) {
 	if recursionDepth > RECURSION_MAX_DEPTH {
-		err = errors.New("Max fallback recursion depth reached!" + key)
-		return
+		return utils.ErrMaxRecursionDepth, recursionDepth
 	}
 	rpf, err := ratingStorage.GetRatingProfile(key, false)
 	if err != nil || rpf == nil {
-		return err
+		return utils.ErrNotFound, recursionDepth
 	}
 	if err = rpf.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
 		// try rating profile fallback
@@ -228,7 +229,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 					tempCD.TimeEnd = cd.RatingInfos[index+1].ActivationTime
 				}
 				for _, fbk := range ri.FallbackKeys {
-					if err := tempCD.getRatingPlansForPrefix(fbk, recursionDepth); err != nil {
+					if err, _ := tempCD.getRatingPlansForPrefix(fbk, recursionDepth); err != nil {
 						continue
 					}
 					// extract the rate infos and break
@@ -256,7 +257,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 			}
 		}
 	}
-	return
+	return nil, recursionDepth
 }
 
 // checks if there is rating info for the entire call duration

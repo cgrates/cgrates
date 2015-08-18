@@ -61,3 +61,35 @@ func TestGetRatingProfileForPrefixFirstEmpty(t *testing.T) {
 		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
 	}
 }
+
+func TestGetRatingProfileNotFound(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2015, 8, 18, 22, 05, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 8, 18, 22, 06, 30, 0, time.UTC),
+		Tenant:      "vdf",
+		Category:    "0",
+		Direction:   OUTBOUND,
+		Subject:     "no_rating_profile",
+		Destination: "0256098",
+	}
+	cd.LoadRatingPlans()
+	if len(cd.RatingInfos) != 1 || !cd.continousRatingInfos() {
+		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
+	}
+}
+
+func TestGetRatingProfileFoundButNoDestination(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2015, 8, 18, 22, 05, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 8, 18, 22, 06, 30, 0, time.UTC),
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Direction:   OUTBOUND,
+		Subject:     "nt",
+		Destination: "447956",
+	}
+	cd.LoadRatingPlans()
+	if len(cd.RatingInfos) != 0 {
+		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
+	}
+}

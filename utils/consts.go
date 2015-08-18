@@ -17,6 +17,7 @@ var (
 	ErrNotImplemented     = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound           = errors.New("NOT_FOUND")
 	ErrServerError        = errors.New("SERVER_ERROR")
+	ErrMaxRecursionDepth  = errors.New("MAX_RECURSION_DEPTH")
 	ErrMandatoryIeMissing = errors.New("MANDATORY_IE_MISSING")
 	ErrExists             = errors.New("EXISTS")
 	ErrBrokenReference    = errors.New("BROKEN_REFERENCE")
