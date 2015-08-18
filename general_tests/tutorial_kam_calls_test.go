@@ -44,7 +44,7 @@ func TestTutKamCallsInitCfg(t *testing.T) {
 	}
 	// Init config first
 	var err error
-	tutKamCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "cgrates"))
+	tutKamCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "kamevapi", "cgrates", "etc", "cgrates"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -73,12 +73,12 @@ func TestTutKamCallsResetStorDb(t *testing.T) {
 }
 
 // start FS server
-func TestTutKamCallsStartFS(t *testing.T) {
+func TestTutKamCallsStartKamailio(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	engine.KillProcName("freeswitch", 5000)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
+	engine.KillProcName("kamailio", 3000)
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "kamailio", "etc", "init.d", "kamailio"), "start", 2000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -89,18 +89,17 @@ func TestTutKamCallsStartEngine(t *testing.T) {
 		return
 	}
 	engine.KillProcName("cgr-engine", *waitRater)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Restart FS so we make sure reconnects are working
-func TestTutKamCallsRestartFS(t *testing.T) {
+func TestTutKamCallsRestartKamailio(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	engine.KillProcName("freeswitch", 5000)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "kamevapi", "kamailio", "etc", "init.d", "kamailio"), "restart", 3000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -226,12 +225,12 @@ func TestTutKamCallsStartPjsuaListener(t *testing.T) {
 	}
 	var err error
 	acnts := []*engine.PjsuaAccount{
-		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
-		&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
-		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
-		&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
-		&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
-		&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "1234", Realm: "*", Registrar: "sip:127.0.0.1:5060"}}
+		&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
+		&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
+		&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
+		&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
+		&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"},
+		&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "CGRateS.org", Realm: "*", Registrar: "sip:127.0.0.1:5060"}}
 	if tutKamCallsPjSuaListener, err = engine.StartPjsuaListener(acnts, 5070, *waitRater); err != nil {
 		t.Fatal(err)
 	}
@@ -242,7 +241,7 @@ func TestTutKamCallsCall1001To1002(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(67)*time.Second, 5071); err != nil {
 		t.Fatal(err)
 	}
@@ -253,7 +252,7 @@ func TestTutKamCallsCall1001To1003(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "1234", Realm: "*"}, "sip:1003@127.0.0.1",
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1001@127.0.0.1", Username: "1001", Password: "CGRateS.org", Realm: "*"}, "sip:1003@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(65)*time.Second, 5072); err != nil {
 		t.Fatal(err)
 	}
@@ -263,7 +262,7 @@ func TestTutKamCallsCall1002To1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1002@127.0.0.1", Username: "1002", Password: "CGRateS.org", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(61)*time.Second, 5073); err != nil {
 		t.Fatal(err)
 	}
@@ -273,7 +272,7 @@ func TestTutKamCallsCall1003To1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1003@127.0.0.1", Username: "1003", Password: "CGRateS.org", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(63)*time.Second, 5074); err != nil {
 		t.Fatal(err)
 	}
@@ -283,7 +282,7 @@ func TestTutKamCallsCall1004To1001(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "1234", Realm: "*"}, "sip:1001@127.0.0.1",
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1004@127.0.0.1", Username: "1004", Password: "CGRateS.org", Realm: "*"}, "sip:1001@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(62)*time.Second, 5075); err != nil {
 		t.Fatal(err)
 	}
@@ -293,7 +292,7 @@ func TestTutKamCallsCall1006To1002(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1006@127.0.0.1", Username: "1006", Password: "CGRateS.org", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(64)*time.Second, 5076); err != nil {
 		t.Fatal(err)
 	}
@@ -303,7 +302,7 @@ func TestTutKamCallsCall1007To1002(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "1234", Realm: "*"}, "sip:1002@127.0.0.1",
+	if err := engine.PjsuaCallUri(&engine.PjsuaAccount{Id: "sip:1007@127.0.0.1", Username: "1007", Password: "CGRateS.org", Realm: "*"}, "sip:1002@127.0.0.1",
 		"sip:127.0.0.1:5060", time.Duration(66)*time.Second, 5077); err != nil {
 		t.Fatal(err)
 	}
@@ -341,7 +340,7 @@ func TestTutKamCalls1001Cdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		cgrId = reply[0].CgrId
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
@@ -415,7 +414,7 @@ func TestTutKamCalls1002Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_POSTPAID {
@@ -442,7 +441,7 @@ func TestTutKamCalls1003Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PSEUDOPREPAID {
@@ -470,7 +469,7 @@ func TestTutKamCalls1004Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_RATED {
@@ -498,7 +497,7 @@ func TestTutKamCalls1006Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
@@ -528,7 +527,7 @@ func TestTutKamCalls1007Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "KAMAILIO_CGR_CALL_END" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {

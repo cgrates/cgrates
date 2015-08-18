@@ -12,8 +12,8 @@ Scenario
 - **CGRateS** with following components:
 
  - CGR-SM started as translator between OpenSIPS_ and **cgr-rater** for both authorization events (pseudoprepaid) as well as CDR ones.
- - CGR-Mediator component attaching costs to the raw CDRs from OpenSIPS_ inside CGR StorDB.
- - CGR-CDRE exporting mediated CDRs from CGR StorDB (export path: */tmp*).
+ - CGR-CDRS component processing raw CDRs from CGR-SM component and storing them inside CGR StorDB.
+ - CGR-CDRE exporting rated CDRs from CGR StorDB (export path: */tmp*).
  - CGR-History component keeping the archive of the rates modifications (path browsable with git client at */tmp/cgr_history*).
 
 
@@ -22,7 +22,7 @@ Starting OpenSIPS_ with custom configuration
 
 ::
 
- /usr/share/cgrates/tutorials/osips_event/opensips/etc/init.d/opensips start
+ /usr/share/cgrates/tutorials/osips_async/opensips/etc/init.d/opensips start
 
 To verify that OpenSIPS_ is running we run the console command:
 
@@ -36,9 +36,9 @@ Starting **CGRateS** with custom configuration
 
 ::
 
- /usr/share/cgrates/tutorials/osips_event/cgrates/etc/init.d/cgrates start
+ /usr/share/cgrates/tutorials/osips_async/cgrates/etc/init.d/cgrates start
 
-Check that cgrates is running
+Make sure that cgrates is running
 
 ::
 
@@ -48,7 +48,7 @@ Check that cgrates is running
 CDR processing
 --------------
 
-At the end of each call OpenSIPS_ will generate an CDR event and due to automatic handler registration built in **CGRateS-SM** component, this will be directed towards the port configured inside *cgrates.cfg*. This event will reach inside **CGRateS** through the *SM* component (close to real-time). Once in-there it will be instantly mediated and it is ready to be exported. 
+At the end of each call OpenSIPS_ will generate an CDR event and due to automatic handler registration built in **CGRateS-SM** component, this will be directed towards the port configured inside *cgrates.json*. This event will reach inside **CGRateS** through the *SM* component (close to real-time). Once in-there it will be instantly rated and be ready for export. 
 
 
 **CGRateS** Usage

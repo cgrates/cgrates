@@ -44,7 +44,7 @@ func TestTutOsipsCallsInitCfg(t *testing.T) {
 	}
 	// Init config first
 	var err error
-	tutOsipsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "cgrates"))
+	tutOsipsCallsCfg, err = config.NewCGRConfigFromFolder(path.Join(*dataDir, "tutorials", "osips_async", "cgrates", "etc", "cgrates"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -73,12 +73,12 @@ func TestTutOsipsCallsResetStorDb(t *testing.T) {
 }
 
 // start FS server
-func TestTutOsipsCallsStartFS(t *testing.T) {
+func TestTutOsipsCallsStartOsips(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	engine.KillProcName("freeswitch", 5000)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
+	engine.KillProcName("opensips", 3000)
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "opensips", "etc", "init.d", "opensips"), "start", 3000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -89,18 +89,17 @@ func TestTutOsipsCallsStartEngine(t *testing.T) {
 		return
 	}
 	engine.KillProcName("cgr-engine", *waitRater)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "cgrates", "etc", "init.d", "cgrates"), "start", 100); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Restart FS so we make sure reconnects are working
-func TestTutOsipsCallsRestartFS(t *testing.T) {
+func TestTutOsipsCallsRestartOsips(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	engine.KillProcName("freeswitch", 5000)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "osips_async", "opensips", "etc", "init.d", "opensips"), "restart", 3000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -341,7 +340,7 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		cgrId = reply[0].CgrId
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
@@ -415,7 +414,7 @@ func TestTutOsipsCalls1002Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_POSTPAID {
@@ -442,7 +441,7 @@ func TestTutOsipsCalls1003Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PSEUDOPREPAID {
@@ -470,7 +469,7 @@ func TestTutOsipsCalls1004Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_RATED {
@@ -498,7 +497,7 @@ func TestTutOsipsCalls1006Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
@@ -528,7 +527,7 @@ func TestTutOsipsCalls1007Cdrs(t *testing.T) {
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
+		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {

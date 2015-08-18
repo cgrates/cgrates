@@ -99,8 +99,7 @@ func TestTutFsCallsRestartFS(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	engine.KillProcName("freeswitch", 5000)
-	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "start", 3000); err != nil {
+	if err := engine.CallScript(path.Join(*dataDir, "tutorials", "fs_evsock", "freeswitch", "etc", "init.d", "freeswitch"), "start", 5000); err != nil {
 		t.Fatal(err)
 	}
 }
