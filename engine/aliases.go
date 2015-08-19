@@ -97,11 +97,22 @@ func (al *Alias) SetId(id string) error {
 	return nil
 }
 
+type AttrMatchingAlias struct {
+	Destination string
+	Direction   string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Group       string
+}
+
 type AliasService interface {
 	SetAlias(Alias, *string) error
 	UpdateAlias(Alias, *string) error
 	RemoveAlias(Alias, *string) error
 	GetAlias(Alias, *Alias) error
+	GetMatchingAlias(AttrMatchingAlias, *string) error
 }
 
 type AliasHandler struct {
@@ -191,6 +202,43 @@ func (am *AliasHandler) GetAlias(al Alias, result *Alias) error {
 	return utils.ErrNotFound
 }
 
+func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string) error {
+	response := Alias{}
+	if err := aliasService.GetAlias(Alias{
+		Direction: attr.Direction,
+		Tenant:    attr.Tenant,
+		Category:  attr.Category,
+		Account:   attr.Account,
+		Subject:   attr.Subject,
+		Group:     attr.Group,
+	}, &response); err != nil {
+		return err
+	}
+	// sort according to weight
+	values := response.Values.GetWeightSlice()
+	// check destination ids
+
+	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
+		if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
+			for _, aliasHandler := range values {
+				for alias, aliasDestIds := range aliasHandler {
+					destIds := x.(map[interface{}]struct{})
+					for idId := range destIds {
+						dId := idId.(string)
+						for _, aliasDestId := range aliasDestIds {
+							if aliasDestId == utils.ANY || aliasDestId == dId {
+								*result = alias
+								return nil
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return utils.ErrNotFound
+}
+
 type ProxyAliasService struct {
 	Client *rpcclient.RpcClient
 }
@@ -219,45 +267,10 @@ func (ps *ProxyAliasService) GetAlias(al Alias, alias *Alias) error {
 	return ps.Client.Call("AliasV1.GetAlias", al, alias)
 }
 
-func (ps *ProxyAliasService) ReloadAliases(in string, reply *string) error {
-	return ps.Client.Call("AliasV1.ReloadAliases", in, reply)
+func (ps *ProxyAliasService) GetMatchingAlias(attr AttrMatchingAlias, alias *string) error {
+	return ps.Client.Call("AliasV1.GetMatchingAlias", attr, alias)
 }
 
-func GetBestAlias(destination, direction, tenant, category, account, subject, group string) (string, error) {
-	if aliasService == nil {
-		return "", nil
-	}
-	response := Alias{}
-	if err := aliasService.GetAlias(Alias{
-		Direction: direction,
-		Tenant:    tenant,
-		Category:  category,
-		Account:   account,
-		Subject:   subject,
-		Group:     group,
-	}, &response); err != nil {
-		return "", err
-	}
-	// sort according to weight
-	values := response.Values.GetWeightSlice()
-	// check destination ids
-
-	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
-		if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
-			for _, aliasHandler := range values {
-				for alias, aliasDestIds := range aliasHandler {
-					destIds := x.(map[interface{}]struct{})
-					for idId := range destIds {
-						dId := idId.(string)
-						for _, aliasDestId := range aliasDestIds {
-							if aliasDestId == utils.ANY || aliasDestId == dId {
-								return alias, nil
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return "", utils.ErrNotFound
+func (ps *ProxyAliasService) ReloadAliases(in string, reply *string) error {
+	return ps.Client.Call("AliasV1.ReloadAliases", in, reply)
 }
