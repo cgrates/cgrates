@@ -1169,7 +1169,13 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 	if attr.Tennat != "" && attr.Direction == "" {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Direction")
 	}
-	err := self.RatingDb.RemoveRatingProfile(attr.GetId())
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+		err := self.RatingDb.RemoveRatingProfile(attr.GetId())
+		if err != nil {
+			return 0, err
+		}
+		return 0, nil
+	}, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
 		return err
