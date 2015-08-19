@@ -33,13 +33,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewPartialFlatstoreRecord(record []string) (*PartialFlatstoreRecord, error) {
+func NewPartialFlatstoreRecord(record []string, timezone string) (*PartialFlatstoreRecord, error) {
 	if len(record) < 7 {
 		return nil, errors.New("MISSING_IE")
 	}
 	pr := &PartialFlatstoreRecord{Method: record[0], AccId: record[3] + record[1] + record[2], Values: record}
 	var err error
-	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6]); err != nil {
+	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6], timezone); err != nil {
 		return nil, err
 	}
 	return pr, nil
@@ -179,10 +179,10 @@ func (self *PartialRecordsCache) UncachePartial(fileName string, pr *PartialFlat
 	}, fileName)
 }
 
-func NewCsvRecordsProcessor(csvReader *csv.Reader, cdrFormat, fileName, failedCallsPrefix string,
+func NewCsvRecordsProcessor(csvReader *csv.Reader, cdrFormat, timezone, fileName, failedCallsPrefix string,
 	cdrSourceIds []string, duMultiplyFactors []float64, cdrFilters []utils.RSRFields, cdrFields [][]*config.CfgCdrField,
 	httpSkipTlsCheck bool, partialRecordsCache *PartialRecordsCache) *CsvRecordsProcessor {
-	return &CsvRecordsProcessor{csvReader: csvReader, cdrFormat: cdrFormat, fileName: fileName,
+	return &CsvRecordsProcessor{csvReader: csvReader, cdrFormat: cdrFormat, timezone: timezone, fileName: fileName,
 		failedCallsPrefix: failedCallsPrefix, cdrSourceIds: cdrSourceIds,
 		duMultiplyFactors: duMultiplyFactors, cdrFilters: cdrFilters, cdrFields: cdrFields,
 		httpSkipTlsCheck: httpSkipTlsCheck, partialRecordsCache: partialRecordsCache}
@@ -192,6 +192,7 @@ func NewCsvRecordsProcessor(csvReader *csv.Reader, cdrFormat, fileName, failedCa
 type CsvRecordsProcessor struct {
 	csvReader           *csv.Reader
 	cdrFormat           string
+	timezone            string // Timezone for CDRs which are not clearly specifying it
 	fileName            string
 	failedCallsPrefix   string
 	cdrSourceIds        []string // Should be in sync with cdrFields on indexes
@@ -224,7 +225,7 @@ func (self *CsvRecordsProcessor) processPartialRecord(record []string) ([]string
 		record = append(record, "0") // Append duration 0 for failed calls flatstore CDR and do not process it further
 		return record, nil
 	}
-	pr, err := NewPartialFlatstoreRecord(record)
+	pr, err := NewPartialFlatstoreRecord(record, self.timezone)
 	if err != nil {
 		return nil, err
 	}
@@ -304,7 +305,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cfgIdx int) 
 		} else {
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
-		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal); err != nil {
+		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
 			return nil, err
 		}
 	}
@@ -325,7 +326,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cfgIdx int) 
 			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
 				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
 			}
-			if err := populateStoredCdrField(storedCdr, httpFieldCfg.CdrFieldId, fieldVal); err != nil {
+			if err := populateStoredCdrField(storedCdr, httpFieldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
 				return nil, err
 			}
 		}

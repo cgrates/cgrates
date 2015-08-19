@@ -41,12 +41,12 @@ type CallCostLog struct {
 
 // Handler for generic cgr cdr http
 func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
-	cgrCdr, err := NewCgrCdrFromHttpReq(r)
+	cgrCdr, err := NewCgrCdrFromHttpReq(r, cdrServer.cgrCfg.DefaultTimezone)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 		return
 	}
-	if err := cdrServer.processCdr(cgrCdr.AsStoredCdr()); err != nil {
+	if err := cdrServer.processCdr(cgrCdr.AsStoredCdr(cdrServer.cgrCfg.DefaultTimezone)); err != nil {
 		Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
 	}
 }
@@ -59,7 +59,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 		Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 		return
 	}
-	if err := cdrServer.processCdr(fsCdr.AsStoredCdr()); err != nil {
+	if err := cdrServer.processCdr(fsCdr.AsStoredCdr(cdrServer.Timezone())); err != nil {
 		Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
 	}
 }
@@ -74,6 +74,10 @@ type CdrServer struct {
 	rater  Connector
 	stats  StatsInterface
 	guard  *GuardianLock
+}
+
+func (self *CdrServer) Timezone() string {
+	return self.cgrCfg.DefaultTimezone
 }
 
 func (self *CdrServer) RegisterHanlersToServer(server *Server) {
@@ -92,7 +96,7 @@ func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
 	if cdr.Subject == "" { // Use account information as rating subject if missing
 		cdr.Subject = cdr.Account
 	}
-	storedCdr, err := NewStoredCdrFromExternalCdr(cdr)
+	storedCdr, err := NewStoredCdrFromExternalCdr(cdr, self.cgrCfg.DefaultTimezone)
 	if err != nil {
 		return err
 	}
@@ -246,7 +250,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 		dcSupplFld, _ := utils.NewRSRField(dc.SupplierField)
 		dcDCausseld, _ := utils.NewRSRField(dc.DisconnectCauseField)
 		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
-			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCausseld, []*utils.RSRField{}, true)
+			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCausseld, []*utils.RSRField{}, true, self.cgrCfg.DefaultTimezone)
 		if err != nil {
 			Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", storedCdr.CgrId, dc.RunId, err.Error()))
 			continue // do not add it to the forked CDR list

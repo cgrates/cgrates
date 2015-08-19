@@ -146,8 +146,8 @@ func (fsev FSEvent) GetCategory(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[Category], config.CgrConfig().DefaultCategory)
 }
-func (fsev FSEvent) GetCgrId() string {
-	setupTime, _ := fsev.GetSetupTime(utils.META_DEFAULT)
+func (fsev FSEvent) GetCgrId(timezone string) string {
+	setupTime, _ := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
 	return utils.Sha1(fsev[UUID], setupTime.UTC().String())
 }
 func (fsev FSEvent) GetUUID() string {
@@ -188,7 +188,7 @@ func (fsev FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetTenant(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetCallDestNr(utils.META_DEFAULT)) == ""
 }
-func (fsev FSEvent) GetSetupTime(fieldName string) (t time.Time, err error) {
+func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err error) {
 	fsSTimeStr, hasKey := fsev[SETUP_TIME]
 	if hasKey && fsSTimeStr != "0" {
 		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so cgrid will not corelate
@@ -198,9 +198,9 @@ func (fsev FSEvent) GetSetupTime(fieldName string) (t time.Time, err error) {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.ParseTimeDetectLayout(sTimeStr)
+	return utils.ParseTimeDetectLayout(sTimeStr, timezone)
 }
-func (fsev FSEvent) GetAnswerTime(fieldName string) (t time.Time, err error) {
+func (fsev FSEvent) GetAnswerTime(fieldName, timezone string) (t time.Time, err error) {
 	fsATimeStr, hasKey := fsev[ANSWER_TIME]
 	if hasKey && fsATimeStr != "0" {
 		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so cgrid will not corelate
@@ -210,11 +210,11 @@ func (fsev FSEvent) GetAnswerTime(fieldName string) (t time.Time, err error) {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		aTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.ParseTimeDetectLayout(aTimeStr)
+	return utils.ParseTimeDetectLayout(aTimeStr, timezone)
 }
 
 func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
-	return utils.ParseTimeDetectLayout(fsev[END_TIME])
+	return utils.ParseTimeDetectLayout(fsev[END_TIME], config.CgrConfig().DefaultTimezone)
 }
 
 func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {
@@ -266,16 +266,16 @@ func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 func (fsev FSEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for _, fldRule := range config.CgrConfig().SmFsConfig.CdrExtraFields {
-		extraFields[fldRule.Id] = fsev.ParseEventValue(fldRule)
+		extraFields[fldRule.Id] = fsev.ParseEventValue(fldRule, config.CgrConfig().DefaultTimezone)
 	}
 	return extraFields
 }
 
 // Used in derived charging and sittuations when we need to run regexp on fields
-func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField) string {
+func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
 	switch rsrFld.Id {
 	case utils.CGRID:
-		return rsrFld.ParseValue(fsev.GetCgrId())
+		return rsrFld.ParseValue(fsev.GetCgrId(timezone))
 	case utils.TOR:
 		return rsrFld.ParseValue(utils.VOICE)
 	case utils.ACCID:
@@ -299,10 +299,10 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 	case utils.DESTINATION:
 		return rsrFld.ParseValue(fsev.GetDestination(""))
 	case utils.SETUP_TIME:
-		st, _ := fsev.GetSetupTime("")
+		st, _ := fsev.GetSetupTime("", timezone)
 		return rsrFld.ParseValue(st.String())
 	case utils.ANSWER_TIME:
-		at, _ := fsev.GetAnswerTime("")
+		at, _ := fsev.GetAnswerTime("", timezone)
 		return rsrFld.ParseValue(at.String())
 	case utils.USAGE:
 		dur, _ := fsev.GetDuration("")
@@ -328,25 +328,25 @@ func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string
 	if fieldFilter == nil {
 		return true, ""
 	}
-	if fieldFilter.IsStatic() && fsev.ParseEventValue(&utils.RSRField{Id: fieldFilter.Id}) == fsev.ParseEventValue(fieldFilter) {
-		return true, fsev.ParseEventValue(&utils.RSRField{Id: fieldFilter.Id})
+	if fieldFilter.IsStatic() && fsev.ParseEventValue(&utils.RSRField{Id: fieldFilter.Id}, config.CgrConfig().DefaultTimezone) == fsev.ParseEventValue(fieldFilter, config.CgrConfig().DefaultTimezone) {
+		return true, fsev.ParseEventValue(&utils.RSRField{Id: fieldFilter.Id}, config.CgrConfig().DefaultTimezone)
 	}
 	preparedFilter := &utils.RSRField{Id: fieldFilter.Id, RSRules: make([]*utils.ReSearchReplace, len(fieldFilter.RSRules))} // Reset rules so they do not point towards same structures as original fieldFilter
 	for idx := range fieldFilter.RSRules {
 		// Hardcode the template with maximum of 5 groups ordered
 		preparedFilter.RSRules[idx] = &utils.ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: utils.FILTER_REGEXP_TPL}
 	}
-	preparedVal := fsev.ParseEventValue(preparedFilter)
-	filteredValue := fsev.ParseEventValue(fieldFilter)
+	preparedVal := fsev.ParseEventValue(preparedFilter, config.CgrConfig().DefaultTimezone)
+	filteredValue := fsev.ParseEventValue(fieldFilter, config.CgrConfig().DefaultTimezone)
 	if preparedFilter.RegexpMatched() && (len(preparedVal) == 0 || preparedVal == filteredValue) {
 		return true, filteredValue
 	}
 	return false, ""
 }
 
-func (fsev FSEvent) AsStoredCdr() *engine.StoredCdr {
+func (fsev FSEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
 	storCdr := new(engine.StoredCdr)
-	storCdr.CgrId = fsev.GetCgrId()
+	storCdr.CgrId = fsev.GetCgrId(timezone)
 	storCdr.TOR = utils.VOICE
 	storCdr.AccId = fsev.GetUUID()
 	storCdr.CdrHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
@@ -358,8 +358,8 @@ func (fsev FSEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.Account = fsev.GetAccount(utils.META_DEFAULT)
 	storCdr.Subject = fsev.GetSubject(utils.META_DEFAULT)
 	storCdr.Destination = fsev.GetDestination(utils.META_DEFAULT)
-	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT)
-	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT)
+	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT, timezone)
+	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
 	storCdr.Pdd, _ = fsev.GetPdd(utils.META_DEFAULT)
 	storCdr.ExtraFields = fsev.GetExtraFields()
@@ -389,7 +389,7 @@ func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 		SetupTime:   utils.FirstNonEmpty(fsev[SETUP_TIME], fsev[ANSWER_TIME]),
 		Duration:    fsev[DURATION],
 	}
-	return lcrReq.AsCallDescriptor()
+	return lcrReq.AsCallDescriptor(config.CgrConfig().DefaultTimezone)
 }
 
 // Converts a slice of strings into a FS array string, contains len(array) at first index since FS does not support len(ARRAY::) for now

@@ -368,8 +368,8 @@ Task-Runtime: 1349437318`
 // Detects if any of the parsers do not return static values
 func TestEventParseStatic(t *testing.T) {
 	ev := new(FSEvent).AsEvent("")
-	setupTime, _ := ev.GetSetupTime("^2013-12-07 08:42:24")
-	answerTime, _ := ev.GetAnswerTime("^2013-12-07 08:42:24")
+	setupTime, _ := ev.GetSetupTime("^2013-12-07 08:42:24", "")
+	answerTime, _ := ev.GetAnswerTime("^2013-12-07 08:42:24", "")
 	dur, _ := ev.GetDuration("^60s")
 	if ev.GetReqType("^test") != "test" ||
 		ev.GetDirection("^test") != "test" ||
@@ -421,8 +421,8 @@ Task-Runtime: 1349437318`
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(body)
-	setupTime, _ := ev.GetSetupTime("Event-Date-Local")
-	answerTime, _ := ev.GetAnswerTime("Event-Date-Local")
+	setupTime, _ := ev.GetSetupTime("Event-Date-Local", "")
+	answerTime, _ := ev.GetAnswerTime("Event-Date-Local", "")
 	dur, _ := ev.GetDuration("Event-Calling-Line-Number")
 	if ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		ev.GetDirection("FreeSWITCH-Hostname") != "*out" ||
@@ -463,12 +463,12 @@ Caller-Channel-Answered-Time
 Task-Runtime: 1349437318`
 	var nilTime time.Time
 	ev := new(FSEvent).AsEvent(body)
-	if setupTime, err := ev.GetSetupTime(""); err != nil {
+	if setupTime, err := ev.GetSetupTime("", ""); err != nil {
 		t.Error("Error when parsing empty setupTime")
 	} else if setupTime != nilTime {
 		t.Error("Expecting nil time, got: ", setupTime)
 	}
-	if answerTime, err := ev.GetAnswerTime(""); err != nil {
+	if answerTime, err := ev.GetAnswerTime("", ""); err != nil {
 		t.Error("Error when parsing empty setupTime")
 	} else if answerTime != nilTime {
 		t.Error("Expecting nil time, got: ", answerTime)
@@ -479,8 +479,8 @@ func TestParseFsHangup(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
-	setupTime, _ := ev.GetSetupTime(utils.META_DEFAULT)
-	answerTime, _ := ev.GetAnswerTime(utils.META_DEFAULT)
+	setupTime, _ := ev.GetSetupTime(utils.META_DEFAULT, "")
+	answerTime, _ := ev.GetAnswerTime(utils.META_DEFAULT, "")
 	dur, _ := ev.GetDuration(utils.META_DEFAULT)
 	if ev.GetReqType(utils.META_DEFAULT) != utils.META_PREPAID ||
 		ev.GetDirection(utils.META_DEFAULT) != "*out" ||
@@ -514,66 +514,66 @@ func TestParseEventValue(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
-	if cgrid := ev.ParseEventValue(&utils.RSRField{Id: utils.CGRID}); cgrid != "164b0422fdc6a5117031b427439482c6a4f90e41" {
+	if cgrid := ev.ParseEventValue(&utils.RSRField{Id: utils.CGRID}, ""); cgrid != "164b0422fdc6a5117031b427439482c6a4f90e41" {
 		t.Error("Unexpected cgrid parsed", cgrid)
 	}
-	if tor := ev.ParseEventValue(&utils.RSRField{Id: utils.TOR}); tor != utils.VOICE {
+	if tor := ev.ParseEventValue(&utils.RSRField{Id: utils.TOR}, ""); tor != utils.VOICE {
 		t.Error("Unexpected tor parsed", tor)
 	}
-	if accid := ev.ParseEventValue(&utils.RSRField{Id: utils.ACCID}); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+	if accid := ev.ParseEventValue(&utils.RSRField{Id: utils.ACCID}, ""); accid != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
 		t.Error("Unexpected result parsed", accid)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CDRHOST}); parsed != "10.0.3.15" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CDRHOST}, ""); parsed != "10.0.3.15" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CDRSOURCE}); parsed != "FS_EVENT" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CDRSOURCE}, ""); parsed != "FS_EVENT" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.REQTYPE}); parsed != utils.META_PREPAID {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.REQTYPE}, ""); parsed != utils.META_PREPAID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DIRECTION}); parsed != utils.OUT {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DIRECTION}, ""); parsed != utils.OUT {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.TENANT}); parsed != "cgrates.org" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.TENANT}, ""); parsed != "cgrates.org" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CATEGORY}); parsed != "call" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CATEGORY}, ""); parsed != "call" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ACCOUNT}); parsed != "1001" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ACCOUNT}, ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUBJECT}); parsed != "1001" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUBJECT}, ""); parsed != "1001" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DESTINATION}); parsed != "1003" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DESTINATION}, ""); parsed != "1003" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	sTime, _ := utils.ParseTimeDetectLayout("1436280728471153"[:len("1436280728471153")-6]) // We discard nanoseconds information so we can correlate csv
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SETUP_TIME}); parsed != sTime.String() {
+	sTime, _ := utils.ParseTimeDetectLayout("1436280728471153"[:len("1436280728471153")-6], "") // We discard nanoseconds information so we can correlate csv
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SETUP_TIME}, ""); parsed != sTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", sTime.String(), parsed)
 	}
-	aTime, _ := utils.ParseTimeDetectLayout("1436280728971147"[:len("1436280728971147")-6])
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ANSWER_TIME}); parsed != aTime.String() {
+	aTime, _ := utils.ParseTimeDetectLayout("1436280728971147"[:len("1436280728971147")-6], "")
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ANSWER_TIME}, ""); parsed != aTime.String() {
 		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.USAGE}); parsed != "66000000000" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.USAGE}, ""); parsed != "66000000000" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.PDD}); parsed != "0.028" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.PDD}, ""); parsed != "0.028" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUPPLIER}); parsed != "supplier1" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUPPLIER}, ""); parsed != "supplier1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.MEDI_RUNID}); parsed != utils.DEFAULT_RUNID {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.MEDI_RUNID}, ""); parsed != utils.DEFAULT_RUNID {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.COST}); parsed != "-1" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.COST}, ""); parsed != "-1" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: "Hangup-Cause"}); parsed != "NORMAL_CLEARING" {
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: "Hangup-Cause"}, ""); parsed != "NORMAL_CLEARING" {
 		t.Error("Unexpected result parsed", parsed)
 	}
 }
@@ -631,14 +631,14 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
-	setupTime, _ := utils.ParseTimeDetectLayout("1436280728")
-	aTime, _ := utils.ParseTimeDetectLayout("1436280728")
+	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
+	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	eStoredCdr := &engine.StoredCdr{CgrId: "164b0422fdc6a5117031b427439482c6a4f90e41",
 		TOR: utils.VOICE, AccId: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad", CdrHost: "10.0.3.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 		Destination: "1003", SetupTime: setupTime, AnswerTime: aTime,
 		Usage: time.Duration(66) * time.Second, Pdd: time.Duration(28) * time.Millisecond, Supplier: "supplier1", DisconnectCause: "NORMAL_CLEARING", ExtraFields: make(map[string]string), Cost: -1}
-	if storedCdr := ev.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+	if storedCdr := ev.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }

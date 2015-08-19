@@ -80,8 +80,8 @@ duration::
 
 */
 
-func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
-	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv, cdrStartEvents: make(map[string]*OsipsEvent)}
+func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector, timezone string) (*OsipsSessionManager, error) {
+	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, cdrStartEvents: make(map[string]*OsipsEvent)}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
 		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart}, // Raised when OpenSIPS starts so we can register our event handlers
 		"E_ACC_CDR":          []func(*osipsdagram.OsipsEvent){osm.onCdr},           // Raised if cdr_flag is configured
@@ -95,6 +95,7 @@ type OsipsSessionManager struct {
 	cfg             *config.SmOsipsConfig
 	rater           engine.Connector
 	cdrsrv          engine.Connector
+	timezone        string
 	eventHandlers   map[string][]func(*osipsdagram.OsipsEvent)
 	evSubscribeStop chan struct{}                         // Reference towards the channel controlling subscriptions, keep it as reference so we do not need to copy it
 	stopServing     chan struct{}                         // Stop serving datagrams
@@ -237,8 +238,8 @@ func (osm *OsipsSessionManager) onOpensipsStart(cdrDagram *osipsdagram.OsipsEven
 // Triggered by CDR event
 func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	osipsEv, _ := NewOsipsEvent(cdrDagram)
-	if err := osm.ProcessCdr(osipsEv.AsStoredCdr()); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(), osipsEv.GetUUID(), err.Error()))
+	if err := osm.ProcessCdr(osipsEv.AsStoredCdr(osm.timezone)); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(osm.timezone), osipsEv.GetUUID(), err.Error()))
 	}
 }
 
@@ -330,7 +331,7 @@ func (osm *OsipsSessionManager) processCdrStop(osipsEv *OsipsEvent) error {
 	if err := osipsEvStart.updateDurationFromEvent(osipsEv); err != nil {
 		return err
 	}
-	return osm.ProcessCdr(osipsEvStart.AsStoredCdr())
+	return osm.ProcessCdr(osipsEvStart.AsStoredCdr(osm.timezone))
 }
 
 // Searches and return the session with the specifed uuid
@@ -350,4 +351,8 @@ func (osm *OsipsSessionManager) Sessions() []*Session {
 // Sync sessions with FS
 func (osm *OsipsSessionManager) SyncSessions() error {
 	return nil
+}
+
+func (osm *OsipsSessionManager) Timezone() string {
+	return osm.timezone
 }

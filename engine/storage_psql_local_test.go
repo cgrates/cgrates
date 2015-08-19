@@ -491,7 +491,7 @@ func TestPSQLSetCdr(t *testing.T) {
 		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "15s", utils.PDD: "7s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": utils.TEST_SQL}
 
 	for _, cdr := range []*CgrCdr{cgrCdr1, cgrCdr2, cgrCdr3, cgrCdr4, cgrCdr5} {
-		if err := psqlDb.SetCdr(cdr.AsStoredCdr()); err != nil {
+		if err := psqlDb.SetCdr(cdr.AsStoredCdr("")); err != nil {
 			t.Error(err.Error())
 		}
 	}
@@ -885,15 +885,15 @@ func TestPSQLRemStoredCdrs(t *testing.T) {
 	} else if len(storedCdrs) != 7 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
-	tm, _ := utils.ParseTimeDetectLayout("2013-11-08T08:42:20Z")
+	tm, _ := utils.ParseTimeDetectLayout("2013-11-08T08:42:20Z", "")
 	cgrIdA1 := utils.Sha1("aaa1", tm.String())
-	tm, _ = utils.ParseTimeDetectLayout("2013-11-08T08:42:22Z")
+	tm, _ = utils.ParseTimeDetectLayout("2013-11-08T08:42:22Z", "")
 	cgrIdA2 := utils.Sha1("aaa2", tm.String())
-	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:24Z")
+	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:24Z", "")
 	cgrIdA3 := utils.Sha1("aaa3", tm.String())
-	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:21Z")
+	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:21Z", "")
 	cgrIdA4 := utils.Sha1("aaa4", tm.String())
-	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:25Z")
+	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:25Z", "")
 	cgrIdA5 := utils.Sha1("aaa5", tm.String())
 	cgrIdB2 := utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
 	cgrIdB3 := utils.Sha1("bbb3", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())

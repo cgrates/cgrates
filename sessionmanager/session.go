@@ -58,7 +58,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 		sessionManager: sm,
 		connId:         connId,
 	}
-	if err := sm.Rater().GetSessionRuns(ev.AsStoredCdr(), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
+	if err := sm.Rater().GetSessionRuns(ev.AsStoredCdr(s.sessionManager.Timezone()), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
 	}
 	for runIdx := range s.sessionRuns {
@@ -130,7 +130,7 @@ func (s *Session) Close(ev engine.Event) error {
 		lastCC := sr.CallCosts[len(sr.CallCosts)-1]
 		lastCC.Timespans.Decompress()
 		// put credit back
-		startTime, err := ev.GetAnswerTime(sr.DerivedCharger.AnswerTimeField)
+		startTime, err := ev.GetAnswerTime(sr.DerivedCharger.AnswerTimeField, s.sessionManager.Timezone())
 		if err != nil {
 			engine.Logger.Crit("Error parsing prepaid call start time from event")
 			return err
@@ -235,7 +235,7 @@ func (s *Session) SaveOperations() {
 
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
-			CgrId:          s.eventStart.GetCgrId(),
+			CgrId:          s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			Source:         utils.SESSION_MANAGER_SOURCE,
 			RunId:          sr.DerivedCharger.RunId,
 			CallCost:       firstCC,
@@ -256,13 +256,13 @@ func (s *Session) SaveOperations() {
 
 func (s *Session) AsActiveSessions() []*ActiveSession {
 	var aSessions []*ActiveSession
-	sTime, _ := s.eventStart.GetSetupTime(utils.META_DEFAULT)
-	aTime, _ := s.eventStart.GetAnswerTime(utils.META_DEFAULT)
+	sTime, _ := s.eventStart.GetSetupTime(utils.META_DEFAULT, s.sessionManager.Timezone())
+	aTime, _ := s.eventStart.GetAnswerTime(utils.META_DEFAULT, s.sessionManager.Timezone())
 	usage, _ := s.eventStart.GetDuration(utils.META_DEFAULT)
 	pdd, _ := s.eventStart.GetPdd(utils.META_DEFAULT)
 	for _, sessionRun := range s.sessionRuns {
 		aSession := &ActiveSession{
-			CgrId:       s.eventStart.GetCgrId(),
+			CgrId:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			TOR:         utils.VOICE,
 			AccId:       s.eventStart.GetUUID(),
 			CdrHost:     s.eventStart.GetOriginatorIP(utils.META_DEFAULT),

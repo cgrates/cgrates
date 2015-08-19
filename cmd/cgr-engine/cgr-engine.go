@@ -106,7 +106,7 @@ func startCdrc(responder *engine.Responder, cdrsChan chan struct{}, cdrcCfgs map
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: conn}
 	}
-	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan)
+	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan, cfg.DefaultTimezone)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -162,7 +162,7 @@ func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cac
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, raterConn, cdrsConn)
+	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
 	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
@@ -214,7 +214,7 @@ func startSmKamailio(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn)
+	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
 	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
@@ -266,7 +266,7 @@ func startSmOpenSIPS(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn)
+	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
 	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err := sm.Connect(); err != nil {

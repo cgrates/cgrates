@@ -76,8 +76,8 @@ func (osipsev *OsipsEvent) GetName() string {
 	return osipsev.osipsEvent.Name
 }
 
-func (osipsev *OsipsEvent) GetCgrId() string {
-	setupTime, _ := osipsev.GetSetupTime(utils.META_DEFAULT)
+func (osipsev *OsipsEvent) GetCgrId(timezone string) string {
+	setupTime, _ := osipsev.GetSetupTime(utils.META_DEFAULT, timezone)
 	return utils.Sha1(osipsev.GetUUID(), setupTime.UTC().String())
 }
 
@@ -141,25 +141,25 @@ func (osipsev *OsipsEvent) GetReqType(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_REQTYPE], config.CgrConfig().DefaultReqType)
 }
-func (osipsev *OsipsEvent) GetSetupTime(fieldName string) (time.Time, error) {
+func (osipsev *OsipsEvent) GetSetupTime(fieldName, timezone string) (time.Time, error) {
 	sTimeStr := utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[OSIPS_SETUP_TIME], osipsev.osipsEvent.AttrValues[OSIPS_EVENT_TIME])
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.ParseTimeDetectLayout(sTimeStr)
+	return utils.ParseTimeDetectLayout(sTimeStr, timezone)
 }
-func (osipsev *OsipsEvent) GetAnswerTime(fieldName string) (time.Time, error) {
+func (osipsev *OsipsEvent) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
 	aTimeStr := utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[TIME])
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		aTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else if fieldName == utils.META_DEFAULT {
 		aTimeStr = osipsev.osipsEvent.AttrValues[TIME]
 	}
-	return utils.ParseTimeDetectLayout(aTimeStr)
+	return utils.ParseTimeDetectLayout(aTimeStr, timezone)
 }
 func (osipsev *OsipsEvent) GetEndTime() (time.Time, error) {
 	var nilTime time.Time
-	aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT)
+	aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
 	if err != nil {
 		return nilTime, err
 	}
@@ -217,11 +217,11 @@ func (osipsev *OsipsEvent) MissingParameter() bool {
 			len(osipsev.osipsEvent.AttrValues[TIME]) == 0
 	} else if osipsev.GetName() == "E_ACC_EVENT" && osipsev.osipsEvent.AttrValues["method"] == "UPDATE" { // Updated event out of start/stop
 		// Data needed when stopping a prepaid loop or building a CDR with start/stop event
-		setupTime, err := osipsev.GetSetupTime(TIME)
+		setupTime, err := osipsev.GetSetupTime(TIME, config.CgrConfig().DefaultTimezone)
 		if err != nil || setupTime.Equal(nilTime) {
 			return true
 		}
-		aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT)
+		aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
 		if err != nil || aTime.Equal(nilTime) {
 			return true
 		}
@@ -240,7 +240,7 @@ func (osipsev *OsipsEvent) MissingParameter() bool {
 	}
 	return true
 }
-func (osipsev *OsipsEvent) ParseEventValue(*utils.RSRField) string {
+func (osipsev *OsipsEvent) ParseEventValue(fld *utils.RSRField, timezone string) string {
 	return ""
 }
 func (osipsev *OsipsEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
@@ -262,9 +262,9 @@ func (osipsev *OsipsEvent) DialogId() string {
 	return osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID]
 }
 
-func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
+func (osipsEv *OsipsEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
 	storCdr := new(engine.StoredCdr)
-	storCdr.CgrId = osipsEv.GetCgrId()
+	storCdr.CgrId = osipsEv.GetCgrId(timezone)
 	storCdr.TOR = utils.VOICE
 	storCdr.AccId = osipsEv.GetUUID()
 	storCdr.CdrHost = osipsEv.GetOriginatorIP(utils.META_DEFAULT)
@@ -276,8 +276,8 @@ func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
 	storCdr.Account = osipsEv.GetAccount(utils.META_DEFAULT)
 	storCdr.Subject = osipsEv.GetSubject(utils.META_DEFAULT)
 	storCdr.Destination = osipsEv.GetDestination(utils.META_DEFAULT)
-	storCdr.SetupTime, _ = osipsEv.GetSetupTime(utils.META_DEFAULT)
-	storCdr.AnswerTime, _ = osipsEv.GetAnswerTime(utils.META_DEFAULT)
+	storCdr.SetupTime, _ = osipsEv.GetSetupTime(utils.META_DEFAULT, timezone)
+	storCdr.AnswerTime, _ = osipsEv.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = osipsEv.GetDuration(utils.META_DEFAULT)
 	storCdr.Pdd, _ = osipsEv.GetPdd(utils.META_DEFAULT)
 	storCdr.Supplier = osipsEv.GetSupplier(utils.META_DEFAULT)
@@ -289,11 +289,11 @@ func (osipsEv *OsipsEvent) AsStoredCdr() *engine.StoredCdr {
 
 // Computes duration out of setup time of the callEnd
 func (osipsEv *OsipsEvent) updateDurationFromEvent(updatedOsipsEv *OsipsEvent) error {
-	endTime, err := updatedOsipsEv.GetSetupTime(TIME)
+	endTime, err := updatedOsipsEv.GetSetupTime(TIME, config.CgrConfig().DefaultTimezone)
 	if err != nil {
 		return err
 	}
-	answerTime, err := osipsEv.GetAnswerTime(utils.META_DEFAULT)
+	answerTime, err := osipsEv.GetAnswerTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
 	osipsEv.osipsEvent.AttrValues[OSIPS_DURATION] = endTime.Sub(answerTime).String()
 	osipsEv.osipsEvent.AttrValues["method"] = "UPDATE" // So we can know it is an end event
 	osipsEv.osipsEvent.AttrValues[OSIPS_SIPCODE] = updatedOsipsEv.osipsEvent.AttrValues[OSIPS_SIPCODE]

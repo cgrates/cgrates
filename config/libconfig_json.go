@@ -28,6 +28,7 @@ type GeneralJsonCfg struct {
 	Default_category     *string
 	Default_tenant       *string
 	Default_subject      *string
+	Default_timezone     *string
 	Reconnects           *int
 	Connect_attempts     *int
 }
@@ -135,6 +136,7 @@ type CdrcJsonCfg struct {
 	Cdrs                       *string
 	Cdr_format                 *string
 	Field_separator            *string
+	Timezone                   *string
 	Run_delay                  *int
 	Data_usage_multiply_factor *float64
 	Cdr_in_dir                 *string

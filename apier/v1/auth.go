@@ -57,7 +57,7 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float
 	if usageRecord.Usage == "" {
 		usageRecord.Usage = strconv.FormatFloat(self.Config.MaxCallDuration.Seconds(), 'f', -1, 64)
 	}
-	storedCdr, err := usageRecord.AsStoredCdr()
+	storedCdr, err := usageRecord.AsStoredCdr(self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

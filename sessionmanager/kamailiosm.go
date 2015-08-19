@@ -31,8 +31,8 @@ import (
 	"github.com/cgrates/kamevapi"
 )
 
-func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv engine.Connector) (*KamailioSessionManager, error) {
-	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, conns: make(map[string]*kamevapi.KamEvapi)}
+func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv engine.Connector, timezone string) (*KamailioSessionManager, error) {
+	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, conns: make(map[string]*kamevapi.KamEvapi)}
 	return ksm, nil
 }
 
@@ -40,6 +40,7 @@ type KamailioSessionManager struct {
 	cfg      *config.SmKamConfig
 	rater    engine.Connector
 	cdrsrv   engine.Connector
+	timezone string
 	conns    map[string]*kamevapi.KamEvapi
 	sessions []*Session
 }
@@ -63,7 +64,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	}
 	var remainingDuration float64
 	var errMaxSession error
-	if errMaxSession = self.rater.GetDerivedMaxSessionTime(kev.AsStoredCdr(), &remainingDuration); errMaxSession != nil {
+	if errMaxSession = self.rater.GetDerivedMaxSessionTime(kev.AsStoredCdr(self.Timezone()), &remainingDuration); errMaxSession != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time, error: %s", errMaxSession.Error()))
 	}
 	var supplStr string
@@ -148,7 +149,7 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 	if kev.MissingParameter() {
 		engine.Logger.Err(fmt.Sprintf("<SM-Kamailio> Mandatory IE missing out of event: %+v", kev))
 	}
-	go self.ProcessCdr(kev.AsStoredCdr())
+	go self.ProcessCdr(kev.AsStoredCdr(self.Timezone()))
 	s := self.GetSession(kev.GetUUID())
 	if s == nil { // Not handled by us
 		return
@@ -243,4 +244,8 @@ func (self *KamailioSessionManager) Sessions() []*Session {
 
 func (self *KamailioSessionManager) SyncSessions() error {
 	return nil
+}
+
+func (self *KamailioSessionManager) Timezone() string {
+	return self.timezone
 }

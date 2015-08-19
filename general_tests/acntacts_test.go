@@ -54,7 +54,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,10`
 	cdrStats := ``
 	users := ``
 	csvr := engine.NewTpReader(ratingDbAcntActs, acntDbAcntActs, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}

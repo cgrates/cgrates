@@ -53,12 +53,12 @@ func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
 	var tStart, tEnd time.Time
 	var err error
 	if len(attrs.TimeStart) != 0 {
-		if tStart, err = utils.ParseTimeDetectLayout(attrs.TimeStart); err != nil {
+		if tStart, err = utils.ParseTimeDetectLayout(attrs.TimeStart, self.CdrSrv.Timezone()); err != nil {
 			return err
 		}
 	}
 	if len(attrs.TimeEnd) != 0 {
-		if tEnd, err = utils.ParseTimeDetectLayout(attrs.TimeEnd); err != nil {
+		if tEnd, err = utils.ParseTimeDetectLayout(attrs.TimeEnd, self.CdrSrv.Timezone()); err != nil {
 			return err
 		}
 	}

@@ -532,7 +532,7 @@ func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 	return css, nil
 }
 
-func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *utils.TPCdrStat) {
+func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *utils.TPCdrStat, timezone string) {
 	if tpCs.QueueLength != "" && tpCs.QueueLength != "0" {
 		if qi, err := strconv.Atoi(tpCs.QueueLength); err == nil {
 			cs.QueueLength = qi
@@ -560,7 +560,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 	if tpCs.SetupInterval != "" {
 		times := strings.Split(tpCs.SetupInterval, utils.INFIELD_SEP)
 		if len(times) > 0 {
-			if sTime, err := utils.ParseTimeDetectLayout(times[0]); err == nil {
+			if sTime, err := utils.ParseTimeDetectLayout(times[0], timezone); err == nil {
 				if len(cs.SetupInterval) < 1 {
 					cs.SetupInterval = append(cs.SetupInterval, sTime)
 				} else {
@@ -571,7 +571,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 			}
 		}
 		if len(times) > 1 {
-			if eTime, err := utils.ParseTimeDetectLayout(times[1]); err == nil {
+			if eTime, err := utils.ParseTimeDetectLayout(times[1], timezone); err == nil {
 				if len(cs.SetupInterval) < 2 {
 					cs.SetupInterval = append(cs.SetupInterval, eTime)
 				} else {

@@ -29,19 +29,19 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr) (*StoredCdr, error) {
+func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr, timezone string) (*StoredCdr, error) {
 	var err error
 	storedCdr := &StoredCdr{CgrId: extCdr.CgrId, OrderId: extCdr.OrderId, TOR: extCdr.TOR, AccId: extCdr.AccId, CdrHost: extCdr.CdrHost, CdrSource: extCdr.CdrSource,
 		ReqType: extCdr.ReqType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category, Account: extCdr.Account, Subject: extCdr.Subject,
 		Destination: extCdr.Destination, Supplier: extCdr.Supplier, DisconnectCause: extCdr.DisconnectCause,
 		MediationRunId: extCdr.MediationRunId, RatedAccount: extCdr.RatedAccount, RatedSubject: extCdr.RatedSubject, Cost: extCdr.Cost, Rated: extCdr.Rated}
-	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime); err != nil {
+	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime, timezone); err != nil {
 		return nil, err
 	}
 	if len(storedCdr.CgrId) == 0 { // Populate CgrId if not present
 		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
 	}
-	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime); err != nil {
+	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime, timezone); err != nil {
 		return nil, err
 	}
 	if storedCdr.Usage, err = utils.ParseDurationWithSecs(extCdr.Usage); err != nil {
@@ -209,7 +209,7 @@ func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *utils.RSRField) (bool
 	return false, ""
 }
 
-func (storedCdr *StoredCdr) AsStoredCdr() *StoredCdr {
+func (storedCdr *StoredCdr) AsStoredCdr(timezone string) *StoredCdr {
 	return storedCdr
 }
 
@@ -259,7 +259,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
 func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, pddFld,
 	answerTimeFld, durationFld, supplierFld, disconnectCauseFld *utils.RSRField,
-	extraFlds []*utils.RSRField, primaryMandatory bool) (*StoredCdr, error) {
+	extraFlds []*utils.RSRField, primaryMandatory bool, timezone string) (*StoredCdr, error) {
 	if reqTypeFld == nil {
 		reqTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
@@ -378,13 +378,13 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	sTimeStr := storedCdr.FieldAsString(setupTimeFld)
 	if primaryMandatory && len(sTimeStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.SETUP_TIME, setupTimeFld.Id)
-	} else if frkStorCdr.SetupTime, err = utils.ParseTimeDetectLayout(sTimeStr); err != nil {
+	} else if frkStorCdr.SetupTime, err = utils.ParseTimeDetectLayout(sTimeStr, timezone); err != nil {
 		return nil, err
 	}
 	aTimeStr := storedCdr.FieldAsString(answerTimeFld)
 	if primaryMandatory && len(aTimeStr) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing(utils.ANSWER_TIME, answerTimeFld.Id)
-	} else if frkStorCdr.AnswerTime, err = utils.ParseTimeDetectLayout(aTimeStr); err != nil {
+	} else if frkStorCdr.AnswerTime, err = utils.ParseTimeDetectLayout(aTimeStr, timezone); err != nil {
 		return nil, err
 	}
 	durStr := storedCdr.FieldAsString(durationFld)
@@ -447,7 +447,7 @@ func (storedCdr *StoredCdr) ComputeLcr() bool {
 func (storedCdr *StoredCdr) GetName() string {
 	return storedCdr.CdrSource
 }
-func (storedCdr *StoredCdr) GetCgrId() string {
+func (storedCdr *StoredCdr) GetCgrId(timezone string) string {
 	return storedCdr.CgrId
 }
 func (storedCdr *StoredCdr) GetUUID() string {
@@ -528,7 +528,7 @@ func (storedCdr *StoredCdr) GetReqType(fieldName string) string {
 	}
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
-func (storedCdr *StoredCdr) GetSetupTime(fieldName string) (time.Time, error) {
+func (storedCdr *StoredCdr) GetSetupTime(fieldName, timezone string) (time.Time, error) {
 	if utils.IsSliceMember([]string{utils.SETUP_TIME, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.SetupTime, nil
 	}
@@ -538,9 +538,9 @@ func (storedCdr *StoredCdr) GetSetupTime(fieldName string) (time.Time, error) {
 	} else {
 		sTimeVal = storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 	}
-	return utils.ParseTimeDetectLayout(sTimeVal)
+	return utils.ParseTimeDetectLayout(sTimeVal, timezone)
 }
-func (storedCdr *StoredCdr) GetAnswerTime(fieldName string) (time.Time, error) {
+func (storedCdr *StoredCdr) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
 	if utils.IsSliceMember([]string{utils.ANSWER_TIME, utils.META_DEFAULT}, fieldName) {
 		return storedCdr.AnswerTime, nil
 	}
@@ -550,7 +550,7 @@ func (storedCdr *StoredCdr) GetAnswerTime(fieldName string) (time.Time, error) {
 	} else {
 		aTimeVal = storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 	}
-	return utils.ParseTimeDetectLayout(aTimeVal)
+	return utils.ParseTimeDetectLayout(aTimeVal, timezone)
 }
 func (storedCdr *StoredCdr) GetEndTime() (time.Time, error) {
 	return storedCdr.AnswerTime.Add(storedCdr.Usage), nil
@@ -607,7 +607,7 @@ func (storedCdr *StoredCdr) MissingParameter() bool {
 		len(storedCdr.Account) == 0 ||
 		len(storedCdr.Destination) == 0
 }
-func (storedCdr *StoredCdr) ParseEventValue(rsrFld *utils.RSRField) string {
+func (storedCdr *StoredCdr) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
 	return storedCdr.FieldAsString(rsrFld)
 }
 func (storedCdr *StoredCdr) String() string {
@@ -660,14 +660,14 @@ type UsageRecord struct {
 	ExtraFields map[string]string
 }
 
-func (self *UsageRecord) AsStoredCdr() (*StoredCdr, error) {
+func (self *UsageRecord) AsStoredCdr(timezone string) (*StoredCdr, error) {
 	var err error
 	storedCdr := &StoredCdr{TOR: self.TOR, ReqType: self.ReqType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
 		Account: self.Account, Subject: self.Subject, Destination: self.Destination}
-	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime); err != nil {
+	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
 		return nil, err
 	}
-	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(self.AnswerTime); err != nil {
+	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(self.AnswerTime, timezone); err != nil {
 		return nil, err
 	}
 	if storedCdr.Usage, err = utils.ParseDurationWithSecs(self.Usage); err != nil {
@@ -682,7 +682,7 @@ func (self *UsageRecord) AsStoredCdr() (*StoredCdr, error) {
 	return storedCdr, nil
 }
 
-func (self *UsageRecord) AsCallDescriptor() (*CallDescriptor, error) {
+func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
 	var err error
 	cd := &CallDescriptor{
 		TOR:         self.TOR,
@@ -697,7 +697,7 @@ func (self *UsageRecord) AsCallDescriptor() (*CallDescriptor, error) {
 	if len(timeStr) == 0 { // In case of auth, answer time will not be defined, so take it out of setup one
 		timeStr = self.SetupTime
 	}
-	if cd.TimeStart, err = utils.ParseTimeDetectLayout(timeStr); err != nil {
+	if cd.TimeStart, err = utils.ParseTimeDetectLayout(timeStr, timezone); err != nil {
 		return nil, err
 	}
 	if usage, err := utils.ParseDurationWithSecs(self.Usage); err != nil {
