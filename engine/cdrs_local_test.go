@@ -115,8 +115,8 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
 	} else {
-		rcvSetupTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].SetupTime)
-		rcvAnswerTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].AnswerTime)
+		rcvSetupTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].SetupTime, "")
+		rcvAnswerTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].AnswerTime, "")
 		//rcvUsage, _ := utils.ParseDurationWithSecs(rcvedCdrs[0].Usage)
 		if rcvedCdrs[0].CgrId != testCdr1.CgrId ||
 			rcvedCdrs[0].TOR != testCdr1.TOR ||

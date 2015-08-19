@@ -19,12 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"reflect"
-	"sort"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -105,17 +102,11 @@ func TestCacheRefresh(t *testing.T) {
 	ratingStorage.GetDestination("T11")
 	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}})
 	t.Log("Test cache refresh")
-	ratingStorage.CacheAll()
+	ratingStorage.CacheRatingAll()
 	d, err := ratingStorage.GetDestination("T11")
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
 		t.Error("Error refreshing cache:", d)
-	}
-}
-
-func TestCacheAliases(t *testing.T) {
-	if subj, err := cache2go.GetCached(utils.RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey("vdf", "a3")); err == nil && subj != "minu" {
-		t.Error("Error caching alias: ", subj, err)
 	}
 }
 
@@ -127,110 +118,6 @@ func TestStoreInterfaces(t *testing.T) {
 	sql := new(SQLStorage)
 	var _ CdrStorage = sql
 	var _ LogStorage = sql
-}
-
-func TestGetRPAliases(t *testing.T) {
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
-		t.Error(err)
-	}
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
-		t.Error(err)
-	}
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
-		t.Error(err)
-	}
-	expectAliases := sort.StringSlice([]string{"2001", "2002"})
-	expectAliases.Sort()
-	if aliases, err := ratingStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
-		t.Error(err)
-	} else {
-		aliases := sort.StringSlice(aliases)
-		aliases.Sort()
-		if !reflect.DeepEqual(aliases, expectAliases) {
-			t.Errorf("Expecting: %v, received: %v", expectAliases, aliases)
-		}
-	}
-}
-
-func TestRemRSubjAliases(t *testing.T) {
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
-		t.Error(err)
-	}
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
-		t.Error(err)
-	}
-	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}, true); err != nil {
-		t.Error(err)
-	}
-	if cgrAliases, err := ratingStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
-		t.Error(err)
-	} else if len(cgrAliases) != 0 {
-		t.Error("Subject aliases not removed: ", cgrAliases)
-	}
-	if iscAliases, err := ratingStorage.GetRPAliases("itsyscom.com", "1001", true); err != nil { // Make sure the aliases were removed at tenant level
-		t.Error(err)
-	} else if !reflect.DeepEqual(iscAliases, []string{"2003"}) {
-		t.Errorf("Unexpected aliases: %v", iscAliases)
-	}
-}
-
-func TestStorageRpAliases(t *testing.T) {
-	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err == nil {
-		t.Error("Found alias before setting")
-	}
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "1991"), "1991"); err != nil {
-		t.Error(err)
-	}
-	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err != nil {
-		t.Error("Alias not found after setting")
-	}
-	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1991"}}, true); err != nil {
-		t.Error(err)
-	}
-	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err == nil {
-		t.Error("Found alias after removing")
-	}
-}
-
-func TestGetAccountAliases(t *testing.T) {
-	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2001"), "1001"); err != nil {
-		t.Error(err)
-	}
-	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2002"), "1001"); err != nil {
-		t.Error(err)
-	}
-	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
-		t.Error(err)
-	}
-	expectAliases := sort.StringSlice([]string{"2001", "2002"})
-	expectAliases.Sort()
-	if aliases, err := ratingStorage.GetAccountAliases("cgrates.org", "1001", true); err != nil {
-		t.Error(err)
-	} else {
-		aliases := sort.StringSlice(aliases)
-		aliases.Sort()
-		if !reflect.DeepEqual(aliases, expectAliases) {
-			t.Errorf("Expecting: %v, received: %v", expectAliases, aliases)
-		}
-	}
-}
-
-func TestStorageAccAliases(t *testing.T) {
-	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err == nil {
-		t.Error("Found alias before setting")
-	}
-	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "1991"), "1991"); err != nil {
-		t.Error(err)
-	}
-	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err != nil {
-		t.Error("Alias not found after setting")
-	}
-	if err := ratingStorage.RemoveAccAliases([]*TenantAccount{&TenantAccount{Tenant: "cgrates.org", Account: "1991"}}, true); err != nil {
-		t.Error(err)
-	}
-	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err == nil {
-		t.Error("Found alias after removing")
-	}
 }
 
 /************************** Benchmarks *****************************/

@@ -1,0 +1,5 @@
+#Direction,Tenant,Category,Account,Subject,DestinationId,Group,Alias,Weight
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,dan1,10
+*out,cgrates.org,call,dan,dan,GLOBAL1,*rating_profile,dan2,20
+*any,*any,*any,*any,*any,*any,*rating_profile,rif1,20
+*any,*any,*any,*any,*any,*any,*account,dan1,10

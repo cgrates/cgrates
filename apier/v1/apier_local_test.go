@@ -30,7 +30,6 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -1538,6 +1537,7 @@ func TestApierLocalSetDestination(t *testing.T) {
 	}
 }
 
+/*
 func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1607,6 +1607,7 @@ func TestApierLocalGetAccountAliases(t *testing.T) {
 	}
 }
 
+
 func TestApierLocalAddAccountAliases(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1650,6 +1651,7 @@ func TestApierLocalRemAccountAliases(t *testing.T) {
 		t.Error("Unexpected error", err.Error())
 	}
 }
+*/
 
 func TestApierLocalGetScheduledActions(t *testing.T) {
 	if !*testLocal {
@@ -1770,6 +1772,7 @@ func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 	}
 }
 
+/*
 func TestApierGetCacheStats3(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1782,7 +1785,7 @@ func TestApierGetCacheStats3(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
 	}
-}
+}*/
 
 // Simply kill the engine after we are done with tests within this file
 func TestApierStopEngine(t *testing.T) {

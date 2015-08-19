@@ -117,7 +117,7 @@ func TestFallbackWithBackTrace(t *testing.T) {
 	}
 }
 
-func TestFallbackDefault(t *testing.T) {
+func TestFallbackNoDefault(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
@@ -127,7 +127,7 @@ func TestFallbackDefault(t *testing.T) {
 		Subject:     "one",
 		Destination: "0723"}
 	cd.LoadRatingPlans()
-	if len(cd.RatingInfos) != 1 {
+	if len(cd.RatingInfos) != 0 {
 		t.Error("Error restoring activation periods: ", len(cd.RatingInfos))
 	}
 }

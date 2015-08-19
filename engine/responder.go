@@ -52,6 +52,7 @@ type Responder struct {
 	CdrSrv        *CdrServer
 	Stats         StatsInterface
 	Timeout       time.Duration
+	Timezone      string
 	cnt           int64
 	responseCache *cache2go.ResponseCache
 }
@@ -246,7 +247,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
 			continue
 		}
-		startTime, err := ev.GetSetupTime(utils.META_DEFAULT)
+		startTime, err := ev.GetSetupTime(utils.META_DEFAULT, rs.Timezone)
 		if err != nil {
 			return err
 		}
@@ -313,7 +314,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.ReqTypeField)) {
 			continue // We only consider prepaid sessions
 		}
-		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
+		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)
 		if err != nil {
 			rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
 				Err: err,

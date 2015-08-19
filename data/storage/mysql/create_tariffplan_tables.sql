@@ -336,7 +336,7 @@ CREATE TABLE tp_cdr_stats (
   KEY `tpid` (`tpid`)
 );
 
-    --
+--
 -- Table structure for table `tp_users`
 --
 
@@ -348,6 +348,28 @@ CREATE TABLE tp_users (
   `user_name` varchar(64) NOT NULL,
   `attribute_name` varchar(64) NOT NULL,
   `attribute_value` varchar(64) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`)
+);
+
+--
+-- Table structure for table `tp_aliases`
+--
+
+DROP TABLE IF EXISTS tp_aliases;
+CREATE TABLE tp_aliases (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `direction` varchar(8) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `category` varchar(64) NOT NULL,
+  `account` varchar(64) NOT NULL,
+  `subject` varchar(64) NOT NULL,
+  `group` varchar(64) NOT NULL,
+  `destionation_id` varchar(64) NOT NULL,
+  `alias` varchar(64) NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)

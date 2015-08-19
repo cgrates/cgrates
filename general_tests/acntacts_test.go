@@ -53,13 +53,15 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,10`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``
+	aliases := ``
 	csvr := engine.NewTpReader(ratingDbAcntActs, acntDbAcntActs, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "")
 	if err := csvr.LoadAll(); err != nil {
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDbAcntActs.CacheAll()
+	ratingDbAcntActs.CacheRatingAll()
+	acntDbAcntActs.CacheAccountingAll()
 	expectAcnt := &engine.Account{Id: "*out:cgrates.org:1"}
 	if acnt, err := acntDbAcntActs.GetAccount("*out:cgrates.org:1"); err != nil {
 		t.Error(err)

@@ -44,7 +44,7 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
 		t.Error(err)
 	}
-	if err := ratingStorage.CachePrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
+	if err := ratingStorage.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
 		t.Error(err)
 	}
 	var dcs utils.DerivedChargers
@@ -94,7 +94,7 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	ratingStorage.CacheAll()
+	ratingStorage.CacheRatingAll()
 	if rifStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(utils.OUT, testTenant, "rif")); err != nil {
 		t.Error(err)
 		//} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND].Equal(rifsAccount.BalanceMap[utils.VOICE+OUTBOUND]) {
@@ -148,7 +148,7 @@ func TestGetSessionRuns(t *testing.T) {
 	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
-	ratingStorage.CacheAll()
+	ratingStorage.CacheRatingAll()
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
@@ -368,7 +368,7 @@ func TestGetLCR(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if err := ratingStorage.CachePrefixValues(map[string][]string{
+	if err := ratingStorage.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:    []string{utils.DESTINATION_PREFIX + dstDe.Id},
 		utils.RATING_PLAN_PREFIX:    []string{utils.RATING_PLAN_PREFIX + rp1.Id, utils.RATING_PLAN_PREFIX + rp2.Id},
 		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + danRpfl.Id, utils.RATING_PROFILE_PREFIX + rifRpfl.Id},

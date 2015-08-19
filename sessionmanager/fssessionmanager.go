@@ -40,15 +40,17 @@ type FSSessionManager struct {
 	sessions    []*Session
 	rater       engine.Connector
 	cdrsrv      engine.Connector
+	timezone    string
 }
 
-func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs engine.Connector) *FSSessionManager {
+func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs engine.Connector, timezone string) *FSSessionManager {
 	return &FSSessionManager{
 		cfg:         smFsConfig,
 		conns:       make(map[string]*fsock.FSock),
 		senderPools: make(map[string]*fsock.FSockPool),
 		rater:       rater,
 		cdrsrv:      cdrs,
+		timezone:    timezone,
 	}
 }
 
@@ -165,6 +167,10 @@ func (sm *FSSessionManager) RemoveSession(uuid string) {
 	}
 }
 
+func (sm *FSSessionManager) Timezone() string {
+	return sm.timezone
+}
+
 // Sets the call timeout valid of starting of the call
 func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string, maxDur time.Duration) error {
 	// _, err := fsock.FS.SendApiCmd(fmt.Sprintf("sched_hangup +%d %s\n\n", int(maxDur.Seconds()), uuid))
@@ -179,7 +185,7 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid, connId string, maxDur time.
 // Queries LCR and sets the cgr_lcr channel variable
 func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 	var lcrCost engine.LCRCost
-	startTime, err := ev.GetSetupTime(utils.META_DEFAULT)
+	startTime, err := ev.GetSetupTime(utils.META_DEFAULT, sm.timezone)
 	if err != nil {
 		return err
 	}
@@ -217,7 +223,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 		return
 	}
 	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
-	if err := sm.rater.GetDerivedMaxSessionTime(ev.AsStoredCdr(), &maxCallDuration); err != nil {
+	if err := sm.rater.GetDerivedMaxSessionTime(ev.AsStoredCdr(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
 	}
 	if maxCallDuration != -1 { // For calls different than unlimited, set limits
@@ -291,7 +297,7 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 		return
 	}
 	if sm.cfg.CreateCdr {
-		go sm.ProcessCdr(ev.AsStoredCdr())
+		go sm.ProcessCdr(ev.AsStoredCdr(config.CgrConfig().DefaultTimezone))
 	}
 	var s *Session
 	for i := 0; i < 2; i++ { // Protect us against concurrency, wait a couple of seconds for the answer to be populated before we process hangup
@@ -397,7 +403,7 @@ func (sm *FSSessionManager) SyncSessions() error {
 			sm.RemoveSession(session.eventStart.GetUUID()) // Unreference it early so we avoid concurrency
 			fsev := session.eventStart.(FSEvent)
 			now := time.Now()
-			aTime, _ := fsev.GetAnswerTime("")
+			aTime, _ := fsev.GetAnswerTime("", sm.timezone)
 			dur := now.Sub(aTime)
 			fsev[END_TIME] = now.String()
 			fsev[DURATION] = strconv.FormatFloat(dur.Seconds(), 'f', -1, 64)

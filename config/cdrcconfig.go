@@ -31,6 +31,7 @@ type CdrcConfig struct {
 	CdrFormat               string          // The type of CDR file to process <csv|opensips_flatstore>
 	FieldSeparator          rune            // The separator to use when reading csvs
 	DataUsageMultiplyFactor float64         // Conversion factor for data usage
+	Timezone                string          // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	RunDelay                time.Duration   // Delay between runs, 0 for inotify driven requests
 	MaxOpenFiles            int             // Maximum number of files opened simultaneously
 	CdrInDir                string          // Folder to process CDRs from
@@ -67,6 +68,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	}
 	if jsnCfg.Data_usage_multiply_factor != nil {
 		self.DataUsageMultiplyFactor = *jsnCfg.Data_usage_multiply_factor
+	}
+	if jsnCfg.Timezone != nil {
+		self.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Run_delay != nil {
 		self.RunDelay = time.Duration(*jsnCfg.Run_delay) * time.Second
@@ -122,6 +126,7 @@ func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc.CdrFormat = self.CdrFormat
 	clnCdrc.FieldSeparator = self.FieldSeparator
 	clnCdrc.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor
+	clnCdrc.Timezone = self.Timezone
 	clnCdrc.RunDelay = self.RunDelay
 	clnCdrc.MaxOpenFiles = self.MaxOpenFiles
 	clnCdrc.CdrInDir = self.CdrInDir

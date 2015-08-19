@@ -84,6 +84,7 @@ T1,NAT,LANDLINE_OFFPEAK,*middle,4,0,
 T2,GERMANY,GBP_72,*middle,4,0,
 T2,GERMANY_O2,GBP_70,*middle,4,0,
 T2,GERMANY_PREMIUM,GBP_71,*middle,4,0,
+GER,GERMANY,R4,*middle,4,0,
 DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG,*middle,4,,
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5,*middle,4,,
 DATA_RATE,*any,LANDLINE_OFFPEAK,*middle,4,0,
@@ -112,6 +113,7 @@ RP_UK,DR_UK_Mobile_BIG5,*any,10
 RP_DATA,DATA_RATE,*any,10
 RP_MX,MX_DISC,WORKDAYS_00,10
 RP_MX,MX_FREE,WORKDAYS_18,10
+GER_ONLY,GER,*any,10
 ANY_PLAN,DATA_RATE,*any,10
 `
 	ratingProfiles = `
@@ -122,7 +124,7 @@ ANY_PLAN,DATA_RATE,*any,10
 *out,vdf,0,rif,2012-01-01T00:00:00Z,EVENING,,
 *out,vdf,call,rif,2012-02-28T00:00:00Z,EVENING,,
 *out,vdf,call,dan,2012-01-01T00:00:00Z,EVENING,,
-*out,vdf,0,minu;a1;a2;a3,2012-01-01T00:00:00Z,EVENING,,
+*out,vdf,0,minu,2012-01-01T00:00:00Z,EVENING,,
 *out,vdf,0,*any,2012-02-28T00:00:00Z,EVENING,,
 *out,vdf,0,one,2012-02-28T00:00:00Z,STANDARD,,
 *out,vdf,0,inf,2012-02-28T00:00:00Z,STANDARD,inf,
@@ -136,6 +138,7 @@ ANY_PLAN,DATA_RATE,*any,10
 *out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,,
 *out,cgrates.org,data,rif,2013-01-06T00:00:00Z,RP_DATA,,
 *out,cgrates.org,call,max,2013-03-23T00:00:00Z,RP_MX,,
+*out,cgrates.org,call,nt,2012-02-28T00:00:00Z,GER_ONLY,,
 *in,cgrates.org,LCR_STANDARD,max,2013-03-23T00:00:00Z,RP_MX,,
 *out,cgrates.org,call,money,2015-02-28T00:00:00Z,EVENING,,
 `
@@ -187,7 +190,7 @@ CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
-vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
+vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
 cgrates.org,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
 cgrates.org,remo,*out,TOPUP10_AT,
 vdf,empty0,*out,TOPUP_SHARED0_AT,
@@ -217,13 +220,22 @@ cgrates.org,rif,test0,val0
 cgrates.org,rif,test1,val1
 cgrates.org,dan,another,value
 `
+	aliases = `
+#Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Group[6],Alias[7],Weight[8]
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,dan1,10
+*out,cgrates.org,call,dan,dan,GLOBAL1,*rating_profile,dan2,20
+*any,*any,*any,*any,*any,*any,*rating_profile,rif1,20
+*any,*any,*any,*any,*any,*any,*account,dan1,10
+*out,vdf,0,a1,a1,*any,*rating_profile,minu,10
+*out,vdf,0,a1,a1,*any,*account,minu,10
+`
 )
 
 var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
+		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -269,8 +281,12 @@ func init() {
 	if err := csvr.LoadUsers(); err != nil {
 		log.Print("error in LoadUsers:", err)
 	}
+	if err := csvr.LoadAliases(); err != nil {
+		log.Print("error in LoadAliases:", err)
+	}
 	csvr.WriteToDatabase(false, false)
-	ratingStorage.CacheAll()
+	ratingStorage.CacheRatingAll()
+	accountingStorage.CacheAccountingAll()
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -440,7 +456,7 @@ func TestLoadRates(t *testing.T) {
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.destinationRates) != 13 {
+	if len(csvr.destinationRates) != 14 {
 		t.Error("Failed to load destinationrates: ", len(csvr.destinationRates))
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
@@ -588,7 +604,7 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadRatingPlans(t *testing.T) {
-	if len(csvr.ratingPlans) != 12 {
+	if len(csvr.ratingPlans) != 13 {
 		t.Error("Failed to load rating plans: ", len(csvr.ratingPlans))
 	}
 	rplan := csvr.ratingPlans["STANDARD"]
@@ -760,7 +776,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 20 {
+	if len(csvr.ratingProfiles) != 21 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
@@ -1027,27 +1043,6 @@ func TestLoadAccountActions(t *testing.T) {
 	}
 }
 
-func TestLoadRpAliases(t *testing.T) {
-	if len(csvr.rpAliases) != 3 {
-		t.Error("Failed to load rp aliases: ", csvr.rpAliases)
-	}
-	if csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a1")] != "minu" ||
-		csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a2")] != "minu" ||
-		csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a3")] != "minu" {
-		t.Error("Error loading rp aliases: ", csvr.rpAliases)
-	}
-}
-
-func TestLoadAccAliases(t *testing.T) {
-	if len(csvr.accAliases) != 2 {
-		t.Error("Failed to load acc aliases: ", csvr.accAliases)
-	}
-	if csvr.accAliases[utils.AccountAliasKey("vdf", "a1")] != "minitsboy" ||
-		csvr.accAliases[utils.AccountAliasKey("vdf", "a2")] != "minitsboy" {
-		t.Error("Error loading acc aliases: ", csvr.accAliases)
-	}
-}
-
 func TestLoadDerivedChargers(t *testing.T) {
 	if len(csvr.derivedChargers) != 2 {
 		t.Error("Failed to load derivedChargers: ", csvr.derivedChargers)
@@ -1131,5 +1126,35 @@ func TestLoadUsers(t *testing.T) {
 
 	if !reflect.DeepEqual(csvr.users[user1.GetId()], user1) {
 		t.Errorf("Unexpected user %+v", csvr.users[user1.GetId()])
+	}
+}
+
+func TestLoadAliases(t *testing.T) {
+	if len(csvr.aliases) != 5 {
+		t.Error("Failed to load aliases: ", csvr.aliases)
+	}
+	alias1 := &Alias{
+		Direction: "*out",
+		Tenant:    "cgrates.org",
+		Category:  "call",
+		Account:   "dan",
+		Subject:   "dan",
+		Group:     "*rating_profile",
+		Values: AliasValues{
+			&AliasValue{
+				DestinationId: "EU_LANDLINE",
+				Alias:         "dan1",
+				Weight:        10,
+			},
+			&AliasValue{
+				DestinationId: "GLOBAL1",
+				Alias:         "dan2",
+				Weight:        20,
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(csvr.aliases[alias1.GetId()], alias1) {
+		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
 	}
 }

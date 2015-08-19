@@ -128,8 +128,12 @@ func Round(x float64, prec int, method string) float64 {
 	return rounder / pow
 }
 
-func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
+func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	var nilTime time.Time
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return nilTime, err
+	}
 	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
 	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
 	gotimeRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
@@ -144,27 +148,27 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 	case gotimeRule.MatchString(tmStr):
 		return time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", tmStr)
 	case sqlRule.MatchString(tmStr):
-		return time.Parse("2006-01-02 15:04:05", tmStr)
+		return time.ParseInLocation("2006-01-02 15:04:05", tmStr, loc)
 	case fsTimestamp.MatchString(tmStr):
 		if tmstmp, err := strconv.ParseInt(tmStr+"000", 10, 64); err != nil {
 			return nilTime, err
 		} else {
-			return time.Unix(0, tmstmp), nil
+			return time.Unix(0, tmstmp).In(loc), nil
 		}
 	case unixTimestampRule.MatchString(tmStr):
 		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
 			return nilTime, err
 		} else {
-			return time.Unix(tmstmp, 0), nil
+			return time.Unix(tmstmp, 0).In(loc), nil
 		}
 	case tmStr == "0" || len(tmStr) == 0: // Time probably missing from request
 		return nilTime, nil
 	case oneLineTimestampRule.MatchString(tmStr):
-		return time.Parse("20060102150405", tmStr)
+		return time.ParseInLocation("20060102150405", tmStr, loc)
 	case oneSpaceTimestampRule.MatchString(tmStr):
-		return time.Parse("02.01.2006  15:04:05", tmStr)
+		return time.ParseInLocation("02.01.2006  15:04:05", tmStr, loc)
 	case eamonTimestampRule.MatchString(tmStr):
-		return time.Parse("02/01/2006 15:04:05", tmStr)
+		return time.ParseInLocation("02/01/2006 15:04:05", tmStr, loc)
 	case tmStr == "*now":
 		return time.Now(), nil
 	}

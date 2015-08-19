@@ -12,6 +12,7 @@ import (
 
 type TpReader struct {
 	tpid              string
+	timezone          string
 	ratingStorage     RatingStorage
 	accountingStorage AccountingStorage
 	lr                LoadReader
@@ -22,8 +23,6 @@ type TpReader struct {
 	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
 	dirtyAccAliases   []*TenantAccount       // used to clean aliases that might have changed
 	destinations      map[string]*Destination
-	rpAliases         map[string]string
-	accAliases        map[string]string
 	timings           map[string]*utils.TPTiming
 	rates             map[string]*utils.TPRate
 	destinationRates  map[string]*utils.TPDestinationRate
@@ -34,11 +33,13 @@ type TpReader struct {
 	derivedChargers   map[string]utils.DerivedChargers
 	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
+	aliases           map[string]*Alias
 }
 
-func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid string) *TpReader {
+func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string) *TpReader {
 	tpr := &TpReader{
 		tpid:              tpid,
+		timezone:          timezone,
 		ratingStorage:     rs,
 		accountingStorage: as,
 		lr:                lr,
@@ -53,11 +54,10 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid str
 		ratingProfiles:    make(map[string]*RatingProfile),
 		sharedGroups:      make(map[string]*SharedGroup),
 		lcrs:              make(map[string]*LCR),
-		rpAliases:         make(map[string]string),
-		accAliases:        make(map[string]string),
 		accountActions:    make(map[string]*Account),
 		cdrStats:          make(map[string]*CdrStats),
 		users:             make(map[string]*UserProfile),
+		aliases:           make(map[string]*Alias),
 		derivedChargers:   make(map[string]utils.DerivedChargers),
 	}
 	//add *any and *asap timing tag (in case of no timings file)
@@ -340,15 +340,6 @@ func (tpr *TpReader) LoadRatingProfiles() (err error) {
 		return err
 	}
 	for _, tpRpf := range mpTpRpfs {
-		// extract aliases from subject
-		aliases := strings.Split(tpRpf.Subject, ";")
-		tpr.dirtyRpAliases = append(tpr.dirtyRpAliases, &TenantRatingSubject{Tenant: tpRpf.Tenant, Subject: aliases[0]})
-		if len(aliases) > 1 {
-			tpRpf.Subject = aliases[0]
-			for _, alias := range aliases[1:] {
-				tpr.rpAliases[utils.RatingSubjectAliasKey(tpRpf.Tenant, alias)] = tpRpf.Subject
-			}
-		}
 		rpf := &RatingProfile{Id: tpRpf.KeyId()}
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseDate(tpRa.ActivationTime)
@@ -456,7 +447,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 			}
 		}
 		tag := utils.LCRKey(tpLcr.Direction, tpLcr.Tenant, tpLcr.Category, tpLcr.Account, tpLcr.Subject)
-		activationTime, _ := utils.ParseTimeDetectLayout(tpLcr.ActivationTime)
+		activationTime, _ := utils.ParseTimeDetectLayout(tpLcr.ActivationTime, tpr.timezone)
 
 		lcr, found := tpr.lcrs[tag]
 		if !found {
@@ -611,7 +602,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 	for key, atrsLst := range storAts {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, atr := range atrsLst {
-			balanceExpirationDate, _ := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate)
+			balanceExpirationDate, _ := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 			id := atr.Id
 			if id == "" {
 				id = utils.GenUUID()
@@ -692,17 +683,22 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				} else if len(actions) == 0 {
 					return fmt.Errorf("no action with id <%s>", at.ActionsId)
 				}
-				tptm, err := tpr.lr.GetTpTimings(tpr.tpid, at.TimingId)
-				if err != nil {
-					return errors.New(err.Error() + " (Timing): " + at.TimingId)
-				} else if len(tptm) == 0 {
-					return fmt.Errorf("no timing with id <%s>", at.TimingId)
+				var t *utils.TPTiming
+				if at.TimingId != utils.ASAP {
+					tptm, err := tpr.lr.GetTpTimings(tpr.tpid, at.TimingId)
+					if err != nil {
+						return errors.New(err.Error() + " (Timing): " + at.TimingId)
+					} else if len(tptm) == 0 {
+						return fmt.Errorf("no timing with id <%s>", at.TimingId)
+					}
+					tm, err := TpTimings(tptm).GetTimings()
+					if err != nil {
+						return err
+					}
+					t = tm[at.TimingId]
+				} else {
+					t = tpr.timings[at.TimingId] // *asap
 				}
-				tm, err := TpTimings(tptm).GetTimings()
-				if err != nil {
-					return err
-				}
-				t := tm[at.TimingId]
 				actTmg := &ActionPlan{
 					Uuid:   utils.GenUUID(),
 					Id:     accountAction.ActionPlanId,
@@ -853,16 +849,6 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 		if _, alreadyDefined := tpr.accountActions[aa.KeyId()]; alreadyDefined {
 			return fmt.Errorf("duplicate account action found: %s", aa.KeyId())
 		}
-
-		// extract aliases from subject
-		aliases := strings.Split(aa.Account, ";")
-		tpr.dirtyAccAliases = append(tpr.dirtyAccAliases, &TenantAccount{Tenant: aa.Tenant, Account: aliases[0]})
-		if len(aliases) > 1 {
-			aa.Account = aliases[0]
-			for _, alias := range aliases[1:] {
-				tpr.accAliases[utils.AccountAliasKey(aa.Tenant, alias)] = aa.Account
-			}
-		}
 		var aTriggers []*ActionTrigger
 		if aa.ActionTriggersId != "" {
 			var exists bool
@@ -989,7 +975,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 				// only return error if there was something there for the tag
 				return fmt.Errorf("could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
 			}
-			UpdateCdrStats(cs, triggers, tpStat)
+			UpdateCdrStats(cs, triggers, tpStat, tpr.timezone)
 			tpr.cdrStats[tag] = cs
 		}
 	}
@@ -1076,6 +1062,38 @@ func (tpr *TpReader) LoadUsers() error {
 	return err
 }
 
+func (tpr *TpReader) LoadAliasesFiltered(filter *TpAlias) (bool, error) {
+	tpAliases, err := tpr.lr.GetTpAliases(filter)
+
+	alias := &Alias{
+		Direction: filter.Direction,
+		Tenant:    filter.Tenant,
+		Category:  filter.Category,
+		Account:   filter.Account,
+		Subject:   filter.Subject,
+		Group:     filter.Group,
+		Values:    make(AliasValues, 0),
+	}
+	for _, tpAlias := range tpAliases {
+		alias.Values = append(alias.Values, &AliasValue{
+			DestinationId: tpAlias.DestinationId,
+			Alias:         tpAlias.Alias,
+			Weight:        tpAlias.Weight,
+		})
+	}
+	tpr.accountingStorage.SetAlias(alias)
+	return len(tpAliases) > 0, err
+}
+
+func (tpr *TpReader) LoadAliases() error {
+	tps, err := tpr.lr.GetTpAliases(&TpAlias{Tpid: tpr.tpid})
+	if err != nil {
+		return err
+	}
+	tpr.aliases, err = TpAliases(tps).GetAliases()
+	return err
+}
+
 func (tpr *TpReader) LoadAll() error {
 	var err error
 	if err = tpr.LoadDestinations(); err != nil {
@@ -1121,6 +1139,9 @@ func (tpr *TpReader) LoadAll() error {
 		return err
 	}
 	if err = tpr.LoadUsers(); err != nil {
+		return err
+	}
+	if err = tpr.LoadAliases(); err != nil {
 		return err
 	}
 	return nil
@@ -1249,36 +1270,6 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("Rating Profile Aliases:")
-	}
-	if err := tpr.ratingStorage.RemoveRpAliases(tpr.dirtyRpAliases, true); err != nil {
-		return err
-	}
-	for key, alias := range tpr.rpAliases {
-		err = tpr.ratingStorage.SetRpAlias(key, alias)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", key)
-		}
-	}
-	if verbose {
-		log.Print("Account Aliases:")
-	}
-	if err := tpr.ratingStorage.RemoveAccAliases(tpr.dirtyAccAliases, true); err != nil {
-		return err
-	}
-	for key, alias := range tpr.accAliases {
-		err = tpr.ratingStorage.SetAccAlias(key, alias)
-		if err != nil {
-			return err
-		}
-		if verbose {
-			log.Print("\t", key)
-		}
-	}
-	if verbose {
 		log.Print("Derived Chargers:")
 	}
 	for key, dcs := range tpr.derivedChargers {
@@ -1312,6 +1303,18 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 		if verbose {
 			log.Print("\t", u.GetId())
+		}
+	}
+	if verbose {
+		log.Print("Aliases:")
+	}
+	for _, al := range tpr.aliases {
+		err = tpr.accountingStorage.SetAlias(al)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", al.GetId())
 		}
 	}
 	return
@@ -1419,22 +1422,6 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.RP_ALIAS_PREFIX: // aliases
-		keys := make([]string, len(tpr.rpAliases))
-		i := 0
-		for k := range tpr.rpAliases {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
-	case utils.ACC_ALIAS_PREFIX: // aliases
-		keys := make([]string, len(tpr.accAliases))
-		i := 0
-		for k := range tpr.accAliases {
-			keys[i] = k
-			i++
-		}
-		return keys, nil
 	case utils.DERIVEDCHARGERS_PREFIX: // derived chargers
 		keys := make([]string, len(tpr.derivedChargers))
 		i := 0
@@ -1463,6 +1450,14 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(tpr.users))
 		i := 0
 		for k := range tpr.users {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case utils.ALIASES_PREFIX:
+		keys := make([]string, len(tpr.aliases))
+		i := 0
+		for k := range tpr.aliases {
 			keys[i] = k
 			i++
 		}

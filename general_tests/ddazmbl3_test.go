@@ -60,8 +60,9 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``
+	aliases := ``
 	csvr := engine.NewTpReader(ratingDb3, acntDb3, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users), "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "")
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +108,8 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
-	ratingDb3.CacheAll()
+	ratingDb3.CacheRatingAll()
+	acntDb3.CacheAccountingAll()
 
 	if cachedDests := cache2go.CountEntries(utils.DESTINATION_PREFIX); cachedDests != 2 {
 		t.Error("Wrong number of cached destinations found", cachedDests)

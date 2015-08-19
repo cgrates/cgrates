@@ -41,8 +41,8 @@ func TestOsipsEventInterface(t *testing.T) {
 }
 
 func TestOsipsEventParseStatic(t *testing.T) {
-	setupTime, _ := osipsEv.GetSetupTime("^2013-12-07 08:42:24")
-	answerTime, _ := osipsEv.GetAnswerTime("^2013-12-07 08:42:24")
+	setupTime, _ := osipsEv.GetSetupTime("^2013-12-07 08:42:24", "")
+	answerTime, _ := osipsEv.GetAnswerTime("^2013-12-07 08:42:24", "")
 	dur, _ := osipsEv.GetDuration("^60s")
 	pdd, _ := osipsEv.GetPdd("^10s")
 	if osipsEv.GetReqType("^test") != "test" ||
@@ -78,15 +78,15 @@ func TestOsipsEventParseStatic(t *testing.T) {
 func TestOsipsEventGetValues(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
-	setupTime, _ := osipsEv.GetSetupTime(utils.META_DEFAULT)
-	eSetupTime, _ := utils.ParseTimeDetectLayout("1406370492")
-	answerTime, _ := osipsEv.GetAnswerTime(utils.META_DEFAULT)
-	eAnswerTime, _ := utils.ParseTimeDetectLayout("1406370499")
+	setupTime, _ := osipsEv.GetSetupTime(utils.META_DEFAULT, "")
+	eSetupTime, _ := utils.ParseTimeDetectLayout("1406370492", "")
+	answerTime, _ := osipsEv.GetAnswerTime(utils.META_DEFAULT, "")
+	eAnswerTime, _ := utils.ParseTimeDetectLayout("1406370499", "")
 	dur, _ := osipsEv.GetDuration(utils.META_DEFAULT)
 	pdd, _ := osipsEv.GetPdd(utils.META_DEFAULT)
 	endTime, _ := osipsEv.GetEndTime()
 	if osipsEv.GetName() != "E_ACC_CDR" ||
-		osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()) ||
+		osipsEv.GetCgrId("") != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()) ||
 		osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ" ||
 		osipsEv.GetDirection(utils.META_DEFAULT) != utils.OUT ||
 		osipsEv.GetSubject(utils.META_DEFAULT) != "dan" ||
@@ -105,7 +105,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 		osipsEv.GetDisconnectCause(utils.META_DEFAULT) != "200" ||
 		osipsEv.GetOriginatorIP(utils.META_DEFAULT) != "172.16.254.77" {
 		t.Error("GetValues not matching: ", osipsEv.GetName() != "E_ACC_CDR",
-			osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()),
+			osipsEv.GetCgrId("") != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()),
 			osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ",
 			osipsEv.GetDirection(utils.META_DEFAULT) != utils.OUT,
 			osipsEv.GetSubject(utils.META_DEFAULT) != "dan",
@@ -141,21 +141,21 @@ func TestOsipsEventMissingParameter(t *testing.T) {
 }
 
 func TestOsipsEventAsStoredCdr(t *testing.T) {
-	setupTime, _ := utils.ParseTimeDetectLayout("1406370492")
-	answerTime, _ := utils.ParseTimeDetectLayout("1406370499")
+	setupTime, _ := utils.ParseTimeDetectLayout("1406370492", "")
+	answerTime, _ := utils.ParseTimeDetectLayout("1406370499", "")
 	eStoredCdr := &engine.StoredCdr{CgrId: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()),
 		TOR: utils.VOICE, AccId: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", CdrHost: "172.16.254.77", CdrSource: "OSIPS_E_ACC_CDR",
 		ReqType:   utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "itsyscom.com", Category: "call", Account: "dan", Subject: "dan",
 		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime,
 		Usage: time.Duration(20) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "supplier3", DisconnectCause: "200", ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
-	if storedCdr := osipsEv.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+	if storedCdr := osipsEv.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }
 
 func TestOsipsAccMissedToStoredCdr(t *testing.T) {
-	setupTime, _ := utils.ParseTimeDetectLayout("1431182699")
+	setupTime, _ := utils.ParseTimeDetectLayout("1431182699", "")
 	osipsEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_MISSED_EVENT",
 		AttrValues: map[string]string{"method": "INVITE", "from_tag": "5cb81eaa", "to_tag": "", "callid": "27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0",
 			"sip_code": "404", "sip_reason": "Not Found", "time": "1431182699", "cgr_reqtype": utils.META_PSEUDOPREPAID,
@@ -167,7 +167,7 @@ func TestOsipsAccMissedToStoredCdr(t *testing.T) {
 		ReqType: utils.META_PSEUDOPREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Supplier: "supplier1",
 		DisconnectCause: "404", Destination: "1002", SetupTime: setupTime, AnswerTime: setupTime,
 		Usage: time.Duration(0), ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
-	if storedCdr := osipsEv.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+	if storedCdr := osipsEv.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 

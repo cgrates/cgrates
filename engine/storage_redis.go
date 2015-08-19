@@ -23,8 +23,6 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
-	"log"
-	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -68,21 +66,19 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 	return rs.db.Keys(prefix + "*")
 }
 
-func (rs *RedisStorage) CacheAll() error {
-	return rs.Cache(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+func (rs *RedisStorage) CacheRatingAll() error {
+	return rs.cacheRating(nil, nil, nil, nil, nil, nil, nil)
 }
 
-func (rs *RedisStorage) CachePrefixes(prefixes ...string) error {
+func (rs *RedisStorage) CacheRatingPrefixes(prefixes ...string) error {
 	pm := map[string][]string{
 		utils.DESTINATION_PREFIX:     []string{},
 		utils.RATING_PLAN_PREFIX:     []string{},
 		utils.RATING_PROFILE_PREFIX:  []string{},
-		utils.RP_ALIAS_PREFIX:        []string{},
 		utils.LCR_PREFIX:             []string{},
 		utils.DERIVEDCHARGERS_PREFIX: []string{},
 		utils.ACTION_PREFIX:          []string{},
 		utils.SHARED_GROUP_PREFIX:    []string{},
-		utils.ACC_ALIAS_PREFIX:       []string{},
 	}
 	for _, prefix := range prefixes {
 		if _, found := pm[prefix]; !found {
@@ -90,19 +86,18 @@ func (rs *RedisStorage) CachePrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return rs.Cache(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.RP_ALIAS_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX], pm[utils.ACC_ALIAS_PREFIX])
+	return rs.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (rs *RedisStorage) CachePrefixValues(prefixes map[string][]string) error {
+func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) error {
 	pm := map[string][]string{
 		utils.DESTINATION_PREFIX:     []string{},
 		utils.RATING_PLAN_PREFIX:     []string{},
 		utils.RATING_PROFILE_PREFIX:  []string{},
-		utils.RP_ALIAS_PREFIX:        []string{},
 		utils.LCR_PREFIX:             []string{},
-		utils.DERIVEDCHARGERS_PREFIX: []string{}, utils.ACTION_PREFIX: []string{},
-		utils.SHARED_GROUP_PREFIX: []string{},
-		utils.ACC_ALIAS_PREFIX:    []string{},
+		utils.DERIVEDCHARGERS_PREFIX: []string{},
+		utils.ACTION_PREFIX:          []string{},
+		utils.SHARED_GROUP_PREFIX:    []string{},
 	}
 	for prefix, ids := range prefixes {
 		if _, found := pm[prefix]; !found {
@@ -110,10 +105,10 @@ func (rs *RedisStorage) CachePrefixValues(prefixes map[string][]string) error {
 		}
 		pm[prefix] = ids
 	}
-	return rs.Cache(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.RP_ALIAS_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX], pm[utils.ACC_ALIAS_PREFIX])
+	return rs.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (rs *RedisStorage) Cache(dKeys, rpKeys, rpfKeys, plsKeys, lcrKeys, dcsKeys, actKeys, shgKeys, alsKeys []string) (err error) {
+func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, shgKeys []string) (err error) {
 	cache2go.BeginTransaction()
 	if dKeys == nil || (float64(cache2go.CountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		// if need to load more than a half of exiting keys load them all
@@ -200,26 +195,6 @@ func (rs *RedisStorage) Cache(dKeys, rpKeys, rpfKeys, plsKeys, lcrKeys, dcsKeys,
 	if len(lcrKeys) != 0 {
 		Logger.Info("Finished LCR rules caching.")
 	}
-	if plsKeys == nil {
-		Logger.Info("Caching all rating subject aliases.")
-		if plsKeys, err = rs.db.Keys(utils.RP_ALIAS_PREFIX + "*"); err != nil {
-			cache2go.RollbackTransaction()
-			return err
-		}
-		cache2go.RemPrefixKey(utils.RP_ALIAS_PREFIX)
-	} else if len(plsKeys) != 0 {
-		Logger.Info(fmt.Sprintf("Caching rating subject aliases: %v", plsKeys))
-	}
-	for _, key := range plsKeys {
-		cache2go.RemKey(key)
-		if _, err = rs.GetRpAlias(key[len(utils.RP_ALIAS_PREFIX):], true); err != nil {
-			cache2go.RollbackTransaction()
-			return err
-		}
-	}
-	if len(plsKeys) != 0 {
-		Logger.Info("Finished rating profile aliases caching.")
-	}
 	// DerivedChargers caching
 	if dcsKeys == nil {
 		Logger.Info("Caching all derived chargers")
@@ -263,6 +238,7 @@ func (rs *RedisStorage) Cache(dKeys, rpKeys, rpfKeys, plsKeys, lcrKeys, dcsKeys,
 	if len(actKeys) != 0 {
 		Logger.Info("Finished actions caching.")
 	}
+
 	if shgKeys == nil {
 		cache2go.RemPrefixKey(utils.SHARED_GROUP_PREFIX)
 	}
@@ -285,25 +261,64 @@ func (rs *RedisStorage) Cache(dKeys, rpKeys, rpfKeys, plsKeys, lcrKeys, dcsKeys,
 	if len(shgKeys) != 0 {
 		Logger.Info("Finished shared groups caching.")
 	}
+
+	cache2go.CommitTransaction()
+	return nil
+}
+
+func (rs *RedisStorage) CacheAccountingAll() error {
+	return rs.cacheAccounting(nil)
+}
+
+func (rs *RedisStorage) CacheAccountingPrefixes(prefixes ...string) error {
+	pm := map[string][]string{
+		utils.ALIASES_PREFIX: []string{},
+	}
+	for _, prefix := range prefixes {
+		if _, found := pm[prefix]; !found {
+			return utils.ErrNotFound
+		}
+		pm[prefix] = nil
+	}
+	return rs.cacheAccounting(pm[utils.ALIASES_PREFIX])
+}
+
+func (rs *RedisStorage) CacheAccountingPrefixValues(prefixes map[string][]string) error {
+	pm := map[string][]string{
+		utils.ALIASES_PREFIX: []string{},
+	}
+	for prefix, ids := range prefixes {
+		if _, found := pm[prefix]; !found {
+			return utils.ErrNotFound
+		}
+		pm[prefix] = ids
+	}
+	return rs.cacheAccounting(pm[utils.ALIASES_PREFIX])
+}
+
+func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
+	cache2go.BeginTransaction()
 	if alsKeys == nil {
-		Logger.Info("Caching all account aliases.")
-		if alsKeys, err = rs.db.Keys(utils.ACC_ALIAS_PREFIX + "*"); err != nil {
+		cache2go.RemPrefixKey(utils.ALIASES_PREFIX)
+	}
+	if alsKeys == nil {
+		Logger.Info("Caching all aliases")
+		if alsKeys, err = rs.db.Keys(utils.ALIASES_PREFIX + "*"); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
-		cache2go.RemPrefixKey(utils.ACC_ALIAS_PREFIX)
 	} else if len(alsKeys) != 0 {
-		Logger.Info(fmt.Sprintf("Caching account aliases: %v", alsKeys))
+		Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
 	}
 	for _, key := range alsKeys {
 		cache2go.RemKey(key)
-		if _, err = rs.GetAccAlias(key[len(utils.ACC_ALIAS_PREFIX):], true); err != nil {
+		if _, err = rs.GetAlias(key[len(utils.ALIASES_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
 	}
 	if len(alsKeys) != 0 {
-		Logger.Info("Finished account aliases caching.")
+		Logger.Info("Finished aliases caching.")
 	}
 	cache2go.CommitTransaction()
 	return nil
@@ -384,108 +399,29 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	err = rs.db.Set(utils.RATING_PROFILE_PREFIX+rpf.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
+		go historyScribe.Record(rpf.GetHistoryRecord(false), &response)
 	}
 	return
 }
 
-func (rs *RedisStorage) GetRpAlias(key string, skipCache bool) (alias string, err error) {
-	key = utils.RP_ALIAS_PREFIX + key
-	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
-			return x.(string), nil
-		} else {
-			return "", err
-		}
+func (rs *RedisStorage) RemoveRatingProfile(key string) error {
+	keys, err := rs.db.Keys(utils.RATING_PROFILE_PREFIX + key + "*")
+	if err != nil {
+		return err
 	}
-	var values []byte
-	if values, err = rs.db.Get(key); err == nil {
-		alias = string(values)
-		cache2go.Cache(key, alias)
-	}
-	return
-}
-
-func (rs *RedisStorage) SetRpAlias(key, alias string) (err error) {
-	err = rs.db.Set(utils.RP_ALIAS_PREFIX+key, []byte(alias))
-	return
-}
-
-// Removes the aliases of a specific account, on a tenant
-func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject, skipCache bool) (err error) {
-	if skipCache {
-		alsKeys, err := rs.db.Keys(utils.RP_ALIAS_PREFIX + "*")
+	for _, key := range keys {
+		_, err = rs.db.Del(key)
 		if err != nil {
 			return err
 		}
-		for _, key := range alsKeys {
-			for _, tntRSubj := range tenantRtSubjects {
-				tenantPrfx := utils.RP_ALIAS_PREFIX + tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
-				if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
-					continue
-				}
-				alias, err := rs.GetRpAlias(key[len(utils.RP_ALIAS_PREFIX):], true)
-				if err != nil {
-					return err
-				}
-				if tntRSubj.Subject != alias {
-					continue
-				}
-				if _, err = rs.db.Del(key); err != nil {
-					return err
-				}
-				cache2go.RemKey(key)
-				break
-			}
-		}
-	} else {
-		alsMap, err := cache2go.GetAllEntries(utils.RP_ALIAS_PREFIX)
-		if err != nil {
-			return err
-		}
-
-		for key, aliasInterface := range alsMap {
-			alias := aliasInterface.Value().(string)
-			for _, tntRSubj := range tenantRtSubjects {
-				tenantPrfx := tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
-				if len(key) < len(tenantPrfx) || !strings.HasPrefix(key, tenantPrfx) { // filter out the tenant for accounts
-					continue
-				}
-				if tntRSubj.Subject != alias {
-					continue
-				}
-				if _, err = rs.db.Del(utils.RP_ALIAS_PREFIX + key); err != nil {
-					return err
-				}
-				cache2go.RemKey(utils.RP_ALIAS_PREFIX + key)
-				break
-			}
-		}
-
-	}
-	return
-}
-
-func (rs *RedisStorage) GetRPAliases(tenant, subject string, skipCache bool) (aliases []string, err error) {
-	tenantPrfx := utils.RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
-	var alsKeys []string
-	if !skipCache {
-		alsKeys = cache2go.GetEntriesKeys(tenantPrfx)
-	}
-	if len(alsKeys) == 0 {
-		if alsKeys, err = rs.db.Keys(tenantPrfx + "*"); err != nil {
-			return nil, err
+		cache2go.RemKey(key)
+		rpf := &RatingProfile{Id: key}
+		if err == nil && historyScribe != nil {
+			response := 0
+			go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
 		}
 	}
-	for _, key := range alsKeys {
-		if alsSubj, err := rs.GetRpAlias(key[len(utils.RP_ALIAS_PREFIX):], skipCache); err != nil {
-			return nil, err
-		} else if alsSubj == subject {
-			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
-			aliases = append(aliases, alsFromKey)
-		}
-	}
-	return aliases, nil
+	return nil
 }
 
 func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
@@ -510,107 +446,6 @@ func (rs *RedisStorage) SetLCR(lcr *LCR) (err error) {
 	err = rs.db.Set(utils.LCR_PREFIX+lcr.GetId(), result)
 	cache2go.Cache(utils.LCR_PREFIX+lcr.GetId(), lcr)
 	return
-}
-
-func (rs *RedisStorage) GetAccAlias(key string, skipCache bool) (alias string, err error) {
-	key = utils.ACC_ALIAS_PREFIX + key
-	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
-			return x.(string), nil
-		} else {
-			return "", err
-		}
-	}
-	var values []byte
-	if values, err = rs.db.Get(key); err == nil {
-		alias = string(values)
-		cache2go.Cache(key, alias)
-	}
-	return
-}
-
-// Adds one alias for one account
-func (rs *RedisStorage) SetAccAlias(key, alias string) (err error) {
-	err = rs.db.Set(utils.ACC_ALIAS_PREFIX+key, []byte(alias))
-	return
-}
-
-func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount, skipCache bool) (err error) {
-	if skipCache {
-		alsKeys, err := rs.db.Keys(utils.ACC_ALIAS_PREFIX + "*")
-		if err != nil {
-			return err
-		}
-		for _, key := range alsKeys {
-			for _, tntAcnt := range tenantAccounts {
-				tenantPrfx := utils.ACC_ALIAS_PREFIX + tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
-				if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
-					continue
-				}
-				alias, err := rs.GetAccAlias(key[len(utils.ACC_ALIAS_PREFIX):], true)
-				if err != nil {
-					return err
-				}
-				if tntAcnt.Account != alias {
-					continue
-				}
-				if _, err = rs.db.Del(key); err != nil {
-					log.Print("")
-					return err
-				}
-				cache2go.RemKey(key)
-				break
-			}
-		}
-
-	} else {
-		alsMap, err := cache2go.GetAllEntries(utils.ACC_ALIAS_PREFIX)
-		if err != nil {
-			return err
-		}
-
-		for key, aliasInterface := range alsMap {
-			alias := aliasInterface.Value().(string)
-			for _, tntAcnt := range tenantAccounts {
-				tenantPrfx := tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
-				if len(key) < len(tenantPrfx) || !strings.HasPrefix(key, tenantPrfx) { // filter out the tenant for accounts
-					continue
-				}
-				if tntAcnt.Account != alias {
-					continue
-				}
-				if _, err = rs.db.Del(utils.ACC_ALIAS_PREFIX + key); err != nil {
-					return err
-				}
-				cache2go.RemKey(utils.ACC_ALIAS_PREFIX + key)
-				break
-			}
-		}
-	}
-	return
-}
-
-// Returns the aliases of one specific account on a tenant
-func (rs *RedisStorage) GetAccountAliases(tenant, account string, skipCache bool) (aliases []string, err error) {
-	tenantPrfx := utils.ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
-	var alsKeys []string
-	if !skipCache {
-		alsKeys = cache2go.GetEntriesKeys(tenantPrfx)
-	}
-	if len(alsKeys) == 0 {
-		if alsKeys, err = rs.db.Keys(tenantPrfx + "*"); err != nil {
-			return nil, err
-		}
-	}
-	for _, key := range alsKeys {
-		if alsAcnt, err := rs.GetAccAlias(key[len(utils.ACC_ALIAS_PREFIX):], skipCache); err != nil {
-			return nil, err
-		} else if alsAcnt == account {
-			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
-			aliases = append(aliases, alsFromKey)
-		}
-	}
-	return aliases, nil
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
@@ -769,6 +604,23 @@ func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err
 	return
 }
 
+func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+	result, err := rs.ms.Marshal(sub)
+	rs.db.Set(utils.PUBSUB_SUBSCRIBERS_PREFIX+key, result)
+	return
+}
+
+func (rs *RedisStorage) RemoveSubscriber(key string) (err error) {
+	_, err = rs.db.Del(utils.PUBSUB_SUBSCRIBERS_PREFIX + key)
+	return
+}
+
+func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
+	result, err := rs.ms.Marshal(up)
+	rs.db.Set(utils.USERS_PREFIX+up.GetId(), result)
+	return
+}
+
 func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
 	var values []byte
 	if values, err = rs.db.Get(utils.USERS_PREFIX + key); err == nil {
@@ -795,25 +647,46 @@ func (rs *RedisStorage) GetUsers() (result []*UserProfile, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
-	result, err := rs.ms.Marshal(sub)
-	rs.db.Set(utils.PUBSUB_SUBSCRIBERS_PREFIX+key, result)
-	return
-}
-
-func (rs *RedisStorage) RemoveSubscriber(key string) (err error) {
-	_, err = rs.db.Del(utils.PUBSUB_SUBSCRIBERS_PREFIX + key)
-	return
-}
-
-func (rs *RedisStorage) SetUser(up *UserProfile) (err error) {
-	result, err := rs.ms.Marshal(up)
-	rs.db.Set(utils.USERS_PREFIX+up.GetId(), result)
-	return
-}
-
 func (rs *RedisStorage) RemoveUser(key string) (err error) {
 	_, err = rs.db.Del(utils.USERS_PREFIX + key)
+	return
+}
+
+func (rs *RedisStorage) SetAlias(al *Alias) (err error) {
+	result, err := rs.ms.Marshal(al.Values)
+	rs.db.Set(utils.ALIASES_PREFIX+al.GetId(), result)
+	return
+}
+
+func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
+	key = utils.ALIASES_PREFIX + key
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			al = &Alias{Values: x.(AliasValues)}
+			al.SetId(key[len(utils.ALIASES_PREFIX):])
+			return al, nil
+		} else {
+			return nil, err
+		}
+	}
+	var values []byte
+	if values, err = rs.db.Get(key); err == nil {
+		al = &Alias{Values: make(AliasValues, 0)}
+		al.SetId(key[len(utils.ALIASES_PREFIX):])
+		err = rs.ms.Unmarshal(values, &al.Values)
+		if err == nil {
+			cache2go.Cache(key, al.Values)
+		}
+	}
+	return
+}
+
+func (rs *RedisStorage) RemoveAlias(key string) (err error) {
+	key = utils.ALIASES_PREFIX + key
+	_, err = rs.db.Del(key)
+	if err == nil {
+		cache2go.RemKey(key)
+	}
 	return
 }
 

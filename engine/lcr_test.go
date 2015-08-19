@@ -216,7 +216,7 @@ func TestLcrRequestAsCallDescriptor(t *testing.T) {
 	sTime := time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC)
 	callDur := time.Duration(1) * time.Minute
 	lcrReq := &LcrRequest{Account: "2001", SetupTime: sTime.String()}
-	if _, err := lcrReq.AsCallDescriptor(); err == nil || err != utils.ErrMandatoryIeMissing {
+	if _, err := lcrReq.AsCallDescriptor(""); err == nil || err != utils.ErrMandatoryIeMissing {
 		t.Error("Unexpected error received: %v", err)
 	}
 	lcrReq = &LcrRequest{Account: "2001", Destination: "2002", SetupTime: sTime.String()}
@@ -230,7 +230,7 @@ func TestLcrRequestAsCallDescriptor(t *testing.T) {
 		TimeStart:   sTime,
 		TimeEnd:     sTime.Add(callDur),
 	}
-	if cd, err := lcrReq.AsCallDescriptor(); err != nil {
+	if cd, err := lcrReq.AsCallDescriptor(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCd, cd) {
 		t.Errorf("Expected: %+v, received: %+v", eCd, cd)

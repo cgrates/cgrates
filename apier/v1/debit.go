@@ -54,7 +54,7 @@ func (self *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) e
 	if usageRecord.AnswerTime == "" {
 		usageRecord.AnswerTime = utils.META_NOW
 	}
-	cd, err := usageRecord.AsCallDescriptor()
+	cd, err := usageRecord.AsCallDescriptor(self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

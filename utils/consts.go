@@ -18,6 +18,7 @@ var (
 	ErrNotFound           = errors.New("NOT_FOUND")
 	ErrTimedOut           = errors.New("TIMED_OUT")
 	ErrServerError        = errors.New("SERVER_ERROR")
+	ErrMaxRecursionDepth  = errors.New("MAX_RECURSION_DEPTH")
 	ErrMandatoryIeMissing = errors.New("MANDATORY_IE_MISSING")
 	ErrExists             = errors.New("EXISTS")
 	ErrBrokenReference    = errors.New("BROKEN_REFERENCE")
@@ -79,6 +80,7 @@ const (
 	DERIVED_CHARGERS_CSV       = "DerivedChargers.csv"
 	CDR_STATS_CSV              = "CdrStats.csv"
 	USERS_CSV                  = "Users.csv"
+	ALIASES_CSV                = "Aliases.csv"
 	ROUNDING_UP                = "*up"
 	ROUNDING_MIDDLE            = "*middle"
 	ROUNDING_DOWN              = "*down"
@@ -161,8 +163,6 @@ const (
 	ACTION_TIMING_PREFIX       = "apl_"
 	RATING_PLAN_PREFIX         = "rpl_"
 	RATING_PROFILE_PREFIX      = "rpf_"
-	RP_ALIAS_PREFIX            = "ral_"
-	ACC_ALIAS_PREFIX           = "aal_"
 	ACTION_PREFIX              = "act_"
 	SHARED_GROUP_PREFIX        = "shg_"
 	ACCOUNT_PREFIX             = "ubl_"
@@ -172,6 +172,7 @@ const (
 	CDR_STATS_QUEUE_PREFIX     = "csq_"
 	PUBSUB_SUBSCRIBERS_PREFIX  = "pss_"
 	USERS_PREFIX               = "usr_"
+	ALIASES_PREFIX             = "als_"
 	CDR_STATS_PREFIX           = "cst_"
 	TEMP_DESTINATION_PREFIX    = "tmp_"
 	LOG_CALL_COST_PREFIX       = "cco_"
@@ -220,6 +221,8 @@ const (
 	REFUND_INCR_CACHE_PREFIX     = "REFUND_INCR_"
 	GET_SESS_RUNS_CACHE_PREFIX   = "GET_SESS_RUNS_"
 	LOG_CALL_COST_CACHE_PREFIX   = "LOG_CALL_COSTS_"
+	ALIAS_GROUP_RP               = "*rating_profile"
+	ALIAS_GROUP_ACC              = "*account"
 )
 
 var (

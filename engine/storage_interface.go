@@ -38,19 +38,15 @@ type Storage interface {
 // Interface for storage providers.
 type RatingStorage interface {
 	Storage
-	CacheAll() error
-	CachePrefixes(...string) error
-	CachePrefixValues(map[string][]string) error
-	Cache([]string, []string, []string, []string, []string, []string, []string, []string, []string) error
+	CacheRatingAll() error
+	CacheRatingPrefixes(...string) error
+	CacheRatingPrefixValues(map[string][]string) error
 	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string, bool) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
-	GetRpAlias(string, bool) (string, error)
-	SetRpAlias(string, string) error
-	RemoveRpAliases([]*TenantRatingSubject, bool) error
-	GetRPAliases(string, string, bool) ([]string, error)
+	RemoveRatingProfile(string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 	GetLCR(string, bool) (*LCR, error)
@@ -67,14 +63,13 @@ type RatingStorage interface {
 	GetActionPlans(string) (ActionPlans, error)
 	SetActionPlans(string, ActionPlans) error
 	GetAllActionPlans() (map[string]ActionPlans, error)
-	GetAccAlias(string, bool) (string, error)
-	SetAccAlias(string, string) error
-	RemoveAccAliases([]*TenantAccount, bool) error
-	GetAccountAliases(string, string, bool) ([]string, error)
 }
 
 type AccountingStorage interface {
 	Storage
+	CacheAccountingAll() error
+	CacheAccountingPrefixes(...string) error
+	CacheAccountingPrefixValues(map[string][]string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
@@ -87,6 +82,9 @@ type AccountingStorage interface {
 	GetUser(string) (*UserProfile, error)
 	GetUsers() ([]*UserProfile, error)
 	RemoveUser(string) error
+	SetAlias(*Alias) error
+	GetAlias(string, bool) (*Alias, error)
+	RemoveAlias(string) error
 }
 
 type CdrStorage interface {
@@ -125,6 +123,7 @@ type LoadReader interface {
 	GetTpSharedGroups(string, string) ([]TpSharedGroup, error)
 	GetTpCdrStats(string, string) ([]TpCdrstat, error)
 	GetTpUsers(*TpUser) ([]TpUser, error)
+	GetTpAliases(*TpAlias) ([]TpAlias, error)
 	GetTpDerivedChargers(*TpDerivedCharger) ([]TpDerivedCharger, error)
 	GetTpLCRs(string, string) ([]TpLcrRule, error)
 	GetTpActions(string, string) ([]TpAction, error)
@@ -144,6 +143,7 @@ type LoadWriter interface {
 	SetTpSharedGroups([]TpSharedGroup) error
 	SetTpCdrStats([]TpCdrstat) error
 	SetTpUsers([]TpUser) error
+	SetTpAliases([]TpAlias) error
 	SetTpDerivedChargers([]TpDerivedCharger) error
 	SetTpLCRs([]TpLcrRule) error
 	SetTpActions([]TpAction) error

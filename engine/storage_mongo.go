@@ -156,7 +156,7 @@ func (ms *MongoStorage) GetRatingProfile(key string) (rp *RatingProfile, err err
 func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
 	if historyScribe != nil {
 		response := 0
-		historyScribe.Record(rp.GetHistoryRecord(), &response)
+		historyScribe.Record(rp.GetHistoryRecord(false), &response)
 	}
 	return ms.db.C("ratingprofiles").Insert(rp)
 }

@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	OK = "OK"
+	OK = utils.OK
 )
 
 type ApierV1 struct {
@@ -86,7 +86,7 @@ func (self *ApierV1) SetDestination(attrs utils.AttrSetDestination, reply *strin
 	if err := self.RatingDb.SetDestination(dest); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	self.RatingDb.CachePrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{dest.Id}})
+	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{dest.Id}})
 	*reply = OK
 	return nil
 }
@@ -205,7 +205,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if loaded, err := dbReader.LoadDestinationsFiltered(attrs.DestinationId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -216,7 +216,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	if len(attrs.DestinationId) == 0 {
 		destIds = nil // Cache all destinations, temporary here until we add ApierV2.LoadDestinations
 	}
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX: destIds}); err != nil {
 		return err
 	}
@@ -229,7 +229,7 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	dc := engine.APItoModelDerivedCharger(&attrs)
 	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
 		return utils.NewErrServerError(err)
@@ -239,7 +239,7 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 	if len(attrs.Direction) != 0 && len(attrs.Tenant) != 0 && len(attrs.Category) != 0 && len(attrs.Account) != 0 && len(attrs.Subject) != 0 {
 		derivedChargingKeys = []string{utils.DERIVEDCHARGERS_PREFIX + attrs.GetDerivedChargersKey()}
 	}
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{utils.DERIVEDCHARGERS_PREFIX: derivedChargingKeys}); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.DERIVEDCHARGERS_PREFIX: derivedChargingKeys}); err != nil {
 		return err
 	}
 	*reply = OK
@@ -256,7 +256,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if loaded, err := dbReader.LoadRatingPlansFiltered(attrs.RatingPlanId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -265,9 +265,13 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	//Automatic cache of the newly inserted rating plan
 	var changedRPlKeys []string
 	if len(attrs.TPid) != 0 {
-		changedRPlKeys = []string{utils.RATING_PLAN_PREFIX + attrs.RatingPlanId}
+		if attrs.RatingPlanId != "" {
+			changedRPlKeys = []string{utils.RATING_PLAN_PREFIX + attrs.RatingPlanId}
+		} else {
+			changedRPlKeys = nil
+		}
 	}
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX: nil,
 		utils.RATING_PLAN_PREFIX: changedRPlKeys,
 	}); err != nil {
@@ -282,7 +286,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	rp := engine.APItoModelRatingProfile(&attrs)
 	if err := dbReader.LoadRatingProfilesFiltered(&rp[0]); err != nil {
 		return utils.NewErrServerError(err)
@@ -292,7 +296,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	if attrs.KeyId() != ":::" { // if has some filters
 		ratingProfile = []string{utils.RATING_PROFILE_PREFIX + attrs.KeyId()}
 	}
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{utils.RATING_PROFILE_PREFIX: ratingProfile}); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.RATING_PROFILE_PREFIX: ratingProfile}); err != nil {
 		return err
 	}
 	*reply = OK
@@ -309,7 +313,7 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -318,7 +322,7 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	if len(attrs.SharedGroupId) != 0 {
 		changedSharedGroup = []string{utils.SHARED_GROUP_PREFIX + attrs.SharedGroupId}
 	}
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{utils.SHARED_GROUP_PREFIX: changedSharedGroup}); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.SHARED_GROUP_PREFIX: changedSharedGroup}); err != nil {
 		return err
 	}
 	*reply = OK
@@ -335,7 +339,7 @@ func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadCdrStatsFiltered(attrs.CdrStatsId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -355,7 +359,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if err := dbReader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -398,15 +402,10 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	for idx, shgId := range shgIds {
 		shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
 	}
-	rpAliases, _ := dbReader.GetLoadedIds(utils.RP_ALIAS_PREFIX)
-	rpAlsKeys := make([]string, len(rpAliases))
-	for idx, alias := range rpAliases {
-		rpAlsKeys[idx] = utils.RP_ALIAS_PREFIX + alias
-	}
-	accAliases, _ := dbReader.GetLoadedIds(utils.ACC_ALIAS_PREFIX)
-	accAlsKeys := make([]string, len(accAliases))
-	for idx, alias := range accAliases {
-		accAlsKeys[idx] = utils.ACC_ALIAS_PREFIX + alias
+	aliases, _ := dbReader.GetLoadedIds(utils.ALIASES_PREFIX)
+	alsKeys := make([]string, len(aliases))
+	for idx, alias := range aliases {
+		alsKeys[idx] = utils.ALIASES_PREFIX + alias
 	}
 	lcrIds, _ := dbReader.GetLoadedIds(utils.LCR_PREFIX)
 	lcrKeys := make([]string, len(lcrIds))
@@ -419,16 +418,19 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 	}
 	engine.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
 		utils.RATING_PROFILE_PREFIX:  rpfKeys,
-		utils.RP_ALIAS_PREFIX:        rpAlsKeys,
 		utils.LCR_PREFIX:             lcrKeys,
 		utils.DERIVEDCHARGERS_PREFIX: dcsKeys,
 		utils.ACTION_PREFIX:          actKeys,
 		utils.SHARED_GROUP_PREFIX:    shgKeys,
-		utils.ACC_ALIAS_PREFIX:       accAlsKeys,
+	}); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
+		utils.ALIASES_PREFIX: shgKeys,
 	}); err != nil {
 		return err
 	}
@@ -524,7 +526,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		return utils.NewErrServerError(err)
 	}
 	//Automatic cache of the newly inserted rating profile
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + keyId},
 	}); err != nil {
 		return err
@@ -578,7 +580,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	if err := self.RatingDb.SetActions(attrs.ActionsId, storeActions); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	self.RatingDb.CachePrefixes(utils.ACTION_PREFIX)
+	self.RatingDb.CacheRatingPrefixes(utils.ACTION_PREFIX)
 	*reply = OK
 	return nil
 }
@@ -706,7 +708,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	if attr.BalanceDirection == "" {
 		attr.BalanceDirection = engine.OUTBOUND
 	}
-	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime)
+	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime, self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -822,7 +824,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
 	if _, err := engine.Guardian.Guard(func() (interface{}, error) {
 		aas := engine.APItoModelAccountAction(&attrs)
 		if err := dbReader.LoadAccountActionsFiltered(aas); err != nil {
@@ -834,7 +836,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.RatingDb.CachePrefixes(utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.SHARED_GROUP_PREFIX, utils.ACC_ALIAS_PREFIX); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.SHARED_GROUP_PREFIX); err != nil {
 		return err
 	}
 	if self.Sched != nil {
@@ -857,7 +859,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, rpAlsKeys, accAlsKeys, lcrKeys, dcsKeys []string
+	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, lcrKeys, dcsKeys, alsKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -888,16 +890,10 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
 		}
 	}
-	if len(attrs.RpAliases) > 0 {
-		rpAlsKeys = make([]string, len(attrs.RpAliases))
-		for idx, alias := range attrs.RpAliases {
-			rpAlsKeys[idx] = utils.RP_ALIAS_PREFIX + alias
-		}
-	}
-	if len(attrs.AccAliases) > 0 {
-		accAlsKeys = make([]string, len(attrs.AccAliases))
-		for idx, alias := range attrs.AccAliases {
-			accAlsKeys[idx] = utils.ACC_ALIAS_PREFIX + alias
+	if len(attrs.Aliases) > 0 {
+		alsKeys = make([]string, len(attrs.Aliases))
+		for idx, alias := range attrs.Aliases {
+			alsKeys[idx] = utils.ALIASES_PREFIX + alias
 		}
 	}
 	if len(attrs.LCRIds) > 0 {
@@ -913,20 +909,23 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 		}
 	}
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
 		utils.RATING_PROFILE_PREFIX:  rpfKeys,
-		utils.RP_ALIAS_PREFIX:        rpAlsKeys,
 		utils.LCR_PREFIX:             lcrKeys,
 		utils.DERIVEDCHARGERS_PREFIX: dcsKeys,
 		utils.ACTION_PREFIX:          actKeys,
 		utils.SHARED_GROUP_PREFIX:    shgKeys,
-		utils.ACC_ALIAS_PREFIX:       accAlsKeys,
 	}); err != nil {
 		return err
 	}
-	*reply = "OK"
+	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
+		utils.ALIASES_PREFIX: alsKeys,
+	}); err != nil {
+		return err
+	}
+	*reply = utils.OK
 	return nil
 }
 
@@ -937,10 +936,9 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.RatingProfiles = cache2go.CountEntries(utils.RATING_PROFILE_PREFIX)
 	cs.Actions = cache2go.CountEntries(utils.ACTION_PREFIX)
 	cs.SharedGroups = cache2go.CountEntries(utils.SHARED_GROUP_PREFIX)
-	cs.RatingAliases = cache2go.CountEntries(utils.RP_ALIAS_PREFIX)
-	cs.AccountAliases = cache2go.CountEntries(utils.ACC_ALIAS_PREFIX)
 	cs.DerivedChargers = cache2go.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
 	cs.LcrProfiles = cache2go.CountEntries(utils.LCR_PREFIX)
+	cs.Aliases = cache2go.CountEntries(utils.ALIASES_PREFIX)
 	if self.CdrStatsSrv != nil && self.Config.CDRStatsEnabled {
 		var queueIds []string
 		if err := self.CdrStatsSrv.GetQueueIds(0, &queueIds); err != nil {
@@ -966,7 +964,7 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 	cachedItemAge := new(utils.CachedItemAge)
 	var found bool
 	for idx, cacheKey := range []string{utils.DESTINATION_PREFIX + itemId, utils.RATING_PLAN_PREFIX + itemId, utils.RATING_PROFILE_PREFIX + itemId,
-		utils.ACTION_PREFIX + itemId, utils.SHARED_GROUP_PREFIX + itemId, utils.RP_ALIAS_PREFIX + itemId, utils.ACC_ALIAS_PREFIX + itemId,
+		utils.ACTION_PREFIX + itemId, utils.SHARED_GROUP_PREFIX + itemId, utils.ALIASES_PREFIX + itemId,
 		utils.LCR_PREFIX + itemId} {
 		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
 			found = true
@@ -1024,7 +1022,9 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
 		path.Join(attrs.FolderPath, utils.CDR_STATS_CSV),
-		path.Join(attrs.FolderPath, utils.USERS_CSV)), "")
+		path.Join(attrs.FolderPath, utils.USERS_CSV),
+		path.Join(attrs.FolderPath, utils.ALIASES_CSV),
+	), "", self.Config.DefaultTimezone)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1069,15 +1069,10 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, shgId := range shgIds {
 		shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
 	}
-	rpAliases, _ := loader.GetLoadedIds(utils.RP_ALIAS_PREFIX)
-	rpAlsKeys := make([]string, len(rpAliases))
-	for idx, alias := range rpAliases {
-		rpAlsKeys[idx] = utils.RP_ALIAS_PREFIX + alias
-	}
-	accAliases, _ := loader.GetLoadedIds(utils.ACC_ALIAS_PREFIX)
-	accAlsKeys := make([]string, len(accAliases))
-	for idx, alias := range accAliases {
-		accAlsKeys[idx] = utils.ACC_ALIAS_PREFIX + alias
+	aliases, _ := loader.GetLoadedIds(utils.ALIASES_PREFIX)
+	alsKeys := make([]string, len(aliases))
+	for idx, alias := range aliases {
+		alsKeys[idx] = utils.ALIASES_PREFIX + alias
 	}
 	lcrIds, _ := loader.GetLoadedIds(utils.LCR_PREFIX)
 	lcrKeys := make([]string, len(lcrIds))
@@ -1092,16 +1087,19 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	aps, _ := loader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
 	engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
 		utils.RATING_PROFILE_PREFIX:  rpfKeys,
-		utils.RP_ALIAS_PREFIX:        rpAlsKeys,
 		utils.LCR_PREFIX:             lcrKeys,
 		utils.DERIVEDCHARGERS_PREFIX: dcsKeys,
 		utils.ACTION_PREFIX:          actKeys,
 		utils.SHARED_GROUP_PREFIX:    shgKeys,
-		utils.ACC_ALIAS_PREFIX:       accAlsKeys,
+	}); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
+		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
 	}
@@ -1124,6 +1122,64 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return err
 		}
 	}
-	*reply = "OK"
+	*reply = utils.OK
+	return nil
+}
+
+type AttrRemoveRatingProfile struct {
+	Direction string
+	Tennat    string
+	Category  string
+	Subject   string
+}
+
+func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
+	if arrp.Direction != "" && arrp.Direction != utils.ANY {
+		result += arrp.Direction
+		result += utils.CONCATENATED_KEY_SEP
+	} else {
+		return
+	}
+	if arrp.Tennat != "" && arrp.Tennat != utils.ANY {
+		result += arrp.Tennat
+		result += utils.CONCATENATED_KEY_SEP
+	} else {
+		return
+	}
+
+	if arrp.Category != "" && arrp.Category != utils.ANY {
+		result += arrp.Category
+		result += utils.CONCATENATED_KEY_SEP
+	} else {
+		return
+	}
+	if arrp.Subject != "" && arrp.Subject != utils.ANY {
+		result += arrp.Subject
+	}
+	return
+}
+
+func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
+	if attr.Subject != "" && attr.Category == "" {
+		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Category")
+	}
+	if attr.Category != "" && attr.Tennat == "" {
+		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Tenant")
+	}
+	if attr.Tennat != "" && attr.Direction == "" {
+		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Direction")
+	}
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+		err := self.RatingDb.RemoveRatingProfile(attr.GetId())
+		if err != nil {
+			return 0, err
+		}
+		return 0, nil
+	}, "RemoveRatingProfile")
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = utils.OK
 	return nil
 }

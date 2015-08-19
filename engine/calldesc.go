@@ -69,6 +69,7 @@ var (
 	historyScribe          history.Scribe
 	pubSubServer           PublisherSubscriber
 	userService            UserService
+	aliasService           AliasService
 )
 
 // Exported method to set the storage getter.
@@ -110,6 +111,10 @@ func SetPubSub(ps PublisherSubscriber) {
 
 func SetUserService(us UserService) {
 	userService = us
+}
+
+func SetAliasService(as AliasService) {
+	aliasService = as
 }
 
 func Publish(event CgrEvent) {
@@ -173,10 +178,12 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 Restores the activation periods for the specified prefix from storage.
 */
 func (cd *CallDescriptor) LoadRatingPlans() (err error) {
-	err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
-	if err != nil || !cd.continousRatingInfos() {
-		// use the default subject
-		err = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
+	var rec int
+	err, rec = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
+	if err == utils.ErrNotFound && rec == 1 {
+		//if err != nil || !cd.continousRatingInfos() {
+		// use the default subject only if the initial one was not found
+		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
 	if err != nil || !cd.continousRatingInfos() {
@@ -188,14 +195,13 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 
 // FIXME: this method is not exhaustive but will cover 99% of cases just good
 // it will not cover very long calls with very short activation periods for rates
-func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (err error) {
+func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (error, int) {
 	if recursionDepth > RECURSION_MAX_DEPTH {
-		err = errors.New("Max fallback recursion depth reached!" + key)
-		return
+		return utils.ErrMaxRecursionDepth, recursionDepth
 	}
 	rpf, err := ratingStorage.GetRatingProfile(key, false)
 	if err != nil || rpf == nil {
-		return err
+		return utils.ErrNotFound, recursionDepth
 	}
 	if err = rpf.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
 		// try rating profile fallback
@@ -224,7 +230,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 					tempCD.TimeEnd = cd.RatingInfos[index+1].ActivationTime
 				}
 				for _, fbk := range ri.FallbackKeys {
-					if err := tempCD.getRatingPlansForPrefix(fbk, recursionDepth); err != nil {
+					if err, _ := tempCD.getRatingPlansForPrefix(fbk, recursionDepth); err != nil {
 						continue
 					}
 					// extract the rate infos and break
@@ -252,7 +258,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 			}
 		}
 	}
-	return
+	return nil, recursionDepth
 }
 
 // checks if there is rating info for the entire call duration
@@ -298,10 +304,9 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	// check if subject is alias
-	if rs, err := cache2go.GetCached(utils.RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey(cd.Tenant, subject)); err == nil {
-		realSubject := rs.(string)
-		subject = realSubject
-		cd.Subject = realSubject
+	if alias, err := GetBestAlias(cd.Destination, cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject, utils.ALIAS_GROUP_RP); err == nil && alias != "" {
+		subject = alias
+		cd.Subject = alias
 	}
 	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, subject)
 }
@@ -311,8 +316,9 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
 		// check if subject is alias
-		if realSubject, err := cache2go.GetCached(utils.ACC_ALIAS_PREFIX + utils.AccountAliasKey(cd.Tenant, subj)); err == nil {
-			cd.Account = realSubject.(string)
+		alias, err := GetBestAlias(cd.Destination, cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject, utils.ALIAS_GROUP_ACC)
+		if err == nil && alias != "" {
+			cd.Account = alias
 		}
 		subj = cd.Account
 	}
@@ -720,7 +726,8 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.Flush()
-	ratingStorage.CacheAll()
+	ratingStorage.CacheRatingAll()
+	accountingStorage.CacheAccountingAll()
 	return nil
 
 }

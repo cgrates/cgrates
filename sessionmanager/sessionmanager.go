@@ -36,4 +36,5 @@ type SessionManager interface {
 	Shutdown() error
 	Sessions() []*Session
 	SyncSessions() error
+	Timezone() string
 }

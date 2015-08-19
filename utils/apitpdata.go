@@ -526,11 +526,10 @@ type ApiReloadCache struct {
 	RatingProfileIds []string
 	ActionIds        []string
 	SharedGroupIds   []string
-	RpAliases        []string
-	AccAliases       []string
 	LCRIds           []string
 	DerivedChargers  []string
 	LcrProfiles      []string
+	Aliases          []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
@@ -542,12 +541,11 @@ type CacheStats struct {
 	RatingProfiles  int
 	Actions         int
 	SharedGroups    int
-	RatingAliases   int
-	AccountAliases  int
 	DerivedChargers int
 	LcrProfiles     int
 	CdrStats        int
 	Users           int
+	Aliases         int
 }
 
 type AttrCachedItemAge struct {
@@ -606,7 +604,7 @@ type AttrExpFileCdrs struct {
 	Paginator
 }
 
-func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
+func (self *AttrExpFileCdrs) AsCdrsFilter(timezone string) (*CdrsFilter, error) {
 	cdrFltr := &CdrsFilter{
 		CgrIds:        self.CgrIds,
 		RunIds:        self.MediationRunIds,
@@ -627,14 +625,14 @@ func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
 		Paginator:     self.Paginator,
 	}
 	if len(self.TimeStart) != 0 {
-		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart); err != nil {
+		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &answerTimeStart
 		}
 	}
 	if len(self.TimeEnd) != 0 {
-		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd); err != nil {
+		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &answerTimeEnd
@@ -682,7 +680,7 @@ type AttrGetCdrs struct {
 	Paginator
 }
 
-func (self *AttrGetCdrs) AsCdrsFilter() (*CdrsFilter, error) {
+func (self *AttrGetCdrs) AsCdrsFilter(timezone string) (*CdrsFilter, error) {
 	cdrFltr := &CdrsFilter{
 		CgrIds:        self.CgrIds,
 		RunIds:        self.MediationRunIds,
@@ -703,14 +701,14 @@ func (self *AttrGetCdrs) AsCdrsFilter() (*CdrsFilter, error) {
 		Paginator:     self.Paginator,
 	}
 	if len(self.TimeStart) != 0 {
-		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart); err != nil {
+		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &answerTimeStart
 		}
 	}
 	if len(self.TimeEnd) != 0 {
-		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd); err != nil {
+		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &answerTimeEnd
@@ -935,7 +933,7 @@ type RpcCdrsFilter struct {
 	Paginator                             // Add pagination
 }
 
-func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
+func (self *RpcCdrsFilter) AsCdrsFilter(timezone string) (*CdrsFilter, error) {
 	cdrFltr := &CdrsFilter{
 		CgrIds:              self.CgrIds,
 		NotCgrIds:           self.NotCgrIds,
@@ -985,56 +983,56 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 		Paginator:           self.Paginator,
 	}
 	if len(self.SetupTimeStart) != 0 {
-		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart); err != nil {
+		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.SetupTimeStart = &sTimeStart
 		}
 	}
 	if len(self.SetupTimeEnd) != 0 {
-		if sTimeEnd, err := ParseTimeDetectLayout(self.SetupTimeEnd); err != nil {
+		if sTimeEnd, err := ParseTimeDetectLayout(self.SetupTimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.SetupTimeEnd = &sTimeEnd
 		}
 	}
 	if len(self.AnswerTimeStart) != 0 {
-		if aTimeStart, err := ParseTimeDetectLayout(self.AnswerTimeStart); err != nil {
+		if aTimeStart, err := ParseTimeDetectLayout(self.AnswerTimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &aTimeStart
 		}
 	}
 	if len(self.AnswerTimeEnd) != 0 {
-		if aTimeEnd, err := ParseTimeDetectLayout(self.AnswerTimeEnd); err != nil {
+		if aTimeEnd, err := ParseTimeDetectLayout(self.AnswerTimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &aTimeEnd
 		}
 	}
 	if len(self.CreatedAtStart) != 0 {
-		if tStart, err := ParseTimeDetectLayout(self.CreatedAtStart); err != nil {
+		if tStart, err := ParseTimeDetectLayout(self.CreatedAtStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.CreatedAtStart = &tStart
 		}
 	}
 	if len(self.CreatedAtEnd) != 0 {
-		if tEnd, err := ParseTimeDetectLayout(self.CreatedAtEnd); err != nil {
+		if tEnd, err := ParseTimeDetectLayout(self.CreatedAtEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.CreatedAtEnd = &tEnd
 		}
 	}
 	if len(self.UpdatedAtStart) != 0 {
-		if tStart, err := ParseTimeDetectLayout(self.UpdatedAtStart); err != nil {
+		if tStart, err := ParseTimeDetectLayout(self.UpdatedAtStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.UpdatedAtStart = &tStart
 		}
 	}
 	if len(self.UpdatedAtEnd) != 0 {
-		if tEnd, err := ParseTimeDetectLayout(self.UpdatedAtEnd); err != nil {
+		if tEnd, err := ParseTimeDetectLayout(self.UpdatedAtEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.UpdatedAtEnd = &tEnd

@@ -54,7 +54,7 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 *out,cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,,
 *out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,,`
 	csvr := engine.NewTpReader(ratingDb, acntDb, engine.NewStringCSVStorage(',', dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "", "", ""), "")
+		"", "", "", "", "", "", "", "", "", ""), "", "")
 
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
@@ -75,7 +75,8 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	ratingDb.CacheAll()
+	ratingDb.CacheRatingAll()
+	acntDb.CacheAccountingAll()
 
 	if cachedRPlans := cache2go.CountEntries(utils.RATING_PLAN_PREFIX); cachedRPlans != 3 {
 		t.Error("Wrong number of cached rating plans found", cachedRPlans)
@@ -86,8 +87,8 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 }
 
 func TestCosts1GetCost1(t *testing.T) {
-	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z")
-	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z")
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:31:30Z", "")
 	cd := &engine.CallDescriptor{
 		Direction:   "*out",
 		Category:    "call",
@@ -106,8 +107,8 @@ func TestCosts1GetCost1(t *testing.T) {
 }
 
 func TestCosts1GetCostZeroDuration(t *testing.T) {
-	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z")
-	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z")
+	tStart, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
+	tEnd, _ := utils.ParseTimeDetectLayout("2013-08-07T17:30:00Z", "")
 	cd := &engine.CallDescriptor{
 		Direction:   "*out",
 		Category:    "call",

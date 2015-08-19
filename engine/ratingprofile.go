@@ -179,17 +179,18 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 				FallbackKeys:   rpa.FallbackKeys})
 		} else {
 			// add for fallback information
-			ris = append(ris, &RatingInfo{
-				MatchedSubject: "",
-				MatchedPrefix:  "",
-				MatchedDestId:  "",
-				ActivationTime: rpa.ActivationTime,
-				RateIntervals:  nil,
-				FallbackKeys:   rpa.FallbackKeys,
-			})
+			if len(rpa.FallbackKeys) > 0 {
+				ris = append(ris, &RatingInfo{
+					MatchedSubject: "",
+					MatchedPrefix:  "",
+					MatchedDestId:  "",
+					ActivationTime: rpa.ActivationTime,
+					RateIntervals:  nil,
+					FallbackKeys:   rpa.FallbackKeys,
+				})
+			}
 		}
 	}
-
 	if len(ris) > 0 {
 		cd.addRatingInfos(ris)
 		return
@@ -199,12 +200,13 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 }
 
 // history record method
-func (rpf *RatingProfile) GetHistoryRecord() history.Record {
+func (rpf *RatingProfile) GetHistoryRecord(deleted bool) history.Record {
 	js, _ := json.Marshal(rpf)
 	return history.Record{
 		Id:       rpf.Id,
 		Filename: history.RATING_PROFILES_FN,
 		Payload:  js,
+		Deleted:  deleted,
 	}
 }
 

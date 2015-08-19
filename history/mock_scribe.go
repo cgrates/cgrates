@@ -40,7 +40,7 @@ func NewMockScribe() (*MockScribe, error) {
 func (s *MockScribe) Record(rec Record, out *int) error {
 	s.mu.Lock()
 	fn := rec.Filename
-	recordsMap[fn] = recordsMap[fn].SetOrAdd(&rec)
+	recordsMap[fn] = recordsMap[fn].Modify(&rec)
 	s.mu.Unlock()
 	s.save(fn)
 	return nil

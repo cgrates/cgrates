@@ -36,6 +36,7 @@ const CGRATES_CFG_JSON = `
 	"default_category": "call",				// default Type of Record to consider when missing from requests
 	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
+    "default_timezone": "Local",			// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
     "connect_attempts": 3,                  // initial server connect attempts
     "response_cache_ttl": "3s",              // the life span of a cached response
     "reconnects": -1,                       // number of retries in case of connection lost
@@ -161,6 +162,7 @@ const CGRATES_CFG_JSON = `
 		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
 		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": ",",						// separator used in case of csv files
+		"timezone": "",								// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 		"run_delay": 0,								// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
 		"max_open_files": 1024,						// maximum simultaneous files to process, 0 for unlimited
 		"data_usage_multiply_factor": 1024,			// conversion factor for data usage

@@ -25,7 +25,7 @@ import (
 
 type Event interface {
 	GetName() string
-	GetCgrId() string
+	GetCgrId(timezone string) string
 	GetUUID() string
 	GetSessionIds() []string // Returns identifiers needed to control a session (eg disconnect)
 	GetDirection(string) string
@@ -36,8 +36,8 @@ type Event interface {
 	GetCategory(string) string
 	GetTenant(string) string
 	GetReqType(string) string
-	GetSetupTime(string) (time.Time, error)
-	GetAnswerTime(string) (time.Time, error)
+	GetSetupTime(string, string) (time.Time, error)
+	GetAnswerTime(string, string) (time.Time, error)
 	GetEndTime() (time.Time, error)
 	GetDuration(string) (time.Duration, error)
 	GetPdd(string) (time.Duration, error)
@@ -46,9 +46,9 @@ type Event interface {
 	GetOriginatorIP(string) string
 	GetExtraFields() map[string]string
 	MissingParameter() bool
-	ParseEventValue(*utils.RSRField) string
+	ParseEventValue(*utils.RSRField, string) string
 	PassesFieldFilter(*utils.RSRField) (bool, string)
-	AsStoredCdr() *StoredCdr
+	AsStoredCdr(timezone string) *StoredCdr
 	String() string
 	AsEvent(string) Event
 	ComputeLcr() bool

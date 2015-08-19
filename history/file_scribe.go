@@ -63,7 +63,7 @@ func NewFileScribe(fileRoot string, saveInterval time.Duration) (*FileScribe, er
 func (s *FileScribe) Record(rec Record, out *int) error {
 	s.mu.Lock()
 	fileToSave := rec.Filename
-	recordsMap[fileToSave] = recordsMap[fileToSave].SetOrAdd(&rec)
+	recordsMap[fileToSave] = recordsMap[fileToSave].Modify(&rec)
 
 	// flood protection for save method (do not save on every loop iteration)
 	if s.waitingFile == fileToSave {
