@@ -430,7 +430,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		return err
 	}
 	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
-		utils.ALIASES_PREFIX: shgKeys,
+		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
 	}
