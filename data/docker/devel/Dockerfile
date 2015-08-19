@@ -9,18 +9,18 @@ RUN gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF && gpg -
 
 # add freeswitch apt repo
 RUN echo 'deb http://files.freeswitch.org/repo/deb/debian/ jessie main' > /etc/apt/sources.list.d/freeswitch.list
-    
+
 # install dependencies
 RUN apt-get -y update && apt-get -y install git bzr mercurial redis-server mysql-server python-pycurl python-mysqldb postgresql postgresql-client sudo wget freeswitch-meta-vanilla vim zsh
 
 # add cgrates user
-RUN useradd -c CGRateS -d /var/run/cgrates -s /bin/false -r cgrates      
+RUN useradd -c CGRateS -d /var/run/cgrates -s /bin/false -r cgrates
 
 # install golang
 RUN wget -qO- https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz | tar xzf - -C /root/
 
 #install oh-my-zsh
-RUN wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O - | zsh
+RUN sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"; exit 0
 
 # cleanup
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
