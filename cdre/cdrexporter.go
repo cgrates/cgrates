@@ -52,7 +52,8 @@ const (
 var err error
 
 func NewCdrExporter(cdrs []*engine.StoredCdr, cdrDb engine.CdrStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
-	dataUsageMultiplyFactor, smsUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
+	dataUsageMultiplyFactor, smsUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor float64,
+	costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool, timezone string) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -71,6 +72,7 @@ func NewCdrExporter(cdrs []*engine.StoredCdr, cdrDb engine.CdrStorage, exportTpl
 		cgrPrecision:            cgrPrecision,
 		maskDestId:              maskDestId,
 		httpSkipTlsCheck:        httpSkipTlsCheck,
+		timezone:                timezone,
 		maskLen:                 maskLen,
 		negativeExports:         make(map[string]string),
 	}
@@ -95,6 +97,7 @@ type CdrExporter struct {
 	maskDestId                                                      string
 	maskLen                                                         int
 	httpSkipTlsCheck                                                bool
+	timezone                                                        string
 	header, trailer                                                 []string   // Header and Trailer fields
 	content                                                         [][]string // Rows of cdr fields
 	firstCdrATime, lastCdrATime                                     time.Time
@@ -162,7 +165,7 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.StoredCdr, cfgCdrFld *c
 	if len(layout) == 0 {
 		layout = time.RFC3339
 	}
-	if dtFld, err := utils.ParseTimeDetectLayout(cdr.FieldAsString(cfgCdrFld.Value[0])); err != nil { // Only one rule makes sense here
+	if dtFld, err := utils.ParseTimeDetectLayout(cdr.FieldAsString(cfgCdrFld.Value[0]), cdre.timezone); err != nil { // Only one rule makes sense here
 		return "", err
 	} else {
 		return dtFld.Format(layout), nil

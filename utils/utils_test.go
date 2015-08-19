@@ -133,62 +133,62 @@ func TestRoundByMethodDown2(t *testing.T) {
 func TestParseTimeDetectLayout(t *testing.T) {
 	tmStr := "2013-12-30T15:00:01Z"
 	expectedTime := time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)
-	tm, err := ParseTimeDetectLayout(tmStr)
+	tm, err := ParseTimeDetectLayout(tmStr, "")
 	if err != nil {
 		t.Error(err)
 	} else if !tm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", tm, expectedTime)
 	}
-	_, err = ParseTimeDetectLayout(tmStr[1:])
+	_, err = ParseTimeDetectLayout(tmStr[1:], "")
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
 	sqlTmStr := "2013-12-30 15:00:01"
-	sqlTm, err := ParseTimeDetectLayout(sqlTmStr)
+	sqlTm, err := ParseTimeDetectLayout(sqlTmStr, "")
 	if err != nil {
 		t.Error(err)
 	} else if !sqlTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", sqlTm, expectedTime)
 	}
-	_, err = ParseTimeDetectLayout(sqlTmStr[1:])
+	_, err = ParseTimeDetectLayout(sqlTmStr[1:], "")
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
 	unixTmStr := "1388415601"
-	unixTm, err := ParseTimeDetectLayout(unixTmStr)
+	unixTm, err := ParseTimeDetectLayout(unixTmStr, "")
 	if err != nil {
 		t.Error(err)
 	} else if !unixTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", unixTm, expectedTime)
 	}
-	_, err = ParseTimeDetectLayout(unixTmStr[1:])
+	_, err = ParseTimeDetectLayout(unixTmStr[1:], "")
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
 	goTmStr := "2013-12-30 15:00:01 +0000 UTC"
-	goTm, err := ParseTimeDetectLayout(goTmStr)
+	goTm, err := ParseTimeDetectLayout(goTmStr, "")
 	if err != nil {
 		t.Error(err)
 	} else if !goTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", goTm, expectedTime)
 	}
-	_, err = ParseTimeDetectLayout(goTmStr[1:])
+	_, err = ParseTimeDetectLayout(goTmStr[1:], "")
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
 	goTmStr = "2013-12-30 15:00:01.000000000 +0000 UTC"
-	goTm, err = ParseTimeDetectLayout(goTmStr)
+	goTm, err = ParseTimeDetectLayout(goTmStr, "")
 	if err != nil {
 		t.Error(err)
 	} else if !goTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", goTm, expectedTime)
 	}
-	_, err = ParseTimeDetectLayout(goTmStr[1:])
+	_, err = ParseTimeDetectLayout(goTmStr[1:], "")
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
 	fsTmstampStr := "1394291049287234"
-	fsTm, err := ParseTimeDetectLayout(fsTmstampStr)
+	fsTm, err := ParseTimeDetectLayout(fsTmstampStr, "")
 	expectedTime = time.Date(2014, 3, 8, 15, 4, 9, 287234000, time.UTC)
 	if err != nil {
 		t.Error(err)
@@ -196,7 +196,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", fsTm, expectedTime)
 	}
 	fsTmstampStr = "0"
-	fsTm, err = ParseTimeDetectLayout(fsTmstampStr)
+	fsTm, err = ParseTimeDetectLayout(fsTmstampStr, "")
 	expectedTime = time.Time{}
 	if err != nil {
 		t.Error(err)
@@ -204,7 +204,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", fsTm, expectedTime)
 	}
 	onelineTmstampStr := "20131023215149"
-	olTm, err := ParseTimeDetectLayout(onelineTmstampStr)
+	olTm, err := ParseTimeDetectLayout(onelineTmstampStr, "")
 	expectedTime = time.Date(2013, 10, 23, 21, 51, 49, 0, time.UTC)
 	if err != nil {
 		t.Error(err)
@@ -212,20 +212,20 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", olTm, expectedTime)
 	}
 	oneSpaceTmStr := "08.04.2014 22:14:29"
-	tsTm, err := ParseTimeDetectLayout(oneSpaceTmStr)
+	tsTm, err := ParseTimeDetectLayout(oneSpaceTmStr, "")
 	expectedTime = time.Date(2014, 4, 8, 22, 14, 29, 0, time.UTC)
 	if err != nil {
 		t.Error(err)
 	} else if !tsTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", tsTm, expectedTime)
 	}
-	if nowTm, err := ParseTimeDetectLayout(META_NOW); err != nil {
+	if nowTm, err := ParseTimeDetectLayout(META_NOW, ""); err != nil {
 		t.Error(err)
 	} else if time.Now().Sub(nowTm) > time.Duration(1)*time.Millisecond {
 		t.Errorf("Unexpected time parsed: %v", nowTm)
 	}
 	eamonTmStr := "31/05/2015 14:46:00"
-	eamonTmS, err := ParseTimeDetectLayout(eamonTmStr)
+	eamonTmS, err := ParseTimeDetectLayout(eamonTmStr, "")
 	expectedTime = time.Date(2015, 5, 31, 14, 46, 0, 0, time.UTC)
 	if err != nil {
 		t.Error(err)

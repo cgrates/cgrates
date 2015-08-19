@@ -76,8 +76,8 @@ type FSCdr struct {
 	body   map[string]interface{} // keeps the loaded body for extra field search
 }
 
-func (fsCdr FSCdr) getCgrId() string {
-	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME])
+func (fsCdr FSCdr) getCgrId(timezone string) string {
+	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone)
 	return utils.Sha1(fsCdr.vars[FS_UUID], setupTime.UTC().String())
 }
 
@@ -124,10 +124,10 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 	return
 }
 
-func (fsCdr FSCdr) AsStoredCdr() *StoredCdr {
+func (fsCdr FSCdr) AsStoredCdr(timezone string) *StoredCdr {
 
 	storCdr := new(StoredCdr)
-	storCdr.CgrId = fsCdr.getCgrId()
+	storCdr.CgrId = fsCdr.getCgrId(timezone)
 	storCdr.TOR = utils.VOICE
 	storCdr.AccId = fsCdr.vars[FS_UUID]
 	storCdr.CdrHost = fsCdr.vars[FS_IP]
@@ -139,11 +139,11 @@ func (fsCdr FSCdr) AsStoredCdr() *StoredCdr {
 	storCdr.Account = utils.FirstNonEmpty(fsCdr.vars[FS_ACCOUNT], fsCdr.vars[FS_USERNAME])
 	storCdr.Subject = utils.FirstNonEmpty(fsCdr.vars[FS_SUBJECT], fsCdr.vars[FS_USERNAME])
 	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[FS_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
-	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
+	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
 	pddStr := utils.FirstNonEmpty(fsCdr.vars[FS_PROGRESS_MEDIAMSEC], fsCdr.vars[FS_PROGRESSMS])
 	pddStr = pddStr + "ms"
 	storCdr.Pdd, _ = time.ParseDuration(pddStr)
-	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME])
+	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME], timezone)
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
 	storCdr.Supplier = fsCdr.vars[utils.CGR_SUPPLIER]
 	storCdr.DisconnectCause = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DISCONNECT_CAUSE], fsCdr.vars["hangup_cause"])

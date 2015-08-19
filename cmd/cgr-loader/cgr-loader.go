@@ -72,6 +72,7 @@ var (
 	cdrstatsAddress = flag.String("cdrstats_address", cgrConfig.RPCGOBListen, "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
 	usersAddress    = flag.String("users_address", cgrConfig.RPCGOBListen, "Users service to contact for data reloads, empty to disable automatic data reloads")
 	runId           = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
+	timezone        = flag.String("timezone", cgrConfig.DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
 )
 
 func main() {
@@ -160,7 +161,7 @@ func main() {
 			path.Join(*dataPath, utils.ALIASES_CSV),
 		)
 	}
-	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid)
+	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid, *timezone)
 	err = tpReader.LoadAll()
 	if err != nil {
 		log.Fatal(err)

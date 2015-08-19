@@ -46,6 +46,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_category:     utils.StringPointer("call"),
 		Default_tenant:       utils.StringPointer("cgrates.org"),
 		Default_subject:      utils.StringPointer("cgrates"),
+		Default_timezone:     utils.StringPointer("Local"),
 		Connect_attempts:     utils.IntPointer(3),
 		Reconnects:           utils.IntPointer(-1)}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
@@ -294,6 +295,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Cdrs:                       utils.StringPointer("internal"),
 			Cdr_format:                 utils.StringPointer("csv"),
 			Field_separator:            utils.StringPointer(","),
+			Timezone:                   utils.StringPointer(""),
 			Run_delay:                  utils.IntPointer(0),
 			Max_open_files:             utils.IntPointer(1024),
 			Data_usage_multiply_factor: utils.Float64Pointer(1024.0),

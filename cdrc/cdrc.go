@@ -42,7 +42,7 @@ const (
 )
 
 // Populates the
-func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) error {
+func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal, timezone string) error {
 	var err error
 	switch fieldId {
 	case utils.TOR:
@@ -64,7 +64,7 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) err
 	case utils.DESTINATION:
 		cdr.Destination += fieldVal
 	case utils.SETUP_TIME:
-		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
+		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 		}
 	case utils.PDD:
@@ -72,7 +72,7 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal string) err
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 		}
 	case utils.ANSWER_TIME:
-		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
+		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 		}
 	case utils.USAGE:
@@ -101,14 +101,15 @@ Common parameters within configs processed:
 Parameters specific per config instance:
  * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
 */
-func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs engine.Connector, exitChan chan struct{}) (*Cdrc, error) {
+func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs engine.Connector, exitChan chan struct{}, dfltTimezone string) (*Cdrc, error) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
 	}
 	cdrc := &Cdrc{cdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator,
-		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, dfltCdrcCfg: cdrcCfg, cdrs: cdrs, exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
+		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, dfltCdrcCfg: cdrcCfg, timezone: utils.FirstNonEmpty(cdrcCfg.Timezone, dfltTimezone), cdrs: cdrs,
+		exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
 	}
 	var processFile struct{}
 	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
@@ -157,6 +158,7 @@ type Cdrc struct {
 	httpSkipTlsCheck    bool
 	cdrcCfgs            map[string]*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
 	dfltCdrcCfg         *config.CdrcConfig
+	timezone            string
 	cdrs                engine.Connector
 	httpClient          *http.Client
 	exitChan            chan struct{}
@@ -250,10 +252,10 @@ func (self *Cdrc) processFile(filePath string) error {
 	case CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE:
 		csvReader := csv.NewReader(bufio.NewReader(file))
 		csvReader.Comma = self.csvSep
-		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.cdrFormat, fn, self.failedCallsPrefix,
+		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.cdrFormat, self.timezone, fn, self.failedCallsPrefix,
 			self.cdrSourceIds, self.duMultiplyFactors, self.cdrFilters, self.cdrFields, self.httpSkipTlsCheck, self.partialRecordsCache)
 	case utils.FWV:
-		recordsProcessor = NewFwvRecordsProcessor(file, self.cdrcCfgs, self.dfltCdrcCfg, self.httpClient, self.httpSkipTlsCheck)
+		recordsProcessor = NewFwvRecordsProcessor(file, self.cdrcCfgs, self.dfltCdrcCfg, self.httpClient, self.httpSkipTlsCheck, self.timezone)
 	default:
 		return fmt.Errorf("Unsupported CDR format: %s", self.cdrFormat)
 	}

@@ -43,7 +43,7 @@ func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.
 
 // Retrieves CDRs based on the filters
 func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCdr) error {
-	cdrsFltr, err := attrs.AsCdrsFilter()
+	cdrsFltr, err := attrs.AsCdrsFilter(apier.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

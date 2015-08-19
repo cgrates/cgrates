@@ -185,6 +185,7 @@ type CGRConfig struct {
 	DefaultCategory      string        // set default type of record
 	DefaultTenant        string        // set default tenant
 	DefaultSubject       string        // set default rating subject, useful in case of fallback
+	DefaultTimezone      string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	Reconnects           int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
 	ConnectAttempts      int           // number of initial connection attempts before giving up
 	RoundingDecimals     int           // Number of decimals to round end prices at

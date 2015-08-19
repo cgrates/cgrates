@@ -12,6 +12,7 @@ import (
 
 type TpReader struct {
 	tpid              string
+	timezone          string
 	ratingStorage     RatingStorage
 	accountingStorage AccountingStorage
 	lr                LoadReader
@@ -35,9 +36,10 @@ type TpReader struct {
 	aliases           map[string]*Alias
 }
 
-func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid string) *TpReader {
+func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string) *TpReader {
 	tpr := &TpReader{
 		tpid:              tpid,
+		timezone:          timezone,
 		ratingStorage:     rs,
 		accountingStorage: as,
 		lr:                lr,
@@ -445,7 +447,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 			}
 		}
 		tag := utils.LCRKey(tpLcr.Direction, tpLcr.Tenant, tpLcr.Category, tpLcr.Account, tpLcr.Subject)
-		activationTime, _ := utils.ParseTimeDetectLayout(tpLcr.ActivationTime)
+		activationTime, _ := utils.ParseTimeDetectLayout(tpLcr.ActivationTime, tpr.timezone)
 
 		lcr, found := tpr.lcrs[tag]
 		if !found {
@@ -600,7 +602,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 	for key, atrsLst := range storAts {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, atr := range atrsLst {
-			balanceExpirationDate, _ := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate)
+			balanceExpirationDate, _ := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 			id := atr.Id
 			if id == "" {
 				id = utils.GenUUID()
@@ -973,7 +975,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 				// only return error if there was something there for the tag
 				return fmt.Errorf("could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
 			}
-			UpdateCdrStats(cs, triggers, tpStat)
+			UpdateCdrStats(cs, triggers, tpStat, tpr.timezone)
 			tpr.cdrStats[tag] = cs
 		}
 	}

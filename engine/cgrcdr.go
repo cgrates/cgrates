@@ -24,7 +24,7 @@ import (
 	"strconv"
 )
 
-func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
+func NewCgrCdrFromHttpReq(req *http.Request, timezone string) (CgrCdr, error) {
 	if req.Form == nil {
 		if err := req.ParseForm(); err != nil {
 			return nil, err
@@ -40,11 +40,11 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 
 type CgrCdr map[string]string
 
-func (cgrCdr CgrCdr) getCgrId() string {
+func (cgrCdr CgrCdr) getCgrId(timezone string) string {
 	if cgrId, hasIt := cgrCdr[utils.CGRID]; hasIt {
 		return cgrId
 	}
-	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME])
+	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME], timezone)
 	return utils.Sha1(cgrCdr[utils.ACCID], setupTime.UTC().String())
 }
 
@@ -58,9 +58,9 @@ func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 	return extraFields
 }
 
-func (cgrCdr CgrCdr) AsStoredCdr() *StoredCdr {
+func (cgrCdr CgrCdr) AsStoredCdr(timezone string) *StoredCdr {
 	storCdr := new(StoredCdr)
-	storCdr.CgrId = cgrCdr.getCgrId()
+	storCdr.CgrId = cgrCdr.getCgrId(timezone)
 	storCdr.TOR = cgrCdr[utils.TOR]
 	storCdr.AccId = cgrCdr[utils.ACCID]
 	storCdr.CdrHost = cgrCdr[utils.CDRHOST]
@@ -72,9 +72,9 @@ func (cgrCdr CgrCdr) AsStoredCdr() *StoredCdr {
 	storCdr.Account = cgrCdr[utils.ACCOUNT]
 	storCdr.Subject = cgrCdr[utils.SUBJECT]
 	storCdr.Destination = cgrCdr[utils.DESTINATION]
-	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
+	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
 	storCdr.Pdd, _ = utils.ParseDurationWithSecs(cgrCdr[utils.PDD])
-	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.ANSWER_TIME])
+	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.ANSWER_TIME], timezone)
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(cgrCdr[utils.USAGE])
 	storCdr.Supplier = cgrCdr[utils.SUPPLIER]
 	storCdr.DisconnectCause = cgrCdr[utils.DISCONNECT_CAUSE]

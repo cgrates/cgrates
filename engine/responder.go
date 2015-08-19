@@ -50,6 +50,7 @@ type Responder struct {
 	ExitChan chan bool
 	CdrSrv   *CdrServer
 	Stats    StatsInterface
+	Timezone string
 	cnt      int64
 }
 
@@ -208,7 +209,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
 			continue
 		}
-		startTime, err := ev.GetSetupTime(utils.META_DEFAULT)
+		startTime, err := ev.GetSetupTime(utils.META_DEFAULT, rs.Timezone)
 		if err != nil {
 			return err
 		}
@@ -272,7 +273,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.ReqTypeField)) {
 			continue // We only consider prepaid sessions
 		}
-		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
+		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)
 		if err != nil {
 			return errors.New("Error parsing answer event start time")
 		}

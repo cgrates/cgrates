@@ -60,7 +60,7 @@ type LcrRequest struct {
 	*utils.Paginator
 }
 
-func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
+func (self *LcrRequest) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
 	if len(self.Account) == 0 || len(self.Destination) == 0 {
 		return nil, utils.ErrMandatoryIeMissing
 	}
@@ -81,7 +81,7 @@ func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
 	var err error
 	if len(self.SetupTime) == 0 {
 		timeStart = time.Now()
-	} else if timeStart, err = utils.ParseTimeDetectLayout(self.SetupTime); err != nil {
+	} else if timeStart, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
 		return nil, err
 	}
 	var callDur time.Duration
