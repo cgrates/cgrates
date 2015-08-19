@@ -1128,7 +1128,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 
 type AttrRemoveRatingProfile struct {
 	Direction string
-	Tennat    string
+	Tenant    string
 	Category  string
 	Subject   string
 }
@@ -1140,8 +1140,8 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 	} else {
 		return
 	}
-	if arrp.Tennat != "" && arrp.Tennat != utils.ANY {
-		result += arrp.Tennat
+	if arrp.Tenant != "" && arrp.Tenant != utils.ANY {
+		result += arrp.Tenant
 		result += utils.CONCATENATED_KEY_SEP
 	} else {
 		return
@@ -1160,14 +1160,13 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 }
 
 func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
-	if attr.Subject != "" && attr.Category == "" {
-		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Category")
+	if attr.Direction == "" {
+		attr.Direction = utils.OUT
 	}
-	if attr.Category != "" && attr.Tennat == "" {
-		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Tenant")
-	}
-	if attr.Tennat != "" && attr.Direction == "" {
-		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Direction")
+	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Direction, attr.Tenant, attr.Category}, "")) ||
+		(attr.Category != "" && utils.IsSliceMember([]string{attr.Direction, attr.Tenant}, "")) ||
+		attr.Tenant != "" && attr.Direction == "" {
+		return utils.ErrMandatoryIeMissing
 	}
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		err := self.RatingDb.RemoveRatingProfile(attr.GetId())
