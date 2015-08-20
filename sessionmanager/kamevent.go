@@ -129,11 +129,12 @@ func (kev KamEvent) GetAccount(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_ACCOUNT])
 }
+
 func (kev KamEvent) GetSubject(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_SUBJECT], kev[CGR_ACCOUNT])
+	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_SUBJECT], kev.GetAccount(fieldName))
 }
 func (kev KamEvent) GetDestination(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value

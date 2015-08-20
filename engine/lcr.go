@@ -57,6 +57,7 @@ type LcrRequest struct {
 	SetupTime    string
 	Duration     string
 	IgnoreErrors bool
+	ExtraFields  map[string]string
 	*utils.Paginator
 }
 
@@ -90,7 +91,7 @@ func (self *LcrRequest) AsCallDescriptor(timezone string) (*CallDescriptor, erro
 	} else if callDur, err = utils.ParseDurationWithSecs(self.Duration); err != nil {
 		return nil, err
 	}
-	return &CallDescriptor{
+	cd := &CallDescriptor{
 		Direction:   self.Direction,
 		Tenant:      self.Tenant,
 		Category:    self.Category,
@@ -99,7 +100,14 @@ func (self *LcrRequest) AsCallDescriptor(timezone string) (*CallDescriptor, erro
 		Destination: self.Destination,
 		TimeStart:   timeStart,
 		TimeEnd:     timeStart.Add(callDur),
-	}, nil
+	}
+	if self.ExtraFields != nil {
+		cd.ExtraFields = make(map[string]string)
+	}
+	for key, val := range self.ExtraFields {
+		cd.ExtraFields[key] = val
+	}
+	return cd, nil
 }
 
 // A LCR reply, used in APIer and SM where we need to expose it

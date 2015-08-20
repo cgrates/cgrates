@@ -42,7 +42,7 @@ const (
 	ACCOUNT            = "variable_" + utils.CGR_ACCOUNT
 	DESTINATION        = "variable_" + utils.CGR_DESTINATION
 	REQTYPE            = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
-	Category           = "variable_" + utils.CGR_CATEGORY
+	CATEGORY           = "variable_" + utils.CGR_CATEGORY
 	VAR_CGR_SUPPLIER   = "variable_" + utils.CGR_SUPPLIER
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_" + utils.CGR_TENANT
@@ -101,30 +101,27 @@ func (fsev FSEvent) GetDirection(fieldName string) string {
 	//TODO: implement direction
 	return utils.OUT
 }
-func (fsev FSEvent) GetSubject(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[SUBJECT], fsev[USERNAME])
-	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[SUBJECT], fsev[USERNAME])
-}
 
+// Account calling
 func (fsev FSEvent) GetAccount(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[ACCOUNT], fsev[USERNAME])
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[ACCOUNT], fsev[USERNAME])
+}
+
+// Rating subject being charged
+func (fsev FSEvent) GetSubject(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[SUBJECT], fsev.GetAccount(fieldName))
 }
 
 // Charging destination number
 func (fsev FSEvent) GetDestination(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[DESTINATION], fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[DESTINATION], fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 }
@@ -133,18 +130,14 @@ func (fsev FSEvent) GetDestination(fieldName string) string {
 func (fsev FSEvent) GetCallDestNr(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CALL_DEST_NR], fsev[SIP_REQ_USER])
 }
 func (fsev FSEvent) GetCategory(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[Category], config.CgrConfig().DefaultCategory)
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[Category], config.CgrConfig().DefaultCategory)
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[CATEGORY], config.CgrConfig().DefaultCategory)
 }
 func (fsev FSEvent) GetCgrId(timezone string) string {
 	setupTime, _ := fsev.GetSetupTime(utils.META_DEFAULT, timezone)
@@ -159,8 +152,6 @@ func (fsev FSEvent) GetSessionIds() []string {
 func (fsev FSEvent) GetTenant(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[CSTMID], config.CgrConfig().DefaultTenant)
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID], config.CgrConfig().DefaultTenant)
 }
@@ -173,15 +164,13 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[REQTYPE], reqTypeDetected, config.CgrConfig().DefaultReqType)
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], reqTypeDetected, config.CgrConfig().DefaultReqType)
 }
 func (fsev FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" ||
-		strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" ||
+		strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetDestination(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetCategory(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetUUID()) == "" ||
@@ -257,15 +246,13 @@ func (fsev FSEvent) GetDisconnectCause(fieldName string) string {
 func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	} else if fieldName == utils.META_DEFAULT {
-		return fsev[FS_IPv4]
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[FS_IPv4])
 }
 
 func (fsev FSEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
-	for _, fldRule := range config.CgrConfig().SmFsConfig.CdrExtraFields {
+	for _, fldRule := range config.CgrConfig().SmFsConfig.ExtraFields {
 		extraFields[fldRule.Id] = fsev.ParseEventValue(fldRule, config.CgrConfig().DefaultTimezone)
 	}
 	return extraFields
@@ -388,6 +375,7 @@ func (fsev FSEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 		Destination: fsev.GetDestination(utils.META_DEFAULT),
 		SetupTime:   utils.FirstNonEmpty(fsev[SETUP_TIME], fsev[ANSWER_TIME]),
 		Duration:    fsev[DURATION],
+		ExtraFields: fsev.GetExtraFields(),
 	}
 	return lcrReq.AsCallDescriptor(config.CgrConfig().DefaultTimezone)
 }

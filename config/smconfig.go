@@ -61,7 +61,7 @@ type SmFsConfig struct {
 	Cdrs                string
 	Reconnects          int
 	CreateCdr           bool
-	CdrExtraFields      []*utils.RSRField
+	ExtraFields         []*utils.RSRField
 	DebitInterval       time.Duration
 	MinCallDuration     time.Duration
 	MaxCallDuration     time.Duration
@@ -94,8 +94,8 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
 	}
-	if jsnCfg.Cdr_extra_fields != nil {
-		if self.CdrExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCfg.Cdr_extra_fields); err != nil {
+	if jsnCfg.Extra_fields != nil {
+		if self.ExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCfg.Extra_fields); err != nil {
 			return err
 		}
 	}

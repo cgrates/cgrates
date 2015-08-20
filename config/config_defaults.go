@@ -197,7 +197,7 @@ const CGRATES_CFG_JSON = `
 	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
-	"cdr_extra_fields": [],			// extra fields to store in CDRs when creating them
+	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",		// maximum call duration a prepaid call can last

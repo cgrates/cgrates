@@ -97,18 +97,20 @@ func (osipsev *OsipsEvent) GetDirection(fieldName string) string {
 	return utils.OUT
 }
 
-func (osipsev *OsipsEvent) GetSubject(fieldName string) string {
-	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
-	}
-	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_SUBJECT], osipsev.GetAccount(fieldName))
-}
-
+// Account being charged
 func (osipsev *OsipsEvent) GetAccount(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
 	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_ACCOUNT])
+}
+
+// Rating subject being charged, falls back on account if missing
+func (osipsev *OsipsEvent) GetSubject(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_SUBJECT], osipsev.GetAccount(fieldName))
 }
 
 func (osipsev *OsipsEvent) GetDestination(fieldName string) string {
