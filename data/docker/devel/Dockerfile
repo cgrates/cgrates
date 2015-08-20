@@ -17,7 +17,7 @@ RUN apt-get -y update && apt-get -y install git bzr mercurial redis-server mysql
 RUN useradd -c CGRateS -d /var/run/cgrates -s /bin/false -r cgrates
 
 # install golang
-RUN wget -qO- https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz | tar xzf - -C /root/
+RUN wget -qO- https://storage.googleapis.com/golang/go1.5.linux-amd64.tar.gz | tar xzf - -C /root/
 
 #install oh-my-zsh
 RUN sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"; exit 0
