@@ -33,13 +33,13 @@ import (
 
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
-	cgrConfig, _      = config.NewDefaultCGRConfig()
-	tariffplandb_type = flag.String("tariffplandb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
-	tariffplandb_host = flag.String("tariffplandb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
-	tariffplandb_port = flag.String("tariffplandb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
-	tariffplandb_name = flag.String("tariffplandb_name", cgrConfig.TpDbName, "The name/number of the TariffPlan to connect to.")
-	tariffplandb_user = flag.String("tariffplandb_user", cgrConfig.TpDbUser, "The TariffPlan user to sign in as.")
-	tariffplandb_pass = flag.String("tariffplandb_passwd", cgrConfig.TpDbPass, "The TariffPlan user's password.")
+	cgrConfig, _ = config.NewDefaultCGRConfig()
+	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
+	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
+	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
+	tpdb_name    = flag.String("tpdb_name", cgrConfig.TpDbName, "The name/number of the TariffPlan to connect to.")
+	tpdb_user    = flag.String("tpdb_user", cgrConfig.TpDbUser, "The TariffPlan user to sign in as.")
+	tpdb_pass    = flag.String("tpdb_passwd", cgrConfig.TpDbPass, "The TariffPlan user's password.")
 
 	datadb_type = flag.String("datadb_type", cgrConfig.DataDbType, "The type of the DataDb database <redis>")
 	datadb_host = flag.String("datadb_host", cgrConfig.DataDbHost, "The DataDb host to connect to.")
@@ -90,8 +90,8 @@ func main() {
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
-			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tariffplandb_type, *tariffplandb_host, *tariffplandb_port, *tariffplandb_name,
-				*tariffplandb_user, *tariffplandb_pass, *dbdata_encoding)
+			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
+				*tpdb_user, *tpdb_pass, *dbdata_encoding)
 			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns)
@@ -99,8 +99,8 @@ func main() {
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns)
 		} else { // Default load from csv files to dataDb
-			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tariffplandb_type, *tariffplandb_host, *tariffplandb_port, *tariffplandb_name,
-				*tariffplandb_user, *tariffplandb_pass, *dbdata_encoding)
+			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
+				*tpdb_user, *tpdb_pass, *dbdata_encoding)
 			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding)
 		}
 		// Defer databases opened to be closed when we are done
