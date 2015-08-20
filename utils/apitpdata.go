@@ -559,9 +559,8 @@ type CachedItemAge struct {
 	RatingProfile   time.Duration
 	Action          time.Duration
 	SharedGroup     time.Duration
-	RatingAlias     time.Duration
-	AccountAlias    time.Duration
 	DerivedChargers time.Duration
+	Alias           time.Duration
 	LcrProfiles     time.Duration
 }
 

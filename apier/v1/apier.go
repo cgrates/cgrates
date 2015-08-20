@@ -964,8 +964,8 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 	cachedItemAge := new(utils.CachedItemAge)
 	var found bool
 	for idx, cacheKey := range []string{utils.DESTINATION_PREFIX + itemId, utils.RATING_PLAN_PREFIX + itemId, utils.RATING_PROFILE_PREFIX + itemId,
-		utils.ACTION_PREFIX + itemId, utils.SHARED_GROUP_PREFIX + itemId, utils.ALIASES_PREFIX + itemId,
-		utils.LCR_PREFIX + itemId} {
+		utils.ACTION_PREFIX + itemId, utils.SHARED_GROUP_PREFIX + itemId, utils.ALIASES_PREFIX + itemId, utils.LCR_PREFIX + itemId} {
+
 		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
 			found = true
 			switch idx {
@@ -980,10 +980,8 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 			case 4:
 				cachedItemAge.SharedGroup = age
 			case 5:
-				cachedItemAge.RatingAlias = age
+				cachedItemAge.Alias = age
 			case 6:
-				cachedItemAge.AccountAlias = age
-			case 7:
 				cachedItemAge.LcrProfiles = age
 			}
 		}
