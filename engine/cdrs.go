@@ -93,9 +93,6 @@ func (self *CdrServer) ProcessCdr(cdr *StoredCdr) error {
 
 // RPC method, used to process external CDRs
 func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
-	if cdr.Subject == "" { // Use account information as rating subject if missing
-		cdr.Subject = cdr.Account
-	}
 	storedCdr, err := NewStoredCdrFromExternalCdr(cdr, self.cgrCfg.DefaultTimezone)
 	if err != nil {
 		return err
@@ -151,6 +148,9 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
+	if storedCdr.Subject == "" { // Use account information as rating subject if missing
+		storedCdr.Subject = storedCdr.Account
+	}
 	if upData, err := LoadUserProfile(storedCdr, "ExtraFields"); err != nil {
 		return err
 	} else {
