@@ -70,6 +70,7 @@ const (
 	PDD_MEDIA_MS       = "variable_progress_mediamsec"
 	PDD_NOMEDIA_MS     = "variable_progressmsec"
 	IGNOREPARK         = "variable_cgr_ignorepark"
+	FS_VARPREFIX       = "variable_"
 
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
@@ -306,7 +307,11 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 	case utils.COST:
 		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
-		return rsrFld.ParseValue(fsev[rsrFld.Id])
+		val := rsrFld.ParseValue(fsev[rsrFld.Id])
+		if val == "" { // Trying looking for variable_+ Id also if the first one not found
+			val = rsrFld.ParseValue(fsev[FS_VARPREFIX+rsrFld.Id])
+		}
+		return val
 	}
 }
 
