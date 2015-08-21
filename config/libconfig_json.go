@@ -64,6 +64,7 @@ type RaterJsonCfg struct {
 	Cdrstats *string
 	Historys *string
 	Pubsubs  *string
+	Aliases  *string
 	Users    *string
 }
 
@@ -230,7 +231,12 @@ type PubSubServJsonCfg struct {
 	Enabled *bool
 }
 
-// PubSub server config section
+// Aliases server config section
+type AliasesServJsonCfg struct {
+	Enabled *bool
+}
+
+// Users server config section
 type UserServJsonCfg struct {
 	Enabled *bool
 	Indexes *[]string
