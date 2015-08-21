@@ -56,26 +56,27 @@ const (
 )
 
 var (
-	cfgDir       = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
-	version      = flag.Bool("version", false, "Prints the application version.")
-	raterEnabled = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
-	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
-	cdrsEnabled  = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
-	pidFile      = flag.String("pid", "", "Write pid file")
-	cpuprofile   = flag.String("cpuprofile", "", "write cpu profile to file")
-	singlecpu    = flag.Bool("singlecpu", false, "Run on single CPU core")
-	bal          = balancer2go.NewBalancer()
-	exitChan     = make(chan bool)
-	server       = &engine.Server{}
-	cdrServer    *engine.CdrServer
-	cdrStats     engine.StatsInterface
-	scribeServer history.Scribe
-	pubSubServer engine.PublisherSubscriber
-	userServer   engine.UserService
-	cfg          *config.CGRConfig
-	sms          []sessionmanager.SessionManager
-	smRpc        *v1.SessionManagerV1
-	err          error
+	cfgDir        = flag.String("config_dir", utils.CONFIG_DIR, "Configuration directory path.")
+	version       = flag.Bool("version", false, "Prints the application version.")
+	raterEnabled  = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
+	schedEnabled  = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
+	cdrsEnabled   = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
+	pidFile       = flag.String("pid", "", "Write pid file")
+	cpuprofile    = flag.String("cpuprofile", "", "write cpu profile to file")
+	singlecpu     = flag.Bool("singlecpu", false, "Run on single CPU core")
+	bal           = balancer2go.NewBalancer()
+	exitChan      = make(chan bool)
+	server        = &engine.Server{}
+	cdrServer     *engine.CdrServer
+	cdrStats      engine.StatsInterface
+	scribeServer  history.Scribe
+	pubSubServer  engine.PublisherSubscriber
+	aliasesServer engine.AliasService
+	userServer    engine.UserService
+	cfg           *config.CGRConfig
+	sms           []sessionmanager.SessionManager
+	smRpc         *v1.SessionManagerV1
+	err           error
 )
 
 func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, doneChan chan struct{}) {
@@ -479,6 +480,11 @@ func main() {
 		server.RpcRegisterName("PubSubV1", pubSubServer)
 	}
 
+	if cfg.AliasesServerEnabled {
+		aliasesServer = engine.NewAliasHandler(accountDb)
+		server.RpcRegisterName("AliasesV1", aliasesServer)
+	}
+
 	if cfg.HistoryServerEnabled {
 		scribeServer, err = history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval)
 		if err != nil {
@@ -538,6 +544,18 @@ func main() {
 			}
 		}
 		engine.SetPubSub(pubSubServer)
+	}()
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if cfg.RaterAliasesServer != "" && cfg.RaterAliasesServer != utils.INTERNAL {
+			if aliasesServer, err = engine.NewProxyAliases(cfg.RaterAliasesServer, cfg.ConnectAttempts, -1); err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<AliasesServer> Could not connect to the server, error: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+		}
+		engine.SetAliasService(aliasesServer)
 	}()
 	wg.Add(1)
 	go func() {
