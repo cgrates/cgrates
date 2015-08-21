@@ -549,7 +549,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		if cfg.RaterAliasesServer != "" && cfg.RaterAliasesServer != utils.INTERNAL {
-			if aliasesServer, err = engine.NewProxyAliases(cfg.RaterAliasesServer, cfg.ConnectAttempts, -1); err != nil {
+			if aliasesServer, err = engine.NewProxyAliasService(cfg.RaterAliasesServer, cfg.ConnectAttempts, -1); err != nil {
 				engine.Logger.Crit(fmt.Sprintf("<AliasesServer> Could not connect to the server, error: %s", err.Error()))
 				exitChan <- true
 				return
