@@ -117,7 +117,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 3,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 2,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
