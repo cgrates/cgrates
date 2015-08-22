@@ -165,11 +165,11 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 	case utils.SETUP_TIME:
 		return rsrFld.ParseValue(storedCdr.SetupTime.Format(time.RFC3339))
 	case utils.PDD:
-		return strconv.FormatFloat(utils.Round(storedCdr.Pdd.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+		return strconv.FormatFloat(storedCdr.Pdd.Seconds(), 'f', -1, 64)
 	case utils.ANSWER_TIME:
 		return rsrFld.ParseValue(storedCdr.AnswerTime.Format(time.RFC3339))
 	case utils.USAGE:
-		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+		return strconv.FormatFloat(storedCdr.Usage.Seconds(), 'f', -1, 64)
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(storedCdr.Supplier)
 	case utils.DISCONNECT_CAUSE:
