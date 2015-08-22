@@ -123,11 +123,11 @@ func TestDfBalancerJsonCfg(t *testing.T) {
 
 func TestDfRaterJsonCfg(t *testing.T) {
 	eCfg := &RaterJsonCfg{Enabled: utils.BoolPointer(false), Balancer: utils.StringPointer(""), Cdrstats: utils.StringPointer(""),
-		Historys: utils.StringPointer(""), Pubsubs: utils.StringPointer(""), Users: utils.StringPointer("")}
+		Historys: utils.StringPointer(""), Pubsubs: utils.StringPointer(""), Users: utils.StringPointer(""), Aliases: utils.StringPointer("")}
 	if cfg, err := dfCgrJsonCfg.RaterJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Errorf("Received: %+v", cfg)
 	}
 }
 
@@ -411,6 +411,17 @@ func TestDfPubSubServJsonCfg(t *testing.T) {
 		Enabled: utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.PubSubServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestDfAliasesServJsonCfg(t *testing.T) {
+	eCfg := &AliasesServJsonCfg{
+		Enabled: utils.BoolPointer(false),
+	}
+	if cfg, err := dfCgrJsonCfg.AliasesServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

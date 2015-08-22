@@ -519,6 +519,24 @@ type AttrGetAccounts struct {
 	Limit      int // Limit number of items retrieved
 }
 
+type AttrSetTPAlias struct {
+	TPid      string
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Group     string
+}
+
+type AttrSetTPUser struct {
+	TPid           string
+	Tenant         string
+	UserName       string
+	AttributeName  string
+	AttributeValue string
+}
+
 // Data used to do remote cache reloads via api
 type ApiReloadCache struct {
 	DestinationIds   []string
@@ -1094,4 +1112,20 @@ type AttrGetSMASessions struct {
 type AttrGetCallCost struct {
 	CgrId string // Unique id of the CDR
 	RunId string // Run Id
+}
+
+type TpAlias struct {
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Group     string
+	Values    []*AliasValue
+}
+
+type AliasValue struct {
+	DestinationId string
+	Alias         string
+	Weight        float64
 }

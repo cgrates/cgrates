@@ -198,6 +198,7 @@ type CGRConfig struct {
 	RaterHistoryServer   string
 	RaterPubSubServer    string
 	RaterUserServer      string
+	RaterAliasesServer   string
 	BalancerEnabled      bool
 	SchedulerEnabled     bool
 	CDRSEnabled          bool                 // Enable CDR Server service
@@ -219,8 +220,8 @@ type CGRConfig struct {
 	HistoryServerEnabled bool                              // Starts History as server: <true|false>.
 	HistoryDir           string                            // Location on disk where to store history files.
 	HistorySaveInterval  time.Duration                     // The timout duration between pubsub writes
-	PubSubServer         string                            // Address where to reach the master pubsub server: <internal|x.y.z.y:1234>
 	PubSubServerEnabled  bool                              // Starts PubSub as server: <true|false>.
+	AliasesServerEnabled bool                              // Starts PubSub as server: <true|false>.
 	UserServerEnabled    bool                              // Starts User as server: <true|false>
 	UserServerIndexes    []string                          // List of user profile field indexes
 	MailerServer         string                            // The server to use when sending emails out
@@ -249,6 +250,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 		}
 		if self.RaterPubSubServer == utils.INTERNAL && !self.PubSubServerEnabled {
 			return errors.New("PubSub server not enabled but requested by Rater component.")
+		}
+		if self.RaterAliasesServer == utils.INTERNAL && !self.AliasesServerEnabled {
+			return errors.New("Aliases server not enabled but requested by Rater component.")
 		}
 		if self.RaterUserServer == utils.INTERNAL && !self.UserServerEnabled {
 			return errors.New("Users service not enabled but requested by Rater component.")
@@ -425,6 +429,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
+	jsnAliasesServCfg, err := jsnCfg.AliasesServJsonCfg()
+	if err != nil {
+		return err
+	}
+
 	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
 	if err != nil {
 		return err
@@ -566,6 +575,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnRaterCfg.Pubsubs != nil {
 			self.RaterPubSubServer = *jsnRaterCfg.Pubsubs
 		}
+		if jsnRaterCfg.Aliases != nil {
+			self.RaterAliasesServer = *jsnRaterCfg.Aliases
+		}
 		if jsnRaterCfg.Users != nil {
 			self.RaterUserServer = *jsnRaterCfg.Users
 		}
@@ -706,6 +718,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnPubSubServCfg != nil {
 		if jsnPubSubServCfg.Enabled != nil {
 			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
+		}
+	}
+
+	if jsnAliasesServCfg != nil {
+		if jsnAliasesServCfg.Enabled != nil {
+			self.AliasesServerEnabled = *jsnAliasesServCfg.Enabled
 		}
 	}
 

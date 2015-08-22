@@ -60,6 +60,8 @@ const (
 	TBL_TP_ACTION_TRIGGERS     = "tp_action_triggers"
 	TBL_TP_ACCOUNT_ACTIONS     = "tp_account_actions"
 	TBL_TP_DERIVED_CHARGERS    = "tp_derived_chargers"
+	TBL_TP_USERS               = "tp_users"
+	TBL_TP_ALIASES             = "tp_aliases"
 	TBL_CDRS_PRIMARY           = "cdrs_primary"
 	TBL_CDRS_EXTRA             = "cdrs_extra"
 	TBL_COST_DETAILS           = "cost_details"

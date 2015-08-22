@@ -93,6 +93,7 @@ const CGRATES_CFG_JSON = `
 	"historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
 	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
 	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+    "aliases": "",							// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
 },
 
 
@@ -254,6 +255,9 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,							// starts PubSub service: <true|false>.
 },
 
+"aliases": {
+	"enabled": false,							// starts Aliases service: <true|false>.
+},
 
 "users": {
 	"enabled": false,							// starts User service: <true|false>.

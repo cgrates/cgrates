@@ -358,14 +358,23 @@ func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrstat) {
 	return
 }
 
-func APItoModelApierAlias(t *utils.ApierTPTiming) (result *TpTiming) {
-	return &TpTiming{
-		Tpid:      t.TPid,
-		Tag:       t.TimingId,
-		Years:     t.Years,
-		Months:    t.Months,
-		MonthDays: t.MonthDays,
-		WeekDays:  t.WeekDays,
-		Time:      t.Time,
+func APItoModelAliases(attr *utils.AttrSetTPAlias) (result *TpAlias) {
+	return &TpAlias{
+		Tpid:      attr.TPid,
+		Direction: attr.Direction,
+		Tenant:    attr.Tenant,
+		Category:  attr.Category,
+		Account:   attr.Account,
+		Subject:   attr.Subject,
+		Group:     attr.Group,
+	}
+}
+
+func APItoModelUsers(attr *utils.AttrSetTPUser) (result *TpUser) {
+	return &TpUser{
+		Tpid:           attr.TPid,
+		Tenant:         attr.Tenant,
+		AttributeName:  attr.AttributeName,
+		AttributeValue: attr.AttributeValue,
 	}
 }
