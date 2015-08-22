@@ -148,9 +148,22 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
+	if storedCdr.Direction == "" {
+		storedCdr.Direction = utils.OUT
+	}
+	if storedCdr.ReqType == "" {
+		storedCdr.ReqType = self.cgrCfg.DefaultReqType
+	}
+	if storedCdr.Tenant == "" {
+		storedCdr.Tenant = self.cgrCfg.DefaultTenant
+	}
+	if storedCdr.Category == "" {
+		storedCdr.Category = self.cgrCfg.DefaultCategory
+	}
 	if storedCdr.Subject == "" { // Use account information as rating subject if missing
 		storedCdr.Subject = storedCdr.Account
 	}
+
 	if upData, err := LoadUserProfile(storedCdr, "ExtraFields"); err != nil {
 		return err
 	} else {

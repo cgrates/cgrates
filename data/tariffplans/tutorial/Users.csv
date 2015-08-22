@@ -5,8 +5,15 @@ cgrates.org,1001,Cli,+4986517174963
 cgrates.org,1001,Account,1001
 cgrates.org,1001,Subject,1001
 cgrates.org,1001,Uuid,388539dfd4f5cefee8f488b78c6c244b9e19138e
+cgrates.org,1001,ReqType,*prepaid
 cgrates.org,1002,SysUserName,rif
 cgrates.org,1002,RifAttr,RifVal
 cgrates.org,1002,Account,1002
 cgrates.org,1002,Subject,1002
 cgrates.org,1002,Uuid,27f37edec0670fa34cf79076b80ef5021e39c5b5
+cgrates.org,1004,SysUserName,danb4
+cgrates.org,1004,SysPassword,hisPass321
+cgrates.org,1004,Cli,+4986517174964
+cgrates.org,1004,Account,1004
+cgrates.org,1004,Subject,1004
+cgrates.org,1004,ReqType,*rated
