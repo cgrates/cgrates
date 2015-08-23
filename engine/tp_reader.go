@@ -1328,12 +1328,12 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Print("\t", al.GetId())
 		}
 	}
+	ldInst := tpr.GetLoadInstance()
 	if verbose {
-		ldInst := tpr.GetLoadInstance()
 		log.Printf("LoadHistory, instance: %+v\n", ldInst)
-		if err = tpr.accountingStorage.AddLoadHistory(ldInst, tpr.loadHistSize); err != nil {
-			return err
-		}
+	}
+	if err = tpr.accountingStorage.AddLoadHistory(ldInst, tpr.loadHistSize); err != nil {
+		return err
 	}
 	return
 }

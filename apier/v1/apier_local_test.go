@@ -825,7 +825,7 @@ func TestApierGetCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2, LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -1221,7 +1221,7 @@ func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{}
+	expectedStats := &utils.CacheStats{LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -1267,12 +1267,17 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 3, Actions: 5, DerivedChargers: 2}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
-	} else if !reflect.DeepEqual(rcvStats, expectedStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %v, expected: %v", rcvStats, expectedStats)
+	} else {
+		if rcvStats.Destinations != 4 ||
+			rcvStats.RatingPlans != 3 ||
+			rcvStats.RatingProfiles != 3 ||
+			rcvStats.Actions != 5 ||
+			rcvStats.DerivedChargers != 2 {
+			t.Errorf("Calling ApierV1.GetCacheStats received: %v", rcvStats)
+		}
 	}
 }
 
@@ -1751,7 +1756,7 @@ func TestApierGetCacheStats2(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := new(utils.CacheStats)
+	expectedStats := &utils.CacheStats{LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())

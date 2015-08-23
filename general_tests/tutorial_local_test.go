@@ -37,6 +37,7 @@ import (
 var tutLocalCfgPath string
 var tutFsLocalCfg *config.CGRConfig
 var tutLocalRpc *rpc.Client
+var loadInst engine.LoadInstance // Share load information between tests
 
 func TestTutLocalInitCfg(t *testing.T) {
 	if !*testLocal {
@@ -100,12 +101,11 @@ func TestTutLocalLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	reply := ""
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tutLocalRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := tutLocalRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
-	} else if reply != "OK" {
-		t.Error(reply)
+	} else if loadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", loadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -118,7 +118,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	var rcvStats *utils.CacheStats
 
 	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 2,
-		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3}
+		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
