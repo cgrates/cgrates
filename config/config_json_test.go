@@ -83,12 +83,13 @@ func TestDfDbJsonCfg(t *testing.T) {
 		t.Error("Received: ", cfg)
 	}
 	eCfg = &DbJsonCfg{
-		Db_type:   utils.StringPointer("redis"),
-		Db_host:   utils.StringPointer("127.0.0.1"),
-		Db_port:   utils.IntPointer(6379),
-		Db_name:   utils.StringPointer("11"),
-		Db_user:   utils.StringPointer(""),
-		Db_passwd: utils.StringPointer(""),
+		Db_type:           utils.StringPointer("redis"),
+		Db_host:           utils.StringPointer("127.0.0.1"),
+		Db_port:           utils.IntPointer(6379),
+		Db_name:           utils.StringPointer("11"),
+		Db_user:           utils.StringPointer(""),
+		Db_passwd:         utils.StringPointer(""),
+		Load_history_size: utils.IntPointer(10),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)

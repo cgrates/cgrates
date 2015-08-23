@@ -66,6 +66,7 @@ const CGRATES_CFG_JSON = `
 	"db_name": "11", 						// data_db database name to connect to
 	"db_user": "", 							// username to use when connecting to data_db
 	"db_passwd": "", 						// password to use when connecting to data_db
+	"load_history_size": 10,				// Number of records in the load history
 },
 
 

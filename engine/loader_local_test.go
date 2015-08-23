@@ -134,7 +134,7 @@ func TestLoadFromCSV(t *testing.T) {
 
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
-	), "", "")
+	), "", "", lCfg.LoadHistorySize)
 
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
@@ -207,7 +207,7 @@ func TestLoadFromStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, utils.TEST_SQL, "")
+	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, utils.TEST_SQL, "", lCfg.LoadHistorySize)
 	if err := loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -250,7 +250,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, utils.TEST_SQL, "")
+	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, utils.TEST_SQL, "", lCfg.LoadHistorySize)
 	// Load ratingPlans. This will also set destination keys
 	if ratingPlans, err := storDb.GetTpRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")

@@ -564,6 +564,8 @@ type CacheStats struct {
 	CdrStats        int
 	Users           int
 	Aliases         int
+	LastLoadId      string
+	LastLoadTime    string
 }
 
 type AttrCachedItemAge struct {

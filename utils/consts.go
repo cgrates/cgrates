@@ -182,6 +182,7 @@ const (
 	LOG_ERR                    = "ler_"
 	LOG_CDR                    = "cdr_"
 	LOG_MEDIATED_CDR           = "mcd_"
+	LOADINST_KEY               = "load_history"
 	// sources
 	SESSION_MANAGER_SOURCE       = "SMR"
 	MEDIATOR_SOURCE              = "MED"
@@ -220,6 +221,7 @@ const (
 	OSIPS_FLATSTORE              = "opensips_flatstore"
 	ALIAS_GROUP_RP               = "*rating_profile"
 	ALIAS_GROUP_ACC              = "*account"
+	NOT_AVAILABLE                = "N/A"
 )
 
 var (

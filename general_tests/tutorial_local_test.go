@@ -587,8 +587,50 @@ func TestTutLocalProcessExternalCdrUP(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if !reflect.DeepEqual(eCdr, cdrs[0]) {
-			t.Errorf("Expecting: %+v, received: %+v", eCdr, cdrs[0])
+		if cdrs[0].CgrId != eCdr.CgrId {
+			t.Errorf("Unexpected CgrId for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].TOR != eCdr.TOR {
+			t.Errorf("Unexpected TOR for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].CdrSource != eCdr.CdrSource {
+			t.Errorf("Unexpected CdrSource for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].ReqType != eCdr.ReqType {
+			t.Errorf("Unexpected ReqType for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Tenant != eCdr.Tenant {
+			t.Errorf("Unexpected Tenant for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Category != eCdr.Category {
+			t.Errorf("Unexpected Category for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Account != eCdr.Account {
+			t.Errorf("Unexpected Account for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Subject != eCdr.Subject {
+			t.Errorf("Unexpected Subject for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Destination != eCdr.Destination {
+			t.Errorf("Unexpected Destination for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Supplier != eCdr.Supplier {
+			t.Errorf("Unexpected Supplier for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].SetupTime != eCdr.SetupTime {
+			t.Errorf("Unexpected SetupTime for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Pdd != eCdr.Pdd {
+			t.Errorf("Unexpected Pdd for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].AnswerTime != eCdr.AnswerTime {
+			t.Errorf("Unexpected AnswerTime for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Usage != eCdr.Usage {
+			t.Errorf("Unexpected Usage for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].DisconnectCause != eCdr.DisconnectCause {
+			t.Errorf("Unexpected DisconnectCause for CDR: %+v", cdrs[0])
 		}
 	}
 }

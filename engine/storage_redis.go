@@ -320,6 +320,12 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	if len(alsKeys) != 0 {
 		Logger.Info("Finished aliases caching.")
 	}
+	Logger.Info("Caching load history")
+	if _, err = rs.GetLoadHistory(1, true); err != nil {
+		cache2go.RollbackTransaction()
+		return err
+	}
+	Logger.Info("Finished load history caching.")
 	cache2go.CommitTransaction()
 	return nil
 }
@@ -690,6 +696,65 @@ func (rs *RedisStorage) RemoveAlias(key string) (err error) {
 	return
 }
 
+// Limit will only retrieve the last n items out of history, newest first
+func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*LoadInstance, error) {
+	if limit == 0 {
+		return nil, nil
+	}
+	if !skipCache {
+		if x, err := cache2go.GetCached(utils.LOADINST_KEY); err != nil {
+			return nil, err
+		} else {
+			items := x.([]*LoadInstance)
+			if len(items) < limit {
+				return items, nil
+			}
+			return items[:limit], nil
+		}
+	}
+	marshaleds, err := rs.db.Lrange(utils.LOADINST_KEY, 0, limit-1)
+	if err != nil {
+		return nil, err
+	}
+	loadInsts := make([]*LoadInstance, len(marshaleds))
+	for idx, marshaled := range marshaleds {
+		var lInst LoadInstance
+		err = rs.ms.Unmarshal(marshaled, &lInst)
+		if err != nil {
+			return nil, err
+		}
+		loadInsts[idx] = &lInst
+	}
+	cache2go.RemKey(utils.LOADINST_KEY)
+	cache2go.Cache(utils.LOADINST_KEY, loadInsts)
+	return loadInsts, nil
+}
+
+// Adds a single load instance to load history
+func (rs *RedisStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) error {
+	if loadHistSize == 0 { // Load history disabled
+		return nil
+	}
+	marshaled, err := rs.ms.Marshal(&ldInst)
+	if err != nil {
+		return err
+	}
+	_, err = Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
+		histLen, err := rs.db.Llen(utils.LOADINST_KEY)
+		if err != nil {
+			return nil, err
+		}
+		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
+			if _, err := rs.db.Rpop(utils.LOADINST_KEY); err != nil {
+				return nil, err
+			}
+		}
+		err = rs.db.Lpush(utils.LOADINST_KEY, marshaled)
+		return nil, err
+	}, utils.LOADINST_KEY)
+	return err
+}
+
 func (rs *RedisStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 	var values []byte
 	if values, err = rs.db.Get(utils.ACTION_TIMING_PREFIX + key); err == nil {
@@ -705,6 +770,9 @@ func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) 
 		return err
 	}
 	result, err := rs.ms.Marshal(&ats)
+	if err != nil {
+		return err
+	}
 	err = rs.db.Set(utils.ACTION_TIMING_PREFIX+key, result)
 	return
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -13,6 +14,7 @@ import (
 type TpReader struct {
 	tpid              string
 	timezone          string
+	loadHistSize      int
 	ratingStorage     RatingStorage
 	accountingStorage AccountingStorage
 	lr                LoadReader
@@ -34,12 +36,14 @@ type TpReader struct {
 	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
+	loadInstance      *LoadInstance
 }
 
-func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string) *TpReader {
+func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string, loadHistSize int) *TpReader {
 	tpr := &TpReader{
 		tpid:              tpid,
 		timezone:          timezone,
+		loadHistSize:      loadHistSize,
 		ratingStorage:     rs,
 		accountingStorage: as,
 		lr:                lr,
@@ -1166,6 +1170,13 @@ func (tpr *TpReader) IsValid() bool {
 	return valid
 }
 
+func (tpr *TpReader) GetLoadInstance() *LoadInstance {
+	if tpr.loadInstance == nil {
+		tpr.loadInstance = &LoadInstance{LoadId: utils.GenUUID(), TariffPlanId: tpr.tpid, LoadTime: time.Now()}
+	}
+	return tpr.loadInstance
+}
+
 func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if tpr.ratingStorage == nil || tpr.accountingStorage == nil {
 		return errors.New("no database connection")
@@ -1315,6 +1326,13 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 		if verbose {
 			log.Print("\t", al.GetId())
+		}
+	}
+	if verbose {
+		ldInst := tpr.GetLoadInstance()
+		log.Printf("LoadHistory, instance: %+v\n", ldInst)
+		if err = tpr.accountingStorage.AddLoadHistory(ldInst, tpr.loadHistSize); err != nil {
+			return err
 		}
 	}
 	return

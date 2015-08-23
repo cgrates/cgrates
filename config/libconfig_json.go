@@ -42,14 +42,15 @@ type ListenJsonCfg struct {
 
 // Database config
 type DbJsonCfg struct {
-	Db_type        *string
-	Db_host        *string
-	Db_port        *int
-	Db_name        *string
-	Db_user        *string
-	Db_passwd      *string
-	Max_open_conns *int // Used only in case of storDb
-	Max_idle_conns *int
+	Db_type           *string
+	Db_host           *string
+	Db_port           *int
+	Db_name           *string
+	Db_user           *string
+	Db_passwd         *string
+	Max_open_conns    *int // Used only in case of storDb
+	Max_idle_conns    *int
+	Load_history_size *int // Used in case of dataDb to limit the length of the loads history
 }
 
 // Balancer config section

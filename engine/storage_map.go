@@ -590,6 +590,14 @@ func (ms *MapStorage) RemoveAlias(key string) error {
 	return nil
 }
 
+func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool) ([]*LoadInstance, error) {
+	return nil, nil
+}
+
+func (ms *MapStorage) AddLoadHistory(*LoadInstance, int) error {
+	return nil
+}
+
 func (ms *MapStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 	if values, ok := ms.dict[utils.ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
