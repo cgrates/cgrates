@@ -706,13 +706,16 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*LoadInstan
 			return nil, err
 		} else {
 			items := x.([]*LoadInstance)
-			if len(items) < limit {
+			if len(items) < limit || limit == -1 {
 				return items, nil
 			}
 			return items[:limit], nil
 		}
 	}
-	marshaleds, err := rs.db.Lrange(utils.LOADINST_KEY, 0, limit-1)
+	if limit != -1 {
+		limit -= -1 // Decrease limit to match redis approach on lrange
+	}
+	marshaleds, err := rs.db.Lrange(utils.LOADINST_KEY, 0, limit)
 	if err != nil {
 		return nil, err
 	}

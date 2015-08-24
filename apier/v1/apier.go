@@ -1186,8 +1186,36 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 	}, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
-		return err
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
+	return nil
+}
+
+func (self *ApierV1) GetLoadHistory(attrs utils.Paginator, reply *[]*engine.LoadInstance) error {
+	nrItems := -1
+	offset := 0
+	if attrs.Offset != nil { // For offset we need full data
+		offset = *attrs.Offset
+	} else if attrs.Limit != nil {
+		nrItems = *attrs.Limit
+	}
+	loadHist, err := self.AccountDb.GetLoadHistory(nrItems, true)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if attrs.Offset != nil && attrs.Limit != nil { // Limit back to original
+		nrItems = *attrs.Limit
+	}
+	if len(loadHist) == 0 || len(loadHist) <= offset || nrItems == 0 {
+		return utils.ErrNotFound
+	}
+	if offset != 0 {
+		nrItems = offset + nrItems
+	}
+	if nrItems == -1 || nrItems > len(loadHist) { // So we can use it in indexing bellow
+		nrItems = len(loadHist)
+	}
+	*reply = loadHist[offset:nrItems]
 	return nil
 }

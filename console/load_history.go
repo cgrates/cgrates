@@ -24,43 +24,43 @@ import (
 )
 
 func init() {
-	c := &CmdGetAccounts{
-		name:      "accounts",
-		rpcMethod: "ApierV1.GetAccounts",
-		rpcParams: &utils.AttrGetAccounts{Direction: "*out"},
+	c := &CmdGetLoadHistory{
+		name:      "load_history",
+		rpcMethod: "ApierV1.GetLoadHistory",
+		rpcParams: new(utils.Paginator),
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
-// Commander implementation
-type CmdGetAccounts struct {
+// Returns the list of load items from the history, in reverse order
+type CmdGetLoadHistory struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrGetAccounts
+	rpcParams *utils.Paginator
 	*CommandExecuter
 }
 
-func (self *CmdGetAccounts) Name() string {
+func (self *CmdGetLoadHistory) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAccounts) RpcMethod() string {
+func (self *CmdGetLoadHistory) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccounts) RpcParams(reset bool) interface{} {
+func (self *CmdGetLoadHistory) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrGetAccounts{Direction: "*out"}
+		self.rpcParams = new(utils.Paginator)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetAccounts) PostprocessRpcParams() error {
+func (self *CmdGetLoadHistory) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetAccounts) RpcResult() interface{} {
-	a := make([]engine.Account, 0)
+func (self *CmdGetLoadHistory) RpcResult() interface{} {
+	a := make([]*engine.LoadInstance, 0)
 	return &a
 }
