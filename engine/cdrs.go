@@ -339,7 +339,6 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 
 // ToDo: Add websocket support
 func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
-	Logger.Debug(fmt.Sprintf("replicateCdr cdr: %+v, configuration: %+v", cdr, self.cgrCfg.CDRSCdrReplication))
 	for _, rplCfg := range self.cgrCfg.CDRSCdrReplication {
 		passesFilters := true
 		for _, cdfFltr := range rplCfg.CdrFilter {
