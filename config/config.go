@@ -549,6 +549,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnGeneralCfg.Tpexport_dir != nil {
 			self.TpExportPath = *jsnGeneralCfg.Tpexport_dir
 		}
+		if jsnGeneralCfg.Default_timezone != nil {
+			self.DefaultTimezone = *jsnGeneralCfg.Default_timezone
+		}
 	}
 
 	if jsnListenCfg != nil {

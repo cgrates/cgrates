@@ -148,6 +148,7 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
+	Logger.Debug(fmt.Sprintf("***processCdr: %+v", storedCdr))
 	if storedCdr.Direction == "" {
 		storedCdr.Direction = utils.OUT
 	}
@@ -177,6 +178,7 @@ func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
 		if err := self.cdrDb.SetCdr(storedCdr); err != nil { // Only original CDR stored in primary table, no derived
 			Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", storedCdr, err.Error()))
 		}
+		Logger.Debug(fmt.Sprintf("***Have set primary CDR to: %+v", storedCdr))
 	}
 	go self.deriveRateStoreStatsReplicate(storedCdr)
 	return nil
@@ -184,23 +186,27 @@ func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) deriveRateStoreStatsReplicate(storedCdr *StoredCdr) error {
+	Logger.Debug(fmt.Sprintf("***deriveRateStoreStatsReplicate storedCdr: %+v", storedCdr))
 	cdrRuns, err := self.deriveCdrs(storedCdr)
 	if err != nil {
 		return err
 	}
 	for _, cdr := range cdrRuns {
 		// Rate CDR
+		Logger.Debug(fmt.Sprintf("***deriveRateStoreStatsReplicate cdr in runs: %+v", cdr))
 		if self.rater != nil && !cdr.Rated {
 			if err := self.rateCDR(cdr); err != nil {
 				cdr.Cost = -1.0 // If there was an error, mark the CDR
 				cdr.ExtraInfo = err.Error()
 			}
 		}
+		Logger.Debug(fmt.Sprintf("***deriveRateStoreStatsReplicate after rating cdr is: %+v", cdr))
 		if self.cgrCfg.CDRSStoreCdrs { // Store CDRs
 			// Store RatedCDR
 			if err := self.cdrDb.SetRatedCdr(cdr); err != nil {
 				Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", cdr, err.Error()))
 			}
+			Logger.Debug(fmt.Sprintf("***deriveRateStoreStatsReplicate stored cdr is: %+v", cdr))
 			// Store CostDetails
 			if cdr.Rated || utils.IsSliceMember([]string{utils.RATED, utils.META_RATED}, cdr.ReqType) { // Account related CDRs are saved automatically, so save the others here if requested
 				if err := self.cdrDb.LogCallCost(cdr.CgrId, utils.CDRS_SOURCE, cdr.MediationRunId, cdr.CostDetails); err != nil {

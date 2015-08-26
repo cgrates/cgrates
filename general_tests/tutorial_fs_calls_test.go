@@ -506,7 +506,7 @@ func TestTutFsCalls1006Cdrs(t *testing.T) {
 		if reply[0].Destination != "1002" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
 		}
-		if reply[0].Usage != "64" && reply[0].Usage != "65" { // Usage as seconds
+		if reply[0].Usage != "63" && reply[0].Usage != "64" && reply[0].Usage != "65" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
 		}
 		if reply[0].Cost == -1.0 { // Cost was not calculated
