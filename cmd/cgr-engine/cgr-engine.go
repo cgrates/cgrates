@@ -371,9 +371,14 @@ func startPubSubServer(internalPubSubSChan chan engine.PublisherSubscriber, acco
 }
 
 // ToDo: Make sure we are caching before starting this one
-func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb engine.AccountingStorage, server *engine.Server) {
+func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb engine.AccountingStorage, server *engine.Server, exitChan chan bool) {
 	aliasesServer := engine.NewAliasHandler(accountDb)
 	server.RpcRegisterName("AliasesV1", aliasesServer)
+	if err := accountDb.CacheAccountingPrefixes(utils.ALIASES_PREFIX); err != nil {
+		engine.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
 	internalAliaseSChan <- aliasesServer
 }
 
@@ -382,6 +387,7 @@ func startUsersServer(internalUserSChan chan engine.UserService, accountDb engin
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
 		exitChan <- true
+		return
 	}
 	server.RpcRegisterName("UsersV1", userServer)
 	internalUserSChan <- userServer
@@ -527,10 +533,8 @@ func main() {
 
 	// Start rater service
 	if cfg.RaterEnabled {
-		cacheChan := make(chan struct{})                            // Share the cacheChan with the rater to inform when cache is ready
-		go cacheRaterData(cacheChan, ratingDb, accountDb, exitChan) // Handle data caching outside of rater start
 		go startRater(internalRaterChan, internalBalancerChan, internalSchedulerChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
-			cacheChan, server, ratingDb, accountDb, loadDb, cdrDb, logDb, &stopHandled, exitChan)
+			server, ratingDb, accountDb, loadDb, cdrDb, logDb, &stopHandled, exitChan)
 	}
 
 	// Start Scheduler
@@ -601,7 +605,7 @@ func main() {
 
 	// Start Aliases service
 	if cfg.AliasesServerEnabled {
-		go startAliasesServer(internalAliaseSChan, accountDb, server)
+		go startAliasesServer(internalAliaseSChan, accountDb, server, exitChan)
 	}
 
 	// Start users service

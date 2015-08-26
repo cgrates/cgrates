@@ -61,7 +61,7 @@ func TestCDRStatsLclStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if _, err := engine.StopStartEngine(cdrstCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrstCfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -15,6 +15,7 @@
 	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 	"pubsubs": "internal",					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
 	"users": "internal",					// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+	"historys": "127.0.0.1:2013",
 },
 
 "scheduler": {
@@ -39,6 +40,10 @@
 "users": {
 	"enabled": true,				// starts User service: <true|false>.
 	"indexes": ["Uuid"],			// user profile field indexes
+},
+
+"historys": {
+	"enabled": true,				// starts User service: <true|false>.
 },
 
 

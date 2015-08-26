@@ -12,6 +12,7 @@
 
 "rater": {
 	"enabled": true,						// enable Rater service: <true|false>
+	"cdrstats": "internal",
 },
  "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>

@@ -955,9 +955,10 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 		}
 		cs.Users = len(ups)
 	}
-	if loadHistInsts, err := self.AccountDb.GetLoadHistory(1, false); err != nil {
-		return utils.NewErrServerError(err)
-	} else if len(loadHistInsts) == 0 {
+	if loadHistInsts, err := self.AccountDb.GetLoadHistory(1, false); err != nil || len(loadHistInsts) == 0 {
+		if err != nil { // Not really an error here since we only count in cache
+			engine.Logger.Err(fmt.Sprintf("ApierV1.GetCacheStats, error on GetLoadHistory: %s"))
+		}
 		cs.LastLoadId = utils.NOT_AVAILABLE
 		cs.LastLoadTime = utils.NOT_AVAILABLE
 	} else {

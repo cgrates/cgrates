@@ -38,29 +38,32 @@ func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled 
 	internalBalancerChan <- bal
 }
 
-func cacheRaterData(doneChan chan struct{}, ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, exitChan chan bool) {
-	if err := ratingDb.CacheRatingAll(); err != nil {
-		engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	if err := accountDb.CacheAccountingAll(); err != nil {
-		engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	close(doneChan)
-}
-
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
 	internalCdrStatSChan chan engine.StatsInterface, internalHistorySChan chan history.Scribe,
 	internalPubSubSChan chan engine.PublisherSubscriber, internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
-	cacheChan chan struct{}, server *engine.Server,
+	server *engine.Server,
 	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
 	stopHandled *bool, exitChan chan bool) {
 	var wg sync.WaitGroup // Sync all external connections in a group
 
+	// Cache data
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := ratingDb.CacheRatingAll(); err != nil {
+			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+		if err := accountDb.CacheAccountingPrefixes(); err != nil { // Used to cache load history
+			engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+	}()
+
+	// Retrieve scheduler for it's API methods
 	var sched *scheduler.Scheduler // Need the scheduler in APIer
 	if cfg.SchedulerEnabled {
 		wg.Add(1)
@@ -185,7 +188,6 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 		Config: cfg, Responder: responder, CdrStatsSrv: cdrStats, Users: userServer}
 	apierRpcV2 := &v2.ApierV2{
 		ApierV1: *apierRpcV1}
-
 	// internalSchedulerChan shared here
 	server.RpcRegister(responder)
 	server.RpcRegister(apierRpcV1)
