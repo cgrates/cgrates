@@ -142,6 +142,5 @@ func (fsCdr FSCdr) AsStoredCdr(timezone string) *StoredCdr {
 	storCdr.DisconnectCause = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DISCONNECT_CAUSE], fsCdr.vars["hangup_cause"])
 	storCdr.ExtraFields = fsCdr.getExtraFields()
 	storCdr.Cost = -1
-	Logger.Debug(fmt.Sprintf("***FSCdr.AsStoredCDR, original answer time: %s, timezone: %s, returning storCdr: %+v", fsCdr.vars[FS_ANSWER_TIME], timezone, storCdr))
 	return storCdr
 }
