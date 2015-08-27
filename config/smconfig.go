@@ -59,7 +59,6 @@ type SmFsConfig struct {
 	Enabled             bool
 	Rater               string
 	Cdrs                string
-	Reconnects          int
 	CreateCdr           bool
 	ExtraFields         []*utils.RSRField
 	DebitInterval       time.Duration
@@ -87,9 +86,6 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	}
 	if jsnCfg.Cdrs != nil {
 		self.Cdrs = *jsnCfg.Cdrs
-	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
@@ -179,7 +175,6 @@ type SmKamConfig struct {
 	Enabled         bool
 	Rater           string
 	Cdrs            string
-	Reconnects      int
 	CreateCdr       bool
 	DebitInterval   time.Duration
 	MinCallDuration time.Duration
@@ -200,9 +195,6 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 	}
 	if jsnCfg.Cdrs != nil {
 		self.Cdrs = *jsnCfg.Cdrs
-	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
@@ -254,7 +246,6 @@ type SmOsipsConfig struct {
 	ListenUdp               string
 	Rater                   string
 	Cdrs                    string
-	Reconnects              int
 	CreateCdr               bool
 	DebitInterval           time.Duration
 	MinCallDuration         time.Duration
@@ -276,9 +267,6 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 	}
 	if jsnCfg.Cdrs != nil {
 		self.Cdrs = *jsnCfg.Cdrs
-	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr

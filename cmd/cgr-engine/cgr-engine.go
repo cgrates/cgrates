@@ -108,21 +108,14 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 	engine.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
-	delay := utils.Fib()
 	if cfg.SmFsConfig.Rater == utils.INTERNAL {
 		resp := <-internalRaterChan
 		raterConn = resp
 		internalRaterChan <- resp
 	} else {
 		var err error
-		for i := 0; i < cfg.SmFsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Rater, cfg.ConnectAttempts, cfg.SmFsConfig.Reconnects, utils.GOB)
-			if err == nil { //Connected so no need to reiterate
-				break
-			}
-			time.Sleep(delay())
-		}
-		if err != nil {
+		client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Rater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+		if err == nil { //Connected so no need to reiterate
 			engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 			exitChan <- true
 			return
@@ -136,14 +129,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 		cdrsConn = resp
 		internalRaterChan <- resp
 	} else if len(cfg.SmFsConfig.Cdrs) != 0 {
-		delay = utils.Fib()
-		for i := 0; i < cfg.SmFsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Cdrs, cfg.ConnectAttempts, cfg.SmFsConfig.Reconnects, utils.GOB)
-			if err == nil { //Connected so no need to reiterate
-				break
-			}
-			time.Sleep(delay())
-		}
+		client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Cdrs, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
 			exitChan <- true
@@ -170,14 +156,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		internalRaterChan <- resp
 	} else {
 		var err error
-		delay := utils.Fib()
-		for i := 0; i < cfg.SmKamConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Rater, cfg.ConnectAttempts, cfg.SmKamConfig.Reconnects, utils.GOB)
-			if err == nil { //Connected so no need to reiterate
-				break
-			}
-			time.Sleep(delay())
-		}
+		client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Rater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to rater: %v", err))
 			exitChan <- true
@@ -191,14 +170,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		cdrsConn = resp
 		internalRaterChan <- resp
 	} else if len(cfg.SmKamConfig.Cdrs) != 0 {
-		delay := utils.Fib()
-		for i := 0; i < cfg.SmKamConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Cdrs, cfg.ConnectAttempts, cfg.SmKamConfig.Reconnects, utils.GOB)
-			if err == nil { //Connected so no need to reiterate
-				break
-			}
-			time.Sleep(delay())
-		}
+		client, err = rpcclient.NewRpcClient("tcp", cfg.SmKamConfig.Cdrs, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SM-Kamailio> Could not connect to CDRS via RPC: %v", err))
 			exitChan <- true
@@ -225,14 +197,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		internalRaterChan <- resp
 	} else {
 		var err error
-		delay := utils.Fib()
-		for i := 0; i < cfg.SmOsipsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Rater, cfg.ConnectAttempts, cfg.SmOsipsConfig.Reconnects, utils.GOB)
-			if err == nil { //Connected so no need to reiterate
-				break
-			}
-			time.Sleep(delay())
-		}
+		client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Rater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to rater: %v", err))
 			exitChan <- true
@@ -246,14 +211,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		cdrsConn = resp
 		internalRaterChan <- resp
 	} else if len(cfg.SmOsipsConfig.Cdrs) != 0 {
-		delay := utils.Fib()
-		for i := 0; i < cfg.SmOsipsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Cdrs, cfg.ConnectAttempts, cfg.SmOsipsConfig.Reconnects, utils.GOB)
-			if err == nil { //Connected so no need to reiterate
-				break
-			}
-			time.Sleep(delay())
-		}
+		client, err = rpcclient.NewRpcClient("tcp", cfg.SmOsipsConfig.Cdrs, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
 			exitChan <- true
@@ -261,7 +219,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		}
 		cdrsConn = &engine.RPCClientConnector{Client: client}
 	}
-	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
+	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, cfg.Reconnects, raterConn, cdrsConn, cfg.DefaultTimezone)
 	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err := sm.Connect(); err != nil {
@@ -282,14 +240,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		raterConn = responder
 		internalRaterChan <- responder // Put back the connection since there might be other entities waiting for it
 	} else if len(cfg.CDRSRater) != 0 {
-		delay := utils.Fib()
-		for i := 0; i < cfg.CDRSReconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSRater, cfg.ConnectAttempts, cfg.CDRSReconnects, utils.GOB)
-			if err == nil { //Connected so no need to reiterate
-				break
-			}
-			time.Sleep(delay())
-		}
+		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSRater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to rater: %s", err.Error()))
 			exitChan <- true
@@ -305,14 +256,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		if cfg.CDRSRater == cfg.CDRSStats {
 			statsConn = &engine.ProxyStats{Client: client}
 		} else {
-			delay := utils.Fib()
-			for i := 0; i < cfg.CDRSReconnects; i++ {
-				client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.ConnectAttempts, cfg.CDRSReconnects, utils.GOB)
-				if err == nil { //Connected so no need to reiterate
-					break
-				}
-				time.Sleep(delay())
-			}
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil {
 				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
 				exitChan <- true

@@ -148,7 +148,6 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Store_cdrs:      utils.BoolPointer(true),
 		Rater:           utils.StringPointer("internal"),
 		Cdrstats:        utils.StringPointer(""),
-		Reconnects:      utils.IntPointer(5),
 		Cdr_replication: &[]*CdrReplicationJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
@@ -323,7 +322,6 @@ func TestSmFsJsonCfg(t *testing.T) {
 		Enabled:                utils.BoolPointer(false),
 		Rater:                  utils.StringPointer("internal"),
 		Cdrs:                   utils.StringPointer("internal"),
-		Reconnects:             utils.IntPointer(5),
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           utils.StringSlicePointer([]string{}),
 		Debit_interval:         utils.StringPointer("10s"),
@@ -354,7 +352,6 @@ func TestSmKamJsonCfg(t *testing.T) {
 		Enabled:           utils.BoolPointer(false),
 		Rater:             utils.StringPointer("internal"),
 		Cdrs:              utils.StringPointer("internal"),
-		Reconnects:        utils.IntPointer(5),
 		Create_cdr:        utils.BoolPointer(false),
 		Debit_interval:    utils.StringPointer("10s"),
 		Min_call_duration: utils.StringPointer("0s"),
@@ -379,7 +376,6 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 		Listen_udp:                utils.StringPointer("127.0.0.1:2020"),
 		Rater:                     utils.StringPointer("internal"),
 		Cdrs:                      utils.StringPointer("internal"),
-		Reconnects:                utils.IntPointer(5),
 		Create_cdr:                utils.BoolPointer(false),
 		Debit_interval:            utils.StringPointer("10s"),
 		Min_call_duration:         utils.StringPointer("0s"),

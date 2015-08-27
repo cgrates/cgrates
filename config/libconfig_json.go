@@ -81,7 +81,6 @@ type CdrsJsonCfg struct {
 	Store_cdrs      *bool
 	Rater           *string
 	Cdrstats        *string
-	Reconnects      *int
 	Cdr_replication *[]*CdrReplicationJsonCfg
 }
 
@@ -158,7 +157,6 @@ type SmFsJsonCfg struct {
 	Enabled                *bool
 	Rater                  *string
 	Cdrs                   *string
-	Reconnects             *int
 	Create_cdr             *bool
 	Extra_fields           *[]string
 	Debit_interval         *string
@@ -185,7 +183,6 @@ type SmKamJsonCfg struct {
 	Enabled           *bool
 	Rater             *string
 	Cdrs              *string
-	Reconnects        *int
 	Create_cdr        *bool
 	Debit_interval    *string
 	Min_call_duration *string
@@ -205,7 +202,6 @@ type SmOsipsJsonCfg struct {
 	Listen_udp                *string
 	Rater                     *string
 	Cdrs                      *string
-	Reconnects                *int
 	Create_cdr                *bool
 	Debit_interval            *string
 	Min_call_duration         *string

@@ -207,7 +207,6 @@ type CGRConfig struct {
 	CDRSStoreCdrs        bool                 // store cdrs in storDb
 	CDRSRater            string               // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
 	CDRSStats            string               // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
-	CDRSReconnects       int                  // number of reconnects to remote services before giving up
 	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
 	CDRStatsEnabled      bool                 // Enable CDR Stats service
 	CDRStatsSaveInterval time.Duration        // Save interval duration
@@ -615,9 +614,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnCdrsCfg.Cdrstats != nil {
 			self.CDRSStats = *jsnCdrsCfg.Cdrstats
-		}
-		if jsnCdrsCfg.Reconnects != nil {
-			self.CDRSReconnects = *jsnCdrsCfg.Reconnects
 		}
 		if jsnCdrsCfg.Cdr_replication != nil {
 			self.CDRSCdrReplication = make([]*CdrReplicationCfg, len(*jsnCdrsCfg.Cdr_replication))
