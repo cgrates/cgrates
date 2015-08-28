@@ -358,23 +358,43 @@ func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrstat) {
 	return
 }
 
-func APItoModelAliases(attr *utils.AttrSetTPAlias) (result *TpAlias) {
-	return &TpAlias{
-		Tpid:      attr.TPid,
-		Direction: attr.Direction,
-		Tenant:    attr.Tenant,
-		Category:  attr.Category,
-		Account:   attr.Account,
-		Subject:   attr.Subject,
-		Group:     attr.Group,
+func APItoModelAliases(attr *utils.TPAliases) (result []TpAlias) {
+	for _, v := range attr.Values {
+		result = append(result, TpAlias{
+			Tpid:          attr.TPid,
+			Direction:     attr.Direction,
+			Tenant:        attr.Tenant,
+			Category:      attr.Category,
+			Account:       attr.Account,
+			Subject:       attr.Subject,
+			Group:         attr.Group,
+			DestinationId: v.DestinationId,
+			Alias:         v.Alias,
+			Weight:        v.Weight,
+		})
 	}
+	if len(attr.Values) == 0 {
+		result = append(result, TpAlias{
+			Tpid: attr.TPid,
+		})
+	}
+	return
 }
 
-func APItoModelUsers(attr *utils.AttrSetTPUser) (result *TpUser) {
-	return &TpUser{
-		Tpid:           attr.TPid,
-		Tenant:         attr.Tenant,
-		AttributeName:  attr.AttributeName,
-		AttributeValue: attr.AttributeValue,
+func APItoModelUsers(attr *utils.TPUsers) (result []TpUser) {
+	for _, p := range attr.Profile {
+		result = append(result, TpUser{
+			Tpid:           attr.TPid,
+			Tenant:         attr.Tenant,
+			UserName:       attr.UserName,
+			AttributeName:  p.AttrName,
+			AttributeValue: p.AttrValue,
+		})
 	}
+	if len(attr.Profile) == 0 {
+		result = append(result, TpUser{
+			Tpid: attr.TPid,
+		})
+	}
+	return
 }

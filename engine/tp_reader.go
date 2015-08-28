@@ -1062,7 +1062,24 @@ func (tpr *TpReader) LoadUsers() error {
 	if err != nil {
 		return err
 	}
-	tpr.users, err = TpUsers(tps).GetUsers()
+	userMap, err := TpUsers(tps).GetUsers()
+	if err != nil {
+		return err
+	}
+	for key, usr := range userMap {
+		up, found := tpr.users[key]
+		if !found {
+			up = &UserProfile{
+				Tenant:   usr.Tenant,
+				UserName: usr.UserName,
+				Profile:  make(map[string]string),
+			}
+			tpr.users[key] = up
+		}
+		for _, p := range usr.Profile {
+			up.Profile[p.AttrName] = p.AttrValue
+		}
+	}
 	return err
 }
 
@@ -1094,7 +1111,32 @@ func (tpr *TpReader) LoadAliases() error {
 	if err != nil {
 		return err
 	}
-	tpr.aliases, err = TpAliases(tps).GetAliases()
+	alMap, err := TpAliases(tps).GetAliases()
+	if err != nil {
+		return err
+	}
+	for key, tal := range alMap {
+		al, found := tpr.aliases[key]
+		if !found {
+			al = &Alias{
+				Direction: tal.Direction,
+				Tenant:    tal.Tenant,
+				Category:  tal.Category,
+				Account:   tal.Account,
+				Subject:   tal.Subject,
+				Group:     tal.Group,
+				Values:    make(AliasValues, 0),
+			}
+			tpr.aliases[key] = al
+		}
+		for _, v := range tal.Values {
+			al.Values = append(al.Values, &AliasValue{
+				DestinationId: v.DestinationId,
+				Alias:         v.Alias,
+				Weight:        v.Weight,
+			})
+		}
+	}
 	return err
 }
 
