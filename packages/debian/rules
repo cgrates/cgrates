@@ -23,7 +23,7 @@ binary-arch: clean
 	dh_installdirs
 	exec $(CURDIR)/update_external_libs.sh
 	ln -sf $(CURDIR) src/github.com/cgrates/cgrates
-	cd $(CURDIR)/src/github.com/cgrates/cgrates/ && go install
+	exec $(CURDIR)/build.sh
 	mkdir -p $(PKGDIR)/usr/bin
 	cp $(GOPATH)/bin/cgr-* $(PKGDIR)/usr/bin/
 	mkdir -p $(PKGDIR)/etc/
