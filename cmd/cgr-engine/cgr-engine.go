@@ -115,7 +115,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 	} else {
 		var err error
 		client, err = rpcclient.NewRpcClient("tcp", cfg.SmFsConfig.Rater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
-		if err == nil { //Connected so no need to reiterate
+		if err != nil { //Connected so no need to reiterate
 			engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 			exitChan <- true
 			return
