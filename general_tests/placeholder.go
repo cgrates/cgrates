@@ -16,11 +16,4 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cgrates
-
-import (
-	_ "github.com/cgrates/cgrates/cmd/cgr-console"
-	_ "github.com/cgrates/cgrates/cmd/cgr-engine"
-	_ "github.com/cgrates/cgrates/cmd/cgr-loader"
-	_ "github.com/cgrates/cgrates/cmd/cgr-tester"
-)
+package general_tests

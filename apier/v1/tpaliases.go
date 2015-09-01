@@ -24,12 +24,12 @@ import (
 )
 
 // Creates a new alias within a tariff plan
-func (self *ApierV1) SetTPAlias(attrs utils.AttrSetTPAlias, reply *string) error {
+func (self *ApierV1) SetTPAlias(attrs utils.TPAliases, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Direction", "Tenant", "Category", "Account", "Subject", "Group"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tm := engine.APItoModelAliases(&attrs)
-	if err := self.StorDb.SetTpAliases([]engine.TpAlias{*tm}); err != nil {
+	if err := self.StorDb.SetTpAliases(tm); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = "OK"
@@ -47,7 +47,7 @@ type AttrGetTPAlias struct {
 }
 
 // Queries specific Alias on Tariff plan
-func (self *ApierV1) GetTPAlias(attr AttrGetTPAlias, reply *engine.Alias) error {
+func (self *ApierV1) GetTPAliases(attr AttrGetTPAlias, reply *utils.TPAliases) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
