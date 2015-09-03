@@ -55,6 +55,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.DERIVED_CHARGERS_CSV:  (*TPCSVImporter).importDerivedChargers,
 	utils.CDR_STATS_CSV:         (*TPCSVImporter).importCdrStats,
 	utils.USERS_CSV:             (*TPCSVImporter).importUsers,
+	utils.ALIASES_CSV:           (*TPCSVImporter).importAliases,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -313,4 +314,18 @@ func (self *TPCSVImporter) importUsers(fn string) error {
 	}
 
 	return self.StorDb.SetTpUsers(tps)
+}
+
+func (self *TPCSVImporter) importAliases(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	tps, err := self.csvr.GetTpAliases(nil)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+	}
+	return self.StorDb.SetTpAliases(tps)
 }
