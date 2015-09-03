@@ -195,7 +195,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 		}
 	}
 	if storedCdr.CgrId == "" && storedCdr.AccId != "" && cfgKey != "*header" {
-		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.UTC().String())
 	}
 	if storedCdr.TOR == utils.DATA && duMultiplyFactor != 0 {
 		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * duMultiplyFactor)

@@ -39,7 +39,7 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr, timezone string) (*StoredC
 		return nil, err
 	}
 	if len(storedCdr.CgrId) == 0 { // Populate CgrId if not present
-		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.UTC().String())
 	}
 	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime, timezone); err != nil {
 		return nil, err

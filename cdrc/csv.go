@@ -309,7 +309,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cfgIdx int) 
 			return nil, err
 		}
 	}
-	storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+	storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.UTC().String())
 	if storedCdr.TOR == utils.DATA && self.duMultiplyFactors[cfgIdx] != 0 {
 		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * self.duMultiplyFactors[cfgIdx])
 	}
