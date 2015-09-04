@@ -579,12 +579,14 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 		if err == nil {
 			cache2go.Cache(key, al.Values)
 			for _, v := range al.Values {
-				var existingKeys []string
-				rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias
+				var existingKeys map[string]bool
+				rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias + al.Group
 				if x, err := cache2go.GetCached(rKey); err == nil {
-					existingKeys = x.([]string)
+					existingKeys = x.(map[string]bool)
+				} else {
+					existingKeys = make(map[string]bool)
 				}
-				existingKeys = append(existingKeys, key)
+				existingKeys[key] = true
 				cache2go.Cache(rKey, existingKeys)
 			}
 		}
@@ -595,7 +597,28 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 }
 
 func (ms *MapStorage) RemoveAlias(key string) error {
-	delete(ms.dict, utils.ALIASES_PREFIX+key)
+	al := &Alias{}
+	al.SetId(key)
+	key = utils.ALIASES_PREFIX + key
+	aliasValues := make(AliasValues, 0)
+	if values, ok := ms.dict[key]; ok {
+		ms.ms.Unmarshal(values, &aliasValues)
+	}
+	delete(ms.dict, key)
+	for _, v := range aliasValues {
+		var existingKeys map[string]bool
+		rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias + al.Group
+		if x, err := cache2go.GetCached(rKey); err == nil {
+			existingKeys = x.(map[string]bool)
+		}
+		if len(existingKeys) == 1 {
+			cache2go.RemKey(rKey)
+		} else {
+			delete(existingKeys, key)
+			cache2go.Cache(rKey, existingKeys)
+		}
+	}
+	cache2go.RemKey(key)
 	return nil
 }
 

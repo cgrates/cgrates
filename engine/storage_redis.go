@@ -684,12 +684,14 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 			cache2go.Cache(key, al.Values)
 			// cache reverse alias
 			for _, v := range al.Values {
-				var existingKeys []string
-				rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias
+				var existingKeys map[string]bool
+				rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias + al.Group
 				if x, err := cache2go.GetCached(rKey); err == nil {
-					existingKeys = x.([]string)
+					existingKeys = x.(map[string]bool)
+				} else {
+					existingKeys = make(map[string]bool)
 				}
-				existingKeys = append(existingKeys, key)
+				existingKeys[key] = true
 				cache2go.Cache(rKey, existingKeys)
 			}
 		}
@@ -698,9 +700,28 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 }
 
 func (rs *RedisStorage) RemoveAlias(key string) (err error) {
+	al := &Alias{}
+	al.SetId(key)
 	key = utils.ALIASES_PREFIX + key
+	aliasValues := make(AliasValues, 0)
+	if values, err := rs.db.Get(key); err == nil {
+		rs.ms.Unmarshal(values, &aliasValues)
+	}
 	_, err = rs.db.Del(key)
 	if err == nil {
+		for _, v := range aliasValues {
+			var existingKeys map[string]bool
+			rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias + al.Group
+			if x, err := cache2go.GetCached(rKey); err == nil {
+				existingKeys = x.(map[string]bool)
+			}
+			if len(existingKeys) == 1 {
+				cache2go.RemKey(rKey)
+			} else {
+				delete(existingKeys, key)
+				cache2go.Cache(rKey, existingKeys)
+			}
+		}
 		cache2go.RemKey(key)
 	}
 	return

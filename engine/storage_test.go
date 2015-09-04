@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -97,7 +98,7 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 	}
 }
 
-func TestCacheRefresh(t *testing.T) {
+func TestStorageCacheRefresh(t *testing.T) {
 	ratingStorage.SetDestination(&Destination{"T11", []string{"0"}})
 	ratingStorage.GetDestination("T11")
 	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}})
@@ -107,6 +108,129 @@ func TestCacheRefresh(t *testing.T) {
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
 		t.Error("Error refreshing cache:", d)
+	}
+}
+
+func TestStorageGetAliases(t *testing.T) {
+	ala := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Group:     utils.ALIAS_GROUP_RP,
+		Values: AliasValues{
+			&AliasValue{
+				Alias:         "aaa",
+				Weight:        10,
+				DestinationId: utils.ANY,
+			},
+		},
+	}
+	alb := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Group:     utils.ALIAS_GROUP_ACC,
+		Values: AliasValues{
+			&AliasValue{
+				Alias:         "aaa",
+				Weight:        10,
+				DestinationId: utils.ANY,
+			},
+		},
+	}
+	accountingStorage.SetAlias(ala)
+	accountingStorage.SetAlias(alb)
+	foundAlias, err := accountingStorage.GetAlias(ala.GetId(), true)
+	if err != nil || len(foundAlias.Values) != 1 {
+		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
+	}
+	foundAlias, err = accountingStorage.GetAlias(alb.GetId(), true)
+	if err != nil || len(foundAlias.Values) != 1 {
+		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
+	}
+	foundAlias, err = accountingStorage.GetAlias(ala.GetId(), false)
+	if err != nil || len(foundAlias.Values) != 1 {
+		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
+	}
+	foundAlias, err = accountingStorage.GetAlias(alb.GetId(), false)
+	if err != nil || len(foundAlias.Values) != 1 {
+		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
+	}
+}
+
+func TestStorageCacheGetReverseAliases(t *testing.T) {
+	ala := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Group:     utils.ALIAS_GROUP_RP,
+	}
+	alb := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Group:     utils.ALIAS_GROUP_ACC,
+	}
+	if x, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_RP); err == nil {
+		aliasKeys := x.(map[string]bool)
+		_, found := aliasKeys[utils.ALIASES_PREFIX+ala.GetId()]
+		if !found {
+			t.Error("Error getting reverse alias: ", aliasKeys)
+		}
+	} else {
+		t.Error("Error getting reverse alias: ", err)
+	}
+	if x, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_ACC); err == nil {
+		aliasKeys := x.(map[string]bool)
+		_, found := aliasKeys[utils.ALIASES_PREFIX+alb.GetId()]
+		if !found {
+			t.Error("Error getting reverse alias: ", aliasKeys)
+		}
+	} else {
+		t.Error("Error getting reverse alias: ", err)
+	}
+}
+
+func TestStorageCacheRemoveCachedAliases(t *testing.T) {
+	ala := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Group:     utils.ALIAS_GROUP_RP,
+	}
+	alb := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Group:     utils.ALIAS_GROUP_ACC,
+	}
+	accountingStorage.RemoveAlias(ala.GetId())
+	accountingStorage.RemoveAlias(alb.GetId())
+
+	if _, err := cache2go.GetCached(utils.ALIASES_PREFIX + ala.GetId()); err == nil {
+		t.Error("Error removing cached alias: ", err)
+	}
+	if _, err := cache2go.GetCached(utils.ALIASES_PREFIX + alb.GetId()); err == nil {
+		t.Error("Error removing cached alias: ", err)
+	}
+
+	if _, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_RP); err == nil {
+		t.Error("Error removing cached reverse alias: ", err)
+	}
+	if _, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_ACC); err == nil {
+		t.Error("Error removing cached reverse alias: ", err)
 	}
 }
 
