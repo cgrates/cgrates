@@ -367,7 +367,7 @@ CREATE TABLE tp_aliases (
   `account` varchar(64) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `group` varchar(64) NOT NULL,
-  `destionation_id` varchar(64) NOT NULL,
+  `destination_id` varchar(64) NOT NULL,
   `alias` varchar(64) NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,

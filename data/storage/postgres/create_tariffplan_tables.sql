@@ -363,7 +363,7 @@ CREATE TABLE tp_aliases (
   "account" VARCHAR(64) NOT NULL,
   "subject" VARCHAR(64) NOT NULL,
   "group" VARCHAR(64) NOT NULL,
-  "destionation_id" VARCHAR(64) NOT NULL,
+  "destination_id" VARCHAR(64) NOT NULL,
   "alias" VARCHAR(64) NOT NULL,
   "weight" NUMERIC(8,2) NOT NULL,
   "created_at" TIMESTAMP
