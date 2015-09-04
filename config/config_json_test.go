@@ -147,13 +147,16 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Extra_fields:    utils.StringSlicePointer([]string{}),
 		Store_cdrs:      utils.BoolPointer(true),
 		Rater:           utils.StringPointer("internal"),
+		Pubsubs:         utils.StringPointer(""),
+		Users:           utils.StringPointer(""),
+		Aliases:         utils.StringPointer(""),
 		Cdrstats:        utils.StringPointer(""),
 		Cdr_replication: &[]*CdrReplicationJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", *cfg)
+		t.Errorf("Received: %+v", *cfg)
 	}
 }
 

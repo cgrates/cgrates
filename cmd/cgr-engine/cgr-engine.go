@@ -229,7 +229,9 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 }
 
 func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage, cdrDb engine.CdrStorage,
-	internalRaterChan chan *engine.Responder, internalCdrStatSChan chan engine.StatsInterface, server *engine.Server, exitChan chan bool) {
+	internalRaterChan chan *engine.Responder, internalPubSubSChan chan engine.PublisherSubscriber,
+	internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
+	internalCdrStatSChan chan engine.StatsInterface, server *engine.Server, exitChan chan bool) {
 	engine.Logger.Info("Starting CGRateS CDRS service.")
 	var err error
 	var client *rpcclient.RpcClient
@@ -247,6 +249,57 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 			return
 		}
 		raterConn = &engine.RPCClientConnector{Client: client}
+	}
+	// Pubsub connection init
+	var pubSubConn engine.PublisherSubscriber
+	if cfg.CDRSPubSub == utils.INTERNAL {
+		pubSubConn = <-internalPubSubSChan
+	} else if len(cfg.CDRSPubSub) != 0 {
+		if cfg.CDRSRater == cfg.CDRSPubSub {
+			pubSubConn = &engine.ProxyPubSub{Client: client}
+		} else {
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			if err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to pubsub server: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			pubSubConn = &engine.ProxyPubSub{Client: client}
+		}
+	}
+	// Users connection init
+	var usersConn engine.UserService
+	if cfg.CDRSUsers == utils.INTERNAL {
+		usersConn = <-internalUserSChan
+	} else if len(cfg.CDRSUsers) != 0 {
+		if cfg.CDRSRater == cfg.CDRSUsers {
+			usersConn = &engine.ProxyUserService{Client: client}
+		} else {
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSUsers, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			if err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to users server: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			usersConn = &engine.ProxyUserService{Client: client}
+		}
+	}
+	// Aliases connection init
+	var aliasesConn engine.AliasService
+	if cfg.CDRSAliases == utils.INTERNAL {
+		aliasesConn = <-internalAliaseSChan
+	} else if len(cfg.CDRSAliases) != 0 {
+		if cfg.CDRSRater == cfg.CDRSAliases {
+			aliasesConn = &engine.ProxyAliasService{Client: client}
+		} else {
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSAliases, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			if err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to aliases server: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			aliasesConn = &engine.ProxyAliasService{Client: client}
+		}
 	}
 	// Stats connection init
 	var statsConn engine.StatsInterface
@@ -266,7 +319,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		}
 	}
 
-	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, raterConn, statsConn)
+	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, raterConn, pubSubConn, usersConn, aliasesConn, statsConn)
 	engine.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHanlersToServer(server)
 	engine.Logger.Info("Registering CDRS RPC service.")
@@ -488,7 +541,7 @@ func main() {
 
 	// Start CDR Server
 	if cfg.CDRSEnabled {
-		go startCDRS(internalCdrSChan, logDb, cdrDb, internalRaterChan, internalCdrStatSChan, server, exitChan)
+		go startCDRS(internalCdrSChan, logDb, cdrDb, internalRaterChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan, internalCdrStatSChan, server, exitChan)
 	}
 
 	// Start CDR Stats server

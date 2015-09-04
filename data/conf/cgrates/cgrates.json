@@ -86,6 +86,9 @@
 //	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 //	"store_cdrs": true,						// store cdrs in storDb
 //	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
+//	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
+//	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+//  "aliases": "",                          // address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
 //	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 //	"reconnects": 5,						// number of reconnect attempts to rater or cdrs
 //	"cdr_replication":[],					// replicate the raw CDR to a number of servers

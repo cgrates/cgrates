@@ -80,6 +80,9 @@ type CdrsJsonCfg struct {
 	Extra_fields    *[]string
 	Store_cdrs      *bool
 	Rater           *string
+	Pubsubs         *string
+	Users           *string
+	Aliases         *string
 	Cdrstats        *string
 	Cdr_replication *[]*CdrReplicationJsonCfg
 }
