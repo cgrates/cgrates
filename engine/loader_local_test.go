@@ -379,7 +379,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 }
 
 // Compares previously loaded data from csv and stor to be identical, redis specific tests
-func TestMatchLoadCsvWithStor(t *testing.T) {
+func TestMatchLoadCsvWithStorRating(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -395,6 +395,41 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 	}
 	for _, key := range keysCsv {
 		var refVal []byte
+		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
+			qVal, err := rs.db.Get(key)
+			if err != nil {
+				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
+			}
+			if idx == 0 { // Only compare at second iteration, first one is to set reference value
+				refVal = qVal
+				continue
+			}
+			if len(refVal) != len(qVal) {
+				t.Errorf("Missmatched data for key: %s\n\t, reference val: %s \n\t retrieved value: %s\n on iteration: %d", key, refVal, qVal, idx)
+			}
+		}
+	}
+}
+
+func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	rsCsv, redisDb := accountDbCsv.(*RedisStorage)
+	if !redisDb {
+		return // We only support these tests for redis
+	}
+	rsStor := accountDbStor.(*RedisStorage)
+	rsApier := accountDbApier.(*RedisStorage)
+	keysCsv, err := rsCsv.db.Keys("*")
+	if err != nil {
+		t.Fatal("Failed querying redis keys for csv data")
+	}
+	for _, key := range keysCsv {
+		var refVal []byte
+		if key == "load_history" {
+			continue
+		}
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
 			qVal, err := rs.db.Get(key)
 			if err != nil {
