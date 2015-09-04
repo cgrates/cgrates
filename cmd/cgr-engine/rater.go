@@ -20,7 +20,6 @@ package main
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
@@ -45,12 +44,13 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	server *engine.Server,
 	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
 	stopHandled *bool, exitChan chan bool) {
-	var wg sync.WaitGroup // Sync all external connections in a group
+	waitTasks := make([]chan struct{}, 0)
 
-	// Cache data
-	wg.Add(1)
+	//Cache load
+	cacheTaskChan := make(chan struct{})
+	waitTasks = append(waitTasks, cacheTaskChan)
 	go func() {
-		defer wg.Done()
+		defer close(cacheTaskChan)
 		if err := ratingDb.CacheRatingAll(); err != nil {
 			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
 			exitChan <- true
@@ -61,25 +61,29 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 			exitChan <- true
 			return
 		}
+
 	}()
 
 	// Retrieve scheduler for it's API methods
 	var sched *scheduler.Scheduler // Need the scheduler in APIer
 	if cfg.SchedulerEnabled {
-		wg.Add(1)
+		schedTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, schedTaskChan)
 		go func() {
-			defer wg.Done()
+			defer close(schedTaskChan)
 			sched = <-internalSchedulerChan
 			internalSchedulerChan <- sched
+
 		}()
 	}
 
 	// Connection to balancer
 	var bal *balancer2go.Balancer
 	if cfg.RaterBalancer != "" {
-		wg.Add(1)
+		balTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, balTaskChan)
 		go func() {
-			defer wg.Done()
+			defer close(balTaskChan)
 			if cfg.RaterBalancer == utils.INTERNAL {
 				bal = <-internalBalancerChan
 				internalBalancerChan <- bal // Put it back if someone else is interested about
@@ -94,9 +98,10 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	// Connection to CDRStats
 	var cdrStats engine.StatsInterface
 	if cfg.RaterCdrStats != "" {
-		wg.Add(1)
+		cdrstatTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, cdrstatTaskChan)
 		go func() {
-			defer wg.Done()
+			defer close(cdrstatTaskChan)
 			if cfg.RaterCdrStats == utils.INTERNAL {
 				cdrStats = <-internalCdrStatSChan
 				internalCdrStatSChan <- cdrStats
@@ -110,9 +115,10 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 
 	// Connection to HistoryS
 	if cfg.RaterHistoryServer != "" {
-		wg.Add(1)
+		histTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, histTaskChan)
 		go func() {
-			defer wg.Done()
+			defer close(histTaskChan)
 			var scribeServer history.Scribe
 			if cfg.RaterHistoryServer == utils.INTERNAL {
 				scribeServer = <-internalHistorySChan
@@ -128,9 +134,10 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 
 	// Connection to pubsubs
 	if cfg.RaterPubSubServer != "" {
-		wg.Add(1)
+		pubsubTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
-			defer wg.Done()
+			defer close(pubsubTaskChan)
 			var pubSubServer engine.PublisherSubscriber
 			if cfg.RaterPubSubServer == utils.INTERNAL {
 				pubSubServer = <-internalPubSubSChan
@@ -146,9 +153,10 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 
 	// Connection to AliasService
 	if cfg.RaterAliasesServer != "" {
-		wg.Add(1)
+		aliasesTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, aliasesTaskChan)
 		go func() {
-			defer wg.Done()
+			defer close(aliasesTaskChan)
 			var aliasesServer engine.AliasService
 			if cfg.RaterAliasesServer == utils.INTERNAL {
 				aliasesServer = <-internalAliaseSChan
@@ -165,9 +173,10 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	// Connection to UserService
 	var userServer engine.UserService
 	if cfg.RaterUserServer != "" {
-		wg.Add(1)
+		usersTaskChan := make(chan struct{})
+		waitTasks = append(waitTasks, usersTaskChan)
 		go func() {
-			defer wg.Done()
+			defer close(usersTaskChan)
 			if cfg.RaterUserServer == utils.INTERNAL {
 				userServer = <-internalUserSChan
 				internalUserSChan <- userServer
@@ -181,7 +190,9 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	}
 
 	// Wait for all connections to complete before going further
-	wg.Wait()
+	for _, chn := range waitTasks {
+		<-chn
+	}
 
 	responder := &engine.Responder{Bal: bal, ExitChan: exitChan, Stats: cdrStats}
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Sched: sched,

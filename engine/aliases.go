@@ -10,6 +10,11 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// Temporary export AliasService for the ApierV1 to be able to emulate old APIs
+func GetAliasService() AliasService {
+	return aliasService
+}
+
 type Alias struct {
 	Direction string
 	Tenant    string

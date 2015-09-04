@@ -155,6 +155,8 @@ const (
 	NANOSECONDS                = "nanoseconds"
 	SECONDS                    = "seconds"
 	OUT                        = "*out"
+	META_OUT                   = "*out"
+	META_ANY                   = "*any"
 	CDR_IMPORT                 = "cdr_import"
 	CDR_EXPORT                 = "cdr_export"
 	CDRFIELD                   = "cdrfield"
