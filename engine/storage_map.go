@@ -578,6 +578,15 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 		err = ms.ms.Unmarshal(values, &al.Values)
 		if err == nil {
 			cache2go.Cache(key, al.Values)
+			for _, v := range al.Values {
+				var existingKeys []string
+				rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias
+				if x, err := cache2go.GetCached(rKey); err == nil {
+					existingKeys = x.([]string)
+				}
+				existingKeys = append(existingKeys, key)
+				cache2go.Cache(rKey, existingKeys)
+			}
 		}
 	} else {
 		return nil, utils.ErrNotFound

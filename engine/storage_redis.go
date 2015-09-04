@@ -682,6 +682,16 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		err = rs.ms.Unmarshal(values, &al.Values)
 		if err == nil {
 			cache2go.Cache(key, al.Values)
+			// cache reverse alias
+			for _, v := range al.Values {
+				var existingKeys []string
+				rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias
+				if x, err := cache2go.GetCached(rKey); err == nil {
+					existingKeys = x.([]string)
+				}
+				existingKeys = append(existingKeys, key)
+				cache2go.Cache(rKey, existingKeys)
+			}
 		}
 	}
 	return
