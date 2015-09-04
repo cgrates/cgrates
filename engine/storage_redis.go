@@ -23,6 +23,7 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -665,6 +666,7 @@ func (rs *RedisStorage) SetAlias(al *Alias) (err error) {
 }
 
 func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
+	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
@@ -691,7 +693,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 				} else {
 					existingKeys = make(map[string]bool)
 				}
-				existingKeys[key] = true
+				existingKeys[utils.ConcatenatedKey(origKey, v.DestinationId)] = true
 				cache2go.Cache(rKey, existingKeys)
 			}
 		}
@@ -702,6 +704,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 func (rs *RedisStorage) RemoveAlias(key string) (err error) {
 	al := &Alias{}
 	al.SetId(key)
+	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	aliasValues := make(AliasValues, 0)
 	if values, err := rs.db.Get(key); err == nil {
@@ -715,10 +718,14 @@ func (rs *RedisStorage) RemoveAlias(key string) (err error) {
 			if x, err := cache2go.GetCached(rKey); err == nil {
 				existingKeys = x.(map[string]bool)
 			}
-			if len(existingKeys) == 1 {
+			for eKey := range existingKeys {
+				if strings.HasPrefix(eKey, origKey) {
+					delete(existingKeys, eKey)
+				}
+			}
+			if len(existingKeys) == 0 {
 				cache2go.RemKey(rKey)
 			} else {
-				delete(existingKeys, key)
 				cache2go.Cache(rKey, existingKeys)
 			}
 		}

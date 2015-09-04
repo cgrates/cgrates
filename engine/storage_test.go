@@ -181,16 +181,16 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 	}
 	if x, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_RP); err == nil {
 		aliasKeys := x.(map[string]bool)
-		_, found := aliasKeys[utils.ALIASES_PREFIX+ala.GetId()]
+		_, found := aliasKeys[utils.ConcatenatedKey(ala.GetId(), utils.ANY)]
 		if !found {
-			t.Error("Error getting reverse alias: ", aliasKeys)
+			t.Error("Error getting reverse alias: ", aliasKeys, ala.GetId()+utils.ANY)
 		}
 	} else {
 		t.Error("Error getting reverse alias: ", err)
 	}
 	if x, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_ACC); err == nil {
 		aliasKeys := x.(map[string]bool)
-		_, found := aliasKeys[utils.ALIASES_PREFIX+alb.GetId()]
+		_, found := aliasKeys[utils.ConcatenatedKey(alb.GetId(), utils.ANY)]
 		if !found {
 			t.Error("Error getting reverse alias: ", aliasKeys)
 		}

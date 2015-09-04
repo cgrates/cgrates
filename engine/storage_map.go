@@ -562,6 +562,7 @@ func (ms *MapStorage) SetAlias(al *Alias) error {
 }
 
 func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
+	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
@@ -586,7 +587,7 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 				} else {
 					existingKeys = make(map[string]bool)
 				}
-				existingKeys[key] = true
+				existingKeys[utils.ConcatenatedKey(origKey, v.DestinationId)] = true
 				cache2go.Cache(rKey, existingKeys)
 			}
 		}
@@ -599,6 +600,7 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 func (ms *MapStorage) RemoveAlias(key string) error {
 	al := &Alias{}
 	al.SetId(key)
+	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	aliasValues := make(AliasValues, 0)
 	if values, ok := ms.dict[key]; ok {
@@ -611,10 +613,14 @@ func (ms *MapStorage) RemoveAlias(key string) error {
 		if x, err := cache2go.GetCached(rKey); err == nil {
 			existingKeys = x.(map[string]bool)
 		}
-		if len(existingKeys) == 1 {
+		for eKey := range existingKeys {
+			if strings.HasPrefix(eKey, origKey) {
+				delete(existingKeys, eKey)
+			}
+		}
+		if len(existingKeys) == 0 {
 			cache2go.RemKey(rKey)
 		} else {
-			delete(existingKeys, key)
 			cache2go.Cache(rKey, existingKeys)
 		}
 	}
