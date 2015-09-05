@@ -253,7 +253,9 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	// Pubsub connection init
 	var pubSubConn engine.PublisherSubscriber
 	if cfg.CDRSPubSub == utils.INTERNAL {
-		pubSubConn = <-internalPubSubSChan
+		pubSubs := <-internalPubSubSChan
+		pubSubConn = pubSubs
+		internalPubSubSChan <- pubSubs
 	} else if len(cfg.CDRSPubSub) != 0 {
 		if cfg.CDRSRater == cfg.CDRSPubSub {
 			pubSubConn = &engine.ProxyPubSub{Client: client}
@@ -270,7 +272,9 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	// Users connection init
 	var usersConn engine.UserService
 	if cfg.CDRSUsers == utils.INTERNAL {
-		usersConn = <-internalUserSChan
+		userS := <-internalUserSChan
+		usersConn = userS
+		internalUserSChan <- userS
 	} else if len(cfg.CDRSUsers) != 0 {
 		if cfg.CDRSRater == cfg.CDRSUsers {
 			usersConn = &engine.ProxyUserService{Client: client}
@@ -287,7 +291,9 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	// Aliases connection init
 	var aliasesConn engine.AliasService
 	if cfg.CDRSAliases == utils.INTERNAL {
-		aliasesConn = <-internalAliaseSChan
+		aliaseS := <-internalAliaseSChan
+		aliasesConn = aliaseS
+		internalAliaseSChan <- aliaseS
 	} else if len(cfg.CDRSAliases) != 0 {
 		if cfg.CDRSRater == cfg.CDRSAliases {
 			aliasesConn = &engine.ProxyAliasService{Client: client}
@@ -304,7 +310,9 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	// Stats connection init
 	var statsConn engine.StatsInterface
 	if cfg.CDRSStats == utils.INTERNAL {
-		statsConn = <-internalCdrStatSChan
+		statS := <-internalCdrStatSChan
+		statsConn = statS
+		internalCdrStatSChan <- statS
 	} else if len(cfg.CDRSStats) != 0 {
 		if cfg.CDRSRater == cfg.CDRSStats {
 			statsConn = &engine.ProxyStats{Client: client}
