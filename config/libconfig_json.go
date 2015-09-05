@@ -31,6 +31,7 @@ type GeneralJsonCfg struct {
 	Default_timezone     *string
 	Reconnects           *int
 	Connect_attempts     *int
+	Internal_ttl         *string
 }
 
 // Listen config section

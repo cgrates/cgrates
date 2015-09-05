@@ -189,6 +189,7 @@ type CGRConfig struct {
 	DefaultTimezone      string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	Reconnects           int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
 	ConnectAttempts      int           // number of initial connection attempts before giving up
+	InternalTtl          time.Duration // maximum duration to wait for internal connections before giving up
 	RoundingDecimals     int           // Number of decimals to round end prices at
 	HttpSkipTlsVerify    bool          // If enabled Http Client will accept any TLS certificate
 	TpExportPath         string        // Path towards export folder for offline Tariff Plans
@@ -562,6 +563,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnGeneralCfg.Default_timezone != nil {
 			self.DefaultTimezone = *jsnGeneralCfg.Default_timezone
+		}
+		if jsnGeneralCfg.Internal_ttl != nil {
+			if self.InternalTtl, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Internal_ttl); err != nil {
+				return err
+			}
 		}
 	}
 

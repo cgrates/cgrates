@@ -48,7 +48,8 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_subject:      utils.StringPointer("cgrates"),
 		Default_timezone:     utils.StringPointer("Local"),
 		Connect_attempts:     utils.IntPointer(3),
-		Reconnects:           utils.IntPointer(-1)}
+		Reconnects:           utils.IntPointer(-1),
+		Internal_ttl:         utils.StringPointer("2m")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
