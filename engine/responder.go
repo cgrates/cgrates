@@ -803,11 +803,11 @@ func (cp ConnectorPool) LogCallCost(ccl *CallCostLog, reply *string) error {
 	return utils.ErrTimedOut
 }
 
-func (cp ConnectorPool) GetLCR(cd *CallDescriptor, reply *LCRCost) error {
+func (cp ConnectorPool) GetLCR(attr *AttrGetLcr, reply *LCRCost) error {
 	for _, con := range cp {
 		c := make(chan error, 1)
 		lcrCost := &LCRCost{}
-		go func() { c <- con.GetLCR(cd, lcrCost) }()
+		go func() { c <- con.GetLCR(attr, lcrCost) }()
 		select {
 		case err := <-c:
 			*reply = *lcrCost

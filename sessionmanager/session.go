@@ -70,7 +70,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 // the debit loop method (to be stoped by sending somenthing on stopDebit channel)
 func (s *Session) debitLoop(runIdx int) {
 	nextCd := s.sessionRuns[runIdx].CallDescriptor
-	nextCd.CgrId = s.eventStart.GetCgrId()
+	nextCd.CgrId = s.eventStart.GetCgrId("")
 	index := 0.0
 	debitPeriod := s.sessionManager.DebitInterval()
 	for {

@@ -105,7 +105,7 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 	exitChan <- true // If run stopped, something is bad, stop the application
 }
 
-func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cacheChan chan struct{}) {
+func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	engine.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
 	var raterConn, cdrsConn engine.ConnectorPool
 	var client *rpcclient.RpcClient
@@ -114,11 +114,11 @@ func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cac
 	for _, raterCfg := range cfg.SmFsConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = resp
+			raterConn = append(raterConn, resp)
 			internalRaterChan <- resp
 		}
-		for i := 0; i < cfg.SmFsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.SmFsConfig.Reconnects, utils.GOB)
+		for i := 0; i < cfg.Reconnects; i++ {
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -138,11 +138,11 @@ func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cac
 		for _, cdrsCfg := range cfg.SmFsConfig.HaCdrs {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
-				cdrsConn = resp
+				raterConn = append(raterConn, resp)
 				internalRaterChan <- resp
 			}
-			for i := 0; i < cfg.SmFsConfig.Reconnects; i++ {
-				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.SmFsConfig.Reconnects, utils.GOB)
+			for i := 0; i < cfg.Reconnects; i++ {
+				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 				if err == nil { //Connected so no need to reiterate
 					break
 				}
@@ -166,7 +166,7 @@ func startSmFreeSWITCH(responder *engine.Responder, cdrDb engine.CdrStorage, cac
 	exitChan <- true
 }
 
-func startSmKamailio(responder *engine.Responder, cdrDb engine.CdrStorage, cacheChan chan struct{}) {
+func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	engine.Logger.Info("Starting CGRateS SM-Kamailio service.")
 	var raterConn, cdrsConn engine.ConnectorPool
 	var client *rpcclient.RpcClient
@@ -176,11 +176,11 @@ func startSmKamailio(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 	for _, raterCfg := range cfg.SmKamConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = resp
+			raterConn = append(raterConn, resp)
 			internalRaterChan <- resp
 		}
-		for i := 0; i < cfg.SmKamConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.SmKamConfig.Reconnects, utils.GOB)
+		for i := 0; i < cfg.Reconnects; i++ {
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -198,11 +198,11 @@ func startSmKamailio(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 			for _, cdrsCfg := range cfg.SmKamConfig.HaCdrs {
 				if cdrsCfg.Server == utils.INTERNAL {
 					resp := <-internalRaterChan
-					cdrsConn = resp
+					raterConn = append(raterConn, resp)
 					internalRaterChan <- resp
 				}
-				for i := 0; i < cfg.SmKamConfig.Reconnects; i++ {
-					client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.SmKamConfig.Reconnects, utils.GOB)
+				for i := 0; i < cfg.Reconnects; i++ {
+					client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 					if err == nil { //Connected so no need to reiterate
 						break
 					}
@@ -226,7 +226,7 @@ func startSmKamailio(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 	exitChan <- true
 }
 
-func startSmOpenSIPS(responder *engine.Responder, cdrDb engine.CdrStorage, cacheChan chan struct{}) {
+func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	var raterConn, cdrsConn engine.ConnectorPool
 	var client *rpcclient.RpcClient
 
@@ -235,11 +235,11 @@ func startSmOpenSIPS(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 	for _, raterCfg := range cfg.SmOsipsConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = resp
+			raterConn = append(raterConn, resp)
 			internalRaterChan <- resp
 		}
-		for i := 0; i < cfg.SmOsipsConfig.Reconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.SmOsipsConfig.Reconnects, utils.GOB)
+		for i := 0; i < cfg.Reconnects; i++ {
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -257,13 +257,13 @@ func startSmOpenSIPS(responder *engine.Responder, cdrDb engine.CdrStorage, cache
 	for _, cdrsCfg := range cfg.SmOsipsConfig.HaCdrs {
 		if cdrsCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			cdrsConn = resp
+			raterConn = append(raterConn, resp)
 			internalRaterChan <- resp
 		}
 		if len(cfg.SmOsipsConfig.HaCdrs) != 0 {
 			delay := utils.Fib()
-			for i := 0; i < cfg.SmOsipsConfig.Reconnects; i++ {
-				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.SmOsipsConfig.Reconnects, utils.GOB)
+			for i := 0; i < cfg.Reconnects; i++ {
+				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 				if err == nil { //Connected so no need to reiterate
 					break
 				}
