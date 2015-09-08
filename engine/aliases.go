@@ -265,9 +265,6 @@ func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[strin
 
 func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string) error {
 	response := Alias{}
-	if attr.Destination == "" {
-		attr.Destination = utils.ANY
-	}
 	if err := aliasService.GetAlias(Alias{
 		Direction: attr.Direction,
 		Tenant:    attr.Tenant,
@@ -280,8 +277,15 @@ func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string)
 	}
 	// sort according to weight
 	values := response.Values.GetWeightSlice()
+	if attr.Destination == "" || attr.Destination == utils.ANY {
+		for _, aliasHandler := range values {
+			for alias := range aliasHandler {
+				*result = alias
+				return nil
+			}
+		}
+	}
 	// check destination ids
-
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
 		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 			for _, aliasHandler := range values {
