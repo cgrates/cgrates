@@ -33,20 +33,20 @@ import (
 
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
-	cgrConfig, _  = config.NewDefaultCGRConfig()
-	ratingdb_type = flag.String("ratingdb_type", cgrConfig.TpDbType, "The type of the RatingDb database <redis>")
-	ratingdb_host = flag.String("ratingdb_host", cgrConfig.TpDbHost, "The RatingDb host to connect to.")
-	ratingdb_port = flag.String("ratingdb_port", cgrConfig.TpDbPort, "The RatingDb port to bind to.")
-	ratingdb_name = flag.String("ratingdb_name", cgrConfig.TpDbName, "The name/number of the RatingDb to connect to.")
-	ratingdb_user = flag.String("ratingdb_user", cgrConfig.TpDbUser, "The RatingDb user to sign in as.")
-	ratingdb_pass = flag.String("ratingdb_passwd", cgrConfig.TpDbPass, "The RatingDb user's password.")
+	cgrConfig, _ = config.NewDefaultCGRConfig()
+	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
+	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
+	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
+	tpdb_name    = flag.String("tpdb_name", cgrConfig.TpDbName, "The name/number of the TariffPlan to connect to.")
+	tpdb_user    = flag.String("tpdb_user", cgrConfig.TpDbUser, "The TariffPlan user to sign in as.")
+	tpdb_pass    = flag.String("tpdb_passwd", cgrConfig.TpDbPass, "The TariffPlan user's password.")
 
-	accountdb_type = flag.String("accountdb_type", cgrConfig.DataDbType, "The type of the AccountingDb database <redis>")
-	accountdb_host = flag.String("accountdb_host", cgrConfig.DataDbHost, "The AccountingDb host to connect to.")
-	accountdb_port = flag.String("accountdb_port", cgrConfig.DataDbPort, "The AccountingDb port to bind to.")
-	accountdb_name = flag.String("accountdb_name", cgrConfig.DataDbName, "The name/number of the AccountingDb to connect to.")
-	accountdb_user = flag.String("accountdb_user", cgrConfig.DataDbUser, "The AccountingDb user to sign in as.")
-	accountdb_pass = flag.String("accountdb_passwd", cgrConfig.DataDbPass, "The AccountingDb user's password.")
+	datadb_type = flag.String("datadb_type", cgrConfig.DataDbType, "The type of the DataDb database <redis>")
+	datadb_host = flag.String("datadb_host", cgrConfig.DataDbHost, "The DataDb host to connect to.")
+	datadb_port = flag.String("datadb_port", cgrConfig.DataDbPort, "The DataDb port to bind to.")
+	datadb_name = flag.String("datadb_name", cgrConfig.DataDbName, "The name/number of the DataDb to connect to.")
+	datadb_user = flag.String("datadb_user", cgrConfig.DataDbUser, "The DataDb user to sign in as.")
+	datadb_pass = flag.String("datadb_passwd", cgrConfig.DataDbPass, "The DataDb user's password.")
 
 	stor_db_type = flag.String("stordb_type", cgrConfig.StorDBType, "The type of the storDb database <mysql>")
 	stor_db_host = flag.String("stordb_host", cgrConfig.StorDBHost, "The storDb host to connect to.")
@@ -72,6 +72,7 @@ var (
 	cdrstatsAddress = flag.String("cdrstats_address", cgrConfig.RPCGOBListen, "CDRStats service to contact for data reloads, empty to disable automatic data reloads")
 	usersAddress    = flag.String("users_address", cgrConfig.RPCGOBListen, "Users service to contact for data reloads, empty to disable automatic data reloads")
 	runId           = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
+	loadHistorySize = flag.Int("load_history_size", cgrConfig.LoadHistorySize, "Limit the number of records in the load history")
 	timezone        = flag.String("timezone", cgrConfig.DefaultTimezone, `Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>`)
 )
 
@@ -90,18 +91,18 @@ func main() {
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
-			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name,
-				*ratingdb_user, *ratingdb_pass, *dbdata_encoding)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding)
+			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
+				*tpdb_user, *tpdb_pass, *dbdata_encoding)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns)
 		} else if *toStorDb { // Import from csv files to storDb
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
 				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns)
 		} else { // Default load from csv files to dataDb
-			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name,
-				*ratingdb_user, *ratingdb_pass, *dbdata_encoding)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding)
+			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
+				*tpdb_user, *tpdb_pass, *dbdata_encoding)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding)
 		}
 		// Defer databases opened to be closed when we are done
 		for _, db := range []engine.Storage{ratingDb, accountDb, storDb} {
@@ -161,7 +162,7 @@ func main() {
 			path.Join(*dataPath, utils.ALIASES_CSV),
 		)
 	}
-	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid, *timezone)
+	tpReader := engine.NewTpReader(ratingDb, accountDb, loader, *tpid, *timezone, *loadHistorySize)
 	err = tpReader.LoadAll()
 	if err != nil {
 		log.Fatal(err)

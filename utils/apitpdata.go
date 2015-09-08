@@ -321,6 +321,35 @@ type TPLcrRule struct {
 	Weight         float64
 }
 
+type TPAliases struct {
+	TPid      string
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Group     string
+	Values    []*TPAliasValue
+}
+
+type TPAliasValue struct {
+	DestinationId string
+	Alias         string
+	Weight        float64
+}
+
+type TPUsers struct {
+	TPid     string
+	Tenant   string
+	UserName string
+	Profile  []*TPUserProfile
+}
+
+type TPUserProfile struct {
+	AttrName  string
+	AttrValue string
+}
+
 type TPCdrStats struct {
 	TPid       string
 	CdrStatsId string
@@ -546,6 +575,8 @@ type CacheStats struct {
 	CdrStats        int
 	Users           int
 	Aliases         int
+	LastLoadId      string
+	LastLoadTime    string
 }
 
 type AttrCachedItemAge struct {
@@ -559,9 +590,8 @@ type CachedItemAge struct {
 	RatingProfile   time.Duration
 	Action          time.Duration
 	SharedGroup     time.Duration
-	RatingAlias     time.Duration
-	AccountAlias    time.Duration
 	DerivedChargers time.Duration
+	Alias           time.Duration
 	LcrProfiles     time.Duration
 }
 
@@ -1095,4 +1125,20 @@ type AttrGetSMASessions struct {
 type AttrGetCallCost struct {
 	CgrId string // Unique id of the CDR
 	RunId string // Run Id
+}
+
+type TpAlias struct {
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Group     string
+	Values    []*AliasValue
+}
+
+type AliasValue struct {
+	DestinationId string
+	Alias         string
+	Weight        float64
 }

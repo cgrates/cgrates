@@ -91,9 +91,8 @@ type SmFsConfig struct {
 	Enabled             bool
 	HaRater             []*HaPoolConfig
 	HaCdrs              []*HaPoolConfig
-	Reconnects          int
 	CreateCdr           bool
-	CdrExtraFields      []*utils.RSRField
+	ExtraFields         []*utils.RSRField
 	DebitInterval       time.Duration
 	MinCallDuration     time.Duration
 	MaxCallDuration     time.Duration
@@ -128,14 +127,11 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
-	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
 	}
-	if jsnCfg.Cdr_extra_fields != nil {
-		if self.CdrExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCfg.Cdr_extra_fields); err != nil {
+	if jsnCfg.Extra_fields != nil {
+		if self.ExtraFields, err = utils.ParseRSRFieldsFromSlice(*jsnCfg.Extra_fields); err != nil {
 			return err
 		}
 	}
@@ -219,7 +215,6 @@ type SmKamConfig struct {
 	Enabled         bool
 	HaRater         []*HaPoolConfig
 	HaCdrs          []*HaPoolConfig
-	Reconnects      int
 	CreateCdr       bool
 	DebitInterval   time.Duration
 	MinCallDuration time.Duration
@@ -248,9 +243,6 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 			self.HaCdrs[idx] = NewDfltHaPoolConfig()
 			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
 		}
-	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
@@ -302,7 +294,6 @@ type SmOsipsConfig struct {
 	ListenUdp               string
 	HaRater                 []*HaPoolConfig
 	HaCdrs                  []*HaPoolConfig
-	Reconnects              int
 	CreateCdr               bool
 	DebitInterval           time.Duration
 	MinCallDuration         time.Duration
@@ -332,9 +323,6 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 			self.HaCdrs[idx] = NewDfltHaPoolConfig()
 			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
 		}
-	}
-	if jsnCfg.Reconnects != nil {
-		self.Reconnects = *jsnCfg.Reconnects
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr

@@ -304,9 +304,19 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	// check if subject is alias
-	if alias, err := GetBestAlias(cd.Destination, cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject, utils.ALIAS_GROUP_RP); err == nil && alias != "" {
-		subject = alias
-		cd.Subject = alias
+	if aliasService != nil {
+		var alias string
+		if err := aliasService.GetMatchingAlias(AttrMatchingAlias{
+			Destination: cd.Destination,
+			Direction:   cd.Direction,
+			Tenant:      cd.Tenant,
+			Category:    cd.Category,
+			Account:     cd.Account,
+			Subject:     cd.Subject,
+			Group:       utils.ALIAS_GROUP_RP}, &alias); err == nil && alias != "" {
+			subject = alias
+			cd.Subject = alias
+		}
 	}
 	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, cd.Category, subject)
 }
@@ -316,9 +326,20 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
 		// check if subject is alias
-		alias, err := GetBestAlias(cd.Destination, cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject, utils.ALIAS_GROUP_ACC)
-		if err == nil && alias != "" {
-			cd.Account = alias
+		if aliasService != nil {
+			var alias string
+			err := aliasService.GetMatchingAlias(
+				AttrMatchingAlias{
+					Destination: cd.Destination,
+					Direction:   cd.Direction,
+					Tenant:      cd.Tenant,
+					Category:    cd.Category,
+					Account:     cd.Account,
+					Subject:     cd.Subject,
+					Group:       utils.ALIAS_GROUP_ACC}, &alias)
+			if err == nil && alias != "" {
+				cd.Account = alias
+			}
 		}
 		subj = cd.Account
 	}

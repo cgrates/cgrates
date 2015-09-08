@@ -10,6 +10,11 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+// Temporary export AliasService for the ApierV1 to be able to emulate old APIs
+func GetAliasService() AliasService {
+	return aliasService
+}
+
 type Alias struct {
 	Direction string
 	Tenant    string
@@ -97,11 +102,29 @@ func (al *Alias) SetId(id string) error {
 	return nil
 }
 
+type AttrMatchingAlias struct {
+	Destination string
+	Direction   string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Group       string
+}
+
+type AttrReverseAlias struct {
+	Alias string
+	Group string
+}
+
 type AliasService interface {
 	SetAlias(Alias, *string) error
 	UpdateAlias(Alias, *string) error
 	RemoveAlias(Alias, *string) error
 	GetAlias(Alias, *Alias) error
+	GetMatchingAlias(AttrMatchingAlias, *string) error
+	GetReverseAlias(AttrReverseAlias, *map[string]*Alias) error
+	RemoveReverseAlias(AttrReverseAlias, *string) error
 }
 
 type AliasHandler struct {
@@ -178,6 +201,28 @@ func (am *AliasHandler) RemoveAlias(al Alias, reply *string) error {
 	return nil
 }
 
+func (am *AliasHandler) RemoveReverseAlias(attr AttrReverseAlias, reply *string) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Group
+	if x, err := cache2go.Get(rKey); err == nil {
+		existingKeys := x.(map[string]bool)
+		for key := range existingKeys {
+			// get destination id
+			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
+			if len(elems) > 0 {
+				key = strings.Join(elems[:len(elems)-1], utils.CONCATENATED_KEY_SEP)
+			}
+			if err := am.accountingDb.RemoveAlias(key); err != nil {
+				*reply = err.Error()
+				return err
+			}
+		}
+	}
+	*reply = utils.OK
+	return nil
+}
+
 func (am *AliasHandler) GetAlias(al Alias, result *Alias) error {
 	am.mu.RLock()
 	defer am.mu.RUnlock()
@@ -186,6 +231,77 @@ func (am *AliasHandler) GetAlias(al Alias, result *Alias) error {
 		if r, err := am.accountingDb.GetAlias(variant, false); err == nil {
 			*result = *r
 			return nil
+		}
+	}
+	return utils.ErrNotFound
+}
+
+func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[string]*Alias) error {
+	am.mu.Lock()
+	defer am.mu.Unlock()
+	aliases := make(map[string]*Alias)
+	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Group
+	if x, err := cache2go.Get(rKey); err == nil {
+		existingKeys := x.(map[string]bool)
+		for key := range existingKeys {
+
+			// get destination id
+			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
+			var destID string
+			if len(elems) > 0 {
+				destID = elems[len(elems)-1]
+				key = strings.Join(elems[:len(elems)-1], utils.CONCATENATED_KEY_SEP)
+			}
+			if r, err := am.accountingDb.GetAlias(key, false); err != nil {
+				return err
+			} else {
+				aliases[destID] = r
+			}
+		}
+	}
+	*result = aliases
+	return nil
+}
+
+func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string) error {
+	response := Alias{}
+	if err := aliasService.GetAlias(Alias{
+		Direction: attr.Direction,
+		Tenant:    attr.Tenant,
+		Category:  attr.Category,
+		Account:   attr.Account,
+		Subject:   attr.Subject,
+		Group:     attr.Group,
+	}, &response); err != nil {
+		return err
+	}
+	// sort according to weight
+	values := response.Values.GetWeightSlice()
+	if attr.Destination == "" || attr.Destination == utils.ANY {
+		for _, aliasHandler := range values {
+			for alias := range aliasHandler {
+				*result = alias
+				return nil
+			}
+		}
+	}
+	// check destination ids
+	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
+		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
+			for _, aliasHandler := range values {
+				for alias, aliasDestIds := range aliasHandler {
+					destIds := x.(map[interface{}]struct{})
+					for idId := range destIds {
+						dId := idId.(string)
+						for _, aliasDestId := range aliasDestIds {
+							if aliasDestId == utils.ANY || aliasDestId == dId {
+								*result = alias
+								return nil
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 	return utils.ErrNotFound
@@ -204,60 +320,33 @@ func NewProxyAliasService(addr string, attempts, reconnects int) (*ProxyAliasSer
 }
 
 func (ps *ProxyAliasService) SetAlias(al Alias, reply *string) error {
-	return ps.Client.Call("AliasV1.SetAlias", al, reply)
+	return ps.Client.Call("AliasesV1.SetAlias", al, reply)
 }
 
 func (ps *ProxyAliasService) UpdateAlias(al Alias, reply *string) error {
-	return ps.Client.Call("AliasV1.UpdateAlias", al, reply)
+	return ps.Client.Call("AliasesV1.UpdateAlias", al, reply)
 }
 
 func (ps *ProxyAliasService) RemoveAlias(al Alias, reply *string) error {
-	return ps.Client.Call("AliasV1.RemoveAlias", al, reply)
+	return ps.Client.Call("AliasesV1.RemoveAlias", al, reply)
 }
 
 func (ps *ProxyAliasService) GetAlias(al Alias, alias *Alias) error {
-	return ps.Client.Call("AliasV1.GetAlias", al, alias)
+	return ps.Client.Call("AliasesV1.GetAlias", al, alias)
+}
+
+func (ps *ProxyAliasService) GetMatchingAlias(attr AttrMatchingAlias, alias *string) error {
+	return ps.Client.Call("AliasesV1.GetMatchingAlias", attr, alias)
+}
+
+func (ps *ProxyAliasService) GetReverseAlias(attr AttrReverseAlias, alias *map[string]*Alias) error {
+	return ps.Client.Call("AliasesV1.GetReverseAlias", attr, alias)
+}
+
+func (ps *ProxyAliasService) RemoveReverseAlias(attr AttrReverseAlias, reply *string) error {
+	return ps.Client.Call("AliasesV1.RemoveReverseAlias", attr, reply)
 }
 
 func (ps *ProxyAliasService) ReloadAliases(in string, reply *string) error {
-	return ps.Client.Call("AliasV1.ReloadAliases", in, reply)
-}
-
-func GetBestAlias(destination, direction, tenant, category, account, subject, group string) (string, error) {
-	if aliasService == nil {
-		return "", nil
-	}
-	response := Alias{}
-	if err := aliasService.GetAlias(Alias{
-		Direction: direction,
-		Tenant:    tenant,
-		Category:  category,
-		Account:   account,
-		Subject:   subject,
-		Group:     group,
-	}, &response); err != nil {
-		return "", err
-	}
-	// sort according to weight
-	values := response.Values.GetWeightSlice()
-	// check destination ids
-
-	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
-		if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
-			for _, aliasHandler := range values {
-				for alias, aliasDestIds := range aliasHandler {
-					destIds := x.(map[interface{}]struct{})
-					for idId := range destIds {
-						dId := idId.(string)
-						for _, aliasDestId := range aliasDestIds {
-							if aliasDestId == utils.ANY || aliasDestId == dId {
-								return alias, nil
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return "", utils.ErrNotFound
+	return ps.Client.Call("AliasesV1.ReloadAliases", in, reply)
 }

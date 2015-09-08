@@ -247,7 +247,7 @@ func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
 	key = utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
+		if x, err := cache2go.Get(key); err == nil {
 			return x.(*RatingPlan), nil
 		} else {
 			return nil, err
@@ -290,7 +290,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 func (ms *MapStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingProfile, err error) {
 	key = utils.RATING_PROFILE_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
+		if x, err := cache2go.Get(key); err == nil {
 			return x.(*RatingProfile), nil
 		} else {
 			return nil, err
@@ -335,7 +335,7 @@ func (ms *MapStorage) RemoveRatingProfile(key string) (err error) {
 func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
+		if x, err := cache2go.Get(key); err == nil {
 			return x.(*LCR), nil
 		} else {
 			return nil, err
@@ -398,7 +398,7 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
 	key = utils.ACTION_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
+		if x, err := cache2go.Get(key); err == nil {
 			return x.(Actions), nil
 		} else {
 			return nil, err
@@ -422,7 +422,7 @@ func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
+		if x, err := cache2go.Get(key); err == nil {
 			return x.(*SharedGroup), nil
 		} else {
 			return nil, err
@@ -562,9 +562,10 @@ func (ms *MapStorage) SetAlias(al *Alias) error {
 }
 
 func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
+	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
+		if x, err := cache2go.Get(key); err == nil {
 			al = &Alias{Values: x.(AliasValues)}
 			al.SetId(key[len(utils.ALIASES_PREFIX):])
 			return al, nil
@@ -578,6 +579,17 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 		err = ms.ms.Unmarshal(values, &al.Values)
 		if err == nil {
 			cache2go.Cache(key, al.Values)
+			for _, v := range al.Values {
+				var existingKeys map[string]bool
+				rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias + al.Group
+				if x, err := cache2go.Get(rKey); err == nil {
+					existingKeys = x.(map[string]bool)
+				} else {
+					existingKeys = make(map[string]bool)
+				}
+				existingKeys[utils.ConcatenatedKey(origKey, v.DestinationId)] = true
+				cache2go.Cache(rKey, existingKeys)
+			}
 		}
 	} else {
 		return nil, utils.ErrNotFound
@@ -586,7 +598,41 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 }
 
 func (ms *MapStorage) RemoveAlias(key string) error {
-	delete(ms.dict, utils.ALIASES_PREFIX+key)
+	al := &Alias{}
+	al.SetId(key)
+	origKey := key
+	key = utils.ALIASES_PREFIX + key
+	aliasValues := make(AliasValues, 0)
+	if values, ok := ms.dict[key]; ok {
+		ms.ms.Unmarshal(values, &aliasValues)
+	}
+	delete(ms.dict, key)
+	for _, v := range aliasValues {
+		var existingKeys map[string]bool
+		rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias + al.Group
+		if x, err := cache2go.Get(rKey); err == nil {
+			existingKeys = x.(map[string]bool)
+		}
+		for eKey := range existingKeys {
+			if strings.HasPrefix(eKey, origKey) {
+				delete(existingKeys, eKey)
+			}
+		}
+		if len(existingKeys) == 0 {
+			cache2go.RemKey(rKey)
+		} else {
+			cache2go.Cache(rKey, existingKeys)
+		}
+	}
+	cache2go.RemKey(key)
+	return nil
+}
+
+func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool) ([]*LoadInstance, error) {
+	return nil, nil
+}
+
+func (ms *MapStorage) AddLoadHistory(*LoadInstance, int) error {
 	return nil
 }
 
@@ -627,7 +673,7 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error
 func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool) (dcs utils.DerivedChargers, err error) {
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
-		if x, err := cache2go.GetCached(key); err == nil {
+		if x, err := cache2go.Get(key); err == nil {
 			return x.(utils.DerivedChargers), nil
 		} else {
 			return nil, err

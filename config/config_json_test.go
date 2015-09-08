@@ -50,6 +50,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Connect_attempts:     utils.IntPointer(3),
 		Reconnects:           utils.IntPointer(-1),
 		Response_cache_ttl:   utils.StringPointer("3s")}
+		Internal_ttl:         utils.StringPointer("2m")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
@@ -84,12 +85,13 @@ func TestDfDbJsonCfg(t *testing.T) {
 		t.Error("Received: ", cfg)
 	}
 	eCfg = &DbJsonCfg{
-		Db_type:   utils.StringPointer("redis"),
-		Db_host:   utils.StringPointer("127.0.0.1"),
-		Db_port:   utils.IntPointer(6379),
-		Db_name:   utils.StringPointer("11"),
-		Db_user:   utils.StringPointer(""),
-		Db_passwd: utils.StringPointer(""),
+		Db_type:           utils.StringPointer("redis"),
+		Db_host:           utils.StringPointer("127.0.0.1"),
+		Db_port:           utils.IntPointer(6379),
+		Db_name:           utils.StringPointer("11"),
+		Db_user:           utils.StringPointer(""),
+		Db_passwd:         utils.StringPointer(""),
+		Load_history_size: utils.IntPointer(10),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(DATADB_JSN); err != nil {
 		t.Error(err)
@@ -124,11 +126,11 @@ func TestDfBalancerJsonCfg(t *testing.T) {
 
 func TestDfRaterJsonCfg(t *testing.T) {
 	eCfg := &RaterJsonCfg{Enabled: utils.BoolPointer(false), Balancer: utils.StringPointer(""), Cdrstats: utils.StringPointer(""),
-		Historys: utils.StringPointer(""), Pubsubs: utils.StringPointer(""), Users: utils.StringPointer("")}
+		Historys: utils.StringPointer(""), Pubsubs: utils.StringPointer(""), Users: utils.StringPointer(""), Aliases: utils.StringPointer("")}
 	if cfg, err := dfCgrJsonCfg.RaterJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		t.Errorf("Received: %+v", cfg)
 	}
 }
 
@@ -147,14 +149,16 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 		Extra_fields:    utils.StringSlicePointer([]string{}),
 		Store_cdrs:      utils.BoolPointer(true),
 		Rater:           utils.StringPointer("internal"),
+		Pubsubs:         utils.StringPointer(""),
+		Users:           utils.StringPointer(""),
+		Aliases:         utils.StringPointer(""),
 		Cdrstats:        utils.StringPointer(""),
-		Reconnects:      utils.IntPointer(5),
 		Cdr_replication: &[]*CdrReplicationJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", *cfg)
+		t.Errorf("Received: %+v", *cfg)
 	}
 }
 
@@ -333,7 +337,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 			}},
 		Reconnects:             utils.IntPointer(5),
 		Create_cdr:             utils.BoolPointer(false),
-		Cdr_extra_fields:       utils.StringSlicePointer([]string{}),
+		Extra_fields:           utils.StringSlicePointer([]string{}),
 		Debit_interval:         utils.StringPointer("10s"),
 		Min_call_duration:      utils.StringPointer("0s"),
 		Max_call_duration:      utils.StringPointer("3h"),
@@ -403,7 +407,7 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 				Server:  utils.StringPointer("internal"),
 				Timeout: utils.StringPointer("100ms"),
 			}},
-		Reconnects:                utils.IntPointer(5),
+		Listen_udp:                utils.StringPointer("127.0.0.1:2020"),
 		Create_cdr:                utils.BoolPointer(false),
 		Debit_interval:            utils.StringPointer("10s"),
 		Min_call_duration:         utils.StringPointer("0s"),
@@ -436,6 +440,17 @@ func TestDfPubSubServJsonCfg(t *testing.T) {
 		Enabled: utils.BoolPointer(false),
 	}
 	if cfg, err := dfCgrJsonCfg.PubSubServJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestDfAliasesServJsonCfg(t *testing.T) {
+	eCfg := &AliasesServJsonCfg{
+		Enabled: utils.BoolPointer(false),
+	}
+	if cfg, err := dfCgrJsonCfg.AliasesServJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

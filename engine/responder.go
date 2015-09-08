@@ -233,7 +233,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	for _, dc := range dcs {
-		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.META_PSEUDOPREPAID, utils.PREPAID, utils.PSEUDOPREPAID}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
+		if utils.IsSliceMember([]string{utils.META_RATED, utils.RATED}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
 			continue
 		}
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
@@ -273,6 +273,9 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 		if err != nil {
 			*reply = 0
 			return err
+		}
+		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
+			continue
 		}
 		// Set maxCallDuration, smallest out of all forked sessions
 		if maxCallDuration == -1.0 { // first time we set it /not initialized yet
@@ -623,11 +626,11 @@ func (rcc *RPCClientConnector) GetDerivedChargers(attrs *utils.AttrDerivedCharge
 }
 
 func (rcc *RPCClientConnector) ProcessCdr(cdr *StoredCdr, reply *string) error {
-	return rcc.Client.Call("CDRSV1.ProcessCdr", cdr, reply)
+	return rcc.Client.Call("CdrsV1.ProcessCdr", cdr, reply)
 }
 
 func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *string) error {
-	return rcc.Client.Call("CDRSV1.LogCallCost", ccl, reply)
+	return rcc.Client.Call("CdrsV1.LogCallCost", ccl, reply)
 }
 
 func (rcc *RPCClientConnector) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {

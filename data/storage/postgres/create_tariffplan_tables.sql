@@ -355,18 +355,18 @@ CREATE INDEX tpusers_idx ON tp_users (tpid,tenant,user_name);
 
 DROP TABLE IF EXISTS tp_aliases;
 CREATE TABLE tp_aliases (
-  `id` SERIAL PRIMARY KEY,
-  `tpid` VARCHAR(64) NOT NULL,
-  `direction` VARCHAR(8) NOT NULL,
-  `tenant` VARCHAR(64) NOT NULL,
-  `category` VARCHAR(32) NOT NULL,
-  `account` VARCHAR(64) NOT NULL,
-  `subject` VARCHAR(64) NOT NULL,
-  `group` VARCHAR(64) NOT NULL,
-  `destionation_id` VARCHAR(64) NOT NULL,
-  `alias` VARCHAR(64) NOT NULL,
-  `weight` NUMERIC(8,2) NOT NULL,
-  `created_at` TIMESTAMP
+  "id" SERIAL PRIMARY KEY,
+  "tpid" VARCHAR(64) NOT NULL,
+  "direction" VARCHAR(8) NOT NULL,
+  "tenant" VARCHAR(64) NOT NULL,
+  "category" VARCHAR(32) NOT NULL,
+  "account" VARCHAR(64) NOT NULL,
+  "subject" VARCHAR(64) NOT NULL,
+  "group" VARCHAR(64) NOT NULL,
+  "destination_id" VARCHAR(64) NOT NULL,
+  "alias" VARCHAR(64) NOT NULL,
+  "weight" NUMERIC(8,2) NOT NULL,
+  "created_at" TIMESTAMP
 );
 CREATE INDEX tpaliases_tpid_idx ON tp_aliases (tpid);
-CREATE INDEX tpaliases_idx ON tp_aliases (`tpid`,`direction`,`tenant,category`,`account`,`subject`,`group`);
+CREATE INDEX tpaliases_idx ON tp_aliases ("tpid","direction","tenant","category","account","subject","group");

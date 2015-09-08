@@ -80,8 +80,8 @@ duration::
 
 */
 
-func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector, timezone string) (*OsipsSessionManager, error) {
-	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, cdrStartEvents: make(map[string]*OsipsEvent)}
+func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, reconnects int, rater, cdrsrv engine.Connector, timezone string) (*OsipsSessionManager, error) {
+	osm := &OsipsSessionManager{cfg: smOsipsCfg, reconnects: reconnects, rater: rater, cdrsrv: cdrsrv, timezone: timezone, cdrStartEvents: make(map[string]*OsipsEvent)}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
 		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart}, // Raised when OpenSIPS starts so we can register our event handlers
 		"E_ACC_CDR":          []func(*osipsdagram.OsipsEvent){osm.onCdr},           // Raised if cdr_flag is configured
@@ -93,6 +93,7 @@ func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engi
 
 type OsipsSessionManager struct {
 	cfg             *config.SmOsipsConfig
+	reconnects      int
 	rater           engine.Connector
 	cdrsrv          engine.Connector
 	timezone        string
@@ -107,7 +108,7 @@ type OsipsSessionManager struct {
 // Called when firing up the session manager, will stay connected for the duration of the daemon running
 func (osm *OsipsSessionManager) Connect() (err error) {
 	osm.stopServing = make(chan struct{})
-	if osm.miConn, err = osipsdagram.NewOsipsMiDatagramConnector(osm.cfg.MiAddr, osm.cfg.Reconnects); err != nil {
+	if osm.miConn, err = osipsdagram.NewOsipsMiDatagramConnector(osm.cfg.MiAddr, osm.reconnects); err != nil {
 		return fmt.Errorf("Cannot connect to OpenSIPS at %s, error: %s", osm.cfg.MiAddr, err.Error())
 	}
 	osm.evSubscribeStop = make(chan struct{})

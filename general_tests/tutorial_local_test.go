@@ -37,6 +37,7 @@ import (
 var tutLocalCfgPath string
 var tutFsLocalCfg *config.CGRConfig
 var tutLocalRpc *rpc.Client
+var loadInst engine.LoadInstance // Share load information between tests
 
 func TestTutLocalInitCfg(t *testing.T) {
 	if !*testLocal {
@@ -100,12 +101,11 @@ func TestTutLocalLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	reply := ""
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
-	if err := tutLocalRpc.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+	if err := tutLocalRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
-	} else if reply != "OK" {
-		t.Error(reply)
+	} else if loadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", loadInst)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
@@ -117,8 +117,8 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 3,
-		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 2}
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 2,
+		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -190,7 +190,7 @@ func TestTutLocalGetUsers(t *testing.T) {
 	var users engine.UserProfiles
 	if err := tutLocalRpc.Call("UsersV1.GetUsers", engine.UserProfile{}, &users); err != nil {
 		t.Error("Got error on UsersV1.GetUsers: ", err.Error())
-	} else if len(users) != 2 {
+	} else if len(users) != 3 {
 		t.Error("Calling UsersV1.GetUsers got users:", len(users))
 	}
 }
@@ -551,6 +551,87 @@ func TestTutLocalProcessExternalCdr(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
+	}
+}
+
+// Test CDR from external sources
+func TestTutLocalProcessExternalCdrUP(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "testextcdr2", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, Direction: utils.OUT,
+		ReqType: utils.USERS, Tenant: utils.USERS, Account: utils.USERS, Destination: "1001", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "2", Pdd: "0.2", DisconnectCause: "NORMAL_DISCONNECT",
+		ExtraFields: map[string]string{"Cli": "+4986517174964", "fieldextr2": "valextr2", "SysUserName": utils.USERS},
+	}
+	var reply string
+	if err := tutLocalRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	eCdr := &engine.ExternalCdr{CgrId: "63a8d2bfeca2cfb790826c3ec461696d6574cfde", OrderId: 2,
+		TOR:   utils.VOICE,
+		AccId: "testextcdr2", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "call", Account: "1004", Subject: "1004", Destination: "1001", Supplier: "SUPPL1",
+		SetupTime: time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC).Local().Format(time.RFC3339), AnswerTime: time.Date(2014, 8, 4, 13, 0, 7, 0, time.UTC).Local().Format(time.RFC3339),
+		Usage: "2", Pdd: "0.2", DisconnectCause: "NORMAL_DISCONNECT",
+		ExtraFields:    map[string]string{"Cli": "+4986517174964", "fieldextr2": "valextr2", "SysUserName": "danb4"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1}
+	var cdrs []*engine.ExternalCdr
+	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1004"}, DestPrefixes: []string{"1001"}}
+	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].CgrId != eCdr.CgrId {
+			t.Errorf("Unexpected CgrId for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].TOR != eCdr.TOR {
+			t.Errorf("Unexpected TOR for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].CdrSource != eCdr.CdrSource {
+			t.Errorf("Unexpected CdrSource for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].ReqType != eCdr.ReqType {
+			t.Errorf("Unexpected ReqType for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Tenant != eCdr.Tenant {
+			t.Errorf("Unexpected Tenant for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Category != eCdr.Category {
+			t.Errorf("Unexpected Category for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Account != eCdr.Account {
+			t.Errorf("Unexpected Account for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Subject != eCdr.Subject {
+			t.Errorf("Unexpected Subject for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Destination != eCdr.Destination {
+			t.Errorf("Unexpected Destination for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Supplier != eCdr.Supplier {
+			t.Errorf("Unexpected Supplier for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].SetupTime != eCdr.SetupTime {
+			t.Errorf("Unexpected SetupTime for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Pdd != eCdr.Pdd {
+			t.Errorf("Unexpected Pdd for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].AnswerTime != eCdr.AnswerTime {
+			t.Errorf("Unexpected AnswerTime for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].Usage != eCdr.Usage {
+			t.Errorf("Unexpected Usage for CDR: %+v", cdrs[0])
+		}
+		if cdrs[0].DisconnectCause != eCdr.DisconnectCause {
+			t.Errorf("Unexpected DisconnectCause for CDR: %+v", cdrs[0])
+		}
 	}
 }
 

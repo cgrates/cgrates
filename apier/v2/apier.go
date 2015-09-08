@@ -19,6 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"errors"
+	"fmt"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -41,7 +47,7 @@ func (self *ApierV2) LoadRatingProfile(attrs AttrLoadRatingProfile, reply *strin
 	tpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
 	tpRpf.SetRatingProfilesId(attrs.RatingProfileId)
 	rpf := engine.APItoModelRatingProfile(tpRpf)
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if err := dbReader.LoadRatingProfilesFiltered(&rpf[0]); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -67,7 +73,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	tpAa := &utils.TPAccountActions{TPid: attrs.TPid}
 	tpAa.SetAccountActionsId(attrs.AccountActionsId)
 	aa := engine.APItoModelAccountAction(tpAa)
@@ -105,7 +111,7 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	tpDc := &utils.TPDerivedChargers{TPid: attrs.TPid}
 	tpDc.SetDerivedChargersId(attrs.DerivedChargersId)
 	dc := engine.APItoModelDerivedCharger(tpDc)
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -118,5 +124,135 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 		return err
 	}
 	*reply = v1.OK
+	return nil
+}
+
+func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *engine.LoadInstance) error {
+	if len(attrs.FolderPath) == 0 {
+		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
+	}
+	if fi, err := os.Stat(attrs.FolderPath); err != nil {
+		if strings.HasSuffix(err.Error(), "no such file or directory") {
+			return utils.ErrInvalidPath
+		}
+		return utils.NewErrServerError(err)
+	} else if !fi.IsDir() {
+		return utils.ErrInvalidPath
+	}
+	loader := engine.NewTpReader(self.RatingDb, self.AccountDb, engine.NewFileCSVStorage(utils.CSV_SEP,
+		path.Join(attrs.FolderPath, utils.DESTINATIONS_CSV),
+		path.Join(attrs.FolderPath, utils.TIMINGS_CSV),
+		path.Join(attrs.FolderPath, utils.RATES_CSV),
+		path.Join(attrs.FolderPath, utils.DESTINATION_RATES_CSV),
+		path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
+		path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
+		path.Join(attrs.FolderPath, utils.SHARED_GROUPS_CSV),
+		path.Join(attrs.FolderPath, utils.LCRS_CSV),
+		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
+		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
+		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
+		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV),
+		path.Join(attrs.FolderPath, utils.CDR_STATS_CSV),
+		path.Join(attrs.FolderPath, utils.USERS_CSV),
+		path.Join(attrs.FolderPath, utils.ALIASES_CSV),
+	), "", self.Config.DefaultTimezone, self.Config.LoadHistorySize)
+	if err := loader.LoadAll(); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if attrs.DryRun {
+		*reply = engine.LoadInstance{LoadId: utils.DRYRUN}
+		return nil // Mission complete, no errors
+	}
+
+	if attrs.Validate {
+		if !loader.IsValid() {
+			return errors.New("invalid data")
+		}
+	}
+
+	if err := loader.WriteToDatabase(attrs.FlushDb, false); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	// Make sure the items are in the cache
+	dstIds, _ := loader.GetLoadedIds(utils.DESTINATION_PREFIX)
+	dstKeys := make([]string, len(dstIds))
+	for idx, dId := range dstIds {
+		dstKeys[idx] = utils.DESTINATION_PREFIX + dId // Cache expects them as redis keys
+	}
+	rplIds, _ := loader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
+	rpKeys := make([]string, len(rplIds))
+	for idx, rpId := range rplIds {
+		rpKeys[idx] = utils.RATING_PLAN_PREFIX + rpId
+	}
+	rpfIds, _ := loader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
+	rpfKeys := make([]string, len(rpfIds))
+	for idx, rpfId := range rpfIds {
+		rpfKeys[idx] = utils.RATING_PROFILE_PREFIX + rpfId
+	}
+	actIds, _ := loader.GetLoadedIds(utils.ACTION_PREFIX)
+	actKeys := make([]string, len(actIds))
+	for idx, actId := range actIds {
+		actKeys[idx] = utils.ACTION_PREFIX + actId
+	}
+	shgIds, _ := loader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
+	shgKeys := make([]string, len(shgIds))
+	for idx, shgId := range shgIds {
+		shgKeys[idx] = utils.SHARED_GROUP_PREFIX + shgId
+	}
+	aliases, _ := loader.GetLoadedIds(utils.ALIASES_PREFIX)
+	alsKeys := make([]string, len(aliases))
+	for idx, alias := range aliases {
+		alsKeys[idx] = utils.ALIASES_PREFIX + alias
+	}
+	lcrIds, _ := loader.GetLoadedIds(utils.LCR_PREFIX)
+	lcrKeys := make([]string, len(lcrIds))
+	for idx, lcrId := range lcrIds {
+		lcrKeys[idx] = utils.LCR_PREFIX + lcrId
+	}
+	dcs, _ := loader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
+	dcsKeys := make([]string, len(dcs))
+	for idx, dc := range dcs {
+		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
+	}
+	aps, _ := loader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
+	engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+		utils.DESTINATION_PREFIX:     dstKeys,
+		utils.RATING_PLAN_PREFIX:     rpKeys,
+		utils.RATING_PROFILE_PREFIX:  rpfKeys,
+		utils.LCR_PREFIX:             lcrKeys,
+		utils.DERIVEDCHARGERS_PREFIX: dcsKeys,
+		utils.ACTION_PREFIX:          actKeys,
+		utils.SHARED_GROUP_PREFIX:    shgKeys,
+	}); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
+		utils.ALIASES_PREFIX: alsKeys,
+	}); err != nil {
+		return err
+	}
+	if len(aps) != 0 && self.Sched != nil {
+		engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
+		self.Sched.LoadActionPlans(self.RatingDb)
+		self.Sched.Restart()
+	}
+	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
+		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
+			return err
+		}
+	}
+
+	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
+	if len(userKeys) != 0 && self.Users != nil {
+		var r string
+		if err := self.Users.ReloadUsers("", &r); err != nil {
+			return err
+		}
+	}
+	*reply = *loader.GetLoadInstance()
 	return nil
 }

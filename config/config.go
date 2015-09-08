@@ -170,6 +170,7 @@ type CGRConfig struct {
 	DataDbName           string        // The name of the database to connect to.
 	DataDbUser           string        // The user to sign in as.
 	DataDbPass           string        // The user's password.
+	LoadHistorySize      int           // Maximum number of records to archive in load history
 	StorDBType           string        // Should reflect the database type used to store logs
 	StorDBHost           string        // The host to connect to. Values that start with / are for UNIX domain sockets.
 	StorDBPort           string        // Th e port to bind to.
@@ -190,6 +191,7 @@ type CGRConfig struct {
 	Reconnects           int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
 	ConnectAttempts      int           // number of initial connection attempts before giving up
 	ResponseCacheTTL     time.Duration // the life span of a cached response
+	InternalTtl          time.Duration // maximum duration to wait for internal connections before giving up
 	RoundingDecimals     int           // Number of decimals to round end prices at
 	HttpSkipTlsVerify    bool          // If enabled Http Client will accept any TLS certificate
 	TpExportPath         string        // Path towards export folder for offline Tariff Plans
@@ -200,14 +202,17 @@ type CGRConfig struct {
 	RaterHistoryServer   string
 	RaterPubSubServer    string
 	RaterUserServer      string
+	RaterAliasesServer   string
 	BalancerEnabled      bool
 	SchedulerEnabled     bool
 	CDRSEnabled          bool                 // Enable CDR Server service
 	CDRSExtraFields      []*utils.RSRField    // Extra fields to store in CDRs
 	CDRSStoreCdrs        bool                 // store cdrs in storDb
 	CDRSRater            string               // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
+	CDRSPubSub           string               // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
+	CDRSUsers            string               // address where to reach the users service: <""|internal|x.y.z.y:1234>
+	CDRSAliases          string               // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
 	CDRSStats            string               // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
-	CDRSReconnects       int                  // number of reconnects to remote services before giving up
 	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
 	CDRStatsEnabled      bool                 // Enable CDR Stats service
 	CDRStatsSaveInterval time.Duration        // Save interval duration
@@ -221,8 +226,8 @@ type CGRConfig struct {
 	HistoryServerEnabled bool                              // Starts History as server: <true|false>.
 	HistoryDir           string                            // Location on disk where to store history files.
 	HistorySaveInterval  time.Duration                     // The timout duration between pubsub writes
-	PubSubServer         string                            // Address where to reach the master pubsub server: <internal|x.y.z.y:1234>
 	PubSubServerEnabled  bool                              // Starts PubSub as server: <true|false>.
+	AliasesServerEnabled bool                              // Starts PubSub as server: <true|false>.
 	UserServerEnabled    bool                              // Starts User as server: <true|false>
 	UserServerIndexes    []string                          // List of user profile field indexes
 	MailerServer         string                            // The server to use when sending emails out
@@ -252,6 +257,9 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if self.RaterPubSubServer == utils.INTERNAL && !self.PubSubServerEnabled {
 			return errors.New("PubSub server not enabled but requested by Rater component.")
 		}
+		if self.RaterAliasesServer == utils.INTERNAL && !self.AliasesServerEnabled {
+			return errors.New("Aliases server not enabled but requested by Rater component.")
+		}
 		if self.RaterUserServer == utils.INTERNAL && !self.UserServerEnabled {
 			return errors.New("Users service not enabled but requested by Rater component.")
 		}
@@ -260,6 +268,15 @@ func (self *CGRConfig) checkConfigSanity() error {
 	if self.CDRSEnabled {
 		if self.CDRSRater == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by CDRS component.")
+		}
+		if self.CDRSPubSub == utils.INTERNAL && !self.PubSubServerEnabled {
+			return errors.New("PubSub service not enabled but requested by CDRS component.")
+		}
+		if self.CDRSUsers == utils.INTERNAL && !self.UserServerEnabled {
+			return errors.New("Users service not enabled but requested by CDRS component.")
+		}
+		if self.CDRSAliases == utils.INTERNAL && !self.AliasesServerEnabled {
+			return errors.New("Aliases service not enabled but requested by CDRS component.")
 		}
 		if self.CDRSStats == utils.INTERNAL && !self.CDRStatsEnabled {
 			return errors.New("CDRStats not enabled but requested by CDRS component.")
@@ -427,6 +444,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 
+	jsnAliasesServCfg, err := jsnCfg.AliasesServJsonCfg()
+	if err != nil {
+		return err
+	}
+
 	jsnUserServCfg, err := jsnCfg.UserServJsonCfg()
 	if err != nil {
 		return err
@@ -477,6 +499,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnDataDbCfg.Db_passwd != nil {
 			self.DataDbPass = *jsnDataDbCfg.Db_passwd
+		}
+		if jsnDataDbCfg.Load_history_size != nil {
+			self.LoadHistorySize = *jsnDataDbCfg.Load_history_size
 		}
 	}
 
@@ -543,6 +568,14 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnGeneralCfg.Tpexport_dir != nil {
 			self.TpExportPath = *jsnGeneralCfg.Tpexport_dir
 		}
+		if jsnGeneralCfg.Default_timezone != nil {
+			self.DefaultTimezone = *jsnGeneralCfg.Default_timezone
+		}
+		if jsnGeneralCfg.Internal_ttl != nil {
+			if self.InternalTtl, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Internal_ttl); err != nil {
+				return err
+			}
+		}
 	}
 
 	if jsnListenCfg != nil {
@@ -573,6 +606,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnRaterCfg.Pubsubs != nil {
 			self.RaterPubSubServer = *jsnRaterCfg.Pubsubs
 		}
+		if jsnRaterCfg.Aliases != nil {
+			self.RaterAliasesServer = *jsnRaterCfg.Aliases
+		}
 		if jsnRaterCfg.Users != nil {
 			self.RaterUserServer = *jsnRaterCfg.Users
 		}
@@ -601,11 +637,17 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnCdrsCfg.Rater != nil {
 			self.CDRSRater = *jsnCdrsCfg.Rater
 		}
+		if jsnCdrsCfg.Pubsubs != nil {
+			self.CDRSPubSub = *jsnCdrsCfg.Pubsubs
+		}
+		if jsnCdrsCfg.Users != nil {
+			self.CDRSUsers = *jsnCdrsCfg.Users
+		}
+		if jsnCdrsCfg.Aliases != nil {
+			self.CDRSAliases = *jsnCdrsCfg.Aliases
+		}
 		if jsnCdrsCfg.Cdrstats != nil {
 			self.CDRSStats = *jsnCdrsCfg.Cdrstats
-		}
-		if jsnCdrsCfg.Reconnects != nil {
-			self.CDRSReconnects = *jsnCdrsCfg.Reconnects
 		}
 		if jsnCdrsCfg.Cdr_replication != nil {
 			self.CDRSCdrReplication = make([]*CdrReplicationCfg, len(*jsnCdrsCfg.Cdr_replication))
@@ -713,6 +755,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	if jsnPubSubServCfg != nil {
 		if jsnPubSubServCfg.Enabled != nil {
 			self.PubSubServerEnabled = *jsnPubSubServCfg.Enabled
+		}
+	}
+
+	if jsnAliasesServCfg != nil {
+		if jsnAliasesServCfg.Enabled != nil {
+			self.AliasesServerEnabled = *jsnAliasesServCfg.Enabled
 		}
 	}
 

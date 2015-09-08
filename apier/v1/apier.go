@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
@@ -205,7 +206,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if loaded, err := dbReader.LoadDestinationsFiltered(attrs.DestinationId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -229,7 +230,7 @@ func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *s
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	dc := engine.APItoModelDerivedCharger(&attrs)
 	if err := dbReader.LoadDerivedChargersFiltered(&dc[0], true); err != nil {
 		return utils.NewErrServerError(err)
@@ -256,7 +257,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if loaded, err := dbReader.LoadRatingPlansFiltered(attrs.RatingPlanId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if !loaded {
@@ -286,7 +287,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	rp := engine.APItoModelRatingProfile(&attrs)
 	if err := dbReader.LoadRatingProfilesFiltered(&rp[0]); err != nil {
 		return utils.NewErrServerError(err)
@@ -313,7 +314,7 @@ func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) e
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if err := dbReader.LoadSharedGroupsFiltered(attrs.SharedGroupId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -339,7 +340,7 @@ func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if err := dbReader.LoadCdrStatsFiltered(attrs.CdrStatsId, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -359,7 +360,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if err := dbReader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -430,7 +431,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 		return err
 	}
 	if err := self.AccountDb.CacheAccountingPrefixValues(map[string][]string{
-		utils.ALIASES_PREFIX: shgKeys,
+		utils.ALIASES_PREFIX: alsKeys,
 	}); err != nil {
 		return err
 	}
@@ -824,7 +825,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone)
+	dbReader := engine.NewTpReader(self.RatingDb, self.AccountDb, self.StorDb, attrs.TPid, self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if _, err := engine.Guardian.Guard(func() (interface{}, error) {
 		aas := engine.APItoModelAccountAction(&attrs)
 		if err := dbReader.LoadAccountActionsFiltered(aas); err != nil {
@@ -925,6 +926,7 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 	}); err != nil {
 		return err
 	}
+
 	*reply = utils.OK
 	return nil
 }
@@ -953,6 +955,16 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 		}
 		cs.Users = len(ups)
 	}
+	if loadHistInsts, err := self.AccountDb.GetLoadHistory(1, false); err != nil || len(loadHistInsts) == 0 {
+		if err != nil { // Not really an error here since we only count in cache
+			engine.Logger.Err(fmt.Sprintf("ApierV1.GetCacheStats, error on GetLoadHistory: %s"))
+		}
+		cs.LastLoadId = utils.NOT_AVAILABLE
+		cs.LastLoadTime = utils.NOT_AVAILABLE
+	} else {
+		cs.LastLoadId = loadHistInsts[0].LoadId
+		cs.LastLoadTime = loadHistInsts[0].LoadTime.Format(time.RFC3339)
+	}
 	*reply = *cs
 	return nil
 }
@@ -964,8 +976,8 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 	cachedItemAge := new(utils.CachedItemAge)
 	var found bool
 	for idx, cacheKey := range []string{utils.DESTINATION_PREFIX + itemId, utils.RATING_PLAN_PREFIX + itemId, utils.RATING_PROFILE_PREFIX + itemId,
-		utils.ACTION_PREFIX + itemId, utils.SHARED_GROUP_PREFIX + itemId, utils.ALIASES_PREFIX + itemId,
-		utils.LCR_PREFIX + itemId} {
+		utils.ACTION_PREFIX + itemId, utils.SHARED_GROUP_PREFIX + itemId, utils.ALIASES_PREFIX + itemId, utils.LCR_PREFIX + itemId} {
+
 		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
 			found = true
 			switch idx {
@@ -980,10 +992,8 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 			case 4:
 				cachedItemAge.SharedGroup = age
 			case 5:
-				cachedItemAge.RatingAlias = age
+				cachedItemAge.Alias = age
 			case 6:
-				cachedItemAge.AccountAlias = age
-			case 7:
 				cachedItemAge.LcrProfiles = age
 			}
 		}
@@ -1024,7 +1034,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.CDR_STATS_CSV),
 		path.Join(attrs.FolderPath, utils.USERS_CSV),
 		path.Join(attrs.FolderPath, utils.ALIASES_CSV),
-	), "", self.Config.DefaultTimezone)
+	), "", self.Config.DefaultTimezone, self.Config.LoadHistorySize)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -1128,7 +1138,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 
 type AttrRemoveRatingProfile struct {
 	Direction string
-	Tennat    string
+	Tenant    string
 	Category  string
 	Subject   string
 }
@@ -1140,8 +1150,8 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 	} else {
 		return
 	}
-	if arrp.Tennat != "" && arrp.Tennat != utils.ANY {
-		result += arrp.Tennat
+	if arrp.Tenant != "" && arrp.Tenant != utils.ANY {
+		result += arrp.Tenant
 		result += utils.CONCATENATED_KEY_SEP
 	} else {
 		return
@@ -1160,14 +1170,13 @@ func (arrp *AttrRemoveRatingProfile) GetId() (result string) {
 }
 
 func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *string) error {
-	if attr.Subject != "" && attr.Category == "" {
-		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Category")
+	if attr.Direction == "" {
+		attr.Direction = utils.OUT
 	}
-	if attr.Category != "" && attr.Tennat == "" {
-		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Tenant")
-	}
-	if attr.Tennat != "" && attr.Direction == "" {
-		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "Direction")
+	if (attr.Subject != "" && utils.IsSliceMember([]string{attr.Direction, attr.Tenant, attr.Category}, "")) ||
+		(attr.Category != "" && utils.IsSliceMember([]string{attr.Direction, attr.Tenant}, "")) ||
+		attr.Tenant != "" && attr.Direction == "" {
+		return utils.ErrMandatoryIeMissing
 	}
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		err := self.RatingDb.RemoveRatingProfile(attr.GetId())
@@ -1178,8 +1187,36 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 	}, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
-		return err
+		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
+	return nil
+}
+
+func (self *ApierV1) GetLoadHistory(attrs utils.Paginator, reply *[]*engine.LoadInstance) error {
+	nrItems := -1
+	offset := 0
+	if attrs.Offset != nil { // For offset we need full data
+		offset = *attrs.Offset
+	} else if attrs.Limit != nil {
+		nrItems = *attrs.Limit
+	}
+	loadHist, err := self.AccountDb.GetLoadHistory(nrItems, true)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if attrs.Offset != nil && attrs.Limit != nil { // Limit back to original
+		nrItems = *attrs.Limit
+	}
+	if len(loadHist) == 0 || len(loadHist) <= offset || nrItems == 0 {
+		return utils.ErrNotFound
+	}
+	if offset != 0 {
+		nrItems = offset + nrItems
+	}
+	if nrItems == -1 || nrItems > len(loadHist) { // So we can use it in indexing bellow
+		nrItems = len(loadHist)
+	}
+	*reply = loadHist[offset:nrItems]
 	return nil
 }

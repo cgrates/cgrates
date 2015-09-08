@@ -64,7 +64,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	users := ``
 	aliases := ``
 	csvr := engine.NewTpReader(ratingDb2, acntDb2, engine.NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "")
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "", 10)
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

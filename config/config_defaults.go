@@ -40,6 +40,7 @@ const CGRATES_CFG_JSON = `
     "connect_attempts": 3,                  // initial server connect attempts
     "response_cache_ttl": "3s",              // the life span of a cached response
     "reconnects": -1,                       // number of retries in case of connection lost
+	"internal_ttl": "2m",					// maximum duration to wait for internal connections before giving up
 },
 
 
@@ -67,6 +68,7 @@ const CGRATES_CFG_JSON = `
 	"db_name": "11", 						// data_db database name to connect to
 	"db_user": "", 							// username to use when connecting to data_db
 	"db_passwd": "", 						// password to use when connecting to data_db
+	"load_history_size": 10,				// Number of records in the load history
 },
 
 
@@ -83,7 +85,7 @@ const CGRATES_CFG_JSON = `
 
 
 "balancer": {
-	"enabled": false, 						// start Balancer service: <true|false>
+	"enabled": false,						// start Balancer service: <true|false>
 },
 
 
@@ -94,6 +96,7 @@ const CGRATES_CFG_JSON = `
 	"historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
 	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
 	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+	"aliases": "",							// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
 },
 
 
@@ -107,8 +110,10 @@ const CGRATES_CFG_JSON = `
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
 	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
+	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
+	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+	"aliases": "",							// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
 	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-	"reconnects": 5,						// number of reconnect attempts to rater or cdrs
 	"cdr_replication":[],					// replicate the raw CDR to a number of servers
 },
 
@@ -125,7 +130,7 @@ const CGRATES_CFG_JSON = `
 		"field_separator": ",",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-        "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
+		"generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
@@ -200,9 +205,8 @@ const CGRATES_CFG_JSON = `
 	"ha_cdrs": [
         {"server": "internal",	"timeout": "100ms"}
     ],
-	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
-	"cdr_extra_fields": [],			// extra fields to store in CDRs when creating them
+	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
@@ -226,7 +230,6 @@ const CGRATES_CFG_JSON = `
 	"ha_cdrs": [
         {"server": "internal",	"timeout": "100ms"}
     ],
-	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
@@ -265,6 +268,11 @@ const CGRATES_CFG_JSON = `
 
 "pubsubs": {
 	"enabled": false,							// starts PubSub service: <true|false>.
+},
+
+
+"aliases": {
+	"enabled": false,							// starts Aliases service: <true|false>.
 },
 
 

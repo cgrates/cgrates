@@ -160,7 +160,7 @@ func FromMapStringString(m map[string]string, in interface{}) {
 		field := v.FieldByName(fieldName)
 		if field.IsValid() {
 			if field.Kind() == reflect.String {
-				if v.FieldByName(fieldName).String() != "" {
+				if field.String() != "" && field.CanSet() {
 					field.SetString(fieldValue)
 				}
 			}

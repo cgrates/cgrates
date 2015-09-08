@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -13,6 +14,7 @@ import (
 type TpReader struct {
 	tpid              string
 	timezone          string
+	loadHistSize      int
 	ratingStorage     RatingStorage
 	accountingStorage AccountingStorage
 	lr                LoadReader
@@ -34,12 +36,14 @@ type TpReader struct {
 	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
+	loadInstance      *LoadInstance
 }
 
-func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string) *TpReader {
+func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string, loadHistSize int) *TpReader {
 	tpr := &TpReader{
 		tpid:              tpid,
 		timezone:          timezone,
+		loadHistSize:      loadHistSize,
 		ratingStorage:     rs,
 		accountingStorage: as,
 		lr:                lr,
@@ -1058,7 +1062,24 @@ func (tpr *TpReader) LoadUsers() error {
 	if err != nil {
 		return err
 	}
-	tpr.users, err = TpUsers(tps).GetUsers()
+	userMap, err := TpUsers(tps).GetUsers()
+	if err != nil {
+		return err
+	}
+	for key, usr := range userMap {
+		up, found := tpr.users[key]
+		if !found {
+			up = &UserProfile{
+				Tenant:   usr.Tenant,
+				UserName: usr.UserName,
+				Profile:  make(map[string]string),
+			}
+			tpr.users[key] = up
+		}
+		for _, p := range usr.Profile {
+			up.Profile[p.AttrName] = p.AttrValue
+		}
+	}
 	return err
 }
 
@@ -1090,7 +1111,32 @@ func (tpr *TpReader) LoadAliases() error {
 	if err != nil {
 		return err
 	}
-	tpr.aliases, err = TpAliases(tps).GetAliases()
+	alMap, err := TpAliases(tps).GetAliases()
+	if err != nil {
+		return err
+	}
+	for key, tal := range alMap {
+		al, found := tpr.aliases[key]
+		if !found {
+			al = &Alias{
+				Direction: tal.Direction,
+				Tenant:    tal.Tenant,
+				Category:  tal.Category,
+				Account:   tal.Account,
+				Subject:   tal.Subject,
+				Group:     tal.Group,
+				Values:    make(AliasValues, 0),
+			}
+			tpr.aliases[key] = al
+		}
+		for _, v := range tal.Values {
+			al.Values = append(al.Values, &AliasValue{
+				DestinationId: v.DestinationId,
+				Alias:         v.Alias,
+				Weight:        v.Weight,
+			})
+		}
+	}
 	return err
 }
 
@@ -1164,6 +1210,13 @@ func (tpr *TpReader) IsValid() bool {
 		}
 	}
 	return valid
+}
+
+func (tpr *TpReader) GetLoadInstance() *LoadInstance {
+	if tpr.loadInstance == nil {
+		tpr.loadInstance = &LoadInstance{LoadId: utils.GenUUID(), TariffPlanId: tpr.tpid, LoadTime: time.Now()}
+	}
+	return tpr.loadInstance
 }
 
 func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
@@ -1316,6 +1369,13 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 		if verbose {
 			log.Print("\t", al.GetId())
 		}
+	}
+	ldInst := tpr.GetLoadInstance()
+	if verbose {
+		log.Printf("LoadHistory, instance: %+v\n", ldInst)
+	}
+	if err = tpr.accountingStorage.AddLoadHistory(ldInst, tpr.loadHistSize); err != nil {
+		return err
 	}
 	return
 }

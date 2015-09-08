@@ -25,6 +25,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 )
@@ -32,48 +33,54 @@ import (
 /*
 Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered engines.
 */
-func stopBalancerSignalHandler() {
+func stopBalancerSignalHandler(bal *balancer2go.Balancer, exitChan chan bool) {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-
 	sig := <-c
 	engine.Logger.Info(fmt.Sprintf("Caught signal %v, sending shutdown to engines\n", sig))
 	bal.Shutdown("Responder.Shutdown")
 	exitChan <- true
 }
 
-func generalSignalHandler() {
+func generalSignalHandler(internalCdrStatSChan chan engine.StatsInterface, exitChan chan bool) {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
 	sig := <-c
 	engine.Logger.Info(fmt.Sprintf("Caught signal %v, shuting down cgr-engine\n", sig))
 	var dummyInt int
-	if cdrStats != nil {
+	select {
+	case cdrStats := <-internalCdrStatSChan:
 		cdrStats.Stop(dummyInt, &dummyInt)
+	default:
 	}
+
 	exitChan <- true
 }
 
 /*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from balancer and closes the storage before exiting.
 */
-func stopRaterSignalHandler() {
+func stopRaterSignalHandler(internalCdrStatSChan chan engine.StatsInterface, exitChan chan bool) {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	sig := <-c
 
 	engine.Logger.Info(fmt.Sprintf("Caught signal %v, unregistering from balancer\n", sig))
-	unregisterFromBalancer()
+	unregisterFromBalancer(exitChan)
 	var dummyInt int
-	cdrStats.Stop(dummyInt, &dummyInt)
+	select {
+	case cdrStats := <-internalCdrStatSChan:
+		cdrStats.Stop(dummyInt, &dummyInt)
+	default:
+	}
 	exitChan <- true
 }
 
 /*
 Connects to the balancer and calls unregister RPC method.
 */
-func unregisterFromBalancer() {
+func unregisterFromBalancer(exitChan chan bool) {
 	client, err := rpc.Dial("tcp", cfg.RaterBalancer)
 	if err != nil {
 		engine.Logger.Crit("Cannot contact the balancer!")
@@ -92,7 +99,7 @@ func unregisterFromBalancer() {
 /*
 Connects to the balancer and rehisters the engine to the server.
 */
-func registerToBalancer() {
+func registerToBalancer(exitChan chan bool) {
 	client, err := rpc.Dial("tcp", cfg.RaterBalancer)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cannot contact the balancer: %v", err))
@@ -126,7 +133,7 @@ func reloadSchedulerSingnalHandler(sched *scheduler.Scheduler, getter engine.Rat
 /*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and shuts down the session manager.
 */
-func shutdownSessionmanagerSingnalHandler() {
+func shutdownSessionmanagerSingnalHandler(exitChan chan bool) {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-c

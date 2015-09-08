@@ -30,7 +30,7 @@ After post-install actions are performed, CGRateS will be configured in */etc/cg
 After the go environment is installed_ (at least go1.2) and configured_ issue the following commands:
 ::
 
-    go get github.com/cgrates/cgrates
+    go get github.com/cgrates/cgrates/...
 
 This command will install the trunk version of CGRateS together with all the necessary dependencies.
 
@@ -44,7 +44,7 @@ This command will install the trunk version of CGRateS together with all the nec
 Database setup
 ~~~~~~~~~~~~~~
 
-For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary. 
+For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary.
 
 At present we support the following databases:
 
@@ -62,7 +62,7 @@ Used as StorDb, optimized for CDR archiving and offline Tariff Plan versioning.
 Once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
 
  ::
-   
+
   cd /usr/share/cgrates/storage/mysql/
   ./setup_cgr_db.sh root CGRateS.org localhost
 
@@ -72,7 +72,7 @@ Used as StorDb, optimized for CDR archiving and offline Tariff Plan versioning.
 Once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
 
  ::
-   
+
   cd /usr/share/cgrates/storage/postgres/
   ./setup_cgr_db.sh
 
@@ -87,4 +87,3 @@ Git
 The CGR-History component will use Git_ to archive tariff plan changes, hence it's installation is necessary before using CGR-History.
 
 .. _Git: http://git-scm.com/
-

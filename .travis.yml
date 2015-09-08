@@ -2,6 +2,7 @@ language: go
 
 go:
   - 1.4
+  - 1.5
 
 script: $TRAVIS_BUILD_DIR/test.sh
 
@@ -17,4 +18,3 @@ notifications:
   email:
     on_success: never
     on_failure: always
-

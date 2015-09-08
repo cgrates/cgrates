@@ -163,7 +163,7 @@ func (self *SQLStorage) RemTpData(table, tpid string, args ...string) error {
 	tx := self.db.Begin()
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES,
-			utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_LCRS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TBL_TP_DERIVED_CHARGERS} {
+			utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_LCRS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TBL_TP_DERIVED_CHARGERS, utils.TBL_TP_ALIASES} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1388,24 +1388,24 @@ func (self *SQLStorage) SetTpAliases(aliases []TpAlias) error {
 
 func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 	var tpAliases []TpAlias
-	q := self.db.Where("tpid = ?", filter.Tpid)
+	q := self.db.Where("`tpid` = ?", filter.Tpid)
 	if len(filter.Direction) != 0 {
-		q = q.Where("direction = ?", filter.Direction)
+		q = q.Where("`direction` = ?", filter.Direction)
 	}
 	if len(filter.Tenant) != 0 {
-		q = q.Where("tenant = ?", filter.Tenant)
+		q = q.Where("`tenant` = ?", filter.Tenant)
 	}
 	if len(filter.Category) != 0 {
-		q = q.Where("category = ?", filter.Category)
+		q = q.Where("`category` = ?", filter.Category)
 	}
 	if len(filter.Account) != 0 {
-		q = q.Where("account = ?", filter.Account)
+		q = q.Where("`account` = ?", filter.Account)
 	}
 	if len(filter.Subject) != 0 {
-		q = q.Where("subject = ?", filter.Subject)
+		q = q.Where("`subject` = ?", filter.Subject)
 	}
 	if len(filter.Group) != 0 {
-		q = q.Where("group = ?", filter.Group)
+		q = q.Where("`group` = ?", filter.Group)
 	}
 
 	if err := q.Find(&tpAliases).Error; err != nil {

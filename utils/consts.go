@@ -61,6 +61,8 @@ const (
 	TBL_TP_ACTION_TRIGGERS     = "tp_action_triggers"
 	TBL_TP_ACCOUNT_ACTIONS     = "tp_account_actions"
 	TBL_TP_DERIVED_CHARGERS    = "tp_derived_chargers"
+	TBL_TP_USERS               = "tp_users"
+	TBL_TP_ALIASES             = "tp_aliases"
 	TBL_CDRS_PRIMARY           = "cdrs_primary"
 	TBL_CDRS_EXTRA             = "cdrs_extra"
 	TBL_COST_DETAILS           = "cost_details"
@@ -154,6 +156,8 @@ const (
 	NANOSECONDS                = "nanoseconds"
 	SECONDS                    = "seconds"
 	OUT                        = "*out"
+	META_OUT                   = "*out"
+	META_ANY                   = "*any"
 	CDR_IMPORT                 = "cdr_import"
 	CDR_EXPORT                 = "cdr_export"
 	CDRFIELD                   = "cdrfield"
@@ -173,6 +177,7 @@ const (
 	PUBSUB_SUBSCRIBERS_PREFIX  = "pss_"
 	USERS_PREFIX               = "usr_"
 	ALIASES_PREFIX             = "als_"
+	REVERSE_ALIASES_PREFIX     = "rls_"
 	CDR_STATS_PREFIX           = "cst_"
 	TEMP_DESTINATION_PREFIX    = "tmp_"
 	LOG_CALL_COST_PREFIX       = "cco_"
@@ -181,6 +186,7 @@ const (
 	LOG_ERR                    = "ler_"
 	LOG_CDR                    = "cdr_"
 	LOG_MEDIATED_CDR           = "mcd_"
+	LOADINST_KEY               = "load_history"
 	// sources
 	SESSION_MANAGER_SOURCE       = "SMR"
 	MEDIATOR_SOURCE              = "MED"
@@ -223,6 +229,7 @@ const (
 	LOG_CALL_COST_CACHE_PREFIX   = "LOG_CALL_COSTS_"
 	ALIAS_GROUP_RP               = "*rating_profile"
 	ALIAS_GROUP_ACC              = "*account"
+	NOT_AVAILABLE                = "N/A"
 )
 
 var (

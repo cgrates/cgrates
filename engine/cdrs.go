@@ -64,16 +64,19 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, stats StatsInterface) (*CdrServer, error) {
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, stats: stats, guard: &GuardianLock{queue: make(map[string]chan bool)}}, nil
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, pubsub PublisherSubscriber, users UserService, aliases AliasService, stats StatsInterface) (*CdrServer, error) {
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{queue: make(map[string]chan bool)}}, nil
 }
 
 type CdrServer struct {
-	cgrCfg *config.CGRConfig
-	cdrDb  CdrStorage
-	rater  Connector
-	stats  StatsInterface
-	guard  *GuardianLock
+	cgrCfg  *config.CGRConfig
+	cdrDb   CdrStorage
+	rater   Connector
+	pubsub  PublisherSubscriber
+	users   UserService
+	aliases AliasService
+	stats   StatsInterface
+	guard   *GuardianLock
 }
 
 func (self *CdrServer) Timezone() string {
@@ -93,9 +96,6 @@ func (self *CdrServer) ProcessCdr(cdr *StoredCdr) error {
 
 // RPC method, used to process external CDRs
 func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
-	if cdr.Subject == "" { // Use account information as rating subject if missing
-		cdr.Subject = cdr.Account
-	}
 	storedCdr, err := NewStoredCdrFromExternalCdr(cdr, self.cgrCfg.DefaultTimezone)
 	if err != nil {
 		return err
@@ -151,6 +151,22 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
+	if storedCdr.Direction == "" {
+		storedCdr.Direction = utils.OUT
+	}
+	if storedCdr.ReqType == "" {
+		storedCdr.ReqType = self.cgrCfg.DefaultReqType
+	}
+	if storedCdr.Tenant == "" {
+		storedCdr.Tenant = self.cgrCfg.DefaultTenant
+	}
+	if storedCdr.Category == "" {
+		storedCdr.Category = self.cgrCfg.DefaultCategory
+	}
+	if storedCdr.Subject == "" { // Use account information as rating subject if missing
+		storedCdr.Subject = storedCdr.Account
+	}
+
 	if upData, err := LoadUserProfile(storedCdr, "ExtraFields"); err != nil {
 		return err
 	} else {
@@ -280,9 +296,7 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 		DurationIndex: storedCdr.Usage,
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, storedCdr.ReqType) { // Prepaid - Cost can be recalculated in case of missing records from SM
-		//Logger.Debug(utils.ToJSON(cd))
 		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
-			//Logger.Debug(utils.ToJSON(cc))
 			self.cdrDb.LogCallCost(storedCdr.CgrId, utils.CDRS_SOURCE, storedCdr.MediationRunId, cc)
 		}
 	} else {
@@ -326,7 +340,6 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 
 // ToDo: Add websocket support
 func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
-	Logger.Debug(fmt.Sprintf("replicateCdr cdr: %+v, configuration: %+v", cdr, self.cgrCfg.CDRSCdrReplication))
 	for _, rplCfg := range self.cgrCfg.CDRSCdrReplication {
 		passesFilters := true
 		for _, cdfFltr := range rplCfg.CdrFilter {

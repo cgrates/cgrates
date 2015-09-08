@@ -645,7 +645,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 
 func TestFsEvGetExtraFields(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
-	cfg.SmFsConfig.CdrExtraFields = []*utils.RSRField{&utils.RSRField{Id: "Channel-Read-Codec-Name"}, &utils.RSRField{Id: "Channel-Write-Codec-Name"}, &utils.RSRField{Id: "NonExistingHeader"}}
+	cfg.SmFsConfig.ExtraFields = []*utils.RSRField{&utils.RSRField{Id: "Channel-Read-Codec-Name"}, &utils.RSRField{Id: "Channel-Write-Codec-Name"}, &utils.RSRField{Id: "NonExistingHeader"}}
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).AsEvent(hangupEv)
 	expectedExtraFields := map[string]string{"Channel-Read-Codec-Name": "SPEEX", "Channel-Write-Codec-Name": "SPEEX", "NonExistingHeader": ""}

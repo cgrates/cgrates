@@ -39,7 +39,7 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr, timezone string) (*StoredC
 		return nil, err
 	}
 	if len(storedCdr.CgrId) == 0 { // Populate CgrId if not present
-		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.UTC().String())
 	}
 	if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(extCdr.AnswerTime, timezone); err != nil {
 		return nil, err
@@ -165,11 +165,11 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 	case utils.SETUP_TIME:
 		return rsrFld.ParseValue(storedCdr.SetupTime.Format(time.RFC3339))
 	case utils.PDD:
-		return strconv.FormatFloat(utils.Round(storedCdr.Pdd.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+		return strconv.FormatFloat(storedCdr.Pdd.Seconds(), 'f', -1, 64)
 	case utils.ANSWER_TIME:
 		return rsrFld.ParseValue(storedCdr.AnswerTime.Format(time.RFC3339))
 	case utils.USAGE:
-		return strconv.FormatFloat(utils.Round(storedCdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
+		return strconv.FormatFloat(storedCdr.Usage.Seconds(), 'f', -1, 64)
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(storedCdr.Supplier)
 	case utils.DISCONNECT_CAUSE:

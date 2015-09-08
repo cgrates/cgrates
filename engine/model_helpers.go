@@ -717,48 +717,80 @@ func ValueOrDefault(val string, deflt string) string {
 
 type TpUsers []TpUser
 
-func (tps TpUsers) GetUsers() (map[string]*UserProfile, error) {
-	users := make(map[string]*UserProfile)
+func (tps TpUsers) GetUsers() (map[string]*utils.TPUsers, error) {
+	users := make(map[string]*utils.TPUsers)
 	for _, tp := range tps {
-		var user *UserProfile
+		var user *utils.TPUsers
 		var found bool
 		if user, found = users[tp.GetId()]; !found {
-			user = &UserProfile{
+			user = &utils.TPUsers{
 				Tenant:   tp.Tenant,
 				UserName: tp.UserName,
-				Profile:  make(map[string]string),
 			}
 			users[tp.GetId()] = user
 		}
-		user.Profile[tp.AttributeName] = tp.AttributeValue
+		user.Profile = append(user.Profile,
+			&utils.TPUserProfile{
+				AttrName:  tp.AttributeName,
+				AttrValue: tp.AttributeValue,
+			})
 	}
 	return users, nil
 }
 
 type TpAliases []TpAlias
 
-func (tps TpAliases) GetAliases() (map[string]*Alias, error) {
-	als := make(map[string]*Alias)
+func (tps TpAliases) GetAliases() (map[string]*utils.TPAliases, error) {
+	als := make(map[string]*utils.TPAliases)
 	for _, tp := range tps {
-		var al *Alias
+		var al *utils.TPAliases
 		var found bool
 		if al, found = als[tp.GetId()]; !found {
-			al = &Alias{
+			al = &utils.TPAliases{
 				Direction: tp.Direction,
 				Tenant:    tp.Tenant,
 				Category:  tp.Category,
 				Account:   tp.Account,
 				Subject:   tp.Subject,
 				Group:     tp.Group,
-				Values:    make(AliasValues, 0),
 			}
 			als[tp.GetId()] = al
 		}
-		al.Values = append(al.Values, &AliasValue{
+		al.Values = append(al.Values, &utils.TPAliasValue{
 			DestinationId: tp.DestinationId,
 			Alias:         tp.Alias,
 			Weight:        tp.Weight,
 		})
 	}
 	return als, nil
+}
+
+type TpLcrRules []TpLcrRule
+
+func (tps TpLcrRules) GetLcrRules() (map[string]*utils.TPLcrRules, error) {
+	lcrs := make(map[string]*utils.TPLcrRules)
+	for _, tp := range tps {
+		var lcr *utils.TPLcrRules
+		var found bool
+		if lcr, found = lcrs[tp.GetLcrRuleId()]; !found {
+			lcr = &utils.TPLcrRules{
+				LcrRulesId: tp.GetLcrRuleId(),
+			}
+			lcrs[tp.GetLcrRuleId()] = lcr
+		}
+		lcr.LcrRules = append(lcr.LcrRules, &utils.TPLcrRule{
+			Direction:      tp.Direction,
+			Tenant:         tp.Tenant,
+			Category:       tp.Category,
+			Account:        tp.Account,
+			Subject:        tp.Subject,
+			DestinationId:  tp.DestinationTag,
+			RpCategory:     tp.RpCategory,
+			Strategy:       tp.Strategy,
+			StrategyParams: tp.StrategyParams,
+			ActivationTime: tp.ActivationTime,
+			Weight:         tp.Weight,
+		})
+	}
+	return lcrs, nil
 }

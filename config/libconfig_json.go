@@ -32,6 +32,7 @@ type GeneralJsonCfg struct {
 	Reconnects           *int
 	Connect_attempts     *int
 	Response_cache_ttl   *string
+	Internal_ttl         *string
 }
 
 // Listen config section
@@ -43,14 +44,15 @@ type ListenJsonCfg struct {
 
 // Database config
 type DbJsonCfg struct {
-	Db_type        *string
-	Db_host        *string
-	Db_port        *int
-	Db_name        *string
-	Db_user        *string
-	Db_passwd      *string
-	Max_open_conns *int // Used only in case of storDb
-	Max_idle_conns *int
+	Db_type           *string
+	Db_host           *string
+	Db_port           *int
+	Db_name           *string
+	Db_user           *string
+	Db_passwd         *string
+	Max_open_conns    *int // Used only in case of storDb
+	Max_idle_conns    *int
+	Load_history_size *int // Used in case of dataDb to limit the length of the loads history
 }
 
 // Balancer config section
@@ -65,6 +67,7 @@ type RaterJsonCfg struct {
 	Cdrstats *string
 	Historys *string
 	Pubsubs  *string
+	Aliases  *string
 	Users    *string
 }
 
@@ -79,8 +82,10 @@ type CdrsJsonCfg struct {
 	Extra_fields    *[]string
 	Store_cdrs      *bool
 	Rater           *string
+	Pubsubs         *string
+	Users           *string
+	Aliases         *string
 	Cdrstats        *string
-	Reconnects      *int
 	Cdr_replication *[]*CdrReplicationJsonCfg
 }
 
@@ -157,9 +162,8 @@ type SmFsJsonCfg struct {
 	Enabled                *bool
 	Ha_rater               *[]*HaPoolJsonCfg
 	Ha_cdrs                *[]*HaPoolJsonCfg
-	Reconnects             *int
 	Create_cdr             *bool
-	Cdr_extra_fields       *[]string
+	Extra_fields           *[]string
 	Debit_interval         *string
 	Min_call_duration      *string
 	Max_call_duration      *string
@@ -190,7 +194,6 @@ type SmKamJsonCfg struct {
 	Enabled           *bool
 	Ha_rater          *[]*HaPoolJsonCfg
 	Ha_cdrs           *[]*HaPoolJsonCfg
-	Reconnects        *int
 	Create_cdr        *bool
 	Debit_interval    *string
 	Min_call_duration *string
@@ -210,7 +213,6 @@ type SmOsipsJsonCfg struct {
 	Listen_udp                *string
 	Ha_rater                  *[]*HaPoolJsonCfg
 	Ha_cdrs                   *[]*HaPoolJsonCfg
-	Reconnects                *int
 	Create_cdr                *bool
 	Debit_interval            *string
 	Min_call_duration         *string
@@ -237,7 +239,12 @@ type PubSubServJsonCfg struct {
 	Enabled *bool
 }
 
-// PubSub server config section
+// Aliases server config section
+type AliasesServJsonCfg struct {
+	Enabled *bool
+}
+
+// Users server config section
 type UserServJsonCfg struct {
 	Enabled *bool
 	Indexes *[]string

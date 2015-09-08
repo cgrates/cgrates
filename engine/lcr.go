@@ -57,6 +57,7 @@ type LcrRequest struct {
 	SetupTime    string
 	Duration     string
 	IgnoreErrors bool
+	ExtraFields  map[string]string
 	*utils.Paginator
 }
 
@@ -90,7 +91,7 @@ func (self *LcrRequest) AsCallDescriptor(timezone string) (*CallDescriptor, erro
 	} else if callDur, err = utils.ParseDurationWithSecs(self.Duration); err != nil {
 		return nil, err
 	}
-	return &CallDescriptor{
+	cd := &CallDescriptor{
 		Direction:   self.Direction,
 		Tenant:      self.Tenant,
 		Category:    self.Category,
@@ -99,7 +100,14 @@ func (self *LcrRequest) AsCallDescriptor(timezone string) (*CallDescriptor, erro
 		Destination: self.Destination,
 		TimeStart:   timeStart,
 		TimeEnd:     timeStart.Add(callDur),
-	}, nil
+	}
+	if self.ExtraFields != nil {
+		cd.ExtraFields = make(map[string]string)
+	}
+	for key, val := range self.ExtraFields {
+		cd.ExtraFields[key] = val
+	}
+	return cd, nil
 }
 
 // A LCR reply, used in APIer and SM where we need to expose it
@@ -266,7 +274,7 @@ func (es LCREntriesSorter) Sort() {
 func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 	var potentials LCREntriesSorter
 	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
-		if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
+		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 
 			destIds := x.(map[interface{}]struct{})
 			for idId := range destIds {
