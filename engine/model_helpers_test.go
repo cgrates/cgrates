@@ -322,28 +322,22 @@ func TestTPSharedGroupsAsExportSlice(t *testing.T) {
 //*in,cgrates.org,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
 func TestTPLcrRulesAsExportSlice(t *testing.T) {
 	lcr := &utils.TPLcrRules{
-		TPid:       "TEST_TPID",
-		LcrRulesId: "TEST_LCR",
-		LcrRules: []*utils.TPLcrRule{
+		TPid:      "TEST_TPID",
+		Direction: "*in",
+		Tenant:    "cgrates.org",
+		Category:  "LCR_STANDARD",
+		Account:   "*any",
+		Subject:   "*any",
+		Rules: []*utils.TPLcrRule{
 			&utils.TPLcrRule{
-				Direction:      "*in",
-				Tenant:         "cgrates.org",
-				Account:        "*any",
-				Subject:        "*any",
 				DestinationId:  "EU_LANDLINE",
-				Category:       "LCR_STANDARD",
 				Strategy:       "*static",
 				StrategyParams: "ivo;dan;rif",
 				ActivationTime: "2012-01-01T00:00:00Z",
 				Weight:         20.0},
 			//*in,cgrates.org,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
 			&utils.TPLcrRule{
-				Direction:      "*in",
-				Tenant:         "cgrates.org",
-				Account:        "*any",
-				Subject:        "*any",
 				DestinationId:  "*any",
-				Category:       "LCR_STANDARD",
 				Strategy:       "*lowest_cost",
 				StrategyParams: "",
 				ActivationTime: "2012-01-01T00:00:00Z",

@@ -37,9 +37,8 @@ func (self *ApierV1) SetTPUser(attrs utils.TPUsers, reply *string) error {
 }
 
 type AttrGetTPUser struct {
-	TPid     string // Tariff plan id
-	Tenant   string
-	UserName string
+	TPid   string // Tariff plan id
+	UserId string
 }
 
 // Queries specific User on Tariff plan
@@ -48,10 +47,9 @@ func (self *ApierV1) GetTPUser(attr AttrGetTPUser, reply *utils.TPUsers) error {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	usr := &engine.TpUser{
-		Tpid:     attr.TPid,
-		Tenant:   attr.Tenant,
-		UserName: attr.UserName,
+		Tpid: attr.TPid,
 	}
+	usr.SetId(attr.UserId)
 	if tms, err := self.StorDb.GetTpUsers(usr); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(tms) == 0 {
@@ -76,7 +74,7 @@ func (self *ApierV1) GetTPUserIds(attrs AttrGetTPUserIds, reply *[]string) error
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_USERS, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_USERS, utils.TPDistinctIds{"tenant", "user_name"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound

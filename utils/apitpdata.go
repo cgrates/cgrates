@@ -302,17 +302,16 @@ type TPSharedGroup struct {
 }
 
 type TPLcrRules struct {
-	TPid       string
-	LcrRulesId string
-	LcrRules   []*TPLcrRule
+	TPid      string
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Rules     []*TPLcrRule
 }
 
 type TPLcrRule struct {
-	Direction      string
-	Tenant         string
-	Category       string
-	Account        string
-	Subject        string
 	DestinationId  string
 	RpCategory     string
 	Strategy       string

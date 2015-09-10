@@ -37,29 +37,17 @@ func (self *ApierV1) SetTPAlias(attrs utils.TPAliases, reply *string) error {
 }
 
 type AttrGetTPAlias struct {
-	TPid      string // Tariff plan id
-	Direction string
-	Tenant    string
-	Category  string
-	Account   string
-	Subject   string
-	Group     string
+	TPid    string // Tariff plan id
+	AliasId string
 }
 
 // Queries specific Alias on Tariff plan
-func (self *ApierV1) GetTPAliases(attr AttrGetTPAlias, reply *utils.TPAliases) error {
+func (self *ApierV1) GetTPAlias(attr AttrGetTPAlias, reply *utils.TPAliases) error {
 	if missing := utils.MissingStructFields(&attr, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	al := &engine.TpAlias{
-		Tpid:      attr.TPid,
-		Direction: attr.Direction,
-		Tenant:    attr.Tenant,
-		Category:  attr.Category,
-		Account:   attr.Account,
-		Subject:   attr.Subject,
-		Group:     attr.Group,
-	}
+	al := &engine.TpAlias{Tpid: attr.TPid}
+	al.SetId(attr.AliasId)
 	if tms, err := self.StorDb.GetTpAliases(al); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(tms) == 0 {
@@ -84,7 +72,7 @@ func (self *ApierV1) GetTPAliasIds(attrs AttrGetTPAliasIds, reply *[]string) err
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ALIASES, utils.TPDistinctIds{"tag"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ALIASES, utils.TPDistinctIds{"`direction`", "`tenant`", "`category`", "`account`", "`subject`", "`group`"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound

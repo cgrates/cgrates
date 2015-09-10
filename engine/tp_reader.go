@@ -412,7 +412,7 @@ func (tpr *TpReader) LoadSharedGroups() error {
 }
 
 func (tpr *TpReader) LoadLCRs() (err error) {
-	tps, err := tpr.lr.GetTpLCRs(tpr.tpid, "")
+	tps, err := tpr.lr.GetTpLCRs(&TpLcrRule{Tpid: tpr.tpid})
 	if err != nil {
 		return err
 	}
