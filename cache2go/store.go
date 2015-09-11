@@ -95,7 +95,7 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 	prefix, key := prefix[:PREFIX_LEN], prefix[PREFIX_LEN:]
 	if keyMap, ok := cs[prefix]; ok {
 		for iterKey := range keyMap {
-			if len(key) > 0 && strings.HasPrefix(iterKey, key) {
+			if len(key) == 0 || strings.HasPrefix(iterKey, key) {
 				keys = append(keys, prefix+iterKey)
 			}
 		}

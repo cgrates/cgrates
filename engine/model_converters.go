@@ -138,14 +138,14 @@ func APItoModelRatingProfile(rpf *utils.TPRatingProfile) (result []TpRatingProfi
 }
 
 func APItoModelLcrRule(lcrs *utils.TPLcrRules) (result []TpLcrRule) {
-	for _, lcr := range lcrs.LcrRules {
+	for _, lcr := range lcrs.Rules {
 		result = append(result, TpLcrRule{
 			Tpid:           lcrs.TPid,
-			Direction:      lcr.Direction,
-			Tenant:         lcr.Tenant,
-			Category:       lcr.Category,
-			Account:        lcr.Account,
-			Subject:        lcr.Subject,
+			Direction:      lcrs.Direction,
+			Tenant:         lcrs.Tenant,
+			Category:       lcrs.Category,
+			Account:        lcrs.Account,
+			Subject:        lcrs.Subject,
 			DestinationTag: lcr.DestinationId,
 			RpCategory:     lcr.RpCategory,
 			Strategy:       lcr.Strategy,
@@ -154,7 +154,7 @@ func APItoModelLcrRule(lcrs *utils.TPLcrRules) (result []TpLcrRule) {
 			Weight:         lcr.Weight,
 		})
 	}
-	if len(lcrs.LcrRules) == 0 {
+	if len(lcrs.Rules) == 0 {
 		result = append(result, TpLcrRule{
 			Tpid: lcrs.TPid,
 		})

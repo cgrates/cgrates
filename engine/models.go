@@ -139,10 +139,10 @@ func (lcr *TpLcrRule) SetLcrRuleId(id string) error {
 		return fmt.Errorf("wrong LcrRule Id: %s", id)
 	}
 	lcr.Direction = ids[0]
-	lcr.Tenant = ids[2]
-	lcr.Category = ids[3]
+	lcr.Tenant = ids[1]
+	lcr.Category = ids[2]
 	lcr.Account = ids[3]
-	lcr.Subject = ids[5]
+	lcr.Subject = ids[4]
 	return nil
 }
 
@@ -337,6 +337,16 @@ func (tu *TpUser) GetId() string {
 	return utils.ConcatenatedKey(tu.Tenant, tu.UserName)
 }
 
+func (tu *TpUser) SetId(id string) error {
+	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(vals) != 2 {
+		return utils.ErrInvalidKey
+	}
+	tu.Tenant = vals[0]
+	tu.UserName = vals[1]
+	return nil
+}
+
 type TpAlias struct {
 	Id            int64
 	Tpid          string
@@ -353,6 +363,20 @@ type TpAlias struct {
 
 func (ta *TpAlias) TableName() string {
 	return "tp_aliases"
+}
+
+func (ta *TpAlias) SetId(id string) error {
+	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(vals) != 6 {
+		return utils.ErrInvalidKey
+	}
+	ta.Direction = vals[0]
+	ta.Tenant = vals[1]
+	ta.Category = vals[2]
+	ta.Account = vals[3]
+	ta.Subject = vals[4]
+	ta.Group = vals[5]
+	return nil
 }
 
 func (ta *TpAlias) GetId() string {

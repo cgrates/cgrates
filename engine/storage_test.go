@@ -179,7 +179,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Subject:   "b1",
 		Group:     utils.ALIAS_GROUP_ACC,
 	}
-	if x, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_RP); err == nil {
+	if x, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_RP); err == nil {
 		aliasKeys := x.(map[string]bool)
 		_, found := aliasKeys[utils.ConcatenatedKey(ala.GetId(), utils.ANY)]
 		if !found {
@@ -188,7 +188,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 	} else {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	if x, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_ACC); err == nil {
+	if x, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_ACC); err == nil {
 		aliasKeys := x.(map[string]bool)
 		_, found := aliasKeys[utils.ConcatenatedKey(alb.GetId(), utils.ANY)]
 		if !found {
@@ -219,17 +219,17 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 	accountingStorage.RemoveAlias(ala.GetId())
 	accountingStorage.RemoveAlias(alb.GetId())
 
-	if _, err := cache2go.GetCached(utils.ALIASES_PREFIX + ala.GetId()); err == nil {
+	if _, err := cache2go.Get(utils.ALIASES_PREFIX + ala.GetId()); err == nil {
 		t.Error("Error removing cached alias: ", err)
 	}
-	if _, err := cache2go.GetCached(utils.ALIASES_PREFIX + alb.GetId()); err == nil {
+	if _, err := cache2go.Get(utils.ALIASES_PREFIX + alb.GetId()); err == nil {
 		t.Error("Error removing cached alias: ", err)
 	}
 
-	if _, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_RP); err == nil {
+	if _, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_RP); err == nil {
 		t.Error("Error removing cached reverse alias: ", err)
 	}
-	if _, err := cache2go.GetCached(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_ACC); err == nil {
+	if _, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_ACC); err == nil {
 		t.Error("Error removing cached reverse alias: ", err)
 	}
 }

@@ -774,16 +774,15 @@ func (tps TpLcrRules) GetLcrRules() (map[string]*utils.TPLcrRules, error) {
 		var found bool
 		if lcr, found = lcrs[tp.GetLcrRuleId()]; !found {
 			lcr = &utils.TPLcrRules{
-				LcrRulesId: tp.GetLcrRuleId(),
+				Direction: tp.Direction,
+				Tenant:    tp.Tenant,
+				Category:  tp.Category,
+				Account:   tp.Account,
+				Subject:   tp.Subject,
 			}
 			lcrs[tp.GetLcrRuleId()] = lcr
 		}
-		lcr.LcrRules = append(lcr.LcrRules, &utils.TPLcrRule{
-			Direction:      tp.Direction,
-			Tenant:         tp.Tenant,
-			Category:       tp.Category,
-			Account:        tp.Account,
-			Subject:        tp.Subject,
+		lcr.Rules = append(lcr.Rules, &utils.TPLcrRule{
 			DestinationId:  tp.DestinationTag,
 			RpCategory:     tp.RpCategory,
 			Strategy:       tp.Strategy,

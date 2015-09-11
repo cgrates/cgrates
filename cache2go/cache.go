@@ -111,7 +111,7 @@ func CachePush(key string, value interface{}) {
 }
 
 // The function to extract a value for a key that never expire
-func GetCached(key string) (v interface{}, err error) {
+func Get(key string) (v interface{}, err error) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.Get(key)
