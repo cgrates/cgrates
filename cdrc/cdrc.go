@@ -101,7 +101,7 @@ Common parameters within configs processed:
 Parameters specific per config instance:
  * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
 */
-func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs engine.Connector, exitChan chan struct{}, dfltTimezone string) (*Cdrc, error) {
+func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs engine.Connector, closeChan chan struct{}, dfltTimezone string) (*Cdrc, error) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
@@ -109,7 +109,7 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs
 	cdrc := &Cdrc{cdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator,
 		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, dfltCdrcCfg: cdrcCfg, timezone: utils.FirstNonEmpty(cdrcCfg.Timezone, dfltTimezone), cdrs: cdrs,
-		exitChan: exitChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
+		closeChan: closeChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
 	}
 	var processFile struct{}
 	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
@@ -161,7 +161,7 @@ type Cdrc struct {
 	timezone            string
 	cdrs                engine.Connector
 	httpClient          *http.Client
-	exitChan            chan struct{}
+	closeChan           chan struct{}        // Used to signal config reloads when we need to span different CDRC-Client
 	maxOpenFiles        chan struct{}        // Maximum number of simultaneous files processed
 	partialRecordsCache *PartialRecordsCache // Shared between all files in the folder we process
 }
@@ -174,8 +174,8 @@ func (self *Cdrc) Run() error {
 	// Not automated, process and sleep approach
 	for {
 		select {
-		case exitChan := <-self.exitChan: // Exit, reinject exitChan for other CDRCs
-			self.exitChan <- exitChan
+		case closeChan := <-self.closeChan: // Exit, reinject closeChan for other CDRCs
+			self.closeChan <- closeChan
 			engine.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
 			return nil
 		default:
@@ -199,8 +199,7 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 	engine.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.cdrInDir))
 	for {
 		select {
-		case exitChan := <-self.exitChan: // Exit, reinject exitChan for other CDRCs
-			self.exitChan <- exitChan
+		case <-self.closeChan: // Exit, reinject closeChan for other CDRCs
 			engine.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
 			return nil
 		case ev := <-watcher.Events:

@@ -140,7 +140,6 @@ func (self *FwvRecordsProcessor) recordPassesCfgFilter(record, configKey string)
 			fmt.Errorf("Ignoring record: %v - cannot compile filter %+v", record, rsrFilter)
 			return false
 		} else if !rsrFilter.FilterPasses(record[cfgFieldIdx:]) {
-			fmt.Printf("Record content to test: %s\n", record[cfgFieldIdx:])
 			filterPasses = false
 			break
 		}
