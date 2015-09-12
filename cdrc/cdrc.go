@@ -174,8 +174,7 @@ func (self *Cdrc) Run() error {
 	// Not automated, process and sleep approach
 	for {
 		select {
-		case closeChan := <-self.closeChan: // Exit, reinject closeChan for other CDRCs
-			self.closeChan <- closeChan
+		case <-self.closeChan: // Exit, reinject closeChan for other CDRCs
 			engine.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
 			return nil
 		default:

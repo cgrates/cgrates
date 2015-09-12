@@ -71,8 +71,8 @@ var (
 )
 
 func startCdrcs(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *engine.Responder, exitChan chan bool) {
-	cfgReloadsChan := cfg.GetConfigReloadsItem(utils.CDRC)
 	for {
+		cdrcChildrenChan := make(chan struct{}) // Will use it to communicate with the children of one fork
 		for _, cdrcCfgs := range cfg.CdrcProfiles {
 			var cdrcCfg *config.CdrcConfig
 			for _, cdrcCfg = range cdrcCfgs { // Take a random config out since they should be the same
@@ -81,15 +81,14 @@ func startCdrcs(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan 
 			if cdrcCfg.Enabled == false {
 				continue // Ignore not enabled
 			}
-			go startCdrc(internalCdrSChan, internalRaterChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cfgReloadsChan, exitChan)
+			go startCdrc(internalCdrSChan, internalRaterChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cdrcChildrenChan, exitChan)
 		}
 		select {
 		case <-exitChan: // Stop forking CDRCs
 			break
-		case <-cfgReloadsChan: // Will release another start as soon as channel will be closed
-			engine.Logger.Info("Reloading CDRC configuration")
-			cfgReloadsChan = make(chan struct{}) // Schedule waiting again for another reload
-			cfg.SetConfigReloadsItem(utils.CDRC, cfgReloadsChan)
+		case <-cfg.ConfigReloads[utils.CDRC]: // Consume the load request and wait for a new one
+			close(cdrcChildrenChan) // Stop all the children of the previous run
+			engine.Logger.Info("<CDRC> Configuration reload")
 			continue
 		}
 	}

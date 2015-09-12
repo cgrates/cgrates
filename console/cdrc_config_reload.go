@@ -35,7 +35,7 @@ func init() {
 type CmdCdrcConfigReload struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrReloadCdrcConfig
+	rpcParams *v1.AttrReloadConfig
 	*CommandExecuter
 }
 
@@ -49,7 +49,7 @@ func (self *CmdCdrcConfigReload) RpcMethod() string {
 
 func (self *CmdCdrcConfigReload) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = new(v1.AttrReloadCdrcConfig)
+		self.rpcParams = new(v1.AttrReloadConfig)
 	}
 	return self.rpcParams
 }

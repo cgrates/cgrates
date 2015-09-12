@@ -25,7 +25,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -65,8 +64,11 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
-	cfg.configReloads = make(map[string]chan struct{})
-	cfg.configReloads[utils.CDRC] = make(chan struct{})
+	cfg.ConfigReloads = make(map[string]chan struct{})
+	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
+	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
@@ -79,7 +81,6 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.dfltCdrcProfile = cfg.CdrcProfiles["/var/log/cgrates/cdrc/in"][utils.META_DEFAULT].Clone()
 	dfltFsConnConfig = cfg.SmFsConfig.Connections[0] // We leave it crashing here on purpose if no Connection defaults defined
 	dfltKamConnConfig = cfg.SmKamConfig.Connections[0]
-	cfg.cfgReloadsMutex = new(sync.RWMutex)
 	if err := cfg.checkConfigSanity(); err != nil {
 		return nil, err
 	}
@@ -235,11 +236,10 @@ type CGRConfig struct {
 	MailerAuthPass       string                            // Authenticate to email server with this password
 	MailerFromAddr       string                            // From address used when sending emails out
 	DataFolderPath       string                            // Path towards data folder, for tests internal usage, not loading out of .json options
-	configReloads        map[string]chan struct{}          // Signals to specific entities that a config reload should occur
+	ConfigReloads        map[string]chan struct{}          // Signals to specific entities that a config reload should occur
 	// Cache defaults loaded from json and needing clones
-	dfltCdreProfile *CdreConfig   // Default cdreConfig profile
-	dfltCdrcProfile *CdrcConfig   // Default cdrcConfig profile
-	cfgReloadsMutex *sync.RWMutex // cfgReloadsMutex parts of the configuration for reloads and such
+	dfltCdreProfile *CdreConfig // Default cdreConfig profile
+	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
@@ -783,18 +783,4 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 	return nil
-}
-
-// Used to access config reloads map from outside
-func (self *CGRConfig) GetConfigReloadsItem(itemKey string) chan struct{} {
-	self.cfgReloadsMutex.RLock()
-	defer self.cfgReloadsMutex.RUnlock()
-	return self.configReloads[itemKey]
-}
-
-// Used to set config reloads map from outside
-func (self *CGRConfig) SetConfigReloadsItem(itemKey string, itemVal chan struct{}) {
-	self.cfgReloadsMutex.Lock()
-	defer self.cfgReloadsMutex.Unlock()
-	self.configReloads[itemKey] = itemVal
 }
