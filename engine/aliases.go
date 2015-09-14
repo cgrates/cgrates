@@ -123,7 +123,7 @@ type AliasService interface {
 	RemoveAlias(Alias, *string) error
 	GetAlias(Alias, *Alias) error
 	GetMatchingAlias(AttrMatchingAlias, *string) error
-	GetReverseAlias(AttrReverseAlias, *map[string]*Alias) error
+	GetReverseAlias(AttrReverseAlias, *map[string][]*Alias) error
 	RemoveReverseAlias(AttrReverseAlias, *string) error
 }
 
@@ -236,10 +236,10 @@ func (am *AliasHandler) GetAlias(al Alias, result *Alias) error {
 	return utils.ErrNotFound
 }
 
-func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[string]*Alias) error {
+func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[string][]*Alias) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-	aliases := make(map[string]*Alias)
+	aliases := make(map[string][]*Alias)
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Group
 	if x, err := cache2go.Get(rKey); err == nil {
 		existingKeys := x.(map[string]bool)
@@ -255,7 +255,7 @@ func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[strin
 			if r, err := am.accountingDb.GetAlias(key, false); err != nil {
 				return err
 			} else {
-				aliases[destID] = r
+				aliases[destID] = append(aliases[destID], r)
 			}
 		}
 	}
@@ -339,7 +339,7 @@ func (ps *ProxyAliasService) GetMatchingAlias(attr AttrMatchingAlias, alias *str
 	return ps.Client.Call("AliasesV1.GetMatchingAlias", attr, alias)
 }
 
-func (ps *ProxyAliasService) GetReverseAlias(attr AttrReverseAlias, alias *map[string]*Alias) error {
+func (ps *ProxyAliasService) GetReverseAlias(attr AttrReverseAlias, alias *map[string][]*Alias) error {
 	return ps.Client.Call("AliasesV1.GetReverseAlias", attr, alias)
 }
 
