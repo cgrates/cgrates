@@ -46,22 +46,27 @@ func (s *Scheduler) Loop() {
 		}
 		s.Lock()
 		a0 := s.queue[0]
+		//engine.Logger.Info(fmt.Sprintf("Scheduler qeue length: %v", len(s.qeue)))
 		now := time.Now()
-		if a0.GetNextStartTime(now).Equal(now) || a0.GetNextStartTime(now).Before(now) {
+		start := a0.GetNextStartTime(now)
+		if start.Equal(now) || start.Before(now) {
 			go a0.Execute()
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
-			now = time.Now()
-			if !a0.GetNextStartTime(now).Before(now) {
+			now = time.Now().Add(time.Second)
+			start = a0.GetNextStartTime(now)
+			if !start.Before(now) {
 				s.queue = append(s.queue, a0)
 				s.queue = s.queue[1:]
 				sort.Sort(s.queue)
+			} else {
+				s.queue = s.queue[1:]
 			}
 			s.Unlock()
 		} else {
 			s.Unlock()
 			d := a0.GetNextStartTime(now).Sub(now)
-			// engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
+			//engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
