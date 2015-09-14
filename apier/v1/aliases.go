@@ -20,7 +20,6 @@ package v1
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -69,17 +68,19 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 	if aliases == nil {
 		return errors.New("ALIASES_NOT_ENABLED")
 	}
-	var reverseAliases map[string]*engine.Alias
+	var reverseAliases map[string][]*engine.Alias
 	if err := aliases.GetReverseAlias(engine.AttrReverseAlias{Alias: tenantRatingSubject.Subject, Group: utils.ALIAS_GROUP_RP}, &reverseAliases); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	var ignr string
-	for _, alias := range reverseAliases {
-		if alias.Tenant != tenantRatingSubject.Tenant {
-			continue // From another tenant
-		}
-		if err := aliases.RemoveAlias(*alias, &ignr); err != nil {
-			return utils.NewErrServerError(err)
+	for _, aliass := range reverseAliases {
+		for _, alias := range aliass {
+			if alias.Tenant != tenantRatingSubject.Tenant {
+				continue // From another tenant
+			}
+			if err := aliases.RemoveAlias(*alias, &ignr); err != nil {
+				return utils.NewErrServerError(err)
+			}
 		}
 	}
 	*reply = utils.OK
@@ -118,17 +119,19 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 	if aliases == nil {
 		return errors.New("ALIASES_NOT_ENABLED")
 	}
-	var reverseAliases map[string]*engine.Alias
+	var reverseAliases map[string][]*engine.Alias
 	if err := aliases.GetReverseAlias(engine.AttrReverseAlias{Alias: tenantAccount.Account, Group: utils.ALIAS_GROUP_ACC}, &reverseAliases); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	var ignr string
-	for _, alias := range reverseAliases {
-		if alias.Tenant != tenantAccount.Tenant {
-			continue // From another tenant
-		}
-		if err := aliases.RemoveAlias(*alias, &ignr); err != nil {
-			return utils.NewErrServerError(err)
+	for _, aliass := range reverseAliases {
+		for _, alias := range aliass {
+			if alias.Tenant != tenantAccount.Tenant {
+				continue // From another tenant
+			}
+			if err := aliases.RemoveAlias(*alias, &ignr); err != nil {
+				return utils.NewErrServerError(err)
+			}
 		}
 	}
 	*reply = utils.OK

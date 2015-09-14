@@ -30,7 +30,6 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -110,7 +109,6 @@ func TestApierInitStorDb(t *testing.T) {
 	}
 }
 
-/*
 // Finds cgr-engine executable and starts it with default configuration
 func TestApierStartEngine(t *testing.T) {
 	if !*testLocal {
@@ -128,7 +126,6 @@ func TestApierStartEngine(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
 }
-*/
 
 // Connect rpc client to rater
 func TestApierRpcConn(t *testing.T) {
@@ -1545,13 +1542,18 @@ func TestApierLocalSetDestination(t *testing.T) {
 	}
 }
 
-func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
+func TestApierLocalGetAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var alias engine.Alias
 	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
 	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Group: utils.ALIAS_GROUP_RP, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil {
+		t.Error("Unexpected nil error received")
+	} else if err.Error() != utils.ErrNotFound.Error() {
+		t.Error("Unexpected error", err.Error())
+	}
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Group: utils.ALIAS_GROUP_ACC, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil {
 		t.Error("Unexpected nil error received")
 	} else if err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error", err.Error())
@@ -1564,13 +1566,11 @@ func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
 	}
 	addRtSubjAliases := &AttrAddRatingSubjectAliases{Tenant: "cgrates.org", Category: "call", Subject: "1001", Aliases: []string{"2001", "2002", "2003"}}
 	var rply string
-	fmt.Println("Before AddRatingSubjectAliases")
 	if err := rater.Call("ApierV1.AddRatingSubjectAliases", addRtSubjAliases, &rply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if rply != utils.OK {
 		t.Error("Unexpected reply: ", rply)
 	}
-	fmt.Println("After AddRatingSubjectAliases")
 	var alias engine.Alias
 	for _, als := range addRtSubjAliases.Aliases {
 		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Group: utils.ALIAS_GROUP_RP, Direction: "*out", Tenant: addRtSubjAliases.Tenant, Category: addRtSubjAliases.Category,
@@ -1593,21 +1593,8 @@ func TestApierLocalRemRatingSubjectAliases(t *testing.T) {
 	}
 	var alias engine.Alias
 	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
-	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Group: utils.ALIAS_GROUP_RP, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err != utils.ErrNotFound {
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Group: utils.ALIAS_GROUP_RP, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Unexpected error %v, alias: %+v", err, alias)
-	}
-}
-
-func TestApierLocalGetAccountAliases(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	tenantAcnt := engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}
-	var acntAliases []string
-	if err := rater.Call("ApierV1.GetAccountAliases", tenantAcnt, &acntAliases); err == nil {
-		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Unexpected error", err.Error())
 	}
 }
 
@@ -1615,23 +1602,18 @@ func TestApierLocalAddAccountAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	addAcntAliases := &AttrAddAccountAliases{Tenant: "cgrates.org", Account: "1001", Aliases: []string{"2001", "2002", "2003"}}
+	addAcntAliases := &AttrAddAccountAliases{Tenant: "cgrates.org", Category: "call", Account: "1001", Aliases: []string{"2001", "2002", "2003"}}
 	var rply string
 	if err := rater.Call("ApierV1.AddAccountAliases", addAcntAliases, &rply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if rply != utils.OK {
 		t.Error("Unexpected reply: ", rply)
 	}
-	var acntAliases []string
-	expectAcntAliases := sort.StringSlice(addAcntAliases.Aliases)
-	expectAcntAliases.Sort()
-	if err := rater.Call("ApierV1.GetAccountAliases", engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAliases); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else {
-		acntAliases := sort.StringSlice(acntAliases)
-		acntAliases.Sort()
-		if !reflect.DeepEqual(expectAcntAliases, acntAliases) {
-			t.Errorf("Expecting: %v, received: %v", expectAcntAliases, acntAliases)
+	var alias engine.Alias
+	for _, als := range addAcntAliases.Aliases {
+		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Group: utils.ALIAS_GROUP_ACC, Direction: "*out", Tenant: addAcntAliases.Tenant, Category: addAcntAliases.Category,
+			Account: als, Subject: als}, &alias); err != nil {
+			t.Error("Unexpected error", err.Error())
 		}
 	}
 }
@@ -1647,11 +1629,10 @@ func TestApierLocalRemAccountAliases(t *testing.T) {
 	} else if rply != utils.OK {
 		t.Error("Unexpected reply: ", rply)
 	}
-	var acntAliases []string
-	if err := rater.Call("ApierV1.GetAccountAliases", engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAliases); err == nil {
-		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Unexpected error", err.Error())
+	var alias engine.Alias
+	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Group: utils.ALIAS_GROUP_ACC, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error %v, alias: %+v", err, alias)
 	}
 }
 
