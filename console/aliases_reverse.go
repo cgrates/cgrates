@@ -58,6 +58,6 @@ func (self *CmdGetReverseAliases) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetReverseAliases) RpcResult() interface{} {
-	a := make(map[string]*engine.Alias)
+	a := make(map[string][]*engine.Alias)
 	return &a
 }
