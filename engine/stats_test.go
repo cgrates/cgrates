@@ -95,7 +95,7 @@ func TestAcceptCdr(t *testing.T) {
 		Category:        "category",
 		Account:         "account",
 		Subject:         "subject",
-		Destination:     "12345678",
+		Destination:     "0723045326",
 		SetupTime:       time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 		Usage:           10 * time.Second,
 		Pdd:             7 * time.Second,
@@ -156,11 +156,11 @@ func TestAcceptCdr(t *testing.T) {
 	if sq.conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{DestinationPrefix: []string{"test"}}
+	sq.conf = &CdrStats{DestinationIds: []string{"test"}}
 	if sq.conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{DestinationPrefix: []string{"test", "123"}}
+	sq.conf = &CdrStats{DestinationIds: []string{"NAT", "RET"}}
 	if sq.conf.AcceptCdr(cdr) != true {
 		t.Errorf("Should have accepted this CDR: %+v", cdr)
 	}

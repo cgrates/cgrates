@@ -356,30 +356,30 @@ type TPCdrStats struct {
 }
 
 type TPCdrStat struct {
-	QueueLength         string
-	TimeWindow          string
-	SaveInterval        string
-	Metrics             string
-	SetupInterval       string
-	TORs                string
-	CdrHosts            string
-	CdrSources          string
-	ReqTypes            string
-	Directions          string
-	Tenants             string
-	Categories          string
-	Accounts            string
-	Subjects            string
-	DestinationPrefixes string
-	PddInterval         string
-	UsageInterval       string
-	Suppliers           string
-	DisconnectCauses    string
-	MediationRunIds     string
-	RatedAccounts       string
-	RatedSubjects       string
-	CostInterval        string
-	ActionTriggers      string
+	QueueLength      string
+	TimeWindow       string
+	SaveInterval     string
+	Metrics          string
+	SetupInterval    string
+	TORs             string
+	CdrHosts         string
+	CdrSources       string
+	ReqTypes         string
+	Directions       string
+	Tenants          string
+	Categories       string
+	Accounts         string
+	Subjects         string
+	DestinationIds   string
+	PddInterval      string
+	UsageInterval    string
+	Suppliers        string
+	DisconnectCauses string
+	MediationRunIds  string
+	RatedAccounts    string
+	RatedSubjects    string
+	CostInterval     string
+	ActionTriggers   string
 }
 
 type TPDerivedChargers struct {

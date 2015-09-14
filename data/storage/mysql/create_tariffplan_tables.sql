@@ -321,7 +321,7 @@ CREATE TABLE tp_cdr_stats (
   `categories` varchar(32) NOT NULL,
   `accounts` varchar(24) NOT NULL,
   `subjects` varchar(64) NOT NULL,
-  `destination_prefixes` varchar(64) NOT NULL,
+  `destination_ids` varchar(64) NOT NULL,
   `pdd_interval` varchar(64) NOT NULL,
   `usage_interval` varchar(64) NOT NULL,
   `suppliers` varchar(64) NOT NULL,
