@@ -225,6 +225,7 @@ const (
 	ALIAS_GROUP_RP               = "*rating_profile"
 	ALIAS_GROUP_ACC              = "*account"
 	NOT_AVAILABLE                = "N/A"
+	CALL                         = "call"
 )
 
 var (

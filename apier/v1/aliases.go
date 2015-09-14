@@ -20,34 +20,39 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type AttrAddRatingSubjectAliases struct {
-	Tenant, Subject string
-	Aliases         []string
+	Tenant, Category, Subject string
+	Aliases                   []string
 }
 
 type AttrAddAccountAliases struct {
-	Tenant, Account string
-	Aliases         []string
+	Tenant, Category, Account string
+	Aliases                   []string
 }
 
-// Retrieve aliases configured for a rating profile subject
+// Add aliases configured for a rating profile subject <Deprecated>
 func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, reply *string) error {
-	if engine.GetAliasService() == nil {
-		return errors.New("ALIASES_NOT_ENABLED")
-	}
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Subject", "Aliases"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	if attrs.Category == "" {
+		attrs.Category = utils.CALL
+	}
+	aliases := engine.GetAliasService()
+	if aliases == nil {
+		return errors.New("ALIASES_NOT_ENABLED")
+	}
+	var ignr string
 	for _, alias := range attrs.Aliases {
-		var ignr string
-		if err := engine.GetAliasService().SetAlias(
-			engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Account: utils.META_ANY, Subject: attrs.Subject, Group: utils.ALIAS_GROUP_RP,
-				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY, Alias: alias, Weight: 10.0}}}, &ignr); err != nil {
+		if err := aliases.SetAlias(
+			engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Group: utils.ALIAS_GROUP_RP,
+				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY, Alias: attrs.Subject, Weight: 10.0}}}, &ignr); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
@@ -55,40 +60,25 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 	return nil
 }
 
-/*
-// Retrieve aliases configured for a rating profile subject
+// Remove aliases configured for a rating profile subject
 func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRatingSubject, reply *string) error {
-	if engine.GetAliasService() == nil {
-		return errors.New("ALIASES_NOT_ENABLED")
-	}
 	if missing := utils.MissingStructFields(&tenantRatingSubject, []string{"Tenant", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.RatingDb.RemoveRpAliases([]*engine.TenantRatingSubject{&tenantRatingSubject}, false); err != nil {
-		if err == utils.ErrNotFound {
-			return err
-		}
-		return utils.NewErrServerError(err)
-	}
-
-	// cache refresh not needed, synched in RemoveRpAliases
-	*reply = utils.OK
-	return nil
-}
-*/
-
-func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *string) error {
-	if engine.GetAliasService() == nil {
+	aliases := engine.GetAliasService()
+	if aliases == nil {
 		return errors.New("ALIASES_NOT_ENABLED")
 	}
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Aliases"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
+	var reverseAliases map[string]*engine.Alias
+	if err := aliases.GetReverseAlias(engine.AttrReverseAlias{Alias: tenantRatingSubject.Subject, Group: utils.ALIAS_GROUP_RP}, &reverseAliases); err != nil {
+		return utils.NewErrServerError(err)
 	}
-	for _, alias := range attrs.Aliases {
-		var ignr string
-		if err := engine.GetAliasService().SetAlias(
-			engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Account: attrs.Account, Subject: utils.META_ANY, Group: utils.ALIAS_GROUP_ACC,
-				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY, Alias: alias, Weight: 10.0}}}, &ignr); err != nil {
+	var ignr string
+	for _, alias := range reverseAliases {
+		if alias.Tenant != tenantRatingSubject.Tenant {
+			continue // From another tenant
+		}
+		if err := aliases.RemoveAlias(*alias, &ignr); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
@@ -96,22 +86,51 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 	return nil
 }
 
-/*
-// Retrieve aliases configured for a rating profile subject
-func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply *string) error {
-	if engine.GetAliasService() == nil {
-		return errors.New("ALIASES_NOT_ENABLED")
-	}
-	if missing := utils.MissingStructFields(&tenantAccount, []string{"Tenant", "Account"}); len(missing) != 0 {
+func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Aliases"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.RatingDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}, false); err != nil {
-		if err == utils.ErrNotFound {
-			return err
+	if attrs.Category == "" {
+		attrs.Category = utils.CALL
+	}
+	aliases := engine.GetAliasService()
+	if aliases == nil {
+		return errors.New("ALIASES_NOT_ENABLED")
+	}
+	var ignr string
+	for _, alias := range attrs.Aliases {
+		if err := aliases.SetAlias(
+			engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: utils.META_ANY, Group: utils.ALIAS_GROUP_ACC,
+				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY, Alias: attrs.Account, Weight: 10.0}}}, &ignr); err != nil {
+			return utils.NewErrServerError(err)
 		}
-		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
 	return nil
 }
-*/
+
+// Remove aliases configured for an account
+func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply *string) error {
+	if missing := utils.MissingStructFields(&tenantAccount, []string{"Tenant", "Account"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	aliases := engine.GetAliasService()
+	if aliases == nil {
+		return errors.New("ALIASES_NOT_ENABLED")
+	}
+	var reverseAliases map[string]*engine.Alias
+	if err := aliases.GetReverseAlias(engine.AttrReverseAlias{Alias: tenantAccount.Account, Group: utils.ALIAS_GROUP_ACC}, &reverseAliases); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	var ignr string
+	for _, alias := range reverseAliases {
+		if alias.Tenant != tenantAccount.Tenant {
+			continue // From another tenant
+		}
+		if err := aliases.RemoveAlias(*alias, &ignr); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	*reply = utils.OK
+	return nil
+}
