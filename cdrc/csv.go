@@ -126,7 +126,7 @@ func (self *PartialRecordsCache) dumpUnpairedRecords(fileName string) error {
 		}
 		delete(self.partialRecords, fileName)
 		return nil, nil
-	}, fileName)
+	}, 0, fileName)
 	return err
 }
 
@@ -147,7 +147,7 @@ func (self *PartialRecordsCache) GetPartialRecord(accId, prefFileName string) (s
 				cachedFilename = fName
 			}
 			return nil, nil
-		}, fName)
+		}, 0, fName)
 		if cachedPartial != nil {
 			break
 		}
@@ -169,14 +169,14 @@ func (self *PartialRecordsCache) CachePartial(fileName string, pr *PartialFlatst
 			self.partialRecords[fileName][pr.AccId] = pr
 		}
 		return nil, nil
-	}, fileName)
+	}, 0, fileName)
 }
 
 func (self *PartialRecordsCache) UncachePartial(fileName string, pr *PartialFlatstoreRecord) {
 	self.guard.Guard(func() (interface{}, error) {
 		delete(self.partialRecords[fileName], pr.AccId) // Remove the record out of cache
 		return nil, nil
-	}, fileName)
+	}, 0, fileName)
 }
 
 func NewCsvRecordsProcessor(csvReader *csv.Reader, cdrFormat, timezone, fileName, failedCallsPrefix string,

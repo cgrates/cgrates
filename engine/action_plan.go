@@ -256,7 +256,7 @@ func (at *ActionPlan) Execute() (err error) {
 						Logger.Warning(fmt.Sprintf("Could not remove account Id: %s: %d", accId, err))
 					}
 					return 0, nil
-				}, accId)
+				}, 0, accId)
 				if err != nil {
 					Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
 				}
@@ -275,7 +275,7 @@ func (at *ActionPlan) Execute() (err error) {
 			_, err := Guardian.Guard(func() (interface{}, error) {
 				ub, err := accountingStorage.GetAccount(accId)
 				if err != nil {
-					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", accId))
+					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", 0, accId))
 					return 0, err
 				} else if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
 					return 0, fmt.Errorf("Account %s is disabled", accId)
@@ -285,7 +285,7 @@ func (at *ActionPlan) Execute() (err error) {
 				//Logger.Info(fmt.Sprintf("After execute, account: %+v", ub))
 				accountingStorage.SetAccount(ub)
 				return 0, nil
-			}, accId)
+			}, 0, accId)
 			if err != nil {
 				Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
 			}

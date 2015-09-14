@@ -741,7 +741,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 			return 0, err
 		}
 		return 0, nil
-	}, tag)
+	}, 0, tag)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -811,7 +811,7 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 			return 0, err
 		}
 		return 0, nil
-	}, accID)
+	}, 0, accID)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -832,7 +832,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 			return 0, err
 		}
 		return 0, nil
-	}, attrs.KeyId()); err != nil {
+	}, 0, attrs.KeyId()); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
@@ -1184,7 +1184,7 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 			return 0, err
 		}
 		return 0, nil
-	}, "RemoveRatingProfile")
+	}, 0, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)

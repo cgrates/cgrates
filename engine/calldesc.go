@@ -628,7 +628,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 			if _, err := Guardian.Guard(func() (interface{}, error) {
 				duration, err = cd.getMaxSessionDuration(account)
 				return 0, err
-			}, memberIds...); err != nil {
+			}, 0, memberIds...); err != nil {
 				return 0, err
 			}
 		} else {
@@ -683,7 +683,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 			Guardian.Guard(func() (interface{}, error) {
 				cc, err = cd.debit(account, false, true)
 				return 0, err
-			}, memberIds...)
+			}, 0, memberIds...)
 		} else {
 			return nil, err
 		}
@@ -719,7 +719,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				cc, err = cd.debit(account, false, true)
 				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
-			}, memberIds...)
+			}, 0, memberIds...)
 		} else {
 			return nil, err
 		}

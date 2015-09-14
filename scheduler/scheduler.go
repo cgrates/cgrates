@@ -111,7 +111,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 			engine.Guardian.Guard(func() (interface{}, error) {
 				storage.SetActionPlans(key, newAts)
 				return 0, nil
-			}, utils.ACTION_TIMING_PREFIX)
+			}, 0, utils.ACTION_TIMING_PREFIX)
 		}
 	}
 	sort.Sort(s.queue)

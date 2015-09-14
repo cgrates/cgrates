@@ -115,7 +115,7 @@ func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 				return nil, utils.ErrExists
 			}
 			return nil, self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
-		}, ccl.CgrId)
+		}, 0, ccl.CgrId)
 		return err
 	}
 	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)

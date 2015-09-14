@@ -30,18 +30,18 @@ func ATestAccountLock(t *testing.T) {
 		time.Sleep(1 * time.Second)
 		log.Print("end first 1")
 		return 0, nil
-	}, "1")
+	}, 0, "1")
 	go Guardian.Guard(func() (interface{}, error) {
 		log.Print("first 2")
 		time.Sleep(1 * time.Second)
 		log.Print("end first 2")
 		return 0, nil
-	}, "2")
+	}, 0, "2")
 	go Guardian.Guard(func() (interface{}, error) {
 		log.Print("second 1")
 		time.Sleep(1 * time.Second)
 		log.Print("end second 1")
 		return 0, nil
-	}, "1")
+	}, 0, "1")
 	time.Sleep(3 * time.Second)
 }

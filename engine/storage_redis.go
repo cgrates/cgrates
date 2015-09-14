@@ -792,7 +792,7 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) e
 		}
 		err = rs.db.Lpush(utils.LOADINST_KEY, marshaled)
 		return nil, err
-	}, utils.LOADINST_KEY)
+	}, 0, utils.LOADINST_KEY)
 	return err
 }
 

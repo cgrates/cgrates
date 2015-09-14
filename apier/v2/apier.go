@@ -82,7 +82,7 @@ func (self *ApierV2) LoadAccountActions(attrs AttrLoadAccountActions, reply *str
 			return 0, err
 		}
 		return 0, nil
-	}, attrs.AccountActionsId); err != nil {
+	}, 0, attrs.AccountActionsId); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
