@@ -167,7 +167,8 @@ type TpAction struct {
 	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
 	Units           float64 `index:"12" re:"\d+\s*"`
 	BalanceWeight   float64 `index:"13" re:"\d+\.?\d*\s*"`
-	Weight          float64 `index:"14" re:"\d+\.?\d*\s*"`
+	BalanceDisabled bool    `index:"14"`
+	Weight          float64 `index:"15" re:"\d+\.?\d*\s*"`
 	CreatedAt       time.Time
 }
 

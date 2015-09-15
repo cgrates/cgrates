@@ -157,6 +157,7 @@ CREATE TABLE tp_actions (
   balance_weight NUMERIC(8,2) NOT NULL,
   extra_parameters VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
+  disabled BOOLEAN NOT NULL,
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, action, balance_tag, balance_type, direction, expiry_time, timing_tags, destination_tags, shared_group, balance_weight, weight)
 );

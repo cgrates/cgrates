@@ -43,6 +43,7 @@ type Balance struct {
 	SharedGroup    string
 	Timings        []*RITiming
 	TimingIDs      string
+	Disabled       bool
 	precision      int
 	account        *Account // used to store ub reference for shared balances
 	dirty          bool
@@ -57,16 +58,21 @@ func (b *Balance) Equal(o *Balance) bool {
 	}
 	bDestIds := b.sortDestinationIds()
 	oDestIds := o.sortDestinationIds()
-	return b.Id == o.Id &&
+	return b.Uuid == o.Uuid &&
+		b.Id == o.Id &&
 		b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
 		bDestIds == oDestIds &&
 		b.RatingSubject == o.RatingSubject &&
 		b.Category == o.Category &&
-		b.SharedGroup == o.SharedGroup
+		b.SharedGroup == o.SharedGroup &&
+		b.Disabled == o.Disabled
 }
 
 func (b *Balance) MatchFilter(o *Balance) bool {
+	if o.Uuid != "" {
+		return b.Uuid == o.Uuid
+	}
 	if o.Id != "" {
 		return b.Id == o.Id
 	}
@@ -93,7 +99,8 @@ func (b *Balance) IsDefault() bool {
 		b.Category == "" &&
 		b.ExpirationDate.IsZero() &&
 		b.SharedGroup == "" &&
-		b.Weight == 0
+		b.Weight == 0 &&
+		b.Disabled == false
 }
 
 func (b *Balance) IsExpired() bool {
@@ -105,6 +112,9 @@ func (b *Balance) IsActive() bool {
 }
 
 func (b *Balance) IsActiveAt(t time.Time) bool {
+	if b.Disabled {
+		return false
+	}
 	if len(b.Timings) == 0 {
 		return true
 	}
@@ -182,6 +192,7 @@ func (b *Balance) Clone() *Balance {
 		SharedGroup:    b.SharedGroup,
 		TimingIDs:      b.TimingIDs,
 		Timings:        b.Timings, // should not be a problem with aliasing
+		Disabled:       b.Disabled,
 		dirty:          b.dirty,
 	}
 }

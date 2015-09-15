@@ -265,8 +265,8 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_ACTIONS", "*topup_reset", "", "", "*monetary", utils.OUT, "call", "*any", "special1", "GROUP1", "*never", "", "5", "10", "10"},
-		[]string{"TEST_ACTIONS", "*http_post", "http://localhost/&param1=value1", "", "", "", "", "", "", "", "", "", "0", "0", "20"},
+		[]string{"TEST_ACTIONS", "*topup_reset", "", "", "*monetary", utils.OUT, "call", "*any", "special1", "GROUP1", "*never", "", "5", "10", "false", "10"},
+		[]string{"TEST_ACTIONS", "*http_post", "http://localhost/&param1=value1", "", "", "", "", "", "", "", "", "", "0", "0", "false", "20"},
 	}
 
 	ms := APItoModelAction(tpActs)

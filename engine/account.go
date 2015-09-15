@@ -96,10 +96,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 // Returns the remaining credit in user's balance.
 func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	if a == nil {
-		return errors.New("nil minute action")
-	}
-	if a.Balance.Uuid == "" {
-		a.Balance.Uuid = utils.GenUUID()
+		return errors.New("nil action")
 	}
 	bClone := a.Balance.Clone()
 
@@ -127,6 +124,9 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			bClone.SetValue(-bClone.GetValue())
 		}
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
+		if bClone.Uuid == "" {
+			bClone.Uuid = utils.GenUUID()
+		}
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], bClone)
 	}
 	if a.Balance.SharedGroup != "" {
@@ -147,9 +147,36 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 
+func (ub *Account) enableDisableBalanceAction(a *Action) error {
+	if a == nil {
+		return errors.New("nil action")
+	}
+
+	if ub.BalanceMap == nil {
+		ub.BalanceMap = make(map[string]BalanceChain)
+	}
+	found := false
+	id := a.BalanceType + a.Direction
+	ub.CleanExpiredBalances()
+	for _, b := range ub.BalanceMap[id] {
+		if b.MatchFilter(a.Balance) {
+			b.Disabled = a.Balance.Disabled
+			b.dirty = true
+			found = true
+		}
+	}
+	if !found {
+		return utils.ErrNotFound
+	}
+	return nil
+}
+
 func (ub *Account) getBalancesForPrefix(prefix, category string, balances BalanceChain, sharedGroup string) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
+		if b.Disabled {
+			continue
+		}
 		if b.IsExpired() || (b.SharedGroup == "" && b.GetValue() <= 0) {
 			continue
 		}

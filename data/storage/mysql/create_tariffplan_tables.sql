@@ -162,6 +162,7 @@ CREATE TABLE `tp_actions` (
   `balance_weight` DECIMAL(8,2) NOT NULL,
   `extra_parameters` varchar(256) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
+  `disabled` BOOLEAN NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),

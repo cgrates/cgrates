@@ -1,6 +1,6 @@
-#ActionsTag[0],Action[1],ActionExtraParameters[2],BalanceTag[3],BalanceType[4],Direction[5],Category[6],DestinationTag[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingTags[11],Units[12],BalanceWeight[13],Weight[14]
-PREPAID_10,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,10,10,10
-BONUS_1,*topup,,,*monetary,*out,,*any,,,*unlimited,,1,10,10
-LOG_BALANCE,*log,,,,,,,,,,,,,10
-CDRST_WARN_HTTP,*call_url,http://localhost:8080,,,,,,,,,,,,10
-CDRST_LOG,*log,,,,,,,,,,,,,10
+#ActionsTag[0],Action[1],ActionExtraParameters[2],BalanceTag[3],BalanceType[4],Direction[5],Category[6],DestinationTag[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingTags[11],Units[12],BalanceWeight[13],BalanceDisabled[14],Weight[15]
+PREPAID_10,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,10,10,false,10
+BONUS_1,*topup,,,*monetary,*out,,*any,,,*unlimited,,1,10,false,10
+LOG_BALANCE,*log,,,,,,,,,,,,,false,10
+CDRST_WARN_HTTP,*call_url,http://localhost:8080,,,,,,,,,,,,false,10
+CDRST_LOG,*log,,,,,,,,,,,,,false,10
