@@ -20,6 +20,7 @@ package engine
 
 import (
 	"sync"
+	"time"
 )
 
 // global package variable
@@ -34,7 +35,7 @@ type GuardianLock struct {
 	mu    sync.Mutex
 }
 
-func (cm *GuardianLock) Guard(handler func() (interface{}, error), names ...string) (reply interface{}, err error) {
+func (cm *GuardianLock) Guard(handler func() (interface{}, error), timeout time.Duration, names ...string) (reply interface{}, err error) {
 	cm.mu.Lock()
 	for _, name := range names {
 		lock, exists := Guardian.queue[name]
@@ -45,7 +46,22 @@ func (cm *GuardianLock) Guard(handler func() (interface{}, error), names ...stri
 		lock <- true
 	}
 	cm.mu.Unlock()
-	reply, err = handler()
+	funcWaiter := make(chan bool)
+	go func() {
+		// execute
+		reply, err = handler()
+		funcWaiter <- true
+	}()
+	// wait with timeout
+	if timeout > 0 {
+		select {
+		case <-funcWaiter:
+		case <-time.After(timeout):
+		}
+	} else {
+		<-funcWaiter
+	}
+	// release
 	for _, name := range names {
 		lock := Guardian.queue[name]
 		<-lock

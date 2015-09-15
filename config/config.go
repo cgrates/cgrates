@@ -31,14 +31,15 @@ import (
 )
 
 const (
-	DISABLED = "disabled"
-	JSON     = "json"
-	GOB      = "gob"
-	POSTGRES = "postgres"
-	MONGO    = "mongo"
-	REDIS    = "redis"
-	SAME     = "same"
-	FS       = "freeswitch"
+	DISABLED    = "disabled"
+	JSON        = "json"
+	GOB         = "gob"
+	POSTGRES    = "postgres"
+	MONGO       = "mongo"
+	REDIS       = "redis"
+	SAME        = "same"
+	FS          = "freeswitch"
+	CFG_RELOADS = "cfg_reloads_"
 )
 
 var (
@@ -65,7 +66,10 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
 	cfg.ConfigReloads = make(map[string]chan struct{})
-	cfg.ConfigReloads[utils.CDRC] = make(chan struct{})
+	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
+	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
@@ -216,7 +220,6 @@ type CGRConfig struct {
 	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
 	CDRStatsEnabled      bool                 // Enable CDR Stats service
 	CDRStatsSaveInterval time.Duration        // Save interval duration
-	//CDRStatConfig        *CdrStatsConfig // Active cdr stats configuration instances, platform level
 	CdreProfiles         map[string]*CdreConfig
 	CdrcProfiles         map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
 	SmFsConfig           *SmFsConfig                       // SM-FreeSWITCH configuration
@@ -239,7 +242,6 @@ type CGRConfig struct {
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
-
 }
 
 func (self *CGRConfig) checkConfigSanity() error {

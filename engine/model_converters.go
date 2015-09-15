@@ -138,14 +138,14 @@ func APItoModelRatingProfile(rpf *utils.TPRatingProfile) (result []TpRatingProfi
 }
 
 func APItoModelLcrRule(lcrs *utils.TPLcrRules) (result []TpLcrRule) {
-	for _, lcr := range lcrs.LcrRules {
+	for _, lcr := range lcrs.Rules {
 		result = append(result, TpLcrRule{
 			Tpid:           lcrs.TPid,
-			Direction:      lcr.Direction,
-			Tenant:         lcr.Tenant,
-			Category:       lcr.Category,
-			Account:        lcr.Account,
-			Subject:        lcr.Subject,
+			Direction:      lcrs.Direction,
+			Tenant:         lcrs.Tenant,
+			Category:       lcrs.Category,
+			Account:        lcrs.Account,
+			Subject:        lcrs.Subject,
 			DestinationTag: lcr.DestinationId,
 			RpCategory:     lcr.RpCategory,
 			Strategy:       lcr.Strategy,
@@ -154,7 +154,7 @@ func APItoModelLcrRule(lcrs *utils.TPLcrRules) (result []TpLcrRule) {
 			Weight:         lcr.Weight,
 		})
 	}
-	if len(lcrs.LcrRules) == 0 {
+	if len(lcrs.Rules) == 0 {
 		result = append(result, TpLcrRule{
 			Tpid: lcrs.TPid,
 		})
@@ -321,32 +321,32 @@ func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrstat) {
 	for _, st := range stats.CdrStats {
 		ql, _ := strconv.Atoi(st.QueueLength)
 		result = append(result, TpCdrstat{
-			Tpid:                stats.TPid,
-			Tag:                 stats.CdrStatsId,
-			QueueLength:         ql,
-			TimeWindow:          st.TimeWindow,
-			SaveInterval:        st.SaveInterval,
-			Metrics:             st.Metrics,
-			SetupInterval:       st.SetupInterval,
-			Tors:                st.TORs,
-			CdrHosts:            st.CdrHosts,
-			CdrSources:          st.CdrSources,
-			ReqTypes:            st.ReqTypes,
-			Directions:          st.Directions,
-			Tenants:             st.Tenants,
-			Categories:          st.Categories,
-			Accounts:            st.Accounts,
-			Subjects:            st.Subjects,
-			DestinationPrefixes: st.DestinationPrefixes,
-			PddInterval:         st.PddInterval,
-			UsageInterval:       st.UsageInterval,
-			Suppliers:           st.Suppliers,
-			DisconnectCauses:    st.DisconnectCauses,
-			MediationRunids:     st.MediationRunIds,
-			RatedAccounts:       st.RatedAccounts,
-			RatedSubjects:       st.RatedSubjects,
-			CostInterval:        st.CostInterval,
-			ActionTriggers:      st.ActionTriggers,
+			Tpid:             stats.TPid,
+			Tag:              stats.CdrStatsId,
+			QueueLength:      ql,
+			TimeWindow:       st.TimeWindow,
+			SaveInterval:     st.SaveInterval,
+			Metrics:          st.Metrics,
+			SetupInterval:    st.SetupInterval,
+			Tors:             st.TORs,
+			CdrHosts:         st.CdrHosts,
+			CdrSources:       st.CdrSources,
+			ReqTypes:         st.ReqTypes,
+			Directions:       st.Directions,
+			Tenants:          st.Tenants,
+			Categories:       st.Categories,
+			Accounts:         st.Accounts,
+			Subjects:         st.Subjects,
+			DestinationIds:   st.DestinationIds,
+			PddInterval:      st.PddInterval,
+			UsageInterval:    st.UsageInterval,
+			Suppliers:        st.Suppliers,
+			DisconnectCauses: st.DisconnectCauses,
+			MediationRunids:  st.MediationRunIds,
+			RatedAccounts:    st.RatedAccounts,
+			RatedSubjects:    st.RatedSubjects,
+			CostInterval:     st.CostInterval,
+			ActionTriggers:   st.ActionTriggers,
 		})
 	}
 	if len(stats.CdrStats) == 0 {

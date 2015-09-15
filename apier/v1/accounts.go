@@ -92,7 +92,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return 0, err
 		}
 		return 0, nil
-	}, utils.ACTION_TIMING_PREFIX)
+	}, 0, utils.ACTION_TIMING_PREFIX)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -147,7 +147,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 			return 0, err
 		}
 		return 0, nil
-	}, balanceId)
+	}, 0, balanceId)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -193,7 +193,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			return 0, err
 		}
 		return 0, nil
-	}, balanceId)
+	}, 0, balanceId)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -203,7 +203,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 				return 0, err
 			}
 			return 0, nil
-		}, utils.ACTION_TIMING_PREFIX)
+		}, 0, utils.ACTION_TIMING_PREFIX)
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}
@@ -226,7 +226,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 			return 0, err
 		}
 		return 0, nil
-	}, accountId)
+	}, 0, accountId)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

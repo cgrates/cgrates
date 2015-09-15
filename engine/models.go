@@ -139,10 +139,10 @@ func (lcr *TpLcrRule) SetLcrRuleId(id string) error {
 		return fmt.Errorf("wrong LcrRule Id: %s", id)
 	}
 	lcr.Direction = ids[0]
-	lcr.Tenant = ids[2]
-	lcr.Category = ids[3]
+	lcr.Tenant = ids[1]
+	lcr.Category = ids[2]
 	lcr.Account = ids[3]
-	lcr.Subject = ids[5]
+	lcr.Subject = ids[4]
 	return nil
 }
 
@@ -167,7 +167,8 @@ type TpAction struct {
 	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
 	Units           float64 `index:"12" re:"\d+\s*"`
 	BalanceWeight   float64 `index:"13" re:"\d+\.?\d*\s*"`
-	Weight          float64 `index:"14" re:"\d+\.?\d*\s*"`
+	BalanceDisabled bool    `index:"14"`
+	Weight          float64 `index:"15" re:"\d+\.?\d*\s*"`
 	CreatedAt       time.Time
 }
 
@@ -290,34 +291,34 @@ func (tpdc *TpDerivedCharger) GetDerivedChargersId() string {
 }
 
 type TpCdrstat struct {
-	Id                  int64
-	Tpid                string
-	Tag                 string `index:"0" re:""`
-	QueueLength         int    `index:"1" re:""`
-	TimeWindow          string `index:"2" re:""`
-	SaveInterval        string `index:"3" re:""`
-	Metrics             string `index:"4" re:""`
-	SetupInterval       string `index:"5" re:""`
-	Tors                string `index:"6" re:""`
-	CdrHosts            string `index:"7" re:""`
-	CdrSources          string `index:"8" re:""`
-	ReqTypes            string `index:"9" re:""`
-	Directions          string `index:"10" re:""`
-	Tenants             string `index:"11" re:""`
-	Categories          string `index:"12" re:""`
-	Accounts            string `index:"13" re:""`
-	Subjects            string `index:"14" re:""`
-	DestinationPrefixes string `index:"15" re:""`
-	PddInterval         string `index:"16" re:""`
-	UsageInterval       string `index:"17" re:""`
-	Suppliers           string `index:"18" re:""`
-	DisconnectCauses    string `index:"19" re:""`
-	MediationRunids     string `index:"20" re:""`
-	RatedAccounts       string `index:"21" re:""`
-	RatedSubjects       string `index:"22" re:""`
-	CostInterval        string `index:"23" re:""`
-	ActionTriggers      string `index:"24" re:""`
-	CreatedAt           time.Time
+	Id               int64
+	Tpid             string
+	Tag              string `index:"0" re:""`
+	QueueLength      int    `index:"1" re:""`
+	TimeWindow       string `index:"2" re:""`
+	SaveInterval     string `index:"3" re:""`
+	Metrics          string `index:"4" re:""`
+	SetupInterval    string `index:"5" re:""`
+	Tors             string `index:"6" re:""`
+	CdrHosts         string `index:"7" re:""`
+	CdrSources       string `index:"8" re:""`
+	ReqTypes         string `index:"9" re:""`
+	Directions       string `index:"10" re:""`
+	Tenants          string `index:"11" re:""`
+	Categories       string `index:"12" re:""`
+	Accounts         string `index:"13" re:""`
+	Subjects         string `index:"14" re:""`
+	DestinationIds   string `index:"15" re:""`
+	PddInterval      string `index:"16" re:""`
+	UsageInterval    string `index:"17" re:""`
+	Suppliers        string `index:"18" re:""`
+	DisconnectCauses string `index:"19" re:""`
+	MediationRunids  string `index:"20" re:""`
+	RatedAccounts    string `index:"21" re:""`
+	RatedSubjects    string `index:"22" re:""`
+	CostInterval     string `index:"23" re:""`
+	ActionTriggers   string `index:"24" re:""`
+	CreatedAt        time.Time
 }
 
 func (t TpCdrstat) TableName() string {
@@ -337,6 +338,16 @@ func (tu *TpUser) GetId() string {
 	return utils.ConcatenatedKey(tu.Tenant, tu.UserName)
 }
 
+func (tu *TpUser) SetId(id string) error {
+	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(vals) != 2 {
+		return utils.ErrInvalidKey
+	}
+	tu.Tenant = vals[0]
+	tu.UserName = vals[1]
+	return nil
+}
+
 type TpAlias struct {
 	Id            int64
 	Tpid          string
@@ -353,6 +364,20 @@ type TpAlias struct {
 
 func (ta *TpAlias) TableName() string {
 	return "tp_aliases"
+}
+
+func (ta *TpAlias) SetId(id string) error {
+	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(vals) != 6 {
+		return utils.ErrInvalidKey
+	}
+	ta.Direction = vals[0]
+	ta.Tenant = vals[1]
+	ta.Category = vals[2]
+	ta.Account = vals[3]
+	ta.Subject = vals[4]
+	ta.Group = vals[5]
+	return nil
 }
 
 func (ta *TpAlias) GetId() string {

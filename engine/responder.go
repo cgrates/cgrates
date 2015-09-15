@@ -93,7 +93,7 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	} else {
 		r, e := Guardian.Guard(func() (interface{}, error) {
 			return arg.GetCost()
-		}, arg.GetAccountKey())
+		}, 0, arg.GetAccountKey())
 		if e != nil {
 			return e
 		} else if r != nil {
@@ -181,7 +181,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	} else {
 		r, e := Guardian.Guard(func() (interface{}, error) {
 			return arg.RefundIncrements()
-		}, arg.GetAccountKey())
+		}, 0, arg.GetAccountKey())
 		*reply, err = r.(float64), e
 	}
 	rs.getCache().Cache(utils.REFUND_INCR_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
@@ -424,7 +424,7 @@ func (rs *Responder) FlushCache(arg *CallDescriptor, reply *float64) (err error)
 	} else {
 		r, e := Guardian.Guard(func() (interface{}, error) {
 			return 0, arg.FlushCache()
-		}, arg.GetAccountKey())
+		}, 0, arg.GetAccountKey())
 		*reply, err = r.(float64), e
 	}
 	return
@@ -470,7 +470,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 			_, err = Guardian.Guard(func() (interface{}, error) {
 				err = client.Call(method, *key, reply)
 				return reply, err
-			}, key.GetAccountKey())
+			}, 0, key.GetAccountKey())
 			if err != nil {
 				Logger.Err(fmt.Sprintf("<Balancer> Got en error from rater: %v", err))
 			}
@@ -493,7 +493,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 			_, err = Guardian.Guard(func() (interface{}, error) {
 				err = client.Call(method, *key, &reply)
 				return reply, err
-			}, key.GetAccountKey())
+			}, 0, key.GetAccountKey())
 			if err != nil {
 				Logger.Info(fmt.Sprintf("Got en error from rater: %v", err))
 			}

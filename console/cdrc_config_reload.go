@@ -18,46 +18,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import (
+	"github.com/cgrates/cgrates/apier/v1"
+)
 
 func init() {
-	c := &CmdGetReverseAliases{
-		name:      "aliases_reverse",
-		rpcMethod: "AliasesV1.GetReverseAlias",
-		rpcParams: &engine.AttrReverseAlias{},
+	c := &CmdCdrcConfigReload{
+		name:      "cdrc_config_reload",
+		rpcMethod: "ApierV1.ReloadCdrcConfig",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetReverseAliases struct {
+type CmdCdrcConfigReload struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.AttrReverseAlias
+	rpcParams *v1.AttrReloadConfig
 	*CommandExecuter
 }
 
-func (self *CmdGetReverseAliases) Name() string {
+func (self *CmdCdrcConfigReload) Name() string {
 	return self.name
 }
 
-func (self *CmdGetReverseAliases) RpcMethod() string {
+func (self *CmdCdrcConfigReload) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetReverseAliases) RpcParams(reset bool) interface{} {
+func (self *CmdCdrcConfigReload) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.AttrReverseAlias{}
+		self.rpcParams = new(v1.AttrReloadConfig)
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetReverseAliases) PostprocessRpcParams() error {
+func (self *CmdCdrcConfigReload) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetReverseAliases) RpcResult() interface{} {
-	a := make(map[string][]*engine.Alias)
-	return &a
+func (self *CmdCdrcConfigReload) RpcResult() interface{} {
+	var s string
+	return &s
 }

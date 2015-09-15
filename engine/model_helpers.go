@@ -503,30 +503,30 @@ func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 	css := make(map[string][]*utils.TPCdrStat)
 	for _, tpCs := range tps {
 		css[tpCs.Tag] = append(css[tpCs.Tag], &utils.TPCdrStat{
-			QueueLength:         strconv.Itoa(tpCs.QueueLength),
-			TimeWindow:          tpCs.TimeWindow,
-			Metrics:             tpCs.Metrics,
-			SaveInterval:        tpCs.SaveInterval,
-			SetupInterval:       tpCs.SetupInterval,
-			TORs:                tpCs.Tors,
-			CdrHosts:            tpCs.CdrHosts,
-			CdrSources:          tpCs.CdrSources,
-			ReqTypes:            tpCs.ReqTypes,
-			Directions:          tpCs.Directions,
-			Tenants:             tpCs.Tenants,
-			Categories:          tpCs.Categories,
-			Accounts:            tpCs.Accounts,
-			Subjects:            tpCs.Subjects,
-			DestinationPrefixes: tpCs.DestinationPrefixes,
-			PddInterval:         tpCs.PddInterval,
-			UsageInterval:       tpCs.UsageInterval,
-			Suppliers:           tpCs.Suppliers,
-			DisconnectCauses:    tpCs.DisconnectCauses,
-			MediationRunIds:     tpCs.MediationRunids,
-			RatedAccounts:       tpCs.RatedAccounts,
-			RatedSubjects:       tpCs.RatedSubjects,
-			CostInterval:        tpCs.CostInterval,
-			ActionTriggers:      tpCs.ActionTriggers,
+			QueueLength:      strconv.Itoa(tpCs.QueueLength),
+			TimeWindow:       tpCs.TimeWindow,
+			Metrics:          tpCs.Metrics,
+			SaveInterval:     tpCs.SaveInterval,
+			SetupInterval:    tpCs.SetupInterval,
+			TORs:             tpCs.Tors,
+			CdrHosts:         tpCs.CdrHosts,
+			CdrSources:       tpCs.CdrSources,
+			ReqTypes:         tpCs.ReqTypes,
+			Directions:       tpCs.Directions,
+			Tenants:          tpCs.Tenants,
+			Categories:       tpCs.Categories,
+			Accounts:         tpCs.Accounts,
+			Subjects:         tpCs.Subjects,
+			DestinationIds:   tpCs.DestinationIds,
+			PddInterval:      tpCs.PddInterval,
+			UsageInterval:    tpCs.UsageInterval,
+			Suppliers:        tpCs.Suppliers,
+			DisconnectCauses: tpCs.DisconnectCauses,
+			MediationRunIds:  tpCs.MediationRunids,
+			RatedAccounts:    tpCs.RatedAccounts,
+			RatedSubjects:    tpCs.RatedSubjects,
+			CostInterval:     tpCs.CostInterval,
+			ActionTriggers:   tpCs.ActionTriggers,
 		})
 	}
 	return css, nil
@@ -609,8 +609,8 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 	if tpCs.Subjects != "" {
 		cs.Subject = append(cs.Subject, tpCs.Subjects)
 	}
-	if tpCs.DestinationPrefixes != "" {
-		cs.DestinationPrefix = append(cs.DestinationPrefix, tpCs.DestinationPrefixes)
+	if tpCs.DestinationIds != "" {
+		cs.DestinationIds = append(cs.DestinationIds, tpCs.DestinationIds)
 	}
 	if tpCs.PddInterval != "" {
 		pdds := strings.Split(tpCs.PddInterval, utils.INFIELD_SEP)
@@ -774,16 +774,15 @@ func (tps TpLcrRules) GetLcrRules() (map[string]*utils.TPLcrRules, error) {
 		var found bool
 		if lcr, found = lcrs[tp.GetLcrRuleId()]; !found {
 			lcr = &utils.TPLcrRules{
-				LcrRulesId: tp.GetLcrRuleId(),
+				Direction: tp.Direction,
+				Tenant:    tp.Tenant,
+				Category:  tp.Category,
+				Account:   tp.Account,
+				Subject:   tp.Subject,
 			}
 			lcrs[tp.GetLcrRuleId()] = lcr
 		}
-		lcr.LcrRules = append(lcr.LcrRules, &utils.TPLcrRule{
-			Direction:      tp.Direction,
-			Tenant:         tp.Tenant,
-			Category:       tp.Category,
-			Account:        tp.Account,
-			Subject:        tp.Subject,
+		lcr.Rules = append(lcr.Rules, &utils.TPLcrRule{
 			DestinationId:  tp.DestinationTag,
 			RpCategory:     tp.RpCategory,
 			Strategy:       tp.Strategy,

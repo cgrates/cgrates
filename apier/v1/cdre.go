@@ -34,6 +34,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/cgrates/cgrates/cdre"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -92,6 +94,9 @@ func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 // Export Cdrs to file
 func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
 	var err error
+
+	cdreReloadStruct := <-self.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
+	defer func() { self.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
 	exportTemplate := self.Config.CdreProfiles[utils.META_DEFAULT]
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
@@ -204,5 +209,22 @@ func (self *ApierV1) RemCdrs(attrs utils.AttrRemCdrs, reply *string) error {
 		return utils.NewErrServerError(err)
 	}
 	*reply = "OK"
+	return nil
+}
+
+// Reloads CDRE configuration out of folder specified
+func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) error {
+	if attrs.ConfigDir == "" {
+		attrs.ConfigDir = utils.CONFIG_DIR
+	}
+	newCfg, err := config.NewCGRConfigFromFolder(attrs.ConfigDir)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	cdreReloadStruct := <-apier.Config.ConfigReloads[utils.CDRE] // Get the CDRE reload channel                     // Read the content of the channel, locking it
+	apier.Config.CdreProfiles = newCfg.CdreProfiles
+	apier.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct // Unlock reloads
+	engine.Logger.Info("<CDRE> Configuration reloaded")
+	*reply = OK
 	return nil
 }

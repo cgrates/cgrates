@@ -812,8 +812,22 @@ func TestAccountdebitBalance(t *testing.T) {
 	newMb := &Balance{Weight: 20, DestinationIds: "NEW"}
 	a := &Action{BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: newMb}
 	ub.debitBalanceAction(a, false)
-	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 3 || ub.BalanceMap[utils.VOICE+OUTBOUND][2].Uuid != newMb.Uuid {
+	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 3 || ub.BalanceMap[utils.VOICE+OUTBOUND][2].DestinationIds != newMb.DestinationIds {
 		t.Errorf("Error adding minute bucket! %d %+v %+v", len(ub.BalanceMap[utils.VOICE+OUTBOUND]), ub.BalanceMap[utils.VOICE+OUTBOUND][2], newMb)
+	}
+}
+
+func TestAccountDisableBalance(t *testing.T) {
+	ub := &Account{
+		Id:            "rif",
+		AllowNegative: true,
+		BalanceMap:    map[string]BalanceChain{utils.SMS: BalanceChain{&Balance{Value: 14}}, utils.DATA: BalanceChain{&Balance{Value: 1204}}, utils.VOICE + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}}},
+	}
+	newMb := &Balance{Weight: 20, DestinationIds: "NAT", Disabled: true}
+	a := &Action{BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: newMb}
+	ub.enableDisableBalanceAction(a)
+	if len(ub.BalanceMap[utils.VOICE+OUTBOUND]) != 2 || ub.BalanceMap[utils.VOICE+OUTBOUND][0].Disabled != true {
+		t.Errorf("Error disabling balance! %d %+v %+v", len(ub.BalanceMap[utils.VOICE+OUTBOUND]), ub.BalanceMap[utils.VOICE+OUTBOUND][0], newMb)
 	}
 }
 

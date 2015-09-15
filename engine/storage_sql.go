@@ -426,23 +426,25 @@ func (self *SQLStorage) SetTpDerivedChargers(sgs []TpDerivedCharger) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTpLCRs(sgs []TpLcrRule) error {
-	if len(sgs) == 0 {
+func (self *SQLStorage) SetTpLCRs(lcrs []TpLcrRule) error {
+	if len(lcrs) == 0 {
 		return nil //Nothing to set
 	}
 	m := make(map[string]bool)
 
 	tx := self.db.Begin()
-	for _, lcr := range sgs {
+	for _, lcr := range lcrs {
 		if found, _ := m[lcr.GetLcrRuleId()]; !found {
 			m[lcr.GetLcrRuleId()] = true
-			tmpDc := &TpLcrRule{}
-			if err := tmpDc.SetLcrRuleId(lcr.GetLcrRuleId()); err != nil {
-				tx.Rollback()
-				return err
-			}
 
-			if err := tx.Where(tmpDc).Delete(TpLcrRule{}).Error; err != nil {
+			if err := tx.Where(&TpLcrRule{
+				Tpid:      lcr.Tpid,
+				Direction: lcr.Direction,
+				Tenant:    lcr.Tenant,
+				Category:  lcr.Category,
+				Account:   lcr.Account,
+				Subject:   lcr.Subject,
+			}).Delete(TpLcrRule{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -1198,12 +1200,25 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, er
 
 }
 
-func (self *SQLStorage) GetTpLCRs(tpid, tag string) ([]TpLcrRule, error) {
+func (self *SQLStorage) GetTpLCRs(filter *TpLcrRule) ([]TpLcrRule, error) {
 	var tpLcrRule []TpLcrRule
-	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
+	q := self.db.Where("`tpid` = ?", filter.Tpid)
+	if len(filter.Direction) != 0 {
+		q = q.Where("`direction` = ?", filter.Direction)
 	}
+	if len(filter.Tenant) != 0 {
+		q = q.Where("`tenant` = ?", filter.Tenant)
+	}
+	if len(filter.Category) != 0 {
+		q = q.Where("`category` = ?", filter.Category)
+	}
+	if len(filter.Account) != 0 {
+		q = q.Where("`account` = ?", filter.Account)
+	}
+	if len(filter.Subject) != 0 {
+		q = q.Where("`subject` = ?", filter.Subject)
+	}
+
 	if err := q.Find(&tpLcrRule).Error; err != nil {
 		return nil, err
 	}

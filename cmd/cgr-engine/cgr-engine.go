@@ -71,8 +71,33 @@ var (
 	err   error
 )
 
+func startCdrcs(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *engine.Responder, exitChan chan bool) {
+	for {
+		cdrcChildrenChan := make(chan struct{}) // Will use it to communicate with the children of one fork
+		for _, cdrcCfgs := range cfg.CdrcProfiles {
+			var cdrcCfg *config.CdrcConfig
+			for _, cdrcCfg = range cdrcCfgs { // Take a random config out since they should be the same
+				break
+			}
+			if cdrcCfg.Enabled == false {
+				continue // Ignore not enabled
+			}
+			go startCdrc(internalCdrSChan, internalRaterChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cdrcChildrenChan, exitChan)
+		}
+		select {
+		case <-exitChan: // Stop forking CDRCs
+			break
+		case <-cfg.ConfigReloads[utils.CDRC]: // Consume the load request and wait for a new one
+			close(cdrcChildrenChan) // Stop all the children of the previous run
+			engine.Logger.Info("<CDRC> Configuration reload")
+			continue
+		}
+	}
+}
+
 // Fires up a cdrc instance
-func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *engine.Responder, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, closeChan chan struct{}, exitChan chan bool) {
+func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *engine.Responder, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool,
+	closeChan chan struct{}, exitChan chan bool) {
 	var cdrsConn engine.Connector
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
@@ -101,8 +126,8 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 	}
 	if err := cdrc.Run(); err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cdrc run error: %s", err.Error()))
+		exitChan <- true // If run stopped, something is bad, stop the application
 	}
-	exitChan <- true // If run stopped, something is bad, stop the application
 }
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
@@ -615,23 +640,8 @@ func main() {
 		go startCdrStats(internalCdrStatSChan, ratingDb, accountDb, server)
 	}
 
-	// Start CDRC components
-	var cdrcEnabled bool
-	for _, cdrcCfgs := range cfg.CdrcProfiles {
-		var cdrcCfg *config.CdrcConfig
-		for _, cdrcCfg = range cdrcCfgs { // Take a random config out since they should be the same
-			break
-		}
-		if cdrcCfg.Enabled == false {
-			continue // Ignore not enabled
-		} else if !cdrcEnabled {
-			cdrcEnabled = true // Mark that at least one cdrc service is active
-		}
-		go startCdrc(internalCdrSChan, internalRaterChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cfg.ConfigReloads[utils.CDRC], exitChan)
-	}
-	if cdrcEnabled {
-		engine.Logger.Info("Starting CGRateS CDR client.")
-	}
+	// Start CDRC components if necessary
+	go startCdrcs(internalCdrSChan, internalRaterChan, exitChan)
 
 	// Start SM-FreeSWITCH
 	if cfg.SmFsConfig.Enabled {

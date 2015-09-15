@@ -153,18 +153,18 @@ SG3,*any,*lowest,
 *in,cgrates.org,call,*any,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
 `
 	actions = `
-MINI,*topup_reset,,,*monetary,*out,,,,,*unlimited,,10,10,10
-MINI,*topup,,,*voice,*out,,NAT,test,,*unlimited,,100,10,10
-SHARED,*topup,,,*monetary,*out,,,,SG1,*unlimited,,100,10,10
-TOPUP10_AC,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,1,10,10
-TOPUP10_AC1,*topup_reset,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,10
-SE0,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,0,10,10
-SE10,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,10,5,10
-SE10,*topup,,,*monetary,*out,,,,,*unlimited,,10,10,10
-EE0,*topup_reset,,,*monetary,*out,,,,SG3,*unlimited,,0,10,10
-EE0,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,10
-DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,10
-NEG,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,10
+MINI,*topup_reset,,,*monetary,*out,,,,,*unlimited,,10,10,false,10
+MINI,*topup,,,*voice,*out,,NAT,test,,*unlimited,,100,10,false,10
+SHARED,*topup,,,*monetary,*out,,,,SG1,*unlimited,,100,10,false,10
+TOPUP10_AC,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,1,10,false,10
+TOPUP10_AC1,*topup_reset,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,false,10
+SE0,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,0,10,false,10
+SE10,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,10,5,false,10
+SE10,*topup,,,*monetary,*out,,,,,*unlimited,,10,10,false,10
+EE0,*topup_reset,,,*monetary,*out,,,,SG3,*unlimited,,0,10,false,10
+EE0,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,false,10
+DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,false,10
+NEG,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,false,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -1077,24 +1077,24 @@ func TestLoadCdrStats(t *testing.T) {
 			time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
 			time.Date(2014, 7, 29, 16, 0, 0, 0, time.UTC),
 		},
-		TOR:               []string{utils.VOICE},
-		CdrHost:           []string{"87.139.12.167"},
-		CdrSource:         []string{"FS_JSON"},
-		ReqType:           []string{utils.META_RATED},
-		Direction:         []string{utils.OUT},
-		Tenant:            []string{"cgrates.org"},
-		Category:          []string{"call"},
-		Account:           []string{"dan"},
-		Subject:           []string{"dan"},
-		DestinationPrefix: []string{"49"},
-		PddInterval:       []time.Duration{3 * time.Minute, 7 * time.Minute},
-		UsageInterval:     []time.Duration{5 * time.Minute, 10 * time.Minute},
-		Supplier:          []string{"suppl1"},
-		DisconnectCause:   []string{"NORMAL_CLEARING"},
-		MediationRunIds:   []string{"default"},
-		RatedAccount:      []string{"rif"},
-		RatedSubject:      []string{"rif"},
-		CostInterval:      []float64{0, 2},
+		TOR:             []string{utils.VOICE},
+		CdrHost:         []string{"87.139.12.167"},
+		CdrSource:       []string{"FS_JSON"},
+		ReqType:         []string{utils.META_RATED},
+		Direction:       []string{utils.OUT},
+		Tenant:          []string{"cgrates.org"},
+		Category:        []string{"call"},
+		Account:         []string{"dan"},
+		Subject:         []string{"dan"},
+		DestinationIds:  []string{"49"},
+		PddInterval:     []time.Duration{3 * time.Minute, 7 * time.Minute},
+		UsageInterval:   []time.Duration{5 * time.Minute, 10 * time.Minute},
+		Supplier:        []string{"suppl1"},
+		DisconnectCause: []string{"NORMAL_CLEARING"},
+		MediationRunIds: []string{"default"},
+		RatedAccount:    []string{"rif"},
+		RatedSubject:    []string{"rif"},
+		CostInterval:    []float64{0, 2},
 	}
 	for _, triggerKey := range []string{"STANDARD_TRIGGER", "STANDARD_TRIGGERS"} {
 		cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers[triggerKey]...)

@@ -48,27 +48,28 @@ type Action struct {
 }
 
 const (
-	LOG             = "*log"
-	RESET_TRIGGERS  = "*reset_triggers"
-	SET_RECURRENT   = "*set_recurrent"
-	UNSET_RECURRENT = "*unset_recurrent"
-	ALLOW_NEGATIVE  = "*allow_negative"
-	DENY_NEGATIVE   = "*deny_negative"
-	RESET_ACCOUNT   = "*reset_account"
-	REMOVE_ACCOUNT  = "*remove_account"
-	TOPUP_RESET     = "*topup_reset"
-	TOPUP           = "*topup"
-	DEBIT_RESET     = "*debit_reset"
-	DEBIT           = "*debit"
-	RESET_COUNTER   = "*reset_counter"
-	RESET_COUNTERS  = "*reset_counters"
-	ENABLE_ACCOUNT  = "*enable_account"
-	DISABLE_ACCOUNT = "*disable_account"
-	CALL_URL        = "*call_url"
-	CALL_URL_ASYNC  = "*call_url_async"
-	MAIL_ASYNC      = "*mail_async"
-	UNLIMITED       = "*unlimited"
-	CDRLOG          = "*cdrlog"
+	LOG                    = "*log"
+	RESET_TRIGGERS         = "*reset_triggers"
+	SET_RECURRENT          = "*set_recurrent"
+	UNSET_RECURRENT        = "*unset_recurrent"
+	ALLOW_NEGATIVE         = "*allow_negative"
+	DENY_NEGATIVE          = "*deny_negative"
+	RESET_ACCOUNT          = "*reset_account"
+	REMOVE_ACCOUNT         = "*remove_account"
+	TOPUP_RESET            = "*topup_reset"
+	TOPUP                  = "*topup"
+	DEBIT_RESET            = "*debit_reset"
+	DEBIT                  = "*debit"
+	RESET_COUNTER          = "*reset_counter"
+	RESET_COUNTERS         = "*reset_counters"
+	ENABLE_ACCOUNT         = "*enable_account"
+	DISABLE_ACCOUNT        = "*disable_account"
+	ENABLE_DISABLE_BALANCE = "*enable_disable_balance"
+	CALL_URL               = "*call_url"
+	CALL_URL_ASYNC         = "*call_url_async"
+	MAIL_ASYNC             = "*mail_async"
+	UNLIMITED              = "*unlimited"
+	CDRLOG                 = "*cdrlog"
 )
 
 func (a *Action) Clone() *Action {
@@ -120,6 +121,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return enableUserAction, true
 	case DISABLE_ACCOUNT:
 		return disableUserAction, true
+	case ENABLE_DISABLE_BALANCE:
+		return enableDisableBalanceAction, true
 	case CALL_URL:
 		return callUrl, true
 	case CALL_URL_ASYNC:
@@ -404,6 +407,14 @@ func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 		return errors.New("nil user balance")
 	}
 	ub.Disabled = true
+	return
+}
+
+func enableDisableBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+	if ub == nil {
+		return errors.New("nil user balance")
+	}
+	ub.enableDisableBalanceAction(a)
 	return
 }
 

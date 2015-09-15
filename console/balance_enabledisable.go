@@ -18,46 +18,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import (
+	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
+)
 
 func init() {
-	c := &CmdGetReverseAliases{
-		name:      "aliases_reverse",
-		rpcMethod: "AliasesV1.GetReverseAlias",
-		rpcParams: &engine.AttrReverseAlias{},
+	c := &CmdEnableDisableBalance{
+		name:      "balance_enabledisable",
+		rpcMethod: "ApierV1.EnableDisableBalance",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetReverseAliases struct {
+type CmdEnableDisableBalance struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.AttrReverseAlias
+	rpcParams *v1.AttrAddBalance
 	*CommandExecuter
 }
 
-func (self *CmdGetReverseAliases) Name() string {
+func (self *CmdEnableDisableBalance) Name() string {
 	return self.name
 }
 
-func (self *CmdGetReverseAliases) RpcMethod() string {
+func (self *CmdEnableDisableBalance) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetReverseAliases) RpcParams(reset bool) interface{} {
+func (self *CmdEnableDisableBalance) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.AttrReverseAlias{}
+		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MONETARY, Overwrite: false}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetReverseAliases) PostprocessRpcParams() error {
+func (self *CmdEnableDisableBalance) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetReverseAliases) RpcResult() interface{} {
-	a := make(map[string][]*engine.Alias)
-	return &a
+func (self *CmdEnableDisableBalance) RpcResult() interface{} {
+	var s string
+	return &s
 }

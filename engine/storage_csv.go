@@ -261,7 +261,7 @@ func (csvs *CSVStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, er
 	return tpSharedGroups, nil
 }
 
-func (csvs *CSVStorage) GetTpLCRs(tpid, tag string) ([]TpLcrRule, error) {
+func (csvs *CSVStorage) GetTpLCRs(filter *TpLcrRule) ([]TpLcrRule, error) {
 	csvReader, fp, err := csvs.readerFunc(csvs.lcrFn, csvs.sep, getColumnCount(TpLcrRule{}))
 	if err != nil {
 		log.Print("Could not load LCR rules file: ", err)
@@ -281,7 +281,9 @@ func (csvs *CSVStorage) GetTpLCRs(tpid, tag string) ([]TpLcrRule, error) {
 			return nil, err
 		} else {
 			lcr := tpRate.(TpLcrRule)
-			lcr.Tpid = tpid
+			if filter != nil {
+				lcr.Tpid = filter.Tpid
+			}
 			tpLCRs = append(tpLCRs, lcr)
 		}
 	}

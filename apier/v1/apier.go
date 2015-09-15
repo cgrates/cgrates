@@ -116,6 +116,7 @@ func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 type AttrAddBalance struct {
 	Tenant        string
 	Account       string
+	BalanceUuid   string
 	BalanceId     string
 	BalanceType   string
 	Direction     string
@@ -126,6 +127,7 @@ type AttrAddBalance struct {
 	Weight        float64
 	SharedGroup   string
 	Overwrite     bool // When true it will reset if the balance is already there
+	Disabled      bool
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
@@ -164,6 +166,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			BalanceType: attr.BalanceType,
 			Direction:   attr.Direction,
 			Balance: &engine.Balance{
+				Uuid:           attr.BalanceUuid,
 				Id:             attr.BalanceId,
 				Value:          attr.Value,
 				ExpirationDate: expTime,
@@ -171,6 +174,48 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				DestinationIds: attr.DestinationId,
 				Weight:         attr.Weight,
 				SharedGroup:    attr.SharedGroup,
+				Disabled:       attr.Disabled,
+			},
+		},
+	})
+	if err := at.Execute(); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) error {
+	expTime, err := utils.ParseDate(attr.ExpiryTime)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	tag := utils.ConcatenatedKey(attr.Direction, attr.Tenant, attr.Account)
+	if _, err := self.AccountDb.GetAccount(tag); err != nil {
+		return utils.ErrNotFound
+	}
+	at := &engine.ActionPlan{
+		AccountIds: []string{tag},
+	}
+	if attr.Direction == "" {
+		attr.Direction = engine.OUTBOUND
+	}
+	at.SetActions(engine.Actions{
+		&engine.Action{
+			ActionType:  engine.ENABLE_DISABLE_BALANCE,
+			BalanceType: attr.BalanceType,
+			Direction:   attr.Direction,
+			Balance: &engine.Balance{
+				Id:             attr.BalanceId,
+				Value:          attr.Value,
+				ExpirationDate: expTime,
+				RatingSubject:  attr.RatingSubject,
+				DestinationIds: attr.DestinationId,
+				Weight:         attr.Weight,
+				SharedGroup:    attr.SharedGroup,
+				Disabled:       attr.Disabled,
 			},
 		},
 	})
@@ -741,7 +786,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 			return 0, err
 		}
 		return 0, nil
-	}, tag)
+	}, 0, tag)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -811,7 +856,7 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 			return 0, err
 		}
 		return 0, nil
-	}, accID)
+	}, 0, accID)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -832,7 +877,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 			return 0, err
 		}
 		return 0, nil
-	}, attrs.KeyId()); err != nil {
+	}, 0, attrs.KeyId()); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
@@ -1184,7 +1229,7 @@ func (self *ApierV1) RemoveRatingProfile(attr AttrRemoveRatingProfile, reply *st
 			return 0, err
 		}
 		return 0, nil
-	}, "RemoveRatingProfile")
+	}, 0, "RemoveRatingProfile")
 	if err != nil {
 		*reply = err.Error()
 		return utils.NewErrServerError(err)
