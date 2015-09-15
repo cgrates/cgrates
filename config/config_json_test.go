@@ -49,7 +49,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_timezone:     utils.StringPointer("Local"),
 		Connect_attempts:     utils.IntPointer(3),
 		Reconnects:           utils.IntPointer(-1),
-		Response_cache_ttl:   utils.StringPointer("3s")}
+		Response_cache_ttl:   utils.StringPointer("3s"),
 		Internal_ttl:         utils.StringPointer("2m")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
@@ -335,7 +335,6 @@ func TestSmFsJsonCfg(t *testing.T) {
 				Server:  utils.StringPointer("internal"),
 				Timeout: utils.StringPointer("100ms"),
 			}},
-		Reconnects:             utils.IntPointer(5),
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           utils.StringSlicePointer([]string{}),
 		Debit_interval:         utils.StringPointer("10s"),
@@ -374,7 +373,6 @@ func TestSmKamJsonCfg(t *testing.T) {
 				Server:  utils.StringPointer("internal"),
 				Timeout: utils.StringPointer("100ms"),
 			}},
-		Reconnects:        utils.IntPointer(5),
 		Create_cdr:        utils.BoolPointer(false),
 		Debit_interval:    utils.StringPointer("10s"),
 		Min_call_duration: utils.StringPointer("0s"),
@@ -407,7 +405,6 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 				Server:  utils.StringPointer("internal"),
 				Timeout: utils.StringPointer("100ms"),
 			}},
-		Listen_udp:                utils.StringPointer("127.0.0.1:2020"),
 		Create_cdr:                utils.BoolPointer(false),
 		Debit_interval:            utils.StringPointer("10s"),
 		Min_call_duration:         utils.StringPointer("0s"),
