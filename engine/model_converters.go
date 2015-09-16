@@ -367,8 +367,10 @@ func APItoModelAliases(attr *utils.TPAliases) (result []TpAlias) {
 			Category:      attr.Category,
 			Account:       attr.Account,
 			Subject:       attr.Subject,
-			Group:         attr.Group,
+			Context:       attr.Context,
 			DestinationId: v.DestinationId,
+			Target:        v.Target,
+			Original:      v.Original,
 			Alias:         v.Alias,
 			Weight:        v.Weight,
 		})

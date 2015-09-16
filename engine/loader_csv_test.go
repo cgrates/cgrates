@@ -222,12 +222,12 @@ cgrates.org,dan,another,value
 `
 	aliases = `
 #Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Group[6],Alias[7],Weight[8]
-*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,dan1,10
-*out,cgrates.org,call,dan,dan,GLOBAL1,*rating_profile,dan2,20
-*any,*any,*any,*any,*any,*any,*rating_profile,rif1,20
-*any,*any,*any,*any,*any,*any,*account,dan1,10
-*out,vdf,0,a1,a1,*any,*rating_profile,minu,10
-*out,vdf,0,a1,a1,*any,*account,minu,10
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,Subject,dan,dan1,10
+*out,cgrates.org,call,dan,dan,GLOBAL1,*rating_profile,Subject,dan,dan2,20
+*any,*any,*any,*any,*any,*any,*rating_profile,Subject,*any,rif1,20
+*any,*any,*any,*any,*any,*any,*account,Account,*any,dan1,10
+*out,vdf,0,a1,a1,*any,*rating_profile,Subject,a1,minu,10
+*out,vdf,0,a1,a1,*any,*account,Account,a1,minu,10
 `
 )
 
@@ -1139,22 +1139,22 @@ func TestLoadAliases(t *testing.T) {
 		Category:  "call",
 		Account:   "dan",
 		Subject:   "dan",
-		Group:     "*rating_profile",
+		Context:   "*rating_profile",
 		Values: AliasValues{
 			&AliasValue{
 				DestinationId: "EU_LANDLINE",
-				Alias:         "dan1",
+				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan1"}},
 				Weight:        10,
 			},
 			&AliasValue{
 				DestinationId: "GLOBAL1",
-				Alias:         "dan2",
+				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan2"}},
 				Weight:        20,
 			},
 		},
 	}
 
 	if !reflect.DeepEqual(csvr.aliases[alias1.GetId()], alias1) {
-		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
+		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()].Values[1])
 	}
 }

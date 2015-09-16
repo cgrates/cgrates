@@ -1385,7 +1385,7 @@ func (self *SQLStorage) SetTpAliases(aliases []TpAlias) error {
 				Category:  alias.Category,
 				Account:   alias.Account,
 				Subject:   alias.Subject,
-				Group:     alias.Group,
+				Context:   alias.Context,
 			}).Delete(TpAlias{}).Error; err != nil {
 				tx.Rollback()
 				return err
@@ -1419,8 +1419,8 @@ func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 	if len(filter.Subject) != 0 {
 		q = q.Where("`subject` = ?", filter.Subject)
 	}
-	if len(filter.Group) != 0 {
-		q = q.Where("`group` = ?", filter.Group)
+	if len(filter.Context) != 0 {
+		q = q.Where("`context` = ?", filter.Context)
 	}
 
 	if err := q.Find(&tpAliases).Error; err != nil {

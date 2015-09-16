@@ -313,7 +313,7 @@ func (cd *CallDescriptor) GetKey(subject string) string {
 			Category:    cd.Category,
 			Account:     cd.Account,
 			Subject:     cd.Subject,
-			Group:       utils.ALIAS_GROUP_RP}, &alias); err == nil && alias != "" {
+			Context:     utils.ALIAS_GROUP_RP}, &alias); err == nil && alias != "" {
 			subject = alias
 			cd.Subject = alias
 		}
@@ -336,7 +336,7 @@ func (cd *CallDescriptor) GetAccountKey() string {
 					Category:    cd.Category,
 					Account:     cd.Account,
 					Subject:     cd.Subject,
-					Group:       utils.ALIAS_GROUP_ACC}, &alias)
+					Context:     utils.ALIAS_GROUP_ACC}, &alias)
 			if err == nil && alias != "" {
 				cd.Account = alias
 			}

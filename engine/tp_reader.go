@@ -1092,15 +1092,18 @@ func (tpr *TpReader) LoadAliasesFiltered(filter *TpAlias) (bool, error) {
 		Category:  filter.Category,
 		Account:   filter.Account,
 		Subject:   filter.Subject,
-		Group:     filter.Group,
+		Context:   filter.Context,
 		Values:    make(AliasValues, 0),
 	}
 	for _, tpAlias := range tpAliases {
-		alias.Values = append(alias.Values, &AliasValue{
+		av := &AliasValue{
 			DestinationId: tpAlias.DestinationId,
-			Alias:         tpAlias.Alias,
+			Pairs:         make(AliasPairs),
 			Weight:        tpAlias.Weight,
-		})
+		}
+		av.Pairs[tpAlias.Target] = make(map[string]string)
+		av.Pairs[tpAlias.Target][tpAlias.Original] = tpAlias.Alias
+		alias.Values = append(alias.Values)
 	}
 	tpr.accountingStorage.SetAlias(alias)
 	return len(tpAliases) > 0, err
@@ -1124,18 +1127,22 @@ func (tpr *TpReader) LoadAliases() error {
 				Category:  tal.Category,
 				Account:   tal.Account,
 				Subject:   tal.Subject,
-				Group:     tal.Group,
+				Context:   tal.Context,
 				Values:    make(AliasValues, 0),
 			}
 			tpr.aliases[key] = al
 		}
 		for _, v := range tal.Values {
-			al.Values = append(al.Values, &AliasValue{
+			av := &AliasValue{
 				DestinationId: v.DestinationId,
-				Alias:         v.Alias,
+				Pairs:         make(AliasPairs),
 				Weight:        v.Weight,
-			})
+			}
+			av.Pairs[v.Target] = make(map[string]string)
+			av.Pairs[v.Target][v.Original] = v.Alias
+			al.Values = append(al.Values, av)
 		}
+
 	}
 	return err
 }

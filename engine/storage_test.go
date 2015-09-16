@@ -118,10 +118,10 @@ func TestStorageGetAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Group:     utils.ALIAS_GROUP_RP,
+		Context:   utils.ALIAS_GROUP_RP,
 		Values: AliasValues{
 			&AliasValue{
-				Alias:         "aaa",
+				Pairs:         AliasPairs{"Subject": map[string]string{"b1": "aaa"}},
 				Weight:        10,
 				DestinationId: utils.ANY,
 			},
@@ -133,10 +133,10 @@ func TestStorageGetAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Group:     utils.ALIAS_GROUP_ACC,
+		Context:   utils.ALIAS_GROUP_ACC,
 		Values: AliasValues{
 			&AliasValue{
-				Alias:         "aaa",
+				Pairs:         AliasPairs{"Account": map[string]string{"b1": "aaa"}},
 				Weight:        10,
 				DestinationId: utils.ANY,
 			},
@@ -169,7 +169,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Group:     utils.ALIAS_GROUP_RP,
+		Context:   utils.ALIAS_GROUP_RP,
 	}
 	alb := &Alias{
 		Direction: "*out",
@@ -177,9 +177,9 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Group:     utils.ALIAS_GROUP_ACC,
+		Context:   utils.ALIAS_GROUP_ACC,
 	}
-	if x, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_RP); err == nil {
+	if x, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.ALIAS_GROUP_RP); err == nil {
 		aliasKeys := x.(map[string]bool)
 		_, found := aliasKeys[utils.ConcatenatedKey(ala.GetId(), utils.ANY)]
 		if !found {
@@ -188,7 +188,7 @@ func TestStorageCacheGetReverseAliases(t *testing.T) {
 	} else {
 		t.Error("Error getting reverse alias: ", err)
 	}
-	if x, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_GROUP_ACC); err == nil {
+	if x, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + utils.ALIAS_GROUP_ACC); err == nil {
 		aliasKeys := x.(map[string]bool)
 		_, found := aliasKeys[utils.ConcatenatedKey(alb.GetId(), utils.ANY)]
 		if !found {
@@ -206,7 +206,7 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Group:     utils.ALIAS_GROUP_RP,
+		Context:   utils.ALIAS_GROUP_RP,
 	}
 	alb := &Alias{
 		Direction: "*out",
@@ -214,7 +214,7 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 		Category:  "0",
 		Account:   "b1",
 		Subject:   "b1",
-		Group:     utils.ALIAS_GROUP_ACC,
+		Context:   utils.ALIAS_GROUP_ACC,
 	}
 	accountingStorage.RemoveAlias(ala.GetId())
 	accountingStorage.RemoveAlias(alb.GetId())

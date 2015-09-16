@@ -685,16 +685,20 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		if err == nil {
 			cache2go.Cache(key, al.Values)
 			// cache reverse alias
-			for _, v := range al.Values {
-				var existingKeys map[string]bool
-				rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias + al.Group
-				if x, err := cache2go.Get(rKey); err == nil {
-					existingKeys = x.(map[string]bool)
-				} else {
-					existingKeys = make(map[string]bool)
+			for _, value := range al.Values {
+				for target, pairs := range value.Pairs {
+					for _, alias := range pairs {
+						var existingKeys map[string]bool
+						rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
+						if x, err := cache2go.Get(rKey); err == nil {
+							existingKeys = x.(map[string]bool)
+						} else {
+							existingKeys = make(map[string]bool)
+						}
+						existingKeys[utils.ConcatenatedKey(origKey, value.DestinationId)] = true
+						cache2go.Cache(rKey, existingKeys)
+					}
 				}
-				existingKeys[utils.ConcatenatedKey(origKey, v.DestinationId)] = true
-				cache2go.Cache(rKey, existingKeys)
 			}
 		}
 	}
@@ -712,24 +716,28 @@ func (rs *RedisStorage) RemoveAlias(key string) (err error) {
 	}
 	_, err = rs.db.Del(key)
 	if err == nil {
-		for _, v := range aliasValues {
-			var existingKeys map[string]bool
-			rKey := utils.REVERSE_ALIASES_PREFIX + v.Alias + al.Group
-			if x, err := cache2go.Get(rKey); err == nil {
-				existingKeys = x.(map[string]bool)
-			}
-			for eKey := range existingKeys {
-				if strings.HasPrefix(origKey, eKey) {
-					delete(existingKeys, eKey)
+		for _, value := range aliasValues {
+			for target, pairs := range value.Pairs {
+				for _, alias := range pairs {
+					var existingKeys map[string]bool
+					rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
+					if x, err := cache2go.Get(rKey); err == nil {
+						existingKeys = x.(map[string]bool)
+					}
+					for eKey := range existingKeys {
+						if strings.HasPrefix(origKey, eKey) {
+							delete(existingKeys, eKey)
+						}
+					}
+					if len(existingKeys) == 0 {
+						cache2go.RemKey(rKey)
+					} else {
+						cache2go.Cache(rKey, existingKeys)
+					}
 				}
-			}
-			if len(existingKeys) == 0 {
-				cache2go.RemKey(rKey)
-			} else {
-				cache2go.Cache(rKey, existingKeys)
+				cache2go.RemKey(key)
 			}
 		}
-		cache2go.RemKey(key)
 	}
 	return
 }

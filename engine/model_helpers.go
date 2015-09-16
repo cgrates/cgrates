@@ -752,12 +752,14 @@ func (tps TpAliases) GetAliases() (map[string]*utils.TPAliases, error) {
 				Category:  tp.Category,
 				Account:   tp.Account,
 				Subject:   tp.Subject,
-				Group:     tp.Group,
+				Context:   tp.Context,
 			}
 			als[tp.GetId()] = al
 		}
 		al.Values = append(al.Values, &utils.TPAliasValue{
 			DestinationId: tp.DestinationId,
+			Target:        tp.Target,
+			Original:      tp.Original,
 			Alias:         tp.Alias,
 			Weight:        tp.Weight,
 		})

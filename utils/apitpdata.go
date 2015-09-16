@@ -327,12 +327,14 @@ type TPAliases struct {
 	Category  string
 	Account   string
 	Subject   string
-	Group     string
+	Context   string
 	Values    []*TPAliasValue
 }
 
 type TPAliasValue struct {
 	DestinationId string
+	Target        string
+	Original      string
 	Alias         string
 	Weight        float64
 }

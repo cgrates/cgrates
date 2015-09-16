@@ -21,20 +21,41 @@ type Alias struct {
 	Category  string
 	Account   string
 	Subject   string
-	Group     string
+	Context   string
 	Values    AliasValues
 }
 
 type AliasValue struct {
 	DestinationId string
-	Alias         string
+	Pairs         AliasPairs
 	Weight        float64
 }
 
 func (av *AliasValue) Equals(other *AliasValue) bool {
 	return av.DestinationId == other.DestinationId &&
-		av.Alias == other.Alias &&
+		av.Pairs.Equals(other.Pairs) &&
 		av.Weight == other.Weight
+}
+
+type AliasPairs map[string]map[string]string
+
+func (ap AliasPairs) Equals(other AliasPairs) bool {
+	if len(ap) != len(other) {
+		return false
+	}
+
+	for attribute, origAlias := range ap {
+		otherOrigAlias, ok := other[attribute]
+		if !ok || len(origAlias) != len(otherOrigAlias) {
+			return false
+		}
+		for orig := range origAlias {
+			if origAlias[orig] != otherOrigAlias[orig] {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 type AliasValues []*AliasValue
@@ -68,23 +89,27 @@ func (avs AliasValues) GetWeightSlice() (result []map[string][]string) {
 		} else {
 			m = result[len(result)-1]
 		}
-		m[value.Alias] = append(m[value.Alias], value.DestinationId)
+		for _, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				m[alias] = append(m[alias], value.DestinationId)
+			}
+		}
 	}
 	return
 }
 
 func (al *Alias) GetId() string {
-	return utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group)
+	return utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Context)
 }
 
 func (al *Alias) GenerateIds() []string {
 	var result []string
-	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group))
-	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, utils.ANY, al.Group))
-	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, utils.ANY, utils.ANY, al.Group))
-	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, utils.ANY, utils.ANY, utils.ANY, al.Group))
-	result = append(result, utils.ConcatenatedKey(al.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY, al.Group))
-	result = append(result, utils.ConcatenatedKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, al.Group))
+	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Context))
+	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, utils.ANY, al.Context))
+	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, utils.ANY, utils.ANY, al.Context))
+	result = append(result, utils.ConcatenatedKey(al.Direction, al.Tenant, utils.ANY, utils.ANY, utils.ANY, al.Context))
+	result = append(result, utils.ConcatenatedKey(al.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY, al.Context))
+	result = append(result, utils.ConcatenatedKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, al.Context))
 	return result
 }
 
@@ -98,7 +123,7 @@ func (al *Alias) SetId(id string) error {
 	al.Category = vals[2]
 	al.Account = vals[3]
 	al.Subject = vals[4]
-	al.Group = vals[5]
+	al.Context = vals[5]
 	return nil
 }
 
@@ -109,12 +134,13 @@ type AttrMatchingAlias struct {
 	Category    string
 	Account     string
 	Subject     string
-	Group       string
+	Context     string
 }
 
 type AttrReverseAlias struct {
-	Alias string
-	Group string
+	Alias   string
+	Target  string
+	Context string
 }
 
 type AliasService interface {
@@ -204,7 +230,7 @@ func (am *AliasHandler) RemoveAlias(al Alias, reply *string) error {
 func (am *AliasHandler) RemoveReverseAlias(attr AttrReverseAlias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Group
+	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
 	if x, err := cache2go.Get(rKey); err == nil {
 		existingKeys := x.(map[string]bool)
 		for key := range existingKeys {
@@ -240,7 +266,7 @@ func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[strin
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
-	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Group
+	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
 	if x, err := cache2go.Get(rKey); err == nil {
 		existingKeys := x.(map[string]bool)
 		for key := range existingKeys {
@@ -271,7 +297,7 @@ func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string)
 		Category:  attr.Category,
 		Account:   attr.Account,
 		Subject:   attr.Subject,
-		Group:     attr.Group,
+		Context:   attr.Context,
 	}, &response); err != nil {
 		return err
 	}

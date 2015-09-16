@@ -167,7 +167,7 @@ type TpAction struct {
 	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
 	Units           float64 `index:"12" re:"\d+\s*"`
 	BalanceWeight   float64 `index:"13" re:"\d+\.?\d*\s*"`
-	BalanceDisabled bool    `index:"14"`
+	BalanceDisabled bool    `index:"14" re:""`
 	Weight          float64 `index:"15" re:"\d+\.?\d*\s*"`
 	CreatedAt       time.Time
 }
@@ -357,9 +357,11 @@ type TpAlias struct {
 	Account       string  `index:"3" re:""`
 	Subject       string  `index:"4" re:""`
 	DestinationId string  `index:"5" re:""`
-	Group         string  `index:"6" re:""`
-	Alias         string  `index:"7" re:""`
-	Weight        float64 `index:"8" re:""`
+	Context       string  `index:"6" re:""`
+	Target        string  `index:"7" re:""`
+	Original      string  `index:"8" re:""`
+	Alias         string  `index:"9" re:""`
+	Weight        float64 `index:"10" re:""`
 }
 
 func (ta *TpAlias) TableName() string {
@@ -376,12 +378,12 @@ func (ta *TpAlias) SetId(id string) error {
 	ta.Category = vals[2]
 	ta.Account = vals[3]
 	ta.Subject = vals[4]
-	ta.Group = vals[5]
+	ta.Context = vals[5]
 	return nil
 }
 
 func (ta *TpAlias) GetId() string {
-	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Group)
+	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
 }
 
 type TblCdrsPrimary struct {
