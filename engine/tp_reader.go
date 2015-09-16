@@ -511,7 +511,6 @@ func (tpr *TpReader) LoadActions() (err error) {
 				ExtraParameters:  tpact.ExtraParameters,
 				ExpirationString: tpact.ExpiryTime,
 				Balance: &Balance{
-					Uuid:           utils.GenUUID(),
 					Id:             tpact.BalanceId,
 					Value:          tpact.Units,
 					Weight:         tpact.BalanceWeight,
@@ -805,7 +804,6 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
 						Balance: &Balance{
-							Uuid:           utils.GenUUID(),
 							Value:          tpact.Units,
 							Weight:         tpact.BalanceWeight,
 							RatingSubject:  tpact.RatingSubject,
@@ -1007,7 +1005,6 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
 						Balance: &Balance{
-							Uuid:           utils.GenUUID(),
 							Value:          tpact.Units,
 							Weight:         tpact.BalanceWeight,
 							RatingSubject:  tpact.RatingSubject,
