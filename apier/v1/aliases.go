@@ -18,13 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-import (
-	"errors"
-
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
-
 type AttrAddRatingSubjectAliases struct {
 	Tenant, Category, Subject string
 	Aliases                   []string
@@ -35,6 +28,7 @@ type AttrAddAccountAliases struct {
 	Aliases                   []string
 }
 
+/*
 // Add aliases configured for a rating profile subject <Deprecated>
 func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Subject", "Aliases"}); len(missing) != 0 {
@@ -137,3 +131,4 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 	*reply = utils.OK
 	return nil
 }
+*/
