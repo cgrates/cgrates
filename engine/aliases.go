@@ -76,28 +76,6 @@ func (avs AliasValues) Sort() {
 	sort.Sort(avs)
 }
 
-// returns a mapping between aliases and destination ids in a slice sorted by weights
-func (avs AliasValues) GetWeightSlice() (result []map[string][]string) {
-	avs.Sort()
-	prevWeight := -1.0
-	for _, value := range avs {
-		var m map[string][]string
-		if value.Weight != prevWeight {
-			// start a new map
-			m = make(map[string][]string)
-			result = append(result, m)
-		} else {
-			m = result[len(result)-1]
-		}
-		for _, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				m[alias] = append(m[alias], value.DestinationId)
-			}
-		}
-	}
-	return
-}
-
 func (al *Alias) GetId() string {
 	return utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Context)
 }
@@ -135,6 +113,8 @@ type AttrMatchingAlias struct {
 	Account     string
 	Subject     string
 	Context     string
+	Target      string
+	Original    string
 }
 
 type AttrReverseAlias struct {
@@ -302,25 +282,35 @@ func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string)
 		return err
 	}
 	// sort according to weight
-	values := response.Values.GetWeightSlice()
+	values := response.Values
+	values.Sort()
+
+	// if destination does not metter get first alias
 	if attr.Destination == "" || attr.Destination == utils.ANY {
-		for _, aliasHandler := range values {
-			for alias := range aliasHandler {
-				*result = alias
-				return nil
+		for _, value := range values {
+			if origAlias, ok := value.Pairs[attr.Target]; ok {
+				if alias, ok := origAlias[attr.Original]; ok {
+					*result = alias
+					return nil
+				}
 			}
 		}
+		return utils.ErrNotFound
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
 		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-			for _, aliasHandler := range values {
-				for alias, aliasDestIds := range aliasHandler {
-					destIds := x.(map[interface{}]struct{})
-					for idId := range destIds {
-						dId := idId.(string)
-						for _, aliasDestId := range aliasDestIds {
-							if aliasDestId == utils.ANY || aliasDestId == dId {
+			destIds := x.(map[interface{}]struct{})
+			for _, value := range values {
+				for idId := range destIds {
+					dId := idId.(string)
+					if value.DestinationId == utils.ANY || value.DestinationId == dId {
+						if origAliasMap, ok := value.Pairs[attr.Target]; ok {
+							if alias, ok := origAliasMap[attr.Original]; ok {
+								*result = alias
+								return nil
+							}
+							if alias, ok := origAliasMap[utils.ANY]; ok {
 								*result = alias
 								return nil
 							}

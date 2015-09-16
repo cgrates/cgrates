@@ -55,12 +55,12 @@ func (s *Scheduler) Loop() {
 			// do not add it to the queue
 			now = time.Now().Add(time.Second)
 			start = a0.GetNextStartTime(now)
-			if !start.Before(now) {
+			if start.Before(now) {
+				s.queue = s.queue[1:]
+			} else {
 				s.queue = append(s.queue, a0)
 				s.queue = s.queue[1:]
 				sort.Sort(s.queue)
-			} else {
-				s.queue = s.queue[1:]
 			}
 			s.Unlock()
 		} else {
