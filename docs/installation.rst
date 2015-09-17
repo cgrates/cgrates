@@ -34,8 +34,22 @@ After the go environment is installed_ (at least go1.2) and configured_ issue th
 
 This command will install the trunk version of CGRateS together with all the necessary dependencies.
 
+For developing CGRateS and switching betwen lts versions we are using the new (experimental) vendor directory feature introduced in go 1.5. In a nutshell all the dependencies are installed and used from a folder named vendor placed in the root of the project.
+
+To manage this vendor folder we use a tool named _glide which will download specific versions of the external packages used by CGRateS. To configure the project with glide use the following commands:
+::
+   export GO15VENDOREXPERIMENT=1 #this should be placed in the rc script of your shell
+   go get github.com/cgrates/cgrates
+   cd $GOPATH/src/github.com/cgrates/cgrates
+   glide update
+
+The glide update command will install the external dependencies versions specified in the glide.yaml file in the vendor folder. There are different versions for each CGRateS branch, versions that are recorded in the yaml file when the GCRateS releases are made (using glide pin command).
+
+Note that the vendor folder should not be registered with the VCS we are using. For more information and command options for use _glide readme page.
+
 .. _installed: http://golang.org/doc/install
 .. _configured: http://golang.org/doc/code.html
+.. _glide: https://github.com/Masterminds/glide
 
 
 3.3. Post-install
