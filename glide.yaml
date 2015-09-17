@@ -1,4 +1,4 @@
-package: main
+package: github.com/cgrates/cgrates
 import:
   - package: github.com/ugorji/go
   - package: github.com/jinzhu/gorm
