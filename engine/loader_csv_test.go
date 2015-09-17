@@ -223,6 +223,8 @@ cgrates.org,dan,another,value
 	aliases = `
 #Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Group[6],Alias[7],Weight[8]
 *out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,Subject,dan,dan1,10
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,Subject,rif,rif1,10
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,Cli,0723,0724,10
 *out,cgrates.org,call,dan,dan,GLOBAL1,*rating_profile,Subject,dan,dan2,20
 *any,*any,*any,*any,*any,*any,*rating_profile,Subject,*any,rif1,20
 *any,*any,*any,*any,*any,*any,*account,Account,*any,dan1,10
@@ -1143,9 +1145,18 @@ func TestLoadAliases(t *testing.T) {
 		Values: AliasValues{
 			&AliasValue{
 				DestinationId: "EU_LANDLINE",
-				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan1"}},
-				Weight:        10,
+				Pairs: AliasPairs{
+					"Subject": map[string]string{
+						"dan": "dan1",
+						"rif": "rif1",
+					},
+					"Cli": map[string]string{
+						"0723": "0724",
+					},
+				},
+				Weight: 10,
 			},
+
 			&AliasValue{
 				DestinationId: "GLOBAL1",
 				Pairs:         AliasPairs{"Subject": map[string]string{"dan": "dan2"}},
@@ -1155,6 +1166,9 @@ func TestLoadAliases(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(csvr.aliases[alias1.GetId()], alias1) {
-		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()].Values[1])
+		for _, value := range csvr.aliases[alias1.GetId()].Values {
+			t.Logf("Value: %+v", value)
+		}
+		t.Errorf("Unexpected alias %+v", csvr.aliases[alias1.GetId()])
 	}
 }

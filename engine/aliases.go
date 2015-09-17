@@ -76,6 +76,15 @@ func (avs AliasValues) Sort() {
 	sort.Sort(avs)
 }
 
+func (avs AliasValues) GetValueByDestId(destID string) *AliasValue {
+	for _, value := range avs {
+		if value.DestinationId == destID {
+			return value
+		}
+	}
+	return nil
+}
+
 func (al *Alias) GetId() string {
 	return utils.ConcatenatedKey(al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Context)
 }
