@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
@@ -280,7 +281,7 @@ func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[strin
 
 func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string) error {
 	response := Alias{}
-	if err := aliasService.GetAlias(Alias{
+	if err := am.GetAlias(Alias{
 		Direction: attr.Direction,
 		Tenant:    attr.Tenant,
 		Category:  attr.Category,
@@ -374,4 +375,91 @@ func (ps *ProxyAliasService) RemoveReverseAlias(attr AttrReverseAlias, reply *st
 
 func (ps *ProxyAliasService) ReloadAliases(in string, reply *string) error {
 	return ps.Client.Call("AliasesV1.ReloadAliases", in, reply)
+}
+
+func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) (interface{}, error) {
+	if aliasService == nil { // no alias service => no fun
+		return in, nil
+	}
+	response := Alias{}
+	if err := aliasService.GetAlias(Alias{
+		Direction: attr.Direction,
+		Tenant:    attr.Tenant,
+		Category:  attr.Category,
+		Account:   attr.Account,
+		Subject:   attr.Subject,
+		Context:   attr.Context,
+	}, &response); err != nil {
+		return nil, err
+	}
+
+	// sort according to weight
+	values := response.Values
+	values.Sort()
+
+	var rightPairs AliasPairs
+	// if destination does not metter get first alias
+	if attr.Destination == "" || attr.Destination == utils.ANY {
+		rightPairs = values[0].Pairs
+	}
+
+	if rightPairs == nil {
+		// check destination ids
+		for _, p := range utils.SplitPrefix(attr.Destination, MIN_PREFIX_MATCH) {
+			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
+				destIds := x.(map[interface{}]struct{})
+				for _, value := range values {
+					for idId := range destIds {
+						dId := idId.(string)
+						if value.DestinationId == utils.ANY || value.DestinationId == dId {
+							rightPairs = value.Pairs
+						}
+						if rightPairs != nil {
+							break
+						}
+					}
+					if rightPairs != nil {
+						break
+					}
+				}
+			}
+			if rightPairs != nil {
+				break
+			}
+		}
+	}
+
+	if rightPairs != nil {
+		// change values in the given object
+		v := reflect.ValueOf(in)
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+		for target, originalAlias := range rightPairs {
+			for original, alias := range originalAlias {
+				field := v.FieldByName(target)
+				if field.IsValid() {
+					if field.Kind() == reflect.String {
+						if field.String() == original && field.CanSet() {
+							field.SetString(alias)
+						}
+					}
+				}
+				if extraFields != "" {
+					efField := v.FieldByName(extraFields)
+					if efField.IsValid() && efField.Kind() == reflect.Map {
+						keys := efField.MapKeys()
+						for _, key := range keys {
+							if key.Kind() == reflect.String && key.String() == target {
+								if efField.MapIndex(key).String() == original {
+									efField.SetMapIndex(key, reflect.ValueOf(alias))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return in, nil
 }

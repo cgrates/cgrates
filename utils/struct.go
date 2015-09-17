@@ -118,7 +118,6 @@ func GetMapExtraFields(in interface{}, extraFields string) map[string]string {
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
-		in = v.Interface()
 	}
 	field := v.FieldByName(extraFields)
 	if field.Kind() == reflect.Map {
@@ -134,10 +133,9 @@ func SetMapExtraFields(in interface{}, values map[string]string, extraFields str
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
-		in = v.Interface()
 	}
 	efField := v.FieldByName(extraFields)
-	if efField.Kind() == reflect.Map {
+	if efField.IsValid() && efField.Kind() == reflect.Map {
 		keys := efField.MapKeys()
 		for _, key := range keys {
 			if efField.MapIndex(key).String() != "" {
@@ -154,7 +152,6 @@ func FromMapStringString(m map[string]string, in interface{}) {
 	v := reflect.ValueOf(in)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
-		in = v.Interface()
 	}
 	for fieldName, fieldValue := range m {
 		field := v.FieldByName(fieldName)
