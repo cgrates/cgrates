@@ -1,0 +1,19 @@
+package: main
+import:
+  - package: github.com/ugorji/go
+  - package: github.com/jinzhu/gorm
+  - package: golang.org/x/net
+  - package: github.com/DisposaBoy/JsonConfigReader
+  - package: github.com/hoisie/redis
+  - package: github.com/go-sql-driver/mysql
+  - package: github.com/gorhill/cronexpr
+  - package: github.com/lib/pq
+  - package: github.com/qor/inflection
+  - package: gopkg.in/mgo.v2
+  - package: github.com/kr/pty
+  - package: gopkg.in/fsnotify.v1
+  - package: github.com/peterh/liner
+  - package: github.com/cgrates/rpcclient
+  - package: github.com/cgrates/osipsdagram
+  - package: github.com/cgrates/kamevapi
+  - package: github.com/cgrates/fsock

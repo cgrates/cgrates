@@ -26,7 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 
-	"github.com/cgrates/gorm"
+	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 )
 

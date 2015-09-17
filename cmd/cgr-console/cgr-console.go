@@ -29,8 +29,8 @@ import (
 
 	"github.com/cgrates/cgrates/console"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/liner"
 	"github.com/cgrates/rpcclient"
+	"github.com/peterh/liner"
 )
 
 var (

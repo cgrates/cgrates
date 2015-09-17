@@ -30,8 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/go-sql-driver/mysql"
-	//"github.com/jinzhu/gorm"
-	"github.com/cgrates/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 type SQLStorage struct {

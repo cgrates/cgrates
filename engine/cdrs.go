@@ -26,7 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 var cdrServer *CdrServer // Share the server so we can use it in http handlers
