@@ -244,6 +244,21 @@ func TestStoreInterfaces(t *testing.T) {
 	var _ LogStorage = sql
 }
 
+func TestDifferentUuid(t *testing.T) {
+	a1, err := accountingStorage.GetAccount("*out:cgrates.org:12345")
+	if err != nil {
+		t.Error("Error getting account: ", err)
+	}
+	a2, err := accountingStorage.GetAccount("*out:cgrates.org:123456")
+	if err != nil {
+		t.Error("Error getting account: ", err)
+	}
+	if a1.BalanceMap[utils.VOICE+utils.OUT][0].Uuid == a2.BalanceMap[utils.VOICE+utils.OUT][0].Uuid ||
+		a1.BalanceMap[utils.MONETARY+utils.OUT][0].Uuid == a2.BalanceMap[utils.MONETARY+utils.OUT][0].Uuid {
+		t.Errorf("Identical uuids in different accounts: %+v <-> %+v", a1.BalanceMap[utils.VOICE+utils.OUT][0], a1.BalanceMap[utils.MONETARY+utils.OUT][0])
+	}
+}
+
 /************************** Benchmarks *****************************/
 
 func GetUB() *Account {
