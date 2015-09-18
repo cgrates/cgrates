@@ -25,7 +25,7 @@ import (
 
 // Creates a new LcrRules profile within a tariff plan
 func (self *ApierV1) SetTPLcrRule(attrs utils.TPLcrRules, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrRulesId", "Identifier", "Weight"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Direction", "Tenant", "Category", "Account", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tm := engine.APItoModelLcrRule(&attrs)
