@@ -81,11 +81,20 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+	// replace aliases
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: arg.Destination,
+			Direction:   arg.Direction,
+			Tenant:      arg.Tenant,
+			Category:    arg.Category,
+			Account:     arg.Account,
+			Subject:     arg.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, arg, utils.EXTRA_FIELDS)
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*CallDescriptor)
-		*arg = *udRcv
 	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.GetCost")
@@ -107,11 +116,20 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+	// replace aliases
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: arg.Destination,
+			Direction:   arg.Direction,
+			Tenant:      arg.Tenant,
+			Category:    arg.Category,
+			Account:     arg.Account,
+			Subject:     arg.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, arg, utils.EXTRA_FIELDS)
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*CallDescriptor)
-		*arg = *udRcv
 	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.Debit")
@@ -135,11 +153,20 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+	// replace aliases
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: arg.Destination,
+			Direction:   arg.Direction,
+			Tenant:      arg.Tenant,
+			Category:    arg.Category,
+			Account:     arg.Account,
+			Subject:     arg.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, arg, utils.EXTRA_FIELDS)
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*CallDescriptor)
-		*arg = *udRcv
 	}
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.MaxDebit")
@@ -170,11 +197,20 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+	// replace aliases
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: arg.Destination,
+			Direction:   arg.Direction,
+			Tenant:      arg.Tenant,
+			Category:    arg.Category,
+			Account:     arg.Account,
+			Subject:     arg.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, arg, utils.EXTRA_FIELDS)
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*CallDescriptor)
-		*arg = *udRcv
 	}
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
@@ -195,11 +231,20 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
-	if upData, err := LoadUserProfile(arg, "ExtraFields"); err != nil {
+	// replace aliases
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: arg.Destination,
+			Direction:   arg.Direction,
+			Tenant:      arg.Tenant,
+			Category:    arg.Category,
+			Account:     arg.Account,
+			Subject:     arg.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, arg, utils.EXTRA_FIELDS)
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*CallDescriptor)
-		*arg = *udRcv
 	}
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.GetMaxSessionTime")
@@ -218,11 +263,21 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
 	}
-	if upData, err := LoadUserProfile(ev, "ExtraFields"); err != nil {
+	// replace aliases
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: ev.Destination,
+			Direction:   ev.Direction,
+			Tenant:      ev.Tenant,
+			Category:    ev.Category,
+			Account:     ev.Account,
+			Subject:     ev.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, ev, utils.EXTRA_FIELDS)
+
+	// replace user profile fields
+	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*StoredCdr)
-		*ev = *udRcv
 	}
 	maxCallDuration := -1.0
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
@@ -296,11 +351,20 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
 	}
-	if upData, err := LoadUserProfile(ev, "ExtraFields"); err != nil {
+	// replace aliases
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: ev.Destination,
+			Direction:   ev.Direction,
+			Tenant:      ev.Tenant,
+			Category:    ev.Category,
+			Account:     ev.Account,
+			Subject:     ev.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, ev, utils.EXTRA_FIELDS)
+	// replace user profile fields
+	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*StoredCdr)
-		*ev = *udRcv
 	}
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
@@ -357,11 +421,20 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	if rs.CdrSrv == nil {
 		return errors.New("CDR_SERVER_NOT_RUNNING")
 	}
-	if upData, err := LoadUserProfile(cdr, "ExtraFields"); err != nil {
+	// replace aliases
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: cdr.Destination,
+			Direction:   cdr.Direction,
+			Tenant:      cdr.Tenant,
+			Category:    cdr.Category,
+			Account:     cdr.Account,
+			Subject:     cdr.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, cdr, utils.EXTRA_FIELDS)
+	// replace user profile fields
+	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*StoredCdr)
-		*cdr = *udRcv
 	}
 	if err := rs.CdrSrv.ProcessCdr(cdr); err != nil {
 		return err
@@ -399,11 +472,21 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	if attrs.CallDescriptor.Subject == "" {
 		attrs.CallDescriptor.Subject = attrs.CallDescriptor.Account
 	}
-	if upData, err := LoadUserProfile(attrs.CallDescriptor, "ExtraFields"); err != nil {
+	// replace aliases
+	cd := attrs.CallDescriptor
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: cd.Destination,
+			Direction:   cd.Direction,
+			Tenant:      cd.Tenant,
+			Category:    cd.Category,
+			Account:     cd.Account,
+			Subject:     cd.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, cd, utils.EXTRA_FIELDS)
+	// replace user profile fields
+	if err := LoadUserProfile(attrs.CallDescriptor, utils.EXTRA_FIELDS); err != nil {
 		return err
-	} else {
-		udRcv := upData.(*CallDescriptor)
-		*attrs.CallDescriptor = *udRcv
 	}
 	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.Stats, attrs.Paginator)
 	if err != nil {

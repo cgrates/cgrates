@@ -167,11 +167,8 @@ func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
 		storedCdr.Subject = storedCdr.Account
 	}
 
-	if upData, err := LoadUserProfile(storedCdr, "ExtraFields"); err != nil {
+	if err := LoadUserProfile(storedCdr, "ExtraFields"); err != nil {
 		return err
-	} else {
-		cdrRcv := upData.(*StoredCdr)
-		*storedCdr = *cdrRcv
 	}
 	if storedCdr.ReqType == utils.META_NONE {
 		return nil

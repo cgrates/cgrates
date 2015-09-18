@@ -227,10 +227,10 @@ const (
 	REFUND_INCR_CACHE_PREFIX     = "REFUND_INCR_"
 	GET_SESS_RUNS_CACHE_PREFIX   = "GET_SESS_RUNS_"
 	LOG_CALL_COST_CACHE_PREFIX   = "LOG_CALL_COSTS_"
-	ALIAS_GROUP_RP               = "*rating_profile"
-	ALIAS_GROUP_ACC              = "*account"
+	ALIAS_CONTEXT_RATING         = "*rating"
 	NOT_AVAILABLE                = "N/A"
 	CALL                         = "call"
+	EXTRA_FIELDS                 = "ExtraFields"
 )
 
 var (

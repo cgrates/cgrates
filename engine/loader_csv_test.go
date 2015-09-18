@@ -222,14 +222,14 @@ cgrates.org,dan,another,value
 `
 	aliases = `
 #Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Group[6],Alias[7],Weight[8]
-*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,Subject,dan,dan1,10
-*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,Subject,rif,rif1,10
-*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating_profile,Cli,0723,0724,10
-*out,cgrates.org,call,dan,dan,GLOBAL1,*rating_profile,Subject,dan,dan2,20
-*any,*any,*any,*any,*any,*any,*rating_profile,Subject,*any,rif1,20
-*any,*any,*any,*any,*any,*any,*account,Account,*any,dan1,10
-*out,vdf,0,a1,a1,*any,*rating_profile,Subject,a1,minu,10
-*out,vdf,0,a1,a1,*any,*account,Account,a1,minu,10
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Subject,dan,dan1,10
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Subject,rif,rif1,10
+*out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Cli,0723,0724,10
+*out,cgrates.org,call,dan,dan,GLOBAL1,*rating,Subject,dan,dan2,20
+*any,*any,*any,*any,*any,*any,*rating,Subject,*any,rif1,20
+*any,*any,*any,*any,*any,*any,*rating,Account,*any,dan1,10
+*out,vdf,0,a1,a1,*any,*rating,Subject,a1,minu,10
+*out,vdf,0,a1,a1,*any,*rating,Account,a1,minu,10
 `
 )
 
@@ -1132,8 +1132,8 @@ func TestLoadUsers(t *testing.T) {
 }
 
 func TestLoadAliases(t *testing.T) {
-	if len(csvr.aliases) != 5 {
-		t.Error("Failed to load aliases: ", csvr.aliases)
+	if len(csvr.aliases) != 3 {
+		t.Error("Failed to load aliases: ", len(csvr.aliases))
 	}
 	alias1 := &Alias{
 		Direction: "*out",
@@ -1141,7 +1141,7 @@ func TestLoadAliases(t *testing.T) {
 		Category:  "call",
 		Account:   "dan",
 		Subject:   "dan",
-		Context:   "*rating_profile",
+		Context:   "*rating",
 		Values: AliasValues{
 			&AliasValue{
 				DestinationId: "EU_LANDLINE",

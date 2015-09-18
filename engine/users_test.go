@@ -546,7 +546,7 @@ func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 		Usage:       "13",
 	}
 
-	out, err := LoadUserProfile(ur, "")
+	err := LoadUserProfile(ur, "")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
@@ -563,7 +563,6 @@ func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 		AnswerTime:  "t4",
 		Usage:       "13",
 	}
-	ur = out.(*UsageRecord)
 	if !reflect.DeepEqual(ur, expected) {
 		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
@@ -597,7 +596,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
 		},
 	}
 
-	out, err := LoadUserProfile(ur, "ExtraFields")
+	err := LoadUserProfile(ur, "ExtraFields")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
@@ -617,7 +616,6 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
 			"Test": "1",
 		},
 	}
-	ur = out.(*ExternalCdr)
 	if !reflect.DeepEqual(ur, expected) {
 		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
@@ -651,7 +649,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 		},
 	}
 
-	_, err := LoadUserProfile(ur, "ExtraFields")
+	err := LoadUserProfile(ur, "ExtraFields")
 	if err != utils.ErrNotFound {
 		t.Error("Error detecting err in loading user profile: ", err)
 	}
@@ -686,7 +684,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 		},
 	}
 
-	out, err := LoadUserProfile(ur, "ExtraFields")
+	err := LoadUserProfile(ur, "ExtraFields")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
@@ -707,7 +705,6 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 			"Best": "BestValue",
 		},
 	}
-	ur = out.(*ExternalCdr)
 	if !reflect.DeepEqual(ur, expected) {
 		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
@@ -745,13 +742,12 @@ func TestUsersCallDescLoadUserProfile(t *testing.T) {
 		TimeEnd:     startTime.Add(time.Duration(1) * time.Minute),
 		ExtraFields: map[string]string{"Cli": "+4986517174963"},
 	}
-	out, err := LoadUserProfile(cd, "ExtraFields")
+	err := LoadUserProfile(cd, "ExtraFields")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
-	cdRcv := out.(*CallDescriptor)
-	if !reflect.DeepEqual(expected, cdRcv) {
-		t.Errorf("Expected: %+v got: %+v", expected, cdRcv)
+	if !reflect.DeepEqual(expected, cd) {
+		t.Errorf("Expected: %+v got: %+v", expected, cd)
 	}
 }
 
@@ -791,12 +787,11 @@ func TestUsersStoredCdrLoadUserProfile(t *testing.T) {
 		Usage:       time.Duration(1) * time.Minute,
 		ExtraFields: map[string]string{"Cli": "+4986517174963"},
 	}
-	out, err := LoadUserProfile(cdr, "ExtraFields")
+	err := LoadUserProfile(cdr, "ExtraFields")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
-	cdRcv := out.(*StoredCdr)
-	if !reflect.DeepEqual(expected, cdRcv) {
-		t.Errorf("Expected: %+v got: %+v", expected, cdRcv)
+	if !reflect.DeepEqual(expected, cdr) {
+		t.Errorf("Expected: %+v got: %+v", expected, cdr)
 	}
 }

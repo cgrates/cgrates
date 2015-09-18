@@ -13,7 +13,7 @@ func TestAliasesGetAlias(t *testing.T) {
 		Category:  "call",
 		Account:   "dan",
 		Subject:   "dan",
-		Context:   "*rating_profile",
+		Context:   "*rating",
 	}, &alias)
 	if err != nil ||
 		len(alias.Values) != 2 ||
@@ -30,7 +30,7 @@ func TestAliasesGetMatchingAlias(t *testing.T) {
 		Category:    "call",
 		Account:     "dan",
 		Subject:     "dan",
-		Context:     "*rating_profile",
+		Context:     "*rating",
 		Destination: "444",
 		Target:      "Subject",
 		Original:    "rif",
@@ -54,24 +54,21 @@ func TestAliasesLoadAlias(t *testing.T) {
 			"Other": "stuff",
 		},
 	}
-	in, err := LoadAlias(
+	err := LoadAlias(
 		&AttrMatchingAlias{
 			Direction:   "*out",
 			Tenant:      "cgrates.org",
 			Category:    "call",
 			Account:     "dan",
 			Subject:     "dan",
-			Context:     "*rating_profile",
+			Context:     "*rating",
 			Destination: "444",
 		}, cd, "ExtraFields")
-	if err != nil || in == nil {
+	if err != nil || cd == nil {
 		t.Error("Error getting alias: ", err, response)
 	}
-	if in != nil {
-		newCd := in.(*CallDescriptor)
-		if newCd.Subject != "rif1" ||
-			newCd.ExtraFields["Cli"] != "0724" {
-			t.Errorf("Aliases failed to change interface: %+v", newCd)
-		}
+	if cd.Subject != "rif1" ||
+		cd.ExtraFields["Cli"] != "0724" {
+		t.Errorf("Aliases failed to change interface: %+v", cd)
 	}
 }

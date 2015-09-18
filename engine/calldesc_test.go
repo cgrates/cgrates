@@ -627,6 +627,17 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 		Account:     "a1",
 		Destination: "0723",
 	}
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: cd.Destination,
+			Direction:   cd.Direction,
+			Tenant:      cd.Tenant,
+			Category:    cd.Category,
+			Account:     cd.Account,
+			Subject:     cd.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, cd, utils.EXTRA_FIELDS)
+
 	result, err := cd.GetMaxSessionDuration()
 	expected := time.Minute
 	if result != expected || err != nil {

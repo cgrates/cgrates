@@ -316,7 +316,7 @@ func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string)
 					dId := idId.(string)
 					if value.DestinationId == utils.ANY || value.DestinationId == dId {
 						if origAliasMap, ok := value.Pairs[attr.Target]; ok {
-							if alias, ok := origAliasMap[attr.Original]; ok {
+							if alias, ok := origAliasMap[attr.Original]; ok || attr.Original == "" || attr.Original == utils.ANY {
 								*result = alias
 								return nil
 							}
@@ -377,9 +377,9 @@ func (ps *ProxyAliasService) ReloadAliases(in string, reply *string) error {
 	return ps.Client.Call("AliasesV1.ReloadAliases", in, reply)
 }
 
-func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) (interface{}, error) {
+func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) error {
 	if aliasService == nil { // no alias service => no fun
-		return in, nil
+		return nil
 	}
 	response := Alias{}
 	if err := aliasService.GetAlias(Alias{
@@ -390,7 +390,7 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) (int
 		Subject:   attr.Subject,
 		Context:   attr.Context,
 	}, &response); err != nil {
-		return nil, err
+		return err
 	}
 
 	// sort according to weight
@@ -440,7 +440,7 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) (int
 				field := v.FieldByName(target)
 				if field.IsValid() {
 					if field.Kind() == reflect.String {
-						if field.String() == original && field.CanSet() {
+						if field.CanSet() && (original == "" || original == utils.ANY || field.String() == original) {
 							field.SetString(alias)
 						}
 					}
@@ -451,7 +451,7 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) (int
 						keys := efField.MapKeys()
 						for _, key := range keys {
 							if key.Kind() == reflect.String && key.String() == target {
-								if efField.MapIndex(key).String() == original {
+								if original == "" || original == utils.ANY || efField.MapIndex(key).String() == original {
 									efField.SetMapIndex(key, reflect.ValueOf(alias))
 								}
 							}
@@ -461,5 +461,5 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) (int
 			}
 		}
 	}
-	return in, nil
+	return nil
 }

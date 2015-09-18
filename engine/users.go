@@ -410,9 +410,9 @@ func (ps *ProxyUserService) ReloadUsers(in string, reply *string) error {
 }
 
 // extraFields - Field name in the interface containing extraFields information
-func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
+func LoadUserProfile(in interface{}, extraFields string) error {
 	if userService == nil { // no user service => no fun
-		return in, nil
+		return nil
 	}
 	m := utils.ToMapStringString(in)
 	var needsUsers bool
@@ -423,7 +423,7 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 		}
 	}
 	if !needsUsers { // Do not process further if user profile is not needed
-		return in, nil
+		return nil
 	}
 	up := &UserProfile{
 		Profile: make(map[string]string),
@@ -451,7 +451,7 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 	}
 	ups := UserProfiles{}
 	if err := userService.GetUsers(*up, &ups); err != nil {
-		return nil, err
+		return err
 	}
 	if len(ups) > 0 {
 		up = ups[0]
@@ -459,7 +459,7 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 		m["Tenant"] = up.Tenant
 		utils.FromMapStringString(m, in)
 		utils.SetMapExtraFields(in, m, extraFields)
-		return in, nil
+		return nil
 	}
-	return nil, utils.ErrNotFound
+	return utils.ErrNotFound
 }
