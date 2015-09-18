@@ -1,5 +1,8 @@
 #! /usr/bin/env sh
 
+export GO15VENDOREXPERIMENT=1
+glide up
+
 go test -i github.com/cgrates/cgrates/apier/v1
 go test -i github.com/cgrates/cgrates/apier/v2
 go test -i github.com/cgrates/cgrates/engine

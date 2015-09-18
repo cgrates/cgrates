@@ -1,5 +1,7 @@
 #! /usr/bin/env sh
 
+echo "installing CGRateS..."
+
 go install github.com/cgrates/cgrates/cmd/cgr-engine
 cr=$?
 go install github.com/cgrates/cgrates/cmd/cgr-loader
@@ -10,5 +12,3 @@ go install github.com/cgrates/cgrates/cmd/cgr-tester
 ct=$?
 
 exit $cr || $cl || $cc || $ct
-
-

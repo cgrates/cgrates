@@ -16,10 +16,13 @@ cd /usr/share/cgrates/storage/postgres && ./setup_cgr_db.sh
 
 #env vars
 export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
+export GO15VENDOREXPERIMENT=1
 
 # build and install cgrates
-/root/cgr/update_external_libs.sh
-go install github.com/cgrates/cgrates
+go get -v github.com/Masterminds/glide
+cd /root/cgr
+glide -y devel.yaml up
+./build.sh
 
 # create cgr-engine link
 ln -s /root/code/bin/cgr-engine /usr/bin/cgr-engine
