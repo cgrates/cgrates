@@ -166,8 +166,20 @@ func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
 	if storedCdr.Subject == "" { // Use account information as rating subject if missing
 		storedCdr.Subject = storedCdr.Account
 	}
-
-	if err := LoadUserProfile(storedCdr, "ExtraFields"); err != nil {
+	// replace aliases
+	if err := LoadAlias(&AttrMatchingAlias{
+		Destination: storedCdr.Destination,
+		Direction:   storedCdr.Direction,
+		Tenant:      storedCdr.Tenant,
+		Category:    storedCdr.Category,
+		Account:     storedCdr.Account,
+		Subject:     storedCdr.Subject,
+		Context:     utils.ALIAS_CONTEXT_RATING,
+	}, storedCdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	// replace user profile fields
+	if err := LoadUserProfile(storedCdr, utils.EXTRA_FIELDS); err != nil {
 		return err
 	}
 	if storedCdr.ReqType == utils.META_NONE {

@@ -82,7 +82,7 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 		arg.Subject = arg.Account
 	}
 	// replace aliases
-	LoadAlias(
+	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
 			Direction:   arg.Direction,
@@ -91,7 +91,9 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 			Account:     arg.Account,
 			Subject:     arg.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, arg, utils.EXTRA_FIELDS)
+		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -117,7 +119,7 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 		arg.Subject = arg.Account
 	}
 	// replace aliases
-	LoadAlias(
+	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
 			Direction:   arg.Direction,
@@ -126,7 +128,9 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 			Account:     arg.Account,
 			Subject:     arg.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, arg, utils.EXTRA_FIELDS)
+		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -154,7 +158,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 		arg.Subject = arg.Account
 	}
 	// replace aliases
-	LoadAlias(
+	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
 			Direction:   arg.Direction,
@@ -163,7 +167,9 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 			Account:     arg.Account,
 			Subject:     arg.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, arg, utils.EXTRA_FIELDS)
+		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -198,7 +204,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 		arg.Subject = arg.Account
 	}
 	// replace aliases
-	LoadAlias(
+	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
 			Direction:   arg.Direction,
@@ -207,7 +213,9 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 			Account:     arg.Account,
 			Subject:     arg.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, arg, utils.EXTRA_FIELDS)
+		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -232,7 +240,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 		arg.Subject = arg.Account
 	}
 	// replace aliases
-	LoadAlias(
+	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: arg.Destination,
 			Direction:   arg.Direction,
@@ -241,7 +249,9 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 			Account:     arg.Account,
 			Subject:     arg.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, arg, utils.EXTRA_FIELDS)
+		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -264,7 +274,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 		ev.Subject = ev.Account
 	}
 	// replace aliases
-	LoadAlias(
+	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: ev.Destination,
 			Direction:   ev.Direction,
@@ -273,7 +283,9 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 			Account:     ev.Account,
 			Subject:     ev.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, ev, utils.EXTRA_FIELDS)
+		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 
 	// replace user profile fields
 	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
@@ -352,7 +364,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		ev.Subject = ev.Account
 	}
 	// replace aliases
-	LoadAlias(
+	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: ev.Destination,
 			Direction:   ev.Direction,
@@ -361,7 +373,9 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 			Account:     ev.Account,
 			Subject:     ev.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, ev, utils.EXTRA_FIELDS)
+		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
 		return err
@@ -421,21 +435,6 @@ func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	if rs.CdrSrv == nil {
 		return errors.New("CDR_SERVER_NOT_RUNNING")
 	}
-	// replace aliases
-	LoadAlias(
-		&AttrMatchingAlias{
-			Destination: cdr.Destination,
-			Direction:   cdr.Direction,
-			Tenant:      cdr.Tenant,
-			Category:    cdr.Category,
-			Account:     cdr.Account,
-			Subject:     cdr.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, cdr, utils.EXTRA_FIELDS)
-	// replace user profile fields
-	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
 	if err := rs.CdrSrv.ProcessCdr(cdr); err != nil {
 		return err
 	}
@@ -474,7 +473,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	}
 	// replace aliases
 	cd := attrs.CallDescriptor
-	LoadAlias(
+	if err := LoadAlias(
 		&AttrMatchingAlias{
 			Destination: cd.Destination,
 			Direction:   cd.Direction,
@@ -483,7 +482,9 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 			Account:     cd.Account,
 			Subject:     cd.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, cd, utils.EXTRA_FIELDS)
+		}, cd, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
 	// replace user profile fields
 	if err := LoadUserProfile(attrs.CallDescriptor, utils.EXTRA_FIELDS); err != nil {
 		return err
