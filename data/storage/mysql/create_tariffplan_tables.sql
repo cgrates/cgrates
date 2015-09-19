@@ -367,11 +367,14 @@ CREATE TABLE tp_aliases (
   `category` varchar(64) NOT NULL,
   `account` varchar(64) NOT NULL,
   `subject` varchar(64) NOT NULL,
-  `group` varchar(64) NOT NULL,
   `destination_id` varchar(64) NOT NULL,
+  `context` varchar(64) NOT NULL,
+  `target` varchar(64) NOT NULL,
+  `original` varchar(64) NOT NULL,
   `alias` varchar(64) NOT NULL,
   `weight` decimal(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_aliases` (`tpid`,`direction`,`tenant`,`category`,`account`,`subject`,`context`, `target`)
 );
