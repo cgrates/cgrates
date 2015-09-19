@@ -18,6 +18,7 @@
 //	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
 //	"default_timezone": "Local",			// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 //	"connect_attempts": 3,					// initial server connect attempts
+//	"response_cache_ttl": "3s",				// the life span of a cached response
 //	"reconnects": -1,						// number of retries in case of connection lost
 //	"internal_ttl": "2m",					// maximum duration to wait for internal connections before giving up
 //},
@@ -30,7 +31,7 @@
 //},
 
 
-//"tariffplan_db": {							// database used to store active tariff plan configuration
+//"tariffplan_db": {						// database used to store active tariff plan configuration
 //	"db_type": "redis",						// tariffplan_db type: <redis>
 //	"db_host": "127.0.0.1",					// tariffplan_db host address
 //	"db_port": 6379, 						// port to reach the tariffplan_db
@@ -54,17 +55,17 @@
 //"stor_db": {								// database used to store offline tariff plans and CDRs
 //	"db_type": "mysql",						// stor database type to use: <mysql|postgres>
 //	"db_host": "127.0.0.1",					// the host to connect to
-//	"db_port": 3306, 						// the port to reach the stordb
-//	"db_name": "cgrates", 					// stor database name
-//	"db_user": "cgrates", 					// username to use when connecting to stordb
-//	"db_passwd": "CGRateS.org", 			// password to use when connecting to stordb
+//	"db_port": 3306,						// the port to reach the stordb
+//	"db_name": "cgrates",					// stor database name
+//	"db_user": "cgrates",					// username to use when connecting to stordb
+//	"db_passwd": "CGRateS.org",				// password to use when connecting to stordb
 //	"max_open_conns": 100,					// maximum database connections opened
 //	"max_idle_conns": 10,					// maximum database connections idle
 //},
 
 
 //"balancer": {
-//	"enabled": false, 						// start Balancer service: <true|false>
+//	"enabled": false,						// start Balancer service: <true|false>
 //},
 
 
@@ -109,7 +110,7 @@
 //		"field_separator": ",",
 //		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 //		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-//      "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
+//		"generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
 //		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 //		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
 //		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
@@ -180,7 +181,6 @@
 //	"enabled": false,				// starts SessionManager service: <true|false>
 //	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
 //	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-//	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 //	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 //	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
 //	"debit_interval": "10s",		// interval to perform debits on.
@@ -202,7 +202,6 @@
 //	"enabled": false,				// starts SessionManager service: <true|false>
 //	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
 //	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-//	"reconnects": 5,				// number of reconnect attempts to rater or cdrs
 //	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 //	"debit_interval": "10s",		// interval to perform debits on.
 //	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
@@ -247,7 +246,7 @@
 
 //"users": {
 //	"enabled": false,							// starts User service: <true|false>.
-//	"indexes": [],                  			// user profile field indexes
+//	"indexes": [],								// user profile field indexes
 //},
 
 

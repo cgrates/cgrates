@@ -36,10 +36,10 @@ const CGRATES_CFG_JSON = `
 	"default_category": "call",				// default Type of Record to consider when missing from requests
 	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
 	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
-    "default_timezone": "Local",			// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-    "connect_attempts": 3,                  // initial server connect attempts
-    "response_cache_ttl": "3s",              // the life span of a cached response
-    "reconnects": -1,                       // number of retries in case of connection lost
+	"default_timezone": "Local",			// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	"connect_attempts": 3,					// initial server connect attempts
+	"response_cache_ttl": "3s",				// the life span of a cached response
+	"reconnects": -1,						// number of retries in case of connection lost
 	"internal_ttl": "2m",					// maximum duration to wait for internal connections before giving up
 },
 
@@ -75,10 +75,10 @@ const CGRATES_CFG_JSON = `
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_type": "mysql",						// stor database type to use: <mysql|postgres>
 	"db_host": "127.0.0.1",					// the host to connect to
-	"db_port": 3306, 						// the port to reach the stordb
-	"db_name": "cgrates", 					// stor database name
-	"db_user": "cgrates", 					// username to use when connecting to stordb
-	"db_passwd": "CGRateS.org", 			// password to use when connecting to stordb
+	"db_port": 3306,						// the port to reach the stordb
+	"db_name": "cgrates",					// stor database name
+	"db_user": "cgrates",					// username to use when connecting to stordb
+	"db_passwd": "CGRateS.org",				// password to use when connecting to stordb
 	"max_open_conns": 100,					// maximum database connections opened
 	"max_idle_conns": 10,					// maximum database connections idle
 },
@@ -199,12 +199,8 @@ const CGRATES_CFG_JSON = `
 
 "sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-	"ha_rater": [
-        {"server": "internal",	"timeout": "100ms"}
-    ],
-	"ha_cdrs": [
-        {"server": "internal",	"timeout": "100ms"}
-    ],
+	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
+	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
 	"debit_interval": "10s",		// interval to perform debits on.
@@ -224,12 +220,8 @@ const CGRATES_CFG_JSON = `
 
 "sm_kamailio": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-	"ha_rater": [
-        {"server": "internal",	"timeout": "100ms"}
-    ],
-	"ha_cdrs": [
-        {"server": "internal",	"timeout": "100ms"}
-    ],
+	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
+	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
@@ -243,12 +235,8 @@ const CGRATES_CFG_JSON = `
 "sm_opensips": {
 	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
-	"ha_rater": [
-        {"server": "internal",	"timeout": "100ms"}
-    ],
-	"ha_cdrs": [
-        {"server": "internal",	"timeout": "100ms"}
-    ],
+	"rater": "internal",				// address where to reach the Rater <""|internal|127.0.0.1:2013>
+	"cdrs": "internal",					// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"reconnects": 5,					// number of reconnects if connection is lost
 	"create_cdr": false,				// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",			// interval to perform debits on.
@@ -278,7 +266,7 @@ const CGRATES_CFG_JSON = `
 
 "users": {
 	"enabled": false,							// starts User service: <true|false>.
-	"indexes": [],                  			// user profile field indexes
+	"indexes": [],								// user profile field indexes
 },
 
 

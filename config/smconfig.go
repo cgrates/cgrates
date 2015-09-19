@@ -33,26 +33,10 @@ func NewDfltHaPoolConfig() *HaPoolConfig {
 	return &dfltVal
 }
 
-// One connection to FreeSWITCH server
+// One connection to Rater
 type HaPoolConfig struct {
 	Server  string
 	Timeout time.Duration
-}
-
-func (self *HaPoolConfig) loadFromJsonCfg(jsnCfg *HaPoolJsonCfg) error {
-	var err error
-	if jsnCfg == nil {
-		return nil
-	}
-	if jsnCfg.Server != nil {
-		self.Server = *jsnCfg.Server
-	}
-	if jsnCfg.Timeout != nil {
-		if self.Timeout, err = utils.ParseDurationWithSecs(*jsnCfg.Timeout); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // Returns the first cached default value for a SM-FreeSWITCH connection
@@ -113,19 +97,11 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Ha_rater != nil {
-		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
-			self.HaRater[idx] = NewDfltHaPoolConfig()
-			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
-		}
+	if jsnCfg.Rater != nil {
+		self.HaRater = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Rater, Timeout: time.Duration(1) * time.Second}}
 	}
-	if jsnCfg.Ha_cdrs != nil {
-		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
-			self.HaCdrs[idx] = NewDfltHaPoolConfig()
-			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
-		}
+	if jsnCfg.Cdrs != nil {
+		self.HaCdrs = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Cdrs, Timeout: time.Duration(1) * time.Second}}
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
@@ -230,19 +206,11 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Ha_rater != nil {
-		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
-			self.HaRater[idx] = NewDfltHaPoolConfig()
-			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
-		}
+	if jsnCfg.Rater != nil {
+		self.HaRater = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Rater, Timeout: time.Duration(1) * time.Second}}
 	}
-	if jsnCfg.Ha_cdrs != nil {
-		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
-			self.HaCdrs[idx] = NewDfltHaPoolConfig()
-			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
-		}
+	if jsnCfg.Cdrs != nil {
+		self.HaCdrs = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Cdrs, Timeout: time.Duration(1) * time.Second}}
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
@@ -310,19 +278,11 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 	if jsnCfg.Listen_udp != nil {
 		self.ListenUdp = *jsnCfg.Listen_udp
 	}
-	if jsnCfg.Ha_rater != nil {
-		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
-			self.HaRater[idx] = NewDfltHaPoolConfig()
-			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
-		}
+	if jsnCfg.Rater != nil {
+		self.HaRater = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Rater, Timeout: time.Duration(1) * time.Second}}
 	}
-	if jsnCfg.Ha_cdrs != nil {
-		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
-			self.HaCdrs[idx] = NewDfltHaPoolConfig()
-			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
-		}
+	if jsnCfg.Cdrs != nil {
+		self.HaCdrs = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Cdrs, Timeout: time.Duration(1) * time.Second}}
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCdr = *jsnCfg.Create_cdr
