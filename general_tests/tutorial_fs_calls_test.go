@@ -72,6 +72,7 @@ func TestTutFsCallsResetStorDb(t *testing.T) {
 	}
 }
 
+/*
 // start FS server
 func TestTutFsCallsStartFS(t *testing.T) {
 	if !*testCalls {
@@ -103,6 +104,7 @@ func TestTutFsCallsRestartFS(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+*/
 
 // Connect rpc client to rater
 func TestTutFsCallsRpcConn(t *testing.T) {
