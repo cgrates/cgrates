@@ -132,24 +132,23 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	engine.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
-	var raterConn, cdrsConn engine.ConnectorPool
+	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
 	for _, raterCfg := range cfg.SmFsConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = append(raterConn, resp)
+			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
 			internalRaterChan <- resp
 		} else {
-			var err error
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil { //Connected so no need to reiterate
 				engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
-			raterConn = append(raterConn, &engine.RPCClientConnector{Client: client, Timeout: raterCfg.Timeout})
+			raterConn = &engine.RPCClientConnector{Client: client}
 		}
 	}
 	// Connect to CDRS
@@ -159,7 +158,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 		for _, cdrsCfg := range cfg.SmFsConfig.HaCdrs {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
-				cdrsConn = append(cdrsConn, resp)
+				cdrsConn = resp
 				internalRaterChan <- resp
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
@@ -168,7 +167,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 					exitChan <- true
 					return
 				}
-				cdrsConn = append(cdrsConn, &engine.RPCClientConnector{Client: client, Timeout: cdrsCfg.Timeout})
+				cdrsConn = &engine.RPCClientConnector{Client: client}
 			}
 		}
 	}
@@ -183,24 +182,23 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 
 func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	engine.Logger.Info("Starting CGRateS SM-Kamailio service.")
-	var raterConn, cdrsConn engine.ConnectorPool
+	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
 	for _, raterCfg := range cfg.SmKamConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = append(raterConn, resp)
+			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
 			internalRaterChan <- resp
 		} else {
-			var err error
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil { //Connected so no need to reiterate
 				engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
-			raterConn = append(raterConn, &engine.RPCClientConnector{Client: client, Timeout: raterCfg.Timeout})
+			raterConn = &engine.RPCClientConnector{Client: client}
 		}
 	}
 	// Connect to CDRS
@@ -210,7 +208,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		for _, cdrsCfg := range cfg.SmKamConfig.HaCdrs {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
-				cdrsConn = append(cdrsConn, resp)
+				cdrsConn = resp
 				internalRaterChan <- resp
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
@@ -219,7 +217,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 					exitChan <- true
 					return
 				}
-				cdrsConn = append(cdrsConn, &engine.RPCClientConnector{Client: client, Timeout: cdrsCfg.Timeout})
+				cdrsConn = &engine.RPCClientConnector{Client: client}
 			}
 		}
 	}
@@ -233,24 +231,24 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 }
 
 func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
-	var raterConn, cdrsConn engine.ConnectorPool
+	engine.Logger.Info("Starting CGRateS SM-OpenSIPS service.")
+	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
 	for _, raterCfg := range cfg.SmOsipsConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = append(raterConn, resp)
+			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
 			internalRaterChan <- resp
 		} else {
-			var err error
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil { //Connected so no need to reiterate
 				engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
-			raterConn = append(raterConn, &engine.RPCClientConnector{Client: client, Timeout: raterCfg.Timeout})
+			raterConn = &engine.RPCClientConnector{Client: client}
 		}
 	}
 	// Connect to CDRS
@@ -260,7 +258,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		for _, cdrsCfg := range cfg.SmOsipsConfig.HaCdrs {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
-				cdrsConn = append(cdrsConn, resp)
+				cdrsConn = resp
 				internalRaterChan <- resp
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
@@ -269,7 +267,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 					exitChan <- true
 					return
 				}
-				cdrsConn = append(cdrsConn, &engine.RPCClientConnector{Client: client, Timeout: cdrsCfg.Timeout})
+				cdrsConn = &engine.RPCClientConnector{Client: client}
 			}
 		}
 	}
