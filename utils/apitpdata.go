@@ -1105,12 +1105,13 @@ type AttrExecuteAction struct {
 }
 
 type AttrSetAccount struct {
-	Tenant        string
-	Direction     string
-	Account       string
-	ActionPlanId  string
-	AllowNegative *bool
-	Disabled      *bool
+	Tenant           string
+	Direction        string
+	Account          string
+	ActionPlanId     string
+	ActionTriggersId string
+	AllowNegative    *bool
+	Disabled         *bool
 }
 
 type AttrRemoveAccount struct {

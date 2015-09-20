@@ -182,6 +182,13 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 				at.AccountIds = append(at.AccountIds, balanceId)
 			}
 		}
+		if len(attr.ActionTriggersId) != 0 {
+			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId)
+			if err != nil {
+				return 0, err
+			}
+			ub.ActionTriggers = atrs
+		}
 		if attr.AllowNegative != nil {
 			ub.AllowNegative = *attr.AllowNegative
 		}
