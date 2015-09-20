@@ -168,19 +168,6 @@ func TestTutLocalGetCachedItemAge(t *testing.T) {
 	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
-
-	/*
-		if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "1006", &rcvAge); err != nil {
-			t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-		} else if rcvAge.RatingAlias > time.Duration(2)*time.Second {
-			t.Errorf("Cache too old: %d", rcvAge)
-		}
-		if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "1006", &rcvAge); err != nil {
-			t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-		} else if rcvAge.RatingAlias > time.Duration(2)*time.Second || rcvAge.AccountAlias > time.Duration(2)*time.Second {
-			t.Errorf("Cache too old: %d", rcvAge)
-		}
-	*/
 }
 
 func TestTutLocalGetUsers(t *testing.T) {
@@ -1035,6 +1022,81 @@ func TestTutLocalLeastCost(t *testing.T) {
 	}
 }
 
+// Test adding the account via API, using the data previously devined in .csv
+func TestTutLocalSetAccount(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply string
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "tutacnt1", ActionPlanId: "PACKAGE_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+	if err := tutLocalRpc.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+	}
+	type AttrGetAccounts struct {
+		Tenant     string
+		Direction  string
+		AccountIds []string
+		Offset     int // Set the item offset
+		Limit      int // Limit number of items retrieved
+	}
+	var acnts []*engine.Account
+	if err := tutLocalRpc.Call("ApierV1.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, Direction: attrs.Direction, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+		t.Error(err)
+	} else if len(acnts) != 1 {
+		t.Errorf("Accounts received: %+v", acnts)
+	} else {
+		acnt := acnts[0]
+		dta, _ := utils.NewDTAFromAccountKey(acnt.Id)
+		if dta.Direction != attrs.Direction || dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
+			t.Error("Unexpected account id received: ", acnt.Id)
+		}
+		if balances := acnt.BalanceMap["*monetary*out"]; len(balances) != 1 {
+			t.Errorf("Unexpected balances found: %+v", balances)
+		}
+		if len(acnt.ActionTriggers) != 4 {
+			t.Errorf("Unexpected action triggers for account: %+v", acnt.ActionTriggers)
+		}
+		if acnt.AllowNegative {
+			t.Error("AllowNegative should not be set")
+		}
+		if acnt.Disabled {
+			t.Error("Disabled should not be set")
+		}
+	}
+	attrs = &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "tutacnt1", AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true)}
+	if err := tutLocalRpc.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+	}
+	if err := tutLocalRpc.Call("ApierV1.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, Direction: attrs.Direction, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+		t.Error(err)
+	} else if len(acnts) != 1 {
+		t.Errorf("Accounts received: %+v", acnts)
+	} else {
+		acnt := acnts[0]
+		dta, _ := utils.NewDTAFromAccountKey(acnt.Id)
+		if dta.Direction != attrs.Direction || dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
+			t.Error("Unexpected account id received: ", acnt.Id)
+		}
+		if balances := acnt.BalanceMap["*monetary*out"]; len(balances) != 1 {
+			t.Errorf("Unexpected balances found: %+v", balances)
+		}
+		if len(acnt.ActionTriggers) != 4 {
+			t.Errorf("Unexpected action triggers for account: %+v", acnt.ActionTriggers)
+		}
+		if !acnt.AllowNegative {
+			t.Error("AllowNegative should be set")
+		}
+		if !acnt.Disabled {
+			t.Error("Disabled should be set")
+		}
+	}
+
+}
+
 /*
 // Make sure all stats queues were updated
 func TestTutLocalCdrStatsAfter(t *testing.T) {
@@ -1081,7 +1143,6 @@ func TestTutLocalCdrStatsAfter(t *testing.T) {
 }
 */
 
-/*
 func TestTutLocalStopCgrEngine(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1090,4 +1151,3 @@ func TestTutLocalStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
