@@ -532,7 +532,7 @@ func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 	return css, nil
 }
 
-func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *utils.TPCdrStat, timezone string) {
+func UpdateCdrStats(cs *CdrStats, triggers ActionTriggers, tpCs *utils.TPCdrStat, timezone string) {
 	if tpCs.QueueLength != "" && tpCs.QueueLength != "0" {
 		if qi, err := strconv.Atoi(tpCs.QueueLength); err == nil {
 			cs.QueueLength = qi

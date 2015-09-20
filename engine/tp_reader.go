@@ -20,7 +20,7 @@ type TpReader struct {
 	lr                LoadReader
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionPlan
-	actionsTriggers   map[string][]*ActionTrigger
+	actionsTriggers   map[string]ActionTriggers
 	accountActions    map[string]*Account
 	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
 	dirtyAccAliases   []*TenantAccount       // used to clean aliases that might have changed
@@ -49,7 +49,7 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, ti
 		lr:                lr,
 		actions:           make(map[string][]*Action),
 		actionsTimings:    make(map[string][]*ActionPlan),
-		actionsTriggers:   make(map[string][]*ActionTrigger),
+		actionsTriggers:   make(map[string]ActionTriggers),
 		rates:             make(map[string]*utils.TPRate),
 		destinations:      make(map[string]*Destination),
 		destinationRates:  make(map[string]*utils.TPDestinationRate),
@@ -739,7 +739,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			}
 		}
 		// action triggers
-		var actionTriggers ActionTriggerPriotityList
+		var actionTriggers ActionTriggers
 		//ActionTriggerPriotityList []*ActionTrigger
 		if accountAction.ActionTriggersId != "" {
 			tpatrs, err := tpr.lr.GetTpActionTriggers(tpr.tpid, accountAction.ActionTriggersId)
@@ -1281,6 +1281,18 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	}
 	for k, ats := range tpr.actionsTimings {
 		err = tpr.ratingStorage.SetActionPlans(k, ats)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Action Triggers:")
+	}
+	for k, atrs := range tpr.actionsTriggers {
+		err = tpr.ratingStorage.SetActionTriggers(k, atrs)
 		if err != nil {
 			return err
 		}

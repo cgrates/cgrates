@@ -1050,7 +1050,7 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply engine.ActionTriggerPriotityList
+	var reply engine.ActionTriggers
 	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
@@ -1065,7 +1065,7 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 		return
 	}
 	// Test first get so we can steal the id which we need to remove
-	var reply engine.ActionTriggerPriotityList
+	var reply engine.ActionTriggers
 	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())

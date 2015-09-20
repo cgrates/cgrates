@@ -645,6 +645,26 @@ func (ms *MapStorage) AddLoadHistory(*LoadInstance, int) error {
 	return nil
 }
 
+func (ms *MapStorage) GetActionTriggers(key string) (atrs ActionTriggers, err error) {
+	if values, ok := ms.dict[utils.ACTION_TRIGGER_PREFIX+key]; ok {
+		err = ms.ms.Unmarshal(values, &atrs)
+	} else {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
+	if len(atrs) == 0 {
+		// delete the key
+		delete(ms.dict, utils.ACTION_TRIGGER_PREFIX+key)
+		return
+	}
+	result, err := ms.ms.Marshal(&atrs)
+	ms.dict[utils.ACTION_TRIGGER_PREFIX+key] = result
+	return
+}
+
 func (ms *MapStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 	if values, ok := ms.dict[utils.ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)

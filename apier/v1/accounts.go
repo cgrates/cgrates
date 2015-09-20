@@ -105,7 +105,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 }
 
 // Returns a list of ActionTriggers on an account
-func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engine.ActionTriggerPriotityList) error {
+func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engine.ActionTriggers) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -135,7 +135,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 		if err != nil {
 			return 0, err
 		}
-		nactrs := make(engine.ActionTriggerPriotityList, 0)
+		nactrs := make(engine.ActionTriggers, 0)
 		for _, actr := range ub.ActionTriggers {
 			match, _ := regexp.MatchString(attrs.ActionTriggersId, actr.Id)
 			if len(attrs.ActionTriggersId) != 0 && !match {

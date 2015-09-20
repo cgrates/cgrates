@@ -283,7 +283,7 @@ func GetUB() *Account {
 		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{utils.SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
-		ActionTriggers: ActionTriggerPriotityList{at, at, at},
+		ActionTriggers: ActionTriggers{at, at, at},
 	}
 	return ub
 }

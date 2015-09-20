@@ -49,7 +49,7 @@ func (sts *CDRStatsV1) GetQueue(id string, sq *engine.StatsQueue) error {
 	return sts.CdrStats.GetQueue(id, sq)
 }
 
-func (sts *CDRStatsV1) GetQueueTriggers(id string, ats *engine.ActionTriggerPriotityList) error {
+func (sts *CDRStatsV1) GetQueueTriggers(id string, ats *engine.ActionTriggers) error {
 	return sts.CdrStats.GetQueueTriggers(id, ats)
 }
 

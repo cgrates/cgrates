@@ -48,7 +48,7 @@ type Account struct {
 	Id             string
 	BalanceMap     map[string]BalanceChain
 	UnitCounters   []*UnitsCounter
-	ActionTriggers ActionTriggerPriotityList
+	ActionTriggers ActionTriggers
 	AllowNegative  bool
 	Disabled       bool
 }

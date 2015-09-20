@@ -31,7 +31,7 @@ type StatsInterface interface {
 	GetValues(string, *map[string]float64) error
 	GetQueueIds(int, *[]string) error
 	GetQueue(string, *StatsQueue) error
-	GetQueueTriggers(string, *ActionTriggerPriotityList) error
+	GetQueueTriggers(string, *ActionTriggers) error
 	AppendCDR(*StoredCdr, *int) error
 	AddQueue(*CdrStats, *int) error
 	ReloadQueues([]string, *int) error
@@ -114,7 +114,7 @@ func (s *Stats) GetQueue(id string, sq *StatsQueue) error {
 	return nil
 }
 
-func (s *Stats) GetQueueTriggers(id string, ats *ActionTriggerPriotityList) error {
+func (s *Stats) GetQueueTriggers(id string, ats *ActionTriggers) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	q, found := s.queues[id]
@@ -124,7 +124,7 @@ func (s *Stats) GetQueueTriggers(id string, ats *ActionTriggerPriotityList) erro
 	if q.conf.Triggers != nil {
 		*ats = q.conf.Triggers
 	} else {
-		*ats = ActionTriggerPriotityList{}
+		*ats = ActionTriggers{}
 	}
 	return nil
 }
@@ -314,7 +314,7 @@ func (ps *ProxyStats) GetQueue(id string, sq *StatsQueue) error {
 	return ps.Client.Call("Stats.GetQueue", id, sq)
 }
 
-func (ps *ProxyStats) GetQueueTriggers(id string, ats *ActionTriggerPriotityList) error {
+func (ps *ProxyStats) GetQueueTriggers(id string, ats *ActionTriggers) error {
 	return ps.Client.Call("Stats.GetQueueTriggers", id, ats)
 }
 

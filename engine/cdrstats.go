@@ -79,7 +79,7 @@ type CdrStats struct {
 	RatedAccount    []string        // CDRFieldFilter on RatedAccounts
 	RatedSubject    []string        // CDRFieldFilter on RatedSubjects
 	CostInterval    []float64       // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
-	Triggers        ActionTriggerPriotityList
+	Triggers        ActionTriggers
 }
 
 func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {

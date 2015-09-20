@@ -141,21 +141,21 @@ func (at *ActionTrigger) sortDestinationIds() string {
 }
 
 // Structure to store actions according to weight
-type ActionTriggerPriotityList []*ActionTrigger
+type ActionTriggers []*ActionTrigger
 
-func (atpl ActionTriggerPriotityList) Len() int {
+func (atpl ActionTriggers) Len() int {
 	return len(atpl)
 }
 
-func (atpl ActionTriggerPriotityList) Swap(i, j int) {
+func (atpl ActionTriggers) Swap(i, j int) {
 	atpl[i], atpl[j] = atpl[j], atpl[i]
 }
 
 //we need higher weights earlyer in the list
-func (atpl ActionTriggerPriotityList) Less(j, i int) bool {
+func (atpl ActionTriggers) Less(j, i int) bool {
 	return atpl[i].Weight < atpl[j].Weight
 }
 
-func (atpl ActionTriggerPriotityList) Sort() {
+func (atpl ActionTriggers) Sort() {
 	sort.Sort(atpl)
 }

@@ -804,6 +804,28 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) e
 	return err
 }
 
+func (rs *RedisStorage) GetActionTriggers(key string) (atrs ActionTriggers, err error) {
+	var values []byte
+	if values, err = rs.db.Get(utils.ACTION_TRIGGER_PREFIX + key); err == nil {
+		err = rs.ms.Unmarshal(values, &atrs)
+	}
+	return
+}
+
+func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
+	if len(atrs) == 0 {
+		// delete the key
+		_, err = rs.db.Del(utils.ACTION_TRIGGER_PREFIX + key)
+		return err
+	}
+	result, err := rs.ms.Marshal(&atrs)
+	if err != nil {
+		return err
+	}
+	err = rs.db.Set(utils.ACTION_TRIGGER_PREFIX+key, result)
+	return
+}
+
 func (rs *RedisStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 	var values []byte
 	if values, err = rs.db.Get(utils.ACTION_TIMING_PREFIX + key); err == nil {
