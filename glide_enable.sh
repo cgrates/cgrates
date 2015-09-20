@@ -7,7 +7,7 @@ echo "Executing Glide..."
 
 go get -v github.com/Masterminds/glide
 gl=$?
-glide up
+$GOPATH/bin/glide up
 gu=$?
 
 exit $gl || $gu
