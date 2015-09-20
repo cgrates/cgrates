@@ -1,6 +1,6 @@
 #! /usr/bin/env sh
 
-echo "Installing CGRateS..."
+echo "Building CGRateS..."
 
 go install github.com/cgrates/cgrates/cmd/cgr-engine
 cr=$?

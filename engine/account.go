@@ -188,13 +188,13 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, balances Balanc
 		}
 		b.account = ub
 		if b.DestinationIds != "" && b.DestinationIds != utils.ANY {
+			balDestIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
-						balDestIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
 						for _, balDestID := range balDestIds {
-							if dId == balDestID {
+							if dId == strings.TrimSpace(balDestID) {
 								b.precision = len(p)
 								usefulBalances = append(usefulBalances, b)
 								break
