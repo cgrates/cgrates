@@ -5,6 +5,7 @@
 export DH_VERBOSE=1
 
 export GOPATH=$(CURDIR)
+export GO15VENDOREXPERIMENT=1
 
 PKGDIR=debian/cgrates
 SRCDIR=src/github.com/cgrates/cgrates
@@ -23,7 +24,8 @@ binary-arch: clean
 	dh_installdirs
 	mkdir -p src/github.com/cgrates
 	ln -sf $(CURDIR) src/github.com/cgrates
-	exec $(CURDIR)/glide_enable.sh
+	go get -v github.com/Masterminds/glide
+	$(GOPATH)/bin/glide up
 	exec $(CURDIR)/build.sh
 	mkdir -p $(PKGDIR)/usr/bin
 	cp $(GOPATH)/bin/cgr-* $(PKGDIR)/usr/bin/
