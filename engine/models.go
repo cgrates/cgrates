@@ -216,6 +216,8 @@ type TpAccountAction struct {
 	Direction         string `index:"2" re:"\*out\s*"`
 	ActionPlanTag     string `index:"3" re:"\w+\s*"`
 	ActionTriggersTag string `index:"4" re:"\w+\s*"`
+	AllowNegative     bool   `index:"5" re:""`
+	Disabled          bool   `index:"6" re:""`
 	CreatedAt         time.Time
 }
 
@@ -330,8 +332,9 @@ type TpUser struct {
 	Tpid           string
 	Tenant         string `index:"0" re:""`
 	UserName       string `index:"1" re:""`
-	AttributeName  string `index:"2" re:""`
-	AttributeValue string `index:"3" re:""`
+	Masked         bool   `index:"2" re:""`
+	AttributeName  string `index:"3" re:""`
+	AttributeValue string `index:"4" re:""`
 }
 
 func (tu *TpUser) GetId() string {

@@ -458,6 +458,8 @@ func (tps TpAccountActions) GetAccountActions() (map[string]*utils.TPAccountActi
 			Direction:        tpAa.Direction,
 			ActionPlanId:     tpAa.ActionPlanTag,
 			ActionTriggersId: tpAa.ActionTriggersTag,
+			AllowNegative:    tpAa.AllowNegative,
+			Disabled:         tpAa.Disabled,
 		}
 		aas[aacts.KeyId()] = aacts
 	}
@@ -728,6 +730,9 @@ func (tps TpUsers) GetUsers() (map[string]*utils.TPUsers, error) {
 				UserName: tp.UserName,
 			}
 			users[tp.GetId()] = user
+		}
+		if tp.Masked == true {
+			user.Masked = true
 		}
 		user.Profile = append(user.Profile,
 			&utils.TPUserProfile{

@@ -190,15 +190,16 @@ CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
-vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
-cgrates.org,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
-cgrates.org,123456,*out,TOPUP10_AT,STANDARD_TRIGGERS
-cgrates.org,remo,*out,TOPUP10_AT,
-vdf,empty0,*out,TOPUP_SHARED0_AT,
-vdf,empty10,*out,TOPUP_SHARED10_AT,
-vdf,emptyX,*out,TOPUP_EMPTY_AT,
-vdf,emptyY,*out,TOPUP_EMPTY_AT,
-vdf,post,*out,POST_AT,
+vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER,,
+cgrates.org,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS,,
+cgrates.org,123456,*out,TOPUP10_AT,STANDARD_TRIGGERS,,
+cgrates.org,remo,*out,TOPUP10_AT,,,
+vdf,empty0,*out,TOPUP_SHARED0_AT,,,
+vdf,empty10,*out,TOPUP_SHARED10_AT,,,
+vdf,emptyX,*out,TOPUP_EMPTY_AT,,,
+vdf,emptyY,*out,TOPUP_EMPTY_AT,,,
+vdf,post,*out,POST_AT,,,
+cgrates.org,alodis,*out,TOPUP_EMPTY_AT,,true,true
 `
 
 	derivedCharges = `
@@ -217,9 +218,10 @@ CDRST2,,,,ACD,,,,,,,,,,,,,,,,,,,,
 `
 	users = `
 #Tenant[0],UserName[1],AttributeName[2],AttributeValue[3]
-cgrates.org,rif,test0,val0
-cgrates.org,rif,test1,val1
-cgrates.org,dan,another,value
+cgrates.org,rif,false,test0,val0
+cgrates.org,rif,,test1,val1
+cgrates.org,dan,,another,value
+cgrates.org,mas,true,another,value
 `
 	aliases = `
 #Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Group[6],Alias[7],Weight[8]
@@ -1021,7 +1023,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 9 {
+	if len(csvr.accountActions) != 10 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["*out:vdf:minitsboy"]
@@ -1117,7 +1119,7 @@ func TestLoadCdrStats(t *testing.T) {
 }
 
 func TestLoadUsers(t *testing.T) {
-	if len(csvr.users) != 2 {
+	if len(csvr.users) != 3 {
 		t.Error("Failed to load users: ", csvr.users)
 	}
 	user1 := &UserProfile{

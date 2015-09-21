@@ -49,7 +49,7 @@ DISABLE_ACNT,*disable_account,,,,,,,,,,,,,false,10
 ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10`
 	actionTriggers := ``
-	accountActions := `cgrates.org,1,*out,TOPUP10_AT,`
+	accountActions := `cgrates.org,1,*out,TOPUP10_AT,,,`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``

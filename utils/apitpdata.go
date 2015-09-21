@@ -342,6 +342,7 @@ type TPAliasValue struct {
 type TPUsers struct {
 	TPid     string
 	Tenant   string
+	Masked   bool
 	UserName string
 	Profile  []*TPUserProfile
 }
@@ -506,6 +507,8 @@ type TPAccountActions struct {
 	Direction        string // Traffic direction
 	ActionPlanId     string // Id of ActionPlan profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
+	AllowNegative    bool
+	Disabled         bool
 }
 
 // Returns the id used in some nosql dbs (eg: redis)

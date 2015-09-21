@@ -13,6 +13,7 @@ import (
 type UserProfile struct {
 	Tenant   string
 	UserName string
+	Masked   bool
 	Profile  map[string]string
 	ponder   int
 }

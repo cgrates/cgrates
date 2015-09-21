@@ -234,6 +234,16 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 	}
 }
 
+func TestStorageDisabledAccount(t *testing.T) {
+	acc, err := accountingStorage.GetAccount("*out:cgrates.org:alodis")
+	if err != nil || acc == nil {
+		t.Error("Error loading disabled user account: ", err, acc)
+	}
+	if acc.Disabled != true || acc.AllowNegative != true {
+		t.Errorf("Error loading user account properties: %+v", acc)
+	}
+}
+
 // Install fails to detect them and starting server will panic, these tests will fix this
 func TestStoreInterfaces(t *testing.T) {
 	rds := new(RedisStorage)

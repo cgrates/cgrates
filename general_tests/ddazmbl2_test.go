@@ -58,7 +58,7 @@ TOPUP10_AC1,*topup_reset,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
-	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,`
+	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,,,`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``
