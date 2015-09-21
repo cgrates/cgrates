@@ -26,6 +26,8 @@ go test github.com/cgrates/cgrates/config
 cfg=$?
 go test github.com/cgrates/cgrates/cmd/cgr-engine
 cr=$?
+go test github.com/cgrates/cgrates/console
+con=$?
 go test github.com/cgrates/cgrates/cdrc
 cdrcs=$?
 go test github.com/cgrates/cgrates/utils
@@ -37,4 +39,4 @@ c2g=$?
 go test github.com/cgrates/cgrates/cdre
 cdre=$?
 
-exit $v1 && $v2 && $en && $gt && $sm && $cfg && $bl && $cr && $cdrc && $ut && $hs && $c2g && $cdre
+exit $v1 && $v2 && $en && $gt && $sm && $cfg && $bl && $cr && $con && $cdrc && $ut && $hs && $c2g && $cdre
