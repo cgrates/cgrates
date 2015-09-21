@@ -140,6 +140,13 @@ func (at *ActionTrigger) sortDestinationIds() string {
 	return strings.Join(destIds, utils.INFIELD_SEP)
 }
 
+// makes a shallow copy of the receiver
+func (at *ActionTrigger) Clone() *ActionTrigger {
+	clone := new(ActionTrigger)
+	*clone = *at
+	return clone
+}
+
 // Structure to store actions according to weight
 type ActionTriggers []*ActionTrigger
 
@@ -158,4 +165,16 @@ func (atpl ActionTriggers) Less(j, i int) bool {
 
 func (atpl ActionTriggers) Sort() {
 	sort.Sort(atpl)
+}
+
+// clone with new id(uuid)
+func (atrs ActionTriggers) Clone() ActionTriggers {
+	// set ids to action triggers
+	var newATriggers ActionTriggers
+	for _, atr := range atrs {
+		newAtr := atr.Clone()
+		newAtr.Id = utils.GenUUID()
+		newATriggers = append(newATriggers, newAtr)
+	}
+	return newATriggers
 }

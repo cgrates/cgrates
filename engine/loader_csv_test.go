@@ -166,7 +166,7 @@ EE0,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,false,10
 DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,false,10
 NEG,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,false,10
 `
-	actionTimings = `
+	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 MORE_MINUTES,SHARED,ONE_TIME_RUN,10
 TOPUP10_AT,TOPUP10_AC,*asap,10
@@ -238,7 +238,7 @@ var csvr *TpReader
 
 func init() {
 	csvr = NewTpReader(ratingStorage, accountingStorage, NewStringCSVStorage(',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "", 10)
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats, users, aliases), "", "", 10)
 	if err := csvr.LoadDestinations(); err != nil {
 		log.Print("error in LoadDestinations:", err)
 	}
@@ -911,7 +911,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	  }
 
 	  // execute action timings to fill memebers
-	  atm := csvr.actionsTimings["MORE_MINUTES"][1]
+	  atm := csvr.actionPlans["MORE_MINUTES"][1]
 	  atm.Execute()
 	  atm.actions, atm.stCache = nil, time.Time{}
 
@@ -961,10 +961,10 @@ func TestLoadLCRs(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionsTimings) != 6 {
-		t.Error("Failed to load action timings: ", len(csvr.actionsTimings))
+	if len(csvr.actionPlans) != 6 {
+		t.Error("Failed to load action timings: ", len(csvr.actionPlans))
 	}
-	atm := csvr.actionsTimings["MORE_MINUTES"][0]
+	atm := csvr.actionPlans["MORE_MINUTES"][0]
 	expected := &ActionPlan{
 		Uuid:       atm.Uuid,
 		Id:         "MORE_MINUTES",
@@ -992,7 +992,6 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
-		Id:                    "st0",
 		BalanceType:           utils.VOICE,
 		BalanceDirection:      OUTBOUND,
 		ThresholdType:         TRIGGER_MIN_COUNTER,
@@ -1003,11 +1002,10 @@ func TestLoadActionTriggers(t *testing.T) {
 		Executed:              false,
 	}
 	if !reflect.DeepEqual(atr, expected) {
-		t.Error("Error loading action trigger: ", atr)
+		t.Errorf("Error loading action trigger: %+v", atr)
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
-		Id:                    "st1",
 		BalanceType:           utils.VOICE,
 		BalanceDirection:      OUTBOUND,
 		ThresholdType:         TRIGGER_MAX_BALANCE,
@@ -1018,7 +1016,7 @@ func TestLoadActionTriggers(t *testing.T) {
 		Executed:              false,
 	}
 	if !reflect.DeepEqual(atr, expected) {
-		t.Error("Error loading action trigger: ", atr)
+		t.Errorf("Error loading action trigger: %+v", atr)
 	}
 }
 
@@ -1031,8 +1029,12 @@ func TestLoadAccountActions(t *testing.T) {
 		Id:             "*out:vdf:minitsboy",
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
 	}
+	// set propper uuid
+	for i, atr := range aa.ActionTriggers {
+		csvr.actionsTriggers["STANDARD_TRIGGER"][i].Id = atr.Id
+	}
 	if !reflect.DeepEqual(aa, expected) {
-		t.Error("Error loading account action: ", aa)
+		t.Errorf("Error loading account action: %+v", aa.ActionTriggers[0])
 	}
 	// test that it does not overwrite balances
 	existing, err := accountingStorage.GetAccount(aa.Id)

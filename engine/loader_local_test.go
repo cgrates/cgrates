@@ -405,7 +405,7 @@ func TestMatchLoadCsvWithStorRating(t *testing.T) {
 				continue
 			}
 			if len(refVal) != len(qVal) {
-				t.Errorf("Missmatched data for key: %s\n\t, reference val: %s \n\t retrieved value: %s\n on iteration: %d", key, refVal, qVal, idx)
+				t.Errorf("Missmatched data for key: %s\n\t reference val: %s \n\t retrieved val: %s\n on iteration: %d", key, refVal, qVal, idx)
 			}
 		}
 	}

@@ -19,7 +19,7 @@ type TpReader struct {
 	accountingStorage AccountingStorage
 	lr                LoadReader
 	actions           map[string][]*Action
-	actionsTimings    map[string][]*ActionPlan
+	actionPlans       map[string][]*ActionPlan
 	actionsTriggers   map[string]ActionTriggers
 	accountActions    map[string]*Account
 	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
@@ -48,7 +48,7 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, ti
 		accountingStorage: as,
 		lr:                lr,
 		actions:           make(map[string][]*Action),
-		actionsTimings:    make(map[string][]*ActionPlan),
+		actionPlans:       make(map[string][]*ActionPlan),
 		actionsTriggers:   make(map[string]ActionTriggers),
 		rates:             make(map[string]*utils.TPRate),
 		destinations:      make(map[string]*Destination),
@@ -586,7 +586,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 				},
 				ActionsId: at.ActionsId,
 			}
-			tpr.actionsTimings[atId] = append(tpr.actionsTimings[atId], actTmg)
+			tpr.actionPlans[atId] = append(tpr.actionPlans[atId], actTmg)
 		}
 	}
 
@@ -606,16 +606,11 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, atr := range atrsLst {
 			balanceExpirationDate, _ := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
-			id := atr.Id
-			if id == "" {
-				id = utils.GenUUID()
-			}
 			minSleep, err := utils.ParseDurationWithSecs(atr.MinSleep)
 			if err != nil {
 				return err
 			}
 			atrs[idx] = &ActionTrigger{
-				Id:                    id,
 				ThresholdType:         atr.ThresholdType,
 				ThresholdValue:        atr.ThresholdValue,
 				Recurrent:             atr.Recurrent,
@@ -633,9 +628,6 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				Weight:                atr.Weight,
 				ActionsId:             atr.ActionsId,
 				MinQueuedItems:        atr.MinQueuedItems,
-			}
-			if atrs[idx].Id == "" {
-				atrs[idx].Id = utils.GenUUID()
 			}
 		}
 		tpr.actionsTriggers[key] = atrs
@@ -732,7 +724,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				actionTimings = append(actionTimings, actTmg)
 			}
 
-			// write action timings
+			// write action triggers
 			err = tpr.ratingStorage.SetActionPlans(accountAction.ActionPlanId, actionTimings)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
@@ -755,10 +747,13 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			for key, atrsLst := range atrs {
 				atrs := make([]*ActionTrigger, len(atrsLst))
 				for idx, apiAtr := range atrsLst {
+					minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 					expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
-					atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
+					atrs[idx] = &ActionTrigger{
 						ThresholdType:         apiAtr.ThresholdType,
 						ThresholdValue:        apiAtr.ThresholdValue,
+						Recurrent:             apiAtr.Recurrent,
+						MinSleep:              minSleep,
 						BalanceId:             apiAtr.BalanceId,
 						BalanceType:           apiAtr.BalanceType,
 						BalanceDirection:      apiAtr.BalanceDirection,
@@ -778,6 +773,11 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			// collect action ids from triggers
 			for _, atr := range actionTriggers {
 				actionsIds = append(actionsIds, atr.ActionsId)
+			}
+			// write action triggers
+			err = tpr.ratingStorage.SetActionTriggers(accountAction.ActionTriggersId, actionTriggers)
+			if err != nil {
+				return errors.New(err.Error() + " (SetActionTriggers): " + accountAction.ActionTriggersId)
 			}
 		}
 
@@ -828,7 +828,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				Id: id,
 			}
 		}
-		ub.ActionTriggers = actionTriggers
+		ub.ActionTriggers = actionTriggers.Clone()
 
 		if err := tpr.accountingStorage.SetAccount(ub); err != nil {
 			return err
@@ -851,19 +851,20 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 		if _, alreadyDefined := tpr.accountActions[aa.KeyId()]; alreadyDefined {
 			return fmt.Errorf("duplicate account action found: %s", aa.KeyId())
 		}
-		var aTriggers []*ActionTrigger
+		var aTriggers ActionTriggers
 		if aa.ActionTriggersId != "" {
 			var exists bool
 			if aTriggers, exists = tpr.actionsTriggers[aa.ActionTriggersId]; !exists {
 				return fmt.Errorf("could not get action triggers for tag %s", aa.ActionTriggersId)
 			}
 		}
+
 		ub := &Account{
 			Id:             aa.KeyId(),
-			ActionTriggers: aTriggers,
+			ActionTriggers: aTriggers.Clone(),
 		}
 		tpr.accountActions[aa.KeyId()] = ub
-		aTimings, exists := tpr.actionsTimings[aa.ActionPlanId]
+		aTimings, exists := tpr.actionPlans[aa.ActionPlanId]
 		if !exists {
 			log.Printf("could not get action plan for tag %v", aa.ActionPlanId)
 			// must not continue here
@@ -947,10 +948,13 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 					for _, atrsLst := range atrsM {
 						atrs := make([]*ActionTrigger, len(atrsLst))
 						for idx, apiAtr := range atrsLst {
+							minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 							expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
-							atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
+							atrs[idx] = &ActionTrigger{
 								ThresholdType:         apiAtr.ThresholdType,
 								ThresholdValue:        apiAtr.ThresholdValue,
+								Recurrent:             apiAtr.Recurrent,
+								MinSleep:              minSleep,
 								BalanceId:             apiAtr.BalanceId,
 								BalanceType:           apiAtr.BalanceType,
 								BalanceDirection:      apiAtr.BalanceDirection,
@@ -976,6 +980,11 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 			if triggerTag != "" && !exists {
 				// only return error if there was something there for the tag
 				return fmt.Errorf("could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
+			}
+			// write action triggers
+			err = tpr.ratingStorage.SetActionTriggers(triggerTag, triggers)
+			if err != nil {
+				return errors.New(err.Error() + " (SetActionTriggers): " + triggerTag)
 			}
 			UpdateCdrStats(cs, triggers, tpStat, tpr.timezone)
 			tpr.cdrStats[tag] = cs
@@ -1279,7 +1288,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Action Plans:")
 	}
-	for k, ats := range tpr.actionsTimings {
+	for k, ats := range tpr.actionPlans {
 		err = tpr.ratingStorage.SetActionPlans(k, ats)
 		if err != nil {
 			return err
@@ -1452,7 +1461,7 @@ func (tpr *TpReader) ShowStatistics() {
 	// actions
 	log.Print("Actions: ", len(tpr.actions))
 	// action plans
-	log.Print("Action plans: ", len(tpr.actionsTimings))
+	log.Print("Action plans: ", len(tpr.actionPlans))
 	// action trigers
 	log.Print("Action trigers: ", len(tpr.actionsTriggers))
 	// account actions
@@ -1492,7 +1501,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ACTION_PREFIX: // actionsTimings
+	case utils.ACTION_PREFIX: // actionPlans
 		keys := make([]string, len(tpr.actions))
 		i := 0
 		for k := range tpr.actions {
@@ -1500,10 +1509,10 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ACTION_TIMING_PREFIX: // actionsTimings
-		keys := make([]string, len(tpr.actionsTimings))
+	case utils.ACTION_TIMING_PREFIX: // actionPlans
+		keys := make([]string, len(tpr.actionPlans))
 		i := 0
-		for k := range tpr.actionsTimings {
+		for k := range tpr.actionPlans {
 			keys[i] = k
 			i++
 		}
