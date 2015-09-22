@@ -1201,21 +1201,21 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) ([]TpSharedGroup, er
 
 func (self *SQLStorage) GetTpLCRs(filter *TpLcrRule) ([]TpLcrRule, error) {
 	var tpLcrRule []TpLcrRule
-	q := self.db.Where("`tpid` = ?", filter.Tpid)
+	q := self.db.Where("tpid = ?", filter.Tpid)
 	if len(filter.Direction) != 0 {
-		q = q.Where("`direction` = ?", filter.Direction)
+		q = q.Where("direction = ?", filter.Direction)
 	}
 	if len(filter.Tenant) != 0 {
-		q = q.Where("`tenant` = ?", filter.Tenant)
+		q = q.Where("tenant = ?", filter.Tenant)
 	}
 	if len(filter.Category) != 0 {
-		q = q.Where("`category` = ?", filter.Category)
+		q = q.Where("category = ?", filter.Category)
 	}
 	if len(filter.Account) != 0 {
-		q = q.Where("`account` = ?", filter.Account)
+		q = q.Where("account = ?", filter.Account)
 	}
 	if len(filter.Subject) != 0 {
-		q = q.Where("`subject` = ?", filter.Subject)
+		q = q.Where("subject = ?", filter.Subject)
 	}
 
 	if err := q.Find(&tpLcrRule).Error; err != nil {
@@ -1402,24 +1402,24 @@ func (self *SQLStorage) SetTpAliases(aliases []TpAlias) error {
 
 func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 	var tpAliases []TpAlias
-	q := self.db.Where("`tpid` = ?", filter.Tpid)
+	q := self.db.Where("tpid = ?", filter.Tpid)
 	if len(filter.Direction) != 0 {
-		q = q.Where("`direction` = ?", filter.Direction)
+		q = q.Where("direction = ?", filter.Direction)
 	}
 	if len(filter.Tenant) != 0 {
-		q = q.Where("`tenant` = ?", filter.Tenant)
+		q = q.Where("tenant = ?", filter.Tenant)
 	}
 	if len(filter.Category) != 0 {
-		q = q.Where("`category` = ?", filter.Category)
+		q = q.Where("category = ?", filter.Category)
 	}
 	if len(filter.Account) != 0 {
-		q = q.Where("`account` = ?", filter.Account)
+		q = q.Where("account = ?", filter.Account)
 	}
 	if len(filter.Subject) != 0 {
-		q = q.Where("`subject` = ?", filter.Subject)
+		q = q.Where("subject = ?", filter.Subject)
 	}
 	if len(filter.Context) != 0 {
-		q = q.Where("`context` = ?", filter.Context)
+		q = q.Where("context = ?", filter.Context)
 	}
 
 	if err := q.Find(&tpAliases).Error; err != nil {
