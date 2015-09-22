@@ -411,7 +411,7 @@ func TestTutOsipsCalls1002Cdrs(t *testing.T) {
 	req := utils.RpcCdrsFilter{Accounts: []string{"1002"}, RunIds: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
+	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
@@ -485,7 +485,7 @@ func TestTutOsipsCalls1004Cdrs(t *testing.T) {
 
 }
 
-// Make sure account was debited properly
+// Make sure aliasing was done for 1006 and we have no CDRs for it
 func TestTutOsipsCalls1006Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
@@ -494,24 +494,8 @@ func TestTutOsipsCalls1006Cdrs(t *testing.T) {
 	req := utils.RpcCdrsFilter{Accounts: []string{"1006"}, RunIds: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
+	} else if len(reply) != 0 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
-	} else {
-		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
-		}
-		if reply[0].ReqType != utils.META_PREPAID {
-			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
-		}
-		if reply[0].Destination != "1002" {
-			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
-		}
-		if reply[0].Usage != "64" && reply[0].Usage != "65" { // Usage as seconds
-			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
-		}
-		if reply[0].Cost == -1.0 { // Cost was not calculated
-			t.Errorf("Unexpected Cost for CDR: %+v", reply[0])
-		}
 	}
 }
 
