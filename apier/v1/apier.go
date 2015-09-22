@@ -492,6 +492,13 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 			return err
 		}
 	}
+	userKeys, _ := dbReader.GetLoadedIds(utils.USERS_PREFIX)
+	if len(userKeys) != 0 && self.Users != nil {
+		var r string
+		if err := self.Users.ReloadUsers("", &r); err != nil {
+			return err
+		}
+	}
 	*reply = OK
 	return nil
 }
@@ -1169,7 +1176,6 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return err
 		}
 	}
-
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
