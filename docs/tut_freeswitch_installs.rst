@@ -1,13 +1,13 @@
 Software installation
 =====================
 
-As operating system we have chosen Debian Wheezy, since all the software components we use provide packaging for it.
+As operating system we have chosen Debian Jessie, since all the software components we use provide packaging for it.
 
 
 FreeSWITCH_
 -----------
 
-More information regarding installing FreeSWITCH_ on Debian can be found on it's official `installation wiki <https://confluence.freeswitch.org/display/FREESWITCH/Debian#Debian-DebianPackage>`_.
+More information regarding installing FreeSWITCH_ on Debian can be found on it's official `installation wiki <https://freeswitch.org/confluence/display/FREESWITCH/FreeSWITCH+1.6+Video>`_.
 
 To get FreeSWITCH_ installed and configured, we have choosen the simplest method, out of *vanilla* packages plus one individual module we need: *mod-json-cdr*.
 
@@ -15,12 +15,10 @@ We got FreeSWITCH_ installed via following commands:
 
 ::
 
- gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF
- gpg -a --export D76EDC7725E010CF | sudo apt-key add -
- cd /etc/apt/sources.list.d/
- wget http://apt.itsyscom.com/conf/freeswitch.apt.list
+ wget -O - http://files.freeswitch.org/repo/deb/freeswitch-1.6/key.gpg |apt-key add -
+ echo "deb http://files.freeswitch.org/repo/deb/freeswitch-1.6/ jessie main" > /etc/apt/sources.list.d/freeswitch.list
  apt-get update
- apt-get install freeswitch-meta-vanilla freeswitch-mod-json-cdr
+ apt-get install freeswitch-meta-vanilla freeswitch-mod-json-cdr libyuv-dev
 
 Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
 
