@@ -46,6 +46,7 @@ type ActionTrigger struct {
 	BalanceRatingSubject  string    // filter for balance
 	BalanceCategory       string    // filter for balance
 	BalanceSharedGroup    string    // filter for balance
+	BalanceDisabled       bool      // filter for balance
 	Weight                float64
 	ActionsId             string
 	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
@@ -111,7 +112,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
 	direction := a.Direction == "" || at.BalanceDirection == a.Direction
-	thresholdType, thresholdValue, destinationId, weight, ratingSubject, category, sharedGroup := true, true, true, true, true, true, true
+	thresholdType, thresholdValue, destinationId, weight, ratingSubject, category, sharedGroup, disabled := true, true, true, true, true, true, true, true
 	if a.ExtraParameters != "" {
 		t := struct {
 			ThresholdType        string
@@ -121,6 +122,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 			BalanceRatingSubject string
 			BalanceCategory      string
 			BalanceSharedGroup   string
+			BalanceDisabled      bool
 		}{}
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
 		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
@@ -130,8 +132,9 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
 		category = t.BalanceCategory == "" || at.BalanceCategory == t.BalanceCategory
 		sharedGroup = t.BalanceSharedGroup == "" || at.BalanceSharedGroup == t.BalanceSharedGroup
+		disabled = at.BalanceDisabled == t.BalanceDisabled
 	}
-	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && category && sharedGroup
+	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && category && sharedGroup && disabled
 }
 
 func (at *ActionTrigger) sortDestinationIds() string {

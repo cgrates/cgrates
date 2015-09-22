@@ -482,6 +482,7 @@ type TPActionTrigger struct {
 	BalanceRatingSubject  string  // filter for balance
 	BalanceCategory       string  // filter for balance
 	BalanceSharedGroup    string  // filter for balance
+	BalanceDisabled       bool    // filter for balance
 	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached
 	Weight                float64 // weight

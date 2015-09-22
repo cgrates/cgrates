@@ -436,6 +436,7 @@ func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTri
 			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
 			BalanceCategory:       tpAt.BalanceCategory,
 			BalanceSharedGroup:    tpAt.BalanceSharedGroup,
+			BalanceDisabled:       tpAt.BalanceDisabled,
 			Weight:                tpAt.Weight,
 			ActionsId:             tpAt.ActionsTag,
 			MinQueuedItems:        tpAt.MinQueuedItems,
