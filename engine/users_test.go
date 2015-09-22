@@ -14,8 +14,12 @@ var testMap = UserMap{
 		":user":       map[string]string{"t": "v"},
 		"test:":       map[string]string{"t": "v"},
 		"test1:user1": map[string]string{"t": "v", "x": "y"},
+		"test:masked": map[string]string{"t": "v"},
 	},
 	index: make(map[string]map[string]bool),
+	masked: map[string]bool{
+		"test:masked": true,
+	},
 }
 
 func TestUsersAdd(t *testing.T) {
@@ -157,6 +161,32 @@ func TestUsersGetFull(t *testing.T) {
 	}
 }
 
+func TestUsersGetFullMasked(t *testing.T) {
+	up := UserProfile{
+		Tenant: "test",
+	}
+	results := UserProfiles{}
+	testMap.GetUsers(up, &results)
+	if len(results) != 3 {
+		t.Error("error getting users: ", results)
+	}
+}
+
+func TestUsersGetFullUnMasked(t *testing.T) {
+	up := UserProfile{
+		Tenant: "test",
+		Masked: true,
+	}
+	results := UserProfiles{}
+	testMap.GetUsers(up, &results)
+	if len(results) != 4 {
+		for _, r := range results {
+			t.Logf("U: %+v", r)
+		}
+		t.Error("error getting users: ", results)
+	}
+}
+
 func TestUsersGetTenant(t *testing.T) {
 	up := UserProfile{
 		Tenant:   "testX",
@@ -279,7 +309,7 @@ func TestUsersAddIndex(t *testing.T) {
 	testMap.AddIndex([]string{"t"}, &r)
 	if r != utils.OK ||
 		len(testMap.index) != 1 ||
-		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 4 {
+		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 5 {
 		t.Error("error adding index: ", testMap.index)
 	}
 }
@@ -289,8 +319,8 @@ func TestUsersAddIndexFull(t *testing.T) {
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	if r != utils.OK ||
-		len(testMap.index) != 6 ||
-		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 4 {
+		len(testMap.index) != 7 ||
+		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 5 {
 		t.Error("error adding index: ", testMap.index)
 	}
 }

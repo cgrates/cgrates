@@ -62,6 +62,7 @@ type UserService interface {
 
 type UserMap struct {
 	table        map[string]map[string]string
+	masked       map[string]bool
 	index        map[string]map[string]bool
 	indexKeys    []string
 	accountingDb AccountingStorage
@@ -80,6 +81,7 @@ func NewUserMap(accountingDb AccountingStorage, indexes []string) (*UserMap, err
 func newUserMap(accountingDb AccountingStorage, indexes []string) *UserMap {
 	return &UserMap{
 		table:        make(map[string]map[string]string),
+		masked:       make(map[string]bool),
 		index:        make(map[string]map[string]bool),
 		indexKeys:    indexes,
 		accountingDb: accountingDb,
@@ -92,18 +94,24 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	// backup old data
 	oldTable := um.table
 	oldIndex := um.index
+	oldMaksed := um.masked
 	um.table = make(map[string]map[string]string)
 	um.index = make(map[string]map[string]bool)
+	um.masked = make(map[string]bool)
 
 	// load from db
 	if ups, err := um.accountingDb.GetUsers(); err == nil {
 		for _, up := range ups {
 			um.table[up.GetId()] = up.Profile
+			if up.Masked {
+				um.masked[up.GetId()] = true
+			}
 		}
 	} else {
 		// restore old data before return
 		um.table = oldTable
 		um.index = oldIndex
+		um.masked = oldMaksed
 
 		*reply = err.Error()
 		return err
@@ -116,6 +124,7 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 			Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", um.indexKeys, err))
 			um.table = oldTable
 			um.index = oldIndex
+			um.masked = oldMaksed
 
 			*reply = err.Error()
 			return err
@@ -133,6 +142,9 @@ func (um *UserMap) SetUser(up UserProfile, reply *string) error {
 		return err
 	}
 	um.table[up.GetId()] = up.Profile
+	if up.Masked {
+		um.masked[up.GetId()] = true
+	}
 	um.addIndex(&up, um.indexKeys)
 	*reply = utils.OK
 	return nil
@@ -146,6 +158,7 @@ func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
 		return err
 	}
 	delete(um.table, up.GetId())
+	delete(um.masked, up.GetId())
 	um.deleteIndex(&up)
 	*reply = utils.OK
 	return nil
@@ -159,6 +172,7 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 		*reply = utils.ErrNotFound.Error()
 		return utils.ErrNotFound
 	}
+	masked := um.masked[up.GetId()]
 	if m == nil {
 		m = make(map[string]string)
 	}
@@ -169,6 +183,7 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 	oldUp := &UserProfile{
 		Tenant:   up.Tenant,
 		UserName: up.UserName,
+		Masked:   masked,
 		Profile:  oldM,
 	}
 	for key, value := range up.Profile {
@@ -177,6 +192,7 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 	finalUp := &UserProfile{
 		Tenant:   up.Tenant,
 		UserName: up.UserName,
+		Masked:   up.Masked,
 		Profile:  m,
 	}
 	if err := um.accountingDb.SetUser(finalUp); err != nil {
@@ -184,6 +200,9 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 		return err
 	}
 	um.table[up.GetId()] = m
+	if up.Masked == false {
+		delete(um.masked, up.GetId())
+	}
 	um.deleteIndex(oldUp)
 	um.addIndex(finalUp, um.indexKeys)
 	*reply = utils.OK
@@ -227,6 +246,10 @@ func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
 
 	candidates := make(UserProfiles, 0) // It should not return nil in case of no users but []
 	for key, values := range table {
+		// skip masked if not asked for
+		if up.Masked == false && um.masked[key] == true {
+			continue
+		}
 		ponder := 0
 		tableUP := &UserProfile{
 			Profile: values,
@@ -258,7 +281,10 @@ func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
 			continue
 		}
 		// all filters passed, add to candidates
-		nup := &UserProfile{Profile: make(map[string]string)}
+		nup := &UserProfile{
+			Profile: make(map[string]string),
+			Masked:  um.masked[key],
+		}
 		nup.SetId(key)
 		nup.ponder = ponder
 		for k, v := range tableUP.Profile {
@@ -427,6 +453,7 @@ func LoadUserProfile(in interface{}, extraFields string) error {
 		return nil
 	}
 	up := &UserProfile{
+		Masked:  false, // do not get masked users
 		Profile: make(map[string]string),
 	}
 	tenant := m["Tenant"]
