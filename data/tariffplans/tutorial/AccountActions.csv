@@ -1,4 +1,4 @@
-#Tenant,Account,Direction,ActionPlanTag,ActionTriggersTag,AllowNegative,Disabled
+#Tenant,Account,Direction,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
 cgrates.org,1001,*out,PACKAGE_1001,STANDARD_TRIGGERS,,
 cgrates.org,1002,*out,PACKAGE_10,STANDARD_TRIGGERS,,
 cgrates.org,1003,*out,PACKAGE_10,STANDARD_TRIGGERS,,
