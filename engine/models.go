@@ -201,9 +201,10 @@ type TpActionTrigger struct {
 	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*|\*any"`
 	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
-	MinQueuedItems         int     `index:"16" re:"\d+"`
-	ActionsTag             string  `index:"17" re:"\w+"`
-	Weight                 float64 `index:"18" re:"\d+\.?\d*"`
+	BalanceDisabled        bool    `index:"16" re:""`
+	MinQueuedItems         int     `index:"17" re:"\d+"`
+	ActionsTag             string  `index:"18" re:"\w+"`
+	Weight                 float64 `index:"19" re:"\d+\.?\d*"`
 	CreatedAt              time.Time
 }
 

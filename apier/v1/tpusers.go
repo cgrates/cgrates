@@ -47,7 +47,8 @@ func (self *ApierV1) GetTPUser(attr AttrGetTPUser, reply *utils.TPUsers) error {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	usr := &engine.TpUser{
-		Tpid: attr.TPid,
+		Tpid:   attr.TPid,
+		Masked: true,
 	}
 	usr.SetId(attr.UserId)
 	if tms, err := self.StorDb.GetTpUsers(usr); err != nil {

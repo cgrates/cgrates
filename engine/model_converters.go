@@ -231,6 +231,7 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result []TpActionTrig
 			BalanceRatingSubject:   at.BalanceRatingSubject,
 			BalanceCategory:        at.BalanceCategory,
 			BalanceSharedGroup:     at.BalanceSharedGroup,
+			BalanceDisabled:        at.BalanceDisabled,
 			MinQueuedItems:         at.MinQueuedItems,
 			ActionsTag:             at.ActionsId,
 			Weight:                 at.Weight,

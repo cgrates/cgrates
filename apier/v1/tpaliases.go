@@ -72,7 +72,7 @@ func (self *ApierV1) GetTPAliasIds(attrs AttrGetTPAliasIds, reply *[]string) err
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ALIASES, utils.TPDistinctIds{"`direction`", "`tenant`", "`category`", "`account`", "`subject`", "`group`"}, nil, &attrs.Paginator); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_ALIASES, utils.TPDistinctIds{"direction", "tenant", "category", "account", "subject", "context"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound

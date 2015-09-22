@@ -1,6 +1,6 @@
-#Tag[0],UniqueId[1],ThresholdType[2],ThresholdValue[3],Recurrent[4],MinSleep[5],BalanceTag[6],BalanceType[7],BalanceDirection[8],BalanceCategory[9],BalanceDestinationTag[10],BalanceRatingSubject[11],BalanceSharedGroup[12],BalanceExpiryTime[13],BalanceTimingTags[14],BalanceWeight[15],StatsMinQueuedItems[16],ActionsTag[17],Weight[18]
-CDRST3_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,3,CDRST_LOG,10
-CDRST3_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,5,CDRST_LOG,10
-CDRST3_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,5,CDRST_LOG,10
-CDRST4_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,5,CDRST_LOG,10
-CDRST4_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,2,CDRST_LOG,10
+#Tag[0],UniqueId[1],ThresholdType[2],ThresholdValue[3],Recurrent[4],MinSleep[5],BalanceTag[6],BalanceType[7],BalanceDirection[8],BalanceCategory[9],BalanceDestinationTag[10],BalanceRatingSubject[11],BalanceSharedGroup[12],BalanceExpiryTime[13],BalanceTimingTags[14],BalanceWeight[15],BalanceDisabled[16],StatsMinQueuedItems[17],ActionsTag[18],Weight[19]
+CDRST3_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,,3,CDRST_LOG,10
+CDRST3_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,,5,CDRST_LOG,10
+CDRST3_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,,5,CDRST_LOG,10
+CDRST4_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,,5,CDRST_LOG,10
+CDRST4_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,,2,CDRST_LOG,10
