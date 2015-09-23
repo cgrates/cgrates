@@ -1,10 +1,12 @@
 # edit servers config files
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/redis/redis.conf /etc/mysql/my.cnf
 echo 'host    all             all             0.0.0.0/32            md5'>>/etc/postgresql/9.4/main/pg_hba.conf
+sed -i 's/ulimit/#ulimit/g' /etc/init.d/cassandra
 
 /etc/init.d/mysql start
 /etc/init.d/postgresql start
 /etc/init.d/redis-server start
+/etc/init.d/cassandra start
 
 # create a link to data dir
 ln -s /root/code/src/github.com/cgrates/cgrates/data /usr/share/cgrates

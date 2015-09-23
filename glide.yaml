@@ -34,3 +34,9 @@ import:
     ref:     a376b1f937ba959857929fa3e111c0f3243278c0
   - package: github.com/cgrates/fsock
     ref:     7ec136e2798fbfe44f713f5ee5828ce643dec4c2
+  - package: github.com/gocql/gocql
+    ref:     5c0a2c93853c0e6d6806853c000afd694b5851f7
+  - package: github.com/golang/snappy
+    ref:     723cc1e459b8eea2dea4583200fd60757d40097a
+  - package: gopkg.in/inf.v0
+    ref:     3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
