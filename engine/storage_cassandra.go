@@ -40,8 +40,38 @@ func (cs *CassandraStorage) Flush(ignore string) (err error) {
 	return cs.db.Query(fmt.Sprintf("delete * from %s", cs.keyspace)).Exec()
 }
 
-func (cs *CassandraStorage) SetRatedCdr(*StoredCdr) error                                { return nil }
-func (cs *CassandraStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error { return nil }
+func (cs *CassandraStorage) SetRatedCdr(*StoredCdr) error { return nil }
+func (cs *CassandraStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
+	/*if cc == nil {
+		return nil
+	}
+	tss, err := json.Marshal(cc.Timespans)
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
+		return err
+	}
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,tor,direction,tenant,category,account,subject,destination,cost,timespans,cost_source,created_at) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s',%f,'%s','%s','%s') ON DUPLICATE KEY UPDATE tor=values(tor),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),cost=values(cost),timespans=values(timespans),cost_source=values(cost_source),updated_at='%s'",
+		utils.TBL_COST_DETAILS,
+		cgrid,
+		runid,
+		cc.TOR,
+		cc.Direction,
+		cc.Tenant,
+		cc.Category,
+		cc.Account,
+		cc.Subject,
+		cc.Destination,
+		cc.Cost,
+		tss,
+		source,
+		time.Now().Format(time.RFC3339),
+		time.Now().Format(time.RFC3339)))
+	if err != nil {
+		Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
+		return err
+	}*/
+	return nil
+}
 func (cs *CassandraStorage) GetCallCostLog(cgrid, source, runid string) (*CallCost, error) {
 	return nil, nil
 }
