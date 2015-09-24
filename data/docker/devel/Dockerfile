@@ -25,6 +25,9 @@ RUN useradd -c CGRateS -d /var/run/cgrates -s /bin/false -r cgrates
 # install golang
 RUN wget -qO- https://storage.googleapis.com/golang/go1.5.1.linux-amd64.tar.gz | tar xzf - -C /root/
 
+#install glide
+RUN GOROOT=/root/go GOPATH=/root/code /root/go/bin/go get github.com/Masterminds/glide
+
 #install oh-my-zsh
 RUN TERM=xterm sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"; exit 0
 

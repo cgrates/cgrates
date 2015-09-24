@@ -21,9 +21,8 @@ export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPAT
 export GO15VENDOREXPERIMENT=1
 
 # build and install cgrates
-go get -v github.com/Masterminds/glide
 cd /root/cgr
-glide -y devel.yaml up
+#glide -y devel.yaml up
 ./build.sh
 
 # create cgr-engine link
@@ -32,7 +31,7 @@ ln -s /root/code/bin/cgr-engine /usr/bin/cgr-engine
 # expand freeswitch conf
 cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_conf.tar.gz
 
-cd /root/.oh-my-zsh; git pull
+#cd /root/.oh-my-zsh; git pull
 
 cd /root/cgr
 echo "for cgradmin run: cgr-engine -config_dir data/conf/samples/cgradmin"
