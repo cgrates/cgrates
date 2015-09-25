@@ -134,31 +134,31 @@ func TestPassesFieldFilter(t *testing.T) {
 	if pass, _ := cdr.PassesFieldFilter(nil); !pass {
 		t.Error("Not passing filter")
 	}
-	acntPrefxFltr, _ := utils.NewRSRField(`~account:s/(.+)/1001/`)
+	acntPrefxFltr, _ := utils.NewRSRField(`~Account:s/(.+)/1001/`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing filter")
 	}
-	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^(10)\d\d$/10/`)
+	acntPrefxFltr, _ = utils.NewRSRField(`~Account:s/^(10)\d\d$/10/`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}
-	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^\d(10)\d$/10/`)
+	acntPrefxFltr, _ = utils.NewRSRField(`~Account:s/^\d(10)\d$/10/`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Passing filter")
 	}
-	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^(10)\d\d$/010/`)
+	acntPrefxFltr, _ = utils.NewRSRField(`~Account:s/^(10)\d\d$/010/`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Passing filter")
 	}
-	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^1010$/1010/`)
+	acntPrefxFltr, _ = utils.NewRSRField(`~Account:s/^1010$/1010/`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Passing filter")
 	}
-	torFltr, _ := utils.NewRSRField(`^tor::*voice/`)
+	torFltr, _ := utils.NewRSRField(`^TOR::*voice/`)
 	if pass, _ := cdr.PassesFieldFilter(torFltr); !pass {
 		t.Error("Not passing filter")
 	}
-	torFltr, _ = utils.NewRSRField(`^tor/*data/`)
+	torFltr, _ = utils.NewRSRField(`^TOR/*data/`)
 	if pass, _ := cdr.PassesFieldFilter(torFltr); pass {
 		t.Error("Passing filter")
 	}
@@ -172,7 +172,7 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 	cdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem0005",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	acntPrefxFltr, _ := utils.NewRSRField(`~account:s/^\w+[shmp]\d{4}$//`)
+	acntPrefxFltr, _ := utils.NewRSRField(`~Account:s/^\w+[shmp]\d{4}$//`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}
@@ -186,11 +186,11 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 	cdr = &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0402129281",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^0\d{9}$//`)
+	acntPrefxFltr, _ = utils.NewRSRField(`~Account:s/^0\d{9}$//`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}
-	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^0(\d{9})$/placeholder/`)
+	acntPrefxFltr, _ = utils.NewRSRField(`~Account:s/^0(\d{9})$/placeholder/`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
@@ -203,14 +203,14 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 	cdr = &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0162447222",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if acntPrefxFltr, err := utils.NewRSRField(`~account:s/^0\d{9}$//`); err != nil {
+	if acntPrefxFltr, err := utils.NewRSRField(`~Account:s/^0\d{9}$//`); err != nil {
 		t.Error("Unexpected parse error", err)
 	} else if acntPrefxFltr == nil {
 		t.Error("Failed parsing rule")
 	} else if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}
-	if acntPrefxFltr, err := utils.NewRSRField(`~account:s/^\w+[shmp]\d{4}$//`); err != nil {
+	if acntPrefxFltr, err := utils.NewRSRField(`~Account:s/^\w+[shmp]\d{4}$//`); err != nil {
 		t.Error("Unexpected parse error", err)
 	} else if acntPrefxFltr == nil {
 		t.Error("Failed parsing rule")
@@ -390,7 +390,7 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	rsrStSuppl, _ := utils.NewRSRField("^supplier1")
 	rsrStDCause, _ := utils.NewRSRField("^HANGUP_COMPLETE")
 	rsrPdd, _ := utils.NewRSRField("^3")
-	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStIn, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: "destination"},
+	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStIn, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: utils.DESTINATION},
 		rsrStST, rsrPdd, rsrStAT, rsrStDur, rsrStSuppl, rsrStDCause, []*utils.RSRField{}, true, "")
 	if err != nil {
 		t.Error("Unexpected error received", err)
@@ -404,9 +404,10 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
 	}
-	_, err = storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: "dummy_header"}, &utils.RSRField{Id: "direction"}, &utils.RSRField{Id: "tenant"},
-		&utils.RSRField{Id: "tor"}, &utils.RSRField{Id: "account"}, &utils.RSRField{Id: "subject"}, &utils.RSRField{Id: "destination"},
-		&utils.RSRField{Id: "setup_time"}, &utils.RSRField{Id: utils.PDD}, &utils.RSRField{Id: "answer_time"}, &utils.RSRField{Id: "duration"}, &utils.RSRField{Id: utils.SUPPLIER},
+	_, err = storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: "dummy_header"}, &utils.RSRField{Id: utils.DIRECTION}, &utils.RSRField{Id: utils.TENANT},
+		&utils.RSRField{Id: utils.TOR}, &utils.RSRField{Id: utils.ACCOUNT}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.DESTINATION},
+		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.PDD}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE},
+		&utils.RSRField{Id: utils.SUPPLIER},
 		&utils.RSRField{Id: utils.DISCONNECT_CAUSE}, []*utils.RSRField{}, true, "")
 	if err == nil {
 		t.Error("Failed to detect missing header")

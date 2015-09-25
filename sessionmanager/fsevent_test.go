@@ -586,7 +586,7 @@ FreeSWITCH-Switchname: h1.ip-switch.net
 FreeSWITCH-IPv4: 88.198.12.156
 Caller-Username: futurem0005`
 	ev := new(FSEvent).AsEvent(body)
-	acntPrefxFltr, _ := utils.NewRSRField(`~account:s/^\w+[shmp]\d{4}$//`)
+	acntPrefxFltr, _ := utils.NewRSRField(`~Account:s/^\w+[shmp]\d{4}$//`)
 	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}
@@ -607,7 +607,7 @@ FreeSWITCH-Switchname: h1.ip-switch.net
 FreeSWITCH-IPv4: 88.198.12.156
 Caller-Username: 0402129281`
 	ev = new(FSEvent).AsEvent(body)
-	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^0\d{9}$//`)
+	acntPrefxFltr, _ = utils.NewRSRField(`~Account:s/^0\d{9}$//`)
 	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}

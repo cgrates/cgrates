@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -63,6 +64,8 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal, timezone s
 		cdr.Subject += fieldVal
 	case utils.DESTINATION:
 		cdr.Destination += fieldVal
+	case utils.RATED:
+		cdr.Rated, _ = strconv.ParseBool(fieldVal)
 	case utils.SETUP_TIME:
 		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
 			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())

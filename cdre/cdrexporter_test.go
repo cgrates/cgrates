@@ -56,17 +56,17 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
-	fltrRule, _ := utils.ParseRSRFields("~mediation_runid:s/default/RUN_RTL/", utils.INFIELD_SEP)
-	val, _ := utils.ParseRSRFields("cost", utils.INFIELD_SEP)
-	cfgCdrFld := &config.CfgCdrField{Tag: "cost", Type: "cdrfield", CdrFieldId: "cost", Value: val, FieldFilter: fltrRule}
+	fltrRule, _ := utils.ParseRSRFields("~MediationRunId:s/default/RUN_RTL/", utils.INFIELD_SEP)
+	val, _ := utils.ParseRSRFields(utils.COST, utils.INFIELD_SEP)
+	cfgCdrFld := &config.CfgCdrField{Tag: "cost", Type: "cdrfield", CdrFieldId: utils.COST, Value: val, FieldFilter: fltrRule}
 	if costVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if costVal != "1.01" {
 		t.Error("Expecting: 1.01, received: ", costVal)
 	}
-	fltrRule, _ = utils.ParseRSRFields("~mediation_runid:s/default/RETAIL1/", utils.INFIELD_SEP)
-	val, _ = utils.ParseRSRFields("account", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "account", Type: "cdrfield", CdrFieldId: "account", Value: val, FieldFilter: fltrRule}
+	fltrRule, _ = utils.ParseRSRFields("~MediationRunId:s/default/RETAIL1/", utils.INFIELD_SEP)
+	val, _ = utils.ParseRSRFields(utils.ACCOUNT, utils.INFIELD_SEP)
+	cfgCdrFld = &config.CfgCdrField{Tag: utils.ACCOUNT, Type: "cdrfield", CdrFieldId: utils.ACCOUNT, Value: val, FieldFilter: fltrRule}
 	if acntVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if acntVal != "1000" {
@@ -109,15 +109,15 @@ func TestCdreCdrFieldValue(t *testing.T) {
 		ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.01}
-	val, _ := utils.ParseRSRFields("destination", utils.INFIELD_SEP)
-	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: "cdrfield", CdrFieldId: "destination", Value: val}
+	val, _ := utils.ParseRSRFields(utils.DESTINATION, utils.INFIELD_SEP)
+	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: "cdrfield", CdrFieldId: utils.DESTINATION, Value: val}
 	if val, err := cdre.cdrFieldValue(cdr, cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if val != cdr.Destination {
 		t.Errorf("Expecting: %s, received: %s", cdr.Destination, val)
 	}
 	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: "cdrfield", CdrFieldId: "destination", Value: val, FieldFilter: fltr}
+	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: "cdrfield", CdrFieldId: utils.DESTINATION, Value: val, FieldFilter: fltr}
 	if _, err := cdre.cdrFieldValue(cdr, cfgCdrFld); err == nil {
 		t.Error("Failed to use filter")
 	}
