@@ -1,0 +1,5 @@
+tar-ignore = .hg
+tar-ignore = .git
+tar-ignore = .bzr
+tar-ignore = .gitignore
+tar-ignore = .travis.yml
