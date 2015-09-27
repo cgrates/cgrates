@@ -4,6 +4,8 @@ cgrates (0.9.1~rc8) UNRELEASED; urgency=low
 
  -- DanB <danb@cgrates.org>  Monday, 22 September 2015 12:05:00 +0200
 
+ cgrates (0.9.1~rc7) UNRELEASED; urgency=low
+
   * RC7.
 
  -- DanB <danb@cgrates.org>  Wednesday, 3 August 2015 14:04:00 -0600
