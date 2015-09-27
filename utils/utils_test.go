@@ -221,7 +221,7 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	}
 	if nowTm, err := ParseTimeDetectLayout(META_NOW, ""); err != nil {
 		t.Error(err)
-	} else if time.Now().Sub(nowTm) > time.Duration(1)*time.Millisecond {
+	} else if time.Now().Sub(nowTm) > time.Duration(10)*time.Millisecond {
 		t.Errorf("Unexpected time parsed: %v", nowTm)
 	}
 	eamonTmStr := "31/05/2015 14:46:00"
