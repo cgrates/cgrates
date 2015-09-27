@@ -9,6 +9,6 @@ Homepage: http://cgrates.org
 Package: cgrates
 Architecture: amd64
 Suggests: git, redis-server, mysql-server
-Version: 0.9.1-rc7
+Version: 0.9.1-rc8
 Description: Carrier Grade Real-time Charging System
   CGRateS is a very fast and easy scalable real-time charging system for Telecom environments.
