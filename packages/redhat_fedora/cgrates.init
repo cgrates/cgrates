@@ -1,0 +1,98 @@
+#!/bin/bash
+#
+# Startup script for CGRateS
+#
+# chkconfig: - 85 15
+# description: Carrier Grade Real-time Charging System
+#
+# processname: cgr-engine
+# pidfile: /var/run/cgrates.pid
+# config: /etc/cgrates/cgrates.json
+#
+### BEGIN INIT INFO
+# Provides: cgrates
+# Required-Start: $local_fs $network $named
+# Should-Start: mysqld postgresql
+# Short-Description: start, stop CGRateS
+# Description: Carrier Grade Real-time Charging System
+### END INIT INFO
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+piddir="/var/run/cgrates"
+pidfile="$piddir/cgrates.pid"
+
+lockfile="/var/lock/subsys/cgrates"
+
+OPTIONS=""
+RETVAL=0
+
+[ -f /etc/sysconfig/cgrates ] && . /etc/sysconfig/cgrates
+
+start() {
+	echo -n $"Starting cgrates: "
+
+	# check whether CGRateS was already started
+	if status -p $pidfile cgr-engine > /dev/null 2>&1 ; then
+		echo -n "already running" && warning && echo
+		return 0
+	fi
+
+	mkdir -p $piddir
+	chown cgrates:cgrates $piddir
+	su cgrates -s /bin/sh -c "cgr-engine -pid=$pidfile $OPTIONS" 2>/dev/null &
+	RETVAL=$?
+	if [ $RETVAL = 0 ]; then
+		touch $lockfile
+		echo_success
+	else
+		echo_failure
+	fi
+	echo
+	return $RETVAL
+}
+
+stop() {
+	echo -n $"Stopping cgrates: "
+	# check whether CGRateS is running
+	if ! status -p $pidfile cgrates > /dev/null 2>&1 ; then
+		echo -n "not running" && warning && echo
+		return 0
+	fi
+
+	killproc cgr-engine 2> /dev/null
+	RETVAL=$?
+	echo
+	[ $RETVAL = 0 ] && rm -f $lockfile $pidfile
+	return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	status)
+		status -p $pidfile cgrates
+		RETVAL=$?
+		;;
+	restart|reload)
+		stop
+		start
+		;;
+	condrestart|try-restart)
+		if [ -f $pidfile ] ; then
+			stop
+			start
+		fi
+		;;
+	*)
+		echo $"Usage: cgrates {start|stop|reload|restart|condrestart|status|help}"
+		RETVAL=2
+esac
+
+exit $RETVAL

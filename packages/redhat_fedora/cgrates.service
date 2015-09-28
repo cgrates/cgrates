@@ -1,0 +1,15 @@
+[Unit]
+Description=Carrier Grade Real-time Charging System
+After=network.target mysqld.service postgresql.service redis.service
+
+[Service]
+Type=simple
+User=cgrates
+Group=cgrates
+EnvironmentFile=-/etc/sysconfig/cgrates
+ExecStart=/usr/bin/cgr-engine $OPTIONS
+Restart=always
+TimeoutStopSec=30s
+
+[Install]
+WantedBy=multi-user.target
