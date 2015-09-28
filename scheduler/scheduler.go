@@ -80,17 +80,17 @@ func (s *Scheduler) Loop() {
 }
 
 func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
-	actionTimings, err := storage.GetAllActionPlans()
+	actionPlans, err := storage.GetAllActionPlans()
 	if err != nil {
-		engine.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
+		engine.Logger.Warning(fmt.Sprintf("Cannot get action plans: %v", err))
 	}
 	// recreate the queue
 	s.Lock()
 	s.queue = engine.ActionPlanPriotityList{}
-	for key, ats := range actionTimings {
+	for key, ats := range actionPlans {
 		toBeSaved := false
 		isAsap := false
-		newAts := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
+		newApls := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
 		for _, at := range ats {
 			isAsap = at.IsASAP()
 			toBeSaved = toBeSaved || isAsap
@@ -100,7 +100,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 				}
 				at.Execute()
 				at.AccountIds = make([]string, 0)
-				// do not append it to the newAts list to be saved
+				// do not append it to the newApls list to be saved
 			} else {
 				now := time.Now()
 				if at.GetNextStartTime(now).Before(now) {
@@ -109,12 +109,12 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 				}
 				s.queue = append(s.queue, at)
 			}
-			// save even asap action timings with empty account id list
-			newAts = append(newAts, at)
+			// save even asap action plans with empty account id list
+			newApls = append(newApls, at)
 		}
 		if toBeSaved {
 			engine.Guardian.Guard(func() (interface{}, error) {
-				storage.SetActionPlans(key, newAts)
+				storage.SetActionPlans(key, newApls)
 				return 0, nil
 			}, 0, utils.ACTION_TIMING_PREFIX)
 		}
