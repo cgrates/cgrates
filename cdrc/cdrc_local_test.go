@@ -93,7 +93,7 @@ func stopEngine() error {
 }
 
 // Need it here and not in init since Travis has no possibility to load local file
-func TestLoadConfigt(*testing.T) {
+func TestCsvLclLoadConfigt(*testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -104,7 +104,7 @@ func TestLoadConfigt(*testing.T) {
 	}
 }
 
-func TestEmptyTables(t *testing.T) {
+func TestCsvLclEmptyTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -131,7 +131,7 @@ func TestEmptyTables(t *testing.T) {
 }
 
 // Creates cdr files and starts the engine
-func TestCreateCdrFiles(t *testing.T) {
+func TestCsvLclCreateCdrFiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -162,7 +162,7 @@ func TestCreateCdrFiles(t *testing.T) {
 
 }
 
-func TestProcessCdrDir(t *testing.T) {
+func TestCsvLclProcessCdrDir(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -187,7 +187,7 @@ func TestProcessCdrDir(t *testing.T) {
 }
 
 // Creates cdr files and starts the engine
-func TestCreateCdr3File(t *testing.T) {
+func TestCsvLclCreateCdr3File(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -202,7 +202,7 @@ func TestCreateCdr3File(t *testing.T) {
 	}
 }
 
-func TestProcessCdr3Dir(t *testing.T) {
+func TestCsvLclProcessCdr3Dir(t *testing.T) {
 	if !*testLocal {
 		return
 	}

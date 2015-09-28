@@ -95,6 +95,7 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal, timezone s
 // Understands and processes a specific format of cdr (eg: .csv or .fwv)
 type RecordsProcessor interface {
 	ProcessNextRecord() ([]*engine.StoredCdr, error) // Process a single record in the CDR file, return a slice of CDRs since based on configuration we can have more templates
+	ProcessedRecordsNr() int64
 }
 
 /*
@@ -260,7 +261,7 @@ func (self *Cdrc) processFile(filePath string) error {
 	default:
 		return fmt.Errorf("Unsupported CDR format: %s", self.cdrFormat)
 	}
-	procRowNr := 0
+	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	cdrsPosted := 0
 	timeStart := time.Now()
 	for {
@@ -268,9 +269,8 @@ func (self *Cdrc) processFile(filePath string) error {
 		if err != nil && err == io.EOF {
 			break
 		}
-		procRowNr += 1
 		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d, error: %s", procRowNr, err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d, error: %s", rowNr, err.Error()))
 			continue
 		}
 		for _, storedCdr := range cdrs { // Send CDRs to CDRS
@@ -283,9 +283,8 @@ func (self *Cdrc) processFile(filePath string) error {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", storedCdr, reply))
-			} else {
-				cdrsPosted += 1
 			}
+			cdrsPosted += 1
 		}
 	}
 	// Finished with file, move it to processed folder
@@ -295,6 +294,6 @@ func (self *Cdrc) processFile(filePath string) error {
 		return err
 	}
 	engine.Logger.Info(fmt.Sprintf("Finished processing %s, moved to %s. Total records processed: %d, CDRs posted: %d, run duration: %s",
-		fn, newPath, procRowNr, cdrsPosted, time.Now().Sub(timeStart)))
+		fn, newPath, recordsProcessor.ProcessedRecordsNr(), cdrsPosted, time.Now().Sub(timeStart)))
 	return nil
 }

@@ -52,16 +52,17 @@ func NewFwvRecordsProcessor(file *os.File, cdrcCfgs map[string]*config.CdrcConfi
 }
 
 type FwvRecordsProcessor struct {
-	file             *os.File
-	cdrcCfgs         map[string]*config.CdrcConfig
-	dfltCfg          *config.CdrcConfig // General parameters
-	httpClient       *http.Client
-	httpSkipTlsCheck bool
-	timezone         string
-	lineLen          int64             // Length of the line in the file
-	offset           int64             // Index of the next byte to process
-	trailerOffset    int64             // Index where trailer starts, to be used as boundary when reading cdrs
-	headerCdr        *engine.StoredCdr // Cache here the general purpose stored CDR
+	file               *os.File
+	cdrcCfgs           map[string]*config.CdrcConfig
+	dfltCfg            *config.CdrcConfig // General parameters
+	httpClient         *http.Client
+	httpSkipTlsCheck   bool
+	timezone           string
+	lineLen            int64             // Length of the line in the file
+	offset             int64             // Index of the next byte to process
+	processedRecordsNr int64             // Number of content records in file
+	trailerOffset      int64             // Index where trailer starts, to be used as boundary when reading cdrs
+	headerCdr          *engine.StoredCdr // Cache here the general purpose stored CDR
 }
 
 // Sets the line length based on first line, sets offset back to initial after reading
@@ -76,6 +77,10 @@ func (self *FwvRecordsProcessor) setLineLen() error {
 		return err
 	}
 	return nil
+}
+
+func (self *FwvRecordsProcessor) ProcessedRecordsNr() int64 {
+	return self.processedRecordsNr
 }
 
 func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error) {
@@ -116,6 +121,7 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 		engine.Logger.Err(fmt.Sprintf("<Cdrc> Could not read complete line, have instead: %s", string(buf)))
 		return nil, io.EOF
 	}
+	self.processedRecordsNr += 1
 	record := string(buf)
 	for cfgKey := range self.cdrcCfgs {
 		if passes := self.recordPassesCfgFilter(record, cfgKey); !passes {

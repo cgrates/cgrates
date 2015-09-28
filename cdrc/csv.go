@@ -195,6 +195,7 @@ type CsvRecordsProcessor struct {
 	timezone            string // Timezone for CDRs which are not clearly specifying it
 	fileName            string
 	failedCallsPrefix   string
+	processedRecordsNr  int64    // Number of content records in file
 	cdrSourceIds        []string // Should be in sync with cdrFields on indexes
 	duMultiplyFactors   []float64
 	cdrFilters          []utils.RSRFields       // Should be in sync with cdrFields on indexes
@@ -203,11 +204,16 @@ type CsvRecordsProcessor struct {
 	partialRecordsCache *PartialRecordsCache // Shared by cdrc so we can cache for all files in a folder
 }
 
+func (self *CsvRecordsProcessor) ProcessedRecordsNr() int64 {
+	return self.processedRecordsNr
+}
+
 func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error) {
 	record, err := self.csvReader.Read()
 	if err != nil {
 		return nil, err
 	}
+	self.processedRecordsNr += 1
 	if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.cdrFormat) {
 		if record, err = self.processPartialRecord(record); err != nil {
 			return nil, err
