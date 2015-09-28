@@ -20,6 +20,7 @@ package scheduler
 
 import (
 	"fmt"
+	"log"
 	"sort"
 	"sync"
 	"time"
@@ -87,32 +88,35 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	// recreate the queue
 	s.Lock()
 	s.queue = engine.ActionPlanPriotityList{}
-	for key, ats := range actionPlans {
+	for key, aps := range actionPlans {
 		toBeSaved := false
 		isAsap := false
 		newApls := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
-		for _, at := range ats {
-			isAsap = at.IsASAP()
+		for _, ap := range aps {
+			log.Printf("AP %+v", ap)
+			isAsap = ap.IsASAP()
 			toBeSaved = toBeSaved || isAsap
 			if isAsap {
-				if len(at.AccountIds) > 0 {
+				if len(ap.AccountIds) > 0 {
 					engine.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
 				}
-				at.Execute()
-				at.AccountIds = make([]string, 0)
-				// do not append it to the newApls list to be saved
+				ap.Execute()
+				ap.AccountIds = make([]string, 0)
 			} else {
 				now := time.Now()
-				if at.GetNextStartTime(now).Before(now) {
+				if ap.GetNextStartTime(now).Before(now) {
 					// the task is obsolete, do not add it to the queue
 					continue
 				}
-				s.queue = append(s.queue, at)
+				s.queue = append(s.queue, ap)
 			}
 			// save even asap action plans with empty account id list
-			newApls = append(newApls, at)
+			newApls = append(newApls, ap)
 		}
 		if toBeSaved {
+			for _, ap := range newApls {
+				log.Printf("NewAP: %+v", ap)
+			}
 			engine.Guardian.Guard(func() (interface{}, error) {
 				storage.SetActionPlans(key, newApls)
 				return 0, nil

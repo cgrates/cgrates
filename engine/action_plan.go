@@ -296,6 +296,9 @@ func (at *ActionPlan) Execute() (err error) {
 }
 
 func (at *ActionPlan) IsASAP() bool {
+	if at.Timing == nil {
+		return false
+	}
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
 

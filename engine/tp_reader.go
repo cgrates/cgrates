@@ -571,7 +571,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 			if !exists {
 				return fmt.Errorf("[ActionPlans] Could not load the timing for tag: %v", at.TimingId)
 			}
-			actTmg := &ActionPlan{
+			actPln := &ActionPlan{
 				Uuid:   utils.GenUUID(),
 				Id:     atId,
 				Weight: at.Weight,
@@ -586,7 +586,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 				},
 				ActionsId: at.ActionsId,
 			}
-			tpr.actionPlans[atId] = append(tpr.actionPlans[atId], actTmg)
+			tpr.actionPlans[atId] = append(tpr.actionPlans[atId], actPln)
 		}
 	}
 
@@ -694,7 +694,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				} else {
 					t = tpr.timings[at.TimingId] // *asap
 				}
-				actTmg := &ActionPlan{
+				actPln := &ActionPlan{
 					Uuid:   utils.GenUUID(),
 					Id:     accountAction.ActionPlanId,
 					Weight: at.Weight,
@@ -709,7 +709,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					ActionsId: at.ActionsId,
 				}
 				// collect action ids from timings
-				actionsIds = append(actionsIds, actTmg.ActionsId)
+				actionsIds = append(actionsIds, actPln.ActionsId)
 				//add user balance id if no already in
 				found := false
 				for _, ubId := range exitingAccountIds {
@@ -719,9 +719,9 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					}
 				}
 				if !found {
-					actTmg.AccountIds = append(exitingAccountIds, id)
+					actPln.AccountIds = append(exitingAccountIds, id)
 				}
-				actionTimings = append(actionTimings, actTmg)
+				actionTimings = append(actionTimings, actPln)
 			}
 
 			// write action triggers
@@ -1503,7 +1503,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ACTION_PREFIX: // actionPlans
+	case utils.ACTION_PREFIX:
 		keys := make([]string, len(tpr.actions))
 		i := 0
 		for k := range tpr.actions {
