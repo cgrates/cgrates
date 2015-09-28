@@ -499,8 +499,8 @@ func main() {
 	if *pidFile != "" {
 		writePid()
 	}
-	if !*singlecpu {
-		runtime.GOMAXPROCS(runtime.NumCPU()) // For now it slows down computing due to CPU management, to be reviewed in future Go releases
+	if *singlecpu {
+		runtime.GOMAXPROCS(1) // Having multiple cpus slows down computing due to CPU management, to be reviewed in future Go releases
 	}
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
