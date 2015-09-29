@@ -28,14 +28,14 @@ import (
 func TestSingleResultMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 0, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 1, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: OUTBOUND, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.getCost()
 	if cc1.Cost != 61 {
 		t.Errorf("expected 61 was %v", cc1.Cost)
 	}
 	/*t1 = time.Date(2012, time.February, 2, 17, 1, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 17, 2, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: utils.OUT, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 60 {
 		t.Errorf("expected 60 was %v", cc2.Cost)
@@ -52,7 +52,7 @@ func TestSingleResultMerge(t *testing.T) {
 func TestMultipleResultMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 0, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: OUTBOUND, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.getCost()
 	if cc1.Cost != 61 {
 		//ils.LogFull(cc1)
@@ -63,7 +63,7 @@ func TestMultipleResultMerge(t *testing.T) {
 	}
 	t1 = time.Date(2012, time.February, 2, 18, 00, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: OUTBOUND, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.getCost()
 	if cc2.Cost != 30 {
 		t.Errorf("expected 30 was %v", cc2.Cost)
@@ -83,7 +83,7 @@ func TestMultipleResultMerge(t *testing.T) {
 func TestMultipleInputLeftMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: OUTBOUND, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.getCost()
 	//log.Printf("Timing: %+v", cc1.Timespans[1].RateInterval.Timing)
 	//log.Printf("Rating: %+v", cc1.Timespans[1].RateInterval.Rating)
@@ -92,7 +92,7 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 	}
 	/*t1 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 02, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: utils.OUT, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.getCost()
 	if cc2.Cost != 30 {
 		t.Errorf("expected 30 was %v", cc2.Cost)
@@ -109,14 +109,14 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 func TestMultipleInputRightMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 58, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: OUTBOUND, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.getCost()
 	if cc1.Cost != 61 {
 		t.Errorf("expected 61 was %v", cc1.Cost)
 	}
 	t1 = time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: OUTBOUND, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.getCost()
 	if cc2.Cost != 91 {
 		t.Errorf("expected 91 was %v", cc2.Cost)
@@ -133,7 +133,7 @@ func TestMultipleInputRightMerge(t *testing.T) {
 func TestCallCostMergeEmpty(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 58, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: OUTBOUND, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.getCost()
 	cc2 := &CallCost{}
 	cc1.Merge(cc2)

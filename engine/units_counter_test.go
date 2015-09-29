@@ -26,7 +26,7 @@ import (
 
 func TestUnitsCounterAddBalance(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction:   OUTBOUND,
+		Direction:   utils.OUT,
 		BalanceType: utils.SMS,
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
 	}
@@ -38,7 +38,7 @@ func TestUnitsCounterAddBalance(t *testing.T) {
 
 func TestUnitsCounterAddBalanceExists(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction:   OUTBOUND,
+		Direction:   utils.OUT,
 		BalanceType: utils.SMS,
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Value: 10, Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
 	}

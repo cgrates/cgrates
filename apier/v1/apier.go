@@ -151,7 +151,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 		AccountIds: []string{tag},
 	}
 	if attr.Direction == "" {
-		attr.Direction = engine.OUTBOUND
+		attr.Direction = utils.OUT
 	}
 	aType := engine.DEBIT
 	// reverse the sign as it is a debit
@@ -200,7 +200,7 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 		AccountIds: []string{tag},
 	}
 	if attr.Direction == "" {
-		attr.Direction = engine.OUTBOUND
+		attr.Direction = utils.OUT
 	}
 	at.SetActions(engine.Actions{
 		&engine.Action{
@@ -759,7 +759,7 @@ type AttrAddActionTrigger struct {
 
 func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
 	if attr.BalanceDirection == "" {
-		attr.BalanceDirection = engine.OUTBOUND
+		attr.BalanceDirection = utils.OUT
 	}
 	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime, self.Config.DefaultTimezone)
 	if err != nil {
@@ -823,7 +823,7 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 		a = &engine.Action{Id: attr.Id}
 	} else {
 		if attr.Direction == "" {
-			attr.Direction = engine.OUTBOUND
+			attr.Direction = utils.OUT
 		}
 		extraParameters, err := json.Marshal(struct {
 			ThresholdType        string

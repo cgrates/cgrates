@@ -73,8 +73,8 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	}
 	b10 := &Balance{Value: 10, Weight: 10, DestinationIds: "DE_TMOBILE"}
 	b20 := &Balance{Value: 20, Weight: 10, DestinationIds: "DE_TMOBILE"}
-	rifsAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, testTenant, "rif"), BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{b10}}}
-	dansAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, testTenant, "dan"), BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{b20}}}
+	rifsAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, testTenant, "rif"), BalanceMap: map[string]BalanceChain{utils.VOICE + utils.OUT: BalanceChain{b10}}}
+	dansAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, testTenant, "dan"), BalanceMap: map[string]BalanceChain{utils.VOICE + utils.OUT: BalanceChain{b20}}}
 	if err := accountingStorage.SetAccount(rifsAccount); err != nil {
 		t.Error(err)
 	}
@@ -96,15 +96,15 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	ratingStorage.CacheRatingAll()
 	if rifStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(utils.OUT, testTenant, "rif")); err != nil {
 		t.Error(err)
-		//} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND].Equal(rifsAccount.BalanceMap[utils.VOICE+OUTBOUND]) {
-		//	t.Errorf("Expected: %+v, received: %+v", rifsAccount.BalanceMap[utils.VOICE+OUTBOUND][0], rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0])
-	} else if rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != rifsAccount.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() {
-		t.Error("BalanceValue: ", rifStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
+		//} else if rifStoredAcnt.BalanceMap[utils.VOICE+utils.OUT].Equal(rifsAccount.BalanceMap[utils.VOICE+utils.OUT]) {
+		//	t.Errorf("Expected: %+v, received: %+v", rifsAccount.BalanceMap[utils.VOICE+utils.OUT][0], rifStoredAcnt.BalanceMap[utils.VOICE+utils.OUT][0])
+	} else if rifStoredAcnt.BalanceMap[utils.VOICE+utils.OUT][0].GetValue() != rifsAccount.BalanceMap[utils.VOICE+utils.OUT][0].GetValue() {
+		t.Error("BalanceValue: ", rifStoredAcnt.BalanceMap[utils.VOICE+utils.OUT][0].GetValue())
 	}
 	if danStoredAcnt, err := accountingStorage.GetAccount(utils.ConcatenatedKey(utils.OUT, testTenant, "dan")); err != nil {
 		t.Error(err)
-	} else if danStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != dansAccount.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() {
-		t.Error("BalanceValue: ", danStoredAcnt.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
+	} else if danStoredAcnt.BalanceMap[utils.VOICE+utils.OUT][0].GetValue() != dansAccount.BalanceMap[utils.VOICE+utils.OUT][0].GetValue() {
+		t.Error("BalanceValue: ", danStoredAcnt.BalanceMap[utils.VOICE+utils.OUT][0].GetValue())
 	}
 	var dcs utils.DerivedChargers
 	attrs := &utils.AttrDerivedChargers{Tenant: testTenant, Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
@@ -430,8 +430,8 @@ func TestGetLCR(t *testing.T) {
 	}
 	bRif12 := &Balance{Value: 40, Weight: 10, DestinationIds: dstDe.Id}
 	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationIds: dstDe.Id}
-	rif12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "rif12"), BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{bRif12}}, AllowNegative: true}
-	ivo12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{utils.VOICE + OUTBOUND: BalanceChain{bIvo12}}, AllowNegative: true}
+	rif12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "rif12"), BalanceMap: map[string]BalanceChain{utils.VOICE + utils.OUT: BalanceChain{bRif12}}, AllowNegative: true}
+	ivo12sAccount := &Account{Id: utils.ConcatenatedKey(utils.OUT, "tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{utils.VOICE + utils.OUT: BalanceChain{bIvo12}}, AllowNegative: true}
 	for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {
 		if err := accountingStorage.SetAccount(acnt); err != nil {
 			t.Error(err)

@@ -628,22 +628,6 @@ func (bc BalanceChain) GetTotalValue() (total float64) {
 	return
 }
 
-func (bc BalanceChain) Debit(amount float64) float64 {
-	bc.Sort()
-	for i, b := range bc {
-		if b.IsExpired() {
-			continue
-		}
-		if b.GetValue() >= amount || i == len(bc)-1 { // if last one go negative
-			b.SubstractValue(amount)
-			break
-		}
-		b.SetValue(0)
-		amount -= b.GetValue()
-	}
-	return bc.GetTotalValue()
-}
-
 func (bc BalanceChain) Equal(o BalanceChain) bool {
 	if len(bc) != len(o) {
 		return false

@@ -974,7 +974,7 @@ func TestApierSetActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	act1 := &utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}
+	act1 := &utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Direction: utils.OUT, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}
 	attrs1 := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{act1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err != nil {
@@ -993,7 +993,7 @@ func TestApierGetActions(t *testing.T) {
 		return
 	}
 	expectActs := []*utils.TPAction{
-		&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
+		&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Direction: utils.OUT, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
 
 	var reply []*utils.TPAction
 	if err := rater.Call("ApierV1.GetActions", "ACTS_1", &reply); err != nil {

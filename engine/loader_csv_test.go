@@ -809,7 +809,7 @@ func TestLoadActions(t *testing.T) {
 			Id:               "MINI0",
 			ActionType:       TOPUP_RESET,
 			BalanceType:      utils.MONETARY,
-			Direction:        OUTBOUND,
+			Direction:        utils.OUT,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
 			Weight:           10,
@@ -823,7 +823,7 @@ func TestLoadActions(t *testing.T) {
 			Id:               "MINI1",
 			ActionType:       TOPUP,
 			BalanceType:      utils.VOICE,
-			Direction:        OUTBOUND,
+			Direction:        utils.OUT,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
 			Weight:           10,
@@ -845,7 +845,7 @@ func TestLoadActions(t *testing.T) {
 			Id:               "SHARED0",
 			ActionType:       TOPUP,
 			BalanceType:      utils.MONETARY,
-			Direction:        OUTBOUND,
+			Direction:        utils.OUT,
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &Balance{
@@ -995,7 +995,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
 		BalanceType:           utils.VOICE,
-		BalanceDirection:      OUTBOUND,
+		BalanceDirection:      utils.OUT,
 		ThresholdType:         TRIGGER_MIN_COUNTER,
 		ThresholdValue:        10,
 		BalanceDestinationIds: "GERMANY_O2",
@@ -1009,7 +1009,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
 		BalanceType:           utils.VOICE,
-		BalanceDirection:      OUTBOUND,
+		BalanceDirection:      utils.OUT,
 		ThresholdType:         TRIGGER_MAX_BALANCE,
 		ThresholdValue:        200,
 		BalanceDestinationIds: "GERMANY",

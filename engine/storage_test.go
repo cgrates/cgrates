@@ -273,14 +273,14 @@ func TestDifferentUuid(t *testing.T) {
 
 func GetUB() *Account {
 	uc := &UnitsCounter{
-		Direction:   OUTBOUND,
+		Direction:   utils.OUT,
 		BalanceType: utils.SMS,
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
 	}
 	at := &ActionTrigger{
 		Id:                    "some_uuid",
 		BalanceType:           utils.MONETARY,
-		BalanceDirection:      OUTBOUND,
+		BalanceDirection:      utils.OUT,
 		ThresholdValue:        100.0,
 		BalanceDestinationIds: "NAT",
 		Weight:                10.0,
@@ -291,7 +291,7 @@ func GetUB() *Account {
 	ub := &Account{
 		Id:             "rif",
 		AllowNegative:  true,
-		BalanceMap:     map[string]BalanceChain{utils.SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{utils.SMS + utils.OUT: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA + utils.OUT: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggers{at, at, at},
 	}

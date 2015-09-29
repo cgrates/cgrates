@@ -30,9 +30,6 @@ import (
 )
 
 const (
-	// Direction type
-	INBOUND  = "*in"
-	OUTBOUND = "*out"
 	// action trigger threshold types
 	TRIGGER_MIN_COUNTER = "*min_counter"
 	TRIGGER_MAX_COUNTER = "*max_counter"
@@ -104,6 +101,9 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)
 	}
 	found := false
+	if a.Direction == "" {
+		a.Direction = utils.OUT
+	}
 	id := a.BalanceType + a.Direction
 	ub.CleanExpiredBalances()
 	for _, b := range ub.BalanceMap[id] {
@@ -394,6 +394,9 @@ COMMIT:
 }
 
 func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
+	if direction == "" {
+		direction = utils.OUT
+	}
 	for _, balance := range ub.BalanceMap[utils.MONETARY+direction] {
 		if balance.IsDefault() {
 			return balance
@@ -401,7 +404,7 @@ func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 	}
 	// create default balance
 	defaultBalance := &Balance{
-		Uuid:   "DEFAULT" + utils.GenUUID(),
+		Uuid:   utils.GenUUID(),
 		Weight: 0,
 	} // minimum weight
 	if ub.BalanceMap == nil {
@@ -517,7 +520,7 @@ func (ub *Account) getUnitCounter(a *Action) *UnitsCounter {
 	for _, uc := range ub.UnitCounters {
 		direction := a.Direction
 		if direction == "" {
-			direction = OUTBOUND
+			direction = utils.OUT
 		}
 		if uc.BalanceType == a.BalanceType && uc.Direction == direction {
 			return uc
@@ -534,7 +537,7 @@ func (ub *Account) countUnits(a *Action) {
 	if unitsCounter == nil {
 		direction := a.Direction
 		if direction == "" {
-			direction = OUTBOUND
+			direction = utils.OUT
 		}
 		unitsCounter = &UnitsCounter{BalanceType: a.BalanceType, Direction: direction}
 		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
@@ -556,7 +559,7 @@ func (ub *Account) initCounters() {
 			if a.Balance != nil {
 				direction := at.BalanceDirection
 				if direction == "" {
-					direction = OUTBOUND
+					direction = utils.OUT
 				}
 				uc, exists := ucTempMap[direction]
 				if !exists {

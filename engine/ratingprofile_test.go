@@ -21,6 +21,8 @@ package engine
 import (
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestGetRatingProfileForPrefix(t *testing.T) {
@@ -29,7 +31,7 @@ func TestGetRatingProfileForPrefix(t *testing.T) {
 		TimeEnd:     time.Date(2013, 11, 18, 13, 47, 30, 0, time.UTC),
 		Tenant:      "vdf",
 		Category:    "0",
-		Direction:   OUTBOUND,
+		Direction:   utils.OUT,
 		Subject:     "fallback1",
 		Destination: "0256098",
 	}
@@ -48,7 +50,7 @@ func TestGetRatingProfileForPrefixFirstEmpty(t *testing.T) {
 		TimeEnd:     time.Date(2013, 11, 18, 13, 47, 30, 0, time.UTC),
 		Tenant:      "vdf",
 		Category:    "0",
-		Direction:   OUTBOUND,
+		Direction:   utils.OUT,
 		Subject:     "fallback1",
 		Destination: "0256098",
 	}
@@ -68,7 +70,7 @@ func TestGetRatingProfileNotFound(t *testing.T) {
 		TimeEnd:     time.Date(2015, 8, 18, 22, 06, 30, 0, time.UTC),
 		Tenant:      "vdf",
 		Category:    "0",
-		Direction:   OUTBOUND,
+		Direction:   utils.OUT,
 		Subject:     "no_rating_profile",
 		Destination: "0256098",
 	}
@@ -84,7 +86,7 @@ func TestGetRatingProfileFoundButNoDestination(t *testing.T) {
 		TimeEnd:     time.Date(2015, 8, 18, 22, 06, 30, 0, time.UTC),
 		Tenant:      "cgrates.org",
 		Category:    "call",
-		Direction:   OUTBOUND,
+		Direction:   utils.OUT,
 		Subject:     "nt",
 		Destination: "447956",
 	}
