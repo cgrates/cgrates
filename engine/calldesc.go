@@ -427,7 +427,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cd.account = nil // make sure it's not cached
 	cc, err := cd.getCost()
 	if err != nil {
-		return nil, err
+		return cc, err
 	}
 
 	cost := 0.0

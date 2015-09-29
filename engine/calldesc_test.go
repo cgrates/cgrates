@@ -387,6 +387,17 @@ func TestSubjectNotFound(t *testing.T) {
 	}
 }
 
+func TestSubjectNotFoundCostNegativeOne(t *testing.T) {
+	t1 := time.Date(2013, time.February, 1, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.February, 1, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "cgrates.org", Subject: "not_exiting", Destination: "025740532", TimeStart: t1, TimeEnd: t2}
+	result, _ := cd.GetCost()
+	if result.Cost != -1 || result.GetConnectFee() != 0 {
+		//t.Logf("%+v", result.Timespans[0].RateInterval)
+		t.Errorf("Expected -1 was %v", result)
+	}
+}
+
 func TestMultipleRatingPlans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 8, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 18, 30, 0, 0, time.UTC)

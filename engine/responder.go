@@ -105,10 +105,11 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 		r, e := Guardian.Guard(func() (interface{}, error) {
 			return arg.GetCost()
 		}, 0, arg.GetAccountKey())
+		if r != nil {
+			*reply = *r.(*CallCost)
+		}
 		if e != nil {
 			return e
-		} else if r != nil {
-			*reply = *r.(*CallCost)
 		}
 	}
 	return

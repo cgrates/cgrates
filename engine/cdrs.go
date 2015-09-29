@@ -312,7 +312,7 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 		err = self.rater.GetCost(cd, cc)
 	}
 	if err != nil {
-		return nil, err
+		return cc, err
 	}
 	return cc, nil
 }
