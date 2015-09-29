@@ -20,7 +20,6 @@ package scheduler
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"sync"
 	"time"
@@ -93,7 +92,6 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 		isAsap := false
 		newApls := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
 		for _, ap := range aps {
-			log.Printf("AP %+v", ap)
 			isAsap = ap.IsASAP()
 			toBeSaved = toBeSaved || isAsap
 			if isAsap {
@@ -114,9 +112,6 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 			newApls = append(newApls, ap)
 		}
 		if toBeSaved {
-			for _, ap := range newApls {
-				log.Printf("NewAP: %+v", ap)
-			}
 			engine.Guardian.Guard(func() (interface{}, error) {
 				storage.SetActionPlans(key, newApls)
 				return 0, nil

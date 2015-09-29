@@ -93,7 +93,7 @@ func (at *ActionPlan) GetNextStartTimeOld(now time.Time) (t time.Time) {
 		var err error
 		t, err = time.Parse(FORMAT, l)
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Cannot parse action timing's StartTime %v", l))
+			Logger.Err(fmt.Sprintf("Cannot parse action plan's StartTime %v", l))
 			at.stCache = t
 			return
 		}
@@ -258,7 +258,7 @@ func (at *ActionPlan) Execute() (err error) {
 					return 0, nil
 				}, 0, accId)
 				if err != nil {
-					Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
+					Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 				}
 			}
 			continue // do not go to getActionFunc
@@ -266,7 +266,7 @@ func (at *ActionPlan) Execute() (err error) {
 
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
-			// do not allow the action timing to be rescheduled
+			// do not allow the action plan to be rescheduled
 			at.Timing = nil
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
@@ -287,7 +287,7 @@ func (at *ActionPlan) Execute() (err error) {
 				return 0, nil
 			}, 0, accId)
 			if err != nil {
-				Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
+				Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 			}
 		}
 	}
@@ -297,7 +297,8 @@ func (at *ActionPlan) Execute() (err error) {
 
 func (at *ActionPlan) IsASAP() bool {
 	if at.Timing == nil {
-		return false
+		Logger.Warning(fmt.Sprintf("Nil timing on action plan: %+v, executing ASAP!", at))
+		return true
 	}
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
