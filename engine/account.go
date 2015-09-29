@@ -404,7 +404,7 @@ func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 	}
 	// create default balance
 	defaultBalance := &Balance{
-		Uuid:   utils.GenUUID(),
+		Uuid:   "D" + utils.GenUUID()[1:],
 		Weight: 0,
 	} // minimum weight
 	if ub.BalanceMap == nil {
