@@ -541,7 +541,7 @@ func TestTutLocalProcessExternalCdr(t *testing.T) {
 	}
 }
 
-// Test CDR from external sources
+// Test CDR involving UserProfile
 func TestTutLocalProcessExternalCdrUP(t *testing.T) {
 	if !*testLocal {
 		return
@@ -618,6 +618,64 @@ func TestTutLocalProcessExternalCdrUP(t *testing.T) {
 		}
 		if cdrs[0].DisconnectCause != eCdr.DisconnectCause {
 			t.Errorf("Unexpected DisconnectCause for CDR: %+v", cdrs[0])
+		}
+	}
+}
+
+func TestTutLocalCostErrors(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "testtutlocal_1", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "fake", Account: "2001", Subject: "2001", Destination: "1001", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "1", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var reply string
+	if err := tutLocalRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+
+	var cdrs []*engine.ExternalCdr
+	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{cdr.Account}, DestPrefixes: []string{cdr.Destination}}
+	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].AccId != cdr.AccId {
+			t.Errorf("Unexpected AccId for Cdr received: %+v", cdrs[0])
+		}
+		if cdrs[0].Cost != -1 {
+			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
+		}
+	}
+	cdr2 := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "testtutlocal_2", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_POSTPAID, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "fake", Account: "2002", Subject: "2002", Destination: "1001", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "1", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	if err := tutLocalRpc.Call("CdrsV2.ProcessExternalCdr", cdr2, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+
+	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{cdr2.Account}, DestPrefixes: []string{cdr2.Destination}}
+	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].AccId != cdr2.AccId {
+			t.Errorf("Unexpected AccId for Cdr received: %+v", cdrs[0])
+		}
+		if cdrs[0].Cost != -1 {
+			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
 		}
 	}
 }
