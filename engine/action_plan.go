@@ -297,8 +297,7 @@ func (at *ActionPlan) Execute() (err error) {
 
 func (at *ActionPlan) IsASAP() bool {
 	if at.Timing == nil {
-		Logger.Warning(fmt.Sprintf("Nil timing on action plan: %+v, executing ASAP!", at))
-		return true
+		return false
 	}
 	return at.Timing.Timing.StartTime == utils.ASAP
 }

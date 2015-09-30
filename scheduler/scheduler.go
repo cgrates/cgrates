@@ -92,6 +92,10 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 		isAsap := false
 		newApls := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
 		for _, ap := range aps {
+			if ap.Timing == nil {
+				Logger.Warning(fmt.Sprintf("Nil timing on action plan: %+v, discarding!", at))
+				continue
+			}
 			isAsap = ap.IsASAP()
 			toBeSaved = toBeSaved || isAsap
 			if isAsap {
