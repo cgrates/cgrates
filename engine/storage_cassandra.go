@@ -15,10 +15,15 @@ type CassandraStorage struct {
 	ms       Marshaler
 }
 
-func NewCassandraStorage(addresses []string, keyspace, mrshlerStr string) (*CassandraStorage, error) {
+func NewCassandraStorage(addresses []string, keyspace, user, pass, mrshlerStr string) (*CassandraStorage, error) {
 	cluster := gocql.NewCluster(addresses...)
 	cluster.Keyspace = keyspace
+	cluster.Authenticator = gocql.PasswordAuthenticator{
+		Username: user,
+		Password: pass,
+	}
 	session, err := cluster.CreateSession()
+
 	if err != nil {
 		return nil, err
 	}
