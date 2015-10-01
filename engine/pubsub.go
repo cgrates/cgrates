@@ -69,13 +69,13 @@ func (ps *PubSub) saveSubscriber(key string) {
 		return
 	}
 	if err := accountingStorage.SetSubscriber(key, subData); err != nil {
-		Logger.Err("<PubSub> Error saving subscriber: " + err.Error())
+		utils.Logger.Err("<PubSub> Error saving subscriber: " + err.Error())
 	}
 }
 
 func (ps *PubSub) removeSubscriber(key string) {
 	if err := accountingStorage.RemoveSubscriber(key); err != nil {
-		Logger.Err("<PubSub> Error removing subscriber: " + err.Error())
+		utils.Logger.Err("<PubSub> Error removing subscriber: " + err.Error())
 	}
 }
 
@@ -133,7 +133,7 @@ func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 		}
 		split := utils.InfieldSplit(key)
 		if len(split) != 2 {
-			Logger.Warning("<PubSub> Wrong transport;address pair: " + key)
+			utils.Logger.Warning("<PubSub> Wrong transport;address pair: " + key)
 			continue
 		}
 		transport := split[0]
@@ -147,7 +147,7 @@ func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 					if _, err := ps.pubFunc(address, ps.ttlVerify, evt); err == nil {
 						break // Success, no need to reinterate
 					} else if i == 4 { // Last iteration, syslog the warning
-						Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), evt["EventName"]))
+						utils.Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), evt["EventName"]))
 						break
 					}
 					time.Sleep(delay())

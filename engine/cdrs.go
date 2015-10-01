@@ -43,11 +43,11 @@ type CallCostLog struct {
 func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 	cgrCdr, err := NewCgrCdrFromHttpReq(r, cdrServer.cgrCfg.DefaultTimezone)
 	if err != nil {
-		Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 		return
 	}
 	if err := cdrServer.processCdr(cgrCdr.AsStoredCdr(cdrServer.cgrCfg.DefaultTimezone)); err != nil {
-		Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
 	}
 }
 
@@ -56,11 +56,11 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	fsCdr, err := NewFSCdr(body, cdrServer.cgrCfg)
 	if err != nil {
-		Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<CDRS> Could not create CDR entry: %s", err.Error()))
 		return
 	}
 	if err := cdrServer.processCdr(fsCdr.AsStoredCdr(cdrServer.Timezone())); err != nil {
-		Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<CDRS> Errors when storing CDR entry: %s", err.Error()))
 	}
 }
 
@@ -143,7 +143,7 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 	}
 	for _, cdr := range cdrs {
 		if err := self.processCdr(cdr); err != nil {
-			Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
 		}
 	}
 	return nil
@@ -187,7 +187,7 @@ func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
 	}
 	if self.cgrCfg.CDRSStoreCdrs { // Store RawCDRs, this we do sync so we can reply with the status
 		if err := self.cdrDb.SetCdr(storedCdr); err != nil { // Only original CDR stored in primary table, no derived
-			Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", storedCdr, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", storedCdr, err.Error()))
 		}
 	}
 	go self.deriveRateStoreStatsReplicate(storedCdr)
@@ -211,19 +211,19 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(storedCdr *StoredCdr) error
 		if self.cgrCfg.CDRSStoreCdrs { // Store CDRs
 			// Store RatedCDR
 			if err := self.cdrDb.SetRatedCdr(cdr); err != nil {
-				Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", cdr, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", cdr, err.Error()))
 			}
 			// Store CostDetails
 			if cdr.Rated || utils.IsSliceMember([]string{utils.RATED, utils.META_RATED}, cdr.ReqType) { // Account related CDRs are saved automatically, so save the others here if requested
 				if err := self.cdrDb.LogCallCost(cdr.CgrId, utils.CDRS_SOURCE, cdr.MediationRunId, cdr.CostDetails); err != nil {
-					Logger.Err(fmt.Sprintf("<CDRS> Storing costs for CDR %+v, costDetails: %+v, got error: %s", cdr, cdr.CostDetails, err.Error()))
+					utils.Logger.Err(fmt.Sprintf("<CDRS> Storing costs for CDR %+v, costDetails: %+v, got error: %s", cdr, cdr.CostDetails, err.Error()))
 				}
 			}
 		}
 		// Attach CDR to stats
 		if self.stats != nil { // Send CDR to stats
 			if err := self.stats.AppendCDR(cdr, nil); err != nil {
-				Logger.Err(fmt.Sprintf("<CDRS> Could not append cdr to stats: %s", err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<CDRS> Could not append cdr to stats: %s", err.Error()))
 			}
 		}
 		if len(self.cgrCfg.CDRSCdrReplication) != 0 {
@@ -246,7 +246,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 		Account: storedCdr.Account, Subject: storedCdr.Subject}
 	var dcs utils.DerivedChargers
 	if err := self.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		Logger.Err(fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", storedCdr.CgrId, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", storedCdr.CgrId, err.Error()))
 		return nil, err
 	}
 	for _, dc := range dcs {
@@ -277,7 +277,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
 			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCausseld, []*utils.RSRField{}, true, self.cgrCfg.DefaultTimezone)
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", storedCdr.CgrId, dc.RunId, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", storedCdr.CgrId, dc.RunId, err.Error()))
 			continue // do not add it to the forked CDR list
 		}
 		cdrRuns = append(cdrRuns, forkedCdr)
@@ -331,7 +331,7 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 			time.Sleep(delay())
 		}
 		if err != nil && err == gorm.RecordNotFound { //calculate CDR as for pseudoprepaid
-			Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId))
+			utils.Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId))
 			qryCC, err = self.getCostFromRater(storedCdr)
 		}
 
@@ -366,7 +366,7 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 			errChan := make(chan error)
 			go func(cdr *StoredCdr, rplCfg *config.CdrReplicationCfg, errChan chan error) {
 				if _, err := httpClient.PostForm(fmt.Sprintf("%s", rplCfg.Server), cdr.AsHttpForm()); err != nil {
-					Logger.Err(fmt.Sprintf("<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
+					utils.Logger.Err(fmt.Sprintf("<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
 					errChan <- err
 				}
 				errChan <- nil

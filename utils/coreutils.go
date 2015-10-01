@@ -20,18 +20,15 @@ package utils
 
 import (
 	"archive/zip"
-	"bytes"
+
 	"crypto/rand"
 	"crypto/sha1"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
-	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -287,30 +284,6 @@ func InfieldJoin(vals ...string) string {
 
 func InfieldSplit(val string) []string {
 	return strings.Split(val, INFIELD_SEP)
-}
-
-func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, error) {
-	body, err := json.Marshal(content)
-	if err != nil {
-		return nil, err
-	}
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTlsVerify},
-	}
-	client := &http.Client{Transport: tr}
-	resp, err := client.Post(url, "application/json", bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode > 299 {
-		return respBody, fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
-	}
-	return respBody, nil
 }
 
 func Unzip(src, dest string) error {

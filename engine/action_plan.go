@@ -93,7 +93,7 @@ func (at *ActionPlan) GetNextStartTimeOld(now time.Time) (t time.Time) {
 		var err error
 		t, err = time.Parse(FORMAT, l)
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Cannot parse action plan's StartTime %v", l))
+			utils.Logger.Err(fmt.Sprintf("Cannot parse action plan's StartTime %v", l))
 			at.stCache = t
 			return
 		}
@@ -241,7 +241,7 @@ func (at *ActionPlan) Execute() (err error) {
 	at.resetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsId, err))
+		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsId, err))
 		return
 	}
 	for _, a := range aac {
@@ -253,12 +253,12 @@ func (at *ActionPlan) Execute() (err error) {
 			for _, accId := range at.AccountIds {
 				_, err := Guardian.Guard(func() (interface{}, error) {
 					if err := accountingStorage.RemoveAccount(accId); err != nil {
-						Logger.Warning(fmt.Sprintf("Could not remove account Id: %s: %d", accId, err))
+						utils.Logger.Warning(fmt.Sprintf("Could not remove account Id: %s: %d", accId, err))
 					}
 					return 0, nil
 				}, 0, accId)
 				if err != nil {
-					Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
+					utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 				}
 			}
 			continue // do not go to getActionFunc
@@ -268,26 +268,26 @@ func (at *ActionPlan) Execute() (err error) {
 		if !exists {
 			// do not allow the action plan to be rescheduled
 			at.Timing = nil
-			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+			utils.Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
 		for _, accId := range at.AccountIds {
 			_, err := Guardian.Guard(func() (interface{}, error) {
 				ub, err := accountingStorage.GetAccount(accId)
 				if err != nil {
-					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", 0, accId))
+					utils.Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", 0, accId))
 					return 0, err
 				} else if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
 					return 0, fmt.Errorf("Account %s is disabled", accId)
 				}
-				//Logger.Info(fmt.Sprintf("Executing %v on %+v", a.ActionType, ub))
+				//utils.Logger.Info(fmt.Sprintf("Executing %v on %+v", a.ActionType, ub))
 				err = actionFunction(ub, nil, a, aac)
-				//Logger.Info(fmt.Sprintf("After execute, account: %+v", ub))
+				//utils.Logger.Info(fmt.Sprintf("After execute, account: %+v", ub))
 				accountingStorage.SetAccount(ub)
 				return 0, nil
 			}, 0, accId)
 			if err != nil {
-				Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
+				utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 			}
 		}
 	}

@@ -87,7 +87,7 @@ func NewStats(ratingDb RatingStorage, accountingDb AccountingStorage, saveInterv
 	if css, err := ratingDb.GetAllCdrStats(); err == nil {
 		cdrStats.UpdateQueues(css, nil)
 	} else {
-		Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
+		utils.Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
 	}
 	return cdrStats
 }
@@ -195,7 +195,7 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 		for _, id := range ids {
 			sq, exists := s.queues[id]
 			if !exists {
-				Logger.Warning(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
+				utils.Logger.Warning(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
 				continue
 			}
 			sq.Cdrs = make([]*QCdr, 0)

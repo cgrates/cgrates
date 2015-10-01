@@ -43,7 +43,7 @@ func (self *ApierV1) GetLcr(lcrReq engine.LcrRequest, lcrReply *engine.LcrReply)
 	lcrReply.Strategy = lcrQried.Entry.Strategy
 	for _, qriedSuppl := range lcrQried.SupplierCosts {
 		if qriedSuppl.Error != "" {
-			engine.Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", qriedSuppl.Supplier, qriedSuppl.Error))
+			utils.Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", qriedSuppl.Supplier, qriedSuppl.Error))
 			if !lcrReq.IgnoreErrors {
 				return fmt.Errorf("%s:%s", utils.ErrServerError.Error(), "LCR_COMPUTE_ERRORS")
 			}

@@ -111,14 +111,14 @@ func (self *PartialRecordsCache) dumpUnpairedRecords(fileName string) error {
 			unpairedFilePath := path.Join(self.cdrOutDir, fileName+UNPAIRED_SUFFIX)
 			fileOut, err := os.Create(unpairedFilePath)
 			if err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed creating %s, error: %s", unpairedFilePath, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed creating %s, error: %s", unpairedFilePath, err.Error()))
 				return nil, err
 			}
 			csvWriter := csv.NewWriter(fileOut)
 			csvWriter.Comma = self.csvSep
 			for _, pr := range self.partialRecords[fileName] {
 				if err := csvWriter.Write(pr.Values); err != nil {
-					engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing unpaired record %v to file: %s, error: %s", pr, unpairedFilePath, err.Error()))
+					utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed writing unpaired record %v to file: %s, error: %s", pr, unpairedFilePath, err.Error()))
 					return nil, err
 				}
 			}

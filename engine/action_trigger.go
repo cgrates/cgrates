@@ -68,7 +68,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	aac, err = ratingStorage.GetActions(at.ActionsId, false)
 	aac.Sort()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
+		utils.Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
 		return
 	}
 	at.Executed = true
@@ -80,10 +80,10 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
-			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+			utils.Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
-		//go Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
+		//go utils.Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
 		err = actionFunction(ub, sq, a, aac)
 		if err == nil {
 			atLeastOneActionExecuted = true

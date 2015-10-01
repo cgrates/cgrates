@@ -27,6 +27,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
+	"github.com/cgrates/cgrates/utils"
 	"golang.org/x/net/websocket"
 )
 
@@ -58,15 +59,15 @@ func (s *Server) ServeJSON(addr string) {
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at %s.", addr))
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at %s.", addr))
 	for {
 		conn, err := lJSON.Accept()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
+			utils.Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
 			continue
 		}
 
-		//Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
+		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
 		go jsonrpc.ServeConn(conn)
 	}
 
@@ -80,15 +81,15 @@ func (s *Server) ServeGOB(addr string) {
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at %s.", addr))
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at %s.", addr))
 	for {
 		conn, err := lGOB.Accept()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
+			utils.Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
 			continue
 		}
 
-		//Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
+		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
 		go rpc.ServeConn(conn)
 	}
 }
@@ -109,7 +110,7 @@ func (s *Server) ServeHTTP(addr string) {
 	if !s.httpEnabled {
 		return
 	}
-	Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
+	utils.Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
 	http.ListenAndServe(addr, nil)
 }
 

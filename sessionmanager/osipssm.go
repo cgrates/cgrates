@@ -116,10 +116,10 @@ func (osm *OsipsSessionManager) Connect() (err error) {
 	go osm.SubscribeEvents(osm.evSubscribeStop)
 	evsrv, err := osipsdagram.NewEventServer(osm.cfg.ListenUdp, osm.eventHandlers)
 	if err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Cannot initialize datagram server, error: <%s>", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Cannot initialize datagram server, error: <%s>", err.Error()))
 		return
 	}
-	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPS> Listening for datagram events at <%s>", osm.cfg.ListenUdp))
+	utils.Logger.Info(fmt.Sprintf("<SM-OpenSIPS> Listening for datagram events at <%s>", osm.cfg.ListenUdp))
 	evsrv.ServeEvents(osm.stopServing) // Will break through stopServing on error in other places
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
 }
@@ -170,16 +170,16 @@ func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, connId, notif
 	sessionIds := ev.GetSessionIds()
 	if len(sessionIds) != 2 {
 		errMsg := fmt.Sprintf("Failed disconnecting session for event: %+v, notify: %s, dialogId: %v", ev, notify, sessionIds)
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> " + errMsg))
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> " + errMsg))
 		return errors.New(errMsg)
 	}
 	cmd := fmt.Sprintf(":dlg_end_dlg:\n%s\n%s\n\n", sessionIds[0], sessionIds[1])
 	if reply, err := osm.miConn.SendCommand([]byte(cmd)); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed disconnecting session for event: %+v, notify: %s, dialogId: %v, error: <%s>", ev, notify, sessionIds, err))
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed disconnecting session for event: %+v, notify: %s, dialogId: %v, error: <%s>", ev, notify, sessionIds, err))
 		return err
 	} else if !bytes.HasPrefix(reply, []byte("200 OK")) {
 		errStr := fmt.Sprintf("Failed disconnecting session for event: %+v, notify: %s, dialogId: %v", ev, notify, sessionIds)
-		engine.Logger.Err("<SM-OpenSIPS> " + errStr)
+		utils.Logger.Err("<SM-OpenSIPS> " + errStr)
 		return errors.New(errStr)
 	}
 	return nil
@@ -219,10 +219,10 @@ func (osm *OsipsSessionManager) subscribeEvents() error {
 		}
 		cmd := fmt.Sprintf(":event_subscribe:\n%s\nudp:%s:%s\n%d\n", eventName, addrListen, portListen, int(subscribeInterval.Seconds()))
 		if reply, err := osm.miConn.SendCommand([]byte(cmd)); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>, error: <%s>", osm.cfg.MiAddr, err))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>, error: <%s>", osm.cfg.MiAddr, err))
 			return err
 		} else if !bytes.HasPrefix(reply, []byte("200 OK")) {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>", osm.cfg.MiAddr))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>", osm.cfg.MiAddr))
 			return errors.New("Failed subscribing to OpenSIPS events")
 		}
 	}
@@ -240,7 +240,7 @@ func (osm *OsipsSessionManager) onOpensipsStart(cdrDagram *osipsdagram.OsipsEven
 func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	osipsEv, _ := NewOsipsEvent(cdrDagram)
 	if err := osm.ProcessCdr(osipsEv.AsStoredCdr(osm.timezone)); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(osm.timezone), osipsEv.GetUUID(), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(osm.timezone), osipsEv.GetUUID(), err.Error()))
 	}
 }
 
@@ -252,17 +252,17 @@ func (osm *OsipsSessionManager) onAccEvent(osipsDgram *osipsdagram.OsipsEvent) {
 	}
 	if osipsDgram.AttrValues["method"] == "INVITE" { // Call start
 		if err := osm.callStart(osipsEv); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_START out of %+v, error: <%s>", osipsDgram, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_START out of %+v, error: <%s>", osipsDgram, err.Error()))
 		}
 		if err := osm.processCdrStart(osipsEv); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing cdr start out of %+v, error: <%s>", osipsDgram, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing cdr start out of %+v, error: <%s>", osipsDgram, err.Error()))
 		}
 	} else if osipsDgram.AttrValues["method"] == "BYE" {
 		if err := osm.callEnd(osipsEv); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_END out of %+v, error: <%s>", osipsDgram, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_END out of %+v, error: <%s>", osipsDgram, err.Error()))
 		}
 		if err := osm.processCdrStop(osipsEv); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing cdr stop out of %+v, error: <%s>", osipsDgram, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing cdr stop out of %+v, error: <%s>", osipsDgram, err.Error()))
 		}
 	}
 }

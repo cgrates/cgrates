@@ -71,7 +71,7 @@ func (self *PostgresStorage) LogCallCost(cgrid, source, runid string, cc *CallCo
 	}
 	tss, err := json.Marshal(cc.Timespans)
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
+		utils.Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 		return err
 	}
 	tx := self.db.Begin()

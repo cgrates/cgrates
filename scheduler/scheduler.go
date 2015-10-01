@@ -46,7 +46,7 @@ func (s *Scheduler) Loop() {
 		}
 		s.Lock()
 		a0 := s.queue[0]
-		//engine.Logger.Info(fmt.Sprintf("Scheduler qeue length: %v", len(s.qeue)))
+		//utils.Logger.Info(fmt.Sprintf("Scheduler qeue length: %v", len(s.qeue)))
 		now := time.Now()
 		start := a0.GetNextStartTime(now)
 		if start.Equal(now) || start.Before(now) {
@@ -66,12 +66,12 @@ func (s *Scheduler) Loop() {
 		} else {
 			s.Unlock()
 			d := a0.GetNextStartTime(now).Sub(now)
-			//engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
+			//utils.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				engine.Logger.Info(fmt.Sprintf("Time for action on %v", a0))
+				utils.Logger.Info(fmt.Sprintf("Time for action on %v", a0))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
@@ -82,7 +82,7 @@ func (s *Scheduler) Loop() {
 func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	actionPlans, err := storage.GetAllActionPlans()
 	if err != nil {
-		engine.Logger.Warning(fmt.Sprintf("Cannot get action plans: %v", err))
+		utils.Logger.Warning(fmt.Sprintf("Cannot get action plans: %v", err))
 	}
 	// recreate the queue
 	s.Lock()
@@ -93,14 +93,14 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 		newApls := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
 		for _, ap := range aps {
 			if ap.Timing == nil {
-				engine.Logger.Warning(fmt.Sprintf("<Scheduler> Nil timing on action plan: %+v, discarding!", ap))
+				utils.Logger.Warning(fmt.Sprintf("<Scheduler> Nil timing on action plan: %+v, discarding!", ap))
 				continue
 			}
 			isAsap = ap.IsASAP()
 			toBeSaved = toBeSaved || isAsap
 			if isAsap {
 				if len(ap.AccountIds) > 0 {
-					engine.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
+					utils.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
 				}
 				ap.Execute()
 				ap.AccountIds = make([]string, 0)

@@ -134,7 +134,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		sg, err := ratingStorage.GetSharedGroup(a.Balance.SharedGroup, false)
 		if err != nil || sg == nil {
 			//than problem
-			Logger.Warning(fmt.Sprintf("Could not get shared group: %v", a.Balance.SharedGroup))
+			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", a.Balance.SharedGroup))
 		} else {
 			if !utils.IsSliceMember(sg.MemberIds, ub.Id) {
 				// add member and save
@@ -229,7 +229,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, balanceT
 		if b.SharedGroup != "" {
 			sharedGroup, err := ratingStorage.GetSharedGroup(b.SharedGroup, false)
 			if err != nil {
-				Logger.Warning(fmt.Sprintf("Could not get shared group: %v", b.SharedGroup))
+				utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", b.SharedGroup))
 				continue
 			}
 			sharedBalances := sharedGroup.GetBalances(destination, category, balanceType, account)
@@ -345,7 +345,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 	//log.Printf("After balances CD: %+v", cd)
 	leftCC, err = cd.getCost()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+		utils.Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 	}
 	if leftCC.Cost == 0 && len(leftCC.Timespans) > 0 {
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
@@ -363,7 +363,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		// get the default money balanance
 		// and go negative on it with the amount still unpaid
 		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !ub.AllowNegative && !dryRun {
-			Logger.Err(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
+			utils.Logger.Err(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
 		}
 		for _, ts := range leftCC.Timespans {
 			if ts.Increments == nil {
@@ -627,7 +627,7 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]strin
 	for _, sgID := range sharedGroupIds {
 		sharedGroup, err := ratingStorage.GetSharedGroup(sgID, false)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
+			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 			return nil, err
 		}
 		for _, memberId := range sharedGroup.MemberIds {

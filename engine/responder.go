@@ -549,7 +549,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 	for err != nil {
 		client := rs.Bal.Balance()
 		if client == nil {
-			Logger.Info("<Balancer> Waiting for raters to register...")
+			utils.Logger.Info("<Balancer> Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			_, err = Guardian.Guard(func() (interface{}, error) {
@@ -557,7 +557,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 				return reply, err
 			}, 0, key.GetAccountKey())
 			if err != nil {
-				Logger.Err(fmt.Sprintf("<Balancer> Got en error from rater: %v", err))
+				utils.Logger.Err(fmt.Sprintf("<Balancer> Got en error from rater: %v", err))
 			}
 		}
 	}
@@ -572,7 +572,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 	for err != nil {
 		client := rs.Bal.Balance()
 		if client == nil {
-			Logger.Info("Waiting for raters to register...")
+			utils.Logger.Info("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			_, err = Guardian.Guard(func() (interface{}, error) {
@@ -580,7 +580,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 				return reply, err
 			}, 0, key.GetAccountKey())
 			if err != nil {
-				Logger.Info(fmt.Sprintf("Got en error from rater: %v", err))
+				utils.Logger.Info(fmt.Sprintf("Got en error from rater: %v", err))
 			}
 		}
 	}
@@ -591,15 +591,15 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 RPC method that receives a rater address, connects to it and ads the pair to the rater list for balancing
 */
 func (rs *Responder) RegisterRater(clientAddress string, replay *int) error {
-	Logger.Info(fmt.Sprintf("Started rater %v registration...", clientAddress))
+	utils.Logger.Info(fmt.Sprintf("Started rater %v registration...", clientAddress))
 	time.Sleep(2 * time.Second) // wait a second for Rater to start serving
 	client, err := rpc.Dial("tcp", clientAddress)
 	if err != nil {
-		Logger.Err("Could not connect to client!")
+		utils.Logger.Err("Could not connect to client!")
 		return err
 	}
 	rs.Bal.AddClient(clientAddress, client)
-	Logger.Info(fmt.Sprintf("Rater %v registered succesfully.", clientAddress))
+	utils.Logger.Info(fmt.Sprintf("Rater %v registered succesfully.", clientAddress))
 	return nil
 }
 
@@ -611,9 +611,9 @@ func (rs *Responder) UnRegisterRater(clientAddress string, replay *int) error {
 	if ok {
 		client.Close()
 		rs.Bal.RemoveClient(clientAddress)
-		Logger.Info(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))
+		utils.Logger.Info(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))
 	} else {
-		Logger.Info(fmt.Sprintf("Server %v was not on my watch!", clientAddress))
+		utils.Logger.Info(fmt.Sprintf("Server %v was not on my watch!", clientAddress))
 	}
 	return nil
 }

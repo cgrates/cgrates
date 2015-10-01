@@ -393,12 +393,12 @@ func (lc *LCRCost) GetSupplierRatio(supplier string) int {
 	for _, param := range params {
 		ratioSlice := strings.Split(param, utils.CONCATENATED_KEY_SEP)
 		if len(ratioSlice) != 2 {
-			Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
+			utils.Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
 			continue
 		}
 		p, err := strconv.Atoi(ratioSlice[1])
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
+			utils.Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
 			continue
 		}
 		ratios[ratioSlice[0]] = p
@@ -432,7 +432,7 @@ func (lc *LCRCost) HasErrors() bool {
 func (lc *LCRCost) LogErrors() {
 	for _, supplCost := range lc.SupplierCosts {
 		if len(supplCost.Error) != 0 {
-			Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", supplCost.Supplier, supplCost.Error))
+			utils.Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", supplCost.Supplier, supplCost.Error))
 		}
 	}
 }

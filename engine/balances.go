@@ -225,7 +225,7 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 	credit = initialCredit
 	cc, err := b.GetCost(cd, false)
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+		utils.Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 		return 0, credit
 	}
 	if cc.deductConnectFee {
@@ -423,7 +423,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			}
 
 			if ts.RateInterval == nil {
-				Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
+				utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 				return nil, errors.New("timespan with no rate interval assigned")
 			}
 			maxCost, strategy := ts.RateInterval.GetMaxCost()
@@ -523,7 +523,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 		}
 		//log.Printf("TS: %+v", ts)
 		if ts.RateInterval == nil {
-			Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
+			utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 			return nil, errors.New("timespan with no rate interval assigned")
 		}
 		maxCost, strategy := ts.RateInterval.GetMaxCost()

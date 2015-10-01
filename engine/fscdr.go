@@ -108,11 +108,11 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 						return
 					}
 				} else {
-					Logger.Warning(fmt.Sprintf("Slice with no maps: %v", reflect.TypeOf(item)))
+					utils.Logger.Warning(fmt.Sprintf("Slice with no maps: %v", reflect.TypeOf(item)))
 				}
 			}
 		default:
-			Logger.Warning(fmt.Sprintf("Unexpected type: %v", reflect.TypeOf(v)))
+			utils.Logger.Warning(fmt.Sprintf("Unexpected type: %v", reflect.TypeOf(v)))
 		}
 	}
 	return

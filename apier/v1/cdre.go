@@ -35,7 +35,6 @@ import (
 
 	"github.com/cgrates/cgrates/cdre"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -224,7 +223,7 @@ func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) er
 	cdreReloadStruct := <-apier.Config.ConfigReloads[utils.CDRE] // Get the CDRE reload channel                     // Read the content of the channel, locking it
 	apier.Config.CdreProfiles = newCfg.CdreProfiles
 	apier.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct // Unlock reloads
-	engine.Logger.Info("<CDRE> Configuration reloaded")
+	utils.Logger.Info("<CDRE> Configuration reloaded")
 	*reply = OK
 	return nil
 }

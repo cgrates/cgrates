@@ -464,7 +464,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	for idx, dc := range dcs {
 		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 	}
-	engine.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
+	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
@@ -483,7 +483,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}
 	aps, _ := dbReader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
 	if len(aps) != 0 && self.Sched != nil {
-		engine.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
+		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
 		self.Sched.LoadActionPlans(self.RatingDb)
 		self.Sched.Restart()
 	}
@@ -1010,7 +1010,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	}
 	if loadHistInsts, err := self.AccountDb.GetLoadHistory(1, false); err != nil || len(loadHistInsts) == 0 {
 		if err != nil { // Not really an error here since we only count in cache
-			engine.Logger.Err(fmt.Sprintf("ApierV1.GetCacheStats, error on GetLoadHistory: %s"))
+			utils.Logger.Err(fmt.Sprintf("ApierV1.GetCacheStats, error on GetLoadHistory: %s"))
 		}
 		cs.LastLoadId = utils.NOT_AVAILABLE
 		cs.LastLoadTime = utils.NOT_AVAILABLE
@@ -1148,7 +1148,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
-	engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
@@ -1167,7 +1167,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return err
 	}
 	if len(aps) != 0 && self.Sched != nil {
-		engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
+		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
 		self.Sched.LoadActionPlans(self.RatingDb)
 		self.Sched.Restart()
 	}

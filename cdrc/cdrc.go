@@ -179,7 +179,7 @@ func (self *Cdrc) Run() error {
 	for {
 		select {
 		case <-self.closeChan: // Exit, reinject closeChan for other CDRCs
-			engine.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
+			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
 			return nil
 		default:
 		}
@@ -199,35 +199,35 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 	if err != nil {
 		return
 	}
-	engine.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.cdrInDir))
+	utils.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.cdrInDir))
 	for {
 		select {
 		case <-self.closeChan: // Exit, reinject closeChan for other CDRCs
-			engine.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
+			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
 			return nil
 		case ev := <-watcher.Events:
 			if ev.Op&fsnotify.Create == fsnotify.Create && (self.cdrFormat != FS_CSV || path.Ext(ev.Name) != ".csv") {
 				go func() { //Enable async processing here
 					if err = self.processFile(ev.Name); err != nil {
-						engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
+						utils.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
 					}
 				}()
 			}
 		case err := <-watcher.Errors:
-			engine.Logger.Err(fmt.Sprintf("Inotify error: %s", err.Error()))
+			utils.Logger.Err(fmt.Sprintf("Inotify error: %s", err.Error()))
 		}
 	}
 }
 
 // One run over the CDR folder
 func (self *Cdrc) processCdrDir() error {
-	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.cdrInDir))
+	utils.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.cdrInDir))
 	filesInDir, _ := ioutil.ReadDir(self.cdrInDir)
 	for _, file := range filesInDir {
 		if self.cdrFormat != FS_CSV || path.Ext(file.Name()) != ".csv" {
 			go func() { //Enable async processing here
 				if err := self.processFile(path.Join(self.cdrInDir, file.Name())); err != nil {
-					engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", file, err.Error()))
+					utils.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", file, err.Error()))
 				}
 			}()
 		}
@@ -242,11 +242,11 @@ func (self *Cdrc) processFile(filePath string) error {
 		defer func() { self.maxOpenFiles <- processFile }()
 	}
 	_, fn := path.Split(filePath)
-	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing: %s", filePath))
+	utils.Logger.Info(fmt.Sprintf("<Cdrc> Parsing: %s", filePath))
 	file, err := os.Open(filePath)
 	defer file.Close()
 	if err != nil {
-		engine.Logger.Crit(err.Error())
+		utils.Logger.Crit(err.Error())
 		return err
 	}
 	var recordsProcessor RecordsProcessor
@@ -270,19 +270,19 @@ func (self *Cdrc) processFile(filePath string) error {
 			break
 		}
 		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d, error: %s", rowNr, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<Cdrc> Row %d, error: %s", rowNr, err.Error()))
 			continue
 		}
 		for _, storedCdr := range cdrs { // Send CDRs to CDRS
 			var reply string
 			if self.dfltCdrcCfg.DryRun {
-				engine.Logger.Info(fmt.Sprintf("<Cdrc> DryRun CDR: %+v", storedCdr))
+				utils.Logger.Info(fmt.Sprintf("<Cdrc> DryRun CDR: %+v", storedCdr))
 				continue
 			}
 			if err := self.cdrs.ProcessCdr(storedCdr, &reply); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", storedCdr, reply))
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", storedCdr, reply))
 			}
 			cdrsPosted += 1
 		}
@@ -290,10 +290,10 @@ func (self *Cdrc) processFile(filePath string) error {
 	// Finished with file, move it to processed folder
 	newPath := path.Join(self.cdrOutDir, fn)
 	if err := os.Rename(filePath, newPath); err != nil {
-		engine.Logger.Err(err.Error())
+		utils.Logger.Err(err.Error())
 		return err
 	}
-	engine.Logger.Info(fmt.Sprintf("Finished processing %s, moved to %s. Total records processed: %d, CDRs posted: %d, run duration: %s",
+	utils.Logger.Info(fmt.Sprintf("Finished processing %s, moved to %s. Total records processed: %d, CDRs posted: %d, run duration: %s",
 		fn, newPath, recordsProcessor.ProcessedRecordsNr(), cdrsPosted, time.Now().Sub(timeStart)))
 	return nil
 }

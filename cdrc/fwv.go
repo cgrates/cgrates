@@ -87,12 +87,12 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 	defer func() { self.offset += self.lineLen }() // Schedule increasing the offset once we are out from processing the record
 	if self.offset == 0 {                          // First time, set the necessary offsets
 		if err := self.setLineLen(); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row 0, error: cannot set lineLen: %s", err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<Cdrc> Row 0, error: cannot set lineLen: %s", err.Error()))
 			return nil, io.EOF
 		}
 		if len(self.dfltCfg.TrailerFields) != 0 {
 			if fi, err := self.file.Stat(); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Row 0, error: cannot get file stats: %s", err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Row 0, error: cannot get file stats: %s", err.Error()))
 				return nil, err
 			} else {
 				self.trailerOffset = fi.Size() - self.lineLen
@@ -100,7 +100,7 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 		}
 		if len(self.dfltCfg.HeaderFields) != 0 { // ToDo: Process here the header fields
 			if err := self.processHeader(); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Row 0, error reading header: %s", err.Error()))
+				utils.Logger.Err(fmt.Sprintf("<Cdrc> Row 0, error reading header: %s", err.Error()))
 				return nil, io.EOF
 			}
 			return nil, nil
@@ -109,7 +109,7 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 	recordCdrs := make([]*engine.StoredCdr, 0) // More CDRs based on the number of filters and field templates
 	if self.trailerOffset != 0 && self.offset >= self.trailerOffset {
 		if err := self.processTrailer(); err != nil && err != io.EOF {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Read trailer error: %s ", err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<Cdrc> Read trailer error: %s ", err.Error()))
 		}
 		return nil, io.EOF
 	}
@@ -118,7 +118,7 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 	if err != nil {
 		return nil, err
 	} else if nRead != len(buf) {
-		engine.Logger.Err(fmt.Sprintf("<Cdrc> Could not read complete line, have instead: %s", string(buf)))
+		utils.Logger.Err(fmt.Sprintf("<Cdrc> Could not read complete line, have instead: %s", string(buf)))
 		return nil, io.EOF
 	}
 	self.processedRecordsNr += 1
@@ -247,6 +247,6 @@ func (self *FwvRecordsProcessor) processTrailer() error {
 	} else if nRead != len(buf) {
 		return fmt.Errorf("In trailer, line len: %d, have read: %d", self.lineLen, nRead)
 	}
-	//engine.Logger.Debug(fmt.Sprintf("Have read trailer: <%q>", string(buf)))
+	//utils.Logger.Debug(fmt.Sprintf("Have read trailer: <%q>", string(buf)))
 	return nil
 }

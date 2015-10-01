@@ -23,6 +23,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type StatsQueue struct {
@@ -91,7 +93,7 @@ func (sq *StatsQueue) Save(adb AccountingStorage) {
 	defer sq.mux.Unlock()
 	if sq.dirty {
 		if err := adb.SetCdrStatsQueue(sq); err != nil {
-			Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
+			utils.Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
 			return
 		}
 		sq.dirty = false

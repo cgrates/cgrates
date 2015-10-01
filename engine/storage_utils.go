@@ -34,7 +34,7 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler str
 		var db_nb int
 		db_nb, err = strconv.Atoi(name)
 		if err != nil {
-			Logger.Crit("Redis db name must be an integer!")
+			utils.Logger.Crit("Redis db name must be an integer!")
 			return nil, err
 		}
 		if port != "" {
@@ -57,7 +57,7 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 		var db_nb int
 		db_nb, err = strconv.Atoi(name)
 		if err != nil {
-			Logger.Crit("Redis db name must be an integer!")
+			utils.Logger.Crit("Redis db name must be an integer!")
 			return nil, err
 		}
 		if port != "" {
@@ -86,7 +86,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 			var db_nb int
 			db_nb, err = strconv.Atoi(name)
 			if err != nil {
-				Logger.Crit("Redis db name must be an integer!")
+				utils.Logger.Crit("Redis db name must be an integer!")
 				return nil, err
 			}
 			if port != "" {

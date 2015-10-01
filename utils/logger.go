@@ -19,8 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"log"
+	"log/syslog"
 )
+
+var Logger LoggerInterface
+
+func init() {
+	var err error
+	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
+	if err != nil {
+		Logger = new(StdLogger)
+		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
+	}
+}
 
 type LoggerInterface interface {
 	Alert(m string) error

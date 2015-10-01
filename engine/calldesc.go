@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 
-	"log/syslog"
 	"sort"
 	"strings"
 	"time"
@@ -41,12 +40,6 @@ const (
 )
 
 func init() {
-	var err error
-	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
-	if err != nil {
-		Logger = new(utils.StdLogger)
-		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
-	}
 	if DEBUG {
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
@@ -59,7 +52,6 @@ func init() {
 }
 
 var (
-	Logger                 utils.LoggerInterface
 	ratingStorage          RatingStorage
 	accountingStorage      AccountingStorage
 	storageLogger          LogStorage
@@ -345,13 +337,13 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			}
 		}
 	}
-	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
+	// utils.Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on rate intervals
 	for i := 0; i < len(timespans); i++ {
 		//log.Printf("==============%v==================", i)
 		//log.Printf("TS: %+v", timespans[i])
 		rp := timespans[i].ratingInfo
-		// Logger.Debug(fmt.Sprintf("rp: %+v", rp))
+		// utils.Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rp.RateIntervals.Sort()
 		/*for _, interval := range rp.RateIntervals {
@@ -383,10 +375,10 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		//log.Print(timespans[i].RateInterval.Timing)
 	}
 
-	//Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
+	//utils.Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
 	//log.Printf("After SplitByRateInterval: %+v", timespans[0].RateInterval.Timing)
 	timespans = cd.roundTimeSpansToIncrement(timespans)
-	// Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
+	// utils.Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
 	//log.Printf("After round: %+v", timespans[0].RateInterval.Timing)
 	return
 }
@@ -475,7 +467,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
 		return &CallCost{Cost: -1}, err
 	}
 	timespans := cd.splitInTimeSpans()
@@ -498,7 +490,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	// global rounding
 	roundingDecimals, roundingMethod := cc.GetLongestRounding()
 	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
-	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
+	//utils.Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	cc.Timespans.Compress()
 	return cc, err
 }
@@ -521,23 +513,23 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	if origCD.TOR == "" {
 		origCD.TOR = utils.VOICE
 	}
-	//Logger.Debug("ORIG: " + utils.ToJSON(origCD))
+	//utils.Logger.Debug("ORIG: " + utils.ToJSON(origCD))
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
-	//Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
+	//utils.Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
 	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
 
 	//use this to check what increment was payed with debt
 	initialDefaultBalanceValue := defaultBalance.GetValue()
 
-	//Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
-	//Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
+	//utils.Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
+	//utils.Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
 
 	//
 	cc, err := cd.debit(account, true, false)
-	//Logger.Debug("CC: " + utils.ToJSON(cc))
+	//utils.Logger.Debug("CC: " + utils.ToJSON(cc))
 	//log.Print("CC: ", utils.ToIJSON(cc))
-	//Logger.Debug(fmt.Sprintf("ERR: %v", err))
+	//utils.Logger.Debug(fmt.Sprintf("ERR: %v", err))
 	if err != nil {
 		return 0, err
 	}
@@ -551,12 +543,12 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	for _, ts := range cc.Timespans {
 		//if ts.RateInterval != nil {
 		//log.Printf("TS: %+v", ts)
-		//Logger.Debug("TS: " + utils.ToJSON(ts))
+		//utils.Logger.Debug("TS: " + utils.ToJSON(ts))
 		//}
 		if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
 			rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
-				//Logger.Debug(fmt.Sprintf("0_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
+				//utils.Logger.Debug(fmt.Sprintf("0_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 				return utils.MinDuration(initialDuration, totalDuration), nil
 			}
 		}
@@ -564,14 +556,14 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			ts.createIncrementsSlice()
 		}
 		for _, incr := range ts.Increments {
-			//Logger.Debug("INCR: " + utils.ToJSON(incr))
+			//utils.Logger.Debug("INCR: " + utils.ToJSON(incr))
 			totalCost += incr.Cost
 			if incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
 				initialDefaultBalanceValue -= incr.Cost
 				if initialDefaultBalanceValue < 0 {
 					// this increment was payed with debt
 					// TODO: improve this check
-					//Logger.Debug(fmt.Sprintf("1_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
+					//utils.Logger.Debug(fmt.Sprintf("1_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 					return utils.MinDuration(initialDuration, totalDuration), nil
 
 				}
@@ -579,19 +571,19 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 			totalDuration += incr.Duration
 			if totalDuration >= initialDuration {
 				// we have enough, return
-				//Logger.Debug(fmt.Sprintf("2_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
+				//utils.Logger.Debug(fmt.Sprintf("2_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 				return initialDuration, nil
 			}
 		}
 	}
-	//Logger.Debug(fmt.Sprintf("3_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
+	//utils.Logger.Debug(fmt.Sprintf("3_INIT DUR %v, TOTAL DUR: %v", initialDuration, totalDuration))
 	return utils.MinDuration(initialDuration, totalDuration), nil
 }
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
-		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
@@ -624,7 +616,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 	cc, err = account.debitCreditBalance(cd, !dryRun, dryRun, goNegative)
 	//log.Printf("HERE: %+v %v", cc, err)
 	if err != nil {
-		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	}
 	cost := 0.0
@@ -646,7 +638,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	// lock all group members
 	if account, err := cd.getAccount(); err != nil || account == nil {
-		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
@@ -668,7 +660,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
-		Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
 		//log.Printf("ACC: %+v", account)

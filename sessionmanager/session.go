@@ -84,11 +84,11 @@ func (s *Session) debitLoop(runIdx int) {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
 		nextCd.LoopIndex = index
-		//engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s", utils.ToJSON(nextCd)))
+		//utils.Logger.Debug(fmt.Sprintf("NEXTCD: %s", utils.ToJSON(nextCd)))
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
 		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
-			engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
+			utils.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 			s.sessionManager.DisconnectSession(s.eventStart, s.connId, SYSTEM_ERROR)
 			return
 		}
@@ -100,9 +100,9 @@ func (s *Session) debitLoop(runIdx int) {
 			s.sessionManager.WarnSessionMinDuration(s.eventStart.GetUUID(), s.connId)
 		}
 		s.sessionRuns[runIdx].CallCosts = append(s.sessionRuns[runIdx].CallCosts, cc)
-		//engine.Logger.Debug(fmt.Sprintf("CALLCOST: %s", utils.ToJSON(cc)))
+		//utils.Logger.Debug(fmt.Sprintf("CALLCOST: %s", utils.ToJSON(cc)))
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
-		//engine.Logger.Debug(fmt.Sprintf("NEXTCD: %s DURATION: %s", utils.ToJSON(nextCd), nextCd.GetDuration().String()))
+		//utils.Logger.Debug(fmt.Sprintf("NEXTCD: %s DURATION: %s", utils.ToJSON(nextCd), nextCd.GetDuration().String()))
 		// update call duration with real debited duration
 		nextCd.DurationIndex -= debitPeriod
 		nextCd.DurationIndex += cc.GetDuration()
@@ -116,7 +116,7 @@ func (s *Session) debitLoop(runIdx int) {
 func (s *Session) Close(ev engine.Event) error {
 	close(s.stopDebit) // Close the channel so all the sessionRuns listening will be notified
 	if _, err := ev.GetEndTime(); err != nil {
-		engine.Logger.Err("Error parsing event stop time.")
+		utils.Logger.Err("Error parsing event stop time.")
 		for idx := range s.sessionRuns {
 			s.sessionRuns[idx].CallDescriptor.TimeEnd = s.sessionRuns[idx].CallDescriptor.TimeStart.Add(s.sessionRuns[idx].CallDescriptor.DurationIndex)
 		}
@@ -127,24 +127,24 @@ func (s *Session) Close(ev engine.Event) error {
 		if len(sr.CallCosts) == 0 {
 			continue // why would we have 0 callcosts
 		}
-		//engine.Logger.Debug(fmt.Sprintf("ALL CALLCOSTS: %s", utils.ToJSON(sr.CallCosts)))
+		//utils.Logger.Debug(fmt.Sprintf("ALL CALLCOSTS: %s", utils.ToJSON(sr.CallCosts)))
 		lastCC := sr.CallCosts[len(sr.CallCosts)-1]
 		lastCC.Timespans.Decompress()
 		// put credit back
 		startTime, err := ev.GetAnswerTime(sr.DerivedCharger.AnswerTimeField, s.sessionManager.Timezone())
 		if err != nil {
-			engine.Logger.Crit("Error parsing prepaid call start time from event")
+			utils.Logger.Crit("Error parsing prepaid call start time from event")
 			return err
 		}
 		duration, err := ev.GetDuration(sr.DerivedCharger.UsageField)
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Error parsing call duration from event %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("Error parsing call duration from event %s", err.Error()))
 			return err
 		}
 		hangupTime := startTime.Add(duration)
-		//engine.Logger.Debug(fmt.Sprintf("BEFORE REFUND: %s", utils.ToJSON(lastCC)))
+		//utils.Logger.Debug(fmt.Sprintf("BEFORE REFUND: %s", utils.ToJSON(lastCC)))
 		err = s.Refund(lastCC, hangupTime)
-		//engine.Logger.Debug(fmt.Sprintf("AFTER REFUND: %s", utils.ToJSON(lastCC)))
+		//utils.Logger.Debug(fmt.Sprintf("AFTER REFUND: %s", utils.ToJSON(lastCC)))
 		if err != nil {
 			return err
 		}
@@ -156,7 +156,7 @@ func (s *Session) Close(ev engine.Event) error {
 func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refundDuration := end.Sub(hangupTime)
-	//engine.Logger.Debug(fmt.Sprintf("HANGUPTIME: %s REFUNDDURATION: %s", hangupTime.String(), refundDuration.String()))
+	//utils.Logger.Debug(fmt.Sprintf("HANGUPTIME: %s REFUNDDURATION: %s", hangupTime.String(), refundDuration.String()))
 	var refundIncrements engine.Increments
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
@@ -191,7 +191,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 		}
 	}
 	// show only what was actualy refunded (stopped in timespan)
-	// engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
+	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
 		cd := &engine.CallDescriptor{
 			Direction:   lastCC.Direction,
@@ -208,7 +208,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			return err
 		}
 	}
-	//engine.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
+	//utils.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
 	lastCC.Cost -= refundIncrements.GetTotalCost()
 	lastCC.Timespans.Compress()
 	return nil
@@ -228,10 +228,10 @@ func (s *Session) SaveOperations() {
 		}
 		firstCC := sr.CallCosts[0]
 		for _, cc := range sr.CallCosts[1:] {
-			//engine.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %s", utils.ToJSON(firstCC)))
-			//engine.Logger.Debug(fmt.Sprintf("OTHER MERGE: %s", utils.ToJSON(cc)))
+			//utils.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %s", utils.ToJSON(firstCC)))
+			//utils.Logger.Debug(fmt.Sprintf("OTHER MERGE: %s", utils.ToJSON(cc)))
 			firstCC.Merge(cc)
-			//engine.Logger.Debug(fmt.Sprintf("AFTER MERGE: %s", utils.ToJSON(firstCC)))
+			//utils.Logger.Debug(fmt.Sprintf("AFTER MERGE: %s", utils.ToJSON(firstCC)))
 		}
 
 		var reply string
@@ -249,7 +249,7 @@ func (s *Session) SaveOperations() {
 			if err == utils.ErrExists {
 				s.Refund(firstCC, firstCC.Timespans[0].TimeStart)
 			} else {
-				engine.Logger.Err(fmt.Sprintf("<SM> ERROR failed to log call cost: %v", err))
+				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to log call cost: %v", err))
 			}
 		}
 	}

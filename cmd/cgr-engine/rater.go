@@ -53,12 +53,12 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	go func() {
 		defer close(cacheTaskChan)
 		if err := ratingDb.CacheRatingAll(); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 		if err := accountDb.CacheAccountingPrefixes(); err != nil { // Used to cache load history
-			engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
 			exitChan <- true
 			return
 		}
@@ -76,7 +76,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 			case sched = <-internalSchedulerChan:
 				internalSchedulerChan <- sched
 			case <-time.After(cfg.InternalTtl):
-				engine.Logger.Crit("<Rater>: Internal scheduler connection timeout.")
+				utils.Logger.Crit("<Rater>: Internal scheduler connection timeout.")
 				exitChan <- true
 				return
 			}
@@ -96,7 +96,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				case bal = <-internalBalancerChan:
 					internalBalancerChan <- bal // Put it back if someone else is interested about
 				case <-time.After(cfg.InternalTtl):
-					engine.Logger.Crit("<Rater>: Internal balancer connection timeout.")
+					utils.Logger.Crit("<Rater>: Internal balancer connection timeout.")
 					exitChan <- true
 					return
 				}
@@ -120,12 +120,12 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				case cdrStats = <-internalCdrStatSChan:
 					internalCdrStatSChan <- cdrStats
 				case <-time.After(cfg.InternalTtl):
-					engine.Logger.Crit("<Rater>: Internal cdrstats connection timeout.")
+					utils.Logger.Crit("<Rater>: Internal cdrstats connection timeout.")
 					exitChan <- true
 					return
 				}
 			} else if cdrStats, err = engine.NewProxyStats(cfg.RaterCdrStats, cfg.ConnectAttempts, -1); err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to cdrstats, error: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to cdrstats, error: %s", err.Error()))
 				exitChan <- true
 				return
 			}
@@ -144,12 +144,12 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				case scribeServer = <-internalHistorySChan:
 					internalHistorySChan <- scribeServer
 				case <-time.After(cfg.InternalTtl):
-					engine.Logger.Crit("<Rater>: Internal historys connection timeout.")
+					utils.Logger.Crit("<Rater>: Internal historys connection timeout.")
 					exitChan <- true
 					return
 				}
 			} else if scribeServer, err = history.NewProxyScribe(cfg.RaterHistoryServer, cfg.ConnectAttempts, -1); err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<Rater> Could not connect historys, error: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect historys, error: %s", err.Error()))
 				exitChan <- true
 				return
 			}
@@ -169,12 +169,12 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				case pubSubServer = <-internalPubSubSChan:
 					internalPubSubSChan <- pubSubServer
 				case <-time.After(cfg.InternalTtl):
-					engine.Logger.Crit("<Rater>: Internal pubsub connection timeout.")
+					utils.Logger.Crit("<Rater>: Internal pubsub connection timeout.")
 					exitChan <- true
 					return
 				}
 			} else if pubSubServer, err = engine.NewProxyPubSub(cfg.RaterPubSubServer, cfg.ConnectAttempts, -1); err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to pubsubs: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to pubsubs: %s", err.Error()))
 				exitChan <- true
 				return
 			}
@@ -194,12 +194,12 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				case aliasesServer = <-internalAliaseSChan:
 					internalAliaseSChan <- aliasesServer
 				case <-time.After(cfg.InternalTtl):
-					engine.Logger.Crit("<Rater>: Internal aliases connection timeout.")
+					utils.Logger.Crit("<Rater>: Internal aliases connection timeout.")
 					exitChan <- true
 					return
 				}
 			} else if aliasesServer, err = engine.NewProxyAliasService(cfg.RaterAliasesServer, cfg.ConnectAttempts, -1); err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to aliases, error: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to aliases, error: %s", err.Error()))
 				exitChan <- true
 				return
 			}
@@ -219,12 +219,12 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				case userServer = <-internalUserSChan:
 					internalUserSChan <- userServer
 				case <-time.After(cfg.InternalTtl):
-					engine.Logger.Crit("<Rater>: Internal users connection timeout.")
+					utils.Logger.Crit("<Rater>: Internal users connection timeout.")
 					exitChan <- true
 					return
 				}
 			} else if userServer, err = engine.NewProxyUserService(cfg.RaterUserServer, cfg.ConnectAttempts, -1); err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<Rater> Could not connect users, error: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect users, error: %s", err.Error()))
 				exitChan <- true
 				return
 			}

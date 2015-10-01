@@ -121,7 +121,7 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	if len(um.indexKeys) != 0 {
 		var s string
 		if err := um.AddIndex(um.indexKeys, &s); err != nil {
-			Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", um.indexKeys, err))
+			utils.Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", um.indexKeys, err))
 			um.table = oldTable
 			um.index = oldIndex
 			um.masked = oldMaksed

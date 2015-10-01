@@ -136,11 +136,11 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub != nil {
 		body, _ := json.Marshal(ub)
-		Logger.Info(fmt.Sprintf("Threshold hit, Balance: %s", body))
+		utils.Logger.Info(fmt.Sprintf("Threshold hit, Balance: %s", body))
 	}
 	if sq != nil {
 		body, _ := json.Marshal(sq)
-		Logger.Info(fmt.Sprintf("Threshold hit, StatsQueue: %s", body))
+		utils.Logger.Info(fmt.Sprintf("Threshold hit, StatsQueue: %s", body))
 	}
 	return
 }
@@ -246,7 +246,7 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 				cdr.ExtraFields[key] = parsedValue
 			}
 		}
-		//Logger.Debug(fmt.Sprintf("account: %+v, action: %+v, balance: %+v", acc, action, action.Balance))
+		//utils.Logger.Debug(fmt.Sprintf("account: %+v, action: %+v, balance: %+v", acc, action, action.Balance))
 		cdrs = append(cdrs, cdr)
 		if cdrStorage == nil { // Only save if the cdrStorage is defined
 			continue
@@ -463,7 +463,7 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 			if _, err := utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, o); err == nil {
 				break // Success, no need to reinterate
 			} else if i == 4 { // Last iteration, syslog the warning
-				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], triggered: %s", a.ExtraParameters, err.Error(), o))
+				utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], triggered: %s", a.ExtraParameters, err.Error(), o))
 				break
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
@@ -506,9 +506,9 @@ func mailAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) err
 				break
 			} else if i == 4 {
 				if ub != nil {
-					Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], BalanceId: %s", a.ExtraParameters, err.Error(), ub.Id))
+					utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], BalanceId: %s", a.ExtraParameters, err.Error(), ub.Id))
 				} else if sq != nil {
-					Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], StatsQueueTriggeredId: %s", a.ExtraParameters, err.Error(), sq.Id))
+					utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], StatsQueueTriggeredId: %s", a.ExtraParameters, err.Error(), sq.Id))
 				}
 				break
 			}

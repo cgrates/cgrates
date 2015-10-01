@@ -117,7 +117,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 	for index, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {
 		rpl, err := ratingStorage.GetRatingPlan(rpa.RatingPlanId, false)
 		if err != nil || rpl == nil {
-			Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
+			utils.Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 			continue
 		}
 		prefix := ""

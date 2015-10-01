@@ -80,7 +80,7 @@ func startCdrcs(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan 
 			break
 		case <-cfg.ConfigReloads[utils.CDRC]: // Consume the load request and wait for a new one
 			if cdrcInitialized {
-				engine.Logger.Info("<CDRC> Configuration reload")
+				utils.Logger.Info("<CDRC> Configuration reload")
 				close(cdrcChildrenChan) // Stop all the children of the previous run
 			}
 			cdrcChildrenChan = make(chan struct{})
@@ -118,7 +118,7 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 	} else {
 		conn, err := rpcclient.NewRpcClient("tcp", cdrcCfg.Cdrs, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<CDRC> Could not connect to CDRS via RPC: %v", err))
+			utils.Logger.Crit(fmt.Sprintf("<CDRC> Could not connect to CDRS via RPC: %v", err))
 			exitChan <- true
 			return
 		}
@@ -126,18 +126,18 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 	}
 	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan, cfg.DefaultTimezone)
 	if err != nil {
-		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
+		utils.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
 	if err := cdrc.Run(); err != nil {
-		engine.Logger.Crit(fmt.Sprintf("Cdrc run error: %s", err.Error()))
+		utils.Logger.Crit(fmt.Sprintf("Cdrc run error: %s", err.Error()))
 		exitChan <- true // If run stopped, something is bad, stop the application
 	}
 }
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
-	engine.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
+	utils.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	var err error
@@ -150,7 +150,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil { //Connected so no need to reiterate
-				engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
+				utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
@@ -169,7 +169,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 				if err != nil {
-					engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
+					utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
 					exitChan <- true
 					return
 				}
@@ -181,13 +181,13 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
 	exitChan <- true
 }
 
 func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
-	engine.Logger.Info("Starting CGRateS SM-Kamailio service.")
+	utils.Logger.Info("Starting CGRateS SM-Kamailio service.")
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	var err error
@@ -200,7 +200,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil { //Connected so no need to reiterate
-				engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
+				utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
@@ -219,7 +219,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 				if err != nil {
-					engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
+					utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
 					exitChan <- true
 					return
 				}
@@ -231,13 +231,13 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
 	exitChan <- true
 }
 
 func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
-	engine.Logger.Info("Starting CGRateS SM-OpenSIPS service.")
+	utils.Logger.Info("Starting CGRateS SM-OpenSIPS service.")
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	var err error
@@ -250,7 +250,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil { //Connected so no need to reiterate
-				engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
+				utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
@@ -269,7 +269,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 				if err != nil {
-					engine.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
+					utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
 					exitChan <- true
 					return
 				}
@@ -281,7 +281,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err := sm.Connect(); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
 	}
 	exitChan <- true
 }
@@ -290,7 +290,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	internalRaterChan chan *engine.Responder, internalPubSubSChan chan engine.PublisherSubscriber,
 	internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
 	internalCdrStatSChan chan engine.StatsInterface, server *engine.Server, exitChan chan bool) {
-	engine.Logger.Info("Starting CGRateS CDRS service.")
+	utils.Logger.Info("Starting CGRateS CDRS service.")
 	var err error
 	var client *rpcclient.RpcClient
 	// Rater connection init
@@ -302,7 +302,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	} else if len(cfg.CDRSRater) != 0 {
 		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSRater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to rater: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to rater: %s", err.Error()))
 			exitChan <- true
 			return
 		}
@@ -320,7 +320,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to pubsub server: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to pubsub server: %s", err.Error()))
 				exitChan <- true
 				return
 			}
@@ -339,7 +339,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSUsers, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to users server: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to users server: %s", err.Error()))
 				exitChan <- true
 				return
 			}
@@ -358,7 +358,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSAliases, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to aliases server: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to aliases server: %s", err.Error()))
 				exitChan <- true
 				return
 			}
@@ -377,7 +377,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
 				exitChan <- true
 				return
 			}
@@ -386,9 +386,9 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	}
 
 	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, raterConn, pubSubConn, usersConn, aliasesConn, statsConn)
-	engine.Logger.Info("Registering CDRS HTTP Handlers.")
+	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHanlersToServer(server)
-	engine.Logger.Info("Registering CDRS RPC service.")
+	utils.Logger.Info("Registering CDRS RPC service.")
 	cdrSrv := v1.CdrsV1{CdrSrv: cdrServer}
 	server.RpcRegister(&cdrSrv)
 	server.RpcRegister(&v2.CdrsV2{CdrsV1: cdrSrv})
@@ -400,7 +400,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 }
 
 func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, ratingDb engine.RatingStorage, exitChan chan bool) {
-	engine.Logger.Info("Starting CGRateS Scheduler.")
+	utils.Logger.Info("Starting CGRateS Scheduler.")
 	sched := scheduler.NewScheduler()
 	go reloadSchedulerSingnalHandler(sched, ratingDb)
 	time.Sleep(1)
@@ -420,7 +420,7 @@ func startCdrStats(internalCdrStatSChan chan engine.StatsInterface, ratingDb eng
 func startHistoryServer(internalHistorySChan chan history.Scribe, server *engine.Server, exitChan chan bool) {
 	scribeServer, err := history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval)
 	if err != nil {
-		engine.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
+		utils.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
 		exitChan <- true
 	}
 	server.RpcRegisterName("ScribeV1", scribeServer)
@@ -438,7 +438,7 @@ func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb 
 	aliasesServer := engine.NewAliasHandler(accountDb)
 	server.RpcRegisterName("AliasesV1", aliasesServer)
 	if err := accountDb.CacheAccountingPrefixes(utils.ALIASES_PREFIX); err != nil {
-		engine.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
+		utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
@@ -448,7 +448,7 @@ func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb 
 func startUsersServer(internalUserSChan chan engine.UserService, accountDb engine.AccountingStorage, server *engine.Server, exitChan chan bool) {
 	userServer, err := engine.NewUserMap(accountDb, cfg.UserServerIndexes)
 	if err != nil {
-		engine.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
+		utils.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
 		exitChan <- true
 		return
 	}
@@ -485,7 +485,7 @@ func startRpc(server *engine.Server, internalRaterChan chan *engine.Responder,
 }
 
 func writePid() {
-	engine.Logger.Info(*pidFile)
+	utils.Logger.Info(*pidFile)
 	f, err := os.Create(*pidFile)
 	if err != nil {
 		log.Fatal("Could not write pid file: ", err)
@@ -518,7 +518,7 @@ func main() {
 	}
 	cfg, err = config.NewCGRConfigFromFolder(*cfgDir)
 	if err != nil {
-		engine.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
+		utils.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
 		return
 	}
 	config.SetCgrConfig(cfg) // Share the config object
@@ -540,7 +540,7 @@ func main() {
 		ratingDb, err = engine.ConfigureRatingStorage(cfg.TpDbType, cfg.TpDbHost, cfg.TpDbPort,
 			cfg.TpDbName, cfg.TpDbUser, cfg.TpDbPass, cfg.DBDataEncoding)
 		if err != nil { // Cannot configure getter database, show stopper
-			engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
 		}
 		defer ratingDb.Close()
@@ -548,7 +548,7 @@ func main() {
 		accountDb, err = engine.ConfigureAccountingStorage(cfg.DataDbType, cfg.DataDbHost, cfg.DataDbPort,
 			cfg.DataDbName, cfg.DataDbUser, cfg.DataDbPass, cfg.DBDataEncoding)
 		if err != nil { // Cannot configure getter database, show stopper
-			engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+			utils.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 			return
 		}
 		defer accountDb.Close()
@@ -558,7 +558,7 @@ func main() {
 		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
 			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
 		if err != nil { // Cannot configure logger database, show stopper
-			engine.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return
 		}
 		defer logDb.Close()
@@ -668,8 +668,8 @@ func main() {
 
 	if *pidFile != "" {
 		if err := os.Remove(*pidFile); err != nil {
-			engine.Logger.Warning("Could not remove pid file: " + err.Error())
+			utils.Logger.Warning("Could not remove pid file: " + err.Error())
 		}
 	}
-	engine.Logger.Info("Stopped all components. CGRateS shutdown!")
+	utils.Logger.Info("Stopped all components. CGRateS shutdown!")
 }

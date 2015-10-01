@@ -216,7 +216,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
-	engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
@@ -235,7 +235,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return err
 	}
 	if len(aps) != 0 && self.Sched != nil {
-		engine.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
+		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
 		self.Sched.LoadActionPlans(self.RatingDb)
 		self.Sched.Restart()
 	}
