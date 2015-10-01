@@ -9,3 +9,5 @@ make squeeze:
 	ln -sf packages/squeeze debian ;\
 	dpkg-buildpackage -rfakeroot -tc; \
 	rm debian
+
+.PHONY: deb squeeze
