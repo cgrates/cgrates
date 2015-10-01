@@ -55,7 +55,7 @@ func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, 
 }
 
 // Post with built-in failover
-func HttpPoster(url string, skipTlsVerify bool, content interface{}, retries int, fallbackFilePath string) ([]byte, error) {
+func HttpJsonPoster(url string, skipTlsVerify bool, content interface{}, retries int, fallbackFilePath string) ([]byte, error) {
 	body, err := json.Marshal(content)
 	if err != nil {
 		return nil, err
