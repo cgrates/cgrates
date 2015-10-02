@@ -40,7 +40,7 @@ func TestHttpJsonPoster(t *testing.T) {
 	}
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
 	filePath := "/tmp/cgr_test_http_poster.json"
-	if _, err := HttpPoster("http://localhost:8080/invalid", true, content, true, 3, filePath); err != nil {
+	if _, err := HttpPoster("http://localhost:8080/invalid", true, content, CONTENT_JSON, 3, filePath); err != nil {
 		t.Error(err)
 	}
 	jsnContent, _ := json.Marshal(content)
@@ -62,7 +62,7 @@ func TestHttpBytesPoster(t *testing.T) {
 		Test2
 		`)
 	filePath := "/tmp/test_http_poster.http"
-	if _, err := HttpPoster("http://localhost:8080/invalid", true, content, false, 3, filePath); err != nil {
+	if _, err := HttpPoster("http://localhost:8080/invalid", true, content, CONTENT_TEXT, 3, filePath); err != nil {
 		t.Error(err)
 	}
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
