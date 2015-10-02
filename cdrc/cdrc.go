@@ -64,7 +64,7 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal, timezone s
 		cdr.Subject += fieldVal
 	case utils.DESTINATION:
 		cdr.Destination += fieldVal
-	case utils.RATED:
+	case utils.RATED_FLD:
 		cdr.Rated, _ = strconv.ParseBool(fieldVal)
 	case utils.SETUP_TIME:
 		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
@@ -86,6 +86,10 @@ func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal, timezone s
 		cdr.Supplier += fieldVal
 	case utils.DISCONNECT_CAUSE:
 		cdr.DisconnectCause += fieldVal
+	case utils.COST:
+		if cdr.Cost, err = strconv.ParseFloat(fieldVal, 64); err != nil {
+			return fmt.Errorf("Cannot parse cost field with value: %s, err: %s", fieldVal, err.Error())
+		}
 	default: // Extra fields will not match predefined so they all show up here
 		cdr.ExtraFields[fieldId] += fieldVal
 	}

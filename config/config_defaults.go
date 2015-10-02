@@ -28,19 +28,20 @@ const CGRATES_CFG_JSON = `
 // This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
-	"http_skip_tls_verify": false,			// if enabled Http Client will accept any TLS certificate
-	"rounding_decimals": 10,				// system level precision for floats
-	"dbdata_encoding": "msgpack",			// encoding used to store object data in strings: <msgpack|json>
-	"tpexport_dir": "/var/log/cgrates/tpe",	// path towards export folder for offline Tariff Plans
-	"default_reqtype": "*rated",			// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
-	"default_category": "call",				// default Type of Record to consider when missing from requests
-	"default_tenant": "cgrates.org",		// default Tenant to consider when missing from requests
-	"default_subject": "cgrates",			// default rating Subject to consider when missing from requests
-	"default_timezone": "Local",			// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	"connect_attempts": 3,					// initial server connect attempts
-	"response_cache_ttl": "3s",				// the life span of a cached response
-	"reconnects": -1,						// number of retries in case of connection lost
-	"internal_ttl": "2m",					// maximum duration to wait for internal connections before giving up
+	"http_skip_tls_verify": false,						// if enabled Http Client will accept any TLS certificate
+	"rounding_decimals": 10,							// system level precision for floats
+	"dbdata_encoding": "msgpack",						// encoding used to store object data in strings: <msgpack|json>
+	"tpexport_dir": "/var/log/cgrates/tpe",				// path towards export folder for offline Tariff Plans
+	"http_failed_dir": "/var/log/cgrates/http_failed",	// directory path where we store failed http requests
+	"default_reqtype": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
+	"default_category": "call",							// default Type of Record to consider when missing from requests
+	"default_tenant": "cgrates.org",					// default Tenant to consider when missing from requests
+	"default_subject": "cgrates",						// default rating Subject to consider when missing from requests
+	"default_timezone": "Local",						// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	"connect_attempts": 3,								// initial server connect attempts
+	"reconnects": -1,									// number of retries in case of connection lost
+	"response_cache_ttl": "3s",							// the life span of a cached response
+	"internal_ttl": "2m",								// maximum duration to wait for internal connections before giving up
 },
 
 

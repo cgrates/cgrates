@@ -26,5 +26,6 @@ type CdrReplicationCfg struct {
 	Transport   string
 	Server      string
 	Synchronous bool
+	Attempts    int             // Number of attempts if not success
 	CdrFilter   utils.RSRFields // Only replicate if the filters here are matching
 }

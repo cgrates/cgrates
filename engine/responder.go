@@ -287,7 +287,6 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-
 	// replace user profile fields
 	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
 		return err

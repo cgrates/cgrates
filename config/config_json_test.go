@@ -42,6 +42,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Rounding_decimals:    utils.IntPointer(10),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/log/cgrates/tpe"),
+		Http_failed_dir:      utils.StringPointer("/var/log/cgrates/http_failed"),
 		Default_reqtype:      utils.StringPointer(utils.META_RATED),
 		Default_category:     utils.StringPointer("call"),
 		Default_tenant:       utils.StringPointer("cgrates.org"),

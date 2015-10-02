@@ -199,6 +199,7 @@ type CGRConfig struct {
 	RoundingDecimals     int           // Number of decimals to round end prices at
 	HttpSkipTlsVerify    bool          // If enabled Http Client will accept any TLS certificate
 	TpExportPath         string        // Path towards export folder for offline Tariff Plans
+	HttpFailedDir        string        // Directory path where we store failed http requests
 	MaxCallDuration      time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
 	RaterEnabled         bool          // start standalone server (no balancer)
 	RaterBalancer        string        // balancer address host:port
@@ -570,6 +571,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnGeneralCfg.Tpexport_dir != nil {
 			self.TpExportPath = *jsnGeneralCfg.Tpexport_dir
 		}
+		if jsnGeneralCfg.Http_failed_dir != nil {
+			self.HttpFailedDir = *jsnGeneralCfg.Http_failed_dir
+		}
 		if jsnGeneralCfg.Default_timezone != nil {
 			self.DefaultTimezone = *jsnGeneralCfg.Default_timezone
 		}
@@ -663,6 +667,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 				}
 				if rplJsonCfg.Synchronous != nil {
 					self.CDRSCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
+				}
+				if rplJsonCfg.Attempts != nil {
+					self.CDRSCdrReplication[idx].Attempts = *rplJsonCfg.Attempts
 				}
 				if rplJsonCfg.Cdr_filter != nil {
 					if self.CDRSCdrReplication[idx].CdrFilter, err = utils.ParseRSRFields(*rplJsonCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {

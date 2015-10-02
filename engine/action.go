@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"net/smtp"
+	"path"
 	"reflect"
 	"sort"
 	"strconv"
@@ -427,7 +428,7 @@ func genericReset(ub *Account) error {
 	return nil
 }
 
-func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	var o interface{}
 	if ub != nil {
 		o = ub
@@ -435,12 +436,9 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err 
 	if sq != nil {
 		o = sq
 	}
-	//jsn, err := json.Marshal(o)
-	//if err != nil {
-	//	return err
-	//}
 	cfg := config.CgrConfig()
-	_, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, o)
+	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
+	_, err := utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, o, utils.CONTENT_JSON, 1, fallbackPath)
 	return err
 }
 
@@ -453,23 +451,9 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 	if sq != nil {
 		o = sq
 	}
-	//jsn, err := json.Marshal(o)
-	//if err != nil {
-	//	return err
-	//}
 	cfg := config.CgrConfig()
-	go func() {
-		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-			if _, err := utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, o); err == nil {
-				break // Success, no need to reinterate
-			} else if i == 4 { // Last iteration, syslog the warning
-				utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], triggered: %s", a.ExtraParameters, err.Error(), o))
-				break
-			}
-			time.Sleep(time.Duration(i) * time.Minute)
-		}
-
-	}()
+	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
+	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, o, utils.CONTENT_JSON, 3, fallbackPath)
 	return nil
 }
 

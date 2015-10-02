@@ -21,13 +21,32 @@ package utils
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 )
+
+var (
+	CONTENT_JSON = "json"
+	CONTENT_FORM = "form"
+	CONTENT_TEXT = "text"
+)
+
+// Converts interface to []byte
+func GetBytes(content interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(content)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
 
 // Post without automatic failover
 func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, error) {
@@ -55,8 +74,20 @@ func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, 
 }
 
 // Post with built-in failover
-func HttpJsonPoster(url string, skipTlsVerify bool, content interface{}, retries int, fallbackFilePath string) ([]byte, error) {
-	body, err := json.Marshal(content)
+func HttpPoster(addr string, skipTlsVerify bool, content interface{}, contentType string, attempts int, fallbackFilePath string) ([]byte, error) {
+	var body []byte
+	var urlData url.Values
+	var err error
+	switch contentType {
+	case CONTENT_JSON:
+		body, err = json.Marshal(content)
+	case CONTENT_FORM:
+		urlData = content.(url.Values)
+	case CONTENT_TEXT:
+		body = content.([]byte)
+	default:
+		err = fmt.Errorf("Unsupported ContentType: %s", contentType)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -65,22 +96,31 @@ func HttpJsonPoster(url string, skipTlsVerify bool, content interface{}, retries
 	}
 	client := &http.Client{Transport: tr}
 	delay := Fib()
-	for i := 0; i < retries; i++ {
-		resp, err := client.Post(url, "application/json", bytes.NewBuffer(body))
+	bodyType := "application/x-www-form-urlencoded"
+	if contentType == CONTENT_JSON {
+		bodyType = "application/json"
+	}
+	for i := 0; i < attempts; i++ {
+		var resp *http.Response
+		if IsSliceMember([]string{CONTENT_JSON, CONTENT_TEXT}, contentType) {
+			resp, err = client.Post(addr, bodyType, bytes.NewBuffer(body))
+		} else if contentType == CONTENT_FORM {
+			resp, err = client.PostForm(addr, urlData)
+		}
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("<HttpPoster> Posting to : <%s>, error: <%s>", url, err.Error()))
+			Logger.Warning(fmt.Sprintf("<HttpPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
 			time.Sleep(delay())
 			continue
 		}
 		defer resp.Body.Close()
 		respBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("<HttpPoster> Posting to : <%s>, error: <%s>", url, err.Error()))
+			Logger.Warning(fmt.Sprintf("<HttpPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
 			time.Sleep(delay())
 			continue
 		}
 		if resp.StatusCode > 299 {
-			Logger.Warning(fmt.Sprintf("<HttpPoster> Posting to : <%s>, unexpected status code received: <%d>", url, resp.StatusCode))
+			Logger.Warning(fmt.Sprintf("<HttpPoster> Posting to : <%s>, unexpected status code received: <%d>", addr, resp.StatusCode))
 			time.Sleep(delay())
 			continue
 		}

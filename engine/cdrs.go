@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -362,10 +363,11 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 		}
 		switch rplCfg.Transport {
 		case utils.META_HTTP_POST:
-			httpClient := new(http.Client)
 			errChan := make(chan error)
 			go func(cdr *StoredCdr, rplCfg *config.CdrReplicationCfg, errChan chan error) {
-				if _, err := httpClient.PostForm(fmt.Sprintf("%s", rplCfg.Server), cdr.AsHttpForm()); err != nil {
+				utils.Logger.Debug(fmt.Sprintf("Replicating CDR: %+v, attempts: %d", cdr, rplCfg.Attempts))
+				fallbackPath := path.Join(self.cgrCfg.HttpFailedDir, fmt.Sprintf("cdr_%s_%s_%s.form", rplCfg.Transport, rplCfg.Server, utils.GenUUID()))
+				if _, err := utils.HttpPoster(rplCfg.Server, self.cgrCfg.HttpSkipTlsVerify, cdr.AsHttpForm(), utils.CONTENT_FORM, rplCfg.Attempts, fallbackPath); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
 					errChan <- err
 				}

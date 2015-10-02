@@ -39,6 +39,7 @@ binary-arch: clean
 	mkdir -p $(PKGDIR)/var/log/cgrates/cdre/fwv
 	mkdir -p $(PKGDIR)/var/log/cgrates/history
 	mkdir -p $(PKGDIR)/var/log/cgrates/tpe
+	mkdir -p $(PKGDIR)/var/log/cgrates/http_failed
 	dh_strip
 	dh_compress
 	dh_fixperms
