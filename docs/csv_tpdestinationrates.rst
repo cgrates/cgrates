@@ -25,8 +25,8 @@ Index 2 - *RatesTag*
   References profile defined in Rates.csv_.
 
 
-.. _Destinations.csv: csv_tpdestinations.html
-.. _Rates.csv: csv_tprates.html
+.. _Destinations.csv: csv_tpdestinations.rst
+.. _Rates.csv: csv_tprates.rst
 
 
 
