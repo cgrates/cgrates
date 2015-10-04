@@ -135,6 +135,9 @@ func (storedCdr *StoredCdr) FormatUsage(layout string) string {
 
 // Used to retrieve fields as string, primary fields are const labeled
 func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
+	if rsrFld.IsStatic() { // Static values do not care about headers
+		return rsrFld.ParseValue("")
+	}
 	switch rsrFld.Id {
 	case utils.CGRID:
 		return rsrFld.ParseValue(storedCdr.CgrId)
@@ -187,6 +190,15 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 	default:
 		return rsrFld.ParseValue(storedCdr.ExtraFields[rsrFld.Id])
 	}
+}
+
+// concatenates values of multiple fields defined in template, used eg in CDR templates
+func (storedCdr *StoredCdr) FieldsAsString(rsrFlds utils.RSRFields) string {
+	var fldVal string
+	for _, rsrFld := range rsrFlds {
+		fldVal += storedCdr.FieldAsString(rsrFld)
+	}
+	return fldVal
 }
 
 func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string) {

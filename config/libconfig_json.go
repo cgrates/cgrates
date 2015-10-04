@@ -256,7 +256,11 @@ type MailerJsonCfg struct {
 
 // SureTax config section
 type SureTaxJsonCfg struct {
-	Url            *string // API url
-	Client_number  *string // client number provided by SureTax
-	Validation_key *string // validation key provided by SureTax
+	Url                *string // API url
+	Client_number      *string // client number provided by SureTax
+	Validation_key     *string // validation key provided by SureTax
+	Timezone           *string // convert the time of the events to this timezone before sending request out
+	Include_local_cost *bool   // sum local calculated cost with tax one
+	Origination_number *string // template extracting origination number out of StoredCdr
+	Termination_number *string // template extracting origination number out of StoredCdr
 }

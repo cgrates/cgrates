@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,7 +33,11 @@ type CdrReplicationCfg struct {
 }
 
 type SureTaxCfg struct {
-	Url           string
-	ClientNumber  string
-	ValidationKey string
+	Url               string
+	ClientNumber      string
+	ValidationKey     string
+	Timezone          *time.Location // Convert the time of the events to this timezone before sending request out
+	IncludeLocalCost  bool
+	OriginationNumber utils.RSRFields // Concatenate all of them to get value
+	TerminationNumber utils.RSRFields // Concatenate all of them to get value
 }

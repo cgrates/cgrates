@@ -238,7 +238,7 @@ type CGRConfig struct {
 	MailerAuthUser       string                            // Authenticate to email server using this user
 	MailerAuthPass       string                            // Authenticate to email server with this password
 	MailerFromAddr       string                            // From address used when sending emails out
-	SureTax              *SureTaxCfg                       // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
+	SureTaxCfg           *SureTaxCfg                       // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
 	DataFolderPath       string                            // Path towards data folder, for tests internal usage, not loading out of .json options
 	ConfigReloads        map[string]chan struct{}          // Signals to specific entities that a config reload should occur
 	// Cache defaults loaded from json and needing clones
@@ -804,15 +804,33 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	if jsnSureTaxCfg != nil {
-		self.SureTax = new(SureTaxCfg) // Reset previous values
+		self.SureTaxCfg = new(SureTaxCfg) // Reset previous values
 		if jsnSureTaxCfg.Url != nil {
-			self.SureTax.Url = *jsnSureTaxCfg.Url
+			self.SureTaxCfg.Url = *jsnSureTaxCfg.Url
 		}
 		if jsnSureTaxCfg.Client_number != nil {
-			self.SureTax.ClientNumber = *jsnSureTaxCfg.Client_number
+			self.SureTaxCfg.ClientNumber = *jsnSureTaxCfg.Client_number
 		}
 		if jsnSureTaxCfg.Validation_key != nil {
-			self.SureTax.ValidationKey = *jsnSureTaxCfg.Validation_key
+			self.SureTaxCfg.ValidationKey = *jsnSureTaxCfg.Validation_key
+		}
+		if jsnSureTaxCfg.Timezone != nil {
+			if self.SureTaxCfg.Timezone, err = time.LoadLocation(*jsnSureTaxCfg.Timezone); err != nil {
+				return err
+			}
+		}
+		if jsnSureTaxCfg.Include_local_cost != nil {
+			self.SureTaxCfg.IncludeLocalCost = *jsnSureTaxCfg.Include_local_cost
+		}
+		if jsnSureTaxCfg.Origination_number != nil {
+			if self.SureTaxCfg.OriginationNumber, err = utils.ParseRSRFields(*jsnSureTaxCfg.Origination_number, utils.INFIELD_SEP); err != nil {
+				return err
+			}
+		}
+		if jsnSureTaxCfg.Termination_number != nil {
+			if self.SureTaxCfg.TerminationNumber, err = utils.ParseRSRFields(*jsnSureTaxCfg.Termination_number, utils.INFIELD_SEP); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

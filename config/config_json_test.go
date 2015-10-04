@@ -459,9 +459,13 @@ func TestDfMailerJsonCfg(t *testing.T) {
 
 func TestDfSureTaxJsonCfg(t *testing.T) {
 	eCfg := &SureTaxJsonCfg{
-		Url:            utils.StringPointer(""),
-		Client_number:  utils.StringPointer(""),
-		Validation_key: utils.StringPointer(""),
+		Url:                utils.StringPointer(""),
+		Client_number:      utils.StringPointer(""),
+		Validation_key:     utils.StringPointer(""),
+		Timezone:           utils.StringPointer("Local"),
+		Include_local_cost: utils.BoolPointer(false),
+		Origination_number: utils.StringPointer("Subject"),
+		Termination_number: utils.StringPointer("Destination"),
 	}
 	if cfg, err := dfCgrJsonCfg.SureTaxJsonCfg(); err != nil {
 		t.Error(err)
