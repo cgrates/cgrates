@@ -52,6 +52,7 @@ const (
 	ALIASESSERV_JSN = "aliases"
 	USERSERV_JSN    = "users"
 	MAILER_JSN      = "mailer"
+	SURETAX_JSON    = "suretax"
 )
 
 // Loads the json config out of io.Reader, eg other sources than file, maybe over http
@@ -287,6 +288,18 @@ func (self CgrJsonCfg) MailerJsonCfg() (*MailerJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(MailerJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) SureTaxJsonCfg() (*SureTaxJsonCfg, error) {
+	rawCfg, hasKey := self[SURETAX_JSON]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(SureTaxJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

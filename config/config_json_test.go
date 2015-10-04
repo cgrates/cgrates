@@ -444,7 +444,6 @@ func TestDfUserServJsonCfg(t *testing.T) {
 }
 
 func TestDfMailerJsonCfg(t *testing.T) {
-
 	eCfg := &MailerJsonCfg{
 		Server:       utils.StringPointer("localhost"),
 		Auth_user:    utils.StringPointer("cgrates"),
@@ -452,6 +451,19 @@ func TestDfMailerJsonCfg(t *testing.T) {
 		From_address: utils.StringPointer("cgr-mailer@localhost.localdomain"),
 	}
 	if cfg, err := dfCgrJsonCfg.MailerJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
+func TestDfSureTaxJsonCfg(t *testing.T) {
+	eCfg := &SureTaxJsonCfg{
+		Url:            utils.StringPointer(""),
+		Client_number:  utils.StringPointer(""),
+		Validation_key: utils.StringPointer(""),
+	}
+	if cfg, err := dfCgrJsonCfg.SureTaxJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
 		t.Error("Received: ", cfg)

@@ -29,3 +29,9 @@ type CdrReplicationCfg struct {
 	Attempts    int             // Number of attempts if not success
 	CdrFilter   utils.RSRFields // Only replicate if the filters here are matching
 }
+
+type SureTaxCfg struct {
+	Url           string
+	ClientNumber  string
+	ValidationKey string
+}

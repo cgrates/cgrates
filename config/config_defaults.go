@@ -279,4 +279,10 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"suretax": {
+	"url": "",									// API url
+	"client_number": "",						// client number, provided by SureTax
+	"validation_key": "",						// validation key provided by SureTax
+},
+
 }`

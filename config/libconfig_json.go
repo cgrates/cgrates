@@ -253,3 +253,10 @@ type MailerJsonCfg struct {
 	Auth_passwd  *string
 	From_address *string
 }
+
+// SureTax config section
+type SureTaxJsonCfg struct {
+	Url            *string // API url
+	Client_number  *string // client number provided by SureTax
+	Validation_key *string // validation key provided by SureTax
+}
