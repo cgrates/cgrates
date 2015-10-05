@@ -6,7 +6,7 @@
 drop table if exists cgrates.cdrs_primary;
 create table cgrates.cdrs_primary (
   id uuid,
-  cgrid ascii,
+  cgrid text,
   tor text,
   accid text,
   cdrhost text,
@@ -26,7 +26,7 @@ create table cgrates.cdrs_primary (
   disconnect_cause text,
   created_at timestamp,
   deleted_at timestamp,
-  PRIMARY KEY (id),
+  PRIMARY KEY (id, cgrid),
 );
 
 --
@@ -36,11 +36,11 @@ create table cgrates.cdrs_primary (
 DROP TABLE IF EXISTS cgrates.cdrs_extra;
 CREATE TABLE cgrates.cdrs_extra (
   id uuid,
-  cgrid ascii,
+  cgrid text,
   extra_fields text,
   created_at timestamp,
   deleted_at timestamp,
-  PRIMARY KEY (id),
+  PRIMARY KEY (id, cgrid),
 );
 
 --
@@ -50,7 +50,7 @@ CREATE TABLE cgrates.cdrs_extra (
 DROP TABLE IF EXISTS cgrates.cost_details;
 CREATE TABLE cgrates.cost_details (
   id uuid,
-  cgrid ascii,
+  cgrid text,
   runid  text,
   tor  text,
   direction text,
@@ -65,7 +65,7 @@ CREATE TABLE cgrates.cost_details (
   created_at timestamp,
   updated_at timestamp,
   deleted_at timestamp,
-  PRIMARY KEY (id),
+  PRIMARY KEY (id, cgrid),
 );
 
 --
@@ -74,7 +74,7 @@ CREATE TABLE cgrates.cost_details (
 DROP TABLE IF EXISTS cgrates.rated_cdrs;
 CREATE TABLE cgrates.rated_cdrs (
   id uuid,
-  cgrid ascii,
+  cgrid text,
   runid  text,
   reqtype text,
   direction text,
@@ -94,5 +94,29 @@ CREATE TABLE cgrates.rated_cdrs (
   created_at timestamp,
   updated_at timestamp,
   deleted_at timestamp,
-  PRIMARY KEY (id),
+  PRIMARY KEY (id, cgrid),
 );
+
+ DROP TABLE IF EXISTS cgrates.string_index;
+ CREATE TABLE cgrates.string_index (
+    field text,
+    value text,
+    id uuid,
+    PRIMARY KEY((field, value), id)
+ );
+
+ DROP TABLE IF EXISTS cgrates.decimal_index;
+ CREATE TABLE cgrates.decimal_index (
+    field text,
+    value decimal,
+    id uuid,
+    PRIMARY KEY((field, value), id)
+ );
+
+ DROP TABLE IF EXISTS cgrates.time_index;
+ CREATE TABLE cgrates.time_index (
+    field text,
+    value timestamp,
+    id uuid,
+    PRIMARY KEY((field, value), id)
+ );

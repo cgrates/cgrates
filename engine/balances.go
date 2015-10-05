@@ -312,27 +312,27 @@ func (b *Balance) SetValue(amount float64) {
 	accountId := ""
 	allowNegative := ""
 	disabled := ""
-	if b.account != nil {
+	if b.account != nil { // only publish modifications for balances with account set
 		accountId = b.account.Id
 		allowNegative = strconv.FormatBool(b.account.AllowNegative)
 		disabled = strconv.FormatBool(b.account.Disabled)
+		Publish(CgrEvent{
+			"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
+			"Uuid":                 b.Uuid,
+			"Id":                   b.Id,
+			"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
+			"ExpirationDate":       b.ExpirationDate.String(),
+			"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
+			"DestinationIds":       b.DestinationIds,
+			"RatingSubject":        b.RatingSubject,
+			"Category":             b.Category,
+			"SharedGroup":          b.SharedGroup,
+			"TimingIDs":            b.TimingIDs,
+			"Account":              accountId,
+			"AccountAllowNegative": allowNegative,
+			"AccountDisabled":      disabled,
+		})
 	}
-	Publish(CgrEvent{
-		"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
-		"Uuid":                 b.Uuid,
-		"Id":                   b.Id,
-		"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
-		"ExpirationDate":       b.ExpirationDate.String(),
-		"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
-		"DestinationIds":       b.DestinationIds,
-		"RatingSubject":        b.RatingSubject,
-		"Category":             b.Category,
-		"SharedGroup":          b.SharedGroup,
-		"TimingIDs":            b.TimingIDs,
-		"Account":              accountId,
-		"AccountAllowNegative": allowNegative,
-		"AccountDisabled":      disabled,
-	})
 }
 
 func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun bool) (cc *CallCost, err error) {

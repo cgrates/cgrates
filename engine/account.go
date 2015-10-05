@@ -110,6 +110,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		if b.IsExpired() {
 			continue // just to be safe (cleaned expired balances above)
 		}
+		b.account = ub
 		if b.MatchFilter(a.Balance) {
 			if reset {
 				b.SetValue(0)
