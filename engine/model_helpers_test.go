@@ -468,6 +468,8 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 				UsageField:           utils.META_DEFAULT,
 				SupplierField:        utils.META_DEFAULT,
 				DisconnectCauseField: utils.META_DEFAULT,
+				CostField:            utils.META_DEFAULT,
+				RatedField:           utils.META_DEFAULT,
 			},
 			&utils.TPDerivedCharger{
 				RunId:                "derived_run2",
@@ -485,14 +487,16 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 				UsageField:           utils.META_DEFAULT,
 				SupplierField:        utils.META_DEFAULT,
 				DisconnectCauseField: utils.META_DEFAULT,
+				RatedField:           utils.META_DEFAULT,
+				CostField:            utils.META_DEFAULT,
 			},
 		},
 	}
 	expectedSlc := [][]string{
 		[]string{"*out", "cgrates.org", "call", "1001", "1001",
-			"derived_run1", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
+			"derived_run1", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
 		[]string{"*out", "cgrates.org", "call", "1001", "1001",
-			"derived_run2", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
+			"derived_run2", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
 	}
 	ms := APItoModelDerivedCharger(dcs)
 	var slc [][]string

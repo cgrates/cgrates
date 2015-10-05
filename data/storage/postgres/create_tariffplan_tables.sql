@@ -291,6 +291,8 @@ CREATE TABLE tp_derived_chargers (
   usage_field  VARCHAR(24) NOT NULL,
   supplier_field  VARCHAR(24) NOT NULL,
   disconnect_cause_field  VARCHAR(24) NOT NULL,
+  rated_field  VARCHAR(24) NOT NULL,
+  cost_field  VARCHAR(24) NOT NULL,
   created_at TIMESTAMP
 );
 CREATE INDEX tpderivedchargers_tpid_idx ON tp_derived_chargers (tpid);

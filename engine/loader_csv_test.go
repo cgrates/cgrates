@@ -203,10 +203,10 @@ cgrates.org,alodis,*out,TOPUP_EMPTY_AT,,true,true
 `
 
 	derivedCharges = `
-#Direction,Tenant,Category,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,PddField,AnswerTimeField,UsageField
-*out,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1/,^prepaid,,,,rif,rif,,,,,,,
-*out,cgrates.org,call,dan,dan,extra2,,,,,,ivo,ivo,,,,,,,
-*out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,,,
+#Direction,Tenant,Category,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,PddField,AnswerTimeField,UsageField,SupplierField,DisconnectCauseField,CostField,RatedField
+*out,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1/,^prepaid,,,,rif,rif,,,,,,,,,
+*out,cgrates.org,call,dan,dan,extra2,,,,,,ivo,ivo,,,,,,,,,
+*out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,,,,,,
 `
 	cdrStats = `
 #Id[0],QueueLength[1],TimeWindow[2],SaveInterval[3],Metric[4],SetupInterval[5],TOR[6],CdrHost[7],CdrSource[8],ReqType[9],Direction[10],Tenant[11],Category[12],Account[13],Subject[14],DestinationPrefix[15],PddInterval[16],UsageInterval[17],Supplier[18],DisconnectCause[19],MediationRunIds[20],RatedAccount[21],RatedSubject[22],CostInterval[23],Triggers[24]
@@ -1058,11 +1058,11 @@ func TestLoadDerivedChargers(t *testing.T) {
 		&utils.DerivedCharger{RunId: "extra1", RunFilters: "^filteredHeader1/filterValue1/", ReqTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
 			TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT, AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
 			SetupTimeField: utils.META_DEFAULT, PddField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-			SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT},
+			SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
 		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 			CategoryField: utils.META_DEFAULT, AccountField: "ivo", SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
 			SetupTimeField: utils.META_DEFAULT, PddField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
-			SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT},
+			SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
 	}
 	keyCharger1 := utils.DerivedChargersKey("*out", "cgrates.org", "call", "dan", "dan")
 

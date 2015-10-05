@@ -370,7 +370,7 @@ func TestStoredCdrForkCdr(t *testing.T) {
 	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.DIRECTION}, &utils.RSRField{Id: utils.TENANT},
 		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.ACCOUNT}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.DESTINATION},
 		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.PDD}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE},
-		&utils.RSRField{Id: utils.SUPPLIER}, &utils.RSRField{Id: utils.DISCONNECT_CAUSE},
+		&utils.RSRField{Id: utils.SUPPLIER}, &utils.RSRField{Id: utils.DISCONNECT_CAUSE}, &utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST},
 		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "field_extr2"}}, true, "")
 	if err != nil {
 		t.Error("Unexpected error received", err)
@@ -379,7 +379,7 @@ func TestStoredCdrForkCdr(t *testing.T) {
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), Pdd: time.Duration(200) * time.Millisecond, AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, Supplier: "suppl1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"},
-		MediationRunId: "sample_run1", Cost: -1}
+		MediationRunId: "sample_run1", Rated: false, Cost: 1.01}
 	if !reflect.DeepEqual(expctSplRatedCdr, rtSampleCdrOut) {
 		t.Errorf("Expected: %v, received: %v", expctSplRatedCdr, rtSampleCdrOut)
 	}
@@ -404,8 +404,10 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	rsrStSuppl, _ := utils.NewRSRField("^supplier1")
 	rsrStDCause, _ := utils.NewRSRField("^HANGUP_COMPLETE")
 	rsrPdd, _ := utils.NewRSRField("^3")
+	rsrStRated, _ := utils.NewRSRField("^true")
+	rsrStCost, _ := utils.NewRSRField("^1.2")
 	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStIn, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: utils.DESTINATION},
-		rsrStST, rsrPdd, rsrStAT, rsrStDur, rsrStSuppl, rsrStDCause, []*utils.RSRField{}, true, "")
+		rsrStST, rsrPdd, rsrStAT, rsrStDur, rsrStSuppl, rsrStDCause, rsrStRated, rsrStCost, []*utils.RSRField{}, true, "")
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
@@ -413,8 +415,8 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 		Direction: "*in", Tenant: "cgrates.com", Category: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "1002",
 		SetupTime:  time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(12) * time.Second, Pdd: time.Duration(3) * time.Second,
-		Supplier: "supplier1", DisconnectCause: "HANGUP_COMPLETE",
-		ExtraFields: map[string]string{}, MediationRunId: "wholesale_run", Cost: -1}
+		Supplier: "supplier1", DisconnectCause: "HANGUP_COMPLETE", Rated: true, Cost: 1.2,
+		ExtraFields: map[string]string{}, MediationRunId: "wholesale_run"}
 	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
 	}
@@ -422,7 +424,7 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 		&utils.RSRField{Id: utils.TOR}, &utils.RSRField{Id: utils.ACCOUNT}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.DESTINATION},
 		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.PDD}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE},
 		&utils.RSRField{Id: utils.SUPPLIER},
-		&utils.RSRField{Id: utils.DISCONNECT_CAUSE}, []*utils.RSRField{}, true, "")
+		&utils.RSRField{Id: utils.DISCONNECT_CAUSE}, &utils.RSRField{Id: utils.RATED_FLD}, &utils.RSRField{Id: utils.COST}, []*utils.RSRField{}, true, "")
 	if err == nil {
 		t.Error("Failed to detect missing header")
 	}
@@ -433,17 +435,18 @@ func TestStoredCdrForkCdrFromMetaDefaults(t *testing.T) {
 		CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(4) * time.Second, Supplier: "SUPPL3", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(4) * time.Second, Supplier: "SUPPL3",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	expctCdr := &StoredCdr{CgrId: storCdr.CgrId, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(4) * time.Second, Supplier: "SUPPL3",
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, MediationRunId: "wholesale_run", Cost: -1}
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(4) * time.Second, Supplier: "SUPPL3", Cost: 1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, MediationRunId: "wholesale_run"}
 	cdrOut, err := storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
 		&utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
 		&utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
-		&utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
+		&utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
 		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "fieldextr2"}}, true, "")
 	if err != nil {
 		t.Fatal("Unexpected error received", err)
@@ -453,7 +456,7 @@ func TestStoredCdrForkCdrFromMetaDefaults(t *testing.T) {
 		t.Errorf("Expected: %v, received: %v", expctCdr, cdrOut)
 	}
 	// Should also accept nil as defaults
-	if cdrOut, err := storCdr.ForkCdr("wholesale_run", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+	if cdrOut, err := storCdr.ForkCdr("wholesale_run", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		[]*utils.RSRField{&utils.RSRField{Id: "field_extr1"}, &utils.RSRField{Id: "fieldextr2"}}, true, ""); err != nil {
 		t.Fatal("Unexpected error received", err)
 	} else if !reflect.DeepEqual(expctCdr, cdrOut) {

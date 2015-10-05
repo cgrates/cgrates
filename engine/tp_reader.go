@@ -895,7 +895,7 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 		for _, tpDc := range tpDcs.DerivedChargers {
 			dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
 				tpDc.AccountField, tpDc.SubjectField, tpDc.DestinationField, tpDc.SetupTimeField, tpDc.PddField, tpDc.AnswerTimeField, tpDc.UsageField, tpDc.SupplierField,
-				tpDc.DisconnectCauseField)
+				tpDc.DisconnectCauseField, tpDc.RatedField, tpDc.CostField)
 			if err != nil {
 				return err
 			}

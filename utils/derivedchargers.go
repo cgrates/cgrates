@@ -24,7 +24,8 @@ import (
 )
 
 // Wraps regexp compiling in case of rsr fields
-func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, pddFld, aTimeFld, durFld, supplFld, dCauseFld string) (dc *DerivedCharger, err error) {
+func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, pddFld, aTimeFld, durFld,
+	supplFld, dCauseFld, ratedFld, costFld string) (dc *DerivedCharger, err error) {
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
@@ -113,6 +114,18 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 			return nil, err
 		}
 	}
+	dc.RatedField = ratedFld
+	if strings.HasPrefix(dc.RatedField, REGEXP_PREFIX) || strings.HasPrefix(dc.RatedField, STATIC_VALUE_PREFIX) {
+		if dc.rsrRatedField, err = NewRSRField(dc.RatedField); err != nil {
+			return nil, err
+		}
+	}
+	dc.CostField = costFld
+	if strings.HasPrefix(dc.CostField, REGEXP_PREFIX) || strings.HasPrefix(dc.CostField, STATIC_VALUE_PREFIX) {
+		if dc.rsrCostField, err = NewRSRField(dc.CostField); err != nil {
+			return nil, err
+		}
+	}
 	return dc, nil
 }
 
@@ -132,6 +145,8 @@ type DerivedCharger struct {
 	UsageField              string      // Field containing usage information
 	SupplierField           string      // Field containing supplier information
 	DisconnectCauseField    string      // Field containing disconnect cause information
+	CostField               string      // Field containing cost information
+	RatedField              string      // Field marking rated request in CDR
 	rsrRunFilters           []*RSRField // Storage for compiled Regexp in case of RSRFields
 	rsrReqTypeField         *RSRField
 	rsrDirectionField       *RSRField
@@ -146,6 +161,8 @@ type DerivedCharger struct {
 	rsrUsageField           *RSRField
 	rsrSupplierField        *RSRField
 	rsrDisconnectCauseField *RSRField
+	rsrCostField            *RSRField
+	rsrRatedField           *RSRField
 }
 
 func DerivedChargersKey(direction, tenant, category, account, subject string) string {
@@ -169,7 +186,7 @@ func (dcs DerivedChargers) Append(dc *DerivedCharger) (DerivedChargers, error) {
 
 func (dcs DerivedChargers) AppendDefaultRun() (DerivedChargers, error) {
 	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
-		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
 	return append(dcs, dcDf), nil
 }
 
@@ -197,5 +214,7 @@ func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
 		dc.AnswerTimeField == other.AnswerTimeField &&
 		dc.UsageField == other.UsageField &&
 		dc.SupplierField == other.SupplierField &&
-		dc.DisconnectCauseField == other.DisconnectCauseField
+		dc.DisconnectCauseField == other.DisconnectCauseField &&
+		dc.CostField == other.CostField &&
+		dc.RatedField == other.RatedField
 }

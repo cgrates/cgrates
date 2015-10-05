@@ -302,6 +302,8 @@ func APItoModelDerivedCharger(dcs *utils.TPDerivedChargers) (result []TpDerivedC
 			UsageField:           dc.UsageField,
 			SupplierField:        dc.SupplierField,
 			DisconnectCauseField: dc.DisconnectCauseField,
+			CostField:            dc.CostField,
+			RatedField:           dc.RatedField,
 		})
 	}
 	if len(dcs.DerivedChargers) == 0 {

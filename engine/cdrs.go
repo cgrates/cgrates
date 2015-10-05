@@ -274,12 +274,17 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 		dcATimeFld, _ := utils.NewRSRField(dc.AnswerTimeField)
 		dcDurFld, _ := utils.NewRSRField(dc.UsageField)
 		dcSupplFld, _ := utils.NewRSRField(dc.SupplierField)
-		dcDCausseld, _ := utils.NewRSRField(dc.DisconnectCauseField)
+		dcDCauseFld, _ := utils.NewRSRField(dc.DisconnectCauseField)
+		dcRatedFld, _ := utils.NewRSRField(dc.RatedField)
+		dcCostFld, _ := utils.NewRSRField(dc.CostField)
 		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
-			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCausseld, []*utils.RSRField{}, true, self.cgrCfg.DefaultTimezone)
+			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCauseFld, dcRatedFld, dcCostFld, []*utils.RSRField{}, true, self.cgrCfg.DefaultTimezone)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", storedCdr.CgrId, dc.RunId, err.Error()))
 			continue // do not add it to the forked CDR list
+		}
+		if !forkedCdr.Rated {
+			forkedCdr.Cost = -1.0 // Make sure that un-rated CDRs start with Cost -1
 		}
 		cdrRuns = append(cdrRuns, forkedCdr)
 	}
@@ -365,7 +370,6 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 		case utils.META_HTTP_POST:
 			errChan := make(chan error)
 			go func(cdr *StoredCdr, rplCfg *config.CdrReplicationCfg, errChan chan error) {
-				utils.Logger.Debug(fmt.Sprintf("Replicating CDR: %+v, attempts: %d", cdr, rplCfg.Attempts))
 				fallbackPath := path.Join(self.cgrCfg.HttpFailedDir, fmt.Sprintf("cdr_%s_%s_%s.form", rplCfg.Transport, rplCfg.Server, utils.GenUUID()))
 				if _, err := utils.HttpPoster(rplCfg.Server, self.cgrCfg.HttpSkipTlsVerify, cdr.AsHttpForm(), utils.CONTENT_FORM, rplCfg.Attempts, fallbackPath); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))

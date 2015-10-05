@@ -272,6 +272,8 @@ type TpDerivedCharger struct {
 	UsageField           string `index:"17" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	SupplierField        string `index:"18" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	DisconnectCauseField string `index:"19" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	RatedField           string `index:"20" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	CostField            string `index:"21" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	CreatedAt            time.Time
 }
 

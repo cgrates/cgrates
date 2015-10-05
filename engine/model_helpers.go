@@ -494,6 +494,8 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 			UsageField:           ValueOrDefault(tpDcMdl.UsageField, utils.META_DEFAULT),
 			SupplierField:        ValueOrDefault(tpDcMdl.SupplierField, utils.META_DEFAULT),
 			DisconnectCauseField: ValueOrDefault(tpDcMdl.DisconnectCauseField, utils.META_DEFAULT),
+			CostField:            ValueOrDefault(tpDcMdl.CostField, utils.META_DEFAULT),
+			RatedField:           ValueOrDefault(tpDcMdl.RatedField, utils.META_DEFAULT),
 		}
 		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, nDc)
 	}

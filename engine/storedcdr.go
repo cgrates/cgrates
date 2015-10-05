@@ -183,6 +183,8 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(storedCdr.RatedAccount)
 	case utils.RATED_SUBJECT:
 		return rsrFld.ParseValue(storedCdr.RatedSubject)
+	case utils.RATED_FLD:
+		return rsrFld.ParseValue(strconv.FormatBool(storedCdr.Rated))
 	case utils.COST:
 		return rsrFld.ParseValue(strconv.FormatFloat(storedCdr.Cost, 'f', -1, 64)) // Recommended to use FormatCost
 	case utils.COST_DETAILS:
@@ -270,7 +272,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
 func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, pddFld,
-	answerTimeFld, durationFld, supplierFld, disconnectCauseFld *utils.RSRField,
+	answerTimeFld, durationFld, supplierFld, disconnectCauseFld, ratedFld, costFld *utils.RSRField,
 	extraFlds []*utils.RSRField, primaryMandatory bool, timezone string) (*StoredCdr, error) {
 	if reqTypeFld == nil {
 		reqTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -350,6 +352,18 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	if disconnectCauseFld.Id == utils.META_DEFAULT {
 		disconnectCauseFld.Id = utils.DISCONNECT_CAUSE
 	}
+	if ratedFld == nil {
+		ratedFld, _ = utils.NewRSRField(utils.META_DEFAULT)
+	}
+	if ratedFld.Id == utils.META_DEFAULT {
+		ratedFld.Id = utils.RATED_FLD
+	}
+	if costFld == nil {
+		costFld, _ = utils.NewRSRField(utils.META_DEFAULT)
+	}
+	if costFld.Id == utils.META_DEFAULT {
+		costFld.Id = utils.COST
+	}
 	var err error
 	frkStorCdr := new(StoredCdr)
 	frkStorCdr.CgrId = storedCdr.CgrId
@@ -413,6 +427,18 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	}
 	frkStorCdr.Supplier = storedCdr.FieldAsString(supplierFld)
 	frkStorCdr.DisconnectCause = storedCdr.FieldAsString(disconnectCauseFld)
+	ratedStr := storedCdr.FieldAsString(ratedFld)
+	if primaryMandatory && len(ratedStr) == 0 {
+		return nil, utils.NewErrMandatoryIeMissing(utils.RATED_FLD, ratedFld.Id)
+	} else if frkStorCdr.Rated, err = strconv.ParseBool(ratedStr); err != nil {
+		return nil, err
+	}
+	costStr := storedCdr.FieldAsString(costFld)
+	if primaryMandatory && len(costStr) == 0 {
+		return nil, utils.NewErrMandatoryIeMissing(utils.COST, costFld.Id)
+	} else if frkStorCdr.Cost, err = strconv.ParseFloat(costStr, 64); err != nil {
+		return nil, err
+	}
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
 	for _, fld := range extraFlds {
 		frkStorCdr.ExtraFields[fld.Id] = storedCdr.FieldAsString(fld)

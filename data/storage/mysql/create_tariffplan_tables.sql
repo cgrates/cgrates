@@ -296,6 +296,8 @@ CREATE TABLE tp_derived_chargers (
   `usage_field`  varchar(24) NOT NULL,
   `supplier_field`  varchar(24) NOT NULL,
   `disconnect_cause_field`  varchar(24) NOT NULL,
+  `rated_field`  varchar(24) NOT NULL,
+  `cost_field`  varchar(24) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)

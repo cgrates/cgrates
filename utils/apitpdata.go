@@ -446,6 +446,8 @@ type TPDerivedCharger struct {
 	UsageField           string
 	SupplierField        string
 	DisconnectCauseField string
+	CostField            string
+	RatedField           string
 }
 
 type TPActionPlan struct {

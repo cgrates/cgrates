@@ -1,2 +1,2 @@
-#Direction[0],Tenant[1],Category[2],Account[3],Subject[4],RunId[5],RunFilter[6],ReqTypeField[7],DirectionField[8],TenantField[9],CategoryField[10],AccountField[11],SubjectField[12],DestinationField[13],SetupTimeField[14],PddField[15],AnswerTimeField[16],UsageField[17],SupplierField[18],DisconnectCause[19]
-*out,cgrates.org,call,1001,1001,derived_run1,,^*rated,*default,*default,*default,*default,^1002,*default,*default,*default,*default,*default,*default,*default
+#Direction[0],Tenant[1],Category[2],Account[3],Subject[4],RunId[5],RunFilter[6],ReqTypeField[7],DirectionField[8],TenantField[9],CategoryField[10],AccountField[11],SubjectField[12],DestinationField[13],SetupTimeField[14],PddField[15],AnswerTimeField[16],UsageField[17],SupplierField[18],DisconnectCause[19],RatedField[20],CostField[21]
+*out,cgrates.org,call,1001,1001,derived_run1,,^*rated,*default,*default,*default,*default,^1002,*default,*default,*default,*default,*default,*default,*default,*default,*default

@@ -131,7 +131,7 @@ func TestGetSessionRuns(t *testing.T) {
 	dfDC := &utils.DerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 		CategoryField: utils.META_DEFAULT, AccountField: utils.META_DEFAULT, SubjectField: utils.META_DEFAULT, DestinationField: utils.META_DEFAULT,
 		SetupTimeField: utils.META_DEFAULT, PddField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
-		DisconnectCauseField: utils.META_DEFAULT}
+		DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT}
 	extra1DC := &utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^" + utils.META_PREPAID, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 		CategoryField: "^0", AccountField: "^minitsboy", SubjectField: "^rif", DestinationField: "^0256",
 		SetupTimeField: utils.META_DEFAULT, PddField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT}
