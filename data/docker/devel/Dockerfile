@@ -10,14 +10,17 @@ RUN gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF && gpg -
 # add freeswitch apt repo
 RUN echo 'deb http://files.freeswitch.org/repo/deb/debian/ jessie main' > /etc/apt/sources.list.d/freeswitch.list
 
-# add cassandra gpg keys
-RUN gpg --keyserver pgp.mit.edu --recv-keys F758CE318D77295D; gpg --export --armor F758CE318D77295D | apt-key add -;gpg --keyserver pgp.mit.edu --recv-keys 2B5C1B00;gpg --export --armor 2B5C1B00 |  apt-key add -;gpg --keyserver pgp.mit.edu --recv-keys 0353B12C;gpg --export --armor 0353B12C | apt-key add -
+# add mongo repo keys
+RUN apt-key adv --keyserver 'keyserver.ubuntu.com' --recv '7F0CEB10'
 
-# add cassandra repo
-RUN echo 'deb http://www.apache.org/dist/cassandra/debian 21x main' > /etc/apt/sources.list.d/cassandra.list
+# add mongo repo
+RUN echo 'deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/3.0 main' | tee '/etc/apt/sources.list.d/mongodb-org-3.0.list'
 
 # install dependencies
-RUN apt-get -y update && apt-get -y install git bzr mercurial redis-server mysql-server python-pycurl python-mysqldb postgresql postgresql-client cassandra sudo wget freeswitch-meta-vanilla vim zsh
+RUN apt-get -y update && apt-get -y install git bzr mercurial redis-server mysql-server python-pycurl python-mysqldb postgresql postgresql-client sudo wget freeswitch-meta-vanilla vim zsh mongodb-org
+
+# add mongo conf
+COPY mongod.conf /etc/mongod.conf
 
 # add cgrates user
 RUN useradd -c CGRateS -d /var/run/cgrates -s /bin/false -r cgrates
