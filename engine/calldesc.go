@@ -777,7 +777,6 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCR
 	}
 	// sort by activation time
 	lcr.Sort()
-
 	// find if one ore more entries apply to this cd (create lcr timespans)
 	// create timespans and attach lcr entries to them
 	lcrCost := &LCRCost{}
@@ -819,7 +818,6 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCR
 				cc, err = lcrCD.debit(cd.account, true, true)
 			} else {
 				cc, err = lcrCD.GetCost()
-
 			}
 			//log.Printf("CC: %+v", cc.Timespans[0].ratingInfo.RateIntervals[0].Rating.Rates[0])
 			if err != nil || cc == nil {

@@ -54,7 +54,7 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 	}
 }
 
-func TestGetDerivedMaxSessionTime(t *testing.T) {
+func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 	testTenant := "vdf"
 	cdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
 		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan", Subject: "dan",
@@ -120,7 +120,7 @@ func TestGetDerivedMaxSessionTime(t *testing.T) {
 	}
 }
 
-func TestGetSessionRuns(t *testing.T) {
+func TestResponderGetSessionRuns(t *testing.T) {
 	testTenant := "vdf"
 	cdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
 		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: testTenant, Category: "call", Account: "dan2", Subject: "dan2",
@@ -162,7 +162,7 @@ func TestGetSessionRuns(t *testing.T) {
 	}
 }
 
-func TestGetLCR(t *testing.T) {
+func TestResponderGetLCR(t *testing.T) {
 	rsponder.Stats = NewStats(ratingStorage, accountingStorage, 0) // Load stats instance
 	dstDe := &Destination{Id: "GERMANY", Prefixes: []string{"+49"}}
 	if err := ratingStorage.SetDestination(dstDe); err != nil {
@@ -368,8 +368,8 @@ func TestGetLCR(t *testing.T) {
 	}
 	if err := ratingStorage.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:    []string{utils.DESTINATION_PREFIX + dstDe.Id},
-		utils.RATING_PLAN_PREFIX:    []string{utils.RATING_PLAN_PREFIX + rp1.Id, utils.RATING_PLAN_PREFIX + rp2.Id},
-		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + danRpfl.Id, utils.RATING_PROFILE_PREFIX + rifRpfl.Id},
+		utils.RATING_PLAN_PREFIX:    []string{utils.RATING_PLAN_PREFIX + rp1.Id, utils.RATING_PLAN_PREFIX + rp2.Id, utils.RATING_PLAN_PREFIX + rp3.Id},
+		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + danRpfl.Id, utils.RATING_PROFILE_PREFIX + rifRpfl.Id, utils.RATING_PROFILE_PREFIX + ivoRpfl.Id},
 		utils.LCR_PREFIX:            []string{utils.LCR_PREFIX + lcrStatic.GetId(), utils.LCR_PREFIX + lcrLowestCost.GetId()},
 	}); err != nil {
 		t.Error(err)
@@ -398,7 +398,7 @@ func TestGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
 		t.Errorf("Expecting: %+v, received: %+v", eStLcr.Entry, lcr.Entry)
 	} else if !reflect.DeepEqual(eStLcr.SupplierCosts, lcr.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts[0], lcr.SupplierCosts[0])
+		t.Errorf("Expecting: %+v, received: %+v", eStLcr.SupplierCosts, lcr.SupplierCosts)
 	}
 	// Test *least_cost strategy here
 	cdLowestCost := &CallDescriptor{
@@ -426,7 +426,7 @@ func TestGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.Entry, lcrLc.Entry)
 
 	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts[1], lcrLc.SupplierCosts[1])
+		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts, lcrLc.SupplierCosts)
 	}
 	bRif12 := &Balance{Value: 40, Weight: 10, DestinationIds: dstDe.Id}
 	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationIds: dstDe.Id}
@@ -480,7 +480,7 @@ func TestGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
 
 	} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts[0], lcrQT.SupplierCosts[0])
+		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts, lcrQT.SupplierCosts)
 	}
 	cdr := &StoredCdr{Supplier: "rif12", AnswerTime: time.Now(), Usage: 3 * time.Minute, Cost: 1}
 	rsponder.Stats.AppendCDR(cdr, nil)
@@ -499,7 +499,7 @@ func TestGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.Entry, lcrQT.Entry)
 
 	} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
-		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts[1], lcrQT.SupplierCosts[1])
+		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts, lcrQT.SupplierCosts)
 	}
 
 	// Test *qos strategy here
@@ -528,6 +528,6 @@ func TestGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eQosLcr.Entry, lcrQ.Entry)
 
 	} else if !reflect.DeepEqual(eQosLcr.SupplierCosts, lcrQ.SupplierCosts) {
-		t.Errorf("Expecting: %+v, %+v, %+v, received: %+v, %+v, %+v", eQosLcr.SupplierCosts[0], eQosLcr.SupplierCosts[1], eQosLcr.SupplierCosts[2], lcrQ.SupplierCosts[0], lcrQ.SupplierCosts[1], lcrQ.SupplierCosts[2])
+		t.Errorf("Expecting: %+v, received: %+v", eQosLcr.SupplierCosts, lcrQ.SupplierCosts)
 	}
 }

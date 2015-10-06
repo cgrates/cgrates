@@ -69,30 +69,7 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 func (ms *MongoStorage) Flush(ignore string) (err error) {
-	err = ms.db.C("ratingprofiles").DropCollection()
-	if err != nil {
-		return
-	}
-	err = ms.db.C("ratingplans").DropCollection()
-	if err != nil {
-		return
-	}
-	err = ms.db.C("destinations").DropCollection()
-	if err != nil {
-		return
-	}
-	err = ms.db.C("actions").DropCollection()
-	if err != nil {
-		return
-	}
-	err = ms.db.C("userbalances").DropCollection()
-	if err != nil {
-		return
-	}
-	err = ms.db.C("actiontimings").DropCollection()
-	if err != nil {
-		return
-	}
+	ms.db.DropDatabase()
 	return nil
 }
 
