@@ -36,7 +36,7 @@ const (
 	RECURSION_MAX_DEPTH = 3
 	MIN_PREFIX_MATCH    = 1
 	FALLBACK_SUBJECT    = utils.ANY
-	DEBUG               = true
+	DEBUG               = false
 )
 
 func init() {
@@ -44,9 +44,10 @@ func init() {
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	} else {
-		//ratingStorage, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
-		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
+		ratingStorage, _ = NewMongoStorage("127.0.0.1:27017", "cgrates_rating_test", "", "")
+		accountingStorage, _ = NewMongoStorage("127.0.0.1:27017", "cgrates_accounting_test", "", "")
+		//ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
+		//accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
 	}
 	storageLogger = ratingStorage.(LogStorage)
 }

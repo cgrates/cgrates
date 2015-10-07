@@ -226,6 +226,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 			cache2go.RollbackTransaction()
 			return err
 		}
+		cache2go.RemPrefixKey(utils.ACTION_PREFIX)
 	} else if len(actKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching actions: %v", actKeys))
 	}
@@ -417,13 +418,12 @@ func (rs *RedisStorage) RemoveRatingProfile(key string) error {
 		return err
 	}
 	for _, key := range keys {
-		_, err = rs.db.Del(key)
-		if err != nil {
+		if _, err = rs.db.Del(key); err != nil {
 			return err
 		}
 		cache2go.RemKey(key)
 		rpf := &RatingProfile{Id: key}
-		if err == nil && historyScribe != nil {
+		if historyScribe != nil {
 			response := 0
 			go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
 		}
@@ -680,7 +680,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
 		al = &Alias{Values: make(AliasValues, 0)}
-		al.SetId(key[len(utils.ALIASES_PREFIX):])
+		al.SetId(origKey)
 		err = rs.ms.Unmarshal(values, &al.Values)
 		if err == nil {
 			cache2go.Cache(key, al.Values)
