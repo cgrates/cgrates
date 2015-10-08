@@ -481,7 +481,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}); err != nil {
 		return err
 	}
-	aps, _ := dbReader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
+	aps, _ := dbReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	if len(aps) != 0 && self.Sched != nil {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
 		self.Sched.LoadActionPlans(self.RatingDb)
@@ -698,7 +698,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.HasData(utils.ACTION_TIMING_PREFIX, attrs.Id); err != nil {
+		if exists, err := self.RatingDb.HasData(utils.ACTION_PLAN_PREFIX, attrs.Id); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists
@@ -1147,7 +1147,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, dc := range dcs {
 		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 	}
-	aps, _ := loader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
+	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{

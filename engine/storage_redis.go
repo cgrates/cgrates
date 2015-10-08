@@ -335,7 +335,7 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
-	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_TIMING_PREFIX, utils.ACCOUNT_PREFIX:
+	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX:
 		return rs.db.Exists(category + subject)
 	}
 	return false, errors.New("Unsupported category in HasData")
@@ -671,7 +671,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
 			al = &Alias{Values: x.(AliasValues)}
-			al.SetId(key[len(utils.ALIASES_PREFIX):])
+			al.SetId(origKey)
 			return al, nil
 		} else {
 			return nil, err
@@ -828,7 +828,7 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 
 func (rs *RedisStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 	var values []byte
-	if values, err = rs.db.Get(utils.ACTION_TIMING_PREFIX + key); err == nil {
+	if values, err = rs.db.Get(utils.ACTION_PLAN_PREFIX + key); err == nil {
 		err = rs.ms.Unmarshal(values, &ats)
 	}
 	return
@@ -837,19 +837,19 @@ func (rs *RedisStorage) GetActionPlans(key string) (ats ActionPlans, err error) 
 func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
 	if len(ats) == 0 {
 		// delete the key
-		_, err = rs.db.Del(utils.ACTION_TIMING_PREFIX + key)
+		_, err = rs.db.Del(utils.ACTION_PLAN_PREFIX + key)
 		return err
 	}
 	result, err := rs.ms.Marshal(&ats)
 	if err != nil {
 		return err
 	}
-	err = rs.db.Set(utils.ACTION_TIMING_PREFIX+key, result)
+	err = rs.db.Set(utils.ACTION_PLAN_PREFIX+key, result)
 	return
 }
 
 func (rs *RedisStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
-	keys, err := rs.db.Keys(utils.ACTION_TIMING_PREFIX + "*")
+	keys, err := rs.db.Keys(utils.ACTION_PLAN_PREFIX + "*")
 	if err != nil {
 		return nil, err
 	}
@@ -861,7 +861,7 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]ActionPlans, err err
 		}
 		var tempAts ActionPlans
 		err = rs.ms.Unmarshal(values, &tempAts)
-		ats[key[len(utils.ACTION_TIMING_PREFIX):]] = tempAts
+		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = tempAts
 	}
 
 	return
@@ -967,11 +967,5 @@ func (rs *RedisStorage) LogActionPlan(source string, at *ActionPlan, as Actions)
 		return
 	}
 	err = rs.db.Set(utils.LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v", string(mat), string(mas))))
-	return
-}
-
-func (rs *RedisStorage) LogError(uuid, source, runid, errstr string) (err error) {
-	err = rs.db.Set(utils.
-		LOG_ERR+source+runid+"_"+uuid, []byte(errstr))
 	return
 }

@@ -166,7 +166,7 @@ const (
 	ASR                        = "ASR"
 	ACD                        = "ACD"
 	FILTER_REGEXP_TPL          = "$1$2$3$4$5"
-	ACTION_TIMING_PREFIX       = "apl_"
+	ACTION_PLAN_PREFIX         = "apl_"
 	ACTION_TRIGGER_PREFIX      = "atr_"
 	RATING_PLAN_PREFIX         = "rpl_"
 	RATING_PROFILE_PREFIX      = "rpf_"

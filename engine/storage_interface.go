@@ -105,7 +105,6 @@ type CdrStorage interface {
 type LogStorage interface {
 	Storage
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogError(uuid, source, runid, errstr string) error
 	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
 	LogActionPlan(source string, at *ActionPlan, as Actions) error
 }

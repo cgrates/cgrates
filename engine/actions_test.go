@@ -1080,7 +1080,7 @@ func TestRemoveAction(t *testing.T) {
 	at.Execute()
 	afterUb, err := accountingStorage.GetAccount("*out:cgrates.org:remo")
 	if err == nil || afterUb != nil {
-		t.Error("error removing account: ", err)
+		t.Error("error removing account: ", err, afterUb)
 	}
 }
 

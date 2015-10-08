@@ -594,7 +594,6 @@ func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 func (self *SQLStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
 	return
 }
-func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error) { return }
 
 func (self *SQLStorage) SetCdr(cdr *StoredCdr) error {
 	extraFields, err := json.Marshal(cdr.ExtraFields)

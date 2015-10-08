@@ -1511,7 +1511,7 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case utils.ACTION_TIMING_PREFIX: // actionPlans
+	case utils.ACTION_PLAN_PREFIX: // actionPlans
 		keys := make([]string, len(tpr.actionPlans))
 		i := 0
 		for k := range tpr.actionPlans {

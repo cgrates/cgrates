@@ -92,7 +92,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return 0, err
 		}
 		return 0, nil
-	}, 0, utils.ACTION_TIMING_PREFIX)
+	}, 0, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -210,7 +210,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 				return 0, err
 			}
 			return 0, nil
-		}, 0, utils.ACTION_TIMING_PREFIX)
+		}, 0, utils.ACTION_PLAN_PREFIX)
 		if err != nil {
 			return utils.NewErrServerError(err)
 		}

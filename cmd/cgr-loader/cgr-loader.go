@@ -262,7 +262,7 @@ func main() {
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
-		actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
+		actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 		if len(actTmgIds) != 0 {
 			if *verbose {
 				log.Print("Reloading scheduler")

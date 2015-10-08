@@ -103,7 +103,10 @@ func TestStorageCacheRefresh(t *testing.T) {
 	ratingStorage.GetDestination("T11")
 	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}})
 	t.Log("Test cache refresh")
-	ratingStorage.CacheRatingAll()
+	err := ratingStorage.CacheRatingAll()
+	if err != nil {
+		t.Error("Error cache rating: ", err)
+	}
 	d, err := ratingStorage.GetDestination("T11")
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {

@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"sort"
 	"strings"
@@ -44,10 +45,25 @@ func init() {
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	} else {
-		ratingStorage, _ = NewMongoStorage("127.0.0.1:27017", "cgrates_rating_test", "", "")
-		accountingStorage, _ = NewMongoStorage("127.0.0.1:27017", "cgrates_accounting_test", "", "")
-		//ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
-		//accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
+		var err error
+		ratingStorage, err = NewMongoStorage("127.0.0.1:27017", "cgrates_rating_test", "", "")
+		if err != nil {
+			log.Fatal(err)
+		}
+		accountingStorage, err = NewMongoStorage("127.0.0.1:27017", "cgrates_accounting_test", "", "")
+		if err != nil {
+			log.Fatal(err)
+		}
+		/*
+ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPAcomCK)
+		if err != nil {
+			log.Fatal(err)
+		}
+		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
+		if err != nil {
+			log.Fatal(err)
+		}
+*/
 	}
 	storageLogger = ratingStorage.(LogStorage)
 }

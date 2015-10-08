@@ -215,7 +215,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, dc := range dcs {
 		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 	}
-	aps, _ := loader.GetLoadedIds(utils.ACTION_TIMING_PREFIX)
+	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{

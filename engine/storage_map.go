@@ -666,7 +666,7 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err er
 }
 
 func (ms *MapStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
-	if values, ok := ms.dict[utils.ACTION_TIMING_PREFIX+key]; ok {
+	if values, ok := ms.dict[utils.ACTION_PLAN_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
 		return nil, utils.ErrNotFound
@@ -677,23 +677,23 @@ func (ms *MapStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
 func (ms *MapStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
 	if len(ats) == 0 {
 		// delete the key
-		delete(ms.dict, utils.ACTION_TIMING_PREFIX+key)
+		delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
 		return
 	}
 	result, err := ms.ms.Marshal(&ats)
-	ms.dict[utils.ACTION_TIMING_PREFIX+key] = result
+	ms.dict[utils.ACTION_PLAN_PREFIX+key] = result
 	return
 }
 
 func (ms *MapStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
 	ats = make(map[string]ActionPlans)
 	for key, value := range ms.dict {
-		if !strings.HasPrefix(key, utils.ACTION_TIMING_PREFIX) {
+		if !strings.HasPrefix(key, utils.ACTION_PLAN_PREFIX) {
 			continue
 		}
 		var tempAts ActionPlans
 		err = ms.ms.Unmarshal(value, &tempAts)
-		ats[key[len(utils.ACTION_TIMING_PREFIX):]] = tempAts
+		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = tempAts
 	}
 
 	return
@@ -789,9 +789,4 @@ func (ms *MapStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (
 	}
 	ms.dict[utils.LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s", string(mat), string(mas)))
 	return
-}
-
-func (ms *MapStorage) LogError(uuid, source, runid, errstr string) (err error) {
-	ms.dict[utils.LOG_ERR+source+runid+"_"+uuid] = []byte(errstr)
-	return nil
 }
