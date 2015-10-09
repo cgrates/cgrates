@@ -410,7 +410,14 @@ func (self *SQLStorage) SetTpDerivedChargers(sgs []TpDerivedCharger) error {
 				return err
 			}
 
-			if err := tx.Where(tmpDc).Delete(TpDerivedCharger{}).Error; err != nil {
+			if err := tx.Where(tmpDc).Delete(TpDerivedCharger{
+				Tpid:      dCharger.Tpid,
+				Direction: dCharger.Direction,
+				Tenant:    dCharger.Tenant,
+				Category:  dCharger.Category,
+				Account:   dCharger.Account,
+				Subject:   dCharger.Subject,
+			}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
