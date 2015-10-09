@@ -205,6 +205,8 @@ const (
 	METATAG                      = "metatag"
 	HTTP_POST                    = "http_post"
 	META_HTTP_POST               = "*http_post"
+	META_HTTP_JSON               = "*http_json"
+	META_HTTP_TEXT               = "*http_text"
 	META_HTTP_JSONRPC            = "*http_jsonrpc"
 	NANO_MULTIPLIER              = 1000000000
 	CGR_AUTHORIZE                = "CGR_AUTHORIZE"

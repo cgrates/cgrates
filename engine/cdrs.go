@@ -366,20 +366,40 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 		if !passesFilters { // Not passes filters, ignore this replication
 			continue
 		}
+		var body interface{}
+		var content = ""
 		switch rplCfg.Transport {
 		case utils.META_HTTP_POST:
-			errChan := make(chan error)
-			go func(cdr *StoredCdr, rplCfg *config.CdrReplicationCfg, errChan chan error) {
-				fallbackPath := path.Join(self.cgrCfg.HttpFailedDir, fmt.Sprintf("cdr_%s_%s_%s.form", rplCfg.Transport, rplCfg.Server, utils.GenUUID()))
-				if _, err := utils.HttpPoster(rplCfg.Server, self.cgrCfg.HttpSkipTlsVerify, cdr.AsHttpForm(), utils.CONTENT_FORM, rplCfg.Attempts, fallbackPath); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
-					errChan <- err
-				}
-				errChan <- nil
-			}(cdr, rplCfg, errChan)
-			if rplCfg.Synchronous { // Synchronize here
-				<-errChan
+			content = utils.CONTENT_FORM
+			body = cdr.AsHttpForm()
+		case utils.META_HTTP_TEXT:
+			content = utils.CONTENT_TEXT
+			body = cdr
+		case utils.META_HTTP_JSON:
+			content = utils.CONTENT_JSON
+			body = cdr
+		}
+
+		errChan := make(chan error)
+		go func(body interface{}, rplCfg *config.CdrReplicationCfg, content string, errChan chan error) {
+
+			fallbackPath := path.Join(
+				self.cgrCfg.HttpFailedDir,
+				rplCfg.GetFallbackFileName())
+
+			_, err := utils.HttpPoster(
+				rplCfg.Server, self.cgrCfg.HttpSkipTlsVerify, body,
+				content, rplCfg.Attempts, fallbackPath)
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf(
+					"<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
+				errChan <- err
 			}
+			errChan <- nil
+
+		}(body, rplCfg, content, errChan)
+		if rplCfg.Synchronous { // Synchronize here
+			<-errChan
 		}
 	}
 	return nil
