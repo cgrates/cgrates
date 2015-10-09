@@ -205,8 +205,6 @@ func TestLcrGet(t *testing.T) {
 		Subject:     "rif",
 	}
 	lcr, err := cd.GetLCR(nil, nil)
-	//jsn, _ := json.Marshal(lcr)
-	//log.Print("LCR: ", string(jsn))
 	if err != nil || lcr == nil {
 		t.Errorf("Bad lcr: %+v, %v", lcr, err)
 	}

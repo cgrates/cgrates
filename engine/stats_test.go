@@ -231,9 +231,11 @@ func TestStatsAppendCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Error appending cdr to stats: ", err)
 	}
-	if len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
+	t.Log(cdrStats.queues)
+	if len(cdrStats.queues) != 2 ||
+		len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
 		len(cdrStats.queues["CDRST2"].Cdrs) != 1 {
-		t.Error("Error appending cdr to queue: ", len(cdrStats.queues["CDRST2"].Cdrs))
+		t.Error("Error appending cdr to queue: ", len(cdrStats.queues))
 	}
 }
 

@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -78,45 +77,12 @@ func NewMongoStorage(address, db, user, pass string) (*MongoStorage, error) {
 		Background: false, // Build index in background and return immediately
 		Sparse:     false, // Only index documents containing the Key fields
 	}
-	err = ndb.C(colAct).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colApl).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colAtr).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colDcs).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colAls).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colStq).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colPbs).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colUsr).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colLcr).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colLht).EnsureIndex(index)
-	if err != nil {
-		return nil, err
+	keyCollections := []string{colAct, colApl, colAtr, colDcs, colAls, colUsr, colLcr, colLht}
+	for _, col := range keyCollections {
+		err = ndb.C(col).EnsureIndex(index)
+		if err != nil {
+			return nil, err
+		}
 	}
 	index = mgo.Index{
 		Key:        []string{"id"},
@@ -125,34 +91,12 @@ func NewMongoStorage(address, db, user, pass string) (*MongoStorage, error) {
 		Background: false,
 		Sparse:     false,
 	}
-	err = ndb.C(colDst).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colRpf).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colRpl).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colDst).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colShg).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-	err = ndb.C(colAcc).EnsureIndex(index)
-	if err != nil {
-		return nil, err
-	}
-
-	err = ndb.C(colCrs).EnsureIndex(index)
-	if err != nil {
-		return nil, err
+	idCollections := []string{colDst, colRpf, colRpl, colDst, colShg, colAcc, colCrs}
+	for _, col := range idCollections {
+		err = ndb.C(col).EnsureIndex(index)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &MongoStorage{db: ndb, session: session}, err
 }
@@ -348,10 +292,10 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	for _, key := range lcrKeys {
 		cache2go.RemKey(key)
-		/*if _, err = ms.GetLCR(key[len(utils.LCR_PREFIX):], true); err != nil {
+		if _, err = ms.GetLCR(key[len(utils.LCR_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
 			return err
-		}*/
+		}
 	}
 	if len(lcrKeys) != 0 {
 		utils.Logger.Info("Finished LCR rules caching.")
@@ -600,10 +544,7 @@ func (ms *MongoStorage) RemoveRatingProfile(key string) error {
 			go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
 		}
 	}
-	if err := iter.Close(); err != nil {
-		return err
-	}
-	return nil
+	return iter.Close()
 }
 
 func (ms *MongoStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
@@ -742,7 +683,7 @@ func (ms *MongoStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error)
 		Key   string
 		Value *StatsQueue
 	}
-	err = ms.db.C(colStq).Find(bson.M{"key": key}).One(result)
+	err = ms.db.C(colStq).Find(bson.M{"key": key}).One(&result)
 	if err == nil {
 		sq = result.Value
 	}
@@ -750,7 +691,7 @@ func (ms *MongoStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error)
 }
 
 func (ms *MongoStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
-	_, err = ms.db.C(colShg).Upsert(bson.M{"key": sq.GetId()}, &struct {
+	_, err = ms.db.C(colStq).Upsert(bson.M{"key": sq.GetId()}, &struct {
 		Key   string
 		Value *StatsQueue
 	}{Key: sq.GetId(), Value: sq})
@@ -1091,9 +1032,10 @@ func (ms *MongoStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 
 func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	iter := ms.db.C(colCrs).Find(nil).Iter()
-	cs := &CdrStats{}
-	for iter.Next(cs) {
-		css = append(css, cs)
+	var cs CdrStats
+	for iter.Next(&cs) {
+		clone := cs // avoid using the same pointer in append
+		css = append(css, &clone)
 	}
 	err = iter.Close()
 	return
