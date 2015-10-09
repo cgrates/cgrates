@@ -253,7 +253,7 @@ func (at *ActionPlan) Execute() (err error) {
 			for _, accId := range at.AccountIds {
 				_, err := Guardian.Guard(func() (interface{}, error) {
 					if err := accountingStorage.RemoveAccount(accId); err != nil {
-						utils.Logger.Warning(fmt.Sprintf("Could not remove account Id: %s: %d", accId, err))
+						utils.Logger.Warning(fmt.Sprintf("Could not remove account Id: %s: %v", accId, err))
 					}
 					return 0, nil
 				}, 0, accId)
@@ -275,7 +275,7 @@ func (at *ActionPlan) Execute() (err error) {
 			_, err := Guardian.Guard(func() (interface{}, error) {
 				ub, err := accountingStorage.GetAccount(accId)
 				if err != nil {
-					utils.Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", 0, accId))
+					utils.Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", accId))
 					return 0, err
 				} else if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
 					return 0, fmt.Errorf("Account %s is disabled", accId)

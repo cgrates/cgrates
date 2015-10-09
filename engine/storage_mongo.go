@@ -489,7 +489,7 @@ func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPla
 		}
 	}
 	rp = new(RatingPlan)
-	err = ms.db.C(colRpl).Find(bson.M{"id": key}).One(&rp)
+	err = ms.db.C(colRpl).Find(bson.M{"id": key}).One(rp)
 	if err == nil {
 		cache2go.Cache(utils.RATING_PLAN_PREFIX+key, rp)
 	}
@@ -514,7 +514,7 @@ func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool) (rp *Rating
 		}
 	}
 	rp = new(RatingProfile)
-	err = ms.db.C(colRpf).Find(bson.M{"id": key}).One(&rp)
+	err = ms.db.C(colRpf).Find(bson.M{"id": key}).One(rp)
 	if err == nil {
 		cache2go.Cache(utils.RATING_PROFILE_PREFIX+key, rp)
 	}
@@ -522,7 +522,7 @@ func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool) (rp *Rating
 }
 
 func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
-	_, err := ms.db.C("ratingprofiles").Upsert(bson.M{"id": rp.Id}, rp)
+	_, err := ms.db.C(colRpf).Upsert(bson.M{"id": rp.Id}, rp)
 	if err == nil && historyScribe != nil {
 		var response int
 		historyScribe.Record(rp.GetHistoryRecord(false), &response)

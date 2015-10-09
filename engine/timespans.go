@@ -473,16 +473,17 @@ func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
 
 // Splits the given timespan on activation period's activation time.
 func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
-	if !ts.Contains(rp.ActivationTime) {
+	activationTime := rp.ActivationTime.In(ts.TimeStart.Location())
+	if !ts.Contains(activationTime) {
 		return nil
 	}
 	newTs = &TimeSpan{
-		TimeStart: rp.ActivationTime,
+		TimeStart: activationTime,
 		TimeEnd:   ts.TimeEnd,
 	}
 	newTs.copyRatingInfo(ts)
 	newTs.DurationIndex = ts.DurationIndex
-	ts.TimeEnd = rp.ActivationTime
+	ts.TimeEnd = activationTime
 	ts.SetNewDurationIndex(newTs)
 	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	return

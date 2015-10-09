@@ -370,7 +370,7 @@ func TestResponderGetLCR(t *testing.T) {
 		utils.DESTINATION_PREFIX:    []string{utils.DESTINATION_PREFIX + dstDe.Id},
 		utils.RATING_PLAN_PREFIX:    []string{utils.RATING_PLAN_PREFIX + rp1.Id, utils.RATING_PLAN_PREFIX + rp2.Id, utils.RATING_PLAN_PREFIX + rp3.Id},
 		utils.RATING_PROFILE_PREFIX: []string{utils.RATING_PROFILE_PREFIX + danRpfl.Id, utils.RATING_PROFILE_PREFIX + rifRpfl.Id, utils.RATING_PROFILE_PREFIX + ivoRpfl.Id},
-		utils.LCR_PREFIX:            []string{utils.LCR_PREFIX + lcrStatic.GetId(), utils.LCR_PREFIX + lcrLowestCost.GetId()},
+		utils.LCR_PREFIX:            []string{utils.LCR_PREFIX + lcrStatic.GetId(), utils.LCR_PREFIX + lcrLowestCost.GetId(), utils.LCR_PREFIX + lcrQosThreshold.GetId(), utils.LCR_PREFIX + lcrQos.GetId()},
 	}); err != nil {
 		t.Error(err)
 	}
