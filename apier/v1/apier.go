@@ -209,6 +209,7 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 			BalanceType: attr.BalanceType,
 			Direction:   attr.Direction,
 			Balance: &engine.Balance{
+				Uuid:           attr.BalanceUuid,
 				Id:             attr.BalanceId,
 				Value:          attr.Value,
 				ExpirationDate: expTime,
