@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -33,26 +32,28 @@ import (
 )
 
 const (
-	colDst    = "destinations"
-	colAct    = "actions"
-	colApl    = "actionplans"
-	colAtr    = "actiontriggers"
-	colRpl    = "ratingplans"
-	colRpf    = "ratingprofiles"
-	colAcc    = "accounts"
-	colShg    = "sharedgroups"
-	colLcr    = "lcrrules"
-	colDcs    = "derivedchargers"
-	colAls    = "aliases"
-	colStq    = "statsqeues"
-	colPbs    = "pubsub"
-	colUsr    = "users"
-	colCrs    = "cdrstats"
-	colLht    = "loadhistory"
-	colLogCC  = "callcostlogs"
-	colLogAtr = "actiontriggerslogs"
-	colLogApl = "actionplanlogs"
-	colLogErr = "errorlogs"
+	colDst       = "destinations"
+	colAct       = "actions"
+	colApl       = "actionplans"
+	colAtr       = "actiontriggers"
+	colRpl       = "ratingplans"
+	colRpf       = "ratingprofiles"
+	colAcc       = "accounts"
+	colShg       = "sharedgroups"
+	colLcr       = "lcrrules"
+	colDcs       = "derivedchargers"
+	colAls       = "aliases"
+	colStq       = "statsqeues"
+	colPbs       = "pubsub"
+	colUsr       = "users"
+	colCrs       = "cdrstats"
+	colLht       = "loadhistory"
+	colLogCC     = "callcostlogs"
+	colLogAtr    = "actiontriggerslogs"
+	colLogApl    = "actionplanlogs"
+	colLogErr    = "errorlogs"
+	colCdrs      = "cdrs"
+	colRatedCdrs = "ratedcdrs"
 )
 
 type MongoStorage struct {
@@ -121,33 +122,6 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 		}
 	}
 	return nil
-}
-
-type LogCostEntry struct {
-	Id       string `bson:"_id,omitempty"`
-	CallCost *CallCost
-	Source   string
-}
-
-type LogTimingEntry struct {
-	ActionPlan *ActionPlan
-	Actions    Actions
-	LogTime    time.Time
-	Source     string
-}
-
-type LogTriggerEntry struct {
-	ubId          string
-	ActionTrigger *ActionTrigger
-	Actions       Actions
-	LogTime       time.Time
-	Source        string
-}
-
-type LogErrEntry struct {
-	Id     string `bson:"_id,omitempty"`
-	ErrStr string
-	Source string
 }
 
 func (ms *MongoStorage) CacheRatingAll() error {
@@ -1040,23 +1014,4 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	}
 	err = iter.Close()
 	return
-}
-
-func (ms *MongoStorage) LogCallCost(cgrid, source string, cc *CallCost) error {
-	return ms.db.C(colLogCC).Insert(&LogCostEntry{cgrid, cc, source})
-}
-
-func (ms *MongoStorage) GetCallCostLog(cgrid, source string) (cc *CallCost, err error) {
-	result := new(LogCostEntry)
-	err = ms.db.C(colLogCC).Find(bson.M{"_id": cgrid, "source": source}).One(result)
-	cc = result.CallCost
-	return
-}
-
-func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
-	return ms.db.C(colLogAtr).Insert(&LogTriggerEntry{ubId, at, as, time.Now(), source})
-}
-
-func (ms *MongoStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
-	return ms.db.C(colLogApl).Insert(&LogTimingEntry{at, as, time.Now(), source})
 }
