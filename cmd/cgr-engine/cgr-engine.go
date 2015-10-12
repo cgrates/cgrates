@@ -558,7 +558,7 @@ func main() {
 		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
 			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
 		if err != nil { // Cannot configure logger database, show stopper
-			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+			utils.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting! (%+v)", err, cfg))
 			return
 		}
 		defer logDb.Close()

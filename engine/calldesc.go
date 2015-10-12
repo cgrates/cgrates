@@ -46,11 +46,11 @@ func init() {
 		accountingStorage, _ = NewMapStorage()
 	} else {
 		var err error
-		ratingStorage, err = NewMongoStorage("127.0.0.1:27017", "cgrates_rating_test", "", "")
+		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "")
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, err = NewMongoStorage("127.0.0.1:27017", "cgrates_accounting_test", "", "")
+		accountingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_accounting_test", "", "")
 		if err != nil {
 			log.Fatal(err)
 		}

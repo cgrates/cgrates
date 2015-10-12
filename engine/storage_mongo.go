@@ -60,7 +60,8 @@ type MongoStorage struct {
 	db      *mgo.Database
 }
 
-func NewMongoStorage(address, db, user, pass string) (*MongoStorage, error) {
+func NewMongoStorage(host, port, db, user, pass string) (*MongoStorage, error) {
+	address := fmt.Sprintf("%s:%s", host, port)
 	if user != "" && pass != "" {
 		address = fmt.Sprintf("%s:%s@%s", user, pass, address)
 	}
