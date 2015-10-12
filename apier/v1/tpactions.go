@@ -96,7 +96,7 @@ func (self *ApierV1) RemTPActions(attrs AttrGetTPActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_ACTIONS, attrs.TPid, attrs.ActionsId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_ACTIONS, attrs.TPid, map[string]string{"tag": attrs.ActionsId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

@@ -94,7 +94,7 @@ func (self *ApierV1) RemTPCdrStats(attrs AttrGetTPCdrStats, reply *string) error
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "CdrStatsId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, attrs.CdrStatsId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, map[string]string{"tag": attrs.CdrStatsId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

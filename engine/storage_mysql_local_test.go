@@ -372,7 +372,7 @@ func TestMySQLRemoveTPData(t *testing.T) {
 		t.Error("Could not store TPTiming")
 	}
 	// Remove Timings
-	if err := mysqlDb.RemTpData(utils.TBL_TP_TIMINGS, utils.TEST_SQL, tm.TimingId); err != nil {
+	if err := mysqlDb.RemTpData(utils.TBL_TP_TIMINGS, utils.TEST_SQL, map[string]string{"tag": tm.TimingId}); err != nil {
 		t.Error(err.Error())
 	}
 	if tmgs, err := mysqlDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
@@ -393,7 +393,7 @@ func TestMySQLRemoveTPData(t *testing.T) {
 		t.Error("Could not store TPRatingProfile")
 	}
 	// Remove RatingProfile
-	if err := mysqlDb.RemTpData(utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.LoadId, rp.Direction, rp.Tenant, rp.Category, rp.Subject); err != nil {
+	if err := mysqlDb.RemTpData(utils.TBL_TP_RATE_PROFILES, rp.TPid, map[string]string{"loadid": rp.LoadId, "direction": rp.Direction, "tenant": rp.Tenant, "category": rp.Category, "subject": rp.Subject}); err != nil {
 		t.Error(err.Error())
 	}
 	if rps, err := mysqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
@@ -414,7 +414,7 @@ func TestMySQLRemoveTPData(t *testing.T) {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove AccountActions
-	if err := mysqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, aa.LoadId, aa.Direction, aa.Tenant, aa.Account); err != nil {
+	if err := mysqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadis": aa.LoadId, "direction": aa.Direction, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		t.Error(err.Error())
 	}
 	if aas, err := mysqlDb.GetTpAccountActions(maa); err != nil {
@@ -450,7 +450,7 @@ func TestMySQLRemoveTPData(t *testing.T) {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove TariffPlan completely
-	if err := mysqlDb.RemTpData("", utils.TEST_SQL); err != nil {
+	if err := mysqlDb.RemTpData("", utils.TEST_SQL, nil); err != nil {
 		t.Error(err.Error())
 	}
 	// Make sure we have removed it

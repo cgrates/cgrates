@@ -103,7 +103,7 @@ func (self *ApierV1) RemTPDerivedChargers(attrs AttrGetTPDerivedChargers, reply 
 	if err := tmpDc.SetDerivedChargersId(attrs.DerivedChargersId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_DERIVED_CHARGERS, attrs.TPid, tmpDc.Loadid, tmpDc.Direction, tmpDc.Tenant, tmpDc.Category, tmpDc.Account, tmpDc.Subject); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_DERIVED_CHARGERS, attrs.TPid, map[string]string{"loadid": tmpDc.Loadid, "direction": tmpDc.Direction, "tenant": tmpDc.Tenant, "category": tmpDc.Category, "account": tmpDc.Account, "subject": tmpDc.Subject}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/utils"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -26,10 +28,71 @@ const (
 	colTpCrs = "tp_cdrstats"
 )
 
-func (ms *MongoStorage) GetTpIds() ([]string, error) { return nil, nil }
-func (ms *MongoStorage) GetTpTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error) {
-	return nil, nil
+func (ms *MongoStorage) GetTpIds() ([]string, error) {
+	tpidMap := make(map[string]bool)
+	cols, err := ms.db.CollectionNames()
+	if err != nil {
+		return nil, err
+	}
+	for _, col := range cols {
+		if strings.HasPrefix(col, "tp_") {
+			tpids := make([]string, 0)
+			if err := ms.db.C(col).Find(nil).Select(bson.M{"tpid": 1}).Distinct("tpid", &tpids); err != nil {
+				return nil, err
+			}
+			for _, tpid := range tpids {
+				tpidMap[tpid] = true
+			}
+		}
+	}
+	var tpids []string
+	for tpid := range tpidMap {
+		tpids = append(tpids, tpid)
+	}
+	return tpids, nil
 }
+func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDistinctIds, filter map[string]string, pag *utils.Paginator) ([]string, error) {
+	selectors := bson.M{}
+	for _, d := range distinct {
+		selectors[d] = 1
+	}
+	filter["tpid"] = tpid
+	q := ms.db.C(table).Find(filter)
+	if pag != nil {
+		if pag.Limit != nil {
+			q = q.Limit(*pag.Limit)
+		}
+		if pag.Offset != nil {
+			q = q.Skip(*pag.Offset)
+		}
+	}
+
+	iter := q.Select(selectors).Iter()
+	distinctIds := make(map[string]bool)
+	item := make(map[string]string)
+	for iter.Next(item) {
+		id := ""
+		last := len(distinct) - 1
+		for i, d := range distinct {
+			if distinctValue, ok := item[d]; ok {
+				id += distinctValue
+			}
+			if i < last {
+				id += utils.CONCATENATED_KEY_SEP
+			}
+		}
+		distinctIds[id] = true
+	}
+	if err := iter.Close(); err != nil {
+		return nil, err
+	}
+	var results []string
+	for id := range distinctIds {
+		results = append(results, id)
+	}
+	return results, nil
+}
+
 func (ms *MongoStorage) GetTpTimings(tpid, tag string) ([]TpTiming, error) {
 	filter := bson.M{
 		"tpid": tpid,
@@ -41,6 +104,7 @@ func (ms *MongoStorage) GetTpTimings(tpid, tag string) ([]TpTiming, error) {
 	err := ms.db.C(colTpTmg).Find(filter).All(&results)
 	return results, err
 }
+
 func (ms *MongoStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, error) {
 	filter := bson.M{
 		"tpid": tpid,
@@ -52,6 +116,7 @@ func (ms *MongoStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, er
 	err := ms.db.C(colTpDst).Find(filter).All(&results)
 	return results, err
 }
+
 func (ms *MongoStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
 	filter := bson.M{
 		"tpid": tpid,
@@ -63,6 +128,7 @@ func (ms *MongoStorage) GetTpRates(tpid, tag string) ([]TpRate, error) {
 	err := ms.db.C(colTpRts).Find(filter).All(&results)
 	return results, err
 }
+
 func (ms *MongoStorage) GetTpDestinationRates(tpid, tag string, pag *utils.Paginator) ([]TpDestinationRate, error) {
 	filter := bson.M{
 		"tpid": tpid,
@@ -290,9 +356,23 @@ func (ms *MongoStorage) GetTpAccountActions(tp *TpAccountAction) ([]TpAccountAct
 	return results, err
 }
 
-func (ms *MongoStorage) RemTpData(string, string, ...string) error {
-
-	return nil
+func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) error {
+	if len(table) == 0 { // Remove tpid out of all tables
+		cols, err := ms.db.CollectionNames()
+		if err != nil {
+			return err
+		}
+		for _, col := range cols {
+			if strings.HasPrefix(col, "tp_") {
+				if err := ms.db.C(col).Remove(bson.M{"tpid": tpid}); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	// Remove from a single table
+	args["tpid"] = tpid
+	return ms.db.C(table).Remove(args)
 }
 
 func (ms *MongoStorage) SetTpTimings(tps []TpTiming) error {
