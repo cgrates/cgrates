@@ -19,6 +19,9 @@ cd /usr/share/cgrates/storage/mysql && ./setup_cgr_db.sh root CGRateS.org
 # setup postgres
 cd /usr/share/cgrates/storage/postgres && ./setup_cgr_db.sh
 
+# create cgrates user for mongo
+mongo --eval 'db.createUser({"user":"cgrates", "pwd":"CGRateS.org", "roles":[{role: "userAdminAnyDatabase", db: "admin"}]})' admin
+
 #env vars
 export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
 export GO15VENDOREXPERIMENT=1

@@ -414,7 +414,7 @@ func TestMySQLRemoveTPData(t *testing.T) {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove AccountActions
-	if err := mysqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadis": aa.LoadId, "direction": aa.Direction, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
+	if err := mysqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadid": aa.LoadId, "direction": aa.Direction, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		t.Error(err.Error())
 	}
 	if aas, err := mysqlDb.GetTpAccountActions(maa); err != nil {
