@@ -33,13 +33,8 @@ type CdrReplicationCfg struct {
 	CdrFilter   utils.RSRFields // Only replicate if the filters here are matching
 }
 
-func (rplCfg CdrReplicationCfg) GetFallbackFileName() string {
-	serverName := url.QueryEscape(rplCfg.Server)
-
-	result := fmt.Sprintf("cdr_%s_%s_%s.form",
-		rplCfg.Transport,
-		serverName, utils.GenUUID())
-	return result
+func (rplCfg CdrReplicationCfg) FallbackFileName() string {
+	return fmt.Sprintf("cdr_%s_%s_%s.form", rplCfg.Transport, url.QueryEscape(rplCfg.Server), utils.GenUUID())
 }
 
 type SureTaxCfg struct {

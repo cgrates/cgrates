@@ -379,11 +379,9 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 
 		errChan := make(chan error)
 		go func(body interface{}, rplCfg *config.CdrReplicationCfg, content string, errChan chan error) {
-
 			fallbackPath := path.Join(
 				self.cgrCfg.HttpFailedDir,
-				rplCfg.GetFallbackFileName())
-
+				rplCfg.FallbackFileName())
 			_, err := utils.HttpPoster(
 				rplCfg.Server, self.cgrCfg.HttpSkipTlsVerify, body,
 				content, rplCfg.Attempts, fallbackPath)
@@ -398,6 +396,7 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 		if rplCfg.Synchronous { // Synchronize here
 			<-errChan
 		}
+
 	}
 	return nil
 }
