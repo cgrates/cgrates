@@ -51,7 +51,7 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler str
 }
 
 func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler string) (db AccountingStorage, err error) {
-	var d Storage
+	var d AccountingStorage
 	switch db_type {
 	case utils.REDIS:
 		var db_nb int
@@ -73,11 +73,11 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 	if err != nil {
 		return nil, err
 	}
-	return d.(AccountingStorage), nil
+	return d, nil
 }
 
 func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int) (db LogStorage, err error) {
-	var d Storage
+	var d LogStorage
 	switch db_type {
 	/*
 		case utils.REDIS:
@@ -104,11 +104,11 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 	if err != nil {
 		return nil, err
 	}
-	return d.(LogStorage), nil
+	return d, nil
 }
 
 func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int) (db LoadStorage, err error) {
-	var d Storage
+	var d LoadStorage
 	switch db_type {
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
@@ -122,11 +122,11 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	if err != nil {
 		return nil, err
 	}
-	return d.(LoadStorage), nil
+	return d, nil
 }
 
 func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn int) (db CdrStorage, err error) {
-	var d Storage
+	var d CdrStorage
 	switch db_type {
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
@@ -140,5 +140,5 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 	if err != nil {
 		return nil, err
 	}
-	return d.(CdrStorage), nil
+	return d, nil
 }

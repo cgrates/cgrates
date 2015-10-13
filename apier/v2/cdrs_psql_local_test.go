@@ -19,15 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var cdrsPsqlCfgPath string
@@ -69,13 +70,11 @@ func TestV2CdrsPsqlInjectUnratedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var psqlDb *engine.PostgresStorage
-	if d, err := engine.NewPostgresStorage(cdrsPsqlCfg.StorDBHost, cdrsPsqlCfg.StorDBPort, cdrsPsqlCfg.StorDBName, cdrsPsqlCfg.StorDBUser, cdrsPsqlCfg.StorDBPass,
-		cdrsPsqlCfg.StorDBMaxOpenConns, cdrsPsqlCfg.StorDBMaxIdleConns); err != nil {
+	psqlDb, err := engine.NewPostgresStorage(cdrsPsqlCfg.StorDBHost, cdrsPsqlCfg.StorDBPort, cdrsPsqlCfg.StorDBName, cdrsPsqlCfg.StorDBUser, cdrsPsqlCfg.StorDBPass,
+		cdrsPsqlCfg.StorDBMaxOpenConns, cdrsPsqlCfg.StorDBMaxIdleConns)
+	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
-	} else {
-		psqlDb = d.(*engine.PostgresStorage)
 	}
 	strCdr1 := &engine.StoredCdr{CgrId: utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,

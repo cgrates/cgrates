@@ -36,12 +36,11 @@ func TestPSQLCreateTables(t *testing.T) {
 		return
 	}
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	if d, err := NewPostgresStorage("localhost", "5432", cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass,
+	var err error
+	if psqlDb, err = NewPostgresStorage("localhost", "5432", cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass,
 		cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns); err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
-	} else {
-		psqlDb = d.(*PostgresStorage)
 	}
 	for _, scriptName := range []string{utils.CREATE_CDRS_TABLES_SQL, utils.CREATE_TARIFFPLAN_TABLES_SQL} {
 		if err := psqlDb.CreateTablesFromScript(path.Join(*dataDir, "storage", utils.POSTGRES, scriptName)); err != nil {

@@ -79,10 +79,9 @@ func NewMongoStorage(host, port, db, user, pass string) (*MongoStorage, error) {
 		Background: false, // Build index in background and return immediately
 		Sparse:     false, // Only index documents containing the Key fields
 	}
-	keyCollections := []string{colAct, colApl, colAtr, colDcs, colAls, colUsr, colLcr, colLht}
-	for _, col := range keyCollections {
-		err = ndb.C(col).EnsureIndex(index)
-		if err != nil {
+	collections := []string{colAct, colApl, colAtr, colDcs, colAls, colUsr, colLcr, colLht}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
 			return nil, err
 		}
 	}
@@ -93,10 +92,126 @@ func NewMongoStorage(host, port, db, user, pass string) (*MongoStorage, error) {
 		Background: false,
 		Sparse:     false,
 	}
-	idCollections := []string{colDst, colRpf, colRpl, colDst, colShg, colAcc, colCrs}
-	for _, col := range idCollections {
-		err = ndb.C(col).EnsureIndex(index)
-		if err != nil {
+	collections = []string{colDst, colRpf, colRpl, colDst, colShg, colAcc, colCrs}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "tag"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "category", "subject", "loadid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_RATE_PROFILES}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "category", "account", "subject"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_LCRS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "tenant", "username"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_USERS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "category", "account", "subject", "context"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_LCRS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "category", "subject", "account", "loadid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_DERIVED_CHARGERS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "account", "loadid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_DERIVED_CHARGERS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"id", "source", "runid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{colLogCC}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"cgrid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{colCdrs, colRatedCdrs}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
 			return nil, err
 		}
 	}

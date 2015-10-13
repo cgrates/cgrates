@@ -360,13 +360,17 @@ func (ms *MongoStorage) RemTpData(table, tpid string, args map[string]string) er
 		}
 		for _, col := range cols {
 			if strings.HasPrefix(col, "tp_") {
-				if err := ms.db.C(col).Remove(bson.M{"tpid": tpid}); err != nil {
+				if _, err := ms.db.C(col).RemoveAll(bson.M{"tpid": tpid}); err != nil {
 					return err
 				}
 			}
 		}
+		return nil
 	}
 	// Remove from a single table
+	if args == nil {
+		args = make(map[string]string)
+	}
 	args["tpid"] = tpid
 	return ms.db.C(table).Remove(args)
 }
@@ -698,12 +702,14 @@ func (ms *MongoStorage) LogActionPlan(source string, at *ActionPlan, as Actions)
 }
 
 func (ms *MongoStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
-	return ms.db.C(colLogCC).Insert(&struct {
+	s := &struct {
 		Id       string `bson:"id,omitempty"`
 		Source   string
 		Runid    string `bson:"runid,omitempty"`
 		CallCost *CallCost
-	}{cgrid, source, runid, cc})
+	}{cgrid, source, runid, cc}
+	_, err := ms.db.C(colLogCC).Upsert(bson.M{"id": s.Id, "source": s.Source, "runid": s.Runid}, s)
+	return err
 }
 
 func (ms *MongoStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
@@ -713,17 +719,19 @@ func (ms *MongoStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCos
 		Runid    string `bson:"runid,omitempty"`
 		CallCost *CallCost
 	}{}
-	err = ms.db.C(colLogCC).Find(bson.M{"_id": cgrid, "source": source}).One(result)
+	err = ms.db.C(colLogCC).Find(bson.M{"id": cgrid, "source": source, "runid": runid}).One(result)
 	cc = result.CallCost
 	return
 }
 
 func (ms *MongoStorage) SetCdr(cdr *StoredCdr) error {
-	return ms.db.C(colCdrs).Insert(cdr)
+	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CgrId}, cdr)
+	return err
 }
 
 func (ms *MongoStorage) SetRatedCdr(storedCdr *StoredCdr) error {
-	return ms.db.C(colRatedCdrs).Insert(storedCdr)
+	_, err := ms.db.C(colRatedCdrs).Upsert(bson.M{"cgrid": storedCdr.CgrId}, storedCdr)
+	return err
 }
 
 // Remove CDR data out of all CDR tables based on their cgrid

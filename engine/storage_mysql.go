@@ -28,7 +28,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (Storage, error) {
+func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (*MySQLStorage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true", user, password, host, port, name)
 	db, err := gorm.Open("mysql", connectString)
 	if err != nil {
