@@ -111,11 +111,9 @@ func TestCsvLclEmptyTables(t *testing.T) {
 	if *storDbType != utils.MYSQL {
 		t.Fatal("Unsupported storDbType")
 	}
-	var mysql *engine.MySQLStorage
-	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns); err != nil {
+	mysql, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+	if err != nil {
 		t.Fatal("Error on opening database connection: ", err)
-	} else {
-		mysql = d.(*engine.MySQLStorage)
 	}
 	for _, scriptName := range []string{utils.CREATE_CDRS_TABLES_SQL, utils.CREATE_TARIFFPLAN_TABLES_SQL} {
 		if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, scriptName)); err != nil {

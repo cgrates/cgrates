@@ -158,7 +158,7 @@ func (self *SQLStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 	return ids, nil
 }
 
-func (self *SQLStorage) RemTpData(table, tpid string, args ...string) error {
+func (self *SQLStorage) RemTpData(table, tpid string, args map[string]string) error {
 	tx := self.db.Begin()
 	if len(table) == 0 { // Remove tpid out of all tables
 		for _, tblName := range []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES,
@@ -173,15 +173,9 @@ func (self *SQLStorage) RemTpData(table, tpid string, args ...string) error {
 	}
 	// Remove from a single table
 	tx = tx.Table(table).Where("tpid = ?", tpid)
-	switch table {
-	default:
-		tx = tx.Where("tag = ?", args[0])
-	case utils.TBL_TP_RATE_PROFILES:
-		tx = tx.Where("loadid = ?", args[0]).Where("direction = ?", args[1]).Where("tenant = ?", args[2]).Where("category = ?", args[3]).Where("subject = ?", args[4])
-	case utils.TBL_TP_ACCOUNT_ACTIONS:
-		tx = tx.Where("loadid = ?", args[0]).Where("direction = ?", args[1]).Where("tenant = ?", args[2]).Where("account = ?", args[3])
-	case utils.TBL_TP_DERIVED_CHARGERS:
-		tx = tx.Where("loadid = ?", args[0]).Where("direction = ?", args[1]).Where("tenant = ?", args[2]).Where("category = ?", args[3]).Where("account = ?", args[4]).Where("subject = ?", args[5])
+	// Compose filters
+	for key, value := range args {
+		tx = tx.Where(key+" = ?", value)
 	}
 	if err := tx.Delete(nil).Error; err != nil {
 		tx.Rollback()
@@ -410,7 +404,14 @@ func (self *SQLStorage) SetTpDerivedChargers(sgs []TpDerivedCharger) error {
 				return err
 			}
 
-			if err := tx.Where(tmpDc).Delete(TpDerivedCharger{}).Error; err != nil {
+			if err := tx.Where(tmpDc).Delete(TpDerivedCharger{
+				Tpid:      dCharger.Tpid,
+				Direction: dCharger.Direction,
+				Tenant:    dCharger.Tenant,
+				Category:  dCharger.Category,
+				Account:   dCharger.Account,
+				Subject:   dCharger.Subject,
+			}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}

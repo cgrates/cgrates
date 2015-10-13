@@ -21,7 +21,6 @@ package v2
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -31,47 +30,45 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var cdrsPsqlCfgPath string
-var cdrsPsqlCfg *config.CGRConfig
-var cdrsPsqlRpc *rpc.Client
-var cmdEngineCdrPsql *exec.Cmd
+var cdrsMongoCfgPath string
+var cdrsMongoCfg *config.CGRConfig
+var cdrsMongoRpc *rpc.Client
 
-func TestV2CdrsPsqlInitConfig(t *testing.T) {
+func TestV2CdrsMongoInitConfig(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var err error
-	cdrsPsqlCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsv2psql")
-	if cdrsPsqlCfg, err = config.NewCGRConfigFromFolder(cdrsPsqlCfgPath); err != nil {
-		t.Fatal(err)
+	cdrsMongoCfgPath = path.Join(*dataDir, "conf", "samples", "cdrsv2mongo")
+	if cdrsMongoCfg, err = config.NewCGRConfigFromFolder(cdrsMongoCfgPath); err != nil {
+		t.Fatal("Got config error: ", err.Error())
 	}
 }
 
-func TestV2CdrsPsqlInitDataDb(t *testing.T) {
+func TestV2CdrsMongoInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := engine.InitDataDb(cdrsPsqlCfg); err != nil {
+	if err := engine.InitDataDb(cdrsMongoCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // InitDb so we can rely on count
-func TestV2CdrsPsqlInitCdrDb(t *testing.T) {
+func TestV2CdrsMongoInitCdrDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := engine.InitStorDb(cdrsPsqlCfg); err != nil {
+	if err := engine.InitStorDb(cdrsMongoCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestV2CdrsPsqlInjectUnratedCdr(t *testing.T) {
+func TestV2CdrsMongoInjectUnratedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	psqlDb, err := engine.NewPostgresStorage(cdrsPsqlCfg.StorDBHost, cdrsPsqlCfg.StorDBPort, cdrsPsqlCfg.StorDBName, cdrsPsqlCfg.StorDBUser, cdrsPsqlCfg.StorDBPass,
-		cdrsPsqlCfg.StorDBMaxOpenConns, cdrsPsqlCfg.StorDBMaxIdleConns)
+	mysqlDb, err := engine.NewMongoStorage(cdrsMongoCfg.StorDBHost, cdrsMongoCfg.StorDBPort, cdrsMongoCfg.StorDBName, cdrsMongoCfg.StorDBUser, cdrsMongoCfg.StorDBPass)
 	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
@@ -82,35 +79,34 @@ func TestV2CdrsPsqlInjectUnratedCdr(t *testing.T) {
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
-	if err := psqlDb.SetCdr(strCdr1); err != nil {
+	if err := mysqlDb.SetCdr(strCdr1); err != nil {
 		t.Error(err.Error())
 	}
 }
 
-func TestV2CdrsPsqlStartEngine(t *testing.T) {
+func TestV2CdrsMongoStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var err error
-	if cmdEngineCdrPsql, err = engine.StartEngine(cdrsPsqlCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsMongoCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
-func TestV2CdrsPsqlPsqlRpcConn(t *testing.T) {
+func TestV2CdrsMongoRpcConn(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var err error
-	cdrsPsqlRpc, err = jsonrpc.Dial("tcp", cdrsPsqlCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	cdrsMongoRpc, err = jsonrpc.Dial("tcp", cdrsMongoCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 }
 
 // Insert some CDRs
-func TestV2CdrsPsqlProcessCdr(t *testing.T) {
+func TestV2CdrsMongoProcessCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -136,7 +132,7 @@ func TestV2CdrsPsqlProcessCdr(t *testing.T) {
 		},
 	}
 	for _, cdr := range cdrs {
-		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		if err := cdrsMongoRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)
@@ -144,54 +140,54 @@ func TestV2CdrsPsqlProcessCdr(t *testing.T) {
 	}
 }
 
-func TestV2CdrsPsqlGetCdrs(t *testing.T) {
+func TestV2CdrsMongoGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var reply []*engine.ExternalCdr
 	req := utils.RpcCdrsFilter{}
-	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 4 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 	// CDRs with errors
 	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
-	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// CDRs Rated
 	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(-1.0)}
-	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// CDRs non rated OR SkipRated
 	req = utils.RpcCdrsFilter{MaxCost: utils.Float64Pointer(-1.0)}
-	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// Skip Errors
 	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
-	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 }
 
-func TestV2CdrsPsqlCountCdrs(t *testing.T) {
+func TestV2CdrsMongoCountCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var reply int64
 	req := utils.AttrGetCdrs{}
-	if err := cdrsPsqlRpc.Call("ApierV2.CountCdrs", req, &reply); err != nil {
+	if err := cdrsMongoRpc.Call("ApierV2.CountCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != 4 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
@@ -199,7 +195,7 @@ func TestV2CdrsPsqlCountCdrs(t *testing.T) {
 }
 
 // Test Prepaid CDRs without previous costs being calculated
-func TestV2CdrsPsqlProcessPrepaidCdr(t *testing.T) {
+func TestV2CdrsMongoProcessPrepaidCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -226,7 +222,7 @@ func TestV2CdrsPsqlProcessPrepaidCdr(t *testing.T) {
 	}
 	tStart := time.Now()
 	for _, cdr := range cdrs {
-		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		if err := cdrsMongoRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
 			t.Error("Unexpected error: ", err.Error())
 		} else if reply != utils.OK {
 			t.Error("Unexpected reply received: ", reply)
@@ -237,7 +233,7 @@ func TestV2CdrsPsqlProcessPrepaidCdr(t *testing.T) {
 	}
 }
 
-func TestV2CdrsPsqlKillEngine(t *testing.T) {
+func TestV2CdrsMongoKillEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}

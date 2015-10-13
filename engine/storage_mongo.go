@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -33,26 +32,28 @@ import (
 )
 
 const (
-	colDst    = "destinations"
-	colAct    = "actions"
-	colApl    = "actionplans"
-	colAtr    = "actiontriggers"
-	colRpl    = "ratingplans"
-	colRpf    = "ratingprofiles"
-	colAcc    = "accounts"
-	colShg    = "sharedgroups"
-	colLcr    = "lcrrules"
-	colDcs    = "derivedchargers"
-	colAls    = "aliases"
-	colStq    = "statsqeues"
-	colPbs    = "pubsub"
-	colUsr    = "users"
-	colCrs    = "cdrstats"
-	colLht    = "loadhistory"
-	colLogCC  = "callcostlogs"
-	colLogAtr = "actiontriggerslogs"
-	colLogApl = "actionplanlogs"
-	colLogErr = "errorlogs"
+	colDst       = "destinations"
+	colAct       = "actions"
+	colApl       = "actionplans"
+	colAtr       = "actiontriggers"
+	colRpl       = "ratingplans"
+	colRpf       = "ratingprofiles"
+	colAcc       = "accounts"
+	colShg       = "sharedgroups"
+	colLcr       = "lcrrules"
+	colDcs       = "derivedchargers"
+	colAls       = "aliases"
+	colStq       = "statsqeues"
+	colPbs       = "pubsub"
+	colUsr       = "users"
+	colCrs       = "cdrstats"
+	colLht       = "loadhistory"
+	colLogCC     = "callcostlogs"
+	colLogAtr    = "actiontriggerslogs"
+	colLogApl    = "actionplanlogs"
+	colLogErr    = "errorlogs"
+	colCdrs      = "cdrs"
+	colRatedCdrs = "ratedcdrs"
 )
 
 type MongoStorage struct {
@@ -60,7 +61,8 @@ type MongoStorage struct {
 	db      *mgo.Database
 }
 
-func NewMongoStorage(address, db, user, pass string) (*MongoStorage, error) {
+func NewMongoStorage(host, port, db, user, pass string) (*MongoStorage, error) {
+	address := fmt.Sprintf("%s:%s", host, port)
 	if user != "" && pass != "" {
 		address = fmt.Sprintf("%s:%s@%s", user, pass, address)
 	}
@@ -77,10 +79,9 @@ func NewMongoStorage(address, db, user, pass string) (*MongoStorage, error) {
 		Background: false, // Build index in background and return immediately
 		Sparse:     false, // Only index documents containing the Key fields
 	}
-	keyCollections := []string{colAct, colApl, colAtr, colDcs, colAls, colUsr, colLcr, colLht}
-	for _, col := range keyCollections {
-		err = ndb.C(col).EnsureIndex(index)
-		if err != nil {
+	collections := []string{colAct, colApl, colAtr, colDcs, colAls, colUsr, colLcr, colLht}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
 			return nil, err
 		}
 	}
@@ -91,10 +92,126 @@ func NewMongoStorage(address, db, user, pass string) (*MongoStorage, error) {
 		Background: false,
 		Sparse:     false,
 	}
-	idCollections := []string{colDst, colRpf, colRpl, colDst, colShg, colAcc, colCrs}
-	for _, col := range idCollections {
-		err = ndb.C(col).EnsureIndex(index)
-		if err != nil {
+	collections = []string{colDst, colRpf, colRpl, colDst, colShg, colAcc, colCrs}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "tag"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "category", "subject", "loadid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_RATE_PROFILES}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "category", "account", "subject"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_LCRS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "tenant", "username"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_USERS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "category", "account", "subject", "context"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_LCRS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "category", "subject", "account", "loadid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_DERIVED_CHARGERS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"tpid", "direction", "tenant", "account", "loadid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{utils.TBL_TP_DERIVED_CHARGERS}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"id", "source", "runid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{colLogCC}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
+			return nil, err
+		}
+	}
+	index = mgo.Index{
+		Key:        []string{"cgrid"},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	collections = []string{colCdrs, colRatedCdrs}
+	for _, col := range collections {
+		if err = ndb.C(col).EnsureIndex(index); err != nil {
 			return nil, err
 		}
 	}
@@ -120,33 +237,6 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 		}
 	}
 	return nil
-}
-
-type LogCostEntry struct {
-	Id       string `bson:"_id,omitempty"`
-	CallCost *CallCost
-	Source   string
-}
-
-type LogTimingEntry struct {
-	ActionPlan *ActionPlan
-	Actions    Actions
-	LogTime    time.Time
-	Source     string
-}
-
-type LogTriggerEntry struct {
-	ubId          string
-	ActionTrigger *ActionTrigger
-	Actions       Actions
-	LogTime       time.Time
-	Source        string
-}
-
-type LogErrEntry struct {
-	Id     string `bson:"_id,omitempty"`
-	ErrStr string
-	Source string
 }
 
 func (ms *MongoStorage) CacheRatingAll() error {
@@ -1039,23 +1129,4 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	}
 	err = iter.Close()
 	return
-}
-
-func (ms *MongoStorage) LogCallCost(cgrid, source string, cc *CallCost) error {
-	return ms.db.C(colLogCC).Insert(&LogCostEntry{cgrid, cc, source})
-}
-
-func (ms *MongoStorage) GetCallCostLog(cgrid, source string) (cc *CallCost, err error) {
-	result := new(LogCostEntry)
-	err = ms.db.C(colLogCC).Find(bson.M{"_id": cgrid, "source": source}).One(result)
-	cc = result.CallCost
-	return
-}
-
-func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
-	return ms.db.C(colLogAtr).Insert(&LogTriggerEntry{ubId, at, as, time.Now(), source})
-}
-
-func (ms *MongoStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
-	return ms.db.C(colLogApl).Insert(&LogTimingEntry{at, as, time.Now(), source})
 }

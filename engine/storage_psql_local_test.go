@@ -36,12 +36,11 @@ func TestPSQLCreateTables(t *testing.T) {
 		return
 	}
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	if d, err := NewPostgresStorage("localhost", "5432", cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass,
+	var err error
+	if psqlDb, err = NewPostgresStorage("localhost", "5432", cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass,
 		cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns); err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
-	} else {
-		psqlDb = d.(*PostgresStorage)
 	}
 	for _, scriptName := range []string{utils.CREATE_CDRS_TABLES_SQL, utils.CREATE_TARIFFPLAN_TABLES_SQL} {
 		if err := psqlDb.CreateTablesFromScript(path.Join(*dataDir, "storage", utils.POSTGRES, scriptName)); err != nil {
@@ -367,7 +366,7 @@ func TestPSQLRemoveTPData(t *testing.T) {
 		t.Error("Could not store TPTiming")
 	}
 	// Remove Timings
-	if err := psqlDb.RemTpData(utils.TBL_TP_TIMINGS, utils.TEST_SQL, tm.TimingId); err != nil {
+	if err := psqlDb.RemTpData(utils.TBL_TP_TIMINGS, utils.TEST_SQL, map[string]string{"tag": tm.TimingId}); err != nil {
 		t.Error(err.Error())
 	}
 	if tmgs, err := psqlDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
@@ -388,7 +387,7 @@ func TestPSQLRemoveTPData(t *testing.T) {
 		t.Error("Could not store TPRatingProfile")
 	}
 	// Remove RatingProfile
-	if err := psqlDb.RemTpData(utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.LoadId, rp.Direction, rp.Tenant, rp.Category, rp.Subject); err != nil {
+	if err := psqlDb.RemTpData(utils.TBL_TP_RATE_PROFILES, rp.TPid, map[string]string{"loadid": rp.LoadId, "direction": rp.Direction, "tenant": rp.Tenant, "category": rp.Category, "subject": rp.Subject}); err != nil {
 		t.Error(err.Error())
 	}
 	if rps, err := psqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
@@ -409,7 +408,7 @@ func TestPSQLRemoveTPData(t *testing.T) {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove AccountActions
-	if err := psqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, aa.LoadId, aa.Direction, aa.Tenant, aa.Account); err != nil {
+	if err := psqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadid": aa.LoadId, "direction": aa.Direction, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		t.Error(err.Error())
 	}
 	if aas, err := psqlDb.GetTpAccountActions(maa); err != nil {
@@ -445,7 +444,7 @@ func TestPSQLRemoveTPData(t *testing.T) {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove TariffPlan completely
-	if err := psqlDb.RemTpData("", utils.TEST_SQL); err != nil {
+	if err := psqlDb.RemTpData("", utils.TEST_SQL, nil); err != nil {
 		t.Error(err.Error())
 	}
 	// Make sure we have removed it

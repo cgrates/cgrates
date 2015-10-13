@@ -90,7 +90,7 @@ func (self *ApierV1) RemTPUser(attrs AttrGetTPUser, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "UserId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_USERS, attrs.TPid); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_USERS, attrs.TPid, map[string]string{"tag": attrs.UserId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

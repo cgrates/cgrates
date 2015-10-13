@@ -90,13 +90,12 @@ func TestCreateStorTpTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var db *MySQLStorage
-	if d, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns); err != nil {
+	db, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns)
+	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
 	} else {
-		db = d.(*MySQLStorage)
-		storDb = d.(LoadStorage)
+		storDb = db
 	}
 	// Creating the table serves also as reset since there is a drop prior to create
 	if err := db.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", utils.CREATE_TARIFFPLAN_TABLES_SQL)); err != nil {
