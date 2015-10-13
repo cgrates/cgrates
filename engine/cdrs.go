@@ -372,9 +372,6 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 		case utils.META_HTTP_POST:
 			content = utils.CONTENT_FORM
 			body = cdr.AsHttpForm()
-		case utils.META_HTTP_TEXT:
-			content = utils.CONTENT_TEXT
-			body = cdr
 		case utils.META_HTTP_JSON:
 			content = utils.CONTENT_JSON
 			body = cdr

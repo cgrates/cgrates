@@ -674,11 +674,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 				if rplJsonCfg.Synchronous != nil {
 					self.CDRSCdrReplication[idx].Synchronous = *rplJsonCfg.Synchronous
 				}
+				self.CDRSCdrReplication[idx].Attempts = 1
 				if rplJsonCfg.Attempts != nil {
 					self.CDRSCdrReplication[idx].Attempts = *rplJsonCfg.Attempts
-				} else {
-					// Use 1 as default. If not the cdr will never send
-					self.CDRSCdrReplication[idx].Attempts = 1
 				}
 				if rplJsonCfg.Cdr_filter != nil {
 					if self.CDRSCdrReplication[idx].CdrFilter, err = utils.ParseRSRFields(*rplJsonCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
