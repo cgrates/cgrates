@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"time"
-
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"net/url"
+	"time"
 )
 
 type CdrReplicationCfg struct {
@@ -30,6 +31,15 @@ type CdrReplicationCfg struct {
 	Synchronous bool
 	Attempts    int             // Number of attempts if not success
 	CdrFilter   utils.RSRFields // Only replicate if the filters here are matching
+}
+
+func (rplCfg CdrReplicationCfg) GetFallbackFileName() string {
+	serverName := url.QueryEscape(rplCfg.Server)
+
+	result := fmt.Sprintf("cdr_%s_%s_%s.form",
+		rplCfg.Transport,
+		serverName, utils.GenUUID())
+	return result
 }
 
 type SureTaxCfg struct {
