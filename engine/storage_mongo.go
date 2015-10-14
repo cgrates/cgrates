@@ -32,28 +32,26 @@ import (
 )
 
 const (
-	colDst       = "destinations"
-	colAct       = "actions"
-	colApl       = "actionplans"
-	colAtr       = "actiontriggers"
-	colRpl       = "ratingplans"
-	colRpf       = "ratingprofiles"
-	colAcc       = "accounts"
-	colShg       = "sharedgroups"
-	colLcr       = "lcrrules"
-	colDcs       = "derivedchargers"
-	colAls       = "aliases"
-	colStq       = "statsqeues"
-	colPbs       = "pubsub"
-	colUsr       = "users"
-	colCrs       = "cdrstats"
-	colLht       = "loadhistory"
-	colLogCC     = "callcostlogs"
-	colLogAtr    = "actiontriggerslogs"
-	colLogApl    = "actionplanlogs"
-	colLogErr    = "errorlogs"
-	colCdrs      = "cdrs"
-	colRatedCdrs = "ratedcdrs"
+	colDst    = "destinations"
+	colAct    = "actions"
+	colApl    = "actionplans"
+	colAtr    = "actiontriggers"
+	colRpl    = "ratingplans"
+	colRpf    = "ratingprofiles"
+	colAcc    = "accounts"
+	colShg    = "sharedgroups"
+	colLcr    = "lcrrules"
+	colDcs    = "derivedchargers"
+	colAls    = "aliases"
+	colStq    = "statsqeues"
+	colPbs    = "pubsub"
+	colUsr    = "users"
+	colCrs    = "cdrstats"
+	colLht    = "loadhistory"
+	colLogAtr = "actiontriggerslogs"
+	colLogApl = "actionplanlogs"
+	colLogErr = "errorlogs"
+	colCdrs   = "cdrs"
 )
 
 type MongoStorage struct {
@@ -190,26 +188,13 @@ func NewMongoStorage(host, port, db, user, pass string) (*MongoStorage, error) {
 		}
 	}
 	index = mgo.Index{
-		Key:        []string{"id", "source", "runid"},
+		Key:        []string{"cgrid", "cdrsource", "mediationrunid"},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{colLogCC}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
-			return nil, err
-		}
-	}
-	index = mgo.Index{
-		Key:        []string{"cgrid"},
-		Unique:     true,
-		DropDups:   false,
-		Background: false,
-		Sparse:     false,
-	}
-	collections = []string{colCdrs, colRatedCdrs}
+	collections = []string{colCdrs}
 	for _, col := range collections {
 		if err = ndb.C(col).EnsureIndex(index); err != nil {
 			return nil, err
