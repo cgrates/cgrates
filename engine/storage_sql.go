@@ -672,7 +672,7 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		selectStr = selectBuf.String()
 	}
 	// Join string
-	selectTmpl := template.Must(template.New("join").Parse("LEFT JOIN {{.Ex}} ON {{.Pr}}.cgrid={{.Ex}}.cgrid LEFT JOIN {{.Rc}} ON {{Pr.}}.cgrid={{.Rc}}.cgrid LEFT JOIN {{.Cd}} ON {{.Rc}}.cgrid={{.Cd}}.cgrid AND {{.Rc}}.runid={{.Cd}}.runid"))
+	selectTmpl := template.Must(template.New("join").Parse("LEFT JOIN {{.Ex}} ON {{.Pr}}.cgrid={{.Ex}}.cgrid LEFT JOIN {{.Rc}} ON {{.Pr}}.cgrid={{.Rc}}.cgrid LEFT JOIN {{.Cd}} ON {{.Rc}}.cgrid={{.Cd}}.cgrid AND {{.Rc}}.runid={{.Cd}}.runid"))
 	var joinBuf bytes.Buffer
 	selectTmpl.Execute(&joinBuf, &struct {
 		Pr string
