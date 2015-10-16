@@ -645,7 +645,7 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	// Select string
 	var selectStr string
 	if qryFltr.FilterOnRated { // We use different tables to query account data in case of derived
-		selectTmpl := template.Must(template.New("select").Parse("{{.Pr}}.cgrid,{{.Pr}}.id,{{.Pr}}.tor,{{.Pr}}.accid,{{.Pr}}.cdrhost,{{.Pr}}.cdrsource,{{.Rc}}.reqtype,{{.Rc}}.direction,{{.Rc}}.tenant,{{.Rc}}.category,{{.Rc}}.account,{{.Rc}}.subject,{{.Rc}}.destination,{{.Rc}}.setup_time,{{.Rc}}.answer_time,{{.Rc}}.usage,{{.Rc}}.pdd,{{.Rc}}.supplier,{{.Ex}}.disconnect_cause,{{.Rc}}.extra_fields,{{.Rc}}.runid,{{.Cd}}.cost,{{.Cd}}.tor,{{.Cd}}.direction,{{.Cd}}.tenant,{{.Cd}}.category,{{.Cd}}.account,{{.Cd}}.subject,{{.Cd}}.destination,{{.Cd}}.cost,{{.Cd}}.timespans"))
+		selectTmpl := template.Must(template.New("select").Parse("{{.Pr}}.cgrid,{{.Pr}}.id,{{.Pr}}.tor,{{.Pr}}.accid,{{.Pr}}.cdrhost,{{.Pr}}.cdrsource,{{.Rc}}.reqtype,{{.Rc}}.direction,{{.Rc}}.tenant,{{.Rc}}.category,{{.Rc}}.account,{{.Rc}}.subject,{{.Rc}}.destination,{{.Rc}}.setup_time,{{.Rc}}.answer_time,{{.Rc}}.usage,{{.Rc}}.pdd,{{.Rc}}.supplier,{{.Rc}}.disconnect_cause,{{.Ex}}.extra_fields,{{.Rc}}.runid,{{.Rc}}.cost,{{.Cd}}.tor,{{.Cd}}.direction,{{.Cd}}.tenant,{{.Cd}}.category,{{.Cd}}.account,{{.Cd}}.subject,{{.Cd}}.destination,{{.Cd}}.cost,{{.Cd}}.timespans"))
 		var selectBuf bytes.Buffer
 		selectTmpl.Execute(&selectBuf, &struct {
 			Pr string

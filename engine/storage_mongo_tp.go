@@ -855,7 +855,7 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		if *qryFltr.MaxCost == -1.0 { // Non-rated CDRs
 			filters["cost"] = bson.M{"$eq": nil} // Need to include it otherwise all CDRs will be returned
 		} else { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
-			filters["cost"] = bson.M{"$gte": *qryFltr.MinCost, "$lt": *qryFltr.MaxCost}
+			filters["cost"] = bson.M{"$lt": *qryFltr.MaxCost}
 		}
 	}
 	q := ms.db.C(colCdrs).Find(filters)
