@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"net/url"
-	"time"
 )
 
 type CdrReplicationCfg struct {
@@ -35,14 +34,4 @@ type CdrReplicationCfg struct {
 
 func (rplCfg CdrReplicationCfg) FallbackFileName() string {
 	return fmt.Sprintf("cdr_%s_%s_%s.form", rplCfg.Transport, url.QueryEscape(rplCfg.Server), utils.GenUUID())
-}
-
-type SureTaxCfg struct {
-	Url               string
-	ClientNumber      string
-	ValidationKey     string
-	Timezone          *time.Location // Convert the time of the events to this timezone before sending request out
-	IncludeLocalCost  bool
-	OriginationNumber utils.RSRFields // Concatenate all of them to get value
-	TerminationNumber utils.RSRFields // Concatenate all of them to get value
 }

@@ -19,13 +19,88 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strconv"
-	"time"
+	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
+
+var sureTaxClient *http.Client // Cache the client here if in use
+
+// Init a new request to be sent out to SureTax
+func NewSureTaxRequest(cdr *StoredCdr, stCfg *config.SureTaxCfg) (*SureTaxRequest, error) {
+	aTimeLoc := cdr.AnswerTime.In(stCfg.Timezone)
+	revenue := utils.Round(cdr.Cost, 4, utils.ROUNDING_MIDDLE)
+	unts, err := strconv.ParseInt(cdr.FieldsAsString(stCfg.Units), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	taxExempt := []string{}
+	definedTaxExtempt := cdr.FieldsAsString(stCfg.TaxExemptionCodeList)
+	if len(definedTaxExtempt) != 0 {
+		taxExempt = strings.Split(cdr.FieldsAsString(stCfg.TaxExemptionCodeList), ",")
+	}
+	stReq := new(SureTaxRequest)
+	stReq.ClientNumber = stCfg.ClientNumber
+	stReq.BusinessUnit = "" // Export it to config
+	stReq.ValidationKey = stCfg.ValidationKey
+	stReq.DataYear = strconv.Itoa(aTimeLoc.Year())
+	stReq.DataMonth = strconv.Itoa(int(aTimeLoc.Month()))
+	stReq.TotalRevenue = revenue
+	stReq.ReturnFileCode = stCfg.ReturnFileCode
+	stReq.ClientTracking = cdr.FieldsAsString(stCfg.ClientTracking)
+	stReq.ResponseGroup = stCfg.ResponseGroup
+	stReq.ResponseType = stCfg.ResponseType
+	stReq.ItemList = []*STRequestItem{
+		&STRequestItem{
+			CustomerNumber:       cdr.FieldsAsString(stCfg.CustomerNumber),
+			OrigNumber:           cdr.FieldsAsString(stCfg.OrigNumber),
+			TermNumber:           cdr.FieldsAsString(stCfg.TermNumber),
+			BillToNumber:         cdr.FieldsAsString(stCfg.BillToNumber),
+			Zipcode:              cdr.FieldsAsString(stCfg.Zipcode),
+			Plus4:                cdr.FieldsAsString(stCfg.Plus4),
+			P2PZipcode:           cdr.FieldsAsString(stCfg.P2PZipcode),
+			P2PPlus4:             cdr.FieldsAsString(stCfg.P2PPlus4),
+			TransDate:            aTimeLoc.Format("2006-01-02T15:04:05"),
+			Revenue:              revenue,
+			Units:                unts,
+			UnitType:             cdr.FieldsAsString(stCfg.UnitType),
+			Seconds:              int64(cdr.Usage.Seconds()),
+			TaxIncludedCode:      cdr.FieldsAsString(stCfg.TaxIncluded),
+			TaxSitusRule:         cdr.FieldsAsString(stCfg.TaxSitusRule),
+			TransTypeCode:        cdr.FieldsAsString(stCfg.TransTypeCode),
+			SalesTypeCode:        cdr.FieldsAsString(stCfg.SalesTypeCode),
+			RegulatoryCode:       stCfg.RegulatoryCode,
+			TaxExemptionCodeList: taxExempt,
+		},
+	}
+	return stReq, nil
+}
+
+// SureTax Request type
+type SureTaxRequest struct {
+	ClientNumber      string           // Client ID Number – provided by SureTax. Required. Max Len: 10
+	BusinessUnit      string           // Client’s Business Unit. Value for this field is not required. Max Len: 20
+	ValidationKey     string           // Validation Key provided by SureTax. Required for client access to API function. Max Len: 36
+	DataYear          string           // Required. YYYY – Year to use for tax calculation purposes
+	DataMonth         string           // Required. MM – Month to use for tax calculation purposes. Leading zero is preferred.
+	TotalRevenue      float64          // Required. Format: $$$$$$$$$.CCCC. For Negative charges, the first position should have a minus ‘-‘ indicator.
+	ReturnFileCode    string           // Required. 0 – Default.Q – Quote purposes – taxes are computed and returned in the response message for generating quotes.
+	ClientTracking    string           // Field for client transaction tracking. This value will be provided in the response data. Value for this field is not required, but preferred. Max Len: 100
+	IndustryExemption string           // Reserved for future use.
+	ResponseGroup     string           // Required. Determines how taxes are grouped for the response.
+	ResponseType      string           // Required. Determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response.
+	ItemList          []*STRequestItem // List of Item records
+}
 
 // Part of SureTax Request
 type STRequestItem struct {
@@ -52,62 +127,6 @@ type STRequestItem struct {
 	TaxExemptionCodeList []string // Required. Tax Exemption to be applied to this item only.
 }
 
-// Init a new request to be sent out to SureTax
-func NewSureTaxRequest(clientNumber, validationKey string, timezone *time.Location, originationNrTpl, terminationNrTpl utils.RSRFields, cdr *StoredCdr) (*SureTaxRequest, error) {
-	if clientNumber == "" {
-		return nil, utils.NewErrMandatoryIeMissing("ClientNumber")
-	}
-	if validationKey == "" {
-		return nil, utils.NewErrMandatoryIeMissing("ValidationKey")
-	}
-	aTime := cdr.AnswerTime.In(timezone)
-	stReq := &SureTaxRequest{ClientNumber: clientNumber,
-		ValidationKey:  validationKey,
-		DataYear:       strconv.Itoa(aTime.Year()),
-		DataMonth:      strconv.Itoa(int(aTime.Month())),
-		TotalRevenue:   utils.Round(cdr.Cost, 4, utils.ROUNDING_MIDDLE),
-		ReturnFileCode: "0",
-		ClientTracking: cdr.CgrId,
-		ResponseGroup:  "03",
-		ResponseType:   "",
-		ItemList: []*STRequestItem{
-			&STRequestItem{
-				OrigNumber:           cdr.FieldsAsString(originationNrTpl),
-				TermNumber:           cdr.FieldsAsString(terminationNrTpl),
-				BillToNumber:         cdr.FieldsAsString(originationNrTpl),
-				TransDate:            aTime.Format("2006-01-02T15:04:05"),
-				Revenue:              utils.Round(cdr.Cost, 4, utils.ROUNDING_MIDDLE),
-				Units:                1,
-				UnitType:             "00",
-				Seconds:              int64(utils.Round(cdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE)),
-				TaxIncludedCode:      "0",
-				TaxSitusRule:         "1",
-				TransTypeCode:        "010101",
-				SalesTypeCode:        "R",
-				RegulatoryCode:       "01",
-				TaxExemptionCodeList: []string{"00"},
-			},
-		},
-	}
-	return stReq, nil
-}
-
-// SureTax Request type
-type SureTaxRequest struct {
-	ClientNumber      string           // Client ID Number – provided by SureTax. Required. Max Len: 10
-	BusinessUnit      string           // Client’s Business Unit. Value for this field is not required. Max Len: 20
-	ValidationKey     string           // Validation Key provided by SureTax. Required for client access to API function. Max Len: 36
-	DataYear          string           // Required. YYYY – Year to use for tax calculation purposes
-	DataMonth         string           // Required. MM – Month to use for tax calculation purposes. Leading zero is preferred.
-	TotalRevenue      float64          // Required. Format: $$$$$$$$$.CCCC. For Negative charges, the first position should have a minus ‘-‘ indicator.
-	ReturnFileCode    string           // Required. 0 – Default.Q – Quote purposes – taxes are computed and returned in the response message for generating quotes.
-	ClientTracking    string           // Field for client transaction tracking. This value will be provided in the response data. Value for this field is not required, but preferred. Max Len: 100
-	IndustryExemption string           // Reserved for future use.
-	ResponseGroup     string           // Required. Determines how taxes are grouped for the response.
-	ResponseType      string           // Required. Determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response.
-	ItemList          []*STRequestItem // List of Item records
-}
-
 // Converts the request into the format SureTax expects
 func (self *SureTaxRequest) AsHttpForm() (url.Values, error) {
 	jsnContent, err := json.Marshal(self)
@@ -122,7 +141,7 @@ func (self *SureTaxRequest) AsHttpForm() (url.Values, error) {
 // SureTax Response type
 type SureTaxResponse struct {
 	Successful     string           // Response will be either ‘Y' or ‘N' : Y = Success / Success with Item error N = Failure
-	ResponseCode   string           // ResponseCode: 9999 – Request was successful. 1101-1400 – Range of values for a failed request (no processing occurred) 9001 – Request was successful, but items within the request have errors. The specific items with errors are provided in the ItemMessages field.
+	ResponseCode   int64            // ResponseCode: 9999 – Request was successful. 1101-1400 – Range of values for a failed request (no processing occurred) 9001 – Request was successful, but items within the request have errors. The specific items with errors are provided in the ItemMessages field.
 	HeaderMessage  string           // Response message: For ResponseCode 9999 – “Success”For ResponseCode 9001 – “Success with Item errors”.  For ResponseCode 1100-1400 – Unsuccessful / declined web request.
 	ItemMessages   []*STItemMessage // This field contains a list of items that were not able to be processed due to bad or invalid data (see Response Code of “9001”).
 	ClientTracking string           // Client transaction tracking provided in web request.
@@ -151,4 +170,54 @@ type STTaxItem struct {
 	TaxTypeCode string  // Tax Type Code
 	TaxTypeDesc string  // Tax Type Description
 	TaxAmount   float64 // Tax Amount
+}
+
+func SureTaxProcessCdr(cdr *StoredCdr) error {
+	stCfg := config.CgrConfig().SureTaxCfg()
+	if stCfg == nil {
+		return errors.New("SureTax configuration missing")
+	}
+	if sureTaxClient == nil { // First time used, init the client here
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: config.CgrConfig().HttpSkipTlsVerify},
+		}
+		sureTaxClient = &http.Client{Transport: tr}
+	}
+	req, err := NewSureTaxRequest(cdr, stCfg)
+	if err != nil {
+		return err
+	}
+	body, err := json.Marshal(req)
+	if err != nil {
+		return err
+	}
+	resp, err := sureTaxClient.Post(stCfg.Url, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
+	}
+	var stResp SureTaxResponse
+	if err := json.Unmarshal(respBody, &stResp); err != nil {
+		return err
+	}
+	if stResp.ResponseCode != 9999 {
+		cdr.ExtraInfo = stResp.HeaderMessage
+		return nil // No error because the request was processed by SureTax, error will be in the ExtraInfo
+	}
+	// Write cost to CDR
+	if !stCfg.IncludeLocalCost {
+		cdr.Cost = utils.Round(stResp.TotalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+	} else {
+		cdr.Cost = utils.Round(cdr.Cost+stResp.TotalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+	}
+	// Add response into extra fields to be available for later review
+	cdr.ExtraFields[utils.META_SURETAX] = string(respBody)
+	return nil
 }

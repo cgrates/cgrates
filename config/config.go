@@ -31,15 +31,14 @@ import (
 )
 
 const (
-	DISABLED    = "disabled"
-	JSON        = "json"
-	GOB         = "gob"
-	POSTGRES    = "postgres"
-	MONGO       = "mongo"
-	REDIS       = "redis"
-	SAME        = "same"
-	FS          = "freeswitch"
-	CFG_RELOADS = "cfg_reloads_"
+	DISABLED = "disabled"
+	JSON     = "json"
+	GOB      = "gob"
+	POSTGRES = "postgres"
+	MONGO    = "mongo"
+	REDIS    = "redis"
+	SAME     = "same"
+	FS       = "freeswitch"
 )
 
 var (
@@ -70,6 +69,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.CDRE] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
+	cfg.ConfigReloads[utils.SURETAX] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.SURETAX] <- struct{}{} // Unlock the channel
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
@@ -238,8 +239,8 @@ type CGRConfig struct {
 	MailerAuthUser       string                            // Authenticate to email server using this user
 	MailerAuthPass       string                            // Authenticate to email server with this password
 	MailerFromAddr       string                            // From address used when sending emails out
-	SureTaxCfg           *SureTaxCfg                       // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
 	DataFolderPath       string                            // Path towards data folder, for tests internal usage, not loading out of .json options
+	sureTaxCfg           *SureTaxCfg                       // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
 	ConfigReloads        map[string]chan struct{}          // Signals to specific entities that a config reload should occur
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
@@ -804,35 +805,22 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
-	if jsnSureTaxCfg != nil {
-		self.SureTaxCfg = new(SureTaxCfg) // Reset previous values
-		if jsnSureTaxCfg.Url != nil {
-			self.SureTaxCfg.Url = *jsnSureTaxCfg.Url
+	if jsnSureTaxCfg != nil { // New config for SureTax
+		if self.sureTaxCfg, err = NewSureTaxCfgWithDefaults(); err != nil {
+			return err
 		}
-		if jsnSureTaxCfg.Client_number != nil {
-			self.SureTaxCfg.ClientNumber = *jsnSureTaxCfg.Client_number
-		}
-		if jsnSureTaxCfg.Validation_key != nil {
-			self.SureTaxCfg.ValidationKey = *jsnSureTaxCfg.Validation_key
-		}
-		if jsnSureTaxCfg.Timezone != nil {
-			if self.SureTaxCfg.Timezone, err = time.LoadLocation(*jsnSureTaxCfg.Timezone); err != nil {
-				return err
-			}
-		}
-		if jsnSureTaxCfg.Include_local_cost != nil {
-			self.SureTaxCfg.IncludeLocalCost = *jsnSureTaxCfg.Include_local_cost
-		}
-		if jsnSureTaxCfg.Origination_number != nil {
-			if self.SureTaxCfg.OriginationNumber, err = utils.ParseRSRFields(*jsnSureTaxCfg.Origination_number, utils.INFIELD_SEP); err != nil {
-				return err
-			}
-		}
-		if jsnSureTaxCfg.Termination_number != nil {
-			if self.SureTaxCfg.TerminationNumber, err = utils.ParseRSRFields(*jsnSureTaxCfg.Termination_number, utils.INFIELD_SEP); err != nil {
-				return err
-			}
+		if err := self.sureTaxCfg.loadFromJsonCfg(jsnSureTaxCfg); err != nil {
+			return err
 		}
 	}
+
 	return nil
+}
+
+// Use locking to retrieve the configuration, possibility later for runtime reload
+func (self *CGRConfig) SureTaxCfg() *SureTaxCfg {
+	cfgChan := <-self.ConfigReloads[utils.SURETAX] // Lock config for read or reloads
+	stCfg := self.sureTaxCfg
+	self.ConfigReloads[utils.SURETAX] <- cfgChan // unlock config for reloads or read
+	return stCfg
 }

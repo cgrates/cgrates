@@ -459,13 +459,31 @@ func TestDfMailerJsonCfg(t *testing.T) {
 
 func TestDfSureTaxJsonCfg(t *testing.T) {
 	eCfg := &SureTaxJsonCfg{
-		Url:                utils.StringPointer(""),
-		Client_number:      utils.StringPointer(""),
-		Validation_key:     utils.StringPointer(""),
-		Timezone:           utils.StringPointer("Local"),
-		Include_local_cost: utils.BoolPointer(false),
-		Origination_number: utils.StringPointer("Subject"),
-		Termination_number: utils.StringPointer("Destination"),
+		Url:                     utils.StringPointer(""),
+		Client_number:           utils.StringPointer(""),
+		Validation_key:          utils.StringPointer(""),
+		Timezone:                utils.StringPointer("Local"),
+		Include_local_cost:      utils.BoolPointer(false),
+		Return_file_code:        utils.StringPointer("0"),
+		Response_group:          utils.StringPointer("03"),
+		Response_type:           utils.StringPointer("D4"),
+		Regulatory_code:         utils.StringPointer("03"),
+		Client_tracking:         utils.StringPointer("CgrId"),
+		Customer_number:         utils.StringPointer("CustomerNumber"),
+		Orig_number:             utils.StringPointer("Subject"),
+		Term_number:             utils.StringPointer("Destination"),
+		Bill_to_number:          utils.StringPointer(""),
+		Zipcode:                 utils.StringPointer(""),
+		Plus4:                   utils.StringPointer(""),
+		P2PZipcode:              utils.StringPointer(""),
+		P2PPlus4:                utils.StringPointer(""),
+		Units:                   utils.StringPointer("^1"),
+		Unit_type:               utils.StringPointer("^00"),
+		Tax_included:            utils.StringPointer("^0"),
+		Tax_situs_rule:          utils.StringPointer("^04"),
+		Trans_type_code:         utils.StringPointer("^010101"),
+		Sales_type_code:         utils.StringPointer("^R"),
+		Tax_exemption_code_list: utils.StringPointer(""),
 	}
 	if cfg, err := dfCgrJsonCfg.SureTaxJsonCfg(); err != nil {
 		t.Error(err)

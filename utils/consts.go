@@ -235,6 +235,8 @@ const (
 	NOT_AVAILABLE                = "N/A"
 	CALL                         = "call"
 	EXTRA_FIELDS                 = "ExtraFields"
+	META_SURETAX                 = "*sure_tax"
+	SURETAX                      = "suretax"
 )
 
 var (
