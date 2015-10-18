@@ -189,6 +189,7 @@ func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
 	if self.cgrCfg.CDRSStoreCdrs { // Store RawCDRs, this we do sync so we can reply with the status
 		if err := self.cdrDb.SetCdr(storedCdr); err != nil { // Only original CDR stored in primary table, no derived
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", storedCdr, err.Error()))
+			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
 		}
 	}
 	go self.deriveRateStoreStatsReplicate(storedCdr)
