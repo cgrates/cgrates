@@ -20,14 +20,15 @@ package v2
 
 import (
 	"flag"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
@@ -72,13 +73,11 @@ func TestV2CdrsMysqlInjectUnratedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var mysqlDb *engine.MySQLStorage
-	if d, err := engine.NewMySQLStorage(cdrsCfg.StorDBHost, cdrsCfg.StorDBPort, cdrsCfg.StorDBName, cdrsCfg.StorDBUser, cdrsCfg.StorDBPass,
-		cdrsCfg.StorDBMaxOpenConns, cdrsCfg.StorDBMaxIdleConns); err != nil {
+	mysqlDb, err := engine.NewMySQLStorage(cdrsCfg.StorDBHost, cdrsCfg.StorDBPort, cdrsCfg.StorDBName, cdrsCfg.StorDBUser, cdrsCfg.StorDBPass,
+		cdrsCfg.StorDBMaxOpenConns, cdrsCfg.StorDBMaxIdleConns)
+	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
-	} else {
-		mysqlDb = d.(*engine.MySQLStorage)
 	}
 	strCdr1 := &engine.StoredCdr{CgrId: utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,

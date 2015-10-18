@@ -137,7 +137,7 @@ type LoadReader interface {
 }
 
 type LoadWriter interface {
-	RemTpData(string, string, ...string) error
+	RemTpData(string, string, map[string]string) error
 	SetTpTimings([]TpTiming) error
 	SetTpDestinations([]TpDestination) error
 	SetTpRates([]TpRate) error

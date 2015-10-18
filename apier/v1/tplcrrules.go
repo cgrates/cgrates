@@ -89,7 +89,7 @@ func (self *ApierV1) RemTPLcrRule(attrs AttrGetTPLcrRules, reply *string) error 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrRulesId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_LCRS, attrs.TPid, attrs.LcrRuleId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_LCRS, attrs.TPid, map[string]string{"tag": attrs.LcrRuleId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

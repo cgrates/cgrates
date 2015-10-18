@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
-	"path"
 	"reflect"
 	"testing"
 	"time"
@@ -29,58 +27,45 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-var mysqlDb *MySQLStorage
+var mongoDb *MongoStorage
 
-func TestMySQLCreateTables(t *testing.T) {
+func TestMongoCreateTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	var err error
-	if mysqlDb, err = NewMySQLStorage(cgrConfig.StorDBHost, cgrConfig.StorDBPort, cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass,
-		cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns); err != nil {
+	if mongoDb, err = NewMongoStorage("localhost", "27017", cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass); err != nil {
 		t.Error("Error on opening database connection: ", err)
-		return
-	}
-	for _, scriptName := range []string{utils.CREATE_CDRS_TABLES_SQL, utils.CREATE_TARIFFPLAN_TABLES_SQL} {
-		if err := mysqlDb.CreateTablesFromScript(path.Join(*dataDir, "storage", utils.MYSQL, scriptName)); err != nil {
-			t.Error("Error on mysqlDb creation: ", err.Error())
-			return // No point in going further
-		}
-	}
-	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
-		if _, err := mysqlDb.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
-			t.Error(err.Error())
-		}
 	}
 }
 
-func TestMySQLSetGetTPTiming(t *testing.T) {
+func TestMongoSetGetTPTiming(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	tm := TpTiming{Tpid: utils.TEST_SQL, Tag: "ALWAYS", Time: "00:00:00"}
-	if err := mysqlDb.SetTpTimings([]TpTiming{tm}); err != nil {
+	if err := mongoDb.SetTpTimings([]TpTiming{tm}); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(utils.TEST_SQL, tm.Tag); err != nil {
+	if tmgs, err := mongoDb.GetTpTimings(utils.TEST_SQL, tm.Tag); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(tm, tmgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[0])
 	}
 	// Update
 	tm.Time = "00:00:01"
-	if err := mysqlDb.SetTpTimings([]TpTiming{tm}); err != nil {
+	if err := mongoDb.SetTpTimings([]TpTiming{tm}); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(utils.TEST_SQL, tm.Tag); err != nil {
+	if tmgs, err := mongoDb.GetTpTimings(utils.TEST_SQL, tm.Tag); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(tm, tmgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[0])
 	}
 }
 
-func TestMySQLSetGetTPDestination(t *testing.T) {
+func TestMongoSetGetTPDestination(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -89,10 +74,10 @@ func TestMySQLSetGetTPDestination(t *testing.T) {
 		TpDestination{Tpid: utils.TEST_SQL, Tag: utils.TEST_SQL, Prefix: "+49151"},
 		TpDestination{Tpid: utils.TEST_SQL, Tag: utils.TEST_SQL, Prefix: "+49176"},
 	}
-	if err := mysqlDb.SetTpDestinations(dst); err != nil {
+	if err := mongoDb.SetTpDestinations(dst); err != nil {
 		t.Error(err.Error())
 	}
-	storData, err := mysqlDb.GetTpDestinations(utils.TEST_SQL, utils.TEST_SQL)
+	storData, err := mongoDb.GetTpDestinations(utils.TEST_SQL, utils.TEST_SQL)
 	dsts, err := TpDestinations(storData).GetDestinations()
 	expected := &Destination{Id: utils.TEST_SQL, Prefixes: []string{"+49", "+49151", "+49176"}}
 	if err != nil {
@@ -102,7 +87,7 @@ func TestMySQLSetGetTPDestination(t *testing.T) {
 	}
 }
 
-func TestMySQLSetGetTPRates(t *testing.T) {
+func TestMongoSetGetTPRates(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -120,17 +105,17 @@ func TestMySQLSetGetTPRates(t *testing.T) {
 		RateSlots: rtSlots,
 	}
 	mRates := APItoModelRate(rates)
-	if err := mysqlDb.SetTpRates(mRates); err != nil {
+	if err := mongoDb.SetTpRates(mRates); err != nil {
 		t.Error(err.Error())
 	}
-	if rts, err := mysqlDb.GetTpRates(utils.TEST_SQL, RT_ID); err != nil {
+	if rts, err := mongoDb.GetTpRates(utils.TEST_SQL, RT_ID); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(mRates[0], rts[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mRates, rts)
 	}
 }
 
-func TestMySQLSetGetTPDestinationRates(t *testing.T) {
+func TestMongoSetGetTPDestinationRates(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -139,17 +124,17 @@ func TestMySQLSetGetTPDestinationRates(t *testing.T) {
 
 	eDrs := &utils.TPDestinationRate{TPid: utils.TEST_SQL, DestinationRateId: DR_ID, DestinationRates: []*utils.DestinationRate{dr}}
 	mdrs := APItoModelDestinationRate(eDrs)
-	if err := mysqlDb.SetTpDestinationRates(mdrs); err != nil {
+	if err := mongoDb.SetTpDestinationRates(mdrs); err != nil {
 		t.Error(err.Error())
 	}
-	if drs, err := mysqlDb.GetTpDestinationRates(utils.TEST_SQL, DR_ID, nil); err != nil {
+	if drs, err := mongoDb.GetTpDestinationRates(utils.TEST_SQL, DR_ID, nil); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(mdrs[0], drs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mdrs, drs)
 	}
 }
 
-func TestMySQLSetGetTPRatingPlans(t *testing.T) {
+func TestMongoSetGetTPRatingPlans(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -161,27 +146,27 @@ func TestMySQLSetGetTPRatingPlans(t *testing.T) {
 		RatingPlanBindings: []*utils.TPRatingPlanBinding{rbBinding},
 	}
 	mrp := APItoModelRatingPlan(rp)
-	if err := mysqlDb.SetTpRatingPlans(mrp); err != nil {
+	if err := mongoDb.SetTpRatingPlans(mrp); err != nil {
 		t.Error(err.Error())
 	}
-	if drps, err := mysqlDb.GetTpRatingPlans(utils.TEST_SQL, RP_ID, nil); err != nil {
+	if drps, err := mongoDb.GetTpRatingPlans(utils.TEST_SQL, RP_ID, nil); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(mrp[0], drps[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mrp, drps)
 	}
 }
 
-func TestMySQLSetGetTPRatingProfiles(t *testing.T) {
+func TestMongoSetGetTPRatingProfiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RP_1"}}
 	rp := &utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
 	mrp := APItoModelRatingProfile(rp)
-	if err := mysqlDb.SetTpRatingProfiles(mrp); err != nil {
+	if err := mongoDb.SetTpRatingProfiles(mrp); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := mysqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
+	if rps, err := mongoDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(mrp[0], rps[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mrp, rps)
@@ -189,7 +174,7 @@ func TestMySQLSetGetTPRatingProfiles(t *testing.T) {
 
 }
 
-func TestMySQLSetGetTPSharedGroups(t *testing.T) {
+func TestMongoSetGetTPSharedGroups(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -202,17 +187,17 @@ func TestMySQLSetGetTPSharedGroups(t *testing.T) {
 		},
 	}
 	mSgs := APItoModelSharedGroup(tpSgs)
-	if err := mysqlDb.SetTpSharedGroups(mSgs); err != nil {
+	if err := mongoDb.SetTpSharedGroups(mSgs); err != nil {
 		t.Error(err.Error())
 	}
-	if sgs, err := mysqlDb.GetTpSharedGroups(utils.TEST_SQL, SG_ID); err != nil {
+	if sgs, err := mongoDb.GetTpSharedGroups(utils.TEST_SQL, SG_ID); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(mSgs[0], sgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mSgs, sgs)
 	}
 }
 
-func TestMySQLSetGetTPCdrStats(t *testing.T) {
+func TestMongoSetGetTPCdrStats(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -225,17 +210,17 @@ func TestMySQLSetGetTPCdrStats(t *testing.T) {
 		},
 	}
 	mcs := APItoModelCdrStat(setCS)
-	if err := mysqlDb.SetTpCdrStats(mcs); err != nil {
+	if err := mongoDb.SetTpCdrStats(mcs); err != nil {
 		t.Error(err.Error())
 	}
-	if cs, err := mysqlDb.GetTpCdrStats(utils.TEST_SQL, CS_ID); err != nil {
+	if cs, err := mongoDb.GetTpCdrStats(utils.TEST_SQL, CS_ID); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(mcs[0], cs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mcs, cs)
 	}
 }
 
-func TestMySQLSetGetTPDerivedChargers(t *testing.T) {
+func TestMongoSetGetTPDerivedChargers(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -244,17 +229,17 @@ func TestMySQLSetGetTPDerivedChargers(t *testing.T) {
 	dcs := &utils.TPDerivedChargers{TPid: utils.TEST_SQL, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: []*utils.TPDerivedCharger{dc}}
 
 	mdcs := APItoModelDerivedCharger(dcs)
-	if err := mysqlDb.SetTpDerivedChargers(mdcs); err != nil {
+	if err := mongoDb.SetTpDerivedChargers(mdcs); err != nil {
 		t.Error(err.Error())
 	}
-	if rDCs, err := mysqlDb.GetTpDerivedChargers(&mdcs[0]); err != nil {
+	if rDCs, err := mongoDb.GetTpDerivedChargers(&mdcs[0]); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(mdcs[0], rDCs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mdcs, rDCs)
 	}
 }
 
-func TestMySQLSetGetTPActions(t *testing.T) {
+func TestMongoSetGetTPActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -264,17 +249,17 @@ func TestMySQLSetGetTPActions(t *testing.T) {
 			DestinationIds: "*any", BalanceWeight: 10, Weight: 10}}
 	tpActions := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: ACTS_ID, Actions: acts}
 	mas := APItoModelAction(tpActions)
-	if err := mysqlDb.SetTpActions(mas); err != nil {
+	if err := mongoDb.SetTpActions(mas); err != nil {
 		t.Error(err.Error())
 	}
-	if rTpActs, err := mysqlDb.GetTpActions(utils.TEST_SQL, ACTS_ID); err != nil {
+	if rTpActs, err := mongoDb.GetTpActions(utils.TEST_SQL, ACTS_ID); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(mas[0], rTpActs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", mas, rTpActs)
 	}
 }
 
-func TestMySQLTPActionTimings(t *testing.T) {
+func TestMongoTPActionTimings(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -285,17 +270,17 @@ func TestMySQLTPActionTimings(t *testing.T) {
 		ActionPlan:   []*utils.TPActionTiming{&utils.TPActionTiming{ActionsId: "ACTS_1", TimingId: "TM_1", Weight: 10.0}},
 	}
 	maps := APItoModelActionPlan(ap)
-	if err := mysqlDb.SetTpActionPlans(maps); err != nil {
+	if err := mongoDb.SetTpActionPlans(maps); err != nil {
 		t.Error(err.Error())
 	}
-	if rAP, err := mysqlDb.GetTpActionPlans(utils.TEST_SQL, AP_ID); err != nil {
+	if rAP, err := mongoDb.GetTpActionPlans(utils.TEST_SQL, AP_ID); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(maps[0], rAP[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", maps, rAP)
 	}
 }
 
-func TestMySQLSetGetTPActionTriggers(t *testing.T) {
+func TestMongoSetGetTPActionTriggers(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -316,65 +301,65 @@ func TestMySQLSetGetTPActionTriggers(t *testing.T) {
 		ActionTriggers:   []*utils.TPActionTrigger{atrg},
 	}
 	matrg := APItoModelActionTrigger(atrgs)
-	if err := mysqlDb.SetTpActionTriggers(matrg); err != nil {
+	if err := mongoDb.SetTpActionTriggers(matrg); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
-	if rcvMpAtrgs, err := mysqlDb.GetTpActionTriggers(utils.TEST_SQL, utils.TEST_SQL); err != nil {
+	if rcvMpAtrgs, err := mongoDb.GetTpActionTriggers(utils.TEST_SQL, utils.TEST_SQL); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !modelEqual(matrg[0], rcvMpAtrgs[0]) {
 		t.Errorf("Expecting: %v, received: %v", matrg, rcvMpAtrgs)
 	}
 }
 
-func TestMySQLSetGetTpAccountActions(t *testing.T) {
+func TestMongoSetGetTpAccountActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	aa := &utils.TPAccountActions{TPid: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001",
 		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	maa := APItoModelAccountAction(aa)
-	if err := mysqlDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
+	if err := mongoDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := mysqlDb.GetTpAccountActions(maa); err != nil {
+	if aas, err := mongoDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err.Error())
 	} else if !modelEqual(*maa, aas[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", maa, aas)
 	}
 }
 
-func TestMySQLGetTPIds(t *testing.T) {
+func TestMongoGetTPIds(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	eTPIds := []string{utils.TEST_SQL}
-	if tpIds, err := mysqlDb.GetTpIds(); err != nil {
+	if tpIds, err := mongoDb.GetTpIds(); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(eTPIds, tpIds) {
 		t.Errorf("Expecting: %+v, received: %+v", eTPIds, tpIds)
 	}
 }
 
-func TestMySQLRemoveTPData(t *testing.T) {
+func TestMongoRemoveTPData(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	// Create Timings
 	tm := &utils.ApierTPTiming{TPid: utils.TEST_SQL, TimingId: "ALWAYS", Time: "00:00:00"}
 	tms := APItoModelTiming(tm)
-	if err := mysqlDb.SetTpTimings([]TpTiming{*tms}); err != nil {
+	if err := mongoDb.SetTpTimings([]TpTiming{*tms}); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
+	if tmgs, err := mongoDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	} else if len(tmgs) == 0 {
 		t.Error("Could not store TPTiming")
 	}
 	// Remove Timings
-	if err := mysqlDb.RemTpData(utils.TBL_TP_TIMINGS, utils.TEST_SQL, map[string]string{"tag": tm.TimingId}); err != nil {
+	if err := mongoDb.RemTpData(utils.TBL_TP_TIMINGS, utils.TEST_SQL, map[string]string{"tag": tm.TimingId}); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
+	if tmgs, err := mongoDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err)
 	} else if len(tmgs) != 0 {
 		t.Errorf("Timings should be empty, got instead: %+v", tmgs)
@@ -383,19 +368,19 @@ func TestMySQLRemoveTPData(t *testing.T) {
 	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1"}}
 	rp := &utils.TPRatingProfile{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
 	mrp := APItoModelRatingProfile(rp)
-	if err := mysqlDb.SetTpRatingProfiles(mrp); err != nil {
+	if err := mongoDb.SetTpRatingProfiles(mrp); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := mysqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
+	if rps, err := mongoDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err.Error())
 	} else if len(rps) == 0 {
 		t.Error("Could not store TPRatingProfile")
 	}
 	// Remove RatingProfile
-	if err := mysqlDb.RemTpData(utils.TBL_TP_RATE_PROFILES, rp.TPid, map[string]string{"loadid": rp.LoadId, "direction": rp.Direction, "tenant": rp.Tenant, "category": rp.Category, "subject": rp.Subject}); err != nil {
+	if err := mongoDb.RemTpData(utils.TBL_TP_RATE_PROFILES, rp.TPid, map[string]string{"loadid": rp.LoadId, "direction": rp.Direction, "tenant": rp.Tenant, "category": rp.Category, "subject": rp.Subject}); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := mysqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
+	if rps, err := mongoDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err)
 	} else if len(rps) != 0 {
 		t.Errorf("RatingProfiles different than 0: %+v", rps)
@@ -404,73 +389,73 @@ func TestMySQLRemoveTPData(t *testing.T) {
 	aa := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001",
 		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	maa := APItoModelAccountAction(aa)
-	if err := mysqlDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
+	if err := mongoDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := mysqlDb.GetTpAccountActions(maa); err != nil {
+	if aas, err := mongoDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err.Error())
 	} else if len(aas) == 0 {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove AccountActions
-	if err := mysqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadid": aa.LoadId, "direction": aa.Direction, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
+	if err := mongoDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadid": aa.LoadId, "direction": aa.Direction, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := mysqlDb.GetTpAccountActions(maa); err != nil {
+	if aas, err := mongoDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err)
 	} else if len(aas) != 0 {
 		t.Errorf("Non empty account actions: %+v", aas)
 	}
 	// Create again so we can test complete TP removal
-	if err := mysqlDb.SetTpTimings([]TpTiming{*tms}); err != nil {
+	if err := mongoDb.SetTpTimings([]TpTiming{*tms}); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
+	if tmgs, err := mongoDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	} else if len(tmgs) == 0 {
 		t.Error("Could not store TPTiming")
 	}
 	// Create RatingProfile
-	if err := mysqlDb.SetTpRatingProfiles(mrp); err != nil {
+	if err := mongoDb.SetTpRatingProfiles(mrp); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := mysqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
+	if rps, err := mongoDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err.Error())
 	} else if len(rps) == 0 {
 		t.Error("Could not store TPRatingProfile")
 	}
 	// Create AccountActions
-	if err := mysqlDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
+	if err := mongoDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := mysqlDb.GetTpAccountActions(maa); err != nil {
+	if aas, err := mongoDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err.Error())
 	} else if len(aas) == 0 {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove TariffPlan completely
-	if err := mysqlDb.RemTpData("", utils.TEST_SQL, nil); err != nil {
+	if err := mongoDb.RemTpData("", utils.TEST_SQL, nil); err != nil {
 		t.Error(err.Error())
 	}
 	// Make sure we have removed it
-	if tms, err := mysqlDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
+	if tms, err := mongoDb.GetTpTimings(utils.TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err)
 	} else if len(tms) != 0 {
 		t.Errorf("Non empty timings: %+v", tms)
 	}
-	if rpfs, err := mysqlDb.GetTpRatingProfiles(&mrp[0]); err != nil {
+	if rpfs, err := mongoDb.GetTpRatingProfiles(&mrp[0]); err != nil {
 		t.Error(err)
 	} else if len(rpfs) != 0 {
 		t.Errorf("Non empty rpfs: %+v", rpfs)
 	}
-	if aas, err := mysqlDb.GetTpAccountActions(maa); err != nil {
+	if aas, err := mongoDb.GetTpAccountActions(maa); err != nil {
 		t.Error(err)
 	} else if len(aas) != 0 {
 		t.Errorf("Non empty account actions: %+v", aas)
 	}
 }
 
-func TestMySQLSetCdr(t *testing.T) {
+func TestMongoSetCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -495,7 +480,7 @@ func TestMySQLSetCdr(t *testing.T) {
 		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "15s", utils.PDD: "7s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": utils.TEST_SQL}
 
 	for _, cdr := range []*CgrCdr{cgrCdr1, cgrCdr2, cgrCdr3, cgrCdr4, cgrCdr5} {
-		if err := mysqlDb.SetCdr(cdr.AsStoredCdr("")); err != nil {
+		if err := mongoDb.SetCdr(cdr.AsStoredCdr("")); err != nil {
 			t.Error(err.Error())
 		}
 	}
@@ -522,13 +507,13 @@ func TestMySQLSetCdr(t *testing.T) {
 	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
 
 	for _, cdr := range []*StoredCdr{strCdr1, strCdr2, strCdr3} {
-		if err := mysqlDb.SetCdr(cdr); err != nil {
+		if err := mongoDb.SetCdr(cdr); err != nil {
 			t.Error(err.Error())
 		}
 	}
 }
 
-func TestMySQLSetRatedCdr(t *testing.T) {
+func TestMongoSetRatedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -555,13 +540,13 @@ func TestMySQLSetRatedCdr(t *testing.T) {
 	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
 
 	for _, cdr := range []*StoredCdr{strCdr1, strCdr2, strCdr3} {
-		if err := mysqlDb.SetRatedCdr(cdr); err != nil {
+		if err := mongoDb.SetRatedCdr(cdr); err != nil {
 			t.Error(err.Error())
 		}
 	}
 }
 
-func TestMySQLCallCost(t *testing.T) {
+func TestMongoCallCost(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -585,39 +570,39 @@ func TestMySQLCallCost(t *testing.T) {
 			},
 		},
 	}
-	if err := mysqlDb.LogCallCost(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
+	if err := mongoDb.LogCallCost(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
 		t.Error(err.Error())
 	}
-	if ccRcv, err := mysqlDb.GetCallCostLog(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID); err != nil {
+	if ccRcv, err := mongoDb.GetCallCostLog(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID); err != nil {
 		t.Error(err.Error())
-	} else if !reflect.DeepEqual(cc, ccRcv) {
-		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
+	} else if !reflect.DeepEqual(cc.Timespans[0].TimeStart, ccRcv.Timespans[0].TimeStart) {
+		t.Errorf("Expecting call cost:\n%+v,\nreceived:\n%+v", cc.Timespans[0], ccRcv.Timespans[0])
 	}
 	// UPDATE test here
 	cc.Category = "premium_call"
-	if err := mysqlDb.LogCallCost(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
+	if err := mongoDb.LogCallCost(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
 		t.Error(err.Error())
 	}
-	if ccRcv, err := mysqlDb.GetCallCostLog(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID); err != nil {
+	if ccRcv, err := mongoDb.GetCallCostLog(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(cc, ccRcv) {
 		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
 	}
 }
 
-func TestMySQLGetStoredCdrs(t *testing.T) {
+func TestMongoGetStoredCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var timeStart, timeEnd time.Time
 	// All CDRs, no filter
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Count ALL
-	if storedCdrs, count, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Count: true}); err != nil {
+	if storedCdrs, count, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Count: true}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -625,186 +610,186 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 		t.Error("Unexpected count of StoredCdrs returned: ", count)
 	}
 	// Limit 5
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Offset 5
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Offset with limit 2
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(2), Offset: utils.IntPointer(5)}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(2), Offset: utils.IntPointer(5)}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on cgrids
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Count on CGRIDS
-	if _, count, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	if _, count, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, Count: true}); err != nil {
 		t.Error(err.Error())
 	} else if count != 2 {
 		t.Error("Unexpected count of StoredCdrs returned: ", count)
 	}
 	// Filter on cgrids plus reqType
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{utils.META_PREPAID}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Count on multiple filter
-	if _, count, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	if _, count, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{utils.META_PREPAID}, Count: true}); err != nil {
 		t.Error(err.Error())
 	} else if count != 1 {
 		t.Error("Unexpected count of StoredCdrs returned: ", count)
 	}
 	// Filter on runId
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{RunIds: []string{utils.DEFAULT_RUNID}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{RunIds: []string{utils.DEFAULT_RUNID}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on TOR
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple TOR
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS, utils.VOICE}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS, utils.VOICE}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cdrHost
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.2"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.2"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple cdrHost
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.1", "192.168.1.2"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.1", "192.168.1.2"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cdrSource
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CdrSources: []string{"UNKNOWN"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrSources: []string{"UNKNOWN"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple cdrSource
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CdrSources: []string{"UNKNOWN", "UNKNOWN2"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrSources: []string{"UNKNOWN", "UNKNOWN2"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on reqType
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_PREPAID}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_PREPAID}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple reqType
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on direction
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Directions: []string{"*out"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Directions: []string{"*out"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on tenant
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple tenants
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com", "cgrates.org"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com", "cgrates.org"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on category
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple categories
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call", "call"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call", "call"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on account
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1002"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1002"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple account
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1001", "1002"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1001", "1002"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on subject
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple subject
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000", "1002"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000", "1002"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on destPrefix
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"+498651"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"+498651"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on multiple destPrefixes
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"1001", "+498651"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"1001", "+498651"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 4 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ratedAccount
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{RatedAccounts: []string{"8001"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{RatedAccounts: []string{"8001"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ratedSubject
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{RatedSubjects: []string{"91001"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{RatedSubjects: []string{"91001"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreRated
 	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -819,72 +804,72 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 		}
 	}
 	// Filter on orderIdStart
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on orderIdStart and orderIdEnd
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart, OrderIdEnd: orderIdEnd}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart, OrderIdEnd: orderIdEnd}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 4 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on timeStart
 	timeStart = time.Date(2013, 11, 8, 8, 0, 0, 0, time.UTC)
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on timeStart and timeEnd
 	timeEnd = time.Date(2013, 12, 1, 8, 0, 0, 0, time.UTC)
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on minPdd
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3)}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3)}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 7 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on maxPdd
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MaxPdd: utils.Float64Pointer(3)}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MaxPdd: utils.Float64Pointer(3)}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on minPdd, maxPdd
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3), MaxPdd: utils.Float64Pointer(5)}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(3), MaxPdd: utils.Float64Pointer(5)}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Combined filter
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreDerived
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnRated: true}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnRated: true}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 { // ToDo: Recheck this value
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 }
 
-func TestMySQLRemStoredCdrs(t *testing.T) {
+func TestMongoRemStoredCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	cgrIdB1 := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
-	if err := mysqlDb.RemStoredCdrs([]string{cgrIdB1}); err != nil {
+	if err := mongoDb.RemStoredCdrs([]string{cgrIdB1}); err != nil {
 		t.Error(err.Error())
 	}
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 7 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -901,11 +886,11 @@ func TestMySQLRemStoredCdrs(t *testing.T) {
 	cgrIdA5 := utils.Sha1("aaa5", tm.String())
 	cgrIdB2 := utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
 	cgrIdB3 := utils.Sha1("bbb3", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
-	if err := mysqlDb.RemStoredCdrs([]string{cgrIdA1, cgrIdA2, cgrIdA3, cgrIdA4, cgrIdA5,
+	if err := mongoDb.RemStoredCdrs([]string{cgrIdA1, cgrIdA2, cgrIdA3, cgrIdA4, cgrIdA5,
 		cgrIdB2, cgrIdB3}); err != nil {
 		t.Error(err.Error())
 	}
-	if storedCdrs, _, err := mysqlDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -913,7 +898,7 @@ func TestMySQLRemStoredCdrs(t *testing.T) {
 }
 
 // Make sure that what we get is what we set
-func TestMySQLStoreRestoreCdr(t *testing.T) {
+func TestMongoStoreRestoreCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -924,14 +909,14 @@ func TestMySQLStoreRestoreCdr(t *testing.T) {
 		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
 	strCdr.CgrId = utils.Sha1(strCdr.AccId, strCdr.SetupTime.String())
-	if err := mysqlDb.SetCdr(strCdr); err != nil {
+	if err := mongoDb.SetCdr(strCdr); err != nil {
 		t.Error(err.Error())
 	}
-	if err := mysqlDb.SetRatedCdr(strCdr); err != nil {
+	if err := mongoDb.SetRatedCdr(strCdr); err != nil {
 		t.Error(err.Error())
 	}
 	// Check RawCdr
-	if rcvCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}}); err != nil {
+	if rcvCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}}); err != nil {
 		t.Error(err.Error())
 	} else if len(rcvCdrs) != 1 {
 		t.Errorf("Unexpected cdrs returned: %+v", rcvCdrs)
@@ -959,7 +944,7 @@ func TestMySQLStoreRestoreCdr(t *testing.T) {
 		}
 	}
 	// Check RatedCdr
-	if rcvCdrs, _, err := mysqlDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}, FilterOnRated: true}); err != nil {
+	if rcvCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}, FilterOnRated: true}); err != nil {
 		t.Error(err.Error())
 	} else if len(rcvCdrs) != 1 {
 		t.Errorf("Unexpected cdrs returned: %+v", rcvCdrs)

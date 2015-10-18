@@ -17,8 +17,3 @@ import:
   - package: github.com/cgrates/osipsdagram
   - package: github.com/cgrates/kamevapi
   - package: github.com/cgrates/fsock
-  - package: github.com/gocql/gocql
-  - package: github.com/golang/snappy
-  - package: gopkg.in/inf.v0
-
-

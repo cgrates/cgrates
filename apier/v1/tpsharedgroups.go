@@ -94,7 +94,7 @@ func (self *ApierV1) RemTPSharedGroups(attrs AttrGetTPSharedGroups, reply *strin
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupsId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, attrs.SharedGroupsId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, map[string]string{"tag": attrs.SharedGroupsId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"
