@@ -290,7 +290,7 @@ const CGRATES_CFG_JSON = `
 	"response_type": "D4",					// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
 	"regulatory_code": "03",				// provider type
 	"client_tracking": "CgrId",				// template extracting client information out of StoredCdr; <$RSRFields>
-	"customer_number": "CustomerNumber",	// template extracting customer number out of StoredCdr; <$RSRFields>
+	"customer_number": "Subject",			// template extracting customer number out of StoredCdr; <$RSRFields>
 	"orig_number":  "Subject", 				// template extracting origination number out of StoredCdr; <$RSRFields>
 	"term_number": "Destination",			// template extracting termination number out of StoredCdr; <$RSRFields>
 	"bill_to_number": "",					// template extracting billed to number out of StoredCdr; <$RSRFields>

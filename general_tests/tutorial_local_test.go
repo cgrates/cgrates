@@ -638,7 +638,6 @@ func TestTutLocalCostErrors(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-
 	var cdrs []*engine.ExternalCdr
 	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{cdr.Account}, DestPrefixes: []string{cdr.Destination}}
 	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {

@@ -38,6 +38,9 @@ var sureTaxClient *http.Client // Cache the client here if in use
 
 // Init a new request to be sent out to SureTax
 func NewSureTaxRequest(cdr *StoredCdr, stCfg *config.SureTaxCfg) (*SureTaxRequest, error) {
+	if stCfg == nil {
+		return nil, errors.New("Invalid SureTax config.")
+	}
 	aTimeLoc := cdr.AnswerTime.In(stCfg.Timezone)
 	revenue := utils.Round(cdr.Cost, 4, utils.ROUNDING_MIDDLE)
 	unts, err := strconv.ParseInt(cdr.FieldsAsString(stCfg.Units), 10, 64)
@@ -175,7 +178,7 @@ type STTaxItem struct {
 func SureTaxProcessCdr(cdr *StoredCdr) error {
 	stCfg := config.CgrConfig().SureTaxCfg()
 	if stCfg == nil {
-		return errors.New("SureTax configuration missing")
+		return errors.New("Invalid SureTax configuration")
 	}
 	if sureTaxClient == nil { // First time used, init the client here
 		tr := &http.Transport{
@@ -187,10 +190,12 @@ func SureTaxProcessCdr(cdr *StoredCdr) error {
 	if err != nil {
 		return err
 	}
+
 	body, err := json.Marshal(req)
 	if err != nil {
 		return err
 	}
+	utils.Logger.Debug(fmt.Sprintf("###SureTax NewSureTaxRequest: %+v, ItemList: %+v\n", req, req.ItemList[0]))
 	resp, err := sureTaxClient.Post(stCfg.Url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return err
@@ -207,6 +212,7 @@ func SureTaxProcessCdr(cdr *StoredCdr) error {
 	if err := json.Unmarshal(respBody, &stResp); err != nil {
 		return err
 	}
+	utils.Logger.Debug(fmt.Sprintf("###SureTax received response: %+v\n", stResp))
 	if stResp.ResponseCode != 9999 {
 		cdr.ExtraInfo = stResp.HeaderMessage
 		return nil // No error because the request was processed by SureTax, error will be in the ExtraInfo

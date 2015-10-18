@@ -202,11 +202,33 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(storedCdr *StoredCdr) error
 		return err
 	}
 	for _, cdr := range cdrRuns {
+		if cdr.MediationRunId != utils.META_DEFAULT { // Process Aliases and Users for derived CDRs
+			if err := LoadAlias(&AttrMatchingAlias{
+				Destination: cdr.Destination,
+				Direction:   cdr.Direction,
+				Tenant:      cdr.Tenant,
+				Category:    cdr.Category,
+				Account:     cdr.Account,
+				Subject:     cdr.Subject,
+				Context:     utils.ALIAS_CONTEXT_RATING,
+			}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+				return err
+			}
+			if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+				return err
+			}
+		}
 		// Rate CDR
 		if self.rater != nil && !cdr.Rated {
 			if err := self.rateCDR(cdr); err != nil {
 				cdr.Cost = -1.0 // If there was an error, mark the CDR
 				cdr.ExtraInfo = err.Error()
+			}
+		}
+		if cdr.MediationRunId == utils.META_SURETAX { // Request should be processed by SureTax
+			if err := SureTaxProcessCdr(cdr); err != nil {
+				cdr.Cost = -1.0
+				cdr.ExtraInfo = err.Error() // Something failed, write the error in the ExtraInfo
 			}
 		}
 		if self.cgrCfg.CDRSStoreCdrs { // Store CDRs
