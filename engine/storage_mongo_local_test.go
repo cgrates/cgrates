@@ -18,15 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import (
-	"reflect"
-	"testing"
-	"time"
-
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
-)
-
+/*
 var mongoDb *MongoStorage
 
 func TestMongoCreateTables(t *testing.T) {
@@ -973,3 +965,4 @@ func TestMongoStoreRestoreCdr(t *testing.T) {
 		}
 	}
 }
+*/
