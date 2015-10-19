@@ -1,10 +1,6 @@
 package engine
 
 import (
-	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
 	"strings"
 	"time"
 
@@ -738,7 +734,8 @@ func (ms *MongoStorage) RemStoredCdrs(cgrIds []string) error {
 	if len(cgrIds) == 0 {
 		return nil
 	}
-	return ms.db.C(colCdrs).Update(bson.M{"cgrid": bson.M{"$in": cgrIds}}, map[string]interface{}{"deleted_at": time.Now()})
+	_, err := ms.db.C(colCdrs).UpdateAll(bson.M{"cgrid": bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
+	return err
 }
 
 func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
@@ -766,10 +763,9 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 }
 
 func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, int64, error) {
-	log.Print("START!")
 	filters := bson.M{
 		"cgrid":            bson.M{"$in": qryFltr.CgrIds, "$nin": qryFltr.NotCgrIds},
-		"runid":            bson.M{"$in": qryFltr.RunIds, "$nin": qryFltr.NotRunIds},
+		"mediationrunid":   bson.M{"$in": qryFltr.RunIds, "$nin": qryFltr.NotRunIds},
 		"tor":              bson.M{"$in": qryFltr.Tors, "$nin": qryFltr.NotTors},
 		"cdrhost":          bson.M{"$in": qryFltr.CdrHosts, "$nin": qryFltr.NotCdrHosts},
 		"cdrsource":        bson.M{"$in": qryFltr.CdrSources, "$nin": qryFltr.NotCdrSources},
@@ -790,8 +786,8 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		"costdetails.account": bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
 		"costdetails.subject": bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
 	}
-	file, _ := ioutil.TempFile(os.TempDir(), "debug")
-	file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
+	//file, _ := ioutil.TempFile(os.TempDir(), "debug")
+	//file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
 	//file.WriteString(fmt.Sprintf("BEFORE: %v\n", utils.ToIJSON(filters)))
 	ms.cleanEmptyFilters(filters)
 
@@ -858,8 +854,8 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 			filters["cost"] = bson.M{"$lt": *qryFltr.MaxCost}
 		}
 	}
-	file.WriteString(fmt.Sprintf("AFTER: %v\n", utils.ToIJSON(filters)))
-	file.Close()
+	//file.WriteString(fmt.Sprintf("AFTER: %v\n", utils.ToIJSON(filters)))
+	//file.Close()
 	q := ms.db.C(colCdrs).Find(filters)
 	if qryFltr.Paginator.Limit != nil {
 		q = q.Limit(*qryFltr.Paginator.Limit)

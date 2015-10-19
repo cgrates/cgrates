@@ -23,6 +23,7 @@ import (
 	"net/rpc/jsonrpc"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -71,6 +72,7 @@ func TestActionsLocalRpcConn(t *testing.T) {
 		return
 	}
 	var err error
+	time.Sleep(500 * time.Millisecond)
 	actsLclRpc, err = jsonrpc.Dial("tcp", actsLclCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)

@@ -20,15 +20,20 @@ package v2
 
 import (
 	"net/rpc"
+	"net/rpc/jsonrpc"
+	"path"
+	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var cdrsMongoCfgPath string
 var cdrsMongoCfg *config.CGRConfig
 var cdrsMongoRpc *rpc.Client
 
-/*
 func TestV2CdrsMongoInitConfig(t *testing.T) {
 	if !*testLocal {
 		return
@@ -160,7 +165,7 @@ func TestV2CdrsMongoGetCdrs(t *testing.T) {
 	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 3 {
+	} else if len(reply) != 4 {
 		for _, cdr := range reply {
 			t.Logf("CDR: %s %s %s %f", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId, cdr.Cost)
 		}
@@ -170,7 +175,7 @@ func TestV2CdrsMongoGetCdrs(t *testing.T) {
 	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MaxCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
+	} else if len(reply) != 0 {
 		for _, cdr := range reply {
 			t.Logf("CDR: %s %s %s %f", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId, cdr.Cost)
 		}
@@ -248,4 +253,3 @@ func TestV2CdrsMongoKillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
