@@ -614,12 +614,11 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 		LoadId:           "TEST_LOADID",
 		Tenant:           "cgrates.org",
 		Account:          "1001",
-		Direction:        "*out",
 		ActionPlanId:     "PACKAGE_10_SHARED_A_5",
 		ActionTriggersId: "STANDARD_TRIGGERS",
 	}
 	expectedSlc := [][]string{
-		[]string{"cgrates.org", "1001", "*out", "PACKAGE_10_SHARED_A_5", "STANDARD_TRIGGERS", "false", "false"},
+		[]string{"cgrates.org", "1001", "PACKAGE_10_SHARED_A_5", "STANDARD_TRIGGERS", "false", "false"},
 	}
 	ms := APItoModelAccountAction(aa)
 	var slc [][]string

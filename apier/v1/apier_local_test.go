@@ -655,15 +655,15 @@ func TestApierTPAccountActions(t *testing.T) {
 	}
 	reply := ""
 	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1001", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1001", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa2 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1002", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1002", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa3 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1003", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1003", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa4 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1004", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1004", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa5 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1005", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1005", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aaTst := new(utils.TPAccountActions)
 	*aaTst = *aa1
 	aaTst.Account = utils.TEST_SQL
@@ -784,7 +784,7 @@ func TestApierLoadAccountActions(t *testing.T) {
 		return
 	}
 	reply := ""
-	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call("ApierV1.LoadAccountActions", aa1, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadAccountActions: ", err.Error())
 	} else if reply != "OK" {
@@ -1093,7 +1093,7 @@ func TestApierSetAccount(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", ActionPlanId: "ATMS_1"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanId: "ATMS_1"}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1154,36 +1154,36 @@ func TestApierGetAccount(t *testing.T) {
 		return
 	}
 	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
-		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan", Direction: "*out"}
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 1.5 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 1.5, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 1.5 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 1.5, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	// The one we have topped up though executeAction
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 11.5 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 10, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11.5 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 10, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan3", Direction: "*out"}
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan3"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 3.6 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 3.6, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 3.6 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 3.6, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan6", Direction: "*out"}
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan6"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 1 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 1, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 1 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 1, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 
@@ -1193,7 +1193,7 @@ func TestApierTriggersExecute(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan8"}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1289,11 +1289,11 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 		return
 	}
 	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 11 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 

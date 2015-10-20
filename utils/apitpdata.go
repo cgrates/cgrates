@@ -496,10 +496,10 @@ func NewTPAccountActionsFromKeyId(tpid, loadId, keyId string) (*TPAccountActions
 	// *out:cgrates.org:1001
 	s := strings.Split(keyId, ":")
 	// [*out cgrates.org 1001]
-	if len(s) != 3 {
+	if len(s) != 2 {
 		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
 	}
-	return &TPAccountActions{TPid: tpid, LoadId: loadId, Direction: s[0], Tenant: s[1], Account: s[2]}, nil
+	return &TPAccountActions{TPid: tpid, LoadId: loadId, Tenant: s[0], Account: s[1]}, nil
 }
 
 type TPAccountActions struct {
@@ -507,7 +507,6 @@ type TPAccountActions struct {
 	LoadId           string // LoadId, used to group actions on a load
 	Tenant           string // Tenant's Id
 	Account          string // Account name
-	Direction        string // Traffic direction
 	ActionPlanId     string // Id of ActionPlan profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
 	AllowNegative    bool
@@ -516,13 +515,11 @@ type TPAccountActions struct {
 
 // Returns the id used in some nosql dbs (eg: redis)
 func (self *TPAccountActions) KeyId() string {
-	return fmt.Sprintf("%s:%s:%s", self.Direction, self.Tenant, self.Account)
+	return fmt.Sprintf("%s:%s", self.Tenant, self.Account)
 }
 
 func (aa *TPAccountActions) GetAccountActionsId() string {
 	return aa.LoadId +
-		CONCATENATED_KEY_SEP +
-		aa.Direction +
 		CONCATENATED_KEY_SEP +
 		aa.Tenant +
 		CONCATENATED_KEY_SEP +
@@ -531,25 +528,22 @@ func (aa *TPAccountActions) GetAccountActionsId() string {
 
 func (aa *TPAccountActions) SetAccountActionsId(id string) error {
 	ids := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(ids) != 4 {
+	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
 	aa.LoadId = ids[0]
-	aa.Direction = ids[1]
-	aa.Tenant = ids[2]
-	aa.Account = ids[3]
+	aa.Tenant = ids[1]
+	aa.Account = ids[2]
 	return nil
 }
 
 type AttrGetAccount struct {
-	Tenant    string
-	Account   string
-	Direction string
+	Tenant  string
+	Account string
 }
 
 type AttrGetAccounts struct {
 	Tenant     string
-	Direction  string
 	AccountIds []string
 	Offset     int // Set the item offset
 	Limit      int // Limit number of items retrieved
@@ -1112,7 +1106,6 @@ type AttrExecuteAction struct {
 
 type AttrSetAccount struct {
 	Tenant           string
-	Direction        string
 	Account          string
 	ActionPlanId     string
 	ActionTriggersId string
@@ -1121,9 +1114,8 @@ type AttrSetAccount struct {
 }
 
 type AttrRemoveAccount struct {
-	Tenant    string
-	Direction string
-	Account   string
+	Tenant  string
+	Account string
 }
 
 type AttrGetSMASessions struct {

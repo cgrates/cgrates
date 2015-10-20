@@ -49,7 +49,7 @@ DISABLE_ACNT,*disable_account,,,,,,,,,,,,,false,10
 ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10`
 	actionTriggers := ``
-	accountActions := `cgrates.org,1,*out,TOPUP10_AT,,,`
+	accountActions := `cgrates.org,1,TOPUP10_AT,,,`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``
@@ -62,8 +62,8 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,10`
 	csvr.WriteToDatabase(false, false)
 	ratingDbAcntActs.CacheRatingAll()
 	acntDbAcntActs.CacheAccountingAll()
-	expectAcnt := &engine.Account{Id: "*out:cgrates.org:1"}
-	if acnt, err := acntDbAcntActs.GetAccount("*out:cgrates.org:1"); err != nil {
+	expectAcnt := &engine.Account{Id: "cgrates.org:1"}
+	if acnt, err := acntDbAcntActs.GetAccount("cgrates.org:1"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account created")
@@ -73,7 +73,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,10`
 }
 
 func TestAcntActsDisableAcnt(t *testing.T) {
-	acnt1Tag := "*out:cgrates.org:1"
+	acnt1Tag := "cgrates.org:1"
 	at := &engine.ActionPlan{
 		AccountIds: []string{acnt1Tag},
 		ActionsId:  "DISABLE_ACNT",
@@ -81,7 +81,7 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 	if err := at.Execute(); err != nil {
 		t.Error(err)
 	}
-	expectAcnt := &engine.Account{Id: "*out:cgrates.org:1", Disabled: true}
+	expectAcnt := &engine.Account{Id: "cgrates.org:1", Disabled: true}
 	if acnt, err := acntDbAcntActs.GetAccount(acnt1Tag); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectAcnt, acnt) {
@@ -90,7 +90,7 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 }
 
 func TestAcntActsEnableAcnt(t *testing.T) {
-	acnt1Tag := "*out:cgrates.org:1"
+	acnt1Tag := "cgrates.org:1"
 	at := &engine.ActionPlan{
 		AccountIds: []string{acnt1Tag},
 		ActionsId:  "ENABLE_ACNT",
@@ -98,7 +98,7 @@ func TestAcntActsEnableAcnt(t *testing.T) {
 	if err := at.Execute(); err != nil {
 		t.Error(err)
 	}
-	expectAcnt := &engine.Account{Id: "*out:cgrates.org:1", Disabled: false}
+	expectAcnt := &engine.Account{Id: "cgrates.org:1", Disabled: false}
 	if acnt, err := acntDbAcntActs.GetAccount(acnt1Tag); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectAcnt, acnt) {

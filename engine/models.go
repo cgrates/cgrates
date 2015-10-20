@@ -214,28 +214,26 @@ type TpAccountAction struct {
 	Loadid            string
 	Tenant            string `index:"0" re:"\w+\s*"`
 	Account           string `index:"1" re:"(\w+;?)+\s*"`
-	Direction         string `index:"2" re:"\*out\s*"`
-	ActionPlanTag     string `index:"3" re:"\w+\s*"`
-	ActionTriggersTag string `index:"4" re:"\w+\s*"`
-	AllowNegative     bool   `index:"5" re:""`
-	Disabled          bool   `index:"6" re:""`
+	ActionPlanTag     string `index:"2" re:"\w+\s*"`
+	ActionTriggersTag string `index:"3" re:"\w+\s*"`
+	AllowNegative     bool   `index:"4" re:""`
+	Disabled          bool   `index:"5" re:""`
 	CreatedAt         time.Time
 }
 
 func (aa *TpAccountAction) SetAccountActionId(id string) error {
 	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
-	if len(ids) != 4 {
+	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
 	aa.Loadid = ids[0]
-	aa.Direction = ids[1]
-	aa.Tenant = ids[2]
-	aa.Account = ids[3]
+	aa.Tenant = ids[1]
+	aa.Account = ids[2]
 	return nil
 }
 
 func (aa *TpAccountAction) GetAccountActionId() string {
-	return utils.AccountKey(aa.Tenant, aa.Account, aa.Direction)
+	return utils.AccountKey(aa.Tenant, aa.Account)
 }
 
 type TpSharedGroup struct {

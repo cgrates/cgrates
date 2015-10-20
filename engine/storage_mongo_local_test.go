@@ -315,8 +315,7 @@ func TestMongoSetGetTpAccountActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	aa := &utils.TPAccountActions{TPid: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001",
-		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+	aa := &utils.TPAccountActions{TPid: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	maa := APItoModelAccountAction(aa)
 	if err := mongoDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
@@ -386,8 +385,7 @@ func TestMongoRemoveTPData(t *testing.T) {
 		t.Errorf("RatingProfiles different than 0: %+v", rps)
 	}
 	// Create AccountActions
-	aa := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001",
-		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+	aa := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	maa := APItoModelAccountAction(aa)
 	if err := mongoDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
@@ -398,7 +396,7 @@ func TestMongoRemoveTPData(t *testing.T) {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove AccountActions
-	if err := mongoDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadid": aa.LoadId, "direction": aa.Direction, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
+	if err := mongoDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadid": aa.LoadId, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		t.Error(err.Error())
 	}
 	if aas, err := mongoDb.GetTpAccountActions(maa); err != nil {

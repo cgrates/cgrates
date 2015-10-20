@@ -27,7 +27,7 @@ func init() {
 	c := &CmdGetAccounts{
 		name:      "accounts",
 		rpcMethod: "ApierV1.GetAccounts",
-		rpcParams: &utils.AttrGetAccounts{Direction: "*out"},
+		rpcParams: &utils.AttrGetAccounts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -51,7 +51,7 @@ func (self *CmdGetAccounts) RpcMethod() string {
 
 func (self *CmdGetAccounts) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrGetAccounts{Direction: "*out"}
+		self.rpcParams = &utils.AttrGetAccounts{}
 	}
 	return self.rpcParams
 }

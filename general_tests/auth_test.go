@@ -59,7 +59,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 	actions := `TOPUP10_AC,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,0,10,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,*asap,10`
 	actionTriggers := ``
-	accountActions := `cgrates.org,testauthpostpaid1,*out,TOPUP10_AT,,,`
+	accountActions := `cgrates.org,testauthpostpaid1,TOPUP10_AT,,,`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``
@@ -70,7 +70,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	if acnt, err := acntDbAuth.GetAccount("*out:cgrates.org:testauthpostpaid1"); err != nil {
+	if acnt, err := acntDbAuth.GetAccount("cgrates.org:testauthpostpaid1"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")

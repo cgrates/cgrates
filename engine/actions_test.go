@@ -1065,7 +1065,7 @@ func TestActionMakeNegative(t *testing.T) {
 }
 
 func TestRemoveAction(t *testing.T) {
-	if _, err := accountingStorage.GetAccount("*out:cgrates.org:remo"); err != nil {
+	if _, err := accountingStorage.GetAccount("cgrates.org:remo"); err != nil {
 		t.Errorf("account to be removed not found: %v", err)
 	}
 	a := &Action{
@@ -1073,19 +1073,19 @@ func TestRemoveAction(t *testing.T) {
 	}
 
 	at := &ActionPlan{
-		AccountIds: []string{"*out:cgrates.org:remo"},
+		AccountIds: []string{"cgrates.org:remo"},
 		actions:    Actions{a},
 	}
 
 	at.Execute()
-	afterUb, err := accountingStorage.GetAccount("*out:cgrates.org:remo")
+	afterUb, err := accountingStorage.GetAccount("cgrates.org:remo")
 	if err == nil || afterUb != nil {
 		t.Error("error removing account: ", err, afterUb)
 	}
 }
 
 func TestTopupAction(t *testing.T) {
-	initialUb, _ := accountingStorage.GetAccount("*out:vdf:minu")
+	initialUb, _ := accountingStorage.GetAccount("vdf:minu")
 	a := &Action{
 		ActionType:  TOPUP,
 		BalanceType: utils.MONETARY,
@@ -1094,12 +1094,12 @@ func TestTopupAction(t *testing.T) {
 	}
 
 	at := &ActionPlan{
-		AccountIds: []string{"*out:vdf:minu"},
+		AccountIds: []string{"vdf:minu"},
 		actions:    Actions{a},
 	}
 
 	at.Execute()
-	afterUb, _ := accountingStorage.GetAccount("*out:vdf:minu")
+	afterUb, _ := accountingStorage.GetAccount("vdf:minu")
 	initialValue := initialUb.BalanceMap[utils.MONETARY+utils.OUT].GetTotalValue()
 	afterValue := afterUb.BalanceMap[utils.MONETARY+utils.OUT].GetTotalValue()
 	if initialValue != 50 || afterValue != 75 {
@@ -1108,7 +1108,7 @@ func TestTopupAction(t *testing.T) {
 }
 
 func TestTopupActionLoaded(t *testing.T) {
-	initialUb, _ := accountingStorage.GetAccount("*out:vdf:minitsboy")
+	initialUb, _ := accountingStorage.GetAccount("vdf:minitsboy")
 	a := &Action{
 		ActionType:  TOPUP,
 		BalanceType: utils.MONETARY,
@@ -1117,12 +1117,12 @@ func TestTopupActionLoaded(t *testing.T) {
 	}
 
 	at := &ActionPlan{
-		AccountIds: []string{"*out:vdf:minitsboy"},
+		AccountIds: []string{"vdf:minitsboy"},
 		actions:    Actions{a},
 	}
 
 	at.Execute()
-	afterUb, _ := accountingStorage.GetAccount("*out:vdf:minitsboy")
+	afterUb, _ := accountingStorage.GetAccount("vdf:minitsboy")
 	initialValue := initialUb.BalanceMap[utils.MONETARY+utils.OUT].GetTotalValue()
 	afterValue := afterUb.BalanceMap[utils.MONETARY+utils.OUT].GetTotalValue()
 	if initialValue != 100 || afterValue != 125 {
@@ -1133,7 +1133,7 @@ func TestTopupActionLoaded(t *testing.T) {
 }
 
 func TestActionCdrlogEmpty(t *testing.T) {
-	acnt := &Account{Id: "*out:cgrates.org:dan2904"}
+	acnt := &Account{Id: "cgrates.org:dan2904"}
 	cdrlog := &Action{
 		ActionType: CDRLOG,
 	}
@@ -1154,7 +1154,7 @@ func TestActionCdrlogEmpty(t *testing.T) {
 }
 
 func TestActionCdrlogWithParams(t *testing.T) {
-	acnt := &Account{Id: "*out:cgrates.org:dan2904"}
+	acnt := &Account{Id: "cgrates.org:dan2904"}
 	cdrlog := &Action{
 		ActionType:      CDRLOG,
 		ExtraParameters: `{"ReqType":"^*pseudoprepaid","Subject":"^rif", "TOR":"~action_type:s/^\\*(.*)$/did_$1/"}`,
@@ -1181,7 +1181,7 @@ func TestActionCdrlogWithParams(t *testing.T) {
 }
 
 func TestActionCdrLogParamsWithOverload(t *testing.T) {
-	acnt := &Account{Id: "*out:cgrates.org:dan2904"}
+	acnt := &Account{Id: "cgrates.org:dan2904"}
 	cdrlog := &Action{
 		ActionType:      CDRLOG,
 		ExtraParameters: `{"Subject":"^rif","Destination":"^1234","TOR":"~action_tag:s/^at(.)$/0$1/","AccountId":"~account_id:s/^\\*(.*)$/$1/"}`,
@@ -1202,14 +1202,14 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 	cdrs := make([]*StoredCdr, 0)
 	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
 	expectedExtraFields := map[string]string{
-		"AccountId": "out:cgrates.org:dan2904",
+		"AccountId": "cgrates.org:dan2904",
 	}
 	if len(cdrs) != 2 ||
 		cdrs[0].Subject != "rif" {
 		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
 	}
 	if !reflect.DeepEqual(cdrs[0].ExtraFields, expectedExtraFields) {
-		t.Errorf("Received extra_fields: %+v", cdrs[0].ExtraFields)
+		t.Errorf("Received extra_fields: %+v %+v", cdrs[0].ExtraFields, expectedExtraFields)
 	}
 }
 

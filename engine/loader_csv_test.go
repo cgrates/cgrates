@@ -190,16 +190,16 @@ CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
-vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER,,
-cgrates.org,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS,,
-cgrates.org,123456,*out,TOPUP10_AT,STANDARD_TRIGGERS,,
-cgrates.org,remo,*out,TOPUP10_AT,,,
-vdf,empty0,*out,TOPUP_SHARED0_AT,,,
-vdf,empty10,*out,TOPUP_SHARED10_AT,,,
-vdf,emptyX,*out,TOPUP_EMPTY_AT,,,
-vdf,emptyY,*out,TOPUP_EMPTY_AT,,,
-vdf,post,*out,POST_AT,,,
-cgrates.org,alodis,*out,TOPUP_EMPTY_AT,,true,true
+vdf,minitsboy,MORE_MINUTES,STANDARD_TRIGGER,,
+cgrates.org,12345,TOPUP10_AT,STANDARD_TRIGGERS,,
+cgrates.org,123456,TOPUP10_AT,STANDARD_TRIGGERS,,
+cgrates.org,remo,TOPUP10_AT,,,
+vdf,empty0,TOPUP_SHARED0_AT,,,
+vdf,empty10,TOPUP_SHARED10_AT,,,
+vdf,emptyX,TOPUP_EMPTY_AT,,,
+vdf,emptyY,TOPUP_EMPTY_AT,,,
+vdf,post,POST_AT,,,
+cgrates.org,alodis,TOPUP_EMPTY_AT,,true,true
 `
 
 	derivedCharges = `
@@ -970,7 +970,7 @@ func TestLoadActionTimings(t *testing.T) {
 	expected := &ActionPlan{
 		Uuid:       atm.Uuid,
 		Id:         "MORE_MINUTES",
-		AccountIds: []string{"*out:vdf:minitsboy"},
+		AccountIds: []string{"vdf:minitsboy"},
 		Timing: &RateInterval{
 			Timing: &RITiming{
 				Years:     utils.Years{2012},
@@ -1026,9 +1026,9 @@ func TestLoadAccountActions(t *testing.T) {
 	if len(csvr.accountActions) != 10 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
-	aa := csvr.accountActions["*out:vdf:minitsboy"]
+	aa := csvr.accountActions["vdf:minitsboy"]
 	expected := &Account{
-		Id:             "*out:vdf:minitsboy",
+		Id:             "vdf:minitsboy",
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
 	}
 	// set propper uuid

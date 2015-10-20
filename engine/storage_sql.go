@@ -546,7 +546,7 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 	for _, aa := range aas {
 		if found, _ := m[aa.GetAccountActionId()]; !found {
 			m[aa.GetAccountActionId()] = true
-			if err := tx.Where(&TpAccountAction{Tpid: aa.Tpid, Loadid: aa.Loadid, Direction: aa.Direction, Tenant: aa.Tenant, Account: aa.Account}).Delete(TpAccountAction{}).Error; err != nil {
+			if err := tx.Where(&TpAccountAction{Tpid: aa.Tpid, Loadid: aa.Loadid, Tenant: aa.Tenant, Account: aa.Account}).Delete(TpAccountAction{}).Error; err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -1594,9 +1594,6 @@ func (self *SQLStorage) GetTpAccountActions(filter *TpAccountAction) ([]TpAccoun
 
 	var tpAccActs []TpAccountAction
 	q := self.db.Where("tpid = ?", filter.Tpid)
-	if len(filter.Direction) != 0 {
-		q = q.Where("direction = ?", filter.Direction)
-	}
 	if len(filter.Tenant) != 0 {
 		q = q.Where("tenant = ?", filter.Tenant)
 	}

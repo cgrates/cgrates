@@ -250,7 +250,6 @@ func APItoModelAccountAction(aa *utils.TPAccountActions) *TpAccountAction {
 	return &TpAccountAction{
 		Tpid:              aa.TPid,
 		Loadid:            aa.LoadId,
-		Direction:         aa.Direction,
 		Tenant:            aa.Tenant,
 		Account:           aa.Account,
 		ActionPlanTag:     aa.ActionPlanId,

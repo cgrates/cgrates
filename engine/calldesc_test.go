@@ -51,7 +51,7 @@ func populateDB() {
 	}
 
 	minu := &Account{
-		Id: "*out:vdf:minu",
+		Id: "vdf:minu",
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY + utils.OUT: BalanceChain{&Balance{Value: 50}},
 			utils.VOICE + utils.OUT: BalanceChain{
@@ -60,7 +60,7 @@ func populateDB() {
 			}},
 	}
 	broker := &Account{
-		Id: "*out:vdf:broker",
+		Id: "vdf:broker",
 		BalanceMap: map[string]BalanceChain{
 			utils.VOICE + utils.OUT: BalanceChain{
 				&Balance{Value: 20, DestinationIds: "NAT", Weight: 10, RatingSubject: "rif"},
@@ -68,7 +68,7 @@ func populateDB() {
 			}},
 	}
 	luna := &Account{
-		Id: "*out:vdf:luna",
+		Id: "vdf:luna",
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY + utils.OUT: BalanceChain{
 				&Balance{Value: 0, Weight: 20},
@@ -76,7 +76,7 @@ func populateDB() {
 	}
 	// this is added to test if csv load tests account will not overwrite balances
 	minitsboy := &Account{
-		Id: "*out:vdf:minitsboy",
+		Id: "vdf:minitsboy",
 		BalanceMap: map[string]BalanceChain{
 			utils.VOICE + utils.OUT: BalanceChain{
 				&Balance{Value: 20, DestinationIds: "NAT", Weight: 10, RatingSubject: "rif"},
@@ -88,14 +88,14 @@ func populateDB() {
 		},
 	}
 	max := &Account{
-		Id: "*out:cgrates.org:max",
+		Id: "cgrates.org:max",
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY + utils.OUT: BalanceChain{
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
 	money := &Account{
-		Id: "*out:cgrates.org:money",
+		Id: "cgrates.org:money",
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY + utils.OUT: BalanceChain{
 				&Balance{Value: 10000, Weight: 10},
@@ -725,7 +725,7 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 	if len(balanceMap) != 1 || balanceMap[0].GetValue() != 0 {
 		t.Errorf("Wrong shared balance debited: %+v", balanceMap[0])
 	}
-	other, err := accountingStorage.GetAccount("*out:vdf:empty10")
+	other, err := accountingStorage.GetAccount("vdf:empty10")
 	if err != nil || other.BalanceMap[utils.MONETARY+utils.OUT][0].GetValue() != 7.5 {
 		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MONETARY+utils.OUT][0])
 	}
@@ -856,7 +856,7 @@ func TestMaxSesionTimeEmptyBalance(t *testing.T) {
 		Account:     "luna",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
+	acc, _ := accountingStorage.GetAccount("vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != 0 {
 		t.Error("Error get max session for 0 acount", err)
@@ -874,7 +874,7 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 		Account:     "luna",
 		Destination: "112",
 	}
-	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
+	acc, _ := accountingStorage.GetAccount("vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime == 0 {
 		t.Error("Error get max session for 0 acount", err)
@@ -891,7 +891,7 @@ func TestMaxSesionTimeLong(t *testing.T) {
 		Subject:     "money",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("*out:cgrates.org:money")
+	acc, _ := accountingStorage.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != cd.TimeEnd.Sub(cd.TimeStart) {
 		t.Error("Error get max session for acount:", allowedTime, err)
@@ -908,7 +908,7 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 		Subject:     "money",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("*out:cgrates.org:money")
+	acc, _ := accountingStorage.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	expected, err := time.ParseDuration("2h46m40s")
 	if err != nil || allowedTime != expected {

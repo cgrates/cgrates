@@ -1085,7 +1085,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		return
 	}
 	var reply string
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "tutacnt1", ActionPlanId: "PACKAGE_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanId: "PACKAGE_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	if err := tutLocalRpc.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1099,14 +1099,14 @@ func TestTutLocalSetAccount(t *testing.T) {
 		Limit      int // Limit number of items retrieved
 	}
 	var acnts []*engine.Account
-	if err := tutLocalRpc.Call("ApierV1.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, Direction: attrs.Direction, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+	if err := tutLocalRpc.Call("ApierV1.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 		t.Error(err)
 	} else if len(acnts) != 1 {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
 		dta, _ := utils.NewDTAFromAccountKey(acnt.Id)
-		if dta.Direction != attrs.Direction || dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
+		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
 			t.Error("Unexpected account id received: ", acnt.Id)
 		}
 		if balances := acnt.BalanceMap["*monetary*out"]; len(balances) != 1 {
@@ -1122,20 +1122,20 @@ func TestTutLocalSetAccount(t *testing.T) {
 			t.Error("Disabled should not be set")
 		}
 	}
-	attrs = &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "tutacnt1", AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true)}
+	attrs = &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true)}
 	if err := tutLocalRpc.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
-	if err := tutLocalRpc.Call("ApierV1.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, Direction: attrs.Direction, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+	if err := tutLocalRpc.Call("ApierV1.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 		t.Error(err)
 	} else if len(acnts) != 1 {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
 		dta, _ := utils.NewDTAFromAccountKey(acnt.Id)
-		if dta.Direction != attrs.Direction || dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
+		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
 			t.Error("Unexpected account id received: ", acnt.Id)
 		}
 		if balances := acnt.BalanceMap["*monetary*out"]; len(balances) != 1 {

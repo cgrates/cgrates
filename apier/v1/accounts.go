@@ -52,7 +52,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	}
 	for _, ats := range allATs {
 		for _, at := range ats {
-			if utils.IsSliceMember(at.AccountIds, utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
+			if utils.IsSliceMember(at.AccountIds, utils.AccountKey(attrs.Tenant, attrs.Account)) {
 				accountATs = append(accountATs, &AccountActionTiming{Uuid: at.Uuid, ActionPlanId: at.Id, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime(time.Now())})
 			}
 		}
@@ -87,7 +87,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		} else if len(ats) == 0 {
 			return 0, utils.ErrNotFound
 		}
-		ats = engine.RemActionPlan(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction))
+		ats = engine.RemActionPlan(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account))
 		if err := self.RatingDb.SetActionPlans(attrs.ActionPlanId, ats); err != nil {
 			return 0, err
 		}
@@ -109,7 +109,7 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if balance, err := self.AccountDb.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)); err != nil {
+	if balance, err := self.AccountDb.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account)); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = balance.ActionTriggers
@@ -129,7 +129,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	balanceId := utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)
+	balanceId := utils.AccountKey(attrs.Tenant, attrs.Account)
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		ub, err := self.AccountDb.GetAccount(balanceId)
 		if err != nil {
@@ -160,7 +160,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	balanceId := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
+	balanceId := utils.AccountKey(attr.Tenant, attr.Account)
 	var ub *engine.Account
 	var ats engine.ActionPlans
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
@@ -227,7 +227,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accountId := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
+	accountId := utils.AccountKey(attr.Tenant, attr.Account)
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		if err := self.AccountDb.RemoveAccount(accountId); err != nil {
 			return 0, err
@@ -246,13 +246,10 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenanat")
 	}
-	if len(attr.Direction) == 0 {
-		attr.Direction = utils.OUT
-	}
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + utils.ConcatenatedKey(attr.Direction, attr.Tenant)); err != nil {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + utils.ConcatenatedKey(attr.Tenant)); err != nil {
 			return err
 		}
 	} else {
@@ -260,7 +257,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 			if len(acntId) == 0 { // Source of error returned from redis (key not found)
 				continue
 			}
-			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Direction, attr.Tenant, acntId))
+			accountKeys = append(accountKeys, utils.ACCOUNT_PREFIX+utils.ConcatenatedKey(attr.Tenant, acntId))
 		}
 	}
 	if len(accountKeys) == 0 {

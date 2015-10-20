@@ -84,14 +84,14 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 		return
 	}
 	var reply string
-	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: utils.OUT, Account: "dan2904"}
+	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2904"}
 	if err := actsLclRpc.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, Direction: attrsSetAccount.Direction, Units: 5.0, ExpiryTime: UNLIMITED, Weight: 20.0},
+		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, Units: 5.0, ExpiryTime: UNLIMITED, Weight: 20.0},
 		&utils.TPAction{Identifier: CDRLOG},
 	}}
 	if err := actsLclRpc.Call("ApierV1.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -99,7 +99,7 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.SetActions received: %s", reply)
 	}
-	attrsEA := &utils.AttrExecuteAction{Direction: attrsSetAccount.Direction, Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
+	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
 	if err := actsLclRpc.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != utils.OK {

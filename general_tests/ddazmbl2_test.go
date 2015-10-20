@@ -58,7 +58,7 @@ TOPUP10_AC1,*topup_reset,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
-	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,,,`
+	accountActions := `cgrates.org,12345,TOPUP10_AT,,,`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``
@@ -105,7 +105,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	if acnt, err := acntDb2.GetAccount("*out:cgrates.org:12345"); err != nil {
+	if acnt, err := acntDb2.GetAccount("cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")
@@ -130,7 +130,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 func TestExecuteActions2(t *testing.T) {
 	scheduler.NewScheduler().LoadActionPlans(ratingDb2)
 	time.Sleep(time.Millisecond) // Give time to scheduler to topup the account
-	if acnt, err := acntDb2.GetAccount("*out:cgrates.org:12345"); err != nil {
+	if acnt, err := acntDb2.GetAccount("cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
@@ -157,7 +157,7 @@ func TestDebit2(t *testing.T) {
 	} else if cc.Cost != 0.01 {
 		t.Error("Wrong cost returned: ", cc.Cost)
 	}
-	acnt, err := acntDb2.GetAccount("*out:cgrates.org:12345")
+	acnt, err := acntDb2.GetAccount("cgrates.org:12345")
 	if err != nil {
 		t.Error(err)
 	}

@@ -104,7 +104,7 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 
 // Get balance
 func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
-	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
+	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
 	userBalance, err := self.AccountDb.GetAccount(tag)
 	if err != nil {
 		return err
@@ -782,7 +782,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		Executed:              false,
 	}
 
-	tag := utils.AccountKey(attr.Tenant, attr.Account, attr.BalanceDirection)
+	tag := utils.AccountKey(attr.Tenant, attr.Account)
 	_, err = engine.Guardian.Guard(func() (interface{}, error) {
 		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {
@@ -852,7 +852,7 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 			ExtraParameters: string(extraParameters),
 		}
 	}
-	accID := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		acc, err := self.AccountDb.GetAccount(accID)
 		if err != nil {

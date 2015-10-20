@@ -321,7 +321,7 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	if cd.Account != "" {
 		subj = cd.Account
 	}
-	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, subj)
+	return utils.ConcatenatedKey(cd.Tenant, subj)
 }
 
 // Splits the received timespan into sub time spans according to the activation periods intervals.
@@ -600,7 +600,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
-		utils.Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("Could not get account for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {

@@ -456,7 +456,6 @@ func (tps TpAccountActions) GetAccountActions() (map[string]*utils.TPAccountActi
 			LoadId:           tpAa.Loadid,
 			Tenant:           tpAa.Tenant,
 			Account:          tpAa.Account,
-			Direction:        tpAa.Direction,
 			ActionPlanId:     tpAa.ActionPlanTag,
 			ActionTriggersId: tpAa.ActionTriggersTag,
 			AllowNegative:    tpAa.AllowNegative,

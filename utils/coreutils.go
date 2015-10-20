@@ -238,8 +238,8 @@ func ParseDurationWithSecs(durStr string) (time.Duration, error) {
 	}
 }
 
-func AccountKey(tenant, account, direction string) string {
-	return fmt.Sprintf("%s:%s:%s", direction, tenant, account)
+func AccountKey(tenant, account string) string {
+	return fmt.Sprintf("%s:%s", tenant, account)
 }
 
 // returns the minimum duration between the two

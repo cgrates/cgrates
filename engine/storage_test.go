@@ -238,7 +238,7 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 }
 
 func TestStorageDisabledAccount(t *testing.T) {
-	acc, err := accountingStorage.GetAccount("*out:cgrates.org:alodis")
+	acc, err := accountingStorage.GetAccount("cgrates.org:alodis")
 	if err != nil || acc == nil {
 		t.Error("Error loading disabled user account: ", err, acc)
 	}
@@ -258,11 +258,11 @@ func TestStoreInterfaces(t *testing.T) {
 }
 
 func TestDifferentUuid(t *testing.T) {
-	a1, err := accountingStorage.GetAccount("*out:cgrates.org:12345")
+	a1, err := accountingStorage.GetAccount("cgrates.org:12345")
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
-	a2, err := accountingStorage.GetAccount("*out:cgrates.org:123456")
+	a2, err := accountingStorage.GetAccount("cgrates.org:123456")
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
