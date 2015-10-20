@@ -791,7 +791,7 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	//file.WriteString(fmt.Sprintf("BEFORE: %v\n", utils.ToIJSON(filters)))
 	ms.cleanEmptyFilters(filters)
 
-	if qryFltr.OrderIdStart != 0 {
+	/*if qryFltr.OrderIdStart != 0 {
 		filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
 	}
 	if qryFltr.OrderIdEnd != 0 {
@@ -800,7 +800,7 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		} else {
 			filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
 		}
-	}
+	}*/
 
 	if len(qryFltr.DestPrefixes) != 0 {
 		var regexes []bson.RegEx
