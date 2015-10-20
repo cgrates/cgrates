@@ -137,7 +137,7 @@ func TestPublish(t *testing.T) {
 		t.Error("Error publishing: ", err)
 	}
 	for i := 0; i < 1000; i++ { // wait for the theread to populate map
-		if len(m) == 1 {
+		if len(m) == 2 {
 			time.Sleep(time.Microsecond)
 		} else {
 			break
