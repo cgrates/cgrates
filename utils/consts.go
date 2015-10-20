@@ -172,7 +172,7 @@ const (
 	RATING_PROFILE_PREFIX      = "rpf_"
 	ACTION_PREFIX              = "act_"
 	SHARED_GROUP_PREFIX        = "shg_"
-	ACCOUNT_PREFIX             = "ubl_"
+	ACCOUNT_PREFIX             = "act_"
 	DESTINATION_PREFIX         = "dst_"
 	LCR_PREFIX                 = "lcr_"
 	DERIVEDCHARGERS_PREFIX     = "dcs_"
