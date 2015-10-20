@@ -598,7 +598,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// All CDRs, no filter
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 11 {
+	} else if len(storedCdrs) != 20 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Count ALL
@@ -606,7 +606,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
-	} else if count != 11 {
+	} else if count != 20 {
 		t.Error("Unexpected count of StoredCdrs returned: ", count)
 	}
 	// Limit 5
@@ -658,7 +658,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on runId
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{RunIds: []string{utils.DEFAULT_RUNID}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 5 {
+	} else if len(storedCdrs) != 14 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on TOR
@@ -670,7 +670,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on multiple TOR
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS, utils.VOICE}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 9 {
+	} else if len(storedCdrs) != 15 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on cdrHost
@@ -682,7 +682,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on multiple cdrHost
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.1", "192.168.1.2"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 9 {
+	} else if len(storedCdrs) != 15 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on cdrSource
@@ -700,19 +700,19 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on reqType
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_PREPAID}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 3 {
+	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on multiple reqType
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 4 {
+	} else if len(storedCdrs) != 6 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on direction
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Directions: []string{"*out"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 10 {
+	} else if len(storedCdrs) != 15 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on tenant
@@ -724,7 +724,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on multiple tenants
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com", "cgrates.org"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 10 {
+	} else if len(storedCdrs) != 15 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on category
@@ -736,19 +736,19 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on multiple categories
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call", "call"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 9 {
+	} else if len(storedCdrs) != 15 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on account
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1002"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 4 {
+	} else if len(storedCdrs) != 6 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on multiple account
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1001", "1002"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 9 {
+	} else if len(storedCdrs) != 13 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on subject
@@ -760,7 +760,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on multiple subject
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000", "1002"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 4 {
+	} else if len(storedCdrs) != 6 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on destPrefix
@@ -791,7 +791,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 5 {
+	} else if len(storedCdrs) != 7 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	} else {
 		for _, cdr := range storedCdrs {
@@ -806,20 +806,20 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on orderIdStart
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 11 {
+	} else if len(storedCdrs) != 20 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on orderIdStart and orderIdEnd
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart, OrderIdEnd: orderIdEnd}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 11 {
+	} else if len(storedCdrs) != 20 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on timeStart
 	timeStart = time.Date(2013, 11, 8, 8, 0, 0, 0, time.UTC)
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 7 {
+	} else if len(storedCdrs) != 6 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on timeStart and timeEnd
@@ -838,7 +838,7 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 	// Filter on maxPdd
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MaxPdd: utils.Float64Pointer(float64(3 * time.Second))}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 4 {
+	} else if len(storedCdrs) != 13 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on minPdd, maxPdd
@@ -871,7 +871,7 @@ func TestMongoRemStoredCdrs(t *testing.T) {
 	}
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 11 {
+	} else if len(storedCdrs) != 20 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	tm, _ := utils.ParseTimeDetectLayout("2013-11-08T08:42:20Z", "")
@@ -892,7 +892,7 @@ func TestMongoRemStoredCdrs(t *testing.T) {
 	}
 	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 11 {
+	} else if len(storedCdrs) != 20 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 }

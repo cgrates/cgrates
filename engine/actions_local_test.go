@@ -31,7 +31,7 @@ import (
 
 var actsLclCfg *config.CGRConfig
 var actsLclRpc *rpc.Client
-var actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "cgradmin")
+var actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions")
 
 func TestActionsLocalInitCfg(t *testing.T) {
 	if !*testLocal {
