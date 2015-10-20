@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"regexp"
 	"strings"
 	"time"
 
@@ -48,7 +49,7 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		var searchItems []bson.M
 		for _, d := range distinct {
 			searchItems = append(searchItems, bson.M{d: bson.RegEx{
-				Pattern: ".*" + pag.SearchTerm + ".*",
+				Pattern: ".*" + regexp.QuoteMeta(pag.SearchTerm) + ".*",
 				Options: ""}})
 		}
 		findMap["$and"] = []bson.M{bson.M{"$or": searchItems}}
@@ -805,14 +806,14 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	if len(qryFltr.DestPrefixes) != 0 {
 		var regexes []bson.RegEx
 		for _, prefix := range qryFltr.DestPrefixes {
-			regexes = append(regexes, bson.RegEx{Pattern: prefix + ".*"})
+			regexes = append(regexes, bson.RegEx{Pattern: regexp.QuoteMeta(prefix) + ".*"})
 		}
 		filters["destination"] = bson.M{"$in": regexes}
 	}
 	if len(qryFltr.NotDestPrefixes) != 0 {
 		var notRegexes []bson.RegEx
 		for _, prefix := range qryFltr.DestPrefixes {
-			notRegexes = append(notRegexes, bson.RegEx{Pattern: prefix + ".*"})
+			notRegexes = append(notRegexes, bson.RegEx{Pattern: regexp.QuoteMeta(prefix) + ".*"})
 		}
 		if m, ok := filters["destination"]; ok {
 			m.(bson.M)["$nin"] = notRegexes

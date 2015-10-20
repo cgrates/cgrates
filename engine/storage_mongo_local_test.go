@@ -764,13 +764,13 @@ func TestMongoGetStoredCdrs(t *testing.T) {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on destPrefix
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"\\+498651"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"+498651"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 4 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
 	}
 	// Filter on multiple destPrefixes
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"1001", "\\+498651"}}); err != nil {
+	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"1001", "+498651"}}); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
