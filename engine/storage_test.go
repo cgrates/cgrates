@@ -266,9 +266,9 @@ func TestDifferentUuid(t *testing.T) {
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
-	if a1.BalanceMap[utils.VOICE+utils.OUT][0].Uuid == a2.BalanceMap[utils.VOICE+utils.OUT][0].Uuid ||
-		a1.BalanceMap[utils.MONETARY+utils.OUT][0].Uuid == a2.BalanceMap[utils.MONETARY+utils.OUT][0].Uuid {
-		t.Errorf("Identical uuids in different accounts: %+v <-> %+v", a1.BalanceMap[utils.VOICE+utils.OUT][0], a1.BalanceMap[utils.MONETARY+utils.OUT][0])
+	if a1.BalanceMap[utils.VOICE][0].Uuid == a2.BalanceMap[utils.VOICE][0].Uuid ||
+		a1.BalanceMap[utils.MONETARY][0].Uuid == a2.BalanceMap[utils.MONETARY][0].Uuid {
+		t.Errorf("Identical uuids in different accounts: %+v <-> %+v", a1.BalanceMap[utils.VOICE][0], a1.BalanceMap[utils.MONETARY][0])
 	}
 }
 

@@ -86,9 +86,6 @@ func ParseStringMap(s string) StringMap {
 }
 
 func (sm StringMap) Equal(om StringMap) bool {
-	if len(sm) == 0 {
-		return len(om) == 0
-	}
 	if len(sm) != len(om) {
 		return false
 	}

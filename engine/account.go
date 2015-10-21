@@ -187,14 +187,13 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, direction strin
 		if b.HasDirection() && b.Directions[direction] == false {
 			continue
 		}
-
 		b.account = ub
 		if len(b.DestinationIds) > 0 && b.DestinationIds[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
-						if b.DestinationIds[dId.(string)] == false {
+						if b.DestinationIds[dId.(string)] == true {
 							b.precision = len(p)
 							usefulBalances = append(usefulBalances, b)
 							break

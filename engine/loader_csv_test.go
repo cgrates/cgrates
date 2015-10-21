@@ -848,15 +848,16 @@ func TestLoadActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &Balance{
-				Directions:  utils.NewStringMap(utils.OUT),
-				Uuid:        as2[0].Balance.Uuid,
-				Value:       100,
-				Weight:      10,
-				SharedGroup: "SG1",
+				Directions:     utils.NewStringMap(utils.OUT),
+				DestinationIds: utils.StringMap{},
+				Uuid:           as2[0].Balance.Uuid,
+				Value:          100,
+				Weight:         10,
+				SharedGroup:    "SG1",
 			},
 		},
 	}
-	if !reflect.DeepEqual(as2, expected) {
+	if !reflect.DeepEqual(as2[0], expected[0]) {
 		t.Errorf("Error loading action: %+v", as2[0].Balance)
 	}
 	as3 := csvr.actions["DEFEE"]
@@ -867,12 +868,14 @@ func TestLoadActions(t *testing.T) {
 			ExtraParameters: `{"Category":"^ddi","MediationRunId":"^did_run"}`,
 			Weight:          10,
 			Balance: &Balance{
-				Uuid: as3[0].Balance.Uuid,
+				Uuid:           as3[0].Balance.Uuid,
+				Directions:     utils.StringMap{},
+				DestinationIds: utils.StringMap{},
 			},
 		},
 	}
 	if !reflect.DeepEqual(as3, expected) {
-		t.Errorf("Error loading action: %+v", as3[0])
+		t.Errorf("Error loading action: %+v", as3[0].Balance)
 	}
 }
 

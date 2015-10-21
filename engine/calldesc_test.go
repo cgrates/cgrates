@@ -491,6 +491,8 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 	for _, at := range ap {
 		at.Execute()
 	}
+	//acc, _ := accountingStorage.GetAccount("cgrates.org:12345")
+	//log.Print("ACC: ", utils.ToIJSON(acc))
 	cd := &CallDescriptor{
 		Direction:   "*out",
 		Category:    "call",

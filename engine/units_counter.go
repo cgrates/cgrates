@@ -83,10 +83,15 @@ func (uc *UnitsCounter) addUnits(amount float64, prefixMap utils.StringMap) {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
-					if _, found := destIds[mb.DestinationIds]; found {
-						mb.AddValue(amount)
-						counted = true
-						break
+					for key := range mb.DestinationIds {
+						if _, found := destIds[key]; found {
+							mb.AddValue(amount)
+							counted = true
+							break
+						}
+						if counted {
+							break
+						}
 					}
 				}
 				if counted {
