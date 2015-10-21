@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import "strings"
+
 // Converts map[string]string into map[string]interface{}
 func ConvertMapValStrIf(inMap map[string]string) map[string]interface{} {
 	outMap := make(map[string]interface{})
@@ -56,4 +58,66 @@ func MapKeys(m map[string]string) []string {
 		i++
 	}
 	return n
+}
+
+type StringMap map[string]bool
+
+func NewStringMap(s ...string) StringMap {
+	result := make(StringMap)
+	for _, v := range s {
+		v = strings.TrimSpace(v)
+		if v != "" {
+			result[v] = true
+		}
+	}
+	return result
+}
+
+func ParseStringMap(s string) StringMap {
+	slice := strings.Split(s, INFIELD_SEP)
+	result := make(StringMap)
+	for _, v := range slice {
+		v = strings.TrimSpace(v)
+		if v != "" {
+			result[v] = true
+		}
+	}
+	return result
+}
+
+func (sm StringMap) Equal(om StringMap) bool {
+	if len(sm) == 0 {
+		return len(om) == 0
+	}
+	if len(sm) != len(om) {
+		return false
+	}
+	for key := range sm {
+		if !om[key] {
+			return false
+		}
+	}
+	return true
+}
+
+func (sm StringMap) Clone() StringMap {
+	result := make(StringMap, len(sm))
+	for k := range sm {
+		result[k] = true
+	}
+	return result
+}
+
+func (sm StringMap) Keys() []string {
+	result := make([]string, len(sm))
+	i := 0
+	for k := range sm {
+		result[i] = k
+		i++
+	}
+	return result
+}
+
+func (sm StringMap) String() string {
+	return strings.Join(sm.Keys(), INFIELD_SEP)
 }

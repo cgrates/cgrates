@@ -27,7 +27,6 @@ import (
 
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
-	Direction   string
 	BalanceType string
 	//	Units     float64
 	Balances BalanceChain // first balance is the general one (no destination)
@@ -39,7 +38,7 @@ func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 	uc.Balances = BalanceChain{&Balance{}} // general balance
 	for _, at := range ats {
 		if !strings.Contains(at.ThresholdType, "counter") {
-			// only get actions fo counter type action triggers
+			// only get actions for counter type action triggers
 			continue
 		}
 		acs, err := ratingStorage.GetActions(at.ActionsId, false)
@@ -56,7 +55,7 @@ func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 			}
 		}
 	}
-	uc.Balances.Sort()
+	//uc.Balances.Sort() // should not be sorted, leave default in first position
 }
 
 // returns the first balance that has no destination attached
@@ -69,8 +68,13 @@ func (uc *UnitsCounter) GetGeneralBalance() *Balance {
 
 // Adds the units from the received balance to an existing balance if the destination
 // is the same or ads the balance to the list if none matches.
-func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
+func (uc *UnitsCounter) addUnits(amount float64, prefixMap utils.StringMap) {
 	counted := false
+	prefix := ""
+	for key := range prefixMap { // get the first value
+		prefix = key
+		break
+	}
 	if prefix != "" {
 		for _, mb := range uc.Balances {
 			if !mb.HasDestination() {

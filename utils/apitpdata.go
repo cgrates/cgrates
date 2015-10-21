@@ -276,7 +276,7 @@ type TPAction struct {
 	Identifier      string  // Identifier mapped in the code
 	BalanceId       string  // Balance identification string (account scope)
 	BalanceType     string  // Type of balance the action will operate on
-	Direction       string  // Balance direction
+	Directions      string  // Balance direction
 	Units           float64 // Number of units to add/deduct
 	ExpiryTime      string  // Time when the units will expire
 	TimingTags      string  // Timing when balance is active
@@ -476,7 +476,7 @@ type TPActionTrigger struct {
 	MinSleep              string  // Minimum duration between two executions in case of recurrent triggers
 	BalanceId             string  // The id of the balance in the account
 	BalanceType           string  // Type of balance this trigger monitors
-	BalanceDirection      string  // Traffic direction
+	BalanceDirections     string  // Traffic direction
 	BalanceDestinationIds string  // filter for balance
 	BalanceWeight         float64 // filter for balance
 	BalanceExpirationDate string  // filter for balance

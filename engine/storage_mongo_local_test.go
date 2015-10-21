@@ -245,7 +245,7 @@ func TestMongoSetGetTPActions(t *testing.T) {
 	}
 	ACTS_ID := "PREPAID_10"
 	acts := []*utils.TPAction{
-		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
+		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Directions: "*out", Units: 10, ExpiryTime: "*unlimited",
 			DestinationIds: "*any", BalanceWeight: 10, Weight: 10}}
 	tpActions := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: ACTS_ID, Actions: acts}
 	mas := APItoModelAction(tpActions)
@@ -287,7 +287,7 @@ func TestMongoSetGetTPActionTriggers(t *testing.T) {
 	atrg := &utils.TPActionTrigger{
 		Id:                    "MY_FIRST_ATGR",
 		BalanceType:           "*monetary",
-		BalanceDirection:      "*out",
+		BalanceDirections:     "*out",
 		ThresholdType:         "*min_balance",
 		ThresholdValue:        2.0,
 		Recurrent:             true,

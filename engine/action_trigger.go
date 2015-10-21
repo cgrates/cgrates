@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -38,15 +37,15 @@ type ActionTrigger struct {
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
 	BalanceId             string
 	BalanceType           string
-	BalanceDirection      string
-	BalanceDestinationIds string    // filter for balance
-	BalanceWeight         float64   // filter for balance
-	BalanceExpirationDate time.Time // filter for balance
-	BalanceTimingTags     string    // filter for balance
-	BalanceRatingSubject  string    // filter for balance
-	BalanceCategory       string    // filter for balance
-	BalanceSharedGroup    string    // filter for balance
-	BalanceDisabled       bool      // filter for balance
+	BalanceDirections     utils.StringMap // filter for balance
+	BalanceDestinationIds utils.StringMap // filter for balance
+	BalanceWeight         float64         // filter for balance
+	BalanceExpirationDate time.Time       // filter for balance
+	BalanceTimingTags     string          // filter for balance
+	BalanceRatingSubject  string          // filter for balance
+	BalanceCategory       string          // filter for balance
+	BalanceSharedGroup    string          // filter for balance
+	BalanceDisabled       bool            // filter for balance
 	Weight                float64
 	ActionsId             string
 	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
@@ -111,13 +110,13 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		return match
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
-	direction := a.Direction == "" || at.BalanceDirection == a.Direction
-	thresholdType, thresholdValue, destinationId, weight, ratingSubject, category, sharedGroup, disabled := true, true, true, true, true, true, true, true
+	thresholdType, thresholdValue, direction, destinationId, weight, ratingSubject, category, sharedGroup, disabled := true, true, true, true, true, true, true, true, true
 	if a.ExtraParameters != "" {
 		t := struct {
 			ThresholdType        string
 			ThresholdValue       float64
-			DestinationId        string
+			DestinationIds       string
+			BalanceDirections    string
 			BalanceWeight        float64
 			BalanceRatingSubject string
 			BalanceCategory      string
@@ -127,7 +126,8 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
 		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
 		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
-		destinationId = t.DestinationId == "" || strings.Contains(at.BalanceDestinationIds, t.DestinationId)
+		direction = len(t.BalanceDirections) == 0 || at.BalanceDirections.Equal(utils.ParseStringMap(t.BalanceDirections))
+		destinationId = len(t.DestinationIds) == 0 || at.BalanceDestinationIds.Equal(utils.ParseStringMap(t.DestinationIds))
 		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
 		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
 		category = t.BalanceCategory == "" || at.BalanceCategory == t.BalanceCategory
@@ -135,12 +135,6 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		disabled = at.BalanceDisabled == t.BalanceDisabled
 	}
 	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && category && sharedGroup && disabled
-}
-
-func (at *ActionTrigger) sortDestinationIds() string {
-	destIds := strings.Split(at.BalanceDestinationIds, utils.INFIELD_SEP)
-	sort.StringSlice(destIds).Sort()
-	return strings.Join(destIds, utils.INFIELD_SEP)
 }
 
 // makes a shallow copy of the receiver

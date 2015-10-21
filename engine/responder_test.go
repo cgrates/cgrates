@@ -71,8 +71,8 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 	if err := ratingStorage.SetDestination(deTMobile); err != nil {
 		t.Error(err)
 	}
-	b10 := &Balance{Value: 10, Weight: 10, DestinationIds: "DE_TMOBILE"}
-	b20 := &Balance{Value: 20, Weight: 10, DestinationIds: "DE_TMOBILE"}
+	b10 := &Balance{Value: 10, Weight: 10, DestinationIds: utils.NewStringMap("DE_TMOBILE")}
+	b20 := &Balance{Value: 20, Weight: 10, DestinationIds: utils.NewStringMap("DE_TMOBILE")}
 	rifsAccount := &Account{Id: utils.ConcatenatedKey(testTenant, "rif"), BalanceMap: map[string]BalanceChain{utils.VOICE + utils.OUT: BalanceChain{b10}}}
 	dansAccount := &Account{Id: utils.ConcatenatedKey(testTenant, "dan"), BalanceMap: map[string]BalanceChain{utils.VOICE + utils.OUT: BalanceChain{b20}}}
 	if err := accountingStorage.SetAccount(rifsAccount); err != nil {
@@ -428,8 +428,8 @@ func TestResponderGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts, lcrLc.SupplierCosts)
 	}
-	bRif12 := &Balance{Value: 40, Weight: 10, DestinationIds: dstDe.Id}
-	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationIds: dstDe.Id}
+	bRif12 := &Balance{Value: 40, Weight: 10, DestinationIds: utils.NewStringMap(dstDe.Id)}
+	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationIds: utils.NewStringMap(dstDe.Id)}
 	rif12sAccount := &Account{Id: utils.ConcatenatedKey("tenant12", "rif12"), BalanceMap: map[string]BalanceChain{utils.VOICE + utils.OUT: BalanceChain{bRif12}}, AllowNegative: true}
 	ivo12sAccount := &Account{Id: utils.ConcatenatedKey("tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{utils.VOICE + utils.OUT: BalanceChain{bIvo12}}, AllowNegative: true}
 	for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {

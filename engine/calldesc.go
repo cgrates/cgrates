@@ -534,7 +534,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
 	//utils.Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
-	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
+	defaultBalance := account.GetDefaultMoneyBalance()
 
 	//use this to check what increment was payed with debt
 	initialDefaultBalanceValue := defaultBalance.GetValue()
@@ -718,7 +718,7 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 				defer accountingStorage.SetAccount(account)
 			}
 		}
-		account.refundIncrement(increment, cd.Direction, cd.TOR, true)
+		account.refundIncrement(increment, cd.TOR, true)
 	}
 	return 0.0, err
 }

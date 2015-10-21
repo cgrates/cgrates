@@ -506,7 +506,6 @@ func (tpr *TpReader) LoadActions() (err error) {
 				Id:               tag + strconv.Itoa(idx),
 				ActionType:       tpact.Identifier,
 				BalanceType:      tpact.BalanceType,
-				Direction:        tpact.Direction,
 				Weight:           tpact.Weight,
 				ExtraParameters:  tpact.ExtraParameters,
 				ExpirationString: tpact.ExpiryTime,
@@ -514,16 +513,16 @@ func (tpr *TpReader) LoadActions() (err error) {
 					Id:             tpact.BalanceId,
 					Value:          tpact.Units,
 					Weight:         tpact.BalanceWeight,
-					TimingIDs:      tpact.TimingTags,
 					RatingSubject:  tpact.RatingSubject,
 					Category:       tpact.Category,
-					DestinationIds: tpact.DestinationIds,
+					Directions:     utils.ParseStringMap(tpact.Directions),
+					DestinationIds: utils.ParseStringMap(tpact.DestinationIds),
 					SharedGroup:    tpact.SharedGroup,
 				},
 			}
 			// load action timings from tags
-			if acts[idx].Balance.TimingIDs != "" {
-				timingIds := strings.Split(acts[idx].Balance.TimingIDs, utils.INFIELD_SEP)
+			if tpact.TimingTags != "" {
+				timingIds := strings.Split(tpact.TimingTags, utils.INFIELD_SEP)
 				for _, timingID := range timingIds {
 					if timing, found := tpr.timings[timingID]; found {
 						acts[idx].Balance.Timings = append(acts[idx].Balance.Timings, &RITiming{
@@ -617,8 +616,8 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				MinSleep:              minSleep,
 				BalanceId:             atr.BalanceId,
 				BalanceType:           atr.BalanceType,
-				BalanceDirection:      atr.BalanceDirection,
-				BalanceDestinationIds: atr.BalanceDestinationIds,
+				BalanceDirections:     utils.ParseStringMap(atr.BalanceDirections),
+				BalanceDestinationIds: utils.ParseStringMap(atr.BalanceDestinationIds),
 				BalanceWeight:         atr.BalanceWeight,
 				BalanceExpirationDate: balanceExpirationDate,
 				BalanceTimingTags:     atr.BalanceTimingTags,
@@ -756,8 +755,8 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						MinSleep:              minSleep,
 						BalanceId:             apiAtr.BalanceId,
 						BalanceType:           apiAtr.BalanceType,
-						BalanceDirection:      apiAtr.BalanceDirection,
-						BalanceDestinationIds: apiAtr.BalanceDestinationIds,
+						BalanceDirections:     utils.ParseStringMap(apiAtr.BalanceDirections),
+						BalanceDestinationIds: utils.ParseStringMap(apiAtr.BalanceDestinationIds),
 						BalanceWeight:         apiAtr.BalanceWeight,
 						BalanceExpirationDate: expTime,
 						BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
@@ -799,7 +798,6 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						Id:               tag + strconv.Itoa(idx),
 						ActionType:       tpact.Identifier,
 						BalanceType:      tpact.BalanceType,
-						Direction:        tpact.Direction,
 						Weight:           tpact.Weight,
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
@@ -807,7 +805,8 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 							Value:          tpact.Units,
 							Weight:         tpact.BalanceWeight,
 							RatingSubject:  tpact.RatingSubject,
-							DestinationIds: tpact.DestinationIds,
+							Directions:     utils.ParseStringMap(tpact.Directions),
+							DestinationIds: utils.ParseStringMap(tpact.DestinationIds),
 							SharedGroup:    tpact.SharedGroup,
 						},
 					}
@@ -959,8 +958,8 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 								MinSleep:              minSleep,
 								BalanceId:             apiAtr.BalanceId,
 								BalanceType:           apiAtr.BalanceType,
-								BalanceDirection:      apiAtr.BalanceDirection,
-								BalanceDestinationIds: apiAtr.BalanceDestinationIds,
+								BalanceDirections:     utils.ParseStringMap(apiAtr.BalanceDirections),
+								BalanceDestinationIds: utils.ParseStringMap(apiAtr.BalanceDestinationIds),
 								BalanceWeight:         apiAtr.BalanceWeight,
 								BalanceExpirationDate: expTime,
 								BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
@@ -1011,7 +1010,6 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						Id:               tag + strconv.Itoa(idx),
 						ActionType:       tpact.Identifier,
 						BalanceType:      tpact.BalanceType,
-						Direction:        tpact.Direction,
 						Weight:           tpact.Weight,
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
@@ -1019,7 +1017,8 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 							Value:          tpact.Units,
 							Weight:         tpact.BalanceWeight,
 							RatingSubject:  tpact.RatingSubject,
-							DestinationIds: tpact.DestinationIds,
+							Directions:     utils.ParseStringMap(tpact.Directions),
+							DestinationIds: utils.ParseStringMap(tpact.DestinationIds),
 							SharedGroup:    tpact.SharedGroup,
 						},
 					}

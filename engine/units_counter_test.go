@@ -26,11 +26,10 @@ import (
 
 func TestUnitsCounterAddBalance(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction:   utils.OUT,
 		BalanceType: utils.SMS,
-		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
+		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}},
 	}
-	uc.addUnits(20, "test")
+	uc.addUnits(20, utils.NewStringMap("test"))
 	if len(uc.Balances) != 3 {
 		t.Error("Error adding minute bucket: ", uc.Balances)
 	}
@@ -38,11 +37,10 @@ func TestUnitsCounterAddBalance(t *testing.T) {
 
 func TestUnitsCounterAddBalanceExists(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction:   utils.OUT,
 		BalanceType: utils.SMS,
-		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Value: 10, Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
+		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}},
 	}
-	uc.addUnits(5, "0723")
+	uc.addUnits(5, utils.NewStringMap("0723"))
 	if len(uc.Balances) != 3 || uc.Balances[1].GetValue() != 15 {
 		t.Error("Error adding minute bucket!")
 	}

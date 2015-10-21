@@ -158,7 +158,7 @@ type TpAction struct {
 	ExtraParameters string  `index:"2" re:"\S+\s*"`
 	BalanceTag      string  `index:"3" re:"\w+\s*"`
 	BalanceType     string  `index:"4" re:"\*\w+\s*"`
-	Direction       string  `index:"5" re:"\*out\s*"`
+	Directions      string  `index:"5" re:""`
 	Category        string  `index:"6" re:"\*?\w+\s*"`
 	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
 	RatingSubject   string  `index:"8" re:"\w+\s*"`
@@ -193,7 +193,7 @@ type TpActionTrigger struct {
 	MinSleep               string  `index:"5" re:"\d+[smh]?"`
 	BalanceTag             string  `index:"6" re:"\w+\s*"`
 	BalanceType            string  `index:"7" re:"\*\w+"`
-	BalanceDirection       string  `index:"8" re:"\*out"`
+	BalanceDirections      string  `index:"8" re:"\*out"`
 	BalanceCategory        string  `index:"9" re:"\w+|\*any"`
 	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
 	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`

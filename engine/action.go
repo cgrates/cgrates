@@ -41,7 +41,6 @@ type Action struct {
 	Id               string
 	ActionType       string
 	BalanceType      string
-	Direction        string
 	ExtraParameters  string
 	ExpirationString string
 	Weight           float64
@@ -78,7 +77,6 @@ func (a *Action) Clone() *Action {
 		Id:               a.Id,
 		ActionType:       a.ActionType,
 		BalanceType:      a.BalanceType,
-		Direction:        a.Direction,
 		ExtraParameters:  a.ExtraParameters,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
@@ -176,7 +174,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "balance_value":
 			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.GetValue(), 'f', -1, 64))
 		case "destination_id":
-			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds)
+			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds.String())
 		case "extra_params":
 			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
 		case "rating_subject":
@@ -362,7 +360,7 @@ func resetCounterAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Act
 	}
 	uc := ub.getUnitCounter(a)
 	if uc == nil {
-		uc = &UnitsCounter{BalanceType: a.BalanceType, Direction: a.Direction}
+		uc = &UnitsCounter{BalanceType: a.BalanceType}
 		ub.UnitCounters = append(ub.UnitCounters, uc)
 	}
 	uc.initBalances(ub.ActionTriggers)

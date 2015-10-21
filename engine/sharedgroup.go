@@ -90,7 +90,7 @@ func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChai
 }
 
 // Returns all shared group's balances collected from user accounts'
-func (sg *SharedGroup) GetBalances(destination, category, balanceType string, ub *Account) (bc BalanceChain) {
+func (sg *SharedGroup) GetBalances(destination, category, direction, balanceType string, ub *Account) (bc BalanceChain) {
 	//	if len(sg.members) == 0 {
 	for _, ubId := range sg.MemberIds {
 		var nUb *Account
@@ -103,7 +103,7 @@ func (sg *SharedGroup) GetBalances(destination, category, balanceType string, ub
 			}
 		}
 		//sg.members = append(sg.members, nUb)
-		sb := nUb.getBalancesForPrefix(destination, category, nUb.BalanceMap[balanceType], sg.Id)
+		sb := nUb.getBalancesForPrefix(destination, category, direction, nUb.BalanceMap[balanceType], sg.Id)
 		bc = append(bc, sb...)
 	}
 	/*	} else {
