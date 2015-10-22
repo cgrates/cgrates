@@ -91,16 +91,9 @@ func (b *Balance) MatchFilter(o *Balance) bool {
 		(o.SharedGroup == "" || b.SharedGroup == o.SharedGroup)
 }
 
-// the default balance has no destinationid, Expirationdate or ratesubject
+// the default balance has standard Id
 func (b *Balance) IsDefault() bool {
-	return (len(b.DestinationIds) == 0 || b.DestinationIds[utils.ANY] == true) &&
-		len(b.Directions) == 0 &&
-		b.RatingSubject == "" &&
-		b.Category == "" &&
-		b.ExpirationDate.IsZero() &&
-		b.SharedGroup == "" &&
-		b.Weight == 0 &&
-		b.Disabled == false
+	return b.Id == utils.META_DEFAULT
 }
 
 func (b *Balance) IsExpired() bool {

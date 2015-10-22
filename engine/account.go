@@ -118,8 +118,17 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	}
 	// if it is not found then we add it to the list
 	if !found {
-		if bClone.GetValue() != 0 {
-			bClone.SetValue(-bClone.GetValue())
+		// check if the Id is *default (user trying to create the default balance)
+		// use only it's value value
+		if bClone.Id == utils.META_DEFAULT {
+			bClone = &Balance{
+				Id:    utils.META_DEFAULT,
+				Value: -bClone.GetValue(),
+			}
+		} else {
+			if bClone.GetValue() != 0 {
+				bClone.SetValue(-bClone.GetValue())
+			}
 		}
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
 		if bClone.Uuid == "" {
@@ -399,8 +408,8 @@ func (ub *Account) GetDefaultMoneyBalance() *Balance {
 	}
 	// create default balance
 	defaultBalance := &Balance{
-		Uuid:   "D" + utils.GenUUID()[1:],
-		Weight: 0,
+		Uuid: utils.GenUUID(),
+		Id:   utils.META_DEFAULT,
 	} // minimum weight
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
