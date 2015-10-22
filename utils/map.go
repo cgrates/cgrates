@@ -97,6 +97,18 @@ func (sm StringMap) Equal(om StringMap) bool {
 	return true
 }
 
+func (sm StringMap) Includes(om StringMap) bool {
+	if len(sm) < len(om) {
+		return false
+	}
+	for key := range om {
+		if !sm[key] {
+			return false
+		}
+	}
+	return true
+}
+
 func (sm StringMap) Clone() StringMap {
 	result := make(StringMap, len(sm))
 	for k := range sm {

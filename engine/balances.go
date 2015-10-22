@@ -84,9 +84,9 @@ func (b *Balance) MatchFilter(o *Balance) bool {
 	}
 	return (o.ExpirationDate.IsZero() || b.ExpirationDate.Equal(o.ExpirationDate)) &&
 		(o.Weight == 0 || b.Weight == o.Weight) &&
-		(len(o.DestinationIds) == 0 || b.DestinationIds.Equal(o.DestinationIds)) &&
-		(len(o.Directions) == 0 || b.Directions.Equal(o.Directions)) &&
-		(len(o.Categories) == 0 || b.Categories.Equal(o.Categories)) &&
+		(len(o.DestinationIds) == 0 || b.DestinationIds.Includes(o.DestinationIds)) &&
+		(len(o.Directions) == 0 || b.Directions.Includes(o.Directions)) &&
+		(len(o.Categories) == 0 || b.Categories.Includes(o.Categories)) &&
 		(o.RatingSubject == "" || b.RatingSubject == o.RatingSubject) &&
 		(o.SharedGroup == "" || b.SharedGroup == o.SharedGroup)
 }
