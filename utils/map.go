@@ -105,7 +105,7 @@ func (sm StringMap) Clone() StringMap {
 	return result
 }
 
-func (sm StringMap) Keys() []string {
+func (sm StringMap) Slice() []string {
 	result := make([]string, len(sm))
 	i := 0
 	for k := range sm {
@@ -116,5 +116,5 @@ func (sm StringMap) Keys() []string {
 }
 
 func (sm StringMap) String() string {
-	return strings.Join(sm.Keys(), INFIELD_SEP)
+	return strings.Join(sm.Slice(), INFIELD_SEP)
 }

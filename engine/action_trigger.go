@@ -43,7 +43,7 @@ type ActionTrigger struct {
 	BalanceExpirationDate time.Time       // filter for balance
 	BalanceTimingTags     string          // filter for balance
 	BalanceRatingSubject  string          // filter for balance
-	BalanceCategory       string          // filter for balance
+	BalanceCategories     utils.StringMap // filter for balance
 	BalanceSharedGroup    string          // filter for balance
 	BalanceDisabled       bool            // filter for balance
 	Weight                float64
@@ -110,7 +110,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		return match
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
-	thresholdType, thresholdValue, direction, destinationId, weight, ratingSubject, category, sharedGroup, disabled := true, true, true, true, true, true, true, true, true
+	thresholdType, thresholdValue, direction, destinationId, weight, ratingSubject, categories, sharedGroup, disabled := true, true, true, true, true, true, true, true, true
 	if a.ExtraParameters != "" {
 		t := struct {
 			ThresholdType        string
@@ -119,7 +119,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 			BalanceDirections    string
 			BalanceWeight        float64
 			BalanceRatingSubject string
-			BalanceCategory      string
+			BalanceCategories    string
 			BalanceSharedGroup   string
 			BalanceDisabled      bool
 		}{}
@@ -128,13 +128,13 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
 		direction = len(t.BalanceDirections) == 0 || at.BalanceDirections.Equal(utils.ParseStringMap(t.BalanceDirections))
 		destinationId = len(t.DestinationIds) == 0 || at.BalanceDestinationIds.Equal(utils.ParseStringMap(t.DestinationIds))
+		categories = len(t.BalanceCategories) == 0 || at.BalanceCategories.Equal(utils.ParseStringMap(t.BalanceCategories))
 		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
 		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
-		category = t.BalanceCategory == "" || at.BalanceCategory == t.BalanceCategory
 		sharedGroup = t.BalanceSharedGroup == "" || at.BalanceSharedGroup == t.BalanceSharedGroup
 		disabled = at.BalanceDisabled == t.BalanceDisabled
 	}
-	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && category && sharedGroup && disabled
+	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && categories && sharedGroup && disabled
 }
 
 // makes a shallow copy of the receiver

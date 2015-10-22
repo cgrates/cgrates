@@ -159,7 +159,7 @@ type TpAction struct {
 	BalanceTag      string  `index:"3" re:"\w+\s*"`
 	BalanceType     string  `index:"4" re:"\*\w+\s*"`
 	Directions      string  `index:"5" re:""`
-	Category        string  `index:"6" re:"\*?\w+\s*"`
+	Categories      string  `index:"6" re:""`
 	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
 	RatingSubject   string  `index:"8" re:"\w+\s*"`
 	SharedGroup     string  `index:"9" re:"[0-9A-Za-z_;]*"`
@@ -194,7 +194,7 @@ type TpActionTrigger struct {
 	BalanceTag             string  `index:"6" re:"\w+\s*"`
 	BalanceType            string  `index:"7" re:"\*\w+"`
 	BalanceDirections      string  `index:"8" re:"\*out"`
-	BalanceCategory        string  `index:"9" re:"\w+|\*any"`
+	BalanceCategories      string  `index:"9" re:""`
 	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
 	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
 	BalanceSharedGroup     string  `index:"12" re:"\w+|\*any"`

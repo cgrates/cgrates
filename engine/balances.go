@@ -40,7 +40,7 @@ type Balance struct {
 	Weight         float64
 	DestinationIds utils.StringMap
 	RatingSubject  string
-	Category       string
+	Categories     utils.StringMap
 	SharedGroup    string
 	Timings        []*RITiming
 	TimingIDs      string
@@ -64,7 +64,7 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.DestinationIds.Equal(o.DestinationIds) &&
 		b.Directions.Equal(o.Directions) &&
 		b.RatingSubject == o.RatingSubject &&
-		b.Category == o.Category &&
+		b.Categories.Equal(o.Categories) &&
 		b.SharedGroup == o.SharedGroup &&
 		b.Disabled == o.Disabled
 }
@@ -86,8 +86,8 @@ func (b *Balance) MatchFilter(o *Balance) bool {
 		(o.Weight == 0 || b.Weight == o.Weight) &&
 		(len(o.DestinationIds) == 0 || b.DestinationIds.Equal(o.DestinationIds)) &&
 		(len(o.Directions) == 0 || b.Directions.Equal(o.Directions)) &&
+		(len(o.Categories) == 0 || b.Categories.Equal(o.Categories)) &&
 		(o.RatingSubject == "" || b.RatingSubject == o.RatingSubject) &&
-		(o.Category == "" || b.Category == o.Category) &&
 		(o.SharedGroup == "" || b.SharedGroup == o.SharedGroup)
 }
 
@@ -120,7 +120,7 @@ func (b *Balance) IsActiveAt(t time.Time) bool {
 }
 
 func (b *Balance) MatchCategory(category string) bool {
-	return b.Category == "" || b.Category == category
+	return len(b.Categories) == 0 || b.Categories[category] == true
 }
 
 func (b *Balance) HasDestination() bool {
@@ -183,7 +183,7 @@ func (b *Balance) Clone() *Balance {
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
-		Category:       b.Category,
+		Categories:     b.Categories,
 		SharedGroup:    b.SharedGroup,
 		TimingIDs:      b.TimingIDs,
 		Timings:        b.Timings, // should not be a problem with aliasing
@@ -317,7 +317,7 @@ func (b *Balance) SetValue(amount float64) {
 			"DestinationIds":       b.DestinationIds.String(),
 			"Directions":           b.Directions.String(),
 			"RatingSubject":        b.RatingSubject,
-			"Category":             b.Category,
+			"Categories":           b.Categories.String(),
 			"SharedGroup":          b.SharedGroup,
 			"TimingIDs":            b.TimingIDs,
 			"Account":              accountId,

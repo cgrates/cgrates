@@ -43,8 +43,9 @@ func TestBalanceStoreRestore(t *testing.T) {
 	if err != nil {
 		t.Error("Error restoring balance: ", err)
 	}
+	t.Logf("INITIAL: %+v", b)
 	if !b.Equal(b1) {
-		t.Errorf("Balance store/restore failed: expected %v was %v", b, b1)
+		t.Errorf("Balance store/restore failed: expected %+v was %+v", b, b1)
 	}
 }
 
@@ -184,7 +185,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 		TOR:          utils.VOICE,
 		testCallcost: cc,
 	}
-	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{b1}, utils.MONETARY: BalanceChain{&Balance{Category: "0", Value: 21}}}}
+	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{b1}, utils.MONETARY: BalanceChain{&Balance{Categories: utils.NewStringMap("0"), Value: 21}}}}
 	var err error
 	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
 	if err != nil {
@@ -643,7 +644,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 }
 
 func TestDebitCreditSubjectMinutes(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Category: "0", Value: 250, Weight: 10, DestinationIds: utils.StringMap{"NAT": true}, RatingSubject: "minu"}
+	b1 := &Balance{Uuid: "testb", Categories: utils.NewStringMap("0"), Value: 250, Weight: 10, DestinationIds: utils.StringMap{"NAT": true}, RatingSubject: "minu"}
 	cc := &CallCost{
 		Tenant:      "vdf",
 		Category:    "0",
