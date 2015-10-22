@@ -235,6 +235,10 @@ func TestBalanceMatchActionTriggerSharedGroup(t *testing.T) {
 
 func TestBalanceIsDefault(t *testing.T) {
 	b := &Balance{Weight: 0}
+	if b.IsDefault() {
+		t.Errorf("Balance should not be default: %+v", b)
+	}
+	b = &Balance{Id: utils.META_DEFAULT}
 	if !b.IsDefault() {
 		t.Errorf("Balance should be default: %+v", b)
 	}
