@@ -307,32 +307,6 @@ func (b *Balance) SetValue(amount float64) {
 	b.Value = amount
 	b.Value = utils.Round(b.GetValue(), globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	b.dirty = true
-
-	// publish event
-	accountId := ""
-	allowNegative := ""
-	disabled := ""
-	if b.account != nil { // only publish modifications for balances with account set
-		accountId = b.account.Id
-		allowNegative = strconv.FormatBool(b.account.AllowNegative)
-		disabled = strconv.FormatBool(b.account.Disabled)
-		Publish(CgrEvent{
-			"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
-			"Uuid":                 b.Uuid,
-			"Id":                   b.Id,
-			"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
-			"ExpirationDate":       b.ExpirationDate.String(),
-			"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
-			"DestinationIds":       b.DestinationIds,
-			"RatingSubject":        b.RatingSubject,
-			"Category":             b.Category,
-			"SharedGroup":          b.SharedGroup,
-			"TimingIDs":            b.TimingIDs,
-			"Account":              accountId,
-			"AccountAllowNegative": allowNegative,
-			"AccountDisabled":      disabled,
-		})
-	}
 }
 
 func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun bool) (cc *CallCost, err error) {
@@ -669,10 +643,39 @@ func (bc BalanceChain) HasBalance(balance *Balance) bool {
 }
 
 func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
+	savedAccounts := make(map[string]bool)
 	for _, b := range bc {
-		// TODO: check if the account was not already saved ?
-		if b.account != nil && b.account != acc && b.dirty {
+		if b.dirty {
+			// publish event
+			accountId := ""
+			allowNegative := ""
+			disabled := ""
+			if b.account != nil { // only publish modifications for balances with account set
+				//debug.PrintStack()
+				accountId = b.account.Id
+				allowNegative = strconv.FormatBool(b.account.AllowNegative)
+				disabled = strconv.FormatBool(b.account.Disabled)
+				Publish(CgrEvent{
+					"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
+					"Uuid":                 b.Uuid,
+					"Id":                   b.Id,
+					"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
+					"ExpirationDate":       b.ExpirationDate.String(),
+					"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
+					"DestinationIds":       b.DestinationIds,
+					"RatingSubject":        b.RatingSubject,
+					"Category":             b.Category,
+					"SharedGroup":          b.SharedGroup,
+					"TimingIDs":            b.TimingIDs,
+					"Account":              accountId,
+					"AccountAllowNegative": allowNegative,
+					"AccountDisabled":      disabled,
+				})
+			}
+		}
+		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.Id] == false {
 			accountingStorage.SetAccount(b.account)
+			savedAccounts[b.account.Id] = true
 		}
 	}
 }
