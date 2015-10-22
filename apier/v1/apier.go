@@ -165,14 +165,14 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 		&engine.Action{
 			ActionType:  aType,
 			BalanceType: attr.BalanceType,
-			Direction:   attr.Direction,
 			Balance: &engine.Balance{
 				Uuid:           attr.BalanceUuid,
 				Id:             attr.BalanceId,
 				Value:          attr.Value,
 				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
-				DestinationIds: attr.DestinationId,
+				Directions:     utils.ParseStringMap(attr.Direction),
+				DestinationIds: utils.ParseStringMap(attr.DestinationId),
 				Weight:         attr.Weight,
 				SharedGroup:    attr.SharedGroup,
 				Disabled:       attr.Disabled,
@@ -207,14 +207,14 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 		&engine.Action{
 			ActionType:  engine.ENABLE_DISABLE_BALANCE,
 			BalanceType: attr.BalanceType,
-			Direction:   attr.Direction,
 			Balance: &engine.Balance{
 				Uuid:           attr.BalanceUuid,
 				Id:             attr.BalanceId,
 				Value:          attr.Value,
 				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
-				DestinationIds: attr.DestinationId,
+				Directions:     utils.ParseStringMap(attr.Direction),
+				DestinationIds: utils.ParseStringMap(attr.DestinationId),
 				Weight:         attr.Weight,
 				SharedGroup:    attr.SharedGroup,
 				Disabled:       attr.Disabled,
@@ -616,7 +616,6 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 			Id:               utils.GenUUID(),
 			ActionType:       apiAct.Identifier,
 			BalanceType:      apiAct.BalanceType,
-			Direction:        apiAct.Direction,
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
 			ExtraParameters:  apiAct.ExtraParameters,
@@ -625,7 +624,8 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 				Id:             apiAct.BalanceId,
 				Value:          apiAct.Units,
 				Weight:         apiAct.BalanceWeight,
-				DestinationIds: apiAct.DestinationIds,
+				Directions:     utils.ParseStringMap(apiAct.Directions),
+				DestinationIds: utils.ParseStringMap(apiAct.DestinationIds),
 				RatingSubject:  apiAct.RatingSubject,
 				SharedGroup:    apiAct.SharedGroup,
 			},
@@ -653,14 +653,14 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 	for _, engAct := range engActs {
 		act := &utils.TPAction{Identifier: engAct.ActionType,
 			BalanceType:     engAct.BalanceType,
-			Direction:       engAct.Direction,
 			ExpiryTime:      engAct.ExpirationString,
 			ExtraParameters: engAct.ExtraParameters,
 			Weight:          engAct.Weight,
 		}
 		if engAct.Balance != nil {
 			act.Units = engAct.Balance.GetValue()
-			act.DestinationIds = engAct.Balance.DestinationIds
+			act.Directions = engAct.Balance.Directions.String()
+			act.DestinationIds = engAct.Balance.DestinationIds.String()
 			act.RatingSubject = engAct.Balance.RatingSubject
 			act.SharedGroup = engAct.Balance.SharedGroup
 			act.BalanceWeight = engAct.Balance.Weight
@@ -773,8 +773,8 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		ThresholdValue:        attr.ThresholdValue,
 		BalanceId:             attr.BalanceId,
 		BalanceType:           attr.BalanceType,
-		BalanceDirection:      attr.BalanceDirection,
-		BalanceDestinationIds: attr.BalanceDestinationIds,
+		BalanceDirections:     utils.ParseStringMap(attr.BalanceDirection),
+		BalanceDestinationIds: utils.ParseStringMap(attr.BalanceDestinationIds),
 		BalanceWeight:         attr.BalanceWeight,
 		BalanceExpirationDate: balExpiryTime,
 		Weight:                attr.Weight,
@@ -808,7 +808,7 @@ type AttrResetTriggeredAction struct {
 	Id                   string
 	Tenant               string
 	Account              string
-	Direction            string
+	Directions           string
 	BalanceType          string
 	ThresholdType        string
 	ThresholdValue       float64
@@ -824,21 +824,20 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 		// we can identify the trigge by the id
 		a = &engine.Action{Id: attr.Id}
 	} else {
-		if attr.Direction == "" {
-			attr.Direction = utils.OUT
-		}
 		extraParameters, err := json.Marshal(struct {
 			ThresholdType        string
 			ThresholdValue       float64
 			DestinationId        string
 			BalanceWeight        float64
 			BalanceRatingSubject string
+			BalanceDirections    string
 			BalanceSharedGroup   string
 		}{
 			attr.ThresholdType,
 			attr.ThresholdValue,
 			attr.DestinationId,
 			attr.BalanceWeight,
+			attr.Directions,
 			attr.BalanceRatingSubject,
 			attr.BalanceSharedGroup,
 		})
@@ -848,7 +847,6 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 		}
 		a = &engine.Action{
 			BalanceType:     attr.BalanceType,
-			Direction:       attr.Direction,
 			ExtraParameters: string(extraParameters),
 		}
 	}
