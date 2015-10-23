@@ -115,20 +115,20 @@ func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 }
 
 type AttrAddBalance struct {
-	Tenant        string
-	Account       string
-	BalanceUuid   string
-	BalanceId     string
-	BalanceType   string
-	Direction     string
-	Value         float64
-	ExpiryTime    string
-	RatingSubject string
-	DestinationId string
-	Weight        float64
-	SharedGroup   string
-	Overwrite     bool // When true it will reset if the balance is already there
-	Disabled      bool
+	Tenant         string
+	Account        string
+	BalanceUuid    string
+	BalanceId      string
+	BalanceType    string
+	Directions     string
+	Value          float64
+	ExpiryTime     string
+	RatingSubject  string
+	DestinationIds string
+	Weight         float64
+	SharedGroup    string
+	Overwrite      bool // When true it will reset if the balance is already there
+	Disabled       bool
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
@@ -137,7 +137,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 		*reply = err.Error()
 		return err
 	}
-	tag := utils.ConcatenatedKey(attr.Direction, attr.Tenant, attr.Account)
+	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
 		account := &engine.Account{
@@ -171,8 +171,8 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				Value:          attr.Value,
 				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
-				Directions:     utils.ParseStringMap(attr.Direction),
-				DestinationIds: utils.ParseStringMap(attr.DestinationId),
+				Directions:     utils.ParseStringMap(attr.Directions),
+				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
 				Weight:         attr.Weight,
 				SharedGroup:    attr.SharedGroup,
 				Disabled:       attr.Disabled,
@@ -193,15 +193,12 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 		*reply = err.Error()
 		return err
 	}
-	tag := utils.ConcatenatedKey(attr.Direction, attr.Tenant, attr.Account)
+	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		return utils.ErrNotFound
 	}
 	at := &engine.ActionPlan{
 		AccountIds: []string{tag},
-	}
-	if attr.Direction == "" {
-		attr.Direction = utils.OUT
 	}
 	at.SetActions(engine.Actions{
 		&engine.Action{
@@ -213,8 +210,8 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 				Value:          attr.Value,
 				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
-				Directions:     utils.ParseStringMap(attr.Direction),
-				DestinationIds: utils.ParseStringMap(attr.DestinationId),
+				Directions:     utils.ParseStringMap(attr.Directions),
+				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
 				Weight:         attr.Weight,
 				SharedGroup:    attr.SharedGroup,
 				Disabled:       attr.Disabled,
