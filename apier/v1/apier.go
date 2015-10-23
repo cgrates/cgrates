@@ -151,9 +151,6 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	at := &engine.ActionPlan{
 		AccountIds: []string{tag},
 	}
-	if attr.Direction == "" {
-		attr.Direction = utils.OUT
-	}
 	aType := engine.DEBIT
 	// reverse the sign as it is a debit
 	attr.Value = -attr.Value
@@ -227,7 +224,7 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 }
 
 func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
-	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
+	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
 	at := &engine.ActionPlan{
 		AccountIds: []string{tag},
 		ActionsId:  attr.ActionsId,
@@ -905,7 +902,6 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	self.Sched.Restart()
 	*reply = OK
 	return nil
-
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {

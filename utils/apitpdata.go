@@ -1098,7 +1098,6 @@ type AttrSetActions struct {
 }
 
 type AttrExecuteAction struct {
-	Direction string
 	Tenant    string
 	Account   string
 	ActionsId string
