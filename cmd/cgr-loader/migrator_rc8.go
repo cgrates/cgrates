@@ -60,6 +60,16 @@ type Balance struct {
 	dirty          bool
 }
 
+func (b *Balance) IsDefault() bool {
+	return (b.DestinationIds == "" || b.DestinationIds == utils.ANY) &&
+		b.RatingSubject == "" &&
+		b.Category == "" &&
+		b.ExpirationDate.IsZero() &&
+		b.SharedGroup == "" &&
+		b.Weight == 0 &&
+		b.Disabled == false
+}
+
 type UnitsCounter struct {
 	Direction   string
 	BalanceType string
@@ -146,6 +156,10 @@ func (mig MigratorRC8) migrateAccounts() error {
 			newBalDirection := "*" + keyElements[2]
 			newAcc.BalanceMap[newBalKey] = make(engine.BalanceChain, len(oldBalChain))
 			for index, oldBal := range oldBalChain {
+				// check default to set new id
+				if oldBal.IsDefault() {
+					oldBal.Id = utils.META_DEFAULT
+				}
 				newAcc.BalanceMap[newBalKey][index] = &engine.Balance{
 					Uuid:           oldBal.Uuid,
 					Id:             oldBal.Id,
@@ -226,7 +240,9 @@ func (mig MigratorRC8) migrateAccounts() error {
 	}
 	// delete old data
 	utils.Logger.Info(fmt.Sprintf("Deleting old accounts: %s...", OLD_ACCOUNT_PREFIX+"*"))
-	_, err = mig.db.Del(OLD_ACCOUNT_PREFIX + "*")
+	for _, key := range keys {
+		_, err = mig.db.Del(key)
+	}
 	return err
 }
 
