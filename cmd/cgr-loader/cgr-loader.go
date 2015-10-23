@@ -35,7 +35,7 @@ import (
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
-	migrateRC8   = flag.Bool("migrate_rc8", false, "Migrate Accounts and ActionTriggers to RC8 structures")
+	migrateRC8   = flag.Bool("migrate_rc8", false, "Migrate Accounts, Actions and ActionTriggers to RC8 structures")
 	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
 	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
 	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
@@ -120,16 +120,20 @@ func main() {
 		if *tpdb_port != "" {
 			host += ":" + *tpdb_port
 		}
-		migratorRC8atr, err := NewMigratorRC8(host, db_nb, *tpdb_pass, *dbdata_encoding)
+		migratorRC8rat, err := NewMigratorRC8(host, db_nb, *tpdb_pass, *dbdata_encoding)
 		if err != nil {
 			utils.Logger.Crit(err.Error())
 			return
 		}
-		if err := migratorRC8atr.migrateActionTriggers(); err != nil {
+		if err := migratorRC8rat.migrateActionTriggers(); err != nil {
 			utils.Logger.Crit(err.Error())
 			return
 		}
-
+		if err := migratorRC8rat.migrateActions(); err != nil {
+			utils.Logger.Crit(err.Error())
+			return
+		}
+		utils.Logger.Info("Done!")
 		return
 	}
 	// Init necessary db connections, only if not already
