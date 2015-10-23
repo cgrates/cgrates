@@ -1105,7 +1105,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
-		dta, _ := utils.NewDTAFromAccountKey(acnt.Id)
+		dta, _ := utils.NewTAFromAccountKey(acnt.Id)
 		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
 			t.Error("Unexpected account id received: ", acnt.Id)
 		}
@@ -1134,7 +1134,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
-		dta, _ := utils.NewDTAFromAccountKey(acnt.Id)
+		dta, _ := utils.NewTAFromAccountKey(acnt.Id)
 		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
 			t.Error("Unexpected account id received: ", acnt.Id)
 		}

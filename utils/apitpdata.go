@@ -804,16 +804,16 @@ type AttrDerivedChargers struct {
 	Direction, Tenant, Category, Account, Subject string
 }
 
-func NewDTAFromAccountKey(accountKey string) (*DirectionTenantAccount, error) {
+func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
 	accountSplt := strings.Split(accountKey, CONCATENATED_KEY_SEP)
-	if len(accountSplt) != 3 {
-		return nil, fmt.Errorf("Unsupported format for DirectionTenantAccount: %s", accountKey)
+	if len(accountSplt) != 2 {
+		return nil, fmt.Errorf("Unsupported format for TenantAccount: %s", accountKey)
 	}
-	return &DirectionTenantAccount{accountSplt[0], accountSplt[1], accountSplt[2]}, nil
+	return &TenantAccount{accountSplt[0], accountSplt[1]}, nil
 }
 
-type DirectionTenantAccount struct {
-	Direction, Tenant, Account string
+type TenantAccount struct {
+	Tenant, Account string
 }
 
 func NewDTCSFromRPKey(rpKey string) (*DirectionTenantCategorySubject, error) {

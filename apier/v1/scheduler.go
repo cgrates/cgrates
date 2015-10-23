@@ -98,14 +98,14 @@ import (
 */
 
 type AttrsGetScheduledActions struct {
-	Direction, Tenant, Account string
-	TimeStart, TimeEnd         time.Time // Filter based on next runTime
+	Tenant, Account    string
+	TimeStart, TimeEnd time.Time // Filter based on next runTime
 	utils.Paginator
 }
 
 type ScheduledActions struct {
 	NextRunTime                             time.Time
-	Accounts                                []*utils.DirectionTenantAccount
+	Accounts                                []*utils.TenantAccount
 	ActionsId, ActionPlanId, ActionPlanUuid string
 }
 
@@ -142,22 +142,18 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 		}
 		acntFiltersMatch := false
 		for _, acntKey := range qActions.AccountIds {
-			directionMatched := len(attrs.Direction) == 0
 			tenantMatched := len(attrs.Tenant) == 0
 			accountMatched := len(attrs.Account) == 0
-			dta, _ := utils.NewDTAFromAccountKey(acntKey)
+			dta, _ := utils.NewTAFromAccountKey(acntKey)
 			sas.Accounts = append(sas.Accounts, dta)
 			// One member matching
-			if !directionMatched && attrs.Direction == dta.Direction {
-				directionMatched = true
-			}
 			if !tenantMatched && attrs.Tenant == dta.Tenant {
 				tenantMatched = true
 			}
 			if !accountMatched && attrs.Account == dta.Account {
 				accountMatched = true
 			}
-			if directionMatched && tenantMatched && accountMatched {
+			if tenantMatched && accountMatched {
 				acntFiltersMatch = true
 			}
 		}
