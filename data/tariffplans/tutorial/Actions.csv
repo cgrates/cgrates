@@ -1,4 +1,4 @@
-#ActionsId[0],Action[1],ExtraParameters[2],BalanceId[3],BalanceType[4],Direction[5],Category[6],DestinationId[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceDisabled[14],Weight[15]
+#ActionsId[0],Action[1],ExtraParameters[2],BalanceId[3],BalanceType[4],Directions[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceDisabled[14],Weight[15]
 TOPUP_RST_10,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,10,10,false,10
 TOPUP_RST_5,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,5,20,false,10
 TOPUP_RST_5,*topup_reset,,,*voice,*out,,DST_1002,SPECIAL_1002,,*unlimited,,90,20,false,10
