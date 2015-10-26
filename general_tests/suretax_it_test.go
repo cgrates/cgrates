@@ -76,6 +76,7 @@ func TestSTIResetStorDb(t *testing.T) {
 	}
 }
 
+/*
 // Start CGR Engine
 func TestSTIStartEngine(t *testing.T) {
 	if !*testSureTax {
@@ -85,6 +86,7 @@ func TestSTIStartEngine(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+*/
 
 // Connect rpc client to rater
 func TestSTIRpcConn(t *testing.T) {
@@ -92,7 +94,7 @@ func TestSTIRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	stiRpc, err = jsonrpc.Dial("tcp", stiCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	stiRpc, err = jsonrpc.Dial("tcp", "172.16.254.70:2012") // We connect over JSON so we can also troubleshoot if needed // stiCfg.RPCJSONListen
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +147,7 @@ func TestSTIProcessExternalCdr(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(2) * time.Second)
 }
 
 func TestSTIGetCdrs(t *testing.T) {
@@ -163,8 +165,19 @@ func TestSTIGetCdrs(t *testing.T) {
 			t.Errorf("Unexpected Cost for CDR: %+v", cdrs[0])
 		}
 	}
+	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_SURETAX}, Accounts: []string{"1001"}}
+	if err := stiRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.012 {
+			t.Errorf("Unexpected Cost for CDR: %+v", cdrs[0])
+		}
+	}
 }
 
+/*
 func TestSTIStopCgrEngine(t *testing.T) {
 	if !*testSureTax {
 		return
@@ -173,3 +186,4 @@ func TestSTIStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+*/

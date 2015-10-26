@@ -51,7 +51,7 @@ func NewSureTaxRequest(cdr *StoredCdr, stCfg *config.SureTaxCfg) (*SureTaxReques
 	if len(definedTaxExtempt) != 0 {
 		taxExempt = strings.Split(cdr.FieldsAsString(stCfg.TaxExemptionCodeList), ",")
 	}
-	stReq := new(SureTaxRequest)
+	stReq := new(STRequest)
 	stReq.ClientNumber = stCfg.ClientNumber
 	stReq.BusinessUnit = "" // Export it to config
 	stReq.ValidationKey = stCfg.ValidationKey
@@ -85,11 +85,15 @@ func NewSureTaxRequest(cdr *StoredCdr, stCfg *config.SureTaxCfg) (*SureTaxReques
 			TaxExemptionCodeList: taxExempt,
 		},
 	}
-	return stReq, nil
+	return &SureTaxRequest{Request: stReq}, nil
+}
+
+type SureTaxRequest struct {
+	Request *STRequest // SureTax Requires us to encapsulate the content into a request element
 }
 
 // SureTax Request type
-type SureTaxRequest struct {
+type STRequest struct {
 	ClientNumber      string           // Client ID Number – provided by SureTax. Required. Max Len: 10
 	BusinessUnit      string           // Client’s Business Unit. Value for this field is not required. Max Len: 20
 	ValidationKey     string           // Validation Key provided by SureTax. Required for client access to API function. Max Len: 36
@@ -131,6 +135,10 @@ type STRequestItem struct {
 
 // SureTax Response type
 type SureTaxResponse struct {
+	D *STResponse // SureTax requires encapsulating reply into a D object
+}
+
+type STResponse struct {
 	Successful     string           // Response will be either ‘Y' or ‘N' : Y = Success / Success with Item error N = Failure
 	ResponseCode   int64            // ResponseCode: 9999 – Request was successful. 1101-1400 – Range of values for a failed request (no processing occurred) 9001 – Request was successful, but items within the request have errors. The specific items with errors are provided in the ItemMessages field.
 	HeaderMessage  string           // Response message: For ResponseCode 9999 – “Success”For ResponseCode 9001 – “Success with Item errors”.  For ResponseCode 1100-1400 – Unsuccessful / declined web request.
@@ -164,6 +172,7 @@ type STTaxItem struct {
 }
 
 func SureTaxProcessCdr(cdr *StoredCdr) error {
+	fmt.Printf("SureTaxProcessCdr, cdr: %+v\n", cdr)
 	stCfg := config.CgrConfig().SureTaxCfg()
 	if stCfg == nil {
 		return errors.New("Invalid SureTax configuration")
@@ -182,34 +191,36 @@ func SureTaxProcessCdr(cdr *StoredCdr) error {
 	if err != nil {
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("###SureTax NewSureTaxRequest to: %s, body: %+v, ItemList: %+v\n", stCfg.Url, req, req.ItemList[0]))
-	body := append([]byte("request="), jsnContent...)
-	resp, err := sureTaxClient.Post(stCfg.Url, "application/x-www-form-urlencoded", bytes.NewBuffer(body))
+	fmt.Printf("NewSureTaxRequest: %s\n", string(jsnContent))
+	resp, err := sureTaxClient.Post(stCfg.Url, "application/json", bytes.NewBuffer(jsnContent))
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		fmt.Printf("Unexpected response body received, error: %s\n", err.Error())
 		return err
 	}
 	if resp.StatusCode > 299 {
+		fmt.Printf("Unexpected code received: %d\n", resp.StatusCode)
 		return fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
 	}
+	fmt.Printf("Received raw answer from SureTax: %s\n", string(respBody))
 	var stResp SureTaxResponse
 	if err := json.Unmarshal(respBody, &stResp); err != nil {
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("###SureTax received response: %+v\n", stResp))
-	if stResp.ResponseCode != 9999 {
-		cdr.ExtraInfo = stResp.HeaderMessage
+	fmt.Printf("Received answer from SureTax: %+v\n", stResp)
+	if stResp.D.ResponseCode != 9999 {
+		cdr.ExtraInfo = stResp.D.HeaderMessage
 		return nil // No error because the request was processed by SureTax, error will be in the ExtraInfo
 	}
 	// Write cost to CDR
 	if !stCfg.IncludeLocalCost {
-		cdr.Cost = utils.Round(stResp.TotalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		cdr.Cost = utils.Round(stResp.D.TotalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
 	} else {
-		cdr.Cost = utils.Round(cdr.Cost+stResp.TotalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		cdr.Cost = utils.Round(cdr.Cost+stResp.D.TotalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
 	}
 	// Add response into extra fields to be available for later review
 	cdr.ExtraFields[utils.META_SURETAX] = string(respBody)

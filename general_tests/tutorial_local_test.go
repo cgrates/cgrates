@@ -663,7 +663,7 @@ func TestTutLocalCostErrors(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
 	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{cdr2.Account}, DestPrefixes: []string{cdr2.Destination}}
 	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
