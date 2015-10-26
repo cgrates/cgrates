@@ -137,7 +137,7 @@ func TestSTIProcessExternalCdr(t *testing.T) {
 		AccId: "teststicdr1", CdrHost: "192.168.1.1", CdrSource: "STI_TEST", ReqType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "+14082342500", Destination: "+16268412300", Supplier: "SUPPL1",
 		SetupTime: "2015-10-18T13:00:00Z", AnswerTime: "2015-10-18T13:00:00Z",
-		Usage: "15s", Pdd: "7.0", ExtraFields: map[string]string{"ClientNumber": "000000534", "": "valextr2"},
+		Usage: "15s", Pdd: "7.0", ExtraFields: map[string]string{"CustomerNumber": "000000534", "ZipCode": ""},
 	}
 	var reply string
 	if err := stiRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {

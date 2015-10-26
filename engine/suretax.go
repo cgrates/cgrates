@@ -26,7 +26,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 
@@ -130,17 +129,6 @@ type STRequestItem struct {
 	TaxExemptionCodeList []string // Required. Tax Exemption to be applied to this item only.
 }
 
-// Converts the request into the format SureTax expects
-func (self *SureTaxRequest) AsHttpForm() (url.Values, error) {
-	jsnContent, err := json.Marshal(self)
-	if err != nil {
-		return nil, err
-	}
-	v := url.Values{}
-	v.Set("request", string(jsnContent))
-	return v, nil
-}
-
 // SureTax Response type
 type SureTaxResponse struct {
 	Successful     string           // Response will be either ‘Y' or ‘N' : Y = Success / Success with Item error N = Failure
@@ -190,13 +178,13 @@ func SureTaxProcessCdr(cdr *StoredCdr) error {
 	if err != nil {
 		return err
 	}
-
-	body, err := json.Marshal(req)
+	jsnContent, err := json.Marshal(req)
 	if err != nil {
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("###SureTax NewSureTaxRequest: %+v, ItemList: %+v\n", req, req.ItemList[0]))
-	resp, err := sureTaxClient.Post(stCfg.Url, "application/json", bytes.NewBuffer(body))
+	utils.Logger.Debug(fmt.Sprintf("###SureTax NewSureTaxRequest to: %s, body: %+v, ItemList: %+v\n", stCfg.Url, req, req.ItemList[0]))
+	body := append([]byte("request="), jsnContent...)
+	resp, err := sureTaxClient.Post(stCfg.Url, "application/x-www-form-urlencoded", bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}
