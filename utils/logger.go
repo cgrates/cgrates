@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"log/syslog"
+	"runtime"
 )
 
 var Logger LoggerInterface
@@ -84,4 +85,10 @@ func (sl *StdLogger) Notice(m string) (err error) {
 func (sl *StdLogger) Warning(m string) (err error) {
 	log.Print("[WARNING]" + m)
 	return
+}
+
+func LogStack() {
+	buf := make([]byte, 300)
+	runtime.Stack(buf, false)
+	Logger.Debug(string(buf))
 }
