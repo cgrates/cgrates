@@ -70,7 +70,6 @@ func StartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 		return nil, err
 	}
 	engine := exec.Command(enginePath, "-config_dir", cfgPath)
-	engine.Stderr = os.Stderr
 	if err := engine.Start(); err != nil {
 		return nil, err
 	}

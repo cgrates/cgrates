@@ -122,6 +122,7 @@ func (ps *PubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
 func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 	ps.mux.Lock()
 	defer ps.mux.Unlock()
+	evt["Timestamp"] = time.Now().Format(time.RFC3339Nano)
 	for key, subData := range ps.subscribers {
 		if !subData.ExpTime.IsZero() && subData.ExpTime.Before(time.Now()) {
 			delete(ps.subscribers, key)

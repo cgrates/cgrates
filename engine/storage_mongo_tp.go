@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"regexp"
 	"strings"
 	"time"
 
@@ -48,7 +49,7 @@ func (ms *MongoStorage) GetTpTableIds(tpid, table string, distinct utils.TPDisti
 		var searchItems []bson.M
 		for _, d := range distinct {
 			searchItems = append(searchItems, bson.M{d: bson.RegEx{
-				Pattern: ".*" + pag.SearchTerm + ".*",
+				Pattern: ".*" + regexp.QuoteMeta(pag.SearchTerm) + ".*",
 				Options: ""}})
 		}
 		findMap["$and"] = []bson.M{bson.M{"$or": searchItems}}
@@ -720,12 +721,12 @@ func (ms *MongoStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCos
 }
 
 func (ms *MongoStorage) SetCdr(cdr *StoredCdr) error {
-	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CgrId}, cdr)
+	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CgrId, "mediationrunid": cdr.MediationRunId}, cdr)
 	return err
 }
 
 func (ms *MongoStorage) SetRatedCdr(storedCdr *StoredCdr) error {
-	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": storedCdr.CgrId}, storedCdr)
+	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": storedCdr.CgrId, "mediationrunid": storedCdr.MediationRunId}, storedCdr)
 	return err
 }
 
@@ -734,7 +735,8 @@ func (ms *MongoStorage) RemStoredCdrs(cgrIds []string) error {
 	if len(cgrIds) == 0 {
 		return nil
 	}
-	return ms.db.C(colCdrs).Update(bson.M{"cgrid": bson.M{"$in": cgrIds}}, map[string]interface{}{"deleted_at": time.Now()})
+	_, err := ms.db.C(colCdrs).UpdateAll(bson.M{"cgrid": bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
+	return err
 }
 
 func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
@@ -764,7 +766,7 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, int64, error) {
 	filters := bson.M{
 		"cgrid":            bson.M{"$in": qryFltr.CgrIds, "$nin": qryFltr.NotCgrIds},
-		"runid":            bson.M{"$in": qryFltr.RunIds, "$nin": qryFltr.NotRunIds},
+		"mediationrunid":   bson.M{"$in": qryFltr.RunIds, "$nin": qryFltr.NotRunIds},
 		"tor":              bson.M{"$in": qryFltr.Tors, "$nin": qryFltr.NotTors},
 		"cdrhost":          bson.M{"$in": qryFltr.CdrHosts, "$nin": qryFltr.NotCdrHosts},
 		"cdrsource":        bson.M{"$in": qryFltr.CdrSources, "$nin": qryFltr.NotCdrSources},
@@ -785,47 +787,40 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		"costdetails.account": bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
 		"costdetails.subject": bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
 	}
-
+	//file, _ := ioutil.TempFile(os.TempDir(), "debug")
+	//file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
+	//file.WriteString(fmt.Sprintf("BEFORE: %v\n", utils.ToIJSON(filters)))
 	ms.cleanEmptyFilters(filters)
 
-	if qryFltr.OrderIdStart != 0 {
+	/*if qryFltr.OrderIdStart != 0 {
 		filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
 	}
 	if qryFltr.OrderIdEnd != 0 {
 		if m, ok := filters["id"]; ok {
-			m.(bson.M)["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
+			m.(bson.M)["$gte"] = qryFltr.OrderIdStart
 		} else {
 			filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
 		}
-	}
+	}*/
 
-	var regexes []bson.RegEx
 	if len(qryFltr.DestPrefixes) != 0 {
+		var regexes []bson.RegEx
 		for _, prefix := range qryFltr.DestPrefixes {
-			regexes = append(regexes, bson.RegEx{Pattern: prefix + ".*"})
+			regexes = append(regexes, bson.RegEx{Pattern: regexp.QuoteMeta(prefix) + ".*"})
 		}
+		filters["destination"] = bson.M{"$in": regexes}
 	}
-	var notRegexes []bson.RegEx
 	if len(qryFltr.NotDestPrefixes) != 0 {
+		var notRegexes []bson.RegEx
 		for _, prefix := range qryFltr.DestPrefixes {
-			notRegexes = append(notRegexes, bson.RegEx{Pattern: prefix + ".*"})
+			notRegexes = append(notRegexes, bson.RegEx{Pattern: regexp.QuoteMeta(prefix) + ".*"})
+		}
+		if m, ok := filters["destination"]; ok {
+			m.(bson.M)["$nin"] = notRegexes
+		} else {
+			filters["destination"] = bson.M{"$nin": notRegexes}
 		}
 	}
-	filters["destination"] = bson.M{"$in": regexes, "$nin": notRegexes}
-
-	regexes = make([]bson.RegEx, 0)
-	if len(qryFltr.DestPrefixes) != 0 {
-		for _, prefix := range qryFltr.DestPrefixes {
-			regexes = append(regexes, bson.RegEx{Pattern: prefix + ".*"})
-		}
-	}
-	notRegexes = make([]bson.RegEx, 0)
-	if len(qryFltr.NotDestPrefixes) != 0 {
-		for _, prefix := range qryFltr.DestPrefixes {
-			notRegexes = append(notRegexes, bson.RegEx{Pattern: prefix + ".*"})
-		}
-	}
-	filters["destination"] = bson.M{"$in": regexes, "$nin": notRegexes}
 
 	if len(qryFltr.ExtraFields) != 0 {
 		var extrafields []bson.M
@@ -847,17 +842,21 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		if qryFltr.MaxCost == nil {
 			filters["cost"] = bson.M{"$gte": *qryFltr.MinCost}
 		} else if *qryFltr.MinCost == 0.0 && *qryFltr.MaxCost == -1.0 { // Special case when we want to skip errors
-			filters["cost"] = bson.M{"$or": []bson.M{bson.M{"$eq": nil}, bson.M{"$gte": 0.0}}}
+			filters["$or"] = []bson.M{
+				bson.M{"cost": bson.M{"$gte": 0.0}},
+			}
 		} else {
 			filters["cost"] = bson.M{"$gte": *qryFltr.MinCost, "$lt": *qryFltr.MaxCost}
 		}
 	} else if qryFltr.MaxCost != nil {
 		if *qryFltr.MaxCost == -1.0 { // Non-rated CDRs
-			filters["cost"] = bson.M{"$eq": nil} // Need to include it otherwise all CDRs will be returned
+			filters["cost"] = 0.0 // Need to include it otherwise all CDRs will be returned
 		} else { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
 			filters["cost"] = bson.M{"$lt": *qryFltr.MaxCost}
 		}
 	}
+	//file.WriteString(fmt.Sprintf("AFTER: %v\n", utils.ToIJSON(filters)))
+	//file.Close()
 	q := ms.db.C(colCdrs).Find(filters)
 	if qryFltr.Paginator.Limit != nil {
 		q = q.Limit(*qryFltr.Paginator.Limit)

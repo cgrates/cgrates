@@ -145,38 +145,50 @@ func TestV2CdrsMongoGetCdrs(t *testing.T) {
 		return
 	}
 	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{}
+	req := utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 4 {
+		for _, cdr := range reply {
+			t.Logf("CDR: %s %s %s", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId)
+		}
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 	// CDRs with errors
-	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
+	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// CDRs Rated
-	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(-1.0)}
+	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 3 {
+	} else if len(reply) != 4 {
+		for _, cdr := range reply {
+			t.Logf("CDR: %s %s %s %f", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId, cdr.Cost)
+		}
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// CDRs non rated OR SkipRated
-	req = utils.RpcCdrsFilter{MaxCost: utils.Float64Pointer(-1.0)}
+	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MaxCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 1 {
+	} else if len(reply) != 0 {
+		for _, cdr := range reply {
+			t.Logf("CDR: %s %s %s %f", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId, cdr.Cost)
+		}
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// Skip Errors
-	req = utils.RpcCdrsFilter{MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
+	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
+		for _, cdr := range reply {
+			t.Logf("CDR: %s %s %s %f", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId, cdr.Cost)
+		}
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 }
@@ -186,7 +198,7 @@ func TestV2CdrsMongoCountCdrs(t *testing.T) {
 		return
 	}
 	var reply int64
-	req := utils.AttrGetCdrs{}
+	req := utils.AttrGetCdrs{CdrSources: []string{"test", "UNKNOWN"}}
 	if err := cdrsMongoRpc.Call("ApierV2.CountCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != 4 {
