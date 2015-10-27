@@ -172,7 +172,6 @@ type STTaxItem struct {
 }
 
 func SureTaxProcessCdr(cdr *StoredCdr) error {
-	fmt.Printf("SureTaxProcessCdr, cdr: %+v\n", cdr)
 	stCfg := config.CgrConfig().SureTaxCfg()
 	if stCfg == nil {
 		return errors.New("Invalid SureTax configuration")
@@ -191,7 +190,7 @@ func SureTaxProcessCdr(cdr *StoredCdr) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("NewSureTaxRequest: %s\n", string(jsnContent))
+	utils.Logger.Debug(fmt.Sprintf("NewSureTaxRequest: %s\n", string(jsnContent)))
 	resp, err := sureTaxClient.Post(stCfg.Url, "application/json", bytes.NewBuffer(jsnContent))
 	if err != nil {
 		return err
@@ -199,19 +198,19 @@ func SureTaxProcessCdr(cdr *StoredCdr) error {
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Printf("Unexpected response body received, error: %s\n", err.Error())
+		utils.Logger.Debug(fmt.Sprintf("Unexpected response body received, error: %s\n", err.Error()))
 		return err
 	}
 	if resp.StatusCode > 299 {
-		fmt.Printf("Unexpected code received: %d\n", resp.StatusCode)
+		utils.Logger.Debug(fmt.Sprintf("Unexpected code received: %d\n", resp.StatusCode))
 		return fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
 	}
-	fmt.Printf("Received raw answer from SureTax: %s\n", string(respBody))
+	utils.Logger.Debug(fmt.Sprintf("Received raw answer from SureTax: %s\n", string(respBody)))
 	var stResp SureTaxResponse
 	if err := json.Unmarshal(respBody, &stResp); err != nil {
 		return err
 	}
-	fmt.Printf("Received answer from SureTax: %+v\n", stResp)
+	utils.Logger.Debug(fmt.Sprintf("Received answer from SureTax: %+v\n", stResp))
 	if stResp.D.ResponseCode != 9999 {
 		cdr.ExtraInfo = stResp.D.HeaderMessage
 		return nil // No error because the request was processed by SureTax, error will be in the ExtraInfo

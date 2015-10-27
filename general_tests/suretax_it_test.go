@@ -76,7 +76,6 @@ func TestSTIResetStorDb(t *testing.T) {
 	}
 }
 
-/*
 // Start CGR Engine
 func TestSTIStartEngine(t *testing.T) {
 	if !*testSureTax {
@@ -86,7 +85,6 @@ func TestSTIStartEngine(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-*/
 
 // Connect rpc client to rater
 func TestSTIRpcConn(t *testing.T) {
@@ -94,7 +92,7 @@ func TestSTIRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	stiRpc, err = jsonrpc.Dial("tcp", "172.16.254.70:2012") // We connect over JSON so we can also troubleshoot if needed // stiCfg.RPCJSONListen
+	stiRpc, err = jsonrpc.Dial("tcp", stiCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,7 +175,6 @@ func TestSTIGetCdrs(t *testing.T) {
 	}
 }
 
-/*
 func TestSTIStopCgrEngine(t *testing.T) {
 	if !*testSureTax {
 		return
@@ -186,4 +183,3 @@ func TestSTIStopCgrEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
-*/
