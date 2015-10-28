@@ -269,6 +269,7 @@ type SureTaxJsonCfg struct {
 	Url                     *string
 	Client_number           *string
 	Validation_key          *string
+	Business_unit           *string
 	Timezone                *string
 	Include_local_cost      *bool
 	Return_file_code        *string

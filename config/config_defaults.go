@@ -292,6 +292,7 @@ const CGRATES_CFG_JSON = `
 	"url": "",								// API url
 	"client_number": "",					// client number, provided by SureTax
 	"validation_key": "",					// validation key provided by SureTax
+	"business_unit": "",					// client’s Business Unit
 	"timezone": "Local",					// convert the time of the events to this timezone before sending request out <UTC|Local|$IANA_TZ_DB>
 	"include_local_cost": false,			// sum local calculated cost with tax one in final cost
 	"return_file_code": "0",				// default or Quote purposes <0|Q>

@@ -478,6 +478,7 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 		Url:                     utils.StringPointer(""),
 		Client_number:           utils.StringPointer(""),
 		Validation_key:          utils.StringPointer(""),
+		Business_unit:           utils.StringPointer(""),
 		Timezone:                utils.StringPointer("Local"),
 		Include_local_cost:      utils.BoolPointer(false),
 		Return_file_code:        utils.StringPointer("0"),

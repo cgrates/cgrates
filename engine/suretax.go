@@ -53,7 +53,7 @@ func NewSureTaxRequest(cdr *StoredCdr, stCfg *config.SureTaxCfg) (*SureTaxReques
 	}
 	stReq := new(STRequest)
 	stReq.ClientNumber = stCfg.ClientNumber
-	stReq.BusinessUnit = "" // Export it to config
+	stReq.BusinessUnit = stCfg.BusinessUnit
 	stReq.ValidationKey = stCfg.ValidationKey
 	stReq.DataYear = strconv.Itoa(aTimeLoc.Year())
 	stReq.DataMonth = strconv.Itoa(int(aTimeLoc.Month()))
@@ -85,11 +85,21 @@ func NewSureTaxRequest(cdr *StoredCdr, stCfg *config.SureTaxCfg) (*SureTaxReques
 			TaxExemptionCodeList: taxExempt,
 		},
 	}
-	return &SureTaxRequest{Request: stReq}, nil
+	jsnContent, err := json.Marshal(stReq)
+	if err != nil {
+		return nil, err
+	}
+	return &SureTaxRequest{Request: string(jsnContent)}, nil
 }
 
+// SureTax JSON Request
 type SureTaxRequest struct {
-	Request *STRequest // SureTax Requires us to encapsulate the content into a request element
+	Request string `json:"request"` // SureTax Requires us to encapsulate the content into a request element
+}
+
+// SureTax JSON Response
+type SureTaxResponse struct {
+	D string // SureTax requires encapsulating reply into a D object
 }
 
 // SureTax Request type
@@ -133,18 +143,13 @@ type STRequestItem struct {
 	TaxExemptionCodeList []string // Required. Tax Exemption to be applied to this item only.
 }
 
-// SureTax Response type
-type SureTaxResponse struct {
-	D *STResponse // SureTax requires encapsulating reply into a D object
-}
-
 type STResponse struct {
 	Successful     string           // Response will be either ‘Y' or ‘N' : Y = Success / Success with Item error N = Failure
-	ResponseCode   int64            // ResponseCode: 9999 – Request was successful. 1101-1400 – Range of values for a failed request (no processing occurred) 9001 – Request was successful, but items within the request have errors. The specific items with errors are provided in the ItemMessages field.
+	ResponseCode   string           // ResponseCode: 9999 – Request was successful. 1101-1400 – Range of values for a failed request (no processing occurred) 9001 – Request was successful, but items within the request have errors. The specific items with errors are provided in the ItemMessages field.
 	HeaderMessage  string           // Response message: For ResponseCode 9999 – “Success”For ResponseCode 9001 – “Success with Item errors”.  For ResponseCode 1100-1400 – Unsuccessful / declined web request.
 	ItemMessages   []*STItemMessage // This field contains a list of items that were not able to be processed due to bad or invalid data (see Response Code of “9001”).
 	ClientTracking string           // Client transaction tracking provided in web request.
-	TotalTax       float64          // Total Tax – a total of all taxes included in the TaxList
+	TotalTax       string           // Total Tax – a total of all taxes included in the TaxList
 	TransId        int              // Transaction ID – provided by SureTax
 	GroupList      []*STGroup       // contains one-to-many Groups
 }
@@ -166,9 +171,9 @@ type STGroup struct {
 
 // Part of the SureTax Response
 type STTaxItem struct {
-	TaxTypeCode string  // Tax Type Code
-	TaxTypeDesc string  // Tax Type Description
-	TaxAmount   float64 // Tax Amount
+	TaxTypeCode string // Tax Type Code
+	TaxTypeDesc string // Tax Type Description
+	TaxAmount   string // Tax Amount
 }
 
 func SureTaxProcessCdr(cdr *StoredCdr) error {
@@ -198,30 +203,38 @@ func SureTaxProcessCdr(cdr *StoredCdr) error {
 	defer resp.Body.Close()
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		utils.Logger.Debug(fmt.Sprintf("Unexpected response body received, error: %s\n", err.Error()))
+		//utils.Logger.Debug(fmt.Sprintf("Unexpected response body received, error: %s\n", err.Error()))
 		return err
 	}
 	if resp.StatusCode > 299 {
-		utils.Logger.Debug(fmt.Sprintf("Unexpected code received: %d\n", resp.StatusCode))
+		//utils.Logger.Debug(fmt.Sprintf("Unexpected code received: %d\n", resp.StatusCode))
 		return fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
 	}
-	utils.Logger.Debug(fmt.Sprintf("Received raw answer from SureTax: %s\n", string(respBody)))
-	var stResp SureTaxResponse
-	if err := json.Unmarshal(respBody, &stResp); err != nil {
+	//utils.Logger.Debug(fmt.Sprintf("Received raw answer from SureTax: %s\n", string(respBody)))
+	var respFull SureTaxResponse
+	if err := json.Unmarshal(respBody, &respFull); err != nil {
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("Received answer from SureTax: %+v\n", stResp))
-	if stResp.D.ResponseCode != 9999 {
-		cdr.ExtraInfo = stResp.D.HeaderMessage
+	//utils.Logger.Debug(fmt.Sprintf("Received answer from SureTax: %+v\n", respFull))
+	var stResp STResponse
+	if err := json.Unmarshal([]byte(respFull.D), &stResp); err != nil {
+		return err
+	}
+	if stResp.ResponseCode != "9999" {
+		cdr.ExtraInfo = stResp.HeaderMessage
 		return nil // No error because the request was processed by SureTax, error will be in the ExtraInfo
 	}
 	// Write cost to CDR
+	totalTax, err := strconv.ParseFloat(stResp.TotalTax, 64)
+	if err != nil {
+		cdr.ExtraInfo = err.Error()
+	}
 	if !stCfg.IncludeLocalCost {
-		cdr.Cost = utils.Round(stResp.D.TotalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		cdr.Cost = utils.Round(totalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
 	} else {
-		cdr.Cost = utils.Round(cdr.Cost+stResp.D.TotalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
+		cdr.Cost = utils.Round(cdr.Cost+totalTax, config.CgrConfig().RoundingDecimals, utils.ROUNDING_MIDDLE)
 	}
 	// Add response into extra fields to be available for later review
-	cdr.ExtraFields[utils.META_SURETAX] = string(respBody)
+	cdr.ExtraFields[utils.META_SURETAX] = respFull.D
 	return nil
 }
