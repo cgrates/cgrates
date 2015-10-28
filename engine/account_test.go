@@ -1054,10 +1054,10 @@ func TestDebitShared(t *testing.T) {
 		testCallcost:  cc,
 	}
 	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
-		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneya", Value: 0, SharedGroup: "SG_TEST"}},
+		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneya", Value: 0, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 	groupie := &Account{Id: "groupie", BalanceMap: map[string]BalanceChain{
-		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneyc", Value: 130, SharedGroup: "SG_TEST"}},
+		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
@@ -1124,10 +1124,10 @@ func TestMaxDurationShared(t *testing.T) {
 		testCallcost:  cc,
 	}
 	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
-		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneya", Value: 0, SharedGroup: "SG_TEST"}},
+		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneya", Value: 0, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 	groupie := &Account{Id: "groupie", BalanceMap: map[string]BalanceChain{
-		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneyc", Value: 130, SharedGroup: "SG_TEST"}},
+		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}

@@ -57,11 +57,13 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	// gather all balances from shared groups
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
-		if cb.SharedGroup != "" {
-			if sharedGroup, _ := ratingStorage.GetSharedGroup(cb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, ub)
-				sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
-				extendedCreditBalances = append(extendedCreditBalances, sgb...)
+		if len(cb.SharedGroups) > 0 {
+			for sg := range cb.SharedGroups {
+				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false); sharedGroup != nil {
+					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, ub)
+					sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
+					extendedCreditBalances = append(extendedCreditBalances, sgb...)
+				}
 			}
 		} else {
 			extendedCreditBalances = append(extendedCreditBalances, cb)
@@ -69,11 +71,13 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	}
 	var extendedMinuteBalances BalanceChain
 	for _, mb := range unitBalances {
-		if mb.SharedGroup != "" {
-			if sharedGroup, _ := ratingStorage.GetSharedGroup(mb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, cd.TOR, ub)
-				sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
-				extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
+		if len(mb.SharedGroups) > 0 {
+			for sg := range mb.SharedGroups {
+				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false); sharedGroup != nil {
+					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, cd.TOR, ub)
+					sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
+					extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
+				}
 			}
 		} else {
 			extendedMinuteBalances = append(extendedMinuteBalances, mb)
@@ -136,12 +140,12 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		}
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], bClone)
 	}
-	if a.Balance.SharedGroup != "" {
+	for sgId := range a.Balance.SharedGroups {
 		// add shared group member
-		sg, err := ratingStorage.GetSharedGroup(a.Balance.SharedGroup, false)
+		sg, err := ratingStorage.GetSharedGroup(sgId, false)
 		if err != nil || sg == nil {
 			//than problem
-			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", a.Balance.SharedGroup))
+			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 		} else {
 			if !utils.IsSliceMember(sg.MemberIds, ub.Id) {
 				// add member and save
@@ -184,10 +188,10 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, direction strin
 		if b.Disabled {
 			continue
 		}
-		if b.IsExpired() || (b.SharedGroup == "" && b.GetValue() <= 0) {
+		if b.IsExpired() || (len(b.SharedGroups) == 0 && b.GetValue() <= 0) {
 			continue
 		}
-		if sharedGroup != "" && b.SharedGroup != sharedGroup {
+		if sharedGroup != "" && b.SharedGroups[sharedGroup] == false {
 			continue
 		}
 		if !b.MatchCategory(category) {
@@ -233,15 +237,17 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, direction strin
 func (account *Account) getAlldBalancesForPrefix(destination, category, direction, balanceType string) (bc BalanceChain) {
 	balances := account.getBalancesForPrefix(destination, category, direction, account.BalanceMap[balanceType], "")
 	for _, b := range balances {
-		if b.SharedGroup != "" {
-			sharedGroup, err := ratingStorage.GetSharedGroup(b.SharedGroup, false)
-			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", b.SharedGroup))
-				continue
+		if len(b.SharedGroups) > 0 {
+			for sgId := range b.SharedGroups {
+				sharedGroup, err := ratingStorage.GetSharedGroup(sgId, false)
+				if err != nil {
+					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+					continue
+				}
+				sharedBalances := sharedGroup.GetBalances(destination, category, direction, balanceType, account)
+				sharedBalances = sharedGroup.SortBalancesByStrategy(b, sharedBalances)
+				bc = append(bc, sharedBalances...)
 			}
-			sharedBalances := sharedGroup.GetBalances(destination, category, direction, balanceType, account)
-			sharedBalances = sharedGroup.SortBalancesByStrategy(b, sharedBalances)
-			bc = append(bc, sharedBalances...)
 		} else {
 			bc = append(bc, b)
 		}
@@ -596,8 +602,8 @@ func (ub *Account) allBalancesExpired() bool {
 func (ub *Account) GetSharedGroups() (groups []string) {
 	for _, balanceChain := range ub.BalanceMap {
 		for _, b := range balanceChain {
-			if b.SharedGroup != "" {
-				groups = append(groups, b.SharedGroup)
+			for sg := range b.SharedGroups {
+				groups = append(groups, sg)
 			}
 		}
 	}
@@ -611,8 +617,8 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]strin
 	// gather all shared group ids
 	var sharedGroupIds []string
 	for _, b := range balances {
-		if b.SharedGroup != "" {
-			sharedGroupIds = append(sharedGroupIds, b.SharedGroup)
+		for sg := range b.SharedGroups {
+			sharedGroupIds = append(sharedGroupIds, sg)
 		}
 	}
 	var memberIds []string

@@ -283,7 +283,7 @@ type TPAction struct {
 	DestinationIds  string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
 	Categories      string  // category filter for balances
-	SharedGroup     string  // Reference to a shared group
+	SharedGroups     string  // Reference to a shared group
 	BalanceWeight   float64 // Balance weight
 	ExtraParameters string
 	Weight          float64 // Action's weight
@@ -483,7 +483,7 @@ type TPActionTrigger struct {
 	BalanceTimingTags     string  // filter for balance
 	BalanceRatingSubject  string  // filter for balance
 	BalanceCategories     string  // filter for balance
-	BalanceSharedGroup    string  // filter for balance
+	BalanceSharedGroups    string  // filter for balance
 	BalanceDisabled       bool    // filter for balance
 	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached

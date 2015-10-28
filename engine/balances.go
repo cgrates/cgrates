@@ -41,9 +41,9 @@ type Balance struct {
 	DestinationIds utils.StringMap
 	RatingSubject  string
 	Categories     utils.StringMap
-	SharedGroup    string
+	SharedGroups    utils.StringMap
 	Timings        []*RITiming
-	TimingIDs      string
+	TimingIDs      utils.StringMap
 	Disabled       bool
 	precision      int
 	account        *Account // used to store ub reference for shared balances
@@ -65,7 +65,7 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.Directions.Equal(o.Directions) &&
 		b.RatingSubject == o.RatingSubject &&
 		b.Categories.Equal(o.Categories) &&
-		b.SharedGroup == o.SharedGroup &&
+		b.SharedGroups.Equal(o.SharedGroups) &&
 		b.Disabled == o.Disabled
 }
 
@@ -87,8 +87,9 @@ func (b *Balance) MatchFilter(o *Balance) bool {
 		(len(o.DestinationIds) == 0 || b.DestinationIds.Includes(o.DestinationIds)) &&
 		(len(o.Directions) == 0 || b.Directions.Includes(o.Directions)) &&
 		(len(o.Categories) == 0 || b.Categories.Includes(o.Categories)) &&
-		(o.RatingSubject == "" || b.RatingSubject == o.RatingSubject) &&
-		(o.SharedGroup == "" || b.SharedGroup == o.SharedGroup)
+		(len(o.TimingIDs) == 0 || b.TimingIDs.Includes(o.TimingIDs)) &&
+		(len(o.SharedGroups) == 0 || b.SharedGroups.Includes(o.SharedGroups)) &&
+		(o.RatingSubject == "" || b.RatingSubject == o.RatingSubject)
 }
 
 // the default balance has standard Id
@@ -161,8 +162,13 @@ func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 	}
 
 	matchesSharedGroup := true
-	if at.BalanceSharedGroup != "" {
-		matchesSharedGroup = (at.BalanceSharedGroup == b.SharedGroup)
+	if len(at.BalanceSharedGroups) != 0 {
+		matchesSharedGroup = at.BalanceSharedGroups.Equal(b.SharedGroups)
+	}
+
+	matchesTiming := true
+	if len(at.BalanceTimingTags) != 0 {
+		matchesTiming = at.BalanceTimingTags.Equal(b.TimingIDs)
 	}
 
 	return matchesDestination &&
@@ -170,7 +176,8 @@ func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 		matchesExpirationDate &&
 		matchesWeight &&
 		matchesRatingSubject &&
-		matchesSharedGroup
+		matchesSharedGroup &&
+		matchesTiming
 }
 
 func (b *Balance) Clone() *Balance {
@@ -184,7 +191,7 @@ func (b *Balance) Clone() *Balance {
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
 		Categories:     b.Categories,
-		SharedGroup:    b.SharedGroup,
+		SharedGroups:    b.SharedGroups,
 		TimingIDs:      b.TimingIDs,
 		Timings:        b.Timings, // should not be a problem with aliasing
 		Disabled:       b.Disabled,
@@ -657,8 +664,8 @@ func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 					"Directions":           b.Directions.String(),
 					"RatingSubject":        b.RatingSubject,
 					"Categories":           b.Categories.String(),
-					"SharedGroup":          b.SharedGroup,
-					"TimingIDs":            b.TimingIDs,
+					"SharedGroups":          b.SharedGroups.String(),
+					"TimingIDs":            b.TimingIDs.String(),
 					"Account":              accountId,
 					"AccountAllowNegative": allowNegative,
 					"AccountDisabled":      disabled,

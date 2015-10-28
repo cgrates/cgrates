@@ -625,7 +625,7 @@ func TestActionTriggerMatchAll(t *testing.T) {
 		BalanceDestinationIds: utils.NewStringMap("NAT"),
 		BalanceWeight:         1.0,
 		BalanceRatingSubject:  "test1",
-		BalanceSharedGroup:    "test2",
+		BalanceSharedGroups:    utils.NewStringMap("test2"),
 	}
 	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"BalanceDirections":"*out", "ThresholdType":"%v", "ThresholdValue": %v, "DestinationIds": "%v", "BalanceWeight": %v, "BalanceRatingSubject": "%v", "BalanceSharedGroup": "%v"}`, TRIGGER_MAX_BALANCE, 2, "NAT", 1.0, "test1", "test2")}
 	if !at.Match(a) {

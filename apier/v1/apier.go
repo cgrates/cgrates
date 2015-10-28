@@ -126,7 +126,7 @@ type AttrAddBalance struct {
 	RatingSubject  string
 	DestinationIds string
 	Weight         float64
-	SharedGroup    string
+	SharedGroups    string
 	Overwrite      bool // When true it will reset if the balance is already there
 	Disabled       bool
 }
@@ -171,7 +171,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				Directions:     utils.ParseStringMap(attr.Directions),
 				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
 				Weight:         attr.Weight,
-				SharedGroup:    attr.SharedGroup,
+				SharedGroups:    utils.ParseStringMap(attr.SharedGroups),
 				Disabled:       attr.Disabled,
 			},
 		},
@@ -210,7 +210,7 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 				Directions:     utils.ParseStringMap(attr.Directions),
 				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
 				Weight:         attr.Weight,
-				SharedGroup:    attr.SharedGroup,
+				SharedGroups:    utils.ParseStringMap(attr.SharedGroups),
 				Disabled:       attr.Disabled,
 			},
 		},
@@ -621,7 +621,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 				Directions:     utils.ParseStringMap(apiAct.Directions),
 				DestinationIds: utils.ParseStringMap(apiAct.DestinationIds),
 				RatingSubject:  apiAct.RatingSubject,
-				SharedGroup:    apiAct.SharedGroup,
+				SharedGroups:    utils.ParseStringMap(apiAct.SharedGroups),
 			},
 		}
 		storeActions[idx] = a
@@ -656,7 +656,7 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 			act.Directions = engAct.Balance.Directions.String()
 			act.DestinationIds = engAct.Balance.DestinationIds.String()
 			act.RatingSubject = engAct.Balance.RatingSubject
-			act.SharedGroup = engAct.Balance.SharedGroup
+			act.SharedGroups = engAct.Balance.SharedGroups.String()
 			act.BalanceWeight = engAct.Balance.Weight
 		}
 		acts = append(acts, act)

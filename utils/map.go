@@ -130,3 +130,10 @@ func (sm StringMap) Slice() []string {
 func (sm StringMap) String() string {
 	return strings.Join(sm.Slice(), INFIELD_SEP)
 }
+
+func (sm StringMap) GetOne() string {
+	for key := range sm{
+		return key
+	}
+	return ""
+}

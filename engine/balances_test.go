@@ -213,21 +213,21 @@ func TestBalanceMatchActionTriggerRatingSubject(t *testing.T) {
 }
 
 func TestBalanceMatchActionTriggerSharedGroup(t *testing.T) {
-	at := &ActionTrigger{BalanceSharedGroup: "test"}
-	b := &Balance{SharedGroup: "test"}
+	at := &ActionTrigger{BalanceSharedGroups: utils.NewStringMap("test")}
+	b := &Balance{SharedGroups: utils.NewStringMap("test")}
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
-	b.SharedGroup = "test1"
+	b.SharedGroups = utils.NewStringMap("test1")
 	if b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
-	b.SharedGroup = ""
+	b.SharedGroups = utils.NewStringMap("")
 	if b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
-	b.SharedGroup = "test"
-	at.BalanceSharedGroup = ""
+	b.SharedGroups = utils.NewStringMap("test")
+	at.BalanceSharedGroups = utils.NewStringMap("")
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}

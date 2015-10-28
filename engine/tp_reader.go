@@ -517,7 +517,8 @@ func (tpr *TpReader) LoadActions() (err error) {
 					Categories:     utils.ParseStringMap(tpact.Categories),
 					Directions:     utils.ParseStringMap(tpact.Directions),
 					DestinationIds: utils.ParseStringMap(tpact.DestinationIds),
-					SharedGroup:    tpact.SharedGroup,
+					SharedGroups:    utils.ParseStringMap(tpact.SharedGroups),
+					TimingIDs: utils.ParseStringMap(tpact.TimingTags),
 				},
 			}
 			// load action timings from tags
@@ -620,10 +621,10 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				BalanceDestinationIds: utils.ParseStringMap(atr.BalanceDestinationIds),
 				BalanceWeight:         atr.BalanceWeight,
 				BalanceExpirationDate: balanceExpirationDate,
-				BalanceTimingTags:     atr.BalanceTimingTags,
+				BalanceTimingTags:     utils.ParseStringMap(atr.BalanceTimingTags),
 				BalanceRatingSubject:  atr.BalanceRatingSubject,
 				BalanceCategories:     utils.ParseStringMap(atr.BalanceCategories),
-				BalanceSharedGroup:    atr.BalanceSharedGroup,
+				BalanceSharedGroups:    utils.ParseStringMap(atr.BalanceSharedGroups),
 				Weight:                atr.Weight,
 				ActionsId:             atr.ActionsId,
 				MinQueuedItems:        atr.MinQueuedItems,
@@ -761,7 +762,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						BalanceExpirationDate: expTime,
 						BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
 						BalanceCategories:     utils.ParseStringMap(apiAtr.BalanceCategories),
-						BalanceSharedGroup:    apiAtr.BalanceSharedGroup,
+						BalanceSharedGroups:    utils.ParseStringMap(apiAtr.BalanceSharedGroups),
 						Weight:                apiAtr.Weight,
 						ActionsId:             apiAtr.ActionsId,
 					}
@@ -807,7 +808,8 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 							RatingSubject:  tpact.RatingSubject,
 							Directions:     utils.ParseStringMap(tpact.Directions),
 							DestinationIds: utils.ParseStringMap(tpact.DestinationIds),
-							SharedGroup:    tpact.SharedGroup,
+							SharedGroups:    utils.ParseStringMap(tpact.SharedGroups),
+							TimingIDs:  utils.ParseStringMap(tpact.TimingTags),
 						},
 					}
 				}
@@ -964,7 +966,8 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 								BalanceExpirationDate: expTime,
 								BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
 								BalanceCategories:     utils.ParseStringMap(apiAtr.BalanceCategories),
-								BalanceSharedGroup:    apiAtr.BalanceSharedGroup,
+								BalanceSharedGroups:    utils.ParseStringMap(apiAtr.BalanceSharedGroups),
+							BalanceTimingTags: utils.ParseStringMap(apiAtr.BalanceTimingTags),
 								Weight:                apiAtr.Weight,
 								ActionsId:             apiAtr.ActionsId,
 							}
@@ -1019,7 +1022,8 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 							RatingSubject:  tpact.RatingSubject,
 							Directions:     utils.ParseStringMap(tpact.Directions),
 							DestinationIds: utils.ParseStringMap(tpact.DestinationIds),
-							SharedGroup:    tpact.SharedGroup,
+							SharedGroups:    utils.ParseStringMap(tpact.SharedGroups),
+							TimingIDs:    utils.ParseStringMap(tpact.TimingTags),
 						},
 					}
 				}

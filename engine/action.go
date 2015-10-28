@@ -182,7 +182,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "category":
 			parsedValue += rsrFld.ParseValue(action.Balance.Categories.String())
 		case "shared_group":
-			parsedValue += rsrFld.ParseValue(action.Balance.SharedGroup)
+			parsedValue += rsrFld.ParseValue(action.Balance.SharedGroups.String())
 		default:
 			parsedValue += rsrFld.ParseValue("") // Mostly for static values
 		}
