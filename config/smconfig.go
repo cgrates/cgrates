@@ -71,6 +71,47 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 	return nil
 }
 
+type SmGenericConfig struct {
+	Enabled         bool
+	HaRater         []*HaPoolConfig
+	HaCdrs          []*HaPoolConfig
+	DebitInterval   time.Duration
+	MinCallDuration time.Duration
+	MaxCallDuration time.Duration
+}
+
+func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
+	if jsnCfg == nil {
+		return nil
+	}
+	var err error
+	if jsnCfg.Enabled != nil {
+		self.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Rater != nil {
+		self.HaRater = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Rater, Timeout: time.Duration(1) * time.Second}}
+	}
+	if jsnCfg.Cdrs != nil {
+		self.HaCdrs = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Cdrs, Timeout: time.Duration(1) * time.Second}}
+	}
+	if jsnCfg.Debit_interval != nil {
+		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Min_call_duration != nil {
+		if self.MinCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Min_call_duration); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Max_call_duration != nil {
+		if self.MaxCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Max_call_duration); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type SmFsConfig struct {
 	Enabled             bool
 	HaRater             []*HaPoolConfig

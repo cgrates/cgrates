@@ -197,6 +197,15 @@ const CGRATES_CFG_JSON = `
 	}
 },
 
+"sm_generic": {
+	"enabled": false,						// starts SessionManager service: <true|false>
+	"rater": "internal",					// address where to reach the Rater <""|internal|127.0.0.1:2013>
+	"cdrs": "internal",						// address where to reach CDR Server <""|internal|x.y.z.y:1234>
+	"debit_interval": "10s",				// interval to perform debits on.
+	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+},
+
 
 "sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
