@@ -683,3 +683,143 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 		}
 	}
 }
+
+// used in some api for transition
+func (acc *Account) AsOldStructure() interface{} {
+	type Balance struct {
+		Uuid           string //system wide unique
+		Id             string // account wide unique
+		Value          float64
+		ExpirationDate time.Time
+		Weight         float64
+		DestinationIds string
+		RatingSubject  string
+		Category       string
+		SharedGroup    string
+		Timings        []*RITiming
+		TimingIDs      string
+		Disabled       bool
+		precision      int
+		account        *Account
+		dirty          bool
+	}
+	type BalanceChain []*Balance
+	type UnitsCounter struct {
+		Direction   string
+		BalanceType string
+		//	Units     float64
+		Balances BalanceChain // first balance is the general one (no destination)
+	}
+	type ActionTrigger struct {
+		Id                    string
+		ThresholdType         string
+		ThresholdValue        float64
+		Recurrent             bool
+		MinSleep              time.Duration
+		BalanceId             string
+		BalanceType           string
+		BalanceDirection      string
+		BalanceDestinationIds string
+		BalanceWeight         float64
+		BalanceExpirationDate time.Time
+		BalanceTimingTags     string
+		BalanceRatingSubject  string
+		BalanceCategory       string
+		BalanceSharedGroup    string
+		BalanceDisabled       bool
+		Weight                float64
+		ActionsId             string
+		MinQueuedItems        int
+		Executed              bool
+	}
+	type ActionTriggers []*ActionTrigger
+	type Account struct {
+		Id             string
+		BalanceMap     map[string]BalanceChain
+		UnitCounters   []*UnitsCounter
+		ActionTriggers ActionTriggers
+		AllowNegative  bool
+		Disabled       bool
+	}
+
+	result := &Account{
+		Id:             acc.Id,
+		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
+		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
+		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
+		AllowNegative:  acc.AllowNegative,
+		Disabled:       acc.Disabled,
+	}
+	for i, uc := range acc.UnitCounters {
+		result.UnitCounters[i] = &UnitsCounter{
+			BalanceType: uc.BalanceType,
+			Balances:    make(BalanceChain, len(uc.Balances)),
+		}
+		if len(uc.Balances) > 0 {
+			result.UnitCounters[i].Direction = uc.Balances[0].Directions.String()
+			for j, b := range uc.Balances {
+				result.UnitCounters[i].Balances[j] = &Balance{
+					Uuid:           b.Uuid,
+					Id:             b.Id,
+					Value:          b.Value,
+					ExpirationDate: b.ExpirationDate,
+					Weight:         b.Weight,
+					DestinationIds: b.DestinationIds.String(),
+					RatingSubject:  b.RatingSubject,
+					Category:       b.Categories.String(),
+					SharedGroup:    b.SharedGroups.String(),
+					Timings:        b.Timings,
+					TimingIDs:      b.TimingIDs.String(),
+					Disabled:       b.Disabled,
+				}
+			}
+		}
+	}
+	for i,at:=range acc.ActionTriggers{
+		result.ActionTriggers[i]= &ActionTrigger{
+			Id                    :at.Id,
+			ThresholdType         :at.ThresholdType,
+			ThresholdValue        :at.ThresholdValue,
+			Recurrent             :at.Recurrent,
+			MinSleep              :at.MinSleep,
+			BalanceId             :at.BalanceId,
+			BalanceType           :at.BalanceType,
+			BalanceDirection      :at.BalanceDirections.String(),
+			BalanceDestinationIds :at.BalanceDestinationIds.String(),
+			BalanceWeight         :at.BalanceWeight,
+			BalanceExpirationDate :at.BalanceExpirationDate,
+			BalanceTimingTags     :at.BalanceTimingTags.String(),
+			BalanceRatingSubject  :at.BalanceRatingSubject,
+			BalanceCategory       :at.BalanceCategories.String(),
+			BalanceSharedGroup    :at.BalanceSharedGroups.String(),
+			BalanceDisabled       :at.BalanceDisabled,
+			Weight                :at.Weight,
+			ActionsId             :at.ActionsId,
+			MinQueuedItems        :at.MinQueuedItems,
+			Executed              :at.Executed,
+		}
+	}
+	for key, values:=range acc.BalanceMap{
+		if len(values)>0{
+			key += values[0].Directions.String()
+			result.BalanceMap[key]= make(BalanceChain, len(values))
+			for i, b:= range values{
+				result.BalanceMap[key][i]=&Balance{
+					Uuid   :b.Uuid,
+					Id:b.Id,
+					Value          :b.Value,
+					ExpirationDate :b.ExpirationDate,
+					Weight         :b.Weight,
+					DestinationIds :b.DestinationIds.String(),
+					RatingSubject  :b.RatingSubject,
+					Category       :b.Categories.String(),
+					SharedGroup    :b.SharedGroups.String(),
+					Timings:b.Timings,
+					TimingIDs      :b.TimingIDs.String(),
+					Disabled       :b.Disabled,
+				}
+			}
+		}
+	}
+	return result
+}
