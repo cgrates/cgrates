@@ -152,3 +152,15 @@ func (cc *CallCost) AsJSON() string {
 	ccJson, _ := json.Marshal(cc)
 	return string(ccJson)
 }
+
+func (cc *CallCost) UpdateCost() {
+	cost := 0.0
+	if cc.deductConnectFee { // add back the connectFee
+		cost += cc.GetConnectFee()
+	}
+	for _, ts := range cc.Timespans {
+		cost += ts.getCost()
+		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
+	}
+	cc.Cost = cost
+}

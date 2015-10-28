@@ -642,6 +642,7 @@ func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 			allowNegative := ""
 			disabled := ""
 			if b.account != nil { // only publish modifications for balances with account set
+				//utils.LogStack()
 				accountId = b.account.Id
 				allowNegative = strconv.FormatBool(b.account.AllowNegative)
 				disabled = strconv.FormatBool(b.account.Disabled)
