@@ -221,3 +221,14 @@ func TestRSRFieldsId(t *testing.T) {
 		t.Errorf("Received id: %s", idRcv)
 	}
 }
+
+func TestRSRCostDetails(t *testing.T) {
+	fieldsStr1 := `{"Direction":"*out","Category":"default_route","Tenant":"demo.cgrates.org","Subject":"voxbeam_premium","Account":"6335820713","Destination":"15143606781","TOR":"*voice","Cost":0.0007,"Timespans":[{"TimeStart":"2015-08-30T21:46:54Z","TimeEnd":"2015-08-30T21:47:06Z","Cost":0.00072,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"*middle","RoundingDecimals":5,"MaxCost":0,"MaxCostStrategy":"0","Rates":[{"GroupIntervalStart":0,"Value":0.0036,"RateIncrement":6000000000,"RateUnit":60000000000}]},"Weight":10},"DurationIndex":12000000000,"Increments":[{"Duration":6000000000,"Cost":0.00036,"BalanceInfo":{"UnitBalanceUuid":"","MoneyBalanceUuid":"40adda88-25d3-4009-b928-f39d61590439","AccountId":"*out:demo.cgrates.org:6335820713"},"BalanceRateInterval":null,"UnitInfo":null,"CompressFactor":2}],"MatchedSubject":"*out:demo.cgrates.org:default_route:voxbeam_premium","MatchedPrefix":"1514","MatchedDestId":"Canada","RatingPlanId":"RP_VOXBEAM_PREMIUM"}]}`
+	rsrField, err := NewRSRField(`~cost_details:s/"MatchedDestId":"(\w+)"/${1}/`)
+	if err != nil {
+		t.Error(err)
+	}
+	if parsedVal := rsrField.ParseValue(fieldsStr1); parsedVal != "Canada" {
+		t.Errorf("Expecting: Canada, received: %s", parsedVal)
+	}
+}

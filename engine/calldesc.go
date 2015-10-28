@@ -83,7 +83,7 @@ var (
 
 // Exported method to set the storage getter.
 func SetRatingStorage(sg RatingStorage) {
-	ratingStorage = sg
+	   ratingStorage = sg
 }
 
 func SetAccountingStorage(ag AccountingStorage) {
@@ -636,16 +636,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		utils.Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	}
-	cost := 0.0
-	// calculate call cost after balances
-	if cc.deductConnectFee { // add back the connectFee
-		cost += cc.GetConnectFee()
-	}
-	for _, ts := range cc.Timespans {
-		cost += ts.getCost()
-		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
-	}
-	cc.Cost = cost
+	cc.UpdateCost()
 	cc.Timespans.Compress()
 	//log.Printf("OUT CC: ", cc)
 	return

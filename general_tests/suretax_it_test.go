@@ -137,7 +137,7 @@ func TestSTIProcessExternalCdr(t *testing.T) {
 		AccId: "teststicdr1", CdrHost: "192.168.1.1", CdrSource: "STI_TEST", ReqType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "+14082342500", Destination: "+16268412300", Supplier: "SUPPL1",
 		SetupTime: "2015-10-18T13:00:00Z", AnswerTime: "2015-10-18T13:00:00Z",
-		Usage: "15s", Pdd: "7.0", ExtraFields: map[string]string{"ClientNumber": "000000534", "": "valextr2"},
+		Usage: "15s", Pdd: "7.0", ExtraFields: map[string]string{"CustomerNumber": "000000534", "ZipCode": ""},
 	}
 	var reply string
 	if err := stiRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
@@ -145,7 +145,7 @@ func TestSTIProcessExternalCdr(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(2) * time.Second)
 }
 
 func TestSTIGetCdrs(t *testing.T) {
@@ -154,6 +154,16 @@ func TestSTIGetCdrs(t *testing.T) {
 	}
 	var cdrs []*engine.ExternalCdr
 	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
+	if err := stiRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Cost != 0.012 {
+			t.Errorf("Unexpected Cost for CDR: %+v", cdrs[0])
+		}
+	}
+	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_SURETAX}, Accounts: []string{"1001"}}
 	if err := stiRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
