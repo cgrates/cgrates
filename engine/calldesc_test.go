@@ -555,6 +555,28 @@ func TestGetCostWithMaxCost(t *testing.T) {
 		t.Errorf("Expected %v was %v", expected, cc.Cost)
 	}
 }
+func TestGetCostRoundingIssue(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 51, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.GetCost()
+	expected := 0.17
+	if cc.Cost != expected || err != nil {
+		t.Errorf("Expected %v was %+v", expected, cc)
+	}
+}
 
 func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
