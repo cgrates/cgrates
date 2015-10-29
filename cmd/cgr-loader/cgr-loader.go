@@ -94,7 +94,7 @@ func main() {
 		var db_nb int
 		db_nb, err = strconv.Atoi(*datadb_name)
 		if err != nil {
-			utils.Logger.Crit("Redis db name must be an integer!")
+			log.Print("Redis db name must be an integer!")
 			return
 		}
 		host := *datadb_host
@@ -103,17 +103,17 @@ func main() {
 		}
 		migratorRC8acc, err := NewMigratorRC8(host, db_nb, *datadb_pass, *dbdata_encoding)
 		if err != nil {
-			utils.Logger.Crit(err.Error())
+			log.Print(err.Error())
 			return
 		}
 		if err := migratorRC8acc.migrateAccounts(); err != nil {
-			utils.Logger.Crit(err.Error())
+			log.Print(err.Error())
 			return
 		}
 
 		db_nb, err = strconv.Atoi(*tpdb_name)
 		if err != nil {
-			utils.Logger.Crit("Redis db name must be an integer!")
+			log.Print("Redis db name must be an integer!")
 			return
 		}
 		host = *tpdb_host
@@ -122,18 +122,18 @@ func main() {
 		}
 		migratorRC8rat, err := NewMigratorRC8(host, db_nb, *tpdb_pass, *dbdata_encoding)
 		if err != nil {
-			utils.Logger.Crit(err.Error())
+			log.Print(err.Error())
 			return
 		}
 		if err := migratorRC8rat.migrateActionTriggers(); err != nil {
-			utils.Logger.Crit(err.Error())
+			log.Print(err.Error())
 			return
 		}
 		if err := migratorRC8rat.migrateActions(); err != nil {
-			utils.Logger.Crit(err.Error())
+			log.Print(err.Error())
 			return
 		}
-		utils.Logger.Info("Done!")
+		log.Print("Done!")
 		return
 	}
 	// Init necessary db connections, only if not already

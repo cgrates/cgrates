@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -122,7 +123,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 	newAccounts := make([]*engine.Account, len(keys))
 	// get existing accounts
 	for keyIndex, key := range keys {
-		utils.Logger.Info(fmt.Sprintf("Migrating account: %s...", key))
+		log.Printf("Migrating account: %s...", key)
 		values, err := mig.db.Get(key)
 		if err != nil {
 			continue
@@ -239,7 +240,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		}
 	}
 	// delete old data
-	utils.Logger.Info(fmt.Sprintf("Deleting old accounts: %s...", OLD_ACCOUNT_PREFIX+"*"))
+	log.Printf("Deleting old accounts: %s...", OLD_ACCOUNT_PREFIX+"*")
 	for _, key := range keys {
 		_, err = mig.db.Del(key)
 	}
@@ -253,7 +254,7 @@ func (mig MigratorRC8) migrateActionTriggers() error {
 	}
 	newAtrsMap := make(map[string]engine.ActionTriggers, len(keys))
 	for _, key := range keys {
-		utils.Logger.Info(fmt.Sprintf("Migrating action trigger: %s...", key))
+		log.Printf("Migrating action trigger: %s...", key)
 		var oldAtrs ActionTriggers
 		var values []byte
 		if values, err = mig.db.Get(key); err == nil {
@@ -308,7 +309,7 @@ func (mig MigratorRC8) migrateActions() error {
 	}
 	newAcsMap := make(map[string]engine.Actions, len(keys))
 	for _, key := range keys {
-		utils.Logger.Info(fmt.Sprintf("Migrating action: %s...", key))
+		log.Printf("Migrating action: %s...", key)
 		var oldAcs Actions
 		var values []byte
 		if values, err = mig.db.Get(key); err == nil {
@@ -335,7 +336,7 @@ func (mig MigratorRC8) migrateActions() error {
 					DestinationIds: utils.ParseStringMap(oldAc.Balance.DestinationIds),
 					RatingSubject:  oldAc.Balance.RatingSubject,
 					Categories:     utils.ParseStringMap(oldAc.Balance.Category),
-					SharedGroups:    utils.ParseStringMap(oldAc.Balance.SharedGroup),
+					SharedGroups:   utils.ParseStringMap(oldAc.Balance.SharedGroup),
 					Timings:        oldAc.Balance.Timings,
 					TimingIDs:      utils.ParseStringMap(oldAc.Balance.TimingIDs),
 					Disabled:       oldAc.Balance.Disabled,
