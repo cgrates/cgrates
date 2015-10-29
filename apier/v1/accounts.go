@@ -242,7 +242,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	return nil
 }
 
-func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Account) error {
+func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}) error {
 	if len(attr.Tenant) == 0 {
 		return utils.NewErrMandatoryIeMissing("Tenanat")
 	}
@@ -270,12 +270,12 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	} else {
 		limitedAccounts = accountKeys[attr.Offset:]
 	}
-	retAccounts := make([]*engine.Account, 0)
+	retAccounts := make([]interface{}, 0)
 	for _, acntKey := range limitedAccounts {
 		if acnt, err := self.AccountDb.GetAccount(acntKey[len(utils.ACCOUNT_PREFIX):]); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 			return err
 		} else if acnt != nil {
-			retAccounts = append(retAccounts, acnt)
+			retAccounts = append(retAccounts, acnt.AsOldStructure())
 		}
 	}
 	*reply = retAccounts
