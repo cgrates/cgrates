@@ -323,6 +323,22 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 	}
 }
 
+func TestSmGenericJsonCfg(t *testing.T) {
+	eCfg := &SmGenericJsonCfg{
+		Enabled:           utils.BoolPointer(false),
+		Rater:             utils.StringPointer("internal"),
+		Cdrs:              utils.StringPointer("internal"),
+		Debit_interval:    utils.StringPointer("10s"),
+		Min_call_duration: utils.StringPointer("0s"),
+		Max_call_duration: utils.StringPointer("3h"),
+	}
+	if cfg, err := dfCgrJsonCfg.SmGenericJsonCfg(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCfg, cfg) {
+		t.Error("Received: ", cfg)
+	}
+}
+
 func TestSmFsJsonCfg(t *testing.T) {
 	eCfg := &SmFsJsonCfg{
 		Enabled:                utils.BoolPointer(false),
@@ -462,6 +478,7 @@ func TestDfSureTaxJsonCfg(t *testing.T) {
 		Url:                     utils.StringPointer(""),
 		Client_number:           utils.StringPointer(""),
 		Validation_key:          utils.StringPointer(""),
+		Business_unit:           utils.StringPointer(""),
 		Timezone:                utils.StringPointer("Local"),
 		Include_local_cost:      utils.BoolPointer(false),
 		Return_file_code:        utils.StringPointer("0"),

@@ -159,6 +159,16 @@ type CdrcJsonCfg struct {
 	Trailer_fields             *[]*CdrFieldJsonCfg
 }
 
+// SM-Generic config section
+type SmGenericJsonCfg struct {
+	Enabled           *bool
+	Rater             *string
+	Cdrs              *string
+	Debit_interval    *string
+	Min_call_duration *string
+	Max_call_duration *string
+}
+
 // SM-FreeSWITCH config section
 type SmFsJsonCfg struct {
 	Enabled                *bool
@@ -259,6 +269,7 @@ type SureTaxJsonCfg struct {
 	Url                     *string
 	Client_number           *string
 	Validation_key          *string
+	Business_unit           *string
 	Timezone                *string
 	Include_local_cost      *bool
 	Return_file_code        *string

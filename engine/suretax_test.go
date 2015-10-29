@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
@@ -40,7 +41,7 @@ func TestNewSureTaxRequest(t *testing.T) {
 	stCfg.ClientNumber = "000000000"
 	stCfg.ValidationKey = "19491161-F004-4F44-BDB3-E976D6739A64"
 	stCfg.Timezone = time.UTC
-	eSureTaxRequest := &SureTaxRequest{Request: &STRequest{
+	eSTRequest := &STRequest{
 		ClientNumber:   "000000000",
 		ValidationKey:  "19491161-F004-4F44-BDB3-E976D6739A64",
 		DataYear:       "2013",
@@ -69,10 +70,12 @@ func TestNewSureTaxRequest(t *testing.T) {
 				TaxExemptionCodeList: []string{},
 			},
 		},
-	}}
+	}
+	jsnReq, _ := json.Marshal(eSTRequest)
+	eSureTaxRequest := &SureTaxRequest{Request: string(jsnReq)}
 	if stReq, err := NewSureTaxRequest(cdr, stCfg); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSureTaxRequest, stReq) {
-		t.Errorf("Expecting: %+v, received: %+v", eSureTaxRequest.Request.ItemList[0], stReq.Request.ItemList[0])
+		t.Errorf("Expecting: %s, received: %s", string(eSureTaxRequest.Request), string(stReq.Request))
 	}
 }

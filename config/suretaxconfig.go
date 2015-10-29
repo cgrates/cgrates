@@ -46,6 +46,7 @@ type SureTaxCfg struct {
 	Url                  string
 	ClientNumber         string
 	ValidationKey        string
+	BusinessUnit         string
 	Timezone             *time.Location // Convert the time of the events to this timezone before sending request out
 	IncludeLocalCost     bool
 	ReturnFileCode       string
@@ -81,6 +82,9 @@ func (self *SureTaxCfg) loadFromJsonCfg(jsnCfg *SureTaxJsonCfg) error {
 	}
 	if jsnCfg.Validation_key != nil {
 		self.ValidationKey = *jsnCfg.Validation_key
+	}
+	if jsnCfg.Business_unit != nil {
+		self.BusinessUnit = *jsnCfg.Business_unit
 	}
 	if jsnCfg.Timezone != nil {
 		if self.Timezone, err = time.LoadLocation(*jsnCfg.Timezone); err != nil {

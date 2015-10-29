@@ -169,7 +169,7 @@ func TestSTIGetCdrs(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Cost != 0.012 {
+		if cdrs[0].Cost != 0.0027 {
 			t.Errorf("Unexpected Cost for CDR: %+v", cdrs[0])
 		}
 	}

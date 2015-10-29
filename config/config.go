@@ -61,6 +61,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
 	cfg.DataFolderPath = "/usr/share/cgrates/"
+	cfg.SmGenericConfig = new(SmGenericConfig)
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
@@ -224,24 +225,25 @@ type CGRConfig struct {
 	CDRStatsSaveInterval time.Duration        // Save interval duration
 	CdreProfiles         map[string]*CdreConfig
 	CdrcProfiles         map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
-	SmFsConfig           *SmFsConfig                       // SM-FreeSWITCH configuration
-	SmKamConfig          *SmKamConfig                      // SM-Kamailio Configuration
-	SmOsipsConfig        *SmOsipsConfig                    // SM-OpenSIPS Configuration
-	HistoryServer        string                            // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled bool                              // Starts History as server: <true|false>.
-	HistoryDir           string                            // Location on disk where to store history files.
-	HistorySaveInterval  time.Duration                     // The timout duration between pubsub writes
-	PubSubServerEnabled  bool                              // Starts PubSub as server: <true|false>.
-	AliasesServerEnabled bool                              // Starts PubSub as server: <true|false>.
-	UserServerEnabled    bool                              // Starts User as server: <true|false>
-	UserServerIndexes    []string                          // List of user profile field indexes
-	MailerServer         string                            // The server to use when sending emails out
-	MailerAuthUser       string                            // Authenticate to email server using this user
-	MailerAuthPass       string                            // Authenticate to email server with this password
-	MailerFromAddr       string                            // From address used when sending emails out
-	DataFolderPath       string                            // Path towards data folder, for tests internal usage, not loading out of .json options
-	sureTaxCfg           *SureTaxCfg                       // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
-	ConfigReloads        map[string]chan struct{}          // Signals to specific entities that a config reload should occur
+	SmGenericConfig      *SmGenericConfig
+	SmFsConfig           *SmFsConfig              // SM-FreeSWITCH configuration
+	SmKamConfig          *SmKamConfig             // SM-Kamailio Configuration
+	SmOsipsConfig        *SmOsipsConfig           // SM-OpenSIPS Configuration
+	HistoryServer        string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled bool                     // Starts History as server: <true|false>.
+	HistoryDir           string                   // Location on disk where to store history files.
+	HistorySaveInterval  time.Duration            // The timout duration between pubsub writes
+	PubSubServerEnabled  bool                     // Starts PubSub as server: <true|false>.
+	AliasesServerEnabled bool                     // Starts PubSub as server: <true|false>.
+	UserServerEnabled    bool                     // Starts User as server: <true|false>
+	UserServerIndexes    []string                 // List of user profile field indexes
+	MailerServer         string                   // The server to use when sending emails out
+	MailerAuthUser       string                   // Authenticate to email server using this user
+	MailerAuthPass       string                   // Authenticate to email server with this password
+	MailerFromAddr       string                   // From address used when sending emails out
+	DataFolderPath       string                   // Path towards data folder, for tests internal usage, not loading out of .json options
+	sureTaxCfg           *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
+	ConfigReloads        map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
@@ -310,6 +312,21 @@ func (self *CGRConfig) checkConfigSanity() error {
 					}
 				}
 			}
+		}
+	}
+	// SM-Generic checks
+	if self.SmGenericConfig.Enabled {
+		if len(self.SmGenericConfig.HaRater) == 0 {
+			return errors.New("Rater definition is mandatory!")
+		}
+		if len(self.SmGenericConfig.HaCdrs) == 0 {
+			return errors.New("Cdrs definition is mandatory!")
+		}
+		if self.SmGenericConfig.HaRater[0].Server == utils.INTERNAL && !self.RaterEnabled {
+			return errors.New("Rater not enabled but requested by SM-Generic component.")
+		}
+		if self.SmGenericConfig.HaCdrs[0].Server == utils.INTERNAL && !self.CDRSEnabled {
+			return errors.New("CDRS not enabled but referenced by SM-Generic component")
 		}
 	}
 	// SM-FreeSWITCH checks
@@ -420,6 +437,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnCdrcCfg, err := jsnCfg.CdrcJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnSmGenericCfg, err := jsnCfg.SmGenericJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -737,6 +759,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
+	if jsnSmGenericCfg != nil {
+		if err := self.SmGenericConfig.loadFromJsonCfg(jsnSmGenericCfg); err != nil {
+			return err
+		}
+	}
 	if jsnSmFsCfg != nil {
 		if err := self.SmFsConfig.loadFromJsonCfg(jsnSmFsCfg); err != nil {
 			return err
