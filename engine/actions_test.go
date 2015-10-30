@@ -625,7 +625,7 @@ func TestActionTriggerMatchAll(t *testing.T) {
 		BalanceDestinationIds: utils.NewStringMap("NAT"),
 		BalanceWeight:         1.0,
 		BalanceRatingSubject:  "test1",
-		BalanceSharedGroups:    utils.NewStringMap("test2"),
+		BalanceSharedGroups:   utils.NewStringMap("test2"),
 	}
 	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"BalanceDirections":"*out", "ThresholdType":"%v", "ThresholdValue": %v, "DestinationIds": "%v", "BalanceWeight": %v, "BalanceRatingSubject": "%v", "BalanceSharedGroup": "%v"}`, TRIGGER_MAX_BALANCE, 2, "NAT", 1.0, "test1", "test2")}
 	if !at.Match(a) {
@@ -761,6 +761,25 @@ func TestActionTopupResetCredit(t *testing.T) {
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Errorf("Topup reset action failed: %+v", ub.BalanceMap[utils.MONETARY][0])
+	}
+}
+
+func TestActionTopupValueFactor(t *testing.T) {
+	ub := &Account{
+		Id:         "TEST_UB",
+		BalanceMap: map[string]BalanceChain{},
+	}
+	a := &Action{
+		BalanceType: utils.MONETARY,
+		Balance: &Balance{
+			Value:      10,
+			Directions: utils.NewStringMap(utils.OUT),
+		},
+		ExtraParameters: `{"*monetary":2.0}`,
+	}
+	topupResetAction(ub, nil, a, nil)
+	if len(ub.BalanceMap) != 1 || ub.BalanceMap[utils.MONETARY][0].Factor[utils.MONETARY] != 2.0 {
+		t.Errorf("Topup reset action failed to set Factor: %+v", ub.BalanceMap[utils.MONETARY][0].Factor)
 	}
 }
 

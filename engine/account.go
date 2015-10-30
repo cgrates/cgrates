@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -138,6 +139,16 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
 		if bClone.Uuid == "" {
 			bClone.Uuid = utils.GenUUID()
+		}
+		// load ValueFactor if defined in extra parametrs
+		if a.ExtraParameters != "" {
+			vf := ValueFactor{}
+			err := json.Unmarshal([]byte(a.ExtraParameters), &vf)
+			if err == nil {
+				bClone.Factor = vf
+			} else {
+				utils.Logger.Warning(fmt.Sprintf("Could load value factor from actions: extra parametrs: %s", a.ExtraParameters))
+			}
 		}
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], bClone)
 	}
