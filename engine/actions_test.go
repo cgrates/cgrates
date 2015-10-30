@@ -936,7 +936,7 @@ func TestActionResetAllCounters(t *testing.T) {
 		len(ub.UnitCounters[1].Balances) != 1 ||
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
-		t.Errorf("Reset counters action failed: %+v", ub.UnitCounters[1])
+		t.Errorf("Reset counters action failed: %+v", ub.UnitCounters)
 	}
 	if len(ub.UnitCounters) < 1 {
 		t.FailNow()

@@ -571,27 +571,22 @@ func (acc *Account) initCounters() {
 	ucTempMap := make(map[string]*UnitsCounter)
 	// add default balance
 	for _, at := range acc.ActionTriggers {
-		acs, err := ratingStorage.GetActions(at.ActionsId, false)
-		if err != nil {
+		if !strings.Contains(at.ThresholdType, "counter") {
+			// only get actions for counter type action triggers
 			continue
 		}
-		for _, a := range acs {
-			if a.Balance != nil {
-				uc, exists := ucTempMap[a.BalanceType]
-				if !exists {
-					uc = &UnitsCounter{BalanceType: a.BalanceType}
-					ucTempMap[a.BalanceType] = uc
-					uc.Balances = BalanceChain{}
-					acc.UnitCounters = append(acc.UnitCounters, uc)
-				}
-				b := a.Balance.Clone()
-				b.SetValue(0)
-				if !uc.Balances.HasBalance(b) {
-					uc.Balances = append(uc.Balances, b)
-				}
-				//uc.Balances.Sort() // do not sort
-			}
+		uc, exists := ucTempMap[at.BalanceType]
+		if !exists {
+			uc = &UnitsCounter{BalanceType: at.BalanceType}
+			ucTempMap[at.BalanceType] = uc
+			uc.Balances = BalanceChain{}
+			acc.UnitCounters = append(acc.UnitCounters, uc)
 		}
+		b := at.CreateBalance()
+		if !uc.Balances.HasBalance(b) {
+			uc.Balances = append(uc.Balances, b)
+		}
+		//uc.Balances.Sort() // do not sort
 	}
 }
 

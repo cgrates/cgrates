@@ -37,23 +37,16 @@ type UnitsCounter struct {
 func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 	uc.Balances = BalanceChain{&Balance{}} // general balance
 	for _, at := range ats {
-		if !strings.Contains(at.ThresholdType, "counter") {
-			// only get actions for counter type action triggers
+		if !strings.Contains(at.ThresholdType, "counter") ||
+			at.BalanceType != uc.BalanceType {
+			// only get actions for counter type action triggers and with the same type
 			continue
 		}
-		acs, err := ratingStorage.GetActions(at.ActionsId, false)
-		if err != nil {
-			continue
+		b := at.CreateBalance()
+		if !uc.Balances.HasBalance(b) {
+			uc.Balances = append(uc.Balances, b)
 		}
-		for _, a := range acs {
-			if a.Balance != nil {
-				b := a.Balance.Clone()
-				b.SetValue(0)
-				if !uc.Balances.HasBalance(b) {
-					uc.Balances = append(uc.Balances, b)
-				}
-			}
-		}
+
 	}
 	//uc.Balances.Sort() // should not be sorted, leave default in first position
 }
