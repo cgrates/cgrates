@@ -60,7 +60,7 @@ func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 
 // returns the first balance that has no destination attached
 func (uc *UnitsCounter) GetGeneralBalance() *Balance {
-	if len(uc.Balances) == 0 { // general balance not present for some reson
+	if len(uc.Balances) == 0 { // general balance not present for some reason
 		uc.Balances = append(uc.Balances, &Balance{})
 	}
 	return uc.Balances[0]
@@ -70,11 +70,7 @@ func (uc *UnitsCounter) GetGeneralBalance() *Balance {
 // is the same or ads the balance to the list if none matches.
 func (uc *UnitsCounter) addUnits(amount float64, prefixMap utils.StringMap) {
 	counted := false
-	prefix := ""
-	for key := range prefixMap { // get the first value
-		prefix = key
-		break
-	}
+	prefix := prefixMap.String()
 	if prefix != "" {
 		for _, mb := range uc.Balances {
 			if !mb.HasDestination() {

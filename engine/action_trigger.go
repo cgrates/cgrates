@@ -41,7 +41,7 @@ type ActionTrigger struct {
 	BalanceDestinationIds utils.StringMap // filter for balance
 	BalanceWeight         float64         // filter for balance
 	BalanceExpirationDate time.Time       // filter for balance
-	BalanceTimingTags     utils.StringMap          // filter for balance
+	BalanceTimingTags     utils.StringMap // filter for balance
 	BalanceRatingSubject  string          // filter for balance
 	BalanceCategories     utils.StringMap // filter for balance
 	BalanceSharedGroups   utils.StringMap // filter for balance
@@ -110,7 +110,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		return match
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
-	thresholdType, thresholdValue, direction, destinationId, weight, ratingSubject, categories, sharedGroup,timings, disabled := true, true, true, true, true, true, true, true, true, true
+	thresholdType, thresholdValue, direction, destinationId, weight, ratingSubject, categories, sharedGroup, timings, disabled := true, true, true, true, true, true, true, true, true, true
 	if a.ExtraParameters != "" {
 		t := struct {
 			ThresholdType        string
@@ -120,8 +120,8 @@ func (at *ActionTrigger) Match(a *Action) bool {
 			BalanceWeight        float64
 			BalanceRatingSubject string
 			BalanceCategories    string
-			BalanceSharedGroups   string
-			BalanceTimingTags string
+			BalanceSharedGroups  string
+			BalanceTimingTags    string
 			BalanceDisabled      bool
 		}{}
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
@@ -131,7 +131,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		destinationId = len(t.DestinationIds) == 0 || at.BalanceDestinationIds.Equal(utils.ParseStringMap(t.DestinationIds))
 		categories = len(t.BalanceCategories) == 0 || at.BalanceCategories.Equal(utils.ParseStringMap(t.BalanceCategories))
 		timings = len(t.BalanceTimingTags) == 0 || at.BalanceTimingTags.Equal(utils.ParseStringMap(t.BalanceTimingTags))
-		sharedGroup = len(t.BalanceSharedGroups) == 0 || at.BalanceSharedGroups.Equal( utils.ParseStringMap(t.BalanceSharedGroups))
+		sharedGroup = len(t.BalanceSharedGroups) == 0 || at.BalanceSharedGroups.Equal(utils.ParseStringMap(t.BalanceSharedGroups))
 		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
 		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
 		disabled = at.BalanceDisabled == t.BalanceDisabled
@@ -144,6 +144,20 @@ func (at *ActionTrigger) Clone() *ActionTrigger {
 	clone := new(ActionTrigger)
 	*clone = *at
 	return clone
+}
+
+func (at *ActionTrigger) CreateBalance() *Balance {
+	return &Balance{
+		Directions:     at.BalanceDirections,
+		ExpirationDate: at.BalanceExpirationDate,
+		Weight:         at.BalanceWeight,
+		DestinationIds: at.BalanceDestinationIds,
+		RatingSubject:  at.BalanceRatingSubject,
+		Categories:     at.BalanceCategories,
+		SharedGroups:   at.BalanceSharedGroups,
+		TimingIDs:      at.BalanceTimingTags,
+		Disabled:       at.BalanceDisabled,
+	}
 }
 
 // Structure to store actions according to weight

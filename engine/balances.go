@@ -41,7 +41,7 @@ type Balance struct {
 	DestinationIds utils.StringMap
 	RatingSubject  string
 	Categories     utils.StringMap
-	SharedGroups    utils.StringMap
+	SharedGroups   utils.StringMap
 	Timings        []*RITiming
 	TimingIDs      utils.StringMap
 	Disabled       bool
@@ -191,7 +191,7 @@ func (b *Balance) Clone() *Balance {
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
 		Categories:     b.Categories,
-		SharedGroups:    b.SharedGroups,
+		SharedGroups:   b.SharedGroups,
 		TimingIDs:      b.TimingIDs,
 		Timings:        b.Timings, // should not be a problem with aliasing
 		Disabled:       b.Disabled,
@@ -664,7 +664,7 @@ func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 					"Directions":           b.Directions.String(),
 					"RatingSubject":        b.RatingSubject,
 					"Categories":           b.Categories.String(),
-					"SharedGroups":          b.SharedGroups.String(),
+					"SharedGroups":         b.SharedGroups.String(),
 					"TimingIDs":            b.TimingIDs.String(),
 					"Account":              accountId,
 					"AccountAllowNegative": allowNegative,
