@@ -52,8 +52,9 @@ type Account struct {
 
 // User's available minutes for the specified destination
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
-	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, ub.BalanceMap[utils.MONETARY], "")
-	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, ub.BalanceMap[cd.TOR], "")
+	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")
+
+	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")
 	// gather all balances from shared groups
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
@@ -182,7 +183,12 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	return nil
 }
 
-func (ub *Account) getBalancesForPrefix(prefix, category string, direction string, balances BalanceChain, sharedGroup string) BalanceChain {
+func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) BalanceChain {
+	var balances BalanceChain
+	balances = append(balances, ub.BalanceMap[tor]...)
+	if tor != utils.MONETARY && tor != utils.GENERIC {
+		balances = append(balances, ub.BalanceMap[utils.GENERIC]...)
+	}
 	var usefulBalances BalanceChain
 	for _, b := range balances {
 		if b.Disabled {
@@ -235,7 +241,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, direction strin
 
 // like getBalancesForPrefix but expanding shared balances
 func (account *Account) getAlldBalancesForPrefix(destination, category, direction, balanceType string) (bc BalanceChain) {
-	balances := account.getBalancesForPrefix(destination, category, direction, account.BalanceMap[balanceType], "")
+	balances := account.getBalancesForPrefix(destination, category, direction, balanceType, "")
 	for _, b := range balances {
 		if len(b.SharedGroups) > 0 {
 			for sgId := range b.SharedGroups {
@@ -615,8 +621,8 @@ func (ub *Account) GetSharedGroups() (groups []string) {
 
 func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]string, error) {
 	var balances []*Balance
-	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, account.BalanceMap[utils.MONETARY], "")...)
-	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, account.BalanceMap[cd.TOR], "")...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")...)
 	// gather all shared group ids
 	var sharedGroupIds []string
 	for _, b := range balances {

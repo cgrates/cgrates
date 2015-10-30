@@ -103,7 +103,7 @@ func (sg *SharedGroup) GetBalances(destination, category, direction, balanceType
 			}
 		}
 		//sg.members = append(sg.members, nUb)
-		sb := nUb.getBalancesForPrefix(destination, category, direction, nUb.BalanceMap[balanceType], sg.Id)
+		sb := nUb.getBalancesForPrefix(destination, category, direction, balanceType, sg.Id)
 		bc = append(bc, sb...)
 	}
 	/*	} else {

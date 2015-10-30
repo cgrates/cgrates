@@ -45,6 +45,7 @@ type Balance struct {
 	Timings        []*RITiming
 	TimingIDs      utils.StringMap
 	Disabled       bool
+	Factor         ValueFactor
 	precision      int
 	account        *Account // used to store ub reference for shared balances
 	dirty          bool
@@ -319,8 +320,6 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			TimeEnd:   cd.TimeEnd,
 		})
 
-		seconds := duration.Seconds()
-		amount := seconds
 		ts := cc.Timespans[0]
 		ts.RoundToDuration(duration)
 		ts.RateInterval = &RateInterval{
@@ -352,8 +351,10 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		//log.Printf("CC: %+v", ts)
 		for incIndex, inc := range ts.Increments {
 			//log.Printf("INCREMENET: %+v", inc)
-			if seconds == 1 {
-				amount = inc.Duration.Seconds()
+
+			amount := inc.Duration.Seconds()
+			if b.Factor != nil {
+				amount = utils.Round(amount/b.Factor.GetValue(cd.TOR), globalRoundingDecimals, utils.ROUNDING_UP)
 			}
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
@@ -401,9 +402,11 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			maxCost, strategy := ts.RateInterval.GetMaxCost()
 			for incIndex, inc := range ts.Increments {
 				// debit minutes and money
-				seconds := inc.Duration.Seconds()
+				amount := inc.Duration.Seconds()
+				if b.Factor != nil {
+					amount = utils.Round(amount/b.Factor.GetValue(cd.TOR), globalRoundingDecimals, utils.ROUNDING_UP)
+				}
 				cost := inc.Cost
-				//log.Printf("INC: %+v", inc)
 				inc.paid = false
 				if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
 					// cat the entire current timespan
@@ -437,11 +440,11 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						break
 					}
 				}
-				if (cost == 0 || moneyBal != nil) && b.GetValue() >= seconds {
-					b.SubstractValue(seconds)
+				if (cost == 0 || moneyBal != nil) && b.GetValue() >= amount {
+					b.SubstractValue(amount)
 					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
 					inc.BalanceInfo.AccountId = ub.Id
-					inc.UnitInfo = &UnitInfo{cc.Destination, seconds, cc.TOR}
+					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
 					if cost != 0 {
 						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
 						moneyBal.SubstractValue(cost)
@@ -449,7 +452,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: cc.TOR, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: seconds, DestinationIds: utils.StringMap{cc.Destination: true}}})
+						ub.countUnits(&Action{BalanceType: cc.TOR, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: amount, DestinationIds: utils.StringMap{cc.Destination: true}}})
 						if cost != 0 {
 							ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: cost, DestinationIds: utils.StringMap{cc.Destination: true}}})
 						}
@@ -677,4 +680,13 @@ func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 			savedAccounts[b.account.Id] = true
 		}
 	}
+}
+
+type ValueFactor map[string]float64
+
+func (f ValueFactor) GetValue(tor string) float64 {
+	if value, ok := f[tor]; ok {
+		return value
+	}
+	return 1.0
 }
