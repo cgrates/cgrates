@@ -74,7 +74,7 @@ var (
 	storageLogger          LogStorage
 	cdrStorage             CdrStorage
 	debitPeriod            = 10 * time.Second
-	globalRoundingDecimals = 10
+	globalRoundingDecimals = 5
 	historyScribe          history.Scribe
 	pubSubServer           PublisherSubscriber
 	userService            UserService
@@ -83,7 +83,7 @@ var (
 
 // Exported method to set the storage getter.
 func SetRatingStorage(sg RatingStorage) {
-	   ratingStorage = sg
+	ratingStorage = sg
 }
 
 func SetAccountingStorage(ag AccountingStorage) {
