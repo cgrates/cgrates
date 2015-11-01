@@ -47,7 +47,7 @@ func (self *CmdRemoveAccount) RpcMethod() string {
 
 func (self *CmdRemoveAccount) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrRemoveAccount{Direction: utils.OUT}
+		self.rpcParams = &utils.AttrRemoveAccount{}
 	}
 	return self.rpcParams
 }

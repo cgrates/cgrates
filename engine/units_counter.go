@@ -27,7 +27,6 @@ import (
 
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
-	Direction   string
 	BalanceType string
 	//	Units     float64
 	Balances BalanceChain // first balance is the general one (no destination)
@@ -39,7 +38,7 @@ func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 	uc.Balances = BalanceChain{&Balance{}} // general balance
 	for _, at := range ats {
 		if !strings.Contains(at.ThresholdType, "counter") {
-			// only get actions fo counter type action triggers
+			// only get actions for counter type action triggers
 			continue
 		}
 		acs, err := ratingStorage.GetActions(at.ActionsId, false)
@@ -56,12 +55,12 @@ func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 			}
 		}
 	}
-	uc.Balances.Sort()
+	//uc.Balances.Sort() // should not be sorted, leave default in first position
 }
 
 // returns the first balance that has no destination attached
 func (uc *UnitsCounter) GetGeneralBalance() *Balance {
-	if len(uc.Balances) == 0 { // general balance not present for some reson
+	if len(uc.Balances) == 0 { // general balance not present for some reason
 		uc.Balances = append(uc.Balances, &Balance{})
 	}
 	return uc.Balances[0]
@@ -69,8 +68,9 @@ func (uc *UnitsCounter) GetGeneralBalance() *Balance {
 
 // Adds the units from the received balance to an existing balance if the destination
 // is the same or ads the balance to the list if none matches.
-func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
+func (uc *UnitsCounter) addUnits(amount float64, prefixMap utils.StringMap) {
 	counted := false
+	prefix := prefixMap.String()
 	if prefix != "" {
 		for _, mb := range uc.Balances {
 			if !mb.HasDestination() {
@@ -79,10 +79,15 @@ func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
-					if _, found := destIds[mb.DestinationIds]; found {
-						mb.AddValue(amount)
-						counted = true
-						break
+					for key := range mb.DestinationIds {
+						if _, found := destIds[key]; found {
+							mb.AddValue(amount)
+							counted = true
+							break
+						}
+						if counted {
+							break
+						}
 					}
 				}
 				if counted {

@@ -158,11 +158,11 @@ type TpAction struct {
 	ExtraParameters string  `index:"2" re:"\S+\s*"`
 	BalanceTag      string  `index:"3" re:"\w+\s*"`
 	BalanceType     string  `index:"4" re:"\*\w+\s*"`
-	Direction       string  `index:"5" re:"\*out\s*"`
-	Category        string  `index:"6" re:"\*?\w+\s*"`
+	Directions      string  `index:"5" re:""`
+	Categories      string  `index:"6" re:""`
 	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
 	RatingSubject   string  `index:"8" re:"\w+\s*"`
-	SharedGroup     string  `index:"9" re:"[0-9A-Za-z_;]*"`
+	SharedGroups     string  `index:"9" re:"[0-9A-Za-z_;]*"`
 	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
 	Units           float64 `index:"12" re:"\d+\s*"`
@@ -193,11 +193,11 @@ type TpActionTrigger struct {
 	MinSleep               string  `index:"5" re:"\d+[smh]?"`
 	BalanceTag             string  `index:"6" re:"\w+\s*"`
 	BalanceType            string  `index:"7" re:"\*\w+"`
-	BalanceDirection       string  `index:"8" re:"\*out"`
-	BalanceCategory        string  `index:"9" re:"\w+|\*any"`
+	BalanceDirections      string  `index:"8" re:"\*out"`
+	BalanceCategories      string  `index:"9" re:""`
 	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
 	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
-	BalanceSharedGroup     string  `index:"12" re:"\w+|\*any"`
+	BalanceSharedGroups     string  `index:"12" re:"\w+|\*any"`
 	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*|\*any"`
 	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
@@ -214,28 +214,26 @@ type TpAccountAction struct {
 	Loadid            string
 	Tenant            string `index:"0" re:"\w+\s*"`
 	Account           string `index:"1" re:"(\w+;?)+\s*"`
-	Direction         string `index:"2" re:"\*out\s*"`
-	ActionPlanTag     string `index:"3" re:"\w+\s*"`
-	ActionTriggersTag string `index:"4" re:"\w+\s*"`
-	AllowNegative     bool   `index:"5" re:""`
-	Disabled          bool   `index:"6" re:""`
+	ActionPlanTag     string `index:"2" re:"\w+\s*"`
+	ActionTriggersTag string `index:"3" re:"\w+\s*"`
+	AllowNegative     bool   `index:"4" re:""`
+	Disabled          bool   `index:"5" re:""`
 	CreatedAt         time.Time
 }
 
 func (aa *TpAccountAction) SetAccountActionId(id string) error {
 	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
-	if len(ids) != 4 {
+	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
 	aa.Loadid = ids[0]
-	aa.Direction = ids[1]
-	aa.Tenant = ids[2]
-	aa.Account = ids[3]
+	aa.Tenant = ids[1]
+	aa.Account = ids[2]
 	return nil
 }
 
 func (aa *TpAccountAction) GetAccountActionId() string {
-	return utils.AccountKey(aa.Tenant, aa.Account, aa.Direction)
+	return utils.AccountKey(aa.Tenant, aa.Account)
 }
 
 type TpSharedGroup struct {

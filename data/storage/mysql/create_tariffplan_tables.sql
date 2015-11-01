@@ -151,13 +151,13 @@ CREATE TABLE `tp_actions` (
   `action` varchar(24) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
-  `direction` varchar(8) NOT NULL,
+  `directions` varchar(8) NOT NULL,
   `units` DECIMAL(20,4) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
   `timing_tags` varchar(128) NOT NULL,
   `destination_tags` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
-  `category` varchar(32) NOT NULL,
+  `categories` varchar(32) NOT NULL,
   `shared_group` varchar(64) NOT NULL,
   `balance_weight` DECIMAL(8,2) NOT NULL,
   `balance_disabled` BOOLEAN NOT NULL,
@@ -166,7 +166,7 @@ CREATE TABLE `tp_actions` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`direction`,`expiry_time`,`timing_tags`,`destination_tags`,`shared_group`,`balance_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`directions`,`expiry_time`,`timing_tags`,`destination_tags`,`shared_group`,`balance_weight`,`weight`)
 );
 
 --
@@ -203,8 +203,8 @@ CREATE TABLE `tp_action_triggers` (
   `min_sleep` varchar(16) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
-  `balance_direction` varchar(8) NOT NULL,
-  `balance_category` varchar(32) NOT NULL,
+  `balance_directions` varchar(8) NOT NULL,
+  `balance_categories` varchar(32) NOT NULL,
   `balance_destination_tags` varchar(64) NOT NULL,
   `balance_rating_subject` varchar(64) NOT NULL,
   `balance_shared_group` varchar(64) NOT NULL,
@@ -218,7 +218,7 @@ CREATE TABLE `tp_action_triggers` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`balance_type`,`balance_direction`,`threshold_type`,`threshold_value`,`balance_destination_tags`,`actions_tag`)
+  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`balance_type`,`balance_directions`,`threshold_type`,`threshold_value`,`balance_destination_tags`,`actions_tag`)
 );
 
 --
@@ -232,7 +232,6 @@ CREATE TABLE `tp_account_actions` (
   `loadid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `account` varchar(64) NOT NULL,
-  `direction` varchar(8) NOT NULL,
   `action_plan_tag` varchar(64),
   `action_triggers_tag` varchar(64),
   `allow_negative` BOOLEAN NOT NULL,
@@ -240,7 +239,7 @@ CREATE TABLE `tp_account_actions` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_account` (`tpid`,`loadid`,`tenant`,`account`,`direction`)
+  UNIQUE KEY `unique_tp_account` (`tpid`,`loadid`,`tenant`,`account`)
 );
 
 --

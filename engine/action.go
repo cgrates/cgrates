@@ -41,7 +41,6 @@ type Action struct {
 	Id               string
 	ActionType       string
 	BalanceType      string
-	Direction        string
 	ExtraParameters  string
 	ExpirationString string
 	Weight           float64
@@ -78,7 +77,6 @@ func (a *Action) Clone() *Action {
 		Id:               a.Id,
 		ActionType:       a.ActionType,
 		BalanceType:      a.BalanceType,
-		Direction:        a.Direction,
 		ExtraParameters:  a.ExtraParameters,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
@@ -148,9 +146,9 @@ func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (er
 
 // Used by cdrLogAction to dynamically parse values out of account and action
 func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) string {
-	dta, err := utils.NewDTAFromAccountKey(acnt.Id) // Account information should be valid
+	dta, err := utils.NewTAFromAccountKey(acnt.Id) // Account information should be valid
 	if err != nil {
-		dta = new(utils.DirectionTenantAccount) // Init with empty values
+		dta = new(utils.TenantAccount) // Init with empty values
 	}
 	var parsedValue string // Template values
 	for _, rsrFld := range rsrFlds {
@@ -158,7 +156,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "account_id":
 			parsedValue += rsrFld.ParseValue(acnt.Id)
 		case "direction":
-			parsedValue += rsrFld.ParseValue(dta.Direction)
+			parsedValue += rsrFld.ParseValue(action.Balance.Directions.String())
 		case "tenant":
 			parsedValue += rsrFld.ParseValue(dta.Tenant)
 		case "account":
@@ -176,15 +174,15 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "balance_value":
 			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.GetValue(), 'f', -1, 64))
 		case "destination_id":
-			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds)
+			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds.String())
 		case "extra_params":
 			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
 		case "rating_subject":
 			parsedValue += rsrFld.ParseValue(action.Balance.RatingSubject)
 		case "category":
-			parsedValue += rsrFld.ParseValue(action.Balance.Category)
+			parsedValue += rsrFld.ParseValue(action.Balance.Categories.String())
 		case "shared_group":
-			parsedValue += rsrFld.ParseValue(action.Balance.SharedGroup)
+			parsedValue += rsrFld.ParseValue(action.Balance.SharedGroups.String())
 		default:
 			parsedValue += rsrFld.ParseValue("") // Mostly for static values
 		}
@@ -362,7 +360,7 @@ func resetCounterAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Act
 	}
 	uc := ub.getUnitCounter(a)
 	if uc == nil {
-		uc = &UnitsCounter{BalanceType: a.BalanceType, Direction: a.Direction}
+		uc = &UnitsCounter{BalanceType: a.BalanceType}
 		ub.UnitCounters = append(ub.UnitCounters, uc)
 	}
 	uc.initBalances(ub.ActionTriggers)

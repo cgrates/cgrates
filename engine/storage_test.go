@@ -238,7 +238,7 @@ func TestStorageCacheRemoveCachedAliases(t *testing.T) {
 }
 
 func TestStorageDisabledAccount(t *testing.T) {
-	acc, err := accountingStorage.GetAccount("*out:cgrates.org:alodis")
+	acc, err := accountingStorage.GetAccount("cgrates.org:alodis")
 	if err != nil || acc == nil {
 		t.Error("Error loading disabled user account: ", err, acc)
 	}
@@ -258,17 +258,17 @@ func TestStoreInterfaces(t *testing.T) {
 }
 
 func TestDifferentUuid(t *testing.T) {
-	a1, err := accountingStorage.GetAccount("*out:cgrates.org:12345")
+	a1, err := accountingStorage.GetAccount("cgrates.org:12345")
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
-	a2, err := accountingStorage.GetAccount("*out:cgrates.org:123456")
+	a2, err := accountingStorage.GetAccount("cgrates.org:123456")
 	if err != nil {
 		t.Error("Error getting account: ", err)
 	}
-	if a1.BalanceMap[utils.VOICE+utils.OUT][0].Uuid == a2.BalanceMap[utils.VOICE+utils.OUT][0].Uuid ||
-		a1.BalanceMap[utils.MONETARY+utils.OUT][0].Uuid == a2.BalanceMap[utils.MONETARY+utils.OUT][0].Uuid {
-		t.Errorf("Identical uuids in different accounts: %+v <-> %+v", a1.BalanceMap[utils.VOICE+utils.OUT][0], a1.BalanceMap[utils.MONETARY+utils.OUT][0])
+	if a1.BalanceMap[utils.VOICE][0].Uuid == a2.BalanceMap[utils.VOICE][0].Uuid ||
+		a1.BalanceMap[utils.MONETARY][0].Uuid == a2.BalanceMap[utils.MONETARY][0].Uuid {
+		t.Errorf("Identical uuids in different accounts: %+v <-> %+v", a1.BalanceMap[utils.VOICE][0], a1.BalanceMap[utils.MONETARY][0])
 	}
 }
 
@@ -276,16 +276,15 @@ func TestDifferentUuid(t *testing.T) {
 
 func GetUB() *Account {
 	uc := &UnitsCounter{
-		Direction:   utils.OUT,
 		BalanceType: utils.SMS,
-		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
+		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}},
 	}
 	at := &ActionTrigger{
 		Id:                    "some_uuid",
 		BalanceType:           utils.MONETARY,
-		BalanceDirection:      utils.OUT,
+		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdValue:        100.0,
-		BalanceDestinationIds: "NAT",
+		BalanceDestinationIds: utils.NewStringMap("NAT"),
 		Weight:                10.0,
 		ActionsId:             "Commando",
 	}
@@ -294,7 +293,7 @@ func GetUB() *Account {
 	ub := &Account{
 		Id:             "rif",
 		AllowNegative:  true,
-		BalanceMap:     map[string]BalanceChain{utils.SMS + utils.OUT: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA + utils.OUT: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{utils.SMS: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggers{at, at, at},
 	}

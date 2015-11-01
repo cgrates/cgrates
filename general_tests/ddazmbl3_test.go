@@ -56,7 +56,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	actions := `TOPUP10_AC1,*topup_reset,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,false,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
-	accountActions := `cgrates.org,12346,*out,TOPUP10_AT,,,`
+	accountActions := `cgrates.org,12346,TOPUP10_AT,,,`
 	derivedCharges := ``
 	cdrStats := ``
 	users := ``
@@ -103,7 +103,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	if acnt, err := acntDb3.GetAccount("*out:cgrates.org:12346"); err != nil {
+	if acnt, err := acntDb3.GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")
@@ -128,12 +128,12 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 func TestExecuteActions3(t *testing.T) {
 	scheduler.NewScheduler().LoadActionPlans(ratingDb3)
 	time.Sleep(time.Millisecond) // Give time to scheduler to topup the account
-	if acnt, err := acntDb3.GetAccount("*out:cgrates.org:12346"); err != nil {
+	if acnt, err := acntDb3.GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
-	} else if acnt.BalanceMap[utils.VOICE+utils.OUT][0].Value != 40 {
-		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[utils.VOICE+utils.OUT][0].Value)
+	} else if acnt.BalanceMap[utils.VOICE][0].Value != 40 {
+		t.Error("Account does not have enough minutes in balance", acnt.BalanceMap[utils.VOICE][0].Value)
 	}
 }
 
@@ -153,17 +153,17 @@ func TestDebit3(t *testing.T) {
 	} else if cc.Cost != 0.01 {
 		t.Error("Wrong cost returned: ", cc.Cost)
 	}
-	acnt, err := acntDb3.GetAccount("*out:cgrates.org:12346")
+	acnt, err := acntDb3.GetAccount("cgrates.org:12346")
 	if err != nil {
 		t.Error(err)
 	}
 	if len(acnt.BalanceMap) != 2 {
 		t.Error("Wrong number of user balances found", acnt.BalanceMap)
 	}
-	if acnt.BalanceMap[utils.VOICE+utils.OUT][0].Value != 20 {
-		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[utils.VOICE+utils.OUT][0].Value)
+	if acnt.BalanceMap[utils.VOICE][0].Value != 20 {
+		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[utils.VOICE][0].Value)
 	}
-	if acnt.BalanceMap[utils.MONETARY+utils.OUT][0].Value != -0.01 {
-		t.Error("Account does not have expected monetary balance", acnt.BalanceMap[utils.MONETARY+utils.OUT][0].Value)
+	if acnt.BalanceMap[utils.MONETARY][0].Value != -0.01 {
+		t.Error("Account does not have expected monetary balance", acnt.BalanceMap[utils.MONETARY][0].Value)
 	}
 }

@@ -74,7 +74,7 @@ var (
 	storageLogger          LogStorage
 	cdrStorage             CdrStorage
 	debitPeriod            = 10 * time.Second
-	globalRoundingDecimals = 10
+	globalRoundingDecimals = 5
 	historyScribe          history.Scribe
 	pubSubServer           PublisherSubscriber
 	userService            UserService
@@ -83,7 +83,7 @@ var (
 
 // Exported method to set the storage getter.
 func SetRatingStorage(sg RatingStorage) {
-	   ratingStorage = sg
+	ratingStorage = sg
 }
 
 func SetAccountingStorage(ag AccountingStorage) {
@@ -321,7 +321,7 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	if cd.Account != "" {
 		subj = cd.Account
 	}
-	return utils.ConcatenatedKey(cd.Direction, cd.Tenant, subj)
+	return utils.ConcatenatedKey(cd.Tenant, subj)
 }
 
 // Splits the received timespan into sub time spans according to the activation periods intervals.
@@ -534,7 +534,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	cd := origCD.Clone()
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
 	//utils.Logger.Debug(fmt.Sprintf("INITIAL_DURATION: %v", initialDuration))
-	defaultBalance := account.GetDefaultMoneyBalance(cd.Direction)
+	defaultBalance := account.GetDefaultMoneyBalance()
 
 	//use this to check what increment was payed with debt
 	initialDefaultBalanceValue := defaultBalance.GetValue()
@@ -600,7 +600,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
-		utils.Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
+		utils.Logger.Err(fmt.Sprintf("Could not get account for <%s>: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	} else {
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
@@ -709,7 +709,7 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 				defer accountingStorage.SetAccount(account)
 			}
 		}
-		account.refundIncrement(increment, cd.Direction, cd.TOR, true)
+		account.refundIncrement(increment, cd.TOR, true)
 	}
 	return 0.0, err
 }

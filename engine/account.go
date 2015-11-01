@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -52,16 +53,19 @@ type Account struct {
 
 // User's available minutes for the specified destination
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
-	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, ub.BalanceMap[utils.MONETARY+cd.Direction], "")
-	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, ub.BalanceMap[cd.TOR+cd.Direction], "")
+	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")
+
+	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")
 	// gather all balances from shared groups
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
-		if cb.SharedGroup != "" {
-			if sharedGroup, _ := ratingStorage.GetSharedGroup(cb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, utils.MONETARY+cd.Direction, ub)
-				sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
-				extendedCreditBalances = append(extendedCreditBalances, sgb...)
+		if len(cb.SharedGroups) > 0 {
+			for sg := range cb.SharedGroups {
+				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false); sharedGroup != nil {
+					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, ub)
+					sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
+					extendedCreditBalances = append(extendedCreditBalances, sgb...)
+				}
 			}
 		} else {
 			extendedCreditBalances = append(extendedCreditBalances, cb)
@@ -69,11 +73,13 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	}
 	var extendedMinuteBalances BalanceChain
 	for _, mb := range unitBalances {
-		if mb.SharedGroup != "" {
-			if sharedGroup, _ := ratingStorage.GetSharedGroup(mb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.TOR+cd.Direction, ub)
-				sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
-				extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
+		if len(mb.SharedGroups) > 0 {
+			for sg := range mb.SharedGroups {
+				if sharedGroup, _ := ratingStorage.GetSharedGroup(sg, false); sharedGroup != nil {
+					sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.Direction, cd.TOR, ub)
+					sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
+					extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
+				}
 			}
 		} else {
 			extendedMinuteBalances = append(extendedMinuteBalances, mb)
@@ -101,10 +107,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)
 	}
 	found := false
-	if a.Direction == "" {
-		a.Direction = utils.OUT
-	}
-	id := a.BalanceType + a.Direction
+	id := a.BalanceType
 	ub.CleanExpiredBalances()
 	for _, b := range ub.BalanceMap[id] {
 		if b.IsExpired() {
@@ -121,21 +124,40 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	}
 	// if it is not found then we add it to the list
 	if !found {
-		if bClone.GetValue() != 0 {
-			bClone.SetValue(-bClone.GetValue())
+		// check if the Id is *default (user trying to create the default balance)
+		// use only it's value value
+		if bClone.Id == utils.META_DEFAULT {
+			bClone = &Balance{
+				Id:    utils.META_DEFAULT,
+				Value: -bClone.GetValue(),
+			}
+		} else {
+			if bClone.GetValue() != 0 {
+				bClone.SetValue(-bClone.GetValue())
+			}
 		}
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
 		if bClone.Uuid == "" {
 			bClone.Uuid = utils.GenUUID()
 		}
+		// load ValueFactor if defined in extra parametrs
+		if a.ExtraParameters != "" {
+			vf := ValueFactor{}
+			err := json.Unmarshal([]byte(a.ExtraParameters), &vf)
+			if err == nil {
+				bClone.Factor = vf
+			} else {
+				utils.Logger.Warning(fmt.Sprintf("Could load value factor from actions: extra parametrs: %s", a.ExtraParameters))
+			}
+		}
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], bClone)
 	}
-	if a.Balance.SharedGroup != "" {
+	for sgId := range a.Balance.SharedGroups {
 		// add shared group member
-		sg, err := ratingStorage.GetSharedGroup(a.Balance.SharedGroup, false)
+		sg, err := ratingStorage.GetSharedGroup(sgId, false)
 		if err != nil || sg == nil {
 			//than problem
-			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", a.Balance.SharedGroup))
+			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 		} else {
 			if !utils.IsSliceMember(sg.MemberIds, ub.Id) {
 				// add member and save
@@ -157,7 +179,7 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
 	found := false
-	id := a.BalanceType + a.Direction
+	id := a.BalanceType
 	ub.CleanExpiredBalances()
 	for _, b := range ub.BalanceMap[id] {
 		if b.MatchFilter(a.Balance) {
@@ -172,34 +194,39 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	return nil
 }
 
-func (ub *Account) getBalancesForPrefix(prefix, category string, balances BalanceChain, sharedGroup string) BalanceChain {
+func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) BalanceChain {
+	var balances BalanceChain
+	balances = append(balances, ub.BalanceMap[tor]...)
+	if tor != utils.MONETARY && tor != utils.GENERIC {
+		balances = append(balances, ub.BalanceMap[utils.GENERIC]...)
+	}
 	var usefulBalances BalanceChain
 	for _, b := range balances {
 		if b.Disabled {
 			continue
 		}
-		if b.IsExpired() || (b.SharedGroup == "" && b.GetValue() <= 0) {
+		if b.IsExpired() || (len(b.SharedGroups) == 0 && b.GetValue() <= 0) {
 			continue
 		}
-		if sharedGroup != "" && b.SharedGroup != sharedGroup {
+		if sharedGroup != "" && b.SharedGroups[sharedGroup] == false {
 			continue
 		}
 		if !b.MatchCategory(category) {
 			continue
 		}
+		if b.HasDirection() && b.Directions[direction] == false {
+			continue
+		}
 		b.account = ub
-		if b.DestinationIds != "" && b.DestinationIds != utils.ANY {
-			balDestIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
+		if len(b.DestinationIds) > 0 && b.DestinationIds[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
-						for _, balDestID := range balDestIds {
-							if dId == strings.TrimSpace(balDestID) {
-								b.precision = len(p)
-								usefulBalances = append(usefulBalances, b)
-								break
-							}
+						if b.DestinationIds[dId.(string)] == true {
+							b.precision = len(p)
+							usefulBalances = append(usefulBalances, b)
+							break
 						}
 						if b.precision > 0 {
 							break
@@ -224,18 +251,20 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, balances Balanc
 }
 
 // like getBalancesForPrefix but expanding shared balances
-func (account *Account) getAlldBalancesForPrefix(destination, category, balanceType string) (bc BalanceChain) {
-	balances := account.getBalancesForPrefix(destination, category, account.BalanceMap[balanceType], "")
+func (account *Account) getAlldBalancesForPrefix(destination, category, direction, balanceType string) (bc BalanceChain) {
+	balances := account.getBalancesForPrefix(destination, category, direction, balanceType, "")
 	for _, b := range balances {
-		if b.SharedGroup != "" {
-			sharedGroup, err := ratingStorage.GetSharedGroup(b.SharedGroup, false)
-			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", b.SharedGroup))
-				continue
+		if len(b.SharedGroups) > 0 {
+			for sgId := range b.SharedGroups {
+				sharedGroup, err := ratingStorage.GetSharedGroup(sgId, false)
+				if err != nil {
+					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+					continue
+				}
+				sharedBalances := sharedGroup.GetBalances(destination, category, direction, balanceType, account)
+				sharedBalances = sharedGroup.SortBalancesByStrategy(b, sharedBalances)
+				bc = append(bc, sharedBalances...)
 			}
-			sharedBalances := sharedGroup.GetBalances(destination, category, balanceType, account)
-			sharedBalances = sharedGroup.SortBalancesByStrategy(b, sharedBalances)
-			bc = append(bc, sharedBalances...)
 		} else {
 			bc = append(bc, b)
 		}
@@ -244,8 +273,8 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, balanceT
 }
 
 func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
-	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.TOR+cd.Direction)
-	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, utils.MONETARY+cd.Direction)
+	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR)
+	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY)
 	//log.Print(usefulMoneyBalances, usefulUnitBalances)
 	//log.Print("STARTCD: ", cd)
 	var leftCC *CallCost
@@ -372,13 +401,13 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			}
 			for _, increment := range ts.Increments {
 				cost := increment.Cost
-				defaultBalance := ub.GetDefaultMoneyBalance(leftCC.Direction)
+				defaultBalance := ub.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
 				increment.BalanceInfo.MoneyBalanceUuid = defaultBalance.Uuid
 				increment.BalanceInfo.AccountId = ub.Id
 				increment.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: leftCC.Direction, Balance: &Balance{Value: cost, DestinationIds: leftCC.Destination}})
+					ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{leftCC.Direction: true}, Value: cost, DestinationIds: utils.NewStringMap(leftCC.Destination)}})
 				}
 			}
 		}
@@ -394,46 +423,43 @@ COMMIT:
 	return
 }
 
-func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
-	if direction == "" {
-		direction = utils.OUT
-	}
-	for _, balance := range ub.BalanceMap[utils.MONETARY+direction] {
+func (ub *Account) GetDefaultMoneyBalance() *Balance {
+	for _, balance := range ub.BalanceMap[utils.MONETARY] {
 		if balance.IsDefault() {
 			return balance
 		}
 	}
 	// create default balance
 	defaultBalance := &Balance{
-		Uuid:   "D" + utils.GenUUID()[1:],
-		Weight: 0,
+		Uuid: utils.GenUUID(),
+		Id:   utils.META_DEFAULT,
 	} // minimum weight
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	ub.BalanceMap[utils.MONETARY+direction] = append(ub.BalanceMap[utils.MONETARY+direction], defaultBalance)
+	ub.BalanceMap[utils.MONETARY] = append(ub.BalanceMap[utils.MONETARY], defaultBalance)
 	return defaultBalance
 }
 
-func (ub *Account) refundIncrement(increment *Increment, direction, unitType string, count bool) {
+func (ub *Account) refundIncrement(increment *Increment, unitType string, count bool) {
 	var balance *Balance
 	if increment.BalanceInfo.UnitBalanceUuid != "" {
-		if balance = ub.BalanceMap[unitType+direction].GetBalance(increment.BalanceInfo.UnitBalanceUuid); balance == nil {
+		if balance = ub.BalanceMap[unitType].GetBalance(increment.BalanceInfo.UnitBalanceUuid); balance == nil {
 			return
 		}
 		balance.AddValue(increment.Duration.Seconds())
 		if count {
-			ub.countUnits(&Action{BalanceType: unitType, Direction: direction, Balance: &Balance{Value: -increment.Duration.Seconds()}})
+			ub.countUnits(&Action{BalanceType: unitType, Balance: &Balance{Value: -increment.Duration.Seconds()}})
 		}
 	}
 	// check money too
 	if increment.BalanceInfo.MoneyBalanceUuid != "" {
-		if balance = ub.BalanceMap[utils.MONETARY+direction].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
+		if balance = ub.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
 			return
 		}
 		balance.AddValue(increment.Cost)
 		if count {
-			ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: direction, Balance: &Balance{Value: -increment.Cost}})
+			ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: -increment.Cost}})
 		}
 	}
 }
@@ -474,7 +500,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 				}
 			}
 		} else { // BALANCE
-			for _, b := range ub.BalanceMap[at.BalanceType+at.BalanceDirection] {
+			for _, b := range ub.BalanceMap[at.BalanceType] {
 				if !b.dirty { // do not check clean balances
 					continue
 				}
@@ -519,11 +545,7 @@ func (ub *Account) SetRecurrent(a *Action, recurrent bool) {
 // Returns the unit counter that matches the specified action type
 func (ub *Account) getUnitCounter(a *Action) *UnitsCounter {
 	for _, uc := range ub.UnitCounters {
-		direction := a.Direction
-		if direction == "" {
-			direction = utils.OUT
-		}
-		if uc.BalanceType == a.BalanceType && uc.Direction == direction {
+		if uc.BalanceType == a.BalanceType {
 			return uc
 		}
 	}
@@ -536,11 +558,7 @@ func (ub *Account) countUnits(a *Action) {
 	unitsCounter := ub.getUnitCounter(a)
 	// if not found add the counter
 	if unitsCounter == nil {
-		direction := a.Direction
-		if direction == "" {
-			direction = utils.OUT
-		}
-		unitsCounter = &UnitsCounter{BalanceType: a.BalanceType, Direction: direction}
+		unitsCounter = &UnitsCounter{BalanceType: a.BalanceType}
 		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
 	}
 
@@ -548,31 +566,30 @@ func (ub *Account) countUnits(a *Action) {
 	ub.executeActionTriggers(nil)
 }
 
-// Create minute counters for all triggered actions that have actions opertating on balances
-func (ub *Account) initCounters() {
-	ucTempMap := make(map[string]*UnitsCounter, 2)
-	for _, at := range ub.ActionTriggers {
+// Create counters for all triggered actions that have actions opertating on balances
+func (acc *Account) initCounters() {
+	ucTempMap := make(map[string]*UnitsCounter)
+	// add default balance
+	for _, at := range acc.ActionTriggers {
 		acs, err := ratingStorage.GetActions(at.ActionsId, false)
 		if err != nil {
 			continue
 		}
 		for _, a := range acs {
 			if a.Balance != nil {
-				direction := at.BalanceDirection
-				if direction == "" {
-					direction = utils.OUT
-				}
-				uc, exists := ucTempMap[direction]
+				uc, exists := ucTempMap[a.BalanceType]
 				if !exists {
-					uc = &UnitsCounter{BalanceType: a.BalanceType, Direction: direction}
-					ucTempMap[direction] = uc
+					uc = &UnitsCounter{BalanceType: a.BalanceType}
+					ucTempMap[a.BalanceType] = uc
 					uc.Balances = BalanceChain{}
-					ub.UnitCounters = append(ub.UnitCounters, uc)
+					acc.UnitCounters = append(acc.UnitCounters, uc)
 				}
 				b := a.Balance.Clone()
 				b.SetValue(0)
-				uc.Balances = append(uc.Balances, b)
-				uc.Balances.Sort()
+				if !uc.Balances.HasBalance(b) {
+					uc.Balances = append(uc.Balances, b)
+				}
+				//uc.Balances.Sort() // do not sort
 			}
 		}
 	}
@@ -605,8 +622,8 @@ func (ub *Account) allBalancesExpired() bool {
 func (ub *Account) GetSharedGroups() (groups []string) {
 	for _, balanceChain := range ub.BalanceMap {
 		for _, b := range balanceChain {
-			if b.SharedGroup != "" {
-				groups = append(groups, b.SharedGroup)
+			for sg := range b.SharedGroups {
+				groups = append(groups, sg)
 			}
 		}
 	}
@@ -615,13 +632,13 @@ func (ub *Account) GetSharedGroups() (groups []string) {
 
 func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]string, error) {
 	var balances []*Balance
-	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, account.BalanceMap[utils.MONETARY+cd.Direction], "")...)
-	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, account.BalanceMap[cd.TOR+cd.Direction], "")...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")...)
+	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")...)
 	// gather all shared group ids
 	var sharedGroupIds []string
 	for _, b := range balances {
-		if b.SharedGroup != "" {
-			sharedGroupIds = append(sharedGroupIds, b.SharedGroup)
+		for sg := range b.SharedGroups {
+			sharedGroupIds = append(sharedGroupIds, sg)
 		}
 	}
 	var memberIds []string
@@ -669,7 +686,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 				b.SubstractValue(connectFee)
 				// the conect fee is not refundable!
 				if count {
-					acc.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationIds: cc.Destination}})
+					acc.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: connectFee, DestinationIds: utils.StringMap{cc.Destination: true}}})
 				}
 				connectFeePaid = true
 				break
@@ -678,11 +695,151 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 		// debit connect fee
 		if connectFee > 0 && !connectFeePaid {
 			// there are no money for the connect fee; go negative
-			acc.GetDefaultMoneyBalance(cc.Direction).SubstractValue(connectFee)
+			acc.GetDefaultMoneyBalance().SubstractValue(connectFee)
 			// the conect fee is not refundable!
 			if count {
-				acc.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationIds: cc.Destination}})
+				acc.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: connectFee, DestinationIds: utils.StringMap{cc.Destination: true}}})
 			}
 		}
 	}
+}
+
+// used in some api for transition
+func (acc *Account) AsOldStructure() interface{} {
+	type Balance struct {
+		Uuid           string //system wide unique
+		Id             string // account wide unique
+		Value          float64
+		ExpirationDate time.Time
+		Weight         float64
+		DestinationIds string
+		RatingSubject  string
+		Category       string
+		SharedGroup    string
+		Timings        []*RITiming
+		TimingIDs      string
+		Disabled       bool
+		precision      int
+		account        *Account
+		dirty          bool
+	}
+	type BalanceChain []*Balance
+	type UnitsCounter struct {
+		Direction   string
+		BalanceType string
+		//	Units     float64
+		Balances BalanceChain // first balance is the general one (no destination)
+	}
+	type ActionTrigger struct {
+		Id                    string
+		ThresholdType         string
+		ThresholdValue        float64
+		Recurrent             bool
+		MinSleep              time.Duration
+		BalanceId             string
+		BalanceType           string
+		BalanceDirection      string
+		BalanceDestinationIds string
+		BalanceWeight         float64
+		BalanceExpirationDate time.Time
+		BalanceTimingTags     string
+		BalanceRatingSubject  string
+		BalanceCategory       string
+		BalanceSharedGroup    string
+		BalanceDisabled       bool
+		Weight                float64
+		ActionsId             string
+		MinQueuedItems        int
+		Executed              bool
+	}
+	type ActionTriggers []*ActionTrigger
+	type Account struct {
+		Id             string
+		BalanceMap     map[string]BalanceChain
+		UnitCounters   []*UnitsCounter
+		ActionTriggers ActionTriggers
+		AllowNegative  bool
+		Disabled       bool
+	}
+
+	result := &Account{
+		Id:             acc.Id,
+		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
+		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
+		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
+		AllowNegative:  acc.AllowNegative,
+		Disabled:       acc.Disabled,
+	}
+	for i, uc := range acc.UnitCounters {
+		result.UnitCounters[i] = &UnitsCounter{
+			BalanceType: uc.BalanceType,
+			Balances:    make(BalanceChain, len(uc.Balances)),
+		}
+		if len(uc.Balances) > 0 {
+			result.UnitCounters[i].Direction = uc.Balances[0].Directions.String()
+			for j, b := range uc.Balances {
+				result.UnitCounters[i].Balances[j] = &Balance{
+					Uuid:           b.Uuid,
+					Id:             b.Id,
+					Value:          b.Value,
+					ExpirationDate: b.ExpirationDate,
+					Weight:         b.Weight,
+					DestinationIds: b.DestinationIds.String(),
+					RatingSubject:  b.RatingSubject,
+					Category:       b.Categories.String(),
+					SharedGroup:    b.SharedGroups.String(),
+					Timings:        b.Timings,
+					TimingIDs:      b.TimingIDs.String(),
+					Disabled:       b.Disabled,
+				}
+			}
+		}
+	}
+	for i, at := range acc.ActionTriggers {
+		result.ActionTriggers[i] = &ActionTrigger{
+			Id:                    at.Id,
+			ThresholdType:         at.ThresholdType,
+			ThresholdValue:        at.ThresholdValue,
+			Recurrent:             at.Recurrent,
+			MinSleep:              at.MinSleep,
+			BalanceId:             at.BalanceId,
+			BalanceType:           at.BalanceType,
+			BalanceDirection:      at.BalanceDirections.String(),
+			BalanceDestinationIds: at.BalanceDestinationIds.String(),
+			BalanceWeight:         at.BalanceWeight,
+			BalanceExpirationDate: at.BalanceExpirationDate,
+			BalanceTimingTags:     at.BalanceTimingTags.String(),
+			BalanceRatingSubject:  at.BalanceRatingSubject,
+			BalanceCategory:       at.BalanceCategories.String(),
+			BalanceSharedGroup:    at.BalanceSharedGroups.String(),
+			BalanceDisabled:       at.BalanceDisabled,
+			Weight:                at.Weight,
+			ActionsId:             at.ActionsId,
+			MinQueuedItems:        at.MinQueuedItems,
+			Executed:              at.Executed,
+		}
+	}
+	for key, values := range acc.BalanceMap {
+		if len(values) > 0 {
+			key += values[0].Directions.String()
+			result.BalanceMap[key] = make(BalanceChain, len(values))
+			for i, b := range values {
+				result.BalanceMap[key][i] = &Balance{
+					Uuid:           b.Uuid,
+					Id:             b.Id,
+					Value:          b.Value,
+					ExpirationDate: b.ExpirationDate,
+					Weight:         b.Weight,
+					DestinationIds: b.DestinationIds.String(),
+					RatingSubject:  b.RatingSubject,
+					Category:       b.Categories.String(),
+					SharedGroup:    b.SharedGroups.String(),
+					Timings:        b.Timings,
+					TimingIDs:      b.TimingIDs.String(),
+					Disabled:       b.Disabled,
+				}
+			}
+		}
+	}
+	return result
 }

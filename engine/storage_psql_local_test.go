@@ -255,7 +255,7 @@ func TestPSQLSetGetTPActions(t *testing.T) {
 	}
 	ACTS_ID := "PREPAID_10"
 	acts := []*utils.TPAction{
-		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
+		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Directions: "*out", Units: 10, ExpiryTime: "*unlimited",
 			DestinationIds: "*any", BalanceWeight: 10, Weight: 10}}
 	tpActions := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: ACTS_ID, Actions: acts}
 	mas := APItoModelAction(tpActions)
@@ -297,7 +297,7 @@ func TestPSQLSetGetTPActionTriggers(t *testing.T) {
 	atrg := &utils.TPActionTrigger{
 		Id:                    "MY_FIRST_ATGR",
 		BalanceType:           "*monetary",
-		BalanceDirection:      "*out",
+		BalanceDirections:     "*out",
 		ThresholdType:         "*min_balance",
 		ThresholdValue:        2.0,
 		Recurrent:             true,
@@ -326,7 +326,7 @@ func TestPSQLSetGetTpAccountActions(t *testing.T) {
 		return
 	}
 	aa := &utils.TPAccountActions{TPid: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001",
-		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	maa := APItoModelAccountAction(aa)
 	if err := psqlDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
@@ -397,7 +397,7 @@ func TestPSQLRemoveTPData(t *testing.T) {
 	}
 	// Create AccountActions
 	aa := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001",
-		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	maa := APItoModelAccountAction(aa)
 	if err := psqlDb.SetTpAccountActions([]TpAccountAction{*maa}); err != nil {
 		t.Error(err.Error())
@@ -408,7 +408,7 @@ func TestPSQLRemoveTPData(t *testing.T) {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove AccountActions
-	if err := psqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadid": aa.LoadId, "direction": aa.Direction, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
+	if err := psqlDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, map[string]string{"loadid": aa.LoadId, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		t.Error(err.Error())
 	}
 	if aas, err := psqlDb.GetTpAccountActions(maa); err != nil {

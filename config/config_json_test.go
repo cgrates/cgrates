@@ -39,7 +39,7 @@ func TestDfNewdfCgrJsonCfgFromReader(t *testing.T) {
 func TestDfGeneralJsonCfg(t *testing.T) {
 	eCfg := &GeneralJsonCfg{
 		Http_skip_tls_verify: utils.BoolPointer(false),
-		Rounding_decimals:    utils.IntPointer(10),
+		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/log/cgrates/tpe"),
 		Http_failed_dir:      utils.StringPointer("/var/log/cgrates/http_failed"),

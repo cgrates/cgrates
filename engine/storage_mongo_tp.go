@@ -336,9 +336,6 @@ func (ms *MongoStorage) GetTpActionTriggers(tpid, tag string) ([]TpActionTrigger
 
 func (ms *MongoStorage) GetTpAccountActions(tp *TpAccountAction) ([]TpAccountAction, error) {
 	filter := bson.M{"tpid": tp.Tpid}
-	if tp.Direction != "" {
-		filter["direction"] = tp.Direction
-	}
 	if tp.Tenant != "" {
 		filter["tenant"] = tp.Tenant
 	}
@@ -672,11 +669,10 @@ func (ms *MongoStorage) SetTpAccountActions(tps []TpAccountAction) error {
 		if found, _ := m[tp.GetAccountActionId()]; !found {
 			m[tp.GetAccountActionId()] = true
 			tx.Upsert(bson.M{
-				"tpid":      tp.Tpid,
-				"loadid":    tp.Loadid,
-				"direction": tp.Direction,
-				"tenant":    tp.Tenant,
-				"account":   tp.Account}, tp)
+				"tpid":    tp.Tpid,
+				"loadid":  tp.Loadid,
+				"tenant":  tp.Tenant,
+				"account": tp.Account}, tp)
 		}
 	}
 	_, err := tx.Run()

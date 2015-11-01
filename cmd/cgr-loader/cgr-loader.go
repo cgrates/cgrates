@@ -24,6 +24,7 @@ import (
 	"log"
 	"net/rpc"
 	"path"
+	"strconv"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -34,6 +35,7 @@ import (
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
+	migrateRC8   = flag.Bool("migrate_rc8", false, "Migrate Accounts, Actions and ActionTriggers to RC8 structures")
 	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
 	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
 	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
@@ -88,6 +90,52 @@ func main() {
 	var storDb engine.LoadStorage
 	var rater, cdrstats, users *rpc.Client
 	var loader engine.LoadReader
+	if *migrateRC8 {
+		var db_nb int
+		db_nb, err = strconv.Atoi(*datadb_name)
+		if err != nil {
+			log.Print("Redis db name must be an integer!")
+			return
+		}
+		host := *datadb_host
+		if *datadb_port != "" {
+			host += ":" + *datadb_port
+		}
+		migratorRC8acc, err := NewMigratorRC8(host, db_nb, *datadb_pass, *dbdata_encoding)
+		if err != nil {
+			log.Print(err.Error())
+			return
+		}
+		if err := migratorRC8acc.migrateAccounts(); err != nil {
+			log.Print(err.Error())
+			return
+		}
+
+		db_nb, err = strconv.Atoi(*tpdb_name)
+		if err != nil {
+			log.Print("Redis db name must be an integer!")
+			return
+		}
+		host = *tpdb_host
+		if *tpdb_port != "" {
+			host += ":" + *tpdb_port
+		}
+		migratorRC8rat, err := NewMigratorRC8(host, db_nb, *tpdb_pass, *dbdata_encoding)
+		if err != nil {
+			log.Print(err.Error())
+			return
+		}
+		if err := migratorRC8rat.migrateActionTriggers(); err != nil {
+			log.Print(err.Error())
+			return
+		}
+		if err := migratorRC8rat.migrateActions(); err != nil {
+			log.Print(err.Error())
+			return
+		}
+		log.Print("Done!")
+		return
+	}
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {

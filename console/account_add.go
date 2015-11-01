@@ -47,7 +47,7 @@ func (self *CmdAddAccount) RpcMethod() string {
 
 func (self *CmdAddAccount) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrSetAccount{Direction: utils.OUT}
+		self.rpcParams = &utils.AttrSetAccount{}
 	}
 	return self.rpcParams
 }

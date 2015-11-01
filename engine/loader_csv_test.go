@@ -194,16 +194,16 @@ CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
-vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER,,
-cgrates.org,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS,,
-cgrates.org,123456,*out,TOPUP10_AT,STANDARD_TRIGGERS,,
-cgrates.org,remo,*out,TOPUP10_AT,,,
-vdf,empty0,*out,TOPUP_SHARED0_AT,,,
-vdf,empty10,*out,TOPUP_SHARED10_AT,,,
-vdf,emptyX,*out,TOPUP_EMPTY_AT,,,
-vdf,emptyY,*out,TOPUP_EMPTY_AT,,,
-vdf,post,*out,POST_AT,,,
-cgrates.org,alodis,*out,TOPUP_EMPTY_AT,,true,true
+vdf,minitsboy,MORE_MINUTES,STANDARD_TRIGGER,,
+cgrates.org,12345,TOPUP10_AT,STANDARD_TRIGGERS,,
+cgrates.org,123456,TOPUP10_AT,STANDARD_TRIGGERS,,
+cgrates.org,remo,TOPUP10_AT,,,
+vdf,empty0,TOPUP_SHARED0_AT,,,
+vdf,empty10,TOPUP_SHARED10_AT,,,
+vdf,emptyX,TOPUP_EMPTY_AT,,,
+vdf,emptyY,TOPUP_EMPTY_AT,,,
+vdf,post,POST_AT,,,
+cgrates.org,alodis,TOPUP_EMPTY_AT,,true,true
 `
 
 	derivedCharges = `
@@ -813,30 +813,34 @@ func TestLoadActions(t *testing.T) {
 			Id:               "MINI0",
 			ActionType:       TOPUP_RESET,
 			BalanceType:      utils.MONETARY,
-			Direction:        utils.OUT,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &Balance{
-				Uuid:   as1[0].Balance.Uuid,
-				Value:  10,
-				Weight: 10,
+				Uuid:         as1[0].Balance.Uuid,
+				Directions:   utils.NewStringMap(utils.OUT),
+				Value:        10,
+				Weight:       10,
+				TimingIDs:    utils.StringMap{},
+				SharedGroups: utils.StringMap{},
 			},
 		},
 		&Action{
 			Id:               "MINI1",
 			ActionType:       TOPUP,
 			BalanceType:      utils.VOICE,
-			Direction:        utils.OUT,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &Balance{
 				Uuid:           as1[1].Balance.Uuid,
+				Directions:     utils.NewStringMap(utils.OUT),
 				Value:          100,
 				Weight:         10,
 				RatingSubject:  "test",
-				DestinationIds: "NAT",
+				DestinationIds: utils.NewStringMap("NAT"),
+				TimingIDs:      utils.StringMap{},
+				SharedGroups:   utils.StringMap{},
 			},
 		},
 	}
@@ -849,18 +853,20 @@ func TestLoadActions(t *testing.T) {
 			Id:               "SHARED0",
 			ActionType:       TOPUP,
 			BalanceType:      utils.MONETARY,
-			Direction:        utils.OUT,
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &Balance{
-				Uuid:        as2[0].Balance.Uuid,
-				Value:       100,
-				Weight:      10,
-				SharedGroup: "SG1",
+				Directions:     utils.NewStringMap(utils.OUT),
+				DestinationIds: utils.StringMap{},
+				Uuid:           as2[0].Balance.Uuid,
+				Value:          100,
+				Weight:         10,
+				SharedGroups:   utils.NewStringMap("SG1"),
+				TimingIDs:      utils.StringMap{},
 			},
 		},
 	}
-	if !reflect.DeepEqual(as2, expected) {
+	if !reflect.DeepEqual(as2[0], expected[0]) {
 		t.Errorf("Error loading action: %+v", as2[0].Balance)
 	}
 	as3 := csvr.actions["DEFEE"]
@@ -871,12 +877,16 @@ func TestLoadActions(t *testing.T) {
 			ExtraParameters: `{"Category":"^ddi","MediationRunId":"^did_run"}`,
 			Weight:          10,
 			Balance: &Balance{
-				Uuid: as3[0].Balance.Uuid,
+				Uuid:           as3[0].Balance.Uuid,
+				Directions:     utils.StringMap{},
+				DestinationIds: utils.StringMap{},
+				TimingIDs:      utils.StringMap{},
+				SharedGroups:   utils.StringMap{},
 			},
 		},
 	}
 	if !reflect.DeepEqual(as3, expected) {
-		t.Errorf("Error loading action: %+v", as3[0])
+		t.Errorf("Error loading action: %+v", as3[0].Balance)
 	}
 }
 
@@ -974,7 +984,7 @@ func TestLoadActionTimings(t *testing.T) {
 	expected := &ActionPlan{
 		Uuid:       atm.Uuid,
 		Id:         "MORE_MINUTES",
-		AccountIds: []string{"*out:vdf:minitsboy"},
+		AccountIds: []string{"vdf:minitsboy"},
 		Timing: &RateInterval{
 			Timing: &RITiming{
 				Years:     utils.Years{2012},
@@ -999,10 +1009,13 @@ func TestLoadActionTriggers(t *testing.T) {
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
 		BalanceType:           utils.VOICE,
-		BalanceDirection:      utils.OUT,
+		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdType:         TRIGGER_MIN_COUNTER,
 		ThresholdValue:        10,
-		BalanceDestinationIds: "GERMANY_O2",
+		BalanceDestinationIds: utils.NewStringMap("GERMANY_O2"),
+		BalanceCategories:     utils.StringMap{},
+		BalanceTimingTags:     utils.StringMap{},
+		BalanceSharedGroups:   utils.StringMap{},
 		Weight:                10,
 		ActionsId:             "SOME_1",
 		Executed:              false,
@@ -1013,10 +1026,13 @@ func TestLoadActionTriggers(t *testing.T) {
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
 		BalanceType:           utils.VOICE,
-		BalanceDirection:      utils.OUT,
+		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdType:         TRIGGER_MAX_BALANCE,
 		ThresholdValue:        200,
-		BalanceDestinationIds: "GERMANY",
+		BalanceDestinationIds: utils.NewStringMap("GERMANY"),
+		BalanceCategories:     utils.StringMap{},
+		BalanceTimingTags:     utils.StringMap{},
+		BalanceSharedGroups:   utils.StringMap{},
 		Weight:                10,
 		ActionsId:             "SOME_2",
 		Executed:              false,
@@ -1030,9 +1046,9 @@ func TestLoadAccountActions(t *testing.T) {
 	if len(csvr.accountActions) != 10 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
-	aa := csvr.accountActions["*out:vdf:minitsboy"]
+	aa := csvr.accountActions["vdf:minitsboy"]
 	expected := &Account{
-		Id:             "*out:vdf:minitsboy",
+		Id:             "vdf:minitsboy",
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
 	}
 	// set propper uuid

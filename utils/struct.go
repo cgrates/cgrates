@@ -20,6 +20,7 @@ package utils
 import (
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 // Detects missing field values based on mandatory field names, s should be a pointer to a struct
@@ -27,6 +28,10 @@ func MissingStructFields(s interface{}, mandatories []string) []string {
 	missing := []string{}
 	for _, fieldName := range mandatories {
 		fld := reflect.ValueOf(s).Elem().FieldByName(fieldName)
+		// sanitize the string fields before checking
+		if fld.Kind() == reflect.String || fld.CanSet() {
+			fld.SetString(strings.TrimSpace(fld.String()))
+		}
 		if (fld.Kind() == reflect.String && fld.String() == "") ||
 			((fld.Kind() == reflect.Slice || fld.Kind() == reflect.Map) && fld.Len() == 0) ||
 			(fld.Kind() == reflect.Int && fld.Int() == 0) {

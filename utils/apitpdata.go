@@ -276,14 +276,14 @@ type TPAction struct {
 	Identifier      string  // Identifier mapped in the code
 	BalanceId       string  // Balance identification string (account scope)
 	BalanceType     string  // Type of balance the action will operate on
-	Direction       string  // Balance direction
+	Directions      string  // Balance direction
 	Units           float64 // Number of units to add/deduct
 	ExpiryTime      string  // Time when the units will expire
 	TimingTags      string  // Timing when balance is active
 	DestinationIds  string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
-	Category        string  // category filter for balances
-	SharedGroup     string  // Reference to a shared group
+	Categories      string  // category filter for balances
+	SharedGroups     string  // Reference to a shared group
 	BalanceWeight   float64 // Balance weight
 	ExtraParameters string
 	Weight          float64 // Action's weight
@@ -476,14 +476,14 @@ type TPActionTrigger struct {
 	MinSleep              string  // Minimum duration between two executions in case of recurrent triggers
 	BalanceId             string  // The id of the balance in the account
 	BalanceType           string  // Type of balance this trigger monitors
-	BalanceDirection      string  // Traffic direction
+	BalanceDirections     string  // Traffic direction
 	BalanceDestinationIds string  // filter for balance
 	BalanceWeight         float64 // filter for balance
 	BalanceExpirationDate string  // filter for balance
 	BalanceTimingTags     string  // filter for balance
 	BalanceRatingSubject  string  // filter for balance
-	BalanceCategory       string  // filter for balance
-	BalanceSharedGroup    string  // filter for balance
+	BalanceCategories     string  // filter for balance
+	BalanceSharedGroups    string  // filter for balance
 	BalanceDisabled       bool    // filter for balance
 	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached
@@ -496,10 +496,10 @@ func NewTPAccountActionsFromKeyId(tpid, loadId, keyId string) (*TPAccountActions
 	// *out:cgrates.org:1001
 	s := strings.Split(keyId, ":")
 	// [*out cgrates.org 1001]
-	if len(s) != 3 {
+	if len(s) != 2 {
 		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
 	}
-	return &TPAccountActions{TPid: tpid, LoadId: loadId, Direction: s[0], Tenant: s[1], Account: s[2]}, nil
+	return &TPAccountActions{TPid: tpid, LoadId: loadId, Tenant: s[0], Account: s[1]}, nil
 }
 
 type TPAccountActions struct {
@@ -507,7 +507,6 @@ type TPAccountActions struct {
 	LoadId           string // LoadId, used to group actions on a load
 	Tenant           string // Tenant's Id
 	Account          string // Account name
-	Direction        string // Traffic direction
 	ActionPlanId     string // Id of ActionPlan profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
 	AllowNegative    bool
@@ -516,13 +515,11 @@ type TPAccountActions struct {
 
 // Returns the id used in some nosql dbs (eg: redis)
 func (self *TPAccountActions) KeyId() string {
-	return fmt.Sprintf("%s:%s:%s", self.Direction, self.Tenant, self.Account)
+	return fmt.Sprintf("%s:%s", self.Tenant, self.Account)
 }
 
 func (aa *TPAccountActions) GetAccountActionsId() string {
 	return aa.LoadId +
-		CONCATENATED_KEY_SEP +
-		aa.Direction +
 		CONCATENATED_KEY_SEP +
 		aa.Tenant +
 		CONCATENATED_KEY_SEP +
@@ -531,25 +528,22 @@ func (aa *TPAccountActions) GetAccountActionsId() string {
 
 func (aa *TPAccountActions) SetAccountActionsId(id string) error {
 	ids := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(ids) != 4 {
+	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
 	aa.LoadId = ids[0]
-	aa.Direction = ids[1]
-	aa.Tenant = ids[2]
-	aa.Account = ids[3]
+	aa.Tenant = ids[1]
+	aa.Account = ids[2]
 	return nil
 }
 
 type AttrGetAccount struct {
-	Tenant    string
-	Account   string
-	Direction string
+	Tenant  string
+	Account string
 }
 
 type AttrGetAccounts struct {
 	Tenant     string
-	Direction  string
 	AccountIds []string
 	Offset     int // Set the item offset
 	Limit      int // Limit number of items retrieved
@@ -810,16 +804,16 @@ type AttrDerivedChargers struct {
 	Direction, Tenant, Category, Account, Subject string
 }
 
-func NewDTAFromAccountKey(accountKey string) (*DirectionTenantAccount, error) {
+func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
 	accountSplt := strings.Split(accountKey, CONCATENATED_KEY_SEP)
-	if len(accountSplt) != 3 {
-		return nil, fmt.Errorf("Unsupported format for DirectionTenantAccount: %s", accountKey)
+	if len(accountSplt) != 2 {
+		return nil, fmt.Errorf("Unsupported format for TenantAccount: %s", accountKey)
 	}
-	return &DirectionTenantAccount{accountSplt[0], accountSplt[1], accountSplt[2]}, nil
+	return &TenantAccount{accountSplt[0], accountSplt[1]}, nil
 }
 
-type DirectionTenantAccount struct {
-	Direction, Tenant, Account string
+type TenantAccount struct {
+	Tenant, Account string
 }
 
 func NewDTCSFromRPKey(rpKey string) (*DirectionTenantCategorySubject, error) {
@@ -1104,7 +1098,6 @@ type AttrSetActions struct {
 }
 
 type AttrExecuteAction struct {
-	Direction string
 	Tenant    string
 	Account   string
 	ActionsId string
@@ -1112,7 +1105,6 @@ type AttrExecuteAction struct {
 
 type AttrSetAccount struct {
 	Tenant           string
-	Direction        string
 	Account          string
 	ActionPlanId     string
 	ActionTriggersId string
@@ -1121,9 +1113,8 @@ type AttrSetAccount struct {
 }
 
 type AttrRemoveAccount struct {
-	Tenant    string
-	Direction string
-	Account   string
+	Tenant  string
+	Account string
 }
 
 type AttrGetSMASessions struct {
