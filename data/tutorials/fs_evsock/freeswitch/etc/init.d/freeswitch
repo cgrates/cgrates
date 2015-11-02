@@ -56,7 +56,7 @@ do_start() {
     echo "Please review /usr/share/doc/$NAME/README.Debian">&2
     return 3
   fi
-
+  echo $DAEMON_ARGS
   start-stop-daemon --start --quiet \
     --pidfile $PIDFILE --exec $DAEMON --name $NAME --user $USER \
     --test > /dev/null \

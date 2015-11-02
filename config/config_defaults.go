@@ -29,7 +29,7 @@ const CGRATES_CFG_JSON = `
 
 "general": {
 	"http_skip_tls_verify": false,						// if enabled Http Client will accept any TLS certificate
-	"rounding_decimals": 10,							// system level precision for floats
+	"rounding_decimals": 5,							// system level precision for floats
 	"dbdata_encoding": "msgpack",						// encoding used to store object data in strings: <msgpack|json>
 	"tpexport_dir": "/var/log/cgrates/tpe",				// path towards export folder for offline Tariff Plans
 	"http_failed_dir": "/var/log/cgrates/http_failed",	// directory path where we store failed http requests

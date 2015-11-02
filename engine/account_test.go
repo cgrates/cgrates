@@ -1231,6 +1231,92 @@ func TestDebitGeneric(t *testing.T) {
 	}
 }
 
+func TestDebitGenericBalance(t *testing.T) {
+	cc := &CallCost{
+		Direction:   utils.OUT,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 30, 0, time.UTC),
+				ratingInfo:    &RatingInfo{},
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1 * time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		TOR: utils.VOICE,
+	}
+	cd := &CallDescriptor{
+		TimeStart:     cc.Timespans[0].TimeStart,
+		TimeEnd:       cc.Timespans[0].TimeEnd,
+		Direction:     cc.Direction,
+		Destination:   cc.Destination,
+		TOR:           cc.TOR,
+		DurationIndex: cc.GetDuration(),
+		testCallcost:  cc,
+	}
+	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
+		utils.GENERIC:  BalanceChain{&Balance{Uuid: "testm", Value: 100, Weight: 5, DestinationIds: utils.StringMap{"NAT": true}, Factor: ValueFactor{utils.VOICE: 60.0}}},
+		utils.MONETARY: BalanceChain{&Balance{Value: 21}},
+	}}
+	var err error
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[utils.GENERIC][0].GetValue() != 99.4999 ||
+		rifsBalance.BalanceMap[utils.MONETARY][0].GetValue() != 21 {
+		t.Logf("%+v", cc.Timespans[0].Increments[0])
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.GENERIC][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY][0].GetValue())
+	}
+}
+
+func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
+	cc := &CallCost{
+		Direction:   utils.OUT,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 30, 0, time.UTC),
+				ratingInfo:    &RatingInfo{},
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		TOR: utils.VOICE,
+	}
+	cd := &CallDescriptor{
+		TimeStart:     cc.Timespans[0].TimeStart,
+		TimeEnd:       cc.Timespans[0].TimeEnd,
+		Direction:     cc.Direction,
+		Destination:   cc.Destination,
+		TOR:           cc.TOR,
+		DurationIndex: cc.GetDuration(),
+		testCallcost:  cc,
+	}
+	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
+		utils.GENERIC:  BalanceChain{&Balance{Uuid: "testm", Value: 100, Weight: 5, DestinationIds: utils.StringMap{"NAT": true}, Factor: ValueFactor{utils.VOICE: 60.0}, RatingSubject: "free"}},
+		utils.MONETARY: BalanceChain{&Balance{Value: 21}},
+	}}
+	var err error
+	cc, err = rifsBalance.debitCreditBalance(cd, false, false, true)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0])
+	}
+	if rifsBalance.BalanceMap[utils.GENERIC][0].GetValue() != 99.4999 ||
+		rifsBalance.BalanceMap[utils.MONETARY][0].GetValue() != 21 {
+		t.Logf("%+v", cc.Timespans[0].Increments[0])
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.GENERIC][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY][0].GetValue())
+	}
+}
+
 func TestDebitDataUnits(t *testing.T) {
 	cc := &CallCost{
 		Direction:   utils.OUT,

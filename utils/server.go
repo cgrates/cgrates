@@ -15,7 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-package engine
+package utils
 
 import (
 	"bytes"
@@ -27,7 +27,6 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
-	"github.com/cgrates/cgrates/utils"
 	"golang.org/x/net/websocket"
 )
 
@@ -59,11 +58,11 @@ func (s *Server) ServeJSON(addr string) {
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
-	utils.Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at %s.", addr))
+	Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at %s.", addr))
 	for {
 		conn, err := lJSON.Accept()
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
+			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
 			continue
 		}
 
@@ -81,11 +80,11 @@ func (s *Server) ServeGOB(addr string) {
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
-	utils.Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at %s.", addr))
+	Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at %s.", addr))
 	for {
 		conn, err := lGOB.Accept()
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
+			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
 			continue
 		}
 
@@ -110,7 +109,7 @@ func (s *Server) ServeHTTP(addr string) {
 	if !s.httpEnabled {
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
+	Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
 	http.ListenAndServe(addr, nil)
 }
 
