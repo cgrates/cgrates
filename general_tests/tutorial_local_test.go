@@ -120,10 +120,10 @@ func TestTutLocalCacheStats(t *testing.T) {
 	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 1,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
-	if err := tutLocalRpc.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
-		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV2.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
+		t.Errorf("Calling ApierV2.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 	}
 }
 
@@ -133,38 +133,38 @@ func TestTutLocalGetCachedItemAge(t *testing.T) {
 		return
 	}
 	var rcvAge *utils.CachedItemAge
-	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "1002", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "1002", &rcvAge); err != nil {
+		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
 	} else if rcvAge.Destination > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
-	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "RP_RETAIL1", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "RP_RETAIL1", &rcvAge); err != nil {
+		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
 	} else if rcvAge.RatingPlan > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
-	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "*out:cgrates.org:call:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:*any", &rcvAge); err != nil {
+		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
 	} else if rcvAge.RatingProfile > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
-	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "LOG_WARNING", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "LOG_WARNING", &rcvAge); err != nil {
+		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
 	} else if rcvAge.Action > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
-	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "SHARED_A", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "SHARED_A", &rcvAge); err != nil {
+		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
 	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
-	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "*out:cgrates.org:call:1001:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:1001:*any", &rcvAge); err != nil {
+		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
 	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
-	if err := tutLocalRpc.Call("ApierV1.GetCachedItemAge", "*out:cgrates.org:call:*any:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:*any:*any", &rcvAge); err != nil {
+		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
 	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
@@ -503,9 +503,18 @@ func TestTutLocalMaxUsage(t *testing.T) {
 	} else if maxTime != 1 {
 		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
 	}
+	setupReq = &engine.UsageRecord{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+		Account: "test_max_usage", Destination: "1001",
+		SetupTime: "2014-08-04T13:00:00Z",
+	}
+	if err := tutLocalRpc.Call("ApierV2.GetMaxUsage", setupReq, &maxTime); err != nil {
+		t.Error(err)
+	} else if maxTime != -1 {
+		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
+	}
 }
 
-// Check MaxUsage
+// Check DebitUsage
 func TestTutLocalDebitUsage(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1086,10 +1095,10 @@ func TestTutLocalSetAccount(t *testing.T) {
 	}
 	var reply string
 	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanId: "PACKAGE_10", ActionTriggersId: "STANDARD_TRIGGERS"}
-	if err := tutLocalRpc.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 	} else if reply != "OK" {
-		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
 	}
 	type AttrGetAccounts struct {
 		Tenant     string
@@ -1099,7 +1108,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		Limit      int // Limit number of items retrieved
 	}
 	var acnts []*engine.Account
-	if err := tutLocalRpc.Call("ApierV1.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 		t.Error(err)
 	} else if len(acnts) != 1 {
 		t.Errorf("Accounts received: %+v", acnts)
@@ -1123,12 +1132,12 @@ func TestTutLocalSetAccount(t *testing.T) {
 		}
 	}
 	attrs = &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true)}
-	if err := tutLocalRpc.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 	} else if reply != "OK" {
-		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
 	}
-	if err := tutLocalRpc.Call("ApierV1.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 		t.Error(err)
 	} else if len(acnts) != 1 {
 		t.Errorf("Accounts received: %+v", acnts)

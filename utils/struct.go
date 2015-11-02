@@ -29,7 +29,7 @@ func MissingStructFields(s interface{}, mandatories []string) []string {
 	for _, fieldName := range mandatories {
 		fld := reflect.ValueOf(s).Elem().FieldByName(fieldName)
 		// sanitize the string fields before checking
-		if fld.Kind() == reflect.String || fld.CanSet() {
+		if fld.Kind() == reflect.String && fld.CanSet() {
 			fld.SetString(strings.TrimSpace(fld.String()))
 		}
 		if (fld.Kind() == reflect.String && fld.String() == "") ||
