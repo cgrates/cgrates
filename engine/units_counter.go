@@ -19,83 +19,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"log"
 	"strings"
 
-	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
-	BalanceType string
-	//	Units     float64
-	Balances BalanceChain // first balance is the general one (no destination)
+	BalanceType string       // *monetary/*voice/*sms/etc
+	CounterType string       // *event or *balance
+	Balances    BalanceChain // first balance is the general one (no destination)
 }
 
 // clears balances for this counter
 // makes sure there are balances for all action triggers
 func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
-	uc.Balances = BalanceChain{&Balance{}} // general balance
+	uc.Balances = BalanceChain{}
 	for _, at := range ats {
 		if !strings.Contains(at.ThresholdType, "counter") ||
 			at.BalanceType != uc.BalanceType {
 			// only get actions for counter type action triggers and with the same type
 			continue
 		}
-		b := at.CreateBalance()
-		if !uc.Balances.HasBalance(b) {
-			uc.Balances = append(uc.Balances, b)
+		uc.Balances = append(uc.Balances, at.CreateBalance())
+	}
+}
+
+type UnitCounters []*UnitsCounter
+
+func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *Balance) {
+	for _, uc := range ucs {
+		if uc.BalanceType != kind {
+			continue
 		}
-
-	}
-	//uc.Balances.Sort() // should not be sorted, leave default in first position
-}
-
-// returns the first balance that has no destination attached
-func (uc *UnitsCounter) GetGeneralBalance() *Balance {
-	if len(uc.Balances) == 0 { // general balance not present for some reason
-		uc.Balances = append(uc.Balances, &Balance{})
-	}
-	return uc.Balances[0]
-}
-
-// Adds the units from the received balance to an existing balance if the destination
-// is the same or ads the balance to the list if none matches.
-func (uc *UnitsCounter) addUnits(amount float64, prefixMap utils.StringMap) {
-	counted := false
-	prefix := prefixMap.String()
-	if prefix != "" {
-		for _, mb := range uc.Balances {
-			if !mb.HasDestination() {
+		if uc.CounterType == "" {
+			uc.CounterType = utils.COUNTER_EVENT
+		}
+		for _, bal := range uc.Balances {
+			if uc.CounterType == utils.COUNTER_EVENT && cc != nil && bal.MatchCCFilter(cc) {
+				log.Print("MATCHCC")
+				bal.AddValue(amount)
 				continue
 			}
-			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-					destIds := x.(map[interface{}]struct{})
-					for key := range mb.DestinationIds {
-						if _, found := destIds[key]; found {
-							mb.AddValue(amount)
-							counted = true
-							break
-						}
-						if counted {
-							break
-						}
-					}
-				}
-				if counted {
-					break
-				}
+			if uc.CounterType == utils.COUNTER_BALANCE && b != nil && b.MatchFilter(bal) {
+				bal.AddValue(amount)
+				continue
 			}
 		}
-	}
-	if !counted {
-		// use general balance
-		b := uc.GetGeneralBalance()
-		b.AddValue(amount)
+
 	}
 }
-
-/*func (uc *UnitsCounter) String() string {
-	return fmt.Sprintf("%s %s %v", uc.BalanceId, uc.Direction, uc.Units)
-}*/

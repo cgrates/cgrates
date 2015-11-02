@@ -237,6 +237,8 @@ const (
 	EXTRA_FIELDS                 = "ExtraFields"
 	META_SURETAX                 = "*sure_tax"
 	SURETAX                      = "suretax"
+	COUNTER_EVENT                = "*event"
+	COUNTER_BALANCE              = "*balance"
 )
 
 var (

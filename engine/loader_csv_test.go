@@ -182,11 +182,11 @@ POST_AT,NEG,*asap,10
 `
 
 	actionTriggers = `
-STANDARD_TRIGGER,st0,*min_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,,,SOME_1,10
-STANDARD_TRIGGER,st1,*max_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,,,SOME_2,10
-STANDARD_TRIGGERS,,*min_balance,2,false,0,,*monetary,*out,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGER,st0,*min_event_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,,,SOME_1,10
+STANDARD_TRIGGER,st1,*max_event_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,,,SOME_2,10
+STANDARD_TRIGGERS,,*min_event_balance,2,false,0,,*monetary,*out,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_event_balance,20,false,0,,*monetary,*out,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_event_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,,LOG_WARNING,10
 CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,,3,CDRST_WARN_HTTP,10
 CDRST1_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 CDRST1_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
@@ -1010,7 +1010,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	expected := &ActionTrigger{
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
-		ThresholdType:         TRIGGER_MIN_COUNTER,
+		ThresholdType:         TRIGGER_MIN_EVENT_COUNTER,
 		ThresholdValue:        10,
 		BalanceDestinationIds: utils.NewStringMap("GERMANY_O2"),
 		BalanceCategories:     utils.StringMap{},

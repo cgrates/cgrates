@@ -610,7 +610,7 @@ func TestActionTriggerMatcAllFalse(t *testing.T) {
 		ThresholdType:     TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
-	a := &Action{BalanceType: utils.VOICE, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*in"}`, TRIGGER_MAX_COUNTER, 3)}
+	a := &Action{BalanceType: utils.VOICE, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*in"}`, TRIGGER_MAX_EVENT_COUNTER, 3)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}

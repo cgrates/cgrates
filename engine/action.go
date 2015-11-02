@@ -358,7 +358,8 @@ func resetCounterAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Act
 	if ub == nil {
 		return errors.New("nil user balance")
 	}
-	uc := ub.getUnitCounter(a)
+	//uc := ub.getUnitCounter(a.ActionType)
+	var uc *UnitsCounter
 	if uc == nil {
 		uc = &UnitsCounter{BalanceType: a.BalanceType}
 		ub.UnitCounters = append(ub.UnitCounters, uc)

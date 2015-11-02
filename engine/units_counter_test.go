@@ -29,7 +29,7 @@ func TestUnitsCounterAddBalance(t *testing.T) {
 		BalanceType: utils.SMS,
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}},
 	}
-	uc.addUnits(20, utils.NewStringMap("test"))
+	UnitCounters{uc}.addUnits(20, utils.SMS, &CallCost{Destination: "test"}, nil)
 	if len(uc.Balances) != 3 {
 		t.Error("Error adding minute bucket: ", uc.Balances)
 	}
@@ -40,7 +40,7 @@ func TestUnitsCounterAddBalanceExists(t *testing.T) {
 		BalanceType: utils.SMS,
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}},
 	}
-	uc.addUnits(5, utils.NewStringMap("0723"))
+	UnitCounters{uc}.addUnits(5, utils.SMS, &CallCost{Destination: "0723"}, nil)
 	if len(uc.Balances) != 3 || uc.Balances[1].GetValue() != 15 {
 		t.Error("Error adding minute bucket!")
 	}

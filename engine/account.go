@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -32,10 +33,12 @@ import (
 
 const (
 	// action trigger threshold types
-	TRIGGER_MIN_COUNTER = "*min_counter"
-	TRIGGER_MAX_COUNTER = "*max_counter"
-	TRIGGER_MIN_BALANCE = "*min_balance"
-	TRIGGER_MAX_BALANCE = "*max_balance"
+	TRIGGER_MIN_EVENT_COUNTER   = "*min_event_counter"
+	TRIGGER_MIN_BALANCE_COUNTER = "*min_balance_counter"
+	TRIGGER_MAX_EVENT_COUNTER   = "*max_event_counter"
+	TRIGGER_MAX_BALANCE_COUNTER = "*max_balance_counter"
+	TRIGGER_MIN_BALANCE         = "*min_balance"
+	TRIGGER_MAX_BALANCE         = "*max_balance"
 )
 
 /*
@@ -45,7 +48,7 @@ This can represent a user or a shared group.
 type Account struct {
 	Id             string
 	BalanceMap     map[string]BalanceChain
-	UnitCounters   []*UnitsCounter
+	UnitCounters   UnitCounters
 	ActionTriggers ActionTriggers
 	AllowNegative  bool
 	Disabled       bool
@@ -407,7 +410,15 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				increment.BalanceInfo.AccountId = ub.Id
 				increment.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{leftCC.Direction: true}, Value: cost, DestinationIds: utils.NewStringMap(leftCC.Destination)}})
+					ub.countUnits(
+						cost,
+						utils.MONETARY,
+						leftCC,
+						&Balance{
+							Directions:     utils.StringMap{leftCC.Direction: true},
+							Value:          cost,
+							DestinationIds: utils.NewStringMap(leftCC.Destination),
+						})
 				}
 			}
 		}
@@ -441,15 +452,17 @@ func (ub *Account) GetDefaultMoneyBalance() *Balance {
 	return defaultBalance
 }
 
-func (ub *Account) refundIncrement(increment *Increment, unitType string, count bool) {
+func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, count bool) {
 	var balance *Balance
+	unitType := cd.TOR
+	cc := cd.CreateCallCost()
 	if increment.BalanceInfo.UnitBalanceUuid != "" {
 		if balance = ub.BalanceMap[unitType].GetBalance(increment.BalanceInfo.UnitBalanceUuid); balance == nil {
 			return
 		}
 		balance.AddValue(increment.Duration.Seconds())
 		if count {
-			ub.countUnits(&Action{BalanceType: unitType, Balance: &Balance{Value: -increment.Duration.Seconds()}})
+			ub.countUnits(-increment.Duration.Seconds(), unitType, cc, balance)
 		}
 	}
 	// check money too
@@ -459,7 +472,7 @@ func (ub *Account) refundIncrement(increment *Increment, unitType string, count 
 		}
 		balance.AddValue(increment.Cost)
 		if count {
-			ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: -increment.Cost}})
+			ub.countUnits(-increment.Cost, utils.MONETARY, cc, balance)
 		}
 	}
 }
@@ -468,9 +481,9 @@ func (ub *Account) refundIncrement(increment *Increment, unitType string, count 
 func (ub *Account) executeActionTriggers(a *Action) {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
+		limit, counter, kind := at.GetThresholdTypeInfo()
 		// sanity check
-		if !strings.Contains(at.ThresholdType, "counter") &&
-			!strings.Contains(at.ThresholdType, "balance") {
+		if kind != "counter" && kind != "balance" {
 			continue
 		}
 		if at.Executed {
@@ -483,9 +496,11 @@ func (ub *Account) executeActionTriggers(a *Action) {
 		}
 		if strings.Contains(at.ThresholdType, "counter") {
 			for _, uc := range ub.UnitCounters {
-				if uc.BalanceType == at.BalanceType {
+				if uc.BalanceType == at.BalanceType &&
+					uc.CounterType == counter {
 					for _, mb := range uc.Balances {
-						if strings.Contains(at.ThresholdType, "*max") {
+						if limit == "*max" {
+							log.Print("HERE: ", mb.MatchActionTrigger(at))
 							if mb.MatchActionTrigger(at) && mb.GetValue() >= at.ThresholdValue {
 								// run the actions
 								at.Execute(ub, nil)
@@ -504,7 +519,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 				if !b.dirty { // do not check clean balances
 					continue
 				}
-				if strings.Contains(at.ThresholdType, "*max") {
+				if limit == "*max" {
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
 						// run the actions
 						at.Execute(ub, nil)
@@ -542,27 +557,9 @@ func (ub *Account) SetRecurrent(a *Action, recurrent bool) {
 	}
 }
 
-// Returns the unit counter that matches the specified action type
-func (ub *Account) getUnitCounter(a *Action) *UnitsCounter {
-	for _, uc := range ub.UnitCounters {
-		if uc.BalanceType == a.BalanceType {
-			return uc
-		}
-	}
-	return nil
-}
-
-// Increments the counter for the type specified in the received Action
-// with the actions values
-func (ub *Account) countUnits(a *Action) {
-	unitsCounter := ub.getUnitCounter(a)
-	// if not found add the counter
-	if unitsCounter == nil {
-		unitsCounter = &UnitsCounter{BalanceType: a.BalanceType}
-		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
-	}
-
-	unitsCounter.addUnits(a.Balance.GetValue(), a.Balance.DestinationIds) // DestinationIds is actually a destination (number or prefix)
+// Increments the counter for the type
+func (ub *Account) countUnits(amount float64, kind string, cc *CallCost, b *Balance) {
+	ub.UnitCounters.addUnits(amount, kind, cc, b)
 	ub.executeActionTriggers(nil)
 }
 
@@ -577,16 +574,16 @@ func (acc *Account) initCounters() {
 		}
 		uc, exists := ucTempMap[at.BalanceType]
 		if !exists {
-			uc = &UnitsCounter{BalanceType: at.BalanceType}
+			_, ct, _ := at.GetThresholdTypeInfo()
+			uc = &UnitsCounter{
+				BalanceType: at.BalanceType,
+				CounterType: ct,
+			}
 			ucTempMap[at.BalanceType] = uc
-			uc.Balances = BalanceChain{&Balance{}} // init chain with default balance
+			uc.Balances = BalanceChain{}
 			acc.UnitCounters = append(acc.UnitCounters, uc)
 		}
-		b := at.CreateBalance()
-		if !uc.Balances.HasBalance(b) {
-			uc.Balances = append(uc.Balances, b)
-		}
-		//uc.Balances.Sort() // do not sort, default balance first
+		uc.Balances = append(uc.Balances, at.CreateBalance())
 	}
 }
 
@@ -681,7 +678,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 				b.SubstractValue(connectFee)
 				// the conect fee is not refundable!
 				if count {
-					acc.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: connectFee, DestinationIds: utils.StringMap{cc.Destination: true}}})
+					acc.countUnits(connectFee, utils.MONETARY, cc, b)
 				}
 				connectFeePaid = true
 				break
@@ -690,10 +687,11 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 		// debit connect fee
 		if connectFee > 0 && !connectFeePaid {
 			// there are no money for the connect fee; go negative
-			acc.GetDefaultMoneyBalance().SubstractValue(connectFee)
+			b := acc.GetDefaultMoneyBalance()
+			b.SubstractValue(connectFee)
 			// the conect fee is not refundable!
 			if count {
-				acc.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: connectFee, DestinationIds: utils.StringMap{cc.Destination: true}}})
+				acc.countUnits(connectFee, utils.MONETARY, cc, b)
 			}
 		}
 	}

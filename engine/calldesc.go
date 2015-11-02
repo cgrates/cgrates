@@ -709,7 +709,7 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 				defer accountingStorage.SetAccount(account)
 			}
 		}
-		account.refundIncrement(increment, cd.TOR, true)
+		account.refundIncrement(increment, cd, true)
 	}
 	return 0.0, err
 }

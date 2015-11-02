@@ -93,6 +93,40 @@ func (b *Balance) MatchFilter(o *Balance) bool {
 		(o.RatingSubject == "" || b.RatingSubject == o.RatingSubject)
 }
 
+func (b *Balance) MatchCCFilter(cc *CallCost) bool {
+	if len(b.Categories) > 0 && cc.Category != "" && b.Categories[cc.Category] == false {
+		return false
+	}
+	if len(b.Directions) > 0 && cc.Direction != "" && b.Directions[cc.Direction] == false {
+		return false
+	}
+
+	// match destination ids
+	foundMatchingDestId := false
+	if len(b.DestinationIds) > 0 && cc.Destination != "" {
+		for _, p := range utils.SplitPrefix(cc.Destination, MIN_PREFIX_MATCH) {
+			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
+				destIds := x.(map[interface{}]struct{})
+				for filterDestId := range b.DestinationIds {
+					if _, ok := destIds[filterDestId]; ok {
+						foundMatchingDestId = true
+						break
+					}
+				}
+			}
+			if foundMatchingDestId {
+				break
+			}
+		}
+	} else {
+		foundMatchingDestId = true
+	}
+	if !foundMatchingDestId {
+		return false
+	}
+	return true
+}
+
 // the default balance has standard Id
 func (b *Balance) IsDefault() bool {
 	return b.Id == utils.META_DEFAULT
@@ -364,7 +398,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				inc.Cost = 0
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: cc.TOR, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: amount, DestinationIds: utils.StringMap{cc.Destination: true}}})
+					ub.countUnits(amount, cc.TOR, cc, b)
 				}
 			} else {
 				inc.paid = false
@@ -428,7 +462,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					inc.BalanceInfo.AccountId = ub.Id
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: cost, DestinationIds: utils.StringMap{cc.Destination: true}}})
+						ub.countUnits(cost, utils.MONETARY, cc, b)
 					}
 					// go to nextincrement
 					continue
@@ -452,9 +486,9 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: cc.TOR, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: amount, DestinationIds: utils.StringMap{cc.Destination: true}}})
+						ub.countUnits(amount, cc.TOR, cc, b)
 						if cost != 0 {
-							ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: cost, DestinationIds: utils.StringMap{cc.Destination: true}}})
+							ub.countUnits(cost, utils.MONETARY, cc, moneyBal)
 						}
 					}
 				} else {
@@ -529,7 +563,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: amount, DestinationIds: utils.StringMap{cc.Destination: true}}})
+					ub.countUnits(amount, utils.MONETARY, cc, b)
 				}
 
 				//log.Printf("TS: %+v", cc.Cost)
@@ -544,7 +578,7 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 				inc.BalanceInfo.AccountId = ub.Id
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Balance: &Balance{Directions: utils.StringMap{cc.Direction: true}, Value: amount, DestinationIds: utils.StringMap{cc.Destination: true}}})
+					ub.countUnits(amount, utils.MONETARY, cc, b)
 				}
 			} else {
 				inc.paid = false
