@@ -32,7 +32,7 @@ import (
 )
 
 func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv engine.Connector, timezone string) (*KamailioSessionManager, error) {
-	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, conns: make(map[string]*kamevapi.KamEvapi)}
+	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, conns: make(map[string]*kamevapi.KamEvapi), sessions: NewSessions()}
 	return ksm, nil
 }
 
@@ -42,7 +42,7 @@ type KamailioSessionManager struct {
 	cdrsrv   engine.Connector
 	timezone string
 	conns    map[string]*kamevapi.KamEvapi
-	sessions []*Session
+	sessions *Sessions
 }
 
 func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
@@ -133,7 +133,7 @@ func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
 	}
 	s := NewSession(kamEv, connId, self)
 	if s != nil {
-		self.sessions = append(self.sessions, s)
+		self.sessions.indexSession(s)
 	}
 }
 
@@ -150,12 +150,11 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Mandatory IE missing out of event: %+v", kev))
 	}
 	go self.ProcessCdr(kev.AsStoredCdr(self.Timezone()))
-	s := self.GetSession(kev.GetUUID())
+	s := self.sessions.getSession(kev.GetUUID())
 	if s == nil { // Not handled by us
 		return
 	}
-	self.RemoveSession(s.eventStart.GetUUID()) // Unreference it early so we avoid concurrency
-	if err := s.Close(kev); err != nil {       // Stop loop, refund advanced charges and save the costs deducted so far to database
+	if err := self.sessions.removeSession(s, kev); err != nil {
 		utils.Logger.Err(err.Error())
 	}
 }
@@ -193,24 +192,7 @@ func (self *KamailioSessionManager) DisconnectSession(ev engine.Event, connId, n
 	}
 	return nil
 }
-func (self *KamailioSessionManager) RemoveSession(uuid string) {
-	for i, ss := range self.sessions {
-		if ss.eventStart.GetUUID() == uuid {
-			self.sessions = append(self.sessions[:i], self.sessions[i+1:]...)
-			return
-		}
-	}
-}
 
-// Searches and return the session with the specifed uuid
-func (self *KamailioSessionManager) GetSession(uuid string) *Session {
-	for _, s := range self.sessions {
-		if s.eventStart.GetUUID() == uuid {
-			return s
-		}
-	}
-	return nil
-}
 func (self *KamailioSessionManager) DebitInterval() time.Duration {
 	return self.cfg.DebitInterval
 }
@@ -239,7 +221,7 @@ func (self *KamailioSessionManager) Shutdown() error {
 }
 
 func (self *KamailioSessionManager) Sessions() []*Session {
-	return self.sessions
+	return self.sessions.getSessions()
 }
 
 func (self *KamailioSessionManager) SyncSessions() error {
