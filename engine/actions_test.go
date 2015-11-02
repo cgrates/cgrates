@@ -926,28 +926,27 @@ func TestActionResetAllCounters(t *testing.T) {
 				&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)},
 				&Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET"), Directions: utils.NewStringMap(utils.OUT)}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{ThresholdType: "*max_counter", BalanceType: utils.MONETARY, ThresholdValue: 2, BalanceDestinationIds: utils.NewStringMap("NAT"), BalanceWeight: 20, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetCountersAction(ub, nil, nil, nil)
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
-		len(ub.UnitCounters) != 2 ||
-		len(ub.UnitCounters[0].Balances) != 1 ||
-		len(ub.UnitCounters[1].Balances) != 1 ||
-		len(ub.BalanceMap[utils.VOICE]) != 2 ||
+		len(ub.UnitCounters) != 1 ||
+		len(ub.UnitCounters[0].Balances) != 2 ||
+		len(ub.BalanceMap[utils.MONETARY]) != 1 ||
 		ub.ActionTriggers[0].Executed != true {
-		t.Errorf("Reset counters action failed: %+v", ub.UnitCounters)
+		t.Errorf("Reset counters action failed: %+v %+v %+v", ub.UnitCounters, ub.UnitCounters[0], ub.UnitCounters[0].Balances)
 	}
 	if len(ub.UnitCounters) < 1 {
 		t.FailNow()
 	}
-	mb := ub.UnitCounters[1].Balances[0]
+	mb := ub.UnitCounters[0].Balances[1]
 	if mb.Weight != 20 || mb.GetValue() != 0 || mb.DestinationIds["NAT"] == false {
 		t.Errorf("Balance cloned incorrectly: %+v", mb)
 	}
 }
 
-func TestActionResetCounterMinutes(t *testing.T) {
+func TestActionResetCounterOnlyDefault(t *testing.T) {
 	ub := &Account{
 		Id:            "TEST_UB",
 		AllowNegative: true,
@@ -957,24 +956,24 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
 		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdType: "*max_counter", ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.VOICE}
+	a := &Action{BalanceType: utils.MONETARY}
 	resetCounterAction(ub, nil, a, nil)
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
-		len(ub.UnitCounters) != 2 ||
-		len(ub.UnitCounters[1].Balances) != 2 ||
+		len(ub.UnitCounters) != 1 ||
+		len(ub.UnitCounters[0].Balances) != 1 ||
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
-		for _, b := range ub.UnitCounters[1].Balances {
+		for _, b := range ub.UnitCounters[0].Balances {
 			t.Logf("B: %+v", b)
 		}
 		t.Errorf("Reset counters action failed: %+v", ub.UnitCounters)
 	}
-	if len(ub.UnitCounters) < 2 || len(ub.UnitCounters[1].Balances) < 1 {
+	if len(ub.UnitCounters) < 1 || len(ub.UnitCounters[0].Balances) < 1 {
 		t.FailNow()
 	}
-	mb := ub.UnitCounters[1].Balances[1]
-	if mb.Weight != 20 || mb.GetValue() != 0 || mb.DestinationIds["NAT"] == false {
+	mb := ub.UnitCounters[0].Balances[0]
+	if mb.Weight != 0 || mb.GetValue() != 0 || mb.DestinationIds[utils.ANY] != true {
 		t.Errorf("Balance cloned incorrectly: %+v!", mb)
 	}
 }

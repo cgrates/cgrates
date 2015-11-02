@@ -150,13 +150,13 @@ func (at *ActionTrigger) CreateBalance() *Balance {
 	return &Balance{
 		Directions:     at.BalanceDirections,
 		ExpirationDate: at.BalanceExpirationDate,
-		Weight:         at.BalanceWeight,
 		DestinationIds: at.BalanceDestinationIds,
 		RatingSubject:  at.BalanceRatingSubject,
 		Categories:     at.BalanceCategories,
 		SharedGroups:   at.BalanceSharedGroups,
 		TimingIDs:      at.BalanceTimingTags,
 		Disabled:       at.BalanceDisabled,
+		Weight:         at.BalanceWeight,
 	}
 }
 

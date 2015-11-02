@@ -579,14 +579,14 @@ func (acc *Account) initCounters() {
 		if !exists {
 			uc = &UnitsCounter{BalanceType: at.BalanceType}
 			ucTempMap[at.BalanceType] = uc
-			uc.Balances = BalanceChain{}
+			uc.Balances = BalanceChain{&Balance{}} // init chain with default balance
 			acc.UnitCounters = append(acc.UnitCounters, uc)
 		}
 		b := at.CreateBalance()
 		if !uc.Balances.HasBalance(b) {
 			uc.Balances = append(uc.Balances, b)
 		}
-		//uc.Balances.Sort() // do not sort
+		//uc.Balances.Sort() // do not sort, default balance first
 	}
 }
 
