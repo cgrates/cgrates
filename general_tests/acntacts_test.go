@@ -67,7 +67,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,10`
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account created")
-	} else if !reflect.DeepEqual(expectAcnt, acnt) {
+	} else if !reflect.DeepEqual(expectAcnt.ActionTriggers, acnt.ActionTriggers) {
 		t.Errorf("Expecting: %+v, received: %+v", expectAcnt, acnt)
 	}
 }

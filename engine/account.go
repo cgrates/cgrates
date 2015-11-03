@@ -563,7 +563,7 @@ func (acc *Account) countUnits(amount float64, kind string, cc *CallCost, b *Bal
 
 // Create counters for all triggered actions
 func (acc *Account) InitCounters() {
-	acc.UnitCounters = make(UnitCounters, 0)
+	acc.UnitCounters = nil
 	ucTempMap := make(map[string]*UnitCounter)
 	for _, at := range acc.ActionTriggers {
 		if !strings.Contains(at.ThresholdType, "counter") {
