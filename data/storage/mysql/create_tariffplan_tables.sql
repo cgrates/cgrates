@@ -158,7 +158,7 @@ CREATE TABLE `tp_actions` (
   `destination_tags` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
   `categories` varchar(32) NOT NULL,
-  `shared_group` varchar(64) NOT NULL,
+  `shared_groups` varchar(64) NOT NULL,
   `balance_weight` DECIMAL(8,2) NOT NULL,
   `balance_disabled` BOOLEAN NOT NULL,
   `extra_parameters` varchar(256) NOT NULL,
@@ -166,7 +166,7 @@ CREATE TABLE `tp_actions` (
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`directions`,`expiry_time`,`timing_tags`,`destination_tags`,`shared_group`,`balance_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`directions`,`expiry_time`,`timing_tags`,`destination_tags`,`shared_groups`,`balance_weight`,`weight`)
 );
 
 --
@@ -207,7 +207,7 @@ CREATE TABLE `tp_action_triggers` (
   `balance_categories` varchar(32) NOT NULL,
   `balance_destination_tags` varchar(64) NOT NULL,
   `balance_rating_subject` varchar(64) NOT NULL,
-  `balance_shared_group` varchar(64) NOT NULL,
+  `balance_shared_groups` varchar(64) NOT NULL,
   `balance_expiry_time` varchar(24) NOT NULL,
   `balance_timing_tags` varchar(128) NOT NULL,
   `balance_weight` DECIMAL(8,2) NOT NULL,

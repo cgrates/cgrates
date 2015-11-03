@@ -289,7 +289,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage, cdrDb engine.CdrStorage,
 	internalRaterChan chan *engine.Responder, internalPubSubSChan chan engine.PublisherSubscriber,
 	internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
-	internalCdrStatSChan chan engine.StatsInterface, server *engine.Server, exitChan chan bool) {
+	internalCdrStatSChan chan engine.StatsInterface, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS CDRS service.")
 	var err error
 	var client *rpcclient.RpcClient
@@ -410,14 +410,14 @@ func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, ratingDb en
 	exitChan <- true // Should not get out of loop though
 }
 
-func startCdrStats(internalCdrStatSChan chan engine.StatsInterface, ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, server *engine.Server) {
+func startCdrStats(internalCdrStatSChan chan engine.StatsInterface, ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, server *utils.Server) {
 	cdrStats := engine.NewStats(ratingDb, accountDb, cfg.CDRStatsSaveInterval)
 	server.RpcRegister(cdrStats)
 	server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
 	internalCdrStatSChan <- cdrStats
 }
 
-func startHistoryServer(internalHistorySChan chan history.Scribe, server *engine.Server, exitChan chan bool) {
+func startHistoryServer(internalHistorySChan chan history.Scribe, server *utils.Server, exitChan chan bool) {
 	scribeServer, err := history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
@@ -427,14 +427,14 @@ func startHistoryServer(internalHistorySChan chan history.Scribe, server *engine
 	internalHistorySChan <- scribeServer
 }
 
-func startPubSubServer(internalPubSubSChan chan engine.PublisherSubscriber, accountDb engine.AccountingStorage, server *engine.Server) {
+func startPubSubServer(internalPubSubSChan chan engine.PublisherSubscriber, accountDb engine.AccountingStorage, server *utils.Server) {
 	pubSubServer := engine.NewPubSub(accountDb, cfg.HttpSkipTlsVerify)
 	server.RpcRegisterName("PubSubV1", pubSubServer)
 	internalPubSubSChan <- pubSubServer
 }
 
 // ToDo: Make sure we are caching before starting this one
-func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb engine.AccountingStorage, server *engine.Server, exitChan chan bool) {
+func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
 	aliasesServer := engine.NewAliasHandler(accountDb)
 	server.RpcRegisterName("AliasesV1", aliasesServer)
 	if err := accountDb.CacheAccountingPrefixes(utils.ALIASES_PREFIX); err != nil {
@@ -445,7 +445,7 @@ func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb 
 	internalAliaseSChan <- aliasesServer
 }
 
-func startUsersServer(internalUserSChan chan engine.UserService, accountDb engine.AccountingStorage, server *engine.Server, exitChan chan bool) {
+func startUsersServer(internalUserSChan chan engine.UserService, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
 	userServer, err := engine.NewUserMap(accountDb, cfg.UserServerIndexes)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
@@ -456,7 +456,7 @@ func startUsersServer(internalUserSChan chan engine.UserService, accountDb engin
 	internalUserSChan <- userServer
 }
 
-func startRpc(server *engine.Server, internalRaterChan chan *engine.Responder,
+func startRpc(server *utils.Server, internalRaterChan chan *engine.Responder,
 	internalCdrSChan chan *engine.CdrServer,
 	internalCdrStatSChan chan engine.StatsInterface,
 	internalHistorySChan chan history.Scribe,
@@ -573,7 +573,7 @@ func main() {
 	stopHandled := false
 
 	// Rpc/http server
-	server := new(engine.Server)
+	server := new(utils.Server)
 
 	// Async starts here, will follow cgrates.json start order
 	exitChan := make(chan bool)

@@ -28,13 +28,13 @@ type SessionManager interface {
 	Rater() engine.Connector
 	CdrSrv() engine.Connector
 	DebitInterval() time.Duration
-	Connect() error
 	DisconnectSession(engine.Event, string, string) error
 	WarnSessionMinDuration(string, string)
-	RemoveSession(string)
-	ProcessCdr(*engine.StoredCdr) error
-	Shutdown() error
 	Sessions() []*Session
-	SyncSessions() error
 	Timezone() string
+	ProcessCdr(*engine.StoredCdr) error
+	Connect() error
+	Shutdown() error
+	//RemoveSession(string)
+	//SyncSessions() error
 }

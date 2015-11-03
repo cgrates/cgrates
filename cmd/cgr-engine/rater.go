@@ -42,7 +42,7 @@ func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled 
 func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
 	internalCdrStatSChan chan engine.StatsInterface, internalHistorySChan chan history.Scribe,
 	internalPubSubSChan chan engine.PublisherSubscriber, internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
-	server *engine.Server,
+	server *utils.Server,
 	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
 	stopHandled *bool, exitChan chan bool) {
 	waitTasks := make([]chan struct{}, 0)

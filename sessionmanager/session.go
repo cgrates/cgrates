@@ -30,8 +30,8 @@ import (
 // Session type holding the call information fields, a session delegate for specific
 // actions and a channel to signal end of the debit loop.
 type Session struct {
-	eventStart     engine.Event // Store the original event who started this session so we can use it's info later (eg: disconnect, cgrid)
-	stopDebit      chan bool    // Channel to communicate with debit loops when closing the session
+	eventStart     engine.Event  // Store the original event who started this session so we can use it's info later (eg: disconnect, cgrid)
+	stopDebit      chan struct{} // Channel to communicate with debit loops when closing the session
 	sessionManager SessionManager
 	connId         string // Reference towards connection id on the session manager side.
 	warnMinDur     time.Duration
@@ -54,7 +54,7 @@ func (s *Session) SessionRuns() []*engine.SessionRun {
 // Creates a new session and in case of prepaid starts the debit loop for each of the session runs individually
 func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 	s := &Session{eventStart: ev,
-		stopDebit:      make(chan bool),
+		stopDebit:      make(chan struct{}),
 		sessionManager: sm,
 		connId:         connId,
 	}
@@ -138,7 +138,7 @@ func (s *Session) Close(ev engine.Event) error {
 		}
 		duration, err := ev.GetDuration(sr.DerivedCharger.UsageField)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("Error parsing call duration from event %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("Error parsing call duration from event: %s", err.Error()))
 			return err
 		}
 		hangupTime := startTime.Add(duration)
