@@ -136,7 +136,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		newAcc := &engine.Account{
 			Id:             oldAcc.Id,
 			BalanceMap:     make(map[string]engine.BalanceChain, len(oldAcc.BalanceMap)),
-			UnitCounters:   make([]*engine.UnitsCounter, len(oldAcc.UnitCounters)),
+			UnitCounters:   make(engine.UnitCounters, len(oldAcc.UnitCounters)),
 			ActionTriggers: make(engine.ActionTriggers, len(oldAcc.ActionTriggers)),
 			AllowNegative:  oldAcc.AllowNegative,
 			Disabled:       oldAcc.Disabled,
@@ -180,7 +180,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		}
 		// unit counters
 		for _, oldUc := range oldAcc.UnitCounters {
-			newUc := &engine.UnitsCounter{
+			newUc := &engine.UnitCounter{
 				BalanceType: oldUc.BalanceType,
 				Balances:    make(engine.BalanceChain, len(oldUc.Balances)),
 			}
