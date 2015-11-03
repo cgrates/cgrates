@@ -1048,15 +1048,35 @@ func TestLoadAccountActions(t *testing.T) {
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]
 	expected := &Account{
-		Id:             "vdf:minitsboy",
+		Id: "vdf:minitsboy",
+		UnitCounters: UnitCounters{
+			&UnitCounter{
+				BalanceType: "*voice",
+				CounterType: "*event",
+				Balances: BalanceChain{
+					&Balance{
+						Id:             "2c2ce3c9-d62b-49dc-82a5-2a17bdc6eb4e",
+						Value:          0,
+						Directions:     utils.NewStringMap("*out"),
+						DestinationIds: utils.NewStringMap("GERMANY_O2"),
+						SharedGroups:   utils.StringMap{},
+						Categories:     utils.StringMap{},
+						TimingIDs:      utils.StringMap{},
+					},
+				},
+			},
+		},
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
 	}
 	// set propper uuid
 	for i, atr := range aa.ActionTriggers {
 		csvr.actionsTriggers["STANDARD_TRIGGER"][i].Id = atr.Id
 	}
-	if !reflect.DeepEqual(aa, expected) {
-		t.Errorf("Error loading account action: %+v", aa.ActionTriggers[0])
+	for i, b := range aa.UnitCounters[0].Balances {
+		expected.UnitCounters[0].Balances[i].Id = b.Id
+	}
+	if !reflect.DeepEqual(aa.UnitCounters[0].Balances[0], expected.UnitCounters[0].Balances[0]) {
+		t.Errorf("Error loading account action: %+v \n %+v", aa.UnitCounters[0].Balances[0], expected.UnitCounters[0].Balances[0])
 	}
 	// test that it does not overwrite balances
 	existing, err := accountingStorage.GetAccount(aa.Id)

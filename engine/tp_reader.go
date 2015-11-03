@@ -867,6 +867,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 			AllowNegative:  aa.AllowNegative,
 			Disabled:       aa.Disabled,
 		}
+		ub.InitCounters()
 		tpr.accountActions[aa.KeyId()] = ub
 		aTimings, exists := tpr.actionPlans[aa.ActionPlanId]
 		if !exists {
