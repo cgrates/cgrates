@@ -188,6 +188,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 				return 0, err
 			}
 			ub.ActionTriggers = atrs
+			ub.InitCounters()
 		}
 		if attr.AllowNegative != nil {
 			ub.AllowNegative = *attr.AllowNegative

@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -117,7 +116,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			continue // just to be safe (cleaned expired balances above)
 		}
 		b.account = ub
-		if b.MatchFilter(a.Balance) {
+		if b.MatchFilter(a.Balance, false) {
 			if reset {
 				b.SetValue(0)
 			}
@@ -185,7 +184,7 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	id := a.BalanceType
 	ub.CleanExpiredBalances()
 	for _, b := range ub.BalanceMap[id] {
-		if b.MatchFilter(a.Balance) {
+		if b.MatchFilter(a.Balance, false) {
 			b.Disabled = a.Balance.Disabled
 			b.dirty = true
 			found = true
@@ -500,7 +499,6 @@ func (ub *Account) executeActionTriggers(a *Action) {
 					uc.CounterType == counter {
 					for _, mb := range uc.Balances {
 						if limit == "*max" {
-							log.Print("HERE: ", mb.MatchActionTrigger(at))
 							if mb.MatchActionTrigger(at) && mb.GetValue() >= at.ThresholdValue {
 								// run the actions
 								at.Execute(ub, nil)
@@ -537,19 +535,19 @@ func (ub *Account) executeActionTriggers(a *Action) {
 
 // Mark all action trigers as ready for execution
 // If the action is not nil it acts like a filter
-func (ub *Account) ResetActionTriggers(a *Action) {
-	for _, at := range ub.ActionTriggers {
+func (acc *Account) ResetActionTriggers(a *Action) {
+	for _, at := range acc.ActionTriggers {
 		if !at.Match(a) {
 			continue
 		}
 		at.Executed = false
 	}
-	ub.executeActionTriggers(a)
+	acc.executeActionTriggers(a)
 }
 
 // Sets/Unsets recurrent flag for action triggers
-func (ub *Account) SetRecurrent(a *Action, recurrent bool) {
-	for _, at := range ub.ActionTriggers {
+func (acc *Account) SetRecurrent(a *Action, recurrent bool) {
+	for _, at := range acc.ActionTriggers {
 		if !at.Match(a) {
 			continue
 		}
@@ -558,49 +556,51 @@ func (ub *Account) SetRecurrent(a *Action, recurrent bool) {
 }
 
 // Increments the counter for the type
-func (ub *Account) countUnits(amount float64, kind string, cc *CallCost, b *Balance) {
-	ub.UnitCounters.addUnits(amount, kind, cc, b)
-	ub.executeActionTriggers(nil)
+func (acc *Account) countUnits(amount float64, kind string, cc *CallCost, b *Balance) {
+	acc.UnitCounters.addUnits(amount, kind, cc, b)
+	acc.executeActionTriggers(nil)
 }
 
-// Create counters for all triggered actions that have actions opertating on balances
-func (acc *Account) initCounters() {
-	ucTempMap := make(map[string]*UnitsCounter)
-	// add default balance
+// Create counters for all triggered actions
+func (acc *Account) InitCounters() {
+	acc.UnitCounters = make(UnitCounters, 0)
+	ucTempMap := make(map[string]*UnitCounter)
 	for _, at := range acc.ActionTriggers {
 		if !strings.Contains(at.ThresholdType, "counter") {
-			// only get actions for counter type action triggers
 			continue
 		}
-		uc, exists := ucTempMap[at.BalanceType]
+		_, ct, _ := at.GetThresholdTypeInfo()
+		uc, exists := ucTempMap[at.BalanceType+ct]
 		if !exists {
-			_, ct, _ := at.GetThresholdTypeInfo()
-			uc = &UnitsCounter{
+			uc = &UnitCounter{
 				BalanceType: at.BalanceType,
 				CounterType: ct,
 			}
-			ucTempMap[at.BalanceType] = uc
+			ucTempMap[at.BalanceType+ct] = uc
 			uc.Balances = BalanceChain{}
 			acc.UnitCounters = append(acc.UnitCounters, uc)
 		}
-		uc.Balances = append(uc.Balances, at.CreateBalance())
+		b := at.CreateBalance()
+		if !uc.Balances.HasBalance(b) {
+			uc.Balances = append(uc.Balances, b)
+		}
 	}
 }
 
-func (ub *Account) CleanExpiredBalances() {
-	for key, bm := range ub.BalanceMap {
+func (acc *Account) CleanExpiredBalances() {
+	for key, bm := range acc.BalanceMap {
 		for i := 0; i < len(bm); i++ {
 			if bm[i].IsExpired() {
 				// delete it
 				bm = append(bm[:i], bm[i+1:]...)
 			}
 		}
-		ub.BalanceMap[key] = bm
+		acc.BalanceMap[key] = bm
 	}
 }
 
-func (ub *Account) allBalancesExpired() bool {
-	for _, bm := range ub.BalanceMap {
+func (acc *Account) allBalancesExpired() bool {
+	for _, bm := range acc.BalanceMap {
 		for i := 0; i < len(bm); i++ {
 			if !bm[i].IsExpired() {
 				return false
@@ -611,8 +611,8 @@ func (ub *Account) allBalancesExpired() bool {
 }
 
 // returns the shared groups that this user balance belnongs to
-func (ub *Account) GetSharedGroups() (groups []string) {
-	for _, balanceChain := range ub.BalanceMap {
+func (acc *Account) GetSharedGroups() (groups []string) {
+	for _, balanceChain := range acc.BalanceMap {
 		for _, b := range balanceChain {
 			for sg := range b.SharedGroups {
 				groups = append(groups, sg)

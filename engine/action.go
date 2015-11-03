@@ -60,7 +60,6 @@ const (
 	TOPUP                  = "*topup"
 	DEBIT_RESET            = "*debit_reset"
 	DEBIT                  = "*debit"
-	RESET_COUNTER          = "*reset_counter"
 	RESET_COUNTERS         = "*reset_counters"
 	ENABLE_ACCOUNT         = "*enable_account"
 	DISABLE_ACCOUNT        = "*disable_account"
@@ -112,8 +111,6 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return debitResetAction, true
 	case DEBIT:
 		return debitAction, true
-	case RESET_COUNTER:
-		return resetCounterAction, true
 	case RESET_COUNTERS:
 		return resetCountersAction, true
 	case ENABLE_ACCOUNT:
@@ -354,26 +351,11 @@ func debitAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (
 	return
 }
 
-func resetCounterAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-	if ub == nil {
-		return errors.New("nil user balance")
-	}
-	//uc := ub.getUnitCounter(a.ActionType)
-	var uc *UnitsCounter
-	if uc == nil {
-		uc = &UnitsCounter{BalanceType: a.BalanceType}
-		ub.UnitCounters = append(ub.UnitCounters, uc)
-	}
-	uc.initBalances(ub.ActionTriggers)
-	return
-}
-
 func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("nil user balance")
 	}
-	ub.UnitCounters = make([]*UnitsCounter, 0)
-	ub.initCounters()
+	ub.UnitCounters.resetCounters(a)
 	return
 }
 
@@ -422,7 +404,7 @@ func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
-	ub.UnitCounters = make([]*UnitsCounter, 0)
+	ub.UnitCounters = make(UnitCounters, 0)
 	ub.ResetActionTriggers(nil)
 	return nil
 }

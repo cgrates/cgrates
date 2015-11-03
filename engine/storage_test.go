@@ -275,7 +275,7 @@ func TestDifferentUuid(t *testing.T) {
 /************************** Benchmarks *****************************/
 
 func GetUB() *Account {
-	uc := &UnitsCounter{
+	uc := &UnitCounter{
 		BalanceType: utils.SMS,
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}},
 	}
@@ -294,7 +294,7 @@ func GetUB() *Account {
 		Id:             "rif",
 		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{utils.SMS: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   []*UnitsCounter{uc, uc},
+		UnitCounters:   UnitCounters{uc, uc},
 		ActionTriggers: ActionTriggers{at, at, at},
 	}
 	return ub

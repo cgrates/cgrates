@@ -157,6 +157,7 @@ func (at *ActionTrigger) Clone() *ActionTrigger {
 
 func (at *ActionTrigger) CreateBalance() *Balance {
 	return &Balance{
+		Id:             at.Id,
 		Directions:     at.BalanceDirections,
 		ExpirationDate: at.BalanceExpirationDate,
 		DestinationIds: at.BalanceDestinationIds,

@@ -18,35 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import (
-	"log"
-	"strings"
-
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 // Amount of a trafic of a certain type
-type UnitsCounter struct {
+type UnitCounter struct {
 	BalanceType string       // *monetary/*voice/*sms/etc
 	CounterType string       // *event or *balance
 	Balances    BalanceChain // first balance is the general one (no destination)
 }
 
-// clears balances for this counter
-// makes sure there are balances for all action triggers
-func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
-	uc.Balances = BalanceChain{}
-	for _, at := range ats {
-		if !strings.Contains(at.ThresholdType, "counter") ||
-			at.BalanceType != uc.BalanceType {
-			// only get actions for counter type action triggers and with the same type
-			continue
-		}
-		uc.Balances = append(uc.Balances, at.CreateBalance())
-	}
-}
-
-type UnitCounters []*UnitsCounter
+type UnitCounters []*UnitCounter
 
 func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *Balance) {
 	for _, uc := range ucs {
@@ -58,15 +39,27 @@ func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *B
 		}
 		for _, bal := range uc.Balances {
 			if uc.CounterType == utils.COUNTER_EVENT && cc != nil && bal.MatchCCFilter(cc) {
-				log.Print("MATCHCC")
 				bal.AddValue(amount)
 				continue
 			}
-			if uc.CounterType == utils.COUNTER_BALANCE && b != nil && b.MatchFilter(bal) {
+			if uc.CounterType == utils.COUNTER_BALANCE && b != nil && b.MatchFilter(bal, true) {
 				bal.AddValue(amount)
 				continue
 			}
 		}
 
+	}
+}
+
+func (ucs UnitCounters) resetCounters(a *Action) {
+	for _, uc := range ucs {
+		if a != nil && a.BalanceType != "" && a.BalanceType != uc.BalanceType {
+			continue
+		}
+		for _, b := range uc.Balances {
+			if a == nil || a.Balance == nil || b.MatchFilter(a.Balance, false) {
+				b.Value = 0
+			}
+		}
 	}
 }

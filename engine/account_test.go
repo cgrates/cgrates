@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -889,12 +888,10 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
-		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.StringMap{utils.OUT: true}}}}},
+		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.StringMap{utils.OUT: true}}}}},
 		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
-	log.Print("==============")
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	log.Print("==============")
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 110 || ub.BalanceMap[utils.VOICE][0].GetValue() != 20 {
 		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.VOICE][0].GetValue())
 	}
@@ -915,7 +912,7 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}}, &Balance{Directions: utils.NewStringMap(utils.OUT), Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
-		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 1}}}},
+		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 1}}}},
 		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 100, ThresholdType: TRIGGER_MIN_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(1, utils.MONETARY, nil, nil)
@@ -928,10 +925,11 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}},
-		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
+		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
 		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
-	ub.countUnits(1, utils.MONETARY, nil, nil)
+
+	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.BalanceMap[utils.MONETARY]) != 1 || ub.BalanceMap[utils.MONETARY][0].GetValue() != 10 {
 
 		t.Errorf("Error executing triggered actions in order %v BAL: %+v", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.MONETARY][1])
@@ -959,45 +957,45 @@ func TestCleanExpired(t *testing.T) {
 }
 
 func TestAccountUnitCounting(t *testing.T) {
-	ub := &Account{}
-	ub.countUnits(10, utils.MONETARY, nil, nil)
+	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0}}}}}
+	ub.countUnits(10, utils.MONETARY, &CallCost{}, nil)
 	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MONETARY, nil, nil)
+	ub.countUnits(10, utils.MONETARY, &CallCost{}, nil)
 	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
 		t.Error("Error counting units")
 	}
 }
 
 func TestAccountUnitCountingOutbound(t *testing.T) {
-	ub := &Account{}
-	ub.countUnits(10, utils.MONETARY, nil, nil)
+	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0, Directions: utils.NewStringMap(utils.OUT)}}}}}
+	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MONETARY, nil, nil)
+	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MONETARY, nil, nil)
+	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 30 {
 		t.Error("Error counting units")
 	}
 }
 
 func TestAccountUnitCountingOutboundInbound(t *testing.T) {
-	ub := &Account{}
-	ub.countUnits(1, utils.MONETARY, nil, nil)
+	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0, Directions: utils.NewStringMap(utils.OUT)}}}}}
+	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
-		t.Errorf("Error counting units: %+v", ub.UnitCounters[0])
+		t.Errorf("Error counting units: %+v", ub.UnitCounters[0].Balances[0])
 	}
-	ub.countUnits(10, utils.MONETARY, nil, nil)
+	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
 		t.Error("Error counting units")
 	}
-	ub.countUnits(10, utils.MONETARY, nil, nil)
-	if len(ub.UnitCounters) != 1 || (ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 30) { // for the moment no in/out distinction
+	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.IN}, nil)
+	if len(ub.UnitCounters) != 1 || (ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20) {
 		t.Error("Error counting units")
 	}
 }
@@ -1436,6 +1434,133 @@ func TestAccountGetDefaultMoneyBalance(t *testing.T) {
 	defBal := acc.GetDefaultMoneyBalance()
 	if defBal == nil || len(acc.BalanceMap[tag]) != 2 || !defBal.IsDefault() {
 		t.Errorf("Bad default money balance: %+v", defBal)
+	}
+}
+
+func TestAccountInitCounters(t *testing.T) {
+	a := &Account{
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Id:                "TestTR1",
+				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.MONETARY,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR11",
+				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.MONETARY,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR2",
+				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.VOICE,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR3",
+				ThresholdType:     TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.VOICE,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR4",
+				ThresholdType:     TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.SMS,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR5",
+				ThresholdType:     TRIGGER_MAX_BALANCE,
+				BalanceType:       utils.SMS,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+		},
+	}
+	a.InitCounters()
+	if len(a.UnitCounters) != 4 ||
+		len(a.UnitCounters[0].Balances) != 2 ||
+		len(a.UnitCounters[1].Balances) != 1 ||
+		len(a.UnitCounters[2].Balances) != 1 ||
+		len(a.UnitCounters[3].Balances) != 1 {
+		for _, uc := range a.UnitCounters {
+			t.Logf("UC: %+v", uc)
+			for _, b := range uc.Balances {
+				t.Logf("B: %+v", b)
+			}
+		}
+		t.Errorf("Error Initializing unit counters: %v", len(a.UnitCounters))
+	}
+}
+
+func TestAccountDoubleInitCounters(t *testing.T) {
+	a := &Account{
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				Id:                "TestTR1",
+				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.MONETARY,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR11",
+				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.MONETARY,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR2",
+				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.VOICE,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR3",
+				ThresholdType:     TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.VOICE,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR4",
+				ThresholdType:     TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.SMS,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				Id:                "TestTR5",
+				ThresholdType:     TRIGGER_MAX_BALANCE,
+				BalanceType:       utils.SMS,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+		},
+	}
+	a.InitCounters()
+	a.InitCounters()
+	if len(a.UnitCounters) != 4 ||
+		len(a.UnitCounters[0].Balances) != 2 ||
+		len(a.UnitCounters[1].Balances) != 1 ||
+		len(a.UnitCounters[2].Balances) != 1 ||
+		len(a.UnitCounters[3].Balances) != 1 {
+		for _, uc := range a.UnitCounters {
+			t.Logf("UC: %+v", uc)
+			for _, b := range uc.Balances {
+				t.Logf("B: %+v", b)
+			}
+		}
+		t.Errorf("Error Initializing unit counters: %v", len(a.UnitCounters))
 	}
 }
 

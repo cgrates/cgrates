@@ -70,11 +70,11 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.Disabled == o.Disabled
 }
 
-func (b *Balance) MatchFilter(o *Balance) bool {
-	if o.Uuid != "" {
+func (b *Balance) MatchFilter(o *Balance, skipIds bool) bool {
+	if !skipIds && o.Uuid != "" {
 		return b.Uuid == o.Uuid
 	}
-	if o.Id != "" {
+	if !skipIds && o.Id != "" {
 		return b.Id == o.Id
 	}
 	if len(b.DestinationIds) == 0 {
