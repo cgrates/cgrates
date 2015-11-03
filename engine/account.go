@@ -570,6 +570,9 @@ func (acc *Account) InitCounters() {
 			continue
 		}
 		_, ct, _ := at.GetThresholdTypeInfo()
+		if ct == "" {
+			ct = utils.COUNTER_EVENT
+		}
 		uc, exists := ucTempMap[at.BalanceType+ct]
 		if !exists {
 			uc = &UnitCounter{

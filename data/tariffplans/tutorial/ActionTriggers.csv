@@ -1,6 +1,6 @@
 #Tag[0],UniqueId[1],ThresholdType[2],ThresholdValue[3],Recurrent[4],MinSleep[5],BalanceTag[6],BalanceType[7],BalanceDirections[8],BalanceCategories[9],BalanceDestinationIds[10],BalanceRatingSubject[11],BalanceSharedGroup[12],BalanceExpiryTime[13],BalanceTimingIds[14],BalanceWeight[15],BalanceDisabled[16],StatsMinQueuedItems[17],ActionsId[18],Weight[19]
 STANDARD_TRIGGERS,,*min_balance,2,false,0,,*monetary,*out,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_event_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,,LOG_WARNING,10
 STANDARD_TRIGGERS,,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,,LOG_WARNING,10
 STANDARD_TRIGGERS,,*max_balance,100,false,0,,*monetary,*out,,,,,,,,,,DISABLE_AND_LOG,10
 CDRST1_WARN,,*min_asr,45,true,1m,,,,,,,,,,,,3,LOG_WARNING,10

@@ -226,6 +226,10 @@ func (mig MigratorRC8) migrateAccounts() error {
 				MinQueuedItems:        oldAtr.MinQueuedItems,
 				Executed:              oldAtr.Executed,
 			}
+			if newAcc.ActionTriggers[index].ThresholdType == "*min_counter" ||
+				newAcc.ActionTriggers[index].ThresholdType == "*max_counter" {
+				newAcc.ActionTriggers[index].ThresholdType = strings.Replace(newAcc.ActionTriggers[index].ThresholdType, "_", "_event_", 1)
+			}
 		}
 		newAccounts[keyIndex] = newAcc
 	}
@@ -285,6 +289,10 @@ func (mig MigratorRC8) migrateActionTriggers() error {
 				ActionsId:             oldAtr.ActionsId,
 				MinQueuedItems:        oldAtr.MinQueuedItems,
 				Executed:              oldAtr.Executed,
+			}
+			if newAtrs[index].ThresholdType == "*min_counter" ||
+				newAtrs[index].ThresholdType == "*max_counter" {
+				newAtrs[index].ThresholdType = strings.Replace(newAtrs[index].ThresholdType, "_", "_event_", 1)
 			}
 		}
 		newAtrsMap[key] = newAtrs
