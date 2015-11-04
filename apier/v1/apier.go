@@ -102,18 +102,6 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 	return nil
 }
 
-// Get balance
-func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
-	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
-	userBalance, err := self.AccountDb.GetAccount(tag)
-	if err != nil {
-		return err
-	}
-
-	*reply = *userBalance
-	return nil
-}
-
 type AttrAddBalance struct {
 	Tenant         string
 	Account        string
@@ -126,7 +114,7 @@ type AttrAddBalance struct {
 	RatingSubject  string
 	DestinationIds string
 	Weight         float64
-	SharedGroups    string
+	SharedGroups   string
 	Overwrite      bool // When true it will reset if the balance is already there
 	Disabled       bool
 }
@@ -171,7 +159,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				Directions:     utils.ParseStringMap(attr.Directions),
 				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
 				Weight:         attr.Weight,
-				SharedGroups:    utils.ParseStringMap(attr.SharedGroups),
+				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
 				Disabled:       attr.Disabled,
 			},
 		},
@@ -210,7 +198,7 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 				Directions:     utils.ParseStringMap(attr.Directions),
 				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
 				Weight:         attr.Weight,
-				SharedGroups:    utils.ParseStringMap(attr.SharedGroups),
+				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
 				Disabled:       attr.Disabled,
 			},
 		},
@@ -621,7 +609,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 				Directions:     utils.ParseStringMap(apiAct.Directions),
 				DestinationIds: utils.ParseStringMap(apiAct.DestinationIds),
 				RatingSubject:  apiAct.RatingSubject,
-				SharedGroups:    utils.ParseStringMap(apiAct.SharedGroups),
+				SharedGroups:   utils.ParseStringMap(apiAct.SharedGroups),
 			},
 		}
 		storeActions[idx] = a

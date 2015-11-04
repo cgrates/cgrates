@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
 	"math"
 	"regexp"
 	"strings"
@@ -280,5 +281,17 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 		}
 	}
 	*reply = retAccounts
+	return nil
+}
+
+// Get balance
+func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) error {
+	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
+	userBalance, err := self.AccountDb.GetAccount(tag)
+	if err != nil {
+		return err
+	}
+
+	*reply = userBalance.AsOldStructure()
 	return nil
 }

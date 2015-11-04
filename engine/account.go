@@ -759,7 +759,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 
 	result := &Account{
-		Id:             acc.Id,
+		Id:             "*out:" + acc.Id,
 		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
