@@ -4,7 +4,7 @@
 --
 
 DROP TABLE IF EXISTS cdrs;
-CREATE TABLE cdrs_primary (
+CREATE TABLE cdrs (
   id int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
   runid  varchar(64) NOT NULL,
