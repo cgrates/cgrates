@@ -48,10 +48,8 @@ func TestPSQLCreateTables(t *testing.T) {
 			return // No point in going further
 		}
 	}
-	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
-		if _, err := psqlDb.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
-			t.Error(err.Error())
-		}
+	if _, err := psqlDb.Db.Query(fmt.Sprintf("SELECT 1 from %s", utils.TBL_CDRS)); err != nil {
+		t.Error(err.Error())
 	}
 }
 

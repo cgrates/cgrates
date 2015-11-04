@@ -162,7 +162,7 @@ type TpAction struct {
 	Categories      string  `index:"6" re:""`
 	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
 	RatingSubject   string  `index:"8" re:"\w+\s*"`
-	SharedGroups     string  `index:"9" re:"[0-9A-Za-z_;]*"`
+	SharedGroups    string  `index:"9" re:"[0-9A-Za-z_;]*"`
 	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
 	Units           float64 `index:"12" re:"\d+\s*"`
@@ -197,7 +197,7 @@ type TpActionTrigger struct {
 	BalanceCategories      string  `index:"9" re:""`
 	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
 	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
-	BalanceSharedGroups     string  `index:"12" re:"\w+|\*any"`
+	BalanceSharedGroups    string  `index:"12" re:"\w+|\*any"`
 	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*|\*any"`
 	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
@@ -390,9 +390,10 @@ func (ta *TpAlias) GetId() string {
 	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
 }
 
-type TblCdrsPrimary struct {
+type TblCdrs struct {
 	Id              int64
 	Cgrid           string
+	Runid           string
 	Tor             string
 	Accid           string
 	Cdrhost         string
@@ -410,73 +411,16 @@ type TblCdrsPrimary struct {
 	Usage           float64
 	Supplier        string
 	DisconnectCause string
-	CreatedAt       time.Time
-	DeletedAt       time.Time
-}
-
-func (t TblCdrsPrimary) TableName() string {
-	return utils.TBL_CDRS_PRIMARY
-}
-
-type TblCdrsExtra struct {
-	Id          int64
-	Cgrid       string
-	ExtraFields string
-	CreatedAt   time.Time
-	DeletedAt   time.Time
-}
-
-func (t TblCdrsExtra) TableName() string {
-	return utils.TBL_CDRS_EXTRA
-}
-
-type TblCostDetail struct {
-	Id          int64
-	Cgrid       string
-	Runid       string
-	Tor         string
-	Direction   string
-	Tenant      string
-	Category    string
-	Account     string
-	Subject     string
-	Destination string
-	Cost        float64
-	Timespans   string
-	CostSource  string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   time.Time
-}
-
-func (t TblCostDetail) TableName() string {
-	return utils.TBL_COST_DETAILS
-}
-
-type TblRatedCdr struct {
-	Id              int64
-	Cgrid           string
-	Runid           string
-	Reqtype         string
-	Direction       string
-	Tenant          string
-	Category        string
-	Account         string
-	Subject         string
-	Destination     string
-	SetupTime       time.Time
-	Pdd             float64
-	AnswerTime      time.Time
-	Usage           float64
-	Supplier        string
-	DisconnectCause string
+	ExtraFields     string
 	Cost            float64
+	Timespans       string
+	CostSource      string
 	ExtraInfo       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       time.Time
 }
 
-func (t TblRatedCdr) TableName() string {
-	return utils.TBL_RATED_CDRS
+func (t TblCdrs) TableName() string {
+	return utils.TBL_CDRS
 }
