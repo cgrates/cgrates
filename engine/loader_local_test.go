@@ -428,21 +428,23 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
 	for _, key := range keysCsv {
-		var refVal []byte
+		var refMap map[string]interface{}
 		if key == "load_history" {
 			continue
 		}
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
 			qVal, err := rs.db.Get(key)
+			qMap := make(map[string]interface{})
+			err = rs.ms.Unmarshal(qVal, qMap)
 			if err != nil {
 				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
 			}
 			if idx == 0 { // Only compare at second iteration, first one is to set reference value
-				refVal = qVal
+				refMap = qMap
 				continue
 			}
-			if len(refVal) != len(qVal) {
-				t.Errorf("Missmatched data for key: %s\n\t, reference val: %s \n\t retrieved value: %s\n on iteration: %d", key, refVal, qVal, idx)
+			if !reflect.DeepEqual(refMap, qVal) {
+				t.Errorf("Missmatched data for key: %s\n\t, reference val: %+v \n\t retrieved value: %+v\n on iteration: %d", key, refMap, qMap, idx)
 			}
 		}
 	}
