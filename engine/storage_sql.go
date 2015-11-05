@@ -944,15 +944,10 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	}
 
 	// Execute query
-	rows, err := q.Rows()
-	if err != nil {
-		return nil, 0, err
-	}
-	for rows.Next() {
-		var result TblCdrs
-		if err := rows.Scan(&result); err != nil {
-			return nil, 0, err
-		}
+	results := make([]*TblCdrs, 0)
+	q.Find(&results)
+
+	for _, result := range results {
 		var extraFieldsMp map[string]string
 		var ccTimespans TimeSpans
 		if len(result.ExtraFields) != 0 {
