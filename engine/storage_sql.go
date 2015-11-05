@@ -30,7 +30,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
 
@@ -950,43 +949,65 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		return nil, 0, err
 	}
 	for rows.Next() {
-		var cgrid, tor, accid, cdrhost, cdrsrc, reqtype, direction, tenant, category, account, subject, destination, runid, ccTor,
-			ccDirection, ccTenant, ccCategory, ccAccount, ccSubject, ccDestination, ccSupplier, ccDisconnectCause sql.NullString
-		var extraFields, ccTimespansBytes []byte
-		var setupTime, answerTime mysql.NullTime
-		var orderid int64
-		var usage, pdd, cost, ccCost sql.NullFloat64
-		var extraFieldsMp map[string]string
-		var ccTimespans TimeSpans
-		if err := rows.Scan(&cgrid, &orderid, &tor, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination,
-			&setupTime, &answerTime, &usage, &pdd, &ccSupplier, &ccDisconnectCause,
-			&extraFields, &runid, &cost, &ccTor, &ccDirection, &ccTenant, &ccCategory, &ccAccount, &ccSubject, &ccDestination, &ccCost, &ccTimespansBytes); err != nil {
+		var result TblCdrs
+		if err := rows.Scan(&result); err != nil {
 			return nil, 0, err
 		}
-		if len(extraFields) != 0 {
-			if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
-				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid.String, runid.String, err.Error())
+		var extraFieldsMp map[string]string
+		var ccTimespans TimeSpans
+		if len(result.ExtraFields) != 0 {
+			if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
+				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.Runid, err.Error())
 			}
 		}
-		if len(ccTimespansBytes) != 0 {
-			if err := json.Unmarshal(ccTimespansBytes, &ccTimespans); err != nil {
-				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", cgrid.String, runid.String, err.Error())
+		if len(result.Timespans) != 0 {
+			if err := json.Unmarshal([]byte(result.Timespans), &ccTimespans); err != nil {
+				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.Runid, err.Error())
 			}
 		}
-		usageDur, _ := time.ParseDuration(strconv.FormatFloat(usage.Float64, 'f', -1, 64) + "s")
-		pddDur, _ := time.ParseDuration(strconv.FormatFloat(pdd.Float64, 'f', -1, 64) + "s")
+		usageDur, _ := time.ParseDuration(strconv.FormatFloat(result.Usage, 'f', -1, 64) + "s")
+		pddDur, _ := time.ParseDuration(strconv.FormatFloat(result.Pdd, 'f', -1, 64) + "s")
 		storCdr := &StoredCdr{
-			CgrId: cgrid.String, OrderId: orderid, TOR: tor.String, AccId: accid.String, CdrHost: cdrhost.String, CdrSource: cdrsrc.String, ReqType: reqtype.String,
-			Direction: direction.String, Tenant: tenant.String,
-			Category: category.String, Account: account.String, Subject: subject.String, Destination: destination.String,
-			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Usage: usageDur, Pdd: pddDur, Supplier: ccSupplier.String, DisconnectCause: ccDisconnectCause.String,
-			ExtraFields: extraFieldsMp, MediationRunId: runid.String, RatedAccount: ccAccount.String, RatedSubject: ccSubject.String, Cost: cost.Float64,
+			CgrId:           result.Cgrid,
+			OrderId:         result.Id,
+			TOR:             result.Tor,
+			AccId:           result.Accid,
+			CdrHost:         result.Cdrhost,
+			CdrSource:       result.Cdrsource,
+			ReqType:         result.Reqtype,
+			Direction:       result.Direction,
+			Tenant:          result.Tenant,
+			Category:        result.Category,
+			Account:         result.Account,
+			Subject:         result.Subject,
+			Destination:     result.Destination,
+			SetupTime:       result.SetupTime,
+			Pdd:             pddDur,
+			AnswerTime:      result.AnswerTime,
+			Usage:           usageDur,
+			Supplier:        result.Supplier,
+			DisconnectCause: result.DisconnectCause,
+			ExtraFields:     extraFieldsMp,
+			MediationRunId:  result.Runid,
+			RatedAccount:    result.Account,
+			RatedSubject:    result.Subject,
+			Cost:            result.Cost,
+			ExtraInfo:       result.ExtraInfo,
 		}
 		if ccTimespans != nil {
-			storCdr.CostDetails = &CallCost{Direction: ccDirection.String, Category: ccCategory.String, Tenant: ccTenant.String, Subject: ccSubject.String, Account: ccAccount.String, Destination: ccDestination.String, TOR: ccTor.String,
-				Cost: ccCost.Float64, Timespans: ccTimespans}
+			storCdr.CostDetails = &CallCost{
+				Direction:   result.Direction,
+				Category:    result.Category,
+				Tenant:      result.Tenant,
+				Subject:     result.Subject,
+				Account:     result.Account,
+				Destination: result.Destination,
+				TOR:         result.Tor,
+				Cost:        result.Cost,
+				Timespans:   ccTimespans,
+			}
 		}
-		if !cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating
+		if !result.Cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating
 			storCdr.Cost = -1
 		}
 		cdrs = append(cdrs, storCdr)
