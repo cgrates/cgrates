@@ -231,6 +231,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 				newAcc.ActionTriggers[index].ThresholdType = strings.Replace(newAcc.ActionTriggers[index].ThresholdType, "_", "_event_", 1)
 			}
 		}
+		newAcc.InitCounters()
 		newAccounts[keyIndex] = newAcc
 	}
 	// write data back
