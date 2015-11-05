@@ -162,6 +162,7 @@ type CdrcJsonCfg struct {
 // SM-Generic config section
 type SmGenericJsonCfg struct {
 	Enabled           *bool
+	Listen_bijson     *string
 	Rater             *string
 	Cdrs              *string
 	Debit_interval    *string

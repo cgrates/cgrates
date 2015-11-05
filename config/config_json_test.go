@@ -326,6 +326,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 func TestSmGenericJsonCfg(t *testing.T) {
 	eCfg := &SmGenericJsonCfg{
 		Enabled:           utils.BoolPointer(false),
+		Listen_bijson:     utils.StringPointer("127.0.0.1:2014"),
 		Rater:             utils.StringPointer("internal"),
 		Cdrs:              utils.StringPointer("internal"),
 		Debit_interval:    utils.StringPointer("10s"),

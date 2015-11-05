@@ -73,6 +73,7 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 
 type SmGenericConfig struct {
 	Enabled         bool
+	ListenBijson    string
 	HaRater         []*HaPoolConfig
 	HaCdrs          []*HaPoolConfig
 	DebitInterval   time.Duration
@@ -87,6 +88,9 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 	var err error
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
+	}
+	if jsnCfg.Listen_bijson != nil {
+		self.ListenBijson = *jsnCfg.Listen_bijson
 	}
 	if jsnCfg.Rater != nil {
 		self.HaRater = []*HaPoolConfig{&HaPoolConfig{Server: *jsnCfg.Rater, Timeout: time.Duration(1) * time.Second}}
