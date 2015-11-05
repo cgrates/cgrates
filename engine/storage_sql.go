@@ -1007,9 +1007,9 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 				Timespans:   ccTimespans,
 			}
 		}
-		if !result.Cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating
-			storCdr.Cost = -1
-		}
+		//if !result.Cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating
+		storCdr.Cost = -1
+		//}
 		cdrs = append(cdrs, storCdr)
 	}
 	return cdrs, 0, nil
