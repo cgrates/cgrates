@@ -216,6 +216,7 @@ func (self *KamailioSessionManager) ProcessCdr(cdr *engine.StoredCdr) error {
 
 func (sm *KamailioSessionManager) WarnSessionMinDuration(sessionUuid, connId string) {
 }
+
 func (self *KamailioSessionManager) Shutdown() error {
 	return nil
 }
