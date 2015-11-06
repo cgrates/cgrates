@@ -4,7 +4,6 @@ import:
   - package: github.com/jinzhu/gorm
   - package: golang.org/x/net
   - package: github.com/DisposaBoy/JsonConfigReader
-  - package: github.com/hoisie/redis
   - package: github.com/go-sql-driver/mysql
   - package: github.com/gorhill/cronexpr
   - package: github.com/lib/pq
@@ -17,3 +16,4 @@ import:
   - package: github.com/cgrates/osipsdagram
   - package: github.com/cgrates/kamevapi
   - package: github.com/cgrates/fsock
+  - package: github.com/mediocregopher/radix.v2/...

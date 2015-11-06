@@ -388,14 +388,14 @@ func TestMatchLoadCsvWithStorRating(t *testing.T) {
 	}
 	rsStor := ratingDbStor.(*RedisStorage)
 	rsApier := ratingDbApier.(*RedisStorage)
-	keysCsv, err := rsCsv.db.Keys("*")
+	keysCsv, err := rsCsv.db.Cmd("KEYS", "*").List()
 	if err != nil {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
 	for _, key := range keysCsv {
 		var refVal []byte
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
-			qVal, err := rs.db.Get(key)
+			qVal, err := rs.db.Cmd("GET", key).Bytes()
 			if err != nil {
 				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
 			}
@@ -420,7 +420,7 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 	}
 	rsStor := accountDbStor.(*RedisStorage)
 	rsApier := accountDbApier.(*RedisStorage)
-	keysCsv, err := rsCsv.db.Keys("*")
+	keysCsv, err := rsCsv.db.Cmd("KEYS", "*").List()
 	if err != nil {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
@@ -430,7 +430,7 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 			continue
 		}
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
-			qVal, err := rs.db.Get(key)
+			qVal, err := rs.db.Cmd("GET", key).Bytes()
 			if err != nil {
 				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
 			}
