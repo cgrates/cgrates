@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"regexp"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -52,14 +51,6 @@ type ActionTrigger struct {
 	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
 	Executed              bool
 	lastExecutionTime     time.Time
-}
-
-func (at *ActionTrigger) GetThresholdTypeInfo() (limit, counter, kind string) {
-	slice := strings.Split(at.ThresholdType, "_")
-	if len(slice) != 3 {
-		return "", "", ""
-	}
-	return slice[0], "*" + slice[1], slice[2]
 }
 
 func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err error) {
