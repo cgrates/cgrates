@@ -397,10 +397,13 @@ func TestMatchLoadCsvWithStorRating(t *testing.T) {
 		var refMap map[string]interface{}
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
 			qVal, err := rs.db.Get(key)
+			if err != nil {
+				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
+			}
 			qMap := make(map[string]interface{})
 			err = rs.ms.Unmarshal(qVal, qMap)
 			if err != nil {
-				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
+				t.Fatalf("Run: %d, convert key %s, error: %s", idx, key, err.Error())
 			}
 			if idx == 0 { // Only compare at second iteration, first one is to set reference value
 				refMap = qMap
@@ -434,10 +437,13 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 		}
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
 			qVal, err := rs.db.Get(key)
+			if err != nil {
+				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
+			}
 			qMap := make(map[string]interface{})
 			err = rs.ms.Unmarshal(qVal, qMap)
 			if err != nil {
-				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
+				t.Fatalf("Run: %d, convert key %s, error: %s", idx, key, err.Error())
 			}
 			if idx == 0 { // Only compare at second iteration, first one is to set reference value
 				refMap = qMap
