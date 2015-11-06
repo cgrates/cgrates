@@ -409,8 +409,10 @@ func TestMatchLoadCsvWithStorRating(t *testing.T) {
 				refMap = qMap
 				continue
 			}
-			if !reflect.DeepEqual(refMap, qMap) {
-				t.Errorf("Missmatched data for key: %s\n\t reference val: %+v \n\t retrieved val: %+v\n on iteration: %d", key, refMap, qMap, idx)
+			for k, v := range refMap {
+				if !reflect.DeepEqual(qMap[k], v) {
+					t.Errorf("Missmatched data for key: %s, field: %s reference val: %+v \n\t retrieved value: %+v\n on iteration: %d", key, k, v, qMap[k], idx)
+				}
 			}
 		}
 	}
@@ -449,8 +451,13 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 				refMap = qMap
 				continue
 			}
+			for k, v := range refMap {
+				if !reflect.DeepEqual(qMap[k], v) {
+					t.Errorf("Missmatched data for key: %s, field: %s reference val: %+v \n\t retrieved value: %+v\n on iteration: %d", key, k, v, qMap[k], idx)
+				}
+			}
 			if !reflect.DeepEqual(refMap, qMap) {
-				t.Errorf("Missmatched data for key: %s\n\t, reference val: %+v \n\t retrieved value: %+v\n on iteration: %d", key, refMap, qMap, idx)
+
 			}
 		}
 	}
