@@ -21,7 +21,6 @@ package engine
 import (
 	"flag"
 	"path"
-	"reflect"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -394,25 +393,18 @@ func TestMatchLoadCsvWithStorRating(t *testing.T) {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
 	for _, key := range keysCsv {
-		var refMap map[string]interface{}
+		var refVal []byte
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
 			qVal, err := rs.db.Get(key)
 			if err != nil {
 				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
 			}
-			qMap := make(map[string]interface{})
-			err = rs.ms.Unmarshal(qVal, qMap)
-			if err != nil {
-				t.Fatalf("Run: %d, convert key %s, error: %s", idx, key, err.Error())
-			}
 			if idx == 0 { // Only compare at second iteration, first one is to set reference value
-				refMap = qMap
+				refVal = qVal
 				continue
 			}
-			for k, v := range refMap {
-				if !reflect.DeepEqual(qMap[k], v) {
-					t.Errorf("Missmatched data for key: %s, field: %s reference val: %+v \n\t retrieved value: %+v\n on iteration: %d", key, k, v, qMap[k], idx)
-				}
+			if len(refVal) != len(qVal) {
+				t.Errorf("Missmatched data for key: %s\n\t reference val: %s \n\t retrieved val: %s\n on iteration: %d", key, refVal, qVal, idx)
 			}
 		}
 	}
@@ -433,7 +425,7 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
 	for _, key := range keysCsv {
-		var refMap map[string]interface{}
+		var refVal []byte
 		if key == "load_history" {
 			continue
 		}
@@ -442,22 +434,12 @@ func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
 			}
-			qMap := make(map[string]interface{})
-			err = rs.ms.Unmarshal(qVal, qMap)
-			if err != nil {
-				t.Fatalf("Run: %d, convert key %s, error: %s", idx, key, err.Error())
-			}
 			if idx == 0 { // Only compare at second iteration, first one is to set reference value
-				refMap = qMap
+				refVal = qVal
 				continue
 			}
-			for k, v := range refMap {
-				if !reflect.DeepEqual(qMap[k], v) {
-					t.Errorf("Missmatched data for key: %s, field: %s reference val: %+v \n\t retrieved value: %+v\n on iteration: %d", key, k, v, qMap[k], idx)
-				}
-			}
-			if !reflect.DeepEqual(refMap, qMap) {
-
+			if len(refVal) != len(qVal) {
+				t.Errorf("Missmatched data for key: %s\n\t, reference val: %s \n\t retrieved value: %s\n on iteration: %d", key, refVal, qVal, idx)
 			}
 		}
 	}
