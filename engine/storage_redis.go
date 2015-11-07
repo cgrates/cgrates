@@ -40,14 +40,20 @@ type RedisStorage struct {
 
 func NewRedisStorage(address string, db int, pass, mrshlerStr string) (*RedisStorage, error) {
 	p, err := pool.New("tcp", address, 10)
+	//p, err := redis.Dial("tcp", address)
 	if err != nil {
 		return nil, err
 	}
-	if err := p.Cmd("SELECT", db).Err; err != nil {
+	conn, err := p.Get()
+	if err != nil {
+		return nil, err
+	}
+	defer p.Put(conn)
+	if err := conn.Cmd("SELECT", db).Err; err != nil {
 		return nil, err
 	}
 	if pass != "" {
-		if err := p.Cmd("AUTH", pass).Err; err != nil {
+		if err := conn.Cmd("AUTH", pass).Err; err != nil {
 			return nil, err
 		}
 	}
@@ -63,8 +69,7 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string) (*RedisSto
 }
 
 func (rs *RedisStorage) Close() {
-	// no close for me
-	//rs.db.Quit()
+	rs.db.Empty()
 }
 
 func (rs *RedisStorage) Flush(ignore string) error {
@@ -123,10 +128,15 @@ func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 
 func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, shgKeys []string) (err error) {
 	cache2go.BeginTransaction()
+	conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	defer rs.db.Put(conn)
 	if dKeys == nil || (float64(cache2go.CountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		// if need to load more than a half of exiting keys load them all
 		utils.Logger.Info("Caching all destinations")
-		if dKeys, err = rs.db.Cmd("KEYS", utils.DESTINATION_PREFIX+"*").List(); err != nil {
+		if dKeys, err = conn.Cmd("KEYS", utils.DESTINATION_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -150,7 +160,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if rpKeys == nil {
 		utils.Logger.Info("Caching all rating plans")
-		if rpKeys, err = rs.db.Cmd("KEYS", utils.RATING_PLAN_PREFIX+"*").List(); err != nil {
+		if rpKeys, err = conn.Cmd("KEYS", utils.RATING_PLAN_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -170,7 +180,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if rpfKeys == nil {
 		utils.Logger.Info("Caching all rating profiles")
-		if rpfKeys, err = rs.db.Cmd("KEYS", utils.RATING_PROFILE_PREFIX+"*").List(); err != nil {
+		if rpfKeys, err = conn.Cmd("KEYS", utils.RATING_PROFILE_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -190,7 +200,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if lcrKeys == nil {
 		utils.Logger.Info("Caching LCR rules.")
-		if lcrKeys, err = rs.db.Cmd("KEYS", utils.LCR_PREFIX+"*").List(); err != nil {
+		if lcrKeys, err = conn.Cmd("KEYS", utils.LCR_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -211,7 +221,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	// DerivedChargers caching
 	if dcsKeys == nil {
 		utils.Logger.Info("Caching all derived chargers")
-		if dcsKeys, err = rs.db.Cmd("KEYS", utils.DERIVEDCHARGERS_PREFIX+"*").List(); err != nil {
+		if dcsKeys, err = conn.Cmd("KEYS", utils.DERIVEDCHARGERS_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -234,7 +244,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if actKeys == nil {
 		utils.Logger.Info("Caching all actions")
-		if actKeys, err = rs.db.Cmd("KEYS", utils.ACTION_PREFIX+"*").List(); err != nil {
+		if actKeys, err = conn.Cmd("KEYS", utils.ACTION_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -258,7 +268,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if shgKeys == nil {
 		utils.Logger.Info("Caching all shared groups")
-		if shgKeys, err = rs.db.Cmd("KEYS", utils.SHARED_GROUP_PREFIX+"*").List(); err != nil {
+		if shgKeys, err = conn.Cmd("KEYS", utils.SHARED_GROUP_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -312,12 +322,17 @@ func (rs *RedisStorage) CacheAccountingPrefixValues(prefixes map[string][]string
 
 func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	cache2go.BeginTransaction()
+	conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	defer rs.db.Put(conn)
 	if alsKeys == nil {
 		cache2go.RemPrefixKey(utils.ALIASES_PREFIX)
 	}
 	if alsKeys == nil {
 		utils.Logger.Info("Caching all aliases")
-		if alsKeys, err = rs.db.Cmd("KEYS", utils.ALIASES_PREFIX+"*").List(); err != nil {
+		if alsKeys, err = conn.Cmd("KEYS", utils.ALIASES_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -426,12 +441,17 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 }
 
 func (rs *RedisStorage) RemoveRatingProfile(key string) error {
-	keys, err := rs.db.Cmd("KEYS", utils.RATING_PROFILE_PREFIX+key+"*").List()
+	conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	defer rs.db.Put(conn)
+	keys, err := conn.Cmd("KEYS", utils.RATING_PROFILE_PREFIX+key+"*").List()
 	if err != nil {
 		return err
 	}
 	for _, key := range keys {
-		if err = rs.db.Cmd("DEL", key).Err; err != nil {
+		if err = conn.Cmd("DEL", key).Err; err != nil {
 			return err
 		}
 		cache2go.RemKey(key)
@@ -606,13 +626,18 @@ func (rs *RedisStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
 }
 
 func (rs *RedisStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
-	keys, err := rs.db.Cmd("KEYS", utils.PUBSUB_SUBSCRIBERS_PREFIX+"*").List()
+	conn, err := rs.db.Get()
+	if err != nil {
+		return nil, err
+	}
+	defer rs.db.Put(conn)
+	keys, err := conn.Cmd("KEYS", utils.PUBSUB_SUBSCRIBERS_PREFIX+"*").List()
 	if err != nil {
 		return nil, err
 	}
 	result = make(map[string]*SubscriberData)
 	for _, key := range keys {
-		if values, err := rs.db.Cmd("GET", key).Bytes(); err == nil {
+		if values, err := conn.Cmd("GET", key).Bytes(); err == nil {
 			sub := &SubscriberData{}
 			err = rs.ms.Unmarshal(values, sub)
 			result[key[len(utils.PUBSUB_SUBSCRIBERS_PREFIX):]] = sub
@@ -654,12 +679,17 @@ func (rs *RedisStorage) GetUser(key string) (up *UserProfile, err error) {
 }
 
 func (rs *RedisStorage) GetUsers() (result []*UserProfile, err error) {
-	keys, err := rs.db.Cmd("KEYS", utils.USERS_PREFIX+"*").List()
+	conn, err := rs.db.Get()
+	if err != nil {
+		return nil, err
+	}
+	defer rs.db.Put(conn)
+	keys, err := conn.Cmd("KEYS", utils.USERS_PREFIX+"*").List()
 	if err != nil {
 		return nil, err
 	}
 	for _, key := range keys {
-		if values, err := rs.db.Cmd("GET", key).Bytes(); err == nil {
+		if values, err := conn.Cmd("GET", key).Bytes(); err == nil {
 			up := &UserProfile{}
 			err = rs.ms.Unmarshal(values, up)
 			result = append(result, up)
@@ -723,15 +753,20 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 }
 
 func (rs *RedisStorage) RemoveAlias(key string) (err error) {
+	conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	defer rs.db.Put(conn)
 	al := &Alias{}
 	al.SetId(key)
 	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	aliasValues := make(AliasValues, 0)
-	if values, err := rs.db.Cmd("GET", key).Bytes(); err == nil {
+	if values, err := conn.Cmd("GET", key).Bytes(); err == nil {
 		rs.ms.Unmarshal(values, &aliasValues)
 	}
-	err = rs.db.Cmd("DEL", key).Err
+	err = conn.Cmd("DEL", key).Err
 	if err == nil {
 		for _, value := range aliasValues {
 			for target, pairs := range value.Pairs {
@@ -798,6 +833,11 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*LoadInstan
 
 // Adds a single load instance to load history
 func (rs *RedisStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) error {
+	conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	defer rs.db.Put(conn)
 	if loadHistSize == 0 { // Load history disabled
 		return nil
 	}
@@ -806,16 +846,16 @@ func (rs *RedisStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) e
 		return err
 	}
 	_, err = Guardian.Guard(func() (interface{}, error) { // Make sure we do it locked since other instance can modify history while we read it
-		histLen, err := rs.db.Cmd("LLEN", utils.LOADINST_KEY).Int()
+		histLen, err := conn.Cmd("LLEN", utils.LOADINST_KEY).Int()
 		if err != nil {
 			return nil, err
 		}
 		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
-			if err := rs.db.Cmd("RPOP", utils.LOADINST_KEY).Err; err != nil {
+			if err := conn.Cmd("RPOP", utils.LOADINST_KEY).Err; err != nil {
 				return nil, err
 			}
 		}
-		err = rs.db.Cmd("LPUSH", utils.LOADINST_KEY, marshaled).Err
+		err = conn.Cmd("LPUSH", utils.LOADINST_KEY, marshaled).Err
 		return nil, err
 	}, 0, utils.LOADINST_KEY)
 	return err
@@ -830,15 +870,20 @@ func (rs *RedisStorage) GetActionTriggers(key string) (atrs ActionTriggers, err 
 }
 
 func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
+	conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	defer rs.db.Put(conn)
 	if len(atrs) == 0 {
 		// delete the key
-		return rs.db.Cmd("DEL", utils.ACTION_TRIGGER_PREFIX+key).Err
+		return conn.Cmd("DEL", utils.ACTION_TRIGGER_PREFIX+key).Err
 	}
 	result, err := rs.ms.Marshal(&atrs)
 	if err != nil {
 		return err
 	}
-	return rs.db.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
+	return conn.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
 }
 
 func (rs *RedisStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
@@ -862,13 +907,18 @@ func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) 
 }
 
 func (rs *RedisStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
-	keys, err := rs.db.Cmd("KEYS", utils.ACTION_PLAN_PREFIX+"*").List()
+	conn, err := rs.db.Get()
+	if err != nil {
+		return nil, err
+	}
+	defer rs.db.Put(conn)
+	keys, err := conn.Cmd("KEYS", utils.ACTION_PLAN_PREFIX+"*").List()
 	if err != nil {
 		return nil, err
 	}
 	ats = make(map[string]ActionPlans, len(keys))
 	for _, key := range keys {
-		values, err := rs.db.Cmd("GET", key).Bytes()
+		values, err := conn.Cmd("GET", key).Bytes()
 		if err != nil {
 			continue
 		}
@@ -926,12 +976,17 @@ func (rs *RedisStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 }
 
 func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
-	keys, err := rs.db.Cmd("KEYS", utils.CDR_STATS_PREFIX+"*").List()
+	conn, err := rs.db.Get()
+	if err != nil {
+		return nil, err
+	}
+	defer rs.db.Put(conn)
+	keys, err := conn.Cmd("KEYS", utils.CDR_STATS_PREFIX+"*").List()
 	if err != nil {
 		return nil, err
 	}
 	for _, key := range keys {
-		value, err := rs.db.Cmd("GET", key).Bytes()
+		value, err := conn.Cmd("GET", key).Bytes()
 		if err != nil {
 			continue
 		}
