@@ -46,9 +46,9 @@ func SMGeneric() *GenericSessionManager {
 	return smgen
 }
 
-func NewGenericSessionManager(cfg *config.SmGenericConfig, rater engine.Connector, cdrsrv engine.Connector, timezone string) (*GenericSessionManager, error) {
-	gsm := &GenericSessionManager{cfg: cfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, conns: make(map[string]*rpc2.Client), connMutex: new(sync.Mutex)}
-	return gsm, nil
+func NewGenericSessionManager(cfg *config.SmGenericConfig, rater engine.Connector, cdrsrv engine.Connector, timezone string) *GenericSessionManager {
+	gsm := &GenericSessionManager{cfg: cfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, conns: make(map[string]*rpc2.Client), sessions: NewSessions(), connMutex: new(sync.Mutex)}
+	return gsm
 }
 
 type GenericSessionManager struct {
@@ -57,7 +57,7 @@ type GenericSessionManager struct {
 	cdrsrv    engine.Connector
 	timezone  string
 	conns     map[string]*rpc2.Client
-	sessions  []*Session
+	sessions  *Sessions
 	connMutex *sync.Mutex
 }
 
@@ -106,7 +106,41 @@ func (self *GenericSessionManager) SessionEnd(ev GenericEvent) error {
 	return nil
 }
 
-// Called on session end, should send the CDR to CDRS
-func (self *GenericSessionManager) ProcessCdr(ev GenericEvent) error {
+// SessionManager interface methods
+func (self *GenericSessionManager) Rater() engine.Connector {
+	return self.rater
+}
+
+func (self *GenericSessionManager) CdrSrv() engine.Connector {
+	return self.cdrsrv
+}
+
+func (self *GenericSessionManager) DebitInterval() time.Duration {
+	return self.cfg.DebitInterval
+}
+
+func (self *GenericSessionManager) DisconnectSession(ev engine.Event, connId, notify string) error {
+	return nil
+}
+
+func (sm *GenericSessionManager) WarnSessionMinDuration(sessionUuid, connId string) {}
+
+func (self *GenericSessionManager) Sessions() []*Session {
+	return self.sessions.getSessions()
+}
+
+func (self *GenericSessionManager) Timezone() string {
+	return self.timezone
+}
+
+func (self *GenericSessionManager) ProcessCdr(cdr *engine.StoredCdr) error {
+	return nil
+}
+
+func (self *GenericSessionManager) Connect() error {
+	return nil
+}
+
+func (self *GenericSessionManager) Shutdown() error {
 	return nil
 }

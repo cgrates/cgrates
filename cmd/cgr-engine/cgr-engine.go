@@ -66,7 +66,6 @@ var (
 	singlecpu    = flag.Bool("singlecpu", false, "Run on single CPU core")
 
 	cfg   *config.CGRConfig
-	sms   []sessionmanager.SessionManager
 	smRpc *v1.SessionManagerV1
 	err   error
 )
@@ -136,6 +135,56 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 	}
 }
 
+func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Server, exitChan chan bool) {
+	utils.Logger.Info("Starting CGRateS SM-Generic service.")
+	var raterConn, cdrsConn engine.Connector
+	var client *rpcclient.RpcClient
+	var err error
+	// Connect to rater
+	for _, raterCfg := range cfg.SmGenericConfig.HaRater {
+		if raterCfg.Server == utils.INTERNAL {
+			resp := <-internalRaterChan
+			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
+			internalRaterChan <- resp
+		} else {
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			if err != nil { //Connected so no need to reiterate
+				utils.Logger.Crit(fmt.Sprintf("<SM-Generic> Could not connect to Rater via RPC: %v", err))
+				exitChan <- true
+				return
+			}
+			raterConn = &engine.RPCClientConnector{Client: client}
+		}
+	}
+	// Connect to CDRS
+	if reflect.DeepEqual(cfg.SmGenericConfig.HaCdrs, cfg.SmGenericConfig.HaRater) {
+		cdrsConn = raterConn
+	} else if len(cfg.SmGenericConfig.HaCdrs) != 0 {
+		for _, cdrsCfg := range cfg.SmGenericConfig.HaCdrs {
+			if cdrsCfg.Server == utils.INTERNAL {
+				resp := <-internalRaterChan
+				cdrsConn = resp
+				internalRaterChan <- resp
+			} else {
+				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+				if err != nil {
+					utils.Logger.Crit(fmt.Sprintf("<SM-Generic> Could not connect to CDRS via RPC: %v", err))
+					exitChan <- true
+					return
+				}
+				cdrsConn = &engine.RPCClientConnector{Client: client}
+			}
+		}
+	}
+	sm := sessionmanager.NewGenericSessionManager(cfg.SmGenericConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
+	if err = sm.Connect(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Generic> error: %s!", err))
+	}
+	smRpc.SMs = append(smRpc.SMs, sm)
+	smgRpc := v1.NewSMGenericV1(sm)
+	server.RpcRegister(smgRpc)
+}
+
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
 	var raterConn, cdrsConn engine.Connector
@@ -178,7 +227,6 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 		}
 	}
 	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
-	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
@@ -228,7 +276,6 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		}
 	}
 	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
-	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
@@ -278,7 +325,6 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		}
 	}
 	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, cfg.Reconnects, raterConn, cdrsConn, cfg.DefaultTimezone)
-	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err := sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
@@ -618,6 +664,10 @@ func main() {
 	// Start CDRC components if necessary
 	go startCdrcs(internalCdrSChan, internalRaterChan, exitChan)
 
+	// Start SM-Generic
+	if cfg.SmGenericConfig.Enabled {
+		go startSmGeneric(internalRaterChan, server, exitChan)
+	}
 	// Start SM-FreeSWITCH
 	if cfg.SmFsConfig.Enabled {
 		go startSmFreeSWITCH(internalRaterChan, cdrDb, exitChan)
@@ -636,7 +686,7 @@ func main() {
 	}
 
 	// Register session manager service // FixMe: make sure this is thread safe
-	if cfg.SmFsConfig.Enabled || cfg.SmKamConfig.Enabled || cfg.SmOsipsConfig.Enabled { // Register SessionManagerV1 service
+	if cfg.SmGenericConfig.Enabled || cfg.SmFsConfig.Enabled || cfg.SmKamConfig.Enabled || cfg.SmOsipsConfig.Enabled { // Register SessionManagerV1 service
 		smRpc = new(v1.SessionManagerV1)
 		server.RpcRegister(smRpc)
 	}

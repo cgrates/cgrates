@@ -3,9 +3,14 @@ package v1
 import (
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 )
+
+func NewSMGenericV1(sm *sessionmanager.GenericSessionManager) *SMGenericV1 {
+	return &SMGenericV1{sm: sm}
+}
 
 // Exports RPC from SMGeneric
 type SMGenericV1 struct {
@@ -53,7 +58,11 @@ func (self *SMGenericV1) SessionEnd(ev sessionmanager.GenericEvent, reply *strin
 
 // Called on session end, should send the CDR to CDRS
 func (self *SMGenericV1) ProcessCdr(ev sessionmanager.GenericEvent, reply *string) error {
-	if err := self.sm.ProcessCdr(ev); err != nil {
+	cdr, err := ev.AsStoredCdr(config.CgrConfig().DefaultTimezone)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if err := self.sm.ProcessCdr(cdr); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

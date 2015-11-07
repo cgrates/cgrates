@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/cgrates/cgrates/engine"
@@ -62,5 +63,17 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 		}
 	}
 	*reply = retAccounts
+	return nil
+}
+
+// Get balance
+func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
+	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
+	account, err := self.AccountDb.GetAccount(tag)
+	if err != nil {
+		return err
+	}
+
+	*reply = *account
 	return nil
 }

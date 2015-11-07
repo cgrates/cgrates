@@ -69,24 +69,24 @@
 //},
 
 
-//"rater": {
-//	"enabled": false,						// enable Rater service: <true|false>
+"rater": {
+	"enabled": true,						// enable Rater service: <true|false>
 //	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
-//	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality: <""|internal|x.y.z.y:1234>
+	"cdrstats": "internal",					// address where to reach the cdrstats service, empty to disable stats functionality: <""|internal|x.y.z.y:1234>
 //	"historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
 //	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-//	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
-//	"aliases": "",							// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
-//},
+	"users": "internal",					// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+	"aliases": "internal",					// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
+},
 
 
-//"scheduler": {
-//	"enabled": false,						// start Scheduler service: <true|false>
-//},
+"scheduler": {
+	"enabled": true,						// start Scheduler service: <true|false>
+},
 
 
-//"cdrs": {
-//	"enabled": false,						// start the CDR Server service:  <true|false>
+"cdrs": {
+	"enabled": true,						// start the CDR Server service:  <true|false>
 //	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 //	"store_cdrs": true,						// store cdrs in storDb
 //	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
@@ -95,13 +95,13 @@
 //	"aliases": "",							// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
 //	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
 //	"cdr_replication":[],					// replicate the raw CDR to a number of servers
-//},
+},
 
 
-//"cdrstats": {
-//	"enabled": false,						// starts the cdrstats service: <true|false>
+"cdrstats": {
+	"enabled": true,						// starts the cdrstats service: <true|false>
 //	"save_interval": "1m",					// interval to save changed stats into dataDb storage
-//},
+},
 
 
 //"cdre": {
@@ -176,15 +176,15 @@
 //	}
 //},
 
-//"sm_generic": {
-//	"enabled": false,						// starts SessionManager service: <true|false>
+"sm_generic": {
+	"enabled": true,						// starts SessionManager service: <true|false>
 //	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 //	"rater": "internal",					// address where to reach the Rater <""|internal|127.0.0.1:2013>
 //	"cdrs": "internal",						// address where to reach CDR Server <""|internal|x.y.z.y:1234>
 //	"debit_interval": "10s",				// interval to perform debits on.
 //	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 //	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
-//},
+},
 
 
 //"sm_freeswitch": {
@@ -249,15 +249,15 @@
 //},
 
 
-//"aliases": {
-//	"enabled": false,							// starts Aliases service: <true|false>.
-//},
+"aliases": {
+	"enabled": true,							// starts Aliases service: <true|false>.
+},
 
 
-//"users": {
-//	"enabled": false,							// starts User service: <true|false>.
+"users": {
+	"enabled": true,							// starts User service: <true|false>.
 //	"indexes": [],								// user profile field indexes
-//},
+},
 
 
 //"mailer": {
