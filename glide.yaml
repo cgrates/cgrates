@@ -36,5 +36,3 @@ import:
     ref:     788f01e396a99c96c8f56338383926f16841ebae
   - package: github.com/cenkalti/rpc2
     ref:     2d1be381ce47537e9e076b2b76dc70933162e4e9
-  - package: github.com/cenkalti/hub
-    ref:     57d753b5f4856e77b3cf8ecce78c97215a7d324d
