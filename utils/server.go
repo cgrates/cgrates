@@ -52,11 +52,22 @@ func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWrit
 	s.httpEnabled = true
 }
 
+// Registers a new BiJsonRpc name
 func (s *Server) BijsonRegisterName(method string, handlerFunc interface{}) {
 	if s.bijsonSrv == nil {
 		s.bijsonSrv = rpc2.NewServer()
 	}
 	s.bijsonSrv.Handle(method, handlerFunc)
+}
+
+//Registers a new handler for OnConnect event
+func (s *Server) BijsonRegisterOnConnect(f func(*rpc2.Client)) {
+	s.bijsonSrv.OnConnect(f)
+}
+
+//Registers a new handler for OnDisconnect event
+func (s *Server) BijsonRegisterOnDisconnect(f func(*rpc2.Client)) {
+	s.bijsonSrv.OnDisconnect(f)
 }
 
 func (s *Server) ServeJSON(addr string) {

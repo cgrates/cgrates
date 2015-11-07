@@ -181,8 +181,17 @@ func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Serv
 		utils.Logger.Err(fmt.Sprintf("<SM-Generic> error: %s!", err))
 	}
 	smRpc.SMs = append(smRpc.SMs, sm)
+	// Register RPC handler
 	smgRpc := v1.NewSMGenericV1(sm)
 	server.RpcRegister(smgRpc)
+	// Register BiRpc handlers
+	smgBiRpc := v1.NewSMGenericBiRpcV1(smgRpc, sm)
+	for method, handler := range smgBiRpc.Handlers() {
+		server.BijsonRegisterName(method, handler)
+	}
+	// Register OnConnect handlers so we can intercept connections for session disconnects
+	server.BijsonRegisterOnConnect(sm.OnClientConnect)
+	server.BijsonRegisterOnDisconnect(sm.OnClientDisconnect)
 }
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {

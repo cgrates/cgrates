@@ -25,6 +25,7 @@ import (
 	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -65,9 +66,9 @@ type GenericSessionManager struct {
 func (self *GenericSessionManager) OnClientConnect(clnt *rpc2.Client) {
 	self.connMutex.Lock()
 	defer self.connMutex.Unlock()
-	if connId := getClientConnId(clnt); connId != "" {
-		self.conns[connId] = clnt
-	}
+	connId := utils.GenUUID()
+	clnt.State.Set(CGR_CONNUUID, connId) // Set unique id for the connection so we can identify it later in requests
+	self.conns[connId] = clnt
 }
 
 // Unindex the client connection so we can use it to communicate back
