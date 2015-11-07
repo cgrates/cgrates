@@ -456,18 +456,6 @@ func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 }
 
 func (ms *MapStorage) SetAccount(ub *Account) (err error) {
-	// never override existing account with an empty one
-	// UPDATE: if all balances expired and were clean it makes
-	// sense to write empty balance map
-	if len(ub.BalanceMap) == 0 {
-		if ac, err := ms.GetAccount(ub.Id); err == nil && !ac.allBalancesExpired() {
-			ac.ActionTriggers = ub.ActionTriggers
-			ac.UnitCounters = ub.UnitCounters
-			ac.AllowNegative = ub.AllowNegative
-			ac.Disabled = ub.Disabled
-			ub = ac
-		}
-	}
 	result, err := ms.ms.Marshal(ub)
 	ms.dict[utils.ACCOUNT_PREFIX+ub.Id] = result
 	return

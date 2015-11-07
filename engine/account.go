@@ -602,17 +602,6 @@ func (acc *Account) CleanExpiredBalances() {
 	}
 }
 
-func (acc *Account) allBalancesExpired() bool {
-	for _, bm := range acc.BalanceMap {
-		for i := 0; i < len(bm); i++ {
-			if !bm[i].IsExpired() {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 // returns the shared groups that this user balance belnongs to
 func (acc *Account) GetSharedGroups() (groups []string) {
 	for _, balanceChain := range acc.BalanceMap {
