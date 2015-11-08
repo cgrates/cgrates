@@ -68,7 +68,7 @@ func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 func (rs *RedisStorage) CacheRatingAll() error {
-	return rs.cacheRating(nil, nil, nil, nil, nil, nil, nil)
+	return rs.cacheRating(nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func (rs *RedisStorage) CacheRatingPrefixes(prefixes ...string) error {
@@ -79,6 +79,7 @@ func (rs *RedisStorage) CacheRatingPrefixes(prefixes ...string) error {
 		utils.LCR_PREFIX:             []string{},
 		utils.DERIVEDCHARGERS_PREFIX: []string{},
 		utils.ACTION_PREFIX:          []string{},
+		utils.ACTION_PLAN_PREFIX:     []string{},
 		utils.SHARED_GROUP_PREFIX:    []string{},
 	}
 	for _, prefix := range prefixes {
@@ -87,7 +88,7 @@ func (rs *RedisStorage) CacheRatingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return rs.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return rs.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
 func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) error {
@@ -98,6 +99,7 @@ func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 		utils.LCR_PREFIX:             []string{},
 		utils.DERIVEDCHARGERS_PREFIX: []string{},
 		utils.ACTION_PREFIX:          []string{},
+		utils.ACTION_PLAN_PREFIX:     []string{},
 		utils.SHARED_GROUP_PREFIX:    []string{},
 	}
 	for prefix, ids := range prefixes {
@@ -106,10 +108,10 @@ func (rs *RedisStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 		}
 		pm[prefix] = ids
 	}
-	return rs.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return rs.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, shgKeys []string) (err error) {
+func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
 	cache2go.BeginTransaction()
 	if dKeys == nil || (float64(cache2go.CountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		// if need to load more than a half of exiting keys load them all
@@ -239,6 +241,30 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if len(actKeys) != 0 {
 		utils.Logger.Info("Finished actions caching.")
+	}
+
+	if aplKeys == nil {
+		cache2go.RemPrefixKey(utils.ACTION_PLAN_PREFIX)
+	}
+	if aplKeys == nil {
+		utils.Logger.Info("Caching all action plans")
+		if aplKeys, err = rs.db.Keys(utils.ACTION_PLAN_PREFIX + "*"); err != nil {
+			cache2go.RollbackTransaction()
+			return err
+		}
+		cache2go.RemPrefixKey(utils.ACTION_PLAN_PREFIX)
+	} else if len(aplKeys) != 0 {
+		utils.Logger.Info(fmt.Sprintf("Caching action plan: %v", aplKeys))
+	}
+	for _, key := range aplKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetActionPlans(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
+			cache2go.RollbackTransaction()
+			return err
+		}
+	}
+	if len(aplKeys) != 0 {
+		utils.Logger.Info("Finished action plans caching.")
 	}
 
 	if shgKeys == nil {
@@ -826,10 +852,19 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 	return
 }
 
-func (rs *RedisStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
+func (rs *RedisStorage) GetActionPlans(key string, skipCache bool) (ats ActionPlans, err error) {
+	key = utils.ACTION_PLAN_PREFIX + key
+	if !skipCache {
+		if x, err := cache2go.Get(key); err == nil {
+			return x.(ActionPlans), nil
+		} else {
+			return nil, err
+		}
+	}
 	var values []byte
-	if values, err = rs.db.Get(utils.ACTION_PLAN_PREFIX + key); err == nil {
+	if values, err = rs.db.Get(key); err == nil {
 		err = rs.ms.Unmarshal(values, &ats)
+		cache2go.Cache(key, ats)
 	}
 	return
 }
@@ -849,19 +884,15 @@ func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) 
 }
 
 func (rs *RedisStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
-	keys, err := rs.db.Keys(utils.ACTION_PLAN_PREFIX + "*")
+	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
-	ats = make(map[string]ActionPlans, len(keys))
-	for _, key := range keys {
-		values, err := rs.db.Get(key)
-		if err != nil {
-			continue
-		}
-		var tempAts ActionPlans
-		err = rs.ms.Unmarshal(values, &tempAts)
-		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = tempAts
+
+	ats = make(map[string]ActionPlans, len(apls))
+	for key, value := range apls {
+		apl := value.Value().(ActionPlans)
+		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = apl
 	}
 
 	return

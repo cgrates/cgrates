@@ -82,7 +82,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		}
 	}
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		ats, err := self.RatingDb.GetActionPlans(attrs.ActionPlanId)
+		ats, err := self.RatingDb.GetActionPlans(attrs.ActionPlanId, false)
 		if err != nil {
 			return 0, err
 		} else if len(ats) == 0 {
@@ -175,7 +175,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 
 		if len(attr.ActionPlanId) != 0 {
 			var err error
-			ats, err = self.RatingDb.GetActionPlans(attr.ActionPlanId)
+			ats, err = self.RatingDb.GetActionPlans(attr.ActionPlanId, false)
 			if err != nil {
 				return 0, err
 			}

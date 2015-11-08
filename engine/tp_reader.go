@@ -652,7 +652,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
 			var exitingAccountIds []string
-			existingActionPlans, err := tpr.ratingStorage.GetActionPlans(accountAction.ActionPlanId)
+			existingActionPlans, err := tpr.ratingStorage.GetActionPlans(accountAction.ActionPlanId, true)
 			if err == nil && len(existingActionPlans) > 0 {
 				// all action timings from a specific tag shuld have the same list of user balances from the first one
 				exitingAccountIds = existingActionPlans[0].AccountIds
