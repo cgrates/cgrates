@@ -450,7 +450,8 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		// handle max cost
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 
-		cost += ts.getCost()
+		ts.Cost = ts.calculateCost()
+		cost += ts.Cost
 		cd.MaxCostSoFar += cost
 		//log.Print("Before: ", cost)
 		if strategy != "" && maxCost > 0 {
@@ -496,7 +497,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
 			cost += ts.RateInterval.Rating.ConnectFee
 		}
-		cost += ts.getCost()
+		cost += ts.calculateCost()
 	}
 
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
@@ -636,7 +637,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		utils.Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key <%s>: %s", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	}
-	cc.UpdateCost()
+	cc.updateCost()
 	cc.Timespans.Compress()
 	//log.Printf("OUT CC: ", cc)
 	return

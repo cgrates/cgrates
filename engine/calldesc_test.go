@@ -576,7 +576,40 @@ func TestGetCostRoundingIssue(t *testing.T) {
 	cc, err := cd.GetCost()
 	expected := 0.17
 	if cc.Cost != expected || err != nil {
+		t.Log(utils.ToIJSON(cc))
 		t.Errorf("Expected %v was %+v", expected, cc)
+	}
+}
+
+func TestGetCostMaxDebitRoundingIssue(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 51, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	acc, err := accountingStorage.GetAccount("cgrates.org:dy")
+	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
+		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
+	}
+	cc, err := cd.MaxDebit()
+	expected := 0.39
+	if cc.Cost != expected || err != nil {
+		t.Log(utils.ToIJSON(cc))
+		t.Errorf("Expected %v was %+v", expected, cc)
+	}
+	acc, err = accountingStorage.GetAccount("cgrates.org:dy")
+	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
+		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
 }
 

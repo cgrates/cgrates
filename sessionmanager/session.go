@@ -233,8 +233,6 @@ func (s *Session) SaveOperations() {
 			firstCC.Merge(cc)
 			//utils.Logger.Debug(fmt.Sprintf("AFTER MERGE: %s", utils.ToJSON(firstCC)))
 		}
-		// make sure we have rounded timespans final cost
-		firstCC.UpdateCost()
 
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
