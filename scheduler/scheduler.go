@@ -118,6 +118,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 		if toBeSaved {
 			engine.Guardian.Guard(func() (interface{}, error) {
 				storage.SetActionPlans(key, newApls)
+				storage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{key}})
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
 		}

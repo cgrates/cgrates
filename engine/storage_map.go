@@ -63,7 +63,7 @@ func (ms *MapStorage) GetKeysForPrefix(prefix string) ([]string, error) {
 }
 
 func (ms *MapStorage) CacheRatingAll() error {
-	return ms.cacheRating(nil, nil, nil, nil, nil, nil, nil)
+	return ms.cacheRating(nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func (ms *MapStorage) CacheRatingPrefixes(prefixes ...string) error {
@@ -74,6 +74,7 @@ func (ms *MapStorage) CacheRatingPrefixes(prefixes ...string) error {
 		utils.LCR_PREFIX:             []string{},
 		utils.DERIVEDCHARGERS_PREFIX: []string{},
 		utils.ACTION_PREFIX:          []string{},
+		utils.ACTION_PLAN_PREFIX:     []string{},
 		utils.SHARED_GROUP_PREFIX:    []string{},
 	}
 	for _, prefix := range prefixes {
@@ -82,7 +83,7 @@ func (ms *MapStorage) CacheRatingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
 func (ms *MapStorage) CacheRatingPrefixValues(prefixes map[string][]string) error {
@@ -93,6 +94,7 @@ func (ms *MapStorage) CacheRatingPrefixValues(prefixes map[string][]string) erro
 		utils.LCR_PREFIX:             []string{},
 		utils.DERIVEDCHARGERS_PREFIX: []string{},
 		utils.ACTION_PREFIX:          []string{},
+		utils.ACTION_PLAN_PREFIX:     []string{},
 		utils.SHARED_GROUP_PREFIX:    []string{},
 	}
 	for prefix, ids := range prefixes {
@@ -101,10 +103,10 @@ func (ms *MapStorage) CacheRatingPrefixValues(prefixes map[string][]string) erro
 		}
 		pm[prefix] = ids
 	}
-	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (ms *MapStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, shgKeys []string) error {
+func (ms *MapStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) error {
 	cache2go.BeginTransaction()
 	if dKeys == nil || (float64(cache2go.CountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		cache2go.RemPrefixKey(utils.DESTINATION_PREFIX)
@@ -125,6 +127,9 @@ func (ms *MapStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actK
 	}
 	if actKeys == nil {
 		cache2go.RemPrefixKey(utils.ACTION_PREFIX) // Forced until we can fine tune it
+	}
+	if aplKeys == nil {
+		cache2go.RemPrefixKey(utils.ACTION_PLAN_PREFIX)
 	}
 	if shgKeys == nil {
 		cache2go.RemPrefixKey(utils.SHARED_GROUP_PREFIX) // Forced until we can fine tune it
@@ -167,6 +172,13 @@ func (ms *MapStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actK
 		if strings.HasPrefix(k, utils.ACTION_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetActions(k[len(utils.ACTION_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
+				return err
+			}
+		}
+		if strings.HasPrefix(k, utils.ACTION_PLAN_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetActionPlans(k[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
 				cache2go.RollbackTransaction()
 				return err
 			}
@@ -665,9 +677,18 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err er
 	return
 }
 
-func (ms *MapStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
-	if values, ok := ms.dict[utils.ACTION_PLAN_PREFIX+key]; ok {
+func (ms *MapStorage) GetActionPlans(key string, skipCache bool) (ats ActionPlans, err error) {
+	key = utils.ACTION_PLAN_PREFIX + key
+	if !skipCache {
+		if x, err := cache2go.Get(key); err == nil {
+			return x.(ActionPlans), nil
+		} else {
+			return nil, err
+		}
+	}
+	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
+		cache2go.Cache(key, ats)
 	} else {
 		return nil, utils.ErrNotFound
 	}
@@ -686,14 +707,15 @@ func (ms *MapStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
 }
 
 func (ms *MapStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
-	ats = make(map[string]ActionPlans)
-	for key, value := range ms.dict {
-		if !strings.HasPrefix(key, utils.ACTION_PLAN_PREFIX) {
-			continue
-		}
-		var tempAts ActionPlans
-		err = ms.ms.Unmarshal(value, &tempAts)
-		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = tempAts
+	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return nil, err
+	}
+
+	ats = make(map[string]ActionPlans, len(apls))
+	for key, value := range apls {
+		apl := value.Value().(ActionPlans)
+		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = apl
 	}
 
 	return
