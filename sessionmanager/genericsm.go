@@ -80,7 +80,9 @@ func (self *GenericSessionManager) OnClientDisconnect(clnt *rpc2.Client) {
 	}
 }
 
-func (self *GenericSessionManager) GetMaxUsage(ev GenericEvent) (time.Duration, error) {
+// Methods to apply on sessions, mostly exported through RPC/Bi-RPC
+//Calculates maximum usage allowed for event
+func (self *GenericSessionManager) GetMaxUsage(ev GenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	storedCdr, err := ev.AsStoredCdr(self.timezone)
 	if err != nil {
 		return time.Duration(0), err
@@ -93,17 +95,17 @@ func (self *GenericSessionManager) GetMaxUsage(ev GenericEvent) (time.Duration, 
 }
 
 // Called on session start
-func (self *GenericSessionManager) SessionStart(ev GenericEvent) error {
+func (self *GenericSessionManager) SessionStart(ev GenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
 // Interim updates
-func (self *GenericSessionManager) SessionUpdate(ev GenericEvent) error {
+func (self *GenericSessionManager) SessionUpdate(ev GenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
 // Called on session end, should stop debit loop
-func (self *GenericSessionManager) SessionEnd(ev GenericEvent) error {
+func (self *GenericSessionManager) SessionEnd(ev GenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
@@ -134,7 +136,7 @@ func (self *GenericSessionManager) Timezone() string {
 	return self.timezone
 }
 
-func (self *GenericSessionManager) ProcessCdr(cdr *engine.StoredCdr) error {
+func (self *GenericSessionManager) ProcessCdr(ev GenericEvent) error {
 	return nil
 }
 

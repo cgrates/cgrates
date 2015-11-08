@@ -19,17 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"time"
+
 	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSMGenericBiRpcV1(smRpc *SMGenericV1, sm *sessionmanager.GenericSessionManager) *SMGenericBiRpcV1 {
-	return &SMGenericBiRpcV1{smRpc: smRpc, sm: sm}
+func NewSMGenericBiRpcV1(sm *sessionmanager.GenericSessionManager) *SMGenericBiRpcV1 {
+	return &SMGenericBiRpcV1{sm: sm}
 }
 
 type SMGenericBiRpcV1 struct {
-	smRpc *SMGenericV1
-	sm    *sessionmanager.GenericSessionManager
+	sm *sessionmanager.GenericSessionManager
 }
 
 // Publishes methods exported by SMGenericBiRpcV1 as SMGenericV1 (so we can handle standard RPC methods via birpc socket)
@@ -43,27 +45,50 @@ func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 	}
 }
 
-// Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *SMGenericBiRpcV1) GetMaxUsage(client *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
-	return self.smRpc.GetMaxUsage(ev, maxUsage)
+/// Returns MaxUsage (for calls in seconds), -1 for no limit
+func (self *SMGenericBiRpcV1) GetMaxUsage(clnt *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
+	maxUsageDur, err := self.sm.GetMaxUsage(ev, clnt)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if maxUsageDur == time.Duration(-1) {
+		*maxUsage = -1.0
+	} else {
+		*maxUsage = maxUsageDur.Seconds()
+	}
+	return nil
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
-func (self *SMGenericBiRpcV1) SessionStart(client *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
-	return self.smRpc.SessionStart(ev, maxUsage)
+func (self *SMGenericBiRpcV1) SessionStart(clnt *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
+	if err := self.sm.SessionStart(ev, clnt); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	return self.GetMaxUsage(clnt, ev, maxUsage)
 }
 
 // Interim updates, returns remaining duration from the rater
-func (self *SMGenericBiRpcV1) SessionUpdate(client *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
-	return self.smRpc.SessionUpdate(ev, maxUsage)
+func (self *SMGenericBiRpcV1) SessionUpdate(clnt *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
+	if err := self.sm.SessionUpdate(ev, clnt); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	return self.GetMaxUsage(clnt, ev, maxUsage)
 }
 
 // Called on session end, should stop debit loop
-func (self *SMGenericBiRpcV1) SessionEnd(client *rpc2.Client, ev sessionmanager.GenericEvent, reply *string) error {
-	return self.smRpc.SessionEnd(ev, reply)
+func (self *SMGenericBiRpcV1) SessionEnd(clnt *rpc2.Client, ev sessionmanager.GenericEvent, reply *string) error {
+	if err := self.sm.SessionEnd(ev, clnt); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
 }
 
 // Called on session end, should send the CDR to CDRS
-func (self *SMGenericBiRpcV1) ProcessCdr(client *rpc2.Client, ev sessionmanager.GenericEvent, reply *string) error {
-	return self.smRpc.ProcessCdr(ev, reply)
+func (self *SMGenericBiRpcV1) ProcessCdr(clnt *rpc2.Client, ev sessionmanager.GenericEvent, reply *string) error {
+	if err := self.sm.ProcessCdr(ev); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
 }

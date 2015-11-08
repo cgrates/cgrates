@@ -3,7 +3,6 @@ package v1
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -19,7 +18,7 @@ type SMGenericV1 struct {
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
 func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.GenericEvent, maxUsage *float64) error {
-	maxUsageDur, err := self.sm.GetMaxUsage(ev)
+	maxUsageDur, err := self.sm.GetMaxUsage(ev, nil)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -33,7 +32,7 @@ func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.GenericEvent, maxUsage *f
 
 // Called on session start, returns the maximum number of seconds the session can last
 func (self *SMGenericV1) SessionStart(ev sessionmanager.GenericEvent, maxUsage *float64) error {
-	if err := self.sm.SessionStart(ev); err != nil {
+	if err := self.sm.SessionStart(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return self.GetMaxUsage(ev, maxUsage)
@@ -41,7 +40,7 @@ func (self *SMGenericV1) SessionStart(ev sessionmanager.GenericEvent, maxUsage *
 
 // Interim updates, returns remaining duration from the rater
 func (self *SMGenericV1) SessionUpdate(ev sessionmanager.GenericEvent, maxUsage *float64) error {
-	if err := self.sm.SessionUpdate(ev); err != nil {
+	if err := self.sm.SessionUpdate(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return self.GetMaxUsage(ev, maxUsage)
@@ -49,7 +48,7 @@ func (self *SMGenericV1) SessionUpdate(ev sessionmanager.GenericEvent, maxUsage 
 
 // Called on session end, should stop debit loop
 func (self *SMGenericV1) SessionEnd(ev sessionmanager.GenericEvent, reply *string) error {
-	if err := self.sm.SessionEnd(ev); err != nil {
+	if err := self.sm.SessionEnd(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -58,11 +57,7 @@ func (self *SMGenericV1) SessionEnd(ev sessionmanager.GenericEvent, reply *strin
 
 // Called on session end, should send the CDR to CDRS
 func (self *SMGenericV1) ProcessCdr(ev sessionmanager.GenericEvent, reply *string) error {
-	cdr, err := ev.AsStoredCdr(config.CgrConfig().DefaultTimezone)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	if err := self.sm.ProcessCdr(cdr); err != nil {
+	if err := self.sm.ProcessCdr(ev); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

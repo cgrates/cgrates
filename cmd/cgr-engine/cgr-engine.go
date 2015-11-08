@@ -185,7 +185,7 @@ func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Serv
 	smgRpc := v1.NewSMGenericV1(sm)
 	server.RpcRegister(smgRpc)
 	// Register BiRpc handlers
-	smgBiRpc := v1.NewSMGenericBiRpcV1(smgRpc, sm)
+	smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
 	for method, handler := range smgBiRpc.Handlers() {
 		server.BijsonRegisterName(method, handler)
 	}
