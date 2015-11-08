@@ -221,7 +221,7 @@ const (
 	CGR_ACCID                    = "cgr_accid"
 	CGR_HOST                     = "cgr_host"
 	CGR_PDD                      = "cgr_pdd"
-	DISCONNECT_CAUSE             = "disconnect_cause"
+	DISCONNECT_CAUSE             = "DisconnectCause"
 	CGR_DISCONNECT_CAUSE         = "cgr_disconnectcause"
 	CGR_COMPUTELCR               = "cgr_computelcr"
 	CGR_SUPPLIERS                = "cgr_suppliers"
@@ -239,6 +239,9 @@ const (
 	SURETAX                      = "suretax"
 	COUNTER_EVENT                = "*event"
 	COUNTER_BALANCE              = "*balance"
+	EVENT_NAME                   = "EventName"
+	CGR_AUTHORIZATION            = "CgrAuthorization"
+	COMPUTE_LCR                  = "ComputeLcr"
 )
 
 var (

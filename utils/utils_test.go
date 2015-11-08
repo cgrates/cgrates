@@ -467,3 +467,22 @@ func TestAvgEmpty(t *testing.T) {
 		t.Errorf("Wrong Avg: expected %v got %v", expected, result)
 	}
 }
+
+func TestConvertIfaceToString(t *testing.T) {
+	val := interface{}("string1")
+	if resVal, converted := ConvertIfaceToString(val); !converted || resVal != "string1" {
+		t.Error(resVal, converted)
+	}
+	val = interface{}(123)
+	if resVal, converted := ConvertIfaceToString(val); !converted || resVal != "123" {
+		t.Error(resVal, converted)
+	}
+	val = interface{}([]byte("byte_val"))
+	if resVal, converted := ConvertIfaceToString(val); !converted || resVal != "byte_val" {
+		t.Error(resVal, converted)
+	}
+	val = interface{}(true)
+	if resVal, converted := ConvertIfaceToString(val); !converted || resVal != "true" {
+		t.Error(resVal, converted)
+	}
+}

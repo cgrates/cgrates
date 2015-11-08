@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITHOUT ANY WARRANTY; without geven the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -34,7 +34,7 @@ const (
 
 var smgen *GenericSessionManager
 
-// Attempts to get the connId previously set in the client state container
+// Attempts to get the connId prgeviously set in the client state container
 func getClientConnId(clnt *rpc2.Client) string {
 	uuid, hasIt := clnt.State.Get(CGR_CONNUUID)
 	if !hasIt {
@@ -81,12 +81,10 @@ func (self *GenericSessionManager) OnClientDisconnect(clnt *rpc2.Client) {
 }
 
 // Methods to apply on sessions, mostly exported through RPC/Bi-RPC
-//Calculates maximum usage allowed for event
-func (self *GenericSessionManager) GetMaxUsage(ev GenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	storedCdr, err := ev.AsStoredCdr(self.timezone)
-	if err != nil {
-		return time.Duration(0), err
-	}
+//Calculates maximum usage allowed for gevent
+func (self *GenericSessionManager) GetMaxUsage(gev GenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	gev[utils.EVENT_NAME] = utils.CGR_AUTHORIZATION
+	storedCdr := gev.AsStoredCdr(self.timezone)
 	var maxDur float64
 	if err := self.rater.GetDerivedMaxSessionTime(storedCdr, &maxDur); err != nil {
 		return time.Duration(0), err
@@ -95,17 +93,17 @@ func (self *GenericSessionManager) GetMaxUsage(ev GenericEvent, clnt *rpc2.Clien
 }
 
 // Called on session start
-func (self *GenericSessionManager) SessionStart(ev GenericEvent, clnt *rpc2.Client) error {
+func (self *GenericSessionManager) SessionStart(gev GenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
 // Interim updates
-func (self *GenericSessionManager) SessionUpdate(ev GenericEvent, clnt *rpc2.Client) error {
+func (self *GenericSessionManager) SessionUpdate(gev GenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
 // Called on session end, should stop debit loop
-func (self *GenericSessionManager) SessionEnd(ev GenericEvent, clnt *rpc2.Client) error {
+func (self *GenericSessionManager) SessionEnd(gev GenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
@@ -136,7 +134,7 @@ func (self *GenericSessionManager) Timezone() string {
 	return self.timezone
 }
 
-func (self *GenericSessionManager) ProcessCdr(ev GenericEvent) error {
+func (self *GenericSessionManager) ProcessCdr(gev GenericEvent) error {
 	return nil
 }
 

@@ -378,3 +378,31 @@ func ToJSON(v interface{}) string {
 func LogFull(v interface{}) {
 	log.Print(ToIJSON(v))
 }
+
+// Used to convert from generic interface type towards string value
+func ConvertIfaceToString(fld interface{}) (string, bool) {
+	var strVal string
+	var converted bool
+	switch fld.(type) {
+	case string:
+		strVal = fld.(string)
+		converted = true
+	case int:
+		strVal = strconv.Itoa(fld.(int))
+		converted = true
+	case int64:
+		strVal = strconv.FormatInt(fld.(int64), 10)
+		converted = true
+	case bool:
+		strVal = strconv.FormatBool(fld.(bool))
+		converted = true
+	case []uint8:
+		var byteVal []byte
+		if byteVal, converted = fld.([]byte); converted {
+			strVal = string(byteVal)
+		}
+	default: // Maybe we are lucky and the value converts to string
+		strVal, converted = fld.(string)
+	}
+	return strVal, converted
+}
