@@ -732,6 +732,18 @@ func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
 }
 
 func (ms *MongoStorage) SetAccount(acc *Account) error {
+	// never override existing account with an empty one
+	// UPDATE: if all balances expired and were cleaned it makes
+	// sense to write empty balance map
+	if len(acc.BalanceMap) == 0 {
+		if ac, err := ms.GetAccount(acc.Id); err == nil && !ac.allBalancesExpired() {
+			ac.ActionTriggers = acc.ActionTriggers
+			ac.UnitCounters = acc.UnitCounters
+			ac.AllowNegative = acc.AllowNegative
+			ac.Disabled = acc.Disabled
+			acc = ac
+		}
+	}
 	_, err := ms.db.C(colAcc).Upsert(bson.M{"id": acc.Id}, acc)
 	return err
 }
