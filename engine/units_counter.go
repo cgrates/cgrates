@@ -31,6 +31,9 @@ type UnitCounters []*UnitCounter
 
 func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *Balance) {
 	for _, uc := range ucs {
+		if uc == nil { // safeguard
+			continue
+		}
 		if uc.BalanceType != kind {
 			continue
 		}
@@ -53,6 +56,9 @@ func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *B
 
 func (ucs UnitCounters) resetCounters(a *Action) {
 	for _, uc := range ucs {
+		if uc == nil { // safeguard
+			continue
+		}
 		if a != nil && a.BalanceType != "" && a.BalanceType != uc.BalanceType {
 			continue
 		}

@@ -355,7 +355,9 @@ func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 	if ub == nil {
 		return errors.New("nil user balance")
 	}
-	ub.UnitCounters.resetCounters(a)
+	if ub.UnitCounters != nil {
+		ub.UnitCounters.resetCounters(a)
+	}
 	return
 }
 
@@ -404,7 +406,7 @@ func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
-	ub.UnitCounters = make(UnitCounters, 0)
+	ub.InitCounters()
 	ub.ResetActionTriggers(nil)
 	return nil
 }
