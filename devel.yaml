@@ -17,3 +17,5 @@ import:
   - package: github.com/cgrates/osipsdagram
   - package: github.com/cgrates/kamevapi
   - package: github.com/cgrates/fsock
+  - package: github.com/cenkalti/rpc2
+  - package: github.com/cenkalti/hub
