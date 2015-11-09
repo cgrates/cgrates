@@ -873,6 +873,7 @@ func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) 
 	if len(ats) == 0 {
 		// delete the key
 		_, err = rs.db.Del(utils.ACTION_PLAN_PREFIX + key)
+		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		return err
 	}
 	result, err := rs.ms.Marshal(&ats)
@@ -918,7 +919,7 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs util
 func (rs *RedisStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) (err error) {
 	if len(dcs) == 0 {
 		_, err = rs.db.Del(utils.DERIVEDCHARGERS_PREFIX + key)
-		// FIXME: Does cache need cleanup too?
+		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
 		return err
 	}
 	marshaled, err := rs.ms.Marshal(dcs)

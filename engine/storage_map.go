@@ -699,6 +699,7 @@ func (ms *MapStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
+		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		return
 	}
 	result, err := ms.ms.Marshal(&ats)
@@ -740,6 +741,11 @@ func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool) (dcs utils.
 }
 
 func (ms *MapStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) error {
+	if len(dcs) == 0 {
+		delete(ms.dict, utils.DERIVEDCHARGERS_PREFIX+key)
+		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
+		return nil
+	}
 	result, err := ms.ms.Marshal(dcs)
 	ms.dict[utils.DERIVEDCHARGERS_PREFIX+key] = result
 	return err

@@ -64,7 +64,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 type AttrRemActionTiming struct {
 	ActionPlanId    string // Id identifying the ActionTimings profile
 	ActionTimingId  string // Internal CGR id identifying particular ActionTiming, *all for all user related ActionTimings to be canceled
-	Tenant          string // Tenant he account belongs to
+	Tenant          string // Tenant the account belongs to
 	Account         string // Account name
 	ReloadScheduler bool   // If set it will reload the scheduler after adding
 }
@@ -89,6 +89,9 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		ats = engine.RemActionPlan(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account))
 		if err := self.RatingDb.SetActionPlans(attrs.ActionPlanId, ats); err != nil {
 			return 0, err
+		}
+		if len(ats) > 0 { // update cache
+			self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{attrs.ActionPlanId}})
 		}
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)

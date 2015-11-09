@@ -330,27 +330,27 @@ func (at *ActionPlan) String_DISABLED() string {
 }
 
 // Helper to remove ActionPlan members based on specific filters, empty data means no always match
-func RemActionPlan(ats ActionPlans, actionTimingId, balanceId string) ActionPlans {
+func RemActionPlan(ats ActionPlans, actionTimingId, accountId string) ActionPlans {
 	for idx, at := range ats {
 		if len(actionTimingId) != 0 && at.Uuid != actionTimingId { // No Match for ActionPlanId, no need to move further
 			continue
 		}
-		if len(balanceId) == 0 { // No account defined, considered match for complete removal
+		if len(accountId) == 0 { // No account defined, considered match for complete removal
 			if len(ats) == 1 { // Removing last item, by init empty
 				return make([]*ActionPlan, 0)
 			}
 			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 			continue
 		}
-		for iBlnc, blncId := range at.AccountIds {
-			if blncId == balanceId {
+		for iAcc, accId := range at.AccountIds {
+			if accId == accountId {
 				if len(at.AccountIds) == 1 { // Only one balance, remove complete at
 					if len(ats) == 1 { // Removing last item, by init empty
 						return make([]*ActionPlan, 0)
 					}
 					ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 				} else {
-					at.AccountIds[iBlnc], at.AccountIds = at.AccountIds[len(at.AccountIds)-1], at.AccountIds[:len(at.AccountIds)-1]
+					at.AccountIds[iAcc], at.AccountIds = at.AccountIds[len(at.AccountIds)-1], at.AccountIds[:len(at.AccountIds)-1]
 				}
 				// only remove the first one matching
 				break
