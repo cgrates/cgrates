@@ -623,7 +623,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	if err := self.RatingDb.SetActions(attrs.ActionsId, storeActions); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PREFIX: []string{attrs.ActionsId}})
+	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PREFIX: []string{utils.ACTION_PREFIX + attrs.ActionsId}})
 	*reply = OK
 	return nil
 }
@@ -718,7 +718,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 	if err := self.RatingDb.SetActionPlans(attrs.Id, storeAtms); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{attrs.Id}})
+	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.Id}})
 	if attrs.ReloadScheduler {
 		if self.Sched == nil {
 			return errors.New("SCHEDULER_NOT_ENABLED")
