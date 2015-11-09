@@ -91,7 +91,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return 0, err
 		}
 		if len(ats) > 0 { // update cache
-			self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{attrs.ActionPlanId}})
+			self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
 		}
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
