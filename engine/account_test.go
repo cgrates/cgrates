@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"log"
 	"testing"
 	"time"
 
@@ -934,6 +935,35 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 
 		t.Errorf("Error executing triggered actions in order %v BAL: %+v", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.MONETARY][1])
 	}
+}
+
+func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
+	ub := &Account{
+		Id:         "TEST_UB",
+		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{Id: "day_trigger", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
+			&ActionTrigger{Id: "week_trigger", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 100, ThresholdType: TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
+		},
+	}
+	ub.InitCounters()
+	if len(ub.UnitCounters) != 1 || len(ub.UnitCounters[0].Balances) != 2 {
+		log.Print("Error initializing counters: ", ub.UnitCounters[0].Balances[0])
+	}
+
+	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
+	if ub.UnitCounters[0].Balances[0].Value != 1 ||
+		ub.UnitCounters[0].Balances[1].Value != 1 {
+		t.Error("Error incrementing both counters", ub.UnitCounters[0].Balances[0].Value, ub.UnitCounters[0].Balances[1].Value)
+	}
+
+	// we can reset them
+	resetCountersAction(ub, nil, &Action{BalanceType: utils.MONETARY, Balance: &Balance{Id: "day_trigger"}}, nil)
+	if ub.UnitCounters[0].Balances[0].Value != 0 ||
+		ub.UnitCounters[0].Balances[1].Value != 1 {
+		t.Error("Error reseting both counters", ub.UnitCounters[0].Balances[0].Value, ub.UnitCounters[0].Balances[1].Value)
+	}
+
 }
 
 func TestCleanExpired(t *testing.T) {

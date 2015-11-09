@@ -197,7 +197,7 @@ CREATE TABLE `tp_action_triggers` (
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
   `unique_id` varchar(64) NOT NULL,
-  `threshold_type` char(12) NOT NULL,
+  `threshold_type` char(64) NOT NULL,
   `threshold_value` DECIMAL(20,4) NOT NULL,
   `recurrent` BOOLEAN NOT NULL,
   `min_sleep` varchar(16) NOT NULL,
