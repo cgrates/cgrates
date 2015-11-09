@@ -194,7 +194,15 @@ func (self GenericEvent) GetExtraFields() map[string]string {
 	return extraFields
 }
 
-func (self GenericEvent) MissingParameter() bool {
+func (self GenericEvent) MissingParameter(timezone string) bool {
+	switch self.GetName() {
+	case utils.CGR_AUTHORIZATION:
+		if setupTime, err := self.GetSetupTime(utils.META_DEFAULT, timezone); err != nil || setupTime == nilTime {
+			return true
+		}
+		return len(self.GetAccount(utils.META_DEFAULT)) == 0 ||
+			len(self.GetDestination(utils.META_DEFAULT)) == 0
+	}
 	return false
 }
 

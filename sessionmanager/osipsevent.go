@@ -207,7 +207,7 @@ func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
 	}
 	return osipsEv.osipsEvent.OriginatorAddress.IP.String()
 }
-func (osipsev *OsipsEvent) MissingParameter() bool {
+func (osipsev *OsipsEvent) MissingParameter(timezone string) bool {
 	var nilTime time.Time
 	if osipsev.GetName() == "E_ACC_EVENT" && osipsev.osipsEvent.AttrValues["method"] == "INVITE" {
 		return len(osipsev.GetUUID()) == 0 ||
@@ -219,15 +219,15 @@ func (osipsev *OsipsEvent) MissingParameter() bool {
 			len(osipsev.osipsEvent.AttrValues[TIME]) == 0
 	} else if osipsev.GetName() == "E_ACC_EVENT" && osipsev.osipsEvent.AttrValues["method"] == "UPDATE" { // Updated event out of start/stop
 		// Data needed when stopping a prepaid loop or building a CDR with start/stop event
-		setupTime, err := osipsev.GetSetupTime(TIME, config.CgrConfig().DefaultTimezone)
+		setupTime, err := osipsev.GetSetupTime(TIME, timezone)
 		if err != nil || setupTime.Equal(nilTime) {
 			return true
 		}
-		aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
+		aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT, timezone)
 		if err != nil || aTime.Equal(nilTime) {
 			return true
 		}
-		endTime, err := osipsev.GetEndTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
+		endTime, err := osipsev.GetEndTime(utils.META_DEFAULT, timezone)
 		if err != nil || endTime.Equal(nilTime) {
 			return true
 		}

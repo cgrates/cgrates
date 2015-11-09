@@ -638,7 +638,7 @@ func (storedCdr *StoredCdr) GetOriginatorIP(fieldName string) string {
 func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
 	return storedCdr.ExtraFields
 }
-func (storedCdr *StoredCdr) MissingParameter() bool {
+func (storedCdr *StoredCdr) MissingParameter(timezone string) bool {
 	return len(storedCdr.AccId) == 0 ||
 		len(storedCdr.Category) == 0 ||
 		len(storedCdr.Tenant) == 0 ||

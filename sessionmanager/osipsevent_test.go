@@ -128,14 +128,14 @@ func TestOsipsEventGetValues(t *testing.T) {
 }
 
 func TestOsipsEventMissingParameter(t *testing.T) {
-	if !osipsEv.MissingParameter() {
+	if !osipsEv.MissingParameter("") {
 		t.Errorf("Wrongly detected missing parameter: %+v", osipsEv)
 	}
 	osipsEv2 := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_CDR",
 		AttrValues: map[string]string{"to_tag": "4ea9687f", "cgr_account": "dan", "setuptime": "7", "created": "1406370492", "method": "INVITE", "callid": "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ",
 			"sip_reason": "OK", "time": "1406370499", "cgr_reqtype": utils.META_PREPAID, "cgr_subject": "dan", "cgr_tenant": "itsyscom.com", "sip_code": "200",
 			"duration": "20", "from_tag": "eb082607"}}}
-	if !osipsEv2.MissingParameter() {
+	if !osipsEv2.MissingParameter("") {
 		t.Error("Failed to detect missing parameter.")
 	}
 }

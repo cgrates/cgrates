@@ -229,11 +229,11 @@ func (kev KamEvent) GetCdrSource() string {
 	return "KAMAILIO_" + kev.GetName()
 }
 
-func (kev KamEvent) MissingParameter() bool {
+func (kev KamEvent) MissingParameter(timezone string) bool {
 	var nullTime time.Time
 	switch kev.GetName() {
 	case CGR_AUTH_REQUEST:
-		if setupTime, err := kev.GetSetupTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone); err != nil || setupTime == nullTime {
+		if setupTime, err := kev.GetSetupTime(utils.META_DEFAULT, timezone); err != nil || setupTime == nullTime {
 			return true
 		}
 		return len(kev.GetAccount(utils.META_DEFAULT)) == 0 ||
@@ -244,7 +244,7 @@ func (kev KamEvent) MissingParameter() bool {
 			len(kev.GetDestination(utils.META_DEFAULT)) == 0 ||
 			len(kev[KAM_TR_INDEX]) == 0 || len(kev[KAM_TR_LABEL]) == 0
 	case CGR_CALL_START:
-		if aTime, err := kev.GetAnswerTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone); err != nil || aTime == nullTime {
+		if aTime, err := kev.GetAnswerTime(utils.META_DEFAULT, timezone); err != nil || aTime == nullTime {
 			return true
 		}
 		return len(kev.GetUUID()) == 0 ||

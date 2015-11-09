@@ -259,7 +259,7 @@ func (osm *OsipsSessionManager) onAccEvent(osipsDgram *osipsdagram.OsipsEvent) {
 
 // Handler of call start event. Mostly starts a session if needed
 func (osm *OsipsSessionManager) callStart(osipsEv *OsipsEvent) error {
-	if osipsEv.MissingParameter() {
+	if osipsEv.MissingParameter(osm.timezone) {
 		if err := osm.DisconnectSession(osipsEv, "", utils.ErrMandatoryIeMissing.Error()); err != nil {
 			return err
 		}
@@ -282,7 +282,7 @@ func (osm *OsipsSessionManager) callEnd(osipsEv *OsipsEvent) error {
 	if err := origEvent.updateDurationFromEvent(osipsEv); err != nil {
 		return err
 	}
-	if origEvent.MissingParameter() {
+	if origEvent.MissingParameter(osm.timezone) {
 		return utils.ErrMandatoryIeMissing
 	}
 	if err := osm.sessions.removeSession(s, origEvent); err != nil { // Unreference it early so we avoid concurrency

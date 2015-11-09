@@ -45,7 +45,7 @@ type Event interface {
 	GetDisconnectCause(string) string
 	GetOriginatorIP(string) string
 	GetExtraFields() map[string]string
-	MissingParameter() bool
+	MissingParameter(string) bool
 	ParseEventValue(*utils.RSRField, string) string
 	PassesFieldFilter(*utils.RSRField) (bool, string)
 	AsStoredCdr(timezone string) *StoredCdr
