@@ -202,8 +202,17 @@ func (self GenericEvent) MissingParameter(timezone string) bool {
 		}
 		return len(self.GetAccount(utils.META_DEFAULT)) == 0 ||
 			len(self.GetDestination(utils.META_DEFAULT)) == 0
+
+	case utils.CGR_SESSION_START:
+		return false
+	case utils.CGR_SESSION_UPDATE:
+		return false
+	case utils.CGR_SESSION_END:
+		return false
+	case utils.CGR_LCR_REQUEST:
+		return false
 	}
-	return false
+	return true // Unhandled event
 }
 
 func (self GenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
@@ -280,4 +289,19 @@ func (self GenericEvent) AsEvent(timezone string) engine.Event {
 func (self GenericEvent) ComputeLcr() bool {
 	computeLcr, _ := self[utils.COMPUTE_LCR].(bool)
 	return computeLcr
+}
+
+func (self GenericEvent) AsLcrRequest(timezone string) *engine.LcrRequest {
+	setupTimeStr, _ := utils.ConvertIfaceToString(self[utils.SETUP_TIME])
+	usageStr, _ := utils.ConvertIfaceToString(self[utils.USAGE])
+	return &engine.LcrRequest{
+		Direction:   self.GetDirection(utils.META_DEFAULT),
+		Tenant:      self.GetTenant(utils.META_DEFAULT),
+		Category:    self.GetCategory(utils.META_DEFAULT),
+		Account:     self.GetAccount(utils.META_DEFAULT),
+		Subject:     self.GetSubject(utils.META_DEFAULT),
+		Destination: self.GetDestination(utils.META_DEFAULT),
+		SetupTime:   utils.FirstNonEmpty(setupTimeStr),
+		Duration:    usageStr,
+	}
 }

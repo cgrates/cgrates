@@ -240,8 +240,12 @@ const (
 	COUNTER_EVENT                = "*event"
 	COUNTER_BALANCE              = "*balance"
 	EVENT_NAME                   = "EventName"
-	CGR_AUTHORIZATION            = "CgrAuthorization"
 	COMPUTE_LCR                  = "ComputeLcr"
+	CGR_AUTHORIZATION            = "CgrAuthorization"
+	CGR_SESSION_START            = "CgrSessionStart"
+	CGR_SESSION_UPDATE           = "CgrSessionUpdate"
+	CGR_SESSION_END              = "CgrSessionEnd"
+	CGR_LCR_REQUEST              = "CgrLcrRequest"
 )
 
 var (

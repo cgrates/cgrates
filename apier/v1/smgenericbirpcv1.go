@@ -37,11 +37,12 @@ type SMGenericBiRpcV1 struct {
 // Publishes methods exported by SMGenericBiRpcV1 as SMGenericV1 (so we can handle standard RPC methods via birpc socket)
 func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 	return map[string]interface{}{
-		"SMGenericV1.GetMaxUsage":   self.GetMaxUsage,
-		"SMGenericV1.SessionStart":  self.SessionStart,
-		"SMGenericV1.SessionUpdate": self.SessionUpdate,
-		"SMGenericV1.SessionEnd":    self.SessionEnd,
-		"SMGenericV1.ProcessCdr":    self.ProcessCdr,
+		"SMGenericV1.GetMaxUsage":     self.GetMaxUsage,
+		"SMGenericV1.GetLcrSuppliers": self.GetLcrSuppliers,
+		"SMGenericV1.SessionStart":    self.SessionStart,
+		"SMGenericV1.SessionUpdate":   self.SessionUpdate,
+		"SMGenericV1.SessionEnd":      self.SessionEnd,
+		"SMGenericV1.ProcessCdr":      self.ProcessCdr,
 	}
 }
 
@@ -55,6 +56,16 @@ func (self *SMGenericBiRpcV1) GetMaxUsage(clnt *rpc2.Client, ev sessionmanager.G
 		*maxUsage = -1.0
 	} else {
 		*maxUsage = maxUsageDur.Seconds()
+	}
+	return nil
+}
+
+/// Returns list of suppliers which can be used for the request
+func (self *SMGenericBiRpcV1) GetLcrSuppliers(clnt *rpc2.Client, ev sessionmanager.GenericEvent, suppliers *[]string) error {
+	if supls, err := self.sm.GetLcrSuppliers(ev, clnt); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		*suppliers = supls
 	}
 	return nil
 }

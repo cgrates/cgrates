@@ -30,6 +30,16 @@ func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.GenericEvent, maxUsage *f
 	return nil
 }
 
+/// Returns list of suppliers which can be used for the request
+func (self *SMGenericV1) GetLcrSuppliers(ev sessionmanager.GenericEvent, suppliers *[]string) error {
+	if supls, err := self.sm.GetLcrSuppliers(ev, nil); err != nil {
+		return utils.NewErrServerError(err)
+	} else {
+		*suppliers = supls
+	}
+	return nil
+}
+
 // Called on session start, returns the maximum number of seconds the session can last
 func (self *SMGenericV1) SessionStart(ev sessionmanager.GenericEvent, maxUsage *float64) error {
 	if err := self.sm.SessionStart(ev, nil); err != nil {

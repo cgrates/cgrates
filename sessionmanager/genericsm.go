@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"errors"
 	"sync"
 	"time"
 
@@ -84,6 +85,23 @@ func (self *GenericSessionManager) GetMaxUsage(gev GenericEvent, clnt *rpc2.Clie
 		return time.Duration(0), err
 	}
 	return time.Duration(maxDur), nil
+}
+
+func (self *GenericSessionManager) GetLcrSuppliers(gev GenericEvent, clnt *rpc2.Client) ([]string, error) {
+	gev[utils.EVENT_NAME] = utils.CGR_LCR_REQUEST
+	cd, err := gev.AsLcrRequest(self.timezone).AsCallDescriptor(self.timezone)
+	if err != nil {
+		return nil, err
+	}
+	var lcr engine.LCRCost
+	if err = self.rater.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
+		return nil, err
+	}
+	if lcr.HasErrors() {
+		lcr.LogErrors()
+		return nil, errors.New("LCR_COMPUTE_ERROR")
+	}
+	return lcr.SuppliersSlice()
 }
 
 // Called on session start
