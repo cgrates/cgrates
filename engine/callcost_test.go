@@ -33,20 +33,23 @@ func TestSingleResultMerge(t *testing.T) {
 	if cc1.Cost != 61 {
 		t.Errorf("expected 61 was %v", cc1.Cost)
 	}
-	/*t1 = time.Date(2012, time.February, 2, 17, 1, 0, 0, time.UTC)
+	t1 = time.Date(2012, time.February, 2, 17, 1, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 17, 2, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: utils.OUT, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: utils.OUT, Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.GetCost()
-	if cc2.Cost != 60 {
+	if cc2.Cost != 61 {
 		t.Errorf("expected 60 was %v", cc2.Cost)
 	}
 	cc1.Merge(cc2)
-	if len(cc1.Timespans) != 1 || cc1.Timespans[0].GetDuration().Seconds() != 120 {
-		t.Error("wrong resulted timespan: ", len(cc1.Timespans))
+	if len(cc1.Timespans) != 2 || cc1.Timespans[0].GetDuration().Seconds() != 60 || cc1.Timespans[1].GetDuration().Seconds() != 60 {
+		for _, ts := range cc1.Timespans {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("wrong resulted timespan: ", len(cc1.Timespans), cc1.Timespans[0].GetDuration().Seconds())
 	}
-	if cc1.Cost != 120 {
+	if cc1.Cost != 122 {
 		t.Errorf("Exdpected 120 was %v", cc1.Cost)
-	}*/
+	}
 }
 
 func TestMultipleResultMerge(t *testing.T) {
@@ -73,7 +76,7 @@ func TestMultipleResultMerge(t *testing.T) {
 	}
 	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 2 || cc1.Timespans[0].GetDuration().Seconds() != 60 {
-		t.Error("wrong resulted timespan: ", len(cc1.Timespans))
+		t.Error("wrong resulted timespans: ", len(cc1.Timespans))
 	}
 	if cc1.Cost != 91 {
 		t.Errorf("Exdpected 91 was %v", cc1.Cost)
