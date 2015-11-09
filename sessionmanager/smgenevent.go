@@ -32,28 +32,36 @@ var (
 	nilDuration time.Duration
 )
 
-type GenericEvent map[string]interface{}
+type SMGenericEvent map[string]interface{}
 
-func (self GenericEvent) GetName() string {
+func (self SMGenericEvent) GetName() string {
 	result, _ := utils.ConvertIfaceToString(self[utils.EVENT_NAME])
 	return result
 }
 
-func (self GenericEvent) GetCgrId(timezone string) string {
+func (self SMGenericEvent) GetTOR(fieldName string) string {
+	if fieldName == utils.META_DEFAULT {
+		fieldName = utils.TOR
+	}
+	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	return result
+}
+
+func (self SMGenericEvent) GetCgrId(timezone string) string {
 	setupTime, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
 	return utils.Sha1(self.GetUUID(), setupTime.UTC().String())
 }
 
-func (self GenericEvent) GetUUID() string {
+func (self SMGenericEvent) GetUUID() string {
 	result, _ := utils.ConvertIfaceToString(self[utils.ACCID])
 	return result
 }
 
-func (self GenericEvent) GetSessionIds() []string {
+func (self SMGenericEvent) GetSessionIds() []string {
 	return []string{self.GetUUID()}
 }
 
-func (self GenericEvent) GetDirection(fieldName string) string {
+func (self SMGenericEvent) GetDirection(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.DIRECTION
 	}
@@ -61,7 +69,7 @@ func (self GenericEvent) GetDirection(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetAccount(fieldName string) string {
+func (self SMGenericEvent) GetAccount(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.ACCOUNT
 	}
@@ -69,7 +77,7 @@ func (self GenericEvent) GetAccount(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetSubject(fieldName string) string {
+func (self SMGenericEvent) GetSubject(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.SUBJECT
 	}
@@ -77,7 +85,7 @@ func (self GenericEvent) GetSubject(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetDestination(fieldName string) string {
+func (self SMGenericEvent) GetDestination(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.DESTINATION
 	}
@@ -85,11 +93,11 @@ func (self GenericEvent) GetDestination(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetCallDestNr(fieldName string) string {
+func (self SMGenericEvent) GetCallDestNr(fieldName string) string {
 	return self.GetDestination(fieldName)
 }
 
-func (self GenericEvent) GetCategory(fieldName string) string {
+func (self SMGenericEvent) GetCategory(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.CATEGORY
 	}
@@ -97,7 +105,7 @@ func (self GenericEvent) GetCategory(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetTenant(fieldName string) string {
+func (self SMGenericEvent) GetTenant(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.TENANT
 	}
@@ -105,7 +113,7 @@ func (self GenericEvent) GetTenant(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetReqType(fieldName string) string {
+func (self SMGenericEvent) GetReqType(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.REQTYPE
 	}
@@ -113,7 +121,7 @@ func (self GenericEvent) GetReqType(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetSetupTime(fieldName, timezone string) (time.Time, error) {
+func (self SMGenericEvent) GetSetupTime(fieldName, timezone string) (time.Time, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.SETUP_TIME
 	}
@@ -121,7 +129,7 @@ func (self GenericEvent) GetSetupTime(fieldName, timezone string) (time.Time, er
 	return utils.ParseTimeDetectLayout(result, timezone)
 }
 
-func (self GenericEvent) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
+func (self SMGenericEvent) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.ANSWER_TIME
 	}
@@ -129,7 +137,7 @@ func (self GenericEvent) GetAnswerTime(fieldName, timezone string) (time.Time, e
 	return utils.ParseTimeDetectLayout(result, timezone)
 }
 
-func (self GenericEvent) GetEndTime(fieldName, timezone string) (time.Time, error) {
+func (self SMGenericEvent) GetEndTime(fieldName, timezone string) (time.Time, error) {
 	var nilTime time.Time
 	aTime, err := self.GetAnswerTime(utils.META_DEFAULT, timezone)
 	if err != nil {
@@ -142,7 +150,7 @@ func (self GenericEvent) GetEndTime(fieldName, timezone string) (time.Time, erro
 	return aTime.Add(dur), nil
 }
 
-func (self GenericEvent) GetDuration(fieldName string) (time.Duration, error) {
+func (self SMGenericEvent) GetDuration(fieldName string) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.USAGE
 	}
@@ -150,7 +158,7 @@ func (self GenericEvent) GetDuration(fieldName string) (time.Duration, error) {
 	return utils.ParseDurationWithSecs(result)
 }
 
-func (self GenericEvent) GetPdd(fieldName string) (time.Duration, error) {
+func (self SMGenericEvent) GetPdd(fieldName string) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.PDD
 	}
@@ -158,7 +166,7 @@ func (self GenericEvent) GetPdd(fieldName string) (time.Duration, error) {
 	return utils.ParseDurationWithSecs(result)
 }
 
-func (self GenericEvent) GetSupplier(fieldName string) string {
+func (self SMGenericEvent) GetSupplier(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.SUPPLIER
 	}
@@ -166,7 +174,7 @@ func (self GenericEvent) GetSupplier(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetDisconnectCause(fieldName string) string {
+func (self SMGenericEvent) GetDisconnectCause(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.DISCONNECT_CAUSE
 	}
@@ -174,18 +182,23 @@ func (self GenericEvent) GetDisconnectCause(fieldName string) string {
 	return result
 }
 
-func (self GenericEvent) GetOriginatorIP(fieldName string) string {
+func (self SMGenericEvent) GetOriginatorIP(fieldName string) string {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.CDRSOURCE
+		fieldName = utils.CDRHOST
 	}
 	result, _ := utils.ConvertIfaceToString(self[fieldName])
 	return result
 }
 
-func (self GenericEvent) GetExtraFields() map[string]string {
+func (self SMGenericEvent) GetCdrSource() string {
+	return "SM_GENERIC_" + self.GetName()
+}
+
+func (self SMGenericEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for key, val := range self {
-		if utils.IsSliceMember(utils.PrimaryCdrFields, key) {
+		primaryFields := append(utils.PrimaryCdrFields, utils.EVENT_NAME)
+		if utils.IsSliceMember(primaryFields, key) {
 			continue
 		}
 		result, _ := utils.ConvertIfaceToString(val)
@@ -194,7 +207,7 @@ func (self GenericEvent) GetExtraFields() map[string]string {
 	return extraFields
 }
 
-func (self GenericEvent) MissingParameter(timezone string) bool {
+func (self SMGenericEvent) MissingParameter(timezone string) bool {
 	switch self.GetName() {
 	case utils.CGR_AUTHORIZATION:
 		if setupTime, err := self.GetSetupTime(utils.META_DEFAULT, timezone); err != nil || setupTime == nilTime {
@@ -215,7 +228,7 @@ func (self GenericEvent) MissingParameter(timezone string) bool {
 	return true // Unhandled event
 }
 
-func (self GenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
+func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
 	switch rsrFld.Id {
 	case utils.CGRID:
 		return rsrFld.ParseValue(self.GetCgrId(timezone))
@@ -269,29 +282,50 @@ func (self GenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string
 	return ""
 }
 
-func (self GenericEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
+func (self SMGenericEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return true, ""
 }
 
-func (self GenericEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
-	return nil
+func (self SMGenericEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
+	storCdr := new(engine.StoredCdr)
+	storCdr.CgrId = self.GetCgrId(timezone)
+	storCdr.TOR = self.GetTOR(utils.META_DEFAULT)
+	storCdr.AccId = self.GetUUID()
+	storCdr.CdrHost = self.GetOriginatorIP(utils.META_DEFAULT)
+	storCdr.CdrSource = self.GetCdrSource()
+	storCdr.ReqType = self.GetReqType(utils.META_DEFAULT)
+	storCdr.Direction = self.GetDirection(utils.META_DEFAULT)
+	storCdr.Tenant = self.GetTenant(utils.META_DEFAULT)
+	storCdr.Category = self.GetCategory(utils.META_DEFAULT)
+	storCdr.Account = self.GetAccount(utils.META_DEFAULT)
+	storCdr.Subject = self.GetSubject(utils.META_DEFAULT)
+	storCdr.Destination = self.GetDestination(utils.META_DEFAULT)
+	storCdr.SetupTime, _ = self.GetSetupTime(utils.META_DEFAULT, timezone)
+	storCdr.AnswerTime, _ = self.GetAnswerTime(utils.META_DEFAULT, timezone)
+	storCdr.Usage, _ = self.GetDuration(utils.META_DEFAULT)
+	storCdr.Pdd, _ = self.GetPdd(utils.META_DEFAULT)
+	storCdr.Supplier = self.GetSupplier(utils.META_DEFAULT)
+	storCdr.DisconnectCause = self.GetDisconnectCause(utils.META_DEFAULT)
+	storCdr.ExtraFields = self.GetExtraFields()
+	storCdr.Cost = -1
+	return storCdr
 }
 
-func (self GenericEvent) String() string {
+func (self SMGenericEvent) String() string {
 	jsn, _ := json.Marshal(self)
 	return string(jsn)
 }
 
-func (self GenericEvent) AsEvent(timezone string) engine.Event {
+func (self SMGenericEvent) AsEvent(timezone string) engine.Event {
 	return self
 }
 
-func (self GenericEvent) ComputeLcr() bool {
+func (self SMGenericEvent) ComputeLcr() bool {
 	computeLcr, _ := self[utils.COMPUTE_LCR].(bool)
 	return computeLcr
 }
 
-func (self GenericEvent) AsLcrRequest(timezone string) *engine.LcrRequest {
+func (self SMGenericEvent) AsLcrRequest() *engine.LcrRequest {
 	setupTimeStr, _ := utils.ConvertIfaceToString(self[utils.SETUP_TIME])
 	usageStr, _ := utils.ConvertIfaceToString(self[utils.USAGE])
 	return &engine.LcrRequest{

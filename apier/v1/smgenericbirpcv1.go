@@ -47,7 +47,7 @@ func (self *SMGenericBiRpcV1) Handlers() map[string]interface{} {
 }
 
 /// Returns MaxUsage (for calls in seconds), -1 for no limit
-func (self *SMGenericBiRpcV1) GetMaxUsage(clnt *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
+func (self *SMGenericBiRpcV1) GetMaxUsage(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
 	maxUsageDur, err := self.sm.GetMaxUsage(ev, clnt)
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -61,7 +61,7 @@ func (self *SMGenericBiRpcV1) GetMaxUsage(clnt *rpc2.Client, ev sessionmanager.G
 }
 
 /// Returns list of suppliers which can be used for the request
-func (self *SMGenericBiRpcV1) GetLcrSuppliers(clnt *rpc2.Client, ev sessionmanager.GenericEvent, suppliers *[]string) error {
+func (self *SMGenericBiRpcV1) GetLcrSuppliers(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
 	if supls, err := self.sm.GetLcrSuppliers(ev, clnt); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
@@ -71,7 +71,7 @@ func (self *SMGenericBiRpcV1) GetLcrSuppliers(clnt *rpc2.Client, ev sessionmanag
 }
 
 // Called on session start, returns the maximum number of seconds the session can last
-func (self *SMGenericBiRpcV1) SessionStart(clnt *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
+func (self *SMGenericBiRpcV1) SessionStart(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
 	if err := self.sm.SessionStart(ev, clnt); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -79,7 +79,7 @@ func (self *SMGenericBiRpcV1) SessionStart(clnt *rpc2.Client, ev sessionmanager.
 }
 
 // Interim updates, returns remaining duration from the rater
-func (self *SMGenericBiRpcV1) SessionUpdate(clnt *rpc2.Client, ev sessionmanager.GenericEvent, maxUsage *float64) error {
+func (self *SMGenericBiRpcV1) SessionUpdate(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
 	if err := self.sm.SessionUpdate(ev, clnt); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -87,7 +87,7 @@ func (self *SMGenericBiRpcV1) SessionUpdate(clnt *rpc2.Client, ev sessionmanager
 }
 
 // Called on session end, should stop debit loop
-func (self *SMGenericBiRpcV1) SessionEnd(clnt *rpc2.Client, ev sessionmanager.GenericEvent, reply *string) error {
+func (self *SMGenericBiRpcV1) SessionEnd(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, reply *string) error {
 	if err := self.sm.SessionEnd(ev, clnt); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -96,7 +96,7 @@ func (self *SMGenericBiRpcV1) SessionEnd(clnt *rpc2.Client, ev sessionmanager.Ge
 }
 
 // Called on session end, should send the CDR to CDRS
-func (self *SMGenericBiRpcV1) ProcessCdr(clnt *rpc2.Client, ev sessionmanager.GenericEvent, reply *string) error {
+func (self *SMGenericBiRpcV1) ProcessCdr(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, reply *string) error {
 	if err := self.sm.ProcessCdr(ev); err != nil {
 		return utils.NewErrServerError(err)
 	}

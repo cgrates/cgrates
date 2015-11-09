@@ -77,7 +77,7 @@ func (self *GenericSessionManager) OnClientDisconnect(clnt *rpc2.Client) {
 
 // Methods to apply on sessions, mostly exported through RPC/Bi-RPC
 //Calculates maximum usage allowed for gevent
-func (self *GenericSessionManager) GetMaxUsage(gev GenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+func (self *GenericSessionManager) GetMaxUsage(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	gev[utils.EVENT_NAME] = utils.CGR_AUTHORIZATION
 	storedCdr := gev.AsStoredCdr(self.timezone)
 	var maxDur float64
@@ -87,9 +87,9 @@ func (self *GenericSessionManager) GetMaxUsage(gev GenericEvent, clnt *rpc2.Clie
 	return time.Duration(maxDur), nil
 }
 
-func (self *GenericSessionManager) GetLcrSuppliers(gev GenericEvent, clnt *rpc2.Client) ([]string, error) {
+func (self *GenericSessionManager) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([]string, error) {
 	gev[utils.EVENT_NAME] = utils.CGR_LCR_REQUEST
-	cd, err := gev.AsLcrRequest(self.timezone).AsCallDescriptor(self.timezone)
+	cd, err := gev.AsLcrRequest().AsCallDescriptor(self.timezone)
 	if err != nil {
 		return nil, err
 	}
@@ -105,17 +105,17 @@ func (self *GenericSessionManager) GetLcrSuppliers(gev GenericEvent, clnt *rpc2.
 }
 
 // Called on session start
-func (self *GenericSessionManager) SessionStart(gev GenericEvent, clnt *rpc2.Client) error {
+func (self *GenericSessionManager) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
 // Interim updates
-func (self *GenericSessionManager) SessionUpdate(gev GenericEvent, clnt *rpc2.Client) error {
+func (self *GenericSessionManager) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
 // Called on session end, should stop debit loop
-func (self *GenericSessionManager) SessionEnd(gev GenericEvent, clnt *rpc2.Client) error {
+func (self *GenericSessionManager) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 	return nil
 }
 
@@ -146,7 +146,7 @@ func (self *GenericSessionManager) Timezone() string {
 	return self.timezone
 }
 
-func (self *GenericSessionManager) ProcessCdr(gev GenericEvent) error {
+func (self *GenericSessionManager) ProcessCdr(gev SMGenericEvent) error {
 	return nil
 }
 
