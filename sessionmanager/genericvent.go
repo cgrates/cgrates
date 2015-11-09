@@ -129,8 +129,17 @@ func (self GenericEvent) GetAnswerTime(fieldName, timezone string) (time.Time, e
 	return utils.ParseTimeDetectLayout(result, timezone)
 }
 
-func (self GenericEvent) GetEndTime() (time.Time, error) {
-	return nilTime, nil
+func (self GenericEvent) GetEndTime(fieldName, timezone string) (time.Time, error) {
+	var nilTime time.Time
+	aTime, err := self.GetAnswerTime(utils.META_DEFAULT, timezone)
+	if err != nil {
+		return nilTime, err
+	}
+	dur, err := self.GetDuration(utils.META_DEFAULT)
+	if err != nil {
+		return nilTime, err
+	}
+	return aTime.Add(dur), nil
 }
 
 func (self GenericEvent) GetDuration(fieldName string) (time.Duration, error) {

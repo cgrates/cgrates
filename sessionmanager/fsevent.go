@@ -203,8 +203,8 @@ func (fsev FSEvent) GetAnswerTime(fieldName, timezone string) (t time.Time, err 
 	return utils.ParseTimeDetectLayout(aTimeStr, timezone)
 }
 
-func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
-	return utils.ParseTimeDetectLayout(fsev[END_TIME], config.CgrConfig().DefaultTimezone)
+func (fsev FSEvent) GetEndTime(fieldName, timezone string) (t time.Time, err error) {
+	return utils.ParseTimeDetectLayout(fsev[END_TIME], timezone)
 }
 
 func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {

@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without geven the implied warranty of
+but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -32,19 +32,13 @@ const (
 	CGR_CONNUUID = "cgr_connid"
 )
 
-var smgen *GenericSessionManager
-
-// Attempts to get the connId prgeviously set in the client state container
+// Attempts to get the connId previously set in the client state container
 func getClientConnId(clnt *rpc2.Client) string {
 	uuid, hasIt := clnt.State.Get(CGR_CONNUUID)
 	if !hasIt {
 		return ""
 	}
 	return uuid.(string)
-}
-
-func SMGeneric() *GenericSessionManager {
-	return smgen
 }
 
 func NewGenericSessionManager(cfg *config.SmGenericConfig, rater engine.Connector, cdrsrv engine.Connector, timezone string) *GenericSessionManager {

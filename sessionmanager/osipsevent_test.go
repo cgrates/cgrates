@@ -84,7 +84,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 	eAnswerTime, _ := utils.ParseTimeDetectLayout("1406370499", "")
 	dur, _ := osipsEv.GetDuration(utils.META_DEFAULT)
 	pdd, _ := osipsEv.GetPdd(utils.META_DEFAULT)
-	endTime, _ := osipsEv.GetEndTime()
+	endTime, _ := osipsEv.GetEndTime(utils.META_DEFAULT, "")
 	if osipsEv.GetName() != "E_ACC_CDR" ||
 		osipsEv.GetCgrId("") != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ", setupTime.UTC().String()) ||
 		osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ" ||

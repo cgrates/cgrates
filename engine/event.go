@@ -38,7 +38,7 @@ type Event interface {
 	GetReqType(string) string
 	GetSetupTime(string, string) (time.Time, error)
 	GetAnswerTime(string, string) (time.Time, error)
-	GetEndTime() (time.Time, error)
+	GetEndTime(string, string) (time.Time, error)
 	GetDuration(string) (time.Duration, error)
 	GetPdd(string) (time.Duration, error)
 	GetSupplier(string) string

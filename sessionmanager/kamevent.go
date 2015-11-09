@@ -177,8 +177,8 @@ func (kev KamEvent) GetSetupTime(fieldName, timezone string) (time.Time, error) 
 	}
 	return utils.ParseTimeDetectLayout(sTimeStr, timezone)
 }
-func (kev KamEvent) GetEndTime() (time.Time, error) {
-	return utils.ParseTimeDetectLayout(kev[CGR_STOPTIME], config.CgrConfig().DefaultTimezone)
+func (kev KamEvent) GetEndTime(fieldName, timezone string) (time.Time, error) {
+	return utils.ParseTimeDetectLayout(kev[CGR_STOPTIME], timezone)
 }
 func (kev KamEvent) GetDuration(fieldName string) (time.Duration, error) {
 	durStr := utils.FirstNonEmpty(kev[fieldName], kev[CGR_DURATION])

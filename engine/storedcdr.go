@@ -590,7 +590,7 @@ func (storedCdr *StoredCdr) GetAnswerTime(fieldName, timezone string) (time.Time
 	}
 	return utils.ParseTimeDetectLayout(aTimeVal, timezone)
 }
-func (storedCdr *StoredCdr) GetEndTime() (time.Time, error) {
+func (storedCdr *StoredCdr) GetEndTime(fieldName, timezone string) (time.Time, error) {
 	return storedCdr.AnswerTime.Add(storedCdr.Usage), nil
 }
 func (storedCdr *StoredCdr) GetDuration(fieldName string) (time.Duration, error) {

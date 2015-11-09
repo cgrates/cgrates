@@ -115,7 +115,7 @@ func (s *Session) debitLoop(runIdx int) {
 // Stops the debit loop
 func (s *Session) Close(ev engine.Event) error {
 	close(s.stopDebit) // Close the channel so all the sessionRuns listening will be notified
-	if _, err := ev.GetEndTime(); err != nil {
+	if _, err := ev.GetEndTime(utils.META_DEFAULT, s.sessionManager.Timezone()); err != nil {
 		utils.Logger.Err("Error parsing event stop time.")
 		for idx := range s.sessionRuns {
 			s.sessionRuns[idx].CallDescriptor.TimeEnd = s.sessionRuns[idx].CallDescriptor.TimeStart.Add(s.sessionRuns[idx].CallDescriptor.DurationIndex)

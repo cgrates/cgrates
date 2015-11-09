@@ -159,9 +159,9 @@ func (osipsev *OsipsEvent) GetAnswerTime(fieldName, timezone string) (time.Time,
 	}
 	return utils.ParseTimeDetectLayout(aTimeStr, timezone)
 }
-func (osipsev *OsipsEvent) GetEndTime() (time.Time, error) {
+func (osipsev *OsipsEvent) GetEndTime(fieldName, timezone string) (time.Time, error) {
 	var nilTime time.Time
-	aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
+	aTime, err := osipsev.GetAnswerTime(utils.META_DEFAULT, timezone)
 	if err != nil {
 		return nilTime, err
 	}
@@ -227,7 +227,7 @@ func (osipsev *OsipsEvent) MissingParameter() bool {
 		if err != nil || aTime.Equal(nilTime) {
 			return true
 		}
-		endTime, err := osipsev.GetEndTime()
+		endTime, err := osipsev.GetEndTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
 		if err != nil || endTime.Equal(nilTime) {
 			return true
 		}
