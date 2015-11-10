@@ -253,7 +253,7 @@ const (
 	TRIGGER_MAX_BALANCE_COUNTER = "*max_balance_counter"
 	TRIGGER_MIN_BALANCE         = "*min_balance"
 	TRIGGER_MAX_BALANCE         = "*max_balance"
-	TRIGGER_EXP_BALANCE         = "*exp_balance"
+	TRIGGER_BALANCE_EXPIRED     = "*balance_expired"
 )
 
 var (
