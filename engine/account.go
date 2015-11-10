@@ -489,39 +489,35 @@ func (ub *Account) executeActionTriggers(a *Action) {
 					for _, mb := range uc.Balances {
 						if strings.HasPrefix(at.ThresholdType, "*max") {
 							if mb.MatchActionTrigger(at) && mb.GetValue() >= at.ThresholdValue {
-								// run the actions
 								at.Execute(ub, nil)
 							}
 						} else { //MIN
 							if mb.MatchActionTrigger(at) && mb.GetValue() <= at.ThresholdValue {
-								// run the actions
 								at.Execute(ub, nil)
 							}
 						}
 					}
 				}
 			}
-		} else if at.ThresholdType == utils.TRIGGER_MIN_BALANCE || at.ThresholdType == utils.TRIGGER_MAX_BALANCE { // BALANCE THRESHOLD
+		} else { // BALANCE
 			for _, b := range ub.BalanceMap[at.BalanceType] {
-				if !b.dirty { // do not check clean balances
+				if !b.dirty && at.ThresholdType != utils.TRIGGER_EXP_BALANCE { // do not check clean balances
 					continue
 				}
-				if strings.HasPrefix(at.ThresholdType, "*max") {
+				switch at.ThresholdType {
+				case utils.TRIGGER_MAX_BALANCE:
+
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
-						// run the actions
 						at.Execute(ub, nil)
 					}
-				} else { //MIN
+				case utils.TRIGGER_MIN_BALANCE:
 					if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
-						// run the actions
 						at.Execute(ub, nil)
 					}
-				}
-			}
-		} else if at.ThresholdType == utils.TRIGGER_EXP_BALANCE {
-			for _, b := range ub.BalanceMap[at.BalanceType] {
-				if b.MatchActionTrigger(at) && b.IsExpired() {
-					at.Execute(ub, nil)
+				case utils.TRIGGER_EXP_BALANCE:
+					if b.MatchActionTrigger(at) && b.IsExpired() {
+						at.Execute(ub, nil)
+					}
 				}
 			}
 		}
