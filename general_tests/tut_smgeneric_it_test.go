@@ -19,16 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"encoding/json"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -117,7 +114,7 @@ func TestTutSMGCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: smgLoadInst.LoadId, LastLoadTime: smgLoadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutSMGRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
@@ -127,6 +124,7 @@ func TestTutSMGCacheStats(t *testing.T) {
 	}
 }
 
+/*
 // Make sure account was debited properly
 func TestTutSMGAccountsBefore(t *testing.T) {
 	if !*testLocal {
@@ -170,49 +168,7 @@ func TestTutSMGAccountsBefore(t *testing.T) {
 	}
 }
 
-// Make sure all stats queues are in place
-func TestTutSMGCdrStatsBefore(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var statMetrics map[string]float64
-	eMetrics := map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
-	if err := tutSMGRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST1"}, &statMetrics); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
-		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
-	}
-	eMetrics = map[string]float64{engine.ACC: -1, engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1}
-	if err := tutSMGRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1001"}, &statMetrics); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
-		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
-	}
-	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
-	if err := tutSMGRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1002"}, &statMetrics); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
-		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
-	}
-	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
-	if err := tutSMGRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "CDRST_1003"}, &statMetrics); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
-		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
-	}
-	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
-	if err := tutSMGRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL1"}, &statMetrics); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
-		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
-	}
-	eMetrics = map[string]float64{engine.ACD: -1, engine.ASR: -1, engine.TCC: -1, engine.TCD: -1, engine.ACC: -1}
-	if err := tutSMGRpc.Call("CDRStatsV1.GetMetrics", v1.AttrGetMetrics{StatsQueueId: "STATS_SUPPL2"}, &statMetrics); err != nil {
-		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
-	} else if !reflect.DeepEqual(eMetrics, statMetrics) {
-		t.Errorf("Expecting: %v, received: %v", eMetrics, statMetrics)
-	}
-}
+*/
 
 func TestTutSMGStopCgrEngine(t *testing.T) {
 	if !*testLocal {

@@ -138,38 +138,38 @@ func TestTutFsCallsAccountsBefore(t *testing.T) {
 	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
-	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003"}
-	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1004"}
-	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1007"}
-	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 0.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005"}
-	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
-		t.Error("Got error on ApierV1.GetAccount: %v", err)
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
+		t.Error("Got error on ApierV2.GetAccount: %v", err)
 	}
 }
 
@@ -316,8 +316,8 @@ func TestTutFsCallsAccount1001(t *testing.T) {
 	time.Sleep(time.Duration(70) * time.Second) // Allow calls to finish before start querying the results
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() == 10.0 { // Make sure we debitted
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	} else if reply.Disabled == true {
@@ -550,8 +550,8 @@ func TestTutFsCallsAccountDisabled1001(t *testing.T) {
 	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := tutFsCallsRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.Disabled == false {
 		t.Error("Account should be disabled per fraud detection rules.")
 	}

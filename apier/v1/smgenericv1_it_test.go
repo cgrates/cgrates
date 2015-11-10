@@ -83,7 +83,7 @@ func TestSMGV1StartEngine(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestsmgV1RpcConn(t *testing.T) {
+func TestSMGV1RpcConn(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -115,7 +115,7 @@ func TestSMGV1CacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: smgV1LoadInst.LoadId, LastLoadTime: smgV1LoadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := smgV1Rpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
