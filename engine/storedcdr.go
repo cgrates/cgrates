@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -62,6 +63,12 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr, timezone string) (*StoredC
 		storedCdr.ExtraFields[k] = v
 	}
 	return storedCdr, nil
+}
+
+// ToDo: split config to only add here general section
+func NewStoredCdrWithDefaults(cfg *config.CGRConfig) *StoredCdr {
+	return &StoredCdr{TOR: utils.VOICE, ReqType: cfg.DefaultReqType, Direction: utils.OUT, Tenant: cfg.DefaultTenant, Category: cfg.DefaultCategory,
+		ExtraFields: make(map[string]string), Cost: -1}
 }
 
 // Kinda standard of internal CDR, complies to CDR interface also

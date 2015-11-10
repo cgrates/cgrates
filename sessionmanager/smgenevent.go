@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -286,17 +287,17 @@ func (self SMGenericEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return true, ""
 }
 
-func (self SMGenericEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
-	storCdr := new(engine.StoredCdr)
+func (self SMGenericEvent) AsStoredCdr(cfg *config.CGRConfig, timezone string) *engine.StoredCdr {
+	storCdr := engine.NewStoredCdrWithDefaults(cfg)
 	storCdr.CgrId = self.GetCgrId(timezone)
-	storCdr.TOR = self.GetTOR(utils.META_DEFAULT)
+	storCdr.TOR = utils.FirstNonEmpty(self.GetTOR(utils.META_DEFAULT), storCdr.TOR) // Keep default if none in the event
 	storCdr.AccId = self.GetUUID()
 	storCdr.CdrHost = self.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.CdrSource = self.GetCdrSource()
-	storCdr.ReqType = self.GetReqType(utils.META_DEFAULT)
-	storCdr.Direction = self.GetDirection(utils.META_DEFAULT)
-	storCdr.Tenant = self.GetTenant(utils.META_DEFAULT)
-	storCdr.Category = self.GetCategory(utils.META_DEFAULT)
+	storCdr.ReqType = utils.FirstNonEmpty(self.GetReqType(utils.META_DEFAULT), storCdr.ReqType)
+	storCdr.Direction = utils.FirstNonEmpty(self.GetDirection(utils.META_DEFAULT), storCdr.Direction)
+	storCdr.Tenant = utils.FirstNonEmpty(self.GetTenant(utils.META_DEFAULT), storCdr.Tenant)
+	storCdr.Category = utils.FirstNonEmpty(self.GetCategory(utils.META_DEFAULT), storCdr.Category)
 	storCdr.Account = self.GetAccount(utils.META_DEFAULT)
 	storCdr.Subject = self.GetSubject(utils.META_DEFAULT)
 	storCdr.Destination = self.GetDestination(utils.META_DEFAULT)
@@ -314,10 +315,6 @@ func (self SMGenericEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
 func (self SMGenericEvent) String() string {
 	jsn, _ := json.Marshal(self)
 	return string(jsn)
-}
-
-func (self SMGenericEvent) AsEvent(timezone string) engine.Event {
-	return self
 }
 
 func (self SMGenericEvent) ComputeLcr() bool {

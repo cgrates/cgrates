@@ -79,7 +79,7 @@ func (self *GenericSessionManager) OnClientDisconnect(clnt *rpc2.Client) {
 //Calculates maximum usage allowed for gevent
 func (self *GenericSessionManager) GetMaxUsage(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	gev[utils.EVENT_NAME] = utils.CGR_AUTHORIZATION
-	storedCdr := gev.AsStoredCdr(self.timezone)
+	storedCdr := gev.AsStoredCdr(config.CgrConfig(), self.timezone)
 	var maxDur float64
 	if err := self.rater.GetDerivedMaxSessionTime(storedCdr, &maxDur); err != nil {
 		return time.Duration(0), err
