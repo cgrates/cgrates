@@ -195,6 +195,11 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, actId := range actIds {
 		actKeys[idx] = utils.ACTION_PREFIX + actId
 	}
+	aplIds, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+	aplKeys := make([]string, len(aplIds))
+	for idx, aplId := range aplIds {
+		aplKeys[idx] = utils.ACTION_PLAN_PREFIX + aplId
+	}
 	shgIds, _ := loader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
 	shgKeys := make([]string, len(shgIds))
 	for idx, shgId := range shgIds {
@@ -225,6 +230,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		utils.LCR_PREFIX:             lcrKeys,
 		utils.DERIVEDCHARGERS_PREFIX: dcsKeys,
 		utils.ACTION_PREFIX:          actKeys,
+		utils.ACTION_PLAN_PREFIX:     aplKeys,
 		utils.SHARED_GROUP_PREFIX:    shgKeys,
 	}); err != nil {
 		return err
