@@ -30,16 +30,6 @@ import (
 	"strings"
 )
 
-const (
-	// action trigger threshold types
-	TRIGGER_MIN_EVENT_COUNTER   = "*min_event_counter"
-	TRIGGER_MIN_BALANCE_COUNTER = "*min_balance_counter"
-	TRIGGER_MAX_EVENT_COUNTER   = "*max_event_counter"
-	TRIGGER_MAX_BALANCE_COUNTER = "*max_balance_counter"
-	TRIGGER_MIN_BALANCE         = "*min_balance"
-	TRIGGER_MAX_BALANCE         = "*max_balance"
-)
-
 /*
 Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
@@ -512,7 +502,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 					}
 				}
 			}
-		} else { // BALANCE
+		} else if at.ThresholdType == utils.TRIGGER_MIN_BALANCE || at.ThresholdType == utils.TRIGGER_MAX_BALANCE { // BALANCE THRESHOLD
 			for _, b := range ub.BalanceMap[at.BalanceType] {
 				if !b.dirty { // do not check clean balances
 					continue
@@ -527,6 +517,12 @@ func (ub *Account) executeActionTriggers(a *Action) {
 						// run the actions
 						at.Execute(ub, nil)
 					}
+				}
+			}
+		} else if at.ThresholdType == utils.TRIGGER_EXP_BALANCE {
+			for _, b := range ub.BalanceMap[at.BalanceType] {
+				if b.MatchActionTrigger(at) && b.IsExpired() {
+					at.Execute(ub, nil)
 				}
 			}
 		}
