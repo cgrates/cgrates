@@ -893,7 +893,7 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]ActionPlans, err err
 	ats = make(map[string]ActionPlans, len(apls))
 	for key, value := range apls {
 		apl := value.Value().(ActionPlans)
-		ats[key[len(utils.ACTION_PLAN_PREFIX):]] = apl
+		ats[key] = apl
 	}
 
 	return
