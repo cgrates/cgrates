@@ -245,7 +245,7 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 				DestinationIds:  "*any",
 				RatingSubject:   "special1",
 				Categories:      "call",
-				SharedGroups:     "GROUP1",
+				SharedGroups:    "GROUP1",
 				BalanceWeight:   10.0,
 				ExtraParameters: "",
 				Weight:          10.0},
@@ -258,7 +258,7 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 				DestinationIds:  "",
 				RatingSubject:   "",
 				Categories:      "",
-				SharedGroups:     "",
+				SharedGroups:    "",
 				BalanceWeight:   0.0,
 				ExtraParameters: "http://localhost/&param1=value1",
 				Weight:          20.0},
@@ -564,13 +564,13 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 				BalanceTimingTags:     "T1",
 				BalanceRatingSubject:  "special1",
 				BalanceCategories:     "call",
-				BalanceSharedGroups:    "SHARED_1",
+				BalanceSharedGroups:   "SHARED_1",
 				BalanceDisabled:       false,
 				MinQueuedItems:        0,
 				ActionsId:             "LOG_WARNING",
 				Weight:                10},
 			&utils.TPActionTrigger{
-				ThresholdType:         "*max_counter",
+				ThresholdType:         "*max_event_counter",
 				ThresholdValue:        5.0,
 				Recurrent:             false,
 				MinSleep:              "0",
@@ -583,7 +583,7 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 				BalanceTimingTags:     "T1",
 				BalanceRatingSubject:  "special1",
 				BalanceCategories:     "call",
-				BalanceSharedGroups:    "SHARED_1",
+				BalanceSharedGroups:   "SHARED_1",
 				BalanceDisabled:       false,
 				MinQueuedItems:        0,
 				ActionsId:             "LOG_WARNING",
@@ -592,7 +592,7 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 	}
 	expectedSlc := [][]string{
 		[]string{"STANDARD_TRIGGERS", "", "*min_balance", "2", "false", "0", "b1", "*monetary", "*out", "call", "", "special1", "SHARED_1", "*never", "T1", "0", "false", "0", "LOG_WARNING", "10"},
-		[]string{"STANDARD_TRIGGERS", "", "*max_counter", "5", "false", "0", "b2", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "T1", "0", "false", "0", "LOG_WARNING", "10"},
+		[]string{"STANDARD_TRIGGERS", "", "*max_event_counter", "5", "false", "0", "b2", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "T1", "0", "false", "0", "LOG_WARNING", "10"},
 	}
 	ms := APItoModelActionTrigger(at)
 	var slc [][]string

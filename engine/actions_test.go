@@ -516,7 +516,7 @@ func TestActionTriggerMatchNil(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections: utils.NewStringMap(utils.OUT),
 		BalanceType:       utils.MONETARY,
-		ThresholdType:     TRIGGER_MAX_BALANCE,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
 	var a *Action
@@ -529,7 +529,7 @@ func TestActionTriggerMatchAllBlank(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections: utils.NewStringMap(utils.OUT),
 		BalanceType:       utils.MONETARY,
-		ThresholdType:     TRIGGER_MAX_BALANCE,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
 	a := &Action{}
@@ -542,7 +542,7 @@ func TestActionTriggerMatchMinuteBucketBlank(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections: utils.NewStringMap(utils.OUT),
 		BalanceType:       utils.MONETARY,
-		ThresholdType:     TRIGGER_MAX_BALANCE,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
 	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: `{"BalanceDirections":"*out"}`}
@@ -555,10 +555,10 @@ func TestActionTriggerMatchMinuteBucketFull(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections: utils.NewStringMap(utils.OUT),
 		BalanceType:       utils.MONETARY,
-		ThresholdType:     TRIGGER_MAX_BALANCE,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
-	a := &Action{ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`, TRIGGER_MAX_BALANCE, 2)}
+	a := &Action{ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`, utils.TRIGGER_MAX_BALANCE, 2)}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -568,10 +568,10 @@ func TestActionTriggerMatchAllFull(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections: utils.NewStringMap(utils.OUT),
 		BalanceType:       utils.MONETARY,
-		ThresholdType:     TRIGGER_MAX_BALANCE,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*out"}`, TRIGGER_MAX_BALANCE, 2)}
+	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*out"}`, utils.TRIGGER_MAX_BALANCE, 2)}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -581,10 +581,10 @@ func TestActionTriggerMatchSomeFalse(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections: utils.NewStringMap(utils.OUT),
 		BalanceType:       utils.MONETARY,
-		ThresholdType:     TRIGGER_MAX_BALANCE,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*in"}`, TRIGGER_MAX_BALANCE, 2)}
+	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*in"}`, utils.TRIGGER_MAX_BALANCE, 2)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -594,10 +594,10 @@ func TestActionTriggerMatcBalanceFalse(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections: utils.NewStringMap(utils.OUT),
 		BalanceType:       utils.MONETARY,
-		ThresholdType:     TRIGGER_MAX_BALANCE,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*out"}`, TRIGGER_MAX_BALANCE, 3.0)}
+	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*out"}`, utils.TRIGGER_MAX_BALANCE, 3.0)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -607,10 +607,10 @@ func TestActionTriggerMatcAllFalse(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections: utils.NewStringMap(utils.OUT),
 		BalanceType:       utils.MONETARY,
-		ThresholdType:     TRIGGER_MAX_BALANCE,
+		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:    2,
 	}
-	a := &Action{BalanceType: utils.VOICE, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*in"}`, TRIGGER_MAX_EVENT_COUNTER, 3)}
+	a := &Action{BalanceType: utils.VOICE, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*in"}`, utils.TRIGGER_MAX_EVENT_COUNTER, 3)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -620,14 +620,14 @@ func TestActionTriggerMatchAll(t *testing.T) {
 	at := &ActionTrigger{
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		BalanceType:           utils.MONETARY,
-		ThresholdType:         TRIGGER_MAX_BALANCE,
+		ThresholdType:         utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:        2,
 		BalanceDestinationIds: utils.NewStringMap("NAT"),
 		BalanceWeight:         1.0,
 		BalanceRatingSubject:  "test1",
 		BalanceSharedGroups:   utils.NewStringMap("test2"),
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"BalanceDirections":"*out", "ThresholdType":"%v", "ThresholdValue": %v, "DestinationIds": "%v", "BalanceWeight": %v, "BalanceRatingSubject": "%v", "BalanceSharedGroup": "%v"}`, TRIGGER_MAX_BALANCE, 2, "NAT", 1.0, "test1", "test2")}
+	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"BalanceDirections":"*out", "ThresholdType":"%v", "ThresholdValue": %v, "DestinationIds": "%v", "BalanceWeight": %v, "BalanceRatingSubject": "%v", "BalanceSharedGroup": "%v"}`, utils.TRIGGER_MAX_BALANCE, 2, "NAT", 1.0, "test1", "test2")}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -926,7 +926,7 @@ func TestActionResetAllCounters(t *testing.T) {
 				&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)},
 				&Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET"), Directions: utils.NewStringMap(utils.OUT)}}},
 
-		ActionTriggers: ActionTriggers{&ActionTrigger{ThresholdType: TRIGGER_MAX_EVENT_COUNTER, BalanceType: utils.MONETARY, ThresholdValue: 2, BalanceDestinationIds: utils.NewStringMap("NAT"), BalanceWeight: 20, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, BalanceType: utils.MONETARY, ThresholdValue: 2, BalanceDestinationIds: utils.NewStringMap("NAT"), BalanceWeight: 20, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	ub.InitCounters()
 	resetCountersAction(ub, nil, nil, nil)
@@ -954,7 +954,7 @@ func TestActionResetCounterOnlyDefault(t *testing.T) {
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY: BalanceChain{&Balance{Value: 100}},
 			utils.VOICE:    BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdType: TRIGGER_MAX_EVENT_COUNTER, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceType: utils.MONETARY}
 	ub.InitCounters()
@@ -1019,7 +1019,7 @@ func TestActionTriggerLogging(t *testing.T) {
 	for k, v := range atMap {
 		_ = k
 		_ = v
-		/*if strings.Contains(k, LOG_ACTION_TRIGGER_PREFIX) && strings.Contains(v, expected) {
+		/*if strings.Contains(k, LOG_ACTION_utils.TRIGGER_PREFIX) && strings.Contains(v, expected) {
 		    key = k
 		    break
 		}*/

@@ -1077,6 +1077,14 @@ func (ms *MongoStorage) GetActionPlans(key string, skipCache bool) (ats ActionPl
 }
 
 func (ms *MongoStorage) SetActionPlans(key string, ats ActionPlans) error {
+	if len(ats) == 0 {
+		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
+		err := ms.db.C(colApl).Remove(bson.M{"key": key})
+		if err != mgo.ErrNotFound {
+			return err
+		}
+		return nil
+	}
 	_, err := ms.db.C(colApl).Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value ActionPlans
@@ -1121,8 +1129,8 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs util
 
 func (ms *MongoStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) (err error) {
 	if len(dcs) == 0 {
-		err = ms.db.C(colDcs).Remove(bson.M{"key": key})
 		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
+		err = ms.db.C(colDcs).Remove(bson.M{"key": key})
 		if err != mgo.ErrNotFound {
 			return err
 		}

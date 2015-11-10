@@ -1011,7 +1011,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	expected := &ActionTrigger{
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
-		ThresholdType:         TRIGGER_MIN_EVENT_COUNTER,
+		ThresholdType:         utils.TRIGGER_MIN_EVENT_COUNTER,
 		ThresholdValue:        10,
 		BalanceDestinationIds: utils.NewStringMap("GERMANY_O2"),
 		BalanceCategories:     utils.StringMap{},
@@ -1028,7 +1028,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	expected = &ActionTrigger{
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
-		ThresholdType:         TRIGGER_MAX_BALANCE,
+		ThresholdType:         utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue:        200,
 		BalanceDestinationIds: utils.NewStringMap("GERMANY"),
 		BalanceCategories:     utils.StringMap{},

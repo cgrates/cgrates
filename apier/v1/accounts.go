@@ -30,9 +30,8 @@ import (
 )
 
 type AttrAcntAction struct {
-	Tenant    string
-	Account   string
-	Direction string
+	Tenant  string
+	Account string
 }
 
 type AccountActionTiming struct {
@@ -43,7 +42,7 @@ type AccountActionTiming struct {
 }
 
 func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*AccountActionTiming) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
 	accountATs := make([]*AccountActionTiming, 0)
@@ -65,9 +64,8 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 type AttrRemActionTiming struct {
 	ActionPlanId    string // Id identifying the ActionTimings profile
 	ActionTimingId  string // Internal CGR id identifying particular ActionTiming, *all for all user related ActionTimings to be canceled
-	Tenant          string // Tenant he account belongs to
+	Tenant          string // Tenant the account belongs to
 	Account         string // Account name
-	Direction       string // Traffic direction
 	ReloadScheduler bool   // If set it will reload the scheduler after adding
 }
 
@@ -77,7 +75,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if len(attrs.Account) != 0 { // Presence of Account requires complete account details to be provided
-		if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
+		if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 			return utils.NewErrMandatoryIeMissing(missing...)
 		}
 	}
@@ -91,6 +89,9 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		ats = engine.RemActionPlan(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account))
 		if err := self.RatingDb.SetActionPlans(attrs.ActionPlanId, ats); err != nil {
 			return 0, err
+		}
+		if len(ats) > 0 { // update cache
+			self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
 		}
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
@@ -107,7 +108,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 
 // Returns a list of ActionTriggers on an account
 func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engine.ActionTriggers) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	if balance, err := self.AccountDb.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account)); err != nil {
@@ -121,13 +122,12 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 type AttrRemAcntActionTriggers struct {
 	Tenant           string // Tenant he account belongs to
 	Account          string // Account name
-	Direction        string // Traffic direction
 	ActionTriggersId string // Id filtering only specific id to remove (can be regexp pattern)
 }
 
 // Returns a list of ActionTriggers on an account
 func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	balanceId := utils.AccountKey(attrs.Tenant, attrs.Account)
@@ -158,7 +158,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 
 // Ads a new account into dataDb. If already defined, returns success.
 func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	balanceId := utils.AccountKey(attr.Tenant, attr.Account)
@@ -226,7 +226,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 }
 
 func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	accountId := utils.AccountKey(attr.Tenant, attr.Account)
@@ -236,6 +236,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		}
 		return 0, nil
 	}, 0, accountId)
+	// FIXME: remove from all actionplans?
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -251,7 +252,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + utils.ConcatenatedKey(attr.Tenant)); err != nil {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
 			return err
 		}
 	} else {

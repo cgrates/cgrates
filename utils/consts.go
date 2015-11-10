@@ -246,6 +246,14 @@ const (
 	CGR_SESSION_UPDATE           = "CgrSessionUpdate"
 	CGR_SESSION_END              = "CgrSessionEnd"
 	CGR_LCR_REQUEST              = "CgrLcrRequest"
+	// action trigger threshold types
+	TRIGGER_MIN_EVENT_COUNTER   = "*min_event_counter"
+	TRIGGER_MIN_BALANCE_COUNTER = "*min_balance_counter"
+	TRIGGER_MAX_EVENT_COUNTER   = "*max_event_counter"
+	TRIGGER_MAX_BALANCE_COUNTER = "*max_balance_counter"
+	TRIGGER_MIN_BALANCE         = "*min_balance"
+	TRIGGER_MAX_BALANCE         = "*max_balance"
+	TRIGGER_EXP_BALANCE         = "*exp_balance"
 )
 
 var (

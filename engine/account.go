@@ -30,16 +30,6 @@ import (
 	"strings"
 )
 
-const (
-	// action trigger threshold types
-	TRIGGER_MIN_EVENT_COUNTER   = "*min_event_counter"
-	TRIGGER_MIN_BALANCE_COUNTER = "*min_balance_counter"
-	TRIGGER_MAX_EVENT_COUNTER   = "*max_event_counter"
-	TRIGGER_MAX_BALANCE_COUNTER = "*max_balance_counter"
-	TRIGGER_MIN_BALANCE         = "*min_balance"
-	TRIGGER_MAX_BALANCE         = "*max_balance"
-)
-
 /*
 Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
@@ -480,9 +470,8 @@ func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, cou
 func (ub *Account) executeActionTriggers(a *Action) {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
-		limit, counter, kind := at.GetThresholdTypeInfo()
 		// sanity check
-		if kind != "counter" && kind != "balance" {
+		if !strings.Contains(at.ThresholdType, "counter") && !strings.Contains(at.ThresholdType, "balance") {
 			continue
 		}
 		if at.Executed {
@@ -496,16 +485,14 @@ func (ub *Account) executeActionTriggers(a *Action) {
 		if strings.Contains(at.ThresholdType, "counter") {
 			for _, uc := range ub.UnitCounters {
 				if uc.BalanceType == at.BalanceType &&
-					uc.CounterType == counter {
+					strings.Contains(at.ThresholdType, uc.CounterType[1:]) {
 					for _, mb := range uc.Balances {
-						if limit == "*max" {
+						if strings.HasPrefix(at.ThresholdType, "*max") {
 							if mb.MatchActionTrigger(at) && mb.GetValue() >= at.ThresholdValue {
-								// run the actions
 								at.Execute(ub, nil)
 							}
 						} else { //MIN
 							if mb.MatchActionTrigger(at) && mb.GetValue() <= at.ThresholdValue {
-								// run the actions
 								at.Execute(ub, nil)
 							}
 						}
@@ -514,17 +501,21 @@ func (ub *Account) executeActionTriggers(a *Action) {
 			}
 		} else { // BALANCE
 			for _, b := range ub.BalanceMap[at.BalanceType] {
-				if !b.dirty { // do not check clean balances
+				if !b.dirty && at.ThresholdType != utils.TRIGGER_EXP_BALANCE { // do not check clean balances
 					continue
 				}
-				if limit == "*max" {
+				switch at.ThresholdType {
+				case utils.TRIGGER_MAX_BALANCE:
+
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
-						// run the actions
 						at.Execute(ub, nil)
 					}
-				} else { //MIN
+				case utils.TRIGGER_MIN_BALANCE:
 					if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
-						// run the actions
+						at.Execute(ub, nil)
+					}
+				case utils.TRIGGER_EXP_BALANCE:
+					if b.MatchActionTrigger(at) && b.IsExpired() {
 						at.Execute(ub, nil)
 					}
 				}
@@ -569,10 +560,11 @@ func (acc *Account) InitCounters() {
 		if !strings.Contains(at.ThresholdType, "counter") {
 			continue
 		}
-		_, ct, _ := at.GetThresholdTypeInfo()
-		if ct == "" {
-			ct = utils.COUNTER_EVENT
+		ct := utils.COUNTER_EVENT //default
+		if strings.Contains(at.ThresholdType, "balance") {
+			ct = utils.COUNTER_BALANCE
 		}
+
 		uc, exists := ucTempMap[at.BalanceType+ct]
 		if !exists {
 			uc = &UnitCounter{

@@ -826,12 +826,12 @@ func TestApierGetCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2, LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2, ActionPlans: 1, LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 	}
 }
 
@@ -1052,7 +1052,7 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 		return
 	}
 	var reply engine.ActionTriggers
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
@@ -1067,14 +1067,14 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 	}
 	// Test first get so we can steal the id which we need to remove
 	var reply engine.ActionTriggers
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var rmReply string
-	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", Direction: "*out", ActionTriggersId: reply[0].Id}
+	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", ActionTriggersId: reply[0].Id}
 	if err := rater.Call("ApierV1.RemAccountActionTriggers", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
 	} else if rmReply != OK {
@@ -1115,7 +1115,7 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 		return
 	}
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan7", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan7"}
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {
@@ -1133,14 +1133,14 @@ func TestApierRemActionTiming(t *testing.T) {
 		return
 	}
 	var rmReply string
-	rmReq := AttrRemActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4", Direction: "*out"}
+	rmReq := AttrRemActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4"}
 	if err := rater.Call("ApierV1.RemActionTiming", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
 	} else if rmReply != OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan4", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan4"}
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 0 {
@@ -1155,32 +1155,32 @@ func TestApierGetAccount(t *testing.T) {
 	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
 		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 1.5 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 1.5, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	// The one we have topped up though executeAction
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan2"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11.5 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 10, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan3"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 3.6 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 3.6, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan6"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 1 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 1, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -1290,7 +1290,7 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 	}
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11 {
 		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
