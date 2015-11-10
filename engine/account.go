@@ -100,7 +100,6 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	}
 	found := false
 	id := a.BalanceType
-	ub.CleanExpiredBalances()
 	for _, b := range ub.BalanceMap[id] {
 		if b.IsExpired() {
 			continue // just to be safe (cleaned expired balances above)
@@ -172,7 +171,6 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	}
 	found := false
 	id := a.BalanceType
-	ub.CleanExpiredBalances()
 	for _, b := range ub.BalanceMap[id] {
 		if b.MatchFilter(a.Balance, false) {
 			b.Disabled = a.Balance.Disabled
@@ -501,7 +499,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 			}
 		} else { // BALANCE
 			for _, b := range ub.BalanceMap[at.BalanceType] {
-				if !b.dirty && at.ThresholdType != utils.TRIGGER_EXP_BALANCE { // do not check clean balances
+				if !b.dirty && at.ThresholdType != utils.TRIGGER_BALANCE_EXPIRED { // do not check clean balances
 					continue
 				}
 				switch at.ThresholdType {
@@ -514,7 +512,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 					if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
 						at.Execute(ub, nil)
 					}
-				case utils.TRIGGER_EXP_BALANCE:
+				case utils.TRIGGER_BALANCE_EXPIRED:
 					if b.MatchActionTrigger(at) && b.IsExpired() {
 						at.Execute(ub, nil)
 					}
@@ -522,6 +520,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 			}
 		}
 	}
+	ub.CleanExpiredBalances()
 }
 
 // Mark all action trigers as ready for execution
