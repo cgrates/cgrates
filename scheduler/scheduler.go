@@ -82,7 +82,7 @@ func (s *Scheduler) Loop() {
 func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	actionPlans, err := storage.GetAllActionPlans()
 	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf("Cannot get action plans: %v", err))
+		//utils.Logger.Warning(fmt.Sprintf("Cannot get action plans: %v", err))
 	}
 	// recreate the queue
 	s.Lock()
