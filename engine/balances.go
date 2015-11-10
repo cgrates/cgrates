@@ -133,7 +133,8 @@ func (b *Balance) IsDefault() bool {
 }
 
 func (b *Balance) IsExpired() bool {
-	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
+	// check if it expires in the next second
+	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now().Add(1*time.Second))
 }
 
 func (b *Balance) IsActive() bool {

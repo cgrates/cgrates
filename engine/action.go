@@ -69,6 +69,7 @@ const (
 	MAIL_ASYNC             = "*mail_async"
 	UNLIMITED              = "*unlimited"
 	CDRLOG                 = "*cdrlog"
+	SET_DDESTINATIONS      = "*set_ddestinations"
 )
 
 func (a *Action) Clone() *Action {
@@ -125,6 +126,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return callUrlAsync, true
 	case MAIL_ASYNC:
 		return mailAsync, true
+	case SET_DDESTINATIONS:
+		return setddestinations, true
 	}
 	return nil, false
 }
@@ -482,6 +485,44 @@ func mailAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) err
 			time.Sleep(time.Duration(i) * time.Minute)
 		}
 	}()
+	return nil
+}
+
+func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	var ddcDestId string
+	for _, bchain := range ub.BalanceMap {
+		for _, b := range bchain {
+			for destId := range b.DestinationIds {
+				if strings.HasPrefix(destId, "*ddc") {
+					ddcDestId = destId
+					break
+				}
+			}
+			if ddcDestId != "" {
+				break
+			}
+		}
+		if ddcDestId != "" {
+			break
+		}
+	}
+	if ddcDestId != "" {
+		// make slice from prefixes
+		prefixes := make([]string, len(sq.Metrics))
+		i := 0
+		for p := range sq.Metrics {
+			prefixes[i] = p
+			i++
+		}
+		// update destid in storage
+		ratingStorage.SetDestination(&Destination{Id: ddcDestId, Prefixes: prefixes})
+		// remove existing from cache
+		CleanStalePrefixes([]string{ddcDestId})
+		// update new values from redis
+		ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + ddcDestId}})
+	} else {
+		return utils.ErrNotFound
+	}
 	return nil
 }
 

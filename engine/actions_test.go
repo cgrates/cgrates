@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1231,7 +1232,47 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 	}
 }
 
-/********************************** Benchmarks ********************************/
+func TestActionSetDDestination(t *testing.T) {
+	acc := &Account{BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{DestinationIds: utils.NewStringMap("*ddc_test")}}}}
+	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
+	ratingStorage.SetDestination(origD)
+	ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + "*ddc_test"}})
+	// check redis and cache
+	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil || !reflect.DeepEqual(d, origD) {
+		t.Error("Error storing destination: ", d, err)
+	}
+	x1, err := cache2go.Get(utils.DESTINATION_PREFIX + "111")
+	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
+		t.Error("Error cacheing destination: ", x1)
+	}
+	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "222")
+	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
+		t.Error("Error cacheing destination: ", x1)
+	}
+	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "444": 1}}, nil, nil)
+	alteredDest := &Destination{Id: "*ddc_test", Prefixes: []string{"333", "444"}}
+	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil || !reflect.DeepEqual(d, alteredDest) {
+		t.Error("Error storing destination: ", d, err)
+	}
+	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "111")
+	if err == nil {
+		t.Error("Error cacheing destination: ", x1)
+	}
+	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "222")
+	if err == nil {
+		t.Error("Error cacheing destination: ", x1)
+	}
+	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "333")
+	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
+		t.Error("Error cacheing destination: ", x1)
+	}
+	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "444")
+	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
+		t.Error("Error cacheing destination: ", x1)
+	}
+}
+
+/**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {
 	m := make(map[string]int, 1000)
