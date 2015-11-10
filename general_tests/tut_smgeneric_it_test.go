@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"encoding/json"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -136,7 +137,8 @@ func TestTutSMGAccountsBefore(t *testing.T) {
 	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
-		t.Errorf("Calling ApierV2.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
+		jsn, _ := json.Marshal(reply)
+		t.Errorf("Calling ApierV2.GetBalance received: %s", jsn)
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002"}
 	if err := tutSMGRpc.Call("ApierV2.GetAccount", attrs, &reply); err != nil {

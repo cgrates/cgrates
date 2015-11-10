@@ -30,7 +30,7 @@ func (self *SMGenericV1) GetMaxUsage(ev sessionmanager.SMGenericEvent, maxUsage 
 	return nil
 }
 
-/// Returns list of suppliers which can be used for the request
+// Returns list of suppliers which can be used for the request
 func (self *SMGenericV1) GetLcrSuppliers(ev sessionmanager.SMGenericEvent, suppliers *[]string) error {
 	if supls, err := self.sm.GetLcrSuppliers(ev, nil); err != nil {
 		return utils.NewErrServerError(err)

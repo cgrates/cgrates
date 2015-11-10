@@ -84,7 +84,6 @@ func (s *Session) debitLoop(runIdx int) {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
 		nextCd.LoopIndex = index
-		//utils.Logger.Debug(fmt.Sprintf("NEXTCD: %s", utils.ToJSON(nextCd)))
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
 		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
@@ -100,9 +99,7 @@ func (s *Session) debitLoop(runIdx int) {
 			s.sessionManager.WarnSessionMinDuration(s.eventStart.GetUUID(), s.connId)
 		}
 		s.sessionRuns[runIdx].CallCosts = append(s.sessionRuns[runIdx].CallCosts, cc)
-		//utils.Logger.Debug(fmt.Sprintf("CALLCOST: %s", utils.ToJSON(cc)))
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
-		//utils.Logger.Debug(fmt.Sprintf("NEXTCD: %s DURATION: %s", utils.ToJSON(nextCd), nextCd.GetDuration().String()))
 		// update call duration with real debited duration
 		nextCd.DurationIndex -= debitPeriod
 		nextCd.DurationIndex += cc.GetDuration()
@@ -228,10 +225,7 @@ func (s *Session) SaveOperations() {
 		}
 		firstCC := sr.CallCosts[0]
 		for _, cc := range sr.CallCosts[1:] {
-			//utils.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %s", utils.ToJSON(firstCC)))
-			//utils.Logger.Debug(fmt.Sprintf("OTHER MERGE: %s", utils.ToJSON(cc)))
 			firstCC.Merge(cc)
-			//utils.Logger.Debug(fmt.Sprintf("AFTER MERGE: %s", utils.ToJSON(firstCC)))
 		}
 
 		var reply string
