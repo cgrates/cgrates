@@ -122,7 +122,7 @@ func TestMCDRCRpcConn(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	//startEngine()
+	startEngine()
 	var err error
 	rater, err = jsonrpc.Dial("tcp", cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
@@ -197,4 +197,11 @@ func TestMCDRCHandleCdr3File(t *testing.T) {
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/cgrates/cdrc3/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
+}
+
+func TestMCDRCStopEngine(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	stopEngine()
 }
