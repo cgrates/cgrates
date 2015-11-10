@@ -23,16 +23,12 @@ import (
 	"testing"
 	"time"
 
-	//"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var genEv = SMGenericEvent{}
-
-func TestSMGenericEventInterface(t *testing.T) {
-	var _ engine.Event = engine.Event(genEv)
-}
+var cfg, _ = config.NewDefaultCGRConfig()
 
 func TestSMGenericEventParseFields(t *testing.T) {
 	smGev := SMGenericEvent{}
@@ -157,7 +153,7 @@ func TestSMGenericEventAsStoredCdr(t *testing.T) {
 		Destination: "+4986517174963", SetupTime: time.Date(2015, 11, 9, 14, 21, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 9, 14, 22, 2, 0, time.UTC),
 		Usage: time.Duration(83) * time.Second, Pdd: time.Duration(300) * time.Millisecond, Supplier: "supplier1", DisconnectCause: "NORMAL_DISCONNECT",
 		ExtraFields: map[string]string{"Extra1": "Value1", "Extra2": "5"}, Cost: -1}
-	if storedCdr := smGev.AsStoredCdr("UTC"); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+	if storedCdr := smGev.AsStoredCdr(cfg, "UTC"); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }

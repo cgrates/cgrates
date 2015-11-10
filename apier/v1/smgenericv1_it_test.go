@@ -29,6 +29,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -137,6 +138,21 @@ func TestSMGV1AccountsBefore(t *testing.T) {
 	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 10.0 { // Make sure we debitted
 		jsn, _ := json.Marshal(reply)
 		t.Errorf("Calling ApierV2.GetBalance received: %s", jsn)
+	}
+}
+
+// Make sure account was debited properly
+func TestSMGV1GetMaxUsage(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	setupReq := &sessionmanager.SMGenericEvent{utils.REQTYPE: utils.META_PREPAID, utils.TENANT: "cgrates.org",
+		utils.ACCOUNT: "1003", utils.DESTINATION: "1002", utils.SETUP_TIME: "2015-11-10T15:20:00Z"}
+	var maxTime float64
+	if err := smgV1Rpc.Call("SMGenericV1.GetMaxUsage", setupReq, &maxTime); err != nil {
+		t.Error(err)
+	} else if maxTime != 2930 {
+		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
 	}
 }
 
