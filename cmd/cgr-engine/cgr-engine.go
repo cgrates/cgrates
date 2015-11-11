@@ -237,7 +237,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> error: %s!", err))
 	}
 	exitChan <- true
 }
@@ -256,7 +256,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil { //Connected so no need to reiterate
-				utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
+				utils.Logger.Crit(fmt.Sprintf("<SM-Kamailio> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
@@ -275,7 +275,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 				if err != nil {
-					utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
+					utils.Logger.Crit(fmt.Sprintf("<SM-Kamailio> Could not connect to CDRS via RPC: %v", err))
 					exitChan <- true
 					return
 				}
@@ -286,7 +286,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> error: %s!", err))
 	}
 	exitChan <- true
 }
@@ -305,7 +305,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 			if err != nil { //Connected so no need to reiterate
-				utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
+				utils.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
@@ -324,7 +324,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
 				if err != nil {
-					utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
+					utils.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
 					exitChan <- true
 					return
 				}
