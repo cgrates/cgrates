@@ -663,6 +663,28 @@ func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
 	}
 }
 
+func TestMaxDebitUnknowDest(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT", false)
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "9999999999",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 29, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.MaxDebit()
+	if err == nil {
+		t.Errorf("Bad error reported %+v: %v", cc, err)
+	}
+}
+
 func TestGetCostMaxDebitRoundingIssue(t *testing.T) {
 	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT", false)
 	for _, at := range ap {

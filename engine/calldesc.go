@@ -696,12 +696,12 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	} else {
 		//log.Printf("ACC: %+v", account)
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
-			Guardian.Guard(func() (interface{}, error) {
+			_, err = Guardian.Guard(func() (interface{}, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				//log.Print("AFTER MAX SESSION: ", cd)
 				if err != nil || remainingDuration == 0 {
+					cc = cd.CreateCallCost()
 					if cd.GetDuration() == 0 {
-						cc = cd.CreateCallCost()
 						// add RatingInfo
 						err := cd.LoadRatingPlans()
 						if err == nil && len(cd.RatingInfos) > 0 {
@@ -714,7 +714,6 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 						}
 						return cc, nil
 					}
-					cc, err = new(CallCost), fmt.Errorf("no more credit: %v", err)
 					return 0, err
 				}
 				//log.Print("Remaining: ", remainingDuration)
@@ -727,6 +726,9 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
 			}, 0, memberIds...)
+			if err != nil {
+				return cc, err
+			}
 		} else {
 			return nil, err
 		}
