@@ -231,6 +231,31 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	}
 	accountId := utils.AccountKey(attr.Tenant, attr.Account)
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+		// remove it from all action plans
+		allATs, err := self.RatingDb.GetAllActionPlans()
+		if err != nil && err != utils.ErrNotFound {
+			return 0, err
+		}
+		for key, ats := range allATs {
+			changed := false
+			for _, at := range ats {
+				for i := 0; i < len(at.AccountIds); i++ {
+					if at.AccountIds[i] == accountId {
+						// delete without preserving order
+						at.AccountIds[i] = at.AccountIds[len(at.AccountIds)-1]
+						at.AccountIds = at.AccountIds[:len(at.AccountIds)-1]
+						i -= 1
+						changed = true
+					}
+				}
+			}
+			if changed {
+				// save action plan
+				self.RatingDb.SetActionPlans(key, ats)
+				// cache
+				self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
+			}
+		}
 		if err := self.AccountDb.RemoveAccount(accountId); err != nil {
 			return 0, err
 		}
