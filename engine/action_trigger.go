@@ -71,7 +71,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 		return
 	}
 	at.Executed = true
-	atLeastOneActionExecuted := false
+	transactionFailed := false
 	for _, a := range aac {
 		if a.Balance == nil {
 			a.Balance = &Balance{}
@@ -79,19 +79,21 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
-			utils.Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
-			return
+			utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+			transactionFailed = false
+			break
 		}
 		//go utils.Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
-		err = actionFunction(ub, sq, a, aac)
-		if err == nil {
-			atLeastOneActionExecuted = true
+		if err := actionFunction(ub, sq, a, aac); err != nil {
+			utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
+			transactionFailed = false
+			break
 		}
 	}
-	if !atLeastOneActionExecuted || at.Recurrent {
+	if transactionFailed || at.Recurrent {
 		at.Executed = false
 	}
-	if ub != nil {
+	if !transactionFailed && ub != nil {
 		storageLogger.LogActionTrigger(ub.Id, utils.RATER_SOURCE, at, aac)
 		accountingStorage.SetAccount(ub)
 	}
