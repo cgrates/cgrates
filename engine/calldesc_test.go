@@ -581,6 +581,88 @@ func TestGetCostRoundingIssue(t *testing.T) {
 	}
 }
 
+func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT", false)
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.GetCost()
+	if err != nil ||
+		len(cc.Timespans) != 1 ||
+		cc.Timespans[0].MatchedDestId != "RET" ||
+		cc.Timespans[0].MatchedSubject != "*out:cgrates.org:call:dy" ||
+		cc.Timespans[0].MatchedPrefix != "0723" ||
+		cc.Timespans[0].RatingPlanId != "DY_PLAN" {
+		t.Error("MatchedInfo not added:", utils.ToIJSON(cc))
+	}
+}
+
+func TestDebitRatingInfoOnZeroTime(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT", false)
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.Debit()
+	if err != nil ||
+		cc == nil ||
+		len(cc.Timespans) != 1 ||
+		cc.Timespans[0].MatchedDestId != "RET" ||
+		cc.Timespans[0].MatchedSubject != "*out:cgrates.org:call:dy" ||
+		cc.Timespans[0].MatchedPrefix != "0723" ||
+		cc.Timespans[0].RatingPlanId != "DY_PLAN" {
+		t.Error("MatchedInfo not added:", utils.ToIJSON(cc))
+	}
+}
+
+func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT", false)
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.MaxDebit()
+	if err != nil ||
+		len(cc.Timespans) != 1 ||
+		cc.Timespans[0].MatchedDestId != "RET" ||
+		cc.Timespans[0].MatchedSubject != "*out:cgrates.org:call:dy" ||
+		cc.Timespans[0].MatchedPrefix != "0723" ||
+		cc.Timespans[0].RatingPlanId != "DY_PLAN" {
+		t.Error("MatchedInfo not added:", utils.ToIJSON(cc))
+	}
+}
+
 func TestGetCostMaxDebitRoundingIssue(t *testing.T) {
 	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT", false)
 	for _, at := range ap {
@@ -888,7 +970,6 @@ func TestDebitAndMaxDebit(t *testing.T) {
 		t.Error("Error debiting and/or maxdebiting: ", err1, err2)
 	}
 	if !reflect.DeepEqual(cc1, cc2) {
-		t.Log("===============================")
 		t.Logf("CC1: %+v", cc1)
 		for _, ts := range cc1.Timespans {
 			t.Logf("TS: %+v", ts)
@@ -897,7 +978,6 @@ func TestDebitAndMaxDebit(t *testing.T) {
 		for _, ts := range cc2.Timespans {
 			t.Logf("TS: %+v", ts)
 		}
-		t.Log("===============================")
 		t.Error("Debit and MaxDebit differ")
 	}
 }

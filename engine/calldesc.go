@@ -435,7 +435,7 @@ Creates a CallCost structure with the cost information calculated for the receiv
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cd.account = nil // make sure it's not cached
 	cc, err := cd.getCost()
-	if err != nil {
+	if err != nil || cd.GetDuration() == 0 {
 		return cc, err
 	}
 
@@ -474,8 +474,19 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 
 func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	// check for 0 duration
-	if cd.TimeEnd.Sub(cd.TimeStart) == 0 {
-		return cd.CreateCallCost(), nil
+	if cd.GetDuration() == 0 {
+		cc := cd.CreateCallCost()
+		// add RatingInfo
+		err := cd.LoadRatingPlans()
+		if err == nil && len(cd.RatingInfos) > 0 {
+			ts := &TimeSpan{
+				TimeStart: cd.TimeStart,
+				TimeEnd:   cd.TimeEnd,
+			}
+			ts.setRatingInfo(cd.RatingInfos[0])
+			cc.Timespans = append(cc.Timespans, ts)
+		}
+		return cc, nil
 	}
 	if cd.DurationIndex < cd.TimeEnd.Sub(cd.TimeStart) {
 		cd.DurationIndex = cd.TimeEnd.Sub(cd.TimeStart)
@@ -621,8 +632,19 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) (cc *CallCost, err error) {
-	if cd.TimeEnd.Sub(cd.TimeStart) == 0 {
-		return cd.CreateCallCost(), nil
+	if cd.GetDuration() == 0 {
+		cc = cd.CreateCallCost()
+		// add RatingInfo
+		err := cd.LoadRatingPlans()
+		if err == nil && len(cd.RatingInfos) > 0 {
+			ts := &TimeSpan{
+				TimeStart: cd.TimeStart,
+				TimeEnd:   cd.TimeEnd,
+			}
+			ts.setRatingInfo(cd.RatingInfos[0])
+			cc.Timespans = append(cc.Timespans, ts)
+		}
+		return cc, nil
 	}
 	if !dryRun {
 		defer accountingStorage.SetAccount(account)
@@ -678,6 +700,20 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				//log.Print("AFTER MAX SESSION: ", cd)
 				if err != nil || remainingDuration == 0 {
+					if cd.GetDuration() == 0 {
+						cc = cd.CreateCallCost()
+						// add RatingInfo
+						err := cd.LoadRatingPlans()
+						if err == nil && len(cd.RatingInfos) > 0 {
+							ts := &TimeSpan{
+								TimeStart: cd.TimeStart,
+								TimeEnd:   cd.TimeEnd,
+							}
+							ts.setRatingInfo(cd.RatingInfos[0])
+							cc.Timespans = append(cc.Timespans, ts)
+						}
+						return cc, nil
+					}
 					cc, err = new(CallCost), fmt.Errorf("no more credit: %v", err)
 					return 0, err
 				}

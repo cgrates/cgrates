@@ -21,7 +21,6 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -1303,9 +1302,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 			},
 		},
 	}
-	log.Print("=========")
 	err = at.Execute()
-	log.Print("=========")
 	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
