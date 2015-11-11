@@ -21,6 +21,7 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -1347,6 +1348,24 @@ func TestActionTransactionBalanceType(t *testing.T) {
 	}
 	if acc.BalanceMap[utils.MONETARY][0].Value != 10 {
 		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	}
+}
+
+func TestActionExecuteActionNonExistingAccount(t *testing.T) {
+	at := &ActionPlan{
+		AccountIds: []string{"cgrates.org:exe"},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: utils.MONETARY,
+				Balance:     &Balance{Value: 1.1},
+			},
+		},
+	}
+	err = at.Execute()
+	if err == nil {
+		log.Print("Fail to return error on action execute: ", err)
 	}
 }
 

@@ -212,9 +212,9 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 }
 
 func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
-	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
+	accId := utils.AccountKey(attr.Tenant, attr.Account)
 	at := &engine.ActionPlan{
-		AccountIds: []string{tag},
+		AccountIds: []string{accId},
 		ActionsId:  attr.ActionsId,
 	}
 	if err := at.Execute(); err != nil {

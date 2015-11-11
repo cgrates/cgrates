@@ -323,6 +323,7 @@ func (at *ActionPlan) Execute() (err error) {
 	}, 0, at.AccountIds...)
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
+		return err
 	}
 	storageLogger.LogActionPlan(utils.SCHED_SOURCE, at, aac)
 	return
