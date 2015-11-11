@@ -1234,7 +1234,6 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 func TestActionSetDDestination(t *testing.T) {
 	acc := &Account{BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{DestinationIds: utils.NewStringMap("*ddc_test")}}}}
 	origD := &Destination{Id: "*ddc_test", Prefixes: []string{"111", "222"}}
-	alteredD := &Destination{Id: "*ddc_test", Prefixes: []string{"333", "444"}}
 	ratingStorage.SetDestination(origD)
 	ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + "*ddc_test"}})
 	// check redis and cache
@@ -1250,7 +1249,11 @@ func TestActionSetDDestination(t *testing.T) {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "444": 1}}, nil, nil)
-	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil || !reflect.DeepEqual(d, alteredD) {
+	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil ||
+		d.Id != origD.Id ||
+		len(d.Prefixes) != 2 ||
+		!utils.IsSliceMember(d.Prefixes, "333") ||
+		!utils.IsSliceMember(d.Prefixes, "444") {
 		t.Error("Error storing destination: ", d, err)
 	}
 	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "111")

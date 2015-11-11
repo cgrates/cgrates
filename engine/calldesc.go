@@ -37,15 +37,16 @@ const (
 	RECURSION_MAX_DEPTH = 3
 	MIN_PREFIX_MATCH    = 1
 	FALLBACK_SUBJECT    = utils.ANY
-	DEBUG               = true
+	DB                  = "map"
 )
 
 func init() {
-	if DEBUG {
+	var err error
+	switch DB {
+	case "map":
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
-	} else {
-		var err error
+	case "mongo":
 		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "")
 		if err != nil {
 			log.Fatal(err)
@@ -54,16 +55,15 @@ func init() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		/*ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
+	case "redis":
+		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
 		if err != nil {
 			log.Fatal(err)
 		}
 		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
 		if err != nil {
 			log.Fatal(err)
-		}*/
-
+		}
 	}
 	storageLogger = ratingStorage.(LogStorage)
 }
