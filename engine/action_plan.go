@@ -300,7 +300,6 @@ func (at *ActionPlan) Execute() (err error) {
 					// TODO: maybe we should break here as the account is gone
 					// will leave continue for now as the next action can create another acount
 				}
-
 				actionFunction, exists := getActionFunc(a.ActionType)
 				if !exists {
 					// do not allow the action plan to be rescheduled
@@ -309,7 +308,6 @@ func (at *ActionPlan) Execute() (err error) {
 					transactionFailed = true
 					break
 				}
-
 				if err := actionFunction(ub, nil, a, aac); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					transactionFailed = true

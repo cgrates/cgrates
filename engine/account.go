@@ -94,6 +94,9 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		return errors.New("nil action")
 	}
 	bClone := a.Balance.Clone()
+	if bClone == nil {
+		return errors.New("nil balance")
+	}
 
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)

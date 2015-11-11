@@ -377,8 +377,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	ub.debitBalanceAction(a, reset)
-	return
+	return ub.debitBalanceAction(a, reset)
 }
 
 func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {

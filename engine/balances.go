@@ -217,12 +217,13 @@ func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 }
 
 func (b *Balance) Clone() *Balance {
-	return &Balance{
+	if b == nil {
+		return nil
+	}
+	n := &Balance{
 		Uuid:           b.Uuid,
 		Id:             b.Id,
 		Value:          b.Value, // this value is in seconds
-		DestinationIds: b.DestinationIds.Clone(),
-		Directions:     b.Directions.Clone(),
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
@@ -233,6 +234,13 @@ func (b *Balance) Clone() *Balance {
 		Disabled:       b.Disabled,
 		dirty:          b.dirty,
 	}
+	if b.DestinationIds != nil {
+		n.DestinationIds = b.DestinationIds.Clone()
+	}
+	if b.Directions != nil {
+		n.Directions = b.Directions.Clone()
+	}
+	return n
 }
 
 func (b *Balance) getMatchingPrefixAndDestId(dest string) (prefix, destId string) {

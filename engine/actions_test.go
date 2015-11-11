@@ -21,6 +21,7 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -418,13 +419,13 @@ func TestActionPlanFunctionNotAvailable(t *testing.T) {
 		Balance:     &Balance{Value: 1.1},
 	}
 	at := &ActionPlan{
-		AccountIds: []string{"one", "two", "three"},
+		AccountIds: []string{"cgrates.org:dy"},
 		Timing:     &RateInterval{},
 		actions:    []*Action{a},
 	}
 	err := at.Execute()
-	if at.Timing != nil {
-		t.Logf("Faild to detect wrong function type: %v", err)
+	if err != nil {
+		t.Errorf("Faild to detect wrong function type: %v", err)
 	}
 }
 
@@ -1271,6 +1272,84 @@ func TestActionSetDDestination(t *testing.T) {
 	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "444")
 	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
 		t.Error("Error cacheing destination: ", x1)
+	}
+}
+
+func TestActionTransactionFuncType(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:trans",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{&Balance{
+				Value: 10,
+			}},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionPlan{
+		AccountIds: []string{"cgrates.org:trans"},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: utils.MONETARY,
+				Balance:     &Balance{Value: 1.1},
+			},
+			&Action{
+				ActionType:  "VALID_FUNCTION_TYPE",
+				BalanceType: "test",
+				Balance:     &Balance{Value: 1.1},
+			},
+		},
+	}
+	log.Print("=========")
+	err = at.Execute()
+	log.Print("=========")
+	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	if acc.BalanceMap[utils.MONETARY][0].Value != 10 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	}
+}
+
+func TestActionTransactionBalanceType(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:trans",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{&Balance{
+				Value: 10,
+			}},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionPlan{
+		AccountIds: []string{"cgrates.org:trans"},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: utils.MONETARY,
+				Balance:     &Balance{Value: 1.1},
+			},
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: "test",
+				Balance:     nil,
+			},
+		},
+	}
+	err = at.Execute()
+	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	if acc.BalanceMap[utils.MONETARY][0].Value != 10 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
 	}
 }
 
