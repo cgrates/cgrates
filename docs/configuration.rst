@@ -1,4 +1,4 @@
-Configuration
+4.Configuration
 =============
 
 The behaviour of **CGRateS** can be externally influenced by following means:
