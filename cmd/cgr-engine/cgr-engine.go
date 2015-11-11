@@ -176,11 +176,10 @@ func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Serv
 			}
 		}
 	}
-	sm := sessionmanager.NewGenericSessionManager(cfg.SmGenericConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
+	sm := sessionmanager.NewGenericSessionManager(cfg, raterConn, cdrsConn, cfg.DefaultTimezone)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Generic> error: %s!", err))
 	}
-	smRpc.SMs = append(smRpc.SMs, sm)
 	// Register RPC handler
 	smgRpc := v1.NewSMGenericV1(sm)
 	server.RpcRegister(smgRpc)
