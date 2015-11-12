@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -103,9 +104,9 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 }
 
 // End a session from outside
-func (self *SMGeneric) sessionEnd(evStop *SMGenericEvent) error {
+func (self *SMGeneric) sessionEnd(evStop SMGenericEvent) error {
+	evUuid := evStop.GetUUID()
 	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
-		evUuid := evStop.GetUUID()
 		ss := self.getSession(evUuid)
 		if len(ss) == 0 { // Not handled by us
 			return nil, nil
@@ -113,10 +114,10 @@ func (self *SMGeneric) sessionEnd(evStop *SMGenericEvent) error {
 		if !self.unindexSession(evUuid) { // Unreference it early so we avoid concurrency
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
-		if s.stopDebit != nil {
-			close(s.stopDebit) // Stop automatic debits
-		}
-		for _, s := range ss {
+		for idx, s := range ss {
+			if idx == 0 && s.stopDebit != nil {
+				close(s.stopDebit) // Stop automatic debits
+			}
 			eTime, err := evStop.GetEndTime(utils.META_DEFAULT, self.timezone)
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not get endTime from session: %s, runId: %s, error: %s", evUuid, s.runId, err.Error()))
@@ -130,7 +131,7 @@ func (self *SMGeneric) sessionEnd(evStop *SMGenericEvent) error {
 			}
 		}
 		return nil, nil
-	}, time.Duration(2)*time.Second, s.eventStart.GetUUID())
+	}, time.Duration(2)*time.Second, evUuid)
 	return err
 }
 
@@ -165,7 +166,7 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 
 // Called on session start
 func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) error {
-	if err := sessionStart(gev, getClientConnId(clnt)); err != nil {
+	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
 		return err
 	}
 	return nil

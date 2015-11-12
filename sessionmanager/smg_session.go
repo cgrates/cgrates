@@ -107,7 +107,7 @@ func (self *SMGSession) disconnectSession(reason string) error {
 }
 
 // Merge the sum of costs and sends it to CDRS for storage
-func (self *SMGSession) saveOperations(reason string) error {
+func (self *SMGSession) saveOperations() error {
 	if len(self.cc) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
