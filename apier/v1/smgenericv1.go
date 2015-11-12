@@ -42,18 +42,22 @@ func (self *SMGenericV1) GetLcrSuppliers(ev sessionmanager.SMGenericEvent, suppl
 
 // Called on session start, returns the maximum number of seconds the session can last
 func (self *SMGenericV1) SessionStart(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if err := self.sm.SessionStart(ev, nil); err != nil {
+	if minMaxUsage, err := self.sm.SessionStart(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
+	} else {
+		*maxUsage = minMaxUsage.Seconds()
 	}
-	return self.GetMaxUsage(ev, maxUsage)
+	return nil
 }
 
 // Interim updates, returns remaining duration from the rater
 func (self *SMGenericV1) SessionUpdate(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
-	if err := self.sm.SessionUpdate(ev, nil); err != nil {
+	if minMaxUsage, err := self.sm.SessionUpdate(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
+	} else {
+		*maxUsage = minMaxUsage.Seconds()
 	}
-	return self.GetMaxUsage(ev, maxUsage)
+	return nil
 }
 
 // Called on session end, should stop debit loop

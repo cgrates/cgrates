@@ -43,8 +43,8 @@ type SMGeneric struct {
 	timezone    string
 	sessions    map[string][]*SMGSession //Group sessions per sessionId, multiple runs based on derived charging
 	extconns    *SMGExternalConnections  // Reference towards external connections manager
-	sessionsMux *sync.Mutex
-	guard       *engine.GuardianLock // Used to lock on uuid
+	sessionsMux *sync.Mutex              // Locks sessions map
+	guard       *engine.GuardianLock     // Used to lock on uuid
 }
 
 func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
@@ -104,34 +104,28 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 }
 
 // End a session from outside
-func (self *SMGeneric) sessionEnd(evStop SMGenericEvent) error {
-	evUuid := evStop.GetUUID()
+func (self *SMGeneric) sessionEnd(sessionId string, endTime time.Time) error {
 	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
-		ss := self.getSession(evUuid)
+		ss := self.getSession(sessionId)
 		if len(ss) == 0 { // Not handled by us
 			return nil, nil
 		}
-		if !self.unindexSession(evUuid) { // Unreference it early so we avoid concurrency
+		if !self.unindexSession(sessionId) { // Unreference it early so we avoid concurrency
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss {
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
 			}
-			eTime, err := evStop.GetEndTime(utils.META_DEFAULT, self.timezone)
-			if err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not get endTime from session: %s, runId: %s, error: %s", evUuid, s.runId, err.Error()))
-				continue
+			if err := s.close(endTime); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
-			if err = s.close(eTime); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", evUuid, s.runId, err.Error()))
-			}
-			if err = s.saveOperations(); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", evUuid, s.runId, err.Error()))
+			if err := s.saveOperations(); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
 		}
 		return nil, nil
-	}, time.Duration(2)*time.Second, evUuid)
+	}, time.Duration(2)*time.Second, sessionId)
 	return err
 }
 
@@ -164,28 +158,51 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 	return lcr.SuppliersSlice()
 }
 
-// Called on session start
-func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) error {
-	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
-		return err
+// Execute debits for usage/maxUsage
+func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	var minMaxUsage time.Duration
+	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.MaxCallDuration)
+	if err != nil {
+		return nilDuration, err
 	}
-	return nil
+	evUuid := gev.GetUUID()
+	for _, s := range self.getSession(evUuid) {
+		if maxDur, err := s.debit(evMaxUsage); err != nil {
+			return nilDuration, err
+		} else {
+			if maxDur < minMaxUsage {
+				minMaxUsage = maxDur
+			}
+		}
+	}
+	return minMaxUsage, nil
 }
 
-// Interim updates
-func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) error {
-	return nil
+// Called on session start
+func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
+		return nilDuration, err
+	}
+	return self.SessionUpdate(gev, clnt)
 }
 
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
-	if err := self.sessionEnd(gev); err != nil {
+	endTime, err := gev.GetEndTime(utils.META_DEFAULT, self.timezone)
+	if err != nil {
+		return err
+	}
+	if err := self.sessionEnd(gev.GetUUID(), endTime); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
+	var reply string
+	if err := self.cdrsrv.ProcessCdr(gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -193,6 +210,10 @@ func (self *SMGeneric) Connect() error {
 	return nil
 }
 
+// System shutdown
 func (self *SMGeneric) Shutdown() error {
+	for ssId := range self.getSessions() { // Force sessions shutdown
+		self.sessionEnd(ssId, time.Now())
+	}
 	return nil
 }

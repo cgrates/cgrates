@@ -102,7 +102,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	} else if !et.Equal(time.Date(2015, 11, 9, 14, 23, 25, 0, time.UTC)) {
 		t.Error("Unexpected: ", et)
 	}
-	if dur, err := smGev.GetDuration(utils.META_DEFAULT); err != nil {
+	if dur, err := smGev.GetUsage(utils.META_DEFAULT); err != nil {
 		t.Error(err)
 	} else if dur != time.Duration(83)*time.Second {
 		t.Error("Unexpected: ", dur)

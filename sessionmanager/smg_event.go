@@ -144,18 +144,30 @@ func (self SMGenericEvent) GetEndTime(fieldName, timezone string) (time.Time, er
 	if err != nil {
 		return nilTime, err
 	}
-	dur, err := self.GetDuration(utils.META_DEFAULT)
+	dur, err := self.GetUsage(utils.META_DEFAULT)
 	if err != nil {
 		return nilTime, err
 	}
 	return aTime.Add(dur), nil
 }
 
-func (self SMGenericEvent) GetDuration(fieldName string) (time.Duration, error) {
+func (self SMGenericEvent) GetUsage(fieldName string) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.USAGE
 	}
 	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	return utils.ParseDurationWithSecs(result)
+}
+
+func (self SMGenericEvent) GetMaxUsage(fieldName string, cfgMaxUsage time.Duration) (time.Duration, error) {
+	if fieldName == utils.META_DEFAULT {
+		fieldName = utils.MAX_USAGE
+	}
+	maxUsageStr, hasIt := self[fieldName]
+	if !hasIt {
+		return cfgMaxUsage, nil
+	}
+	result, _ := utils.ConvertIfaceToString(maxUsageStr)
 	return utils.ParseDurationWithSecs(result)
 }
 
@@ -262,7 +274,7 @@ func (self SMGenericEvent) ParseEventValue(rsrFld *utils.RSRField, timezone stri
 		at, _ := self.GetAnswerTime(utils.META_DEFAULT, timezone)
 		return rsrFld.ParseValue(at.String())
 	case utils.USAGE:
-		dur, _ := self.GetDuration(utils.META_DEFAULT)
+		dur, _ := self.GetUsage(utils.META_DEFAULT)
 		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
 	case utils.PDD:
 		pdd, _ := self.GetPdd(utils.META_DEFAULT)
@@ -303,7 +315,7 @@ func (self SMGenericEvent) AsStoredCdr(cfg *config.CGRConfig, timezone string) *
 	storCdr.Destination = self.GetDestination(utils.META_DEFAULT)
 	storCdr.SetupTime, _ = self.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = self.GetAnswerTime(utils.META_DEFAULT, timezone)
-	storCdr.Usage, _ = self.GetDuration(utils.META_DEFAULT)
+	storCdr.Usage, _ = self.GetUsage(utils.META_DEFAULT)
 	storCdr.Pdd, _ = self.GetPdd(utils.META_DEFAULT)
 	storCdr.Supplier = self.GetSupplier(utils.META_DEFAULT)
 	storCdr.DisconnectCause = self.GetDisconnectCause(utils.META_DEFAULT)
