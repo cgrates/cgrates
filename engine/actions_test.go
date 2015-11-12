@@ -21,7 +21,6 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -1351,21 +1350,94 @@ func TestActionTransactionBalanceType(t *testing.T) {
 	}
 }
 
-func TestActionExecuteActionNonExistingAccount(t *testing.T) {
+func TestActionWithExpireWithoutExpire(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:exp",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{&Balance{
+				Value: 10,
+			}},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
 	at := &ActionPlan{
-		AccountIds: []string{"cgrates.org:exe"},
+		AccountIds: []string{"cgrates.org:exp"},
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
 				ActionType:  TOPUP,
-				BalanceType: utils.MONETARY,
-				Balance:     &Balance{Value: 1.1},
+				BalanceType: utils.VOICE,
+				Balance: &Balance{
+					Value: 15,
+				},
+			},
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: utils.VOICE,
+				Balance: &Balance{
+					Value:          30,
+					ExpirationDate: time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC),
+				},
 			},
 		},
 	}
 	err = at.Execute()
-	if err == nil {
-		log.Print("Fail to return error on action execute: ", err)
+	acc, err := accountingStorage.GetAccount("cgrates.org:exp")
+	if err != nil || acc == nil {
+		t.Errorf("Error getting account: %+v: %v", acc, err)
+	}
+	if len(acc.BalanceMap) != 2 ||
+		len(acc.BalanceMap[utils.VOICE]) != 2 {
+		t.Errorf("Error debiting expir and unexpire: %+v", acc.BalanceMap[utils.VOICE][0])
+	}
+}
+
+func TestActionRemoveBalance(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:rembal",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{
+				&Balance{
+					Value: 10,
+				},
+				&Balance{
+					Value:          10,
+					DestinationIds: utils.NewStringMap("NAT", "RET"),
+					ExpirationDate: time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC),
+				},
+				&Balance{
+					Value:          10,
+					DestinationIds: utils.NewStringMap("NAT", "RET"),
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionPlan{
+		AccountIds: []string{"cgrates.org:rembal"},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType:  REMOVE_BALANCE,
+				BalanceType: utils.MONETARY,
+				Balance: &Balance{
+					DestinationIds: utils.NewStringMap("NAT", "RET"),
+				},
+			},
+		},
+	}
+	err = at.Execute()
+	acc, err := accountingStorage.GetAccount("cgrates.org:rembal")
+	if err != nil || acc == nil {
+		t.Errorf("Error getting account: %+v: %v", acc, err)
+	}
+	if len(acc.BalanceMap) != 1 ||
+		len(acc.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Error removing balance: %+v", acc.BalanceMap[utils.MONETARY])
 	}
 }
 
