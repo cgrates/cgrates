@@ -103,14 +103,32 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 }
 
 // End a session from outside
-func (self *SMGeneric) sessionEnd(s *SMGSession, evStop *SMGenericEvent) error {
+func (self *SMGeneric) sessionEnd(evStop *SMGenericEvent) error {
 	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
-		if !self.unindexSession(s.eventStart.GetUUID()) { // Unreference it early so we avoid concurrency
+		evUuid := evStop.GetUUID()
+		ss := self.getSession(evUuid)
+		if len(ss) == 0 { // Not handled by us
+			return nil, nil
+		}
+		if !self.unindexSession(evUuid) { // Unreference it early so we avoid concurrency
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
-		//if err := s.Close(evStop); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
-		//	return nil, err
-		//}
+		if s.stopDebit != nil {
+			close(s.stopDebit) // Stop automatic debits
+		}
+		for _, s := range ss {
+			eTime, err := evStop.GetEndTime(utils.META_DEFAULT, self.timezone)
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not get endTime from session: %s, runId: %s, error: %s", evUuid, s.runId, err.Error()))
+				continue
+			}
+			if err = s.close(eTime); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", evUuid, s.runId, err.Error()))
+			}
+			if err = s.saveOperations(); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", evUuid, s.runId, err.Error()))
+			}
+		}
 		return nil, nil
 	}, time.Duration(2)*time.Second, s.eventStart.GetUUID())
 	return err
@@ -147,6 +165,9 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 
 // Called on session start
 func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) error {
+	if err := sessionStart(gev, getClientConnId(clnt)); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -157,6 +178,9 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) erro
 
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
+	if err := self.sessionEnd(gev); err != nil {
+		return err
+	}
 	return nil
 }
 

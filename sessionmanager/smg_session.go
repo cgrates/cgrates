@@ -82,6 +82,11 @@ func (self *SMGSession) refund(dur time.Duration) error {
 	return nil
 }
 
+// Session has ended, check debits and refund the extra charged duration
+func (self *SMGSession) close(endTime time.Time) error {
+	return nil
+}
+
 // Send disconnect order to remote connection
 func (self *SMGSession) disconnectSession(reason string) error {
 	type AttrDisconnectSession struct {
