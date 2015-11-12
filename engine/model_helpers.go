@@ -730,6 +730,7 @@ func (tps TpUsers) GetUsers() (map[string]*utils.TPUsers, error) {
 			user = &utils.TPUsers{
 				Tenant:   tp.Tenant,
 				UserName: tp.UserName,
+				Weight:   tp.Weight,
 			}
 			users[tp.GetId()] = user
 		}

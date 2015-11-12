@@ -354,6 +354,7 @@ CREATE TABLE tp_users (
   `masked` BOOLEAN NOT NULL,
   `attribute_name` varchar(64) NOT NULL,
   `attribute_value` varchar(64) NOT NULL,
+  `weight` DECIMAL(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)

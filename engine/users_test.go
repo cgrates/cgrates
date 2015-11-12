@@ -17,8 +17,19 @@ var testMap = UserMap{
 		"test:masked": map[string]string{"t": "v"},
 	},
 	index: make(map[string]map[string]bool),
-	masked: map[string]bool{
-		"test:masked": true,
+	properties: map[string]*prop{
+		"test:masked": &prop{masked: true},
+	},
+}
+
+var testMap2 = UserMap{
+	table: map[string]map[string]string{
+		"an:u1": map[string]string{"a": "b", "c": "d"},
+		"an:u2": map[string]string{"a": "b"},
+	},
+	index: make(map[string]map[string]bool),
+	properties: map[string]*prop{
+		"an:u2": &prop{weight: 10},
 	},
 }
 
@@ -300,6 +311,23 @@ func TestUsersGetMissingIdTwoSort(t *testing.T) {
 		t.Error("error getting users: ", results)
 	}
 	if results[0].GetId() != "test1:user1" {
+		t.Errorf("Error sorting profiles: %+v", results[0])
+	}
+}
+
+func TestUsersGetMissingIdTwoSortWeight(t *testing.T) {
+	up := UserProfile{
+		Profile: map[string]string{
+			"a": "b",
+			"c": "d",
+		},
+	}
+	results := UserProfiles{}
+	testMap2.GetUsers(up, &results)
+	if len(results) != 2 {
+		t.Error("error getting users: ", results)
+	}
+	if results[0].GetId() != "an:u2" {
 		t.Errorf("Error sorting profiles: %+v", results[0])
 	}
 }
