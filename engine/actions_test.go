@@ -418,12 +418,12 @@ func TestActionPlanFunctionNotAvailable(t *testing.T) {
 		Balance:     &Balance{Value: 1.1},
 	}
 	at := &ActionPlan{
-		AccountIds: []string{"one", "two", "three"},
+		AccountIds: []string{"cgrates.org:dy"},
 		Timing:     &RateInterval{},
 		actions:    []*Action{a},
 	}
 	err := at.Execute()
-	if at.Timing != nil {
+	if err != nil {
 		t.Errorf("Faild to detect wrong function type: %v", err)
 	}
 }
@@ -1097,7 +1097,6 @@ func TestRemoveAction(t *testing.T) {
 		AccountIds: []string{"cgrates.org:remo"},
 		actions:    Actions{a},
 	}
-
 	at.Execute()
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:remo")
 	if err == nil || afterUb != nil {
@@ -1250,8 +1249,11 @@ func TestActionSetDDestination(t *testing.T) {
 		t.Error("Error cacheing destination: ", x1)
 	}
 	setddestinations(acc, &StatsQueueTriggered{Metrics: map[string]float64{"333": 1, "444": 1}}, nil, nil)
-	alteredDest := &Destination{Id: "*ddc_test", Prefixes: []string{"333", "444"}}
-	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil || !reflect.DeepEqual(d, alteredDest) {
+	if d, err := ratingStorage.GetDestination("*ddc_test"); err != nil ||
+		d.Id != origD.Id ||
+		len(d.Prefixes) != 2 ||
+		!utils.IsSliceMember(d.Prefixes, "333") ||
+		!utils.IsSliceMember(d.Prefixes, "444") {
 		t.Error("Error storing destination: ", d, err)
 	}
 	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "111")
@@ -1269,6 +1271,173 @@ func TestActionSetDDestination(t *testing.T) {
 	x1, err = cache2go.Get(utils.DESTINATION_PREFIX + "444")
 	if _, ok := x1.(map[interface{}]struct{})["*ddc_test"]; err != nil || !ok {
 		t.Error("Error cacheing destination: ", x1)
+	}
+}
+
+func TestActionTransactionFuncType(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:trans",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{&Balance{
+				Value: 10,
+			}},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionPlan{
+		AccountIds: []string{"cgrates.org:trans"},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: utils.MONETARY,
+				Balance:     &Balance{Value: 1.1},
+			},
+			&Action{
+				ActionType:  "VALID_FUNCTION_TYPE",
+				BalanceType: "test",
+				Balance:     &Balance{Value: 1.1},
+			},
+		},
+	}
+	err = at.Execute()
+	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	if acc.BalanceMap[utils.MONETARY][0].Value != 10 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	}
+}
+
+func TestActionTransactionBalanceType(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:trans",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{&Balance{
+				Value: 10,
+			}},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionPlan{
+		AccountIds: []string{"cgrates.org:trans"},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: utils.MONETARY,
+				Balance:     &Balance{Value: 1.1},
+			},
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: "test",
+				Balance:     nil,
+			},
+		},
+	}
+	err = at.Execute()
+	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	if acc.BalanceMap[utils.MONETARY][0].Value != 10 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	}
+}
+
+func TestActionWithExpireWithoutExpire(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:exp",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{&Balance{
+				Value: 10,
+			}},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionPlan{
+		AccountIds: []string{"cgrates.org:exp"},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: utils.VOICE,
+				Balance: &Balance{
+					Value: 15,
+				},
+			},
+			&Action{
+				ActionType:  TOPUP,
+				BalanceType: utils.VOICE,
+				Balance: &Balance{
+					Value:          30,
+					ExpirationDate: time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC),
+				},
+			},
+		},
+	}
+	err = at.Execute()
+	acc, err := accountingStorage.GetAccount("cgrates.org:exp")
+	if err != nil || acc == nil {
+		t.Errorf("Error getting account: %+v: %v", acc, err)
+	}
+	if len(acc.BalanceMap) != 2 ||
+		len(acc.BalanceMap[utils.VOICE]) != 2 {
+		t.Errorf("Error debiting expir and unexpire: %+v", acc.BalanceMap[utils.VOICE][0])
+	}
+}
+
+func TestActionRemoveBalance(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:rembal",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{
+				&Balance{
+					Value: 10,
+				},
+				&Balance{
+					Value:          10,
+					DestinationIds: utils.NewStringMap("NAT", "RET"),
+					ExpirationDate: time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC),
+				},
+				&Balance{
+					Value:          10,
+					DestinationIds: utils.NewStringMap("NAT", "RET"),
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionPlan{
+		AccountIds: []string{"cgrates.org:rembal"},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType:  REMOVE_BALANCE,
+				BalanceType: utils.MONETARY,
+				Balance: &Balance{
+					DestinationIds: utils.NewStringMap("NAT", "RET"),
+				},
+			},
+		},
+	}
+	err = at.Execute()
+	acc, err := accountingStorage.GetAccount("cgrates.org:rembal")
+	if err != nil || acc == nil {
+		t.Errorf("Error getting account: %+v: %v", acc, err)
+	}
+	if len(acc.BalanceMap) != 1 ||
+		len(acc.BalanceMap[utils.MONETARY]) != 1 {
+		t.Errorf("Error removing balance: %+v", acc.BalanceMap[utils.MONETARY])
 	}
 }
 

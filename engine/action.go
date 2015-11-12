@@ -56,6 +56,7 @@ const (
 	DENY_NEGATIVE          = "*deny_negative"
 	RESET_ACCOUNT          = "*reset_account"
 	REMOVE_ACCOUNT         = "*remove_account"
+	REMOVE_BALANCE         = "*remove_balance"
 	TOPUP_RESET            = "*topup_reset"
 	TOPUP                  = "*topup"
 	DEBIT_RESET            = "*debit_reset"
@@ -128,6 +129,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return mailAsync, true
 	case SET_DDESTINATIONS:
 		return setddestinations, true
+	case REMOVE_BALANCE:
+		return removeBalance, true
 	}
 	return nil, false
 }
@@ -377,8 +380,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	ub.debitBalanceAction(a, reset)
-	return
+	return ub.debitBalanceAction(a, reset)
 }
 
 func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -524,6 +526,29 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 		return utils.ErrNotFound
 	}
 	return nil
+}
+
+func removeBalance(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if _, exists := ub.BalanceMap[a.BalanceType]; !exists {
+		return utils.ErrNotFound
+	}
+	bChain := ub.BalanceMap[a.BalanceType]
+	found := false
+	for i := 0; i < len(bChain); i++ {
+		if bChain[i].MatchFilter(a.Balance, false) {
+			// delete without preserving order
+			bChain[i] = bChain[len(bChain)-1]
+			bChain = bChain[:len(bChain)-1]
+			i -= 1
+			found = true
+		}
+	}
+	ub.BalanceMap[a.BalanceType] = bChain
+	if !found {
+		return utils.ErrNotFound
+	}
+	// update account in storage
+	return accountingStorage.SetAccount(ub)
 }
 
 // Structure to store actions according to weight

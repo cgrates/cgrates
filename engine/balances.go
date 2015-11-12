@@ -217,12 +217,13 @@ func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 }
 
 func (b *Balance) Clone() *Balance {
-	return &Balance{
+	if b == nil {
+		return nil
+	}
+	n := &Balance{
 		Uuid:           b.Uuid,
 		Id:             b.Id,
 		Value:          b.Value, // this value is in seconds
-		DestinationIds: b.DestinationIds.Clone(),
-		Directions:     b.Directions.Clone(),
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
@@ -233,6 +234,13 @@ func (b *Balance) Clone() *Balance {
 		Disabled:       b.Disabled,
 		dirty:          b.dirty,
 	}
+	if b.DestinationIds != nil {
+		n.DestinationIds = b.DestinationIds.Clone()
+	}
+	if b.Directions != nil {
+		n.Directions = b.Directions.Clone()
+	}
+	return n
 }
 
 func (b *Balance) getMatchingPrefixAndDestId(dest string) (prefix, destId string) {
@@ -420,11 +428,12 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		// get the cost from balance
 		//log.Printf("::::::: %+v", cd)
 		cc, err = b.GetCost(cd, true)
+		if err != nil {
+			return nil, err
+		}
 		cc.Timespans.Decompress()
 		//log.Printf("CC: %+v", cc)
-		if err != nil {
-			return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
-		}
+
 		for tsIndex, ts := range cc.Timespans {
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
@@ -519,14 +528,14 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 	}
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
+	if err != nil {
+		return nil, err
+	}
 	cc.Timespans.Decompress()
 	//log.Printf("CallCost In Debit: %+v", cc)
 	//for _, ts := range cc.Timespans {
 	//	log.Printf("CC_TS: %+v", ts.RateInterval.Rating.Rates[0])
 	//}
-	if err != nil {
-		return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
-	}
 	for tsIndex, ts := range cc.Timespans {
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()

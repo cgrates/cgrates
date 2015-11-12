@@ -211,10 +211,49 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 	return nil
 }
 
-func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
-	tag := fmt.Sprintf("%s:%s", attr.Tenant, attr.Account)
+func (self *ApierV1) RemoveBalances(attr *AttrAddBalance, reply *string) error {
+	expTime, err := utils.ParseDate(attr.ExpiryTime)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	accId := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	if _, err := self.AccountDb.GetAccount(accId); err != nil {
+		return utils.ErrNotFound
+	}
 	at := &engine.ActionPlan{
-		AccountIds: []string{tag},
+		AccountIds: []string{accId},
+	}
+	at.SetActions(engine.Actions{
+		&engine.Action{
+			ActionType:  engine.REMOVE_BALANCE,
+			BalanceType: attr.BalanceType,
+			Balance: &engine.Balance{
+				Uuid:           attr.BalanceUuid,
+				Id:             attr.BalanceId,
+				Value:          attr.Value,
+				ExpirationDate: expTime,
+				RatingSubject:  attr.RatingSubject,
+				Directions:     utils.ParseStringMap(attr.Directions),
+				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
+				Weight:         attr.Weight,
+				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
+				Disabled:       attr.Disabled,
+			},
+		},
+	})
+	if err := at.Execute(); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
+	accId := utils.AccountKey(attr.Tenant, attr.Account)
+	at := &engine.ActionPlan{
+		AccountIds: []string{accId},
 		ActionsId:  attr.ActionsId,
 	}
 	if err := at.Execute(); err != nil {

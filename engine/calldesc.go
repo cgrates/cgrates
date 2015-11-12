@@ -37,15 +37,16 @@ const (
 	RECURSION_MAX_DEPTH = 3
 	MIN_PREFIX_MATCH    = 1
 	FALLBACK_SUBJECT    = utils.ANY
-	DEBUG               = true
+	DB                  = "map"
 )
 
 func init() {
-	if DEBUG {
+	var err error
+	switch DB {
+	case "map":
 		ratingStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
-	} else {
-		var err error
+	case "mongo":
 		ratingStorage, err = NewMongoStorage("127.0.0.1", "27017", "cgrates_rating_test", "", "")
 		if err != nil {
 			log.Fatal(err)
@@ -54,16 +55,15 @@ func init() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		/*ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
+	case "redis":
+		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
 		if err != nil {
 			log.Fatal(err)
 		}
 		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
 		if err != nil {
 			log.Fatal(err)
-		}*/
-
+		}
 	}
 	storageLogger = ratingStorage.(LogStorage)
 }
@@ -197,7 +197,7 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	//load the rating plans
 	if err != nil || !cd.continousRatingInfos() {
 		//log.Print("ERR: ", cd.GetKey(cd.Subject), err)
-		err = errors.New("Could not determine rating plans for call")
+		err = utils.ErrUnauthorizedDestination
 	}
 	return
 }
@@ -435,7 +435,7 @@ Creates a CallCost structure with the cost information calculated for the receiv
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cd.account = nil // make sure it's not cached
 	cc, err := cd.getCost()
-	if err != nil {
+	if err != nil || cd.GetDuration() == 0 {
 		return cc, err
 	}
 
@@ -474,8 +474,19 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 
 func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	// check for 0 duration
-	if cd.TimeEnd.Sub(cd.TimeStart) == 0 {
-		return cd.CreateCallCost(), nil
+	if cd.GetDuration() == 0 {
+		cc := cd.CreateCallCost()
+		// add RatingInfo
+		err := cd.LoadRatingPlans()
+		if err == nil && len(cd.RatingInfos) > 0 {
+			ts := &TimeSpan{
+				TimeStart: cd.TimeStart,
+				TimeEnd:   cd.TimeEnd,
+			}
+			ts.setRatingInfo(cd.RatingInfos[0])
+			cc.Timespans = append(cc.Timespans, ts)
+		}
+		return cc, nil
 	}
 	if cd.DurationIndex < cd.TimeEnd.Sub(cd.TimeStart) {
 		cd.DurationIndex = cd.TimeEnd.Sub(cd.TimeStart)
@@ -621,8 +632,19 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) (cc *CallCost, err error) {
-	if cd.TimeEnd.Sub(cd.TimeStart) == 0 {
-		return cd.CreateCallCost(), nil
+	if cd.GetDuration() == 0 {
+		cc = cd.CreateCallCost()
+		// add RatingInfo
+		err := cd.LoadRatingPlans()
+		if err == nil && len(cd.RatingInfos) > 0 {
+			ts := &TimeSpan{
+				TimeStart: cd.TimeStart,
+				TimeEnd:   cd.TimeEnd,
+			}
+			ts.setRatingInfo(cd.RatingInfos[0])
+			cc.Timespans = append(cc.Timespans, ts)
+		}
+		return cc, nil
 	}
 	if !dryRun {
 		defer accountingStorage.SetAccount(account)
@@ -670,15 +692,28 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		utils.Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
-		return nil, err
+		return nil, utils.ErrUnauthorizedDestination
 	} else {
 		//log.Printf("ACC: %+v", account)
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
-			Guardian.Guard(func() (interface{}, error) {
+			_, err = Guardian.Guard(func() (interface{}, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				//log.Print("AFTER MAX SESSION: ", cd)
 				if err != nil || remainingDuration == 0 {
-					cc, err = new(CallCost), fmt.Errorf("no more credit: %v", err)
+					cc = cd.CreateCallCost()
+					if cd.GetDuration() == 0 {
+						// add RatingInfo
+						err := cd.LoadRatingPlans()
+						if err == nil && len(cd.RatingInfos) > 0 {
+							ts := &TimeSpan{
+								TimeStart: cd.TimeStart,
+								TimeEnd:   cd.TimeEnd,
+							}
+							ts.setRatingInfo(cd.RatingInfos[0])
+							cc.Timespans = append(cc.Timespans, ts)
+						}
+						return cc, nil
+					}
 					return 0, err
 				}
 				//log.Print("Remaining: ", remainingDuration)
@@ -691,6 +726,9 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
 			}, 0, memberIds...)
+			if err != nil {
+				return cc, err
+			}
 		} else {
 			return nil, err
 		}

@@ -14,17 +14,18 @@ func NewErrServerError(err error) error {
 }
 
 var (
-	ErrNotImplemented     = errors.New("NOT_IMPLEMENTED")
-	ErrNotFound           = errors.New("NOT_FOUND")
-	ErrTimedOut           = errors.New("TIMED_OUT")
-	ErrServerError        = errors.New("SERVER_ERROR")
-	ErrMaxRecursionDepth  = errors.New("MAX_RECURSION_DEPTH")
-	ErrMandatoryIeMissing = errors.New("MANDATORY_IE_MISSING")
-	ErrExists             = errors.New("EXISTS")
-	ErrBrokenReference    = errors.New("BROKEN_REFERENCE")
-	ErrParserError        = errors.New("PARSER_ERROR")
-	ErrInvalidPath        = errors.New("INVALID_PATH")
-	ErrInvalidKey         = errors.New("INVALID_KEY")
+	ErrNotImplemented          = errors.New("NOT_IMPLEMENTED")
+	ErrNotFound                = errors.New("NOT_FOUND")
+	ErrTimedOut                = errors.New("TIMED_OUT")
+	ErrServerError             = errors.New("SERVER_ERROR")
+	ErrMaxRecursionDepth       = errors.New("MAX_RECURSION_DEPTH")
+	ErrMandatoryIeMissing      = errors.New("MANDATORY_IE_MISSING")
+	ErrExists                  = errors.New("EXISTS")
+	ErrBrokenReference         = errors.New("BROKEN_REFERENCE")
+	ErrParserError             = errors.New("PARSER_ERROR")
+	ErrInvalidPath             = errors.New("INVALID_PATH")
+	ErrInvalidKey              = errors.New("INVALID_KEY")
+	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
 )
 
 const (
