@@ -349,6 +349,7 @@ CREATE TABLE tp_users (
   masked BOOLEAN NOT NULL,
   attribute_name VARCHAR(64) NOT NULL,
   attribute_value VARCHAR(64) NOT NULL,
+  weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP
 );
 CREATE INDEX tpusers_tpid_idx ON tp_users (tpid);

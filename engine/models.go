@@ -162,7 +162,7 @@ type TpAction struct {
 	Categories      string  `index:"6" re:""`
 	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
 	RatingSubject   string  `index:"8" re:"\w+\s*"`
-	SharedGroups     string  `index:"9" re:"[0-9A-Za-z_;]*"`
+	SharedGroups    string  `index:"9" re:"[0-9A-Za-z_;]*"`
 	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
 	Units           float64 `index:"12" re:"\d+\s*"`
@@ -197,7 +197,7 @@ type TpActionTrigger struct {
 	BalanceCategories      string  `index:"9" re:""`
 	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
 	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
-	BalanceSharedGroups     string  `index:"12" re:"\w+|\*any"`
+	BalanceSharedGroups    string  `index:"12" re:"\w+|\*any"`
 	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*|\*any"`
 	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
@@ -331,11 +331,12 @@ func (t TpCdrstat) TableName() string {
 type TpUser struct {
 	Id             int64
 	Tpid           string
-	Tenant         string `index:"0" re:""`
-	UserName       string `index:"1" re:""`
-	Masked         bool   `index:"2" re:""`
-	AttributeName  string `index:"3" re:""`
-	AttributeValue string `index:"4" re:""`
+	Tenant         string  `index:"0" re:""`
+	UserName       string  `index:"1" re:""`
+	Masked         bool    `index:"2" re:""`
+	AttributeName  string  `index:"3" re:""`
+	AttributeValue string  `index:"4" re:""`
+	Weight         float64 `index:"5" re:""`
 }
 
 func (tu *TpUser) GetId() string {

@@ -223,10 +223,10 @@ CDRST2,,,,ACD,,,,,,,,,,,,,,,,,,,,
 `
 	users = `
 #Tenant[0],UserName[1],AttributeName[2],AttributeValue[3]
-cgrates.org,rif,false,test0,val0
-cgrates.org,rif,,test1,val1
-cgrates.org,dan,,another,value
-cgrates.org,mas,true,another,value
+cgrates.org,rif,false,test0,val0,10
+cgrates.org,rif,,test1,val1,10
+cgrates.org,dan,,another,value,10
+cgrates.org,mas,true,another,value,10
 `
 	aliases = `
 #Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Group[6],Alias[7],Weight[8]

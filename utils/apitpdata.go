@@ -345,6 +345,7 @@ type TPUsers struct {
 	Masked   bool
 	UserName string
 	Profile  []*TPUserProfile
+	Weight   float64
 }
 
 type TPUserProfile struct {
