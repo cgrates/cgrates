@@ -26,12 +26,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSMGenericBiRpcV1(sm *sessionmanager.GenericSessionManager) *SMGenericBiRpcV1 {
+func NewSMGenericBiRpcV1(sm *sessionmanager.SMGeneric) *SMGenericBiRpcV1 {
 	return &SMGenericBiRpcV1{sm: sm}
 }
 
 type SMGenericBiRpcV1 struct {
-	sm *sessionmanager.GenericSessionManager
+	sm *sessionmanager.SMGeneric
 }
 
 // Publishes methods exported by SMGenericBiRpcV1 as SMGenericV1 (so we can handle standard RPC methods via birpc socket)

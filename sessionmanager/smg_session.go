@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,16 +26,20 @@ import (
 )
 
 // One session handled by SM
-type GenericSession struct {
-	eventStart SMGenericEvent // Event which started
-	stopDebit  chan struct{}  // Channel to communicate with debit loops when closing the session
-	connId     string         // Reference towards connection id on the session manager side.
-	runId      string         // Keep a reference for the derived run
+type SMGSession struct {
+	eventStart SMGenericEvent   // Event which started
+	stopDebit  chan struct{}    // Channel to communicate with debit loops when closing the session
+	connId     string           // Reference towards connection id on the session manager side.
+	runId      string           // Keep a reference for the derived run
+	rater      engine.Connector // Connector to Rater service
+	cdrsrv     engine.Connector // Connector to CDRS service
+	extconns   *SMGExternalConnections
 	cd         *engine.CallDescriptor
 	cc         []*engine.CallCost
 }
 
-func (self *GenericSession) debitLoop(debitInterval time.Duration) {
+// Called in case of automatic debits
+func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 	loopIndex := 0
 	for {
 		select {

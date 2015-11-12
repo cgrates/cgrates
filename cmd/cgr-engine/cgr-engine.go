@@ -176,7 +176,8 @@ func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Serv
 			}
 		}
 	}
-	sm := sessionmanager.NewGenericSessionManager(cfg, raterConn, cdrsConn, cfg.DefaultTimezone)
+	smg_econns := sessionmanager.NewSMGExternalConnections()
+	sm := sessionmanager.NewSMGeneric(cfg, raterConn, cdrsConn, cfg.DefaultTimezone, smg_econns)
 	if err = sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Generic> error: %s!", err))
 	}
@@ -189,8 +190,8 @@ func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Serv
 		server.BijsonRegisterName(method, handler)
 	}
 	// Register OnConnect handlers so we can intercept connections for session disconnects
-	server.BijsonRegisterOnConnect(sm.OnClientConnect)
-	server.BijsonRegisterOnDisconnect(sm.OnClientDisconnect)
+	server.BijsonRegisterOnConnect(smg_econns.OnClientConnect)
+	server.BijsonRegisterOnDisconnect(smg_econns.OnClientDisconnect)
 }
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {

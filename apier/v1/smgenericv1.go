@@ -7,13 +7,13 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewSMGenericV1(sm *sessionmanager.GenericSessionManager) *SMGenericV1 {
+func NewSMGenericV1(sm *sessionmanager.SMGeneric) *SMGenericV1 {
 	return &SMGenericV1{sm: sm}
 }
 
 // Exports RPC from SMGeneric
 type SMGenericV1 struct {
-	sm *sessionmanager.GenericSessionManager
+	sm *sessionmanager.SMGeneric
 }
 
 // Returns MaxUsage (for calls in seconds), -1 for no limit
