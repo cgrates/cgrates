@@ -39,6 +39,7 @@ type CdrcConfig struct {
 	FailedCallsPrefix       string          // Used in case of flatstore CDRs to avoid searching for BYE records
 	CdrSourceId             string          // Source identifier for the processed CDRs
 	CdrFilter               utils.RSRFields // Filter CDR records to import
+	ContinueOnSuccess       bool            // Continue after execution
 	PartialRecordCache      time.Duration   // Duration to cache partial records when not pairing
 	HeaderFields            []*CfgCdrField
 	ContentFields           []*CfgCdrField
@@ -94,6 +95,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		if self.CdrFilter, err = utils.ParseRSRFields(*jsnCfg.Cdr_filter, utils.INFIELD_SEP); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Continue_on_success != nil {
+		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.Partial_record_cache != nil {
 		if self.PartialRecordCache, err = utils.ParseDurationWithSecs(*jsnCfg.Partial_record_cache); err != nil {

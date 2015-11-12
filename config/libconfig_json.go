@@ -152,6 +152,7 @@ type CdrcJsonCfg struct {
 	Failed_calls_prefix        *string
 	Cdr_source_id              *string
 	Cdr_filter                 *string
+	Continue_on_success        *bool
 	Max_open_files             *int
 	Partial_record_cache       *string
 	Header_fields              *[]*CdrFieldJsonCfg

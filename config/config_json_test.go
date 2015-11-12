@@ -310,6 +310,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Failed_calls_prefix:        utils.StringPointer("missed_calls"),
 			Cdr_source_id:              utils.StringPointer("freeswitch_csv"),
 			Cdr_filter:                 utils.StringPointer(""),
+			Continue_on_success:        utils.BoolPointer(false),
 			Partial_record_cache:       utils.StringPointer("10s"),
 			Header_fields:              &eFields,
 			Content_fields:             &cdrFields,

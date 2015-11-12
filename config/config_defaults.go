@@ -177,6 +177,7 @@ const CGRATES_CFG_JSON = `
 		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",							// filter CDR records to import
+		"continue_on_success": false,				// continue to the next template if executed
 		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
 		"header_fields": [],						// template of the import header fields
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
