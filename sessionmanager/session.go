@@ -88,6 +88,10 @@ func (s *Session) debitLoop(runIdx int) {
 		cc := new(engine.CallCost)
 		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
+			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
+				s.sessionManager.DisconnectSession(s.eventStart, s.connId, UNAUTHORIZED_DESTINATION)
+				return
+			}
 			s.sessionManager.DisconnectSession(s.eventStart, s.connId, SYSTEM_ERROR)
 			return
 		}

@@ -428,11 +428,12 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		// get the cost from balance
 		//log.Printf("::::::: %+v", cd)
 		cc, err = b.GetCost(cd, true)
+		if err != nil {
+			return nil, err
+		}
 		cc.Timespans.Decompress()
 		//log.Printf("CC: %+v", cc)
-		if err != nil {
-			return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
-		}
+
 		for tsIndex, ts := range cc.Timespans {
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
@@ -527,14 +528,14 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 	}
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
+	if err != nil {
+		return nil, err
+	}
 	cc.Timespans.Decompress()
 	//log.Printf("CallCost In Debit: %+v", cc)
 	//for _, ts := range cc.Timespans {
 	//	log.Printf("CC_TS: %+v", ts.RateInterval.Rating.Rates[0])
 	//}
-	if err != nil {
-		return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
-	}
 	for tsIndex, ts := range cc.Timespans {
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()

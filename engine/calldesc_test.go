@@ -680,7 +680,7 @@ func TestMaxDebitUnknowDest(t *testing.T) {
 		MaxCostSoFar: 0,
 	}
 	cc, err := cd.MaxDebit()
-	if err == nil {
+	if err == nil || err != utils.ErrUnauthorizedDestination {
 		t.Errorf("Bad error reported %+v: %v", cc, err)
 	}
 }

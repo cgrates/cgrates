@@ -197,7 +197,7 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	//load the rating plans
 	if err != nil || !cd.continousRatingInfos() {
 		//log.Print("ERR: ", cd.GetKey(cd.Subject), err)
-		err = errors.New("Could not determine rating plans for call")
+		err = utils.ErrUnauthorizedDestination
 	}
 	return
 }
@@ -692,7 +692,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		utils.Logger.Err(fmt.Sprintf("Could not get user balance for <%s>: %s.", cd.GetAccountKey(), err.Error()))
-		return nil, err
+		return nil, utils.ErrUnauthorizedDestination
 	} else {
 		//log.Printf("ACC: %+v", account)
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
