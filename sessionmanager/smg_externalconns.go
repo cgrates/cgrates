@@ -19,15 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/cenkalti/rpc2"
 	"github.com/cgrates/cgrates/utils"
 )
 
-const (
-	CGR_CONNUUID = "cgr_connid"
-)
+const CGR_CONNUUID = "cgr_connid"
+
+var ErrConnectionNotFound = errors.New("CONNECTION_NOT_FOUND")
 
 // Attempts to get the connId previously set in the client state container
 func getClientConnId(clnt *rpc2.Client) string {

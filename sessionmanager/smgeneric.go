@@ -89,7 +89,8 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 		}
 		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
-			s := &SMGSession{eventStart: evStart, connId: connId, runId: sessionRun.DerivedCharger.RunId, rater: self.rater, cdrsrv: self.cdrsrv, cd: sessionRun.CallDescriptor}
+			s := &SMGSession{eventStart: evStart, connId: connId, runId: sessionRun.DerivedCharger.RunId, timezone: self.timezone,
+				rater: self.rater, cdrsrv: self.cdrsrv, cd: sessionRun.CallDescriptor}
 			self.indexSession(sessionId, s)
 			if self.cgrCfg.SmGenericConfig.DebitInterval != 0 {
 				s.stopDebit = stopDebitChan
