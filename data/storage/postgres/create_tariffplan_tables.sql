@@ -252,7 +252,7 @@ CREATE TABLE tp_lcr_rules (
   subject VARCHAR(64) NOT NULL,
   destination_tag VARCHAR(64) NOT NULL,
   rp_category VARCHAR(32) NOT NULL,
-  strategy VARCHAR(16) NOT NULL,
+  strategy VARCHAR(18) NOT NULL,
   strategy_params VARCHAR(256) NOT NULL,
   activation_time VARCHAR(24) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,

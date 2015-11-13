@@ -257,7 +257,7 @@ CREATE TABLE tp_lcr_rules (
   `subject` varchar(64) NOT NULL,
   `destination_tag` varchar(64) NOT NULL,
   `rp_category` varchar(32) NOT NULL,
-  `strategy` varchar(16) NOT NULL,
+  `strategy` varchar(18) NOT NULL,
   `strategy_params`	varchar(256) NOT NULL,
   `activation_time` varchar(24) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
