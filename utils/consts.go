@@ -239,6 +239,7 @@ const (
 	EXTRA_FIELDS                 = "ExtraFields"
 	META_SURETAX                 = "*sure_tax"
 	SURETAX                      = "suretax"
+	DIAMETER_AGENT               = "diameter_agent"
 	COUNTER_EVENT                = "*event"
 	COUNTER_BALANCE              = "*balance"
 	EVENT_NAME                   = "EventName"

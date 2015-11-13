@@ -65,6 +65,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
+	cfg.DiameterAgentCfg = new(DiameterAgentCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -72,6 +73,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.SURETAX] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.SURETAX] <- struct{}{} // Unlock the channel
+	cfg.ConfigReloads[utils.DIAMETER_AGENT] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
@@ -229,6 +232,7 @@ type CGRConfig struct {
 	SmFsConfig           *SmFsConfig              // SM-FreeSWITCH configuration
 	SmKamConfig          *SmKamConfig             // SM-Kamailio Configuration
 	SmOsipsConfig        *SmOsipsConfig           // SM-OpenSIPS Configuration
+	DiameterAgentCfg     *DiameterAgentCfg        // DiameterAgent configuration
 	HistoryServer        string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled bool                     // Starts History as server: <true|false>.
 	HistoryDir           string                   // Location on disk where to store history files.
@@ -457,6 +461,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnSmOsipsCfg, err := jsnCfg.SmOsipsJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnDACfg, err := jsnCfg.DiameterAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -778,6 +787,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 
 	if jsnSmOsipsCfg != nil {
 		if err := self.SmOsipsConfig.loadFromJsonCfg(jsnSmOsipsCfg); err != nil {
+			return err
+		}
+	}
+
+	if jsnDACfg != nil {
+		if err := self.DiameterAgentCfg.loadFromJsonCfg(jsnDACfg); err != nil {
 			return err
 		}
 	}

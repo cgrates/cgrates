@@ -259,6 +259,36 @@ const CGRATES_CFG_JSON = `
 },
 
 
+"diameter_agent": {
+	"enabled": false,					// enables the diameter agent: <true|false>
+	"listen": "127.0.0.1:3868",			// address where to listen for diameter requests <x.y.z.y:1234>
+	"timezone": "",						// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	"request_processors": [
+		{
+			"id": "*default",									// Identifier of this processor
+			"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+			"request_filter": "Subscription-Id>Subscription-Type(0)",		// filter requests processed by this processor
+			"continue_on_success": false,				// continue to the next template if executed
+			"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "tor", "cdr_field_id": "TOR", "type": "cdrfield", "value": "^*voice", "mandatory": true},
+				{"tag": "accid", "cdr_field_id": "AccId", "type": "cdrfield", "value": "Session-Id", "mandatory": true},
+				{"tag": "reqtype", "cdr_field_id": "ReqType", "type": "cdrfield", "value": "^*users", "mandatory": true},
+				{"tag": "direction", "cdr_field_id": "Direction", "type": "cdrfield", "value": "^*out", "mandatory": true},
+				{"tag": "tenant", "cdr_field_id": "Tenant", "type": "cdrfield", "value": "^*users", "mandatory": true},
+				{"tag": "category", "cdr_field_id": "Category", "type": "cdrfield", "value": "^call_;~Calling-Vlr-Number:s/^$/33000/;~Calling-Vlr-Number:s/^(\\d{5})/${1}/", "mandatory": true},
+				{"tag": "account", "cdr_field_id": "Account", "type": "cdrfield", "value": "^*users", "mandatory": true},
+				{"tag": "subject", "cdr_field_id": "Subject", "type": "cdrfield", "value": "^*users", "mandatory": true},
+				{"tag": "destination", "cdr_field_id": "Destination", "type": "cdrfield", "value": "Real-Called-Number", "mandatory": true},
+				{"tag": "setup_time", "cdr_field_id": "SetupTime", "type": "cdrfield", "value": "Event-Time", "mandatory": true},
+				{"tag": "answer_time", "cdr_field_id": "AnswerTime", "type": "cdrfield", "value": "Event-Time", "mandatory": true},
+				{"tag": "usage", "cdr_field_id": "Usage", "type": "cdrfield", "value": "CC-Time", "mandatory": true},
+				{"tag": "subscriber_id", "cdr_field_id": "SubscriberId", "type": "cdrfield", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
+			],
+		},
+	],
+},
+
+
 "historys": {
 	"enabled": false,							// starts History service: <true|false>.
 	"history_dir": "/var/log/cgrates/history",	// location on disk where to store history files.

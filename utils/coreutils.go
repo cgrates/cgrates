@@ -20,9 +20,10 @@ package utils
 
 import (
 	"archive/zip"
-
+	"bytes"
 	"crypto/rand"
 	"crypto/sha1"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -405,4 +406,18 @@ func ConvertIfaceToString(fld interface{}) (string, bool) {
 		strVal, converted = fld.(string)
 	}
 	return strVal, converted
+}
+
+// Simple object cloner, b should be a pointer towards a value into which we want to decode
+func Clone(a, b interface{}) error {
+	buff := new(bytes.Buffer)
+	enc := gob.NewEncoder(buff)
+	dec := gob.NewDecoder(buff)
+	if err := enc.Encode(a); err != nil {
+		return err
+	}
+	if err := dec.Decode(b); err != nil {
+		return err
+	}
+	return nil
 }

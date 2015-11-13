@@ -235,6 +235,23 @@ type OsipsConnJsonCfg struct {
 	Reconnects *int
 }
 
+// DiameterAgent configuration
+type DiameterAgentJsonCfg struct {
+	Enabled            *bool   // enables the diameter agent: <true|false>
+	Listen             *string // address where to listen for diameter requests <x.y.z.y:1234>
+	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Request_processors *[]*DARequestProcessorJsnCfg
+}
+
+// One Diameter request processor configuration
+type DARequestProcessorJsnCfg struct {
+	Id                  *string
+	Dry_run             *bool
+	Request_filter      *string
+	Continue_on_success *bool
+	Content_fields      *[]*CdrFieldJsonCfg
+}
+
 // History server config section
 type HistServJsonCfg struct {
 	Enabled       *bool
