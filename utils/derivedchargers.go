@@ -165,40 +165,6 @@ type DerivedCharger struct {
 	rsrRatedField           *RSRField
 }
 
-func DerivedChargersKey(direction, tenant, category, account, subject string) string {
-	return ConcatenatedKey(direction, tenant, category, account, subject)
-}
-
-type DerivedChargers []*DerivedCharger
-
-// Precheck that RunId is unique
-func (dcs DerivedChargers) Append(dc *DerivedCharger) (DerivedChargers, error) {
-	if dc.RunId == DEFAULT_RUNID {
-		return nil, errors.New("Reserved RunId")
-	}
-	for _, dcLocal := range dcs {
-		if dcLocal.RunId == dc.RunId {
-			return nil, errors.New("Duplicated RunId")
-		}
-	}
-	return append(dcs, dc), nil
-}
-
-func (dcs DerivedChargers) AppendDefaultRun() (DerivedChargers, error) {
-	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
-		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
-	return append(dcs, dcDf), nil
-}
-
-func (dcs DerivedChargers) Equal(other DerivedChargers) bool {
-	for i, dc := range dcs {
-		if !dc.Equal(other[i]) {
-			return false
-		}
-	}
-	return true
-}
-
 func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
 	return dc.RunId == other.RunId &&
 		dc.RunFilters == other.RunFilters &&
@@ -217,4 +183,44 @@ func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
 		dc.DisconnectCauseField == other.DisconnectCauseField &&
 		dc.CostField == other.CostField &&
 		dc.RatedField == other.RatedField
+}
+
+func DerivedChargersKey(direction, tenant, category, account, subject string) string {
+	return ConcatenatedKey(direction, tenant, category, account, subject)
+}
+
+type DerivedChargers struct {
+	DestinationIds StringMap
+	Chargers       []*DerivedCharger
+}
+
+// Precheck that RunId is unique
+func (dcs *DerivedChargers) Append(dc *DerivedCharger) (*DerivedChargers, error) {
+	if dc.RunId == DEFAULT_RUNID {
+		return nil, errors.New("Reserved RunId")
+	}
+	for _, dcLocal := range dcs.Chargers {
+		if dcLocal.RunId == dc.RunId {
+			return nil, errors.New("Duplicated RunId")
+		}
+	}
+	dcs.Chargers = append(dcs.Chargers, dc)
+	return dcs, nil
+}
+
+func (dcs *DerivedChargers) AppendDefaultRun() (*DerivedChargers, error) {
+	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
+	dcs.Chargers = append(dcs.Chargers, dcDf)
+	return dcs, nil
+}
+
+func (dcs *DerivedChargers) Equal(other *DerivedChargers) bool {
+	dcs.DestinationIds.Equal(other.DestinationIds)
+	for i, dc := range dcs.Chargers {
+		if !dc.Equal(other.Chargers[i]) {
+			return false
+		}
+	}
+	return true
 }

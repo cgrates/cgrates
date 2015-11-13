@@ -36,8 +36,8 @@ func init() {
 // Test internal abilites of GetDerivedChargers
 func TestResponderGetDerivedChargers(t *testing.T) {
 
-	cfgedDC := utils.DerivedChargers{&utils.DerivedCharger{RunId: "responder1", ReqTypeField: utils.META_DEFAULT, DirectionField: "test", TenantField: "test",
-		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
+	cfgedDC := &utils.DerivedChargers{DestinationIds: utils.StringMap{}, Chargers: []*utils.DerivedCharger{&utils.DerivedCharger{RunId: "responder1", ReqTypeField: utils.META_DEFAULT, DirectionField: "test", TenantField: "test",
+		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}}
 	rsponder = &Responder{}
 	attrs := &utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "responder_test", Subject: "responder_test"}
 	if err := ratingStorage.SetDerivedChargers(utils.DerivedChargersKey(utils.OUT, utils.ANY, utils.ANY, utils.ANY, utils.ANY), cfgedDC); err != nil {
@@ -46,8 +46,8 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 	if err := ratingStorage.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
 		t.Error(err)
 	}
-	var dcs utils.DerivedChargers
-	if err := rsponder.GetDerivedChargers(attrs, &dcs); err != nil {
+	dcs := &utils.DerivedChargers{}
+	if err := rsponder.GetDerivedChargers(attrs, dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, cfgedDC) {
 		t.Errorf("Expecting: %v, received: %v ", cfgedDC, dcs)
@@ -82,14 +82,14 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 		t.Error(err)
 	}
 	keyCharger1 := utils.ConcatenatedKey("*out", testTenant, "call", "dan", "dan")
-	charger1 := utils.DerivedChargers{
+	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{
 		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^" + utils.META_PREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^dan", SubjectField: "^dan", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^ivo", SubjectField: "^ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		&utils.DerivedCharger{RunId: "extra3", ReqTypeField: "^" + utils.META_PSEUDOPREPAID, DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "^rif", SubjectField: "^rif", DestinationField: "^+49151708707", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-	}
+	}}
 	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}
@@ -106,9 +106,9 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 	} else if danStoredAcnt.BalanceMap[utils.VOICE][0].GetValue() != dansAccount.BalanceMap[utils.VOICE][0].GetValue() {
 		t.Error("BalanceValue: ", danStoredAcnt.BalanceMap[utils.VOICE][0].GetValue())
 	}
-	var dcs utils.DerivedChargers
+	dcs := &utils.DerivedChargers{}
 	attrs := &utils.AttrDerivedChargers{Tenant: testTenant, Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
-	if err := rsponder.GetDerivedChargers(attrs, &dcs); err != nil {
+	if err := rsponder.GetDerivedChargers(attrs, dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, charger1) {
 		t.Errorf("Expecting: %+v, received: %+v ", charger1, dcs)
@@ -142,7 +142,7 @@ func TestResponderGetSessionRuns(t *testing.T) {
 		CategoryField: "^0", AccountField: "^minu", SubjectField: "^rif", DestinationField: "^0256",
 		SetupTimeField: utils.META_DEFAULT, PddField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT, SupplierField: utils.META_DEFAULT,
 		DisconnectCauseField: utils.META_DEFAULT}
-	charger1 := utils.DerivedChargers{extra1DC, extra2DC, extra3DC}
+	charger1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{extra1DC, extra2DC, extra3DC}}
 	if err := ratingStorage.SetDerivedChargers(keyCharger1, charger1); err != nil {
 		t.Error("Error on setting DerivedChargers", err.Error())
 	}

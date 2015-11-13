@@ -899,11 +899,11 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]ActionPlans, err err
 	return
 }
 
-func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs utils.DerivedChargers, err error) {
+func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
-			return x.(utils.DerivedChargers), nil
+			return x.(*utils.DerivedChargers), nil
 		} else {
 			return nil, err
 		}
@@ -916,8 +916,8 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs util
 	return dcs, err
 }
 
-func (rs *RedisStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) (err error) {
-	if len(dcs) == 0 {
+func (rs *RedisStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) (err error) {
+	if dcs == nil || len(dcs.Chargers) == 0 {
 		_, err = rs.db.Del(utils.DERIVEDCHARGERS_PREFIX + key)
 		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
 		return err

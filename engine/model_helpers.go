@@ -472,7 +472,7 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 	dcs := make(map[string]*utils.TPDerivedChargers)
 	for _, tpDcMdl := range tps {
 		tpDc := &utils.TPDerivedChargers{TPid: tpDcMdl.Tpid, Loadid: tpDcMdl.Loadid, Direction: tpDcMdl.Direction, Tenant: tpDcMdl.Tenant, Category: tpDcMdl.Category,
-			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject}
+			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject, DestinationIds: tpDcMdl.DestinationIds}
 		tag := tpDc.GetDerivedChargesId()
 		if _, hasIt := dcs[tag]; !hasIt {
 			dcs[tag] = tpDc

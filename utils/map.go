@@ -127,12 +127,18 @@ func (sm StringMap) Slice() []string {
 	return result
 }
 
+func (sm StringMap) Copy(o StringMap) {
+	for k, v := range o {
+		sm[k] = v
+	}
+}
+
 func (sm StringMap) String() string {
 	return strings.Join(sm.Slice(), INFIELD_SEP)
 }
 
 func (sm StringMap) GetOne() string {
-	for key := range sm{
+	for key := range sm {
 		return key
 	}
 	return ""
