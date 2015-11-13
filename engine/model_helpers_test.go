@@ -493,9 +493,9 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"*out", "cgrates.org", "call", "1001", "1001",
+		[]string{"*out", "cgrates.org", "call", "1001", "1001", "",
 			"derived_run1", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
-		[]string{"*out", "cgrates.org", "call", "1001", "1001",
+		[]string{"*out", "cgrates.org", "call", "1001", "1001", "",
 			"derived_run2", "", "^rated", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, "^1002", utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT, utils.META_DEFAULT},
 	}
 	ms := APItoModelDerivedCharger(dcs)

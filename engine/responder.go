@@ -294,12 +294,12 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 	maxCallDuration := -1.0
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
-	var dcs utils.DerivedChargers
-	if err := rs.GetDerivedChargers(attrsDC, &dcs); err != nil {
+	dcs := &utils.DerivedChargers{}
+	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
 		return err
 	}
 	dcs, _ = dcs.AppendDefaultRun()
-	for _, dc := range dcs {
+	for _, dc := range dcs.Chargers {
 		if utils.IsSliceMember([]string{utils.META_RATED, utils.RATED}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
 			continue
 		}
@@ -382,8 +382,8 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 	}
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
-	var dcs utils.DerivedChargers
-	if err := rs.GetDerivedChargers(attrsDC, &dcs); err != nil {
+	dcs := &utils.DerivedChargers{}
+	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
 		rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
 			Err: err,
 		})
@@ -391,7 +391,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	sesRuns := make([]*SessionRun, 0)
-	for _, dc := range dcs {
+	for _, dc := range dcs.Chargers {
 		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.ReqTypeField)) {
 			continue // We only consider prepaid sessions
 		}
@@ -426,7 +426,7 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 	if dcsH, err := HandleGetDerivedChargers(ratingStorage, attrs); err != nil {
 		return err
 	} else if dcsH != nil {
-		*dcs = dcsH
+		*dcs = *dcsH
 	}
 	return nil
 }

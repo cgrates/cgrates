@@ -1107,17 +1107,17 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]ActionPlans, err err
 	return
 }
 
-func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs utils.DerivedChargers, err error) {
+func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
 	if !skipCache {
 		if x, err := cache2go.Get(utils.DERIVEDCHARGERS_PREFIX + key); err == nil {
-			return x.(utils.DerivedChargers), nil
+			return x.(*utils.DerivedChargers), nil
 		} else {
 			return nil, err
 		}
 	}
 	var kv struct {
 		Key   string
-		Value utils.DerivedChargers
+		Value *utils.DerivedChargers
 	}
 	err = ms.db.C(colDcs).Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
@@ -1127,8 +1127,8 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs util
 	return
 }
 
-func (ms *MongoStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) (err error) {
-	if len(dcs) == 0 {
+func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) (err error) {
+	if dcs == nil || len(dcs.Chargers) == 0 {
 		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
 		err = ms.db.C(colDcs).Remove(bson.M{"key": key})
 		if err != mgo.ErrNotFound {
@@ -1138,7 +1138,7 @@ func (ms *MongoStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers
 	}
 	_, err = ms.db.C(colDcs).Upsert(bson.M{"key": key}, &struct {
 		Key   string
-		Value utils.DerivedChargers
+		Value *utils.DerivedChargers
 	}{Key: key, Value: dcs})
 	return err
 }

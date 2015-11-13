@@ -394,6 +394,7 @@ type TPDerivedChargers struct {
 	Category        string
 	Account         string
 	Subject         string
+	DestinationIds  string
 	DerivedChargers []*TPDerivedCharger
 }
 
@@ -805,7 +806,7 @@ type AttrGetDestination struct {
 }
 
 type AttrDerivedChargers struct {
-	Direction, Tenant, Category, Account, Subject string
+	Direction, Tenant, Category, Account, Subject, Destination string
 }
 
 func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
