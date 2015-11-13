@@ -280,6 +280,7 @@ CREATE TABLE tp_derived_chargers (
   `category` varchar(32) NOT NULL,
   `account` varchar(24) NOT NULL,
   `subject` varchar(64) NOT NULL,
+  `destination_ids` varchar(64) NOT NULL,
   `runid`  varchar(24) NOT NULL,
   `run_filters`  varchar(256) NOT NULL,
   `req_type_field`  varchar(24) NOT NULL,

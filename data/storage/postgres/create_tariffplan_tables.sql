@@ -275,6 +275,7 @@ CREATE TABLE tp_derived_chargers (
   category VARCHAR(32) NOT NULL,
   account VARCHAR(24) NOT NULL,
   subject VARCHAR(64) NOT NULL,
+  destination_ids VARCHAR(64) NOT NULL,
   runid  VARCHAR(24) NOT NULL,
   run_filters  VARCHAR(256) NOT NULL,
   req_type_field  VARCHAR(24) NOT NULL,
