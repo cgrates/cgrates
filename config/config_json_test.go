@@ -416,14 +416,15 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
-		Enabled:      utils.BoolPointer(false),
-		Listen:       utils.StringPointer("127.0.0.1:3868"),
-		Sm_generic:   utils.StringPointer("internal"),
-		Timezone:     utils.StringPointer(""),
-		Origin_host:  utils.StringPointer("diameter-agent"),
-		Origin_realm: utils.StringPointer("cgrates.org"),
-		Vendor_id:    utils.IntPointer(0),
-		Product_name: utils.StringPointer("CGRateS"),
+		Enabled:          utils.BoolPointer(false),
+		Listen:           utils.StringPointer("127.0.0.1:3868"),
+		Dictionaries_dir: utils.StringPointer(""),
+		Sm_generic:       utils.StringPointer("internal"),
+		Timezone:         utils.StringPointer(""),
+		Origin_host:      utils.StringPointer("diameter-agent"),
+		Origin_realm:     utils.StringPointer("cgrates.org"),
+		Vendor_id:        utils.IntPointer(0),
+		Product_name:     utils.StringPointer("CGRateS"),
 		Request_processors: &[]*DARequestProcessorJsnCfg{
 			&DARequestProcessorJsnCfg{
 				Id:                  utils.StringPointer("*default"),

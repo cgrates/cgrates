@@ -212,7 +212,12 @@ func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 		exitChan <- true
 		return
 	}
-	da := agents.NewDiameterAgent(cfg, smgConn)
+	da, err := agents.NewDiameterAgent(cfg, smgConn)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
+		exitChan <- true
+		return
+	}
 	if err = da.ListenAndServe(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
 	}

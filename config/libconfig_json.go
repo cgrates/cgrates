@@ -239,6 +239,7 @@ type OsipsConnJsonCfg struct {
 type DiameterAgentJsonCfg struct {
 	Enabled            *bool   // enables the diameter agent: <true|false>
 	Listen             *string // address where to listen for diameter requests <x.y.z.y:1234>
+	Dictionaries_dir   *string // path towards additional dictionaries
 	Sm_generic         *string // Connection towards generic SM
 	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	Origin_host        *string
