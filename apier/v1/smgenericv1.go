@@ -5,6 +5,7 @@ import (
 
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func NewSMGenericV1(sm *sessionmanager.SMGeneric) *SMGenericV1 {
@@ -76,4 +77,27 @@ func (self *SMGenericV1) ProcessCdr(ev sessionmanager.SMGenericEvent, reply *str
 	}
 	*reply = utils.OK
 	return nil
+}
+
+// rpcclient.RpcClientConnection interface
+func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	switch serviceMethod {
+	case "SMGenericV1.GetLcrSuppliers":
+		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := args.(*[]string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return self.GetLcrSuppliers(argsConverted, replyConverted)
+		/*smg.handlers["SMGenericV1.GetLcrSuppliers"] = smg.GetLcrSuppliers
+		smg.handlers["SMGenericV1.SessionStart"] = smg.SessionStart
+		smg.handlers["SMGenericV1.SessionUpdate"] = smg.SessionUpdate
+		smg.handlers["SMGenericV1.SessionEnd"] = smg.SessionEnd
+		smg.handlers["SMGenericV1.ProcessCdr"] = smg.ProcessCdr
+		*/
+	}
+	return rpcclient.ErrUnsupporteServiceMethod
 }
