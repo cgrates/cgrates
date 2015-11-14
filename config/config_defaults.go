@@ -203,8 +203,8 @@ const CGRATES_CFG_JSON = `
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"rater": "internal",					// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "internal",						// address where to reach CDR Server <""|internal|x.y.z.y:1234>
-	"debit_interval": "10s",				// interval to perform debits on.
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
+	"debit_interval": "0",					// interval to perform debits on.
+	"min_call_duration": "0",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 },
 
@@ -262,8 +262,12 @@ const CGRATES_CFG_JSON = `
 "diameter_agent": {
 	"enabled": false,					// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",			// address where to listen for diameter requests <x.y.z.y:1234>
-	"sm_generic": "internal",			// Connection towards SMG component for session management
+	"sm_generic": "internal",			// connection towards SMG component for session management
 	"timezone": "",						// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
+	"origin_host": "diameter-agent",	// diameter Origin-Host AVP used in replies
+	"origin_realm": "cgrates.org",		// diameter Origin-Realm AVP used in replies
+	"vendor_id": 0,						// diameter Vendor-Id AVP used in replies
+	"product_name": "CGRateS",			// diameter Product-Name AVP used in replies
 	"request_processors": [
 		{
 			"id": "*default",									// Identifier of this processor

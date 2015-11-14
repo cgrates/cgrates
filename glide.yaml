@@ -5,7 +5,7 @@ import:
   - package: github.com/jinzhu/gorm
     ref:     611e613459953787a01c2afc82835aa0ba01a045
   - package: golang.org/x/net
-    ref:     c764672d0ee39ffd83cfcb375804d3181302b62b
+    ref:     1d9fd3b8333e891c0e7353e1adcfe8a612573033
   - package: github.com/DisposaBoy/JsonConfigReader
     ref:     33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
   - package: github.com/hoisie/redis
@@ -25,7 +25,7 @@ import:
   - package: gopkg.in/fsnotify.v1
     ref:     7be54206639f256967dd82fa767397ba5f8f48f5
   - package: github.com/peterh/liner
-    ref:     32e535aff4145c12d1e154754ab144b49ab578e2
+    ref:     506a2f061bd0b362a8a2fa445be80386f39dedd8
   - package: github.com/cgrates/rpcclient
     ref:     028c43fc34d32dc9095c7605e2e455e0c7a5ea69
   - package: github.com/cgrates/osipsdagram
@@ -38,3 +38,5 @@ import:
     ref:     2d1be381ce47537e9e076b2b76dc70933162e4e9
   - package: github.com/cenkalti/hub
     ref:     57d753b5f4856e77b3cf8ecce78c97215a7d324d
+  - package: github.com/fiorix/go-diameter
+    ref:     b4c1bac20b8e8e1ac7e17fb54dc83b155aacba21

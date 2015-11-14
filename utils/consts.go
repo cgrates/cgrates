@@ -30,6 +30,7 @@ var (
 
 const (
 	VERSION                    = "0.9.1~rc8"
+	DIAMETER_FIRMWARE_REVISION = 918
 	POSTGRES                   = "postgres"
 	MYSQL                      = "mysql"
 	MONGO                      = "mongo"

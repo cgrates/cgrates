@@ -330,8 +330,8 @@ func TestSmGenericJsonCfg(t *testing.T) {
 		Listen_bijson:     utils.StringPointer("127.0.0.1:2014"),
 		Rater:             utils.StringPointer("internal"),
 		Cdrs:              utils.StringPointer("internal"),
-		Debit_interval:    utils.StringPointer("10s"),
-		Min_call_duration: utils.StringPointer("0s"),
+		Debit_interval:    utils.StringPointer("0"),
+		Min_call_duration: utils.StringPointer("0"),
 		Max_call_duration: utils.StringPointer("3h"),
 	}
 	if cfg, err := dfCgrJsonCfg.SmGenericJsonCfg(); err != nil {
@@ -416,10 +416,14 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 
 func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
-		Enabled:    utils.BoolPointer(false),
-		Listen:     utils.StringPointer("127.0.0.1:3868"),
-		Sm_generic: utils.StringPointer("internal"),
-		Timezone:   utils.StringPointer(""),
+		Enabled:      utils.BoolPointer(false),
+		Listen:       utils.StringPointer("127.0.0.1:3868"),
+		Sm_generic:   utils.StringPointer("internal"),
+		Timezone:     utils.StringPointer(""),
+		Origin_host:  utils.StringPointer("diameter-agent"),
+		Origin_realm: utils.StringPointer("cgrates.org"),
+		Vendor_id:    utils.IntPointer(0),
+		Product_name: utils.StringPointer("CGRateS"),
 		Request_processors: &[]*DARequestProcessorJsnCfg{
 			&DARequestProcessorJsnCfg{
 				Id:                  utils.StringPointer("*default"),

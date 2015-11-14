@@ -1,0 +1,63 @@
+/*
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2015 ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package agents
+
+import (
+	"fmt"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
+	"github.com/fiorix/go-diameter/diam"
+	//"github.com/fiorix/go-diameter/diam/avp"
+	"github.com/fiorix/go-diameter/diam/datatype"
+	//"github.com/fiorix/go-diameter/diam/dict"
+	"github.com/fiorix/go-diameter/diam/sm"
+)
+
+func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient) *DiameterAgent {
+	return &DiameterAgent{cgrCfg: cgrCfg, smg: smg}
+}
+
+type DiameterAgent struct {
+	cgrCfg *config.CGRConfig
+	smg    *rpcclient.RpcClient // Connection towards CGR-SMG component
+}
+
+// Creates the message handlers
+func (self *DiameterAgent) handlers() diam.Handler {
+	settings := &sm.Settings{
+		OriginHost:       datatype.DiameterIdentity(self.cgrCfg.DiameterAgentCfg().OriginHost),
+		OriginRealm:      datatype.DiameterIdentity(self.cgrCfg.DiameterAgentCfg().OriginRealm),
+		VendorID:         datatype.Unsigned32(self.cgrCfg.DiameterAgentCfg().VendorId),
+		ProductName:      datatype.UTF8String(self.cgrCfg.DiameterAgentCfg().ProductName),
+		FirmwareRevision: datatype.Unsigned32(utils.DIAMETER_FIRMWARE_REVISION),
+	}
+	dSM := sm.New(settings)
+	dSM.HandleFunc("ALL", self.handleALL)
+	return dSM
+}
+
+func (self *DiameterAgent) handleALL(c diam.Conn, m *diam.Message) {
+	utils.Logger.Warning(fmt.Sprintf("<DiameterAgent> Received unexpected message from %s:\n%s", c.RemoteAddr(), m))
+}
+
+func (self *DiameterAgent) ListenAndServe() error {
+	return diam.ListenAndServe(self.cgrCfg.DiameterAgentCfg().Listen, self.handlers(), nil)
+}

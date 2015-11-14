@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
@@ -135,7 +136,7 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 	}
 }
 
-func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Server, exitChan chan bool) {
+func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internalRaterChan chan *engine.Responder, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-Generic service.")
 	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
@@ -184,6 +185,7 @@ func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Serv
 	// Register RPC handler
 	smgRpc := v1.NewSMGenericV1(sm)
 	server.RpcRegister(smgRpc)
+	internalSMGChan <- smgRpc
 	// Register BiRpc handlers
 	smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
 	for method, handler := range smgBiRpc.Handlers() {
@@ -192,6 +194,29 @@ func startSmGeneric(internalRaterChan chan *engine.Responder, server *utils.Serv
 	// Register OnConnect handlers so we can intercept connections for session disconnects
 	server.BijsonRegisterOnConnect(smg_econns.OnClientConnect)
 	server.BijsonRegisterOnDisconnect(smg_econns.OnClientDisconnect)
+}
+
+func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
+	var smgConn *rpcclient.RpcClient
+	var err error
+	if cfg.DiameterAgentCfg().SMGeneric == utils.INTERNAL {
+		smgRpc := <-internalSMGChan
+		internalSMGChan <- smgRpc
+		smgConn, err = rpcclient.NewRpcClient("", "", 0, 0, rpcclient.INTERNAL_RPC, smgRpc)
+	} else {
+		smgConn, err = rpcclient.NewRpcClient("tcp", cfg.DiameterAgentCfg().SMGeneric, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+	}
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	da := agents.NewDiameterAgent(cfg, smgConn)
+	if err = da.ListenAndServe(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
+	}
+	exitChan <- true
 }
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
@@ -643,7 +668,7 @@ func main() {
 	internalPubSubSChan := make(chan engine.PublisherSubscriber, 1)
 	internalUserSChan := make(chan engine.UserService, 1)
 	internalAliaseSChan := make(chan engine.AliasService, 1)
-
+	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	// Start balancer service
 	if cfg.BalancerEnabled {
 		go startBalancer(internalBalancerChan, &stopHandled, exitChan) // Not really needed async here but to cope with uniformity
@@ -675,7 +700,7 @@ func main() {
 
 	// Start SM-Generic
 	if cfg.SmGenericConfig.Enabled {
-		go startSmGeneric(internalRaterChan, server, exitChan)
+		go startSmGeneric(internalSMGChan, internalRaterChan, server, exitChan)
 	}
 	// Start SM-FreeSWITCH
 	if cfg.SmFsConfig.Enabled {
@@ -698,6 +723,10 @@ func main() {
 	if cfg.SmGenericConfig.Enabled || cfg.SmFsConfig.Enabled || cfg.SmKamConfig.Enabled || cfg.SmOsipsConfig.Enabled { // Register SessionManagerV1 service
 		smRpc = new(v1.SessionManagerV1)
 		server.RpcRegister(smRpc)
+	}
+
+	if cfg.DiameterAgentCfg().Enabled {
+		go startDiameterAgent(internalSMGChan, exitChan)
 	}
 
 	// Start HistoryS service

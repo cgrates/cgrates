@@ -29,6 +29,10 @@ type DiameterAgentCfg struct {
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	SMGeneric         string // connection towards SMG component
 	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	OriginHost        string
+	OriginRealm       string
+	VendorId          int
+	ProductName       string
 	RequestProcessors []*DARequestProcessor
 }
 
@@ -47,6 +51,18 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 	}
 	if jsnCfg.Timezone != nil {
 		self.Timezone = *jsnCfg.Timezone
+	}
+	if jsnCfg.Origin_host != nil {
+		self.OriginHost = *jsnCfg.Origin_host
+	}
+	if jsnCfg.Origin_realm != nil {
+		self.OriginRealm = *jsnCfg.Origin_realm
+	}
+	if jsnCfg.Vendor_id != nil {
+		self.VendorId = *jsnCfg.Vendor_id
+	}
+	if jsnCfg.Product_name != nil {
+		self.ProductName = *jsnCfg.Product_name
 	}
 	if jsnCfg.Request_processors != nil {
 		for _, reqProcJsn := range *jsnCfg.Request_processors {
