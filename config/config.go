@@ -378,6 +378,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return errors.New("CDRS not enabled but referenced by SM-OpenSIPS component")
 		}
 	}
+	// DAgent checks
+	if self.DiameterAgentCfg.Enabled {
+		if self.DiameterAgentCfg.SMGeneric == utils.INTERNAL && !self.SmGenericConfig.Enabled {
+			return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
+		}
+	}
 	return nil
 }
 

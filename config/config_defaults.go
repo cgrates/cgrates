@@ -262,7 +262,8 @@ const CGRATES_CFG_JSON = `
 "diameter_agent": {
 	"enabled": false,					// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",			// address where to listen for diameter requests <x.y.z.y:1234>
-	"timezone": "",						// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	"sm_generic": "internal",			// Connection towards SMG component for session management
+	"timezone": "",						// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"request_processors": [
 		{
 			"id": "*default",									// Identifier of this processor
