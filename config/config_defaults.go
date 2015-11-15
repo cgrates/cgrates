@@ -203,8 +203,8 @@ const CGRATES_CFG_JSON = `
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"rater": "internal",					// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "internal",						// address where to reach CDR Server <""|internal|x.y.z.y:1234>
-	"debit_interval": "0",					// interval to perform debits on.
-	"min_call_duration": "0",				// only authorize calls with allowed duration higher than this
+	"debit_interval": "0s",					// interval to perform debits on.
+	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 },
 
