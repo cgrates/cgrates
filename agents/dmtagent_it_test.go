@@ -20,11 +20,14 @@ package agents
 
 import (
 	"flag"
+	"fmt"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
@@ -77,6 +80,19 @@ func TestDmtAgentStartEngine(t *testing.T) {
 	if _, err := engine.StopStartEngine(daCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestDmtAgentStartClient(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	dmtClient, err := NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "UNIT_TEST",
+		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId, daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%+v", dmtClient)
+	time.Sleep(time.Duration(10) * time.Second)
 }
 
 func TestDmtAgentStopEngine(t *testing.T) {
