@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"math/rand"
 	"time"
 
 	"github.com/fiorix/go-diameter/diam"
@@ -27,10 +26,6 @@ import (
 	"github.com/fiorix/go-diameter/diam/datatype"
 	"github.com/fiorix/go-diameter/diam/sm"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string, firmwareRev int) (*DiameterClient, error) {
 	cfg := &sm.Settings{
@@ -63,4 +58,9 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 type DiameterClient struct {
 	conn     diam.Conn
 	handlers diam.Handler
+}
+
+func (self *DiameterClient) SendMessage(m *diam.Message) error {
+	_, err := m.WriteTo(self.conn)
+	return err
 }

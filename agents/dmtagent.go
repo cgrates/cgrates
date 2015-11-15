@@ -59,8 +59,13 @@ func (self *DiameterAgent) handlers() diam.Handler {
 		FirmwareRevision: datatype.Unsigned32(utils.DIAMETER_FIRMWARE_REVISION),
 	}
 	dSM := sm.New(settings)
+	dSM.HandleFunc("CCR", self.handleCCR)
 	dSM.HandleFunc("ALL", self.handleALL)
 	return dSM
+}
+
+func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
+	utils.Logger.Warning(fmt.Sprintf("<DiameterAgent> Received CCR message from %s:\n%s", c.RemoteAddr(), m))
 }
 
 func (self *DiameterAgent) handleALL(c diam.Conn, m *diam.Message) {
