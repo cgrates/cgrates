@@ -351,7 +351,7 @@ func (b *Balance) SetValue(amount float64) {
 	b.dirty = true
 }
 
-func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun bool) (cc *CallCost, err error) {
+func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -430,6 +430,10 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		cc, err = b.GetCost(cd, true)
 		if err != nil {
 			return nil, err
+		}
+		if debitConnectFee {
+			// this is the first add, debit the connect fee
+			ub.DebitConnectionFee(cc, moneyBalances, count)
 		}
 		cc.Timespans.Decompress()
 		//log.Printf("CC: %+v", cc)
@@ -522,7 +526,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	return
 }
 
-func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun bool) (cc *CallCost, err error) {
+func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -531,6 +535,12 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 	if err != nil {
 		return nil, err
 	}
+
+	if debitConnectFee {
+		// this is the first add, debit the connect fee
+		ub.DebitConnectionFee(cc, moneyBalances, count)
+	}
+
 	cc.Timespans.Decompress()
 	//log.Printf("CallCost In Debit: %+v", cc)
 	//for _, ts := range cc.Timespans {

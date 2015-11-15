@@ -287,15 +287,15 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				//log.Printf("Unit balance: %+v", balance)
 				// log.Printf("CD BEFORE UNIT: %+v", cd)
 
-				partCC, debitErr := balance.DebitUnits(cd, balance.account, usefulMoneyBalances, count, dryRun)
+				partCC, debitErr := balance.debitUnits(cd, balance.account, usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
 					return nil, debitErr
 				}
 				//log.Printf("CD AFTER UNIT: %+v", cd)
 				if partCC != nil {
 					//log.Printf("partCC: %+v", partCC.Timespans[0])
-					initialLength = len(cc.Timespans)
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
+					cc.negativeConnectFee = partCC.negativeConnectFee
 					if initialLength == 0 {
 						// this is the first add, debit the connect fee
 						ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
@@ -329,7 +329,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			for _, balance := range usefulMoneyBalances {
 				//log.Printf("Money balance: %+v", balance)
 				//log.Printf("CD BEFORE MONEY: %+v", cd)
-				partCC, debitErr := balance.DebitMoney(cd, balance.account, count, dryRun)
+				partCC, debitErr := balance.debitMoney(cd, balance.account, usefulMoneyBalances, count, dryRun, initialLength == 0)
 				if debitErr != nil {
 					return nil, debitErr
 				}
@@ -338,10 +338,8 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				if partCC != nil {
 					initialLength = len(cc.Timespans)
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
-					if initialLength == 0 {
-						// this is the first add, debit the connect fee
-						ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
-					}
+					cc.negativeConnectFee = partCC.negativeConnectFee
+
 					//for i, ts := range cc.Timespans {
 					//log.Printf("cc.times[an[%d]: %+v\n", i, ts)
 					//}
@@ -682,6 +680,7 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 		}
 		// debit connect fee
 		if connectFee > 0 && !connectFeePaid {
+			cc.negativeConnectFee = true
 			// there are no money for the connect fee; go negative
 			b := acc.GetDefaultMoneyBalance()
 			b.SubstractValue(connectFee)

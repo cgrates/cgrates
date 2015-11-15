@@ -564,6 +564,10 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	}
 
 	//log.Printf("CC: %+v", cc)
+	// not enough credit for connect fee
+	if cc.negativeConnectFee == true {
+		return 0, nil
+	}
 
 	var totalCost float64
 	var totalDuration time.Duration
