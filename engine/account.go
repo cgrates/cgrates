@@ -270,7 +270,6 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 	//log.Print(usefulMoneyBalances, usefulUnitBalances)
 	//log.Print("STARTCD: ", cd)
 	var leftCC *CallCost
-	var initialLength int
 	cc = cd.CreateCallCost()
 
 	generalBalanceChecker := true
@@ -296,10 +295,6 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					//log.Printf("partCC: %+v", partCC.Timespans[0])
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
 					cc.negativeConnectFee = partCC.negativeConnectFee
-					if initialLength == 0 {
-						// this is the first add, debit the connect fee
-						ub.DebitConnectionFee(cc, usefulMoneyBalances, count)
-					}
 					// for i, ts := range cc.Timespans {
 					//  log.Printf("cc.times[an[%d]: %+v\n", i, ts)
 					// }
@@ -329,14 +324,13 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			for _, balance := range usefulMoneyBalances {
 				//log.Printf("Money balance: %+v", balance)
 				//log.Printf("CD BEFORE MONEY: %+v", cd)
-				partCC, debitErr := balance.debitMoney(cd, balance.account, usefulMoneyBalances, count, dryRun, initialLength == 0)
+				partCC, debitErr := balance.debitMoney(cd, balance.account, usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
 					return nil, debitErr
 				}
 				//log.Printf("CD AFTER MONEY: %+v", cd)
 				//log.Printf("partCC: %+v", partCC)
 				if partCC != nil {
-					initialLength = len(cc.Timespans)
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
 					cc.negativeConnectFee = partCC.negativeConnectFee
 
@@ -373,7 +367,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 
 	//log.Printf("HERE: %+v %d", leftCC)
 	if leftCC.Cost > 0 && goNegative {
-		initialLength = len(cc.Timespans)
+		initialLength := len(cc.Timespans)
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
 		if initialLength == 0 {
 			// this is the first add, debit the connect fee
