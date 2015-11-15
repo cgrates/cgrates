@@ -133,6 +133,10 @@ func main() {
 			log.Print(err.Error())
 			return
 		}
+		if err := migratorRC8rat.migrateDerivedChargers(); err != nil {
+			log.Print(err.Error())
+			return
+		}
 		log.Print("Done!")
 		return
 	}
