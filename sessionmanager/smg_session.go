@@ -29,16 +29,18 @@ import (
 
 // One session handled by SM
 type SMGSession struct {
-	eventStart SMGenericEvent // Event which started
-	stopDebit  chan struct{}  // Channel to communicate with debit loops when closing the session
-	connId     string         // Reference towards connection id on the session manager side.
-	runId      string         // Keep a reference for the derived run
-	timezone   string
-	rater      engine.Connector // Connector to Rater service
-	cdrsrv     engine.Connector // Connector to CDRS service
-	extconns   *SMGExternalConnections
-	cd         *engine.CallDescriptor
-	cc         []*engine.CallCost
+	eventStart    SMGenericEvent // Event which started
+	stopDebit     chan struct{}  // Channel to communicate with debit loops when closing the session
+	connId        string         // Reference towards connection id on the session manager side.
+	runId         string         // Keep a reference for the derived run
+	timezone      string
+	rater         engine.Connector // Connector to Rater service
+	cdrsrv        engine.Connector // Connector to CDRS service
+	extconns      *SMGExternalConnections
+	cd            *engine.CallDescriptor
+	sessionCds    []*engine.CallDescriptor
+	callCosts     []*engine.CallCost
+	extraDuration time.Duration // keeps the current duration debited on top of what heas been asked
 }
 
 // Called in case of automatic debits
@@ -74,16 +76,102 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration) (time.Duration, error) {
-	return nilDuration, nil
+	// apply correction from previous run
+	dur -= self.extraDuration
+	self.extraDuration = 0
+
+	if self.cd.LoopIndex > 0 {
+		self.cd.TimeStart = self.cd.TimeEnd
+	}
+	self.cd.TimeEnd = self.cd.TimeStart.Add(dur)
+	self.cd.DurationIndex += dur
+	cc := &engine.CallCost{}
+	if err := self.rater.MaxDebit(self.cd, cc); err != nil {
+		return 0, err
+	}
+	// cd corrections
+	self.cd.TimeEnd = cc.GetEndTime() // set debited timeEnd
+	// update call duration with real debited duration
+	ccDuration := cc.GetDuration()
+	if ccDuration != dur {
+		self.extraDuration = ccDuration - dur
+	}
+	self.cd.DurationIndex -= dur
+	self.cd.DurationIndex += ccDuration
+	self.cd.MaxCostSoFar += cc.Cost
+	self.cd.LoopIndex += 1
+	self.sessionCds = append(self.sessionCds, self.cd.Clone())
+	self.callCosts = append(self.callCosts, cc)
+	return ccDuration, nil
 }
 
 // Attempts to refund a duration, error on failure
-func (self *SMGSession) refund(dur time.Duration) error {
+func (self *SMGSession) refund(refundDuration time.Duration) error {
+	lastCC := self.callCosts[len(self.callCosts)-1]
+	lastCC.Timespans.Decompress()
+	var refundIncrements engine.Increments
+	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
+		ts := lastCC.Timespans[i]
+		tsDuration := ts.GetDuration()
+		if refundDuration <= tsDuration {
+
+			lastRefundedIncrementIndex := -1
+			for j := len(ts.Increments) - 1; j >= 0; j-- {
+				increment := ts.Increments[j]
+				if increment.Duration <= refundDuration {
+					refundIncrements = append(refundIncrements, increment)
+					refundDuration -= increment.Duration
+					lastRefundedIncrementIndex = j
+				} else {
+					break //increment duration is larger, cannot refund increment
+				}
+			}
+			if lastRefundedIncrementIndex == 0 {
+				lastCC.Timespans[i] = nil
+				lastCC.Timespans = lastCC.Timespans[:i]
+			} else {
+				ts.SplitByIncrement(lastRefundedIncrementIndex)
+			}
+			break // do not go to other timespans
+		} else {
+			refundIncrements = append(refundIncrements, ts.Increments...)
+			// remove the timespan entirely
+			lastCC.Timespans[i] = nil
+			lastCC.Timespans = lastCC.Timespans[:i]
+			// continue to the next timespan with what is left to refund
+			refundDuration -= tsDuration
+		}
+	}
+	// show only what was actualy refunded (stopped in timespan)
+	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
+	if len(refundIncrements) > 0 {
+		cd := &engine.CallDescriptor{
+			Direction:   lastCC.Direction,
+			Tenant:      lastCC.Tenant,
+			Category:    lastCC.Category,
+			Subject:     lastCC.Subject,
+			Account:     lastCC.Account,
+			Destination: lastCC.Destination,
+			Increments:  refundIncrements,
+		}
+		var response float64
+		err := self.rater.RefundIncrements(cd, &response)
+		if err != nil {
+			return err
+		}
+	}
+	//utils.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
+	lastCC.Cost -= refundIncrements.GetTotalCost()
+	lastCC.Timespans.Compress()
 	return nil
 }
 
 // Session has ended, check debits and refund the extra charged duration
 func (self *SMGSession) close(endTime time.Time) error {
+	lastCC := self.callCosts[len(self.callCosts)-1]
+	end := lastCC.GetEndTime()
+	refundDuration := end.Sub(endTime)
+	self.refund(refundDuration)
 	return nil
 }
 
@@ -108,11 +196,11 @@ func (self *SMGSession) disconnectSession(reason string) error {
 
 // Merge the sum of costs and sends it to CDRS for storage
 func (self *SMGSession) saveOperations() error {
-	if len(self.cc) == 0 {
+	if len(self.callCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
-	firstCC := self.cc[0]
-	for _, cc := range self.cc[1:] {
+	firstCC := self.callCosts[0]
+	for _, cc := range self.callCosts[1:] {
 		firstCC.Merge(cc)
 	}
 	var reply string
@@ -128,7 +216,7 @@ func (self *SMGSession) saveOperations() error {
 	// as postpaid. When the close event finally arives we have to refund everything
 	if err != nil {
 		if err == utils.ErrExists {
-			self.refund(self.cd.TimeEnd.Sub(self.cd.TimeStart)) // Refund entire duration
+			self.refund(self.cd.GetDuration()) // Refund entire duration
 		} else {
 			return err
 		}
