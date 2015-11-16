@@ -61,6 +61,11 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	dSM := sm.New(settings)
 	dSM.HandleFunc("CCR", self.handleCCR)
 	dSM.HandleFunc("ALL", self.handleALL)
+	go func() {
+		for err := range dSM.ErrorReports() {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> StateMachine error: %+v", err))
+		}
+	}()
 	return dSM
 }
 
