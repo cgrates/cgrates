@@ -97,7 +97,8 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 	m.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(avp.CCTime, avp.Mbit, 0, datatype.Unsigned32(ccTime))}})
-	m.NewAVP(avp.ServiceInformation, avp.Mbit, 0, &diam.GroupedAVP{
+	/*
+		m.NewAVP(avp.ServiceInformation, avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(20300, avp.Mbit, 0, &diam.GroupedAVP{ // IN-Information
 				AVP: []*diam.AVP{
@@ -116,5 +117,6 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 				},
 			}),
 		}})
+	*/
 	return m
 }
