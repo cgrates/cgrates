@@ -25,6 +25,7 @@ import (
 	"net/rpc"
 	"path"
 	"strconv"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -35,7 +36,8 @@ import (
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
-	migrateRC8   = flag.Bool("migrate_rc8", false, "Migrate Accounts, Actions and ActionTriggers to RC8 structures")
+	migrateRC8   = flag.Bool("migrate_rc8", false, "Migrate Accounts, Actions, ActionTriggers and DerivedChargers to RC8 structures")
+	migrateList  = flag.String("migrate_list", "acc,atr,act,dcs", "Migration item list")
 	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
 	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
 	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
@@ -106,9 +108,10 @@ func main() {
 			log.Print(err.Error())
 			return
 		}
-		if err := migratorRC8acc.migrateAccounts(); err != nil {
-			log.Print(err.Error())
-			return
+		if strings.Contains(*migrateList, "acc") {
+			if err := migratorRC8acc.migrateAccounts(); err != nil {
+				log.Print(err.Error())
+			}
 		}
 
 		db_nb, err = strconv.Atoi(*tpdb_name)
@@ -125,17 +128,20 @@ func main() {
 			log.Print(err.Error())
 			return
 		}
-		if err := migratorRC8rat.migrateActionTriggers(); err != nil {
-			log.Print(err.Error())
-			return
+		if strings.Contains(*migrateList, "atr") {
+			if err := migratorRC8rat.migrateActionTriggers(); err != nil {
+				log.Print(err.Error())
+			}
 		}
-		if err := migratorRC8rat.migrateActions(); err != nil {
-			log.Print(err.Error())
-			return
+		if strings.Contains(*migrateList, "act") {
+			if err := migratorRC8rat.migrateActions(); err != nil {
+				log.Print(err.Error())
+			}
 		}
-		if err := migratorRC8rat.migrateDerivedChargers(); err != nil {
-			log.Print(err.Error())
-			return
+		if strings.Contains(*migrateList, "dcs") {
+			if err := migratorRC8rat.migrateDerivedChargers(); err != nil {
+				log.Print(err.Error())
+			}
 		}
 		log.Print("Done!")
 		return
