@@ -24,7 +24,6 @@ import (
 	"log"
 	"net/rpc"
 	"path"
-	"runtime"
 	"strconv"
 	"strings"
 
@@ -310,9 +309,8 @@ func main() {
 	if users != nil {
 		userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
 	}
-	// release the reader wit it's structures
-	tpReader = nil
-	runtime.GC()
+	// release the reader with it's structures
+	tpReader.Init()
 
 	// Reload scheduler and cache
 	if rater != nil {
