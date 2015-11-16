@@ -330,8 +330,8 @@ func TestSmGenericJsonCfg(t *testing.T) {
 		Listen_bijson:     utils.StringPointer("127.0.0.1:2014"),
 		Rater:             utils.StringPointer("internal"),
 		Cdrs:              utils.StringPointer("internal"),
-		Debit_interval:    utils.StringPointer("0"),
-		Min_call_duration: utils.StringPointer("0"),
+		Debit_interval:    utils.StringPointer("0s"),
+		Min_call_duration: utils.StringPointer("0s"),
 		Max_call_duration: utils.StringPointer("3h"),
 	}
 	if cfg, err := dfCgrJsonCfg.SmGenericJsonCfg(); err != nil {
