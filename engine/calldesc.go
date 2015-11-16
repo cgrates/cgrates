@@ -56,11 +56,11 @@ func init() {
 			log.Fatal(err)
 		}
 	case "redis":
-		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
+		ratingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK, utils.REDIS_MAX_CONNS)
 		if err != nil {
 			log.Fatal(err)
 		}
-		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
+		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK, utils.REDIS_MAX_CONNS)
 		if err != nil {
 			log.Fatal(err)
 		}

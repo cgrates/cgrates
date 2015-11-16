@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/mediocregopher/radix.v2/pool"
+	"github.com/mediocregopher/radix.v2/redis"
 
 	"io/ioutil"
 	"time"
@@ -38,24 +39,29 @@ type RedisStorage struct {
 	ms Marshaler
 }
 
-func NewRedisStorage(address string, db int, pass, mrshlerStr string) (*RedisStorage, error) {
-	p, err := pool.New("tcp", address, 10)
-	//p, err := redis.Dial("tcp", address)
-	if err != nil {
-		return nil, err
-	}
-	conn, err := p.Get()
-	if err != nil {
-		return nil, err
-	}
-	defer p.Put(conn)
-	if err := conn.Cmd("SELECT", db).Err; err != nil {
-		return nil, err
-	}
-	if pass != "" {
-		if err := conn.Cmd("AUTH", pass).Err; err != nil {
+func NewRedisStorage(address string, db int, pass, mrshlerStr string, maxConns int) (*RedisStorage, error) {
+	df := func(network, addr string) (*redis.Client, error) {
+		client, err := redis.Dial(network, addr)
+		if err != nil {
 			return nil, err
 		}
+		if len(pass) != 0 {
+			if err = client.Cmd("AUTH", pass).Err; err != nil {
+				client.Close()
+				return nil, err
+			}
+		}
+		if db != 0 {
+			if err = client.Cmd("SELECT", db).Err; err != nil {
+				client.Close()
+				return nil, err
+			}
+		}
+		return client, nil
+	}
+	p, err := pool.NewCustom("tcp", address, maxConns, df)
+	if err != nil {
+		return nil, err
 	}
 	var mrshler Marshaler
 	if mrshlerStr == utils.MSGPACK {
