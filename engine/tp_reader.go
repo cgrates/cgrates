@@ -6,7 +6,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -1261,200 +1260,162 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if flush {
 		tpr.ratingStorage.Flush("")
 	}
-	var wg sync.WaitGroup
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Destinations:")
-		}
-		for _, d := range tpr.destinations {
-			err = tpr.ratingStorage.SetDestination(d)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Print("\t", d.Id, " : ", d.Prefixes)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Rating Plans:")
-		}
-		for _, rp := range tpr.ratingPlans {
-			err = tpr.ratingStorage.SetRatingPlan(rp)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Print("\t", rp.Id)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Rating Profiles:")
-		}
-		for _, rp := range tpr.ratingProfiles {
-			err = tpr.ratingStorage.SetRatingProfile(rp)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Print("\t", rp.Id)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Action Plans:")
-		}
-		for k, ats := range tpr.actionPlans {
-			err = tpr.ratingStorage.SetActionPlans(k, ats)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Println("\t", k)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Action Triggers:")
-		}
-		for k, atrs := range tpr.actionsTriggers {
-			err = tpr.ratingStorage.SetActionTriggers(k, atrs)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Println("\t", k)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Shared Groups:")
-		}
-		for k, sg := range tpr.sharedGroups {
-			err = tpr.ratingStorage.SetSharedGroup(sg)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Println("\t", k)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("LCR Rules:")
-		}
-		for k, lcr := range tpr.lcrs {
-			err = tpr.ratingStorage.SetLCR(lcr)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Println("\t", k)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Actions:")
-		}
-		for k, as := range tpr.actions {
-			err = tpr.ratingStorage.SetActions(k, as)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Println("\t", k)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Account Actions:")
-		}
-		for _, ub := range tpr.accountActions {
-			err = tpr.accountingStorage.SetAccount(ub)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Println("\t", ub.Id)
-			}
-		}
-	}()
-	go func() {
-		wg.Add(1)
-		if verbose {
-			log.Print("Derived Chargers:")
-		}
-		for key, dcs := range tpr.derivedChargers {
-			err = tpr.ratingStorage.SetDerivedChargers(key, dcs)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Print("\t", key)
-			}
+	if verbose {
+		log.Print("Destinations:")
+	}
+	for _, d := range tpr.destinations {
+		err = tpr.ratingStorage.SetDestination(d)
+		if err != nil {
+			return err
 		}
 		if verbose {
-			log.Print("CDR Stats Queues:")
+			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}
-		for _, sq := range tpr.cdrStats {
-			err = tpr.ratingStorage.SetCdrStats(sq)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Print("\t", sq.Id)
-			}
+	}
+	if verbose {
+		log.Print("Rating Plans:")
+	}
+	for _, rp := range tpr.ratingPlans {
+		err = tpr.ratingStorage.SetRatingPlan(rp)
+		if err != nil {
+			return err
 		}
-	}()
-	go func() {
-		wg.Add(1)
 		if verbose {
-			log.Print("Users:")
+			log.Print("\t", rp.Id)
 		}
-		for _, u := range tpr.users {
-			err = tpr.accountingStorage.SetUser(u)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Print("\t", u.GetId())
-			}
+	}
+	if verbose {
+		log.Print("Rating Profiles:")
+	}
+	for _, rp := range tpr.ratingProfiles {
+		err = tpr.ratingStorage.SetRatingProfile(rp)
+		if err != nil {
+			return err
 		}
-	}()
-	go func() {
-		wg.Add(1)
 		if verbose {
-			log.Print("Aliases:")
+			log.Print("\t", rp.Id)
 		}
-		for _, al := range tpr.aliases {
-			err = tpr.accountingStorage.SetAlias(al)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Print("\t", al.GetId())
-			}
+	}
+	if verbose {
+		log.Print("Action Plans:")
+	}
+	for k, ats := range tpr.actionPlans {
+		err = tpr.ratingStorage.SetActionPlans(k, ats)
+		if err != nil {
+			return err
 		}
-	}()
-	wg.Wait()
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Action Triggers:")
+	}
+	for k, atrs := range tpr.actionsTriggers {
+		err = tpr.ratingStorage.SetActionTriggers(k, atrs)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Shared Groups:")
+	}
+	for k, sg := range tpr.sharedGroups {
+		err = tpr.ratingStorage.SetSharedGroup(sg)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("LCR Rules:")
+	}
+	for k, lcr := range tpr.lcrs {
+		err = tpr.ratingStorage.SetLCR(lcr)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Actions:")
+	}
+	for k, as := range tpr.actions {
+		err = tpr.ratingStorage.SetActions(k, as)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", k)
+		}
+	}
+	if verbose {
+		log.Print("Account Actions:")
+	}
+	for _, ub := range tpr.accountActions {
+		err = tpr.accountingStorage.SetAccount(ub)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println("\t", ub.Id)
+		}
+	}
+	if verbose {
+		log.Print("Derived Chargers:")
+	}
+	for key, dcs := range tpr.derivedChargers {
+		err = tpr.ratingStorage.SetDerivedChargers(key, dcs)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", key)
+		}
+	}
+	if verbose {
+		log.Print("CDR Stats Queues:")
+	}
+	for _, sq := range tpr.cdrStats {
+		err = tpr.ratingStorage.SetCdrStats(sq)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", sq.Id)
+		}
+	}
+	if verbose {
+		log.Print("Users:")
+	}
+	for _, u := range tpr.users {
+		err = tpr.accountingStorage.SetUser(u)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", u.GetId())
+		}
+	}
+	if verbose {
+		log.Print("Aliases:")
+	}
+	for _, al := range tpr.aliases {
+		err = tpr.accountingStorage.SetAlias(al)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print("\t", al.GetId())
+		}
+	}
 	ldInst := tpr.GetLoadInstance()
 	if verbose {
 		log.Printf("LoadHistory, instance: %+v\n", ldInst)
