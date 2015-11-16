@@ -227,6 +227,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	li := loader.GetLoadInstance()
 
+	// release the tp data
 	loader.Init()
 
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
