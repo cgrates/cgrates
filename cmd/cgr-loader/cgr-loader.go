@@ -289,29 +289,32 @@ func main() {
 	if len(*historyServer) != 0 && *verbose {
 		log.Print("Wrote history.")
 	}
+	var dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds []string
+	if rater != nil {
+		dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
+		rplIds, _ = tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
+		rpfIds, _ = tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
+		actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
+		shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
+		alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
+		lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
+		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
+	}
+	actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+	var statsQueueIds []string
+	if cdrstats != nil {
+		statsQueueIds, _ = tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+	}
+	var userIds []string
+	if users != nil {
+		userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
+	}
+	// release the reader wit it's structures
+	tpReader = nil
+
 	// Reload scheduler and cache
 	if rater != nil {
 		reply := ""
-		dstIds, _ := tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
-		rplIds, _ := tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
-		rpfIds, _ := tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
-		actIds, _ := tpReader.GetLoadedIds(utils.ACTION_PREFIX)
-		shgIds, _ := tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-		aliases, _ := tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
-		lcrIds, _ := tpReader.GetLoadedIds(utils.LCR_PREFIX)
-		dcs, _ := tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
-
-		actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-		var statsQueueIds []string
-		if cdrstats != nil {
-			statsQueueIds, _ = tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
-		}
-		var userIds []string
-		if users != nil {
-			userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
-		}
-		// release the reader wit it's structures
-		tpReader = nil
 
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
@@ -326,9 +329,9 @@ func main() {
 			RatingProfileIds: rpfIds,
 			ActionIds:        actIds,
 			SharedGroupIds:   shgIds,
-			Aliases:          aliases,
+			Aliases:          alsIds,
 			LCRIds:           lcrIds,
-			DerivedChargers:  dcs,
+			DerivedChargers:  dcsIds,
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
