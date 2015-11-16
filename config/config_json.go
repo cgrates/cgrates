@@ -48,6 +48,7 @@ const (
 	FS_JSN          = "freeswitch"
 	KAMAILIO_JSN    = "kamailio"
 	OSIPS_JSN       = "opensips"
+	DA_JSN          = "diameter_agent"
 	HISTSERV_JSN    = "historys"
 	PUBSUBSERV_JSN  = "pubsubs"
 	ALIASESSERV_JSN = "aliases"
@@ -241,6 +242,18 @@ func (self CgrJsonCfg) SmOsipsJsonCfg() (*SmOsipsJsonCfg, error) {
 		return nil, nil
 	}
 	cfg := new(SmOsipsJsonCfg)
+	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
+}
+
+func (self CgrJsonCfg) DiameterAgentJsonCfg() (*DiameterAgentJsonCfg, error) {
+	rawCfg, hasKey := self[DA_JSN]
+	if !hasKey {
+		return nil, nil
+	}
+	cfg := new(DiameterAgentJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

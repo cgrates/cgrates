@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
@@ -66,7 +67,6 @@ var (
 	singlecpu    = flag.Bool("singlecpu", false, "Run on single CPU core")
 
 	cfg   *config.CGRConfig
-	sms   []sessionmanager.SessionManager
 	smRpc *v1.SessionManagerV1
 	err   error
 )
@@ -116,7 +116,7 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 		cdrsConn = resp
 		internalRaterChan <- resp
 	} else {
-		conn, err := rpcclient.NewRpcClient("tcp", cdrcCfg.Cdrs, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+		conn, err := rpcclient.NewRpcClient("tcp", cdrcCfg.Cdrs, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRC> Could not connect to CDRS via RPC: %v", err))
 			exitChan <- true
@@ -136,6 +136,94 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 	}
 }
 
+func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internalRaterChan chan *engine.Responder, server *utils.Server, exitChan chan bool) {
+	utils.Logger.Info("Starting CGRateS SM-Generic service.")
+	var raterConn, cdrsConn engine.Connector
+	var client *rpcclient.RpcClient
+	var err error
+	// Connect to rater
+	for _, raterCfg := range cfg.SmGenericConfig.HaRater {
+		if raterCfg.Server == utils.INTERNAL {
+			resp := <-internalRaterChan
+			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
+			internalRaterChan <- resp
+		} else {
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+			if err != nil { //Connected so no need to reiterate
+				utils.Logger.Crit(fmt.Sprintf("<SM-Generic> Could not connect to Rater via RPC: %v", err))
+				exitChan <- true
+				return
+			}
+			raterConn = &engine.RPCClientConnector{Client: client}
+		}
+	}
+	// Connect to CDRS
+	if reflect.DeepEqual(cfg.SmGenericConfig.HaCdrs, cfg.SmGenericConfig.HaRater) {
+		cdrsConn = raterConn
+	} else if len(cfg.SmGenericConfig.HaCdrs) != 0 {
+		for _, cdrsCfg := range cfg.SmGenericConfig.HaCdrs {
+			if cdrsCfg.Server == utils.INTERNAL {
+				resp := <-internalRaterChan
+				cdrsConn = resp
+				internalRaterChan <- resp
+			} else {
+				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+				if err != nil {
+					utils.Logger.Crit(fmt.Sprintf("<SM-Generic> Could not connect to CDRS via RPC: %v", err))
+					exitChan <- true
+					return
+				}
+				cdrsConn = &engine.RPCClientConnector{Client: client}
+			}
+		}
+	}
+	smg_econns := sessionmanager.NewSMGExternalConnections()
+	sm := sessionmanager.NewSMGeneric(cfg, raterConn, cdrsConn, cfg.DefaultTimezone, smg_econns)
+	if err = sm.Connect(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-Generic> error: %s!", err))
+	}
+	// Register RPC handler
+	smgRpc := v1.NewSMGenericV1(sm)
+	server.RpcRegister(smgRpc)
+	internalSMGChan <- smgRpc
+	// Register BiRpc handlers
+	smgBiRpc := v1.NewSMGenericBiRpcV1(sm)
+	for method, handler := range smgBiRpc.Handlers() {
+		server.BijsonRegisterName(method, handler)
+	}
+	// Register OnConnect handlers so we can intercept connections for session disconnects
+	server.BijsonRegisterOnConnect(smg_econns.OnClientConnect)
+	server.BijsonRegisterOnDisconnect(smg_econns.OnClientDisconnect)
+}
+
+func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
+	var smgConn *rpcclient.RpcClient
+	var err error
+	if cfg.DiameterAgentCfg().SMGeneric == utils.INTERNAL {
+		smgRpc := <-internalSMGChan
+		internalSMGChan <- smgRpc
+		smgConn, err = rpcclient.NewRpcClient("", "", 0, 0, rpcclient.INTERNAL_RPC, smgRpc)
+	} else {
+		smgConn, err = rpcclient.NewRpcClient("tcp", cfg.DiameterAgentCfg().SMGeneric, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+	}
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	da, err := agents.NewDiameterAgent(cfg, smgConn)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
+		exitChan <- true
+		return
+	}
+	if err = da.ListenAndServe(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
+	}
+	exitChan <- true
+}
+
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
 	var raterConn, cdrsConn engine.Connector
@@ -148,7 +236,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
 			internalRaterChan <- resp
 		} else {
-			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil { //Connected so no need to reiterate
 				utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
@@ -167,7 +255,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 				cdrsConn = resp
 				internalRaterChan <- resp
 			} else {
-				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 				if err != nil {
 					utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
 					exitChan <- true
@@ -178,10 +266,9 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 		}
 	}
 	sm := sessionmanager.NewFSSessionManager(cfg.SmFsConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
-	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> error: %s!", err))
 	}
 	exitChan <- true
 }
@@ -198,9 +285,9 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
 			internalRaterChan <- resp
 		} else {
-			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil { //Connected so no need to reiterate
-				utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
+				utils.Logger.Crit(fmt.Sprintf("<SM-Kamailio> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
@@ -217,9 +304,9 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 				cdrsConn = resp
 				internalRaterChan <- resp
 			} else {
-				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 				if err != nil {
-					utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
+					utils.Logger.Crit(fmt.Sprintf("<SM-Kamailio> Could not connect to CDRS via RPC: %v", err))
 					exitChan <- true
 					return
 				}
@@ -228,10 +315,9 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		}
 	}
 	sm, _ := sessionmanager.NewKamailioSessionManager(cfg.SmKamConfig, raterConn, cdrsConn, cfg.DefaultTimezone)
-	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err = sm.Connect(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> error: %s!", err))
 	}
 	exitChan <- true
 }
@@ -248,9 +334,9 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
 			internalRaterChan <- resp
 		} else {
-			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil { //Connected so no need to reiterate
-				utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to rater via RPC: %v", err))
+				utils.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to rater via RPC: %v", err))
 				exitChan <- true
 				return
 			}
@@ -267,9 +353,9 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 				cdrsConn = resp
 				internalRaterChan <- resp
 			} else {
-				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 				if err != nil {
-					utils.Logger.Crit(fmt.Sprintf("<SM-FreeSWITCH> Could not connect to CDRS via RPC: %v", err))
+					utils.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
 					exitChan <- true
 					return
 				}
@@ -278,7 +364,6 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		}
 	}
 	sm, _ := sessionmanager.NewOSipsSessionManager(cfg.SmOsipsConfig, cfg.Reconnects, raterConn, cdrsConn, cfg.DefaultTimezone)
-	sms = append(sms, sm)
 	smRpc.SMs = append(smRpc.SMs, sm)
 	if err := sm.Connect(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> error: %s!", err))
@@ -300,7 +385,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		raterConn = responder
 		internalRaterChan <- responder // Put back the connection since there might be other entities waiting for it
 	} else if len(cfg.CDRSRater) != 0 {
-		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSRater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSRater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to rater: %s", err.Error()))
 			exitChan <- true
@@ -318,7 +403,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		if cfg.CDRSRater == cfg.CDRSPubSub {
 			pubSubConn = &engine.ProxyPubSub{Client: client}
 		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to pubsub server: %s", err.Error()))
 				exitChan <- true
@@ -337,7 +422,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		if cfg.CDRSRater == cfg.CDRSUsers {
 			usersConn = &engine.ProxyUserService{Client: client}
 		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSUsers, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSUsers, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to users server: %s", err.Error()))
 				exitChan <- true
@@ -356,7 +441,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		if cfg.CDRSRater == cfg.CDRSAliases {
 			aliasesConn = &engine.ProxyAliasService{Client: client}
 		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSAliases, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSAliases, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to aliases server: %s", err.Error()))
 				exitChan <- true
@@ -375,7 +460,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		if cfg.CDRSRater == cfg.CDRSStats {
 			statsConn = &engine.ProxyStats{Client: client}
 		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
 				exitChan <- true
@@ -588,7 +673,7 @@ func main() {
 	internalPubSubSChan := make(chan engine.PublisherSubscriber, 1)
 	internalUserSChan := make(chan engine.UserService, 1)
 	internalAliaseSChan := make(chan engine.AliasService, 1)
-
+	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	// Start balancer service
 	if cfg.BalancerEnabled {
 		go startBalancer(internalBalancerChan, &stopHandled, exitChan) // Not really needed async here but to cope with uniformity
@@ -618,6 +703,10 @@ func main() {
 	// Start CDRC components if necessary
 	go startCdrcs(internalCdrSChan, internalRaterChan, exitChan)
 
+	// Start SM-Generic
+	if cfg.SmGenericConfig.Enabled {
+		go startSmGeneric(internalSMGChan, internalRaterChan, server, exitChan)
+	}
 	// Start SM-FreeSWITCH
 	if cfg.SmFsConfig.Enabled {
 		go startSmFreeSWITCH(internalRaterChan, cdrDb, exitChan)
@@ -636,9 +725,13 @@ func main() {
 	}
 
 	// Register session manager service // FixMe: make sure this is thread safe
-	if cfg.SmFsConfig.Enabled || cfg.SmKamConfig.Enabled || cfg.SmOsipsConfig.Enabled { // Register SessionManagerV1 service
+	if cfg.SmGenericConfig.Enabled || cfg.SmFsConfig.Enabled || cfg.SmKamConfig.Enabled || cfg.SmOsipsConfig.Enabled { // Register SessionManagerV1 service
 		smRpc = new(v1.SessionManagerV1)
 		server.RpcRegister(smRpc)
+	}
+
+	if cfg.DiameterAgentCfg().Enabled {
+		go startDiameterAgent(internalSMGChan, exitChan)
 	}
 
 	// Start HistoryS service

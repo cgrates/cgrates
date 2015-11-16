@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"log"
 	"testing"
 	"time"
 
@@ -887,9 +888,9 @@ func TestAccountAddMinutBucketEmpty(t *testing.T) {
 func TestAccountExecuteTriggeredActions(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
-		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ThresholdType: TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
+		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
+		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.StringMap{utils.OUT: true}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 110 || ub.BalanceMap[utils.VOICE][0].GetValue() != 20 {
@@ -913,7 +914,7 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}}, &Balance{Directions: utils.NewStringMap(utils.OUT), Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
 		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 100, ThresholdType: TRIGGER_MIN_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 100, ThresholdType: utils.TRIGGER_MIN_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(1, utils.MONETARY, nil, nil)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 110 || ub.BalanceMap[utils.VOICE][0].GetValue() != 20 {
@@ -926,13 +927,59 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}},
 		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.BalanceMap[utils.MONETARY]) != 1 || ub.BalanceMap[utils.MONETARY][0].GetValue() != 10 {
 
 		t.Errorf("Error executing triggered actions in order %v BAL: %+v", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.MONETARY][1])
+	}
+}
+
+func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
+	ub := &Account{
+		Id:         "TEST_UB",
+		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{Id: "day_trigger", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
+			&ActionTrigger{Id: "week_trigger", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 100, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
+		},
+	}
+	ub.InitCounters()
+	if len(ub.UnitCounters) != 1 || len(ub.UnitCounters[0].Balances) != 2 {
+		log.Print("Error initializing counters: ", ub.UnitCounters[0].Balances[0])
+	}
+
+	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
+	if ub.UnitCounters[0].Balances[0].Value != 1 ||
+		ub.UnitCounters[0].Balances[1].Value != 1 {
+		t.Error("Error incrementing both counters", ub.UnitCounters[0].Balances[0].Value, ub.UnitCounters[0].Balances[1].Value)
+	}
+
+	// we can reset them
+	resetCountersAction(ub, nil, &Action{BalanceType: utils.MONETARY, Balance: &Balance{Id: "day_trigger"}}, nil)
+	if ub.UnitCounters[0].Balances[0].Value != 0 ||
+		ub.UnitCounters[0].Balances[1].Value != 1 {
+		t.Error("Error reseting both counters", ub.UnitCounters[0].Balances[0].Value, ub.UnitCounters[0].Balances[1].Value)
+	}
+}
+
+func TestAccountExpActionTrigger(t *testing.T) {
+	ub := &Account{
+		Id:         "TEST_UB",
+		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100, ExpirationDate: time.Date(2015, time.November, 9, 9, 48, 0, 0, time.UTC)}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{Id: "check expired balances", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
+		},
+	}
+	ub.executeActionTriggers(nil)
+	if ub.BalanceMap[utils.MONETARY][0].IsExpired() ||
+		ub.BalanceMap[utils.MONETARY][0].GetValue() != 10 || // expired was cleaned
+		ub.BalanceMap[utils.VOICE][0].GetValue() != 20 ||
+		ub.ActionTriggers[0].Executed != true {
+		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpired())
+		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.VOICE][0].GetValue(), len(ub.BalanceMap[utils.MONETARY]))
 	}
 }
 
@@ -1142,6 +1189,33 @@ func TestMaxDurationShared(t *testing.T) {
 	}
 	if duration != 1*time.Minute {
 		t.Error("Wrong max session from shared group: ", duration)
+	}
+
+}
+
+func TestMaxDurationConnectFeeOnly(t *testing.T) {
+	cd := &CallDescriptor{
+		Tenant:        "cgrates.org",
+		Category:      "call",
+		TimeStart:     time.Date(2015, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2015, 9, 24, 10, 58, 1, 0, time.UTC),
+		Direction:     utils.OUT,
+		Destination:   "4444",
+		Subject:       "dy",
+		Account:       "dy",
+		TOR:           utils.VOICE,
+		DurationIndex: 600,
+	}
+	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
+		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneya", Value: 0.2}},
+	}}
+
+	duration, err := cd.getMaxSessionDuration(rif)
+	if err != nil {
+		t.Error("Error getting max session duration: ", err)
+	}
+	if duration != 0 {
+		t.Error("Wrong max session: ", duration)
 	}
 
 }
@@ -1442,42 +1516,42 @@ func TestAccountInitCounters(t *testing.T) {
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Id:                "TestTR1",
-				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.MONETARY,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR11",
-				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.MONETARY,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR2",
-				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.VOICE,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR3",
-				ThresholdType:     TRIGGER_MAX_BALANCE_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
 				BalanceType:       utils.VOICE,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR4",
-				ThresholdType:     TRIGGER_MAX_BALANCE_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
 				BalanceType:       utils.SMS,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR5",
-				ThresholdType:     TRIGGER_MAX_BALANCE,
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 				BalanceType:       utils.SMS,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
@@ -1505,42 +1579,42 @@ func TestAccountDoubleInitCounters(t *testing.T) {
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
 				Id:                "TestTR1",
-				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.MONETARY,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR11",
-				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.MONETARY,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR2",
-				ThresholdType:     TRIGGER_MAX_EVENT_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.VOICE,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR3",
-				ThresholdType:     TRIGGER_MAX_BALANCE_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
 				BalanceType:       utils.VOICE,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR4",
-				ThresholdType:     TRIGGER_MAX_BALANCE_COUNTER,
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
 				BalanceType:       utils.SMS,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
 				Id:                "TestTR5",
-				ThresholdType:     TRIGGER_MAX_BALANCE,
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 				BalanceType:       utils.SMS,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,

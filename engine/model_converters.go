@@ -177,7 +177,7 @@ func APItoModelAction(as *utils.TPActions) (result []TpAction) {
 			DestinationTags: a.DestinationIds,
 			RatingSubject:   a.RatingSubject,
 			Categories:      a.Categories,
-			SharedGroups:     a.SharedGroups,
+			SharedGroups:    a.SharedGroups,
 			BalanceWeight:   a.BalanceWeight,
 			ExtraParameters: a.ExtraParameters,
 			Weight:          a.Weight,
@@ -230,7 +230,7 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result []TpActionTrig
 			BalanceTimingTags:      at.BalanceTimingTags,
 			BalanceRatingSubject:   at.BalanceRatingSubject,
 			BalanceCategories:      at.BalanceCategories,
-			BalanceSharedGroups:     at.BalanceSharedGroups,
+			BalanceSharedGroups:    at.BalanceSharedGroups,
 			BalanceDisabled:        at.BalanceDisabled,
 			MinQueuedItems:         at.MinQueuedItems,
 			ActionsTag:             at.ActionsId,
@@ -393,6 +393,7 @@ func APItoModelUsers(attr *utils.TPUsers) (result []TpUser) {
 			UserName:       attr.UserName,
 			AttributeName:  p.AttrName,
 			AttributeValue: p.AttrValue,
+			Weight:         attr.Weight,
 		})
 	}
 	if len(attr.Profile) == 0 {

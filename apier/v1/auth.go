@@ -30,7 +30,7 @@ import (
 func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float64) error {
 	err := engine.LoadUserProfile(&usageRecord, "ExtraFields")
 	if err != nil {
-		return err
+		return utils.NewErrServerError(err)
 	}
 	if usageRecord.TOR == "" {
 		usageRecord.TOR = utils.VOICE

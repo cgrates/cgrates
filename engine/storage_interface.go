@@ -55,15 +55,15 @@ type RatingStorage interface {
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
-	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
-	SetDerivedChargers(string, utils.DerivedChargers) error
+	GetDerivedChargers(string, bool) (*utils.DerivedChargers, error)
+	SetDerivedChargers(string, *utils.DerivedChargers) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
 	SetSharedGroup(*SharedGroup) error
 	GetActionTriggers(string) (ActionTriggers, error)
 	SetActionTriggers(string, ActionTriggers) error
-	GetActionPlans(string) (ActionPlans, error)
+	GetActionPlans(string, bool) (ActionPlans, error)
 	SetActionPlans(string, ActionPlans) error
 	GetAllActionPlans() (map[string]ActionPlans, error)
 }

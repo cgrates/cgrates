@@ -47,14 +47,14 @@ func fwvValue(cdrLine string, indexStart, width int, padding string) string {
 	return rawVal
 }
 
-func NewFwvRecordsProcessor(file *os.File, cdrcCfgs map[string]*config.CdrcConfig, dfltCfg *config.CdrcConfig, httpClient *http.Client, httpSkipTlsCheck bool, timezone string) *FwvRecordsProcessor {
+func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig, cdrcCfgs map[string]*config.CdrcConfig, httpClient *http.Client, httpSkipTlsCheck bool, timezone string) *FwvRecordsProcessor {
 	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg, httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone}
 }
 
 type FwvRecordsProcessor struct {
 	file               *os.File
-	cdrcCfgs           map[string]*config.CdrcConfig
 	dfltCfg            *config.CdrcConfig // General parameters
+	cdrcCfgs           map[string]*config.CdrcConfig
 	httpClient         *http.Client
 	httpSkipTlsCheck   bool
 	timezone           string
@@ -123,7 +123,7 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 	}
 	self.processedRecordsNr += 1
 	record := string(buf)
-	for cfgKey := range self.cdrcCfgs {
+	for cfgKey, cdrcCfg := range self.cdrcCfgs {
 		if passes := self.recordPassesCfgFilter(record, cfgKey); !passes {
 			continue
 		}
@@ -131,6 +131,9 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
 		} else {
 			recordCdrs = append(recordCdrs, storedCdr)
+		}
+		if !cdrcCfg.ContinueOnSuccess { // Successfully executed one config, do not continue for next one
+			break
 		}
 	}
 	return recordCdrs, nil
@@ -247,6 +250,5 @@ func (self *FwvRecordsProcessor) processTrailer() error {
 	} else if nRead != len(buf) {
 		return fmt.Errorf("In trailer, line len: %d, have read: %d", self.lineLen, nRead)
 	}
-	//utils.Logger.Debug(fmt.Sprintf("Have read trailer: <%q>", string(buf)))
 	return nil
 }

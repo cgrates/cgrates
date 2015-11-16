@@ -14,21 +14,23 @@ func NewErrServerError(err error) error {
 }
 
 var (
-	ErrNotImplemented     = errors.New("NOT_IMPLEMENTED")
-	ErrNotFound           = errors.New("NOT_FOUND")
-	ErrTimedOut           = errors.New("TIMED_OUT")
-	ErrServerError        = errors.New("SERVER_ERROR")
-	ErrMaxRecursionDepth  = errors.New("MAX_RECURSION_DEPTH")
-	ErrMandatoryIeMissing = errors.New("MANDATORY_IE_MISSING")
-	ErrExists             = errors.New("EXISTS")
-	ErrBrokenReference    = errors.New("BROKEN_REFERENCE")
-	ErrParserError        = errors.New("PARSER_ERROR")
-	ErrInvalidPath        = errors.New("INVALID_PATH")
-	ErrInvalidKey         = errors.New("INVALID_KEY")
+	ErrNotImplemented          = errors.New("NOT_IMPLEMENTED")
+	ErrNotFound                = errors.New("NOT_FOUND")
+	ErrTimedOut                = errors.New("TIMED_OUT")
+	ErrServerError             = errors.New("SERVER_ERROR")
+	ErrMaxRecursionDepth       = errors.New("MAX_RECURSION_DEPTH")
+	ErrMandatoryIeMissing      = errors.New("MANDATORY_IE_MISSING")
+	ErrExists                  = errors.New("EXISTS")
+	ErrBrokenReference         = errors.New("BROKEN_REFERENCE")
+	ErrParserError             = errors.New("PARSER_ERROR")
+	ErrInvalidPath             = errors.New("INVALID_PATH")
+	ErrInvalidKey              = errors.New("INVALID_KEY")
+	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
 )
 
 const (
 	VERSION                    = "0.9.1~rc8"
+	DIAMETER_FIRMWARE_REVISION = 918
 	POSTGRES                   = "postgres"
 	MYSQL                      = "mysql"
 	MONGO                      = "mongo"
@@ -123,6 +125,7 @@ const (
 	COST_DETAILS               = "CostDetails"
 	RATED                      = "rated"
 	RATED_FLD                  = "Rated"
+	MAX_USAGE                  = "MaxUsage"
 	DEFAULT_RUNID              = "*default"
 	META_DEFAULT               = "*default"
 	STATIC_VALUE_PREFIX        = "^"
@@ -218,7 +221,7 @@ const (
 	CGR_ACCID                    = "cgr_accid"
 	CGR_HOST                     = "cgr_host"
 	CGR_PDD                      = "cgr_pdd"
-	DISCONNECT_CAUSE             = "disconnect_cause"
+	DISCONNECT_CAUSE             = "DisconnectCause"
 	CGR_DISCONNECT_CAUSE         = "cgr_disconnectcause"
 	CGR_COMPUTELCR               = "cgr_computelcr"
 	CGR_SUPPLIERS                = "cgr_suppliers"
@@ -234,8 +237,24 @@ const (
 	EXTRA_FIELDS                 = "ExtraFields"
 	META_SURETAX                 = "*sure_tax"
 	SURETAX                      = "suretax"
+	DIAMETER_AGENT               = "diameter_agent"
 	COUNTER_EVENT                = "*event"
 	COUNTER_BALANCE              = "*balance"
+	EVENT_NAME                   = "EventName"
+	COMPUTE_LCR                  = "ComputeLcr"
+	CGR_AUTHORIZATION            = "CgrAuthorization"
+	CGR_SESSION_START            = "CgrSessionStart"
+	CGR_SESSION_UPDATE           = "CgrSessionUpdate"
+	CGR_SESSION_END              = "CgrSessionEnd"
+	CGR_LCR_REQUEST              = "CgrLcrRequest"
+	// action trigger threshold types
+	TRIGGER_MIN_EVENT_COUNTER   = "*min_event_counter"
+	TRIGGER_MIN_BALANCE_COUNTER = "*min_balance_counter"
+	TRIGGER_MAX_EVENT_COUNTER   = "*max_event_counter"
+	TRIGGER_MAX_BALANCE_COUNTER = "*max_balance_counter"
+	TRIGGER_MIN_BALANCE         = "*min_balance"
+	TRIGGER_MAX_BALANCE         = "*max_balance"
+	TRIGGER_BALANCE_EXPIRED     = "*balance_expired"
 )
 
 var (

@@ -13,10 +13,24 @@ Customisable through the use of a configuration file, it will start on demand on
 
  rif@grace:~$ cgr-engine -help
  Usage of cgr-engine:
-    -config="/etc/cgrates/cgrates.cfg": Configuration file location.
-    -version=false: Prints the application version.
+   -cdrs
+         Enforce starting of the cdrs daemon overwriting config
+   -config_dir string
+         Configuration directory path. (default "/etc/cgrates/")
+   -cpuprofile string
+         write cpu profile to file
+   -pid string
+         Write pid file
+   -rater
+         Enforce starting of the rater daemon overwriting config
+   -scheduler
+         Enforce starting of the scheduler daemon .overwriting config
+   -singlecpu
+         Run on single CPU core
+   -version
+         Prints the application version.
 
-:Example: cgr-engine -config=cgr-customconfig.cfg
+:Example: cgr-engine -config_dir=/etc/cgrates
 
 2.1.1. Rater service
 ~~~~~~~~~~~~~~~~~~~~
@@ -75,30 +89,102 @@ Used for importing the rating information into the CGRateS database system.
 
  rif@grace:~$ cgr-loader -help
  Usage of cgr-loader:
-   -dbhost="localhost": The database host to connect to.
-   -dbname="10": he name/number of the database to connect to.
-   -dbpass="": The database user's password.
-   -dbport="6379": The database port to bind to.
-   -dbtype="redis": The type of the database (redis|mongo|postgres)
-   -dbuser="": The database user to sign in as.
-   -flush=false: Flush the database before importing
-   -path=".": The path containing the data files
-   -version=false: Prints the application version.
+   -cdrstats_address string
+         CDRStats service to contact for data reloads, empty to disable automatic data reloads (default "127.0.0.1:2013")
+   -datadb_host string
+         The DataDb host to connect to. (default "127.0.0.1")
+   -datadb_name string
+         The name/number of the DataDb to connect to. (default "11")
+   -datadb_passwd string
+         The DataDb user's password.
+   -datadb_port string
+         The DataDb port to bind to. (default "6379")
+   -datadb_type string
+         The type of the DataDb database <redis> (default "redis")
+   -datadb_user string
+         The DataDb user to sign in as.
+   -dbdata_encoding string
+         The encoding used to store object data in strings (default "msgpack")
+   -dry_run
+         When true will not save loaded data to dataDb but just parse it for consistency and errors.
+   -flushdb
+         Flush the database before importing
+   -from_stordb
+         Load the tariff plan from storDb to dataDb
+   -history_server string
+         The history server address:port, empty to disable automaticautomatic  history archiving (default "127.0.0.1:2013")
+   -load_history_size int
+         Limit the number of records in the load history (default 10)
+   -migrate_rc8
+         Migrate Accounts, Actions and ActionTriggers to RC8 structures
+   -path string
+         The path to folder containing the data files (default "./")
+   -rater_address string
+         Rater service to contact for cache reloads, empty to disable automatic cache reloads (default "127.0.0.1:2013")
+   -runid string
+         Uniquely identify an import/load, postpended to some automatic fields
+   -stats
+         Generates statsistics about given data.
+   -stordb_host string
+         The storDb host to connect to. (default "127.0.0.1")
+   -stordb_name string
+         The name/number of the storDb to connect to. (default "cgrates")
+   -stordb_passwd string
+         The storDb user's password. (default "CGRateS.org")
+   -stordb_port string
+         The storDb port to bind to. (default "3306")
+   -stordb_type string
+         The type of the storDb database <mysql> (default "mysql")
+   -stordb_user string
+         The storDb user to sign in as. (default "cgrates")
+   -timezone string
+         Timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB> (default "Local")
+   -to_stordb
+         Import the tariff plan from files to storDb
+   -tpdb_host string
+         The TariffPlan host to connect to. (default "127.0.0.1")
+   -tpdb_name string
+         The name/number of the TariffPlan to connect to. (default "10")
+   -tpdb_passwd string
+         The TariffPlan user's password.
+   -tpdb_port string
+         The TariffPlan port to bind to. (default "6379")
+   -tpdb_type string
+         The type of the TariffPlan database <redis> (default "redis")
+   -tpdb_user string
+         The TariffPlan user to sign in as.
+   -tpid string
+         The tariff plan id from the database
+   -users_address string
+         Users service to contact for data reloads, empty to disable automatic data reloads (default "127.0.0.1:2013")
+   -validate
+         When true will run various check on the loaded data to check for structural errors
+   -verbose
+         Enable detailed verbose logging output
+   -version
+         Prints the application version.
 
-:Example: cgr-loader -flush
+:Example: cgr-loader -flushdb
 
 
 2.3. cgr-console
 ----------------
 Command line tool used to interface with the Rater (or Balancer). Able to execute sub-commands
+
 ::
 
- cgrrif@grace:~$ cgr-console -help
+ rif@grace:~$ cgr-console -help
  Usage of cgr-console:
-  -rpc_encoding="gob": RPC encoding used <gob|json>
-  -server="127.0.0.1:2012": server address host:port
-  -version=false: Prints the application version.
- cgrrif@grace:~$ cgr-console help_more
+   -rpc_encoding string
+         RPC encoding used <gob|json> (default "json")
+   -server string
+         server address host:port (default "127.0.0.1:2012")
+   -verbose
+         Show extra info about command execution.
+   -version
+         Prints the application version.
+
+ rif@grace:~$ cgr-console help_more
  2013/04/13 17:23:51 
  Usage: cgr-console [cfg_opts...{-h}] <status|get_balance>
 

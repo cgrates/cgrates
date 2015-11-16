@@ -191,7 +191,7 @@ func (sm *FSSessionManager) onChannelAnswer(ev engine.Event, connId string) {
 	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
-	if ev.MissingParameter() {
+	if ev.MissingParameter(sm.timezone) {
 		sm.DisconnectSession(ev, connId, MISSING_PARAMETER)
 	}
 	s := NewSession(ev, connId, sm)

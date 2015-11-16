@@ -283,7 +283,7 @@ type TPAction struct {
 	DestinationIds  string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
 	Categories      string  // category filter for balances
-	SharedGroups     string  // Reference to a shared group
+	SharedGroups    string  // Reference to a shared group
 	BalanceWeight   float64 // Balance weight
 	ExtraParameters string
 	Weight          float64 // Action's weight
@@ -345,6 +345,7 @@ type TPUsers struct {
 	Masked   bool
 	UserName string
 	Profile  []*TPUserProfile
+	Weight   float64
 }
 
 type TPUserProfile struct {
@@ -393,6 +394,7 @@ type TPDerivedChargers struct {
 	Category        string
 	Account         string
 	Subject         string
+	DestinationIds  string
 	DerivedChargers []*TPDerivedCharger
 }
 
@@ -483,7 +485,7 @@ type TPActionTrigger struct {
 	BalanceTimingTags     string  // filter for balance
 	BalanceRatingSubject  string  // filter for balance
 	BalanceCategories     string  // filter for balance
-	BalanceSharedGroups    string  // filter for balance
+	BalanceSharedGroups   string  // filter for balance
 	BalanceDisabled       bool    // filter for balance
 	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached
@@ -555,6 +557,7 @@ type ApiReloadCache struct {
 	RatingPlanIds    []string
 	RatingProfileIds []string
 	ActionIds        []string
+	ActionPlanIds    []string
 	SharedGroupIds   []string
 	LCRIds           []string
 	DerivedChargers  []string
@@ -570,6 +573,7 @@ type CacheStats struct {
 	RatingPlans     int
 	RatingProfiles  int
 	Actions         int
+	ActionPlans     int
 	SharedGroups    int
 	DerivedChargers int
 	LcrProfiles     int
@@ -590,6 +594,7 @@ type CachedItemAge struct {
 	RatingPlan      time.Duration
 	RatingProfile   time.Duration
 	Action          time.Duration
+	ActionPlan      time.Duration
 	SharedGroup     time.Duration
 	DerivedChargers time.Duration
 	Alias           time.Duration
@@ -801,7 +806,7 @@ type AttrGetDestination struct {
 }
 
 type AttrDerivedChargers struct {
-	Direction, Tenant, Category, Account, Subject string
+	Direction, Tenant, Category, Account, Subject, Destination string
 }
 
 func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {

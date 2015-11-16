@@ -177,6 +177,7 @@ const CGRATES_CFG_JSON = `
 		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",							// filter CDR records to import
+		"continue_on_success": false,				// continue to the next template if executed
 		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
 		"header_fields": [],						// template of the import header fields
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
@@ -199,10 +200,11 @@ const CGRATES_CFG_JSON = `
 
 "sm_generic": {
 	"enabled": false,						// starts SessionManager service: <true|false>
+	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 	"rater": "internal",					// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "internal",						// address where to reach CDR Server <""|internal|x.y.z.y:1234>
-	"debit_interval": "10s",				// interval to perform debits on.
-	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
+	"debit_interval": "0",					// interval to perform debits on.
+	"min_call_duration": "0",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 },
 
@@ -254,6 +256,43 @@ const CGRATES_CFG_JSON = `
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
+},
+
+
+"diameter_agent": {
+	"enabled": false,					// enables the diameter agent: <true|false>
+	"listen": "127.0.0.1:3868",			// address where to listen for diameter requests <x.y.z.y:1234>
+	"dictionaries_dir": "",				// path towards directory holding additional dictionaries to load
+	"sm_generic": "internal",			// connection towards SMG component for session management
+	"timezone": "",						// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
+	"origin_host": "diameter-agent",	// diameter Origin-Host AVP used in replies
+	"origin_realm": "cgrates.org",		// diameter Origin-Realm AVP used in replies
+	"vendor_id": 0,						// diameter Vendor-Id AVP used in replies
+	"product_name": "CGRateS",			// diameter Product-Name AVP used in replies
+
+	"request_processors": [
+		{
+			"id": "*default",									// Identifier of this processor
+			"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+			"request_filter": "Subscription-Id>Subscription-Type(0)",		// filter requests processed by this processor
+			"continue_on_success": false,				// continue to the next template if executed
+			"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "tor", "cdr_field_id": "TOR", "type": "cdrfield", "value": "^*voice", "mandatory": true},
+				{"tag": "accid", "cdr_field_id": "AccId", "type": "cdrfield", "value": "Session-Id", "mandatory": true},
+				{"tag": "reqtype", "cdr_field_id": "ReqType", "type": "cdrfield", "value": "^*users", "mandatory": true},
+				{"tag": "direction", "cdr_field_id": "Direction", "type": "cdrfield", "value": "^*out", "mandatory": true},
+				{"tag": "tenant", "cdr_field_id": "Tenant", "type": "cdrfield", "value": "^*users", "mandatory": true},
+				{"tag": "category", "cdr_field_id": "Category", "type": "cdrfield", "value": "^call_;~Calling-Vlr-Number:s/^$/33000/;~Calling-Vlr-Number:s/^(\\d{5})/${1}/", "mandatory": true},
+				{"tag": "account", "cdr_field_id": "Account", "type": "cdrfield", "value": "^*users", "mandatory": true},
+				{"tag": "subject", "cdr_field_id": "Subject", "type": "cdrfield", "value": "^*users", "mandatory": true},
+				{"tag": "destination", "cdr_field_id": "Destination", "type": "cdrfield", "value": "Real-Called-Number", "mandatory": true},
+				{"tag": "setup_time", "cdr_field_id": "SetupTime", "type": "cdrfield", "value": "Event-Time", "mandatory": true},
+				{"tag": "answer_time", "cdr_field_id": "AnswerTime", "type": "cdrfield", "value": "Event-Time", "mandatory": true},
+				{"tag": "usage", "cdr_field_id": "Usage", "type": "cdrfield", "value": "CC-Time", "mandatory": true},
+				{"tag": "subscriber_id", "cdr_field_id": "SubscriberId", "type": "cdrfield", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
+			],
+		},
+	],
 },
 
 

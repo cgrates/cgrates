@@ -417,11 +417,11 @@ func (csvs *CSVStorage) GetTpDerivedChargers(filter *TpDerivedCharger) ([]TpDeri
 			log.Print("bad line in derived chargers csv: ", err)
 			return nil, err
 		}
-		if tpRate, err := csvLoad(TpDerivedCharger{}, record); err != nil {
+		if tp, err := csvLoad(TpDerivedCharger{}, record); err != nil {
 			log.Print("error loading derived charger: ", err)
 			return nil, err
 		} else {
-			dc := tpRate.(TpDerivedCharger)
+			dc := tp.(TpDerivedCharger)
 			if filter != nil {
 				dc.Tpid = filter.Tpid
 				dc.Loadid = filter.Loadid

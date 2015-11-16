@@ -315,7 +315,7 @@ func TestPSQLSetGetTPActionTriggers(t *testing.T) {
 	if rcvMpAtrgs, err := psqlDb.GetTpActionTriggers(utils.TEST_SQL, utils.TEST_SQL); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !modelEqual(matrg[0], rcvMpAtrgs[0]) {
-		t.Errorf("Expecting: %v, received: %v", matrg, rcvMpAtrgs)
+		t.Errorf("Expecting: %+v, received: %+v", matrg, rcvMpAtrgs)
 	}
 }
 

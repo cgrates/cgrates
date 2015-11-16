@@ -114,36 +114,19 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
 	}
-	cdrc := &Cdrc{cdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
-		runDelay: cdrcCfg.RunDelay, csvSep: cdrcCfg.FieldSeparator,
-		httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, dfltCdrcCfg: cdrcCfg, timezone: utils.FirstNonEmpty(cdrcCfg.Timezone, dfltTimezone), cdrs: cdrs,
+	cdrc := &Cdrc{httpSkipTlsCheck: httpSkipTlsCheck, cdrcCfgs: cdrcCfgs, dfltCdrcCfg: cdrcCfg, timezone: utils.FirstNonEmpty(cdrcCfg.Timezone, dfltTimezone), cdrs: cdrs,
 		closeChan: closeChan, maxOpenFiles: make(chan struct{}, cdrcCfg.MaxOpenFiles),
 	}
 	var processFile struct{}
 	for i := 0; i < cdrcCfg.MaxOpenFiles; i++ {
 		cdrc.maxOpenFiles <- processFile // Empty initiate so we do not need to wait later when we pop
 	}
-	cdrc.cdrSourceIds = make([]string, len(cdrcCfgs))
-	cdrc.duMultiplyFactors = make([]float64, len(cdrcCfgs))
-	cdrc.cdrFilters = make([]utils.RSRFields, len(cdrcCfgs))
-	cdrc.cdrFields = make([][]*config.CfgCdrField, len(cdrcCfgs))
-	idx := 0
 	var err error
-	for _, cfg := range cdrcCfgs {
-		if idx == 0 { // Steal the config from just one instance since it should be the same for all
-			cdrc.failedCallsPrefix = cfg.FailedCallsPrefix
-			if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
-				return nil, err
-			}
-		}
-		cdrc.cdrSourceIds[idx] = cfg.CdrSourceId
-		cdrc.duMultiplyFactors[idx] = cfg.DataUsageMultiplyFactor
-		cdrc.cdrFilters[idx] = cfg.CdrFilter
-		cdrc.cdrFields[idx] = cfg.ContentFields
-		idx += 1
+	if cdrc.partialRecordsCache, err = NewPartialRecordsCache(cdrcCfg.PartialRecordCache, cdrcCfg.CdrOutDir, cdrcCfg.FieldSeparator); err != nil {
+		return nil, err
 	}
 	// Before processing, make sure in and out folders exist
-	for _, dir := range []string{cdrc.cdrInDir, cdrc.cdrOutDir} {
+	for _, dir := range []string{cdrcCfg.CdrInDir, cdrcCfg.CdrOutDir} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 			return nil, fmt.Errorf("Nonexistent folder: %s", dir)
 		}
@@ -153,16 +136,6 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs
 }
 
 type Cdrc struct {
-	cdrFormat,
-	cdrInDir,
-	cdrOutDir string
-	failedCallsPrefix   string   // Configured failedCallsPrefix, used in case of flatstore CDRs
-	cdrSourceIds        []string // Should be in sync with cdrFields on indexes
-	runDelay            time.Duration
-	csvSep              rune
-	duMultiplyFactors   []float64
-	cdrFilters          []utils.RSRFields       // Should be in sync with cdrFields on indexes
-	cdrFields           [][]*config.CfgCdrField // Profiles directly connected with cdrFilters
 	httpSkipTlsCheck    bool
 	cdrcCfgs            map[string]*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
 	dfltCdrcCfg         *config.CdrcConfig
@@ -176,19 +149,19 @@ type Cdrc struct {
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
 func (self *Cdrc) Run() error {
-	if self.runDelay == time.Duration(0) { // Automated via inotify
+	if self.dfltCdrcCfg.RunDelay == time.Duration(0) { // Automated via inotify
 		return self.trackCDRFiles()
 	}
 	// Not automated, process and sleep approach
 	for {
 		select {
 		case <-self.closeChan: // Exit, reinject closeChan for other CDRCs
-			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
+			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.dfltCdrcCfg.CdrInDir))
 			return nil
 		default:
 		}
 		self.processCdrDir()
-		time.Sleep(self.runDelay)
+		time.Sleep(self.dfltCdrcCfg.RunDelay)
 	}
 }
 
@@ -199,18 +172,18 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 		return
 	}
 	defer watcher.Close()
-	err = watcher.Add(self.cdrInDir)
+	err = watcher.Add(self.dfltCdrcCfg.CdrInDir)
 	if err != nil {
 		return
 	}
-	utils.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.cdrInDir))
+	utils.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.dfltCdrcCfg.CdrInDir))
 	for {
 		select {
 		case <-self.closeChan: // Exit, reinject closeChan for other CDRCs
-			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.cdrInDir))
+			utils.Logger.Info(fmt.Sprintf("<Cdrc> Shutting down CDRC on path %s.", self.dfltCdrcCfg.CdrInDir))
 			return nil
 		case ev := <-watcher.Events:
-			if ev.Op&fsnotify.Create == fsnotify.Create && (self.cdrFormat != FS_CSV || path.Ext(ev.Name) != ".csv") {
+			if ev.Op&fsnotify.Create == fsnotify.Create && (self.dfltCdrcCfg.CdrFormat != FS_CSV || path.Ext(ev.Name) != ".csv") {
 				go func() { //Enable async processing here
 					if err = self.processFile(ev.Name); err != nil {
 						utils.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
@@ -225,12 +198,12 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 
 // One run over the CDR folder
 func (self *Cdrc) processCdrDir() error {
-	utils.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.cdrInDir))
-	filesInDir, _ := ioutil.ReadDir(self.cdrInDir)
+	utils.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.dfltCdrcCfg.CdrInDir))
+	filesInDir, _ := ioutil.ReadDir(self.dfltCdrcCfg.CdrInDir)
 	for _, file := range filesInDir {
-		if self.cdrFormat != FS_CSV || path.Ext(file.Name()) != ".csv" {
+		if self.dfltCdrcCfg.CdrFormat != FS_CSV || path.Ext(file.Name()) != ".csv" {
 			go func() { //Enable async processing here
-				if err := self.processFile(path.Join(self.cdrInDir, file.Name())); err != nil {
+				if err := self.processFile(path.Join(self.dfltCdrcCfg.CdrInDir, file.Name())); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", file, err.Error()))
 				}
 			}()
@@ -254,16 +227,16 @@ func (self *Cdrc) processFile(filePath string) error {
 		return err
 	}
 	var recordsProcessor RecordsProcessor
-	switch self.cdrFormat {
+	switch self.dfltCdrcCfg.CdrFormat {
 	case CSV, FS_CSV, utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE:
 		csvReader := csv.NewReader(bufio.NewReader(file))
-		csvReader.Comma = self.csvSep
-		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.cdrFormat, self.timezone, fn, self.failedCallsPrefix,
-			self.cdrSourceIds, self.duMultiplyFactors, self.cdrFilters, self.cdrFields, self.httpSkipTlsCheck, self.partialRecordsCache)
+		csvReader.Comma = self.dfltCdrcCfg.FieldSeparator
+		recordsProcessor = NewCsvRecordsProcessor(csvReader, self.timezone, fn, self.dfltCdrcCfg, self.cdrcCfgs,
+			self.httpSkipTlsCheck, self.partialRecordsCache)
 	case utils.FWV:
-		recordsProcessor = NewFwvRecordsProcessor(file, self.cdrcCfgs, self.dfltCdrcCfg, self.httpClient, self.httpSkipTlsCheck, self.timezone)
+		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs, self.httpClient, self.httpSkipTlsCheck, self.timezone)
 	default:
-		return fmt.Errorf("Unsupported CDR format: %s", self.cdrFormat)
+		return fmt.Errorf("Unsupported CDR format: %s", self.dfltCdrcCfg.CdrFormat)
 	}
 	rowNr := 0 // This counts the rows in the file, not really number of CDRs
 	cdrsPosted := 0
@@ -292,7 +265,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		}
 	}
 	// Finished with file, move it to processed folder
-	newPath := path.Join(self.cdrOutDir, fn)
+	newPath := path.Join(self.dfltCdrcCfg.CdrOutDir, fn)
 	if err := os.Rename(filePath, newPath); err != nil {
 		utils.Logger.Err(err.Error())
 		return err

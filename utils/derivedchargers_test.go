@@ -25,19 +25,20 @@ import (
 
 func TestAppendDerivedChargers(t *testing.T) {
 	var err error
-	dcs := make(DerivedChargers, 0)
+
+	dcs := &DerivedChargers{Chargers: make([]*DerivedCharger, 0)}
 	if _, err := dcs.Append(&DerivedCharger{RunId: DEFAULT_RUNID}); err == nil {
 		t.Error("Failed to detect using of the default runid")
 	}
 	if dcs, err = dcs.Append(&DerivedCharger{RunId: "FIRST_RUNID"}); err != nil {
 		t.Error("Failed to add runid")
-	} else if len(dcs) != 1 {
-		t.Error("Unexpected number of items inside DerivedChargers configuration", len(dcs))
+	} else if len(dcs.Chargers) != 1 {
+		t.Error("Unexpected number of items inside DerivedChargers configuration", len(dcs.Chargers))
 	}
 	if dcs, err = dcs.Append(&DerivedCharger{RunId: "SECOND_RUNID"}); err != nil {
 		t.Error("Failed to add runid")
-	} else if len(dcs) != 2 {
-		t.Error("Unexpected number of items inside DerivedChargers configuration", len(dcs))
+	} else if len(dcs.Chargers) != 2 {
+		t.Error("Unexpected number of items inside DerivedChargers configuration", len(dcs.Chargers))
 	}
 	if _, err := dcs.Append(&DerivedCharger{RunId: "SECOND_RUNID"}); err == nil {
 		t.Error("Failed to detect duplicate runid")
@@ -135,25 +136,26 @@ func TestDerivedChargersKey(t *testing.T) {
 }
 
 func TestAppendDefaultRun(t *testing.T) {
-	var dc1 DerivedChargers
+	dc1 := &DerivedChargers{}
 	dcDf := &DerivedCharger{RunId: DEFAULT_RUNID, RunFilters: "", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
 		TenantField: META_DEFAULT, CategoryField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
 		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PddField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT, SupplierField: META_DEFAULT,
 		DisconnectCauseField: META_DEFAULT, CostField: META_DEFAULT, RatedField: META_DEFAULT}
-	eDc1 := DerivedChargers{dcDf}
+	eDc1 := &DerivedChargers{Chargers: []*DerivedCharger{dcDf}}
 	if dc1, _ = dc1.AppendDefaultRun(); !reflect.DeepEqual(dc1, eDc1) {
-		t.Errorf("Expecting: %+v, received: %+v", eDc1[0], dc1[0])
+		t.Errorf("Expecting: %+v, received: %+v", eDc1.Chargers[0], dc1.Chargers[0])
 	}
-	dc2 := DerivedChargers{
+	dc2 := &DerivedChargers{Chargers: []*DerivedCharger{
 		&DerivedCharger{RunId: "extra1", RunFilters: "", ReqTypeField: "reqtype2", DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
 			AccountField: "rif", SubjectField: "rif", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PddField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT,
 			DisconnectCauseField: META_DEFAULT},
 		&DerivedCharger{RunId: "extra2", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PddField: META_DEFAULT, AnswerTimeField: META_DEFAULT,
-			UsageField: META_DEFAULT, SupplierField: META_DEFAULT, DisconnectCauseField: META_DEFAULT},
+			UsageField: META_DEFAULT, SupplierField: META_DEFAULT, DisconnectCauseField: META_DEFAULT}},
 	}
-	eDc2 := append(dc2, dcDf)
+	eDc2 := &DerivedChargers{}
+	eDc2.Chargers = append(dc2.Chargers, dcDf)
 	if dc2, _ = dc2.AppendDefaultRun(); !reflect.DeepEqual(dc2, eDc2) {
-		t.Errorf("Expecting: %+v, received: %+v", eDc2, dc2)
+		t.Errorf("Expecting: %+v, received: %+v", eDc2.Chargers, dc2.Chargers)
 	}
 }

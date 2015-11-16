@@ -192,7 +192,7 @@ CREATE TABLE tp_action_triggers (
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
   unique_id VARCHAR(64) NOT NULL,
-  threshold_type char(64) NOT NULL,
+  threshold_type VARCHAR(64) NOT NULL,
   threshold_value NUMERIC(20,4) NOT NULL,
   recurrent BOOLEAN NOT NULL,
   min_sleep VARCHAR(16) NOT NULL,
@@ -252,7 +252,7 @@ CREATE TABLE tp_lcr_rules (
   subject VARCHAR(64) NOT NULL,
   destination_tag VARCHAR(64) NOT NULL,
   rp_category VARCHAR(32) NOT NULL,
-  strategy VARCHAR(16) NOT NULL,
+  strategy VARCHAR(18) NOT NULL,
   strategy_params VARCHAR(256) NOT NULL,
   activation_time VARCHAR(24) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
@@ -275,6 +275,7 @@ CREATE TABLE tp_derived_chargers (
   category VARCHAR(32) NOT NULL,
   account VARCHAR(24) NOT NULL,
   subject VARCHAR(64) NOT NULL,
+  destination_ids VARCHAR(64) NOT NULL,
   runid  VARCHAR(24) NOT NULL,
   run_filters  VARCHAR(256) NOT NULL,
   req_type_field  VARCHAR(24) NOT NULL,
@@ -349,6 +350,7 @@ CREATE TABLE tp_users (
   masked BOOLEAN NOT NULL,
   attribute_name VARCHAR(64) NOT NULL,
   attribute_value VARCHAR(64) NOT NULL,
+  weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP
 );
 CREATE INDEX tpusers_tpid_idx ON tp_users (tpid);

@@ -28,7 +28,7 @@ type ProxyScribe struct {
 }
 
 func NewProxyScribe(addr string, attempts, reconnects int) (*ProxyScribe, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
+	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB, nil)
 	if err != nil {
 		return nil, err
 	}

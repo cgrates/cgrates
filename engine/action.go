@@ -56,6 +56,7 @@ const (
 	DENY_NEGATIVE          = "*deny_negative"
 	RESET_ACCOUNT          = "*reset_account"
 	REMOVE_ACCOUNT         = "*remove_account"
+	REMOVE_BALANCE         = "*remove_balance"
 	TOPUP_RESET            = "*topup_reset"
 	TOPUP                  = "*topup"
 	DEBIT_RESET            = "*debit_reset"
@@ -69,6 +70,7 @@ const (
 	MAIL_ASYNC             = "*mail_async"
 	UNLIMITED              = "*unlimited"
 	CDRLOG                 = "*cdrlog"
+	SET_DDESTINATIONS      = "*set_ddestinations"
 )
 
 func (a *Action) Clone() *Action {
@@ -125,6 +127,10 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return callUrlAsync, true
 	case MAIL_ASYNC:
 		return mailAsync, true
+	case SET_DDESTINATIONS:
+		return setddestinations, true
+	case REMOVE_BALANCE:
+		return removeBalance, true
 	}
 	return nil, false
 }
@@ -355,7 +361,9 @@ func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 	if ub == nil {
 		return errors.New("nil user balance")
 	}
-	ub.UnitCounters.resetCounters(a)
+	if ub.UnitCounters != nil {
+		ub.UnitCounters.resetCounters(a)
+	}
 	return
 }
 
@@ -372,8 +380,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	ub.debitBalanceAction(a, reset)
-	return
+	return ub.debitBalanceAction(a, reset)
 }
 
 func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -404,7 +411,7 @@ func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
-	ub.UnitCounters = make(UnitCounters, 0)
+	ub.InitCounters()
 	ub.ResetActionTriggers(nil)
 	return nil
 }
@@ -481,6 +488,67 @@ func mailAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) err
 		}
 	}()
 	return nil
+}
+
+func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	var ddcDestId string
+	for _, bchain := range ub.BalanceMap {
+		for _, b := range bchain {
+			for destId := range b.DestinationIds {
+				if strings.HasPrefix(destId, "*ddc") {
+					ddcDestId = destId
+					break
+				}
+			}
+			if ddcDestId != "" {
+				break
+			}
+		}
+		if ddcDestId != "" {
+			break
+		}
+	}
+	if ddcDestId != "" {
+		// make slice from prefixes
+		prefixes := make([]string, len(sq.Metrics))
+		i := 0
+		for p := range sq.Metrics {
+			prefixes[i] = p
+			i++
+		}
+		// update destid in storage
+		ratingStorage.SetDestination(&Destination{Id: ddcDestId, Prefixes: prefixes})
+		// remove existing from cache
+		CleanStalePrefixes([]string{ddcDestId})
+		// update new values from redis
+		ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + ddcDestId}})
+	} else {
+		return utils.ErrNotFound
+	}
+	return nil
+}
+
+func removeBalance(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if _, exists := ub.BalanceMap[a.BalanceType]; !exists {
+		return utils.ErrNotFound
+	}
+	bChain := ub.BalanceMap[a.BalanceType]
+	found := false
+	for i := 0; i < len(bChain); i++ {
+		if bChain[i].MatchFilter(a.Balance, false) {
+			// delete without preserving order
+			bChain[i] = bChain[len(bChain)-1]
+			bChain = bChain[:len(bChain)-1]
+			i -= 1
+			found = true
+		}
+	}
+	ub.BalanceMap[a.BalanceType] = bChain
+	if !found {
+		return utils.ErrNotFound
+	}
+	// update account in storage
+	return accountingStorage.SetAccount(ub)
 }
 
 // Structure to store actions according to weight

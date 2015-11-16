@@ -20,9 +20,10 @@ package utils
 
 import (
 	"archive/zip"
-
+	"bytes"
 	"crypto/rand"
 	"crypto/sha1"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -377,4 +378,46 @@ func ToJSON(v interface{}) string {
 
 func LogFull(v interface{}) {
 	log.Print(ToIJSON(v))
+}
+
+// Used to convert from generic interface type towards string value
+func ConvertIfaceToString(fld interface{}) (string, bool) {
+	var strVal string
+	var converted bool
+	switch fld.(type) {
+	case string:
+		strVal = fld.(string)
+		converted = true
+	case int:
+		strVal = strconv.Itoa(fld.(int))
+		converted = true
+	case int64:
+		strVal = strconv.FormatInt(fld.(int64), 10)
+		converted = true
+	case bool:
+		strVal = strconv.FormatBool(fld.(bool))
+		converted = true
+	case []uint8:
+		var byteVal []byte
+		if byteVal, converted = fld.([]byte); converted {
+			strVal = string(byteVal)
+		}
+	default: // Maybe we are lucky and the value converts to string
+		strVal, converted = fld.(string)
+	}
+	return strVal, converted
+}
+
+// Simple object cloner, b should be a pointer towards a value into which we want to decode
+func Clone(a, b interface{}) error {
+	buff := new(bytes.Buffer)
+	enc := gob.NewEncoder(buff)
+	dec := gob.NewDecoder(buff)
+	if err := enc.Encode(a); err != nil {
+		return err
+	}
+	if err := dec.Decode(b); err != nil {
+		return err
+	}
+	return nil
 }

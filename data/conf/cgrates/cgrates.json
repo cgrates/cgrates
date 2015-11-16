@@ -1,16 +1,14 @@
 {
 
-
 // Real-time Charging System for Telecom & ISP environments
 // Copyright (C) ITsysCOM GmbH
 //
 // This file contains the default configuration hardcoded into CGRateS.
 // This is what you get when you load CGRateS with an empty configuration file.
 
-
 //"general": {
 //	"http_skip_tls_verify": false,						// if enabled Http Client will accept any TLS certificate
-//	"rounding_decimals": 10,							// system level precision for floats
+//	"rounding_decimals": 5,							// system level precision for floats
 //	"dbdata_encoding": "msgpack",						// encoding used to store object data in strings: <msgpack|json>
 //	"tpexport_dir": "/var/log/cgrates/tpe",				// path towards export folder for offline Tariff Plans
 //	"http_failed_dir": "/var/log/cgrates/http_failed",	// directory path where we store failed http requests
@@ -178,6 +176,16 @@
 //	}
 //},
 
+//"sm_generic": {
+//	"enabled": false,						// starts SessionManager service: <true|false>
+//	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
+//	"rater": "internal",					// address where to reach the Rater <""|internal|127.0.0.1:2013>
+//	"cdrs": "internal",						// address where to reach CDR Server <""|internal|x.y.z.y:1234>
+//	"debit_interval": "10s",				// interval to perform debits on.
+//	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
+//	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+//},
+
 
 //"sm_freeswitch": {
 //	"enabled": false,				// starts SessionManager service: <true|false>
@@ -264,6 +272,7 @@
 //	"url": "",								// API url
 //	"client_number": "",					// client number, provided by SureTax
 //	"validation_key": "",					// validation key provided by SureTax
+//	"business_unit": "",					// client’s Business Unit
 //	"timezone": "Local",					// convert the time of the events to this timezone before sending request out <UTC|Local|$IANA_TZ_DB>
 //	"include_local_cost": false,			// sum local calculated cost with tax one in final cost
 //	"return_file_code": "0",				// default or Quote purposes <0|Q>
@@ -271,7 +280,7 @@
 //	"response_type": "D4",					// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
 //	"regulatory_code": "03",				// provider type
 //	"client_tracking": "CgrId",				// template extracting client information out of StoredCdr; <$RSRFields>
-//	"customer_number": "CustomerNumber",	// template extracting customer number out of StoredCdr; <$RSRFields>
+//	"customer_number": "Subject",			// template extracting customer number out of StoredCdr; <$RSRFields>
 //	"orig_number":  "Subject", 				// template extracting origination number out of StoredCdr; <$RSRFields>
 //	"term_number": "Destination",			// template extracting termination number out of StoredCdr; <$RSRFields>
 //	"bill_to_number": "",					// template extracting billed to number out of StoredCdr; <$RSRFields>
@@ -287,6 +296,5 @@
 //	"sales_type_code": "^R",				// template extracting sales type code out of StoredCdr; <$RSRFields>
 //	"tax_exemption_code_list": "",			// template extracting tax exemption code list out of StoredCdr; <$RSRFields>
 //},
-
 
 }

@@ -152,6 +152,7 @@ type CdrcJsonCfg struct {
 	Failed_calls_prefix        *string
 	Cdr_source_id              *string
 	Cdr_filter                 *string
+	Continue_on_success        *bool
 	Max_open_files             *int
 	Partial_record_cache       *string
 	Header_fields              *[]*CdrFieldJsonCfg
@@ -162,6 +163,7 @@ type CdrcJsonCfg struct {
 // SM-Generic config section
 type SmGenericJsonCfg struct {
 	Enabled           *bool
+	Listen_bijson     *string
 	Rater             *string
 	Cdrs              *string
 	Debit_interval    *string
@@ -231,6 +233,29 @@ type SmOsipsJsonCfg struct {
 type OsipsConnJsonCfg struct {
 	Mi_addr    *string
 	Reconnects *int
+}
+
+// DiameterAgent configuration
+type DiameterAgentJsonCfg struct {
+	Enabled            *bool   // enables the diameter agent: <true|false>
+	Listen             *string // address where to listen for diameter requests <x.y.z.y:1234>
+	Dictionaries_dir   *string // path towards additional dictionaries
+	Sm_generic         *string // Connection towards generic SM
+	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Origin_host        *string
+	Origin_realm       *string
+	Vendor_id          *int
+	Product_name       *string
+	Request_processors *[]*DARequestProcessorJsnCfg
+}
+
+// One Diameter request processor configuration
+type DARequestProcessorJsnCfg struct {
+	Id                  *string
+	Dry_run             *bool
+	Request_filter      *string
+	Continue_on_success *bool
+	Content_fields      *[]*CdrFieldJsonCfg
 }
 
 // History server config section

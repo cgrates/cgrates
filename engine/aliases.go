@@ -338,7 +338,7 @@ type ProxyAliasService struct {
 }
 
 func NewProxyAliasService(addr string, attempts, reconnects int) (*ProxyAliasService, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
+	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB, nil)
 	if err != nil {
 		return nil, err
 	}
