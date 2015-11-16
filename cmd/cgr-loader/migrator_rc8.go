@@ -120,7 +120,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 	if err != nil {
 		return err
 	}
-	newAccounts := make([]*engine.Account, len(keys))
+	newAccounts := make([]*engine.Account, 0)
 	var migratedKeys []string
 	// get existing accounts
 	for keyIndex, key := range keys {
