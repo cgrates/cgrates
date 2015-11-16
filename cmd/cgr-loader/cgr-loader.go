@@ -300,6 +300,19 @@ func main() {
 		aliases, _ := tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
 		lcrIds, _ := tpReader.GetLoadedIds(utils.LCR_PREFIX)
 		dcs, _ := tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
+
+		actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+		var statsQueueIds []string
+		if cdrstats != nil {
+			statsQueueIds, _ = tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+		}
+		var userIds []string
+		if users != nil {
+			userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
+		}
+		// release the reader wit it's structures
+		tpReader = nil
+
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
@@ -319,7 +332,7 @@ func main() {
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
-		actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+
 		if len(actTmgIds) != 0 {
 			if *verbose {
 				log.Print("Reloading scheduler")
@@ -331,7 +344,6 @@ func main() {
 
 	}
 	if cdrstats != nil {
-		statsQueueIds, _ := tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 		if *flush {
 			statsQueueIds = []string{} // Force reload all
 		}
@@ -347,7 +359,6 @@ func main() {
 	}
 
 	if users != nil {
-		userIds, _ := tpReader.GetLoadedIds(utils.USERS_PREFIX)
 		if len(userIds) > 0 {
 			if *verbose {
 				log.Print("Reloading Users data")
