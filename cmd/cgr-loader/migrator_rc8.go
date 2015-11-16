@@ -121,6 +121,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		return err
 	}
 	newAccounts := make([]*engine.Account, len(keys))
+	var migratedKeys []string
 	// get existing accounts
 	for keyIndex, key := range keys {
 		log.Printf("Migrating account: %s...", key)
@@ -144,14 +145,18 @@ func (mig MigratorRC8) migrateAccounts() error {
 		// fix id
 		idElements := strings.Split(newAcc.Id, utils.CONCATENATED_KEY_SEP)
 		if len(idElements) != 3 {
-			return fmt.Errorf("Malformed account ID %s", oldAcc.Id)
+			log.Printf("Malformed account ID %s", oldAcc.Id)
+			continue
 		}
 		newAcc.Id = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
 		// balances
+		balanceErr := false
 		for oldBalKey, oldBalChain := range oldAcc.BalanceMap {
 			keyElements := strings.Split(oldBalKey, "*")
 			if len(keyElements) != 3 {
-				return fmt.Errorf("Malformed balance key in %s: %s", oldAcc.Id, oldBalKey)
+				log.Printf("Malformed balance key in %s: %s", oldAcc.Id, oldBalKey)
+				balanceErr = true
+				break
 			}
 			newBalKey := "*" + keyElements[1]
 			newBalDirection := "*" + keyElements[2]
@@ -177,6 +182,9 @@ func (mig MigratorRC8) migrateAccounts() error {
 					Disabled:       oldBal.Disabled,
 				}
 			}
+		}
+		if balanceErr {
+			continue
 		}
 		// unit counters
 		for _, oldUc := range oldAcc.UnitCounters {
@@ -233,6 +241,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		}
 		newAcc.InitCounters()
 		newAccounts[keyIndex] = newAcc
+		migratedKeys = append(migratedKeys, key)
 	}
 	// write data back
 	for _, newAcc := range newAccounts {
@@ -245,9 +254,13 @@ func (mig MigratorRC8) migrateAccounts() error {
 		}
 	}
 	// delete old data
-	log.Printf("Deleting old accounts: %s...", OLD_ACCOUNT_PREFIX+"*")
-	for _, key := range keys {
+	log.Printf("Deleting migrated accounts...")
+	for _, key := range migratedKeys {
 		_, err = mig.db.Del(key)
+	}
+	notMigrated := len(keys) - len(migratedKeys)
+	if notMigrated > 0 {
+		log.Printf("WARNING: there are %d accounts that failed migration!", notMigrated)
 	}
 	return err
 }
