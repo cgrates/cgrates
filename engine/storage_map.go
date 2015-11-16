@@ -469,7 +469,7 @@ func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 
 func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	// never override existing account with an empty one
-	// UPDATE: if all balances expired and were clean it makes
+	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(ub.BalanceMap) == 0 {
 		if ac, err := ms.GetAccount(ub.Id); err == nil && !ac.allBalancesExpired() {

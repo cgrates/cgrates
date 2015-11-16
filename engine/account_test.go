@@ -91,7 +91,7 @@ func TestAccountStorageStoreRestore(t *testing.T) {
 	ub1, err := accountingStorage.GetAccount("other")
 	if err != nil || !ub1.BalanceMap[utils.MONETARY].Equal(rifsBalance.BalanceMap[utils.MONETARY]) {
 		t.Log("UB: ", ub1)
-		t.Errorf("Expected %v was %v", rifsBalance.BalanceMap[utils.MONETARY], ub1.BalanceMap[utils.MONETARY])
+		t.Errorf("Expected %v was %v", rifsBalance, ub1)
 	}
 }
 

@@ -1,3 +1,4 @@
+parent: null
 package: github.com/cgrates/cgrates
 import:
   - package: github.com/ugorji/go
@@ -40,3 +41,7 @@ import:
     ref:     57d753b5f4856e77b3cf8ecce78c97215a7d324d
   - package: github.com/fiorix/go-diameter
     ref:     b4c1bac20b8e8e1ac7e17fb54dc83b155aacba21
+  - package: github.com/mediocregopher/radix.v2
+  version: 9c9a238f8e52b72881f19c4e9113182689f11de0
+  subpackages:
+  - '...'
