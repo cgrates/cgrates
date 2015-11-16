@@ -1454,7 +1454,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 			}
 		}
 	}()
-
+	wg.Wait()
 	ldInst := tpr.GetLoadInstance()
 	if verbose {
 		log.Printf("LoadHistory, instance: %+v\n", ldInst)
