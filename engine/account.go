@@ -745,7 +745,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 
 	result := &Account{
-		Id:             "*out:" + acc.Id,
+		Id:             utils.OUT + ":" + acc.Id,
 		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
@@ -803,7 +803,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 	for key, values := range acc.BalanceMap {
 		if len(values) > 0 {
-			key += values[0].Directions.String()
+			key += utils.OUT
 			result.BalanceMap[key] = make(BalanceChain, len(values))
 			for i, b := range values {
 				result.BalanceMap[key][i] = &Balance{
