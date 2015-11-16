@@ -162,7 +162,7 @@ type TpAction struct {
 	Categories      string  `index:"6" re:""`
 	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
 	RatingSubject   string  `index:"8" re:"\w+\s*"`
-	SharedGroups     string  `index:"9" re:"[0-9A-Za-z_;]*"`
+	SharedGroups    string  `index:"9" re:"[0-9A-Za-z_;]*"`
 	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
 	Units           float64 `index:"12" re:"\d+\s*"`
@@ -197,7 +197,7 @@ type TpActionTrigger struct {
 	BalanceCategories      string  `index:"9" re:""`
 	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
 	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
-	BalanceSharedGroups     string  `index:"12" re:"\w+|\*any"`
+	BalanceSharedGroups    string  `index:"12" re:"\w+|\*any"`
 	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*|\*any"`
 	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
@@ -255,23 +255,24 @@ type TpDerivedCharger struct {
 	Category             string `index:"2" re:"\w+\s*"`
 	Account              string `index:"3" re:"\w+\s*"`
 	Subject              string `index:"4" re:"\*any\s*|\w+\s*"`
-	Runid                string `index:"5" re:"\w+\s*"`
-	RunFilters           string `index:"6" re:"[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	ReqTypeField         string `index:"7" re:"\*default\s*|[~^*]*[0-9A-Za-z_/:().+]+\s*"`
-	DirectionField       string `index:"8" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	TenantField          string `index:"9" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	CategoryField        string `index:"10" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	AccountField         string `index:"11" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	SubjectField         string `index:"12" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	DestinationField     string `index:"13" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	SetupTimeField       string `index:"14" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	PddField             string `index:"15" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	AnswerTimeField      string `index:"16" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	UsageField           string `index:"17" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	SupplierField        string `index:"18" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	DisconnectCauseField string `index:"19" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	RatedField           string `index:"20" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	CostField            string `index:"21" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DestinationIds       string `index:"5" re:""`
+	Runid                string `index:"6" re:"\w+\s*"`
+	RunFilters           string `index:"7" re:"[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	ReqTypeField         string `index:"8" re:"\*default\s*|[~^*]*[0-9A-Za-z_/:().+]+\s*"`
+	DirectionField       string `index:"9" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	TenantField          string `index:"10" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	CategoryField        string `index:"11" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	AccountField         string `index:"12" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SubjectField         string `index:"13" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DestinationField     string `index:"14" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SetupTimeField       string `index:"15" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	PddField             string `index:"16" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	AnswerTimeField      string `index:"17" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	UsageField           string `index:"18" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SupplierField        string `index:"19" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DisconnectCauseField string `index:"20" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	RatedField           string `index:"21" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	CostField            string `index:"22" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	CreatedAt            time.Time
 }
 
@@ -331,11 +332,12 @@ func (t TpCdrstat) TableName() string {
 type TpUser struct {
 	Id             int64
 	Tpid           string
-	Tenant         string `index:"0" re:""`
-	UserName       string `index:"1" re:""`
-	Masked         bool   `index:"2" re:""`
-	AttributeName  string `index:"3" re:""`
-	AttributeValue string `index:"4" re:""`
+	Tenant         string  `index:"0" re:""`
+	UserName       string  `index:"1" re:""`
+	Masked         bool    `index:"2" re:""`
+	AttributeName  string  `index:"3" re:""`
+	AttributeValue string  `index:"4" re:""`
+	Weight         float64 `index:"5" re:""`
 }
 
 func (tu *TpUser) GetId() string {

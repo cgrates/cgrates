@@ -117,7 +117,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, SharedGroups: 1, Aliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
@@ -647,6 +647,7 @@ func TestTutLocalCostErrors(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	var cdrs []*engine.ExternalCdr
 	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{cdr.Account}, DestPrefixes: []string{cdr.Destination}}
 	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {

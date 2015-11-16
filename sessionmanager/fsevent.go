@@ -37,40 +37,41 @@ type FSEvent map[string]string
 
 const (
 	// Freswitch event proprities names
-	DIRECTION          = "Call-Direction"
-	SUBJECT            = "variable_" + utils.CGR_SUBJECT
-	ACCOUNT            = "variable_" + utils.CGR_ACCOUNT
-	DESTINATION        = "variable_" + utils.CGR_DESTINATION
-	REQTYPE            = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
-	CATEGORY           = "variable_" + utils.CGR_CATEGORY
-	VAR_CGR_SUPPLIER   = "variable_" + utils.CGR_SUPPLIER
-	UUID               = "Unique-ID" // -Unique ID for this call leg
-	CSTMID             = "variable_" + utils.CGR_TENANT
-	CALL_DEST_NR       = "Caller-Destination-Number"
-	SIP_REQ_USER       = "variable_sip_req_user"
-	PARK_TIME          = "Caller-Profile-Created-Time"
-	SETUP_TIME         = "Caller-Channel-Created-Time"
-	ANSWER_TIME        = "Caller-Channel-Answered-Time"
-	END_TIME           = "Caller-Channel-Hangup-Time"
-	DURATION           = "variable_billsec"
-	NAME               = "Event-Name"
-	HEARTBEAT          = "HEARTBEAT"
-	ANSWER             = "CHANNEL_ANSWER"
-	HANGUP             = "CHANNEL_HANGUP_COMPLETE"
-	PARK               = "CHANNEL_PARK"
-	AUTH_OK            = "+AUTH_OK"
-	DISCONNECT         = "+SWITCH DISCONNECT"
-	INSUFFICIENT_FUNDS = "-INSUFFICIENT_FUNDS"
-	MISSING_PARAMETER  = "-MISSING_PARAMETER"
-	SYSTEM_ERROR       = "-SYSTEM_ERROR"
-	MANAGER_REQUEST    = "+MANAGER_REQUEST"
-	USERNAME           = "Caller-Username"
-	FS_IPv4            = "FreeSWITCH-IPv4"
-	HANGUP_CAUSE       = "Hangup-Cause"
-	PDD_MEDIA_MS       = "variable_progress_mediamsec"
-	PDD_NOMEDIA_MS     = "variable_progressmsec"
-	IGNOREPARK         = "variable_cgr_ignorepark"
-	FS_VARPREFIX       = "variable_"
+	DIRECTION                = "Call-Direction"
+	SUBJECT                  = "variable_" + utils.CGR_SUBJECT
+	ACCOUNT                  = "variable_" + utils.CGR_ACCOUNT
+	DESTINATION              = "variable_" + utils.CGR_DESTINATION
+	REQTYPE                  = "variable_" + utils.CGR_REQTYPE //prepaid or postpaid
+	CATEGORY                 = "variable_" + utils.CGR_CATEGORY
+	VAR_CGR_SUPPLIER         = "variable_" + utils.CGR_SUPPLIER
+	UUID                     = "Unique-ID" // -Unique ID for this call leg
+	CSTMID                   = "variable_" + utils.CGR_TENANT
+	CALL_DEST_NR             = "Caller-Destination-Number"
+	SIP_REQ_USER             = "variable_sip_req_user"
+	PARK_TIME                = "Caller-Profile-Created-Time"
+	SETUP_TIME               = "Caller-Channel-Created-Time"
+	ANSWER_TIME              = "Caller-Channel-Answered-Time"
+	END_TIME                 = "Caller-Channel-Hangup-Time"
+	DURATION                 = "variable_billsec"
+	NAME                     = "Event-Name"
+	HEARTBEAT                = "HEARTBEAT"
+	ANSWER                   = "CHANNEL_ANSWER"
+	HANGUP                   = "CHANNEL_HANGUP_COMPLETE"
+	PARK                     = "CHANNEL_PARK"
+	AUTH_OK                  = "+AUTH_OK"
+	DISCONNECT               = "+SWITCH DISCONNECT"
+	INSUFFICIENT_FUNDS       = "-INSUFFICIENT_FUNDS"
+	UNAUTHORIZED_DESTINATION = "-UNAUTHORIZED_DESTINATION"
+	MISSING_PARAMETER        = "-MISSING_PARAMETER"
+	SYSTEM_ERROR             = "-SYSTEM_ERROR"
+	MANAGER_REQUEST          = "+MANAGER_REQUEST"
+	USERNAME                 = "Caller-Username"
+	FS_IPv4                  = "FreeSWITCH-IPv4"
+	HANGUP_CAUSE             = "Hangup-Cause"
+	PDD_MEDIA_MS             = "variable_progress_mediamsec"
+	PDD_NOMEDIA_MS           = "variable_progressmsec"
+	IGNOREPARK               = "variable_cgr_ignorepark"
+	FS_VARPREFIX             = "variable_"
 
 	VAR_CGR_DISCONNECT_CAUSE = "variable_" + utils.CGR_DISCONNECT_CAUSE
 	VAR_CGR_CMPUTELCR        = "variable_" + utils.CGR_COMPUTELCR
@@ -168,7 +169,7 @@ func (fsev FSEvent) GetReqType(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], reqTypeDetected, config.CgrConfig().DefaultReqType)
 }
-func (fsev FSEvent) MissingParameter() bool {
+func (fsev FSEvent) MissingParameter(timezone string) bool {
 	return strings.TrimSpace(fsev.GetDirection(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" ||
@@ -203,8 +204,8 @@ func (fsev FSEvent) GetAnswerTime(fieldName, timezone string) (t time.Time, err 
 	return utils.ParseTimeDetectLayout(aTimeStr, timezone)
 }
 
-func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
-	return utils.ParseTimeDetectLayout(fsev[END_TIME], config.CgrConfig().DefaultTimezone)
+func (fsev FSEvent) GetEndTime(fieldName, timezone string) (t time.Time, err error) {
+	return utils.ParseTimeDetectLayout(fsev[END_TIME], timezone)
 }
 
 func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {

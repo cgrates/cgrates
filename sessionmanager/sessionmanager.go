@@ -32,7 +32,6 @@ type SessionManager interface {
 	WarnSessionMinDuration(string, string)
 	Sessions() []*Session
 	Timezone() string
-	ProcessCdr(*engine.StoredCdr) error
 	Connect() error
 	Shutdown() error
 	//RemoveSession(string)

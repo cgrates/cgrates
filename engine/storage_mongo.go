@@ -225,7 +225,7 @@ func (ms *MongoStorage) Flush(ignore string) (err error) {
 }
 
 func (ms *MongoStorage) CacheRatingAll() error {
-	return ms.cacheRating(nil, nil, nil, nil, nil, nil, nil)
+	return ms.cacheRating(nil, nil, nil, nil, nil, nil, nil, nil)
 }
 
 func (ms *MongoStorage) CacheRatingPrefixes(prefixes ...string) error {
@@ -236,6 +236,7 @@ func (ms *MongoStorage) CacheRatingPrefixes(prefixes ...string) error {
 		utils.LCR_PREFIX:             []string{},
 		utils.DERIVEDCHARGERS_PREFIX: []string{},
 		utils.ACTION_PREFIX:          []string{},
+		utils.ACTION_PLAN_PREFIX:     []string{},
 		utils.SHARED_GROUP_PREFIX:    []string{},
 	}
 	for _, prefix := range prefixes {
@@ -244,7 +245,7 @@ func (ms *MongoStorage) CacheRatingPrefixes(prefixes ...string) error {
 		}
 		pm[prefix] = nil
 	}
-	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
 func (ms *MongoStorage) CacheRatingPrefixValues(prefixes map[string][]string) error {
@@ -255,6 +256,7 @@ func (ms *MongoStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 		utils.LCR_PREFIX:             []string{},
 		utils.DERIVEDCHARGERS_PREFIX: []string{},
 		utils.ACTION_PREFIX:          []string{},
+		utils.ACTION_PLAN_PREFIX:     []string{},
 		utils.SHARED_GROUP_PREFIX:    []string{},
 	}
 	for prefix, ids := range prefixes {
@@ -263,10 +265,10 @@ func (ms *MongoStorage) CacheRatingPrefixValues(prefixes map[string][]string) er
 		}
 		pm[prefix] = ids
 	}
-	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
+	return ms.cacheRating(pm[utils.DESTINATION_PREFIX], pm[utils.RATING_PLAN_PREFIX], pm[utils.RATING_PROFILE_PREFIX], pm[utils.LCR_PREFIX], pm[utils.DERIVEDCHARGERS_PREFIX], pm[utils.ACTION_PREFIX], pm[utils.ACTION_PLAN_PREFIX], pm[utils.SHARED_GROUP_PREFIX])
 }
 
-func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, shgKeys []string) (err error) {
+func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actKeys, aplKeys, shgKeys []string) (err error) {
 	cache2go.BeginTransaction()
 	keyResult := struct{ Key string }{}
 	idResult := struct{ Id string }{}
@@ -428,6 +430,35 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if len(actKeys) != 0 {
 		utils.Logger.Info("Finished actions caching.")
+	}
+
+	if aplKeys == nil {
+		cache2go.RemPrefixKey(utils.ACTION_PLAN_PREFIX)
+	}
+	if aplKeys == nil {
+		utils.Logger.Info("Caching all action plans")
+		iter := ms.db.C(colApl).Find(nil).Select(bson.M{"key": 1}).Iter()
+		aplKeys = make([]string, 0)
+		for iter.Next(&keyResult) {
+			aplKeys = append(aplKeys, utils.ACTION_PLAN_PREFIX+keyResult.Key)
+		}
+		if err := iter.Close(); err != nil {
+			cache2go.RollbackTransaction()
+			return err
+		}
+		cache2go.RemPrefixKey(utils.ACTION_PLAN_PREFIX)
+	} else if len(aplKeys) != 0 {
+		utils.Logger.Info(fmt.Sprintf("Caching action plans: %v", aplKeys))
+	}
+	for _, key := range aplKeys {
+		cache2go.RemKey(key)
+		if _, err = ms.GetActionPlans(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
+			cache2go.RollbackTransaction()
+			return err
+		}
+	}
+	if len(aplKeys) != 0 {
+		utils.Logger.Info("Finished action plans caching.")
 	}
 
 	if shgKeys == nil {
@@ -1013,7 +1044,14 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 	return err
 }
 
-func (ms *MongoStorage) GetActionPlans(key string) (ats ActionPlans, err error) {
+func (ms *MongoStorage) GetActionPlans(key string, skipCache bool) (ats ActionPlans, err error) {
+	if !skipCache {
+		if x, err := cache2go.Get(utils.ACTION_PLAN_PREFIX + key); err == nil {
+			return x.(ActionPlans), nil
+		} else {
+			return nil, err
+		}
+	}
 	var kv struct {
 		Key   string
 		Value ActionPlans
@@ -1021,11 +1059,20 @@ func (ms *MongoStorage) GetActionPlans(key string) (ats ActionPlans, err error) 
 	err = ms.db.C(colApl).Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
 		ats = kv.Value
+		cache2go.Cache(utils.ACTION_PLAN_PREFIX+key, ats)
 	}
 	return
 }
 
 func (ms *MongoStorage) SetActionPlans(key string, ats ActionPlans) error {
+	if len(ats) == 0 {
+		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
+		err := ms.db.C(colApl).Remove(bson.M{"key": key})
+		if err != mgo.ErrNotFound {
+			return err
+		}
+		return nil
+	}
 	_, err := ms.db.C(colApl).Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value ActionPlans
@@ -1034,29 +1081,31 @@ func (ms *MongoStorage) SetActionPlans(key string, ats ActionPlans) error {
 }
 
 func (ms *MongoStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
-	var kv struct {
-		Key   string
-		Value ActionPlans
+	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return nil, err
 	}
-	iter := ms.db.C(colApl).Find(nil).Iter()
-	ats = make(map[string]ActionPlans)
-	for iter.Next(&kv) {
-		ats[kv.Key] = kv.Value
+
+	ats = make(map[string]ActionPlans, len(apls))
+	for key, value := range apls {
+		apl := value.Value().(ActionPlans)
+		ats[key] = apl
 	}
+
 	return
 }
 
-func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs utils.DerivedChargers, err error) {
+func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
 	if !skipCache {
 		if x, err := cache2go.Get(utils.DERIVEDCHARGERS_PREFIX + key); err == nil {
-			return x.(utils.DerivedChargers), nil
+			return x.(*utils.DerivedChargers), nil
 		} else {
 			return nil, err
 		}
 	}
 	var kv struct {
 		Key   string
-		Value utils.DerivedChargers
+		Value *utils.DerivedChargers
 	}
 	err = ms.db.C(colDcs).Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
@@ -1066,10 +1115,10 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs util
 	return
 }
 
-func (ms *MongoStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) (err error) {
-	if len(dcs) == 0 {
-		err = ms.db.C(colDcs).Remove(bson.M{"key": key})
+func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) (err error) {
+	if dcs == nil || len(dcs.Chargers) == 0 {
 		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
+		err = ms.db.C(colDcs).Remove(bson.M{"key": key})
 		if err != mgo.ErrNotFound {
 			return err
 		}
@@ -1077,7 +1126,7 @@ func (ms *MongoStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers
 	}
 	_, err = ms.db.C(colDcs).Upsert(bson.M{"key": key}, &struct {
 		Key   string
-		Value utils.DerivedChargers
+		Value *utils.DerivedChargers
 	}{Key: key, Value: dcs})
 	return err
 }

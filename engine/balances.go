@@ -133,7 +133,8 @@ func (b *Balance) IsDefault() bool {
 }
 
 func (b *Balance) IsExpired() bool {
-	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
+	// check if it expires in the next second
+	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now().Add(1*time.Second))
 }
 
 func (b *Balance) IsActive() bool {
@@ -216,12 +217,13 @@ func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 }
 
 func (b *Balance) Clone() *Balance {
-	return &Balance{
+	if b == nil {
+		return nil
+	}
+	n := &Balance{
 		Uuid:           b.Uuid,
 		Id:             b.Id,
 		Value:          b.Value, // this value is in seconds
-		DestinationIds: b.DestinationIds.Clone(),
-		Directions:     b.Directions.Clone(),
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
@@ -232,6 +234,13 @@ func (b *Balance) Clone() *Balance {
 		Disabled:       b.Disabled,
 		dirty:          b.dirty,
 	}
+	if b.DestinationIds != nil {
+		n.DestinationIds = b.DestinationIds.Clone()
+	}
+	if b.Directions != nil {
+		n.Directions = b.Directions.Clone()
+	}
+	return n
 }
 
 func (b *Balance) getMatchingPrefixAndDestId(dest string) (prefix, destId string) {
@@ -342,7 +351,7 @@ func (b *Balance) SetValue(amount float64) {
 	b.dirty = true
 }
 
-func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun bool) (cc *CallCost, err error) {
+func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -419,11 +428,16 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		// get the cost from balance
 		//log.Printf("::::::: %+v", cd)
 		cc, err = b.GetCost(cd, true)
+		if err != nil {
+			return nil, err
+		}
+		if debitConnectFee {
+			// this is the first add, debit the connect fee
+			ub.DebitConnectionFee(cc, moneyBalances, count)
+		}
 		cc.Timespans.Decompress()
 		//log.Printf("CC: %+v", cc)
-		if err != nil {
-			return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
-		}
+
 		for tsIndex, ts := range cc.Timespans {
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
@@ -512,20 +526,26 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	return
 }
 
-func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun bool) (cc *CallCost, err error) {
+func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
+	if err != nil {
+		return nil, err
+	}
+
+	if debitConnectFee {
+		// this is the first add, debit the connect fee
+		ub.DebitConnectionFee(cc, moneyBalances, count)
+	}
+
 	cc.Timespans.Decompress()
 	//log.Printf("CallCost In Debit: %+v", cc)
 	//for _, ts := range cc.Timespans {
 	//	log.Printf("CC_TS: %+v", ts.RateInterval.Rating.Rates[0])
 	//}
-	if err != nil {
-		return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
-	}
 	for tsIndex, ts := range cc.Timespans {
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()

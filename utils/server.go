@@ -27,12 +27,14 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 
+	"github.com/cenkalti/rpc2"
 	"golang.org/x/net/websocket"
 )
 
 type Server struct {
 	rpcEnabled  bool
 	httpEnabled bool
+	bijsonSrv   *rpc2.Server
 }
 
 func (s *Server) RpcRegister(rcvr interface{}) {
@@ -50,13 +52,31 @@ func (s *Server) RegisterHttpFunc(pattern string, handler func(http.ResponseWrit
 	s.httpEnabled = true
 }
 
+// Registers a new BiJsonRpc name
+func (s *Server) BijsonRegisterName(method string, handlerFunc interface{}) {
+	if s.bijsonSrv == nil {
+		s.bijsonSrv = rpc2.NewServer()
+	}
+	s.bijsonSrv.Handle(method, handlerFunc)
+}
+
+//Registers a new handler for OnConnect event
+func (s *Server) BijsonRegisterOnConnect(f func(*rpc2.Client)) {
+	s.bijsonSrv.OnConnect(f)
+}
+
+//Registers a new handler for OnDisconnect event
+func (s *Server) BijsonRegisterOnDisconnect(f func(*rpc2.Client)) {
+	s.bijsonSrv.OnDisconnect(f)
+}
+
 func (s *Server) ServeJSON(addr string) {
 	if !s.rpcEnabled {
 		return
 	}
 	lJSON, e := net.Listen("tcp", addr)
 	if e != nil {
-		log.Fatal("listen error:", e)
+		log.Fatal("ServeJSON listen error:", e)
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at %s.", addr))
 	for {
@@ -65,7 +85,6 @@ func (s *Server) ServeJSON(addr string) {
 			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
 			continue
 		}
-
 		//utils.Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
 		go jsonrpc.ServeConn(conn)
 	}
@@ -78,7 +97,7 @@ func (s *Server) ServeGOB(addr string) {
 	}
 	lGOB, e := net.Listen("tcp", addr)
 	if e != nil {
-		log.Fatal("listen error:", e)
+		log.Fatal("ServeGOB listen error:", e)
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at %s.", addr))
 	for {
@@ -111,6 +130,18 @@ func (s *Server) ServeHTTP(addr string) {
 	}
 	Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
 	http.ListenAndServe(addr, nil)
+}
+
+func (s *Server) ServeBiJSON(addr string) {
+	if s.bijsonSrv == nil {
+		return
+	}
+	lBiJSON, e := net.Listen("tcp", addr)
+	if e != nil {
+		log.Fatal("ServeBiJSON listen error:", e)
+	}
+	Logger.Info(fmt.Sprintf("Starting CGRateS BiJSON server at %s.", addr))
+	s.bijsonSrv.Accept(lBiJSON)
 }
 
 // rpcRequest represents a RPC request.

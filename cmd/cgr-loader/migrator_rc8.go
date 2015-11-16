@@ -378,3 +378,37 @@ func (mig MigratorRC8) migrateActions() error {
 	}
 	return nil
 }
+
+func (mig MigratorRC8) migrateDerivedChargers() error {
+	keys, err := mig.db.Keys(utils.DERIVEDCHARGERS_PREFIX + "*")
+	if err != nil {
+		return err
+	}
+	newDcsMap := make(map[string]*utils.DerivedChargers, len(keys))
+	for _, key := range keys {
+		log.Printf("Migrating derived charger: %s...", key)
+		var oldDcs []*utils.DerivedCharger
+		var values []byte
+		if values, err = mig.db.Get(key); err == nil {
+			if err := mig.ms.Unmarshal(values, &oldDcs); err != nil {
+				return err
+			}
+		}
+		newDcs := &utils.DerivedChargers{
+			DestinationIds: make(utils.StringMap),
+			Chargers:       oldDcs,
+		}
+		newDcsMap[key] = newDcs
+	}
+	// write data back
+	for key, dcs := range newDcsMap {
+		result, err := mig.ms.Marshal(&dcs)
+		if err != nil {
+			return err
+		}
+		if err = mig.db.Set(key, result); err != nil {
+			return err
+		}
+	}
+	return nil
+}

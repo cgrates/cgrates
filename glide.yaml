@@ -1,39 +1,47 @@
 parent: null
 package: github.com/cgrates/cgrates
 import:
-- package: github.com/ugorji/go
-  version: f1f1a805ed361a0e078bb537e4ea78cd37dcf065
-- package: github.com/jinzhu/gorm
-  version: 67f88d977b01a8c87e0e942f791ce2cc21503223
-- package: golang.org/x/net
-  version: b4e17d61b15679caf2335da776c614169a1b4643
-- package: github.com/DisposaBoy/JsonConfigReader
-  version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
-- package: github.com/go-sql-driver/mysql
-  version: 69e3ed7607d7c139386480824801584c947c67cf
-- package: github.com/gorhill/cronexpr
-  version: a557574d6c024ed6e36acc8b610f5f211c91568a
-- package: github.com/lib/pq
-  version: 83c4f410d0aed80a0f44bac6a576a7f2435791f3
-- package: github.com/qor/inflection
-  version: 3272df6c21d04180007eb3349844c89a3856bc25
-- package: gopkg.in/mgo.v2
-  version: 4d04138ffef2791c479c0c8bbffc30b34081b8d9
-- package: github.com/kr/pty
-  version: f7ee69f31298ecbe5d2b349c711e2547a617d398
-- package: gopkg.in/fsnotify.v1
-  version: 7be54206639f256967dd82fa767397ba5f8f48f5
-- package: github.com/peterh/liner
-  version: b850cf8c6d0ee52309aad09ac610508c6c75e819
-- package: github.com/cgrates/rpcclient
-  version: f0f378951e30943373953b44b910cc65ba832da3
-- package: github.com/cgrates/osipsdagram
-  version: 3d6beed663452471dec3ca194137a30d379d9e8f
-- package: github.com/cgrates/kamevapi
-  version: a376b1f937ba959857929fa3e111c0f3243278c0
-- package: github.com/cgrates/fsock
-  version: 7ec136e2798fbfe44f713f5ee5828ce643dec4c2
-- package: github.com/mediocregopher/radix.v2
+  - package: github.com/ugorji/go
+    ref:     1a8bf87a90ddcdc7deaa0038f127ac62135fdd58
+  - package: github.com/jinzhu/gorm
+    ref:     611e613459953787a01c2afc82835aa0ba01a045
+  - package: golang.org/x/net
+    ref:     1d9fd3b8333e891c0e7353e1adcfe8a612573033
+  - package: github.com/DisposaBoy/JsonConfigReader
+    ref:     33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
+  - package: github.com/hoisie/redis
+    ref:     788f01e396a99c96c8f56338383926f16841ebae
+  - package: github.com/go-sql-driver/mysql
+    ref:     d512f204a577a4ab037a1816604c48c9c13210be
+  - package: github.com/gorhill/cronexpr
+    ref:     a557574d6c024ed6e36acc8b610f5f211c91568a
+  - package: github.com/lib/pq
+    ref:     83c4f410d0aed80a0f44bac6a576a7f2435791f3
+  - package: github.com/qor/inflection
+    ref:     3272df6c21d04180007eb3349844c89a3856bc25
+  - package: gopkg.in/mgo.v2
+    ref:     4d04138ffef2791c479c0c8bbffc30b34081b8d9
+  - package: github.com/kr/pty
+    ref:     f7ee69f31298ecbe5d2b349c711e2547a617d398
+  - package: gopkg.in/fsnotify.v1
+    ref:     7be54206639f256967dd82fa767397ba5f8f48f5
+  - package: github.com/peterh/liner
+    ref:     506a2f061bd0b362a8a2fa445be80386f39dedd8
+  - package: github.com/cgrates/rpcclient
+    ref:     028c43fc34d32dc9095c7605e2e455e0c7a5ea69
+  - package: github.com/cgrates/osipsdagram
+    ref:     3d6beed663452471dec3ca194137a30d379d9e8f
+  - package: github.com/cgrates/kamevapi
+    ref:     a376b1f937ba959857929fa3e111c0f3243278c0
+  - package: github.com/cgrates/fsock
+    ref:     7ec136e2798fbfe44f713f5ee5828ce643dec4c2
+  - package: github.com/cenkalti/rpc2
+    ref:     2d1be381ce47537e9e076b2b76dc70933162e4e9
+  - package: github.com/cenkalti/hub
+    ref:     57d753b5f4856e77b3cf8ecce78c97215a7d324d
+  - package: github.com/fiorix/go-diameter
+    ref:     b4c1bac20b8e8e1ac7e17fb54dc83b155aacba21
+  - package: github.com/mediocregopher/radix.v2
   version: 9c9a238f8e52b72881f19c4e9113182689f11de0
   subpackages:
   - '...'

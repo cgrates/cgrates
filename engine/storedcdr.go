@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -62,6 +63,12 @@ func NewStoredCdrFromExternalCdr(extCdr *ExternalCdr, timezone string) (*StoredC
 		storedCdr.ExtraFields[k] = v
 	}
 	return storedCdr, nil
+}
+
+// ToDo: split config to only add here general section
+func NewStoredCdrWithDefaults(cfg *config.CGRConfig) *StoredCdr {
+	return &StoredCdr{TOR: utils.VOICE, ReqType: cfg.DefaultReqType, Direction: utils.OUT, Tenant: cfg.DefaultTenant, Category: cfg.DefaultCategory,
+		ExtraFields: make(map[string]string), Cost: -1}
 }
 
 // Kinda standard of internal CDR, complies to CDR interface also
@@ -590,7 +597,7 @@ func (storedCdr *StoredCdr) GetAnswerTime(fieldName, timezone string) (time.Time
 	}
 	return utils.ParseTimeDetectLayout(aTimeVal, timezone)
 }
-func (storedCdr *StoredCdr) GetEndTime() (time.Time, error) {
+func (storedCdr *StoredCdr) GetEndTime(fieldName, timezone string) (time.Time, error) {
 	return storedCdr.AnswerTime.Add(storedCdr.Usage), nil
 }
 func (storedCdr *StoredCdr) GetDuration(fieldName string) (time.Duration, error) {
@@ -638,7 +645,7 @@ func (storedCdr *StoredCdr) GetOriginatorIP(fieldName string) string {
 func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
 	return storedCdr.ExtraFields
 }
-func (storedCdr *StoredCdr) MissingParameter() bool {
+func (storedCdr *StoredCdr) MissingParameter(timezone string) bool {
 	return len(storedCdr.AccId) == 0 ||
 		len(storedCdr.Category) == 0 ||
 		len(storedCdr.Tenant) == 0 ||

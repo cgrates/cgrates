@@ -138,10 +138,11 @@ func shutdownSessionmanagerSingnalHandler(exitChan chan bool) {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-c
-
-	for _, sm := range sms {
-		if err := sm.Shutdown(); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<SessionManager> %s", err))
+	if smRpc != nil {
+		for _, sm := range smRpc.SMs {
+			if err := sm.Shutdown(); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<SessionManager> %s", err))
+			}
 		}
 	}
 	exitChan <- true

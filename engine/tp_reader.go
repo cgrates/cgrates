@@ -32,7 +32,7 @@ type TpReader struct {
 	ratingProfiles    map[string]*RatingProfile
 	sharedGroups      map[string]*SharedGroup
 	lcrs              map[string]*LCR
-	derivedChargers   map[string]utils.DerivedChargers
+	derivedChargers   map[string]*utils.DerivedChargers
 	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
@@ -62,7 +62,7 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, ti
 		cdrStats:          make(map[string]*CdrStats),
 		users:             make(map[string]*UserProfile),
 		aliases:           make(map[string]*Alias),
-		derivedChargers:   make(map[string]utils.DerivedChargers),
+		derivedChargers:   make(map[string]*utils.DerivedChargers),
 	}
 	//add *any and *asap timing tag (in case of no timings file)
 	tpr.timings[utils.ANY] = &utils.TPTiming{
@@ -652,7 +652,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
 			var exitingAccountIds []string
-			existingActionPlans, err := tpr.ratingStorage.GetActionPlans(accountAction.ActionPlanId)
+			existingActionPlans, err := tpr.ratingStorage.GetActionPlans(accountAction.ActionPlanId, true)
 			if err == nil && len(existingActionPlans) > 0 {
 				// all action timings from a specific tag shuld have the same list of user balances from the first one
 				exitingAccountIds = existingActionPlans[0].AccountIds
@@ -893,7 +893,10 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 	for _, tpDcs := range storDcs {
 		tag := tpDcs.GetDerivedChargersKey()
 		if _, hasIt := tpr.derivedChargers[tag]; !hasIt {
-			tpr.derivedChargers[tag] = make(utils.DerivedChargers, 0) // Load object map since we use this method also from LoadDerivedChargers
+			tpr.derivedChargers[tag] = &utils.DerivedChargers{
+				DestinationIds: make(utils.StringMap),
+				Chargers:       make([]*utils.DerivedCharger, 0),
+			} // Load object map since we use this method also from LoadDerivedChargers
 		}
 		for _, tpDc := range tpDcs.DerivedChargers {
 			dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
@@ -902,7 +905,8 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 			if err != nil {
 				return err
 			}
-			tpr.derivedChargers[tag] = append(tpr.derivedChargers[tag], dc)
+			tpr.derivedChargers[tag].DestinationIds.Copy(utils.ParseStringMap(tpDcs.DestinationIds))
+			tpr.derivedChargers[tag].Chargers = append(tpr.derivedChargers[tag].Chargers, dc)
 		}
 	}
 	if save {

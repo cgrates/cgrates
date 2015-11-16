@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -84,11 +84,14 @@ func (s *Session) debitLoop(runIdx int) {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
 		nextCd.LoopIndex = index
-		//utils.Logger.Debug(fmt.Sprintf("NEXTCD: %s", utils.ToJSON(nextCd)))
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
 		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
+			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
+				s.sessionManager.DisconnectSession(s.eventStart, s.connId, UNAUTHORIZED_DESTINATION)
+				return
+			}
 			s.sessionManager.DisconnectSession(s.eventStart, s.connId, SYSTEM_ERROR)
 			return
 		}
@@ -100,9 +103,7 @@ func (s *Session) debitLoop(runIdx int) {
 			s.sessionManager.WarnSessionMinDuration(s.eventStart.GetUUID(), s.connId)
 		}
 		s.sessionRuns[runIdx].CallCosts = append(s.sessionRuns[runIdx].CallCosts, cc)
-		//utils.Logger.Debug(fmt.Sprintf("CALLCOST: %s", utils.ToJSON(cc)))
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
-		//utils.Logger.Debug(fmt.Sprintf("NEXTCD: %s DURATION: %s", utils.ToJSON(nextCd), nextCd.GetDuration().String()))
 		// update call duration with real debited duration
 		nextCd.DurationIndex -= debitPeriod
 		nextCd.DurationIndex += cc.GetDuration()
@@ -115,7 +116,7 @@ func (s *Session) debitLoop(runIdx int) {
 // Stops the debit loop
 func (s *Session) Close(ev engine.Event) error {
 	close(s.stopDebit) // Close the channel so all the sessionRuns listening will be notified
-	if _, err := ev.GetEndTime(); err != nil {
+	if _, err := ev.GetEndTime(utils.META_DEFAULT, s.sessionManager.Timezone()); err != nil {
 		utils.Logger.Err("Error parsing event stop time.")
 		for idx := range s.sessionRuns {
 			s.sessionRuns[idx].CallDescriptor.TimeEnd = s.sessionRuns[idx].CallDescriptor.TimeStart.Add(s.sessionRuns[idx].CallDescriptor.DurationIndex)
@@ -228,13 +229,8 @@ func (s *Session) SaveOperations() {
 		}
 		firstCC := sr.CallCosts[0]
 		for _, cc := range sr.CallCosts[1:] {
-			//utils.Logger.Debug(fmt.Sprintf("BEFORE MERGE: %s", utils.ToJSON(firstCC)))
-			//utils.Logger.Debug(fmt.Sprintf("OTHER MERGE: %s", utils.ToJSON(cc)))
 			firstCC.Merge(cc)
-			//utils.Logger.Debug(fmt.Sprintf("AFTER MERGE: %s", utils.ToJSON(firstCC)))
 		}
-		// make sure we have rounded timespans final cost
-		firstCC.UpdateCost()
 
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{

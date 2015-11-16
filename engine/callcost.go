@@ -31,6 +31,7 @@ type CallCost struct {
 	Cost                                                            float64
 	Timespans                                                       TimeSpans
 	deductConnectFee                                                bool
+	negativeConnectFee                                              bool // the connect fee went negative on default balance
 	maxCostDisconect                                                bool
 }
 
@@ -153,13 +154,14 @@ func (cc *CallCost) AsJSON() string {
 	return string(ccJson)
 }
 
-func (cc *CallCost) UpdateCost() {
+func (cc *CallCost) updateCost() {
 	cost := 0.0
 	if cc.deductConnectFee { // add back the connectFee
 		cost += cc.GetConnectFee()
 	}
 	for _, ts := range cc.Timespans {
-		cost += ts.getCost()
+		ts.Cost = ts.calculateCost()
+		cost += ts.Cost
 		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	}
 	cc.Cost = cost

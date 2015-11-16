@@ -54,7 +54,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
-	if kev.MissingParameter() {
+	if kev.MissingParameter(self.timezone) {
 		if kar, err := kev.AsKamAuthReply(0.0, "", utils.ErrMandatoryIeMissing); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed building auth reply %s", err.Error()))
 		} else if err = self.conns[connId].Send(kar.String()); err != nil {
@@ -127,7 +127,7 @@ func (self *KamailioSessionManager) onCallStart(evData []byte, connId string) {
 	if kamEv.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
-	if kamEv.MissingParameter() {
+	if kamEv.MissingParameter(self.timezone) {
 		self.DisconnectSession(kamEv, connId, utils.ErrMandatoryIeMissing.Error())
 		return
 	}
@@ -146,7 +146,7 @@ func (self *KamailioSessionManager) onCallEnd(evData []byte, connId string) {
 	if kev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
-	if kev.MissingParameter() {
+	if kev.MissingParameter(self.timezone) {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Mandatory IE missing out of event: %+v", kev))
 	}
 	go self.ProcessCdr(kev.AsStoredCdr(self.Timezone()))
@@ -216,6 +216,7 @@ func (self *KamailioSessionManager) ProcessCdr(cdr *engine.StoredCdr) error {
 
 func (sm *KamailioSessionManager) WarnSessionMinDuration(sessionUuid, connId string) {
 }
+
 func (self *KamailioSessionManager) Shutdown() error {
 	return nil
 }

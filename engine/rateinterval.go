@@ -318,7 +318,6 @@ func (i *RateInterval) GetCost(duration, startSecond time.Duration) float64 {
 		GetRateParameters(startSecond)
 	price /= rateUnit.Seconds()
 	d := duration.Seconds()
-
 	return d * price
 }
 

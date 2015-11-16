@@ -38,14 +38,14 @@ type Event interface {
 	GetReqType(string) string
 	GetSetupTime(string, string) (time.Time, error)
 	GetAnswerTime(string, string) (time.Time, error)
-	GetEndTime() (time.Time, error)
+	GetEndTime(string, string) (time.Time, error)
 	GetDuration(string) (time.Duration, error)
 	GetPdd(string) (time.Duration, error)
 	GetSupplier(string) string
 	GetDisconnectCause(string) string
 	GetOriginatorIP(string) string
 	GetExtraFields() map[string]string
-	MissingParameter() bool
+	MissingParameter(string) bool
 	ParseEventValue(*utils.RSRField, string) string
 	PassesFieldFilter(*utils.RSRField) (bool, string)
 	AsStoredCdr(timezone string) *StoredCdr

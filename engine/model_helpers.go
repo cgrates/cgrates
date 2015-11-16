@@ -394,7 +394,7 @@ func (tps TpActions) GetActions() (map[string][]*utils.TPAction, error) {
 			DestinationIds:  tpAc.DestinationTags,
 			RatingSubject:   tpAc.RatingSubject,
 			Categories:      tpAc.Categories,
-			SharedGroups:     tpAc.SharedGroups,
+			SharedGroups:    tpAc.SharedGroups,
 			BalanceWeight:   tpAc.BalanceWeight,
 			ExtraParameters: tpAc.ExtraParameters,
 			Weight:          tpAc.Weight,
@@ -435,7 +435,7 @@ func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTri
 			BalanceTimingTags:     tpAt.BalanceTimingTags,
 			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
 			BalanceCategories:     tpAt.BalanceCategories,
-			BalanceSharedGroups:    tpAt.BalanceSharedGroups,
+			BalanceSharedGroups:   tpAt.BalanceSharedGroups,
 			BalanceDisabled:       tpAt.BalanceDisabled,
 			Weight:                tpAt.Weight,
 			ActionsId:             tpAt.ActionsTag,
@@ -472,7 +472,7 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 	dcs := make(map[string]*utils.TPDerivedChargers)
 	for _, tpDcMdl := range tps {
 		tpDc := &utils.TPDerivedChargers{TPid: tpDcMdl.Tpid, Loadid: tpDcMdl.Loadid, Direction: tpDcMdl.Direction, Tenant: tpDcMdl.Tenant, Category: tpDcMdl.Category,
-			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject}
+			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject, DestinationIds: tpDcMdl.DestinationIds}
 		tag := tpDc.GetDerivedChargesId()
 		if _, hasIt := dcs[tag]; !hasIt {
 			dcs[tag] = tpDc
@@ -730,6 +730,7 @@ func (tps TpUsers) GetUsers() (map[string]*utils.TPUsers, error) {
 			user = &utils.TPUsers{
 				Tenant:   tp.Tenant,
 				UserName: tp.UserName,
+				Weight:   tp.Weight,
 			}
 			users[tp.GetId()] = user
 		}

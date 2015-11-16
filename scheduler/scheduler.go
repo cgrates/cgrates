@@ -81,7 +81,7 @@ func (s *Scheduler) Loop() {
 
 func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	actionPlans, err := storage.GetAllActionPlans()
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
 		utils.Logger.Warning(fmt.Sprintf("Cannot get action plans: %v", err))
 	}
 	// recreate the queue
@@ -118,6 +118,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 		if toBeSaved {
 			engine.Guardian.Guard(func() (interface{}, error) {
 				storage.SetActionPlans(key, newApls)
+				storage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
 		}

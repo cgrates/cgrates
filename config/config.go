@@ -65,6 +65,7 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.SmFsConfig = new(SmFsConfig)
 	cfg.SmKamConfig = new(SmKamConfig)
 	cfg.SmOsipsConfig = new(SmOsipsConfig)
+	cfg.diameterAgentCfg = new(DiameterAgentCfg)
 	cfg.ConfigReloads = make(map[string]chan struct{})
 	cfg.ConfigReloads[utils.CDRC] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.CDRC] <- struct{}{} // Unlock the channel
@@ -72,6 +73,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg.ConfigReloads[utils.CDRE] <- struct{}{} // Unlock the channel
 	cfg.ConfigReloads[utils.SURETAX] = make(chan struct{}, 1)
 	cfg.ConfigReloads[utils.SURETAX] <- struct{}{} // Unlock the channel
+	cfg.ConfigReloads[utils.DIAMETER_AGENT] = make(chan struct{}, 1)
+	cfg.ConfigReloads[utils.DIAMETER_AGENT] <- struct{}{} // Unlock the channel
 	cgrJsonCfg, err := NewCgrJsonCfgFromReader(strings.NewReader(CGRATES_CFG_JSON))
 	if err != nil {
 		return nil, err
@@ -229,6 +232,7 @@ type CGRConfig struct {
 	SmFsConfig           *SmFsConfig              // SM-FreeSWITCH configuration
 	SmKamConfig          *SmKamConfig             // SM-Kamailio Configuration
 	SmOsipsConfig        *SmOsipsConfig           // SM-OpenSIPS Configuration
+	diameterAgentCfg     *DiameterAgentCfg        // DiameterAgent configuration
 	HistoryServer        string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled bool                     // Starts History as server: <true|false>.
 	HistoryDir           string                   // Location on disk where to store history files.
@@ -374,6 +378,12 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return errors.New("CDRS not enabled but referenced by SM-OpenSIPS component")
 		}
 	}
+	// DAgent checks
+	if self.diameterAgentCfg.Enabled {
+		if self.diameterAgentCfg.SMGeneric == utils.INTERNAL && !self.SmGenericConfig.Enabled {
+			return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
+		}
+	}
 	return nil
 }
 
@@ -457,6 +467,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 	}
 
 	jsnSmOsipsCfg, err := jsnCfg.SmOsipsJsonCfg()
+	if err != nil {
+		return err
+	}
+
+	jsnDACfg, err := jsnCfg.DiameterAgentJsonCfg()
 	if err != nil {
 		return err
 	}
@@ -782,6 +797,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 	}
 
+	if jsnDACfg != nil {
+		if err := self.diameterAgentCfg.loadFromJsonCfg(jsnDACfg); err != nil {
+			return err
+		}
+	}
+
 	if jsnHistServCfg != nil {
 		if jsnHistServCfg.Enabled != nil {
 			self.HistoryServerEnabled = *jsnHistServCfg.Enabled
@@ -847,7 +868,12 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 // Use locking to retrieve the configuration, possibility later for runtime reload
 func (self *CGRConfig) SureTaxCfg() *SureTaxCfg {
 	cfgChan := <-self.ConfigReloads[utils.SURETAX] // Lock config for read or reloads
-	stCfg := self.sureTaxCfg
-	self.ConfigReloads[utils.SURETAX] <- cfgChan // unlock config for reloads or read
-	return stCfg
+	defer func() { self.ConfigReloads[utils.SURETAX] <- cfgChan }()
+	return self.sureTaxCfg
+}
+
+func (self *CGRConfig) DiameterAgentCfg() *DiameterAgentCfg {
+	cfgChan := <-self.ConfigReloads[utils.DIAMETER_AGENT] // Lock config for read or reloads
+	defer func() { self.ConfigReloads[utils.DIAMETER_AGENT] <- cfgChan }()
+	return self.diameterAgentCfg
 }

@@ -533,7 +533,7 @@ func TestStoredCdrEventFields(t *testing.T) {
 	if at, _ := cdr.GetAnswerTime(utils.META_DEFAULT, ""); at != time.Date(2013, 11, 7, 8, 42, 27, 0, time.UTC) {
 		t.Error("Received: ", at)
 	}
-	if et, _ := cdr.GetEndTime(); et != time.Date(2013, 11, 7, 8, 42, 37, 0, time.UTC) {
+	if et, _ := cdr.GetEndTime(utils.META_DEFAULT, ""); et != time.Date(2013, 11, 7, 8, 42, 37, 0, time.UTC) {
 		t.Error("Received: ", et)
 	}
 	if dur, _ := cdr.GetDuration(utils.META_DEFAULT); dur != cdr.Usage {

@@ -17,3 +17,6 @@ import:
   - package: github.com/cgrates/kamevapi
   - package: github.com/cgrates/fsock
   - package: github.com/mediocregopher/radix.v2/...
+  - package: github.com/cenkalti/rpc2
+  - package: github.com/cenkalti/hub
+  - package: github.com/fiorix/go-diameter
