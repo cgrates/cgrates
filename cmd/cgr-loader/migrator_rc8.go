@@ -380,7 +380,7 @@ func (mig MigratorRC8) migrateActions() error {
 }
 
 func (mig MigratorRC8) migrateDerivedChargers() error {
-	keys, err := mig.db.Keys(utils.DERIVEDCHARGERS_PREFIX + "*")
+	keys, err := mig.db.Cmd("KEYS", utils.DERIVEDCHARGERS_PREFIX+"*").List()
 	if err != nil {
 		return err
 	}
@@ -389,7 +389,7 @@ func (mig MigratorRC8) migrateDerivedChargers() error {
 		log.Printf("Migrating derived charger: %s...", key)
 		var oldDcs []*utils.DerivedCharger
 		var values []byte
-		if values, err = mig.db.Get(key); err == nil {
+		if values, err = mig.db.Cmd("GET", key).Bytes(); err == nil {
 			if err := mig.ms.Unmarshal(values, &oldDcs); err != nil {
 				return err
 			}
@@ -406,7 +406,7 @@ func (mig MigratorRC8) migrateDerivedChargers() error {
 		if err != nil {
 			return err
 		}
-		if err = mig.db.Set(key, result); err != nil {
+		if err = mig.db.Cmd("SET", key, result).Err; err != nil {
 			return err
 		}
 	}
