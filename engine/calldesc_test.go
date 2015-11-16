@@ -1069,8 +1069,9 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 	}
 	acc, _ := accountingStorage.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
-	expected, err := time.ParseDuration("2h46m40s")
+	expected, err := time.ParseDuration("9999s") // 1 is the connect fee
 	if err != nil || allowedTime != expected {
+		t.Log(utils.ToIJSON(acc))
 		t.Errorf("Expected: %v got %v", expected, allowedTime)
 	}
 }

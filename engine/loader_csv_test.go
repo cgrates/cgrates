@@ -71,6 +71,7 @@ RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s
 R_URG,0,0,1,1,0
 MX,0,1,1s,1s,0
 DY,0.15,0.05,60s,1s,0s
+CF,1.12,0,1s,1s,0s
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1,*middle,4,0,
@@ -93,6 +94,7 @@ RT_URG,URG,R_URG,*middle,4,0,
 MX_FREE,RET,MX,*middle,4,10,*free
 MX_DISC,RET,MX,*middle,4,10,*disconnect
 RT_DY,RET,DY,*up,2,0,
+RT_DY,EU_LANDLINE,CF,*middle,4,0,
 `
 	ratingPlans = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
@@ -396,7 +398,7 @@ func TestLoadTimimgs(t *testing.T) {
 }
 
 func TestLoadRates(t *testing.T) {
-	if len(csvr.rates) != 14 {
+	if len(csvr.rates) != 15 {
 		t.Error("Failed to load rates: ", len(csvr.rates))
 	}
 	rate := csvr.rates["R1"].RateSlots[0]

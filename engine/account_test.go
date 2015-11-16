@@ -1193,6 +1193,33 @@ func TestMaxDurationShared(t *testing.T) {
 
 }
 
+func TestMaxDurationConnectFeeOnly(t *testing.T) {
+	cd := &CallDescriptor{
+		Tenant:        "cgrates.org",
+		Category:      "call",
+		TimeStart:     time.Date(2015, 9, 24, 10, 48, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2015, 9, 24, 10, 58, 1, 0, time.UTC),
+		Direction:     utils.OUT,
+		Destination:   "4444",
+		Subject:       "dy",
+		Account:       "dy",
+		TOR:           utils.VOICE,
+		DurationIndex: 600,
+	}
+	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
+		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneya", Value: 0.2}},
+	}}
+
+	duration, err := cd.getMaxSessionDuration(rif)
+	if err != nil {
+		t.Error("Error getting max session duration: ", err)
+	}
+	if duration != 0 {
+		t.Error("Wrong max session: ", duration)
+	}
+
+}
+
 func TestDebitSMS(t *testing.T) {
 	cc := &CallCost{
 		Direction:   utils.OUT,
