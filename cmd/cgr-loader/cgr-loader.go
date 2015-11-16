@@ -36,8 +36,7 @@ import (
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
-	migrateRC8   = flag.Bool("migrate_rc8", false, "Migrate Accounts, Actions, ActionTriggers and DerivedChargers to RC8 structures")
-	migrateList  = flag.String("migrate_list", "acc,atr,act,dcs", "Migration item list")
+	migrateRC8   = flag.String("migrate_rc8", "", "Migrate Accounts, Actions, ActionTriggers and DerivedChargers to RC8 structures, possible values: *all,acc,atr,act,dcs")
 	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
 	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
 	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
@@ -92,7 +91,7 @@ func main() {
 	var storDb engine.LoadStorage
 	var rater, cdrstats, users *rpc.Client
 	var loader engine.LoadReader
-	if *migrateRC8 {
+	if *migrateRC8 != "" {
 		var db_nb int
 		db_nb, err = strconv.Atoi(*datadb_name)
 		if err != nil {
@@ -108,7 +107,7 @@ func main() {
 			log.Print(err.Error())
 			return
 		}
-		if strings.Contains(*migrateList, "acc") {
+		if strings.Contains(*migrateRC8, "acc") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8acc.migrateAccounts(); err != nil {
 				log.Print(err.Error())
 			}
@@ -128,17 +127,17 @@ func main() {
 			log.Print(err.Error())
 			return
 		}
-		if strings.Contains(*migrateList, "atr") {
+		if strings.Contains(*migrateRC8, "atr") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8rat.migrateActionTriggers(); err != nil {
 				log.Print(err.Error())
 			}
 		}
-		if strings.Contains(*migrateList, "act") {
+		if strings.Contains(*migrateRC8, "act") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8rat.migrateActions(); err != nil {
 				log.Print(err.Error())
 			}
 		}
-		if strings.Contains(*migrateList, "dcs") {
+		if strings.Contains(*migrateRC8, "dcs") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8rat.migrateDerivedChargers(); err != nil {
 				log.Print(err.Error())
 			}
