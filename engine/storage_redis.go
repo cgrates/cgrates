@@ -270,7 +270,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if aplKeys == nil {
 		utils.Logger.Info("Caching all action plans")
-		if aplKeys, err = rs.db.Keys(utils.ACTION_PLAN_PREFIX + "*"); err != nil {
+		if aplKeys, err = rs.db.Cmd("KEYS", utils.ACTION_PLAN_PREFIX+"*").List(); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
