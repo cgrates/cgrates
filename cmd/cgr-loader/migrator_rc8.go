@@ -133,7 +133,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 	newAccounts := make([]*engine.Account, 0)
 	var migratedKeys []string
 	// get existing accounts
-	for keyIndex, key := range keys {
+	for _, key := range keys {
 		log.Printf("Migrating account: %s...", key)
 		values, err := mig.db.Cmd("GET", key).Bytes()
 		if err != nil {
@@ -250,7 +250,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 			}
 		}
 		newAcc.InitCounters()
-		newAccounts[keyIndex] = newAcc
+		newAccounts = append(newAccounts, newAcc)
 		migratedKeys = append(migratedKeys, key)
 	}
 	// write data back
