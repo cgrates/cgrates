@@ -316,9 +316,6 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 
 // Retrive the cost from engine
 func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error) {
-	//if storedCdr.Usage == time.Duration(0) { // failed call,  nil cost
-	//	return nil, nil // No costs present, better than empty call cost since could lead us to 0 costs
-	//}
 	cc := new(CallCost)
 	var err error
 	cd := &CallDescriptor{
@@ -349,7 +346,7 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 	var qryCC *CallCost
 	var err error
-	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
+	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) && storedCdr.Usage != 0 { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		for i := 0; i < 4; i++ {
