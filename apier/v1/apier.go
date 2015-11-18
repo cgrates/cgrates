@@ -1062,44 +1062,6 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	return nil
 }
 
-func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge) error {
-	if len(itemId) == 0 {
-		return fmt.Errorf("%s:ItemId", utils.ErrMandatoryIeMissing.Error())
-	}
-	cachedItemAge := new(utils.CachedItemAge)
-	var found bool
-	for idx, cacheKey := range []string{utils.DESTINATION_PREFIX + itemId, utils.RATING_PLAN_PREFIX + itemId, utils.RATING_PROFILE_PREFIX + itemId,
-		utils.ACTION_PREFIX + itemId, utils.ACTION_PLAN_PREFIX + itemId, utils.SHARED_GROUP_PREFIX + itemId, utils.ALIASES_PREFIX + itemId, utils.LCR_PREFIX + itemId} {
-
-		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
-			found = true
-			switch idx {
-			case 0:
-				cachedItemAge.Destination = age
-			case 1:
-				cachedItemAge.RatingPlan = age
-			case 2:
-				cachedItemAge.RatingProfile = age
-			case 3:
-				cachedItemAge.Action = age
-			case 4:
-				cachedItemAge.ActionPlan = age
-			case 5:
-				cachedItemAge.SharedGroup = age
-			case 6:
-				cachedItemAge.Alias = age
-			case 7:
-				cachedItemAge.LcrProfiles = age
-			}
-		}
-	}
-	if !found {
-		return utils.ErrNotFound
-	}
-	*reply = *cachedItemAge
-	return nil
-}
-
 func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")

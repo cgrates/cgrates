@@ -715,7 +715,7 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error
 
 	ats = make(map[string]ActionPlans, len(apls))
 	for key, value := range apls {
-		apl := value.Value().(ActionPlans)
+		apl := value.(ActionPlans)
 		ats[key] = apl
 	}
 

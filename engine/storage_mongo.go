@@ -1100,7 +1100,7 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]ActionPlans, err err
 
 	ats = make(map[string]ActionPlans, len(apls))
 	for key, value := range apls {
-		apl := value.Value().(ActionPlans)
+		apl := value.(ActionPlans)
 		ats[key] = apl
 	}
 

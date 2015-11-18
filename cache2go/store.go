@@ -3,7 +3,6 @@ package cache2go
 
 import (
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -12,16 +11,15 @@ type cacheStore interface {
 	Put(string, interface{})
 	Append(string, interface{})
 	Get(string) (interface{}, error)
-	GetAge(string) (time.Duration, error)
 	Delete(string)
 	DeletePrefix(string)
 	CountEntriesForPrefix(string) int
-	GetAllForPrefix(string) (map[string]timestampedValue, error)
+	GetAllForPrefix(string) (map[string]interface{}, error)
 	GetKeysForPrefix(string) []string
 }
 
 // easy to be counted exported by prefix
-type cacheDoubleStore map[string]map[string]timestampedValue
+type cacheDoubleStore map[string]map[string]interface{}
 
 func newDoubleStore() cacheDoubleStore {
 	return make(cacheDoubleStore)
@@ -30,9 +28,9 @@ func newDoubleStore() cacheDoubleStore {
 func (cs cacheDoubleStore) Put(key string, value interface{}) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if _, ok := cs[prefix]; !ok {
-		cs[prefix] = make(map[string]timestampedValue)
+		cs[prefix] = make(map[string]interface{})
 	}
-	cs[prefix][key] = timestampedValue{time.Now(), value}
+	cs[prefix][key] = value
 }
 
 func (cs cacheDoubleStore) Append(key string, value interface{}) {
@@ -50,20 +48,10 @@ func (cs cacheDoubleStore) Get(key string) (interface{}, error) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
 	if keyMap, ok := cs[prefix]; ok {
 		if ti, exists := keyMap[key]; exists {
-			return ti.value, nil
+			return ti, nil
 		}
 	}
 	return nil, utils.ErrNotFound
-}
-
-func (cs cacheDoubleStore) GetAge(key string) (time.Duration, error) {
-	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if keyMap, ok := cs[prefix]; ok {
-		if ti, exists := keyMap[key]; exists {
-			return time.Since(ti.timestamp), nil
-		}
-	}
-	return -1, utils.ErrNotFound
 }
 
 func (cs cacheDoubleStore) Delete(key string) {
@@ -84,7 +72,7 @@ func (cs cacheDoubleStore) CountEntriesForPrefix(prefix string) int {
 	return 0
 }
 
-func (cs cacheDoubleStore) GetAllForPrefix(prefix string) (map[string]timestampedValue, error) {
+func (cs cacheDoubleStore) GetAllForPrefix(prefix string) (map[string]interface{}, error) {
 	if keyMap, ok := cs[prefix]; ok {
 		return keyMap, nil
 	}
@@ -105,13 +93,13 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 
 // faster to access
 type cacheSimpleStore struct {
-	cache    map[string]timestampedValue
+	cache    map[string]interface{}
 	counters map[string]int
 }
 
 func newSimpleStore() cacheSimpleStore {
 	return cacheSimpleStore{
-		cache:    make(map[string]timestampedValue),
+		cache:    make(map[string]interface{}),
 		counters: make(map[string]int),
 	}
 }
@@ -121,7 +109,7 @@ func (cs cacheSimpleStore) Put(key string, value interface{}) {
 		// only count if the key is not already there
 		cs.count(key)
 	}
-	cs.cache[key] = timestampedValue{time.Now(), value}
+	cs.cache[key] = value
 }
 
 func (cs cacheSimpleStore) Append(key string, value interface{}) {
@@ -136,18 +124,10 @@ func (cs cacheSimpleStore) Append(key string, value interface{}) {
 }
 
 func (cs cacheSimpleStore) Get(key string) (interface{}, error) {
-	if ti, exists := cs.cache[key]; exists {
-		return ti.value, nil
+	if value, exists := cs.cache[key]; exists {
+		return value, nil
 	}
 	return nil, utils.ErrNotFound
-}
-
-func (cs cacheSimpleStore) GetAge(key string) (time.Duration, error) {
-	if ti, exists := cs.cache[key]; exists {
-		return time.Since(ti.timestamp), nil
-	}
-
-	return -1, utils.ErrNotFound
 }
 
 func (cs cacheSimpleStore) Delete(key string) {
@@ -198,8 +178,8 @@ func (cs cacheSimpleStore) CountEntriesForPrefix(prefix string) int {
 	return 0
 }
 
-func (cs cacheSimpleStore) GetAllForPrefix(prefix string) (map[string]timestampedValue, error) {
-	result := make(map[string]timestampedValue)
+func (cs cacheSimpleStore) GetAllForPrefix(prefix string) (map[string]interface{}, error) {
+	result := make(map[string]interface{})
 	found := false
 	for key, ti := range cs.cache {
 		if strings.HasPrefix(key, prefix) {
