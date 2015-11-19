@@ -198,7 +198,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 			//return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			continue // Don't do anything for unsupported fields
 		}
-		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
+		if err := storedCdr.ParseFieldValue(cdrFldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
 			return nil, err
 		}
 	}
@@ -221,7 +221,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
 				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
 			}
-			if err := populateStoredCdrField(storedCdr, httpFieldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
+			if err := storedCdr.ParseFieldValue(httpFieldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
 				return nil, err
 			}
 		}

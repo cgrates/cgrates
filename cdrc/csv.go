@@ -309,7 +309,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 		} else {
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
-		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
+		if err := storedCdr.ParseFieldValue(cdrFldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
 			return nil, err
 		}
 	}
@@ -330,7 +330,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
 				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
 			}
-			if err := populateStoredCdrField(storedCdr, httpFieldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
+			if err := storedCdr.ParseFieldValue(httpFieldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
 				return nil, err
 			}
 		}

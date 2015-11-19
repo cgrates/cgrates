@@ -27,7 +27,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -41,60 +40,6 @@ const (
 	FS_CSV          = "freeswitch_csv"
 	UNPAIRED_SUFFIX = ".unpaired"
 )
-
-// Populates the
-func populateStoredCdrField(cdr *engine.StoredCdr, fieldId, fieldVal, timezone string) error {
-	var err error
-	switch fieldId {
-	case utils.TOR:
-		cdr.TOR += fieldVal
-	case utils.ACCID:
-		cdr.AccId += fieldVal
-	case utils.REQTYPE:
-		cdr.ReqType += fieldVal
-	case utils.DIRECTION:
-		cdr.Direction += fieldVal
-	case utils.TENANT:
-		cdr.Tenant += fieldVal
-	case utils.CATEGORY:
-		cdr.Category += fieldVal
-	case utils.ACCOUNT:
-		cdr.Account += fieldVal
-	case utils.SUBJECT:
-		cdr.Subject += fieldVal
-	case utils.DESTINATION:
-		cdr.Destination += fieldVal
-	case utils.RATED_FLD:
-		cdr.Rated, _ = strconv.ParseBool(fieldVal)
-	case utils.SETUP_TIME:
-		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
-			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	case utils.PDD:
-		if cdr.Pdd, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
-			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	case utils.ANSWER_TIME:
-		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
-			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	case utils.USAGE:
-		if cdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
-			return fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	case utils.SUPPLIER:
-		cdr.Supplier += fieldVal
-	case utils.DISCONNECT_CAUSE:
-		cdr.DisconnectCause += fieldVal
-	case utils.COST:
-		if cdr.Cost, err = strconv.ParseFloat(fieldVal, 64); err != nil {
-			return fmt.Errorf("Cannot parse cost field with value: %s, err: %s", fieldVal, err.Error())
-		}
-	default: // Extra fields will not match predefined so they all show up here
-		cdr.ExtraFields[fieldId] += fieldVal
-	}
-	return nil
-}
 
 // Understands and processes a specific format of cdr (eg: .csv or .fwv)
 type RecordsProcessor interface {

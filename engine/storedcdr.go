@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"net/url"
 	"strconv"
@@ -199,6 +200,60 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *utils.RSRField) string {
 	default:
 		return rsrFld.ParseValue(storedCdr.ExtraFields[rsrFld.Id])
 	}
+}
+
+// Populates the field with id from value; strings are appended to original one
+func (storedCdr *StoredCdr) ParseFieldValue(fieldId, fieldVal, timezone string) error {
+	var err error
+	switch fieldId {
+	case utils.TOR:
+		storedCdr.TOR += fieldVal
+	case utils.ACCID:
+		storedCdr.AccId += fieldVal
+	case utils.REQTYPE:
+		storedCdr.ReqType += fieldVal
+	case utils.DIRECTION:
+		storedCdr.Direction += fieldVal
+	case utils.TENANT:
+		storedCdr.Tenant += fieldVal
+	case utils.CATEGORY:
+		storedCdr.Category += fieldVal
+	case utils.ACCOUNT:
+		storedCdr.Account += fieldVal
+	case utils.SUBJECT:
+		storedCdr.Subject += fieldVal
+	case utils.DESTINATION:
+		storedCdr.Destination += fieldVal
+	case utils.RATED_FLD:
+		storedCdr.Rated, _ = strconv.ParseBool(fieldVal)
+	case utils.SETUP_TIME:
+		if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
+			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
+		}
+	case utils.PDD:
+		if storedCdr.Pdd, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
+			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
+		}
+	case utils.ANSWER_TIME:
+		if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal, timezone); err != nil {
+			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
+		}
+	case utils.USAGE:
+		if storedCdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
+			return fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
+		}
+	case utils.SUPPLIER:
+		storedCdr.Supplier += fieldVal
+	case utils.DISCONNECT_CAUSE:
+		storedCdr.DisconnectCause += fieldVal
+	case utils.COST:
+		if storedCdr.Cost, err = strconv.ParseFloat(fieldVal, 64); err != nil {
+			return fmt.Errorf("Cannot parse cost field with value: %s, err: %s", fieldVal, err.Error())
+		}
+	default: // Extra fields will not match predefined so they all show up here
+		storedCdr.ExtraFields[fieldId] += fieldVal
+	}
+	return nil
 }
 
 // concatenates values of multiple fields defined in template, used eg in CDR templates
