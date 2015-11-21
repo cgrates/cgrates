@@ -115,6 +115,29 @@ func (al *Alias) SetId(id string) error {
 	return nil
 }
 
+func (al *Alias) SetReverseCache() {
+	for _, value := range al.Values {
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
+				cache2go.Push(rKey, utils.ConcatenatedKey(al.GetId(), value.DestinationId))
+			}
+		}
+	}
+}
+
+func (al *Alias) RemoveReverseCache() {
+	for _, value := range al.Values {
+		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
+				cache2go.Pop(rKey, tmpKey)
+			}
+		}
+	}
+}
+
 type AttrMatchingAlias struct {
 	Destination string
 	Direction   string

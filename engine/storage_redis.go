@@ -23,7 +23,6 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -363,6 +362,13 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 		utils.Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
 	}
 	for _, key := range alsKeys {
+		// check if it already exists
+		// to remove reverse cache keys
+		if avs, err := cache2go.Get(key); err == nil && avs != nil {
+			al := &Alias{Values: avs.(AliasValues)}
+			al.SetId(key[len(utils.ALIASES_PREFIX):])
+			al.RemoveReverseCache()
+		}
 		cache2go.RemKey(key)
 		if _, err = rs.GetAlias(key[len(utils.ALIASES_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
@@ -755,14 +761,7 @@ func (rs *RedisStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		if err == nil {
 			cache2go.Cache(key, al.Values)
 			// cache reverse alias
-			for _, value := range al.Values {
-				for target, pairs := range value.Pairs {
-					for _, alias := range pairs {
-						rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
-						cache2go.Push(rKey, utils.ConcatenatedKey(origKey, value.DestinationId))
-					}
-				}
-			}
+			al.SetReverseCache()
 		}
 	}
 	return
@@ -776,24 +775,16 @@ func (rs *RedisStorage) RemoveAlias(key string) (err error) {
 	defer rs.db.Put(conn)
 	al := &Alias{}
 	al.SetId(key)
-	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	aliasValues := make(AliasValues, 0)
 	if values, err := conn.Cmd("GET", key).Bytes(); err == nil {
 		rs.ms.Unmarshal(values, &aliasValues)
 	}
+	al.Values = aliasValues
 	err = conn.Cmd("DEL", key).Err
 	if err == nil {
-		for _, value := range aliasValues {
-			tmpKey := utils.ConcatenatedKey(origKey, value.DestinationId)
-			for target, pairs := range value.Pairs {
-				for _, alias := range pairs {
-					rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-					cache2go.Pop(rKey, tmpKey)
-				}
-				cache2go.RemKey(key)
-			}
-		}
+		al.RemoveReverseCache()
+		cache2go.RemKey(key)
 	}
 	return
 }

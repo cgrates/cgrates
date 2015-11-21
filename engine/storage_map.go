@@ -232,6 +232,13 @@ func (ms *MapStorage) cacheAccounting(alsKeys []string) error {
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, utils.ALIASES_PREFIX) {
+			// check if it already exists
+			// to remove reverse cache keys
+			if avs, err := cache2go.Get(k); err == nil && avs != nil {
+				al := &Alias{Values: avs.(AliasValues)}
+				al.SetId(k[len(utils.ALIASES_PREFIX):])
+				al.RemoveReverseCache()
+			}
 			cache2go.RemKey(k)
 			if _, err := ms.GetAlias(k[len(utils.ALIASES_PREFIX):], true); err != nil {
 				cache2go.RollbackTransaction()
@@ -574,7 +581,6 @@ func (ms *MapStorage) SetAlias(al *Alias) error {
 }
 
 func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
-	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -591,14 +597,7 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 		err = ms.ms.Unmarshal(values, &al.Values)
 		if err == nil {
 			cache2go.Cache(key, al.Values)
-			for _, value := range al.Values {
-				for target, pairs := range value.Pairs {
-					for _, alias := range pairs {
-						rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
-						cache2go.Push(rKey, utils.ConcatenatedKey(origKey, value.DestinationId))
-					}
-				}
-			}
+			al.SetReverseCache()
 		}
 	} else {
 		return nil, utils.ErrNotFound
@@ -609,23 +608,15 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 func (ms *MapStorage) RemoveAlias(key string) error {
 	al := &Alias{}
 	al.SetId(key)
-	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	aliasValues := make(AliasValues, 0)
 	if values, ok := ms.dict[key]; ok {
 		ms.ms.Unmarshal(values, &aliasValues)
 	}
+	al.Values = aliasValues
 	delete(ms.dict, key)
-	for _, value := range aliasValues {
-		tmpKey := utils.ConcatenatedKey(origKey, value.DestinationId)
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-				cache2go.Pop(rKey, tmpKey)
-			}
-			cache2go.RemKey(key)
-		}
-	}
+	al.RemoveReverseCache()
+	cache2go.RemKey(key)
 	return nil
 }
 

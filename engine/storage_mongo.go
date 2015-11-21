@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -543,6 +542,13 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		utils.Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
 	}
 	for _, key := range alsKeys {
+		// check if it already exists
+		// to remove reverse cache keys
+		if avs, err := cache2go.Get(key); err == nil && avs != nil {
+			al := &Alias{Values: avs.(AliasValues)}
+			al.SetId(key[len(utils.ALIASES_PREFIX):])
+			al.RemoveReverseCache()
+		}
 		cache2go.RemKey(key)
 		if _, err = ms.GetAlias(key[len(utils.ALIASES_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
@@ -897,14 +903,7 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		if err == nil {
 			cache2go.Cache(key, al.Values)
 			// cache reverse alias
-			for _, value := range al.Values {
-				for target, pairs := range value.Pairs {
-					for _, alias := range pairs {
-						rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
-						cache2go.Push(rKey, utils.ConcatenatedKey(origKey, value.DestinationId))
-					}
-				}
-			}
+			al.SetReverseCache()
 		}
 	}
 	return
@@ -915,27 +914,17 @@ func (ms *MongoStorage) RemoveAlias(key string) (err error) {
 	al.SetId(key)
 	origKey := key
 	key = utils.ALIASES_PREFIX + key
-	var aliasValues AliasValues
-
 	var kv struct {
 		Key   string
 		Value AliasValues
 	}
 	if err := ms.db.C(colAls).Find(bson.M{"key": origKey}).One(&kv); err == nil {
-		aliasValues = kv.Value
+		al.Values = kv.Value
 	}
 	err = ms.db.C(colAls).Remove(bson.M{"key": origKey})
 	if err == nil {
-		for _, value := range aliasValues {
-			tmpKey := utils.ConcatenatedKey(origKey, value.DestinationId)
-			for target, pairs := range value.Pairs {
-				for _, alias := range pairs {
-					rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-					cache2go.Pop(rKey, tmpKey)
-				}
-				cache2go.RemKey(key)
-			}
-		}
+		al.RemoveReverseCache()
+		cache2go.RemKey(key)
 	}
 	return
 }
