@@ -1,10 +1,7 @@
 //Simple caching library with expiration capabilities
 package cache2go
 
-import (
-	"sync"
-	"time"
-)
+import "sync"
 
 const (
 	PREFIX_LEN   = 4
@@ -14,15 +11,6 @@ const (
 	KIND_PRF     = "PRF"
 	DOUBLE_CACHE = true
 )
-
-type timestampedValue struct {
-	timestamp time.Time
-	value     interface{}
-}
-
-func (tsv timestampedValue) Value() interface{} {
-	return tsv.value
-}
 
 type transactionItem struct {
 	key   string
@@ -42,7 +30,7 @@ var (
 	mux   sync.RWMutex
 	cache cacheStore
 	// transaction stuff
-	transactionBuffer []transactionItem
+	transactionBuffer []*transactionItem
 	transactionMux    sync.Mutex
 	transactionON     = false
 	transactionLock   = false
@@ -93,7 +81,7 @@ func Cache(key string, value interface{}) {
 		cache.Put(key, value)
 		//fmt.Println("ADD: ", key)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: value, kind: KIND_ADD})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_ADD})
 	}
 }
 
@@ -106,7 +94,7 @@ func CachePush(key string, value interface{}) {
 	if !transactionON {
 		cache.Append(key, value)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: value, kind: KIND_ADP})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_ADP})
 	}
 }
 
@@ -117,12 +105,6 @@ func Get(key string) (v interface{}, err error) {
 	return cache.Get(key)
 }
 
-func GetKeyAge(key string) (time.Duration, error) {
-	mux.RLock()
-	defer mux.RUnlock()
-	return cache.GetAge(key)
-}
-
 func RemKey(key string) {
 	if !transactionLock {
 		mux.Lock()
@@ -131,7 +113,7 @@ func RemKey(key string) {
 	if !transactionON {
 		cache.Delete(key)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: key, kind: KIND_REM})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, kind: KIND_REM})
 	}
 }
 
@@ -143,7 +125,7 @@ func RemPrefixKey(prefix string) {
 	if !transactionON {
 		cache.DeletePrefix(prefix)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: prefix, kind: KIND_PRF})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: prefix, kind: KIND_PRF})
 	}
 }
 
@@ -164,7 +146,7 @@ func CountEntries(prefix string) (result int) {
 	return cache.CountEntriesForPrefix(prefix)
 }
 
-func GetAllEntries(prefix string) (map[string]timestampedValue, error) {
+func GetAllEntries(prefix string) (map[string]interface{}, error) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.GetAllForPrefix(prefix)
