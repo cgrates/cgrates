@@ -584,23 +584,6 @@ type CacheStats struct {
 	LastLoadTime    string
 }
 
-type AttrCachedItemAge struct {
-	Category string // Item's category, same name as .csv files without extension
-	ItemId   string // Item's identity tag
-}
-
-type CachedItemAge struct {
-	Destination     time.Duration
-	RatingPlan      time.Duration
-	RatingProfile   time.Duration
-	Action          time.Duration
-	ActionPlan      time.Duration
-	SharedGroup     time.Duration
-	DerivedChargers time.Duration
-	Alias           time.Duration
-	LcrProfiles     time.Duration
-}
-
 type AttrExpFileCdrs struct {
 	CdrFormat                  *string  // Cdr output file format <CdreCdrFormats>
 	FieldSeparator             *string  // Separator used between fields
