@@ -28,6 +28,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
@@ -119,4 +120,16 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 		}})
 	*/
 	return m
+}
+
+// Extracts the value out of a specific field in diameter message, able to go into multiple layers in the form of field1>field2>field3
+func dmtMessageFieldValue(dm *diam.Message, fieldId string) string {
+	//fieldNameLevels := strings.Split(fieldId, ">")
+	return ""
+
+}
+
+// Converts Diameter CCR message into StoredCdr based on field template
+func ccrToStoredCdr(ccr *diam.Message, tpl []*config.CfgCdrField) (*engine.StoredCdr, error) {
+	return nil, nil
 }

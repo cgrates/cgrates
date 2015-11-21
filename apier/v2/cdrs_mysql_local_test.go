@@ -79,10 +79,10 @@ func TestV2CdrsMysqlInjectUnratedCdr(t *testing.T) {
 		t.Error("Error on opening database connection: ", err)
 		return
 	}
-	strCdr1 := &engine.StoredCdr{CgrId: utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	strCdr1 := &engine.StoredCdr{CgrId: utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String()),
 		TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		SetupTime: time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 21, 10, 47, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
 	if err := mysqlDb.SetCdr(strCdr1); err != nil {
@@ -236,6 +236,71 @@ func TestV2CdrsMysqlProcessPrepaidCdr(t *testing.T) {
 	}
 	if processDur := time.Now().Sub(tStart); processDur > 1*time.Second {
 		t.Error("Unexpected processing time", processDur)
+	}
+}
+
+func TestV2CdrsMysqlRateWithoutTP(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	rawCdrCgrId := utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String())
+	// Rate the injected CDR, should not rate it since we have no TP loaded
+	attrs := utils.AttrRateCdrs{CgrIds: []string{rawCdrCgrId}}
+	var reply string
+	if err := cdrsRpc.Call("CdrsV2.RateCdrs", attrs, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	var cdrs []*engine.ExternalCdr
+	req := utils.RpcCdrsFilter{CgrIds: []string{rawCdrCgrId}}
+	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		if cdrs[0].Cost != -1 {
+			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
+		}
+	}
+}
+
+func TestV2CdrsMysqloadTariffPlanFromFolder(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var loadInst engine.LoadInstance
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	if err := cdrsRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+		t.Error(err)
+	} else if loadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", loadInst)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+}
+
+func TestV2CdrsMysqlRateWithTP(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	rawCdrCgrId := utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String())
+	attrs := utils.AttrRateCdrs{CgrIds: []string{rawCdrCgrId}}
+	var reply string
+	if err := cdrsRpc.Call("CdrsV2.RateCdrs", attrs, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	var cdrs []*engine.ExternalCdr
+	req := utils.RpcCdrsFilter{CgrIds: []string{rawCdrCgrId}}
+	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		if cdrs[0].Cost != 0.3 {
+			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
+		}
 	}
 }
 

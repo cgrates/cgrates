@@ -143,6 +143,9 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 		return err
 	}
 	for _, cdr := range cdrs {
+		if cdr.MediationRunId == "" { // raw CDRs which were not calculated before
+			cdr.MediationRunId = utils.META_DEFAULT
+		}
 		if err := self.rateStoreStatsReplicate(cdr); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
 		}
