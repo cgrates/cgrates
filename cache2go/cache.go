@@ -8,6 +8,7 @@ const (
 	KIND_ADD     = "ADD"
 	KIND_ADP     = "ADP"
 	KIND_REM     = "REM"
+	KIND_POP     = "POP"
 	KIND_PRF     = "PRF"
 	DOUBLE_CACHE = true
 )
@@ -62,7 +63,9 @@ func CommitTransaction() {
 		case KIND_ADD:
 			Cache(item.key, item.value)
 		case KIND_ADP:
-			CachePush(item.key, item.value)
+			Push(item.key, item.value)
+		case KIND_POP:
+			Pop(item.key, item.value)
 		}
 	}
 	mux.Unlock()
@@ -79,14 +82,14 @@ func Cache(key string, value interface{}) {
 	}
 	if !transactionON {
 		cache.Put(key, value)
-		//fmt.Println("ADD: ", key)
+		//log.Println("ADD: ", key)
 	} else {
 		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_ADD})
 	}
 }
 
 // Appends to an existing slice in the cache key
-func CachePush(key string, value interface{}) {
+func Push(key string, value interface{}) {
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
@@ -103,6 +106,18 @@ func Get(key string) (v interface{}, err error) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.Get(key)
+}
+
+func Pop(key string, value interface{}) {
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
+	}
+	if !transactionON {
+		cache.Pop(key, value)
+	} else {
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_POP})
+	}
 }
 
 func RemKey(key string) {

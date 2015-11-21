@@ -690,7 +690,7 @@ func (ms *MongoStorage) GetDestination(key string) (result *Destination, err err
 	}
 	// create optimized structure
 	for _, p := range result.Prefixes {
-		cache2go.CachePush(utils.DESTINATION_PREFIX+p, result.Id)
+		cache2go.Push(utils.DESTINATION_PREFIX+p, result.Id)
 	}
 	return
 }
@@ -900,15 +900,8 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 			for _, value := range al.Values {
 				for target, pairs := range value.Pairs {
 					for _, alias := range pairs {
-						var existingKeys map[string]bool
-						rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-						if x, err := cache2go.Get(rKey); err == nil {
-							existingKeys = x.(map[string]bool)
-						} else {
-							existingKeys = make(map[string]bool)
-						}
-						existingKeys[utils.ConcatenatedKey(origKey, value.DestinationId)] = true
-						cache2go.Cache(rKey, existingKeys)
+						rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
+						cache2go.Push(rKey, utils.ConcatenatedKey(origKey, value.DestinationId))
 					}
 				}
 			}
@@ -934,23 +927,11 @@ func (ms *MongoStorage) RemoveAlias(key string) (err error) {
 	err = ms.db.C(colAls).Remove(bson.M{"key": origKey})
 	if err == nil {
 		for _, value := range aliasValues {
+			tmpKey := utils.ConcatenatedKey(origKey, value.DestinationId)
 			for target, pairs := range value.Pairs {
 				for _, alias := range pairs {
-					var existingKeys map[string]bool
 					rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-					if x, err := cache2go.Get(rKey); err == nil {
-						existingKeys = x.(map[string]bool)
-					}
-					for eKey := range existingKeys {
-						if strings.HasPrefix(origKey, eKey) {
-							delete(existingKeys, eKey)
-						}
-					}
-					if len(existingKeys) == 0 {
-						cache2go.RemKey(rKey)
-					} else {
-						cache2go.Cache(rKey, existingKeys)
-					}
+					cache2go.Pop(rKey, tmpKey)
 				}
 				cache2go.RemKey(key)
 			}
