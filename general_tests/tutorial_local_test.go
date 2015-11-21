@@ -127,49 +127,6 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 }
 
-// Check items age
-func TestTutLocalGetCachedItemAge(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var rcvAge *utils.CachedItemAge
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "1002", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Destination > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "RP_RETAIL1", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingPlan > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingProfile > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "LOG_WARNING", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Action > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "SHARED_A", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:1001:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:*any:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-}
-
 func TestTutLocalGetUsers(t *testing.T) {
 	if !*testLocal {
 		return

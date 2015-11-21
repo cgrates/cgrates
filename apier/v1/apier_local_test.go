@@ -835,26 +835,6 @@ func TestApierGetCacheStats(t *testing.T) {
 	}
 }
 
-func TestApierGetCachedItemAge(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var rcvAge *utils.CachedItemAge
-	if err := rater.Call("ApierV1.GetCachedItemAge", "+4917", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Destination > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := rater.Call("ApierV1.GetCachedItemAge", "RETAIL1", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingPlan > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := rater.Call("ApierV1.GetCachedItemAge", "DUMMY_DATA", &rcvAge); err == nil || err.Error() != "NOT_FOUND" {
-		t.Error("Did not get NOT_FOUND: ", err.Error())
-	}
-}
-
 // Test here GetDestination
 func TestApierGetDestination(t *testing.T) {
 	if !*testLocal {
