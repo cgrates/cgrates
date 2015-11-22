@@ -418,7 +418,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 	eCfg := &DiameterAgentJsonCfg{
 		Enabled:          utils.BoolPointer(false),
 		Listen:           utils.StringPointer("127.0.0.1:3868"),
-		Dictionaries_dir: utils.StringPointer(""),
+		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		Sm_generic:       utils.StringPointer("internal"),
 		Timezone:         utils.StringPointer(""),
 		Origin_host:      utils.StringPointer("diameter-agent"),

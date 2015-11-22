@@ -260,19 +260,18 @@ const CGRATES_CFG_JSON = `
 
 
 "diameter_agent": {
-	"enabled": false,					// enables the diameter agent: <true|false>
-	"listen": "127.0.0.1:3868",			// address where to listen for diameter requests <x.y.z.y:1234>
-	"dictionaries_dir": "",				// path towards directory holding additional dictionaries to load
-	"sm_generic": "internal",			// connection towards SMG component for session management
-	"timezone": "",						// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
-	"origin_host": "diameter-agent",	// diameter Origin-Host AVP used in replies
-	"origin_realm": "cgrates.org",		// diameter Origin-Realm AVP used in replies
-	"vendor_id": 0,						// diameter Vendor-Id AVP used in replies
-	"product_name": "CGRateS",			// diameter Product-Name AVP used in replies
-
+	"enabled": false,											// enables the diameter agent: <true|false>
+	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
+	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
+	"sm_generic": "internal",									// connection towards SMG component for session management
+	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
+	"origin_host": "diameter-agent",							// diameter Origin-Host AVP used in replies
+	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
+	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
+	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
 	"request_processors": [
 		{
-			"id": "*default",									// Identifier of this processor
+			"id": "*default",									// formal identifier of this processor
 			"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 			"request_filter": "Subscription-Id>Subscription-Type(0)",		// filter requests processed by this processor
 			"continue_on_success": false,				// continue to the next template if executed
