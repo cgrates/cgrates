@@ -42,20 +42,20 @@ func TestDisectUsageForCCR(t *testing.T) {
 
 }
 
-func TestGetUsageFromCCR(t *testing.T) {
-	if usage := getUsageFromCCR(1, 0, 300, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
+func TestUsageFromCCR(t *testing.T) {
+	if usage := usageFromCCR(1, 0, 300, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
 		t.Error(usage)
 	}
-	if usage := getUsageFromCCR(2, 0, 300, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
+	if usage := usageFromCCR(2, 0, 300, time.Duration(300)*time.Second); usage != time.Duration(300)*time.Second {
 		t.Error(usage)
 	}
-	if usage := getUsageFromCCR(2, 3, 300, time.Duration(300)*time.Second); usage != time.Duration(1200)*time.Second {
+	if usage := usageFromCCR(2, 3, 300, time.Duration(300)*time.Second); usage != time.Duration(1200)*time.Second {
 		t.Error(usage)
 	}
-	if usage := getUsageFromCCR(3, 4, 35, time.Duration(300)*time.Second); usage != time.Duration(935)*time.Second {
+	if usage := usageFromCCR(3, 4, 35, time.Duration(300)*time.Second); usage != time.Duration(935)*time.Second {
 		t.Error(usage)
 	}
-	if usage := getUsageFromCCR(3, 1, 35, time.Duration(300)*time.Second); usage != time.Duration(35)*time.Second {
+	if usage := usageFromCCR(3, 1, 35, time.Duration(300)*time.Second); usage != time.Duration(35)*time.Second {
 		t.Error(usage)
 	}
 }

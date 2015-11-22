@@ -85,8 +85,8 @@ func TestDmtAgentSendCCR(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	dmtClient, err := NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "UNIT_TEST",
-		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId, daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION)
+	dmtClient, err := NewDiameterClient(daCfg.DiameterAgentCfg().Listen, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm,
+		daCfg.DiameterAgentCfg().VendorId, daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DictionariesDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,10 +94,14 @@ func TestDmtAgentSendCCR(t *testing.T) {
 		AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(7) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans", Rated: true,
+		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans", Rated: true,
 	}
-	m := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
+	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
 		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, time.Duration(300)*time.Second, true)
+	m, err := ccr.AsDiameterMessage()
+	if err != nil {
+		t.Error(err)
+	}
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}

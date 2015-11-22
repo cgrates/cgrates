@@ -421,7 +421,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		Sm_generic:       utils.StringPointer("internal"),
 		Timezone:         utils.StringPointer(""),
-		Origin_host:      utils.StringPointer("diameter-agent"),
+		Origin_host:      utils.StringPointer("CGR-DA"),
 		Origin_realm:     utils.StringPointer("cgrates.org"),
 		Vendor_id:        utils.IntPointer(0),
 		Product_name:     utils.StringPointer("CGRateS"),
