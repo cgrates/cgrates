@@ -116,6 +116,12 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 	ccr := &CCR{SessionId: sid, OriginHost: originHost, OriginRealm: originRealm, DestinationHost: originHost, DestinationRealm: originRealm,
 		AuthApplicationId: 4, ServiceContextId: cdr.ExtraFields["Service-Context-Id"], CCRequestType: reqType, CCRequestNumber: reqNr, EventTimestamp: cdr.AnswerTime,
 		ServiceIdentifier: 0}
+	ccr.SubscriptionId = make([]struct {
+		SubscriptionIdType int    `avp:"Subscription-Id-Type"`
+		SubscriptionIdData string `avp:"Subscription-Id-Data"`
+	}, 1)
+	ccr.SubscriptionId[0].SubscriptionIdType = 0
+	ccr.SubscriptionId[0].SubscriptionIdData = cdr.Account
 	ccr.RequestedServiceUnit.CCTime = ccTime
 	ccr.ServiceInformation.INInformation.CallingPartyAddress = cdr.Account
 	ccr.ServiceInformation.INInformation.CalledPartyAddress = cdr.Destination
@@ -132,17 +138,21 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 
 // CallControl Request
 type CCR struct {
-	SessionId            string    `avp:"Session-Id"`
-	OriginHost           string    `avp:"Origin-Host"`
-	OriginRealm          string    `avp:"Origin-Realm"`
-	DestinationHost      string    `avp:"Destination-Host"`
-	DestinationRealm     string    `avp:"Destination-Realm"`
-	AuthApplicationId    int       `avp:"Auth-Application-Id"`
-	ServiceContextId     string    `avp:"Service-Context-Id"`
-	CCRequestType        int       `avp:"CC-Request-Type"`
-	CCRequestNumber      int       `avp:"CC-Request-Number"`
-	EventTimestamp       time.Time `avp:"Event-Timestamp"`
-	ServiceIdentifier    int       `avp:"Service-Identifier"`
+	SessionId         string    `avp:"Session-Id"`
+	OriginHost        string    `avp:"Origin-Host"`
+	OriginRealm       string    `avp:"Origin-Realm"`
+	DestinationHost   string    `avp:"Destination-Host"`
+	DestinationRealm  string    `avp:"Destination-Realm"`
+	AuthApplicationId int       `avp:"Auth-Application-Id"`
+	ServiceContextId  string    `avp:"Service-Context-Id"`
+	CCRequestType     int       `avp:"CC-Request-Type"`
+	CCRequestNumber   int       `avp:"CC-Request-Number"`
+	EventTimestamp    time.Time `avp:"Event-Timestamp"`
+	ServiceIdentifier int       `avp:"Service-Identifier"`
+	SubscriptionId    []struct {
+		SubscriptionIdType int    `avp:"Subscription-Id-Type"`
+		SubscriptionIdData string `avp:"Subscription-Id-Data"`
+	} `avp:"Subscription-Id"`
 	RequestedServiceUnit struct {
 		CCTime int `avp:"CC-Time"`
 	} `avp:"Requested-Service-Unit"`
@@ -198,30 +208,24 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 	if _, err := m.NewAVP("Event-Timestamp", avp.Mbit, 0, datatype.Time(self.EventTimestamp)); err != nil {
 		return nil, err
 	}
-	/*
-		subscriptionIdType, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Subscription-Id")
-		if err != nil {
-			return nil, err
-		}
-		subscriptionIdData, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Subscription-Id-Data")
-		if err != nil {
-			return nil, err
-		}
+
+	subscriptionIdType, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Subscription-Id-Type")
+	if err != nil {
+		return nil, err
+	}
+	subscriptionIdData, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Subscription-Id-Data")
+	if err != nil {
+		return nil, err
+	}
+	for _, subscriptionId := range self.SubscriptionId {
 		if _, err := m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
 			AVP: []*diam.AVP{
-				diam.NewAVP(subscriptionIdType.Code, avp.Mbit, 0, datatype.Enumerated(0)),
-				diam.NewAVP(subscriptionIdData.Code, avp.Mbit, 0, datatype.UTF8String(cdr.Account)),
+				diam.NewAVP(subscriptionIdType.Code, avp.Mbit, 0, datatype.Enumerated(subscriptionId.SubscriptionIdType)),
+				diam.NewAVP(subscriptionIdData.Code, avp.Mbit, 0, datatype.UTF8String(subscriptionId.SubscriptionIdData)),
 			}}); err != nil {
 			return nil, err
 		}
-		if _, err := m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
-			AVP: []*diam.AVP{
-				diam.NewAVP(subscriptionIdType.Code, avp.Mbit, 0, datatype.Enumerated(1)),
-				diam.NewAVP(subscriptionIdData.Code, avp.Mbit, 0, datatype.UTF8String("20921006232651")),
-			}}); err != nil {
-			return nil, err
-		}
-	*/
+	}
 	if _, err := m.NewAVP("Service-Identifier", avp.Mbit, 0, datatype.Unsigned32(self.ServiceIdentifier)); err != nil {
 		return nil, err
 	}
@@ -234,7 +238,6 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 			diam.NewAVP(ccTimeAvp.Code, avp.Mbit, 0, datatype.Unsigned32(self.RequestedServiceUnit.CCTime))}}); err != nil {
 		return nil, err
 	}
-
 	inInformation, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "IN-Information")
 	if err != nil {
 		return nil, err
