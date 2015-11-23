@@ -84,7 +84,7 @@ func (self *CdrServer) Timezone() string {
 	return self.cgrCfg.DefaultTimezone
 }
 
-func (self *CdrServer) RegisterHanlersToServer(server *utils.Server) {
+func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
 	cdrServer = self // Share the server object for handlers
 	server.RegisterHttpFunc("/cdr_http", cgrCdrHandler)
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
