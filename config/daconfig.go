@@ -80,6 +80,7 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 			if err := rp.loadFromJsonCfg(reqProcJsn); err != nil {
 				return nil
 			}
+			self.RequestProcessors = append(self.RequestProcessors, rp)
 		}
 	}
 	return nil

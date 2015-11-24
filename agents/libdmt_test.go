@@ -21,6 +21,10 @@ package agents
 import (
 	"testing"
 	"time"
+
+	"github.com/fiorix/go-diameter/diam"
+	"github.com/fiorix/go-diameter/diam/avp"
+	"github.com/fiorix/go-diameter/diam/datatype"
 )
 
 func TestDisectUsageForCCR(t *testing.T) {
@@ -57,5 +61,13 @@ func TestUsageFromCCR(t *testing.T) {
 	}
 	if usage := usageFromCCR(3, 1, 35, time.Duration(300)*time.Second); usage != time.Duration(35)*time.Second {
 		t.Error(usage)
+	}
+}
+
+func TestAvpValAsString(t *testing.T) {
+	originHostStr := "unit_test"
+	a := diam.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(originHostStr))
+	if avpValStr := avpValAsString(a); avpValStr != originHostStr {
+		t.Errorf("Expected: %s, received: %s", originHostStr, avpValStr)
 	}
 }

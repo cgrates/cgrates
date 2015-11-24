@@ -21,11 +21,13 @@ package agents
 import (
 	"flag"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -78,6 +80,65 @@ func TestDmtAgentStartEngine(t *testing.T) {
 	}
 	if _, err := engine.StopStartEngine(daCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
+	//if !*testIntegration {
+	//	return
+	//}
+	cfgDefaults, _ := config.NewDefaultCGRConfig()
+	loadDictionaries(cfgDefaults.DiameterAgentCfg().DictionariesDir, "UNIT_TEST")
+	ccr := &CCR{
+		SessionId:         "routinga;1442095190;1476802709",
+		OriginHost:        cfgDefaults.DiameterAgentCfg().OriginHost,
+		OriginRealm:       cfgDefaults.DiameterAgentCfg().OriginRealm,
+		DestinationHost:   cfgDefaults.DiameterAgentCfg().OriginHost,
+		DestinationRealm:  cfgDefaults.DiameterAgentCfg().OriginRealm,
+		AuthApplicationId: 4,
+		ServiceContextId:  "voice@huawei.com",
+		CCRequestType:     1,
+		CCRequestNumber:   0,
+		EventTimestamp:    time.Date(2015, 11, 23, 12, 22, 24, 0, time.UTC),
+		ServiceIdentifier: 0,
+		SubscriptionId: []struct {
+			SubscriptionIdType int    `avp:"Subscription-Id-Type"`
+			SubscriptionIdData string `avp:"Subscription-Id-Data"`
+		}{
+			struct {
+				SubscriptionIdType int    `avp:"Subscription-Id-Type"`
+				SubscriptionIdData string `avp:"Subscription-Id-Data"`
+			}{SubscriptionIdType: 0, SubscriptionIdData: "4986517174963"},
+			struct {
+				SubscriptionIdType int    `avp:"Subscription-Id-Type"`
+				SubscriptionIdData string `avp:"Subscription-Id-Data"`
+			}{SubscriptionIdType: 0, SubscriptionIdData: "4986517174963"}},
+	}
+	ccr.RequestedServiceUnit.CCTime = 300
+	ccr.ServiceInformation.INInformation.CallingPartyAddress = "4986517174963"
+	ccr.ServiceInformation.INInformation.CalledPartyAddress = "4986517174964"
+	ccr.ServiceInformation.INInformation.RealCalledNumber = "4986517174964"
+	ccr.ServiceInformation.INInformation.ChargeFlowType = 0
+	ccr.ServiceInformation.INInformation.CallingVlrNumber = "49123956767"
+	ccr.ServiceInformation.INInformation.CallingCellIDOrSAI = "12340185301425"
+	ccr.ServiceInformation.INInformation.BearerCapability = "capable"
+	ccr.ServiceInformation.INInformation.CallReferenceNumber = "askjadkfjsdf"
+	ccr.ServiceInformation.INInformation.MSCAddress = "123324234"
+	ccr.ServiceInformation.INInformation.TimeZone = 0
+	ccr.ServiceInformation.INInformation.CalledPartyNP = "4986517174964"
+	ccr.ServiceInformation.INInformation.SSPTime = "20091020120101"
+	var err error
+	if ccr.diamMessage, err = ccr.AsDiameterMessage(); err != nil {
+		t.Error(err)
+	}
+	eSMGE := sessionmanager.SMGenericEvent{"AccId": "routinga;1442095190;1476802709",
+		"Account": "*users", "AnswerTime": "2015-11-23 12:22:24 +0000 UTC", "Category": "call_4912395676749123956767",
+		"Destination": "4986517174964", "Direction": "*out", "ReqType": "*users", "SetupTime": "2015-11-23 12:22:24 +0000 UTC",
+		"Subject": "*users", "SubscriberId": "4986517174963", "TOR": "*voice", "Tenant": "*users", "Usage": "300"}
+	if smge, err := ccr.AsSMGenericEvent(cfgDefaults.DiameterAgentCfg().RequestProcessors[0].ContentFields); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSMGE, smge) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMGE, smge)
 	}
 }
 

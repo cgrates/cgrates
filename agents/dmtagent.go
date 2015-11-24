@@ -73,7 +73,6 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		return
 	}
 	ccr.diamMessage = m // Save it for later searches inside AVPs
-	//utils.Logger.Debug(fmt.Sprintf("CCR unrmashaled: %+v", ccr))
 	cca := NewCCAFromCCR(&ccr)
 	cca.OriginHost = self.cgrCfg.DiameterAgentCfg().OriginHost
 	cca.OriginRealm = self.cgrCfg.DiameterAgentCfg().OriginRealm

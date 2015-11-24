@@ -34,6 +34,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
@@ -148,11 +149,11 @@ type CCR struct {
 	CCRequestType     int       `avp:"CC-Request-Type"`
 	CCRequestNumber   int       `avp:"CC-Request-Number"`
 	EventTimestamp    time.Time `avp:"Event-Timestamp"`
-	ServiceIdentifier int       `avp:"Service-Identifier"`
 	SubscriptionId    []struct {
 		SubscriptionIdType int    `avp:"Subscription-Id-Type"`
 		SubscriptionIdData string `avp:"Subscription-Id-Data"`
 	} `avp:"Subscription-Id"`
+	ServiceIdentifier    int `avp:"Service-Identifier"`
 	RequestedServiceUnit struct {
 		CCTime int `avp:"CC-Time"`
 	} `avp:"Requested-Service-Unit"`
@@ -175,7 +176,7 @@ type CCR struct {
 	diamMessage *diam.Message // Used to parse fields with CGR templates
 }
 
-// ToDo: do it with reflect in the future
+// Used when sending from client to agent
 func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 	if _, err := m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String(self.SessionId)); err != nil {
@@ -208,7 +209,6 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 	if _, err := m.NewAVP("Event-Timestamp", avp.Mbit, 0, datatype.Time(self.EventTimestamp)); err != nil {
 		return nil, err
 	}
-
 	subscriptionIdType, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Subscription-Id-Type")
 	if err != nil {
 		return nil, err
@@ -314,6 +314,53 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 	return m, nil
 }
 
+// Not the cleanest but most efficient way to retrieve a string from AVP since there are string methods on all datatypes
+// and the output is always in teh form "DataType{real_string}Padding:x"
+func avpValAsString(a *diam.AVP) string {
+	dataVal := a.Data.String()
+	startIdx := strings.Index(dataVal, "{")
+	endIdx := strings.Index(dataVal, "}")
+	if startIdx == 0 || endIdx == 0 {
+		return ""
+	}
+	return dataVal[startIdx+1 : endIdx]
+}
+
+// Extracts data out of CCR into a SMGenericEvent based on the configured template
+func (self *CCR) AsSMGenericEvent(tpl []*config.CfgCdrField) (sessionmanager.SMGenericEvent, error) {
+	outMap := make(map[string]string) // work with it so we can append values to keys
+	for _, fldTpl := range tpl {
+		var outVal string
+		for _, rsrTpl := range fldTpl.Value {
+			if rsrTpl.IsStatic() {
+				outVal += rsrTpl.ParseValue("")
+			} else {
+				hierarchyPath := strings.Split(rsrTpl.Id, utils.HIERARCHY_SEP)
+				hpIf := make([]interface{}, len(hierarchyPath))
+				for i, val := range hierarchyPath {
+					hpIf[i] = val
+				}
+				matchingAvps, err := self.diamMessage.FindAVPsWithPath(hpIf)
+				if err != nil || len(matchingAvps) == 0 {
+					utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
+					continue // Filter not matching
+				}
+				if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
+					utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, not considering.", rsrTpl.Id))
+					continue // Not convertible, ignore
+				}
+				outVal += avpValAsString(matchingAvps[0])
+			}
+		}
+		if _, hasKey := outMap[fldTpl.CdrFieldId]; !hasKey {
+			outMap[fldTpl.CdrFieldId] = outVal
+		} else { // If already there, postpend
+			outMap[fldTpl.CdrFieldId] += outVal
+		}
+	}
+	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
+}
+
 func NewCCAFromCCR(ccr *CCR) *CCA {
 	return &CCA{SessionId: ccr.SessionId, AuthApplicationId: ccr.AuthApplicationId, CCRequestType: ccr.CCRequestType, CCRequestNumber: ccr.CCRequestNumber,
 		diamMessage: diam.NewMessage(ccr.diamMessage.Header.CommandCode, ccr.diamMessage.Header.CommandFlags&^diam.RequestFlag, ccr.diamMessage.Header.ApplicationID,
@@ -369,17 +416,4 @@ func (self *CCA) AsDiameterMessage() (*diam.Message, error) {
 		return nil, err
 	}
 	return self.diamMessage, nil
-
-}
-
-// Extracts the value out of a specific field in diameter message, able to go into multiple layers in the form of field1>field2>field3
-func dmtMessageFieldValue(dm *diam.Message, fieldId string) string {
-	//fieldNameLevels := strings.Split(fieldId, ">")
-	return ""
-
-}
-
-// Converts Diameter CCR message into StoredCdr based on field template
-func ccrToStoredCdr(ccr *diam.Message, tpl []*config.CfgCdrField) (*engine.StoredCdr, error) {
-	return nil, nil
 }
