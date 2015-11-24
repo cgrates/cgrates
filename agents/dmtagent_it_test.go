@@ -84,9 +84,9 @@ func TestDmtAgentStartEngine(t *testing.T) {
 }
 
 func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
-	//if !*testIntegration {
-	//	return
-	//}
+	if !*testIntegration {
+		return
+	}
 	cfgDefaults, _ := config.NewDefaultCGRConfig()
 	loadDictionaries(cfgDefaults.DiameterAgentCfg().DictionariesDir, "UNIT_TEST")
 	ccr := &CCR{

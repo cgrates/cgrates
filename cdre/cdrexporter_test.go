@@ -58,7 +58,7 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 	}
 	fltrRule, _ := utils.ParseRSRFields("~MediationRunId:s/default/RUN_RTL/", utils.INFIELD_SEP)
 	val, _ := utils.ParseRSRFields(utils.COST, utils.INFIELD_SEP)
-	cfgCdrFld := &config.CfgCdrField{Tag: "cost", Type: "cdrfield", CdrFieldId: utils.COST, Value: val, FieldFilter: fltrRule}
+	cfgCdrFld := &config.CfgCdrField{Tag: "cost", Type: "cdrfield", FieldId: utils.COST, Value: val, FieldFilter: fltrRule}
 	if costVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if costVal != "1.01" {
@@ -66,7 +66,7 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 	}
 	fltrRule, _ = utils.ParseRSRFields("~MediationRunId:s/default/RETAIL1/", utils.INFIELD_SEP)
 	val, _ = utils.ParseRSRFields(utils.ACCOUNT, utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: utils.ACCOUNT, Type: "cdrfield", CdrFieldId: utils.ACCOUNT, Value: val, FieldFilter: fltrRule}
+	cfgCdrFld = &config.CfgCdrField{Tag: utils.ACCOUNT, Type: "cdrfield", FieldId: utils.ACCOUNT, Value: val, FieldFilter: fltrRule}
 	if acntVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if acntVal != "1000" {
@@ -83,7 +83,7 @@ func TestGetDateTimeFieldVal(t *testing.T) {
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
 	val, _ := utils.ParseRSRFields("stop_time", utils.INFIELD_SEP)
 	layout := "2006-01-02 15:04:05"
-	cfgCdrFld := &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", CdrFieldId: "stop_time", Value: val, Layout: layout}
+	cfgCdrFld := &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", FieldId: "stop_time", Value: val, Layout: layout}
 	if cdrVal, err := cdreTst.getDateTimeFieldVal(cdrTst, cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if cdrVal != "2014-06-11 19:19:00" {
@@ -91,12 +91,12 @@ func TestGetDateTimeFieldVal(t *testing.T) {
 	}
 	// Test filter
 	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", CdrFieldId: "stop_time", Value: val, FieldFilter: fltr, Layout: layout}
+	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", FieldId: "stop_time", Value: val, FieldFilter: fltr, Layout: layout}
 	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, cfgCdrFld); err == nil {
 		t.Error(err)
 	}
 	val, _ = utils.ParseRSRFields("fieldextr2", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", CdrFieldId: "stop_time", Value: val, Layout: layout}
+	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", FieldId: "stop_time", Value: val, Layout: layout}
 	// Test time parse error
 	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, cfgCdrFld); err == nil {
 		t.Error("Should give error here, got none.")
@@ -110,14 +110,14 @@ func TestCdreCdrFieldValue(t *testing.T) {
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.01}
 	val, _ := utils.ParseRSRFields(utils.DESTINATION, utils.INFIELD_SEP)
-	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: "cdrfield", CdrFieldId: utils.DESTINATION, Value: val}
+	cfgCdrFld := &config.CfgCdrField{Tag: "destination", Type: "cdrfield", FieldId: utils.DESTINATION, Value: val}
 	if val, err := cdre.cdrFieldValue(cdr, cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if val != cdr.Destination {
 		t.Errorf("Expecting: %s, received: %s", cdr.Destination, val)
 	}
 	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
-	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: "cdrfield", CdrFieldId: utils.DESTINATION, Value: val, FieldFilter: fltr}
+	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: "cdrfield", FieldId: utils.DESTINATION, Value: val, FieldFilter: fltr}
 	if _, err := cdre.cdrFieldValue(cdr, cfgCdrFld); err == nil {
 		t.Error("Failed to use filter")
 	}
