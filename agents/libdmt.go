@@ -352,10 +352,10 @@ func (self *CCR) AsSMGenericEvent(tpl []*config.CfgCdrField) (sessionmanager.SMG
 				outVal += avpValAsString(matchingAvps[0])
 			}
 		}
-		if _, hasKey := outMap[fldTpl.CdrFieldId]; !hasKey {
-			outMap[fldTpl.CdrFieldId] = outVal
+		if _, hasKey := outMap[fldTpl.FieldId]; !hasKey {
+			outMap[fldTpl.FieldId] = outVal
 		} else { // If already there, postpend
-			outMap[fldTpl.CdrFieldId] += outVal
+			outMap[fldTpl.FieldId] += outVal
 		}
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil

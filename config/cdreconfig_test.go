@@ -29,13 +29,13 @@ func TestCdreCfgClone(t *testing.T) {
 	emptyFields := []*CfgCdrField{}
 	initContentFlds := []*CfgCdrField{
 		&CfgCdrField{Tag: "CgrId",
-			Type:       "cdrfield",
-			CdrFieldId: "cgrid",
-			Value:      cgrIdRsrs},
+			Type:    "cdrfield",
+			FieldId: "cgrid",
+			Value:   cgrIdRsrs},
 		&CfgCdrField{Tag: "RunId",
-			Type:       "cdrfield",
-			CdrFieldId: "mediation_runid",
-			Value:      runIdRsrs},
+			Type:    "cdrfield",
+			FieldId: "mediation_runid",
+			Value:   runIdRsrs},
 	}
 	initCdreCfg := &CdreConfig{
 		CdrFormat:               "csv",
@@ -51,13 +51,13 @@ func TestCdreCfgClone(t *testing.T) {
 	}
 	eClnContentFlds := []*CfgCdrField{
 		&CfgCdrField{Tag: "CgrId",
-			Type:       "cdrfield",
-			CdrFieldId: "cgrid",
-			Value:      cgrIdRsrs},
+			Type:    "cdrfield",
+			FieldId: "cgrid",
+			Value:   cgrIdRsrs},
 		&CfgCdrField{Tag: "RunId",
-			Type:       "cdrfield",
-			CdrFieldId: "mediation_runid",
-			Value:      runIdRsrs},
+			Type:    "cdrfield",
+			FieldId: "mediation_runid",
+			Value:   runIdRsrs},
 	}
 	eClnCdreCfg := &CdreConfig{
 		CdrFormat:               "csv",
@@ -89,9 +89,9 @@ func TestCdreCfgClone(t *testing.T) {
 	if initCdreCfg.CostShiftDigits != 0 {
 		t.Error("Unexpected CostShiftDigits: ", initCdreCfg.CostShiftDigits)
 	}
-	clnCdreCfg.ContentFields[0].CdrFieldId = "destination"
-	if initCdreCfg.ContentFields[0].CdrFieldId != "cgrid" {
-		t.Error("Unexpected change of CdrFieldId: ", initCdreCfg.ContentFields[0].CdrFieldId)
+	clnCdreCfg.ContentFields[0].FieldId = "destination"
+	if initCdreCfg.ContentFields[0].FieldId != "cgrid" {
+		t.Error("Unexpected change of FieldId: ", initCdreCfg.ContentFields[0].FieldId)
 	}
 
 }
