@@ -30,6 +30,7 @@ import (
 	"github.com/cenkalti/rpc2"
 	"golang.org/x/net/websocket"
 )
+import _ "net/http/pprof"
 
 type Server struct {
 	rpcEnabled  bool

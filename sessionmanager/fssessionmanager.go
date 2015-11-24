@@ -340,7 +340,7 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	}
 	for i := 0; len(sm.sessions.getSessions()) > 0 && i < 20; i++ {
 		time.Sleep(100 * time.Millisecond) // wait for the hungup event to be fired
-		utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITC> Shutdown waiting on sessions: %v", sm.sessions))
+		utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> Shutdown waiting on sessions: %v", sm.sessions))
 	}
 	return nil
 }

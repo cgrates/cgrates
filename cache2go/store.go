@@ -11,6 +11,7 @@ type cacheStore interface {
 	Put(string, interface{})
 	Append(string, interface{})
 	Get(string) (interface{}, error)
+	Pop(string, interface{})
 	Delete(string)
 	DeletePrefix(string)
 	CountEntriesForPrefix(string) int
@@ -27,10 +28,12 @@ func newDoubleStore() cacheDoubleStore {
 
 func (cs cacheDoubleStore) Put(key string, value interface{}) {
 	prefix, key := key[:PREFIX_LEN], key[PREFIX_LEN:]
-	if _, ok := cs[prefix]; !ok {
-		cs[prefix] = make(map[string]interface{})
+	mp, ok := cs[prefix]
+	if !ok {
+		mp = make(map[string]interface{})
+		cs[prefix] = mp
 	}
-	cs[prefix][key] = value
+	mp[key] = value
 }
 
 func (cs cacheDoubleStore) Append(key string, value interface{}) {
@@ -52,6 +55,20 @@ func (cs cacheDoubleStore) Get(key string) (interface{}, error) {
 		}
 	}
 	return nil, utils.ErrNotFound
+}
+
+func (cs cacheDoubleStore) Pop(key string, value interface{}) {
+	if v, err := cs.Get(key); err == nil {
+		elements, ok := v.(map[interface{}]struct{})
+		if ok {
+			delete(elements, value)
+			if len(elements) > 0 {
+				cache.Put(key, elements)
+			} else {
+				cache.Delete(key)
+			}
+		}
+	}
 }
 
 func (cs cacheDoubleStore) Delete(key string) {
@@ -128,6 +145,20 @@ func (cs cacheSimpleStore) Get(key string) (interface{}, error) {
 		return value, nil
 	}
 	return nil, utils.ErrNotFound
+}
+
+func (cs cacheSimpleStore) Pop(key string, value interface{}) {
+	if v, err := cs.Get(key); err == nil {
+		elements, ok := v.(map[interface{}]struct{})
+		if ok {
+			delete(elements, value)
+			if len(elements) > 0 {
+				cache.Put(key, elements)
+			} else {
+				cache.Delete(key)
+			}
+		}
+	}
 }
 
 func (cs cacheSimpleStore) Delete(key string) {

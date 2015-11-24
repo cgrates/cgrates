@@ -86,11 +86,25 @@ func TestRemPrefixKey(t *testing.T) {
 }
 
 func TestCachePush(t *testing.T) {
-	CachePush("ccc_t1", "1")
-	CachePush("ccc_t1", "2")
+	Push("ccc_t1", "1")
+	Push("ccc_t1", "2")
 	v, err := Get("ccc_t1")
 	if err != nil || len(v.(map[interface{}]struct{})) != 2 {
 		t.Error("Error in cache push: ", v)
+	}
+}
+
+func TestCachePop(t *testing.T) {
+	Push("ccc_t1", "1")
+	Push("ccc_t1", "2")
+	v, err := Get("ccc_t1")
+	if err != nil || len(v.(map[interface{}]struct{})) != 2 {
+		t.Error("Error in cache push: ", v)
+	}
+	Pop("ccc_t1", "1")
+	v, err = Get("ccc_t1")
+	if err != nil || len(v.(map[interface{}]struct{})) != 1 {
+		t.Error("Error in cache pop: ", v)
 	}
 }
 

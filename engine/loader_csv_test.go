@@ -231,7 +231,7 @@ cgrates.org,dan,,another,value,10
 cgrates.org,mas,true,another,value,10
 `
 	aliases = `
-#Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Group[6],Alias[7],Weight[8]
+#Direction[0],Tenant[1],Category[2],Account[3],Subject[4],DestinationId[5],Context[6],Target[7],Original[8],Alias[9],Weight[10]
 *out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Subject,dan,dan1,10
 *out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Subject,rif,rif1,10
 *out,cgrates.org,call,dan,dan,EU_LANDLINE,*rating,Cli,0723,0724,10
@@ -240,6 +240,8 @@ cgrates.org,mas,true,another,value,10
 *any,*any,*any,*any,*any,*any,*rating,Account,*any,dan1,10
 *out,vdf,0,a1,a1,*any,*rating,Subject,a1,minu,10
 *out,vdf,0,a1,a1,*any,*rating,Account,a1,minu,10
+*out,cgrates.org,call,remo,remo,*any,*rating,Subject,remo,minu,10
+*out,cgrates.org,call,remo,remo,*any,*rating,Account,remo,minu,10
 `
 )
 
@@ -1182,7 +1184,7 @@ func TestLoadUsers(t *testing.T) {
 }
 
 func TestLoadAliases(t *testing.T) {
-	if len(csvr.aliases) != 3 {
+	if len(csvr.aliases) != 4 {
 		t.Error("Failed to load aliases: ", len(csvr.aliases))
 	}
 	alias1 := &Alias{

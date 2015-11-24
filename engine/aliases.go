@@ -115,6 +115,29 @@ func (al *Alias) SetId(id string) error {
 	return nil
 }
 
+func (al *Alias) SetReverseCache() {
+	for _, value := range al.Values {
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
+				cache2go.Push(rKey, utils.ConcatenatedKey(al.GetId(), value.DestinationId))
+			}
+		}
+	}
+}
+
+func (al *Alias) RemoveReverseCache() {
+	for _, value := range al.Values {
+		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
+				cache2go.Pop(rKey, tmpKey)
+			}
+		}
+	}
+}
+
 type AttrMatchingAlias struct {
 	Destination string
 	Direction   string
@@ -222,7 +245,7 @@ func (am *AliasHandler) RemoveReverseAlias(attr AttrReverseAlias, reply *string)
 	defer am.mu.Unlock()
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
 	if x, err := cache2go.Get(rKey); err == nil {
-		existingKeys := x.(map[string]bool)
+		existingKeys := x.(map[string]struct{})
 		for key := range existingKeys {
 			// get destination id
 			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
@@ -258,7 +281,7 @@ func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[strin
 	aliases := make(map[string][]*Alias)
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
 	if x, err := cache2go.Get(rKey); err == nil {
-		existingKeys := x.(map[string]bool)
+		existingKeys := x.(map[string]struct{})
 		for key := range existingKeys {
 
 			// get destination id
