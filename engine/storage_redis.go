@@ -361,11 +361,12 @@ func (rs *RedisStorage) cacheAccounting(alsKeys []string) (err error) {
 	} else if len(alsKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
 	}
+	al := &Alias{}
 	for _, key := range alsKeys {
 		// check if it already exists
 		// to remove reverse cache keys
 		if avs, err := cache2go.Get(key); err == nil && avs != nil {
-			al := &Alias{Values: avs.(AliasValues)}
+			al.Values = avs.(AliasValues)
 			al.SetId(key[len(utils.ALIASES_PREFIX):])
 			al.RemoveReverseCache()
 		}
