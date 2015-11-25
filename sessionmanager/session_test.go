@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 //"github.com/cgrates/cgrates/config"
@@ -80,30 +79,19 @@ func TestSessionNilSession(t *testing.T) {
 }
 */
 
-type MockConnector struct {
+type MockRpcClient struct {
 	refundCd *engine.CallDescriptor
 }
 
-func (mc *MockConnector) GetCost(*engine.CallDescriptor, *engine.CallCost) error  { return nil }
-func (mc *MockConnector) Debit(*engine.CallDescriptor, *engine.CallCost) error    { return nil }
-func (mc *MockConnector) MaxDebit(*engine.CallDescriptor, *engine.CallCost) error { return nil }
-func (mc *MockConnector) RefundIncrements(cd *engine.CallDescriptor, reply *float64) error {
-	mc.refundCd = cd
+func (mc *MockRpcClient) Call(methodName string, arg interface{}, reply interface{}) error {
+	if cd, ok := arg.(*engine.CallDescriptor); ok {
+		mc.refundCd = cd
+	}
 	return nil
 }
-func (mc *MockConnector) GetMaxSessionTime(*engine.CallDescriptor, *float64) error { return nil }
-func (mc *MockConnector) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
-	return nil
-}
-func (mc *MockConnector) GetDerivedMaxSessionTime(*engine.StoredCdr, *float64) error    { return nil }
-func (mc *MockConnector) GetSessionRuns(*engine.StoredCdr, *[]*engine.SessionRun) error { return nil }
-func (mc *MockConnector) ProcessCdr(*engine.StoredCdr, *string) error                   { return nil }
-func (mc *MockConnector) LogCallCost(*engine.CallCostLog, *string) error                { return nil }
-func (mc *MockConnector) GetLCR(*engine.AttrGetLcr, *engine.LCRCost) error              { return nil }
-func (mc *MockConnector) GetTimeout(int, *time.Duration) error                          { return nil }
 
 func TestSessionRefund(t *testing.T) {
-	mc := &MockConnector{}
+	mc := &MockRpcClient{}
 	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
 	ts := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
@@ -123,7 +111,7 @@ func TestSessionRefund(t *testing.T) {
 }
 
 func TestSessionRefundAll(t *testing.T) {
-	mc := &MockConnector{}
+	mc := &MockRpcClient{}
 	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
 	ts := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
@@ -143,7 +131,7 @@ func TestSessionRefundAll(t *testing.T) {
 }
 
 func TestSessionRefundManyAll(t *testing.T) {
-	mc := &MockConnector{}
+	mc := &MockRpcClient{}
 	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
 	ts1 := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),

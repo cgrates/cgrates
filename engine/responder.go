@@ -31,7 +31,6 @@ import (
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 // Individual session run
@@ -51,17 +50,15 @@ type Responder struct {
 	ExitChan      chan bool
 	CdrSrv        *CdrServer
 	Stats         StatsInterface
-	Timeout       time.Duration
 	Timezone      string
 	cnt           int64
 	responseCache *cache2go.ResponseCache
 }
 
-func NewResponder(exitChan chan bool, cdrSrv *CdrServer, stats StatsInterface, timeout, timeToLive time.Duration) *Responder {
+func NewResponder(exitChan chan bool, cdrSrv *CdrServer, stats StatsInterface, timeToLive time.Duration) *Responder {
 	return &Responder{
 		ExitChan:      exitChan,
 		Stats:         stats,
-		Timeout:       timeToLive,
 		responseCache: cache2go.NewResponseCache(timeToLive),
 	}
 }
@@ -617,339 +614,27 @@ func (rs *Responder) UnRegisterRater(clientAddress string, replay *int) error {
 	return nil
 }
 
-func (rs *Responder) GetTimeout(i int, d *time.Duration) error {
-	*d = rs.Timeout
-	return nil
-}
-
-// Reflection worker type for not standalone balancer
-type ResponderWorker struct{}
-
-func (rw *ResponderWorker) Call(serviceMethod string, args interface{}, reply interface{}) error {
+func (rs *Responder) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	if !strings.HasPrefix(serviceMethod, "Responder.") {
+		return utils.ErrNotImplemented
+	}
 	methodName := strings.TrimLeft(serviceMethod, "Responder.")
-	switch args.(type) {
-	case CallDescriptor:
-		cd := args.(CallDescriptor)
-		switch reply.(type) {
-		case *CallCost:
-			rep := reply.(*CallCost)
-			method := reflect.ValueOf(&cd).MethodByName(methodName)
-			ret := method.Call([]reflect.Value{})
-			*rep = *(ret[0].Interface().(*CallCost))
-		case *float64:
-			rep := reply.(*float64)
-			method := reflect.ValueOf(&cd).MethodByName(methodName)
-			ret := method.Call([]reflect.Value{})
-			*rep = *(ret[0].Interface().(*float64))
-		}
-	case string:
-		switch methodName {
-		case "Status":
-			*(reply.(*string)) = "Local!"
-		case "Shutdown":
-			*(reply.(*string)) = "Done!"
-		}
-
+	// get method
+	method := reflect.ValueOf(rs).MethodByName(methodName)
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
 	}
-	return nil
-}
 
-func (rw *ResponderWorker) Close() error {
-	return nil
-}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 
-type Connector interface {
-	GetCost(*CallDescriptor, *CallCost) error
-	Debit(*CallDescriptor, *CallCost) error
-	MaxDebit(*CallDescriptor, *CallCost) error
-	RefundIncrements(*CallDescriptor, *float64) error
-	GetMaxSessionTime(*CallDescriptor, *float64) error
-	GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error
-	GetDerivedMaxSessionTime(*StoredCdr, *float64) error
-	GetSessionRuns(*StoredCdr, *[]*SessionRun) error
-	ProcessCdr(*StoredCdr, *string) error
-	LogCallCost(*CallCostLog, *string) error
-	GetLCR(*AttrGetLcr, *LCRCost) error
-	GetTimeout(int, *time.Duration) error
-}
-
-type RPCClientConnector struct {
-	Client  *rpcclient.RpcClient
-	Timeout time.Duration
-}
-
-func (rcc *RPCClientConnector) GetCost(cd *CallDescriptor, cc *CallCost) error {
-	return rcc.Client.Call("Responder.GetCost", cd, cc)
-}
-
-func (rcc *RPCClientConnector) Debit(cd *CallDescriptor, cc *CallCost) error {
-	return rcc.Client.Call("Responder.Debit", cd, cc)
-}
-
-func (rcc *RPCClientConnector) MaxDebit(cd *CallDescriptor, cc *CallCost) error {
-	return rcc.Client.Call("Responder.MaxDebit", cd, cc)
-}
-
-func (rcc *RPCClientConnector) RefundIncrements(cd *CallDescriptor, resp *float64) error {
-	return rcc.Client.Call("Responder.RefundIncrements", cd, resp)
-}
-
-func (rcc *RPCClientConnector) GetMaxSessionTime(cd *CallDescriptor, resp *float64) error {
-	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
-}
-
-func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
-	return rcc.Client.Call("Responder.GetDerivedMaxSessionTime", ev, reply)
-}
-
-func (rcc *RPCClientConnector) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
-	return rcc.Client.Call("Responder.GetSessionRuns", ev, sRuns)
-}
-
-func (rcc *RPCClientConnector) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
-	return rcc.Client.Call("ApierV1.GetDerivedChargers", attrs, dcs)
-}
-
-func (rcc *RPCClientConnector) ProcessCdr(cdr *StoredCdr, reply *string) error {
-	return rcc.Client.Call("CdrsV1.ProcessCdr", cdr, reply)
-}
-
-func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *string) error {
-	return rcc.Client.Call("CdrsV1.LogCallCost", ccl, reply)
-}
-
-func (rcc *RPCClientConnector) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
-	return rcc.Client.Call("Responder.GetLCR", attrs, reply)
-}
-
-func (rcc *RPCClientConnector) GetTimeout(i int, d *time.Duration) error {
-	*d = rcc.Timeout
-	return nil
-}
-
-type ConnectorPool []Connector
-
-func (cp ConnectorPool) GetCost(cd *CallDescriptor, cc *CallCost) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		callCost := &CallCost{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetCost(cd, callCost) }()
-		select {
-		case err := <-c:
-			*cc = *callCost
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
 	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) Debit(cd *CallDescriptor, cc *CallCost) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		callCost := &CallCost{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.Debit(cd, callCost) }()
-		select {
-		case err := <-c:
-			*cc = *callCost
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
 	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) MaxDebit(cd *CallDescriptor, cc *CallCost) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		callCost := &CallCost{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.MaxDebit(cd, callCost) }()
-		select {
-		case err := <-c:
-			*cc = *callCost
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) RefundIncrements(cd *CallDescriptor, resp *float64) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r float64
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.RefundIncrements(cd, &r) }()
-		select {
-		case err := <-c:
-			*resp = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetMaxSessionTime(cd *CallDescriptor, resp *float64) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r float64
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetMaxSessionTime(cd, &r) }()
-		select {
-		case err := <-c:
-			*resp = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r float64
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetDerivedMaxSessionTime(ev, &r) }()
-		select {
-		case err := <-c:
-			*reply = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		sr := make([]*SessionRun, 0)
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetSessionRuns(ev, &sr) }()
-		select {
-		case err := <-c:
-			*sRuns = sr
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		derivedChargers := utils.DerivedChargers{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetDerivedChargers(attrs, &derivedChargers) }()
-		select {
-		case err := <-c:
-			*dcs = derivedChargers
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) ProcessCdr(cdr *StoredCdr, reply *string) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r string
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.ProcessCdr(cdr, &r) }()
-		select {
-		case err := <-c:
-			*reply = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) LogCallCost(ccl *CallCostLog, reply *string) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r string
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.LogCallCost(ccl, &r) }()
-		select {
-		case err := <-c:
-			*reply = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetLCR(attr *AttrGetLcr, reply *LCRCost) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		lcrCost := &LCRCost{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetLCR(attr, lcrCost) }()
-		select {
-		case err := <-c:
-			*reply = *lcrCost
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetTimeout(i int, d *time.Duration) error {
-	*d = 0
-	return nil
+	return err
 }

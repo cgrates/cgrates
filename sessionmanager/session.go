@@ -58,7 +58,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 		sessionManager: sm,
 		connId:         connId,
 	}
-	if err := sm.Rater().GetSessionRuns(ev.AsStoredCdr(s.sessionManager.Timezone()), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
+	if err := sm.Rater().Call("Responder.GetSessionRuns", ev.AsStoredCdr(s.sessionManager.Timezone()), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
 	}
 	for runIdx := range s.sessionRuns {
@@ -86,7 +86,7 @@ func (s *Session) debitLoop(runIdx int) {
 		nextCd.LoopIndex = index
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
-		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
+		if err := s.sessionManager.Rater().Call("Responder.MaxDebit", nextCd, cc); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 				s.sessionManager.DisconnectSession(s.eventStart, s.connId, UNAUTHORIZED_DESTINATION)
@@ -204,7 +204,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			Increments:  refundIncrements,
 		}
 		var response float64
-		err := s.sessionManager.Rater().RefundIncrements(cd, &response)
+		err := s.sessionManager.Rater().Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {
 			return err
 		}
@@ -233,7 +233,7 @@ func (s *Session) SaveOperations() {
 		}
 
 		var reply string
-		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
+		err := s.sessionManager.CdrSrv().Call("Responder.LogCallCost", &engine.CallCostLog{
 			CgrId:          s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			Source:         utils.SESSION_MANAGER_SOURCE,
 			RunId:          sr.DerivedCharger.RunId,

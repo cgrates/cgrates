@@ -104,7 +104,7 @@ func startCdrcs(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan 
 // Fires up a cdrc instance
 func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *engine.Responder, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool,
 	closeChan chan struct{}, exitChan chan bool) {
-	var cdrsConn engine.Connector
+	var cdrsConn rpcclient.RpcClientConnection
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
@@ -122,7 +122,7 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 			exitChan <- true
 			return
 		}
-		cdrsConn = &engine.RPCClientConnector{Client: conn}
+		cdrsConn = conn
 	}
 	cdrc, err := cdrc.NewCdrc(cdrcCfgs, httpSkipTlsCheck, cdrsConn, closeChan, cfg.DefaultTimezone)
 	if err != nil {
@@ -138,7 +138,7 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 
 func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internalRaterChan chan *engine.Responder, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-Generic service.")
-	var raterConn, cdrsConn engine.Connector
+	var raterConn, cdrsConn rpcclient.RpcClientConnection
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
@@ -154,7 +154,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 				exitChan <- true
 				return
 			}
-			raterConn = &engine.RPCClientConnector{Client: client}
+			raterConn = client
 		}
 	}
 	// Connect to CDRS
@@ -173,7 +173,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 					exitChan <- true
 					return
 				}
-				cdrsConn = &engine.RPCClientConnector{Client: client}
+				cdrsConn = client
 			}
 		}
 	}
@@ -226,7 +226,7 @@ func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
-	var raterConn, cdrsConn engine.Connector
+	var raterConn, cdrsConn rpcclient.RpcClientConnection
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
@@ -242,7 +242,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 				exitChan <- true
 				return
 			}
-			raterConn = &engine.RPCClientConnector{Client: client}
+			raterConn = client
 		}
 	}
 	// Connect to CDRS
@@ -261,7 +261,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 					exitChan <- true
 					return
 				}
-				cdrsConn = &engine.RPCClientConnector{Client: client}
+				cdrsConn = client
 			}
 		}
 	}
@@ -275,7 +275,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 
 func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-Kamailio service.")
-	var raterConn, cdrsConn engine.Connector
+	var raterConn, cdrsConn rpcclient.RpcClientConnection
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
@@ -291,7 +291,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 				exitChan <- true
 				return
 			}
-			raterConn = &engine.RPCClientConnector{Client: client}
+			raterConn = client
 		}
 	}
 	// Connect to CDRS
@@ -310,7 +310,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 					exitChan <- true
 					return
 				}
-				cdrsConn = &engine.RPCClientConnector{Client: client}
+				cdrsConn = client
 			}
 		}
 	}
@@ -324,7 +324,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 
 func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-OpenSIPS service.")
-	var raterConn, cdrsConn engine.Connector
+	var raterConn, cdrsConn rpcclient.RpcClientConnection
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
@@ -340,7 +340,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 				exitChan <- true
 				return
 			}
-			raterConn = &engine.RPCClientConnector{Client: client}
+			raterConn = client
 		}
 	}
 	// Connect to CDRS
@@ -359,7 +359,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 					exitChan <- true
 					return
 				}
-				cdrsConn = &engine.RPCClientConnector{Client: client}
+				cdrsConn = client
 			}
 		}
 	}
@@ -379,7 +379,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	var err error
 	var client *rpcclient.RpcClient
 	// Rater connection init
-	var raterConn engine.Connector
+	var raterConn rpcclient.RpcClientConnection
 	if cfg.CDRSRater == utils.INTERNAL {
 		responder := <-internalRaterChan // Wait for rater to come up before start querying
 		raterConn = responder
@@ -391,7 +391,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 			exitChan <- true
 			return
 		}
-		raterConn = &engine.RPCClientConnector{Client: client}
+		raterConn = client
 	}
 	// Pubsub connection init
 	var pubSubConn engine.PublisherSubscriber

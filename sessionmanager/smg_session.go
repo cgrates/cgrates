@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // One session handled by SM
@@ -34,8 +35,8 @@ type SMGSession struct {
 	connId        string         // Reference towards connection id on the session manager side.
 	runId         string         // Keep a reference for the derived run
 	timezone      string
-	rater         engine.Connector // Connector to Rater service
-	cdrsrv        engine.Connector // Connector to CDRS service
+	rater         rpcclient.RpcClientConnection // Connector to Rater service
+	cdrsrv        rpcclient.RpcClientConnection // Connector to CDRS service
 	extconns      *SMGExternalConnections
 	cd            *engine.CallDescriptor
 	sessionCds    []*engine.CallDescriptor
@@ -86,7 +87,7 @@ func (self *SMGSession) debit(dur time.Duration) (time.Duration, error) {
 	self.cd.TimeEnd = self.cd.TimeStart.Add(dur)
 	self.cd.DurationIndex += dur
 	cc := &engine.CallCost{}
-	if err := self.rater.MaxDebit(self.cd, cc); err != nil {
+	if err := self.rater.Call("Responder.MaxDebit", self.cd, cc); err != nil {
 		return 0, err
 	}
 	// cd corrections
@@ -155,7 +156,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 			Increments:  refundIncrements,
 		}
 		var response float64
-		err := self.rater.RefundIncrements(cd, &response)
+		err := self.rater.Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {
 			return err
 		}
@@ -204,7 +205,7 @@ func (self *SMGSession) saveOperations() error {
 		firstCC.Merge(cc)
 	}
 	var reply string
-	err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
+	err := self.cdrsrv.Call("Responder.LogCallCost", &engine.CallCostLog{
 		CgrId:          self.eventStart.GetCgrId(self.timezone),
 		Source:         utils.SESSION_MANAGER_SOURCE,
 		RunId:          self.runId,

@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 	"github.com/jinzhu/gorm"
 )
 
@@ -65,14 +66,14 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, pubsub PublisherSubscriber, users UserService, aliases AliasService, stats StatsInterface) (*CdrServer, error) {
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{queue: make(map[string]chan bool)}}, nil
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, client rpcclient.RpcClientConnection, pubsub PublisherSubscriber, users UserService, aliases AliasService, stats StatsInterface) (*CdrServer, error) {
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, client: client, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{queue: make(map[string]chan bool)}}, nil
 }
 
 type CdrServer struct {
 	cgrCfg  *config.CGRConfig
 	cdrDb   CdrStorage
-	rater   Connector
+	client  rpcclient.RpcClientConnection
 	pubsub  PublisherSubscriber
 	users   UserService
 	aliases AliasService
@@ -228,7 +229,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *StoredCdr) error {
 		}
 	}
 	// Rate CDR
-	if self.rater != nil && !cdr.Rated {
+	if self.client != nil && !cdr.Rated {
 		if err := self.rateCDR(cdr); err != nil {
 			cdr.Cost = -1.0 // If there was an error, mark the CDR
 			cdr.ExtraInfo = err.Error()
@@ -275,7 +276,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 	attrsDC := &utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
 		Account: storedCdr.Account, Subject: storedCdr.Subject}
 	var dcs utils.DerivedChargers
-	if err := self.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
+	if err := self.client.Call("Responder.GetDerivedChargers", attrsDC, &dcs); err != nil {
 		utils.Logger.Err(fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", storedCdr.CgrId, err.Error()))
 		return nil, err
 	}
@@ -337,11 +338,11 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 		DurationIndex: storedCdr.Usage,
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, storedCdr.ReqType) { // Prepaid - Cost can be recalculated in case of missing records from SM
-		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
+		if err = self.client.Call("Responder.Debit", cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
 			self.cdrDb.LogCallCost(storedCdr.CgrId, utils.CDRS_SOURCE, storedCdr.MediationRunId, cc)
 		}
 	} else {
-		err = self.rater.GetCost(cd, cc)
+		err = self.client.Call("Responder.GetCost", cd, cc)
 	}
 	if err != nil {
 		return cc, err

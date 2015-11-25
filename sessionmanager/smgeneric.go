@@ -28,9 +28,10 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
-func NewSMGeneric(cgrCfg *config.CGRConfig, rater engine.Connector, cdrsrv engine.Connector, timezone string, extconns *SMGExternalConnections) *SMGeneric {
+func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection, timezone string, extconns *SMGExternalConnections) *SMGeneric {
 	gsm := &SMGeneric{cgrCfg: cgrCfg, rater: rater, cdrsrv: cdrsrv, extconns: extconns, timezone: timezone,
 		sessions: make(map[string][]*SMGSession), sessionsMux: new(sync.Mutex), guard: engine.NewGuardianLock()}
 	return gsm
@@ -38,8 +39,8 @@ func NewSMGeneric(cgrCfg *config.CGRConfig, rater engine.Connector, cdrsrv engin
 
 type SMGeneric struct {
 	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
-	rater       engine.Connector
-	cdrsrv      engine.Connector
+	rater       rpcclient.RpcClientConnection
+	cdrsrv      rpcclient.RpcClientConnection
 	timezone    string
 	sessions    map[string][]*SMGSession //Group sessions per sessionId, multiple runs based on derived charging
 	extconns    *SMGExternalConnections  // Reference towards external connections manager
@@ -83,7 +84,7 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 	sessionId := evStart.GetUUID()
 	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
 		var sessionRuns []*engine.SessionRun
-		if err := self.rater.GetSessionRuns(evStart.AsStoredCdr(self.cgrCfg, self.timezone), &sessionRuns); err != nil {
+		if err := self.rater.Call("Responder.GetSessionRuns", evStart.AsStoredCdr(self.cgrCfg, self.timezone), &sessionRuns); err != nil {
 			return nil, err
 		} else if len(sessionRuns) == 0 {
 			return nil, nil
@@ -135,7 +136,7 @@ func (self *SMGeneric) GetMaxUsage(gev SMGenericEvent, clnt *rpc2.Client) (time.
 	gev[utils.EVENT_NAME] = utils.CGR_AUTHORIZATION
 	storedCdr := gev.AsStoredCdr(config.CgrConfig(), self.timezone)
 	var maxDur float64
-	if err := self.rater.GetDerivedMaxSessionTime(storedCdr, &maxDur); err != nil {
+	if err := self.rater.Call("Responder.GetDerivedMaxSessionTime", storedCdr, &maxDur); err != nil {
 		return time.Duration(0), err
 	}
 	return time.Duration(maxDur), nil
@@ -148,7 +149,7 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 		return nil, err
 	}
 	var lcr engine.LCRCost
-	if err = self.rater.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
+	if err = self.rater.Call("Responder.GetLCR", &engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
 		return nil, err
 	}
 	if lcr.HasErrors() {
@@ -200,7 +201,7 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
 	var reply string
-	if err := self.cdrsrv.ProcessCdr(gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
+	if err := self.cdrsrv.Call("Responder.ProcessCdr", gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
 		return err
 	}
 	return nil
