@@ -46,6 +46,11 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+const (
+	META_CCR_USAGE          = "*ccr_usage"
+	META_CCR_SMG_EVENT_NAME = "*ccr_smg_event_name"
+)
+
 func loadDictionaries(dictsDir, componentId string) error {
 	fi, err := os.Stat(dictsDir)
 	if err != nil {
@@ -329,6 +334,11 @@ func avpValAsString(a *diam.AVP) string {
 // Extracts data out of CCR into a SMGenericEvent based on the configured template
 func (self *CCR) AsSMGenericEvent(tpl []*config.CfgCdrField) (sessionmanager.SMGenericEvent, error) {
 	outMap := make(map[string]string) // work with it so we can append values to keys
+	if evName, err := self.metaHandler(META_CCR_SMG_EVENT_NAME, ""); err != nil {
+		return nil, err
+	} else {
+		outMap[utils.EVENT_NAME] = evName
+	}
 	for _, fldTpl := range tpl {
 		var outVal string
 		for _, rsrTpl := range fldTpl.Value {
@@ -359,6 +369,17 @@ func (self *CCR) AsSMGenericEvent(tpl []*config.CfgCdrField) (sessionmanager.SMG
 		}
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
+}
+
+// Handler for meta functions
+func (self *CCR) metaHandler(tag, arg string) (string, error) {
+	switch tag {
+	case META_CCR_SMG_EVENT_NAME:
+		return "", nil
+	case META_CCR_USAGE:
+		return "", nil
+	}
+	return "", nil
 }
 
 func NewCCAFromCCR(ccr *CCR) *CCA {
