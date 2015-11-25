@@ -82,7 +82,7 @@ func (rs *RedisStorage) Flush(ignore string) error {
 }
 
 func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
-	r := rs.db.Cmd("KEYS", "*")
+	r := rs.db.Cmd("KEYS", prefix+"*")
 	if r.Err != nil {
 		return nil, r.Err
 	}
