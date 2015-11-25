@@ -753,6 +753,9 @@ func (acc *Account) AsOldStructure() interface{} {
 		Disabled:       acc.Disabled,
 	}
 	for i, uc := range acc.UnitCounters {
+		if uc == nil {
+			continue
+		}
 		result.UnitCounters[i] = &UnitsCounter{
 			BalanceType: uc.BalanceType,
 			Balances:    make(BalanceChain, len(uc.Balances)),
