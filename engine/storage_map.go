@@ -253,14 +253,11 @@ func (ms *MapStorage) cacheAccounting(alsKeys []string) error {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	switch categ {
-	case utils.DESTINATION_PREFIX:
-		_, exists := ms.dict[utils.DESTINATION_PREFIX+subject]
-		return exists, nil
-	case utils.RATING_PLAN_PREFIX:
-		_, exists := ms.dict[utils.RATING_PLAN_PREFIX+subject]
+	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+		_, exists := ms.dict[categ+subject]
 		return exists, nil
 	}
-	return false, errors.New("Unsupported category")
+	return false, errors.New("Unsupported HasData category")
 }
 
 func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {

@@ -1573,5 +1573,5 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		}
 		return keys, nil
 	}
-	return nil, errors.New("Unsupported category")
+	return nil, errors.New("Unsupported load category")
 }
