@@ -341,9 +341,6 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
 			self.cdrDb.LogCallCost(storedCdr.CgrId, utils.CDRS_SOURCE, storedCdr.MediationRunId, cc)
 		}
-		if storedCdr.AccId == "testtutlocal_3" {
-			utils.Logger.Debug(fmt.Sprintf("### getCostFromRater, cdr %+v, cd: %+v, cc: %+v, error: %v", storedCdr, cd, cc, err))
-		}
 	} else {
 		err = self.rater.GetCost(cd, cc)
 	}
