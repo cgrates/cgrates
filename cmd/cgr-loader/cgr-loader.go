@@ -29,8 +29,8 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -236,7 +236,7 @@ func main() {
 		return
 	}
 	if *historyServer != "" { // Init scribeAgent so we can store the differences
-		if scribeAgent, err := history.NewProxyScribe(*historyServer, 3, 3); err != nil {
+		if scribeAgent, err := rpcclient.NewRpcClient("tcp", *historyServer, 3, 3, utils.GOB, nil); err != nil {
 			log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
 			return
 		} else {
