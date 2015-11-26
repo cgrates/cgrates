@@ -298,7 +298,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	ms.dict[utils.RATING_PLAN_PREFIX+rp.Id] = b.Bytes()
 	response := 0
 	if historyScribe != nil {
-		go historyScribe.Record(rp.GetHistoryRecord(), &response)
+		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
 	return
 }
@@ -328,7 +328,7 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	ms.dict[utils.RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
 	if historyScribe != nil {
-		go historyScribe.Record(rpf.GetHistoryRecord(false), &response)
+		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
 	return
 }
@@ -341,7 +341,7 @@ func (ms *MapStorage) RemoveRatingProfile(key string) (err error) {
 			response := 0
 			rpf := &RatingProfile{Id: key}
 			if historyScribe != nil {
-				go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
+				go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
 			}
 		}
 	}
@@ -406,7 +406,7 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	ms.dict[utils.DESTINATION_PREFIX+dest.Id] = b.Bytes()
 	response := 0
 	if historyScribe != nil {
-		go historyScribe.Record(dest.GetHistoryRecord(), &response)
+		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(), &response)
 	}
 	return
 }

@@ -28,8 +28,8 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -75,10 +75,10 @@ var (
 	cdrStorage             CdrStorage
 	debitPeriod            = 10 * time.Second
 	globalRoundingDecimals = 5
-	historyScribe          history.Scribe
-	pubSubServer           PublisherSubscriber
-	userService            UserService
-	aliasService           AliasService
+	historyScribe          rpcclient.RpcClientConnection
+	pubSubServer           rpcclient.RpcClientConnection
+	userService            rpcclient.RpcClientConnection
+	aliasService           rpcclient.RpcClientConnection
 )
 
 // Exported method to set the storage getter.
@@ -110,26 +110,26 @@ func SetCdrStorage(cStorage CdrStorage) {
 }
 
 // Exported method to set the history scribe.
-func SetHistoryScribe(scribe history.Scribe) {
+func SetHistoryScribe(scribe rpcclient.RpcClientConnection) {
 	historyScribe = scribe
 }
 
-func SetPubSub(ps PublisherSubscriber) {
+func SetPubSub(ps rpcclient.RpcClientConnection) {
 	pubSubServer = ps
 }
 
-func SetUserService(us UserService) {
+func SetUserService(us rpcclient.RpcClientConnection) {
 	userService = us
 }
 
-func SetAliasService(as AliasService) {
+func SetAliasService(as rpcclient.RpcClientConnection) {
 	aliasService = as
 }
 
 func Publish(event CgrEvent) {
 	if pubSubServer != nil {
 		var s string
-		pubSubServer.Publish(event, &s)
+		pubSubServer.Call("PubSubV1.Publish", event, &s)
 	}
 }
 
@@ -820,7 +820,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 	return nil, utils.ErrNotFound
 }
 
-func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCRCost, error) {
+func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, p *utils.Paginator) (*LCRCost, error) {
 	cd.account = nil // make sure it's not cached
 	lcr, err := cd.GetLCRFromStorage()
 	if err != nil {
@@ -951,7 +951,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCR
 						if lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
 							for _, qId := range cdrStatsQueueIds {
 								sq := &StatsQueue{}
-								if err := stats.GetQueue(qId, sq); err == nil {
+								if err := stats.Call("CDRStatsV1.GetQueue", qId, sq); err == nil {
 									if sq.conf.QueueLength == 0 { //only add qeues that don't have fixed length
 										supplierQueues = append(supplierQueues, sq)
 									}
@@ -959,7 +959,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCR
 							}
 						} else {
 							statValues := make(map[string]float64)
-							if err := stats.GetValues(qId, &statValues); err != nil {
+							if err := stats.Call("CDRStatsV1.GetValues", qId, &statValues); err != nil {
 								lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 									Supplier: fullSupplier,
 									Error:    fmt.Sprintf("Get stats values for queue id %s, error %s", qId, err.Error()),

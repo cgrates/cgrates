@@ -12,7 +12,7 @@ import (
 )
 
 // Temporary export AliasService for the ApierV1 to be able to emulate old APIs
-func GetAliasService() AliasService {
+func GetAliasService() rpcclient.RpcClientConnection {
 	return aliasService
 }
 
@@ -156,16 +156,6 @@ type AttrReverseAlias struct {
 	Context string
 }
 
-type AliasService interface {
-	SetAlias(Alias, *string) error
-	UpdateAlias(Alias, *string) error
-	RemoveAlias(Alias, *string) error
-	GetAlias(Alias, *Alias) error
-	GetMatchingAlias(AttrMatchingAlias, *string) error
-	GetReverseAlias(AttrReverseAlias, *map[string][]*Alias) error
-	RemoveReverseAlias(AttrReverseAlias, *string) error
-}
-
 type AliasHandler struct {
 	accountingDb AccountingStorage
 	mu           sync.RWMutex
@@ -177,11 +167,11 @@ func NewAliasHandler(accountingDb AccountingStorage) *AliasHandler {
 	}
 }
 
-func (am *AliasHandler) SetAlias(al Alias, reply *string) error {
+func (am *AliasHandler) SetAlias(al *Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 
-	if err := am.accountingDb.SetAlias(&al); err != nil {
+	if err := am.accountingDb.SetAlias(al); err != nil {
 		*reply = err.Error()
 		return err
 	} //add to cache
@@ -194,7 +184,7 @@ func (am *AliasHandler) SetAlias(al Alias, reply *string) error {
 	return nil
 }
 
-func (am *AliasHandler) UpdateAlias(al Alias, reply *string) error {
+func (am *AliasHandler) UpdateAlias(al *Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	// get previous value
@@ -216,7 +206,7 @@ func (am *AliasHandler) UpdateAlias(al Alias, reply *string) error {
 		}
 	}
 
-	if err := am.accountingDb.SetAlias(&al); err != nil {
+	if err := am.accountingDb.SetAlias(al); err != nil {
 		*reply = err.Error()
 		return err
 	} //add to cache
@@ -229,7 +219,7 @@ func (am *AliasHandler) UpdateAlias(al Alias, reply *string) error {
 	return nil
 }
 
-func (am *AliasHandler) RemoveAlias(al Alias, reply *string) error {
+func (am *AliasHandler) RemoveAlias(al *Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	if err := am.accountingDb.RemoveAlias(al.GetId()); err != nil {
@@ -240,7 +230,7 @@ func (am *AliasHandler) RemoveAlias(al Alias, reply *string) error {
 	return nil
 }
 
-func (am *AliasHandler) RemoveReverseAlias(attr AttrReverseAlias, reply *string) error {
+func (am *AliasHandler) RemoveReverseAlias(attr *AttrReverseAlias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
@@ -263,7 +253,7 @@ func (am *AliasHandler) RemoveReverseAlias(attr AttrReverseAlias, reply *string)
 	return nil
 }
 
-func (am *AliasHandler) GetAlias(al Alias, result *Alias) error {
+func (am *AliasHandler) GetAlias(al *Alias, result *Alias) error {
 	am.mu.RLock()
 	defer am.mu.RUnlock()
 	variants := al.GenerateIds()
@@ -276,7 +266,7 @@ func (am *AliasHandler) GetAlias(al Alias, result *Alias) error {
 	return utils.ErrNotFound
 }
 
-func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[string][]*Alias) error {
+func (am *AliasHandler) GetReverseAlias(attr *AttrReverseAlias, result *map[string][]*Alias) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	aliases := make(map[string][]*Alias)
@@ -303,9 +293,9 @@ func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[strin
 	return nil
 }
 
-func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string) error {
+func (am *AliasHandler) GetMatchingAlias(attr *AttrMatchingAlias, result *string) error {
 	response := Alias{}
-	if err := am.GetAlias(Alias{
+	if err := am.GetAlias(&Alias{
 		Direction: attr.Direction,
 		Tenant:    attr.Tenant,
 		Category:  attr.Category,
@@ -357,48 +347,32 @@ func (am *AliasHandler) GetMatchingAlias(attr AttrMatchingAlias, result *string)
 	return utils.ErrNotFound
 }
 
-type ProxyAliasService struct {
-	Client *rpcclient.RpcClient
-}
-
-func NewProxyAliasService(addr string, attempts, reconnects int) (*ProxyAliasService, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB, nil)
-	if err != nil {
-		return nil, err
+func (am *AliasHandler) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
 	}
-	return &ProxyAliasService{Client: client}, nil
-}
+	// get method
+	method := reflect.ValueOf(am).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
 
-func (ps *ProxyAliasService) SetAlias(al Alias, reply *string) error {
-	return ps.Client.Call("AliasesV1.SetAlias", al, reply)
-}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 
-func (ps *ProxyAliasService) UpdateAlias(al Alias, reply *string) error {
-	return ps.Client.Call("AliasesV1.UpdateAlias", al, reply)
-}
-
-func (ps *ProxyAliasService) RemoveAlias(al Alias, reply *string) error {
-	return ps.Client.Call("AliasesV1.RemoveAlias", al, reply)
-}
-
-func (ps *ProxyAliasService) GetAlias(al Alias, alias *Alias) error {
-	return ps.Client.Call("AliasesV1.GetAlias", al, alias)
-}
-
-func (ps *ProxyAliasService) GetMatchingAlias(attr AttrMatchingAlias, alias *string) error {
-	return ps.Client.Call("AliasesV1.GetMatchingAlias", attr, alias)
-}
-
-func (ps *ProxyAliasService) GetReverseAlias(attr AttrReverseAlias, alias *map[string][]*Alias) error {
-	return ps.Client.Call("AliasesV1.GetReverseAlias", attr, alias)
-}
-
-func (ps *ProxyAliasService) RemoveReverseAlias(attr AttrReverseAlias, reply *string) error {
-	return ps.Client.Call("AliasesV1.RemoveReverseAlias", attr, reply)
-}
-
-func (ps *ProxyAliasService) ReloadAliases(in string, reply *string) error {
-	return ps.Client.Call("AliasesV1.ReloadAliases", in, reply)
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }
 
 func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) error {
@@ -406,7 +380,7 @@ func LoadAlias(attr *AttrMatchingAlias, in interface{}, extraFields string) erro
 		return nil
 	}
 	response := Alias{}
-	if err := aliasService.GetAlias(Alias{
+	if err := aliasService.Call("AliasesV1.GetAlias", &Alias{
 		Direction: attr.Direction,
 		Tenant:    attr.Tenant,
 		Category:  attr.Category,

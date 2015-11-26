@@ -436,7 +436,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	err = rs.db.Cmd("SET", utils.RATING_PLAN_PREFIX+rp.Id, b.Bytes()).Err
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(rp.GetHistoryRecord(), &response)
+		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
 	return
 }
@@ -465,7 +465,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	err = rs.db.Cmd("SET", utils.RATING_PROFILE_PREFIX+rpf.Id, result).Err
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(rpf.GetHistoryRecord(false), &response)
+		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
 	return
 }
@@ -488,7 +488,7 @@ func (rs *RedisStorage) RemoveRatingProfile(key string) error {
 		rpf := &RatingProfile{Id: key}
 		if historyScribe != nil {
 			response := 0
-			go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
+			go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
 		}
 	}
 	return nil
@@ -556,7 +556,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	err = rs.db.Cmd("SET", utils.DESTINATION_PREFIX+dest.Id, b.Bytes()).Err
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(dest.GetHistoryRecord(), &response)
+		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(), &response)
 	}
 	return
 }

@@ -26,9 +26,9 @@ import (
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled *bool, exitChan chan bool) {
@@ -40,8 +40,8 @@ func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled 
 
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
-	internalCdrStatSChan chan engine.StatsInterface, internalHistorySChan chan history.Scribe,
-	internalPubSubSChan chan engine.PublisherSubscriber, internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
+	internalCdrStatSChan chan rpcclient.RpcClientConnection, internalHistorySChan chan rpcclient.RpcClientConnection,
+	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server,
 	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
 	stopHandled *bool, exitChan chan bool) {
@@ -109,7 +109,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	}
 
 	// Connection to CDRStats
-	var cdrStats engine.StatsInterface
+	var cdrStats rpcclient.RpcClientConnection
 	if cfg.RaterCdrStats != "" {
 		cdrstatTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, cdrstatTaskChan)
@@ -124,7 +124,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 					exitChan <- true
 					return
 				}
-			} else if cdrStats, err = engine.NewProxyStats(cfg.RaterCdrStats, cfg.ConnectAttempts, -1); err != nil {
+			} else if cdrStats, err = rpcclient.NewRpcClient("tcp", cfg.RaterCdrStats, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to cdrstats, error: %s", err.Error()))
 				exitChan <- true
 				return
@@ -138,7 +138,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 		waitTasks = append(waitTasks, histTaskChan)
 		go func() {
 			defer close(histTaskChan)
-			var scribeServer history.Scribe
+			var scribeServer rpcclient.RpcClientConnection
 			if cfg.RaterHistoryServer == utils.INTERNAL {
 				select {
 				case scribeServer = <-internalHistorySChan:
@@ -148,7 +148,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 					exitChan <- true
 					return
 				}
-			} else if scribeServer, err = history.NewProxyScribe(cfg.RaterHistoryServer, cfg.ConnectAttempts, -1); err != nil {
+			} else if scribeServer, err = rpcclient.NewRpcClient("tcp", cfg.RaterHistoryServer, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect historys, error: %s", err.Error()))
 				exitChan <- true
 				return
@@ -163,7 +163,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
 			defer close(pubsubTaskChan)
-			var pubSubServer engine.PublisherSubscriber
+			var pubSubServer rpcclient.RpcClientConnection
 			if cfg.RaterPubSubServer == utils.INTERNAL {
 				select {
 				case pubSubServer = <-internalPubSubSChan:
@@ -173,7 +173,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 					exitChan <- true
 					return
 				}
-			} else if pubSubServer, err = engine.NewProxyPubSub(cfg.RaterPubSubServer, cfg.ConnectAttempts, -1); err != nil {
+			} else if pubSubServer, err = rpcclient.NewRpcClient("tcp", cfg.RaterPubSubServer, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to pubsubs: %s", err.Error()))
 				exitChan <- true
 				return
@@ -188,7 +188,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 		waitTasks = append(waitTasks, aliasesTaskChan)
 		go func() {
 			defer close(aliasesTaskChan)
-			var aliasesServer engine.AliasService
+			var aliasesServer rpcclient.RpcClientConnection
 			if cfg.RaterAliasesServer == utils.INTERNAL {
 				select {
 				case aliasesServer = <-internalAliaseSChan:
@@ -198,7 +198,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 					exitChan <- true
 					return
 				}
-			} else if aliasesServer, err = engine.NewProxyAliasService(cfg.RaterAliasesServer, cfg.ConnectAttempts, -1); err != nil {
+			} else if aliasesServer, err = rpcclient.NewRpcClient("tcp", cfg.RaterAliasesServer, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to aliases, error: %s", err.Error()))
 				exitChan <- true
 				return
@@ -208,7 +208,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	}
 
 	// Connection to UserService
-	var userServer engine.UserService
+	var userServer rpcclient.RpcClientConnection
 	if cfg.RaterUserServer != "" {
 		usersTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, usersTaskChan)
@@ -223,7 +223,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 					exitChan <- true
 					return
 				}
-			} else if userServer, err = engine.NewProxyUserService(cfg.RaterUserServer, cfg.ConnectAttempts, -1); err != nil {
+			} else if userServer, err = rpcclient.NewRpcClient("tcp", cfg.RaterUserServer, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect users, error: %s", err.Error()))
 				exitChan <- true
 				return

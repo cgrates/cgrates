@@ -372,9 +372,9 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 }
 
 func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage, cdrDb engine.CdrStorage,
-	internalRaterChan chan *engine.Responder, internalPubSubSChan chan engine.PublisherSubscriber,
-	internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
-	internalCdrStatSChan chan engine.StatsInterface, server *utils.Server, exitChan chan bool) {
+	internalRaterChan chan *engine.Responder, internalPubSubSChan chan rpcclient.RpcClientConnection,
+	internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
+	internalCdrStatSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS CDRS service.")
 	var err error
 	var client *rpcclient.RpcClient
@@ -394,14 +394,14 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		raterConn = client
 	}
 	// Pubsub connection init
-	var pubSubConn engine.PublisherSubscriber
+	var pubSubConn rpcclient.RpcClientConnection
 	if cfg.CDRSPubSub == utils.INTERNAL {
 		pubSubs := <-internalPubSubSChan
 		pubSubConn = pubSubs
 		internalPubSubSChan <- pubSubs
 	} else if len(cfg.CDRSPubSub) != 0 {
 		if cfg.CDRSRater == cfg.CDRSPubSub {
-			pubSubConn = &engine.ProxyPubSub{Client: client}
+			pubSubConn = client
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil {
@@ -409,18 +409,18 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 				exitChan <- true
 				return
 			}
-			pubSubConn = &engine.ProxyPubSub{Client: client}
+			pubSubConn = client
 		}
 	}
 	// Users connection init
-	var usersConn engine.UserService
+	var usersConn rpcclient.RpcClientConnection
 	if cfg.CDRSUsers == utils.INTERNAL {
 		userS := <-internalUserSChan
 		usersConn = userS
 		internalUserSChan <- userS
 	} else if len(cfg.CDRSUsers) != 0 {
 		if cfg.CDRSRater == cfg.CDRSUsers {
-			usersConn = &engine.ProxyUserService{Client: client}
+			usersConn = client
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSUsers, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil {
@@ -428,18 +428,18 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 				exitChan <- true
 				return
 			}
-			usersConn = &engine.ProxyUserService{Client: client}
+			usersConn = client
 		}
 	}
 	// Aliases connection init
-	var aliasesConn engine.AliasService
+	var aliasesConn rpcclient.RpcClientConnection
 	if cfg.CDRSAliases == utils.INTERNAL {
 		aliaseS := <-internalAliaseSChan
 		aliasesConn = aliaseS
 		internalAliaseSChan <- aliaseS
 	} else if len(cfg.CDRSAliases) != 0 {
 		if cfg.CDRSRater == cfg.CDRSAliases {
-			aliasesConn = &engine.ProxyAliasService{Client: client}
+			aliasesConn = client
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSAliases, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil {
@@ -447,18 +447,18 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 				exitChan <- true
 				return
 			}
-			aliasesConn = &engine.ProxyAliasService{Client: client}
+			aliasesConn = client
 		}
 	}
 	// Stats connection init
-	var statsConn engine.StatsInterface
+	var statsConn rpcclient.RpcClientConnection
 	if cfg.CDRSStats == utils.INTERNAL {
 		statS := <-internalCdrStatSChan
 		statsConn = statS
 		internalCdrStatSChan <- statS
 	} else if len(cfg.CDRSStats) != 0 {
 		if cfg.CDRSRater == cfg.CDRSStats {
-			statsConn = &engine.ProxyStats{Client: client}
+			statsConn = client
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
 			if err != nil {
@@ -466,7 +466,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 				exitChan <- true
 				return
 			}
-			statsConn = &engine.ProxyStats{Client: client}
+			statsConn = client
 		}
 	}
 
@@ -495,31 +495,31 @@ func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, ratingDb en
 	exitChan <- true // Should not get out of loop though
 }
 
-func startCdrStats(internalCdrStatSChan chan engine.StatsInterface, ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, server *utils.Server) {
+func startCdrStats(internalCdrStatSChan chan rpcclient.RpcClientConnection, ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, server *utils.Server) {
 	cdrStats := engine.NewStats(ratingDb, accountDb, cfg.CDRStatsSaveInterval)
 	server.RpcRegister(cdrStats)
 	server.RpcRegister(&v1.CDRStatsV1{CdrStats: cdrStats}) // Public APIs
 	internalCdrStatSChan <- cdrStats
 }
 
-func startHistoryServer(internalHistorySChan chan history.Scribe, server *utils.Server, exitChan chan bool) {
+func startHistoryServer(internalHistorySChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
 	scribeServer, err := history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
 		exitChan <- true
 	}
-	server.RpcRegisterName("ScribeV1", scribeServer)
+	server.RpcRegisterName("HistoryV1", scribeServer)
 	internalHistorySChan <- scribeServer
 }
 
-func startPubSubServer(internalPubSubSChan chan engine.PublisherSubscriber, accountDb engine.AccountingStorage, server *utils.Server) {
+func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, accountDb engine.AccountingStorage, server *utils.Server) {
 	pubSubServer := engine.NewPubSub(accountDb, cfg.HttpSkipTlsVerify)
 	server.RpcRegisterName("PubSubV1", pubSubServer)
 	internalPubSubSChan <- pubSubServer
 }
 
 // ToDo: Make sure we are caching before starting this one
-func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
+func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
 	aliasesServer := engine.NewAliasHandler(accountDb)
 	server.RpcRegisterName("AliasesV1", aliasesServer)
 	if err := accountDb.CacheAccountingPrefixes(utils.ALIASES_PREFIX); err != nil {
@@ -530,7 +530,7 @@ func startAliasesServer(internalAliaseSChan chan engine.AliasService, accountDb 
 	internalAliaseSChan <- aliasesServer
 }
 
-func startUsersServer(internalUserSChan chan engine.UserService, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
+func startUsersServer(internalUserSChan chan rpcclient.RpcClientConnection, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
 	userServer, err := engine.NewUserMap(accountDb, cfg.UserServerIndexes)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("<UsersService> Could not start, error: %s", err.Error()))
@@ -543,11 +543,11 @@ func startUsersServer(internalUserSChan chan engine.UserService, accountDb engin
 
 func startRpc(server *utils.Server, internalRaterChan chan *engine.Responder,
 	internalCdrSChan chan *engine.CdrServer,
-	internalCdrStatSChan chan engine.StatsInterface,
-	internalHistorySChan chan history.Scribe,
-	internalPubSubSChan chan engine.PublisherSubscriber,
-	internalUserSChan chan engine.UserService,
-	internalAliaseSChan chan engine.AliasService) {
+	internalCdrStatSChan chan rpcclient.RpcClientConnection,
+	internalHistorySChan chan rpcclient.RpcClientConnection,
+	internalPubSubSChan chan rpcclient.RpcClientConnection,
+	internalUserSChan chan rpcclient.RpcClientConnection,
+	internalAliaseSChan chan rpcclient.RpcClientConnection) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
 	case resp := <-internalRaterChan:
 		internalRaterChan <- resp
@@ -668,11 +668,11 @@ func main() {
 	internalRaterChan := make(chan *engine.Responder, 1)
 	internalSchedulerChan := make(chan *scheduler.Scheduler, 1)
 	internalCdrSChan := make(chan *engine.CdrServer, 1)
-	internalCdrStatSChan := make(chan engine.StatsInterface, 1)
-	internalHistorySChan := make(chan history.Scribe, 1)
-	internalPubSubSChan := make(chan engine.PublisherSubscriber, 1)
-	internalUserSChan := make(chan engine.UserService, 1)
-	internalAliaseSChan := make(chan engine.AliasService, 1)
+	internalCdrStatSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalHistorySChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalUserSChan := make(chan rpcclient.RpcClientConnection, 1)
+	internalAliaseSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
 	// Start balancer service
 	if cfg.BalancerEnabled {

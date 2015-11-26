@@ -66,7 +66,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, client rpcclient.RpcClientConnection, pubsub PublisherSubscriber, users UserService, aliases AliasService, stats StatsInterface) (*CdrServer, error) {
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, client rpcclient.RpcClientConnection, pubsub rpcclient.RpcClientConnection, users rpcclient.RpcClientConnection, aliases rpcclient.RpcClientConnection, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, client: client, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{queue: make(map[string]chan bool)}}, nil
 }
 
@@ -74,10 +74,10 @@ type CdrServer struct {
 	cgrCfg  *config.CGRConfig
 	cdrDb   CdrStorage
 	client  rpcclient.RpcClientConnection
-	pubsub  PublisherSubscriber
-	users   UserService
-	aliases AliasService
-	stats   StatsInterface
+	pubsub  rpcclient.RpcClientConnection
+	users   rpcclient.RpcClientConnection
+	aliases rpcclient.RpcClientConnection
+	stats   rpcclient.RpcClientConnection
 	guard   *GuardianLock
 }
 
@@ -255,7 +255,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *StoredCdr) error {
 	}
 	// Attach CDR to stats
 	if self.stats != nil { // Send CDR to stats
-		if err := self.stats.AppendCDR(cdr, nil); err != nil {
+		if err := self.stats.Call("Stats.AppendCDR", cdr, nil); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Could not append cdr to stats: %s", err.Error()))
 		}
 	}

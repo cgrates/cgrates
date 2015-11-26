@@ -282,7 +282,8 @@ func TestResponderGetLCR(t *testing.T) {
 		}
 	}
 	danStatsId := "dan12_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: danStatsId, Supplier: []string{"dan12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, nil)
+	var r int
+	rsponder.Stats.Call("CDRStatsV1.AddQueue", &CdrStats{Id: danStatsId, Supplier: []string{"dan12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, &r)
 	danRpfl := &RatingProfile{Id: "*out:tenant12:call:dan12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -292,7 +293,7 @@ func TestResponderGetLCR(t *testing.T) {
 		}},
 	}
 	rifStatsId := "rif12_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: rifStatsId, Supplier: []string{"rif12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, nil)
+	rsponder.Stats.Call("CDRStatsV1.AddQueue", &CdrStats{Id: rifStatsId, Supplier: []string{"rif12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, &r)
 	rifRpfl := &RatingProfile{Id: "*out:tenant12:call:rif12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -302,7 +303,7 @@ func TestResponderGetLCR(t *testing.T) {
 		}},
 	}
 	ivoStatsId := "ivo12_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: ivoStatsId, Supplier: []string{"ivo12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, nil)
+	rsponder.Stats.Call("CDRStatsV1.AddQueue", &CdrStats{Id: ivoStatsId, Supplier: []string{"ivo12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, &r)
 	ivoRpfl := &RatingProfile{Id: "*out:tenant12:call:ivo12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -483,9 +484,10 @@ func TestResponderGetLCR(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts, lcrQT.SupplierCosts)
 	}
 	cdr := &StoredCdr{Supplier: "rif12", AnswerTime: time.Now(), Usage: 3 * time.Minute, Cost: 1}
-	rsponder.Stats.AppendCDR(cdr, nil)
+	rsponder.Stats.Call("CDRStatsV1.AppendCDR", cdr, &r)
 	cdr = &StoredCdr{Supplier: "dan12", AnswerTime: time.Now(), Usage: 5 * time.Minute, Cost: 2}
-	rsponder.Stats.AppendCDR(cdr, nil)
+	rsponder.Stats.Call("CDRStatsV1.AppendCDR", cdr, &r)
+
 	eQTLcr = &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;;;4m;;;;;;;;;", Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{

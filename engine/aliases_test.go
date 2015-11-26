@@ -12,7 +12,7 @@ func init() {
 }
 func TestAliasesGetAlias(t *testing.T) {
 	alias := Alias{}
-	err := aliasService.GetAlias(Alias{
+	err := aliasService.Call("AliasesV1.GetAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -23,13 +23,13 @@ func TestAliasesGetAlias(t *testing.T) {
 	if err != nil ||
 		len(alias.Values) != 2 ||
 		len(alias.Values[0].Pairs) != 2 {
-		t.Error("Error getting alias: ", err, alias)
+		t.Error("Error getting alias: ", err, alias, alias.Values[0])
 	}
 }
 
 func TestAliasesGetMatchingAlias(t *testing.T) {
 	var response string
-	err := aliasService.GetMatchingAlias(AttrMatchingAlias{
+	err := aliasService.Call("AliasesV1.GetMatchingAlias", &AttrMatchingAlias{
 		Direction:   "*out",
 		Tenant:      "cgrates.org",
 		Category:    "call",

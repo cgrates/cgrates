@@ -33,6 +33,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -48,8 +49,8 @@ type ApierV1 struct {
 	Sched       *scheduler.Scheduler
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
-	CdrStatsSrv engine.StatsInterface
-	Users       engine.UserService
+	CdrStatsSrv rpcclient.RpcClientConnection
+	Users       rpcclient.RpcClientConnection
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -524,13 +525,13 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}
 
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
+		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, nil); err != nil {
 			return err
 		}
 	}
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
-		if err := self.Users.ReloadUsers("", &r); err != nil {
+		if err := self.Users.Call("AliasV1.ReloadUsers", "", &r); err != nil {
 			return err
 		}
 	}
@@ -1036,14 +1037,14 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.Aliases = cache2go.CountEntries(utils.ALIASES_PREFIX)
 	if self.CdrStatsSrv != nil && self.Config.CDRStatsEnabled {
 		var queueIds []string
-		if err := self.CdrStatsSrv.GetQueueIds(0, &queueIds); err != nil {
+		if err := self.CdrStatsSrv.Call("CDRStatsV1.GetQueueIds", 0, &queueIds); err != nil {
 			return utils.NewErrServerError(err)
 		}
 		cs.CdrStats = len(queueIds)
 	}
 	if self.Config.RaterUserServer == utils.INTERNAL {
 		var ups engine.UserProfiles
-		if err := self.Users.GetUsers(engine.UserProfile{}, &ups); err != nil {
+		if err := self.Users.Call("UsersV1.GetUsers", &engine.UserProfile{}, &ups); err != nil {
 			return utils.NewErrServerError(err)
 		}
 		cs.Users = len(ups)
@@ -1187,13 +1188,13 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		self.Sched.Restart()
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
+		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, nil); err != nil {
 			return err
 		}
 	}
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
-		if err := self.Users.ReloadUsers("", &r); err != nil {
+		if err := self.Users.Call("UsersV1.ReloadUsers", "", &r); err != nil {
 			return err
 		}
 	}

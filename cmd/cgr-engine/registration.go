@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 /*
@@ -43,7 +44,7 @@ func stopBalancerSignalHandler(bal *balancer2go.Balancer, exitChan chan bool) {
 	exitChan <- true
 }
 
-func generalSignalHandler(internalCdrStatSChan chan engine.StatsInterface, exitChan chan bool) {
+func generalSignalHandler(internalCdrStatSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
@@ -52,7 +53,7 @@ func generalSignalHandler(internalCdrStatSChan chan engine.StatsInterface, exitC
 	var dummyInt int
 	select {
 	case cdrStats := <-internalCdrStatSChan:
-		cdrStats.Stop(dummyInt, &dummyInt)
+		cdrStats.Call("CDRStatsV1.Stop", dummyInt, &dummyInt)
 	default:
 	}
 
@@ -62,7 +63,7 @@ func generalSignalHandler(internalCdrStatSChan chan engine.StatsInterface, exitC
 /*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from balancer and closes the storage before exiting.
 */
-func stopRaterSignalHandler(internalCdrStatSChan chan engine.StatsInterface, exitChan chan bool) {
+func stopRaterSignalHandler(internalCdrStatSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	sig := <-c
@@ -72,7 +73,7 @@ func stopRaterSignalHandler(internalCdrStatSChan chan engine.StatsInterface, exi
 	var dummyInt int
 	select {
 	case cdrStats := <-internalCdrStatSChan:
-		cdrStats.Stop(dummyInt, &dummyInt)
+		cdrStats.Call("CDRStatsV1.Stop", dummyInt, &dummyInt)
 	default:
 	}
 	exitChan <- true

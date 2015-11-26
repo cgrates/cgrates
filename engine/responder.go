@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 // Individual session run
@@ -49,13 +50,13 @@ type Responder struct {
 	Bal           *balancer2go.Balancer
 	ExitChan      chan bool
 	CdrSrv        *CdrServer
-	Stats         StatsInterface
+	Stats         rpcclient.RpcClientConnection
 	Timezone      string
 	cnt           int64
 	responseCache *cache2go.ResponseCache
 }
 
-func NewResponder(exitChan chan bool, cdrSrv *CdrServer, stats StatsInterface, timeToLive time.Duration) *Responder {
+func NewResponder(exitChan chan bool, cdrSrv *CdrServer, stats rpcclient.RpcClientConnection, timeToLive time.Duration) *Responder {
 	return &Responder{
 		ExitChan:      exitChan,
 		Stats:         stats,
@@ -615,12 +616,12 @@ func (rs *Responder) UnRegisterRater(clientAddress string, replay *int) error {
 }
 
 func (rs *Responder) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	if !strings.HasPrefix(serviceMethod, "Responder.") {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
 		return utils.ErrNotImplemented
 	}
-	methodName := strings.TrimLeft(serviceMethod, "Responder.")
 	// get method
-	method := reflect.ValueOf(rs).MethodByName(methodName)
+	method := reflect.ValueOf(rs).MethodByName(parts[1])
 	if !method.IsValid() {
 		return utils.ErrNotImplemented
 	}
@@ -631,6 +632,9 @@ func (rs *Responder) Call(serviceMethod string, args interface{}, reply interfac
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
 	}
 	err, ok := ret[0].Interface().(error)
 	if !ok {

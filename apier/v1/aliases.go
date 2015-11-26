@@ -20,6 +20,7 @@ package v1
 
 import (
 	"errors"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -48,8 +49,8 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 	}
 	var ignr string
 	for _, alias := range attrs.Aliases {
-		if err := aliases.SetAlias(
-			engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
+		if err := aliases.Call("AliasesV1.SetAlias",
+			&engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
 				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
 					Pairs: engine.AliasPairs{"Subject": map[string]string{alias: attrs.Subject}}, Weight: 10.0}}}, &ignr); err != nil {
 			return utils.NewErrServerError(err)
@@ -69,7 +70,7 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 		return errors.New("ALIASES_NOT_ENABLED")
 	}
 	var reverseAliases map[string][]*engine.Alias
-	if err := aliases.GetReverseAlias(engine.AttrReverseAlias{Target: "Subject", Alias: tenantRatingSubject.Subject, Context: utils.ALIAS_CONTEXT_RATING}, &reverseAliases); err != nil {
+	if err := aliases.Call("AliasesV1.GetReverseAlias", &engine.AttrReverseAlias{Target: "Subject", Alias: tenantRatingSubject.Subject, Context: utils.ALIAS_CONTEXT_RATING}, &reverseAliases); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	var ignr string
@@ -78,7 +79,7 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 			if alias.Tenant != tenantRatingSubject.Tenant {
 				continue // From another tenant
 			}
-			if err := aliases.RemoveAlias(*alias, &ignr); err != nil {
+			if err := aliases.Call("AliasesV1.RemoveAlias", alias, &ignr); err != nil {
 				return utils.NewErrServerError(err)
 			}
 		}
@@ -100,8 +101,8 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 	}
 	var ignr string
 	for _, alias := range attrs.Aliases {
-		if err := aliases.SetAlias(
-			engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
+		if err := aliases.Call("AliasesV1.SetAlias",
+			&engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
 				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
 					Pairs: engine.AliasPairs{"Account": map[string]string{alias: attrs.Account}}, Weight: 10.0}}}, &ignr); err != nil {
 			return utils.NewErrServerError(err)
@@ -121,7 +122,7 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 		return errors.New("ALIASES_NOT_ENABLED")
 	}
 	var reverseAliases map[string][]*engine.Alias
-	if err := aliases.GetReverseAlias(engine.AttrReverseAlias{Target: "Account", Alias: tenantAccount.Account, Context: utils.ALIAS_CONTEXT_RATING}, &reverseAliases); err != nil {
+	if err := aliases.Call("AliasesV1.GetReverseAlias", &engine.AttrReverseAlias{Target: "Account", Alias: tenantAccount.Account, Context: utils.ALIAS_CONTEXT_RATING}, &reverseAliases); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	var ignr string
@@ -130,7 +131,7 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 			if alias.Tenant != tenantAccount.Tenant {
 				continue // From another tenant
 			}
-			if err := aliases.RemoveAlias(*alias, &ignr); err != nil {
+			if err := aliases.Call("AliasesV1.RemoveAlias", alias, &ignr); err != nil {
 				return utils.NewErrServerError(err)
 			}
 		}

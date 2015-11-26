@@ -253,14 +253,14 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		self.Sched.Restart()
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
+		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, nil); err != nil {
 			return err
 		}
 	}
 
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
-		if err := self.Users.ReloadUsers("", &r); err != nil {
+		if err := self.Users.Call("UsersV1.ReloadUsers", "", &r); err != nil {
 			return err
 		}
 	}

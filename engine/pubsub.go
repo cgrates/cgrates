@@ -3,11 +3,12 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type SubscribeInfo struct {
@@ -26,13 +27,6 @@ func (ce CgrEvent) PassFilters(rsrFields utils.RSRFields) bool {
 		}
 	}
 	return true
-}
-
-type PublisherSubscriber interface {
-	Subscribe(SubscribeInfo, *string) error
-	Unsubscribe(SubscribeInfo, *string) error
-	Publish(CgrEvent, *string) error
-	ShowSubscribers(string, *map[string]*SubscriberData) error
 }
 
 type SubscriberData struct {
@@ -165,28 +159,30 @@ func (ps *PubSub) ShowSubscribers(in string, out *map[string]*SubscriberData) er
 	return nil
 }
 
-type ProxyPubSub struct {
-	Client *rpcclient.RpcClient
-}
-
-func NewProxyPubSub(addr string, attempts, reconnects int) (*ProxyPubSub, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB, nil)
-	if err != nil {
-		return nil, err
+func (ps *PubSub) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
 	}
-	return &ProxyPubSub{Client: client}, nil
-}
+	// get method
+	method := reflect.ValueOf(ps).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
 
-func (ps *ProxyPubSub) Subscribe(si SubscribeInfo, reply *string) error {
-	return ps.Client.Call("PubSubV1.Subscribe", si, reply)
-}
-func (ps *ProxyPubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
-	return ps.Client.Call("PubSubV1.Unsubscribe", si, reply)
-}
-func (ps *ProxyPubSub) Publish(evt CgrEvent, reply *string) error {
-	return ps.Client.Call("PubSubV1.Publish", evt, reply)
-}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 
-func (ps *ProxyPubSub) ShowSubscribers(in string, reply *map[string]*SubscriberData) error {
-	return ps.Client.Call("PubSubV1.ShowSubscribers", in, reply)
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }
