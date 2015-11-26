@@ -49,6 +49,7 @@ func init() {
 const (
 	META_CCR_USAGE          = "*ccr_usage"
 	META_CCR_SMG_EVENT_NAME = "*ccr_smg_event_name"
+	DIAMETER_CCR            = "DIAMETER_CCR"
 )
 
 func loadDictionaries(dictsDir, componentId string) error {
@@ -331,55 +332,76 @@ func avpValAsString(a *diam.AVP) string {
 	return dataVal[startIdx+1 : endIdx]
 }
 
-// Extracts data out of CCR into a SMGenericEvent based on the configured template
-func (self *CCR) AsSMGenericEvent(tpl []*config.CfgCdrField) (sessionmanager.SMGenericEvent, error) {
-	outMap := make(map[string]string) // work with it so we can append values to keys
-	if evName, err := self.metaHandler(META_CCR_SMG_EVENT_NAME, ""); err != nil {
-		return nil, err
-	} else {
-		outMap[utils.EVENT_NAME] = evName
-	}
-	for _, fldTpl := range tpl {
-		var outVal string
-		for _, rsrTpl := range fldTpl.Value {
-			if rsrTpl.IsStatic() {
-				outVal += rsrTpl.ParseValue("")
-			} else {
-				hierarchyPath := strings.Split(rsrTpl.Id, utils.HIERARCHY_SEP)
-				hpIf := make([]interface{}, len(hierarchyPath))
-				for i, val := range hierarchyPath {
-					hpIf[i] = val
-				}
-				matchingAvps, err := self.diamMessage.FindAVPsWithPath(hpIf)
-				if err != nil || len(matchingAvps) == 0 {
-					utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
-					continue // Filter not matching
-				}
-				if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
-					utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, not considering.", rsrTpl.Id))
-					continue // Not convertible, ignore
-				}
-				outVal += avpValAsString(matchingAvps[0])
-			}
-		}
-		if _, hasKey := outMap[fldTpl.FieldId]; !hasKey {
-			outMap[fldTpl.FieldId] = outVal
-		} else { // If already there, postpend
-			outMap[fldTpl.FieldId] += outVal
-		}
-	}
-	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
-}
-
 // Handler for meta functions
 func (self *CCR) metaHandler(tag, arg string) (string, error) {
 	switch tag {
-	case META_CCR_SMG_EVENT_NAME:
-		return "", nil
 	case META_CCR_USAGE:
-		return "", nil
+		usage := usageFromCCR(self.CCRequestType, self.CCRequestNumber, self.RequestedServiceUnit.CCTime, time.Duration(300)*time.Second)
+		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
 	}
 	return "", nil
+}
+
+func (self *CCR) eventFieldValue(cfgFld *config.CfgCdrField) string {
+	var outVal string
+	for _, rsrTpl := range cfgFld.Value {
+		if rsrTpl.IsStatic() {
+			outVal += rsrTpl.ParseValue("")
+		} else {
+			hierarchyPath := strings.Split(rsrTpl.Id, utils.HIERARCHY_SEP)
+			hpIf := make([]interface{}, len(hierarchyPath))
+			for i, val := range hierarchyPath {
+				hpIf[i] = val
+			}
+			matchingAvps, err := self.diamMessage.FindAVPsWithPath(hpIf)
+			if err != nil || len(matchingAvps) == 0 {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
+				continue // Filter not matching
+			}
+			if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, ignoring.", rsrTpl.Id))
+				continue // Not convertible, ignore
+			}
+			outVal += avpValAsString(matchingAvps[0])
+		}
+	}
+	return outVal
+}
+
+// Extracts data out of CCR into a SMGenericEvent based on the configured template
+func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager.SMGenericEvent, error) {
+	outMap := make(map[string]string) // work with it so we can append values to keys
+	outMap[utils.EVENT_NAME] = DIAMETER_CCR
+	for _, cfgFld := range cfgFlds {
+		var outVal string
+		var err error
+		switch cfgFld.Type {
+		case utils.FILLER:
+			outVal = cfgFld.Value.Id()
+			cfgFld.Padding = "right"
+		case utils.CONSTANT:
+			outVal = cfgFld.Value.Id()
+		case utils.METATAG:
+
+			outVal, err = self.metaHandler(cfgFld.MetatagId, cfgFld.Layout)
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.MetatagId, err.Error()))
+			}
+		case utils.CDRFIELD:
+			outVal = self.eventFieldValue(cfgFld)
+		}
+		fmtOut := outVal
+		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
+			return nil, err
+		}
+		if _, hasKey := outMap[cfgFld.FieldId]; !hasKey {
+			outMap[cfgFld.FieldId] = fmtOut
+		} else { // If already there, postpend
+			outMap[cfgFld.FieldId] += fmtOut
+		}
+	}
+	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
 
 func NewCCAFromCCR(ccr *CCR) *CCA {

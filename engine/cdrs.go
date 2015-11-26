@@ -273,7 +273,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 		return cdrRuns, nil
 	}
 	attrsDC := &utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
-		Account: storedCdr.Account, Subject: storedCdr.Subject}
+		Account: storedCdr.Account, Subject: storedCdr.Subject, Destination: storedCdr.Destination}
 	var dcs utils.DerivedChargers
 	if err := self.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
 		utils.Logger.Err(fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", storedCdr.CgrId, err.Error()))
@@ -289,6 +289,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 			}
 		}
 		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
+
 			continue
 		}
 		dcReqTypeFld, _ := utils.NewRSRField(dc.ReqTypeField)
