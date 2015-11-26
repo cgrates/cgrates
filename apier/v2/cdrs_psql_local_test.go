@@ -23,6 +23,7 @@ import (
 	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
+	"strconv"
 	"testing"
 	"time"
 
@@ -299,6 +300,82 @@ func TestV2CdrsPsqlRateWithTP(t *testing.T) {
 		if cdrs[0].Cost != 0.3 {
 			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
 		}
+	}
+}
+
+// Benchmark speed of processing 1000 CDRs
+func TestV2CdrsPsqlProcessRatedExternalCdrBenchmark(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "benchratedcdr", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "15", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var reply string
+	tStart := time.Now()
+	nrCdrs := 1000
+	for i := 0; i < nrCdrs; i++ {
+		cdr.AccId = "benchratedcdr" + strconv.Itoa(i)
+		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received: ", reply)
+		}
+	}
+	if durExec := time.Now().Sub(tStart); durExec > time.Duration(1)*time.Second {
+		t.Errorf("Processing of %d rated CDRs took: %v", nrCdrs, durExec)
+	}
+}
+
+// Benchmark speed of re-rating 1000 CDRs
+func TestV2CdrsPsqlReRateWithTPBenchmark(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var nrCdrs int64
+	req := utils.AttrRateCdrs{RerateRated: true, RerateErrors: true}
+	if err := cdrsPsqlRpc.Call("ApierV2.CountCdrs", req, &nrCdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	tStart := time.Now()
+	var reply string
+	if err := cdrsPsqlRpc.Call("CdrsV2.RateCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	if durExec := time.Now().Sub(tStart); durExec > time.Duration(1)*time.Second {
+		t.Errorf("Rerating of %d rated CDRs took: %v", nrCdrs, durExec)
+	}
+}
+
+// Benchmark speed of processing 1000 postpaid CDRs
+func TestV2CdrsPsqlProcessPostpaidExternalCdrBenchmark(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "benchpostpaidcdr", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_POSTPAID, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "15", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var reply string
+	tStart := time.Now()
+	nrCdrs := 1000
+	for i := 0; i < nrCdrs; i++ {
+		cdr.AccId = "benchpostpaidcdr" + strconv.Itoa(i)
+		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received: ", reply)
+		}
+	}
+	if durExec := time.Now().Sub(tStart); durExec > time.Duration(1)*time.Second {
+		t.Errorf("Processing of %d postpaid CDRs took: %v", nrCdrs, durExec)
 	}
 }
 
