@@ -180,7 +180,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 	for _, cdrFldCfg := range cfgFields {
 		var fieldVal string
 		switch cdrFldCfg.Type {
-		case utils.CDRFIELD:
+		case utils.META_COMPOSED:
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
 					fieldVal += cfgFieldRSR.ParseValue("")
@@ -192,7 +192,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 					}
 				}
 			}
-		case utils.HTTP_POST:
+		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		default:
 			//return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)

@@ -376,18 +376,17 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 		var outVal string
 		var err error
 		switch cfgFld.Type {
-		case utils.FILLER:
+		case utils.META_FILLER:
 			outVal = cfgFld.Value.Id()
 			cfgFld.Padding = "right"
-		case utils.CONSTANT:
+		case utils.META_CONSTANT:
 			outVal = cfgFld.Value.Id()
-		case utils.METATAG:
-
-			outVal, err = self.metaHandler(cfgFld.MetatagId, cfgFld.Layout)
+		case utils.META_HANDLER:
+			outVal, err = self.metaHandler(cfgFld.HandlerId, cfgFld.Layout)
 			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.MetatagId, err.Error()))
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
 			}
-		case utils.CDRFIELD:
+		case utils.META_COMPOSED:
 			outVal = self.eventFieldValue(cfgFld)
 		}
 		fmtOut := outVal
