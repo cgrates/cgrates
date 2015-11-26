@@ -676,13 +676,13 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
 		return nil, utils.ErrAccountNotFound
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
+		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
 				cc, err = cd.debit(account, false, true)
 				return 0, err
 			}, 0, memberIds...)
 		} else {
-			return nil, err
+			return nil, sgerr
 		}
 		return cc, err
 	}
