@@ -26,6 +26,7 @@ var (
 	ErrInvalidPath             = errors.New("INVALID_PATH")
 	ErrInvalidKey              = errors.New("INVALID_KEY")
 	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
+	ErrAccountNotFound         = errors.New("AccountNotFound")
 )
 
 const (

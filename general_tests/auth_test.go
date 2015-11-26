@@ -97,7 +97,7 @@ func TestAuthPostpaidNoAcnt(t *testing.T) {
 		Category: "call", Account: "nonexistent", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
 	var maxSessionTime float64
-	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err == nil || err != utils.ErrNotFound {
+	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err == nil || err != utils.ErrAccountNotFound {
 		t.Error(err)
 	}
 }
