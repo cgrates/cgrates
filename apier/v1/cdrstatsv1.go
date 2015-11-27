@@ -55,7 +55,8 @@ func (sts *CDRStatsV1) GetQueueTriggers(id string, ats *engine.ActionTriggers) e
 }
 
 func (sts *CDRStatsV1) ReloadQueues(attr utils.AttrCDRStatsReloadQueues, reply *string) error {
-	if err := sts.CdrStats.Call("CDRStatsV1.ReloadQueues", attr.StatsQueueIds, nil); err != nil {
+	var out int
+	if err := sts.CdrStats.Call("CDRStatsV1.ReloadQueues", attr.StatsQueueIds, &out); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -63,7 +64,8 @@ func (sts *CDRStatsV1) ReloadQueues(attr utils.AttrCDRStatsReloadQueues, reply *
 }
 
 func (sts *CDRStatsV1) ResetQueues(attr utils.AttrCDRStatsReloadQueues, reply *string) error {
-	if err := sts.CdrStats.Call("CDRStatsV1.ResetQueues", attr.StatsQueueIds, nil); err != nil {
+	var out int
+	if err := sts.CdrStats.Call("CDRStatsV1.ResetQueues", attr.StatsQueueIds, &out); err != nil {
 		return err
 	}
 	*reply = utils.OK

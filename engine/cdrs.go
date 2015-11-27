@@ -255,7 +255,8 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *StoredCdr) error {
 	}
 	// Attach CDR to stats
 	if self.stats != nil { // Send CDR to stats
-		if err := self.stats.Call("Stats.AppendCDR", cdr, nil); err != nil {
+		var out int
+		if err := self.stats.Call("CDRStatsV1.AppendCDR", cdr, &out); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Could not append cdr to stats: %s", err.Error()))
 		}
 	}
