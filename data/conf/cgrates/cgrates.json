@@ -119,21 +119,21 @@
 //		"export_dir": "/var/log/cgrates/cdre",			// path where the exported CDRs will be placed
 //		"header_fields": [],							// template of the exported header fields
 //		"content_fields": [								// template of the exported content fields
-//			{"tag": "CgrId", "cdr_field_id": "CgrId", "type": "cdrfield", "value": "CgrId"},
-//			{"tag":"RunId", "cdr_field_id": "MediationRunId", "type": "cdrfield", "value": "MediationRunId"},
-//			{"tag":"Tor", "cdr_field_id": "TOR", "type": "cdrfield", "value": "TOR"},
-//			{"tag":"AccId", "cdr_field_id": "AccId", "type": "cdrfield", "value": "AccId"},
-//			{"tag":"ReqType", "cdr_field_id": "ReqType", "type": "cdrfield", "value": "ReqType"},
-//			{"tag":"Direction", "cdr_field_id": "Direction", "type": "cdrfield", "value": "Direction"},
-//			{"tag":"Tenant", "cdr_field_id": "Tenant", "type": "cdrfield", "value": "Tenant"},
-//			{"tag":"Category", "cdr_field_id": "Category", "type": "cdrfield", "value": "Category"},
-//			{"tag":"Account", "cdr_field_id": "Account", "type": "cdrfield", "value": "Account"},
-//			{"tag":"Subject", "cdr_field_id": "Subject", "type": "cdrfield", "value": "Subject"},
-//			{"tag":"Destination", "cdr_field_id": "Destination", "type": "cdrfield", "value": "Destination"},
-//			{"tag":"SetupTime", "cdr_field_id": "SetupTime", "type": "cdrfield", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
-//			{"tag":"AnswerTime", "cdr_field_id": "AnswerTime", "type": "cdrfield", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
-//			{"tag":"Usage", "cdr_field_id": "Usage", "type": "cdrfield", "value": "Usage"},
-//			{"tag":"Cost", "cdr_field_id": "Cost", "type": "cdrfield", "value": "Cost"},
+//			{"tag": "CgrId", "field_id": "CgrId", "type": "*composed", "value": "CgrId"},
+//			{"tag":"RunId", "field_id": "MediationRunId", "type": "*composed", "value": "MediationRunId"},
+//			{"tag":"Tor", "field_id": "TOR", "type": "*composed", "value": "TOR"},
+//			{"tag":"AccId", "field_id": "AccId", "type": "*composed", "value": "AccId"},
+//			{"tag":"ReqType", "field_id": "ReqType", "type": "*composed", "value": "ReqType"},
+//			{"tag":"Direction", "field_id": "Direction", "type": "*composed", "value": "Direction"},
+//			{"tag":"Tenant", "field_id": "Tenant", "type": "*composed", "value": "Tenant"},
+//			{"tag":"Category", "field_id": "Category", "type": "*composed", "value": "Category"},
+//			{"tag":"Account", "field_id": "Account", "type": "*composed", "value": "Account"},
+//			{"tag":"Subject", "field_id": "Subject", "type": "*composed", "value": "Subject"},
+//			{"tag":"Destination", "field_id": "Destination", "type": "*composed", "value": "Destination"},
+//			{"tag":"SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "SetupTime", "layout": "2006-01-02T15:04:05Z07:00"},
+//			{"tag":"AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "AnswerTime", "layout": "2006-01-02T15:04:05Z07:00"},
+//			{"tag":"Usage", "field_id": "Usage", "type": "*composed", "value": "Usage"},
+//			{"tag":"Cost", "field_id": "Cost", "type": "*composed", "value": "Cost"},
 //		],
 //		"trailer_fields": [],							// template of the exported trailer fields
 //	}
@@ -156,21 +156,22 @@
 //		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
 //		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
 //		"cdr_filter": "",							// filter CDR records to import
+//		"continue_on_success": false,				// continue to the next template if executed
 //		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
 //		"header_fields": [],						// template of the import header fields
 //		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-//			{"tag": "tor", "cdr_field_id": "TOR", "type": "cdrfield", "value": "2", "mandatory": true},
-//			{"tag": "accid", "cdr_field_id": "AccId", "type": "cdrfield", "value": "3", "mandatory": true},
-//			{"tag": "reqtype", "cdr_field_id": "ReqType", "type": "cdrfield", "value": "4", "mandatory": true},
-//			{"tag": "direction", "cdr_field_id": "Direction", "type": "cdrfield", "value": "5", "mandatory": true},
-//			{"tag": "tenant", "cdr_field_id": "Tenant", "type": "cdrfield", "value": "6", "mandatory": true},
-//			{"tag": "category", "cdr_field_id": "Category", "type": "cdrfield", "value": "7", "mandatory": true},
-//			{"tag": "account", "cdr_field_id": "Account", "type": "cdrfield", "value": "8", "mandatory": true},
-//			{"tag": "subject", "cdr_field_id": "Subject", "type": "cdrfield", "value": "9", "mandatory": true},
-//			{"tag": "destination", "cdr_field_id": "Destination", "type": "cdrfield", "value": "10", "mandatory": true},
-//			{"tag": "setup_time", "cdr_field_id": "SetupTime", "type": "cdrfield", "value": "11", "mandatory": true},
-//			{"tag": "answer_time", "cdr_field_id": "AnswerTime", "type": "cdrfield", "value": "12", "mandatory": true},
-//			{"tag": "usage", "cdr_field_id": "Usage", "type": "cdrfield", "value": "13", "mandatory": true},
+//			{"tag": "tor", "field_id": "TOR", "type": "*composed", "value": "2", "mandatory": true},
+//			{"tag": "accid", "field_id": "AccId", "type": "*composed", "value": "3", "mandatory": true},
+//			{"tag": "reqtype", "field_id": "ReqType", "type": "*composed", "value": "4", "mandatory": true},
+//			{"tag": "direction", "field_id": "Direction", "type": "*composed", "value": "5", "mandatory": true},
+//			{"tag": "tenant", "field_id": "Tenant", "type": "*composed", "value": "6", "mandatory": true},
+//			{"tag": "category", "field_id": "Category", "type": "*composed", "value": "7", "mandatory": true},
+//			{"tag": "account", "field_id": "Account", "type": "*composed", "value": "8", "mandatory": true},
+//			{"tag": "subject", "field_id": "Subject", "type": "*composed", "value": "9", "mandatory": true},
+//			{"tag": "destination", "field_id": "Destination", "type": "*composed", "value": "10", "mandatory": true},
+//			{"tag": "setup_time", "field_id": "SetupTime", "type": "*composed", "value": "11", "mandatory": true},
+//			{"tag": "answer_time", "field_id": "AnswerTime", "type": "*composed", "value": "12", "mandatory": true},
+//			{"tag": "usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
 //		],
 //		"trailer_fields": [],							// template of the import trailer fields
 //	}
@@ -181,7 +182,7 @@
 //	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
 //	"rater": "internal",					// address where to reach the Rater <""|internal|127.0.0.1:2013>
 //	"cdrs": "internal",						// address where to reach CDR Server <""|internal|x.y.z.y:1234>
-//	"debit_interval": "10s",				// interval to perform debits on.
+//	"debit_interval": "0s",					// interval to perform debits on.
 //	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 //	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
 //},
@@ -234,6 +235,42 @@
 //	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
 //	"events_subscribe_interval": "60s",	// automatic events subscription to OpenSIPS, 0 to disable it
 //	"mi_addr": "127.0.0.1:8020",		// address where to reach OpenSIPS MI to send session disconnects
+//},
+
+
+//"diameter_agent": {
+//	"enabled": false,											// enables the diameter agent: <true|false>
+//	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
+//	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
+//	"sm_generic": "internal",									// connection towards SMG component for session management
+//	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
+//	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
+//	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
+//	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
+//	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
+//	"request_processors": [
+//		{
+//			"id": "*default",									// formal identifier of this processor
+//			"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+//			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
+//			"continue_on_success": false,				// continue to the next template if executed
+//			"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+//				{"tag": "tor", "field_id": "TOR", "type": "*composed", "value": "^*voice", "mandatory": true},
+//				{"tag": "accid", "field_id": "AccId", "type": "*composed", "value": "Session-Id", "mandatory": true},
+//				{"tag": "reqtype", "field_id": "ReqType", "type": "*composed", "value": "^*users", "mandatory": true},
+//				{"tag": "direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
+//				{"tag": "tenant", "field_id": "Tenant", "type": "*composed", "value": "^*users", "mandatory": true},
+//				{"tag": "category", "field_id": "Category", "type": "*composed", "value": "^call_;~Service-Information>IN-Information>Calling-Vlr-Number:s/^$/33000/;~Service-Information>IN-Information>Calling-Vlr-Number:s/^(\\d{5})/${1}/", "mandatory": true},
+//				{"tag": "account", "field_id": "Account", "type": "*composed", "value": "^*users", "mandatory": true},
+//				{"tag": "subject", "field_id": "Subject", "type": "*composed", "value": "^*users", "mandatory": true},
+//				{"tag": "destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},
+//				{"tag": "setup_time", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+//				{"tag": "answer_time", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+//				{"tag": "usage", "field_id": "Usage", "type": "*composed", "value": "Requested-Service-Unit>CC-Time", "mandatory": true},
+//				{"tag": "subscriber_id", "field_id": "SubscriberId", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
+//			],
+//		},
+//	],
 //},
 
 
