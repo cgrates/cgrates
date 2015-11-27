@@ -100,6 +100,7 @@ func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 		return err
 	}
 	cd := &engine.CallDescriptor{
+		CgrId:       ev.GetCgrId(sm.Timezone()),
 		Direction:   ev.GetDirection(utils.META_DEFAULT),
 		Tenant:      ev.GetTenant(utils.META_DEFAULT),
 		Category:    ev.GetCategory(utils.META_DEFAULT),
@@ -148,6 +149,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	// ComputeLcr
 	if ev.ComputeLcr() {
 		cd, err := fsev.AsCallDescriptor()
+		cd.CgrId = fsev.GetCgrId(sm.Timezone())
 		if err != nil {
 			utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_PREPROCESS_ERROR: %s", err.Error()))
 			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)

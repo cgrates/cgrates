@@ -145,6 +145,7 @@ func (self *SMGeneric) GetMaxUsage(gev SMGenericEvent, clnt *rpc2.Client) (time.
 func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([]string, error) {
 	gev[utils.EVENT_NAME] = utils.CGR_LCR_REQUEST
 	cd, err := gev.AsLcrRequest().AsCallDescriptor(self.timezone)
+	cd.CgrId = gev.GetCgrId(self.timezone)
 	if err != nil {
 		return nil, err
 	}

@@ -18,7 +18,7 @@ type CacheItem struct {
 type ResponseCache struct {
 	ttl       time.Duration
 	cache     map[string]*CacheItem
-	semaphore map[string]chan bool
+	semaphore map[string]chan bool // used for waiting till the first goroutine processes the response
 	mu        sync.RWMutex
 }
 
