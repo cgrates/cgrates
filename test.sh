@@ -3,6 +3,7 @@
 go test -i github.com/cgrates/cgrates/apier/v1
 go test -i github.com/cgrates/cgrates/apier/v2
 go test -i github.com/cgrates/cgrates/engine
+go test -i github.com/cgrates/cgrates/general_tests
 go test -i github.com/cgrates/cgrates/sessionmanager
 go test -i github.com/cgrates/cgrates/config
 go test -i github.com/cgrates/cgrates/cmd/cgr-engine

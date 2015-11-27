@@ -153,7 +153,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				exitChan <- true
 				return
 			}
-			engine.SetHistoryScribe(scribeServer) // ToDo: replace package sharing with connection based one
+			engine.SetHistoryScribe(scribeServer)
 		}()
 	}
 
@@ -178,7 +178,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				exitChan <- true
 				return
 			}
-			engine.SetPubSub(pubSubServer) // ToDo: replace package sharing with connection based one
+			engine.SetPubSub(pubSubServer)
 		}()
 	}
 
@@ -203,7 +203,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 				exitChan <- true
 				return
 			}
-			engine.SetAliasService(aliasesServer) // ToDo: replace package sharing with connection based one
+			engine.SetAliasService(aliasesServer)
 		}()
 	}
 

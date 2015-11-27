@@ -92,7 +92,7 @@ func (mc *MockRpcClient) Call(methodName string, arg interface{}, reply interfac
 
 func TestSessionRefund(t *testing.T) {
 	mc := &MockRpcClient{}
-	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc, timezone: time.UTC.String()}, eventStart: FSEvent{SETUP_TIME: time.Now().Format(time.RFC3339)}}
 	ts := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
@@ -112,7 +112,7 @@ func TestSessionRefund(t *testing.T) {
 
 func TestSessionRefundAll(t *testing.T) {
 	mc := &MockRpcClient{}
-	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc, timezone: time.UTC.String()}, eventStart: FSEvent{SETUP_TIME: time.Now().Format(time.RFC3339)}}
 	ts := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
@@ -132,7 +132,7 @@ func TestSessionRefundAll(t *testing.T) {
 
 func TestSessionRefundManyAll(t *testing.T) {
 	mc := &MockRpcClient{}
-	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc, timezone: time.UTC.String()}, eventStart: FSEvent{SETUP_TIME: time.Now().Format(time.RFC3339)}}
 	ts1 := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
