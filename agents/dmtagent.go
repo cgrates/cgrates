@@ -65,19 +65,44 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	return dSM
 }
 
-func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
-	//utils.Logger.Warning(fmt.Sprintf("<DiameterAgent> Received CCR message from %s:\n%s", c.RemoteAddr(), m))
-	var ccr CCR
-	if err := m.Unmarshal(&ccr); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", m, err))
-		return
-	}
-	ccr.diamMessage = m // Save it for later searches inside AVPs
-	cca := NewCCAFromCCR(&ccr)
+func (self *DiameterAgent) processCCR(ccr *CCR) (*CCA, error) {
+	cca := NewCCAFromCCR(ccr)
 	cca.OriginHost = self.cgrCfg.DiameterAgentCfg().OriginHost
 	cca.OriginRealm = self.cgrCfg.DiameterAgentCfg().OriginRealm
 	cca.GrantedServiceUnit.CCTime = 300
 	cca.ResultCode = diam.Success
+	return cca, nil
+}
+
+func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
+	ccr, err := NewCCRFromDiameterMessage(m)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", m, err))
+		return
+	}
+	var cca *CCA // For now we simply overload in loop, maybe we will find some other use of this
+	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
+		passesAllFilters := true
+		for _, fldFilter := range reqProcessor.RequestFilter {
+			if !ccr.passesFieldFilter(fldFilter) {
+				passesAllFilters = false
+			}
+		}
+		if !passesAllFilters { // Not going with this processor further
+			continue
+		}
+		cca, err = self.processCCR(ccr)
+		if !reqProcessor.ContinueOnSuccess {
+			break
+		}
+	}
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to generate CCA, error: %s", err.Error()))
+		return
+	} else if cca == nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %+v, ignoring request", ccr))
+		return
+	}
 	if dmtA, err := cca.AsDiameterMessage(); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to convert cca as diameter message, error: %s", err.Error()))
 		return
@@ -85,7 +110,6 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to write message to %s: %s\n%s\n", c.RemoteAddr(), err, dmtA))
 		return
 	}
-
 }
 
 func (self *DiameterAgent) handleALL(c diam.Conn, m *diam.Message) {

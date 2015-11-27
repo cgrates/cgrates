@@ -57,24 +57,24 @@
 	//"dictionaries_dir": "",	// path towards directory holding additional dictionaries to load
 	"request_processors": [
 		{
-			"id": "*default",									// Identifier of this processor
+			"id": "*default",									// formal identifier of this processor
 			"dry_run": false,									// do not send the CDRs to CDRS, just parse them
-			"request_filter": "Subscription-Id>Subscription-Type(0)",		// filter requests processed by this processor
+			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
 			"continue_on_success": false,				// continue to the next template if executed
 			"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "tor", "cdr_field_id": "TOR", "type": "cdrfield", "value": "^*voice", "mandatory": true},
-				{"tag": "accid", "cdr_field_id": "AccId", "type": "cdrfield", "value": "Session-Id", "mandatory": true},
-				{"tag": "reqtype", "cdr_field_id": "ReqType", "type": "cdrfield", "value": "^*users", "mandatory": true},
-				{"tag": "direction", "cdr_field_id": "Direction", "type": "cdrfield", "value": "^*out", "mandatory": true},
-				{"tag": "tenant", "cdr_field_id": "Tenant", "type": "cdrfield", "value": "^*users", "mandatory": true},
-				{"tag": "category", "cdr_field_id": "Category", "type": "cdrfield", "value": "^call_;~Calling-Vlr-Number:s/^$/33000/;~Calling-Vlr-Number:s/^(\\d{5})/${1}/", "mandatory": true},
-				{"tag": "account", "cdr_field_id": "Account", "type": "cdrfield", "value": "^*users", "mandatory": true},
-				{"tag": "subject", "cdr_field_id": "Subject", "type": "cdrfield", "value": "^*users", "mandatory": true},
-				{"tag": "destination", "cdr_field_id": "Destination", "type": "cdrfield", "value": "Real-Called-Number", "mandatory": true},
-				{"tag": "setup_time", "cdr_field_id": "SetupTime", "type": "cdrfield", "value": "Event-Time", "mandatory": true},
-				{"tag": "answer_time", "cdr_field_id": "AnswerTime", "type": "cdrfield", "value": "Event-Time", "mandatory": true},
-				{"tag": "usage", "cdr_field_id": "Usage", "type": "cdrfield", "value": "CC-Time", "mandatory": true},
-				{"tag": "subscriber_id", "cdr_field_id": "SubscriberId", "type": "cdrfield", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
+				{"tag": "tor", "field_id": "TOR", "type": "*composed", "value": "^*voice", "mandatory": true},
+				{"tag": "accid", "field_id": "AccId", "type": "*composed", "value": "Session-Id", "mandatory": true},
+				{"tag": "reqtype", "field_id": "ReqType", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
+				{"tag": "tenant", "field_id": "Tenant", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "category", "field_id": "Category", "type": "*composed", "value": "^call_;~Service-Information>IN-Information>Calling-Vlr-Number:s/^$/33000/;~Service-Information>IN-Information>Calling-Vlr-Number:s/^(\\d{5})/${1}/", "mandatory": true},
+				{"tag": "account", "field_id": "Account", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "subject", "field_id": "Subject", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},
+				{"tag": "setup_time", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+				{"tag": "answer_time", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+				{"tag": "usage", "field_id": "Usage", "type": "*composed", "value": "Requested-Service-Unit>CC-Time", "mandatory": true},
+				{"tag": "subscriber_id", "field_id": "SubscriberId", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
 			],
 		},
 	],

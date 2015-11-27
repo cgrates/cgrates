@@ -273,7 +273,7 @@ const CGRATES_CFG_JSON = `
 		{
 			"id": "*default",									// formal identifier of this processor
 			"dry_run": false,									// do not send the CDRs to CDRS, just parse them
-			"request_filter": "Subscription-Id>Subscription-Type(0)",		// filter requests processed by this processor
+			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
 			"continue_on_success": false,				// continue to the next template if executed
 			"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "tor", "field_id": "TOR", "type": "*composed", "value": "^*voice", "mandatory": true},

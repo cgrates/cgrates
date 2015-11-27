@@ -143,6 +143,15 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 	return ccr
 }
 
+func NewCCRFromDiameterMessage(m *diam.Message) (*CCR, error) {
+	var ccr CCR
+	if err := m.Unmarshal(&ccr); err != nil {
+		return nil, err
+	}
+	ccr.diamMessage = m
+	return &ccr, nil
+}
+
 // CallControl Request
 type CCR struct {
 	SessionId         string    `avp:"Session-Id"`
@@ -332,6 +341,14 @@ func avpValAsString(a *diam.AVP) string {
 	return dataVal[startIdx+1 : endIdx]
 }
 
+// Follows the implementation in the StorCdr
+func (self *CCR) passesFieldFilter(fieldFilter *utils.RSRField) bool {
+	if fieldFilter == nil {
+		return true
+	}
+	return fieldFilter.FilterPasses(self.eventFieldValue(utils.RSRFields{fieldFilter}))
+}
+
 // Handler for meta functions
 func (self *CCR) metaHandler(tag, arg string) (string, error) {
 	switch tag {
@@ -342,9 +359,9 @@ func (self *CCR) metaHandler(tag, arg string) (string, error) {
 	return "", nil
 }
 
-func (self *CCR) eventFieldValue(cfgFld *config.CfgCdrField) string {
+func (self *CCR) eventFieldValue(fldTpl utils.RSRFields) string {
 	var outVal string
-	for _, rsrTpl := range cfgFld.Value {
+	for _, rsrTpl := range fldTpl {
 		if rsrTpl.IsStatic() {
 			outVal += rsrTpl.ParseValue("")
 		} else {
@@ -387,7 +404,7 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
 			}
 		case utils.META_COMPOSED:
-			outVal = self.eventFieldValue(cfgFld)
+			outVal = self.eventFieldValue(cfgFld.Value)
 		}
 		fmtOut := outVal
 		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
