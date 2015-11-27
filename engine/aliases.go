@@ -195,18 +195,18 @@ func (am *AliasHandler) SetAlias(al Alias, reply *string) error {
 }
 
 func (am *AliasHandler) UpdateAlias(al Alias, reply *string) error {
-	// get previous value
-	oldAlias := &Alias{}
-	if err := am.GetAlias(al, oldAlias); err != nil {
-		*reply = err.Error()
-		return err
-	}
 	am.mu.Lock()
 	defer am.mu.Unlock()
+	// get previous value
+	oldAlias, err := am.accountingDb.GetAlias(al.GetId(), false)
+	if err != nil {
+		return err
+	}
+	// move old values that were not overwritten into the new alias
 	for _, oldValue := range oldAlias.Values {
 		found := false
 		for _, value := range al.Values {
-			if oldValue.Equals(value) {
+			if oldValue.DestinationId == value.DestinationId {
 				found = true
 				break
 			}
