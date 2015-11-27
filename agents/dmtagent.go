@@ -65,19 +65,6 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	return dSM
 }
 
-/*
-		case 1: // Initial credit control
-		self.smg.Call("SMGenericV1.SessionStart",ev sessionmanager.SMGenericEvent, maxUsage *float64)")
-	}
-	cca := NewCCAFromCCR(ccr)
-	cca.OriginHost = self.cgrCfg.DiameterAgentCfg().OriginHost
-	cca.OriginRealm = self.cgrCfg.DiameterAgentCfg().OriginRealm
-	cca.GrantedServiceUnit.CCTime = 300
-	cca.ResultCode = diam.Success
-	return cca, nil
-}
-*/
-
 func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor) (*CCA, error) {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {

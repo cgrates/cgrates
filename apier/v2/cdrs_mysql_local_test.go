@@ -23,7 +23,6 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
-	"strconv"
 	"testing"
 	"time"
 
@@ -305,6 +304,7 @@ func TestV2CdrsMysqlRateWithTP(t *testing.T) {
 	}
 }
 
+/*
 // Benchmark speed of processing 1000 CDRs
 func TestV2CdrsMysqlProcessRatedExternalCdrBenchmark(t *testing.T) {
 	if !*testLocal {
@@ -380,6 +380,7 @@ func TestV2CdrsMysqlProcessPostpaidExternalCdrBenchmark(t *testing.T) {
 		t.Errorf("Processing of %d postpaid CDRs took: %v", nrCdrs, durExec)
 	}
 }
+*/
 
 func TestV2CdrsMysqlKillEngine(t *testing.T) {
 	if !*testLocal {

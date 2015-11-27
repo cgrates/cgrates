@@ -23,7 +23,6 @@ import (
 	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
-	"strconv"
 	"testing"
 	"time"
 
@@ -303,6 +302,7 @@ func TestV2CdrsPsqlRateWithTP(t *testing.T) {
 	}
 }
 
+/*
 // Benchmark speed of processing 1000 CDRs
 func TestV2CdrsPsqlProcessRatedExternalCdrBenchmark(t *testing.T) {
 	if !*testLocal {
@@ -378,6 +378,7 @@ func TestV2CdrsPsqlProcessPostpaidExternalCdrBenchmark(t *testing.T) {
 		t.Errorf("Processing of %d postpaid CDRs took: %v", nrCdrs, durExec)
 	}
 }
+*/
 
 func TestV2CdrsPsqlKillEngine(t *testing.T) {
 	if !*testLocal {

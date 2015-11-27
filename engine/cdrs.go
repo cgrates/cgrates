@@ -146,6 +146,22 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 		if cdr.MediationRunId == "" { // raw CDRs which were not calculated before
 			cdr.MediationRunId = utils.META_DEFAULT
 		}
+		// replace aliases for cases they were loaded after CDR received
+		if err := LoadAlias(&AttrMatchingAlias{
+			Destination: cdr.Destination,
+			Direction:   cdr.Direction,
+			Tenant:      cdr.Tenant,
+			Category:    cdr.Category,
+			Account:     cdr.Account,
+			Subject:     cdr.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		// replace user profile fields
+		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+			return err
+		}
 		if err := self.rateStoreStatsReplicate(cdr); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
 		}

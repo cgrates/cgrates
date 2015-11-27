@@ -48,11 +48,18 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 	}
 	var ignr string
 	for _, alias := range attrs.Aliases {
-		if err := aliases.SetAlias(
-			engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
-				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
-					Pairs: engine.AliasPairs{"Subject": map[string]string{alias: attrs.Subject}}, Weight: 10.0}}}, &ignr); err != nil {
-			return utils.NewErrServerError(err)
+		als := engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
+			Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
+				Pairs: engine.AliasPairs{"Subject": map[string]string{alias: attrs.Subject}}, Weight: 10.0}}}
+		var ignrAls engine.Alias
+		if err := aliases.GetAlias(als, &ignrAls); err == nil { // Update the previous alias if already there
+			if err := aliases.UpdateAlias(als, &ignr); err != nil {
+				return utils.NewErrServerError(err)
+			}
+		} else {
+			if err := aliases.SetAlias(als, &ignr); err != nil {
+				return utils.NewErrServerError(err)
+			}
 		}
 	}
 	*reply = utils.OK
@@ -100,11 +107,18 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 	}
 	var ignr string
 	for _, alias := range attrs.Aliases {
-		if err := aliases.SetAlias(
-			engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
-				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
-					Pairs: engine.AliasPairs{"Account": map[string]string{alias: attrs.Account}}, Weight: 10.0}}}, &ignr); err != nil {
-			return utils.NewErrServerError(err)
+		als := engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
+			Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
+				Pairs: engine.AliasPairs{"Account": map[string]string{alias: attrs.Account}}, Weight: 10.0}}}
+		var ignrAls engine.Alias
+		if err := aliases.GetAlias(als, &ignrAls); err == nil { // Update the previous alias if already there
+			if err := aliases.UpdateAlias(als, &ignr); err != nil {
+				return utils.NewErrServerError(err)
+			}
+		} else {
+			if err := aliases.SetAlias(als, &ignr); err != nil {
+				return utils.NewErrServerError(err)
+			}
 		}
 	}
 	*reply = utils.OK

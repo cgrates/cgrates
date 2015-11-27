@@ -195,14 +195,14 @@ func (am *AliasHandler) SetAlias(al Alias, reply *string) error {
 }
 
 func (am *AliasHandler) UpdateAlias(al Alias, reply *string) error {
-	am.mu.Lock()
-	defer am.mu.Unlock()
 	// get previous value
 	oldAlias := &Alias{}
 	if err := am.GetAlias(al, oldAlias); err != nil {
 		*reply = err.Error()
 		return err
 	}
+	am.mu.Lock()
+	defer am.mu.Unlock()
 	for _, oldValue := range oldAlias.Values {
 		found := false
 		for _, value := range al.Values {
