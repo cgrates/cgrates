@@ -160,7 +160,6 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	var minMaxUsage time.Duration
 	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.MaxCallDuration)
 	if err != nil {
 		return nilDuration, err
@@ -170,13 +169,12 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 		if maxDur, err := s.debit(evMaxUsage); err != nil {
 			return nilDuration, err
 		} else {
-			if maxDur < minMaxUsage {
-				minMaxUsage = maxDur
+			if maxDur < evMaxUsage {
+				evMaxUsage = maxDur
 			}
 		}
 	}
-	utils.Logger.Debug(fmt.Sprintf("SMGEneric.SessionUpdate event: %+v, return minMaxUsage: %+v", gev, minMaxUsage))
-	return minMaxUsage, nil
+	return evMaxUsage, nil
 }
 
 // Called on session start
@@ -189,7 +187,6 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
-	utils.Logger.Debug(fmt.Sprintf("SMGEneric.SessionEnd, event: %+v", gev))
 	endTime, err := gev.GetEndTime(utils.META_DEFAULT, self.timezone)
 	if err != nil {
 		return err

@@ -120,9 +120,9 @@ func usageFromCCR(reqType, reqNr, ccTime int, debitIterval time.Duration) time.D
 // Utility function to convert from StoredCdr to CCR struct
 func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendorId int, productName string,
 	firmwareRev int, debitInterval time.Duration, callEnded bool) *CCR {
-	sid := "session;" + strconv.Itoa(int(rand.Uint32()))
+	//sid := "session;" + strconv.Itoa(int(rand.Uint32()))
 	reqType, reqNr, ccTime := disectUsageForCCR(cdr.Usage, debitInterval, callEnded)
-	ccr := &CCR{SessionId: sid, OriginHost: originHost, OriginRealm: originRealm, DestinationHost: originHost, DestinationRealm: originRealm,
+	ccr := &CCR{SessionId: cdr.CgrId, OriginHost: originHost, OriginRealm: originRealm, DestinationHost: originHost, DestinationRealm: originRealm,
 		AuthApplicationId: 4, ServiceContextId: cdr.ExtraFields["Service-Context-Id"], CCRequestType: reqType, CCRequestNumber: reqNr, EventTimestamp: cdr.AnswerTime,
 		ServiceIdentifier: 0}
 	ccr.SubscriptionId = make([]struct {
