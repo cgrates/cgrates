@@ -89,6 +89,9 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		var rpl string
 		err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
 	}
+	if err != nil {
+		return nil, err
+	}
 	cca := NewCCAFromCCR(ccr)
 	cca.OriginHost = self.cgrCfg.DiameterAgentCfg().OriginHost
 	cca.OriginRealm = self.cgrCfg.DiameterAgentCfg().OriginRealm
@@ -98,7 +101,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 }
 
 func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
-	ccr, err := NewCCRFromDiameterMessage(m)
+	ccr, err := NewCCRFromDiameterMessage(m, self.cgrCfg.DiameterAgentCfg().DebitInterval)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", m, err))
 		return

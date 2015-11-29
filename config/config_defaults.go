@@ -264,7 +264,9 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sm_generic": "internal",									// connection towards SMG component for session management
+	"debit_interval": "5m",										// interval for CCR updates
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
+	"dialect": "huawei",										// the diameter dialect used in the communication, supported: <huawei>
 	"origin_host": "CGR-DA",									// diameter Origin-Host AVP used in replies
 	"origin_realm": "cgrates.org",								// diameter Origin-Realm AVP used in replies
 	"vendor_id": 0,												// diameter Vendor-Id AVP used in replies
@@ -287,7 +289,7 @@ const CGRATES_CFG_JSON = `
 				{"tag": "destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},
 				{"tag": "setup_time", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
 				{"tag": "answer_time", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
-				{"tag": "usage", "field_id": "Usage", "type": "*composed", "value": "Requested-Service-Unit>CC-Time", "mandatory": true},
+				{"tag": "usage", "field_id": "Usage", "type": "*handler", "handler_id": "*ccr_usage", "mandatory": true},
 				{"tag": "subscriber_id", "field_id": "SubscriberId", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
 			],
 		},

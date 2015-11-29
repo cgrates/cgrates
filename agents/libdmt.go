@@ -85,33 +85,35 @@ func loadDictionaries(dictsDir, componentId string) error {
 }
 
 // Returns reqType, requestNr and ccTime in seconds
-func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnded bool) (int, int, int) {
+func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnded bool) (reqType, reqNr, ccTime int) {
 	usageSecs := usage.Seconds()
 	debitIntervalSecs := debitInterval.Seconds()
-	reqType := 1
+	reqType = 1
 	if usage > 0 {
 		reqType = 2
 	}
 	if callEnded {
 		reqType = 3
 	}
-	reqNr := int(usageSecs / debitIntervalSecs)
+	reqNr = int(usageSecs / debitIntervalSecs)
 	if callEnded {
 		reqNr += 1
 	}
-	ccTime := debitInterval.Seconds()
+	ccTimeFloat := debitInterval.Seconds()
 	if callEnded {
-		ccTime = math.Mod(usageSecs, debitIntervalSecs)
+		ccTimeFloat = math.Mod(usageSecs, debitIntervalSecs)
 	}
-	return reqType, reqNr, int(ccTime)
+	return reqType, reqNr, int(ccTimeFloat)
 }
 
 func usageFromCCR(reqType, reqNr, ccTime int, debitIterval time.Duration) time.Duration {
 	dISecs := debitIterval.Seconds()
 	if reqType == 3 {
 		reqNr -= 1 // decrease request number to reach the real number
+		ccTime += int(dISecs) * reqNr
+	} else {
+		ccTime = int(dISecs)
 	}
-	ccTime += int(dISecs) * reqNr
 	return time.Duration(ccTime) * time.Second
 }
 
@@ -143,12 +145,14 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 	return ccr
 }
 
-func NewCCRFromDiameterMessage(m *diam.Message) (*CCR, error) {
+// debitInterval is the configured debitInterval, in sync with the diameter client one
+func NewCCRFromDiameterMessage(m *diam.Message, debitInterval time.Duration) (*CCR, error) {
 	var ccr CCR
 	if err := m.Unmarshal(&ccr); err != nil {
 		return nil, err
 	}
 	ccr.diamMessage = m
+	ccr.debitInterval = debitInterval
 	return &ccr, nil
 }
 
@@ -188,7 +192,8 @@ type CCR struct {
 			SSPTime             string `avp:"SSP-Time"`
 		} `avp:"IN-Information"`
 	} `avp:"Service-Information"`
-	diamMessage *diam.Message // Used to parse fields with CGR templates
+	diamMessage   *diam.Message // Used to parse fields with CGR templates
+	debitInterval time.Duration // Configured debit interval
 }
 
 // Used when sending from client to agent
@@ -353,7 +358,7 @@ func (self *CCR) passesFieldFilter(fieldFilter *utils.RSRField) bool {
 func (self *CCR) metaHandler(tag, arg string) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
-		usage := usageFromCCR(self.CCRequestType, self.CCRequestNumber, self.RequestedServiceUnit.CCTime, time.Duration(300)*time.Second)
+		usage := usageFromCCR(self.CCRequestType, self.CCRequestNumber, self.RequestedServiceUnit.CCTime, self.debitInterval)
 		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
 	}
 	return "", nil
