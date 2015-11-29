@@ -207,6 +207,7 @@ func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", storedCdr, err.Error()))
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
 		}
+
 	}
 	go self.deriveRateStoreStatsReplicate(storedCdr)
 	return nil
@@ -341,6 +342,10 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error) {
 	cc := new(CallCost)
 	var err error
+	timeStart := storedCdr.AnswerTime
+	if timeStart.IsZero() { // Fix for FreeSWITCH unanswered calls
+		timeStart = storedCdr.SetupTime
+	}
 	cd := &CallDescriptor{
 		TOR:           storedCdr.TOR,
 		Direction:     storedCdr.Direction,
@@ -349,8 +354,8 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 		Subject:       storedCdr.Subject,
 		Account:       storedCdr.Account,
 		Destination:   storedCdr.Destination,
-		TimeStart:     storedCdr.AnswerTime,
-		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Usage),
+		TimeStart:     timeStart,
+		TimeEnd:       timeStart.Add(storedCdr.Usage),
 		DurationIndex: storedCdr.Usage,
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, storedCdr.ReqType) { // Prepaid - Cost can be recalculated in case of missing records from SM
