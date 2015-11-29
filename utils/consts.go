@@ -130,7 +130,6 @@ const (
 	COST_DETAILS                 = "CostDetails"
 	RATED                        = "rated"
 	RATED_FLD                    = "Rated"
-	MAX_USAGE                    = "MaxUsage"
 	DEFAULT_RUNID                = "*default"
 	META_DEFAULT                 = "*default"
 	STATIC_VALUE_PREFIX          = "^"

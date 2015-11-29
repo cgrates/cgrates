@@ -445,7 +445,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("tenant"), Field_id: utils.StringPointer(utils.TENANT), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("^*users"), Mandatory: utils.BoolPointer(true)},
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("category"), Field_id: utils.StringPointer(utils.CATEGORY), Type: utils.StringPointer(utils.META_COMPOSED),
-						Value: utils.StringPointer("^call_;~Service-Information>IN-Information>Calling-Vlr-Number:s/^$/33000/;~Service-Information>IN-Information>Calling-Vlr-Number:s/^(\\d{5})/${1}/"), Mandatory: utils.BoolPointer(true)},
+						Value: utils.StringPointer("^call"), Mandatory: utils.BoolPointer(true)},
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("account"), Field_id: utils.StringPointer(utils.ACCOUNT), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("^*users"), Mandatory: utils.BoolPointer(true)},
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("subject"), Field_id: utils.StringPointer(utils.SUBJECT), Type: utils.StringPointer(utils.META_COMPOSED),

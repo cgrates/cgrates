@@ -283,7 +283,7 @@ const CGRATES_CFG_JSON = `
 				{"tag": "reqtype", "field_id": "ReqType", "type": "*composed", "value": "^*users", "mandatory": true},
 				{"tag": "direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
 				{"tag": "tenant", "field_id": "Tenant", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "category", "field_id": "Category", "type": "*composed", "value": "^call_;~Service-Information>IN-Information>Calling-Vlr-Number:s/^$/33000/;~Service-Information>IN-Information>Calling-Vlr-Number:s/^(\\d{5})/${1}/", "mandatory": true},
+				{"tag": "category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
 				{"tag": "account", "field_id": "Account", "type": "*composed", "value": "^*users", "mandatory": true},
 				{"tag": "subject", "field_id": "Subject", "type": "*composed", "value": "^*users", "mandatory": true},
 				{"tag": "destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},

@@ -20,6 +20,8 @@ package agents
 
 import (
 	"flag"
+	"net/rpc"
+	"net/rpc/jsonrpc"
 	"path"
 	"reflect"
 	"testing"
@@ -37,6 +39,7 @@ var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path h
 
 var daCfgPath string
 var daCfg *config.CGRConfig
+var apierRpc *rpc.Client
 
 func TestDmtAgentInitCfg(t *testing.T) {
 	if !*testIntegration {
@@ -133,7 +136,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 		t.Error(err)
 	}
 	eSMGE := sessionmanager.SMGenericEvent{"EventName": "DIAMETER_CCR", "AccId": "routinga;1442095190;1476802709",
-		"Account": "*users", "AnswerTime": "2015-11-23 12:22:24 +0000 UTC", "Category": "call_4912395676749123956767",
+		"Account": "*users", "AnswerTime": "2015-11-23 12:22:24 +0000 UTC", "Category": "call",
 		"Destination": "4986517174964", "Direction": "*out", "ReqType": "*users", "SetupTime": "2015-11-23 12:22:24 +0000 UTC",
 		"Subject": "*users", "SubscriberId": "4986517174963", "TOR": "*voice", "Tenant": "*users", "Usage": "300"}
 	if smge, err := ccr.AsSMGenericEvent(cfgDefaults.DiameterAgentCfg().RequestProcessors[0].ContentFields); err != nil {
@@ -141,6 +144,31 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	} else if !reflect.DeepEqual(eSMGE, smge) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGE, smge)
 	}
+}
+
+// Connect rpc client to rater
+func TestDmtAgentApierRpcConn(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var err error
+	apierRpc, err = jsonrpc.Dial("tcp", daCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+// Load the tariff plan, creating accounts and their balances
+func TestDmtAgentTPFromFolder(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	var loadInst engine.LoadInstance
+	if err := apierRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func TestDmtAgentSendCCRInit(t *testing.T) {

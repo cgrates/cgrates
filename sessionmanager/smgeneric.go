@@ -160,7 +160,6 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	utils.Logger.Debug(fmt.Sprintf("SMGEneric.SessionUpdate, event: %+v", gev))
 	var minMaxUsage time.Duration
 	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.MaxCallDuration)
 	if err != nil {
@@ -176,13 +175,12 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 			}
 		}
 	}
-	utils.Logger.Debug(fmt.Sprintf("SMGEneric.SessionUpdate, return minMaxUsage: %+v", minMaxUsage))
+	utils.Logger.Debug(fmt.Sprintf("SMGEneric.SessionUpdate event: %+v, return minMaxUsage: %+v", gev, minMaxUsage))
 	return minMaxUsage, nil
 }
 
 // Called on session start
 func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	utils.Logger.Debug(fmt.Sprintf("SMGEneric.SessionStart, event: %+v", gev))
 	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
 		return nilDuration, err
 	}
