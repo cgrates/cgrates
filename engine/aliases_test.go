@@ -96,7 +96,11 @@ func TestAliasesSetters(t *testing.T) {
 		Account:   "set",
 		Subject:   "set",
 		Context:   "*rating",
-	}, r); err != nil || len(r.Values) != 1 || len(r.Values[0].Pairs) != 1 || r.Values[0].Pairs["Subject"]["1234"] != "1235" {
+	}, r); err != nil ||
+		len(r.Values) != 1 ||
+		len(r.Values[0].Pairs) != 2 ||
+		r.Values[0].Pairs["Subject"]["1234"] != "1235" ||
+		r.Values[0].Pairs["Account"]["1234"] != "1235" {
 		t.Errorf("Error getting alias: %+v", r.Values[0])
 	}
 	if err := aliasService.UpdateAlias(Alias{
@@ -121,7 +125,7 @@ func TestAliasesSetters(t *testing.T) {
 		Account:   "set",
 		Subject:   "set",
 		Context:   "*rating",
-	}, r); err != nil || len(r.Values) != 1 || len(r.Values[0].Pairs) != 1 || r.Values[0].Pairs["Subject"]["1111"] != "2222" {
+	}, r); err != nil || len(r.Values) != 1 || len(r.Values[0].Pairs) != 2 || r.Values[0].Pairs["Subject"]["1111"] != "2222" {
 		t.Errorf("Error getting alias: %+v", r.Values[0].Pairs["Subject"])
 	}
 	if err := aliasService.UpdateAlias(Alias{
@@ -149,10 +153,11 @@ func TestAliasesSetters(t *testing.T) {
 	}, r); err != nil ||
 		len(r.Values) != 2 ||
 		len(r.Values[1].Pairs) != 1 ||
-		r.Values[1].Pairs["Subject"]["1111"] != "2222" ||
-		len(r.Values[0].Pairs) != 1 ||
-		r.Values[0].Pairs["Subject"]["3333"] != "4444" {
-		t.Errorf("Error getting alias: %+v", r.Values)
+		r.Values[1].Pairs["Subject"]["3333"] != "4444" ||
+		len(r.Values[0].Pairs) != 2 ||
+		r.Values[0].Pairs["Subject"]["1111"] != "2222" ||
+		r.Values[0].Pairs["Subject"]["1234"] != "1235" {
+		t.Errorf("Error getting alias: %+v", r.Values[0])
 	}
 }
 

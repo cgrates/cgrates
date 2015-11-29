@@ -202,21 +202,32 @@ func (am *AliasHandler) UpdateAlias(al Alias, reply *string) error {
 	if err != nil {
 		return err
 	}
-	// move old values that were not overwritten into the new alias
-	for _, oldValue := range oldAlias.Values {
+	for _, value := range al.Values {
 		found := false
-		for _, value := range al.Values {
+		if value.DestinationId == "" {
+			value.DestinationId = utils.ANY
+		}
+		for _, oldValue := range oldAlias.Values {
 			if oldValue.DestinationId == value.DestinationId {
+				for target, origAliasMap := range value.Pairs {
+					for orig, alias := range origAliasMap {
+						if oldValue.Pairs[target] == nil {
+							oldValue.Pairs[target] = make(map[string]string)
+						}
+						oldValue.Pairs[target][orig] = alias
+					}
+				}
+				oldValue.Weight = value.Weight
 				found = true
 				break
 			}
 		}
 		if !found {
-			al.Values = append(al.Values, oldValue)
+			oldAlias.Values = append(oldAlias.Values, value)
 		}
 	}
 
-	if err := am.accountingDb.SetAlias(&al); err != nil {
+	if err := am.accountingDb.SetAlias(oldAlias); err != nil {
 		*reply = err.Error()
 		return err
 	} //add to cache
