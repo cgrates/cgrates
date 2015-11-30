@@ -47,7 +47,7 @@ func TestAliasesGetMatchingAlias(t *testing.T) {
 
 func TestAliasesSetters(t *testing.T) {
 	var out string
-	if err := aliasService.SetAlias(Alias{
+	if err := aliasService.Call("AliasesV1.SetAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -63,7 +63,7 @@ func TestAliasesSetters(t *testing.T) {
 		t.Error("Error setting alias: ", err, out)
 	}
 	r := &Alias{}
-	if err := aliasService.GetAlias(Alias{
+	if err := aliasService.Call("AliasesV1.GetAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -74,7 +74,7 @@ func TestAliasesSetters(t *testing.T) {
 		t.Errorf("Error getting alias: %+v", r)
 	}
 
-	if err := aliasService.UpdateAlias(Alias{
+	if err := aliasService.Call("AliasesV1.UpdateAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -89,7 +89,7 @@ func TestAliasesSetters(t *testing.T) {
 	}, &out); err != nil || out != utils.OK {
 		t.Error("Error updateing alias: ", err, out)
 	}
-	if err := aliasService.GetAlias(Alias{
+	if err := aliasService.Call("AliasesV1.GetAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -103,7 +103,7 @@ func TestAliasesSetters(t *testing.T) {
 		r.Values[0].Pairs["Account"]["1234"] != "1235" {
 		t.Errorf("Error getting alias: %+v", r.Values[0])
 	}
-	if err := aliasService.UpdateAlias(Alias{
+	if err := aliasService.Call("AliasesV1.UpdateAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -118,7 +118,7 @@ func TestAliasesSetters(t *testing.T) {
 	}, &out); err != nil || out != utils.OK {
 		t.Error("Error updateing alias: ", err, out)
 	}
-	if err := aliasService.GetAlias(Alias{
+	if err := aliasService.Call("AliasesV1.GetAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -128,7 +128,7 @@ func TestAliasesSetters(t *testing.T) {
 	}, r); err != nil || len(r.Values) != 1 || len(r.Values[0].Pairs) != 2 || r.Values[0].Pairs["Subject"]["1111"] != "2222" {
 		t.Errorf("Error getting alias: %+v", r.Values[0].Pairs["Subject"])
 	}
-	if err := aliasService.UpdateAlias(Alias{
+	if err := aliasService.Call("AliasesV1.UpdateAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
@@ -143,7 +143,7 @@ func TestAliasesSetters(t *testing.T) {
 	}, &out); err != nil || out != utils.OK {
 		t.Error("Error updateing alias: ", err, out)
 	}
-	if err := aliasService.GetAlias(Alias{
+	if err := aliasService.Call("AliasesV1.GetAlias", &Alias{
 		Direction: "*out",
 		Tenant:    "cgrates.org",
 		Category:  "call",
