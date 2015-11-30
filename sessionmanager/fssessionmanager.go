@@ -380,7 +380,7 @@ func (sm *FSSessionManager) SyncSessions() error {
 			}
 			var stillActive bool
 			for _, fsAChan := range aChans {
-				if fsAChan["call_uuid"] == session.eventStart.GetUUID() { // Channel still active
+				if fsAChan["call_uuid"] == session.eventStart.GetUUID() || (fsAChan["call_uuid"] == "" && fsAChan["uuid"] == session.eventStart.GetUUID()) { // Channel still active
 					stillActive = true
 					break
 				}

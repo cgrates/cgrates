@@ -23,14 +23,17 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/mediocregopher/radix.v2/pool"
 	"github.com/mediocregopher/radix.v2/redis"
+)
 
-	"io/ioutil"
-	"time"
+var (
+	ErrRedisNotFound = errors.New("RedisNotFound")
 )
 
 type RedisStorage struct {
@@ -607,14 +610,22 @@ func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetAccount(key string) (ub *Account, err error) {
-	var values []byte
-	if values, err = rs.db.Cmd("GET", utils.ACCOUNT_PREFIX+key).Bytes(); err == nil {
-		ub = &Account{Id: key}
-		err = rs.ms.Unmarshal(values, ub)
+func (rs *RedisStorage) GetAccount(key string) (*Account, error) {
+	rpl := rs.db.Cmd("GET", utils.ACCOUNT_PREFIX+key)
+	if rpl.Err != nil {
+		return nil, rpl.Err
+	} else if rpl.IsType(redis.Nil) {
+		return nil, ErrRedisNotFound
 	}
-
-	return
+	values, err := rpl.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	ub := &Account{Id: key}
+	if err = rs.ms.Unmarshal(values, ub); err != nil {
+		return nil, err
+	}
+	return ub, nil
 }
 
 func (rs *RedisStorage) SetAccount(ub *Account) (err error) {

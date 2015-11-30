@@ -33,8 +33,9 @@ import (
 )
 
 const (
-	COST_DETAILS         = "cost_details"
-	DATETIME             = "datetime"
+	COST_DETAILS = "cost_details"
+	//DATETIME             = "datetime"
+	META_DATETIME        = "*datetime"
 	META_EXPORTID        = "*export_id"
 	META_TIMENOW         = "*time_now"
 	META_FIRSTCDRATIME   = "*first_cdr_atime"
@@ -256,12 +257,12 @@ func (cdre *CdrExporter) composeHeader() error {
 	for _, cfgFld := range cdre.exportTemplate.HeaderFields {
 		var outVal string
 		switch cfgFld.Type {
-		case utils.FILLER:
+		case utils.META_FILLER:
 			outVal = cfgFld.Value.Id()
 			cfgFld.Padding = "right"
-		case utils.CONSTANT:
+		case utils.META_CONSTANT:
 			outVal = cfgFld.Value.Id()
-		case utils.METATAG:
+		case utils.META_HANDLER:
 			outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
@@ -271,7 +272,7 @@ func (cdre *CdrExporter) composeHeader() error {
 			return err
 		}
 		fmtOut := outVal
-		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
@@ -285,12 +286,12 @@ func (cdre *CdrExporter) composeTrailer() error {
 	for _, cfgFld := range cdre.exportTemplate.TrailerFields {
 		var outVal string
 		switch cfgFld.Type {
-		case utils.FILLER:
+		case utils.META_FILLER:
 			outVal = cfgFld.Value.Id()
 			cfgFld.Padding = "right"
-		case utils.CONSTANT:
+		case utils.META_CONSTANT:
 			outVal = cfgFld.Value.Id()
-		case utils.METATAG:
+		case utils.META_HANDLER:
 			outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
@@ -300,7 +301,7 @@ func (cdre *CdrExporter) composeTrailer() error {
 			return err
 		}
 		fmtOut := outVal
-		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
@@ -332,16 +333,16 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 	for idx, cfgFld := range cdre.exportTemplate.ContentFields {
 		var outVal string
 		switch cfgFld.Type {
-		case utils.FILLER:
+		case utils.META_FILLER:
 			outVal = cfgFld.Value.Id()
 			cfgFld.Padding = "right"
-		case utils.CONSTANT:
+		case utils.META_CONSTANT:
 			outVal = cfgFld.Value.Id()
-		case utils.CDRFIELD:
+		case utils.META_COMPOSED:
 			outVal, err = cdre.cdrFieldValue(cdr, cfgFld)
-		case DATETIME:
+		case META_DATETIME:
 			outVal, err = cdre.getDateTimeFieldVal(cdr, cfgFld)
-		case utils.HTTP_POST:
+		case utils.META_HTTP_POST:
 			var outValByte []byte
 			httpAddr := cfgFld.Value.Id()
 			if len(httpAddr) == 0 {
@@ -352,9 +353,9 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
 				}
 			}
-		case utils.COMBIMED:
+		case utils.META_COMBIMED:
 			outVal, err = cdre.getCombimedCdrFieldVal(cdr, cfgFld)
-		case utils.METATAG:
+		case utils.META_HANDLER:
 			if cfgFld.Value.Id() == META_MASKDESTINATION {
 				outVal, err = cdre.metaHandler(cfgFld.Value.Id(), cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}))
 			} else {
@@ -366,7 +367,7 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 			return err
 		}
 		fmtOut := outVal
-		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Tag, outVal, err.Error()))
 			return err
 		}

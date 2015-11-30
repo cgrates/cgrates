@@ -49,10 +49,10 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 	}
 	var ignr string
 	for _, alias := range attrs.Aliases {
-		if err := aliases.Call("AliasesV1.SetAlias",
-			&engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
-				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
-					Pairs: engine.AliasPairs{"Subject": map[string]string{alias: attrs.Subject}}, Weight: 10.0}}}, &ignr); err != nil {
+		als := engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
+			Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
+				Pairs: engine.AliasPairs{"Account": map[string]string{alias: attrs.Subject}, "Subject": map[string]string{alias: attrs.Subject}}, Weight: 10.0}}}
+		if err := aliases.Call("AliasesV1.SetAlias", als, &ignr); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
@@ -101,10 +101,10 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 	}
 	var ignr string
 	for _, alias := range attrs.Aliases {
-		if err := aliases.Call("AliasesV1.SetAlias",
-			&engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
-				Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
-					Pairs: engine.AliasPairs{"Account": map[string]string{alias: attrs.Account}}, Weight: 10.0}}}, &ignr); err != nil {
+		als := engine.Alias{Direction: utils.META_OUT, Tenant: attrs.Tenant, Category: attrs.Category, Account: alias, Subject: alias, Context: utils.ALIAS_CONTEXT_RATING,
+			Values: engine.AliasValues{&engine.AliasValue{DestinationId: utils.META_ANY,
+				Pairs: engine.AliasPairs{"Account": map[string]string{alias: attrs.Account}, "Subject": map[string]string{alias: attrs.Account}}, Weight: 10.0}}}
+		if err := aliases.Call("AliasesV1.SetAlias", als, &ignr); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}

@@ -46,6 +46,12 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+const (
+	META_CCR_USAGE          = "*ccr_usage"
+	META_CCR_SMG_EVENT_NAME = "*ccr_smg_event_name"
+	DIAMETER_CCR            = "DIAMETER_CCR"
+)
+
 func loadDictionaries(dictsDir, componentId string) error {
 	fi, err := os.Stat(dictsDir)
 	if err != nil {
@@ -79,42 +85,44 @@ func loadDictionaries(dictsDir, componentId string) error {
 }
 
 // Returns reqType, requestNr and ccTime in seconds
-func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnded bool) (int, int, int) {
+func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnded bool) (reqType, reqNr, ccTime int) {
 	usageSecs := usage.Seconds()
 	debitIntervalSecs := debitInterval.Seconds()
-	reqType := 1
+	reqType = 1
 	if usage > 0 {
 		reqType = 2
 	}
 	if callEnded {
 		reqType = 3
 	}
-	reqNr := int(usageSecs / debitIntervalSecs)
+	reqNr = int(usageSecs / debitIntervalSecs)
 	if callEnded {
 		reqNr += 1
 	}
-	ccTime := debitInterval.Seconds()
+	ccTimeFloat := debitInterval.Seconds()
 	if callEnded {
-		ccTime = math.Mod(usageSecs, debitIntervalSecs)
+		ccTimeFloat = math.Mod(usageSecs, debitIntervalSecs)
 	}
-	return reqType, reqNr, int(ccTime)
+	return reqType, reqNr, int(ccTimeFloat)
 }
 
 func usageFromCCR(reqType, reqNr, ccTime int, debitIterval time.Duration) time.Duration {
 	dISecs := debitIterval.Seconds()
 	if reqType == 3 {
 		reqNr -= 1 // decrease request number to reach the real number
+		ccTime += int(dISecs) * reqNr
+	} else {
+		ccTime = int(dISecs)
 	}
-	ccTime += int(dISecs) * reqNr
 	return time.Duration(ccTime) * time.Second
 }
 
 // Utility function to convert from StoredCdr to CCR struct
 func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendorId int, productName string,
 	firmwareRev int, debitInterval time.Duration, callEnded bool) *CCR {
-	sid := "session;" + strconv.Itoa(int(rand.Uint32()))
+	//sid := "session;" + strconv.Itoa(int(rand.Uint32()))
 	reqType, reqNr, ccTime := disectUsageForCCR(cdr.Usage, debitInterval, callEnded)
-	ccr := &CCR{SessionId: sid, OriginHost: originHost, OriginRealm: originRealm, DestinationHost: originHost, DestinationRealm: originRealm,
+	ccr := &CCR{SessionId: cdr.CgrId, OriginHost: originHost, OriginRealm: originRealm, DestinationHost: originHost, DestinationRealm: originRealm,
 		AuthApplicationId: 4, ServiceContextId: cdr.ExtraFields["Service-Context-Id"], CCRequestType: reqType, CCRequestNumber: reqNr, EventTimestamp: cdr.AnswerTime,
 		ServiceIdentifier: 0}
 	ccr.SubscriptionId = make([]struct {
@@ -135,6 +143,17 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 	ccr.ServiceInformation.INInformation.TimeZone = 0
 	ccr.ServiceInformation.INInformation.SSPTime = cdr.ExtraFields["SSP-Time"]
 	return ccr
+}
+
+// debitInterval is the configured debitInterval, in sync with the diameter client one
+func NewCCRFromDiameterMessage(m *diam.Message, debitInterval time.Duration) (*CCR, error) {
+	var ccr CCR
+	if err := m.Unmarshal(&ccr); err != nil {
+		return nil, err
+	}
+	ccr.diamMessage = m
+	ccr.debitInterval = debitInterval
+	return &ccr, nil
 }
 
 // CallControl Request
@@ -173,7 +192,8 @@ type CCR struct {
 			SSPTime             string `avp:"SSP-Time"`
 		} `avp:"IN-Information"`
 	} `avp:"Service-Information"`
-	diamMessage *diam.Message // Used to parse fields with CGR templates
+	diamMessage   *diam.Message // Used to parse fields with CGR templates
+	debitInterval time.Duration // Configured debit interval
 }
 
 // Used when sending from client to agent
@@ -326,36 +346,80 @@ func avpValAsString(a *diam.AVP) string {
 	return dataVal[startIdx+1 : endIdx]
 }
 
-// Extracts data out of CCR into a SMGenericEvent based on the configured template
-func (self *CCR) AsSMGenericEvent(tpl []*config.CfgCdrField) (sessionmanager.SMGenericEvent, error) {
-	outMap := make(map[string]string) // work with it so we can append values to keys
-	for _, fldTpl := range tpl {
-		var outVal string
-		for _, rsrTpl := range fldTpl.Value {
-			if rsrTpl.IsStatic() {
-				outVal += rsrTpl.ParseValue("")
-			} else {
-				hierarchyPath := strings.Split(rsrTpl.Id, utils.HIERARCHY_SEP)
-				hpIf := make([]interface{}, len(hierarchyPath))
-				for i, val := range hierarchyPath {
-					hpIf[i] = val
-				}
-				matchingAvps, err := self.diamMessage.FindAVPsWithPath(hpIf)
-				if err != nil || len(matchingAvps) == 0 {
-					utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
-					continue // Filter not matching
-				}
-				if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
-					utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, not considering.", rsrTpl.Id))
-					continue // Not convertible, ignore
-				}
-				outVal += avpValAsString(matchingAvps[0])
+// Follows the implementation in the StorCdr
+func (self *CCR) passesFieldFilter(fieldFilter *utils.RSRField) bool {
+	if fieldFilter == nil {
+		return true
+	}
+	return fieldFilter.FilterPasses(self.eventFieldValue(utils.RSRFields{fieldFilter}))
+}
+
+// Handler for meta functions
+func (self *CCR) metaHandler(tag, arg string) (string, error) {
+	switch tag {
+	case META_CCR_USAGE:
+		usage := usageFromCCR(self.CCRequestType, self.CCRequestNumber, self.RequestedServiceUnit.CCTime, self.debitInterval)
+		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
+	}
+	return "", nil
+}
+
+func (self *CCR) eventFieldValue(fldTpl utils.RSRFields) string {
+	var outVal string
+	for _, rsrTpl := range fldTpl {
+		if rsrTpl.IsStatic() {
+			outVal += rsrTpl.ParseValue("")
+		} else {
+			hierarchyPath := strings.Split(rsrTpl.Id, utils.HIERARCHY_SEP)
+			hpIf := make([]interface{}, len(hierarchyPath))
+			for i, val := range hierarchyPath {
+				hpIf[i] = val
 			}
+			matchingAvps, err := self.diamMessage.FindAVPsWithPath(hpIf)
+			if err != nil || len(matchingAvps) == 0 {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
+				continue // Filter not matching
+			}
+			if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, ignoring.", rsrTpl.Id))
+				continue // Not convertible, ignore
+			}
+			outVal += avpValAsString(matchingAvps[0])
 		}
-		if _, hasKey := outMap[fldTpl.FieldId]; !hasKey {
-			outMap[fldTpl.FieldId] = outVal
+	}
+	return outVal
+}
+
+// Extracts data out of CCR into a SMGenericEvent based on the configured template
+func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager.SMGenericEvent, error) {
+	outMap := make(map[string]string) // work with it so we can append values to keys
+	outMap[utils.EVENT_NAME] = DIAMETER_CCR
+	for _, cfgFld := range cfgFlds {
+		var outVal string
+		var err error
+		switch cfgFld.Type {
+		case utils.META_FILLER:
+			outVal = cfgFld.Value.Id()
+			cfgFld.Padding = "right"
+		case utils.META_CONSTANT:
+			outVal = cfgFld.Value.Id()
+		case utils.META_HANDLER:
+			outVal, err = self.metaHandler(cfgFld.HandlerId, cfgFld.Layout)
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
+			}
+		case utils.META_COMPOSED:
+			outVal = self.eventFieldValue(cfgFld.Value)
+		}
+		fmtOut := outVal
+		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
+			return nil, err
+		}
+		if _, hasKey := outMap[cfgFld.FieldId]; !hasKey {
+			outMap[cfgFld.FieldId] = fmtOut
 		} else { // If already there, postpend
-			outMap[fldTpl.FieldId] += outVal
+			outMap[cfgFld.FieldId] += fmtOut
 		}
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil

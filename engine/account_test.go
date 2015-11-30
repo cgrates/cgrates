@@ -143,6 +143,9 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 	expected := 20 * time.Second
 	if credit != 0 || seconds != expected || len(bucketList) != 2 || bucketList[0].Weight < bucketList[1].Weight {
 		t.Log(seconds, credit, bucketList)
+		for _, b := range bucketList {
+			t.Logf("Balance: %+v", b)
+		}
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }

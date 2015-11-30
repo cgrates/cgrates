@@ -97,9 +97,6 @@ func TestGetEmptyDC2(t *testing.T) {
 	if err := apierDcT.GetDerivedChargers(attrs, &dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, apierDcT.Config.DerivedChargers) {
-		for _, dc := range dcs {
-			fmt.Printf("Got dc: %v\n", dc)
-		}
 		t.Error("Returned DerivedChargers not matching the configured ones")
 	}
 }

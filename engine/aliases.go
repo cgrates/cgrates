@@ -188,25 +188,36 @@ func (am *AliasHandler) UpdateAlias(al *Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	// get previous value
-	oldAlias := &Alias{}
-	if err := am.GetAlias(al, oldAlias); err != nil {
-		*reply = err.Error()
+	oldAlias, err := am.accountingDb.GetAlias(al.GetId(), false)
+	if err != nil {
 		return err
 	}
-	for _, oldValue := range oldAlias.Values {
+	for _, value := range al.Values {
 		found := false
-		for _, value := range al.Values {
-			if oldValue.Equals(value) {
+		if value.DestinationId == "" {
+			value.DestinationId = utils.ANY
+		}
+		for _, oldValue := range oldAlias.Values {
+			if oldValue.DestinationId == value.DestinationId {
+				for target, origAliasMap := range value.Pairs {
+					for orig, alias := range origAliasMap {
+						if oldValue.Pairs[target] == nil {
+							oldValue.Pairs[target] = make(map[string]string)
+						}
+						oldValue.Pairs[target][orig] = alias
+					}
+				}
+				oldValue.Weight = value.Weight
 				found = true
 				break
 			}
 		}
 		if !found {
-			al.Values = append(al.Values, oldValue)
+			oldAlias.Values = append(oldAlias.Values, value)
 		}
 	}
 
-	if err := am.accountingDb.SetAlias(al); err != nil {
+	if err := am.accountingDb.SetAlias(oldAlias); err != nil {
 		*reply = err.Error()
 		return err
 	} //add to cache

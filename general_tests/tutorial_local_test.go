@@ -21,14 +21,11 @@ package general_tests
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	//"os"
 	"path"
 	"reflect"
-	//"strings"
 	"testing"
 	"time"
 
-	//"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -196,7 +193,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6417 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
+	} else if cc.Cost != 0.6425 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -232,7 +229,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3 {
+	} else if cc.Cost != 1.3002 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -268,7 +265,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3 {
+	} else if cc.Cost != 1.3002 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart = time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
@@ -638,6 +635,31 @@ func TestTutLocalCostErrors(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
 		if cdrs[0].AccId != cdr2.AccId {
+			t.Errorf("Unexpected AccId for Cdr received: %+v", cdrs[0])
+		}
+		if cdrs[0].Cost != -1 {
+			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
+		}
+	}
+	cdr3 := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "testtutlocal_3", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_POSTPAID, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "fake", Account: "1001", Subject: "1001", Destination: "2002", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "1", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	if err := tutLocalRpc.Call("CdrsV2.ProcessExternalCdr", cdr3, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
+	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{cdr3.Account}, DestPrefixes: []string{cdr3.Destination}}
+	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].AccId != cdr3.AccId {
 			t.Errorf("Unexpected AccId for Cdr received: %+v", cdrs[0])
 		}
 		if cdrs[0].Cost != -1 {

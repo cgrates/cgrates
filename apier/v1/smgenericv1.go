@@ -87,7 +87,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
 		}
-		replyConverted, canConvert := args.(*float64)
+		replyConverted, canConvert := reply.(*float64)
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
@@ -97,7 +97,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
 		}
-		replyConverted, canConvert := args.(*[]string)
+		replyConverted, canConvert := reply.(*[]string)
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
@@ -107,7 +107,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
 		}
-		replyConverted, canConvert := args.(*float64)
+		replyConverted, canConvert := reply.(*float64)
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
@@ -117,7 +117,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
 		}
-		replyConverted, canConvert := args.(*float64)
+		replyConverted, canConvert := reply.(*float64)
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
@@ -127,7 +127,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
 		}
-		replyConverted, canConvert := args.(*string)
+		replyConverted, canConvert := reply.(*string)
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
@@ -137,11 +137,11 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
 		}
-		replyConverted, canConvert := args.(*string)
+		replyConverted, canConvert := reply.(*string)
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}
-		return self.SessionEnd(argsConverted, replyConverted)
+		return self.ProcessCdr(argsConverted, replyConverted)
 	}
 	return rpcclient.ErrUnsupporteServiceMethod
 }

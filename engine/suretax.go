@@ -195,7 +195,6 @@ func SureTaxProcessCdr(cdr *StoredCdr) error {
 	if err != nil {
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("NewSureTaxRequest: %s\n", string(jsnContent)))
 	resp, err := sureTaxClient.Post(stCfg.Url, "application/json", bytes.NewBuffer(jsnContent))
 	if err != nil {
 		return err

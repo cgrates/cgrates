@@ -292,7 +292,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 
 		}
 		var fieldVal string
-		if cdrFldCfg.Type == utils.CDRFIELD {
+		if cdrFldCfg.Type == utils.META_COMPOSED {
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
 					fieldVal += cfgFieldRSR.ParseValue("")
@@ -304,7 +304,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 					}
 				}
 			}
-		} else if cdrFldCfg.Type == utils.HTTP_POST {
+		} else if cdrFldCfg.Type == utils.META_HTTP_POST {
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		} else {
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)

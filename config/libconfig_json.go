@@ -109,7 +109,7 @@ type CdrFieldJsonCfg struct {
 	Tag          *string
 	Type         *string
 	Field_id     *string
-	Metatag_id   *string
+	Handler_id   *string
 	Value        *string
 	Width        *int
 	Strip        *string
@@ -241,7 +241,9 @@ type DiameterAgentJsonCfg struct {
 	Listen             *string // address where to listen for diameter requests <x.y.z.y:1234>
 	Dictionaries_dir   *string // path towards additional dictionaries
 	Sm_generic         *string // Connection towards generic SM
+	Debit_interval     *string
 	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Dialect            *string
 	Origin_host        *string
 	Origin_realm       *string
 	Vendor_id          *int
