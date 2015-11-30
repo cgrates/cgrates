@@ -88,6 +88,9 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	case 3:
 		var rpl string
 		err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
+		if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
+			err = errCdr
+		}
 	}
 	if err != nil {
 		return nil, err
