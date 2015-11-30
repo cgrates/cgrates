@@ -47,18 +47,21 @@ func TestAliasesGetMatchingAlias(t *testing.T) {
 
 func TestAliasesSetters(t *testing.T) {
 	var out string
-	if err := aliasService.Call("AliasesV1.SetAlias", &Alias{
-		Direction: "*out",
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Account:   "set",
-		Subject:   "set",
-		Context:   "*rating",
-		Values: AliasValues{&AliasValue{
-			DestinationId: utils.ANY,
-			Pairs:         AliasPairs{"Account": map[string]string{"1234": "1235"}},
-			Weight:        10,
-		}},
+	if err := aliasService.Call("AliasesV1.SetAlias", &AttrAddAlias{
+		Alias: &Alias{
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Account:   "set",
+			Subject:   "set",
+			Context:   "*rating",
+			Values: AliasValues{&AliasValue{
+				DestinationId: utils.ANY,
+				Pairs:         AliasPairs{"Account": map[string]string{"1234": "1235"}},
+				Weight:        10,
+			}},
+		},
+		Overwrite: true,
 	}, &out); err != nil || out != utils.OK {
 		t.Error("Error setting alias: ", err, out)
 	}
@@ -74,18 +77,21 @@ func TestAliasesSetters(t *testing.T) {
 		t.Errorf("Error getting alias: %+v", r)
 	}
 
-	if err := aliasService.Call("AliasesV1.UpdateAlias", &Alias{
-		Direction: "*out",
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Account:   "set",
-		Subject:   "set",
-		Context:   "*rating",
-		Values: AliasValues{&AliasValue{
-			DestinationId: utils.ANY,
-			Pairs:         AliasPairs{"Subject": map[string]string{"1234": "1235"}},
-			Weight:        10,
-		}},
+	if err := aliasService.Call("AliasesV1.SetAlias", &AttrAddAlias{
+		Alias: &Alias{
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Account:   "set",
+			Subject:   "set",
+			Context:   "*rating",
+			Values: AliasValues{&AliasValue{
+				DestinationId: utils.ANY,
+				Pairs:         AliasPairs{"Subject": map[string]string{"1234": "1235"}},
+				Weight:        10,
+			}},
+		},
+		Overwrite: false,
 	}, &out); err != nil || out != utils.OK {
 		t.Error("Error updateing alias: ", err, out)
 	}
@@ -103,18 +109,21 @@ func TestAliasesSetters(t *testing.T) {
 		r.Values[0].Pairs["Account"]["1234"] != "1235" {
 		t.Errorf("Error getting alias: %+v", r.Values[0])
 	}
-	if err := aliasService.Call("AliasesV1.UpdateAlias", &Alias{
-		Direction: "*out",
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Account:   "set",
-		Subject:   "set",
-		Context:   "*rating",
-		Values: AliasValues{&AliasValue{
-			DestinationId: utils.ANY,
-			Pairs:         AliasPairs{"Subject": map[string]string{"1111": "2222"}},
-			Weight:        10,
-		}},
+	if err := aliasService.Call("AliasesV1.SetAlias", &AttrAddAlias{
+		Alias: &Alias{
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Account:   "set",
+			Subject:   "set",
+			Context:   "*rating",
+			Values: AliasValues{&AliasValue{
+				DestinationId: utils.ANY,
+				Pairs:         AliasPairs{"Subject": map[string]string{"1111": "2222"}},
+				Weight:        10,
+			}},
+		},
+		Overwrite: false,
 	}, &out); err != nil || out != utils.OK {
 		t.Error("Error updateing alias: ", err, out)
 	}
@@ -128,18 +137,21 @@ func TestAliasesSetters(t *testing.T) {
 	}, r); err != nil || len(r.Values) != 1 || len(r.Values[0].Pairs) != 2 || r.Values[0].Pairs["Subject"]["1111"] != "2222" {
 		t.Errorf("Error getting alias: %+v", r.Values[0].Pairs["Subject"])
 	}
-	if err := aliasService.Call("AliasesV1.UpdateAlias", &Alias{
-		Direction: "*out",
-		Tenant:    "cgrates.org",
-		Category:  "call",
-		Account:   "set",
-		Subject:   "set",
-		Context:   "*rating",
-		Values: AliasValues{&AliasValue{
-			DestinationId: "NAT",
-			Pairs:         AliasPairs{"Subject": map[string]string{"3333": "4444"}},
-			Weight:        10,
-		}},
+	if err := aliasService.Call("AliasesV1.SetAlias", &AttrAddAlias{
+		Alias: &Alias{
+			Direction: "*out",
+			Tenant:    "cgrates.org",
+			Category:  "call",
+			Account:   "set",
+			Subject:   "set",
+			Context:   "*rating",
+			Values: AliasValues{&AliasValue{
+				DestinationId: "NAT",
+				Pairs:         AliasPairs{"Subject": map[string]string{"3333": "4444"}},
+				Weight:        10,
+			}},
+		},
+		Overwrite: false,
 	}, &out); err != nil || out != utils.OK {
 		t.Error("Error updateing alias: ", err, out)
 	}

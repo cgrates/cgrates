@@ -167,62 +167,58 @@ func NewAliasHandler(accountingDb AccountingStorage) *AliasHandler {
 	}
 }
 
-func (am *AliasHandler) SetAlias(al *Alias, reply *string) error {
-	am.mu.Lock()
-	defer am.mu.Unlock()
-
-	if err := am.accountingDb.SetAlias(al); err != nil {
-		*reply = err.Error()
-		return err
-	} //add to cache
-
-	aliasesChanged := []string{utils.ALIASES_PREFIX + al.GetId()}
-	if err := am.accountingDb.CacheAccountingPrefixValues(map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
+type AttrAddAlias struct {
+	Alias     *Alias
+	Overwrite bool
 }
 
-func (am *AliasHandler) UpdateAlias(al *Alias, reply *string) error {
+func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
-	// get previous value
-	oldAlias, err := am.accountingDb.GetAlias(al.GetId(), false)
-	if err != nil {
-		return err
+
+	var oldAlias *Alias
+	if !attr.Overwrite { // get previous value
+		oldAlias, _ = am.accountingDb.GetAlias(attr.Alias.GetId(), false)
 	}
-	for _, value := range al.Values {
-		found := false
-		if value.DestinationId == "" {
-			value.DestinationId = utils.ANY
+
+	if attr.Overwrite || oldAlias == nil {
+		if err := am.accountingDb.SetAlias(attr.Alias); err != nil {
+			*reply = err.Error()
+			return err
 		}
-		for _, oldValue := range oldAlias.Values {
-			if oldValue.DestinationId == value.DestinationId {
-				for target, origAliasMap := range value.Pairs {
-					for orig, alias := range origAliasMap {
-						if oldValue.Pairs[target] == nil {
-							oldValue.Pairs[target] = make(map[string]string)
+	} else {
+		for _, value := range attr.Alias.Values {
+			found := false
+			if value.DestinationId == "" {
+				value.DestinationId = utils.ANY
+			}
+			for _, oldValue := range oldAlias.Values {
+				if oldValue.DestinationId == value.DestinationId {
+					for target, origAliasMap := range value.Pairs {
+						for orig, alias := range origAliasMap {
+							if oldValue.Pairs[target] == nil {
+								oldValue.Pairs[target] = make(map[string]string)
+							}
+							oldValue.Pairs[target][orig] = alias
 						}
-						oldValue.Pairs[target][orig] = alias
 					}
+					oldValue.Weight = value.Weight
+					found = true
+					break
 				}
-				oldValue.Weight = value.Weight
-				found = true
-				break
+			}
+			if !found {
+				oldAlias.Values = append(oldAlias.Values, value)
 			}
 		}
-		if !found {
-			oldAlias.Values = append(oldAlias.Values, value)
+		if err := am.accountingDb.SetAlias(oldAlias); err != nil {
+			*reply = err.Error()
+			return err
 		}
 	}
 
-	if err := am.accountingDb.SetAlias(oldAlias); err != nil {
-		*reply = err.Error()
-		return err
-	} //add to cache
-
-	aliasesChanged := []string{utils.ALIASES_PREFIX + al.GetId()}
+	//add to cache
+	aliasesChanged := []string{utils.ALIASES_PREFIX + attr.Alias.GetId()}
 	if err := am.accountingDb.CacheAccountingPrefixValues(map[string][]string{utils.ALIASES_PREFIX: aliasesChanged}); err != nil {
 		return utils.NewErrServerError(err)
 	}
