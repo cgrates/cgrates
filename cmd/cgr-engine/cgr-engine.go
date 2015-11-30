@@ -138,14 +138,15 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 
 func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internalRaterChan chan *engine.Responder, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-Generic service.")
-	var raterConn, cdrsConn rpcclient.RpcClientConnection
+	raterConn := &rpcclient.RpcClientPool{}
+	cdrsConn := &rpcclient.RpcClientPool{}
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
 	for _, raterCfg := range cfg.SmGenericConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
+			raterConn.AddClient(resp)
 			internalRaterChan <- resp
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
@@ -154,7 +155,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 				exitChan <- true
 				return
 			}
-			raterConn = client
+			raterConn.AddClient(client)
 		}
 	}
 	// Connect to CDRS
@@ -164,7 +165,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 		for _, cdrsCfg := range cfg.SmGenericConfig.HaCdrs {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
-				cdrsConn = resp
+				cdrsConn.AddClient(client)
 				internalRaterChan <- resp
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
@@ -173,7 +174,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 					exitChan <- true
 					return
 				}
-				cdrsConn = client
+				cdrsConn.AddClient(client)
 			}
 		}
 	}
@@ -226,14 +227,15 @@ func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
-	var raterConn, cdrsConn rpcclient.RpcClientConnection
+	raterConn := &rpcclient.RpcClientPool{}
+	cdrsConn := &rpcclient.RpcClientPool{}
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
 	for _, raterCfg := range cfg.SmFsConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
+			raterConn.AddClient(resp)
 			internalRaterChan <- resp
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
@@ -242,7 +244,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 				exitChan <- true
 				return
 			}
-			raterConn = client
+			raterConn.AddClient(client)
 		}
 	}
 	// Connect to CDRS
@@ -252,7 +254,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 		for _, cdrsCfg := range cfg.SmFsConfig.HaCdrs {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
-				cdrsConn = resp
+				cdrsConn.AddClient(resp)
 				internalRaterChan <- resp
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
@@ -261,7 +263,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 					exitChan <- true
 					return
 				}
-				cdrsConn = client
+				cdrsConn.AddClient(client)
 			}
 		}
 	}
@@ -275,14 +277,15 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 
 func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-Kamailio service.")
-	var raterConn, cdrsConn rpcclient.RpcClientConnection
+	raterConn := &rpcclient.RpcClientPool{}
+	cdrsConn := &rpcclient.RpcClientPool{}
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
 	for _, raterCfg := range cfg.SmKamConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
+			raterConn.AddClient(resp)
 			internalRaterChan <- resp
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
@@ -291,7 +294,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 				exitChan <- true
 				return
 			}
-			raterConn = client
+			raterConn.AddClient(client)
 		}
 	}
 	// Connect to CDRS
@@ -301,7 +304,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		for _, cdrsCfg := range cfg.SmKamConfig.HaCdrs {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
-				cdrsConn = resp
+				cdrsConn.AddClient(resp)
 				internalRaterChan <- resp
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
@@ -310,7 +313,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 					exitChan <- true
 					return
 				}
-				cdrsConn = client
+				cdrsConn.AddClient(client)
 			}
 		}
 	}
@@ -324,14 +327,15 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 
 func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-OpenSIPS service.")
-	var raterConn, cdrsConn rpcclient.RpcClientConnection
+	raterConn := &rpcclient.RpcClientPool{}
+	cdrsConn := &rpcclient.RpcClientPool{}
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
 	for _, raterCfg := range cfg.SmOsipsConfig.HaRater {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
-			raterConn = resp // Will overwrite here for the sake of keeping internally the new configuration format for ha connections
+			raterConn.AddClient(resp)
 			internalRaterChan <- resp
 		} else {
 			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
@@ -340,7 +344,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 				exitChan <- true
 				return
 			}
-			raterConn = client
+			raterConn.AddClient(client)
 		}
 	}
 	// Connect to CDRS
@@ -350,7 +354,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		for _, cdrsCfg := range cfg.SmOsipsConfig.HaCdrs {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
-				cdrsConn = resp
+				cdrsConn.AddClient(resp)
 				internalRaterChan <- resp
 			} else {
 				client, err = rpcclient.NewRpcClient("tcp", cdrsCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
@@ -359,7 +363,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 					exitChan <- true
 					return
 				}
-				cdrsConn = client
+				cdrsConn.AddClient(client)
 			}
 		}
 	}
