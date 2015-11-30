@@ -503,6 +503,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	cost := 0.0
 
 	for i, ts := range timespans {
+		ts.createIncrementsSlice()
 		// only add connect fee if this is the first/only call cost request
 		//log.Printf("Interval: %+v", ts.RateInterval.Timing)
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {

@@ -24,7 +24,6 @@ func init() {
 	c := &CmdGetActions{
 		name:      "actions",
 		rpcMethod: "ApierV2.GetActions",
-		rpcParams: "",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +33,7 @@ func init() {
 type CmdGetActions struct {
 	name      string
 	rpcMethod string
-	rpcParams string
+	rpcParams *StringWrapper
 	*CommandExecuter
 }
 
@@ -47,6 +46,9 @@ func (self *CmdGetActions) RpcMethod() string {
 }
 
 func (self *CmdGetActions) RpcParams(reset bool) interface{} {
+	if reset || self.rpcParams == nil {
+		self.rpcParams = &StringWrapper{}
+	}
 	return self.rpcParams
 }
 
