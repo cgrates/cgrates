@@ -199,7 +199,6 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
 	var reply string
-	utils.Logger.Debug(fmt.Sprintf("SMGeneric.ProcessCdr: %+v", gev))
 	if err := self.cdrsrv.ProcessCdr(gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
 		return err
 	}

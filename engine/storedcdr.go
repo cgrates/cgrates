@@ -557,7 +557,7 @@ func (storedCdr *StoredCdr) GetSessionIds() []string {
 	return []string{storedCdr.GetUUID()}
 }
 func (storedCdr *StoredCdr) GetDirection(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.DIRECTION, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.DIRECTION, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Direction
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -566,7 +566,7 @@ func (storedCdr *StoredCdr) GetDirection(fieldName string) string {
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetSubject(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.SUBJECT, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.SUBJECT, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Subject
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -575,7 +575,7 @@ func (storedCdr *StoredCdr) GetSubject(fieldName string) string {
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetAccount(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.ACCOUNT, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.ACCOUNT, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Account
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -584,7 +584,7 @@ func (storedCdr *StoredCdr) GetAccount(fieldName string) string {
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetDestination(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.DESTINATION, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.DESTINATION, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Destination
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -593,7 +593,7 @@ func (storedCdr *StoredCdr) GetDestination(fieldName string) string {
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetCallDestNr(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.DESTINATION, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.DESTINATION, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Destination
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -602,7 +602,7 @@ func (storedCdr *StoredCdr) GetCallDestNr(fieldName string) string {
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetCategory(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.CATEGORY, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.CATEGORY, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Category
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -611,7 +611,7 @@ func (storedCdr *StoredCdr) GetCategory(fieldName string) string {
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetTenant(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.TENANT, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.TENANT, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Tenant
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -620,7 +620,7 @@ func (storedCdr *StoredCdr) GetTenant(fieldName string) string {
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetReqType(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.REQTYPE, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.REQTYPE, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.ReqType
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -629,7 +629,7 @@ func (storedCdr *StoredCdr) GetReqType(fieldName string) string {
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetSetupTime(fieldName, timezone string) (time.Time, error) {
-	if utils.IsSliceMember([]string{utils.SETUP_TIME, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.SETUP_TIME, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.SetupTime, nil
 	}
 	var sTimeVal string
@@ -641,7 +641,7 @@ func (storedCdr *StoredCdr) GetSetupTime(fieldName, timezone string) (time.Time,
 	return utils.ParseTimeDetectLayout(sTimeVal, timezone)
 }
 func (storedCdr *StoredCdr) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
-	if utils.IsSliceMember([]string{utils.ANSWER_TIME, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.ANSWER_TIME, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.AnswerTime, nil
 	}
 	var aTimeVal string
@@ -656,7 +656,7 @@ func (storedCdr *StoredCdr) GetEndTime(fieldName, timezone string) (time.Time, e
 	return storedCdr.AnswerTime.Add(storedCdr.Usage), nil
 }
 func (storedCdr *StoredCdr) GetDuration(fieldName string) (time.Duration, error) {
-	if utils.IsSliceMember([]string{utils.USAGE, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.USAGE, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Usage, nil
 	}
 	var durVal string
@@ -668,7 +668,7 @@ func (storedCdr *StoredCdr) GetDuration(fieldName string) (time.Duration, error)
 	return utils.ParseDurationWithSecs(durVal)
 }
 func (storedCdr *StoredCdr) GetPdd(fieldName string) (time.Duration, error) {
-	if utils.IsSliceMember([]string{utils.PDD, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.PDD, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Pdd, nil
 	}
 	var pddVal string
@@ -680,19 +680,19 @@ func (storedCdr *StoredCdr) GetPdd(fieldName string) (time.Duration, error) {
 	return utils.ParseDurationWithSecs(pddVal)
 }
 func (storedCdr *StoredCdr) GetSupplier(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.SUPPLIER, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.SUPPLIER, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.Supplier
 	}
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetDisconnectCause(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.DISCONNECT_CAUSE, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.DISCONNECT_CAUSE, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.DisconnectCause
 	}
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})
 }
 func (storedCdr *StoredCdr) GetOriginatorIP(fieldName string) string {
-	if utils.IsSliceMember([]string{utils.CDRHOST, utils.META_DEFAULT}, fieldName) {
+	if utils.IsSliceMember([]string{utils.CDRHOST, utils.META_DEFAULT, ""}, fieldName) {
 		return storedCdr.CdrHost
 	}
 	return storedCdr.FieldAsString(&utils.RSRField{Id: fieldName})

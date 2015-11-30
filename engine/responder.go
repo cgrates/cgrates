@@ -341,7 +341,8 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 			*reply = 0
 			return err
 		}
-		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
+		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.ReqTypeField)) {
+			// Only consider prepaid and pseudoprepaid for MaxSessionTime, do it here for unauthorized destination error check
 			continue
 		}
 		// Set maxCallDuration, smallest out of all forked sessions
