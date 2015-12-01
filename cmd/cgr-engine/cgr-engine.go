@@ -138,8 +138,8 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 
 func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internalRaterChan chan *engine.Responder, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-Generic service.")
-	raterConn := &rpcclient.RpcClientPool{}
-	cdrsConn := &rpcclient.RpcClientPool{}
+	raterConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
+	cdrsConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
@@ -227,8 +227,8 @@ func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 
 func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-FreeSWITCH service.")
-	raterConn := &rpcclient.RpcClientPool{}
-	cdrsConn := &rpcclient.RpcClientPool{}
+	raterConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
+	cdrsConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
@@ -277,8 +277,8 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 
 func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-Kamailio service.")
-	raterConn := &rpcclient.RpcClientPool{}
-	cdrsConn := &rpcclient.RpcClientPool{}
+	raterConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
+	cdrsConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
@@ -327,8 +327,8 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 
 func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrStorage, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-OpenSIPS service.")
-	raterConn := &rpcclient.RpcClientPool{}
-	cdrsConn := &rpcclient.RpcClientPool{}
+	raterConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
+	cdrsConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater

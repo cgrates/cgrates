@@ -238,6 +238,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	}
 
 	responder := &engine.Responder{Bal: bal, ExitChan: exitChan, Stats: cdrStats}
+	responder.SetTimeToLive(cfg.ResponseCacheTTL)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Sched: sched,
 		Config: cfg, Responder: responder, CdrStatsSrv: cdrStats, Users: userServer}
 	apierRpcV2 := &v2.ApierV2{

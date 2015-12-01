@@ -57,12 +57,8 @@ type Responder struct {
 	responseCache *cache2go.ResponseCache
 }
 
-func NewResponder(exitChan chan bool, cdrSrv *CdrServer, stats rpcclient.RpcClientConnection, timeToLive time.Duration) *Responder {
-	return &Responder{
-		ExitChan:      exitChan,
-		Stats:         stats,
-		responseCache: cache2go.NewResponseCache(timeToLive),
-	}
+func (rs *Responder) SetTimeToLive(timeToLive time.Duration) {
+	rs.responseCache = cache2go.NewResponseCache(timeToLive)
 }
 
 func (rs *Responder) getCache() *cache2go.ResponseCache {
