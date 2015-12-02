@@ -594,7 +594,7 @@ func main() {
 		writePid()
 	}
 	if *singlecpu {
-		runtime.GOMAXPROCS(1) // Having multiple cpus slows down computing due to CPU management, to be reviewed in future Go releases
+		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
 	}
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
