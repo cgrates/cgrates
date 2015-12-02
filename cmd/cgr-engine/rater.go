@@ -39,7 +39,7 @@ func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled 
 }
 
 // Starts rater and reports on chan
-func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
+func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan struct{}, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
 	internalCdrStatSChan chan engine.StatsInterface, internalHistorySChan chan history.Scribe,
 	internalPubSubSChan chan engine.PublisherSubscriber, internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
 	server *utils.Server,
@@ -62,7 +62,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 			exitChan <- true
 			return
 		}
-
+		cacheDoneChan <- struct{}{}
 	}()
 
 	// Retrieve scheduler for it's API methods

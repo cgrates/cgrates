@@ -484,7 +484,10 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	internalCdrSChan <- cdrServer    // Signal that cdrS is operational
 }
 
-func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, ratingDb engine.RatingStorage, exitChan chan bool) {
+func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneChan chan struct{}, ratingDb engine.RatingStorage, exitChan chan bool) {
+        // Wait for cache to load data before starting
+        cacheDone := <- cacheDoneChan
+        cacheDoneChan <- cacheDone
 	utils.Logger.Info("Starting CGRateS Scheduler.")
 	sched := scheduler.NewScheduler()
 	go reloadSchedulerSingnalHandler(sched, ratingDb)
@@ -666,6 +669,7 @@ func main() {
 	// Define internal connections via channels
 	internalBalancerChan := make(chan *balancer2go.Balancer, 1)
 	internalRaterChan := make(chan *engine.Responder, 1)
+	cacheDoneChan := make(chan struct{}, 1)
 	internalSchedulerChan := make(chan *scheduler.Scheduler, 1)
 	internalCdrSChan := make(chan *engine.CdrServer, 1)
 	internalCdrStatSChan := make(chan engine.StatsInterface, 1)
@@ -681,13 +685,13 @@ func main() {
 
 	// Start rater service
 	if cfg.RaterEnabled {
-		go startRater(internalRaterChan, internalBalancerChan, internalSchedulerChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
+		go startRater(internalRaterChan, cacheDoneChan, internalBalancerChan, internalSchedulerChan, internalCdrStatSChan, internalHistorySChan, internalPubSubSChan, internalUserSChan, internalAliaseSChan,
 			server, ratingDb, accountDb, loadDb, cdrDb, logDb, &stopHandled, exitChan)
 	}
 
 	// Start Scheduler
 	if cfg.SchedulerEnabled {
-		go startScheduler(internalSchedulerChan, ratingDb, exitChan)
+		go startScheduler(internalSchedulerChan, cacheDoneChan, ratingDb, exitChan)
 	}
 
 	// Start CDR Server
