@@ -365,7 +365,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
 	}
 
-	//log.Printf("HERE: %+v %d", leftCC)
+	//log.Printf("HERE: %+v", leftCC)
 	if leftCC.Cost > 0 && goNegative {
 		initialLength := len(cc.Timespans)
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
@@ -379,6 +379,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !ub.AllowNegative && !dryRun {
 			utils.Logger.Err(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
 		}
+		leftCC.Timespans.Decompress()
 		for _, ts := range leftCC.Timespans {
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()

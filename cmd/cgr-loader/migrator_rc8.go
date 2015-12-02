@@ -425,3 +425,45 @@ func (mig MigratorRC8) migrateDerivedChargers() error {
 	}
 	return nil
 }
+
+func (mig MigratorRC8) migrateActionPlans() error {
+	keys, err := mig.db.Cmd("KEYS", utils.ACTION_PLAN_PREFIX+"*").List()
+	if err != nil {
+		return err
+	}
+	aplsMap := make(map[string]engine.ActionPlans, len(keys))
+	for _, key := range keys {
+		log.Printf("Migrating action plans: %s...", key)
+		var apls engine.ActionPlans
+		var values []byte
+		if values, err = mig.db.Cmd("GET", key).Bytes(); err == nil {
+			if err := mig.ms.Unmarshal(values, &apls); err != nil {
+				return err
+			}
+		}
+		// change all AccountIds
+		for _, apl := range apls {
+			for idx, actionId := range apl.AccountIds {
+				// fix id
+				idElements := strings.Split(actionId, utils.CONCATENATED_KEY_SEP)
+				if len(idElements) != 3 {
+					log.Printf("Malformed account ID %s", actionId)
+					continue
+				}
+				apl.AccountIds[idx] = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
+			}
+		}
+		aplsMap[key] = apls
+	}
+	// write data back
+	for key, apl := range aplsMap {
+		result, err := mig.ms.Marshal(apl)
+		if err != nil {
+			return err
+		}
+		if err = mig.db.Cmd("SET", key, result).Err; err != nil {
+			return err
+		}
+	}
+	return nil
+}
