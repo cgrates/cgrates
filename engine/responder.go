@@ -57,8 +57,9 @@ type Responder struct {
 	responseCache *cache2go.ResponseCache
 }
 
-func (rs *Responder) SetTimeToLive(timeToLive time.Duration) {
+func (rs *Responder) SetTimeToLive(timeToLive time.Duration, out *int) error {
 	rs.responseCache = cache2go.NewResponseCache(timeToLive)
+	return nil
 }
 
 func (rs *Responder) getCache() *cache2go.ResponseCache {
@@ -263,7 +264,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
 	cacheKey := "GetDerivedMaxSessionTime" + ev.CgrId
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*float64))
+		*reply = item.Value.(float64)
 		return item.Err
 	}
 	if rs.Bal != nil {
@@ -367,7 +368,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 	cacheKey := "GetSessionRuns" + ev.CgrId
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*sRuns = *(item.Value.(*[]*SessionRun))
+		*sRuns = item.Value.([]*SessionRun)
 		return item.Err
 	}
 	if rs.Bal != nil {
@@ -446,7 +447,7 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
 	cacheKey := "ProcessCdr" + cdr.CgrId
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*string))
+		*reply = item.Value.(string)
 		return item.Err
 	}
 	if rs.CdrSrv == nil {

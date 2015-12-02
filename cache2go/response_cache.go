@@ -54,10 +54,16 @@ func (rc *ResponseCache) Get(key string) (*CacheItem, error) {
 	if rc.ttl == 0 {
 		return nil, utils.ErrNotImplemented
 	}
+	rc.mu.RLock()
+	item, ok := rc.cache[key]
+	rc.mu.RUnlock()
+	if ok {
+		return item, nil
+	}
 	rc.wait(key) // wait for other goroutine processsing this key
 	rc.mu.RLock()
 	defer rc.mu.RUnlock()
-	item, ok := rc.cache[key]
+	item, ok = rc.cache[key]
 	if !ok {
 		return nil, ErrNotFound
 	}
