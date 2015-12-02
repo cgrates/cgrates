@@ -113,7 +113,7 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 	if self.Sched == nil {
 		return errors.New("SCHEDULER_NOT_ENABLED")
 	}
-	var schedActions []*ScheduledActions
+	schedActions := make([]*ScheduledActions, 0) // needs to be initialized if remains empty
 	scheduledActions := self.Sched.GetQueue()
 	for _, qActions := range scheduledActions {
 		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid}
