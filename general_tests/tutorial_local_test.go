@@ -707,6 +707,7 @@ func TestTutLocalLcrStatic(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
+	cd.CgrId = "1"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -731,6 +732,7 @@ func TestTutLocalLcrStatic(t *testing.T) {
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
+	cd.CgrId = "2"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -809,6 +811,7 @@ func TestTutLocalLcrQos(t *testing.T) {
 	}
 	var lcr engine.LCRCost
 	// Since there is no real quality difference, the suppliers will come in random order here
+	cd.CgrId = "3"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -847,6 +850,7 @@ func TestTutLocalLcrQos(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 90, engine.ACC: 0.325, engine.TCC: 0.325, engine.ASR: 100, engine.ACD: 90}},
 		},
 	}
+	cd.CgrId = "4"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -874,6 +878,7 @@ func TestTutLocalLcrQos(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
+	cd.CgrId = "5"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -909,6 +914,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
+	cd.CgrId = "6"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -934,6 +940,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
+	cd.CgrId = "7"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -970,6 +977,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 		},
 	}
 	*/
+	cd.CgrId = "8"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -994,6 +1002,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
+	cd.CgrId = "9"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -1028,6 +1037,7 @@ func TestTutLocalLeastCost(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
+	cd.CgrId = "10"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -1059,6 +1069,7 @@ func TestTutLocalLeastCost(t *testing.T) {
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
+	cd.CgrId = "11"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
