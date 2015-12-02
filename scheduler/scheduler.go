@@ -66,7 +66,7 @@ func (s *Scheduler) Loop() {
 		} else {
 			s.Unlock()
 			d := a0.GetNextStartTime(now).Sub(now)
-			//utils.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
+			utils.Logger.Info(fmt.Sprintf("Time to next action (%s): %v", a0.Id, d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
@@ -84,27 +84,30 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	if err != nil && err != utils.ErrNotFound {
 		utils.Logger.Warning(fmt.Sprintf("Cannot get action plans: %v", err))
 	}
+	utils.Logger.Info(fmt.Sprintf("<Scheduler> processing %d action plans", len(actionPlans)))
 	// recreate the queue
 	s.Lock()
 	s.queue = engine.ActionPlanPriotityList{}
 	for key, aps := range actionPlans {
 		toBeSaved := false
 		isAsap := false
-		newApls := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
+		var newApls []*engine.ActionPlan // will remove the one time runs from the database
 		for _, ap := range aps {
 			if ap.Timing == nil {
 				utils.Logger.Warning(fmt.Sprintf("<Scheduler> Nil timing on action plan: %+v, discarding!", ap))
 				continue
 			}
+			if len(ap.AccountIds) == 0 { // no accounts just ignore
+				continue
+			}
 			isAsap = ap.IsASAP()
 			toBeSaved = toBeSaved || isAsap
 			if isAsap {
-				if len(ap.AccountIds) > 0 {
-					utils.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
-				}
+				utils.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
 				ap.Execute()
 				ap.AccountIds = make([]string, 0)
 			} else {
+
 				now := time.Now()
 				if ap.GetNextStartTime(now).Before(now) {
 					// the task is obsolete, do not add it to the queue
@@ -124,6 +127,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 		}
 	}
 	sort.Sort(s.queue)
+	utils.Logger.Info(fmt.Sprintf("<Scheduler> queued %d action plans", len(s.queue)))
 	s.Unlock()
 }
 
