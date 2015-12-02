@@ -1624,7 +1624,7 @@ func TestApierLocalGetScheduledActions(t *testing.T) {
 	}
 	var rply []*ScheduledActions
 	if err := rater.Call("ApierV1.GetScheduledActions", AttrsGetScheduledActions{}, &rply); err != nil {
-		t.Error("Unexpected error: ", err.Error)
+		t.Error("Unexpected error: ", err)
 	}
 }
 

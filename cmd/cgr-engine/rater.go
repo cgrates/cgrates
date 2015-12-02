@@ -39,13 +39,14 @@ func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled 
 }
 
 // Starts rater and reports on chan
-func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
+
+func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan struct{}, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
 	internalCdrStatSChan chan rpcclient.RpcClientConnection, internalHistorySChan chan rpcclient.RpcClientConnection,
 	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server,
 	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
 	stopHandled *bool, exitChan chan bool) {
-	waitTasks := make([]chan struct{}, 0)
+	var waitTasks []chan struct{}
 
 	//Cache load
 	cacheTaskChan := make(chan struct{})
@@ -62,7 +63,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 			exitChan <- true
 			return
 		}
-
+		cacheDoneChan <- struct{}{}
 	}()
 
 	// Retrieve scheduler for it's API methods
