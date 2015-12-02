@@ -45,7 +45,7 @@ func startRater(internalRaterChan chan *engine.Responder, internalBalancerChan c
 	server *utils.Server,
 	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
 	stopHandled *bool, exitChan chan bool) {
-	waitTasks := make([]chan struct{}, 0)
+	var waitTasks []chan struct{}
 
 	//Cache load
 	cacheTaskChan := make(chan struct{})
