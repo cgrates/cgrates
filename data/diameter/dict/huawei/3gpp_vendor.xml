@@ -2,28 +2,28 @@
 <diameter>
   <application id="4">
     <vendor id="10415" name="3GPP" />
-    <avp name="3GPP-Charging-Characteristics" code="13" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-Charging-Characteristics" code="13" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="3GPP-Charging-Id" code="2" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-Charging-Id" code="2" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-GGSN-MCC-MNC" code="9" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-GGSN-MCC-MNC" code="9" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="3GPP-IMSI" code="1" must="V" may="P" must-not="M" may-encrypt="">
+    <avp name="3GPP-IMSI" code="1" must="V" may="P" must-not="M" may-encrypt="" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="3GPP-IMSI-MCC-MNC" code="8" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-IMSI-MCC-MNC" code="8" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="3GPP-MS-TimeZone" code="23" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-MS-TimeZone" code="23" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-NSAPI" code="10" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-NSAPI" code="10" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-PDP-Type" code="3" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-PDP-Type" code="3" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Ipv4" />
         <item code="1" name="PPP" />
@@ -31,84 +31,84 @@
         <item code="3" name="Ipv4v6" />
       </data>
     </avp>
-    <avp name="3GPP-RAT-Type" code="21" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-RAT-Type" code="21" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-Selection-Mode" code="12" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-Selection-Mode" code="12" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="3GPP-Session-Stop-Indicator" code="11" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-Session-Stop-Indicator" code="11" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-SGSN-MCC-MNC" code="18" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-SGSN-MCC-MNC" code="18" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="3GPP-User-Location-Info" code="22" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="3GPP-User-Location-Info" code="22" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Access-Network-Charging-Identifier-Value" code="503" must="M,V" may="P" must-not="-" may-encrypt="Y">
+    <avp name="Access-Network-Charging-Identifier-Value" code="503" must="M,V" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Access-Network-Information" code="1263" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Access-Network-Information" code="1263" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Access-Transfer-Information" code="2709" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Access-Transfer-Information" code="2709" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Access-Transfer-Type" required="false" max="1" />
         <rule avp="Access-Network-Information" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Access-Transfer-Type" code="2710" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Access-Transfer-Type" code="2710" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="PS to CS Transfer" />
         <item code="1" name="CS to PS Transfer" />
       </data>
     </avp>
-    <avp name="Account-Expiration" code="2309" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Account-Expiration" code="2309" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Accumulated-Cost" code="2052" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Accumulated-Cost" code="2052" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Value-Digits" required="true" max="1" />
         <rule avp="Exponent" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Adaptations" code="1217" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Adaptations" code="1217" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Yes" />
         <item code="1" name="No" />
       </data>
     </avp>
-    <avp name="ADC-Rule-Base-Name" code="1095" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="ADC-Rule-Base-Name" code="1095" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Additional-Content-Information" code="1207" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Additional-Content-Information" code="1207" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Type-Number" required="false" max="1" />
         <rule avp="Additional-Type-Information" required="false" max="1" />
         <rule avp="Content-Size" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Additional-Type-Information" code="1205" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Additional-Type-Information" code="1205" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Address-Data" code="897" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Address-Data" code="897" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Address-Domain" code="898" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Address-Domain" code="898" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Domain-Name" required="false" max="1" />
         <rule avp="3GPP-IMSI-MCC-MNC" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Addressee-Type" code="1208" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Addressee-Type" code="1208" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="TO" />
         <item code="1" name="CC" />
         <item code="2" name="BCC" />
       </data>
     </avp>
-    <avp name="Address-Type" code="899" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Address-Type" code="899" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="e-mail address" />
         <item code="1" name="MSISDN" />
@@ -120,47 +120,47 @@
         <item code="7" name="IMSI" />
       </data>
     </avp>
-    <avp name="AF-Charging-Identifier" code="505" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="AF-Charging-Identifier" code="505" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="AF-Correlation-Information" code="1276" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AF-Correlation-Information" code="1276" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="AF-Charging-Identifier" required="true" max="1" />
         <rule avp="Flows" required="false" />
       </data>
     </avp>
-    <avp name="Allocation-Retention-Priority" code="1034" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="Allocation-Retention-Priority" code="1034" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Priority-Level" required="true" max="1" />
         <rule avp="Pre-emption-Capability" required="false" max="1" />
         <rule avp="Pre-emption-Vulnerability" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Alternate-Charged-Party-Address" code="1280" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Alternate-Charged-Party-Address" code="1280" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="AoC-Cost-Information" code="2053" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AoC-Cost-Information" code="2053" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Accumulated-Cost" required="false" max="1" />
         <rule avp="Incremental-Cost" required="false" />
         <rule avp="Currency-Code" required="false" max="1" />
       </data>
     </avp>
-    <avp name="AoC-Format" code="2310" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AoC-Format" code="2310" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="MONETARY" />
         <item code="1" name="NON_MONETARY" />
         <item code="2" name="CAI" />
       </data>
     </avp>
-    <avp name="AoC-Information" code="2054" must="V.M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AoC-Information" code="2054" must="V.M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="AoC-Cost-Information" required="false" max="1" />
         <rule avp="Tariff-Information" required="false" max="1" />
         <rule avp="AoC-Subscription-Information" required="false" max="1" />
       </data>
     </avp>
-    <avp name="AoC-Request-Type" code="2055" must="V.M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AoC-Request-Type" code="2055" must="V.M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="AoC_NOT_REQUESTED" />
         <item code="1" name="AoC_FULL" />
@@ -168,19 +168,19 @@
         <item code="3" name="AoC_TARIFF_ONLY" />
       </data>
     </avp>
-    <avp name="AoC-Service" code="2311" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AoC-Service" code="2311" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="AoC-Service-Obligatory-Type" required="false" max="1" />
         <rule avp="AoC-Service-Type" required="false" max="1" />
       </data>
     </avp>
-    <avp name="AoC-Service-Obligatory-Type" code="2312" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AoC-Service-Obligatory-Type" code="2312" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="NON_BINDING" />
         <item code="1" name="BINDING" />
       </data>
     </avp>
-    <avp name="AoC-Service-Type" code="2313" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AoC-Service-Type" code="2313" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="NONE" />
         <item code="1" name="AOC-S" />
@@ -188,96 +188,96 @@
         <item code="3" name="AOC-E" />
       </data>
     </avp>
-    <avp name="AoC-Subscription-Information" code="2314" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="AoC-Subscription-Information" code="2314" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="AoC-Service" required="false" />
         <rule avp="AoC-Format" required="false" max="1" />
         <rule avp="Preferred-AoC-Currency" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Application-Port-Identifer" code="3010" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Application-Port-Identifer" code="3010" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Application-Provided-Called-Party-Address" code="837" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Application-Provided-Called-Party-Address" code="837" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Application-Server" code="836" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Application-Server" code="836" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Application-Server-Id" code="2101" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Application-Server-Id" code="2101" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Application-Service-Provider-Identity" code="532" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Application-Service-Provider-Identity" code="532" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Application-Server-Information" code="850" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Application-Server-Information" code="850" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Application-Server" required="false" max="1" />
         <rule avp="Application-Provided-Called-Party-Address" required="false" />
         <rule avp="Status- AS-Code" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Application-Session-Id" code="2103" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Application-Session-Id" code="2103" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Applic-Id" code="1218" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Applic-Id" code="1218" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Associated-Party-Address" code="2035" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Associated-Party-Address" code="2035" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Associated-URI" code="856" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Associated-URI" code="856" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Authorised-QoS" code="849" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Authorised-QoS" code="849" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Aux-Applic-Info" code="1219" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Aux-Applic-Info" code="1219" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Base-Time-Interval" code="1265" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Base-Time-Interval" code="1265" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Basic-Service-Code" code="3411" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Basic-Service-Code" code="3411" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Bearer-Service" required="false" max="1" />
         <rule avp="Teleservice" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Bearer-Capability" code="3412" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Bearer-Capability" code="3412" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Bearer-Service" code="854" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Bearer-Service" code="854" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="BSSID" code="2716" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="BSSID" code="2716" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Called-Asserted-Identity" code="1250" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Called-Asserted-Identity" code="1250" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Called-Party-Address" code="832" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Called-Party-Address" code="832" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Calling-Party-Address" code="831" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Calling-Party-Address" code="831" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Carrier-Select-Routing-Information" code="2023" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Carrier-Select-Routing-Information" code="2023" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Cause-Code" code="861" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Cause-Code" code="861" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Integer32" />
     </avp>
-    <avp name="CG-Address" code="846" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="CG-Address" code="846" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Change-Condition" code="2037" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Change-Condition" code="2037" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Integer32" />
     </avp>
-    <avp name="Change-Time" code="2038" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Change-Time" code="2038" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Charge-Reason-Code" code="2118" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Charge-Reason-Code" code="2118" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="UNKNOWN" />
         <item code="1" name="USAGE" />
@@ -286,10 +286,10 @@
         <item code="4" name="ADD-ON-CHARGE" />
       </data>
     </avp>
-    <avp name="Charged-Party" code="857" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Charged-Party" code="857" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Charging-Characteristics-Selection-Mode" code="2066" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Charging-Characteristics-Selection-Mode" code="2066" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Serving-Node-Supplied" />
         <item code="1" name="Subscription-specific" />
@@ -299,10 +299,10 @@
         <item code="5" name="Visiting-Default" />
       </data>
     </avp>
-    <avp name="Charging-Rule-Base-Name" code="1004" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Charging-Rule-Base-Name" code="1004" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Class-Identifier" code="1214" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Class-Identifier" code="1214" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Personal" />
         <item code="1" name="Advertisement" />
@@ -310,22 +310,22 @@
         <item code="3" name="Auto" />
       </data>
     </avp>
-    <avp name="Client-Address" code="2018" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Client-Address" code="2018" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="CN-IP-Multicast-Distribution" code="921" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="CN-IP-Multicast-Distribution" code="921" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="NO-IP-MULTICAST" />
         <item code="1" name="IP-MULTICAST" />
       </data>
     </avp>
-    <avp name="CN-Operator-Selection-Entity" code="3421" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="CN-Operator-Selection-Entity" code="3421" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="The Serving Network has been selected by the UE" />
         <item code="1" name="The Serving Network has been selected by the network" />
       </data>
     </avp>
-    <avp name="Content-Class" code="1220" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Content-Class" code="1220" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="text" />
         <item code="1" name="image-basic" />
@@ -342,65 +342,65 @@
         <item code="45" name="other-or-multi-mms" />
       </data>
     </avp>
-    <avp name="Content-Disposition" code="828" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Content-Disposition" code="828" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Content-Id" code="2116" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Content-Id" code="2116" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Content-Provider-Id" code="2117" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Content-Provider-Id" code="2117" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Content-Length" code="827" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Content-Length" code="827" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Content-Size" code="1206" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Content-Size" code="1206" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="CSG-Access-Mode" code="2317" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="CSG-Access-Mode" code="2317" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Closed mode" />
         <item code="1" name="Hybrid Mode" />
       </data>
     </avp>
-    <avp name="CSG-Id" code="1437" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="CSG-Id" code="1437" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="CSG-Membership-Indication" code="2318" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="CSG-Membership-Indication" code="2318" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Not CSG member" />
         <item code="1" name="CSG Member" />
       </data>
     </avp>
-    <avp name="Content-Type" code="826" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Content-Type" code="826" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Current-Tariff" code="2056" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Current-Tariff" code="2056" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Currency-Code" required="false" max="1" />
         <rule avp="Scale-Factor" required="false" max="1" />
         <rule avp="Rate-Element" required="false" />
       </data>
     </avp>
-    <avp name="CUG-Information" code="2304" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="CUG-Information" code="2304" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Data-Coding-Scheme" code="2001" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Data-Coding-Scheme" code="2001" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Integer32" />
     </avp>
-    <avp name="Deferred-Location-Event-Type" code="1230" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Deferred-Location-Event-Type" code="1230" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Delivery-Report-Requested" code="1216" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Delivery-Report-Requested" code="1216" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="No" />
         <item code="1" name="Yes" />
       </data>
     </avp>
-    <avp name="Delivery-Status" code="2104" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Delivery-Status" code="2104" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Destination-Interface" code="2002" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Destination-Interface" code="2002" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Interface-Id" required="true" max="1" />
         <rule avp="Interface-Text" required="true" max="1" />
@@ -408,41 +408,41 @@
         <rule avp="Interface-Type" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Diagnostics" code="2039" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Diagnostics" code="2039" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Integer32" />
     </avp>
-    <avp name="Domain-Name" code="1200" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Domain-Name" code="1200" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="DRM-Content" code="1221" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="DRM-Content" code="1221" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="No" />
         <item code="1" name="Yes" />
       </data>
     </avp>
-    <avp name="Dynamic-Address-Flag" code="2051" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Dynamic-Address-Flag" code="2051" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Static" />
         <item code="1" name="Dynamic" />
       </data>
     </avp>
-    <avp name="Dynamic-Address-Flag-Extension" code="2068" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Dynamic-Address-Flag-Extension" code="2068" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Static" />
         <item code="1" name="Dynamic" />
       </data>
     </avp>
-    <avp name="Early-Media-Description" code="1272" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Early-Media-Description" code="1272" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SDP-TimeStamps" required="false" max="1" />
         <rule avp="SDP-Media-Component" required="false" />
         <rule avp="SDP-Session-Description" required="false" />
       </data>
     </avp>
-    <avp name="ePDG-Address" code="3425" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="ePDG-Address" code="3425" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Envelope" code="1266" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Envelope" code="1266" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Envelope-Start-Time" required="true" max="1" />
         <rule avp="Envelope-End-Time" required="false" max="1" />
@@ -452,10 +452,10 @@
         <rule avp="CC-Service-Specific-Units" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Envelope-End-Time" code="1267" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Envelope-End-Time" code="1267" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Envelope-Reporting" code="1268" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Envelope-Reporting" code="1268" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="DO_NOT_REPORT_ENVELOPES" />
         <item code="1" name="REPORT_ENVELOPES" />
@@ -464,32 +464,32 @@
         <item code="4" name="REPORT_ENVELOPES_WITH_VOLUME_AND_EVENTS" />
       </data>
     </avp>
-    <avp name="Envelope-Start-Time" code="1269" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Envelope-Start-Time" code="1269" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Event" code="825" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Event" code="825" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Event-Charging-TimeStamp" code="1258" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Event-Charging-TimeStamp" code="1258" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Event-Type" code="823" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Event-Type" code="823" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SIP-Method" required="false" max="1" />
         <rule avp="Event" required="false" max="1" />
         <rule avp="Expires" required="true" max="1" />
       </data>
     </avp>
-    <avp name="Expires" code="888" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Expires" code="888" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="File-Repair-Supported" code="1224" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="File-Repair-Supported" code="1224" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="SUPPORTED" />
         <item code="1" name="NOT_SUPPORTED" />
       </data>
     </avp>
-    <avp name="Fixed-User-Location-Info" code="2825" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="Fixed-User-Location-Info" code="2825" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SSID" required="false" max="1" />
         <rule avp="BSSID" required="false" max="1" />
@@ -497,43 +497,43 @@
         <rule avp="Physical-Access-Id" required="true" max="1" />
       </data>
     </avp>
-    <avp name="Flows" code="510" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="Flows" code="510" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Media-Component-Number" required="true" max="1" />
         <rule avp="Flow-Number" required="false" />
       </data>
     </avp>
-    <avp name="From-Address" code="2708" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="From-Address" code="2708" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Forwarding-Pending" code="3415" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Forwarding-Pending" code="3415" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Forwarding not pending" />
         <item code="1" name="Forwarding pending" />
       </data>
     </avp>
-    <avp name="GGSN-Address" code="847" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="GGSN-Address" code="847" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Guaranteed-Bitrate-UL" code="1026" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="Guaranteed-Bitrate-UL" code="1026" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="IMS-Application-Reference-Identifier" code="2601" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IMS-Application-Reference-Identifier" code="2601" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="IMS-Charging-Identifier" code="841" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IMS-Charging-Identifier" code="841" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="IMS-Communication-Service-Identifier" code="1281" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IMS-Communication-Service-Identifier" code="1281" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="IMS-Emergency-Indicator" code="2322" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IMS-Emergency-Indicator" code="2322" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Non Emergency" />
         <item code="1" name="Emergency" />
       </data>
     </avp>
-    <avp name="IMS-Information" code="876" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IMS-Information" code="876" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Event-Type" required="false" max="1" />
         <rule avp="Role-Of-Node" required="false" max="1" />
@@ -586,40 +586,40 @@
         <rule avp="TAD-Identifier" required="false" max="1" />
       </data>
     </avp>
-    <avp name="IMS-Visited-Network-Identifier" code="2713" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IMS-Visited-Network-Identifier" code="2713" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="IMSI-Unauthenticated-Flag" code="2308" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IMSI-Unauthenticated-Flag" code="2308" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Authenticated" />
         <item code="1" name="Unauthenticated" />
       </data>
     </avp>
-    <avp name="Incoming-Trunk-Group-Id" code="852" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Incoming-Trunk-Group-Id" code="852" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Incremental-Cost" code="2062" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Incremental-Cost" code="2062" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Value-Digits" required="true" max="1" />
         <rule avp="Exponent" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Initial-IMS-Charging-Identifier" code="2321" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Initial-IMS-Charging-Identifier" code="2321" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Instance-Id" code="3402" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Instance-Id" code="3402" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Interface-Id" code="2003" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Interface-Id" code="2003" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Interface-Port" code="2004" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Interface-Port" code="2004" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Interface-Text" code="2005" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Interface-Text" code="2005" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Interface-Type" code="2006" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Interface-Type" code="2006" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Unknown" />
         <item code="1" name="MOBILE_ORIGINATING" />
@@ -628,47 +628,47 @@
         <item code="4" name="APPLICATION_TERMINATION" />
       </data>
     </avp>
-    <avp name="Inter-Operator-Identifier" code="838" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Inter-Operator-Identifier" code="838" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Originating-IOI" required="false" max="1" />
         <rule avp="Terminating-IOI" required="false" max="1" />
       </data>
     </avp>
-    <avp name="IP-Realm-Default-Indication" code="2603" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IP-Realm-Default-Indication" code="2603" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Default IP Realm Not used" />
         <item code="1" name="Default IP realm used" />
       </data>
     </avp>
-    <avp name="ISUP-Cause" code="3416" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="ISUP-Cause" code="3416" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="ISUP-Cause-Location" required="false" max="1" />
         <rule avp="ISUP-Cause-Value" required="false" max="1" />
         <rule avp="ISUP-Cause-Diagnostic" required="false" max="1" />
       </data>
     </avp>
-    <avp name="ISUP-Cause-Diagnostics" code="3422" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="ISUP-Cause-Diagnostics" code="3422" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="ISUP-Cause-Location" code="3423" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="ISUP-Cause-Location" code="3423" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="ISUP-Cause-Value" code="3424" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="ISUP-Cause-Value" code="3424" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="ISUP-Location-Number" code="3414" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="ISUP-Location-Number" code="3414" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="LCS-APN" code="1231" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-APN" code="1231" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="LCS-Client-Dialed-By-MS" code="1233" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Client-Dialed-By-MS" code="1233" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="LCS-Client-External-Id" code="1234" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Client-External-Id" code="1234" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="LCS-Client-Id" code="1232" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Client-Id" code="1232" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="LCS-Client-Type" required="false" max="1" />
         <rule avp="LCS-Client-External-Id" required="false" max="1" />
@@ -678,14 +678,14 @@
         <rule avp="LCS-Requestor-Id" required="false" max="1" />
       </data>
     </avp>
-    <avp name="LCS-Client-Name" code="1235" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Client-Name" code="1235" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="LCS-Data-Coding-Scheme" required="false" max="1" />
         <rule avp="LCS-Name-String" required="false" max="1" />
         <rule avp="LCS-Format-Indicator" required="false" max="1" />
       </data>
     </avp>
-    <avp name="LCS-Client-Type" code="1241" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Client-Type" code="1241" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="EMERGENCY_SERVICES" />
         <item code="1" name="VALUE_ADDED_SERVICES" />
@@ -693,10 +693,10 @@
         <item code="3" name="LAWFUL_INTERCEPT_SERVICES" />
       </data>
     </avp>
-    <avp name="LCS-Data-Coding-Scheme" code="1236" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Data-Coding-Scheme" code="1236" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="LCS-Format-Indicator" code="1237" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Format-Indicator" code="1237" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="LOGICAL_NAME" />
         <item code="1" name="EMAIL_ADDRESS" />
@@ -705,7 +705,7 @@
         <item code="4" name="SIP_URL" />
       </data>
     </avp>
-    <avp name="LCS-Information" code="878" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Information" code="878" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="LCS-Client-Id" required="false" max="1" />
         <rule avp="Location-Type" required="false" max="1" />
@@ -715,31 +715,31 @@
         <rule avp="MSISDN" required="false" max="1" />
       </data>
     </avp>
-    <avp name="LCS-Name-String" code="1238" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Name-String" code="1238" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="LCS-Requestor-Id" code="1239" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Requestor-Id" code="1239" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="LCS-Data-Coding-Scheme" required="false" max="1" />
         <rule avp="LCS-Requestor-Id-String" required="false" max="1" />
       </data>
     </avp>
-    <avp name="LCS-Requestor-Id-String" code="1240" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="LCS-Requestor-Id-String" code="1240" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Local-GW-Inserted-Indication" code="2604" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Local-GW-Inserted-Indication" code="2604" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Local GW Not Inserted" />
         <item code="1" name="Local GW Inserted" />
       </data>
     </avp>
-    <avp name="Local-Sequence-Number" code="2063" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Local-Sequence-Number" code="2063" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Location-Estimate" code="1242" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Location-Estimate" code="1242" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Location-Estimate-Type" code="1243" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Location-Estimate-Type" code="1243" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="CURRENT_LOCATION" />
         <item code="1" name="CURRENT_LAST_KNOWN_LOCATION" />
@@ -748,50 +748,50 @@
         <item code="4" name="CANCEL_DEFERRED_LOCATION" />
       </data>
     </avp>
-    <avp name="Location-Type" code="1244" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Location-Type" code="1244" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Location-Estimate-Type" required="false" max="1" />
         <rule avp="Deferred-Location-Event-Type" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Low-Balance-Indication" code="2020" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Low-Balance-Indication" code="2020" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="NOT-APPLICABLE" />
         <item code="1" name="YES" />
       </data>
     </avp>
-    <avp name="Low-Priority-Indicator" code="2602" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Low-Priority-Indicator" code="2602" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="NO" />
         <item code="1" name="YES" />
       </data>
     </avp>
-    <avp name="Mandatory-Capability" code="604" must="V,M" may="-" must-not="-" may-encrypt="N">
+    <avp name="Mandatory-Capability" code="604" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Max-Requested-Bandwidth-DL" code="515" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="Max-Requested-Bandwidth-DL" code="515" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Max-Requested-Bandwidth-UL" code="516" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="Max-Requested-Bandwidth-UL" code="516" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="MBMS-2G-3G-Indicator" code="907" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="MBMS-2G-3G-Indicator" code="907" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="2G" />
         <item code="1" name="3G" />
         <item code="2" name="2G-AND-3G" />
       </data>
     </avp>
-    <avp name="MBMS-Charged-Party" code="2323" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MBMS-Charged-Party" code="2323" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Content Provider" />
         <item code="1" name="Subscriber" />
       </data>
     </avp>
-    <avp name="MBMS-GW-Address" code="2307" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MBMS-GW-Address" code="2307" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="MBMS-Information" code="880" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MBMS-Information" code="880" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="TMGI" required="false" max="1" />
         <rule avp="MBMS-Service-Type" required="false" max="1" />
@@ -808,35 +808,35 @@
         <rule avp="MSISDN" required="false" />
       </data>
     </avp>
-    <avp name="MBMS-Service-Area" code="903" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="MBMS-Service-Area" code="903" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="MBMS-Service-Type" code="906" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="MBMS-Service-Type" code="906" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="MULTICAST" />
         <item code="1" name="BROADCAST" />
       </data>
     </avp>
-    <avp name="MBMS-Session-Identity" code="908" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="MBMS-Session-Identity" code="908" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="MBMS-User-Service-Type" code="1225" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="MBMS-User-Service-Type" code="1225" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Enumerated">
         <item code="1" name="DOWNLOAD" />
         <item code="2" name="STREAMING" />
       </data>
     </avp>
-    <avp name="Media-Initiator-Flag" code="882" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Media-Initiator-Flag" code="882" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="called party" />
         <item code="1" name="calling party" />
         <item code="2" name="unknown" />
       </data>
     </avp>
-    <avp name="Media-Initiator-Party" code="1288" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Media-Initiator-Party" code="1288" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Message-Body" code="889" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Message-Body" code="889" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Content-Type" required="true" max="1" />
         <rule avp="Content-Length" required="true" max="1" />
@@ -844,19 +844,19 @@
         <rule avp="Originator" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Message-Class" code="1213" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Message-Class" code="1213" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Class-Identifier" required="false" max="1" />
         <rule avp="Token-Text" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Message-Id" code="1210" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Message-Id" code="1210" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Message-Size" code="1212" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Message-Size" code="1212" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Message-Type" code="1211" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Message-Type" code="1211" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="1" name="m-send-req" />
         <item code="2" name="m-send-conf" />
@@ -875,13 +875,13 @@
         <item code="15" name="m-mbox-delete-conf" />
       </data>
     </avp>
-    <avp name="MMBox-Storage-Requested" code="1248" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MMBox-Storage-Requested" code="1248" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="No" />
         <item code="1" name="Yes" />
       </data>
     </avp>
-    <avp name="MM-Content-Type" code="1203" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MM-Content-Type" code="1203" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Type-Number" required="false" max="1" />
         <rule avp="Additional-Type-Information" required="false" max="1" />
@@ -889,16 +889,16 @@
         <rule avp="Additional-Content-Information" required="false" />
       </data>
     </avp>
-    <avp name="MME-Name" code="2402" must="V,M" may="-" must-not="-" may-encrypt="N">
+    <avp name="MME-Name" code="2402" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="DiameterIdentity" />
     </avp>
-    <avp name="MME-Number-for-MT-SMS" code="1645" must="V" may="-" must-not="M" may-encrypt="N">
+    <avp name="MME-Number-for-MT-SMS" code="1645" must="V" may="-" must-not="M" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="MME-Realm" code="2408" must="V" may="-" must-not="M" may-encrypt="N">
+    <avp name="MME-Realm" code="2408" must="V" may="-" must-not="M" may-encrypt="N" vendor-id="10415">
       <data type="DiameterIdentity" />
     </avp>
-    <avp name="MMS-Information" code="877" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MMS-Information" code="877" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Originator-Address" required="false" max="1" />
         <rule avp="Recipient-Address" required="false" />
@@ -922,44 +922,44 @@
         <rule avp="VAS-Id" required="false" max="1" />
       </data>
     </avp>
-    <avp name="IM-Information" code="2110" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="IM-Information" code="2110" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Originator-Address" required="false" max="1" />
         <rule avp="Recipient-Address" required="false" />
         <rule avp="MC-Service-Id" required="false" />
       </data>
     </avp>
-    <avp name="MMTel-Information" code="2030" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MMTel-Information" code="2030" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Supplementary-Service" required="false" />
       </data>
     </avp>
-    <avp name="MMTel-SService-Type" code="2031" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MMTel-SService-Type" code="2031" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="MSC-Address" code="3417" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MSC-Address" code="3417" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="MSISDN" code="701" must="V,M" may="-" must-not="-" may-encrypt="N">
+    <avp name="MSISDN" code="701" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="MTC-IWF-Address" code="3406" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="MTC-IWF-Address" code="3406" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Neighbour-Node-Address" code="2705" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Neighbour-Node-Address" code="2705" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Network-Call-Reference-Number" code="3418" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Network-Call-Reference-Number" code="3418" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Next-Tariff" code="2057" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Next-Tariff" code="2057" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Currency-Code" required="false" max="1" />
         <rule avp="Scale-Factor" required="false" max="1" />
         <rule avp="Rate-Element" required="false" />
       </data>
     </avp>
-    <avp name="NNI-Information" code="2703" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="NNI-Information" code="2703" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Session-Direction" required="false" max="1" />
         <rule avp="NNI-Type" required="false" max="1" />
@@ -967,14 +967,14 @@
         <rule avp="Neighbour-Node-Address" required="false" max="1" />
       </data>
     </avp>
-    <avp name="NNI-Type" code="2704" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="NNI-Type" code="2704" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="non-roaming" />
         <item code="1" name="roaming without loopback" />
         <item code="2" name="roaming with loopback" />
       </data>
     </avp>
-    <avp name="Node-Functionality" code="862" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Node-Functionality" code="862" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="S-CSCF" />
         <item code="1" name="P-CSCF" />
@@ -996,34 +996,34 @@
         <item code="17" name="ePDG" />
       </data>
     </avp>
-    <avp name="Node-Id" code="2064" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Node-Id" code="2064" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Number-Of-Diversions" code="2034" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Number-Of-Diversions" code="2034" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Number-Of-Messages-Sent" code="2019" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Number-Of-Messages-Sent" code="2019" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Number-Of-Messages-Successfully-Exploded" code="2111" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Number-Of-Messages-Successfully-Exploded" code="2111" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Number-Of-Messages-Successfully-Sent" code="2112" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Number-Of-Messages-Successfully-Sent" code="2112" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Number-Of-Participants" code="885" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Number-Of-Participants" code="885" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Number-Of-Received-Talk-Bursts" code="1282" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Number-Of-Received-Talk-Bursts" code="1282" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Number-Of-Talk-Bursts" code="1283" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Number-Of-Talk-Bursts" code="1283" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Number-Portability-Routing-Information" code="2024" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Number-Portability-Routing-Information" code="2024" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Offline-Charging" code="1278" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Offline-Charging" code="1278" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Quota-Consumption-Time" required="false" max="1" />
         <rule avp="Time-Quota-Mechanism" required="false" max="1" />
@@ -1032,42 +1032,42 @@
         <rule avp="AVP" required="false" />
       </data>
     </avp>
-    <avp name="Online-Charging-Flag" code="2303" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Online-Charging-Flag" code="2303" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="ECF address not provided" />
         <item code="1" name="ECF address provided" />
       </data>
     </avp>
-    <avp name="Optional-Capability" code="605" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Optional-Capability" code="605" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Originating-IOI" code="839" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Originating-IOI" code="839" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Originator-SCCP-Address" code="2008" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Originator-SCCP-Address" code="2008" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Originator" code="864" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Originator" code="864" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Calling Party" />
         <item code="1" name="Called Party" />
       </data>
     </avp>
-    <avp name="Originator-Address" code="886" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Originator-Address" code="886" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Address-Type" required="false" max="1" />
         <rule avp="Address-Data" required="false" max="1" />
         <rule avp="Address-Domain" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Originator-Received-Address" code="2027" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Originator-Received-Address" code="2027" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Address-Type" required="false" max="1" />
         <rule avp="Address-Data" required="false" max="1" />
         <rule avp="Address-Domain" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Originator-Interface" code="2009" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Originator-Interface" code="2009" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Interface-Id" required="true" max="1" />
         <rule avp="Interface-Text" required="true" max="1" />
@@ -1075,13 +1075,13 @@
         <rule avp="Interface-Type" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Outgoing-Session-Id" code="2320" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Outgoing-Session-Id" code="2320" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Outgoing-Trunk-Group-Id" code="853" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Outgoing-Trunk-Group-Id" code="853" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Participant-Access-Priority" code="1259" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Participant-Access-Priority" code="1259" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="1" name="Pre-emptive priority" />
         <item code="2" name="High priority" />
@@ -1089,7 +1089,7 @@
         <item code="4" name="Low priority" />
       </data>
     </avp>
-    <avp name="Participant-Action-Type" code="2049" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Participant-Action-Type" code="2049" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="CREATE_CONF" />
         <item code="1" name="JOIN_CONF" />
@@ -1097,32 +1097,32 @@
         <item code="3" name="QUIT_CONF" />
       </data>
     </avp>
-    <avp name="Participant-Group" code="1260" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Participant-Group" code="1260" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Called-Party-Address" required="false" max="1" />
         <rule avp="Participant-Access-Priority" required="false" max="1" />
         <rule avp="User-Participating-Type" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Participants-Involved" code="887" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Participants-Involved" code="887" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="PDN-Connection-Charging-Id" code="2050" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PDN-Connection-Charging-Id" code="2050" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="PDP-Address" code="1227" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="PDP-Address" code="1227" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="PDP-Context-Type" code="1247" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PDP-Context-Type" code="1247" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Primary" />
         <item code="1" name="Secondary" />
       </data>
     </avp>
-    <avp name="PDP-Address-Prefix-Length" code="2606" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="PDP-Address-Prefix-Length" code="2606" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="PoC-Change-Condition" code="1261" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Change-Condition" code="1261" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="ServiceChange" />
         <item code="1" name="VolumeLimit" />
@@ -1132,13 +1132,13 @@
         <item code="5" name="TariffTime" />
       </data>
     </avp>
-    <avp name="PoC-Change-Time" code="1262" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Change-Time" code="1262" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="PoC-Controlling-Address" code="858" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Controlling-Address" code="858" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="PoC-Event-Type" code="2025" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Event-Type" code="2025" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Normal" />
         <item code="1" name="Instant Ppersonal Aalert event" />
@@ -1147,10 +1147,10 @@
         <item code="4" name="PoC Talk Burst" />
       </data>
     </avp>
-    <avp name="PoC-Group-Name" code="859" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Group-Name" code="859" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="PoC-Information" code="879" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Information" code="879" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="PoC-Server-Role" required="false" max="1" />
         <rule avp="PoC-Session-Type" required="false" max="1" />
@@ -1167,22 +1167,22 @@
         <rule avp="Charged-Party" required="false" max="1" />
       </data>
     </avp>
-    <avp name="PoC-Server-Role" code="883" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Server-Role" code="883" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Participating PoC Server" />
         <item code="1" name="Controlling PoC Server" />
       </data>
     </avp>
-    <avp name="PoC-Session-Id" code="1229" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Session-Id" code="1229" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="PoC-Session-Initiation-type" code="1277" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Session-Initiation-type" code="1277" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Pre-established" />
         <item code="1" name="On-demand" />
       </data>
     </avp>
-    <avp name="PoC-Session-Type" code="884" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-Session-Type" code="884" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="1 to 1 PoC session" />
         <item code="1" name="Chat PoC group session" />
@@ -1190,16 +1190,16 @@
         <item code="3" name="Ad-hoc PoC group session" />
       </data>
     </avp>
-    <avp name="PoC-User-Role" code="1252" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-User-Role" code="1252" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="PoC-User-Role-Ids" required="false" max="1" />
         <rule avp="PoC-User-Role-info-Units" required="false" max="1" />
       </data>
     </avp>
-    <avp name="PoC-User-Role-Ids" code="1253" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-User-Role-Ids" code="1253" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="PoC-User-Role-info-Units" code="1254" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PoC-User-Role-info-Units" code="1254" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="1" name="Moderator" />
         <item code="2" name="Dispatcher" />
@@ -1207,16 +1207,16 @@
         <item code="4" name="Session-Participant" />
       </data>
     </avp>
-    <avp name="Positioning-Data" code="1245" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Positioning-Data" code="1245" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Preferred-AoC-Currency" code="2315" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Preferred-AoC-Currency" code="2315" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Presence-Reporting-Area-Identifier" code="2821" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="Presence-Reporting-Area-Identifier" code="2821" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Presence-Reporting-Area-Information" code="2822" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="Presence-Reporting-Area-Information" code="2822" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Presence-Reporting-Area-Identifier" required="false" max="1" />
         <rule avp="Presence-Reporting-Area-Status" required="false" max="1" />
@@ -1224,42 +1224,42 @@
         <rule avp="AVP" required="false" />
       </data>
     </avp>
-    <avp name="Presence-Reporting-Area-Status" code="2823" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="Presence-Reporting-Area-Status" code="2823" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Priority" code="1209" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Priority" code="1209" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Low" />
         <item code="1" name="Normal" />
         <item code="2" name="High" />
       </data>
     </avp>
-    <avp name="Priority-Indication" code="3006" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Priority-Indication" code="3006" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Non-Priority" />
         <item code="1" name="Priority" />
       </data>
     </avp>
-    <avp name="Priority-Level" code="1046" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="Priority-Level" code="1046" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="PS-Append-Free-Format-Data" code="867" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PS-Append-Free-Format-Data" code="867" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Append" />
         <item code="1" name="Overwrite" />
       </data>
     </avp>
-    <avp name="PS-Free-Format-Data" code="866" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PS-Free-Format-Data" code="866" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="PS-Furnish-Charging-Information" code="865" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PS-Furnish-Charging-Information" code="865" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="3GPP-Charging-Id" required="true" max="1" />
         <rule avp="PS-Free-Format-Data" required="true" max="1" />
         <rule avp="PS-Append-Free-Format-Data" required="false" max="1" />
       </data>
     </avp>
-    <avp name="PS-Information" code="874" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="PS-Information" code="874" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="3GPP-Charging-Id" required="false" max="1" />
         <rule avp="PDN-Connection-Charging-Id" required="false" max="1" />
@@ -1319,7 +1319,7 @@
         <rule avp="CN-Operator-Selection-Entity" required="false" max="1" />
       </data>
     </avp>
-    <avp name="QoS-Information" code="1016" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="QoS-Information" code="1016" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Grouped">
         <rule avp="QoS-Class-Identifier" required="false" max="1" />
         <rule avp="Max-Requested-Bandwidth-UL" required="false" max="1" />
@@ -1334,7 +1334,7 @@
         <rule avp="AVP" required="false" />
       </data>
     </avp>
-    <avp name="QoS-Class-Identifier" code="1028" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="QoS-Class-Identifier" code="1028" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Enumerated">
         <item code="1" name="QCI_1" />
         <item code="2" name="QCI_2" />
@@ -1351,16 +1351,16 @@
         <item code="70" name="QCI_70" />
       </data>
     </avp>
-    <avp name="Quota-Consumption-Time" code="881" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Quota-Consumption-Time" code="881" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Quota-Holding-Time" code="871" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Quota-Holding-Time" code="871" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="RAI" code="909" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="RAI" code="909" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Rate-Element" code="2058" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Rate-Element" code="2058" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="CC-Unit-Type" required="true" max="1" />
         <rule avp="Charge-Reason-Code" required="false" max="1" />
@@ -1369,7 +1369,7 @@
         <rule avp="Unit-Quota-Threshold" required="false" max="1" />
       </data>
     </avp>
-    <avp name="RAT-Type" code="1032" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="RAT-Type" code="1032" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="WLAN" />
         <item code="1" name="VIRTUAL" />
@@ -1384,28 +1384,28 @@
         <item code="2003" name="EHRPD" />
       </data>
     </avp>
-    <avp name="Read-Reply-Report-Requested" code="1222" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Read-Reply-Report-Requested" code="1222" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="No" />
         <item code="1" name="Yes" />
       </data>
     </avp>
-    <avp name="Real-Time-Tariff-Information" code="2305" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Real-Time-Tariff-Information" code="2305" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Tariff-Information" required="false" max="1" />
         <rule avp="Tariff-XML" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Reason-Header" code="3401" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Reason-Header" code="3401" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Received-Talk-Burst-Time" code="1284" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Received-Talk-Burst-Time" code="1284" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Received-Talk-Burst-Volume" code="1285" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Received-Talk-Burst-Volume" code="1285" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Recipient-Address" code="1201" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Recipient-Address" code="1201" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Address-Type" required="false" max="1" />
         <rule avp="Address-Data" required="false" max="1" />
@@ -1413,7 +1413,7 @@
         <rule avp="Addressee-Type" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Recipient-Info" code="2026" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Recipient-Info" code="2026" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Destination-Interface" required="false" max="1" />
         <rule avp="Recipient-Address" required="false" />
@@ -1422,50 +1422,50 @@
         <rule avp="SM-Protocol-Id" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Recipient-Received-Address" code="2028" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Recipient-Received-Address" code="2028" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Address-Type" required="false" max="1" />
         <rule avp="Address-Data" required="false" max="1" />
         <rule avp="Address-Domain" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Recipient-SCCP-Address" code="2010" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Recipient-SCCP-Address" code="2010" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Reference-Number" code="3007" must="V.M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Reference-Number" code="3007" must="V.M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Refund-Information" code="2022" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Refund-Information" code="2022" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Relationship-Mode" code="2706" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Relationship-Mode" code="2706" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="trusted" />
         <item code="1" name="non-trusted" />
       </data>
     </avp>
-    <avp name="Related-IMS-Charging-Identifier" code="2711" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Related-IMS-Charging-Identifier" code="2711" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Related-IMS-Charging-Identifier-Node" code="2712" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Related-IMS-Charging-Identifier-Node" code="2712" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Remaining-Balance" code="2021" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Remaining-Balance" code="2021" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Unit-Value" required="true" max="1" />
         <rule avp="Currency-Code" required="true" max="1" />
       </data>
     </avp>
-    <avp name="Reply-Applic-Id" code="1223" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Reply-Applic-Id" code="1223" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Reply-Path-Requested" code="2011" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Reply-Path-Requested" code="2011" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="No Reply Path Set" />
         <item code="1" name="Reply path Set" />
       </data>
     </avp>
-    <avp name="Reporting-Reason" code="872" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Reporting-Reason" code="872" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="THRESHOLD" />
         <item code="1" name="QHT" />
@@ -1478,35 +1478,35 @@
         <item code="8" name="POOL_EXHAUSTED" />
       </data>
     </avp>
-    <avp name="Requested-Party-Address" code="1251" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Requested-Party-Address" code="1251" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Required-MBMS-Bearer-Capabilities" code="901" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="Required-MBMS-Bearer-Capabilities" code="901" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Role-Of-Node" code="829" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Role-Of-Node" code="829" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="ORIGINATING_ROLE" />
         <item code="1" name="TERMINATING_ROLE" />
         <item code="2" name="FORWARDING_ROLE" />
       </data>
     </avp>
-    <avp name="Route-Header-Received" code="3403" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Route-Header-Received" code="3403" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Route-Header-Transmitted" code="3404" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Route-Header-Transmitted" code="3404" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Scale-Factor" code="2059" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Scale-Factor" code="2059" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Value-Digits" required="true" max="1" />
         <rule avp="Exponent" required="false" max="1" />
       </data>
     </avp>
-    <avp name="SDP-Answer-Timestamp" code="1275" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SDP-Answer-Timestamp" code="1275" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="SDP-Media-Component" code="843" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SDP-Media-Component" code="843" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SDP-Media-Name" required="false" max="1" />
         <rule avp="SDP-Media-Description" required="false" />
@@ -1520,31 +1520,31 @@
         <rule avp="SDP-Type" required="false" max="1" />
       </data>
     </avp>
-    <avp name="SDP-Media-Description" code="845" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SDP-Media-Description" code="845" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="SDP-Media-Name" code="844" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SDP-Media-Name" code="844" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="SDP-Offer-Timestamp" code="1274" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SDP-Offer-Timestamp" code="1274" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="SDP-Session-Description" code="842" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SDP-Session-Description" code="842" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="SDP-TimeStamps" code="1273" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SDP-TimeStamps" code="1273" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SDP-Offer-Timestamp" required="false" max="1" />
         <rule avp="SDP-Answer-Timestamp" required="false" max="1" />
       </data>
     </avp>
-    <avp name="SDP-Type" code="2036" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SDP-Type" code="2036" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="SDP Offer" />
         <item code="1" name="SDP Answer" />
       </data>
     </avp>
-    <avp name="Serving-Node" code="2401" must="V,M" may="-" must-not="-" may-encrypt="N">
+    <avp name="Serving-Node" code="2401" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SGSN-Number" required="false" max="1" />
         <rule avp="SGSN-Name" required="false" max="1" />
@@ -1558,16 +1558,16 @@
         <rule avp="AVP" required="false" />
       </data>
     </avp>
-    <avp name="Session-Direction" code="2707" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Session-Direction" code="2707" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="inbound" />
         <item code="1" name="outbound" />
       </data>
     </avp>
-    <avp name="Served-Party-IP-Address" code="848" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Served-Party-IP-Address" code="848" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Server-Capabilities" code="603" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Server-Capabilities" code="603" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Mandatory-Capability" required="false" />
         <rule avp="Optional-Capability" required="false" />
@@ -1575,10 +1575,10 @@
         <rule avp="AVP" required="false" />
       </data>
     </avp>
-    <avp name="Server-Name" code="602" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Server-Name" code="602" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Service-Data-Container" code="2040" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Service-Data-Container" code="2040" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="AF-Correlation-Information" required="false" max="1" />
         <rule avp="Charging-Rule-Base-Name" required="false" max="1" />
@@ -1604,10 +1604,10 @@
         <rule avp="User-CSG-Information" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Service-Id" code="855" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Service-Id" code="855" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Service-Information" code="873" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Service-Information" code="873" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Subscription-Id" required="false" />
         <rule avp="AoC-Information" required="false" max="1" />
@@ -1627,22 +1627,22 @@
         <rule avp="MC-Information" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Service-Mode" code="2032" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Service-Mode" code="2032" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Service-Specific-Data" code="863" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Service-Specific-Data" code="863" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Service-Specific-Info" code="1249" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Service-Specific-Info" code="1249" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Service-Specific-Data" required="false" max="1" />
         <rule avp="Service-Specific-Type" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Service-Specific-Type" code="1257" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Service-Specific-Type" code="1257" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Serving-Node-Type" code="2047" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Serving-Node-Type" code="2047" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="SGSN" />
         <item code="1" name="PMIPSGW" />
@@ -1653,7 +1653,7 @@
         <item code="6" name="TWAN" />
       </data>
     </avp>
-    <avp name="Session-Priority" code="650" must="V" may="-" must-not="M" may-encrypt="N">
+    <avp name="Session-Priority" code="650" must="V" may="-" must-not="M" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="PRIORITY-0" />
         <item code="1" name="PRIORITY-1" />
@@ -1662,40 +1662,40 @@
         <item code="4" name="PRIORITY-4" />
       </data>
     </avp>
-    <avp name="SGSN-Address" code="1228" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SGSN-Address" code="1228" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="SGW-Address" code="2067" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SGW-Address" code="2067" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="SGW-Change" code="2065" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SGW-Change" code="2065" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="ACR_Start_NOT_due_to_SGW_Change" />
         <item code="1" name="ACR_Start_due_to_SGW_Change" />
       </data>
     </avp>
-    <avp name="SIP-Method" code="824" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SIP-Method" code="824" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="SIP-Request-Timestamp-Fraction" code="2301" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SIP-Request-Timestamp-Fraction" code="2301" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="SIP-Request-Timestamp" code="834" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SIP-Request-Timestamp" code="834" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="SIP-Response-Timestamp-Fraction" code="2302" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SIP-Response-Timestamp-Fraction" code="2302" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="SIP-Response-Timestamp" code="835" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SIP-Response-Timestamp" code="835" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="SM-Device-Trigger-Indicator" code="3407" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-Device-Trigger-Indicator" code="3407" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Not DeviceTrigger" />
         <item code="1" name="Device Trigger" />
       </data>
     </avp>
-    <avp name="SM-Device-Trigger-Information" code="3405" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-Device-Trigger-Information" code="3405" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="MTC-IWF-Address" required="false" max="1" />
         <rule avp="Reference-Number" required="false" max="1" />
@@ -1705,26 +1705,26 @@
         <rule avp="Application-Port-Identifier" required="false" max="1" />
       </data>
     </avp>
-    <avp name="SM-Discharge-Time" code="2012" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-Discharge-Time" code="2012" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="SM-Message-Type" code="2007" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-Message-Type" code="2007" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="SUBMISSION" />
         <item code="1" name="DELIVERY_REPORT" />
         <item code="2" name="SM Service Request" />
       </data>
     </avp>
-    <avp name="SM-Protocol-Id" code="2013" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-Protocol-Id" code="2013" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="SM-Sequence-Number" code="3408" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-Sequence-Number" code="3408" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="SMSC-Address" code="2017" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SMSC-Address" code="2017" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="SMS-Information" code="2000" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SMS-Information" code="2000" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SMS-Node" required="false" max="1" />
         <rule avp="Client-Address" required="false" max="1" />
@@ -1750,7 +1750,7 @@
         <rule avp="Recipient-Address" required="false" />
       </data>
     </avp>
-    <avp name="SMS-Node" code="2016" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SMS-Node" code="2016" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="SMS Router" />
         <item code="1" name="IP-SM-GW" />
@@ -1758,10 +1758,10 @@
         <item code="3" name="SMS-SC" />
       </data>
     </avp>
-    <avp name="SMS-Result" code="3409" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SMS-Result" code="3409" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="SM-Service-Type" code="2029" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-Service-Type" code="2029" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="VAS4SMS Short Message content processing" />
         <item code="1" name="VAS4SMS Short Message forwarding" />
@@ -1776,44 +1776,44 @@
         <item code="10" name="VAS4SMS Short Message Deferred Delivery" />
       </data>
     </avp>
-    <avp name="SM-Status" code="2014" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-Status" code="2014" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="SM-User-Data-Header" code="2015" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="SM-User-Data-Header" code="2015" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Sponsor-Identity" code="531" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="Sponsor-Identity" code="531" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="SSID" code="1524" must="V" may="-" must-not="M,P" may-encrypt="N">
+    <avp name="SSID" code="1524" must="V" may="-" must-not="M,P" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Start-of-Charging" code="3419" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Start-of-Charging" code="3419" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Start-Time" code="2041" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Start-Time" code="2041" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Status-AS-Code" code="2702" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Status-AS-Code" code="2702" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="4xx" />
         <item code="1" name="5xx" />
         <item code="2" name="Timeout" />
       </data>
     </avp>
-    <avp name="Stop-Time" code="2042" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Stop-Time" code="2042" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Submission-Time" code="1202" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Submission-Time" code="1202" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Subscriber-Role" code="2033" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Subscriber-Role" code="2033" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Originating" />
         <item code="1" name="Terminating" />
       </data>
     </avp>
-    <avp name="Supplementary-Service" code="2048" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Supplementary-Service" code="2048" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="MMTel-SService-Type" required="false" max="1" />
         <rule avp="Service-Mode" required="false" max="1" />
@@ -1827,13 +1827,13 @@
         <rule avp="AoC-Information" required="false" max="1" />
       </data>
     </avp>
-    <avp name="TAD-Identifier" code="2717" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="TAD-Identifier" code="2717" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="CS" />
         <item code="1" name="PS" />
       </data>
     </avp>
-    <avp name="Talk-Burst-Exchange" code="1255" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Talk-Burst-Exchange" code="1255" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="PoC-Change-Time" required="true" max="1" />
         <rule avp="Number-Of-Talk-Bursts" required="false" max="1" />
@@ -1846,29 +1846,29 @@
         <rule avp="PoC-Change-Condition" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Talk-Burst-Time" code="1286" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Talk-Burst-Time" code="1286" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Talk-Burst-Volume" code="1287" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Talk-Burst-Volume" code="1287" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Tariff-Information" code="2060" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Tariff-Information" code="2060" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Current-Tariff" required="true" max="1" />
         <rule avp="Tariff-Time-Change" required="false" max="1" />
         <rule avp="Next-Tariff" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Tariff-XML" code="2306" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Tariff-XML" code="2306" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="TDF-IP-Address" code="1091" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="TDF-IP-Address" code="1091" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Address" />
     </avp>
-    <avp name="Teleservice" code="3413" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Teleservice" code="3413" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Terminal-Information" code="1401" must="V,M" may="-" must-not="-" may-encrypt="N">
+    <avp name="Terminal-Information" code="1401" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="IMEI" required="false" max="1" />
         <rule avp="3GPP2-MEID" required="false" max="1" />
@@ -1876,31 +1876,31 @@
         <rule avp="AVP" required="false" />
       </data>
     </avp>
-    <avp name="Terminating-IOI" code="840" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Terminating-IOI" code="840" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Time-First-Usage" code="2043" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Time-First-Usage" code="2043" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Time-Last-Usage" code="2044" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Time-Last-Usage" code="2044" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="Time-Quota-Mechanism" code="1270" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Time-Quota-Mechanism" code="1270" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Time-Quota-Type" required="true" max="1" />
         <rule avp="Base-Time-Interval" required="true" max="1" />
       </data>
     </avp>
-    <avp name="Time-Quota-Threshold" code="868" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Time-Quota-Threshold" code="868" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Time-Quota-Type" code="1271" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Time-Quota-Type" code="1271" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="DISCRETE_TIME_PERIOD" />
         <item code="1" name="CONTINUOUS_TIME_PERIOD" />
       </data>
     </avp>
-    <avp name="Time-Stamps" code="833" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Time-Stamps" code="833" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SIP-Request-Timestamp" required="false" max="1" />
         <rule avp="SIP-Response-Timestamp" required="false" max="1" />
@@ -1908,22 +1908,22 @@
         <rule avp="SIP-Response-Timestamp-Fraction" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Time-Usage" code="2045" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Time-Usage" code="2045" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="TMGI" code="900" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="TMGI" code="900" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Token-Text" code="1215" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Token-Text" code="1215" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Total-Number-Of-Messages-Exploded" code="2113" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="Total-Number-Of-Messages-Exploded" code="2113" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Total-Number-Of-Messages-Sent" code="2114" must="V,M" may="P" must-not="-" may-encrypt="Y">
+    <avp name="Total-Number-Of-Messages-Sent" code="2114" must="V,M" may="P" must-not="-" may-encrypt="Y" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Traffic-Data-Volumes" code="2046" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Traffic-Data-Volumes" code="2046" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="QoS-Information" required="false" max="1" />
         <rule avp="Accounting-Input-Octets" required="false" max="1" />
@@ -1936,21 +1936,21 @@
         <rule avp="User-CSG-Information" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Transcoder-Inserted-Indication" code="2605" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Transcoder-Inserted-Indication" code="2605" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Transcoder Not Inserted" />
         <item code="1" name="Transcoder Inserted" />
       </data>
     </avp>
-    <avp name="Transit-IOI-List" code="2701" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Transit-IOI-List" code="2701" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Trigger" code="1264" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Trigger" code="1264" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Trigger-Type" required="false" />
       </data>
     </avp>
-    <avp name="Trigger-Type" code="870" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Trigger-Type" code="870" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="1" name="CHANGE_IN_SGSN_IP_ADDRESS" />
         <item code="2" name="CHANGE_IN_QOS" />
@@ -1991,60 +1991,60 @@
         <item code="73" name="CHANGE_OF_UE_PRESENCE_IN_PRESENCE_REPORTING_AREA" />
       </data>
     </avp>
-    <avp name="Trunk-Group-Id" code="851" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Trunk-Group-Id" code="851" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Incoming-Trunk-Group-Id" required="false" max="1" />
         <rule avp="Outgoing-Trunk-Group-Id" required="false" max="1" />
       </data>
     </avp>
-    <avp name="TWAN-User-Location-Info" code="2714" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="TWAN-User-Location-Info" code="2714" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="SSID" required="true" max="1" />
         <rule avp="BSSID" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Type-Number" code="1204" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Type-Number" code="1204" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="Unit-Cost" code="2061" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Unit-Cost" code="2061" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Value-Digits" required="true" max="1" />
         <rule avp="Exponent" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Unit-Quota-Threshold" code="1226" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Unit-Quota-Threshold" code="1226" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="User-CSG-Information" code="2319" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="User-CSG-Information" code="2319" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="CSG-Id" required="true" max="1" />
         <rule avp="CSG-Access-Mode" required="true" max="1" />
         <rule avp="CSG-Membership-Indication" required="false" max="1" />
       </data>
     </avp>
-    <avp name="User-Data" code="606" must="V,M" may="-" must-not="-" may-encrypt="N">
+    <avp name="User-Data" code="606" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="User-Location-Info-Time" code="2812" must="V" may="P" must-not="M" may-encrypt="Y">
+    <avp name="User-Location-Info-Time" code="2812" must="V" may="P" must-not="M" may-encrypt="Y" vendor-id="10415">
       <data type="Time" />
     </avp>
-    <avp name="User-Participating-Type" code="1279" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="User-Participating-Type" code="1279" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Enumerated">
         <item code="0" name="Normal" />
         <item code="1" name="NW PoC Box" />
         <item code="2" name="UE PoC Box" />
       </data>
     </avp>
-    <avp name="User-Session-Id" code="830" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="User-Session-Id" code="830" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="VAS-Id" code="1102" must="V,M" may="-" must-not="-" may-encrypt="N">
+    <avp name="VAS-Id" code="1102" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="VASP-Id" code="1101" must="V,M" may="-" must-not="-" may-encrypt="N">
+    <avp name="VASP-Id" code="1101" must="V,M" may="-" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="VCS-Information" code="3410" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="VCS-Information" code="3410" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Grouped">
         <rule avp="Bearer-Capability" required="false" max="1" />
         <rule avp="Network-Call-Reference-Number" required="false" max="1" />
@@ -2060,34 +2060,34 @@
         <rule avp="PS-Free-Format-Data" required="false" max="1" />
       </data>
     </avp>
-    <avp name="VLR-Number" code="3420" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="VLR-Number" code="3420" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="Volume-Quota-Threshold" code="869" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="Volume-Quota-Threshold" code="869" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="Unsigned32" />
     </avp>
-    <avp name="3GPP-QoS-Negotiated-Profile" code="5" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="3GPP-QoS-Negotiated-Profile" code="5" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="UTF8String" />
     </avp>
-    <avp name="3GPP-SGSN-Address" code="6" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="3GPP-SGSN-Address" code="6" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-GGSN-Address" code="7" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="3GPP-GGSN-Address" code="7" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-GGSN-Address" code="7" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="3GPP-GGSN-Address" code="7" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-CG-Address" code="4" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="3GPP-CG-Address" code="4" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-CG-IPv6-Address" code="14" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="3GPP-CG-IPv6-Address" code="14" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-GGSN-IPv6-Addresss" code="16" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="3GPP-GGSN-IPv6-Addresss" code="16" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
-    <avp name="3GPP-SGSN-IPv6-Address" code="15" must="V,M" may="P" must-not="-" may-encrypt="N">
+    <avp name="3GPP-SGSN-IPv6-Address" code="15" must="V,M" may="P" must-not="-" may-encrypt="N" vendor-id="10415">
       <data type="OctetString" />
     </avp>
   </application>
