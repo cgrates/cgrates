@@ -66,12 +66,12 @@ func (s *Scheduler) Loop() {
 		} else {
 			s.Unlock()
 			d := a0.GetNextStartTime(now).Sub(now)
-			utils.Logger.Info(fmt.Sprintf("Time to next action (%s): %v", a0.Id, d))
+			utils.Logger.Info(fmt.Sprintf("<Scheduler> Time to next action (%s): %v", a0.Id, d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				utils.Logger.Info(fmt.Sprintf("Time for action on %v", a0))
+				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for action on %v", a0))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
@@ -82,7 +82,7 @@ func (s *Scheduler) Loop() {
 func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	actionPlans, err := storage.GetAllActionPlans()
 	if err != nil && err != utils.ErrNotFound {
-		utils.Logger.Warning(fmt.Sprintf("Cannot get action plans: %v", err))
+		utils.Logger.Warning(fmt.Sprintf("<Scheduler> Cannot get action plans: %v", err))
 	}
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> processing %d action plans", len(actionPlans)))
 	// recreate the queue
@@ -103,7 +103,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 			isAsap = ap.IsASAP()
 			toBeSaved = toBeSaved || isAsap
 			if isAsap {
-				utils.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
+				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for one time action on %v", key))
 				ap.Execute()
 				ap.AccountIds = make([]string, 0)
 			} else {
