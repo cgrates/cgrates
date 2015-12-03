@@ -2,7 +2,7 @@
 <diameter>
   <application id="4">
     <vendor id="2011" name="Huawei" />
-    <avp name="IN-Information" code="20300" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="IN-Information" code="20300" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Grouped">
         <rule avp="Calling-Party-Address" required="false" max="1" />
         <rule avp="Called-Party-Address" required="false" max="1" />
@@ -28,7 +28,7 @@
         <rule avp="Final-Unit-Tone-Indicator" required="false" max="1" />
       </data>
     </avp>
-    <avp name="MC-Information" code="29000" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="MC-Information" code="29000" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Grouped">
         <rule avp="TransactionId" required="false" max="1" />
         <rule avp="TransparentData" required="false" max="1" />
@@ -36,89 +36,89 @@
         <rule avp="Recipient-Address" required="false" max="1" />
       </data>
     </avp>
-    <avp name="CallingPartyAddress" code="20336" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="CallingPartyAddress" code="20336" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="CalledPartyAddress" code="20337" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="CalledPartyAddress" code="20337" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Real-Called-Number" code="20327" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Real-Called-Number" code="20327" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Connect-Called-Number" code="20373" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Connect-Called-Number" code="20373" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Called-Party-NP" code="20385" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Called-Party-NP" code="20385" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="SSP-Time" code="20386" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="SSP-Time" code="20386" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="SSP-Time" code="20386" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="SSP-Time" code="20386" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Calling-Vlr-Number" code="20302" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Calling-Vlr-Number" code="20302" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Calling-CellID-Or-SAI" code="20303" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Calling-CellID-Or-SAI" code="20303" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Called-Vlr-Number" code="20305" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Called-Vlr-Number" code="20305" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Called-CellID-Or-SAI" code="20306" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Called-CellID-Or-SAI" code="20306" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Original-Called-Party-Id" code="20310" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Original-Called-Party-Id" code="20310" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Redirecting-Party-Id" code="20316" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Redirecting-Party-Id" code="20316" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Redirection-Reason" code="20363" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Redirection-Reason" code="20363" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Unsigned32" />
     </avp>
-    <avp name="MSC-Address" code="20322" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="MSC-Address" code="20322" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Time-Zone" code="20324" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Time-Zone" code="20324" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Integer32" />
     </avp>
-    <avp name="Bearer-Capability" code="20313" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Bearer-Capability" code="20313" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="OctetString" />
     </avp>
-    <avp name="Charge-Flow-Type" code="20339" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Charge-Flow-Type" code="20339" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Call-Reference-Number" code="20321" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Call-Reference-Number" code="20321" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="OctetString" />
     </avp>
-    <avp name="Final-Unit-Tone-Indicator" code="20939" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Final-Unit-Tone-Indicator" code="20939" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Enumerated">
         <item code="0" name="NO_TONE" />
         <item code="1" name="TONE" />
       </data>
     </avp>
-    <avp name="Announcement-Data" code="20931" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Announcement-Data" code="20931" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Grouped">
         <rule avp="Announcement-Order" required="false" max="1" />
         <rule avp="Announcement-Id" required="false" max="1" />
         <rule avp="Announcement-Parameter" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Announcement-Order" code="20932" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Announcement-Order" code="20932" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Announcement-Id" code="20933" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Announcement-Id" code="20933" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Unsigned32" />
     </avp>
-    <avp name="Announcement-Parameter" code="20934" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Announcement-Parameter" code="20934" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Grouped">
         <rule avp="Announcement-Parameter-Type" required="false" max="1" />
         <rule avp="Announcement-Parameter-Value" required="false" max="1" />
       </data>
     </avp>
-    <avp name="Announcement-Parameter-Type" code="20935" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Announcement-Parameter-Type" code="20935" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="Enumerated">
         <item code="0" name="integer" />
         <item code="1" name="number" />
@@ -127,19 +127,19 @@
         <item code="4" name="price" />
       </data>
     </avp>
-    <avp name="Announcement-Parameter-Value" code="20936" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Announcement-Parameter-Value" code="20936" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="Re-Routing-Number" code="20937" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="Re-Routing-Number" code="20937" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="HighLayerCharacteristics" code="29001" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="HighLayerCharacteristics" code="29001" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="OctetString" />
     </avp>
-    <avp name="MC-Service-Id" code="29002" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="MC-Service-Id" code="29002" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
-    <avp name="TransparentData" code="29003" must="V" may="P,M" must-not="-" may-encrypt="N">
+    <avp name="TransparentData" code="29003" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="20300">
       <data type="UTF8String" />
     </avp>
   </application>

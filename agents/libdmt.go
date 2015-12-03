@@ -229,19 +229,11 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 	if _, err := m.NewAVP("Event-Timestamp", avp.Mbit, 0, datatype.Time(self.EventTimestamp)); err != nil {
 		return nil, err
 	}
-	subscriptionIdType, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Subscription-Id-Type")
-	if err != nil {
-		return nil, err
-	}
-	subscriptionIdData, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Subscription-Id-Data")
-	if err != nil {
-		return nil, err
-	}
 	for _, subscriptionId := range self.SubscriptionId {
 		if _, err := m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
 			AVP: []*diam.AVP{
-				diam.NewAVP(subscriptionIdType.Code, avp.Mbit, 0, datatype.Enumerated(subscriptionId.SubscriptionIdType)),
-				diam.NewAVP(subscriptionIdData.Code, avp.Mbit, 0, datatype.UTF8String(subscriptionId.SubscriptionIdData)),
+				diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(subscriptionId.SubscriptionIdType)), // Subscription-Id-Type
+				diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String(subscriptionId.SubscriptionIdData)), // Subscription-Id-Data
 			}}); err != nil {
 			return nil, err
 		}
@@ -249,83 +241,27 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 	if _, err := m.NewAVP("Service-Identifier", avp.Mbit, 0, datatype.Unsigned32(self.ServiceIdentifier)); err != nil {
 		return nil, err
 	}
-	ccTimeAvp, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "CC-Time")
-	if err != nil {
-		return nil, err
-	}
 	if _, err := m.NewAVP("Requested-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
-			diam.NewAVP(ccTimeAvp.Code, avp.Mbit, 0, datatype.Unsigned32(self.RequestedServiceUnit.CCTime))}}); err != nil {
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(self.RequestedServiceUnit.CCTime))}}); err != nil { // CC-Time
 		return nil, err
 	}
-	inInformation, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "IN-Information")
-	if err != nil {
-		return nil, err
-	}
-	callingPartyAddress, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Calling-Party-Address")
-	if err != nil {
-		return nil, err
-	}
-	calledPartyAddress, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Called-Party-Address")
-	if err != nil {
-		return nil, err
-	}
-	realCalledNumber, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Real-Called-Number")
-	if err != nil {
-		return nil, err
-	}
-	chargeFlowType, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Charge-Flow-Type")
-	if err != nil {
-		return nil, err
-	}
-	callingVlrNumber, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Calling-Vlr-Number")
-	if err != nil {
-		return nil, err
-	}
-	callingCellIdOrSai, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Calling-CellID-Or-SAI")
-	if err != nil {
-		return nil, err
-	}
-	bearerCapability, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Bearer-Capability")
-	if err != nil {
-		return nil, err
-	}
-	callReferenceNumber, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Call-Reference-Number")
-	if err != nil {
-		return nil, err
-	}
-	mscAddress, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "MSC-Address")
-	if err != nil {
-		return nil, err
-	}
-	timeZone, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Time-Zone")
-	if err != nil {
-		return nil, err
-	}
-	calledPartyNP, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "Called-Party-NP")
-	if err != nil {
-		return nil, err
-	}
-	sspTime, err := m.Dictionary().FindAVP(m.Header.ApplicationID, "SSP-Time")
-	if err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("Service-Information", avp.Mbit, 0, &diam.GroupedAVP{
+	if _, err := m.NewAVP("Service-Information", avp.Mbit, 10415, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
-			diam.NewAVP(inInformation.Code, avp.Mbit, 0, &diam.GroupedAVP{
+			diam.NewAVP(20300, avp.Mbit, 20300, &diam.GroupedAVP{
 				AVP: []*diam.AVP{
-					diam.NewAVP(callingPartyAddress.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.CallingPartyAddress)),
-					diam.NewAVP(calledPartyAddress.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyAddress)),
-					diam.NewAVP(realCalledNumber.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.RealCalledNumber)),
-					diam.NewAVP(chargeFlowType.Code, avp.Mbit, 0, datatype.Unsigned32(self.ServiceInformation.INInformation.ChargeFlowType)),
-					diam.NewAVP(callingVlrNumber.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.CallingVlrNumber)),
-					diam.NewAVP(callingCellIdOrSai.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.CallingCellIDOrSAI)),
-					diam.NewAVP(bearerCapability.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.BearerCapability)),
-					diam.NewAVP(callReferenceNumber.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.CallReferenceNumber)),
-					diam.NewAVP(mscAddress.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.MSCAddress)),
-					diam.NewAVP(timeZone.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.TimeZone)),
-					diam.NewAVP(calledPartyNP.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyNP)),
-					diam.NewAVP(sspTime.Code, avp.Mbit, 0, datatype.UTF8String(self.ServiceInformation.INInformation.SSPTime)),
+					diam.NewAVP(831, avp.Mbit, 10415, datatype.UTF8String(self.ServiceInformation.INInformation.CallingPartyAddress)),   // Calling-Party-Address
+					diam.NewAVP(832, avp.Mbit, 10415, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyAddress)),    // Called-Party-Address
+					diam.NewAVP(20327, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.RealCalledNumber)),    // Real-Called-Number
+					diam.NewAVP(20339, avp.Mbit, 20300, datatype.Unsigned32(self.ServiceInformation.INInformation.ChargeFlowType)),      // Charge-Flow-Type
+					diam.NewAVP(20302, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CallingVlrNumber)),    // Calling-Vlr-Number
+					diam.NewAVP(20303, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CallingCellIDOrSAI)),  // Calling-CellID-Or-SAI
+					diam.NewAVP(20313, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.BearerCapability)),    // Bearer-Capability
+					diam.NewAVP(20321, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CallReferenceNumber)), // Call-Reference-Number
+					diam.NewAVP(20322, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.MSCAddress)),          // MSC-Address
+					diam.NewAVP(20324, avp.Mbit, 20300, datatype.Unsigned32(self.ServiceInformation.INInformation.TimeZone)),            // Time-Zone
+					diam.NewAVP(20385, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyNP)),       // Called-Party-NP
+					diam.NewAVP(20386, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.SSPTime)),             // SSP-Time
 				},
 			}),
 		}}); err != nil {
@@ -375,7 +311,7 @@ func (self *CCR) eventFieldValue(fldTpl utils.RSRFields) string {
 			for i, val := range hierarchyPath {
 				hpIf[i] = val
 			}
-			matchingAvps, err := self.diamMessage.FindAVPsWithPath(hpIf)
+			matchingAvps, err := self.diamMessage.FindAVPsWithPath(hpIf, dict.UndefinedVendorID)
 			if err != nil || len(matchingAvps) == 0 {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
 				continue // Filter not matching
