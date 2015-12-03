@@ -326,10 +326,16 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 
 func TestSmGenericJsonCfg(t *testing.T) {
 	eCfg := &SmGenericJsonCfg{
-		Enabled:           utils.BoolPointer(false),
-		Listen_bijson:     utils.StringPointer("127.0.0.1:2014"),
-		Rater:             utils.StringPointer("internal"),
-		Cdrs:              utils.StringPointer("internal"),
+		Enabled:       utils.BoolPointer(false),
+		Listen_bijson: utils.StringPointer("127.0.0.1:2014"),
+		Ha_rater: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
+		Ha_cdrs: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
 		Debit_interval:    utils.StringPointer("0s"),
 		Min_call_duration: utils.StringPointer("0s"),
 		Max_call_duration: utils.StringPointer("3h"),
@@ -343,9 +349,15 @@ func TestSmGenericJsonCfg(t *testing.T) {
 
 func TestSmFsJsonCfg(t *testing.T) {
 	eCfg := &SmFsJsonCfg{
-		Enabled:                utils.BoolPointer(false),
-		Rater:                  utils.StringPointer("internal"),
-		Cdrs:                   utils.StringPointer("internal"),
+		Enabled: utils.BoolPointer(false),
+		Ha_rater: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
+		Ha_cdrs: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
 		Create_cdr:             utils.BoolPointer(false),
 		Extra_fields:           utils.StringSlicePointer([]string{}),
 		Debit_interval:         utils.StringPointer("10s"),
@@ -373,9 +385,15 @@ func TestSmFsJsonCfg(t *testing.T) {
 
 func TestSmKamJsonCfg(t *testing.T) {
 	eCfg := &SmKamJsonCfg{
-		Enabled:           utils.BoolPointer(false),
-		Rater:             utils.StringPointer("internal"),
-		Cdrs:              utils.StringPointer("internal"),
+		Enabled: utils.BoolPointer(false),
+		Ha_rater: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
+		Ha_cdrs: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
 		Create_cdr:        utils.BoolPointer(false),
 		Debit_interval:    utils.StringPointer("10s"),
 		Min_call_duration: utils.StringPointer("0s"),
@@ -396,10 +414,16 @@ func TestSmKamJsonCfg(t *testing.T) {
 
 func TestSmOsipsJsonCfg(t *testing.T) {
 	eCfg := &SmOsipsJsonCfg{
-		Enabled:                   utils.BoolPointer(false),
-		Listen_udp:                utils.StringPointer("127.0.0.1:2020"),
-		Rater:                     utils.StringPointer("internal"),
-		Cdrs:                      utils.StringPointer("internal"),
+		Enabled:    utils.BoolPointer(false),
+		Listen_udp: utils.StringPointer("127.0.0.1:2020"),
+		Ha_rater: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
+		Ha_cdrs: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
 		Create_cdr:                utils.BoolPointer(false),
 		Debit_interval:            utils.StringPointer("10s"),
 		Min_call_duration:         utils.StringPointer("0s"),

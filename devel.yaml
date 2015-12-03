@@ -2,6 +2,7 @@ package: github.com/cgrates/cgrates
 import:
   - package: github.com/ugorji/go
   - package: github.com/jinzhu/gorm
+  - package: github.com/jinzhu/inflection
   - package: golang.org/x/net
   - package: github.com/DisposaBoy/JsonConfigReader
   - package: github.com/go-sql-driver/mysql

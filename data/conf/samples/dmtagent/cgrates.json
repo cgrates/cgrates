@@ -47,8 +47,12 @@
 
 "sm_generic": {
 	"enabled": true,
-	"rater": "internal",
-	"cdrs": "internal",
+	"ha_rater": [
+	      {"server": "internal"}     // address where to reach the Rater <""|internal|127.0.0.1:2013>
+	],
+	"ha_cdrs": [
+	      {"server": "internal"}     // address where to reach CDR Server, empty to disable CDR capturing <internal|x.y.z.y:1234>
+	],	
 },
 
 "diameter_agent": {

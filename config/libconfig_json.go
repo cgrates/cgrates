@@ -164,8 +164,8 @@ type CdrcJsonCfg struct {
 type SmGenericJsonCfg struct {
 	Enabled           *bool
 	Listen_bijson     *string
-	Rater             *string
-	Cdrs              *string
+	Ha_rater          *[]*HaPoolJsonCfg
+	Ha_cdrs           *[]*HaPoolJsonCfg
 	Debit_interval    *string
 	Min_call_duration *string
 	Max_call_duration *string
@@ -174,8 +174,8 @@ type SmGenericJsonCfg struct {
 // SM-FreeSWITCH config section
 type SmFsJsonCfg struct {
 	Enabled                *bool
-	Rater                  *string
-	Cdrs                   *string
+	Ha_rater               *[]*HaPoolJsonCfg
+	Ha_cdrs                *[]*HaPoolJsonCfg
 	Create_cdr             *bool
 	Extra_fields           *[]string
 	Debit_interval         *string
@@ -190,6 +190,11 @@ type SmFsJsonCfg struct {
 	Connections            *[]*FsConnJsonCfg
 }
 
+// Represents one connection instance towards a rater/cdrs server
+type HaPoolJsonCfg struct {
+	Server *string
+}
+
 // Represents one connection instance towards FreeSWITCH
 type FsConnJsonCfg struct {
 	Server     *string
@@ -200,8 +205,8 @@ type FsConnJsonCfg struct {
 // SM-Kamailio config section
 type SmKamJsonCfg struct {
 	Enabled           *bool
-	Rater             *string
-	Cdrs              *string
+	Ha_rater          *[]*HaPoolJsonCfg
+	Ha_cdrs           *[]*HaPoolJsonCfg
 	Create_cdr        *bool
 	Debit_interval    *string
 	Min_call_duration *string
@@ -219,8 +224,8 @@ type KamConnJsonCfg struct {
 type SmOsipsJsonCfg struct {
 	Enabled                   *bool
 	Listen_udp                *string
-	Rater                     *string
-	Cdrs                      *string
+	Ha_rater                  *[]*HaPoolJsonCfg
+	Ha_cdrs                   *[]*HaPoolJsonCfg
 	Create_cdr                *bool
 	Debit_interval            *string
 	Min_call_duration         *string
