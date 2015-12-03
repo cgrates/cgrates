@@ -762,7 +762,7 @@ type UsageRecord struct {
 
 func (self *UsageRecord) AsStoredCdr(timezone string) (*StoredCdr, error) {
 	var err error
-	storedCdr := &StoredCdr{TOR: self.TOR, ReqType: self.ReqType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
+	storedCdr := &StoredCdr{CgrId: self.GetId(), TOR: self.TOR, ReqType: self.ReqType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
 		Account: self.Account, Subject: self.Subject, Destination: self.Destination}
 	if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
 		return nil, err
@@ -785,6 +785,7 @@ func (self *UsageRecord) AsStoredCdr(timezone string) (*StoredCdr, error) {
 func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
 	var err error
 	cd := &CallDescriptor{
+		CgrId:       self.GetId(),
 		TOR:         self.TOR,
 		Direction:   self.Direction,
 		Tenant:      self.Tenant,
@@ -812,4 +813,8 @@ func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, err
 		cd.ExtraFields[k] = v
 	}
 	return cd, nil
+}
+
+func (self *UsageRecord) GetId() string {
+	return utils.Sha1(self.TOR, self.ReqType, self.Direction, self.Tenant, self.Category, self.Account, self.Subject, self.Destination, self.SetupTime, self.AnswerTime, self.Usage)
 }

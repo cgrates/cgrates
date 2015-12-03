@@ -570,7 +570,7 @@ func TestUsageReqAsCD(t *testing.T) {
 		Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", Usage: "0.00000001",
 	}
-	eCD := &CallDescriptor{TOR: req.TOR, Direction: req.Direction,
+	eCD := &CallDescriptor{CgrId: "9473e7b2e075d168b9da10ae957ee68fe5a217e4", TOR: req.TOR, Direction: req.Direction,
 		Tenant: req.Tenant, Category: req.Category, Account: req.Account, Subject: req.Subject, Destination: req.Destination,
 		TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).Add(time.Duration(10))}
 	if cd, err := req.AsCallDescriptor(""); err != nil {
