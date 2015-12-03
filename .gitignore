@@ -14,3 +14,4 @@ data/vagrant/.vagrant
 data/vagrant/vagrant_ansible_inventory_default
 data/tutorials/fs_evsock/freeswitch/etc/freeswitch/
 vendor
+*.test
