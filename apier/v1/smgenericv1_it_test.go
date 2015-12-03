@@ -151,7 +151,7 @@ func TestSMGV1GetMaxUsage(t *testing.T) {
 	var maxTime float64
 	if err := smgV1Rpc.Call("SMGenericV1.GetMaxUsage", setupReq, &maxTime); err != nil {
 		t.Error(err)
-	} else if maxTime != 2930 {
+	} else if maxTime != 2690 {
 		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
 	}
 }

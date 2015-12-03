@@ -8,19 +8,29 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/hoisie/redis"
+	"github.com/mediocregopher/radix.v2/redis"
 )
 
 const OLD_ACCOUNT_PREFIX = "ubl_"
 
 type MigratorRC8 struct {
-	dbNb int
-	db   *redis.Client
-	ms   engine.Marshaler
+	db *redis.Client
+	ms engine.Marshaler
 }
 
 func NewMigratorRC8(address string, db int, pass, mrshlerStr string) (*MigratorRC8, error) {
-	ndb := &redis.Client{Addr: address, Db: db, Password: pass}
+	client, err := redis.Dial("tcp", address)
+	if err != nil {
+		return nil, err
+	}
+	if err := client.Cmd("SELECT", db).Err; err != nil {
+		return nil, err
+	}
+	if pass != "" {
+		if err := client.Cmd("AUTH", pass).Err; err != nil {
+			return nil, err
+		}
+	}
 
 	var mrshler engine.Marshaler
 	if mrshlerStr == utils.MSGPACK {
@@ -30,7 +40,7 @@ func NewMigratorRC8(address string, db int, pass, mrshlerStr string) (*MigratorR
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
-	return &MigratorRC8{db: ndb, dbNb: db, ms: mrshler}, nil
+	return &MigratorRC8{db: client, ms: mrshler}, nil
 }
 
 type Account struct {
@@ -116,15 +126,16 @@ type Action struct {
 }
 
 func (mig MigratorRC8) migrateAccounts() error {
-	keys, err := mig.db.Keys(OLD_ACCOUNT_PREFIX + "*")
+	keys, err := mig.db.Cmd("KEYS", OLD_ACCOUNT_PREFIX+"*").List()
 	if err != nil {
 		return err
 	}
-	newAccounts := make([]*engine.Account, len(keys))
+	newAccounts := make([]*engine.Account, 0)
+	var migratedKeys []string
 	// get existing accounts
-	for keyIndex, key := range keys {
+	for _, key := range keys {
 		log.Printf("Migrating account: %s...", key)
-		values, err := mig.db.Get(key)
+		values, err := mig.db.Cmd("GET", key).Bytes()
 		if err != nil {
 			continue
 		}
@@ -144,14 +155,18 @@ func (mig MigratorRC8) migrateAccounts() error {
 		// fix id
 		idElements := strings.Split(newAcc.Id, utils.CONCATENATED_KEY_SEP)
 		if len(idElements) != 3 {
-			return fmt.Errorf("Malformed account ID %s", oldAcc.Id)
+			log.Printf("Malformed account ID %s", oldAcc.Id)
+			continue
 		}
 		newAcc.Id = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
 		// balances
+		balanceErr := false
 		for oldBalKey, oldBalChain := range oldAcc.BalanceMap {
 			keyElements := strings.Split(oldBalKey, "*")
 			if len(keyElements) != 3 {
-				return fmt.Errorf("Malformed balance key in %s: %s", oldAcc.Id, oldBalKey)
+				log.Printf("Malformed balance key in %s: %s", oldAcc.Id, oldBalKey)
+				balanceErr = true
+				break
 			}
 			newBalKey := "*" + keyElements[1]
 			newBalDirection := "*" + keyElements[2]
@@ -177,6 +192,9 @@ func (mig MigratorRC8) migrateAccounts() error {
 					Disabled:       oldBal.Disabled,
 				}
 			}
+		}
+		if balanceErr {
+			continue
 		}
 		// unit counters
 		for _, oldUc := range oldAcc.UnitCounters {
@@ -232,7 +250,8 @@ func (mig MigratorRC8) migrateAccounts() error {
 			}
 		}
 		newAcc.InitCounters()
-		newAccounts[keyIndex] = newAcc
+		newAccounts = append(newAccounts, newAcc)
+		migratedKeys = append(migratedKeys, key)
 	}
 	// write data back
 	for _, newAcc := range newAccounts {
@@ -240,20 +259,26 @@ func (mig MigratorRC8) migrateAccounts() error {
 		if err != nil {
 			return err
 		}
-		if err := mig.db.Set(utils.ACCOUNT_PREFIX+newAcc.Id, result); err != nil {
+		if err := mig.db.Cmd("SET", utils.ACCOUNT_PREFIX+newAcc.Id, result).Err; err != nil {
 			return err
 		}
 	}
 	// delete old data
-	log.Printf("Deleting old accounts: %s...", OLD_ACCOUNT_PREFIX+"*")
-	for _, key := range keys {
-		_, err = mig.db.Del(key)
+	log.Printf("Deleting migrated accounts...")
+	for _, key := range migratedKeys {
+		if err := mig.db.Cmd("DEL", key).Err; err != nil {
+			return err
+		}
+	}
+	notMigrated := len(keys) - len(migratedKeys)
+	if notMigrated > 0 {
+		log.Printf("WARNING: there are %d accounts that failed migration!", notMigrated)
 	}
 	return err
 }
 
 func (mig MigratorRC8) migrateActionTriggers() error {
-	keys, err := mig.db.Keys(utils.ACTION_TRIGGER_PREFIX + "*")
+	keys, err := mig.db.Cmd("KEYS", utils.ACTION_TRIGGER_PREFIX+"*").List()
 	if err != nil {
 		return err
 	}
@@ -262,7 +287,7 @@ func (mig MigratorRC8) migrateActionTriggers() error {
 		log.Printf("Migrating action trigger: %s...", key)
 		var oldAtrs ActionTriggers
 		var values []byte
-		if values, err = mig.db.Get(key); err == nil {
+		if values, err = mig.db.Cmd("GET", key).Bytes(); err == nil {
 			if err := mig.ms.Unmarshal(values, &oldAtrs); err != nil {
 				return err
 			}
@@ -304,7 +329,7 @@ func (mig MigratorRC8) migrateActionTriggers() error {
 		if err != nil {
 			return err
 		}
-		if err = mig.db.Set(key, result); err != nil {
+		if err = mig.db.Cmd("SET", key, result).Err; err != nil {
 			return err
 		}
 	}
@@ -312,7 +337,7 @@ func (mig MigratorRC8) migrateActionTriggers() error {
 }
 
 func (mig MigratorRC8) migrateActions() error {
-	keys, err := mig.db.Keys(utils.ACTION_PREFIX + "*")
+	keys, err := mig.db.Cmd("KEYS", utils.ACTION_PREFIX+"*").List()
 	if err != nil {
 		return err
 	}
@@ -321,7 +346,7 @@ func (mig MigratorRC8) migrateActions() error {
 		log.Printf("Migrating action: %s...", key)
 		var oldAcs Actions
 		var values []byte
-		if values, err = mig.db.Get(key); err == nil {
+		if values, err = mig.db.Cmd("GET", key).Bytes(); err == nil {
 			if err := mig.ms.Unmarshal(values, &oldAcs); err != nil {
 				return err
 			}
@@ -360,7 +385,7 @@ func (mig MigratorRC8) migrateActions() error {
 		if err != nil {
 			return err
 		}
-		if err = mig.db.Set(key, result); err != nil {
+		if err = mig.db.Cmd("SET", key, result).Err; err != nil {
 			return err
 		}
 	}
@@ -368,7 +393,7 @@ func (mig MigratorRC8) migrateActions() error {
 }
 
 func (mig MigratorRC8) migrateDerivedChargers() error {
-	keys, err := mig.db.Keys(utils.DERIVEDCHARGERS_PREFIX + "*")
+	keys, err := mig.db.Cmd("KEYS", utils.DERIVEDCHARGERS_PREFIX+"*").List()
 	if err != nil {
 		return err
 	}
@@ -377,7 +402,7 @@ func (mig MigratorRC8) migrateDerivedChargers() error {
 		log.Printf("Migrating derived charger: %s...", key)
 		var oldDcs []*utils.DerivedCharger
 		var values []byte
-		if values, err = mig.db.Get(key); err == nil {
+		if values, err = mig.db.Cmd("GET", key).Bytes(); err == nil {
 			if err := mig.ms.Unmarshal(values, &oldDcs); err != nil {
 				return err
 			}
@@ -394,7 +419,49 @@ func (mig MigratorRC8) migrateDerivedChargers() error {
 		if err != nil {
 			return err
 		}
-		if err = mig.db.Set(key, result); err != nil {
+		if err = mig.db.Cmd("SET", key, result).Err; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (mig MigratorRC8) migrateActionPlans() error {
+	keys, err := mig.db.Cmd("KEYS", utils.ACTION_PLAN_PREFIX+"*").List()
+	if err != nil {
+		return err
+	}
+	aplsMap := make(map[string]engine.ActionPlans, len(keys))
+	for _, key := range keys {
+		log.Printf("Migrating action plans: %s...", key)
+		var apls engine.ActionPlans
+		var values []byte
+		if values, err = mig.db.Cmd("GET", key).Bytes(); err == nil {
+			if err := mig.ms.Unmarshal(values, &apls); err != nil {
+				return err
+			}
+		}
+		// change all AccountIds
+		for _, apl := range apls {
+			for idx, actionId := range apl.AccountIds {
+				// fix id
+				idElements := strings.Split(actionId, utils.CONCATENATED_KEY_SEP)
+				if len(idElements) != 3 {
+					log.Printf("Malformed account ID %s", actionId)
+					continue
+				}
+				apl.AccountIds[idx] = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
+			}
+		}
+		aplsMap[key] = apls
+	}
+	// write data back
+	for key, apl := range aplsMap {
+		result, err := mig.ms.Marshal(apl)
+		if err != nil {
+			return err
+		}
+		if err = mig.db.Cmd("SET", key, result).Err; err != nil {
 			return err
 		}
 	}

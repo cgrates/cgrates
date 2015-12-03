@@ -87,7 +87,7 @@ func CleanStalePrefixes(destIds []string) {
 		return
 	}
 	for prefix, idIDs := range prefixMap {
-		dIDs := idIDs.Value().(map[interface{}]struct{})
+		dIDs := idIDs.(map[interface{}]struct{})
 		changed := false
 		for _, searchedDID := range destIds {
 			if _, found := dIDs[searchedDID]; found {

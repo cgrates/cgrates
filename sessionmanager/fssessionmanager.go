@@ -204,9 +204,6 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 	if ev.GetReqType(utils.META_DEFAULT) == utils.META_NONE { // Do not process this request
 		return
 	}
-	if sm.cfg.CreateCdr {
-		go sm.ProcessCdr(ev.AsStoredCdr(config.CgrConfig().DefaultTimezone))
-	}
 	var s *Session
 	for i := 0; i < 2; i++ { // Protect us against concurrency, wait a couple of seconds for the answer to be populated before we process hangup
 		s = sm.sessions.getSession(ev.GetUUID())
@@ -215,11 +212,13 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 		}
 		time.Sleep(time.Duration(i+1) * time.Second)
 	}
-	if s == nil { // Not handled by us
-		return
+	if s != nil { // Handled by us, cleanup here
+		if err := sm.sessions.removeSession(s, ev); err != nil {
+			utils.Logger.Err(err.Error())
+		}
 	}
-	if err := sm.sessions.removeSession(s, ev); err != nil {
-		utils.Logger.Err(err.Error())
+	if sm.cfg.CreateCdr {
+		sm.ProcessCdr(ev.AsStoredCdr(config.CgrConfig().DefaultTimezone))
 	}
 }
 
@@ -341,7 +340,7 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	}
 	for i := 0; len(sm.sessions.getSessions()) > 0 && i < 20; i++ {
 		time.Sleep(100 * time.Millisecond) // wait for the hungup event to be fired
-		utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITC> Shutdown waiting on sessions: %v", sm.sessions))
+		utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> Shutdown waiting on sessions: %v", sm.sessions))
 	}
 	return nil
 }
@@ -377,7 +376,7 @@ func (sm *FSSessionManager) SyncSessions() error {
 			}
 			var stillActive bool
 			for _, fsAChan := range aChans {
-				if fsAChan["call_uuid"] == session.eventStart.GetUUID() { // Channel still active
+				if fsAChan["call_uuid"] == session.eventStart.GetUUID() || (fsAChan["call_uuid"] == "" && fsAChan["uuid"] == session.eventStart.GetUUID()) { // Channel still active
 					stillActive = true
 					break
 				}

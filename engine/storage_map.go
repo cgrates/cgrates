@@ -232,6 +232,13 @@ func (ms *MapStorage) cacheAccounting(alsKeys []string) error {
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, utils.ALIASES_PREFIX) {
+			// check if it already exists
+			// to remove reverse cache keys
+			if avs, err := cache2go.Get(k); err == nil && avs != nil {
+				al := &Alias{Values: avs.(AliasValues)}
+				al.SetId(k[len(utils.ALIASES_PREFIX):])
+				al.RemoveReverseCache()
+			}
 			cache2go.RemKey(k)
 			if _, err := ms.GetAlias(k[len(utils.ALIASES_PREFIX):], true); err != nil {
 				cache2go.RollbackTransaction()
@@ -246,14 +253,11 @@ func (ms *MapStorage) cacheAccounting(alsKeys []string) error {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	switch categ {
-	case utils.DESTINATION_PREFIX:
-		_, exists := ms.dict[utils.DESTINATION_PREFIX+subject]
-		return exists, nil
-	case utils.RATING_PLAN_PREFIX:
-		_, exists := ms.dict[utils.RATING_PLAN_PREFIX+subject]
+	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
+		_, exists := ms.dict[categ+subject]
 		return exists, nil
 	}
-	return false, errors.New("Unsupported category")
+	return false, errors.New("Unsupported HasData category")
 }
 
 func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
@@ -385,7 +389,7 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 		err = ms.ms.Unmarshal(out, dest)
 		// create optimized structure
 		for _, p := range dest.Prefixes {
-			cache2go.CachePush(utils.DESTINATION_PREFIX+p, dest.Id)
+			cache2go.Push(utils.DESTINATION_PREFIX+p, dest.Id)
 		}
 	} else {
 		return nil, utils.ErrNotFound
@@ -469,7 +473,7 @@ func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 
 func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	// never override existing account with an empty one
-	// UPDATE: if all balances expired and were clean it makes
+	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(ub.BalanceMap) == 0 {
 		if ac, err := ms.GetAccount(ub.Id); err == nil && !ac.allBalancesExpired() {
@@ -574,7 +578,6 @@ func (ms *MapStorage) SetAlias(al *Alias) error {
 }
 
 func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
-	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -591,22 +594,7 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 		err = ms.ms.Unmarshal(values, &al.Values)
 		if err == nil {
 			cache2go.Cache(key, al.Values)
-			for _, value := range al.Values {
-
-				for target, pairs := range value.Pairs {
-					for _, alias := range pairs {
-						var existingKeys map[string]bool
-						rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-						if x, err := cache2go.Get(rKey); err == nil {
-							existingKeys = x.(map[string]bool)
-						} else {
-							existingKeys = make(map[string]bool)
-						}
-						existingKeys[utils.ConcatenatedKey(origKey, value.DestinationId)] = true
-						cache2go.Cache(rKey, existingKeys)
-					}
-				}
-			}
+			al.SetReverseCache()
 		}
 	} else {
 		return nil, utils.ErrNotFound
@@ -617,35 +605,15 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 func (ms *MapStorage) RemoveAlias(key string) error {
 	al := &Alias{}
 	al.SetId(key)
-	origKey := key
 	key = utils.ALIASES_PREFIX + key
 	aliasValues := make(AliasValues, 0)
 	if values, ok := ms.dict[key]; ok {
 		ms.ms.Unmarshal(values, &aliasValues)
 	}
+	al.Values = aliasValues
 	delete(ms.dict, key)
-	for _, value := range aliasValues {
-		for target, pairs := range value.Pairs {
-			for _, alias := range pairs {
-				var existingKeys map[string]bool
-				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-				if x, err := cache2go.Get(rKey); err == nil {
-					existingKeys = x.(map[string]bool)
-				}
-				for eKey := range existingKeys {
-					if strings.HasPrefix(eKey, origKey) {
-						delete(existingKeys, eKey)
-					}
-				}
-				if len(existingKeys) == 0 {
-					cache2go.RemKey(rKey)
-				} else {
-					cache2go.Cache(rKey, existingKeys)
-				}
-			}
-			cache2go.RemKey(key)
-		}
-	}
+	al.RemoveReverseCache()
+	cache2go.RemKey(key)
 	return nil
 }
 
@@ -715,7 +683,7 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error
 
 	ats = make(map[string]ActionPlans, len(apls))
 	for key, value := range apls {
-		apl := value.Value().(ActionPlans)
+		apl := value.(ActionPlans)
 		ats[key] = apl
 	}
 

@@ -19,15 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
 	"github.com/fiorix/go-diameter/diam/datatype"
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
-func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string, firmwareRev int) (*DiameterClient, error) {
+func NewDiameterClient(addr, originHost, originRealm string, vendorId int, productName string, firmwareRev int, dictsDir string) (*DiameterClient, error) {
 	cfg := &sm.Settings{
 		OriginHost:       datatype.DiameterIdentity(originHost),
 		OriginRealm:      datatype.DiameterIdentity(originRealm),
@@ -35,24 +37,34 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		ProductName:      datatype.UTF8String(productName),
 		FirmwareRevision: datatype.Unsigned32(firmwareRev),
 	}
-	handlers := sm.New(cfg)
+	dSM := sm.New(cfg)
+	go func() {
+		for err := range dSM.ErrorReports() {
+			utils.Logger.Err(fmt.Sprintf("<DiameterClient> StateMachine error: %+v", err))
+		}
+	}()
 	cli := &sm.Client{
-		Handler:            handlers,
+		Handler:            dSM,
 		MaxRetransmits:     3,
 		RetransmitInterval: time.Second,
 		EnableWatchdog:     true,
 		WatchdogInterval:   5 * time.Second,
 		AcctApplicationID: []*diam.AVP{
-			// Advertise that we want support for both
-			// Accounting applications 4 and 999.
 			diam.NewAVP(avp.AcctApplicationID, avp.Mbit, 0, datatype.Unsigned32(4)), // RFC 4006
 		},
+	}
+	if len(dictsDir) != 0 {
+		if err := loadDictionaries(dictsDir, "DiameterClient"); err != nil {
+			return nil, err
+		}
 	}
 	conn, err := cli.Dial(addr)
 	if err != nil {
 		return nil, err
 	}
-	return &DiameterClient{conn: conn, handlers: handlers}, nil
+	dc := &DiameterClient{conn: conn, handlers: dSM}
+	dSM.HandleFunc("ALL", dc.handleALL)
+	return dc, nil
 }
 
 type DiameterClient struct {
@@ -63,4 +75,8 @@ type DiameterClient struct {
 func (self *DiameterClient) SendMessage(m *diam.Message) error {
 	_, err := m.WriteTo(self.conn)
 	return err
+}
+
+func (self *DiameterClient) handleALL(c diam.Conn, m *diam.Message) {
+	utils.Logger.Warning(fmt.Sprintf("<DiameterClient> Received unexpected message from %s:\n%s", c.RemoteAddr(), m))
 }

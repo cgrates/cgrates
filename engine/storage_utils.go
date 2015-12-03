@@ -40,7 +40,10 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler str
 		if port != "" {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
+		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS)
+	case utils.MONGO:
+		d, err = NewMongoStorage(host, port, name, user, pass)
+		db = d.(RatingStorage)
 	default:
 		err = errors.New("unknown db")
 	}
@@ -63,7 +66,7 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 		if port != "" {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
+		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass)
 		db = d.(AccountingStorage)

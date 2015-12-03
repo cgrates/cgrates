@@ -115,6 +115,29 @@ func (al *Alias) SetId(id string) error {
 	return nil
 }
 
+func (al *Alias) SetReverseCache() {
+	for _, value := range al.Values {
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := strings.Join([]string{utils.REVERSE_ALIASES_PREFIX, alias, target, al.Context}, "")
+				cache2go.Push(rKey, utils.ConcatenatedKey(al.GetId(), value.DestinationId))
+			}
+		}
+	}
+}
+
+func (al *Alias) RemoveReverseCache() {
+	for _, value := range al.Values {
+		tmpKey := utils.ConcatenatedKey(al.GetId(), value.DestinationId)
+		for target, pairs := range value.Pairs {
+			for _, alias := range pairs {
+				rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
+				cache2go.Pop(rKey, tmpKey)
+			}
+		}
+	}
+}
+
 type AttrMatchingAlias struct {
 	Destination string
 	Direction   string
@@ -175,25 +198,36 @@ func (am *AliasHandler) UpdateAlias(al Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
 	// get previous value
-	oldAlias := &Alias{}
-	if err := am.GetAlias(al, oldAlias); err != nil {
-		*reply = err.Error()
+	oldAlias, err := am.accountingDb.GetAlias(al.GetId(), false)
+	if err != nil {
 		return err
 	}
-	for _, oldValue := range oldAlias.Values {
+	for _, value := range al.Values {
 		found := false
-		for _, value := range al.Values {
-			if oldValue.Equals(value) {
+		if value.DestinationId == "" {
+			value.DestinationId = utils.ANY
+		}
+		for _, oldValue := range oldAlias.Values {
+			if oldValue.DestinationId == value.DestinationId {
+				for target, origAliasMap := range value.Pairs {
+					for orig, alias := range origAliasMap {
+						if oldValue.Pairs[target] == nil {
+							oldValue.Pairs[target] = make(map[string]string)
+						}
+						oldValue.Pairs[target][orig] = alias
+					}
+				}
+				oldValue.Weight = value.Weight
 				found = true
 				break
 			}
 		}
 		if !found {
-			al.Values = append(al.Values, oldValue)
+			oldAlias.Values = append(oldAlias.Values, value)
 		}
 	}
 
-	if err := am.accountingDb.SetAlias(&al); err != nil {
+	if err := am.accountingDb.SetAlias(oldAlias); err != nil {
 		*reply = err.Error()
 		return err
 	} //add to cache
@@ -222,8 +256,9 @@ func (am *AliasHandler) RemoveReverseAlias(attr AttrReverseAlias, reply *string)
 	defer am.mu.Unlock()
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
 	if x, err := cache2go.Get(rKey); err == nil {
-		existingKeys := x.(map[string]bool)
-		for key := range existingKeys {
+		existingKeys := x.(map[interface{}]struct{})
+		for iKey := range existingKeys {
+			key := iKey.(string)
 			// get destination id
 			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
 			if len(elems) > 0 {
@@ -258,9 +293,9 @@ func (am *AliasHandler) GetReverseAlias(attr AttrReverseAlias, result *map[strin
 	aliases := make(map[string][]*Alias)
 	rKey := utils.REVERSE_ALIASES_PREFIX + attr.Alias + attr.Target + attr.Context
 	if x, err := cache2go.Get(rKey); err == nil {
-		existingKeys := x.(map[string]bool)
-		for key := range existingKeys {
-
+		existingKeys := x.(map[interface{}]struct{})
+		for iKey := range existingKeys {
+			key := iKey.(string)
 			// get destination id
 			elems := strings.Split(key, utils.CONCATENATED_KEY_SEP)
 			var destID string

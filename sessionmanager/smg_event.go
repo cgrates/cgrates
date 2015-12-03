@@ -161,7 +161,7 @@ func (self SMGenericEvent) GetUsage(fieldName string) (time.Duration, error) {
 
 func (self SMGenericEvent) GetMaxUsage(fieldName string, cfgMaxUsage time.Duration) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
-		fieldName = utils.MAX_USAGE
+		fieldName = utils.USAGE
 	}
 	maxUsageStr, hasIt := self[fieldName]
 	if !hasIt {

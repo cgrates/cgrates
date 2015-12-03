@@ -21,14 +21,11 @@ package general_tests
 import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	//"os"
 	"path"
 	"reflect"
-	//"strings"
 	"testing"
 	"time"
 
-	//"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -127,49 +124,6 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 }
 
-// Check items age
-func TestTutLocalGetCachedItemAge(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var rcvAge *utils.CachedItemAge
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "1002", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Destination > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "RP_RETAIL1", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingPlan > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingProfile > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "LOG_WARNING", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Action > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "SHARED_A", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:1001:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := tutLocalRpc.Call("ApierV2.GetCachedItemAge", "*out:cgrates.org:call:*any:*any", &rcvAge); err != nil {
-		t.Error("Got error on ApierV2.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.SharedGroup > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-}
-
 func TestTutLocalGetUsers(t *testing.T) {
 	if !*testLocal {
 		return
@@ -239,7 +193,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6417 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
+	} else if cc.Cost != 0.6425 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -275,7 +229,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3 {
+	} else if cc.Cost != 1.3002 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -311,7 +265,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3 {
+	} else if cc.Cost != 1.3002 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart = time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
@@ -687,6 +641,31 @@ func TestTutLocalCostErrors(t *testing.T) {
 			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
 		}
 	}
+	cdr3 := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "testtutlocal_3", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_POSTPAID, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "fake", Account: "1001", Subject: "1001", Destination: "2002", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "1", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	if err := tutLocalRpc.Call("CdrsV2.ProcessExternalCdr", cdr3, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
+	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{cdr3.Account}, DestPrefixes: []string{cdr3.Destination}}
+	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].AccId != cdr3.AccId {
+			t.Errorf("Unexpected AccId for Cdr received: %+v", cdrs[0])
+		}
+		if cdrs[0].Cost != -1 {
+			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
+		}
+	}
 }
 
 // Make sure queueids were created
@@ -728,6 +707,7 @@ func TestTutLocalLcrStatic(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
+	cd.CgrId = "1"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -752,6 +732,7 @@ func TestTutLocalLcrStatic(t *testing.T) {
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
+	cd.CgrId = "2"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -830,6 +811,7 @@ func TestTutLocalLcrQos(t *testing.T) {
 	}
 	var lcr engine.LCRCost
 	// Since there is no real quality difference, the suppliers will come in random order here
+	cd.CgrId = "3"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -868,6 +850,7 @@ func TestTutLocalLcrQos(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 90, engine.ACC: 0.325, engine.TCC: 0.325, engine.ASR: 100, engine.ACD: 90}},
 		},
 	}
+	cd.CgrId = "4"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -895,6 +878,7 @@ func TestTutLocalLcrQos(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
+	cd.CgrId = "5"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -930,6 +914,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
+	cd.CgrId = "6"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -955,6 +940,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
+	cd.CgrId = "7"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -991,6 +977,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 		},
 	}
 	*/
+	cd.CgrId = "8"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -1015,6 +1002,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
+	cd.CgrId = "9"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -1049,6 +1037,7 @@ func TestTutLocalLeastCost(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
+	cd.CgrId = "10"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -1080,6 +1069,7 @@ func TestTutLocalLeastCost(t *testing.T) {
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
+	cd.CgrId = "11"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {

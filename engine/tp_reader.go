@@ -47,23 +47,8 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, ti
 		ratingStorage:     rs,
 		accountingStorage: as,
 		lr:                lr,
-		actions:           make(map[string][]*Action),
-		actionPlans:       make(map[string][]*ActionPlan),
-		actionsTriggers:   make(map[string]ActionTriggers),
-		rates:             make(map[string]*utils.TPRate),
-		destinations:      make(map[string]*Destination),
-		destinationRates:  make(map[string]*utils.TPDestinationRate),
-		timings:           make(map[string]*utils.TPTiming),
-		ratingPlans:       make(map[string]*RatingPlan),
-		ratingProfiles:    make(map[string]*RatingProfile),
-		sharedGroups:      make(map[string]*SharedGroup),
-		lcrs:              make(map[string]*LCR),
-		accountActions:    make(map[string]*Account),
-		cdrStats:          make(map[string]*CdrStats),
-		users:             make(map[string]*UserProfile),
-		aliases:           make(map[string]*Alias),
-		derivedChargers:   make(map[string]*utils.DerivedChargers),
 	}
+	tpr.Init()
 	//add *any and *asap timing tag (in case of no timings file)
 	tpr.timings[utils.ANY] = &utils.TPTiming{
 		TimingId:  utils.ANY,
@@ -84,6 +69,25 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, ti
 		EndTime:   "",
 	}
 	return tpr
+}
+
+func (tpr *TpReader) Init() {
+	tpr.actions = make(map[string][]*Action)
+	tpr.actionPlans = make(map[string][]*ActionPlan)
+	tpr.actionsTriggers = make(map[string]ActionTriggers)
+	tpr.rates = make(map[string]*utils.TPRate)
+	tpr.destinations = make(map[string]*Destination)
+	tpr.destinationRates = make(map[string]*utils.TPDestinationRate)
+	tpr.timings = make(map[string]*utils.TPTiming)
+	tpr.ratingPlans = make(map[string]*RatingPlan)
+	tpr.ratingProfiles = make(map[string]*RatingProfile)
+	tpr.sharedGroups = make(map[string]*SharedGroup)
+	tpr.lcrs = make(map[string]*LCR)
+	tpr.accountActions = make(map[string]*Account)
+	tpr.cdrStats = make(map[string]*CdrStats)
+	tpr.users = make(map[string]*UserProfile)
+	tpr.aliases = make(map[string]*Alias)
+	tpr.derivedChargers = make(map[string]*utils.DerivedChargers)
 }
 
 func (tpr *TpReader) LoadDestinationsFiltered(tag string) (bool, error) {
@@ -1569,5 +1573,5 @@ func (tpr *TpReader) GetLoadedIds(categ string) ([]string, error) {
 		}
 		return keys, nil
 	}
-	return nil, errors.New("Unsupported category")
+	return nil, errors.New("Unsupported load category")
 }

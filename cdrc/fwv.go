@@ -180,7 +180,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 	for _, cdrFldCfg := range cfgFields {
 		var fieldVal string
 		switch cdrFldCfg.Type {
-		case utils.CDRFIELD:
+		case utils.META_COMPOSED:
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
 					fieldVal += cfgFieldRSR.ParseValue("")
@@ -192,13 +192,13 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 					}
 				}
 			}
-		case utils.HTTP_POST:
+		case utils.META_HTTP_POST:
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		default:
 			//return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			continue // Don't do anything for unsupported fields
 		}
-		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
+		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {
 			return nil, err
 		}
 	}
@@ -221,7 +221,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
 				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
 			}
-			if err := populateStoredCdrField(storedCdr, httpFieldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
+			if err := storedCdr.ParseFieldValue(httpFieldCfg.FieldId, fieldVal, self.timezone); err != nil {
 				return nil, err
 			}
 		}

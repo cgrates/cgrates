@@ -491,6 +491,13 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	for idx, dc := range dcs {
 		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 	}
+	aps, _ := dbReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+	cstKeys, _ := dbReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+	userKeys, _ := dbReader.GetLoadedIds(utils.USERS_PREFIX)
+
+	// relase tp data
+	dbReader.Init()
+
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading cache.")
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
@@ -509,19 +516,18 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}); err != nil {
 		return err
 	}
-	aps, _ := dbReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+
 	if len(aps) != 0 && self.Sched != nil {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
 		self.Sched.LoadActionPlans(self.RatingDb)
 		self.Sched.Restart()
 	}
-	cstKeys, _ := dbReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
 		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
 			return err
 		}
 	}
-	userKeys, _ := dbReader.GetLoadedIds(utils.USERS_PREFIX)
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
 		if err := self.Users.ReloadUsers("", &r); err != nil {
@@ -1056,44 +1062,6 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	return nil
 }
 
-func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge) error {
-	if len(itemId) == 0 {
-		return fmt.Errorf("%s:ItemId", utils.ErrMandatoryIeMissing.Error())
-	}
-	cachedItemAge := new(utils.CachedItemAge)
-	var found bool
-	for idx, cacheKey := range []string{utils.DESTINATION_PREFIX + itemId, utils.RATING_PLAN_PREFIX + itemId, utils.RATING_PROFILE_PREFIX + itemId,
-		utils.ACTION_PREFIX + itemId, utils.ACTION_PLAN_PREFIX + itemId, utils.SHARED_GROUP_PREFIX + itemId, utils.ALIASES_PREFIX + itemId, utils.LCR_PREFIX + itemId} {
-
-		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
-			found = true
-			switch idx {
-			case 0:
-				cachedItemAge.Destination = age
-			case 1:
-				cachedItemAge.RatingPlan = age
-			case 2:
-				cachedItemAge.RatingProfile = age
-			case 3:
-				cachedItemAge.Action = age
-			case 4:
-				cachedItemAge.ActionPlan = age
-			case 5:
-				cachedItemAge.SharedGroup = age
-			case 6:
-				cachedItemAge.Alias = age
-			case 7:
-				cachedItemAge.LcrProfiles = age
-			}
-		}
-	}
-	if !found {
-		return utils.ErrNotFound
-	}
-	*reply = *cachedItemAge
-	return nil
-}
-
 func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
@@ -1190,6 +1158,11 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
+
+	// relase the tp data
+	loader.Init()
 
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
@@ -1213,13 +1186,11 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		self.Sched.LoadActionPlans(self.RatingDb)
 		self.Sched.Restart()
 	}
-	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
 		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
 			return err
 		}
 	}
-	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
 		if err := self.Users.ReloadUsers("", &r); err != nil {

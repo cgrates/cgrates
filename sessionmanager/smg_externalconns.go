@@ -32,6 +32,9 @@ var ErrConnectionNotFound = errors.New("CONNECTION_NOT_FOUND")
 
 // Attempts to get the connId previously set in the client state container
 func getClientConnId(clnt *rpc2.Client) string {
+	if clnt == nil {
+		return ""
+	}
 	uuid, hasIt := clnt.State.Get(CGR_CONNUUID)
 	if !hasIt {
 		return ""

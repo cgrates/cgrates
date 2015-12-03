@@ -20,6 +20,7 @@ package v1
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -40,11 +41,14 @@ func (self *ApierV1) GetDerivedChargers(attrs utils.AttrDerivedChargers, reply *
 
 type AttrSetDerivedChargers struct {
 	Direction, Tenant, Category, Account, Subject, DestinationIds string
-	DerivedChargers                                               *utils.DerivedChargers
+	DerivedChargers                                               []*utils.DerivedCharger
 	Overwrite                                                     bool // Do not overwrite if present in redis
 }
 
 func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *string) (err error) {
+	if len(attrs.DerivedChargers) == 0 {
+		return utils.NewErrMandatoryIeMissing("DerivedChargers")
+	}
 	if len(attrs.Direction) == 0 {
 		attrs.Direction = utils.OUT
 	}
@@ -60,20 +64,22 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	if len(attrs.Subject) == 0 {
 		attrs.Subject = utils.ANY
 	}
-	for _, dc := range attrs.DerivedChargers.Chargers {
+	for _, dc := range attrs.DerivedChargers {
 		if _, err = utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP); err != nil { // Make sure rules are OK before loading in db
 			return fmt.Errorf("%s:%s", utils.ErrParserError.Error(), err.Error())
 		}
 	}
 	dcKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.HasData(utils.DESTINATION_PREFIX, dcKey); err != nil {
+		if exists, err := self.RatingDb.HasData(utils.DERIVEDCHARGERS_PREFIX, dcKey); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists
 		}
 	}
-	if err := self.RatingDb.SetDerivedChargers(dcKey, attrs.DerivedChargers); err != nil {
+	dstIds := strings.Split(attrs.DestinationIds, utils.INFIELD_SEP)
+	dcs := &utils.DerivedChargers{DestinationIds: utils.NewStringMap(dstIds...), Chargers: attrs.DerivedChargers}
+	if err := self.RatingDb.SetDerivedChargers(dcKey, dcs); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{

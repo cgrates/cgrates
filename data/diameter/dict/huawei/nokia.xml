@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diameter>
+  <application id="4">
+    <vendor id="94" name="Nokia" />
+    <avp name="Session-Start-Indicator" code="5105" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="94">
+      <data type="UTF8String" />
+    </avp>
+  </application>
+</diameter>

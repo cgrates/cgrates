@@ -835,26 +835,6 @@ func TestApierGetCacheStats(t *testing.T) {
 	}
 }
 
-func TestApierGetCachedItemAge(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var rcvAge *utils.CachedItemAge
-	if err := rater.Call("ApierV1.GetCachedItemAge", "+4917", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Destination > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := rater.Call("ApierV1.GetCachedItemAge", "RETAIL1", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingPlan > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := rater.Call("ApierV1.GetCachedItemAge", "DUMMY_DATA", &rcvAge); err == nil || err.Error() != "NOT_FOUND" {
-		t.Error("Did not get NOT_FOUND: ", err.Error())
-	}
-}
-
 // Test here GetDestination
 func TestApierGetDestination(t *testing.T) {
 	if !*testLocal {
@@ -1467,13 +1447,13 @@ func TestApierLocalSetDC(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	dcs1 := &utils.DerivedChargers{Chargers: []*utils.DerivedCharger{
+	dcs1 := []*utils.DerivedCharger{
 		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-	}}
-	attrs := AttrSetDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: dcs1}
+	}
+	attrs := AttrSetDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: dcs1, Overwrite: true}
 	var reply string
 	if err := rater.Call("ApierV1.SetDerivedChargers", attrs, &reply); err != nil {
 		t.Error("Unexpected error", err.Error())
@@ -1487,12 +1467,13 @@ func TestApierLocalGetDC(t *testing.T) {
 		return
 	}
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
-	eDcs := utils.DerivedChargers{Chargers: []*utils.DerivedCharger{
-		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-	}}
+	eDcs := utils.DerivedChargers{DestinationIds: utils.NewStringMap(),
+		Chargers: []*utils.DerivedCharger{
+			&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+				AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+			&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+				AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+		}}
 	var dcs utils.DerivedChargers
 	if err := rater.Call("ApierV1.GetDerivedChargers", attrs, &dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
@@ -1643,7 +1624,7 @@ func TestApierLocalGetScheduledActions(t *testing.T) {
 	}
 	var rply []*ScheduledActions
 	if err := rater.Call("ApierV1.GetScheduledActions", AttrsGetScheduledActions{}, &rply); err != nil {
-		t.Error("Unexpected error: ", err.Error)
+		t.Error("Unexpected error: ", err)
 	}
 }
 

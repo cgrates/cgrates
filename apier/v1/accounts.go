@@ -272,7 +272,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 
 func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{}) error {
 	if len(attr.Tenant) == 0 {
-		return utils.NewErrMandatoryIeMissing("Tenanat")
+		return utils.NewErrMandatoryIeMissing("Tenant")
 	}
 	var accountKeys []string
 	var err error

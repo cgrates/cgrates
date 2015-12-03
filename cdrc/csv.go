@@ -283,7 +283,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range self.cdrcCfgs[cdrcId].ContentFields {
 		if utils.IsSliceMember([]string{utils.KAM_FLATSTORE, utils.OSIPS_FLATSTORE}, self.dfltCdrcCfg.CdrFormat) { // Hardcode some values in case of flatstore
-			switch cdrFldCfg.CdrFieldId {
+			switch cdrFldCfg.FieldId {
 			case utils.ACCID:
 				cdrFldCfg.Value = utils.ParseRSRFieldsMustCompile("3;1;2", utils.INFIELD_SEP) // in case of flatstore, accounting id is made up out of callid, from_tag and to_tag
 			case utils.USAGE:
@@ -292,7 +292,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 
 		}
 		var fieldVal string
-		if cdrFldCfg.Type == utils.CDRFIELD {
+		if cdrFldCfg.Type == utils.META_COMPOSED {
 			for _, cfgFieldRSR := range cdrFldCfg.Value {
 				if cfgFieldRSR.IsStatic() {
 					fieldVal += cfgFieldRSR.ParseValue("")
@@ -304,12 +304,12 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 					}
 				}
 			}
-		} else if cdrFldCfg.Type == utils.HTTP_POST {
+		} else if cdrFldCfg.Type == utils.META_HTTP_POST {
 			lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 		} else {
 			return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 		}
-		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
+		if err := storedCdr.ParseFieldValue(cdrFldCfg.FieldId, fieldVal, self.timezone); err != nil {
 			return nil, err
 		}
 	}
@@ -330,7 +330,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
 				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
 			}
-			if err := populateStoredCdrField(storedCdr, httpFieldCfg.CdrFieldId, fieldVal, self.timezone); err != nil {
+			if err := storedCdr.ParseFieldValue(httpFieldCfg.FieldId, fieldVal, self.timezone); err != nil {
 				return nil, err
 			}
 		}

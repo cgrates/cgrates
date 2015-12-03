@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2015 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,41 +21,42 @@ package console
 import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdGetCacheAge{
-		name:      "cache_age",
-		rpcMethod: "ApierV1.GetCachedItemAge",
+	c := &CmdGetActions{
+		name:      "actions",
+		rpcMethod: "ApierV2.GetActions",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetCacheAge struct {
+type CmdGetActions struct {
 	name      string
 	rpcMethod string
 	rpcParams *StringWrapper
 	*CommandExecuter
 }
 
-func (self *CmdGetCacheAge) Name() string {
+func (self *CmdGetActions) Name() string {
 	return self.name
 }
 
-func (self *CmdGetCacheAge) RpcMethod() string {
+func (self *CmdGetActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCacheAge) RpcParams(reset bool) interface{} {
+func (self *CmdGetActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &StringWrapper{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetCacheAge) PostprocessRpcParams() error {
+func (self *CmdGetActions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetCacheAge) RpcResult() interface{} {
-	return &utils.CachedItemAge{}
+func (self *CmdGetActions) RpcResult() interface{} {
+	a := make([]*utils.TPAction, 0)
+	return &a
 }

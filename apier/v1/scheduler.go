@@ -110,22 +110,11 @@ type ScheduledActions struct {
 }
 
 func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *[]*ScheduledActions) error {
-	schedActions := make([]*ScheduledActions, 0)
 	if self.Sched == nil {
 		return errors.New("SCHEDULER_NOT_ENABLED")
 	}
+	schedActions := make([]*ScheduledActions, 0) // needs to be initialized if remains empty
 	scheduledActions := self.Sched.GetQueue()
-	var min, max int
-	if attrs.Paginator.Offset != nil {
-		min = *attrs.Paginator.Offset
-	}
-	if attrs.Paginator.Limit != nil {
-		max = *attrs.Paginator.Limit
-	}
-	if max > len(scheduledActions) {
-		max = len(scheduledActions)
-	}
-	scheduledActions = scheduledActions[min : min+max]
 	for _, qActions := range scheduledActions {
 		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid}
 		if attrs.SearchTerm != "" &&
@@ -140,27 +129,39 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 		if !attrs.TimeEnd.IsZero() && (sas.NextRunTime.After(attrs.TimeEnd) || sas.NextRunTime.Equal(attrs.TimeEnd)) {
 			continue
 		}
-		acntFiltersMatch := false
-		for _, acntKey := range qActions.AccountIds {
-			tenantMatched := len(attrs.Tenant) == 0
-			accountMatched := len(attrs.Account) == 0
-			dta, _ := utils.NewTAFromAccountKey(acntKey)
-			sas.Accounts = append(sas.Accounts, dta)
-			// One member matching
-			if !tenantMatched && attrs.Tenant == dta.Tenant {
-				tenantMatched = true
+		// filter on account
+		if attrs.Tenant != "" || attrs.Account != "" {
+			found := false
+			for _, accID := range qActions.AccountIds {
+				split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
+				if len(split) != 2 {
+					continue // malformed account id
+				}
+				if attrs.Tenant != "" && attrs.Tenant != split[0] {
+					continue
+				}
+				if attrs.Account != "" && attrs.Account != split[1] {
+					continue
+				}
+				found = true
+				break
 			}
-			if !accountMatched && attrs.Account == dta.Account {
-				accountMatched = true
-			}
-			if tenantMatched && accountMatched {
-				acntFiltersMatch = true
+			if !found {
+				continue
 			}
 		}
-		if !acntFiltersMatch {
-			continue
-		}
+		// we have a winner
 		schedActions = append(schedActions, sas)
+	}
+	if attrs.Paginator.Offset != nil {
+		if *attrs.Paginator.Offset <= len(schedActions) {
+			schedActions = schedActions[*attrs.Paginator.Offset:]
+		}
+	}
+	if attrs.Paginator.Limit != nil {
+		if *attrs.Paginator.Limit <= len(schedActions) {
+			schedActions = schedActions[:*attrs.Paginator.Limit]
+		}
 	}
 	*reply = schedActions
 	return nil

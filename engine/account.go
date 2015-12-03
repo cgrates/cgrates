@@ -365,7 +365,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
 	}
 
-	//log.Printf("HERE: %+v %d", leftCC)
+	//log.Printf("HERE: %+v", leftCC)
 	if leftCC.Cost > 0 && goNegative {
 		initialLength := len(cc.Timespans)
 		cc.Timespans = append(cc.Timespans, leftCC.Timespans...)
@@ -379,6 +379,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 		if len(leftCC.Timespans) > 0 && leftCC.Cost > 0 && !ub.AllowNegative && !dryRun {
 			utils.Logger.Err(fmt.Sprintf("<Rater> Going negative on account %s with AllowNegative: false", cd.GetAccountKey()))
 		}
+		leftCC.Timespans.Decompress()
 		for _, ts := range leftCC.Timespans {
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
@@ -744,7 +745,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 
 	result := &Account{
-		Id:             "*out:" + acc.Id,
+		Id:             utils.OUT + ":" + acc.Id,
 		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
@@ -752,6 +753,9 @@ func (acc *Account) AsOldStructure() interface{} {
 		Disabled:       acc.Disabled,
 	}
 	for i, uc := range acc.UnitCounters {
+		if uc == nil {
+			continue
+		}
 		result.UnitCounters[i] = &UnitsCounter{
 			BalanceType: uc.BalanceType,
 			Balances:    make(BalanceChain, len(uc.Balances)),
@@ -802,7 +806,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 	for key, values := range acc.BalanceMap {
 		if len(values) > 0 {
-			key += values[0].Directions.String()
+			key += utils.OUT
 			result.BalanceMap[key] = make(BalanceChain, len(values))
 			for i, b := range values {
 				result.BalanceMap[key][i] = &Balance{

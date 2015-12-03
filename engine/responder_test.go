@@ -110,7 +110,7 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 	attrs := &utils.AttrDerivedChargers{Tenant: testTenant, Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
 	if err := rsponder.GetDerivedChargers(attrs, dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
-	} else if !reflect.DeepEqual(dcs, charger1) {
+	} else if !reflect.DeepEqual(dcs.Chargers, charger1.Chargers) {
 		t.Errorf("Expecting: %+v, received: %+v ", charger1, dcs)
 	}
 	if err := rsponder.GetDerivedMaxSessionTime(cdr, &maxSessionTime); err != nil {

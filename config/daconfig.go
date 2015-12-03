@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	//"time"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -29,7 +29,9 @@ type DiameterAgentCfg struct {
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesDir   string
 	SMGeneric         string // connection towards SMG component
+	DebitInterval     time.Duration
 	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Dialect           string // the diameter dialect used in the implementation <huawei>
 	OriginHost        string
 	OriginRealm       string
 	VendorId          int
@@ -52,6 +54,12 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 	}
 	if jsnCfg.Sm_generic != nil {
 		self.SMGeneric = *jsnCfg.Sm_generic
+	}
+	if jsnCfg.Debit_interval != nil {
+		var err error
+		if self.DebitInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Debit_interval); err != nil {
+			return err
+		}
 	}
 	if jsnCfg.Timezone != nil {
 		self.Timezone = *jsnCfg.Timezone
@@ -80,6 +88,7 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 			if err := rp.loadFromJsonCfg(reqProcJsn); err != nil {
 				return nil
 			}
+			self.RequestProcessors = append(self.RequestProcessors, rp)
 		}
 	}
 	return nil

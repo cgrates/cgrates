@@ -84,7 +84,7 @@ func (self *CdrServer) Timezone() string {
 	return self.cgrCfg.DefaultTimezone
 }
 
-func (self *CdrServer) RegisterHanlersToServer(server *utils.Server) {
+func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
 	cdrServer = self // Share the server object for handlers
 	server.RegisterHttpFunc("/cdr_http", cgrCdrHandler)
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
@@ -143,7 +143,26 @@ func (self *CdrServer) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 		return err
 	}
 	for _, cdr := range cdrs {
-		if err := self.processCdr(cdr); err != nil {
+		if cdr.MediationRunId == "" { // raw CDRs which were not calculated before
+			cdr.MediationRunId = utils.META_DEFAULT
+		}
+		// replace aliases for cases they were loaded after CDR received
+		if err := LoadAlias(&AttrMatchingAlias{
+			Destination: cdr.Destination,
+			Direction:   cdr.Direction,
+			Tenant:      cdr.Tenant,
+			Category:    cdr.Category,
+			Account:     cdr.Account,
+			Subject:     cdr.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		// replace user profile fields
+		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+			return err
+		}
+		if err := self.rateStoreStatsReplicate(cdr); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
 		}
 	}
@@ -183,14 +202,12 @@ func (self *CdrServer) processCdr(storedCdr *StoredCdr) (err error) {
 	if err := LoadUserProfile(storedCdr, utils.EXTRA_FIELDS); err != nil {
 		return err
 	}
-	if storedCdr.ReqType == utils.META_NONE {
-		return nil
-	}
 	if self.cgrCfg.CDRSStoreCdrs { // Store RawCDRs, this we do sync so we can reply with the status
 		if err := self.cdrDb.SetCdr(storedCdr); err != nil { // Only original CDR stored in primary table, no derived
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", storedCdr, err.Error()))
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
 		}
+
 	}
 	go self.deriveRateStoreStatsReplicate(storedCdr)
 	return nil
@@ -203,58 +220,64 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(storedCdr *StoredCdr) error
 		return err
 	}
 	for _, cdr := range cdrRuns {
-		if cdr.MediationRunId != utils.META_DEFAULT { // Process Aliases and Users for derived CDRs
-			if err := LoadAlias(&AttrMatchingAlias{
-				Destination: cdr.Destination,
-				Direction:   cdr.Direction,
-				Tenant:      cdr.Tenant,
-				Category:    cdr.Category,
-				Account:     cdr.Account,
-				Subject:     cdr.Subject,
-				Context:     utils.ALIAS_CONTEXT_RATING,
-			}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-				return err
-			}
-			if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
-				return err
-			}
-		}
-		// Rate CDR
-		if self.rater != nil && !cdr.Rated {
-			if err := self.rateCDR(cdr); err != nil {
-				cdr.Cost = -1.0 // If there was an error, mark the CDR
-				cdr.ExtraInfo = err.Error()
-			}
-		}
-		if cdr.MediationRunId == utils.META_SURETAX { // Request should be processed by SureTax
-			if err := SureTaxProcessCdr(cdr); err != nil {
-				cdr.Cost = -1.0
-				cdr.ExtraInfo = err.Error() // Something failed, write the error in the ExtraInfo
-			}
-		}
-		if self.cgrCfg.CDRSStoreCdrs { // Store CDRs
-			// Store RatedCDR
-			if err := self.cdrDb.SetRatedCdr(cdr); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", cdr, err.Error()))
-			}
-			// Store CostDetails
-			if cdr.Rated || utils.IsSliceMember([]string{utils.RATED, utils.META_RATED}, cdr.ReqType) { // Account related CDRs are saved automatically, so save the others here if requested
-				if err := self.cdrDb.LogCallCost(cdr.CgrId, utils.CDRS_SOURCE, cdr.MediationRunId, cdr.CostDetails); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<CDRS> Storing costs for CDR %+v, costDetails: %+v, got error: %s", cdr, cdr.CostDetails, err.Error()))
-				}
-			}
-		}
-		// Attach CDR to stats
-		if self.stats != nil { // Send CDR to stats
-			if err := self.stats.AppendCDR(cdr, nil); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<CDRS> Could not append cdr to stats: %s", err.Error()))
-			}
-		}
-		if len(self.cgrCfg.CDRSCdrReplication) != 0 {
-			self.replicateCdr(cdr)
+		if err := self.rateStoreStatsReplicate(cdr); err != nil {
+			return err
 		}
 	}
+	return nil
+}
 
+func (self *CdrServer) rateStoreStatsReplicate(cdr *StoredCdr) error {
+	if cdr.MediationRunId != utils.META_DEFAULT { // Process Aliases and Users for derived CDRs
+		if err := LoadAlias(&AttrMatchingAlias{
+			Destination: cdr.Destination,
+			Direction:   cdr.Direction,
+			Tenant:      cdr.Tenant,
+			Category:    cdr.Category,
+			Account:     cdr.Account,
+			Subject:     cdr.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+			return err
+		}
+		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+			return err
+		}
+	}
+	// Rate CDR
+	if self.rater != nil && !cdr.Rated {
+		if err := self.rateCDR(cdr); err != nil {
+			cdr.Cost = -1.0 // If there was an error, mark the CDR
+			cdr.ExtraInfo = err.Error()
+		}
+	}
+	if cdr.MediationRunId == utils.META_SURETAX { // Request should be processed by SureTax
+		if err := SureTaxProcessCdr(cdr); err != nil {
+			cdr.Cost = -1.0
+			cdr.ExtraInfo = err.Error() // Something failed, write the error in the ExtraInfo
+		}
+	}
+	if self.cgrCfg.CDRSStoreCdrs { // Store CDRs
+		// Store RatedCDR
+		if err := self.cdrDb.SetRatedCdr(cdr); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", cdr, err.Error()))
+		}
+		// Store CostDetails
+		if cdr.Rated || utils.IsSliceMember([]string{utils.RATED, utils.META_RATED}, cdr.ReqType) { // Account related CDRs are saved automatically, so save the others here if requested
+			if err := self.cdrDb.LogCallCost(cdr.CgrId, utils.CDRS_SOURCE, cdr.MediationRunId, cdr.CostDetails); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing costs for CDR %+v, costDetails: %+v, got error: %s", cdr, cdr.CostDetails, err.Error()))
+			}
+		}
+	}
+	// Attach CDR to stats
+	if self.stats != nil { // Send CDR to stats
+		if err := self.stats.AppendCDR(cdr, nil); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Could not append cdr to stats: %s", err.Error()))
+		}
+	}
+	if len(self.cgrCfg.CDRSCdrReplication) != 0 {
+		self.replicateCdr(cdr)
+	}
 	return nil
 }
 
@@ -267,7 +290,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 		return cdrRuns, nil
 	}
 	attrsDC := &utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
-		Account: storedCdr.Account, Subject: storedCdr.Subject}
+		Account: storedCdr.Account, Subject: storedCdr.Subject, Destination: storedCdr.Destination}
 	var dcs utils.DerivedChargers
 	if err := self.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
 		utils.Logger.Err(fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", storedCdr.CgrId, err.Error()))
@@ -283,6 +306,7 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 			}
 		}
 		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
+
 			continue
 		}
 		dcReqTypeFld, _ := utils.NewRSRField(dc.ReqTypeField)
@@ -316,11 +340,12 @@ func (self *CdrServer) deriveCdrs(storedCdr *StoredCdr) ([]*StoredCdr, error) {
 
 // Retrive the cost from engine
 func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error) {
-	//if storedCdr.Usage == time.Duration(0) { // failed call,  nil cost
-	//	return nil, nil // No costs present, better than empty call cost since could lead us to 0 costs
-	//}
 	cc := new(CallCost)
 	var err error
+	timeStart := storedCdr.AnswerTime
+	if timeStart.IsZero() { // Fix for FreeSWITCH unanswered calls
+		timeStart = storedCdr.SetupTime
+	}
 	cd := &CallDescriptor{
 		TOR:           storedCdr.TOR,
 		Direction:     storedCdr.Direction,
@@ -329,8 +354,8 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 		Subject:       storedCdr.Subject,
 		Account:       storedCdr.Account,
 		Destination:   storedCdr.Destination,
-		TimeStart:     storedCdr.AnswerTime,
-		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Usage),
+		TimeStart:     timeStart,
+		TimeEnd:       timeStart.Add(storedCdr.Usage),
 		DurationIndex: storedCdr.Usage,
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, storedCdr.ReqType) { // Prepaid - Cost can be recalculated in case of missing records from SM
@@ -349,7 +374,10 @@ func (self *CdrServer) getCostFromRater(storedCdr *StoredCdr) (*CallCost, error)
 func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 	var qryCC *CallCost
 	var err error
-	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
+	if storedCdr.ReqType == utils.META_NONE {
+		return nil
+	}
+	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, storedCdr.ReqType) && storedCdr.Usage != 0 { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		for i := 0; i < 4; i++ {

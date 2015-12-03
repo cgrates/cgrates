@@ -574,7 +574,7 @@ func TestGetCostRoundingIssue(t *testing.T) {
 		MaxCostSoFar: 0,
 	}
 	cc, err := cd.GetCost()
-	expected := 0.17
+	expected := 0.39
 	if cc.Cost != expected || err != nil {
 		t.Log(utils.ToIJSON(cc))
 		t.Errorf("Expected %v was %+v", expected, cc)

@@ -56,16 +56,6 @@ following rules:
 
 To verify that all actions successfully performed, we use following *cgr-console* commands:
 
-- Make sure our rates were loaded successfully and they are already in cache:
-
- ::
-
-  cgr-console cache_stats
-  cgr-console 'cache_age 1002'
-  cgr-console 'cache_age RP_RETAIL1'
-  cgr-console 'cache_age *out:cgrates.org:call:*any'
-  cgr-console 'cache_age LOG_WARNING'
-
 - Make sure all our balances were topped-up:
 
  ::

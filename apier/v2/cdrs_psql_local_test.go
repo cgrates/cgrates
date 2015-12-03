@@ -76,10 +76,10 @@ func TestV2CdrsPsqlInjectUnratedCdr(t *testing.T) {
 		t.Error("Error on opening database connection: ", err)
 		return
 	}
-	strCdr1 := &engine.StoredCdr{CgrId: utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	strCdr1 := &engine.StoredCdr{CgrId: utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String()),
 		TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		SetupTime: time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 21, 10, 47, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
 	if err := psqlDb.SetCdr(strCdr1); err != nil {
@@ -236,6 +236,149 @@ func TestV2CdrsPsqlProcessPrepaidCdr(t *testing.T) {
 		t.Error("Unexpected processing time", processDur)
 	}
 }
+
+func TestV2CdrsPsqlRateWithoutTP(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	rawCdrCgrId := utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String())
+	// Rate the injected CDR, should not rate it since we have no TP loaded
+	attrs := utils.AttrRateCdrs{CgrIds: []string{rawCdrCgrId}}
+	var reply string
+	if err := cdrsPsqlRpc.Call("CdrsV2.RateCdrs", attrs, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	var cdrs []*engine.ExternalCdr
+	req := utils.RpcCdrsFilter{CgrIds: []string{rawCdrCgrId}}
+	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		if cdrs[0].Cost != -1 {
+			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
+		}
+	}
+}
+
+func TestV2CdrsPsqlLoadTariffPlanFromFolder(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var loadInst engine.LoadInstance
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
+	if err := cdrsPsqlRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
+		t.Error(err)
+	} else if loadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", loadInst)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+}
+
+func TestV2CdrsPsqlRateWithTP(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	rawCdrCgrId := utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String())
+	attrs := utils.AttrRateCdrs{CgrIds: []string{rawCdrCgrId}}
+	var reply string
+	if err := cdrsPsqlRpc.Call("CdrsV2.RateCdrs", attrs, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	var cdrs []*engine.ExternalCdr
+	req := utils.RpcCdrsFilter{CgrIds: []string{rawCdrCgrId}}
+	if err := cdrsPsqlRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else {
+		if cdrs[0].Cost != 0.3 {
+			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
+		}
+	}
+}
+
+/*
+// Benchmark speed of processing 1000 CDRs
+func TestV2CdrsPsqlProcessRatedExternalCdrBenchmark(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "benchratedcdr", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "15", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var reply string
+	tStart := time.Now()
+	nrCdrs := 1000
+	for i := 0; i < nrCdrs; i++ {
+		cdr.AccId = "benchratedcdr" + strconv.Itoa(i)
+		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received: ", reply)
+		}
+	}
+	if durExec := time.Now().Sub(tStart); durExec > time.Duration(1)*time.Second {
+		t.Errorf("Processing of %d rated CDRs took: %v", nrCdrs, durExec)
+	}
+}
+
+// Benchmark speed of re-rating 1000 CDRs
+func TestV2CdrsPsqlReRateWithTPBenchmark(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var nrCdrs int64
+	req := utils.AttrRateCdrs{RerateRated: true, RerateErrors: true}
+	if err := cdrsPsqlRpc.Call("ApierV2.CountCdrs", req, &nrCdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	tStart := time.Now()
+	var reply string
+	if err := cdrsPsqlRpc.Call("CdrsV2.RateCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	if durExec := time.Now().Sub(tStart); durExec > time.Duration(1)*time.Second {
+		t.Errorf("Rerating of %d rated CDRs took: %v", nrCdrs, durExec)
+	}
+}
+
+// Benchmark speed of processing 1000 postpaid CDRs
+func TestV2CdrsPsqlProcessPostpaidExternalCdrBenchmark(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.ExternalCdr{TOR: utils.VOICE,
+		AccId: "benchpostpaidcdr", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_POSTPAID, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
+		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
+		Usage: "15", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var reply string
+	tStart := time.Now()
+	nrCdrs := 1000
+	for i := 0; i < nrCdrs; i++ {
+		cdr.AccId = "benchpostpaidcdr" + strconv.Itoa(i)
+		if err := cdrsPsqlRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received: ", reply)
+		}
+	}
+	if durExec := time.Now().Sub(tStart); durExec > time.Duration(1)*time.Second {
+		t.Errorf("Processing of %d postpaid CDRs took: %v", nrCdrs, durExec)
+	}
+}
+*/
 
 func TestV2CdrsPsqlKillEngine(t *testing.T) {
 	if !*testLocal {

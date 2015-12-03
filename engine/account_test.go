@@ -91,7 +91,7 @@ func TestAccountStorageStoreRestore(t *testing.T) {
 	ub1, err := accountingStorage.GetAccount("other")
 	if err != nil || !ub1.BalanceMap[utils.MONETARY].Equal(rifsBalance.BalanceMap[utils.MONETARY]) {
 		t.Log("UB: ", ub1)
-		t.Errorf("Expected %v was %v", rifsBalance.BalanceMap[utils.MONETARY], ub1.BalanceMap[utils.MONETARY])
+		t.Errorf("Expected %v was %v", rifsBalance, ub1)
 	}
 }
 
@@ -143,6 +143,9 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 	expected := 20 * time.Second
 	if credit != 0 || seconds != expected || len(bucketList) != 2 || bucketList[0].Weight < bucketList[1].Weight {
 		t.Log(seconds, credit, bucketList)
+		for _, b := range bucketList {
+			t.Logf("Balance: %+v", b)
+		}
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }

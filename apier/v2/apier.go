@@ -223,6 +223,13 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
 	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
 
+	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
+	li := loader.GetLoadInstance()
+
+	// release the tp data
+	loader.Init()
+
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
@@ -245,20 +252,18 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		self.Sched.LoadActionPlans(self.RatingDb)
 		self.Sched.Restart()
 	}
-	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
 		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
 			return err
 		}
 	}
 
-	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
 		if err := self.Users.ReloadUsers("", &r); err != nil {
 			return err
 		}
 	}
-	*reply = *loader.GetLoadInstance()
+	*reply = *li
 	return nil
 }

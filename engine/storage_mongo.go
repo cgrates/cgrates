@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -543,6 +542,13 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		utils.Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
 	}
 	for _, key := range alsKeys {
+		// check if it already exists
+		// to remove reverse cache keys
+		if avs, err := cache2go.Get(key); err == nil && avs != nil {
+			al := &Alias{Values: avs.(AliasValues)}
+			al.SetId(key[len(utils.ALIASES_PREFIX):])
+			al.RemoveReverseCache()
+		}
 		cache2go.RemKey(key)
 		if _, err = ms.GetAlias(key[len(utils.ALIASES_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
@@ -690,7 +696,7 @@ func (ms *MongoStorage) GetDestination(key string) (result *Destination, err err
 	}
 	// create optimized structure
 	for _, p := range result.Prefixes {
-		cache2go.CachePush(utils.DESTINATION_PREFIX+p, result.Id)
+		cache2go.Push(utils.DESTINATION_PREFIX+p, result.Id)
 	}
 	return
 }
@@ -897,21 +903,7 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		if err == nil {
 			cache2go.Cache(key, al.Values)
 			// cache reverse alias
-			for _, value := range al.Values {
-				for target, pairs := range value.Pairs {
-					for _, alias := range pairs {
-						var existingKeys map[string]bool
-						rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-						if x, err := cache2go.Get(rKey); err == nil {
-							existingKeys = x.(map[string]bool)
-						} else {
-							existingKeys = make(map[string]bool)
-						}
-						existingKeys[utils.ConcatenatedKey(origKey, value.DestinationId)] = true
-						cache2go.Cache(rKey, existingKeys)
-					}
-				}
-			}
+			al.SetReverseCache()
 		}
 	}
 	return
@@ -922,39 +914,17 @@ func (ms *MongoStorage) RemoveAlias(key string) (err error) {
 	al.SetId(key)
 	origKey := key
 	key = utils.ALIASES_PREFIX + key
-	var aliasValues AliasValues
-
 	var kv struct {
 		Key   string
 		Value AliasValues
 	}
 	if err := ms.db.C(colAls).Find(bson.M{"key": origKey}).One(&kv); err == nil {
-		aliasValues = kv.Value
+		al.Values = kv.Value
 	}
 	err = ms.db.C(colAls).Remove(bson.M{"key": origKey})
 	if err == nil {
-		for _, value := range aliasValues {
-			for target, pairs := range value.Pairs {
-				for _, alias := range pairs {
-					var existingKeys map[string]bool
-					rKey := utils.REVERSE_ALIASES_PREFIX + alias + target + al.Context
-					if x, err := cache2go.Get(rKey); err == nil {
-						existingKeys = x.(map[string]bool)
-					}
-					for eKey := range existingKeys {
-						if strings.HasPrefix(origKey, eKey) {
-							delete(existingKeys, eKey)
-						}
-					}
-					if len(existingKeys) == 0 {
-						cache2go.RemKey(rKey)
-					} else {
-						cache2go.Cache(rKey, existingKeys)
-					}
-				}
-				cache2go.RemKey(key)
-			}
-		}
+		al.RemoveReverseCache()
+		cache2go.RemKey(key)
 	}
 	return
 }
@@ -1100,7 +1070,7 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]ActionPlans, err err
 
 	ats = make(map[string]ActionPlans, len(apls))
 	for key, value := range apls {
-		apl := value.Value().(ActionPlans)
+		apl := value.(ActionPlans)
 		ats[key] = apl
 	}
 

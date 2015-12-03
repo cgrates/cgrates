@@ -36,8 +36,7 @@ import (
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
-	migrateRC8   = flag.Bool("migrate_rc8", false, "Migrate Accounts, Actions, ActionTriggers and DerivedChargers to RC8 structures")
-	migrateList  = flag.String("migrate_list", "acc,atr,act,dcs", "Migration item list")
+	migrateRC8   = flag.String("migrate_rc8", "", "Migrate Accounts, Actions, ActionTriggers and DerivedChargers to RC8 structures, possible values: *all,acc,atr,act,dcs,apl")
 	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
 	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
 	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
@@ -92,7 +91,7 @@ func main() {
 	var storDb engine.LoadStorage
 	var rater, cdrstats, users *rpc.Client
 	var loader engine.LoadReader
-	if *migrateRC8 {
+	if *migrateRC8 != "" {
 		var db_nb int
 		db_nb, err = strconv.Atoi(*datadb_name)
 		if err != nil {
@@ -108,7 +107,7 @@ func main() {
 			log.Print(err.Error())
 			return
 		}
-		if strings.Contains(*migrateList, "acc") {
+		if strings.Contains(*migrateRC8, "acc") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8acc.migrateAccounts(); err != nil {
 				log.Print(err.Error())
 			}
@@ -128,18 +127,23 @@ func main() {
 			log.Print(err.Error())
 			return
 		}
-		if strings.Contains(*migrateList, "atr") {
+		if strings.Contains(*migrateRC8, "atr") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8rat.migrateActionTriggers(); err != nil {
 				log.Print(err.Error())
 			}
 		}
-		if strings.Contains(*migrateList, "act") {
+		if strings.Contains(*migrateRC8, "act") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8rat.migrateActions(); err != nil {
 				log.Print(err.Error())
 			}
 		}
-		if strings.Contains(*migrateList, "dcs") {
+		if strings.Contains(*migrateRC8, "dcs") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8rat.migrateDerivedChargers(); err != nil {
+				log.Print(err.Error())
+			}
+		}
+		if strings.Contains(*migrateRC8, "apl") || strings.Contains(*migrateRC8, "*all") {
+			if err := migratorRC8rat.migrateActionPlans(); err != nil {
 				log.Print(err.Error())
 			}
 		}
@@ -290,17 +294,33 @@ func main() {
 	if len(*historyServer) != 0 && *verbose {
 		log.Print("Wrote history.")
 	}
+	var dstIds, rplIds, rpfIds, actIds, shgIds, alsIds, lcrIds, dcsIds []string
+	if rater != nil {
+		dstIds, _ = tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
+		rplIds, _ = tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
+		rpfIds, _ = tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
+		actIds, _ = tpReader.GetLoadedIds(utils.ACTION_PREFIX)
+		shgIds, _ = tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
+		alsIds, _ = tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
+		lcrIds, _ = tpReader.GetLoadedIds(utils.LCR_PREFIX)
+		dcsIds, _ = tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
+	}
+	actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+	var statsQueueIds []string
+	if cdrstats != nil {
+		statsQueueIds, _ = tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
+	}
+	var userIds []string
+	if users != nil {
+		userIds, _ = tpReader.GetLoadedIds(utils.USERS_PREFIX)
+	}
+	// release the reader with it's structures
+	tpReader.Init()
+
 	// Reload scheduler and cache
 	if rater != nil {
 		reply := ""
-		dstIds, _ := tpReader.GetLoadedIds(utils.DESTINATION_PREFIX)
-		rplIds, _ := tpReader.GetLoadedIds(utils.RATING_PLAN_PREFIX)
-		rpfIds, _ := tpReader.GetLoadedIds(utils.RATING_PROFILE_PREFIX)
-		actIds, _ := tpReader.GetLoadedIds(utils.ACTION_PREFIX)
-		shgIds, _ := tpReader.GetLoadedIds(utils.SHARED_GROUP_PREFIX)
-		aliases, _ := tpReader.GetLoadedIds(utils.ALIASES_PREFIX)
-		lcrIds, _ := tpReader.GetLoadedIds(utils.LCR_PREFIX)
-		dcs, _ := tpReader.GetLoadedIds(utils.DERIVEDCHARGERS_PREFIX)
+
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
@@ -314,13 +334,13 @@ func main() {
 			RatingProfileIds: rpfIds,
 			ActionIds:        actIds,
 			SharedGroupIds:   shgIds,
-			Aliases:          aliases,
+			Aliases:          alsIds,
 			LCRIds:           lcrIds,
-			DerivedChargers:  dcs,
+			DerivedChargers:  dcsIds,
 		}, &reply); err != nil {
 			log.Printf("WARNING: Got error on cache reload: %s\n", err.Error())
 		}
-		actTmgIds, _ := tpReader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
+
 		if len(actTmgIds) != 0 {
 			if *verbose {
 				log.Print("Reloading scheduler")
@@ -332,7 +352,6 @@ func main() {
 
 	}
 	if cdrstats != nil {
-		statsQueueIds, _ := tpReader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 		if *flush {
 			statsQueueIds = []string{} // Force reload all
 		}
@@ -348,7 +367,6 @@ func main() {
 	}
 
 	if users != nil {
-		userIds, _ := tpReader.GetLoadedIds(utils.USERS_PREFIX)
 		if len(userIds) > 0 {
 			if *verbose {
 				log.Print("Reloading Users data")

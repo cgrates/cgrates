@@ -20,16 +20,12 @@ package agents
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/datatype"
-	"github.com/fiorix/go-diameter/diam/dict"
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
@@ -37,7 +33,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient) (*Diam
 	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg}
 	dictsDir := cgrCfg.DiameterAgentCfg().DictionariesDir
 	if len(dictsDir) != 0 {
-		if err := da.loadDictionaries(dictsDir); err != nil {
+		if err := loadDictionaries(dictsDir, "DiameterAgent"); err != nil {
 			return nil, err
 		}
 	}
@@ -61,46 +57,84 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	dSM := sm.New(settings)
 	dSM.HandleFunc("CCR", self.handleCCR)
 	dSM.HandleFunc("ALL", self.handleALL)
+	go func() {
+		for err := range dSM.ErrorReports() {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> StateMachine error: %+v", err))
+		}
+	}()
 	return dSM
 }
 
+func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor) (*CCA, error) {
+	passesAllFilters := true
+	for _, fldFilter := range reqProcessor.RequestFilter {
+		if !ccr.passesFieldFilter(fldFilter) {
+			passesAllFilters = false
+		}
+	}
+	if !passesAllFilters { // Not going with this processor further
+		return nil, nil
+	}
+	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.ContentFields)
+	if err != nil {
+		return nil, err
+	}
+	var maxUsage float64
+	switch ccr.CCRequestType {
+	case 1:
+		err = self.smg.Call("SMGenericV1.SessionStart", smgEv, &maxUsage)
+	case 2:
+		err = self.smg.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage)
+	case 3:
+		var rpl string
+		err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
+		if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
+			err = errCdr
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+	cca := NewCCAFromCCR(ccr)
+	cca.OriginHost = self.cgrCfg.DiameterAgentCfg().OriginHost
+	cca.OriginRealm = self.cgrCfg.DiameterAgentCfg().OriginRealm
+	cca.GrantedServiceUnit.CCTime = int(maxUsage)
+	cca.ResultCode = diam.Success
+	return cca, nil
+}
+
 func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
-	utils.Logger.Warning(fmt.Sprintf("<DiameterAgent> Received CCR message from %s:\n%s", c.RemoteAddr(), m))
+	ccr, err := NewCCRFromDiameterMessage(m, self.cgrCfg.DiameterAgentCfg().DebitInterval)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", m, err))
+		return
+	}
+	var cca *CCA // For now we simply overload in loop, maybe we will find some other use of this
+	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
+		if cca, err = self.processCCR(ccr, reqProcessor); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Error processing CCR %+v, processor id: %s, error: %s", ccr, reqProcessor.Id, err.Error()))
+		}
+		if cca != nil && !reqProcessor.ContinueOnSuccess {
+			break
+		}
+	}
+	if err != nil { //ToDo: return standard diameter error
+		return
+	} else if cca == nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %+v, ignoring request", ccr))
+		return
+	}
+	if dmtA, err := cca.AsDiameterMessage(); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to convert cca as diameter message, error: %s", err.Error()))
+		return
+	} else if _, err := dmtA.WriteTo(c); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to write message to %s: %s\n%s\n", c.RemoteAddr(), err, dmtA))
+		return
+	}
 }
 
 func (self *DiameterAgent) handleALL(c diam.Conn, m *diam.Message) {
 	utils.Logger.Warning(fmt.Sprintf("<DiameterAgent> Received unexpected message from %s:\n%s", c.RemoteAddr(), m))
-}
-
-func (self *DiameterAgent) loadDictionaries(dictsDir string) error {
-	fi, err := os.Stat(dictsDir)
-	if err != nil {
-		if strings.HasSuffix(err.Error(), "no such file or directory") {
-			return fmt.Errorf("<DiameterAgent> Invalid dictionaries folder: <%s>", dictsDir)
-		}
-		return err
-	} else if !fi.IsDir() { // If config dir defined, needs to exist
-		return fmt.Errorf("<DiameterAgent> Path: <%s> is not a directory", dictsDir)
-	}
-	return filepath.Walk(dictsDir, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			return nil
-		}
-		cfgFiles, err := filepath.Glob(filepath.Join(path, "*.xml")) // Only consider .xml files
-		if err != nil {
-			return err
-		}
-		if cfgFiles == nil { // No need of processing further since there are no dictionary files in the folder
-			return nil
-		}
-		for _, filePath := range cfgFiles {
-			if err := dict.Default.LoadFile(filePath); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-
 }
 
 func (self *DiameterAgent) ListenAndServe() error {
