@@ -246,7 +246,7 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(self.RequestedServiceUnit.CCTime))}}); err != nil { // CC-Time
 		return nil, err
 	}
-	if si, err := m.NewAVP("Service-Information", avp.Mbit, 10415, &diam.GroupedAVP{
+	if _, err := m.NewAVP("Service-Information", avp.Mbit, 10415, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(20300, avp.Mbit, 20300, &diam.GroupedAVP{
 				AVP: []*diam.AVP{
@@ -259,15 +259,13 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 					diam.NewAVP(20313, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.BearerCapability)),    // Bearer-Capability
 					diam.NewAVP(20321, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CallReferenceNumber)), // Call-Reference-Number
 					diam.NewAVP(20322, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.MSCAddress)),          // MSC-Address
-					diam.NewAVP(20324, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.TimeZone)),            // Time-Zone
+					diam.NewAVP(20324, avp.Mbit, 20300, datatype.Unsigned32(self.ServiceInformation.INInformation.TimeZone)),            // Time-Zone
 					diam.NewAVP(20385, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyNP)),       // Called-Party-NP
 					diam.NewAVP(20386, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.SSPTime)),             // SSP-Time
 				},
 			}),
 		}}); err != nil {
 		return nil, err
-	} else {
-		fmt.Printf("### Service-Information AVP: %+v\n", si)
 	}
 	return m, nil
 }

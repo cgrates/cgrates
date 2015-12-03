@@ -201,7 +201,7 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	time.Sleep(time.Duration(100) * time.Millisecond)
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.5
+	eAcntVal := 9.484
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -232,7 +232,7 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 	time.Sleep(time.Duration(100) * time.Millisecond)
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.25
+	eAcntVal := 9.214
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -263,7 +263,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 	time.Sleep(time.Duration(100) * time.Millisecond)
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.0
+	eAcntVal := 8.944
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -293,7 +293,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	time.Sleep(time.Duration(100) * time.Millisecond)
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.2416
+	eAcntVal := 9.205
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // Should also consider derived charges which double the cost of 6m10s - 2x0.7584
