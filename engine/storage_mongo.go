@@ -955,7 +955,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*
 		cache2go.RemKey(utils.LOADINST_KEY)
 		cache2go.Cache(utils.LOADINST_KEY, loadInsts)
 	}
-	return loadInsts, err
+	return loadInsts, nil
 }
 
 // Adds a single load instance to load history
