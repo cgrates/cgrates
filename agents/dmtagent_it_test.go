@@ -315,10 +315,8 @@ func TestDmtAgentCdrs(t *testing.T) {
 		if cdrs[0].Usage != "610" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
 		}
-		if cdrs[0].Cost != 0.7584 {
-			if cdrs[0].Usage != "610" {
-				t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
-			}
+		if cdrs[0].Cost != 0.795 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
 		}
 	}
 }
