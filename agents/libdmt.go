@@ -246,22 +246,22 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(self.RequestedServiceUnit.CCTime))}}); err != nil { // CC-Time
 		return nil, err
 	}
-	if _, err := m.NewAVP("Service-Information", avp.Mbit, 10415, &diam.GroupedAVP{
+	if _, err := m.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
-			diam.NewAVP(20300, avp.Mbit, 20300, &diam.GroupedAVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
 				AVP: []*diam.AVP{
-					diam.NewAVP(831, avp.Mbit, 10415, datatype.UTF8String(self.ServiceInformation.INInformation.CallingPartyAddress)),   // Calling-Party-Address
-					diam.NewAVP(832, avp.Mbit, 10415, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyAddress)),    // Called-Party-Address
-					diam.NewAVP(20327, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.RealCalledNumber)),    // Real-Called-Number
-					diam.NewAVP(20339, avp.Mbit, 20300, datatype.Unsigned32(self.ServiceInformation.INInformation.ChargeFlowType)),      // Charge-Flow-Type
-					diam.NewAVP(20302, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CallingVlrNumber)),    // Calling-Vlr-Number
-					diam.NewAVP(20303, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CallingCellIDOrSAI)),  // Calling-CellID-Or-SAI
-					diam.NewAVP(20313, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.BearerCapability)),    // Bearer-Capability
-					diam.NewAVP(20321, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CallReferenceNumber)), // Call-Reference-Number
-					diam.NewAVP(20322, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.MSCAddress)),          // MSC-Address
-					diam.NewAVP(20324, avp.Mbit, 20300, datatype.Unsigned32(self.ServiceInformation.INInformation.TimeZone)),            // Time-Zone
-					diam.NewAVP(20385, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyNP)),       // Called-Party-NP
-					diam.NewAVP(20386, avp.Mbit, 20300, datatype.UTF8String(self.ServiceInformation.INInformation.SSPTime)),             // SSP-Time
+					diam.NewAVP(831, avp.Mbit, 10415, datatype.UTF8String(self.ServiceInformation.INInformation.CallingPartyAddress)),  // Calling-Party-Address
+					diam.NewAVP(832, avp.Mbit, 10415, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyAddress)),   // Called-Party-Address
+					diam.NewAVP(20327, avp.Mbit, 2011, datatype.UTF8String(self.ServiceInformation.INInformation.RealCalledNumber)),    // Real-Called-Number
+					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(self.ServiceInformation.INInformation.ChargeFlowType)),      // Charge-Flow-Type
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String(self.ServiceInformation.INInformation.CallingVlrNumber)),    // Calling-Vlr-Number
+					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String(self.ServiceInformation.INInformation.CallingCellIDOrSAI)),  // Calling-CellID-Or-SAI
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.UTF8String(self.ServiceInformation.INInformation.BearerCapability)),    // Bearer-Capability
+					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String(self.ServiceInformation.INInformation.CallReferenceNumber)), // Call-Reference-Number
+					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String(self.ServiceInformation.INInformation.MSCAddress)),          // MSC-Address
+					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(self.ServiceInformation.INInformation.TimeZone)),            // Time-Zone
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String(self.ServiceInformation.INInformation.CalledPartyNP)),       // Called-Party-NP
+					diam.NewAVP(20386, avp.Mbit, 2011, datatype.UTF8String(self.ServiceInformation.INInformation.SSPTime)),             // SSP-Time
 				},
 			}),
 		}}); err != nil {
