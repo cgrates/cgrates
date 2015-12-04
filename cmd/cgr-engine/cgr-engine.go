@@ -143,7 +143,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
-	for _, raterCfg := range cfg.SmGenericConfig.HaRater {
+	for _, raterCfg := range cfg.SmGenericConfig.RaterConns {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
 			raterConn.AddClient(resp)
@@ -159,10 +159,10 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 		}
 	}
 	// Connect to CDRS
-	if reflect.DeepEqual(cfg.SmGenericConfig.HaCdrs, cfg.SmGenericConfig.HaRater) {
+	if reflect.DeepEqual(cfg.SmGenericConfig.CdrsConns, cfg.SmGenericConfig.RaterConns) {
 		cdrsConn = raterConn
-	} else if len(cfg.SmGenericConfig.HaCdrs) != 0 {
-		for _, cdrsCfg := range cfg.SmGenericConfig.HaCdrs {
+	} else if len(cfg.SmGenericConfig.CdrsConns) != 0 {
+		for _, cdrsCfg := range cfg.SmGenericConfig.CdrsConns {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
 				cdrsConn.AddClient(client)
@@ -199,19 +199,24 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 
 func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
-	var smgConn *rpcclient.RpcClient
+	smgConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
+	var client *rpcclient.RpcClient
 	var err error
-	if cfg.DiameterAgentCfg().SMGeneric == utils.INTERNAL {
-		smgRpc := <-internalSMGChan
-		internalSMGChan <- smgRpc
-		smgConn, err = rpcclient.NewRpcClient("", "", 0, 0, rpcclient.INTERNAL_RPC, smgRpc)
-	} else {
-		smgConn, err = rpcclient.NewRpcClient("tcp", cfg.DiameterAgentCfg().SMGeneric, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
-	}
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
-		exitChan <- true
-		return
+	for _, smgCfg := range cfg.DiameterAgentCfg().SMGenericConns {
+		if smgCfg.Server == utils.INTERNAL {
+			smgRpc := <-internalSMGChan
+			internalSMGChan <- smgRpc
+			client, _ = rpcclient.NewRpcClient("", "", 0, 0, rpcclient.INTERNAL_RPC, smgRpc)
+			smgConn.AddClient(client)
+		} else {
+			client, err = rpcclient.NewRpcClient("tcp", smgCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			smgConn.AddClient(client)
+		}
 	}
 	da, err := agents.NewDiameterAgent(cfg, smgConn)
 	if err != nil {
@@ -232,7 +237,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
-	for _, raterCfg := range cfg.SmFsConfig.HaRater {
+	for _, raterCfg := range cfg.SmFsConfig.RaterConns {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
 			raterConn.AddClient(resp)
@@ -248,10 +253,10 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, cdrDb engine.Cd
 		}
 	}
 	// Connect to CDRS
-	if reflect.DeepEqual(cfg.SmFsConfig.HaCdrs, cfg.SmFsConfig.HaRater) {
+	if reflect.DeepEqual(cfg.SmFsConfig.CdrsConns, cfg.SmFsConfig.RaterConns) {
 		cdrsConn = raterConn
-	} else if len(cfg.SmFsConfig.HaCdrs) != 0 {
-		for _, cdrsCfg := range cfg.SmFsConfig.HaCdrs {
+	} else if len(cfg.SmFsConfig.CdrsConns) != 0 {
+		for _, cdrsCfg := range cfg.SmFsConfig.CdrsConns {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
 				cdrsConn.AddClient(resp)
@@ -282,7 +287,7 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
-	for _, raterCfg := range cfg.SmKamConfig.HaRater {
+	for _, raterCfg := range cfg.SmKamConfig.RaterConns {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
 			raterConn.AddClient(resp)
@@ -298,10 +303,10 @@ func startSmKamailio(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		}
 	}
 	// Connect to CDRS
-	if reflect.DeepEqual(cfg.SmKamConfig.HaCdrs, cfg.SmKamConfig.HaRater) {
+	if reflect.DeepEqual(cfg.SmKamConfig.CdrsConns, cfg.SmKamConfig.RaterConns) {
 		cdrsConn = raterConn
-	} else if len(cfg.SmKamConfig.HaCdrs) != 0 {
-		for _, cdrsCfg := range cfg.SmKamConfig.HaCdrs {
+	} else if len(cfg.SmKamConfig.CdrsConns) != 0 {
+		for _, cdrsCfg := range cfg.SmKamConfig.CdrsConns {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
 				cdrsConn.AddClient(resp)
@@ -332,7 +337,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
-	for _, raterCfg := range cfg.SmOsipsConfig.HaRater {
+	for _, raterCfg := range cfg.SmOsipsConfig.RaterConns {
 		if raterCfg.Server == utils.INTERNAL {
 			resp := <-internalRaterChan
 			raterConn.AddClient(resp)
@@ -348,10 +353,10 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 		}
 	}
 	// Connect to CDRS
-	if reflect.DeepEqual(cfg.SmOsipsConfig.HaCdrs, cfg.SmOsipsConfig.HaRater) {
+	if reflect.DeepEqual(cfg.SmOsipsConfig.CdrsConns, cfg.SmOsipsConfig.RaterConns) {
 		cdrsConn = raterConn
-	} else if len(cfg.SmOsipsConfig.HaCdrs) != 0 {
-		for _, cdrsCfg := range cfg.SmOsipsConfig.HaCdrs {
+	} else if len(cfg.SmOsipsConfig.CdrsConns) != 0 {
+		for _, cdrsCfg := range cfg.SmOsipsConfig.CdrsConns {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalRaterChan
 				cdrsConn.AddClient(resp)

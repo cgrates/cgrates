@@ -201,10 +201,10 @@ const CGRATES_CFG_JSON = `
 "sm_generic": {
 	"enabled": false,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-    "ha_rater": [
+    "rater_conns": [
         {"server": "internal"}     // address where to reach the Rater <""|internal|127.0.0.1:2013>
     ],
-	"ha_cdrs": [
+	"cdrs_conns": [
         {"server": "internal"}     // address where to reach CDR Server, empty to disable CDR capturing <internal|x.y.z.y:1234>
     ],
 	"debit_interval": "0s",					// interval to perform debits on.
@@ -215,10 +215,10 @@ const CGRATES_CFG_JSON = `
 
 "sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-    "ha_rater": [
+    "rater_conns": [
         {"server": "internal"}     // address where to reach the Rater <""|internal|127.0.0.1:2013>
     ],
-	"ha_cdrs": [
+	"cdrs_conns": [
         {"server": "internal"}     // address where to reach CDR Server, empty to disable CDR capturing <internal|x.y.z.y:1234>
     ],
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
@@ -240,10 +240,10 @@ const CGRATES_CFG_JSON = `
 
 "sm_kamailio": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-    "ha_rater": [
+    "rater_conns": [
         {"server": "internal"}     // address where to reach the Rater <""|internal|127.0.0.1:2013>
     ],
-	"ha_cdrs": [
+	"cdrs_conns": [
         {"server": "internal"}     // address where to reach CDR Server, empty to disable CDR capturing <internal|x.y.z.y:1234>
     ],
 	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
@@ -259,10 +259,10 @@ const CGRATES_CFG_JSON = `
 "sm_opensips": {
 	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
-    "ha_rater": [
+    "rater_conns": [
         {"server": "internal"}     // address where to reach the Rater <""|internal|127.0.0.1:2013>
     ],
-	"ha_cdrs": [
+	"cdrs_conns": [
         {"server": "internal"}     // address where to reach CDR Server, empty to disable CDR capturing <internal|x.y.z.y:1234>
     ],
 	"reconnects": 5,					// number of reconnects if connection is lost
@@ -279,7 +279,9 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"sm_generic": "internal",									// connection towards SMG component for session management
+	"sm_generic_conns": [
+        {"server": "internal"}									// connection towards SMG component for session management
+    ],
 	"debit_interval": "5m",										// interval for CCR updates
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"dialect": "huawei",										// the diameter dialect used in the communication, supported: <huawei>

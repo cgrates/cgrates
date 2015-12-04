@@ -320,67 +320,67 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// SM-Generic checks
 	if self.SmGenericConfig.Enabled {
-		if len(self.SmGenericConfig.HaRater) == 0 {
+		if len(self.SmGenericConfig.RaterConns) == 0 {
 			return errors.New("Rater definition is mandatory!")
 		}
-		if len(self.SmGenericConfig.HaCdrs) == 0 {
+		if len(self.SmGenericConfig.CdrsConns) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmGenericConfig.HaRater[0].Server == utils.INTERNAL && !self.RaterEnabled {
+		if self.SmGenericConfig.RaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-Generic component.")
 		}
-		if self.SmGenericConfig.HaCdrs[0].Server == utils.INTERNAL && !self.CDRSEnabled {
+		if self.SmGenericConfig.CdrsConns[0].Server == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but referenced by SM-Generic component")
 		}
 	}
 	// SM-FreeSWITCH checks
 	if self.SmFsConfig.Enabled {
-		if len(self.SmFsConfig.HaRater) == 0 {
+		if len(self.SmFsConfig.RaterConns) == 0 {
 			return errors.New("Rater definition is mandatory!")
 		}
-		if len(self.SmFsConfig.HaCdrs) == 0 {
+		if len(self.SmFsConfig.CdrsConns) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmFsConfig.HaRater[0].Server == utils.INTERNAL && !self.RaterEnabled {
+		if self.SmFsConfig.RaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-FreeSWITCH component.")
 		}
-		if self.SmFsConfig.HaCdrs[0].Server == utils.INTERNAL && !self.CDRSEnabled {
+		if self.SmFsConfig.CdrsConns[0].Server == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but referenced by SM-FreeSWITCH component")
 		}
 	}
 	// SM-Kamailio checks
 	if self.SmKamConfig.Enabled {
-		if len(self.SmKamConfig.HaRater) == 0 {
+		if len(self.SmKamConfig.RaterConns) == 0 {
 			return errors.New("Rater definition is mandatory!")
 		}
-		if len(self.SmKamConfig.HaCdrs) == 0 {
+		if len(self.SmKamConfig.CdrsConns) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmKamConfig.HaRater[0].Server == utils.INTERNAL && !self.RaterEnabled {
+		if self.SmKamConfig.RaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-Kamailio component.")
 		}
-		if self.SmKamConfig.HaCdrs[0].Server == utils.INTERNAL && !self.CDRSEnabled {
+		if self.SmKamConfig.CdrsConns[0].Server == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
 		}
 	}
 	// SM-OpenSIPS checks
 	if self.SmOsipsConfig.Enabled {
-		if len(self.SmOsipsConfig.HaRater) == 0 {
+		if len(self.SmOsipsConfig.RaterConns) == 0 {
 			return errors.New("Rater definition is mandatory!")
 		}
-		if len(self.SmOsipsConfig.HaCdrs) == 0 {
+		if len(self.SmOsipsConfig.CdrsConns) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmOsipsConfig.HaRater[0].Server == utils.INTERNAL && !self.RaterEnabled {
+		if self.SmOsipsConfig.RaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by SM-OpenSIPS component.")
 		}
-		if self.SmOsipsConfig.HaCdrs[0].Server == utils.INTERNAL && !self.CDRSEnabled {
+		if self.SmOsipsConfig.CdrsConns[0].Server == utils.INTERNAL && !self.CDRSEnabled {
 			return errors.New("CDRS not enabled but referenced by SM-OpenSIPS component")
 		}
 	}
 	// DAgent checks
 	if self.diameterAgentCfg.Enabled {
-		if self.diameterAgentCfg.SMGeneric == utils.INTERNAL && !self.SmGenericConfig.Enabled {
+		if self.diameterAgentCfg.SMGenericConns[0].Server == utils.INTERNAL && !self.SmGenericConfig.Enabled {
 			return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
 		}
 	}

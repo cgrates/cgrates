@@ -28,7 +28,7 @@ type DiameterAgentCfg struct {
 	Enabled           bool   // enables the diameter agent: <true|false>
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesDir   string
-	SMGeneric         string // connection towards SMG component
+	SMGenericConns    []*HaPoolConfig // connections towards SMG component
 	DebitInterval     time.Duration
 	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	Dialect           string // the diameter dialect used in the implementation <huawei>
@@ -52,8 +52,12 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 	if jsnCfg.Dictionaries_dir != nil {
 		self.DictionariesDir = *jsnCfg.Dictionaries_dir
 	}
-	if jsnCfg.Sm_generic != nil {
-		self.SMGeneric = *jsnCfg.Sm_generic
+	if jsnCfg.Sm_generic_conns != nil {
+		self.SMGenericConns = make([]*HaPoolConfig, len(*jsnCfg.Sm_generic_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Sm_generic_conns {
+			self.SMGenericConns[idx] = NewDfltHaPoolConfig()
+			self.SMGenericConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
 	if jsnCfg.Debit_interval != nil {
 		var err error

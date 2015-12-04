@@ -29,7 +29,7 @@ import (
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
-func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient) (*DiameterAgent, error) {
+func NewDiameterAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection) (*DiameterAgent, error) {
 	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg}
 	dictsDir := cgrCfg.DiameterAgentCfg().DictionariesDir
 	if len(dictsDir) != 0 {
@@ -42,7 +42,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient) (*Diam
 
 type DiameterAgent struct {
 	cgrCfg *config.CGRConfig
-	smg    *rpcclient.RpcClient // Connection towards CGR-SMG component
+	smg    rpcclient.RpcClientConnection // Connection towards CGR-SMG component
 }
 
 // Creates the message handlers

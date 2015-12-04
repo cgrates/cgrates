@@ -164,8 +164,8 @@ type CdrcJsonCfg struct {
 type SmGenericJsonCfg struct {
 	Enabled           *bool
 	Listen_bijson     *string
-	Ha_rater          *[]*HaPoolJsonCfg
-	Ha_cdrs           *[]*HaPoolJsonCfg
+	Rater_conns       *[]*HaPoolJsonCfg
+	Cdrs_conns        *[]*HaPoolJsonCfg
 	Debit_interval    *string
 	Min_call_duration *string
 	Max_call_duration *string
@@ -174,8 +174,8 @@ type SmGenericJsonCfg struct {
 // SM-FreeSWITCH config section
 type SmFsJsonCfg struct {
 	Enabled                *bool
-	Ha_rater               *[]*HaPoolJsonCfg
-	Ha_cdrs                *[]*HaPoolJsonCfg
+	Rater_conns            *[]*HaPoolJsonCfg
+	Cdrs_conns             *[]*HaPoolJsonCfg
 	Create_cdr             *bool
 	Extra_fields           *[]string
 	Debit_interval         *string
@@ -205,8 +205,8 @@ type FsConnJsonCfg struct {
 // SM-Kamailio config section
 type SmKamJsonCfg struct {
 	Enabled           *bool
-	Ha_rater          *[]*HaPoolJsonCfg
-	Ha_cdrs           *[]*HaPoolJsonCfg
+	Rater_conns       *[]*HaPoolJsonCfg
+	Cdrs_conns        *[]*HaPoolJsonCfg
 	Create_cdr        *bool
 	Debit_interval    *string
 	Min_call_duration *string
@@ -224,8 +224,8 @@ type KamConnJsonCfg struct {
 type SmOsipsJsonCfg struct {
 	Enabled                   *bool
 	Listen_udp                *string
-	Ha_rater                  *[]*HaPoolJsonCfg
-	Ha_cdrs                   *[]*HaPoolJsonCfg
+	Rater_conns               *[]*HaPoolJsonCfg
+	Cdrs_conns                *[]*HaPoolJsonCfg
 	Create_cdr                *bool
 	Debit_interval            *string
 	Min_call_duration         *string
@@ -242,10 +242,10 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled            *bool   // enables the diameter agent: <true|false>
-	Listen             *string // address where to listen for diameter requests <x.y.z.y:1234>
-	Dictionaries_dir   *string // path towards additional dictionaries
-	Sm_generic         *string // Connection towards generic SM
+	Enabled            *bool             // enables the diameter agent: <true|false>
+	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
+	Dictionaries_dir   *string           // path towards additional dictionaries
+	Sm_generic_conns   *[]*HaPoolJsonCfg // Connections towards generic SM
 	Debit_interval     *string
 	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	Dialect            *string

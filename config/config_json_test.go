@@ -328,11 +328,11 @@ func TestSmGenericJsonCfg(t *testing.T) {
 	eCfg := &SmGenericJsonCfg{
 		Enabled:       utils.BoolPointer(false),
 		Listen_bijson: utils.StringPointer("127.0.0.1:2014"),
-		Ha_rater: &[]*HaPoolJsonCfg{
+		Rater_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
-		Ha_cdrs: &[]*HaPoolJsonCfg{
+		Cdrs_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
@@ -350,11 +350,11 @@ func TestSmGenericJsonCfg(t *testing.T) {
 func TestSmFsJsonCfg(t *testing.T) {
 	eCfg := &SmFsJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Ha_rater: &[]*HaPoolJsonCfg{
+		Rater_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
-		Ha_cdrs: &[]*HaPoolJsonCfg{
+		Cdrs_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
@@ -386,11 +386,11 @@ func TestSmFsJsonCfg(t *testing.T) {
 func TestSmKamJsonCfg(t *testing.T) {
 	eCfg := &SmKamJsonCfg{
 		Enabled: utils.BoolPointer(false),
-		Ha_rater: &[]*HaPoolJsonCfg{
+		Rater_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
-		Ha_cdrs: &[]*HaPoolJsonCfg{
+		Cdrs_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
@@ -416,11 +416,11 @@ func TestSmOsipsJsonCfg(t *testing.T) {
 	eCfg := &SmOsipsJsonCfg{
 		Enabled:    utils.BoolPointer(false),
 		Listen_udp: utils.StringPointer("127.0.0.1:2020"),
-		Ha_rater: &[]*HaPoolJsonCfg{
+		Rater_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
-		Ha_cdrs: &[]*HaPoolJsonCfg{
+		Cdrs_conns: &[]*HaPoolJsonCfg{
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
@@ -443,14 +443,17 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Enabled:          utils.BoolPointer(false),
 		Listen:           utils.StringPointer("127.0.0.1:3868"),
 		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
-		Sm_generic:       utils.StringPointer("internal"),
-		Debit_interval:   utils.StringPointer("5m"),
-		Timezone:         utils.StringPointer(""),
-		Dialect:          utils.StringPointer("huawei"),
-		Origin_host:      utils.StringPointer("CGR-DA"),
-		Origin_realm:     utils.StringPointer("cgrates.org"),
-		Vendor_id:        utils.IntPointer(0),
-		Product_name:     utils.StringPointer("CGRateS"),
+		Sm_generic_conns: &[]*HaPoolJsonCfg{
+			&HaPoolJsonCfg{
+				Server: utils.StringPointer("internal"),
+			}},
+		Debit_interval: utils.StringPointer("5m"),
+		Timezone:       utils.StringPointer(""),
+		Dialect:        utils.StringPointer("huawei"),
+		Origin_host:    utils.StringPointer("CGR-DA"),
+		Origin_realm:   utils.StringPointer("cgrates.org"),
+		Vendor_id:      utils.IntPointer(0),
+		Product_name:   utils.StringPointer("CGRateS"),
 		Request_processors: &[]*DARequestProcessorJsnCfg{
 			&DARequestProcessorJsnCfg{
 				Id:                  utils.StringPointer("*default"),

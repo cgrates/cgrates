@@ -83,8 +83,8 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 type SmGenericConfig struct {
 	Enabled         bool
 	ListenBijson    string
-	HaRater         []*HaPoolConfig
-	HaCdrs          []*HaPoolConfig
+	RaterConns      []*HaPoolConfig
+	CdrsConns       []*HaPoolConfig
 	DebitInterval   time.Duration
 	MinCallDuration time.Duration
 	MaxCallDuration time.Duration
@@ -101,18 +101,18 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 	if jsnCfg.Listen_bijson != nil {
 		self.ListenBijson = *jsnCfg.Listen_bijson
 	}
-	if jsnCfg.Ha_rater != nil {
-		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
-			self.HaRater[idx] = NewDfltHaPoolConfig()
-			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Rater_conns != nil {
+		self.RaterConns = make([]*HaPoolConfig, len(*jsnCfg.Rater_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rater_conns {
+			self.RaterConns[idx] = NewDfltHaPoolConfig()
+			self.RaterConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Ha_cdrs != nil {
-		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
-			self.HaCdrs[idx] = NewDfltHaPoolConfig()
-			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Cdrs_conns != nil {
+		self.CdrsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
+			self.CdrsConns[idx] = NewDfltHaPoolConfig()
+			self.CdrsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Debit_interval != nil {
@@ -135,8 +135,8 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 
 type SmFsConfig struct {
 	Enabled             bool
-	HaRater             []*HaPoolConfig
-	HaCdrs              []*HaPoolConfig
+	RaterConns          []*HaPoolConfig
+	CdrsConns           []*HaPoolConfig
 	CreateCdr           bool
 	ExtraFields         []*utils.RSRField
 	DebitInterval       time.Duration
@@ -159,18 +159,18 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Ha_rater != nil {
-		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
-			self.HaRater[idx] = NewDfltHaPoolConfig()
-			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Rater_conns != nil {
+		self.RaterConns = make([]*HaPoolConfig, len(*jsnCfg.Rater_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rater_conns {
+			self.RaterConns[idx] = NewDfltHaPoolConfig()
+			self.RaterConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Ha_cdrs != nil {
-		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
-			self.HaCdrs[idx] = NewDfltHaPoolConfig()
-			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Cdrs_conns != nil {
+		self.CdrsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
+			self.CdrsConns[idx] = NewDfltHaPoolConfig()
+			self.CdrsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {
@@ -259,8 +259,8 @@ func (self *KamConnConfig) loadFromJsonCfg(jsnCfg *KamConnJsonCfg) error {
 // SM-Kamailio config section
 type SmKamConfig struct {
 	Enabled         bool
-	HaRater         []*HaPoolConfig
-	HaCdrs          []*HaPoolConfig
+	RaterConns      []*HaPoolConfig
+	CdrsConns       []*HaPoolConfig
 	CreateCdr       bool
 	DebitInterval   time.Duration
 	MinCallDuration time.Duration
@@ -276,18 +276,18 @@ func (self *SmKamConfig) loadFromJsonCfg(jsnCfg *SmKamJsonCfg) error {
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
-	if jsnCfg.Ha_rater != nil {
-		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
-			self.HaRater[idx] = NewDfltHaPoolConfig()
-			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Rater_conns != nil {
+		self.RaterConns = make([]*HaPoolConfig, len(*jsnCfg.Rater_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rater_conns {
+			self.RaterConns[idx] = NewDfltHaPoolConfig()
+			self.RaterConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Ha_cdrs != nil {
-		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
-			self.HaCdrs[idx] = NewDfltHaPoolConfig()
-			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Cdrs_conns != nil {
+		self.CdrsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
+			self.CdrsConns[idx] = NewDfltHaPoolConfig()
+			self.CdrsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {
@@ -338,8 +338,8 @@ func (self *OsipsConnConfig) loadFromJsonCfg(jsnCfg *OsipsConnJsonCfg) error {
 type SmOsipsConfig struct {
 	Enabled                 bool
 	ListenUdp               string
-	HaRater                 []*HaPoolConfig
-	HaCdrs                  []*HaPoolConfig
+	RaterConns              []*HaPoolConfig
+	CdrsConns               []*HaPoolConfig
 	CreateCdr               bool
 	DebitInterval           time.Duration
 	MinCallDuration         time.Duration
@@ -356,18 +356,18 @@ func (self *SmOsipsConfig) loadFromJsonCfg(jsnCfg *SmOsipsJsonCfg) error {
 	if jsnCfg.Listen_udp != nil {
 		self.ListenUdp = *jsnCfg.Listen_udp
 	}
-	if jsnCfg.Ha_rater != nil {
-		self.HaRater = make([]*HaPoolConfig, len(*jsnCfg.Ha_rater))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_rater {
-			self.HaRater[idx] = NewDfltHaPoolConfig()
-			self.HaRater[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Rater_conns != nil {
+		self.RaterConns = make([]*HaPoolConfig, len(*jsnCfg.Rater_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Rater_conns {
+			self.RaterConns[idx] = NewDfltHaPoolConfig()
+			self.RaterConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Ha_cdrs != nil {
-		self.HaCdrs = make([]*HaPoolConfig, len(*jsnCfg.Ha_cdrs))
-		for idx, jsnHaCfg := range *jsnCfg.Ha_cdrs {
-			self.HaCdrs[idx] = NewDfltHaPoolConfig()
-			self.HaCdrs[idx].loadFromJsonCfg(jsnHaCfg)
+	if jsnCfg.Cdrs_conns != nil {
+		self.CdrsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
+			self.CdrsConns[idx] = NewDfltHaPoolConfig()
+			self.CdrsConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {
