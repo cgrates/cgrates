@@ -23,14 +23,14 @@ type CdreConfig struct {
 	CdrFormat                  string
 	FieldSeparator             rune
 	DataUsageMultiplyFactor    float64
-	SmsUsageMultiplyFactor     float64
+	SMSUsageMultiplyFactor     float64
 	GenericUsageMultiplyFactor float64
 	CostMultiplyFactor         float64
 	CostRoundingDecimals       int
 	CostShiftDigits            int
-	MaskDestId                 string
+	MaskDestinationID          string
 	MaskLength                 int
-	ExportDir                  string
+	ExportFolder               string
 	HeaderFields               []*CfgCdrField
 	ContentFields              []*CfgCdrField
 	TrailerFields              []*CfgCdrField
@@ -52,7 +52,7 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 		self.DataUsageMultiplyFactor = *jsnCfg.Data_usage_multiply_factor
 	}
 	if jsnCfg.Sms_usage_multiply_factor != nil {
-		self.SmsUsageMultiplyFactor = *jsnCfg.Sms_usage_multiply_factor
+		self.SMSUsageMultiplyFactor = *jsnCfg.Sms_usage_multiply_factor
 	}
 	if jsnCfg.Generic_usage_multiply_factor != nil {
 		self.GenericUsageMultiplyFactor = *jsnCfg.Generic_usage_multiply_factor
@@ -67,13 +67,13 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 		self.CostShiftDigits = *jsnCfg.Cost_shift_digits
 	}
 	if jsnCfg.Mask_destination_id != nil {
-		self.MaskDestId = *jsnCfg.Mask_destination_id
+		self.MaskDestinationID = *jsnCfg.Mask_destination_id
 	}
 	if jsnCfg.Mask_length != nil {
 		self.MaskLength = *jsnCfg.Mask_length
 	}
-	if jsnCfg.Export_dir != nil {
-		self.ExportDir = *jsnCfg.Export_dir
+	if jsnCfg.Export_folder != nil {
+		self.ExportFolder = *jsnCfg.Export_folder
 	}
 	if jsnCfg.Header_fields != nil {
 		if self.HeaderFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Header_fields); err != nil {
@@ -99,14 +99,14 @@ func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre.CdrFormat = self.CdrFormat
 	clnCdre.FieldSeparator = self.FieldSeparator
 	clnCdre.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor
-	clnCdre.SmsUsageMultiplyFactor = self.SmsUsageMultiplyFactor
+	clnCdre.SMSUsageMultiplyFactor = self.SMSUsageMultiplyFactor
 	clnCdre.GenericUsageMultiplyFactor = self.GenericUsageMultiplyFactor
 	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
 	clnCdre.CostRoundingDecimals = self.CostRoundingDecimals
 	clnCdre.CostShiftDigits = self.CostShiftDigits
-	clnCdre.MaskDestId = self.MaskDestId
+	clnCdre.MaskDestinationID = self.MaskDestinationID
 	clnCdre.MaskLength = self.MaskLength
-	clnCdre.ExportDir = self.ExportDir
+	clnCdre.ExportFolder = self.ExportFolder
 	clnCdre.HeaderFields = make([]*CfgCdrField, len(self.HeaderFields))
 	for idx, fld := range self.HeaderFields {
 		clonedVal := *fld

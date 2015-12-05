@@ -73,12 +73,12 @@ func TestV2CdrsMongoInjectUnratedCdr(t *testing.T) {
 		t.Error("Error on opening database connection: ", err)
 		return
 	}
-	strCdr1 := &engine.StoredCdr{CgrId: utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,
+	strCdr1 := &engine.CDR{CGRID: utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+		RunID: utils.DEFAULT_RUNID, Cost: 1.201}
 	if err := mysqlDb.SetCdr(strCdr1); err != nil {
 		t.Error(err.Error())
 	}
@@ -111,24 +111,25 @@ func TestV2CdrsMongoProcessCdr(t *testing.T) {
 		return
 	}
 	var reply string
-	cdrs := []*engine.StoredCdr{
-		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+	cdrs := []*engine.CDR{
+		&engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+			OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001",
+			Subject: "1001", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-			RatedAccount: "dan", RatedSubject: "dans", Rated: true,
+			Rated: true,
 		},
-		&engine.StoredCdr{CgrId: utils.Sha1("abcdeftg", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+		&engine.CDR{CGRID: utils.Sha1("abcdeftg", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+			OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002",
+			Subject: "1002", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-			RatedAccount: "dan", RatedSubject: "dans",
 		},
-		&engine.StoredCdr{CgrId: utils.Sha1("aererfddf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+		&engine.CDR{CGRID: utils.Sha1("aererfddf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+			OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003",
+			Subject: "1003", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-			RatedAccount: "dan", RatedSubject: "dans",
 		},
 	}
 	for _, cdr := range cdrs {
@@ -144,50 +145,50 @@ func TestV2CdrsMongoGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{NotSources: []string{"CDRS"}}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 4 {
 		for _, cdr := range reply {
-			t.Logf("CDR: %s %s %s", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId)
+			t.Logf("CDR: %s %s %s", cdr.CGRID, cdr.Source, cdr.RunID)
 		}
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 	// CDRs with errors
-	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
+	req = utils.RPCCDRsFilter{NotSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// CDRs Rated
-	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(-1.0)}
+	req = utils.RPCCDRsFilter{NotSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 4 {
 		for _, cdr := range reply {
-			t.Logf("CDR: %s %s %s %f", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId, cdr.Cost)
+			t.Logf("CDR: %s %s %s %f", cdr.CGRID, cdr.Source, cdr.RunID, cdr.Cost)
 		}
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// CDRs non rated OR SkipRated
-	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MaxCost: utils.Float64Pointer(-1.0)}
+	req = utils.RPCCDRsFilter{NotSources: []string{"CDRS"}, MaxCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 0 {
 		for _, cdr := range reply {
-			t.Logf("CDR: %s %s %s %f", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId, cdr.Cost)
+			t.Logf("CDR: %s %s %s %f", cdr.CGRID, cdr.Source, cdr.RunID, cdr.Cost)
 		}
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
 	// Skip Errors
-	req = utils.RpcCdrsFilter{NotCdrSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
+	req = utils.RPCCDRsFilter{NotSources: []string{"CDRS"}, MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
 	if err := cdrsMongoRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		for _, cdr := range reply {
-			t.Logf("CDR: %s %s %s %f", cdr.CgrId, cdr.CdrSource, cdr.MediationRunId, cdr.Cost)
+			t.Logf("CDR: %s %s %s %f", cdr.CGRID, cdr.Source, cdr.RunID, cdr.Cost)
 		}
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
@@ -212,24 +213,21 @@ func TestV2CdrsMongoProcessPrepaidCdr(t *testing.T) {
 		return
 	}
 	var reply string
-	cdrs := []*engine.StoredCdr{
-		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-			RatedAccount: "dan", RatedSubject: "dans", Rated: true,
+	cdrs := []*engine.CDR{
+		&engine.CDR{CGRID: utils.Sha1("dsafdsaf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+			OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
 		},
-		&engine.StoredCdr{CgrId: utils.Sha1("abcdeftg2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+		&engine.CDR{CGRID: utils.Sha1("abcdeftg2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+			OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-			RatedAccount: "dan", RatedSubject: "dans",
 		},
-		&engine.StoredCdr{CgrId: utils.Sha1("aererfddf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-			CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+		&engine.CDR{CGRID: utils.Sha1("aererfddf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+			OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
+			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-			RatedAccount: "dan", RatedSubject: "dans",
 		},
 	}
 	tStart := time.Now()

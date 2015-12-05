@@ -111,7 +111,7 @@ func (sq *StatsQueue) Load(saved *StatsQueue) {
 	}
 }
 
-func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
+func (sq *StatsQueue) AppendCDR(cdr *CDR) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	if sq.conf.AcceptCdr(cdr) {
@@ -162,11 +162,11 @@ func (sq *StatsQueue) removeFromMetrics(cdr *QCdr) {
 	}
 }
 
-func (sq *StatsQueue) simplifyCdr(cdr *StoredCdr) *QCdr {
+func (sq *StatsQueue) simplifyCdr(cdr *CDR) *QCdr {
 	return &QCdr{
 		SetupTime:  cdr.SetupTime,
 		AnswerTime: cdr.AnswerTime,
-		Pdd:        cdr.Pdd,
+		Pdd:        cdr.PDD,
 		Usage:      cdr.Usage,
 		Cost:       cdr.Cost,
 		Dest:       cdr.Destination,

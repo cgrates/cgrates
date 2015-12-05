@@ -90,12 +90,12 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	testCdr1 := &StoredCdr{CgrId: utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, AccId: "httpjsonrpc1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_PSEUDOPREPAID,
+	testCdr1 := &CDR{CGRID: utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		TOR: utils.VOICE, OriginID: "httpjsonrpc1", OriginHost: "192.168.1.1", Source: "UNKNOWN", ReqType: utils.META_PSEUDOPREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201, Rated: true}
+		RunID: utils.DEFAULT_RUNID, Cost: 1.201, Rated: true}
 	var reply string
 	if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", testCdr1, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -108,8 +108,8 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
-	var rcvedCdrs []*ExternalCdr
-	if err := cdrsSlaveRpc.Call("ApierV2.GetCdrs", utils.RpcCdrsFilter{CgrIds: []string{testCdr1.CgrId}, RunIds: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
+	var rcvedCdrs []*ExternalCDR
+	if err := cdrsSlaveRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
@@ -117,10 +117,10 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 		rcvSetupTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].SetupTime, "")
 		rcvAnswerTime, _ := utils.ParseTimeDetectLayout(rcvedCdrs[0].AnswerTime, "")
 		//rcvUsage, _ := utils.ParseDurationWithSecs(rcvedCdrs[0].Usage)
-		if rcvedCdrs[0].CgrId != testCdr1.CgrId ||
+		if rcvedCdrs[0].CGRID != testCdr1.CGRID ||
 			rcvedCdrs[0].TOR != testCdr1.TOR ||
-			rcvedCdrs[0].CdrHost != testCdr1.CdrHost ||
-			rcvedCdrs[0].CdrSource != testCdr1.CdrSource ||
+			rcvedCdrs[0].OriginHost != testCdr1.OriginHost ||
+			rcvedCdrs[0].Source != testCdr1.Source ||
 			rcvedCdrs[0].ReqType != testCdr1.ReqType ||
 			rcvedCdrs[0].Direction != testCdr1.Direction ||
 			rcvedCdrs[0].Tenant != testCdr1.Tenant ||
@@ -131,7 +131,7 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 			!rcvSetupTime.Equal(testCdr1.SetupTime) ||
 			!rcvAnswerTime.Equal(testCdr1.AnswerTime) ||
 			//rcvUsage != 10 ||
-			rcvedCdrs[0].MediationRunId != testCdr1.MediationRunId {
+			rcvedCdrs[0].RunID != testCdr1.RunID {
 			//rcvedCdrs[0].Cost != testCdr1.Cost ||
 			//!reflect.DeepEqual(rcvedCdrs[0].ExtraFields, testCdr1.ExtraFields) {
 			t.Errorf("Expected: %+v, received: %+v", testCdr1, rcvedCdrs[0])

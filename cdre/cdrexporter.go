@@ -52,7 +52,7 @@ const (
 
 var err error
 
-func NewCdrExporter(cdrs []*engine.StoredCdr, cdrDb engine.CdrStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
+func NewCdrExporter(cdrs []*engine.CDR, cdrDb engine.CdrStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
 	dataUsageMultiplyFactor, smsUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor float64,
 	costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool, timezone string) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
@@ -84,7 +84,7 @@ func NewCdrExporter(cdrs []*engine.StoredCdr, cdrDb engine.CdrStorage, exportTpl
 }
 
 type CdrExporter struct {
-	cdrs           []*engine.StoredCdr
+	cdrs           []*engine.CDR
 	cdrDb          engine.CdrStorage // Used to extract cost_details if these are requested
 	exportTemplate *config.CdreConfig
 	cdrFormat      string // csv, fwv
@@ -107,14 +107,14 @@ type CdrExporter struct {
 
 	totalCost                       float64
 	firstExpOrderId, lastExpOrderId int64
-	positiveExports                 []string          // CGRIds of successfully exported CDRs
-	negativeExports                 map[string]string // CgrIds of failed exports
+	positiveExports                 []string          // CGRIDs of successfully exported CDRs
+	negativeExports                 map[string]string // CGRIDs of failed exports
 }
 
 // Return Json marshaled callCost attached to
 // Keep it separately so we test only this part in local tests
-func (cdre *CdrExporter) getCdrCostDetails(cgrId, runId string) (string, error) {
-	cc, err := cdre.cdrDb.GetCallCostLog(cgrId, "", runId)
+func (cdre *CdrExporter) getCdrCostDetails(CGRID, runId string) (string, error) {
+	cc, err := cdre.cdrDb.GetCallCostLog(CGRID, "", runId)
 	if err != nil {
 		return "", err
 	} else if cc == nil {
@@ -124,7 +124,7 @@ func (cdre *CdrExporter) getCdrCostDetails(cgrId, runId string) (string, error) 
 	return string(ccJson), nil
 }
 
-func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *engine.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
 	var combinedVal string // Will result as combination of the field values, filters must match
 	for _, filterRule := range cfgCdrFld.FieldFilter {
 		fltrPass, ftrPassValue := processedCdr.PassesFieldFilter(filterRule)
@@ -132,7 +132,7 @@ func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *engine.StoredCdr, 
 			return "", nil
 		}
 		for _, cdr := range cdre.cdrs {
-			if cdr.CgrId != processedCdr.CgrId {
+			if cdr.CGRID != processedCdr.CGRID {
 				continue // We only care about cdrs with same primary cdr behind
 			}
 			if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == ftrPassValue { // First CDR with filte
@@ -153,7 +153,7 @@ func (cdre *CdrExporter) maskedDestination(destination string) bool {
 	return false
 }
 
-func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
 	if len(cfgCdrFld.Value) == 0 {
 		return "", nil
 	}
@@ -174,7 +174,7 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.StoredCdr, cfgCdrFld *c
 }
 
 // Extracts the value specified by cfgHdr out of cdr
-func (cdre *CdrExporter) cdrFieldValue(cdr *engine.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+func (cdre *CdrExporter) cdrFieldValue(cdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
 	for _, fltrRl := range cfgCdrFld.FieldFilter {
 		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
 			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
@@ -189,7 +189,7 @@ func (cdre *CdrExporter) cdrFieldValue(cdr *engine.StoredCdr, cfgCdrFld *config.
 		var cdrVal string
 		switch rsrFld.Id {
 		case COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
-			if cdr.ExtraFields[COST_DETAILS], err = cdre.getCdrCostDetails(cdr.CgrId, cdr.MediationRunId); err != nil {
+			if cdr.ExtraFields[COST_DETAILS], err = cdre.getCdrCostDetails(cdr.CGRID, cdr.RunID); err != nil {
 				return "", err
 			} else {
 				cdrVal = cdr.FieldAsString(rsrFld)
@@ -229,16 +229,16 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	case META_NRCDRS:
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case META_DURCDRS:
-		emulatedCdr := &engine.StoredCdr{TOR: utils.VOICE, Usage: cdre.totalDuration}
+		emulatedCdr := &engine.CDR{TOR: utils.VOICE, Usage: cdre.totalDuration}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_SMSUSAGE:
-		emulatedCdr := &engine.StoredCdr{TOR: utils.SMS, Usage: cdre.totalSmsUsage}
+		emulatedCdr := &engine.CDR{TOR: utils.SMS, Usage: cdre.totalSmsUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_GENERICUSAGE:
-		emulatedCdr := &engine.StoredCdr{TOR: utils.GENERIC, Usage: cdre.totalGenericUsage}
+		emulatedCdr := &engine.CDR{TOR: utils.GENERIC, Usage: cdre.totalGenericUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_DATAUSAGE:
-		emulatedCdr := &engine.StoredCdr{TOR: utils.DATA, Usage: cdre.totalDataUsage}
+		emulatedCdr := &engine.CDR{TOR: utils.DATA, Usage: cdre.totalDataUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
@@ -311,8 +311,8 @@ func (cdre *CdrExporter) composeTrailer() error {
 }
 
 // Write individual cdr into content buffer, build stats
-func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
-	if cdr == nil || len(cdr.CgrId) == 0 { // We do not export empty CDRs
+func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
+	if cdr == nil || len(cdr.CGRID) == 0 { // We do not export empty CDRs
 		return nil
 	} else if cdr.ExtraFields == nil { // Avoid assignment in nil map if not initialized
 		cdr.ExtraFields = make(map[string]string)
@@ -363,12 +363,12 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 			}
 		}
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s and runid: %s, error: %s", cdr.CgrId, cdr.MediationRunId, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s and runid: %s, error: %s", cdr.CGRID, cdr.RunID, err.Error()))
 			return err
 		}
 		fmtOut := outVal
 		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Tag, outVal, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with CGRID: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CGRID, cdr.RunID, cfgFld.Tag, outVal, err.Error()))
 			return err
 		}
 		cdrRow[idx] += fmtOut
@@ -402,11 +402,11 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 		cdre.totalCost += cdr.Cost
 		cdre.totalCost = utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE)
 	}
-	if cdre.firstExpOrderId > cdr.OrderId || cdre.firstExpOrderId == 0 {
-		cdre.firstExpOrderId = cdr.OrderId
+	if cdre.firstExpOrderId > cdr.OrderID || cdre.firstExpOrderId == 0 {
+		cdre.firstExpOrderId = cdr.OrderID
 	}
-	if cdre.lastExpOrderId < cdr.OrderId {
-		cdre.lastExpOrderId = cdr.OrderId
+	if cdre.lastExpOrderId < cdr.OrderID {
+		cdre.lastExpOrderId = cdr.OrderID
 	}
 	return nil
 }
@@ -415,9 +415,9 @@ func (cdre *CdrExporter) processCdr(cdr *engine.StoredCdr) error {
 func (cdre *CdrExporter) processCdrs() error {
 	for _, cdr := range cdre.cdrs {
 		if err := cdre.processCdr(cdr); err != nil {
-			cdre.negativeExports[cdr.CgrId] = err.Error()
+			cdre.negativeExports[cdr.CGRID] = err.Error()
 		} else {
-			cdre.positiveExports = append(cdre.positiveExports, cdr.CgrId)
+			cdre.positiveExports = append(cdre.positiveExports, cdr.CGRID)
 		}
 	}
 	// Process header and trailer after processing cdrs since the metatag functions can access stats out of built cdrs
@@ -524,12 +524,12 @@ func (cdre *CdrExporter) TotalExportedCdrs() int {
 	return cdre.numberOfRecords
 }
 
-// Return successfully exported CgrIds
+// Return successfully exported CGRIDs
 func (cdre *CdrExporter) PositiveExports() []string {
 	return cdre.positiveExports
 }
 
-// Return failed exported CgrIds together with the reason
+// Return failed exported CGRIDs together with the reason
 func (cdre *CdrExporter) NegativeExports() map[string]string {
 	return cdre.negativeExports
 }

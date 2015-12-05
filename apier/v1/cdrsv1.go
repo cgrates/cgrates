@@ -31,7 +31,7 @@ type CdrsV1 struct {
 }
 
 // Designed for CGR internal usage
-func (self *CdrsV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
+func (self *CdrsV1) ProcessCdr(cdr *engine.CDR, reply *string) error {
 	if err := self.CdrSrv.ProcessCdr(cdr); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -40,7 +40,7 @@ func (self *CdrsV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
 }
 
 // Designed for external programs feeding CDRs to CGRateS
-func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCdr, reply *string) error {
+func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCDR, reply *string) error {
 	if err := self.CdrSrv.ProcessExternalCdr(cdr); err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -64,7 +64,7 @@ func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
 	}
 	//RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes []string,
 	//orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated bool)
-	if err := self.CdrSrv.RateCdrs(attrs.CgrIds, attrs.MediationRunIds, attrs.TORs, attrs.CdrHosts, attrs.CdrSources, attrs.ReqTypes, attrs.Directions,
+	if err := self.CdrSrv.RateCDRs(attrs.CgrIds, attrs.MediationRunIds, attrs.TORs, attrs.CdrHosts, attrs.CdrSources, attrs.ReqTypes, attrs.Directions,
 		attrs.Tenants, attrs.Categories, attrs.Accounts, attrs.Subjects, attrs.DestinationPrefixes, attrs.RatedAccounts, attrs.RatedSubjects,
 		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.RerateErrors, attrs.RerateRated, attrs.SendToStats); err != nil {
 		return utils.NewErrServerError(err)

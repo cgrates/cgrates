@@ -37,7 +37,7 @@ func NewPartialFlatstoreRecord(record []string, timezone string) (*PartialFlatst
 	if len(record) < 7 {
 		return nil, errors.New("MISSING_IE")
 	}
-	pr := &PartialFlatstoreRecord{Method: record[0], AccId: record[3] + record[1] + record[2], Values: record}
+	pr := &PartialFlatstoreRecord{Method: record[0], OriginID: record[3] + record[1] + record[2], Values: record}
 	var err error
 	if pr.Timestamp, err = utils.ParseTimeDetectLayout(record[6], timezone); err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func NewPartialFlatstoreRecord(record []string, timezone string) (*PartialFlatst
 // This is a partial record received from Flatstore, can be INVITE or BYE and it needs to be paired in order to produce duration
 type PartialFlatstoreRecord struct {
 	Method    string    // INVITE or BYE
-	AccId     string    // Copute here the AccId
+	OriginID  string    // Copute here the OriginID
 	Timestamp time.Time // Timestamp of the event, as written by db_flastore module
 	Values    []string  // Can contain original values or updated via UpdateValues
 }
@@ -100,7 +100,7 @@ type PartialRecordsCache struct {
 	ttl            time.Duration
 	cdrOutDir      string
 	csvSep         rune
-	partialRecords map[string]map[string]*PartialFlatstoreRecord // [FileName"][AccId]*PartialRecord
+	partialRecords map[string]map[string]*PartialFlatstoreRecord // [FileName"][OriginID]*PartialRecord
 	guard          *engine.GuardianLock
 }
 
@@ -131,7 +131,7 @@ func (self *PartialRecordsCache) dumpUnpairedRecords(fileName string) error {
 }
 
 // Search in cache and return the partial record with accountind id defined, prefFilename is searched at beginning because of better match probability
-func (self *PartialRecordsCache) GetPartialRecord(accId, prefFileName string) (string, *PartialFlatstoreRecord) {
+func (self *PartialRecordsCache) GetPartialRecord(OriginID, prefFileName string) (string, *PartialFlatstoreRecord) {
 	var cachedFilename string
 	var cachedPartial *PartialFlatstoreRecord
 	checkCachedFNames := []string{prefFileName} // Higher probability to match as firstFileName
@@ -143,7 +143,7 @@ func (self *PartialRecordsCache) GetPartialRecord(accId, prefFileName string) (s
 	for _, fName := range checkCachedFNames { // Need to lock them individually
 		self.guard.Guard(func() (interface{}, error) {
 			var hasPartial bool
-			if cachedPartial, hasPartial = self.partialRecords[fName][accId]; hasPartial {
+			if cachedPartial, hasPartial = self.partialRecords[fName][OriginID]; hasPartial {
 				cachedFilename = fName
 			}
 			return nil, nil
@@ -158,15 +158,15 @@ func (self *PartialRecordsCache) GetPartialRecord(accId, prefFileName string) (s
 func (self *PartialRecordsCache) CachePartial(fileName string, pr *PartialFlatstoreRecord) {
 	self.guard.Guard(func() (interface{}, error) {
 		if fileMp, hasFile := self.partialRecords[fileName]; !hasFile {
-			self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.AccId: pr}
+			self.partialRecords[fileName] = map[string]*PartialFlatstoreRecord{pr.OriginID: pr}
 			if self.ttl != 0 { // Schedule expiry/dump of the just created entry in cache
 				go func() {
 					time.Sleep(self.ttl)
 					self.dumpUnpairedRecords(fileName)
 				}()
 			}
-		} else if _, hasAccId := fileMp[pr.AccId]; !hasAccId {
-			self.partialRecords[fileName][pr.AccId] = pr
+		} else if _, hasOriginID := fileMp[pr.OriginID]; !hasOriginID {
+			self.partialRecords[fileName][pr.OriginID] = pr
 		}
 		return nil, nil
 	}, 0, fileName)
@@ -174,7 +174,7 @@ func (self *PartialRecordsCache) CachePartial(fileName string, pr *PartialFlatst
 
 func (self *PartialRecordsCache) UncachePartial(fileName string, pr *PartialFlatstoreRecord) {
 	self.guard.Guard(func() (interface{}, error) {
-		delete(self.partialRecords[fileName], pr.AccId) // Remove the record out of cache
+		delete(self.partialRecords[fileName], pr.OriginID) // Remove the record out of cache
 		return nil, nil
 	}, 0, fileName)
 }
@@ -203,7 +203,7 @@ func (self *CsvRecordsProcessor) ProcessedRecordsNr() int64 {
 	return self.processedRecordsNr
 }
 
-func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error) {
+func (self *CsvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	record, err := self.csvReader.Read()
 	if err != nil {
 		return nil, err
@@ -231,7 +231,7 @@ func (self *CsvRecordsProcessor) processPartialRecord(record []string) ([]string
 		return nil, err
 	}
 	// Retrieve and complete the record from cache
-	cachedFilename, cachedPartial := self.partialRecordsCache.GetPartialRecord(pr.AccId, self.fileName)
+	cachedFilename, cachedPartial := self.partialRecordsCache.GetPartialRecord(pr.OriginID, self.fileName)
 	if cachedPartial == nil { // Not cached, do it here and stop processing
 		self.partialRecordsCache.CachePartial(self.fileName, pr)
 		return nil, nil
@@ -245,8 +245,8 @@ func (self *CsvRecordsProcessor) processPartialRecord(record []string) ([]string
 }
 
 // Takes the record from a slice and turns it into StoredCdrs, posting them to the cdrServer
-func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.StoredCdr, error) {
-	recordCdrs := make([]*engine.StoredCdr, 0)   // More CDRs based on the number of filters and field templates
+func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.CDR, error) {
+	recordCdrs := make([]*engine.CDR, 0)         // More CDRs based on the number of filters and field templates
 	for cdrcId, cdrcCfg := range self.cdrcCfgs { // cdrFields coming from more templates will produce individual storCdr records
 		// Make sure filters are matching
 		filterBreak := false
@@ -277,8 +277,8 @@ func (self *CsvRecordsProcessor) processRecord(record []string) ([]*engine.Store
 }
 
 // Takes the record out of csv and turns it into storedCdr which can be processed by CDRS
-func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId string) (*engine.StoredCdr, error) {
-	storedCdr := &engine.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrcCfgs[cdrcId].CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
+func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId string) (*engine.CDR, error) {
+	storedCdr := &engine.CDR{OriginHost: "0.0.0.0", Source: self.cdrcCfgs[cdrcId].CdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range self.cdrcCfgs[cdrcId].ContentFields {
@@ -313,7 +313,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 			return nil, err
 		}
 	}
-	storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.UTC().String())
+	storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.SetupTime.UTC().String())
 	if storedCdr.TOR == utils.DATA && self.cdrcCfgs[cdrcId].DataUsageMultiplyFactor != 0 {
 		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * self.cdrcCfgs[cdrcId].DataUsageMultiplyFactor)
 	}

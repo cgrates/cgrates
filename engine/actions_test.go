@@ -1164,9 +1164,9 @@ func TestActionCdrlogEmpty(t *testing.T) {
 	if err != nil {
 		t.Error("Error performing cdrlog action: ", err)
 	}
-	cdrs := make([]*StoredCdr, 0)
+	cdrs := make([]*CDR, 0)
 	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
-	if len(cdrs) != 1 || cdrs[0].CdrSource != CDRLOG {
+	if len(cdrs) != 1 || cdrs[0].Source != CDRLOG {
 		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
 	}
 }
@@ -1190,7 +1190,7 @@ func TestActionCdrlogWithParams(t *testing.T) {
 	if err != nil {
 		t.Error("Error performing cdrlog action: ", err)
 	}
-	cdrs := make([]*StoredCdr, 0)
+	cdrs := make([]*CDR, 0)
 	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
 	if len(cdrs) != 2 ||
 		cdrs[0].Subject != "rif" {
@@ -1217,7 +1217,7 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 	if err != nil {
 		t.Error("Error performing cdrlog action: ", err)
 	}
-	cdrs := make([]*StoredCdr, 0)
+	cdrs := make([]*CDR, 0)
 	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
 	expectedExtraFields := map[string]string{
 		"AccountId": "cgrates.org:dan2904",

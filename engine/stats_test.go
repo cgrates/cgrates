@@ -34,7 +34,7 @@ func TestStatsQueueInit(t *testing.T) {
 
 func TestStatsValue(t *testing.T) {
 	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}})
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		Usage:      10 * time.Second,
 		Cost:       1,
@@ -55,22 +55,22 @@ func TestStatsValue(t *testing.T) {
 }
 
 func TestStatsSimplifyCDR(t *testing.T) {
-	cdr := &StoredCdr{
-		TOR:            "tor",
-		AccId:          "accid",
-		CdrHost:        "cdrhost",
-		CdrSource:      "cdrsource",
-		ReqType:        "reqtype",
-		Direction:      "direction",
-		Tenant:         "tenant",
-		Category:       "category",
-		Account:        "account",
-		Subject:        "subject",
-		Destination:    "12345678",
-		SetupTime:      time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
-		Usage:          10 * time.Second,
-		MediationRunId: "mri",
-		Cost:           10,
+	cdr := &CDR{
+		TOR:         "tor",
+		OriginID:    "accid",
+		OriginHost:  "cdrhost",
+		Source:      "cdrsource",
+		ReqType:     "reqtype",
+		Direction:   "direction",
+		Tenant:      "tenant",
+		Category:    "category",
+		Account:     "account",
+		Subject:     "subject",
+		Destination: "12345678",
+		SetupTime:   time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
+		Usage:       10 * time.Second,
+		RunID:       "mri",
+		Cost:        10,
 	}
 	sq := &StatsQueue{}
 	qcdr := sq.simplifyCdr(cdr)
@@ -84,11 +84,11 @@ func TestStatsSimplifyCDR(t *testing.T) {
 
 func TestAcceptCdr(t *testing.T) {
 	sq := NewStatsQueue(nil)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		TOR:             "tor",
-		AccId:           "accid",
-		CdrHost:         "cdrhost",
-		CdrSource:       "cdrsource",
+		OriginID:        "accid",
+		OriginHost:      "cdrhost",
+		Source:          "cdrsource",
 		ReqType:         "reqtype",
 		Direction:       "direction",
 		Tenant:          "tenant",
@@ -98,10 +98,10 @@ func TestAcceptCdr(t *testing.T) {
 		Destination:     "0723045326",
 		SetupTime:       time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 		Usage:           10 * time.Second,
-		Pdd:             7 * time.Second,
+		PDD:             7 * time.Second,
 		Supplier:        "supplier1",
 		DisconnectCause: "normal",
-		MediationRunId:  "mri",
+		RunID:           "mri",
 		Cost:            10,
 	}
 	sq.conf = &CdrStats{}
@@ -145,14 +145,6 @@ func TestAcceptCdr(t *testing.T) {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{DisconnectCause: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
-		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
-	}
-	sq.conf = &CdrStats{RatedAccount: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
-		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
-	}
-	sq.conf = &CdrStats{RatedSubject: []string{"test"}}
 	if sq.conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
@@ -217,7 +209,7 @@ func TestStatsQueueIds(t *testing.T) {
 
 func TestStatsAppendCdr(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:          "cgrates.org",
 		Category:        "call",
 		AnswerTime:      time.Now(),
@@ -241,7 +233,7 @@ func TestStatsAppendCdr(t *testing.T) {
 
 func TestStatsGetValues(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -250,7 +242,7 @@ func TestStatsGetValues(t *testing.T) {
 		Cost:       10,
 	}
 	cdrStats.AppendCDR(cdr, nil)
-	cdr = &StoredCdr{
+	cdr = &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -270,7 +262,7 @@ func TestStatsGetValues(t *testing.T) {
 
 func TestStatsReloadQueues(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -305,7 +297,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 	cdrStats.AddQueue(&CdrStats{
 		Id: utils.META_DEFAULT,
 	}, nil)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -338,7 +330,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 
 func TestStatsReloadQueuesWithIds(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -370,7 +362,7 @@ func TestStatsReloadQueuesWithIds(t *testing.T) {
 
 func TestStatsSaveQueues(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -388,7 +380,7 @@ func TestStatsSaveQueues(t *testing.T) {
 
 func TestStatsResetQueues(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -420,7 +412,7 @@ func TestStatsResetQueues(t *testing.T) {
 
 func TestStatsResetQueuesWithIds(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),

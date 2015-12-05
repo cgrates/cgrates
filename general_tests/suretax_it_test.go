@@ -133,11 +133,11 @@ func TestSTIProcessExternalCdr(t *testing.T) {
 	if !*testSureTax {
 		return
 	}
-	cdr := &engine.ExternalCdr{TOR: utils.VOICE,
-		AccId: "teststicdr1", CdrHost: "192.168.1.1", CdrSource: "STI_TEST", ReqType: utils.META_RATED, Direction: utils.OUT,
+	cdr := &engine.ExternalCDR{TOR: utils.VOICE,
+		OriginID: "teststicdr1", OriginHost: "192.168.1.1", Source: "STI_TEST", ReqType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "+14082342500", Destination: "+16268412300", Supplier: "SUPPL1",
 		SetupTime: "2015-10-18T13:00:00Z", AnswerTime: "2015-10-18T13:00:00Z",
-		Usage: "15s", Pdd: "7.0", ExtraFields: map[string]string{"CustomerNumber": "000000534", "ZipCode": ""},
+		Usage: "15s", PDD: "7.0", ExtraFields: map[string]string{"CustomerNumber": "000000534", "ZipCode": ""},
 	}
 	var reply string
 	if err := stiRpc.Call("CdrsV2.ProcessExternalCdr", cdr, &reply); err != nil {
@@ -152,8 +152,8 @@ func TestSTIGetCdrs(t *testing.T) {
 	if !*testSureTax {
 		return
 	}
-	var cdrs []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}}
 	if err := stiRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -163,7 +163,7 @@ func TestSTIGetCdrs(t *testing.T) {
 			t.Errorf("Unexpected Cost for CDR: %+v", cdrs[0])
 		}
 	}
-	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_SURETAX}, Accounts: []string{"1001"}}
+	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_SURETAX}, Accounts: []string{"1001"}}
 	if err := stiRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {

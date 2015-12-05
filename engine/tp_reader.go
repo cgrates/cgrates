@@ -898,7 +898,7 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 		tag := tpDcs.GetDerivedChargersKey()
 		if _, hasIt := tpr.derivedChargers[tag]; !hasIt {
 			tpr.derivedChargers[tag] = &utils.DerivedChargers{
-				DestinationIds: make(utils.StringMap),
+				DestinationIDs: make(utils.StringMap),
 				Chargers:       make([]*utils.DerivedCharger, 0),
 			} // Load object map since we use this method also from LoadDerivedChargers
 		}
@@ -909,7 +909,7 @@ func (tpr *TpReader) LoadDerivedChargersFiltered(filter *TpDerivedCharger, save 
 			if err != nil {
 				return err
 			}
-			tpr.derivedChargers[tag].DestinationIds.Copy(utils.ParseStringMap(tpDcs.DestinationIds))
+			tpr.derivedChargers[tag].DestinationIDs.Copy(utils.ParseStringMap(tpDcs.DestinationIds))
 			tpr.derivedChargers[tag].Chargers = append(tpr.derivedChargers[tag].Chargers, dc)
 		}
 	}

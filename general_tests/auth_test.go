@@ -93,7 +93,7 @@ RP_ANY,DR_ANY_1CNT,*any,10`
 }
 
 func TestAuthPostpaidNoAcnt(t *testing.T) {
-	cdr := &engine.StoredCdr{TOR: utils.VOICE, ReqType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
+	cdr := &engine.CDR{TOR: utils.VOICE, ReqType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "nonexistent", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
 	var maxSessionTime float64
@@ -104,7 +104,7 @@ func TestAuthPostpaidNoAcnt(t *testing.T) {
 
 func TestAuthPostpaidNoDestination(t *testing.T) {
 	// Test subject which does not have destination attached
-	cdr := &engine.StoredCdr{TOR: utils.VOICE, ReqType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
+	cdr := &engine.CDR{TOR: utils.VOICE, ReqType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid1",
 		Destination: "441231234", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
 	var maxSessionTime float64
@@ -115,7 +115,7 @@ func TestAuthPostpaidNoDestination(t *testing.T) {
 
 func TestAuthPostpaidFallbackDest(t *testing.T) {
 	// Test subject which has fallback for destination
-	cdr := &engine.StoredCdr{TOR: utils.VOICE, ReqType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
+	cdr := &engine.CDR{TOR: utils.VOICE, ReqType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid2",
 		Destination: "441231234", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
 	var maxSessionTime float64
@@ -128,7 +128,7 @@ func TestAuthPostpaidFallbackDest(t *testing.T) {
 
 func TestAuthPostpaidWithDestination(t *testing.T) {
 	// Test subject which does not have destination attached
-	cdr := &engine.StoredCdr{TOR: utils.VOICE, ReqType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
+	cdr := &engine.CDR{TOR: utils.VOICE, ReqType: utils.META_POSTPAID, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "testauthpostpaid1", Subject: "testauthpostpaid1",
 		Destination: "4986517174963", SetupTime: time.Date(2015, 8, 27, 11, 26, 0, 0, time.UTC)}
 	var maxSessionTime float64

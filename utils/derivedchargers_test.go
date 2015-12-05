@@ -27,27 +27,27 @@ func TestAppendDerivedChargers(t *testing.T) {
 	var err error
 
 	dcs := &DerivedChargers{Chargers: make([]*DerivedCharger, 0)}
-	if _, err := dcs.Append(&DerivedCharger{RunId: DEFAULT_RUNID}); err == nil {
-		t.Error("Failed to detect using of the default runid")
+	if _, err := dcs.Append(&DerivedCharger{RunID: DEFAULT_RUNID}); err == nil {
+		t.Error("Failed to detect using of the default RunID")
 	}
-	if dcs, err = dcs.Append(&DerivedCharger{RunId: "FIRST_RUNID"}); err != nil {
-		t.Error("Failed to add runid")
+	if dcs, err = dcs.Append(&DerivedCharger{RunID: "FIRST_RunID"}); err != nil {
+		t.Error("Failed to add RunID")
 	} else if len(dcs.Chargers) != 1 {
 		t.Error("Unexpected number of items inside DerivedChargers configuration", len(dcs.Chargers))
 	}
-	if dcs, err = dcs.Append(&DerivedCharger{RunId: "SECOND_RUNID"}); err != nil {
-		t.Error("Failed to add runid")
+	if dcs, err = dcs.Append(&DerivedCharger{RunID: "SECOND_RunID"}); err != nil {
+		t.Error("Failed to add RunID")
 	} else if len(dcs.Chargers) != 2 {
 		t.Error("Unexpected number of items inside DerivedChargers configuration", len(dcs.Chargers))
 	}
-	if _, err := dcs.Append(&DerivedCharger{RunId: "SECOND_RUNID"}); err == nil {
-		t.Error("Failed to detect duplicate runid")
+	if _, err := dcs.Append(&DerivedCharger{RunID: "SECOND_RunID"}); err == nil {
+		t.Error("Failed to detect duplicate RunID")
 	}
 }
 
 func TestNewDerivedCharger(t *testing.T) {
 	edc1 := &DerivedCharger{
-		RunId:                "test1",
+		RunID:                "test1",
 		RunFilters:           "",
 		ReqTypeField:         "reqtype1",
 		DirectionField:       "direction1",
@@ -57,7 +57,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		SubjectField:         "subject1",
 		DestinationField:     "destination1",
 		SetupTimeField:       "setuptime1",
-		PddField:             "pdd1",
+		PDDField:             "pdd1",
 		AnswerTimeField:      "answertime1",
 		UsageField:           "duration1",
 		SupplierField:        "supplier1",
@@ -72,7 +72,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", edc1, dc1)
 	}
 	edc2 := &DerivedCharger{
-		RunId:                "test2",
+		RunID:                "test2",
 		RunFilters:           "^cdr_source/tdm_cdrs/",
 		ReqTypeField:         "~reqtype2:s/sip:(.+)/$1/",
 		DirectionField:       "~direction2:s/sip:(.+)/$1/",
@@ -82,7 +82,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		SubjectField:         "~subject2:s/sip:(.+)/$1/",
 		DestinationField:     "~destination2:s/sip:(.+)/$1/",
 		SetupTimeField:       "~setuptime2:s/sip:(.+)/$1/",
-		PddField:             "~pdd:s/sip:(.+)/$1/",
+		PDDField:             "~pdd:s/sip:(.+)/$1/",
 		AnswerTimeField:      "~answertime2:s/sip:(.+)/$1/",
 		UsageField:           "~duration2:s/sip:(.+)/$1/",
 		SupplierField:        "~supplier2:s/(.+)/$1/",
@@ -137,20 +137,20 @@ func TestDerivedChargersKey(t *testing.T) {
 
 func TestAppendDefaultRun(t *testing.T) {
 	dc1 := &DerivedChargers{}
-	dcDf := &DerivedCharger{RunId: DEFAULT_RUNID, RunFilters: "", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
+	dcDf := &DerivedCharger{RunID: DEFAULT_RUNID, RunFilters: "", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
 		TenantField: META_DEFAULT, CategoryField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
-		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PddField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT, SupplierField: META_DEFAULT,
+		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PDDField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT, SupplierField: META_DEFAULT,
 		DisconnectCauseField: META_DEFAULT, CostField: META_DEFAULT, RatedField: META_DEFAULT}
 	eDc1 := &DerivedChargers{Chargers: []*DerivedCharger{dcDf}}
 	if dc1, _ = dc1.AppendDefaultRun(); !reflect.DeepEqual(dc1, eDc1) {
 		t.Errorf("Expecting: %+v, received: %+v", eDc1.Chargers[0], dc1.Chargers[0])
 	}
 	dc2 := &DerivedChargers{Chargers: []*DerivedCharger{
-		&DerivedCharger{RunId: "extra1", RunFilters: "", ReqTypeField: "reqtype2", DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
-			AccountField: "rif", SubjectField: "rif", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PddField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT,
+		&DerivedCharger{RunID: "extra1", RunFilters: "", ReqTypeField: "reqtype2", DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
+			AccountField: "rif", SubjectField: "rif", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PDDField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT,
 			DisconnectCauseField: META_DEFAULT},
-		&DerivedCharger{RunId: "extra2", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
-			AccountField: "ivo", SubjectField: "ivo", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PddField: META_DEFAULT, AnswerTimeField: META_DEFAULT,
+		&DerivedCharger{RunID: "extra2", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
+			AccountField: "ivo", SubjectField: "ivo", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PDDField: META_DEFAULT, AnswerTimeField: META_DEFAULT,
 			UsageField: META_DEFAULT, SupplierField: META_DEFAULT, DisconnectCauseField: META_DEFAULT}},
 	}
 	eDc2 := &DerivedChargers{}

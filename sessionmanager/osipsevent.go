@@ -264,13 +264,13 @@ func (osipsev *OsipsEvent) DialogId() string {
 	return osipsev.osipsEvent.AttrValues[OSIPS_DIALOG_ID]
 }
 
-func (osipsEv *OsipsEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
-	storCdr := new(engine.StoredCdr)
-	storCdr.CgrId = osipsEv.GetCgrId(timezone)
+func (osipsEv *OsipsEvent) AsStoredCdr(timezone string) *engine.CDR {
+	storCdr := new(engine.CDR)
+	storCdr.CGRID = osipsEv.GetCgrId(timezone)
 	storCdr.TOR = utils.VOICE
-	storCdr.AccId = osipsEv.GetUUID()
-	storCdr.CdrHost = osipsEv.GetOriginatorIP(utils.META_DEFAULT)
-	storCdr.CdrSource = "OSIPS_" + osipsEv.GetName()
+	storCdr.OriginID = osipsEv.GetUUID()
+	storCdr.OriginHost = osipsEv.GetOriginatorIP(utils.META_DEFAULT)
+	storCdr.Source = "OSIPS_" + osipsEv.GetName()
 	storCdr.ReqType = osipsEv.GetReqType(utils.META_DEFAULT)
 	storCdr.Direction = osipsEv.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = osipsEv.GetTenant(utils.META_DEFAULT)
@@ -281,7 +281,7 @@ func (osipsEv *OsipsEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
 	storCdr.SetupTime, _ = osipsEv.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = osipsEv.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = osipsEv.GetDuration(utils.META_DEFAULT)
-	storCdr.Pdd, _ = osipsEv.GetPdd(utils.META_DEFAULT)
+	storCdr.PDD, _ = osipsEv.GetPdd(utils.META_DEFAULT)
 	storCdr.Supplier = osipsEv.GetSupplier(utils.META_DEFAULT)
 	storCdr.DisconnectCause = osipsEv.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = osipsEv.GetExtraFields()

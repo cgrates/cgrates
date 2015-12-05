@@ -95,7 +95,7 @@ func TestHandleGetStoredDC(t *testing.T) {
 
 func TestHandleDeivedChargersMatchDestRet(t *testing.T) {
 	dcs := &utils.DerivedChargers{
-		DestinationIds: utils.NewStringMap("RET"),
+		DestinationIDs: utils.NewStringMap("RET"),
 	}
 	if !DerivedChargersMatchesDest(dcs, "0723045326") {
 		t.Error("Derived charger failed to match dest")
@@ -104,7 +104,7 @@ func TestHandleDeivedChargersMatchDestRet(t *testing.T) {
 
 func TestHandleDeivedChargersMatchDestNat(t *testing.T) {
 	dcs := &utils.DerivedChargers{
-		DestinationIds: utils.NewStringMap("NAT"),
+		DestinationIDs: utils.NewStringMap("NAT"),
 	}
 	if !DerivedChargersMatchesDest(dcs, "0723045326") {
 		t.Error("Derived charger failed to match dest")
@@ -113,7 +113,7 @@ func TestHandleDeivedChargersMatchDestNat(t *testing.T) {
 
 func TestHandleDeivedChargersMatchDestNatRet(t *testing.T) {
 	dcs := &utils.DerivedChargers{
-		DestinationIds: utils.NewStringMap("NAT", "RET"),
+		DestinationIDs: utils.NewStringMap("NAT", "RET"),
 	}
 	if !DerivedChargersMatchesDest(dcs, "0723045326") {
 		t.Error("Derived charger failed to match dest")

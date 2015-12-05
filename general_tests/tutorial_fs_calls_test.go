@@ -330,18 +330,18 @@ func TestTutFsCalls1001Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	var cgrId string // Share  with getCostDetails
+	var reply []*engine.ExternalCDR
+	var CGRID string // Share  with getCostDetails
 	var cCost engine.CallCost
-	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestPrefixes: []string{"1002"}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestinationPrefixes: []string{"1002"}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		cgrId = reply[0].CgrId
-		if reply[0].CdrSource != "freeswitch_json" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		CGRID = reply[0].CGRID
+		if reply[0].Source != "freeswitch_json" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
@@ -357,19 +357,19 @@ func TestTutFsCalls1001Cdrs(t *testing.T) {
 		//}
 	}
 	// Make sure call cost contains the matched information
-	if err := tutFsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
+	if err := tutFsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: CGRID}, &cCost); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
 		t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
 	}
 
-	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestPrefixes: []string{"1003"}}
+	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestinationPrefixes: []string{"1003"}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		cgrId = reply[0].CgrId
+		CGRID = reply[0].CGRID
 		if reply[0].ReqType != utils.META_PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
 		}
@@ -381,12 +381,12 @@ func TestTutFsCalls1001Cdrs(t *testing.T) {
 		}
 	}
 	// Make sure call cost contains the matched information
-	if err := tutFsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: cgrId}, &cCost); err != nil {
+	if err := tutFsCallsRpc.Call("ApierV2.GetCallCostLog", utils.AttrGetCallCost{CgrId: CGRID}, &cCost); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
 		t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
 	}
-	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnRated: true}
+	req = utils.RPCCDRsFilter{Accounts: []string{"1001"}, RunIDs: []string{"derived_run1"}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
@@ -407,15 +407,15 @@ func TestTutFsCalls1002Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1002"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1002"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 { // Should be counted here also call originated form 1006 which is aliased to 1002
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		if reply[0].Source != "freeswitch_json" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_POSTPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
@@ -434,15 +434,15 @@ func TestTutFsCalls1003Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1003"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1003"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		if reply[0].Source != "freeswitch_json" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PSEUDOPREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
@@ -462,15 +462,15 @@ func TestTutFsCalls1004Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1004"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1004"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		if reply[0].Source != "freeswitch_json" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_RATED {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
@@ -490,8 +490,8 @@ func TestTutFsCalls1006Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1006"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1006"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 0 {
@@ -504,15 +504,15 @@ func TestTutFsCalls1007Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1007"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1007"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutFsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "freeswitch_json" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		if reply[0].Source != "freeswitch_json" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])

@@ -43,7 +43,7 @@ const (
 
 // Understands and processes a specific format of cdr (eg: .csv or .fwv)
 type RecordsProcessor interface {
-	ProcessNextRecord() ([]*engine.StoredCdr, error) // Process a single record in the CDR file, return a slice of CDRs since based on configuration we can have more templates
+	ProcessNextRecord() ([]*engine.CDR, error) // Process a single record in the CDR file, return a slice of CDRs since based on configuration we can have more templates
 	ProcessedRecordsNr() int64
 }
 

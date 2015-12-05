@@ -197,11 +197,11 @@ func TestMongoSetGetTPSharedGroups(t *testing.T) {
 	}
 }
 
-func TestMongoSetGetTPCdrStats(t *testing.T) {
+func TestMongoSetGetTPcdrstats(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	CS_ID := "CDRSTATS_1"
+	CS_ID := "cdrsTATS_1"
 	setCS := &utils.TPCdrStats{
 		TPid:       utils.TEST_SQL,
 		CdrStatsId: CS_ID,
@@ -459,52 +459,57 @@ func TestMongoSetCdr(t *testing.T) {
 	}
 	cgrCdr1 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa1", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:20Z",
-		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "10s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", utils.CDRSOURCE: utils.TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "10s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", utils.CDRSOURCE: utils.TEST_SQL}
 
 	cgrCdr2 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa2", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_PREPAID, utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:22Z",
-		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "20", utils.PDD: "7s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": utils.TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "20", utils.PDD: "7s", utils.SUPPLIER: "SUPPL1",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "Source": utils.TEST_SQL}
 
 	cgrCdr3 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa3", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
 		utils.CATEGORY: "premium_call", utils.ACCOUNT: "1002", utils.SUBJECT: "1002", utils.DESTINATION: "1001", utils.SETUP_TIME: "2013-11-07T08:42:24Z",
-		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "60s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": utils.TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "60s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "Source": utils.TEST_SQL}
 
 	cgrCdr4 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa4", utils.CDRHOST: "192.168.1.2", utils.REQTYPE: utils.META_PSEUDOPREPAID, utils.DIRECTION: "*out", utils.TENANT: "itsyscom.com",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "+4986517174964", utils.SETUP_TIME: "2013-11-07T08:42:21Z",
-		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "1m2s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": utils.TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "1m2s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "Source": utils.TEST_SQL}
 
 	cgrCdr5 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa5", utils.CDRHOST: "192.168.1.2", utils.REQTYPE: utils.META_POSTPAID, utils.DIRECTION: "*out", utils.TENANT: "itsyscom.com",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1002", utils.SUBJECT: "1002", utils.DESTINATION: "+4986517174963", utils.SETUP_TIME: "2013-11-07T08:42:25Z",
-		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "15s", utils.PDD: "7s", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": utils.TEST_SQL}
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "15s", utils.PDD: "7s", utils.SUPPLIER: "SUPPL1",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "Source": utils.TEST_SQL}
 
 	for _, cdr := range []*CgrCdr{cgrCdr1, cgrCdr2, cgrCdr3, cgrCdr4, cgrCdr5} {
 		if err := mongoDb.SetCdr(cdr.AsStoredCdr("")); err != nil {
 			t.Error(err.Error())
 		}
 	}
-	strCdr1 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,
+	strCdr1 := &CDR{TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
-		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
-	strCdr1.CgrId = utils.Sha1(strCdr1.AccId, strCdr1.SetupTime.String())
-	strCdr2 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN2", ReqType: utils.META_PREPAID,
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(3) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr1.CGRID = utils.Sha1(strCdr1.OriginID, strCdr1.SetupTime.String())
+	strCdr2 := &CDR{TOR: utils.VOICE, OriginID: "bbb2", OriginHost: "192.168.1.2", Source: "UNKNOWN2", ReqType: utils.META_PREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(12) * time.Second, Pdd: time.Duration(4) * time.Second, Supplier: "SUPPL1",
-		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
-	strCdr2.CgrId = utils.Sha1(strCdr2.AccId, strCdr2.SetupTime.String())
-	strCdr3 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: utils.TEST_SQL, ReqType: utils.META_RATED,
+		Usage: time.Duration(12) * time.Second, PDD: time.Duration(4) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID, Cost: 0.201}
+	strCdr2.CGRID = utils.Sha1(strCdr2.OriginID, strCdr2.SetupTime.String())
+	strCdr3 := &CDR{TOR: utils.VOICE, OriginID: "bbb3", OriginHost: "192.168.1.1", Source: utils.TEST_SQL, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1000", Destination: "+4986517174963",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(2) * time.Second, Supplier: "SUPPL1",
-		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
-	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(2) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr3.CGRID = utils.Sha1(strCdr3.OriginID, strCdr3.SetupTime.String())
 
-	for _, cdr := range []*StoredCdr{strCdr1, strCdr2, strCdr3} {
+	for _, cdr := range []*CDR{strCdr1, strCdr2, strCdr3} {
 		if err := mongoDb.SetCdr(cdr); err != nil {
 			t.Error(err.Error())
 		}
@@ -515,29 +520,29 @@ func TestMongoSetRatedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	strCdr1 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: utils.META_RATED,
+	strCdr1 := &CDR{TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
-		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
-	strCdr1.CgrId = utils.Sha1(strCdr1.AccId, strCdr1.SetupTime.String())
-	strCdr2 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN", ReqType: utils.META_PREPAID,
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(3) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr1.CGRID = utils.Sha1(strCdr1.OriginID, strCdr1.SetupTime.String())
+	strCdr2 := &CDR{TOR: utils.VOICE, OriginID: "bbb2", OriginHost: "192.168.1.2", Source: "UNKNOWN", ReqType: utils.META_PREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(12) * time.Second, Pdd: time.Duration(7) * time.Second, Supplier: "SUPPL1",
-		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
-	strCdr2.CgrId = utils.Sha1(strCdr2.AccId, strCdr2.SetupTime.String())
-	strCdr3 := &StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: utils.TEST_SQL, ReqType: utils.META_RATED,
+		Usage: time.Duration(12) * time.Second, PDD: time.Duration(7) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID, Cost: 0.201}
+	strCdr2.CGRID = utils.Sha1(strCdr2.OriginID, strCdr2.SetupTime.String())
+	strCdr3 := &CDR{TOR: utils.VOICE, OriginID: "bbb3", OriginHost: "192.168.1.1", Source: utils.TEST_SQL, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1002", Destination: "+4986517174964",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(2) * time.Second, Supplier: "SUPPL1",
-		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: "wholesale_run", Cost: 1.201}
-	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(2) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       "wholesale_run", Cost: 1.201}
+	strCdr3.CGRID = utils.Sha1(strCdr3.OriginID, strCdr3.SetupTime.String())
 
-	for _, cdr := range []*StoredCdr{strCdr1, strCdr2, strCdr3} {
+	for _, cdr := range []*CDR{strCdr1, strCdr2, strCdr3} {
 		if err := mongoDb.SetRatedCdr(cdr); err != nil {
 			t.Error(err.Error())
 		}
@@ -548,7 +553,7 @@ func TestMongoCallCost(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrId := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	CGRID := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
 	cc := &CallCost{
 		Direction:   "*out",
 		Category:    "call",
@@ -568,330 +573,318 @@ func TestMongoCallCost(t *testing.T) {
 			},
 		},
 	}
-	if err := mongoDb.LogCallCost(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
+	if err := mongoDb.LogCallCost(CGRID, utils.TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
 		t.Error(err.Error())
 	}
-	if ccRcv, err := mongoDb.GetCallCostLog(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID); err != nil {
+	if ccRcv, err := mongoDb.GetCallCostLog(CGRID, utils.TEST_SQL, utils.DEFAULT_RUNID); err != nil {
 		t.Error(err.Error())
 	} else if cc.Cost != ccRcv.Cost {
 		t.Errorf("Expecting call cost:\n%+v,\nreceived:\n%+v", cc.Timespans[0], ccRcv.Timespans[0])
 	}
 	// UPDATE test here
 	cc.Category = "premium_call"
-	if err := mongoDb.LogCallCost(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
+	if err := mongoDb.LogCallCost(CGRID, utils.TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
 		t.Error(err.Error())
 	}
-	if ccRcv, err := mongoDb.GetCallCostLog(cgrId, utils.TEST_SQL, utils.DEFAULT_RUNID); err != nil {
+	if ccRcv, err := mongoDb.GetCallCostLog(CGRID, utils.TEST_SQL, utils.DEFAULT_RUNID); err != nil {
 		t.Error(err.Error())
 	} else if cc.Cost != ccRcv.Cost {
 		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
 	}
 }
 
-func TestMongoGetStoredCdrs(t *testing.T) {
+func TestMongoGetcdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var timeStart, timeEnd time.Time
-	// All CDRs, no filter
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
+	// All cdrs, no filter
+	if cdrs, _, err := mongoDb.GetCDRs(new(utils.CDRsFilter)); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 20 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 20 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Count ALL
-	if storedCdrs, count, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Count: true}); err != nil {
+	if cdrs, count, err := mongoDb.GetCDRs(&utils.CDRsFilter{Count: true}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 0 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 0 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	} else if count != 20 {
-		t.Error("Unexpected count of StoredCdrs returned: ", count)
+		t.Error("Unexpected count of cdrs returned: ", count)
 	}
 	// Limit 5
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 5 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 5 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Offset 5
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 5 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 5 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Offset with limit 2
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(2), Offset: utils.IntPointer(5)}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(2), Offset: utils.IntPointer(5)}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 2 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on cgrids
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	// Filter on CGRIDs
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 3 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 3 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Count on CGRIDS
-	if _, count, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	if _, count, err := mongoDb.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, Count: true}); err != nil {
 		t.Error(err.Error())
 	} else if count != 3 {
-		t.Error("Unexpected count of StoredCdrs returned: ", count)
+		t.Error("Unexpected count of cdrs returned: ", count)
 	}
-	// Filter on cgrids plus reqType
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	// Filter on CGRIDs plus reqType
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{utils.META_PREPAID}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 1 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Count on multiple filter
-	if _, count, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	if _, count, err := mongoDb.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{utils.META_PREPAID}, Count: true}); err != nil {
 		t.Error(err.Error())
 	} else if count != 1 {
-		t.Error("Unexpected count of StoredCdrs returned: ", count)
+		t.Error("Unexpected count of cdrs returned: ", count)
 	}
 	// Filter on runId
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{RunIds: []string{utils.DEFAULT_RUNID}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{RunIDs: []string{utils.DEFAULT_RUNID}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 14 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 14 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on TOR
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{TORs: []string{utils.SMS}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 0 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 0 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on multiple TOR
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tors: []string{utils.SMS, utils.VOICE}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{TORs: []string{utils.SMS, utils.VOICE}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 15 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 15 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on cdrHost
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.2"}}); err != nil {
+	// Filter on OriginHost
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{OriginHosts: []string{"192.168.1.2"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 3 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 3 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on multiple cdrHost
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrHosts: []string{"192.168.1.1", "192.168.1.2"}}); err != nil {
+	// Filter on multiple OriginHost
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{OriginHosts: []string{"192.168.1.1", "192.168.1.2"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 15 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 15 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on cdrSource
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrSources: []string{"UNKNOWN"}}); err != nil {
+	// Filter on Source
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Sources: []string{"UNKNOWN"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 2 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on multiple cdrSource
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CdrSources: []string{"UNKNOWN", "UNKNOWN2"}}); err != nil {
+	// Filter on multiple Source
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Sources: []string{"UNKNOWN", "UNKNOWN2"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 2 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on reqType
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_PREPAID}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{ReqTypes: []string{utils.META_PREPAID}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 5 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 5 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on multiple reqType
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{ReqTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 6 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 6 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on direction
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Directions: []string{"*out"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Directions: []string{"*out"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 15 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 15 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on tenant
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Tenants: []string{"itsyscom.com"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 4 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 4 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on multiple tenants
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Tenants: []string{"itsyscom.com", "cgrates.org"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Tenants: []string{"itsyscom.com", "cgrates.org"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 15 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 15 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on category
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Categories: []string{"premium_call"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 1 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on multiple categories
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Categories: []string{"premium_call", "call"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Categories: []string{"premium_call", "call"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 15 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 15 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on account
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1002"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Accounts: []string{"1002"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 6 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 6 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on multiple account
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Accounts: []string{"1001", "1002"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Accounts: []string{"1001", "1002"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 13 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 13 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on subject
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Subjects: []string{"1000"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 1 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on multiple subject
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{Subjects: []string{"1000", "1002"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{Subjects: []string{"1000", "1002"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 6 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 6 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on destPrefix
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"+498651"}}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{DestinationPrefixes: []string{"+498651"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 4 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 4 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on multiple destPrefixes
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{DestPrefixes: []string{"1001", "+498651"}}); err != nil {
+	// Filter on multiple DestinationPrefixes
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{DestinationPrefixes: []string{"1001", "+498651"}}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 5 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
-	}
-	// Filter on ratedAccount
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{RatedAccounts: []string{"8001"}}); err != nil {
-		t.Error(err.Error())
-	} else if len(storedCdrs) != 1 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
-	}
-	// Filter on ratedSubject
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{RatedSubjects: []string{"91001"}}); err != nil {
-		t.Error(err.Error())
-	} else if len(storedCdrs) != 1 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 5 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on ignoreRated
-	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
+	var OrderIDStart, OrderIDEnd int64 // Capture also OrderIDs for the next test
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 7 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 7 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	} else {
-		for _, cdr := range storedCdrs {
-			if cdr.OrderId < orderIdStart {
-				orderIdStart = cdr.OrderId
+		for _, cdr := range cdrs {
+			if cdr.OrderID < OrderIDStart {
+				OrderIDStart = cdr.OrderID
 			}
-			if cdr.OrderId > orderIdEnd {
-				orderIdEnd = cdr.OrderId
+			if cdr.OrderID > OrderIDEnd {
+				OrderIDEnd = cdr.OrderID
 			}
 		}
 	}
-	// Filter on orderIdStart
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart}); err != nil {
+	// Filter on OrderIDStart
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{OrderIDStart: OrderIDStart}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 20 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 20 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on orderIdStart and orderIdEnd
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{OrderIdStart: orderIdStart, OrderIdEnd: orderIdEnd}); err != nil {
+	// Filter on OrderIDStart and OrderIDEnd
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{OrderIDStart: OrderIDStart, OrderIDEnd: OrderIDEnd}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 20 { // TODO: find mongo equivalent
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 20 { // TODO: find mongo equivalent
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on timeStart
 	timeStart = time.Date(2013, 11, 8, 8, 0, 0, 0, time.UTC)
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{AnswerTimeStart: &timeStart}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 6 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 6 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on timeStart and timeEnd
 	timeEnd = time.Date(2013, 12, 1, 8, 0, 0, 0, time.UTC)
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 2 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 2 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on minPdd
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(float64(3 * time.Second))}); err != nil {
+	// Filter on minPDD
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{MinPDD: utils.Float64Pointer(float64(3 * time.Second))}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 7 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 7 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on maxPdd
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MaxPdd: utils.Float64Pointer(float64(3 * time.Second))}); err != nil {
+	// Filter on maxPDD
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{MaxPDD: utils.Float64Pointer(float64(3 * time.Second))}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 13 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 13 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on minPdd, maxPdd
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{MinPdd: utils.Float64Pointer(float64(3 * time.Second)), MaxPdd: utils.Float64Pointer(float64(5 * time.Second))}); err != nil {
+	// Filter on minPDD, maxPDD
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{MinPDD: utils.Float64Pointer(float64(3 * time.Second)), MaxPDD: utils.Float64Pointer(float64(5 * time.Second))}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 4 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 4 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Combined filter
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{ReqTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{ReqTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 1 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Filter on ignoreDerived
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnRated: true}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd, FilterOnRated: true}); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 2 { // ToDo: Recheck this value
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 2 { // ToDo: Recheck this value
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 }
 
-func TestMongoRemStoredCdrs(t *testing.T) {
+func TestMongoRemCDRs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrIdB1 := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
-	if err := mongoDb.RemStoredCdrs([]string{cgrIdB1}); err != nil {
+	CGRIDB1 := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	if err := mongoDb.RemCDRs([]string{CGRIDB1}); err != nil {
 		t.Error(err.Error())
 	}
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(new(utils.CDRsFilter)); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 20 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 20 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	tm, _ := utils.ParseTimeDetectLayout("2013-11-08T08:42:20Z", "")
-	cgrIdA1 := utils.Sha1("aaa1", tm.String())
+	CGRIDA1 := utils.Sha1("aaa1", tm.String())
 	tm, _ = utils.ParseTimeDetectLayout("2013-11-08T08:42:22Z", "")
-	cgrIdA2 := utils.Sha1("aaa2", tm.String())
+	CGRIDA2 := utils.Sha1("aaa2", tm.String())
 	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:24Z", "")
-	cgrIdA3 := utils.Sha1("aaa3", tm.String())
+	CGRIDA3 := utils.Sha1("aaa3", tm.String())
 	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:21Z", "")
-	cgrIdA4 := utils.Sha1("aaa4", tm.String())
+	CGRIDA4 := utils.Sha1("aaa4", tm.String())
 	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:25Z", "")
-	cgrIdA5 := utils.Sha1("aaa5", tm.String())
-	cgrIdB2 := utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
-	cgrIdB3 := utils.Sha1("bbb3", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
-	if err := mongoDb.RemStoredCdrs([]string{cgrIdA1, cgrIdA2, cgrIdA3, cgrIdA4, cgrIdA5,
-		cgrIdB2, cgrIdB3}); err != nil {
+	CGRIDA5 := utils.Sha1("aaa5", tm.String())
+	CGRIDB2 := utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	CGRIDB3 := utils.Sha1("bbb3", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	if err := mongoDb.RemCDRs([]string{CGRIDA1, CGRIDA2, CGRIDA3, CGRIDA4, CGRIDA5,
+		CGRIDB2, CGRIDB3}); err != nil {
 		t.Error(err.Error())
 	}
-	if storedCdrs, _, err := mongoDb.GetStoredCdrs(new(utils.CdrsFilter)); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(new(utils.CDRsFilter)); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 20 {
-		t.Error("Unexpected number of StoredCdrs returned: ", len(storedCdrs))
+	} else if len(cdrs) != 20 {
+		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 }
 
@@ -900,13 +893,13 @@ func TestMongoStoreRestoreCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	strCdr := &StoredCdr{TOR: utils.VOICE, AccId: "ccc1", CdrHost: "192.168.1.1", CdrSource: "TEST_CDR", ReqType: utils.META_RATED,
+	strCdr := &CDR{TOR: utils.VOICE, OriginID: "ccc1", OriginHost: "192.168.1.1", Source: "TEST_CDR", ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(3) * time.Second, Supplier: "SUPPL1",
-		ExtraFields:    map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
-	strCdr.CgrId = utils.Sha1(strCdr.AccId, strCdr.SetupTime.String())
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(3) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		RunID:       utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr.CGRID = utils.Sha1(strCdr.OriginID, strCdr.SetupTime.String())
 	if err := mongoDb.SetCdr(strCdr); err != nil {
 		t.Error(err.Error())
 	}
@@ -914,16 +907,16 @@ func TestMongoStoreRestoreCdr(t *testing.T) {
 		t.Error(err.Error())
 	}
 	// Check RawCdr
-	if rcvCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}}); err != nil {
+	if rcvcdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{strCdr.CGRID}}); err != nil {
 		t.Error(err.Error())
-	} else if len(rcvCdrs) != 1 {
-		t.Errorf("Unexpected cdrs returned: %+v", rcvCdrs)
+	} else if len(rcvcdrs) != 1 {
+		t.Errorf("Unexpected cdrs returned: %+v", rcvcdrs)
 	} else {
-		rcvCdr := rcvCdrs[0]
-		if strCdr.CgrId != rcvCdr.CgrId ||
+		rcvCdr := rcvcdrs[0]
+		if strCdr.CGRID != rcvCdr.CGRID ||
 			strCdr.TOR != rcvCdr.TOR ||
-			strCdr.AccId != rcvCdr.AccId ||
-			strCdr.CdrHost != rcvCdr.CdrHost ||
+			strCdr.OriginID != rcvCdr.OriginID ||
+			strCdr.OriginHost != rcvCdr.OriginHost ||
 			strCdr.ReqType != rcvCdr.ReqType ||
 			strCdr.Direction != rcvCdr.Direction ||
 			strCdr.Tenant != rcvCdr.Tenant ||
@@ -934,24 +927,24 @@ func TestMongoStoreRestoreCdr(t *testing.T) {
 			!strCdr.SetupTime.Equal(rcvCdr.SetupTime) ||
 			!strCdr.AnswerTime.Equal(rcvCdr.AnswerTime) ||
 			strCdr.Usage != rcvCdr.Usage ||
-			strCdr.Pdd != rcvCdr.Pdd ||
+			strCdr.PDD != rcvCdr.PDD ||
 			strCdr.Supplier != rcvCdr.Supplier ||
 			strCdr.DisconnectCause != rcvCdr.DisconnectCause ||
 			!reflect.DeepEqual(strCdr.ExtraFields, rcvCdr.ExtraFields) {
-			t.Errorf("Expecting: %+v, received: %+v", strCdr, rcvCdrs[0])
+			t.Errorf("Expecting: %+v, received: %+v", strCdr, rcvcdrs[0])
 		}
 	}
 	// Check RatedCdr
-	if rcvCdrs, _, err := mongoDb.GetStoredCdrs(&utils.CdrsFilter{CgrIds: []string{strCdr.CgrId}, FilterOnRated: true}); err != nil {
+	if rcvcdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{strCdr.CGRID}, FilterOnRated: true}); err != nil {
 		t.Error(err.Error())
-	} else if len(rcvCdrs) != 1 {
-		t.Errorf("Unexpected cdrs returned: %+v", rcvCdrs)
+	} else if len(rcvcdrs) != 1 {
+		t.Errorf("Unexpected cdrs returned: %+v", rcvcdrs)
 	} else {
-		rcvCdr := rcvCdrs[0]
-		if strCdr.CgrId != rcvCdr.CgrId ||
+		rcvCdr := rcvcdrs[0]
+		if strCdr.CGRID != rcvCdr.CGRID ||
 			strCdr.TOR != rcvCdr.TOR ||
-			strCdr.AccId != rcvCdr.AccId ||
-			strCdr.CdrHost != rcvCdr.CdrHost ||
+			strCdr.OriginID != rcvCdr.OriginID ||
+			strCdr.OriginHost != rcvCdr.OriginHost ||
 			strCdr.ReqType != rcvCdr.ReqType ||
 			strCdr.Direction != rcvCdr.Direction ||
 			strCdr.Tenant != rcvCdr.Tenant ||
@@ -962,12 +955,12 @@ func TestMongoStoreRestoreCdr(t *testing.T) {
 			//!strCdr.SetupTime.Equal(rcvCdr.SetupTime) || // FixMe
 			//!strCdr.AnswerTime.Equal(rcvCdr.AnswerTime) || // FixMe
 			strCdr.Usage != rcvCdr.Usage ||
-			strCdr.Pdd != rcvCdr.Pdd ||
+			strCdr.PDD != rcvCdr.PDD ||
 			strCdr.Supplier != rcvCdr.Supplier ||
 			strCdr.DisconnectCause != rcvCdr.DisconnectCause ||
 			strCdr.Cost != rcvCdr.Cost ||
 			!reflect.DeepEqual(strCdr.ExtraFields, rcvCdr.ExtraFields) {
-			t.Errorf("Expecting: %+v, received: %+v", strCdr, rcvCdrs[0])
+			t.Errorf("Expecting: %+v, received: %+v", strCdr, rcvcdrs[0])
 		}
 	}
 }

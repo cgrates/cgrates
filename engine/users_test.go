@@ -626,7 +626,7 @@ func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 	}
 }
 
-func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
+func TestUsersExternalCDRGetLoadUserProfileExtraFields(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
@@ -637,7 +637,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
 		index: make(map[string]map[string]bool),
 	}
 
-	ur := &ExternalCdr{
+	ur := &ExternalCDR{
 		TOR:         utils.USERS,
 		ReqType:     utils.USERS,
 		Direction:   "*out",
@@ -658,7 +658,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
-	expected := &ExternalCdr{
+	expected := &ExternalCDR{
 		TOR:         "04",
 		ReqType:     "4",
 		Direction:   "*out",
@@ -679,7 +679,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
 	}
 }
 
-func TestUsersExternalCdrGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
+func TestUsersExternalCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
@@ -690,7 +690,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 		index: make(map[string]map[string]bool),
 	}
 
-	ur := &ExternalCdr{
+	ur := &ExternalCDR{
 		TOR:         utils.USERS,
 		ReqType:     utils.USERS,
 		Direction:   "*out",
@@ -713,7 +713,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 	}
 }
 
-func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
+func TestUsersExternalCDRGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
@@ -724,7 +724,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 		index: make(map[string]map[string]bool),
 	}
 
-	ur := &ExternalCdr{
+	ur := &ExternalCDR{
 		TOR:         utils.USERS,
 		ReqType:     utils.USERS,
 		Direction:   "*out",
@@ -746,7 +746,7 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
-	expected := &ExternalCdr{
+	expected := &ExternalCDR{
 		TOR:         "04",
 		ReqType:     "4",
 		Direction:   "*out",
@@ -809,7 +809,7 @@ func TestUsersCallDescLoadUserProfile(t *testing.T) {
 	}
 }
 
-func TestUsersStoredCdrLoadUserProfile(t *testing.T) {
+func TestUsersCDRLoadUserProfile(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
 			"cgrates.org:dan":      map[string]string{"ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
@@ -819,7 +819,7 @@ func TestUsersStoredCdrLoadUserProfile(t *testing.T) {
 		index: make(map[string]map[string]bool),
 	}
 	startTime := time.Now()
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		TOR:         "*sms",
 		ReqType:     utils.USERS,
 		Tenant:      utils.USERS,
@@ -832,7 +832,7 @@ func TestUsersStoredCdrLoadUserProfile(t *testing.T) {
 		Usage:       time.Duration(1) * time.Minute,
 		ExtraFields: map[string]string{"Cli": "+4986517174963"},
 	}
-	expected := &StoredCdr{
+	expected := &CDR{
 		TOR:         "*sms",
 		ReqType:     "*prepaid",
 		Tenant:      "cgrates.org",

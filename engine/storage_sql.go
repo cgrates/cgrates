@@ -639,18 +639,18 @@ func (self *SQLStorage) LogActionPlan(source string, at *ActionPlan, as Actions)
 	return
 }
 
-func (self *SQLStorage) SetCdr(cdr *StoredCdr) error {
+func (self *SQLStorage) SetCdr(cdr *CDR) error {
 	extraFields, err := json.Marshal(cdr.ExtraFields)
 	if err != nil {
 		return err
 	}
 	tx := self.db.Begin()
 	saved := tx.Save(&TblCdrs{
-		Cgrid:           cdr.CgrId,
+		Cgrid:           cdr.CGRID,
 		Tor:             cdr.TOR,
-		Accid:           cdr.AccId,
-		Cdrhost:         cdr.CdrHost,
-		Cdrsource:       cdr.CdrSource,
+		Accid:           cdr.OriginID,
+		Cdrhost:         cdr.OriginHost,
+		Cdrsource:       cdr.Source,
 		Reqtype:         cdr.ReqType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
@@ -661,7 +661,7 @@ func (self *SQLStorage) SetCdr(cdr *StoredCdr) error {
 		SetupTime:       cdr.SetupTime,
 		AnswerTime:      cdr.AnswerTime,
 		Usage:           cdr.Usage.Seconds(),
-		Pdd:             cdr.Pdd.Seconds(),
+		Pdd:             cdr.PDD.Seconds(),
 		Supplier:        cdr.Supplier,
 		DisconnectCause: cdr.DisconnectCause,
 		ExtraFields:     string(extraFields),
@@ -674,11 +674,11 @@ func (self *SQLStorage) SetCdr(cdr *StoredCdr) error {
 	return nil
 }
 
-func (self *SQLStorage) SetRatedCdr(cdr *StoredCdr) (err error) {
+func (self *SQLStorage) SetRatedCdr(cdr *CDR) (err error) {
 	tx := self.db.Begin()
 	saved := tx.Save(&TblCdrs{
-		Cgrid:           cdr.CgrId,
-		Runid:           cdr.MediationRunId,
+		Cgrid:           cdr.CGRID,
+		Runid:           cdr.RunID,
 		Reqtype:         cdr.ReqType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
@@ -689,7 +689,7 @@ func (self *SQLStorage) SetRatedCdr(cdr *StoredCdr) (err error) {
 		SetupTime:       cdr.SetupTime,
 		AnswerTime:      cdr.AnswerTime,
 		Usage:           cdr.Usage.Seconds(),
-		Pdd:             cdr.Pdd.Seconds(),
+		Pdd:             cdr.PDD.Seconds(),
 		Supplier:        cdr.Supplier,
 		DisconnectCause: cdr.DisconnectCause,
 		Cost:            cdr.Cost,
@@ -699,9 +699,9 @@ func (self *SQLStorage) SetRatedCdr(cdr *StoredCdr) (err error) {
 	if saved.Error != nil {
 		tx.Rollback()
 		tx = self.db.Begin()
-		updated := tx.Model(TblCdrs{}).Where(&TblCdrs{Cgrid: cdr.CgrId, Runid: cdr.MediationRunId}).Updates(&TblCdrs{Reqtype: cdr.ReqType,
+		updated := tx.Model(TblCdrs{}).Where(&TblCdrs{Cgrid: cdr.CGRID, Runid: cdr.RunID}).Updates(&TblCdrs{Reqtype: cdr.ReqType,
 			Direction: cdr.Direction, Tenant: cdr.Tenant, Category: cdr.Category, Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination,
-			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Pdd: cdr.Pdd.Seconds(), Supplier: cdr.Supplier, DisconnectCause: cdr.DisconnectCause,
+			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Pdd: cdr.PDD.Seconds(), Supplier: cdr.Supplier, DisconnectCause: cdr.DisconnectCause,
 			Cost: cdr.Cost, ExtraInfo: cdr.ExtraInfo,
 			UpdatedAt: time.Now()})
 		if updated.Error != nil {
@@ -714,8 +714,8 @@ func (self *SQLStorage) SetRatedCdr(cdr *StoredCdr) (err error) {
 
 }
 
-func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, int64, error) {
-	var cdrs []*StoredCdr
+func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error) {
+	var cdrs []*CDR
 
 	q := self.db.Table(utils.TBL_CDRS).Select("*")
 	if qryFltr.Unscoped {
@@ -725,35 +725,35 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		q = q.Where("(deleted_at IS NULL OR deleted_at <= '0001-01-02')") // Soft deletes
 	}
 	// Add filters, use in to replace the high number of ORs
-	if len(qryFltr.CgrIds) != 0 {
-		q = q.Where("cgrid in (?)", qryFltr.CgrIds)
+	if len(qryFltr.CGRIDs) != 0 {
+		q = q.Where("cgrid in (?)", qryFltr.CGRIDs)
 	}
-	if len(qryFltr.NotCgrIds) != 0 {
-		q = q.Where("cgrid not in (?)", qryFltr.NotCgrIds)
+	if len(qryFltr.NotCGRIDs) != 0 {
+		q = q.Where("cgrid not in (?)", qryFltr.NotCGRIDs)
 	}
-	if len(qryFltr.RunIds) != 0 {
-		q = q.Where("runid in (?)", qryFltr.RunIds)
+	if len(qryFltr.RunIDs) != 0 {
+		q = q.Where("runid in (?)", qryFltr.RunIDs)
 	}
-	if len(qryFltr.NotRunIds) != 0 {
-		q = q.Where("runid not in (?)", qryFltr.NotRunIds)
+	if len(qryFltr.NotRunIDs) != 0 {
+		q = q.Where("runid not in (?)", qryFltr.NotRunIDs)
 	}
-	if len(qryFltr.Tors) != 0 {
-		q = q.Where("tor in (?)", qryFltr.Tors)
+	if len(qryFltr.TORs) != 0 {
+		q = q.Where("tor in (?)", qryFltr.TORs)
 	}
-	if len(qryFltr.NotTors) != 0 {
-		q = q.Where("tor not in (?)", qryFltr.NotTors)
+	if len(qryFltr.NotTORs) != 0 {
+		q = q.Where("tor not in (?)", qryFltr.NotTORs)
 	}
-	if len(qryFltr.CdrHosts) != 0 {
-		q = q.Where("cdrhost in (?)", qryFltr.CdrHosts)
+	if len(qryFltr.OriginHosts) != 0 {
+		q = q.Where("cdrhost in (?)", qryFltr.OriginHosts)
 	}
-	if len(qryFltr.NotCdrHosts) != 0 {
-		q = q.Where("cdrhost not in (?)", qryFltr.NotCdrHosts)
+	if len(qryFltr.NotOriginHosts) != 0 {
+		q = q.Where("cdrhost not in (?)", qryFltr.NotOriginHosts)
 	}
-	if len(qryFltr.CdrSources) != 0 {
-		q = q.Where("cdrsource in (?)", qryFltr.CdrSources)
+	if len(qryFltr.Sources) != 0 {
+		q = q.Where("cdrsource in (?)", qryFltr.Sources)
 	}
-	if len(qryFltr.NotCdrSources) != 0 {
-		q = q.Where("cdrsource not in (?)", qryFltr.NotCdrSources)
+	if len(qryFltr.NotSources) != 0 {
+		q = q.Where("cdrsource not in (?)", qryFltr.NotSources)
 	}
 	if len(qryFltr.ReqTypes) != 0 {
 		q = q.Where("reqtype in (?)", qryFltr.ReqTypes)
@@ -791,9 +791,9 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	if len(qryFltr.NotSubjects) != 0 {
 		q = q.Where("subject not in (?)", qryFltr.NotSubjects)
 	}
-	if len(qryFltr.DestPrefixes) != 0 { // A bit ugly but still more readable than scopes provided by gorm
+	if len(qryFltr.DestinationPrefixes) != 0 { // A bit ugly but still more readable than scopes provided by gorm
 		qIds := bytes.NewBufferString("(")
-		for idx, destPrefix := range qryFltr.DestPrefixes {
+		for idx, destPrefix := range qryFltr.DestinationPrefixes {
 			if idx != 0 {
 				qIds.WriteString(" OR")
 			}
@@ -802,9 +802,9 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		qIds.WriteString(" )")
 		q = q.Where(qIds.String())
 	}
-	if len(qryFltr.NotDestPrefixes) != 0 { // A bit ugly but still more readable than scopes provided by gorm
+	if len(qryFltr.NotDestinationPrefixes) != 0 { // A bit ugly but still more readable than scopes provided by gorm
 		qIds := bytes.NewBufferString("(")
-		for idx, destPrefix := range qryFltr.NotDestPrefixes {
+		for idx, destPrefix := range qryFltr.NotDestinationPrefixes {
 			if idx != 0 {
 				qIds.WriteString(" AND")
 			}
@@ -824,18 +824,6 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	}
 	if len(qryFltr.NotDisconnectCauses) != 0 {
 		q = q.Where("disconnect_cause not in (?)", qryFltr.NotDisconnectCauses)
-	}
-	if len(qryFltr.RatedAccounts) != 0 {
-		q = q.Where(utils.TBL_CDRS+".account in (?)", qryFltr.RatedAccounts)
-	}
-	if len(qryFltr.NotRatedAccounts) != 0 {
-		q = q.Where(utils.TBL_CDRS+".account not in (?)", qryFltr.NotRatedAccounts)
-	}
-	if len(qryFltr.RatedSubjects) != 0 {
-		q = q.Where(utils.TBL_CDRS+".subject in (?)", qryFltr.RatedSubjects)
-	}
-	if len(qryFltr.NotRatedSubjects) != 0 {
-		q = q.Where(utils.TBL_CDRS+".subject not in (?)", qryFltr.NotRatedSubjects)
 	}
 	if len(qryFltr.Costs) != 0 {
 		q = q.Where(utils.TBL_CDRS+".cost in (?)", qryFltr.Costs)
@@ -869,11 +857,11 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		qIds.WriteString(" )")
 		q = q.Where(qIds.String())
 	}
-	if qryFltr.OrderIdStart != 0 { // Keep backwards compatible by testing 0 value
-		q = q.Where(utils.TBL_CDRS+".id >= ?", qryFltr.OrderIdStart)
+	if qryFltr.OrderIDStart != 0 { // Keep backwards compatible by testing 0 value
+		q = q.Where(utils.TBL_CDRS+".id >= ?", qryFltr.OrderIDStart)
 	}
-	if qryFltr.OrderIdEnd != 0 {
-		q = q.Where(utils.TBL_CDRS+".id < ?", qryFltr.OrderIdEnd)
+	if qryFltr.OrderIDEnd != 0 {
+		q = q.Where(utils.TBL_CDRS+".id < ?", qryFltr.OrderIDEnd)
 	}
 	if qryFltr.SetupTimeStart != nil {
 		q = q.Where("setup_time >= ?", qryFltr.SetupTimeStart)
@@ -905,11 +893,11 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 	if qryFltr.MaxUsage != nil {
 		q = q.Where("usage < ?", qryFltr.MaxUsage)
 	}
-	if qryFltr.MinPdd != nil {
-		q = q.Where("pdd >= ?", qryFltr.MinPdd)
+	if qryFltr.MinPDD != nil {
+		q = q.Where("pdd >= ?", qryFltr.MinPDD)
 	}
-	if qryFltr.MaxPdd != nil {
-		q = q.Where("pdd < ?", qryFltr.MaxPdd)
+	if qryFltr.MaxPDD != nil {
+		q = q.Where("pdd < ?", qryFltr.MaxPDD)
 	}
 
 	if qryFltr.MinCost != nil {
@@ -962,13 +950,13 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		}
 		usageDur, _ := time.ParseDuration(strconv.FormatFloat(result.Usage, 'f', -1, 64) + "s")
 		pddDur, _ := time.ParseDuration(strconv.FormatFloat(result.Pdd, 'f', -1, 64) + "s")
-		storCdr := &StoredCdr{
-			CgrId:           result.Cgrid,
-			OrderId:         result.Id,
+		storCdr := &CDR{
+			CGRID:           result.Cgrid,
+			OrderID:         result.Id,
 			TOR:             result.Tor,
-			AccId:           result.Accid,
-			CdrHost:         result.Cdrhost,
-			CdrSource:       result.Cdrsource,
+			OriginID:        result.Accid,
+			OriginHost:      result.Cdrhost,
+			Source:          result.Cdrsource,
 			ReqType:         result.Reqtype,
 			Direction:       result.Direction,
 			Tenant:          result.Tenant,
@@ -977,15 +965,13 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 			Subject:         result.Subject,
 			Destination:     result.Destination,
 			SetupTime:       result.SetupTime,
-			Pdd:             pddDur,
+			PDD:             pddDur,
 			AnswerTime:      result.AnswerTime,
 			Usage:           usageDur,
 			Supplier:        result.Supplier,
 			DisconnectCause: result.DisconnectCause,
 			ExtraFields:     extraFieldsMp,
-			MediationRunId:  result.Runid,
-			RatedAccount:    result.Account,
-			RatedSubject:    result.Subject,
+			RunID:           result.Runid,
 			Cost:            result.Cost,
 			ExtraInfo:       result.ExtraInfo,
 		}
@@ -1011,7 +997,7 @@ func (self *SQLStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 }
 
 // Remove CDR data out of all CDR tables based on their cgrid
-func (self *SQLStorage) RemStoredCdrs(cgrIds []string) error {
+func (self *SQLStorage) RemCDRs(cgrIds []string) error {
 	if len(cgrIds) == 0 {
 		return nil
 	}

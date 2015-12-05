@@ -78,7 +78,7 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 		}
 	}
 	dstIds := strings.Split(attrs.DestinationIds, utils.INFIELD_SEP)
-	dcs := &utils.DerivedChargers{DestinationIds: utils.NewStringMap(dstIds...), Chargers: attrs.DerivedChargers}
+	dcs := &utils.DerivedChargers{DestinationIDs: utils.NewStringMap(dstIds...), Chargers: attrs.DerivedChargers}
 	if err := self.RatingDb.SetDerivedChargers(dcKey, dcs); err != nil {
 		return utils.NewErrServerError(err)
 	}

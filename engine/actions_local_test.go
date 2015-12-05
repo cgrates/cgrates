@@ -105,20 +105,20 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
-	var rcvedCdrs []*ExternalCdr
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RpcCdrsFilter{CdrSources: []string{CDRLOG}}, &rcvedCdrs); err != nil {
+	var rcvedCdrs []*ExternalCDR
+	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
 	} else if rcvedCdrs[0].TOR != utils.MONETARY ||
-		rcvedCdrs[0].CdrHost != "127.0.0.1" ||
-		rcvedCdrs[0].CdrSource != CDRLOG ||
+		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
+		rcvedCdrs[0].Source != CDRLOG ||
 		rcvedCdrs[0].ReqType != utils.META_PREPAID ||
 		rcvedCdrs[0].Tenant != "cgrates.org" ||
 		rcvedCdrs[0].Account != "dan2904" ||
 		rcvedCdrs[0].Subject != "dan2904" ||
 		rcvedCdrs[0].Usage != "1" ||
-		rcvedCdrs[0].MediationRunId != utils.META_DEFAULT ||
+		rcvedCdrs[0].RunID != utils.META_DEFAULT ||
 		rcvedCdrs[0].Cost != attrsAA.Actions[0].Units {
 		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}

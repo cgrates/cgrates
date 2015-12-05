@@ -267,7 +267,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 }
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
-func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
+func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	if rs.Bal != nil {
 		return errors.New("unsupported method on the balancer")
 	}
@@ -357,7 +357,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 }
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
-func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
+func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
@@ -385,7 +385,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
-		rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
+		rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
@@ -398,7 +398,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)
 		if err != nil {
-			rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
+			rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
 				Err: err,
 			})
 			return errors.New("Error parsing answer event start time")
@@ -414,7 +414,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
 	*sRuns = sesRuns
-	rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CgrId, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
 		Value: sRuns,
 	})
 	return nil
@@ -432,7 +432,7 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 	return nil
 }
 
-func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
+func (rs *Responder) ProcessCdr(cdr *CDR, reply *string) error {
 	if rs.CdrSrv == nil {
 		return errors.New("CDR_SERVER_NOT_RUNNING")
 	}
@@ -666,9 +666,9 @@ type Connector interface {
 	RefundIncrements(*CallDescriptor, *float64) error
 	GetMaxSessionTime(*CallDescriptor, *float64) error
 	GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error
-	GetDerivedMaxSessionTime(*StoredCdr, *float64) error
-	GetSessionRuns(*StoredCdr, *[]*SessionRun) error
-	ProcessCdr(*StoredCdr, *string) error
+	GetDerivedMaxSessionTime(*CDR, *float64) error
+	GetSessionRuns(*CDR, *[]*SessionRun) error
+	ProcessCdr(*CDR, *string) error
 	LogCallCost(*CallCostLog, *string) error
 	GetLCR(*AttrGetLcr, *LCRCost) error
 	GetTimeout(int, *time.Duration) error
@@ -699,11 +699,11 @@ func (rcc *RPCClientConnector) GetMaxSessionTime(cd *CallDescriptor, resp *float
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
 }
 
-func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
+func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	return rcc.Client.Call("Responder.GetDerivedMaxSessionTime", ev, reply)
 }
 
-func (rcc *RPCClientConnector) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
+func (rcc *RPCClientConnector) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	return rcc.Client.Call("Responder.GetSessionRuns", ev, sRuns)
 }
 
@@ -711,7 +711,7 @@ func (rcc *RPCClientConnector) GetDerivedChargers(attrs *utils.AttrDerivedCharge
 	return rcc.Client.Call("ApierV1.GetDerivedChargers", attrs, dcs)
 }
 
-func (rcc *RPCClientConnector) ProcessCdr(cdr *StoredCdr, reply *string) error {
+func (rcc *RPCClientConnector) ProcessCdr(cdr *CDR, reply *string) error {
 	return rcc.Client.Call("CdrsV1.ProcessCdr", cdr, reply)
 }
 
@@ -830,7 +830,7 @@ func (cp ConnectorPool) GetMaxSessionTime(cd *CallDescriptor, resp *float64) err
 	return utils.ErrTimedOut
 }
 
-func (cp ConnectorPool) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
+func (cp ConnectorPool) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	for _, con := range cp {
 		c := make(chan error, 1)
 		var r float64
@@ -850,7 +850,7 @@ func (cp ConnectorPool) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) 
 	return utils.ErrTimedOut
 }
 
-func (cp ConnectorPool) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
+func (cp ConnectorPool) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	for _, con := range cp {
 		c := make(chan error, 1)
 		sr := make([]*SessionRun, 0)
@@ -890,7 +890,7 @@ func (cp ConnectorPool) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs
 	return utils.ErrTimedOut
 }
 
-func (cp ConnectorPool) ProcessCdr(cdr *StoredCdr, reply *string) error {
+func (cp ConnectorPool) ProcessCdr(cdr *CDR, reply *string) error {
 	for _, con := range cp {
 		c := make(chan error, 1)
 		var r string

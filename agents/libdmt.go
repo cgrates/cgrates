@@ -118,11 +118,11 @@ func usageFromCCR(reqType, reqNr, ccTime int, debitIterval time.Duration) time.D
 }
 
 // Utility function to convert from StoredCdr to CCR struct
-func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendorId int, productName string,
+func storedCdrToCCR(cdr *engine.CDR, originHost, originRealm string, vendorId int, productName string,
 	firmwareRev int, debitInterval time.Duration, callEnded bool) *CCR {
 	//sid := "session;" + strconv.Itoa(int(rand.Uint32()))
 	reqType, reqNr, ccTime := disectUsageForCCR(cdr.Usage, debitInterval, callEnded)
-	ccr := &CCR{SessionId: cdr.CgrId, OriginHost: originHost, OriginRealm: originRealm, DestinationHost: originHost, DestinationRealm: originRealm,
+	ccr := &CCR{SessionId: cdr.CGRID, OriginHost: originHost, OriginRealm: originRealm, DestinationHost: originHost, DestinationRealm: originRealm,
 		AuthApplicationId: 4, ServiceContextId: cdr.ExtraFields["Service-Context-Id"], CCRequestType: reqType, CCRequestNumber: reqNr, EventTimestamp: cdr.AnswerTime,
 		ServiceIdentifier: 0}
 	ccr.SubscriptionId = make([]struct {
@@ -139,7 +139,7 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 	ccr.ServiceInformation.INInformation.CallingVlrNumber = cdr.ExtraFields["Calling-Vlr-Number"]
 	ccr.ServiceInformation.INInformation.CallingCellIDOrSAI = cdr.ExtraFields["Calling-CellID-Or-SAI"]
 	ccr.ServiceInformation.INInformation.BearerCapability = cdr.ExtraFields["Bearer-Capability"]
-	ccr.ServiceInformation.INInformation.CallReferenceNumber = cdr.CgrId
+	ccr.ServiceInformation.INInformation.CallReferenceNumber = cdr.CGRID
 	ccr.ServiceInformation.INInformation.TimeZone = 0
 	ccr.ServiceInformation.INInformation.SSPTime = cdr.ExtraFields["SSP-Time"]
 	return ccr

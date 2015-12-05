@@ -106,12 +106,12 @@ const (
 	GOB                          = "gob"
 	MSGPACK                      = "msgpack"
 	CSV_LOAD                     = "CSVLOAD"
-	CGRID                        = "CgrId"
+	CGRID                        = "CGRID"
 	TOR                          = "TOR"
-	ORDERID                      = "OrderId"
-	ACCID                        = "AccId"
-	CDRHOST                      = "CdrHost"
-	CDRSOURCE                    = "CdrSource"
+	ORDERID                      = "OrderID"
+	ACCID                        = "OriginID"
+	CDRSOURCE                    = "Source"
+	CDRHOST                      = "OriginHost"
 	REQTYPE                      = "ReqType"
 	DIRECTION                    = "Direction"
 	TENANT                       = "Tenant"
@@ -122,11 +122,9 @@ const (
 	SETUP_TIME                   = "SetupTime"
 	ANSWER_TIME                  = "AnswerTime"
 	USAGE                        = "Usage"
-	PDD                          = "Pdd"
+	PDD                          = "PDD"
 	SUPPLIER                     = "Supplier"
-	MEDI_RUNID                   = "MediationRunId"
-	RATED_ACCOUNT                = "RatedAccount"
-	RATED_SUBJECT                = "RatedSubject"
+	MEDI_RUNID                   = "RunID"
 	COST                         = "Cost"
 	COST_DETAILS                 = "CostDetails"
 	RATED                        = "rated"
@@ -263,6 +261,6 @@ const (
 
 var (
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
-	PrimaryCdrFields = []string{CGRID, TOR, ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
+	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
 		SUPPLIER, DISCONNECT_CAUSE, COST, RATED}
 )

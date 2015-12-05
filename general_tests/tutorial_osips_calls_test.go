@@ -330,18 +330,18 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
+	var reply []*engine.ExternalCDR
 	var cgrId string // Share  with getCostDetails
 	var cCost engine.CallCost
-	req := utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestPrefixes: []string{"1002"}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestinationPrefixes: []string{"1002"}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		cgrId = reply[0].CgrId
-		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		cgrId = reply[0].CGRID
+		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
@@ -363,13 +363,13 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 		t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
 	}
 
-	req = utils.RpcCdrsFilter{RunIds: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestPrefixes: []string{"1003"}}
+	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, Accounts: []string{"1001"}, DestinationPrefixes: []string{"1003"}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		cgrId = reply[0].CgrId
+		cgrId = reply[0].CGRID
 		if reply[0].ReqType != utils.META_PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
 		}
@@ -386,7 +386,7 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 	} else if utils.IsSliceMember([]string{cCost.Timespans[0].MatchedSubject, cCost.Timespans[0].MatchedPrefix, cCost.Timespans[0].MatchedDestId}, "") {
 		t.Errorf("Unexpected Matched* for CallCost: %+v", cCost.Timespans[0])
 	}
-	req = utils.RpcCdrsFilter{Accounts: []string{"1001"}, RunIds: []string{"derived_run1"}, FilterOnRated: true}
+	req = utils.RPCCDRsFilter{Accounts: []string{"1001"}, RunIDs: []string{"derived_run1"}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
@@ -407,15 +407,15 @@ func TestTutOsipsCalls1002Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1002"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1002"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_POSTPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
@@ -434,15 +434,15 @@ func TestTutOsipsCalls1003Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1003"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1003"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PSEUDOPREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
@@ -462,15 +462,15 @@ func TestTutOsipsCalls1004Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1004"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1004"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_RATED {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
@@ -490,8 +490,8 @@ func TestTutOsipsCalls1006Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1006"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1006"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 0 {
@@ -504,15 +504,15 @@ func TestTutOsipsCalls1007Cdrs(t *testing.T) {
 	if !*testCalls {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.RpcCdrsFilter{Accounts: []string{"1007"}, RunIds: []string{utils.META_DEFAULT}}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{Accounts: []string{"1007"}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := tutOsipsCallsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].CdrSource != "OSIPS_E_ACC_EVENT" {
-			t.Errorf("Unexpected CdrSource for CDR: %+v", reply[0])
+		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
+			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
 		if reply[0].ReqType != utils.META_PREPAID {
 			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])

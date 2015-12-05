@@ -222,11 +222,11 @@ func TestEvCorelate(t *testing.T) {
 	cdrEv, err := engine.NewFSCdr(jsonCdr, cfg)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err.Error())
-	} else if cdrEv.AsStoredCdr("").AccId != "86cfd6e2-dbda-45a3-b59d-f683ec368e8b" {
-		t.Error("Unexpected acntId received", cdrEv.AsStoredCdr("").AccId)
+	} else if cdrEv.AsStoredCdr("").OriginID != "86cfd6e2-dbda-45a3-b59d-f683ec368e8b" {
+		t.Error("Unexpected acntId received", cdrEv.AsStoredCdr("").OriginID)
 	}
-	if answerEv.GetCgrId("") != cdrEv.AsStoredCdr("").CgrId {
-		t.Error("CgrIds do not match", answerEv.GetCgrId(""), cdrEv.AsStoredCdr("").CgrId)
+	if answerEv.GetCgrId("") != cdrEv.AsStoredCdr("").CGRID {
+		t.Error("CGRIDs do not match", answerEv.GetCgrId(""), cdrEv.AsStoredCdr("").CGRID)
 	}
 
 }
@@ -554,18 +554,18 @@ func TestEvCdrCorelate(t *testing.T) {
 	cdrEv, err := engine.NewFSCdr(jsonCdr2, cfg)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err.Error())
-	} else if cdrEv.AsStoredCdr("").AccId != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
-		t.Error("Unexpected acntId received", cdrEv.AsStoredCdr("").AccId)
+	} else if cdrEv.AsStoredCdr("").OriginID != "e3133bf7-dcde-4daf-9663-9a79ffcef5ad" {
+		t.Error("Unexpected acntId received", cdrEv.AsStoredCdr("").OriginID)
 	}
 	jsnStoredCdr := cdrEv.AsStoredCdr("")
-	if evStoredCdr.CgrId != jsnStoredCdr.CgrId {
-		t.Errorf("evStoredCdr.CgrId: %s, jsnStoredCdr.CgrId: %s", evStoredCdr.CgrId, jsnStoredCdr.CgrId)
+	if evStoredCdr.CGRID != jsnStoredCdr.CGRID {
+		t.Errorf("evStoredCdr.CGRID: %s, jsnStoredCdr.CGRID: %s", evStoredCdr.CGRID, jsnStoredCdr.CGRID)
 	}
 	if evStoredCdr.TOR != jsnStoredCdr.TOR {
 		t.Errorf("evStoredCdr.TOR: %s, jsnStoredCdr.TOR: %s", evStoredCdr.TOR, jsnStoredCdr.TOR)
 	}
-	if evStoredCdr.AccId != jsnStoredCdr.AccId {
-		t.Errorf("evStoredCdr.AccId: %s, jsnStoredCdr.AccId: %s", evStoredCdr.AccId, jsnStoredCdr.AccId)
+	if evStoredCdr.OriginID != jsnStoredCdr.OriginID {
+		t.Errorf("evStoredCdr.OriginID: %s, jsnStoredCdr.OriginID: %s", evStoredCdr.OriginID, jsnStoredCdr.OriginID)
 	}
 	if evStoredCdr.ReqType != jsnStoredCdr.ReqType {
 		t.Errorf("evStoredCdr.ReqType: %s, jsnStoredCdr.ReqType: %s", evStoredCdr.ReqType, jsnStoredCdr.ReqType)
@@ -591,8 +591,8 @@ func TestEvCdrCorelate(t *testing.T) {
 	if evStoredCdr.SetupTime != jsnStoredCdr.SetupTime {
 		t.Errorf("evStoredCdr.SetupTime: %v, jsnStoredCdr.SetupTime: %v", evStoredCdr.SetupTime, jsnStoredCdr.SetupTime)
 	}
-	if evStoredCdr.Pdd != jsnStoredCdr.Pdd {
-		t.Errorf("evStoredCdr.Pdd: %v, jsnStoredCdr.Pdd: %v", evStoredCdr.Pdd, jsnStoredCdr.Pdd)
+	if evStoredCdr.PDD != jsnStoredCdr.PDD {
+		t.Errorf("evStoredCdr.PDD: %v, jsnStoredCdr.PDD: %v", evStoredCdr.PDD, jsnStoredCdr.PDD)
 	}
 	if evStoredCdr.AnswerTime != jsnStoredCdr.AnswerTime {
 		t.Errorf("evStoredCdr.AnswerTime: %v, jsnStoredCdr.AnswerTime: %v", evStoredCdr.AnswerTime, jsnStoredCdr.AnswerTime)

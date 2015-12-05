@@ -131,19 +131,19 @@ const CGRATES_CFG_JSON = `
 		"field_separator": ",",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-		"generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
+		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
 		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
 		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
 		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_dir": "/var/log/cgrates/cdre",			// path where the exported CDRs will be placed
+		"export_folder": "/var/log/cgrates/cdre",		// path where the exported CDRs will be placed
 		"header_fields": [],							// template of the exported header fields
 		"content_fields": [								// template of the exported content fields
-			{"tag": "CgrId", "field_id": "CgrId", "type": "*composed", "value": "CgrId"},
-			{"tag":"RunId", "field_id": "MediationRunId", "type": "*composed", "value": "MediationRunId"},
-			{"tag":"Tor", "field_id": "TOR", "type": "*composed", "value": "TOR"},
-			{"tag":"AccId", "field_id": "AccId", "type": "*composed", "value": "AccId"},
+			{"tag": "CGRID", "field_id": "CGRID", "type": "*composed", "value": "CGRID"},
+			{"tag":"RunID", "field_id": "RunID", "type": "*composed", "value": "RunID"},
+			{"tag":"TOR", "field_id": "TOR", "type": "*composed", "value": "TOR"},
+			{"tag":"OriginID", "field_id": "OriginID", "type": "*composed", "value": "OriginID"},
 			{"tag":"ReqType", "field_id": "ReqType", "type": "*composed", "value": "ReqType"},
 			{"tag":"Direction", "field_id": "Direction", "type": "*composed", "value": "Direction"},
 			{"tag":"Tenant", "field_id": "Tenant", "type": "*composed", "value": "Tenant"},
@@ -181,18 +181,18 @@ const CGRATES_CFG_JSON = `
 		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
 		"header_fields": [],						// template of the import header fields
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"tag": "tor", "field_id": "TOR", "type": "*composed", "value": "2", "mandatory": true},
-			{"tag": "accid", "field_id": "AccId", "type": "*composed", "value": "3", "mandatory": true},
-			{"tag": "reqtype", "field_id": "ReqType", "type": "*composed", "value": "4", "mandatory": true},
-			{"tag": "direction", "field_id": "Direction", "type": "*composed", "value": "5", "mandatory": true},
-			{"tag": "tenant", "field_id": "Tenant", "type": "*composed", "value": "6", "mandatory": true},
-			{"tag": "category", "field_id": "Category", "type": "*composed", "value": "7", "mandatory": true},
-			{"tag": "account", "field_id": "Account", "type": "*composed", "value": "8", "mandatory": true},
-			{"tag": "subject", "field_id": "Subject", "type": "*composed", "value": "9", "mandatory": true},
-			{"tag": "destination", "field_id": "Destination", "type": "*composed", "value": "10", "mandatory": true},
-			{"tag": "setup_time", "field_id": "SetupTime", "type": "*composed", "value": "11", "mandatory": true},
-			{"tag": "answer_time", "field_id": "AnswerTime", "type": "*composed", "value": "12", "mandatory": true},
-			{"tag": "usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
+			{"tag": "TOR", "field_id": "TOR", "type": "*composed", "value": "2", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "3", "mandatory": true},
+			{"tag": "ReqType", "field_id": "ReqType", "type": "*composed", "value": "4", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "5", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "6", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "7", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "8", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "9", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "10", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "11", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "12", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
 		],
 		"trailer_fields": [],							// template of the import trailer fields
 	}
@@ -278,18 +278,18 @@ const CGRATES_CFG_JSON = `
 			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
 			"continue_on_success": false,				// continue to the next template if executed
 			"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "tor", "field_id": "TOR", "type": "*composed", "value": "^*voice", "mandatory": true},
-				{"tag": "accid", "field_id": "AccId", "type": "*composed", "value": "Session-Id", "mandatory": true},
-				{"tag": "reqtype", "field_id": "ReqType", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
-				{"tag": "tenant", "field_id": "Tenant", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
-				{"tag": "account", "field_id": "Account", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "subject", "field_id": "Subject", "type": "*composed", "value": "^*users", "mandatory": true},
-				{"tag": "destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},
-				{"tag": "setup_time", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
-				{"tag": "answer_time", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
-				{"tag": "usage", "field_id": "Usage", "type": "*handler", "handler_id": "*ccr_usage", "mandatory": true},
+				{"tag": "TOR", "field_id": "TOR", "type": "*composed", "value": "^*voice", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
+				{"tag": "ReqType", "field_id": "ReqType", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>IN-Information>Real-Called-Number", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*ccr_usage", "mandatory": true},
 				{"tag": "subscriber_id", "field_id": "SubscriberId", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
 			],
 		},
@@ -339,7 +339,7 @@ const CGRATES_CFG_JSON = `
 	"response_group": "03",					// determines how taxes are grouped for the response <03|13>
 	"response_type": "D4",					// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
 	"regulatory_code": "03",				// provider type
-	"client_tracking": "CgrId",				// template extracting client information out of StoredCdr; <$RSRFields>
+	"client_tracking": "CGRID",				// template extracting client information out of StoredCdr; <$RSRFields>
 	"customer_number": "Subject",			// template extracting customer number out of StoredCdr; <$RSRFields>
 	"orig_number":  "Subject", 				// template extracting origination number out of StoredCdr; <$RSRFields>
 	"term_number": "Destination",			// template extracting termination number out of StoredCdr; <$RSRFields>

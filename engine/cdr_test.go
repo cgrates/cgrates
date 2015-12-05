@@ -26,38 +26,38 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestStoredCdrInterfaces(t *testing.T) {
-	storedCdr := new(StoredCdr)
-	var _ RawCdr = storedCdr
-	var _ Event = storedCdr
+func TestCDRInterfaces(t *testing.T) {
+	CDR := new(CDR)
+	var _ RawCdr = CDR
+	var _ Event = CDR
 }
 
-func TestNewStoredCdrFromExternalCdr(t *testing.T) {
-	extCdr := &ExternalCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE,
-		AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+func TestNewCDRFromExternalCDR(t *testing.T) {
+	extCdr := &ExternalCDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
-		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", MediationRunId: utils.DEFAULT_RUNID,
-		Usage: "0.00000001", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans", Rated: true,
+		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.DEFAULT_RUNID,
+		Usage: "0.00000001", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
 	}
-	eStorCdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE,
-		AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10), Pdd: time.Duration(7) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans", Rated: true,
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10), PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
 	}
-	if storedCdr, err := NewStoredCdrFromExternalCdr(extCdr, ""); err != nil {
+	if CDR, err := NewCDRFromExternalCDR(extCdr, ""); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eStorCdr, storedCdr) {
-		t.Errorf("Expected: %+v, received: %+v", eStorCdr, storedCdr)
+	} else if !reflect.DeepEqual(eStorCdr, CDR) {
+		t.Errorf("Expected: %+v, received: %+v", eStorCdr, CDR)
 	}
 }
 
-func TestStoredCdrClone(t *testing.T) {
-	storCdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE,
-		AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+func TestCDRClone(t *testing.T) {
+	storCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10), Pdd: time.Duration(7) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans", Rated: true,
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10), PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
 	}
 	if clnStorCdr := storCdr.Clone(); !reflect.DeepEqual(storCdr, clnStorCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", storCdr, clnStorCdr)
@@ -65,19 +65,20 @@ func TestStoredCdrClone(t *testing.T) {
 }
 
 func TestFieldAsString(t *testing.T) {
-	cdr := StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+	cdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(5) * time.Second, Supplier: "SUPPL1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(5) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost:        1.01,
 	}
-	if cdr.FieldAsString(&utils.RSRField{Id: utils.CGRID}) != cdr.CgrId ||
+	if cdr.FieldAsString(&utils.RSRField{Id: utils.CGRID}) != cdr.CGRID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.ORDERID}) != "123" ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.TOR}) != utils.VOICE ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.AccId ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.CDRHOST}) != cdr.CdrHost ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.CDRSOURCE}) != cdr.CdrSource ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.CDRHOST}) != cdr.OriginHost ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.CDRSOURCE}) != cdr.Source ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.ReqType ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.DIRECTION}) != cdr.Direction ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category ||
@@ -89,20 +90,18 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&utils.RSRField{Id: utils.USAGE}) != "10" ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.PDD}) != "5" ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.SUPPLIER}) != cdr.Supplier ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.MediationRunId ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.RunID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.COST}) != "1.01" ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.RATED_ACCOUNT}) != "dan" ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.RATED_SUBJECT}) != "dans" ||
 		cdr.FieldAsString(&utils.RSRField{Id: "field_extr1"}) != cdr.ExtraFields["field_extr1"] ||
 		cdr.FieldAsString(&utils.RSRField{Id: "fieldextr2"}) != cdr.ExtraFields["fieldextr2"] ||
 		cdr.FieldAsString(&utils.RSRField{Id: "dummy_field"}) != "" {
 		t.Error("Unexpected filed value received",
-			cdr.FieldAsString(&utils.RSRField{Id: utils.CGRID}) != cdr.CgrId,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.CGRID}) != cdr.CGRID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.ORDERID}) != "123",
 			cdr.FieldAsString(&utils.RSRField{Id: utils.TOR}) != utils.VOICE,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.AccId,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.CDRHOST}) != cdr.CdrHost,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.CDRSOURCE}) != cdr.CdrSource,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.CDRHOST}) != cdr.OriginHost,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.CDRSOURCE}) != cdr.Source,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.ReqType,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.DIRECTION}) != cdr.Direction,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category,
@@ -114,9 +113,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&utils.RSRField{Id: utils.USAGE}) != "10",
 			cdr.FieldAsString(&utils.RSRField{Id: utils.PDD}) != "5",
 			cdr.FieldAsString(&utils.RSRField{Id: utils.SUPPLIER}) != cdr.Supplier,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.MediationRunId,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.RATED_ACCOUNT}) != "dan",
-			cdr.FieldAsString(&utils.RSRField{Id: utils.RATED_SUBJECT}) != "dans",
+			cdr.FieldAsString(&utils.RSRField{Id: utils.MEDI_RUNID}) != cdr.RunID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.COST}) != "1.01",
 			cdr.FieldAsString(&utils.RSRField{Id: "field_extr1"}) != cdr.ExtraFields["field_extr1"],
 			cdr.FieldAsString(&utils.RSRField{Id: "fieldextr2"}) != cdr.ExtraFields["fieldextr2"],
@@ -125,12 +122,12 @@ func TestFieldAsString(t *testing.T) {
 }
 
 func TestFieldsAsString(t *testing.T) {
-	cdr := StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+	cdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(5) * time.Second, Supplier: "SUPPL1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(5) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	eVal := "call_from_1001"
 	if val := cdr.FieldsAsString(utils.ParseRSRFieldsMustCompile("Category;^_from_;Account", utils.INFIELD_SEP)); val != eVal {
@@ -139,10 +136,10 @@ func TestFieldsAsString(t *testing.T) {
 }
 
 func TestPassesFieldFilter(t *testing.T) {
-	cdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if pass, _ := cdr.PassesFieldFilter(nil); !pass {
@@ -183,7 +180,7 @@ func TestPassesFieldFilter(t *testing.T) {
 }
 
 func TestPassesFieldFilterDn1(t *testing.T) {
-	cdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem0005",
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem0005",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	acntPrefxFltr, _ := utils.NewRSRField(`~Account:s/^\w+[shmp]\d{4}$//`)
@@ -191,13 +188,13 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 		t.Error("Not passing valid filter")
 	}
 
-	cdr = &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem00005",
+	cdr = &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem00005",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
-	cdr = &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0402129281",
+	cdr = &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0402129281",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	acntPrefxFltr, _ = utils.NewRSRField(`~Account:s/^0\d{9}$//`)
@@ -208,13 +205,13 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
-	cdr = &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "04021292812",
+	cdr = &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "04021292812",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
-	cdr = &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0162447222",
+	cdr = &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0162447222",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if acntPrefxFltr, err := utils.NewRSRField(`~Account:s/^0\d{9}$//`); err != nil {
@@ -234,11 +231,11 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 }
 
 func TestUsageMultiply(t *testing.T) {
-	cdr := StoredCdr{Usage: time.Duration(10) * time.Second}
+	cdr := CDR{Usage: time.Duration(10) * time.Second}
 	if cdr.UsageMultiply(1024.0, 0); cdr.Usage != time.Duration(10240)*time.Second {
 		t.Errorf("Unexpected usage after multiply: %v", cdr.Usage.Nanoseconds())
 	}
-	cdr = StoredCdr{Usage: time.Duration(10240) * time.Second} // Simulate conversion back, gives out a bit odd result but this can be rounded on export
+	cdr = CDR{Usage: time.Duration(10240) * time.Second} // Simulate conversion back, gives out a bit odd result but this can be rounded on export
 	expectDuration, _ := time.ParseDuration("10.000005120s")
 	if cdr.UsageMultiply(0.000976563, 0); cdr.Usage != expectDuration {
 		t.Errorf("Unexpected usage after multiply: %v", cdr.Usage.Nanoseconds())
@@ -246,22 +243,22 @@ func TestUsageMultiply(t *testing.T) {
 }
 
 func TestCostMultiply(t *testing.T) {
-	cdr := StoredCdr{Cost: 1.01}
+	cdr := CDR{Cost: 1.01}
 	if cdr.CostMultiply(1.19, 4); cdr.Cost != 1.2019 {
 		t.Errorf("Unexpected cost after multiply: %v", cdr.Cost)
 	}
-	cdr = StoredCdr{Cost: 1.01}
+	cdr = CDR{Cost: 1.01}
 	if cdr.CostMultiply(1000, 0); cdr.Cost != 1010 {
 		t.Errorf("Unexpected cost after multiply: %v", cdr.Cost)
 	}
 }
 
 func TestFormatCost(t *testing.T) {
-	cdr := StoredCdr{Cost: 1.01}
+	cdr := CDR{Cost: 1.01}
 	if cdr.FormatCost(0, 4) != "1.0100" {
 		t.Error("Unexpected format of the cost: ", cdr.FormatCost(0, 4))
 	}
-	cdr = StoredCdr{Cost: 1.01001}
+	cdr = CDR{Cost: 1.01001}
 	if cdr.FormatCost(0, 4) != "1.0100" {
 		t.Error("Unexpected format of the cost: ", cdr.FormatCost(0, 4))
 	}
@@ -277,34 +274,34 @@ func TestFormatCost(t *testing.T) {
 }
 
 func TestFormatUsage(t *testing.T) {
-	cdr := StoredCdr{Usage: time.Duration(10) * time.Second}
+	cdr := CDR{Usage: time.Duration(10) * time.Second}
 	if cdr.FormatUsage(utils.SECONDS) != "10" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage(utils.SECONDS))
 	}
 	if cdr.FormatUsage("default") != "10" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
-	cdr = StoredCdr{TOR: utils.DATA, Usage: time.Duration(1640113000000000)}
+	cdr = CDR{TOR: utils.DATA, Usage: time.Duration(1640113000000000)}
 	if cdr.FormatUsage("default") != "1640113" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
-	cdr = StoredCdr{Usage: time.Duration(2) * time.Millisecond}
+	cdr = CDR{Usage: time.Duration(2) * time.Millisecond}
 	if cdr.FormatUsage("default") != "0.002" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
-	cdr = StoredCdr{Usage: time.Duration(1002) * time.Millisecond}
+	cdr = CDR{Usage: time.Duration(1002) * time.Millisecond}
 	if cdr.FormatUsage("default") != "1.002" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
 }
 
-func TestStoredCdrAsHttpForm(t *testing.T) {
-	storCdr := StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+func TestCDRAsHttpForm(t *testing.T) {
+	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, RatedSubject: "dans", Cost: 1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	cdrForm := storCdr.AsHttpForm()
 	if cdrForm.Get(utils.TOR) != utils.VOICE {
@@ -360,13 +357,14 @@ func TestStoredCdrAsHttpForm(t *testing.T) {
 	}
 }
 
-func TestStoredCdrForkCdr(t *testing.T) {
-	storCdr := StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE,
-		AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+func TestCDRForkCdr(t *testing.T) {
+	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), Pdd: time.Duration(200) * time.Millisecond, AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10) * time.Second, Supplier: "suppl1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"},
-		Cost: 1.01, RatedSubject: "dans"}
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), PDD: time.Duration(200) * time.Millisecond,
+		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10) * time.Second, Supplier: "suppl1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"}, Cost: 1.01}
 	rtSampleCdrOut, err := storCdr.ForkCdr("sample_run1", &utils.RSRField{Id: utils.REQTYPE}, &utils.RSRField{Id: utils.DIRECTION}, &utils.RSRField{Id: utils.TENANT},
 		&utils.RSRField{Id: utils.CATEGORY}, &utils.RSRField{Id: utils.ACCOUNT}, &utils.RSRField{Id: utils.SUBJECT}, &utils.RSRField{Id: utils.DESTINATION},
 		&utils.RSRField{Id: utils.SETUP_TIME}, &utils.RSRField{Id: utils.PDD}, &utils.RSRField{Id: utils.ANSWER_TIME}, &utils.RSRField{Id: utils.USAGE},
@@ -375,21 +373,21 @@ func TestStoredCdrForkCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
-	expctSplRatedCdr := &StoredCdr{CgrId: storCdr.CgrId, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED,
+	expctSplRatedCdr := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), Pdd: time.Duration(200) * time.Millisecond, AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), PDD: time.Duration(200) * time.Millisecond, AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, Supplier: "suppl1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"},
-		MediationRunId: "sample_run1", Rated: false, Cost: 1.01}
+		RunID: "sample_run1", Rated: false, Cost: 1.01}
 	if !reflect.DeepEqual(expctSplRatedCdr, rtSampleCdrOut) {
 		t.Errorf("Expected: %v, received: %v", expctSplRatedCdr, rtSampleCdrOut)
 	}
 }
 
-func TestStoredCdrForkCdrStaticVals(t *testing.T) {
-	storCdr := StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+func TestCDRForkCdrStaticVals(t *testing.T) {
+	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	rsrStPostpaid, _ := utils.NewRSRField("^" + utils.META_POSTPAID)
@@ -403,20 +401,20 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	rsrStDur, _ := utils.NewRSRField("^12s")
 	rsrStSuppl, _ := utils.NewRSRField("^supplier1")
 	rsrStDCause, _ := utils.NewRSRField("^HANGUP_COMPLETE")
-	rsrPdd, _ := utils.NewRSRField("^3")
+	rsrPDD, _ := utils.NewRSRField("^3")
 	rsrStRated, _ := utils.NewRSRField("^true")
 	rsrStCost, _ := utils.NewRSRField("^1.2")
 	rtCdrOut2, err := storCdr.ForkCdr("wholesale_run", rsrStPostpaid, rsrStIn, rsrStCgr, rsrStPC, rsrStFA, rsrStFS, &utils.RSRField{Id: utils.DESTINATION},
-		rsrStST, rsrPdd, rsrStAT, rsrStDur, rsrStSuppl, rsrStDCause, rsrStRated, rsrStCost, []*utils.RSRField{}, true, "")
+		rsrStST, rsrPDD, rsrStAT, rsrStDur, rsrStSuppl, rsrStDCause, rsrStRated, rsrStCost, []*utils.RSRField{}, true, "")
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
-	expctRatedCdr2 := &StoredCdr{CgrId: storCdr.CgrId, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_POSTPAID,
+	expctRatedCdr2 := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_POSTPAID,
 		Direction: "*in", Tenant: "cgrates.com", Category: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "1002",
 		SetupTime:  time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
-		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(12) * time.Second, Pdd: time.Duration(3) * time.Second,
+		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(12) * time.Second, PDD: time.Duration(3) * time.Second,
 		Supplier: "supplier1", DisconnectCause: "HANGUP_COMPLETE", Rated: true, Cost: 1.2,
-		ExtraFields: map[string]string{}, MediationRunId: "wholesale_run"}
+		ExtraFields: map[string]string{}, RunID: "wholesale_run"}
 	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
 	}
@@ -430,19 +428,19 @@ func TestStoredCdrForkCdrStaticVals(t *testing.T) {
 	}
 }
 
-func TestStoredCdrForkCdrFromMetaDefaults(t *testing.T) {
-	storCdr := StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+func TestCDRForkCdrFromMetaDefaults(t *testing.T) {
+	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(4) * time.Second, Supplier: "SUPPL3",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(4) * time.Second, Supplier: "SUPPL3",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	expctCdr := &StoredCdr{CgrId: storCdr.CgrId, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED,
+	expctCdr := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, Pdd: time.Duration(4) * time.Second, Supplier: "SUPPL3", Cost: 1.01,
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, MediationRunId: "wholesale_run"}
+		Usage: time.Duration(10) * time.Second, PDD: time.Duration(4) * time.Second, Supplier: "SUPPL3", Cost: 1.01,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, RunID: "wholesale_run"}
 	cdrOut, err := storCdr.ForkCdr("wholesale_run", &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
 		&utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
 		&utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT}, &utils.RSRField{Id: utils.META_DEFAULT},
@@ -464,32 +462,30 @@ func TestStoredCdrForkCdrFromMetaDefaults(t *testing.T) {
 	}
 }
 
-func TestStoredCdrAsExternalCdr(t *testing.T) {
-	storCdr := StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE,
-		AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+func TestCDRAsExternalCDR(t *testing.T) {
+	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10), Pdd: time.Duration(7) * time.Second, Supplier: "SUPPL1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
-	}
-	expectOutCdr := &ExternalCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE,
-		AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10), PDD: time.Duration(7) * time.Second, Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01}
+	expectOutCdr := &ExternalCDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", MediationRunId: utils.DEFAULT_RUNID,
-		Usage: "0.00000001", Pdd: "7", Supplier: "SUPPL1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
-	}
-	if cdrOut := storCdr.AsExternalCdr(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
+		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.DEFAULT_RUNID,
+		Usage: "0.00000001", PDD: "7", Supplier: "SUPPL1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01}
+	if cdrOut := storCdr.AsExternalCDR(); !reflect.DeepEqual(expectOutCdr, cdrOut) {
 		t.Errorf("Expected: %+v, received: %+v", expectOutCdr, cdrOut)
 	}
 }
 
-func TestStoredCdrEventFields(t *testing.T) {
-	cdr := &StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dans",
+func TestCDREventFields(t *testing.T) {
+	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dans",
 		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 27, 0, time.UTC),
-		MediationRunId: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, Supplier: "suppl1",
-		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan"}
+		RunID: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, Supplier: "suppl1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01}
 
 	if ev := cdr.AsEvent(""); ev != Event(cdr) {
 		t.Error("Received: ", ev)
@@ -542,7 +538,7 @@ func TestStoredCdrEventFields(t *testing.T) {
 	if suppl := cdr.GetSupplier(utils.META_DEFAULT); suppl != cdr.Supplier {
 		t.Error("Received: ", suppl)
 	}
-	if res := cdr.GetOriginatorIP(utils.META_DEFAULT); res != cdr.CdrHost {
+	if res := cdr.GetOriginatorIP(utils.META_DEFAULT); res != cdr.OriginHost {
 		t.Error("Received: ", res)
 	}
 	if extraFlds := cdr.GetExtraFields(); !reflect.DeepEqual(cdr.ExtraFields, extraFlds) {
@@ -550,18 +546,18 @@ func TestStoredCdrEventFields(t *testing.T) {
 	}
 }
 
-func TesUsageReqAsStoredCdr(t *testing.T) {
+func TesUsageReqAsCDR(t *testing.T) {
 	setupReq := &UsageRecord{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call",
 		Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", Usage: "0.00000001",
 	}
-	eStorCdr := &StoredCdr{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: "*out",
+	eStorCdr := &CDR{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(10)}
-	if storedCdr, err := setupReq.AsStoredCdr(""); err != nil {
+	if CDR, err := setupReq.AsStoredCdr(""); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(eStorCdr, storedCdr) {
-		t.Errorf("Expected: %+v, received: %+v", eStorCdr, storedCdr)
+	} else if !reflect.DeepEqual(eStorCdr, CDR) {
+		t.Errorf("Expected: %+v, received: %+v", eStorCdr, CDR)
 	}
 }
 

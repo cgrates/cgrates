@@ -36,7 +36,7 @@ import (
 var sureTaxClient *http.Client // Cache the client here if in use
 
 // Init a new request to be sent out to SureTax
-func NewSureTaxRequest(cdr *StoredCdr, stCfg *config.SureTaxCfg) (*SureTaxRequest, error) {
+func NewSureTaxRequest(cdr *CDR, stCfg *config.SureTaxCfg) (*SureTaxRequest, error) {
 	if stCfg == nil {
 		return nil, errors.New("Invalid SureTax config.")
 	}
@@ -176,7 +176,7 @@ type STTaxItem struct {
 	TaxAmount   string // Tax Amount
 }
 
-func SureTaxProcessCdr(cdr *StoredCdr) error {
+func SureTaxProcessCdr(cdr *CDR) error {
 	stCfg := config.CgrConfig().SureTaxCfg()
 	if stCfg == nil {
 		return errors.New("Invalid SureTax configuration")

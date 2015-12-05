@@ -43,14 +43,14 @@ func HandleGetDerivedChargers(ratingStorage RatingStorage, attrs *utils.AttrDeri
 }
 
 func DerivedChargersMatchesDest(dcs *utils.DerivedChargers, dest string) bool {
-	if len(dcs.DestinationIds) == 0 || dcs.DestinationIds[utils.ANY] {
+	if len(dcs.DestinationIDs) == 0 || dcs.DestinationIDs[utils.ANY] {
 		return true
 	}
 	// check destination ids
 	for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
 		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 			destIds := x.(map[interface{}]struct{})
-			for value := range dcs.DestinationIds {
+			for value := range dcs.DestinationIDs {
 				for idId := range destIds {
 					dId := idId.(string)
 					if value == dId {

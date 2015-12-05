@@ -195,15 +195,15 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 
 func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	defaultTemplate := map[string]utils.RSRFields{
-		"TOR":            utils.ParseRSRFieldsMustCompile("balance_type", utils.INFIELD_SEP),
-		"CdrHost":        utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
-		"Direction":      utils.ParseRSRFieldsMustCompile("direction", utils.INFIELD_SEP),
-		"ReqType":        utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
-		"Tenant":         utils.ParseRSRFieldsMustCompile("tenant", utils.INFIELD_SEP),
-		"Account":        utils.ParseRSRFieldsMustCompile("account", utils.INFIELD_SEP),
-		"Subject":        utils.ParseRSRFieldsMustCompile("account", utils.INFIELD_SEP),
-		"Cost":           utils.ParseRSRFieldsMustCompile("balance_value", utils.INFIELD_SEP),
-		"MediationRunId": utils.ParseRSRFieldsMustCompile("^"+utils.META_DEFAULT, utils.INFIELD_SEP),
+		utils.TOR:        utils.ParseRSRFieldsMustCompile("balance_type", utils.INFIELD_SEP),
+		utils.CDRHOST:    utils.ParseRSRFieldsMustCompile("^127.0.0.1", utils.INFIELD_SEP),
+		utils.DIRECTION:  utils.ParseRSRFieldsMustCompile("direction", utils.INFIELD_SEP),
+		utils.REQTYPE:    utils.ParseRSRFieldsMustCompile("^"+utils.META_PREPAID, utils.INFIELD_SEP),
+		utils.TENANT:     utils.ParseRSRFieldsMustCompile("tenant", utils.INFIELD_SEP),
+		utils.ACCOUNT:    utils.ParseRSRFieldsMustCompile("account", utils.INFIELD_SEP),
+		utils.SUBJECT:    utils.ParseRSRFieldsMustCompile("account", utils.INFIELD_SEP),
+		utils.COST:       utils.ParseRSRFieldsMustCompile("balance_value", utils.INFIELD_SEP),
+		utils.MEDI_RUNID: utils.ParseRSRFieldsMustCompile("^"+utils.META_DEFAULT, utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 
@@ -221,13 +221,13 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 	}
 
 	// set stored cdr values
-	var cdrs []*StoredCdr
+	var cdrs []*CDR
 	for _, action := range acs {
 		if !utils.IsSliceMember([]string{DEBIT, DEBIT_RESET}, action.ActionType) || action.Balance == nil {
 			continue // Only log specific actions
 		}
-		cdr := &StoredCdr{CdrSource: CDRLOG, SetupTime: time.Now(), AnswerTime: time.Now(), AccId: utils.GenUUID(), ExtraFields: make(map[string]string)}
-		cdr.CgrId = utils.Sha1(cdr.AccId, cdr.SetupTime.String())
+		cdr := &CDR{Source: CDRLOG, SetupTime: time.Now(), AnswerTime: time.Now(), OriginID: utils.GenUUID(), ExtraFields: make(map[string]string)}
+		cdr.CGRID = utils.Sha1(cdr.OriginID, cdr.SetupTime.String())
 		cdr.Usage = time.Duration(1) * time.Second
 		elem := reflect.ValueOf(cdr).Elem()
 		for key, rsrFlds := range defaultTemplate {

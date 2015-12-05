@@ -31,7 +31,7 @@ func NewCgrCdrFromHttpReq(req *http.Request, timezone string) (CgrCdr, error) {
 		}
 	}
 	cgrCdr := make(CgrCdr)
-	cgrCdr[utils.CDRHOST] = req.RemoteAddr
+	cgrCdr[utils.CDRSOURCE] = req.RemoteAddr
 	for k, vals := range req.Form {
 		cgrCdr[k] = vals[0] // We only support the first value for now, if more are provided it is considered remote's fault
 	}
@@ -40,9 +40,9 @@ func NewCgrCdrFromHttpReq(req *http.Request, timezone string) (CgrCdr, error) {
 
 type CgrCdr map[string]string
 
-func (cgrCdr CgrCdr) getCgrId(timezone string) string {
-	if cgrId, hasIt := cgrCdr[utils.CGRID]; hasIt {
-		return cgrId
+func (cgrCdr CgrCdr) getCGRID(timezone string) string {
+	if CGRID, hasIt := cgrCdr[utils.CGRID]; hasIt {
+		return CGRID
 	}
 	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME], timezone)
 	return utils.Sha1(cgrCdr[utils.ACCID], setupTime.UTC().String())
@@ -58,22 +58,22 @@ func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 	return extraFields
 }
 
-func (cgrCdr CgrCdr) AsStoredCdr(timezone string) *StoredCdr {
-	storCdr := new(StoredCdr)
-	storCdr.CgrId = cgrCdr.getCgrId(timezone)
+func (cgrCdr CgrCdr) AsStoredCdr(timezone string) *CDR {
+	storCdr := new(CDR)
+	storCdr.CGRID = cgrCdr.getCGRID(timezone)
 	storCdr.TOR = cgrCdr[utils.TOR]
-	storCdr.AccId = cgrCdr[utils.ACCID]
-	storCdr.CdrHost = cgrCdr[utils.CDRHOST]
-	storCdr.CdrSource = cgrCdr[utils.CDRSOURCE]
+	storCdr.OriginID = cgrCdr[utils.ACCID]
+	storCdr.OriginHost = cgrCdr[utils.CDRHOST]
+	storCdr.Source = cgrCdr[utils.CDRSOURCE]
 	storCdr.ReqType = cgrCdr[utils.REQTYPE]
-	storCdr.Direction = "*out"
+	storCdr.Direction = utils.OUT
 	storCdr.Tenant = cgrCdr[utils.TENANT]
 	storCdr.Category = cgrCdr[utils.CATEGORY]
 	storCdr.Account = cgrCdr[utils.ACCOUNT]
 	storCdr.Subject = cgrCdr[utils.SUBJECT]
 	storCdr.Destination = cgrCdr[utils.DESTINATION]
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
-	storCdr.Pdd, _ = utils.ParseDurationWithSecs(cgrCdr[utils.PDD])
+	storCdr.PDD, _ = utils.ParseDurationWithSecs(cgrCdr[utils.PDD])
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(cgrCdr[utils.ANSWER_TIME], timezone)
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(cgrCdr[utils.USAGE])
 	storCdr.Supplier = cgrCdr[utils.SUPPLIER]

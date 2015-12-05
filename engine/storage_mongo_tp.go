@@ -699,35 +699,35 @@ func (ms *MongoStorage) LogActionPlan(source string, at *ActionPlan, as Actions)
 }
 
 func (ms *MongoStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
-	s := &StoredCdr{
-		CgrId:          cgrid,
-		CdrSource:      source,
-		MediationRunId: runid,
-		CostDetails:    cc,
+	s := &CDR{
+		CGRID:       cgrid,
+		Source:      source,
+		RunID:       runid,
+		CostDetails: cc,
 	}
 	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cgrid, "cdrsource": source, "mediationrunid": runid}, s)
 	return err
 }
 
 func (ms *MongoStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	result := StoredCdr{}
+	result := CDR{}
 	err = ms.db.C(colCdrs).Find(bson.M{"cgrid": cgrid, "cdrsource": source, "mediationrunid": runid}).One(&result)
 	cc = result.CostDetails
 	return
 }
 
-func (ms *MongoStorage) SetCdr(cdr *StoredCdr) error {
-	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CgrId, "mediationrunid": cdr.MediationRunId}, cdr)
+func (ms *MongoStorage) SetCdr(cdr *CDR) error {
+	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CGRID, "mediationrunid": cdr.RunID}, cdr)
 	return err
 }
 
-func (ms *MongoStorage) SetRatedCdr(storedCdr *StoredCdr) error {
-	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": storedCdr.CgrId, "mediationrunid": storedCdr.MediationRunId}, storedCdr)
+func (ms *MongoStorage) SetRatedCdr(cdr *CDR) error {
+	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CGRID, "mediationrunid": cdr.RunID}, cdr)
 	return err
 }
 
 // Remove CDR data out of all CDR tables based on their cgrid
-func (ms *MongoStorage) RemStoredCdrs(cgrIds []string) error {
+func (ms *MongoStorage) RemCDRs(cgrIds []string) error {
 	if len(cgrIds) == 0 {
 		return nil
 	}
@@ -759,13 +759,13 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	}
 }
 
-func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, int64, error) {
+func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error) {
 	filters := bson.M{
-		"cgrid":            bson.M{"$in": qryFltr.CgrIds, "$nin": qryFltr.NotCgrIds},
-		"mediationrunid":   bson.M{"$in": qryFltr.RunIds, "$nin": qryFltr.NotRunIds},
-		"tor":              bson.M{"$in": qryFltr.Tors, "$nin": qryFltr.NotTors},
-		"cdrhost":          bson.M{"$in": qryFltr.CdrHosts, "$nin": qryFltr.NotCdrHosts},
-		"cdrsource":        bson.M{"$in": qryFltr.CdrSources, "$nin": qryFltr.NotCdrSources},
+		"cgrid":            bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
+		"mediationrunid":   bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
+		"tor":              bson.M{"$in": qryFltr.TORs, "$nin": qryFltr.NotTORs},
+		"cdrhost":          bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
+		"cdrsource":        bson.M{"$in": qryFltr.Sources, "$nin": qryFltr.NotSources},
 		"reqtype":          bson.M{"$in": qryFltr.ReqTypes, "$nin": qryFltr.NotReqTypes},
 		"direction":        bson.M{"$in": qryFltr.Directions, "$nin": qryFltr.NotDirections},
 		"tenant":           bson.M{"$in": qryFltr.Tenants, "$nin": qryFltr.NotTenants},
@@ -779,9 +779,9 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		"created_at":       bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
 		"updated_at":       bson.M{"$gte": qryFltr.UpdatedAtStart, "$lt": qryFltr.UpdatedAtEnd},
 		"usage":            bson.M{"$gte": qryFltr.MinUsage, "$lt": qryFltr.MaxUsage},
-		"pdd":              bson.M{"$gte": qryFltr.MinPdd, "$lt": qryFltr.MaxPdd},
-		"costdetails.account": bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
-		"costdetails.subject": bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
+		"pdd":              bson.M{"$gte": qryFltr.MinPDD, "$lt": qryFltr.MaxPDD},
+		"costdetails.account": bson.M{"$in": qryFltr.Accounts, "$nin": qryFltr.NotAccounts},
+		"costdetails.subject": bson.M{"$in": qryFltr.Subjects, "$nin": qryFltr.NotSubjects},
 	}
 	//file, _ := ioutil.TempFile(os.TempDir(), "debug")
 	//file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
@@ -799,16 +799,16 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		}
 	}*/
 
-	if len(qryFltr.DestPrefixes) != 0 {
+	if len(qryFltr.DestinationPrefixes) != 0 {
 		var regexes []bson.RegEx
-		for _, prefix := range qryFltr.DestPrefixes {
+		for _, prefix := range qryFltr.DestinationPrefixes {
 			regexes = append(regexes, bson.RegEx{Pattern: regexp.QuoteMeta(prefix) + ".*"})
 		}
 		filters["destination"] = bson.M{"$in": regexes}
 	}
-	if len(qryFltr.NotDestPrefixes) != 0 {
+	if len(qryFltr.NotDestinationPrefixes) != 0 {
 		var notRegexes []bson.RegEx
-		for _, prefix := range qryFltr.DestPrefixes {
+		for _, prefix := range qryFltr.NotDestinationPrefixes {
 			notRegexes = append(notRegexes, bson.RegEx{Pattern: regexp.QuoteMeta(prefix) + ".*"})
 		}
 		if m, ok := filters["destination"]; ok {
@@ -870,8 +870,8 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 
 	// Execute query
 	iter := q.Iter()
-	var cdrs []*StoredCdr
-	cdr := StoredCdr{}
+	var cdrs []*CDR
+	cdr := CDR{}
 	for iter.Next(&cdr) {
 		clone := cdr
 		cdrs = append(cdrs, &clone)
