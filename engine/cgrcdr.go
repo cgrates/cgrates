@@ -65,7 +65,7 @@ func (cgrCdr CgrCdr) AsStoredCdr(timezone string) *CDR {
 	storCdr.OriginID = cgrCdr[utils.ACCID]
 	storCdr.OriginHost = cgrCdr[utils.CDRHOST]
 	storCdr.Source = cgrCdr[utils.CDRSOURCE]
-	storCdr.ReqType = cgrCdr[utils.REQTYPE]
+	storCdr.RequestType = cgrCdr[utils.REQTYPE]
 	storCdr.Direction = utils.OUT
 	storCdr.Tenant = cgrCdr[utils.TENANT]
 	storCdr.Category = cgrCdr[utils.CATEGORY]

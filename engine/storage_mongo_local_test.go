@@ -457,7 +457,8 @@ func TestMongoSetCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa1", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED, utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
+	cgrCdr1 := &CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa1", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: utils.META_RATED,
+		utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
 		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:20Z",
 		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "10s", utils.PDD: "4s", utils.SUPPLIER: "SUPPL1",
 		"field_extr1": "val_extr1", "fieldextr2": "valextr2", utils.CDRSOURCE: utils.TEST_SQL}
@@ -487,21 +488,21 @@ func TestMongoSetCdr(t *testing.T) {
 			t.Error(err.Error())
 		}
 	}
-	strCdr1 := &CDR{TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", ReqType: utils.META_RATED,
+	strCdr1 := &CDR{TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(3) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		RunID:       utils.DEFAULT_RUNID, Cost: 1.201}
 	strCdr1.CGRID = utils.Sha1(strCdr1.OriginID, strCdr1.SetupTime.String())
-	strCdr2 := &CDR{TOR: utils.VOICE, OriginID: "bbb2", OriginHost: "192.168.1.2", Source: "UNKNOWN2", ReqType: utils.META_PREPAID,
+	strCdr2 := &CDR{TOR: utils.VOICE, OriginID: "bbb2", OriginHost: "192.168.1.2", Source: "UNKNOWN2", RequestType: utils.META_PREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(12) * time.Second, PDD: time.Duration(4) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		RunID:       utils.DEFAULT_RUNID, Cost: 0.201}
 	strCdr2.CGRID = utils.Sha1(strCdr2.OriginID, strCdr2.SetupTime.String())
-	strCdr3 := &CDR{TOR: utils.VOICE, OriginID: "bbb3", OriginHost: "192.168.1.1", Source: utils.TEST_SQL, ReqType: utils.META_RATED,
+	strCdr3 := &CDR{TOR: utils.VOICE, OriginID: "bbb3", OriginHost: "192.168.1.1", Source: utils.TEST_SQL, RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1000", Destination: "+4986517174963",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(2) * time.Second, Supplier: "SUPPL1",
@@ -520,21 +521,21 @@ func TestMongoSetRatedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	strCdr1 := &CDR{TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", ReqType: utils.META_RATED,
+	strCdr1 := &CDR{TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(3) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		RunID:       utils.DEFAULT_RUNID, Cost: 1.201}
 	strCdr1.CGRID = utils.Sha1(strCdr1.OriginID, strCdr1.SetupTime.String())
-	strCdr2 := &CDR{TOR: utils.VOICE, OriginID: "bbb2", OriginHost: "192.168.1.2", Source: "UNKNOWN", ReqType: utils.META_PREPAID,
+	strCdr2 := &CDR{TOR: utils.VOICE, OriginID: "bbb2", OriginHost: "192.168.1.2", Source: "UNKNOWN", RequestType: utils.META_PREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(12) * time.Second, PDD: time.Duration(7) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		RunID:       utils.DEFAULT_RUNID, Cost: 0.201}
 	strCdr2.CGRID = utils.Sha1(strCdr2.OriginID, strCdr2.SetupTime.String())
-	strCdr3 := &CDR{TOR: utils.VOICE, OriginID: "bbb3", OriginHost: "192.168.1.1", Source: utils.TEST_SQL, ReqType: utils.META_RATED,
+	strCdr3 := &CDR{TOR: utils.VOICE, OriginID: "bbb3", OriginHost: "192.168.1.1", Source: utils.TEST_SQL, RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1002", Destination: "+4986517174964",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(2) * time.Second, Supplier: "SUPPL1",
@@ -644,16 +645,16 @@ func TestMongoGetcdrs(t *testing.T) {
 	} else if count != 3 {
 		t.Error("Unexpected count of cdrs returned: ", count)
 	}
-	// Filter on CGRIDs plus reqType
+	// Filter on CGRIDs plus RequestType
 	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{utils.META_PREPAID}}); err != nil {
+		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, RequestTypes: []string{utils.META_PREPAID}}); err != nil {
 		t.Error(err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Count on multiple filter
 	if _, count, err := mongoDb.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, ReqTypes: []string{utils.META_PREPAID}, Count: true}); err != nil {
+		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())}, RequestTypes: []string{utils.META_PREPAID}, Count: true}); err != nil {
 		t.Error(err.Error())
 	} else if count != 1 {
 		t.Error("Unexpected count of cdrs returned: ", count)
@@ -700,14 +701,14 @@ func TestMongoGetcdrs(t *testing.T) {
 	} else if len(cdrs) != 2 {
 		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on reqType
-	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{ReqTypes: []string{utils.META_PREPAID}}); err != nil {
+	// Filter on RequestType
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_PREPAID}}); err != nil {
 		t.Error(err.Error())
 	} else if len(cdrs) != 5 {
 		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
-	// Filter on multiple reqType
-	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{ReqTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}); err != nil {
+	// Filter on multiple RequestType
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}); err != nil {
 		t.Error(err.Error())
 	} else if len(cdrs) != 6 {
 		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
@@ -839,7 +840,7 @@ func TestMongoGetcdrs(t *testing.T) {
 		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
 	}
 	// Combined filter
-	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{ReqTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
+	if cdrs, _, err := mongoDb.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
 		t.Error(err.Error())
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of cdrs returned: ", len(cdrs))
@@ -893,7 +894,7 @@ func TestMongoStoreRestoreCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	strCdr := &CDR{TOR: utils.VOICE, OriginID: "ccc1", OriginHost: "192.168.1.1", Source: "TEST_CDR", ReqType: utils.META_RATED,
+	strCdr := &CDR{TOR: utils.VOICE, OriginID: "ccc1", OriginHost: "192.168.1.1", Source: "TEST_CDR", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(3) * time.Second, Supplier: "SUPPL1",
@@ -917,7 +918,7 @@ func TestMongoStoreRestoreCdr(t *testing.T) {
 			strCdr.TOR != rcvCdr.TOR ||
 			strCdr.OriginID != rcvCdr.OriginID ||
 			strCdr.OriginHost != rcvCdr.OriginHost ||
-			strCdr.ReqType != rcvCdr.ReqType ||
+			strCdr.RequestType != rcvCdr.RequestType ||
 			strCdr.Direction != rcvCdr.Direction ||
 			strCdr.Tenant != rcvCdr.Tenant ||
 			strCdr.Category != rcvCdr.Category ||
@@ -945,7 +946,7 @@ func TestMongoStoreRestoreCdr(t *testing.T) {
 			strCdr.TOR != rcvCdr.TOR ||
 			strCdr.OriginID != rcvCdr.OriginID ||
 			strCdr.OriginHost != rcvCdr.OriginHost ||
-			strCdr.ReqType != rcvCdr.ReqType ||
+			strCdr.RequestType != rcvCdr.RequestType ||
 			strCdr.Direction != rcvCdr.Direction ||
 			strCdr.Tenant != rcvCdr.Tenant ||
 			strCdr.Category != rcvCdr.Category ||

@@ -26,7 +26,7 @@ import (
 )
 
 /*
-curl --data "OriginID=asbfdsaf&OriginHost=192.168.1.1&reqtype=rated&direction=*out&tenant=cgrates.org&tor=call&account=1001&subject=1001&destination=1002&time_answer=1383813746&duration=10&field_extr1=val_extr1&fieldextr2=valextr2" http://ipbxdev:2080/cgr
+curl --data "OriginID=asbfdsaf&OriginHost=192.168.1.1&RequestType=rated&direction=*out&tenant=cgrates.org&tor=call&account=1001&subject=1001&destination=1002&time_answer=1383813746&duration=10&field_extr1=val_extr1&fieldextr2=valextr2" http://ipbxdev:2080/cgr
 */
 
 func TestCgrCdrInterfaces(t *testing.T) {
@@ -41,9 +41,9 @@ func TestCgrCdrAsCDR(t *testing.T) {
 		utils.USAGE: "10", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME], "")
 	expctRtCdr := &CDR{CGRID: utils.Sha1(cgrCdr[utils.ACCID], setupTime.String()), TOR: utils.VOICE, OriginID: cgrCdr[utils.ACCID], OriginHost: cgrCdr[utils.CDRHOST],
-		Source:    cgrCdr[utils.CDRSOURCE],
-		ReqType:   cgrCdr[utils.REQTYPE],
-		Direction: cgrCdr[utils.DIRECTION], Tenant: cgrCdr[utils.TENANT], Category: cgrCdr[utils.CATEGORY], Account: cgrCdr[utils.ACCOUNT], Subject: cgrCdr[utils.SUBJECT],
+		Source:      cgrCdr[utils.CDRSOURCE],
+		RequestType: cgrCdr[utils.REQTYPE],
+		Direction:   cgrCdr[utils.DIRECTION], Tenant: cgrCdr[utils.TENANT], Category: cgrCdr[utils.CATEGORY], Account: cgrCdr[utils.ACCOUNT], Subject: cgrCdr[utils.SUBJECT],
 		Destination: cgrCdr[utils.DESTINATION], SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: -1}
@@ -64,7 +64,7 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 		OriginID:        cgrCdr[utils.ACCID],
 		OriginHost:      cgrCdr[utils.CDRHOST],
 		Source:          cgrCdr[utils.CDRSOURCE],
-		ReqType:         cgrCdr[utils.REQTYPE],
+		RequestType:     cgrCdr[utils.REQTYPE],
 		Direction:       cgrCdr[utils.DIRECTION],
 		Tenant:          cgrCdr[utils.TENANT],
 		Category:        cgrCdr[utils.CATEGORY],

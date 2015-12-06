@@ -210,7 +210,7 @@ cgrates.org,alodis,TOPUP_EMPTY_AT,,true,true
 `
 
 	derivedCharges = `
-#Direction,Tenant,Category,Account,Subject,DestinationIds,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,PddField,AnswerTimeField,UsageField,SupplierField,DisconnectCauseField,CostField,RatedField
+#Direction,Tenant,Category,Account,Subject,DestinationIds,RunId,RunFilter,RequestTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,PddField,AnswerTimeField,UsageField,SupplierField,DisconnectCauseField,CostField,RatedField
 *out,cgrates.org,call,dan,dan,,extra1,^filteredHeader1/filterValue1/,^prepaid,,,,rif,rif,,,,,,,,,
 *out,cgrates.org,call,dan,dan,,extra2,,,,,,ivo,ivo,,,,,,,,,
 *out,cgrates.org,call,dan,*any,,extra1,,,,,,rif2,rif2,,,,,,,,,
@@ -1102,11 +1102,11 @@ func TestLoadDerivedChargers(t *testing.T) {
 	expCharger1 := &utils.DerivedChargers{
 		DestinationIDs: utils.StringMap{},
 		Chargers: []*utils.DerivedCharger{
-			&utils.DerivedCharger{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/", ReqTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
+			&utils.DerivedCharger{RunID: "extra1", RunFilters: "^filteredHeader1/filterValue1/", RequestTypeField: "^prepaid", DirectionField: utils.META_DEFAULT,
 				TenantField: utils.META_DEFAULT, CategoryField: utils.META_DEFAULT, AccountField: "rif", SubjectField: "rif", DestinationField: utils.META_DEFAULT,
 				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
 				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},
-			&utils.DerivedCharger{RunID: "extra2", ReqTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
+			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: utils.META_DEFAULT, DirectionField: utils.META_DEFAULT, TenantField: utils.META_DEFAULT,
 				CategoryField: utils.META_DEFAULT, AccountField: "ivo", SubjectField: "ivo", DestinationField: utils.META_DEFAULT,
 				SetupTimeField: utils.META_DEFAULT, PDDField: utils.META_DEFAULT, AnswerTimeField: utils.META_DEFAULT, UsageField: utils.META_DEFAULT,
 				SupplierField: utils.META_DEFAULT, DisconnectCauseField: utils.META_DEFAULT, CostField: utils.META_DEFAULT, RatedField: utils.META_DEFAULT},

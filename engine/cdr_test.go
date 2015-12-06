@@ -34,13 +34,13 @@ func TestCDRInterfaces(t *testing.T) {
 
 func TestNewCDRFromExternalCDR(t *testing.T) {
 	extCdr := &ExternalCDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.DEFAULT_RUNID,
 		Usage: "0.00000001", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
 	}
 	eStorCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10), PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
@@ -54,7 +54,7 @@ func TestNewCDRFromExternalCDR(t *testing.T) {
 
 func TestCDRClone(t *testing.T) {
 	storCdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10), PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
@@ -66,7 +66,7 @@ func TestCDRClone(t *testing.T) {
 
 func TestFieldAsString(t *testing.T) {
 	cdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(5) * time.Second, Supplier: "SUPPL1",
@@ -79,7 +79,7 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.CDRHOST}) != cdr.OriginHost ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.CDRSOURCE}) != cdr.Source ||
-		cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.ReqType ||
+		cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.RequestType ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.DIRECTION}) != cdr.Direction ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category ||
 		cdr.FieldAsString(&utils.RSRField{Id: utils.ACCOUNT}) != cdr.Account ||
@@ -102,7 +102,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&utils.RSRField{Id: utils.ACCID}) != cdr.OriginID,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.CDRHOST}) != cdr.OriginHost,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.CDRSOURCE}) != cdr.Source,
-			cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.ReqType,
+			cdr.FieldAsString(&utils.RSRField{Id: utils.REQTYPE}) != cdr.RequestType,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.DIRECTION}) != cdr.Direction,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.CATEGORY}) != cdr.Category,
 			cdr.FieldAsString(&utils.RSRField{Id: utils.ACCOUNT}) != cdr.Account,
@@ -123,7 +123,7 @@ func TestFieldAsString(t *testing.T) {
 
 func TestFieldsAsString(t *testing.T) {
 	cdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(5) * time.Second, Supplier: "SUPPL1",
@@ -137,7 +137,7 @@ func TestFieldsAsString(t *testing.T) {
 
 func TestPassesFieldFilter(t *testing.T) {
 	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
@@ -297,7 +297,7 @@ func TestFormatUsage(t *testing.T) {
 
 func TestCDRAsHttpForm(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, Supplier: "SUPPL1",
@@ -359,7 +359,7 @@ func TestCDRAsHttpForm(t *testing.T) {
 
 func TestCDRForkCdr(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), PDD: time.Duration(200) * time.Millisecond,
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
@@ -373,7 +373,7 @@ func TestCDRForkCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
-	expctSplRatedCdr := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED,
+	expctSplRatedCdr := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), PDD: time.Duration(200) * time.Millisecond, AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, Supplier: "suppl1", ExtraFields: map[string]string{"field_extr1": "val_extr1", "field_extr2": "valextr2"},
@@ -385,7 +385,7 @@ func TestCDRForkCdr(t *testing.T) {
 
 func TestCDRForkCdrStaticVals(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
@@ -409,7 +409,7 @@ func TestCDRForkCdrStaticVals(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
-	expctRatedCdr2 := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_POSTPAID,
+	expctRatedCdr2 := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID,
 		Direction: "*in", Tenant: "cgrates.com", Category: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "1002",
 		SetupTime:  time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(12) * time.Second, PDD: time.Duration(3) * time.Second,
@@ -430,13 +430,13 @@ func TestCDRForkCdrStaticVals(t *testing.T) {
 
 func TestCDRForkCdrFromMetaDefaults(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(4) * time.Second, Supplier: "SUPPL3",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	expctCdr := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED,
+	expctCdr := &CDR{CGRID: storCdr.CGRID, TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, PDD: time.Duration(4) * time.Second, Supplier: "SUPPL3", Cost: 1.01,
@@ -464,13 +464,13 @@ func TestCDRForkCdrFromMetaDefaults(t *testing.T) {
 
 func TestCDRAsExternalCDR(t *testing.T) {
 	storCdr := CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10), PDD: time.Duration(7) * time.Second, Supplier: "SUPPL1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01}
 	expectOutCdr := &ExternalCDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", RunID: utils.DEFAULT_RUNID,
 		Usage: "0.00000001", PDD: "7", Supplier: "SUPPL1",
@@ -482,7 +482,7 @@ func TestCDRAsExternalCDR(t *testing.T) {
 
 func TestCDREventFields(t *testing.T) {
 	cdr := &CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dans",
+		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dans",
 		Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 27, 0, time.UTC),
 		RunID: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second, Supplier: "suppl1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01}
@@ -547,11 +547,11 @@ func TestCDREventFields(t *testing.T) {
 }
 
 func TesUsageReqAsCDR(t *testing.T) {
-	setupReq := &UsageRecord{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call",
+	setupReq := &UsageRecord{TOR: utils.VOICE, RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call",
 		Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", Usage: "0.00000001",
 	}
-	eStorCdr := &CDR{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: "*out",
+	eStorCdr := &CDR{TOR: utils.VOICE, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), Usage: time.Duration(10)}
 	if CDR, err := setupReq.AsStoredCdr(""); err != nil {
@@ -562,7 +562,7 @@ func TesUsageReqAsCDR(t *testing.T) {
 }
 
 func TestUsageReqAsCD(t *testing.T) {
-	req := &UsageRecord{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call",
+	req := &UsageRecord{TOR: utils.VOICE, RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call",
 		Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: "2013-11-07T08:42:20Z", AnswerTime: "2013-11-07T08:42:26Z", Usage: "0.00000001",
 	}

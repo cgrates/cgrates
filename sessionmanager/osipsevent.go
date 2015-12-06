@@ -271,7 +271,7 @@ func (osipsEv *OsipsEvent) AsStoredCdr(timezone string) *engine.CDR {
 	storCdr.OriginID = osipsEv.GetUUID()
 	storCdr.OriginHost = osipsEv.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = "OSIPS_" + osipsEv.GetName()
-	storCdr.ReqType = osipsEv.GetReqType(utils.META_DEFAULT)
+	storCdr.RequestType = osipsEv.GetReqType(utils.META_DEFAULT)
 	storCdr.Direction = osipsEv.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = osipsEv.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = osipsEv.GetCategory(utils.META_DEFAULT)

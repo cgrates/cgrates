@@ -628,7 +628,7 @@ func (self *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) 
 		TORs:                self.TORs,
 		OriginHosts:         self.CdrHosts,
 		Sources:             self.CdrSources,
-		ReqTypes:            self.ReqTypes,
+		RequestTypes:        self.ReqTypes,
 		Directions:          self.Directions,
 		Tenants:             self.Tenants,
 		Categories:          self.Categories,
@@ -702,7 +702,7 @@ func (self *AttrGetCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		TORs:                self.TORs,
 		OriginHosts:         self.CdrHosts,
 		Sources:             self.CdrSources,
-		ReqTypes:            self.ReqTypes,
+		RequestTypes:        self.ReqTypes,
 		Directions:          self.Directions,
 		Tenants:             self.Tenants,
 		Categories:          self.Categories,
@@ -840,8 +840,8 @@ type CDRsFilter struct {
 	NotSources             []string          // Filter out specific CDR sources
 	TORs                   []string          // If provided, filter on TypeOfRecord
 	NotTORs                []string          // Filter specific TORs out
-	ReqTypes               []string          // If provided, it will fiter reqtype
-	NotReqTypes            []string          // Filter out specific request types
+	RequestTypes           []string          // If provided, it will fiter reqtype
+	NotRequestTypes        []string          // Filter out specific request types
 	Directions             []string          // If provided, it will fiter direction
 	NotDirections          []string          // Filter out specific directions
 	Tenants                []string          // If provided, it will filter tenant
@@ -897,8 +897,8 @@ type RPCCDRsFilter struct {
 	NotSources             []string          // Filter out specific CDR sources
 	TORs                   []string          // If provided, filter on TypeOfRecord
 	NotTORs                []string          // Filter specific TORs out
-	ReqTypes               []string          // If provided, it will fiter reqtype
-	NotReqTypes            []string          // Filter out specific request types
+	RequestTypes           []string          // If provided, it will fiter reqtype
+	NotRequestTypes        []string          // Filter out specific request types
 	Directions             []string          // If provided, it will fiter direction
 	NotDirections          []string          // Filter out specific directions
 	Tenants                []string          // If provided, it will filter tenant
@@ -950,8 +950,8 @@ func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
 		NotOriginHosts:         self.NotOriginHosts,
 		Sources:                self.Sources,
 		NotSources:             self.NotSources,
-		ReqTypes:               self.ReqTypes,
-		NotReqTypes:            self.NotReqTypes,
+		RequestTypes:           self.RequestTypes,
+		NotRequestTypes:        self.NotRequestTypes,
 		Directions:             self.Directions,
 		NotDirections:          self.NotDirections,
 		Tenants:                self.Tenants,

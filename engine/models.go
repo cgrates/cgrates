@@ -392,15 +392,15 @@ func (ta *TpAlias) GetId() string {
 	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
 }
 
-type TblCdrs struct {
-	Id              int64
+type TBLCDRs struct {
+	ID              int64
 	Cgrid           string
-	Runid           string
+	RunID           string
+	OriginHost      string
+	Source          string
+	OriginID        string
 	Tor             string
-	Accid           string
-	Cdrhost         string
-	Cdrsource       string
-	Reqtype         string
+	RequestType     string
 	Direction       string
 	Tenant          string
 	Category        string
@@ -423,6 +423,6 @@ type TblCdrs struct {
 	DeletedAt       time.Time
 }
 
-func (t TblCdrs) TableName() string {
+func (t TBLCDRs) TableName() string {
 	return utils.TBL_CDRS
 }

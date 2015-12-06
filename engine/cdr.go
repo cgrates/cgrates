@@ -34,7 +34,7 @@ import (
 func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 	var err error
 	cdr := &CDR{CGRID: extCdr.CGRID, OrderID: extCdr.OrderID, TOR: extCdr.TOR, OriginID: extCdr.OriginID, OriginHost: extCdr.OriginHost, Source: extCdr.Source,
-		ReqType: extCdr.ReqType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category, Account: extCdr.Account, Subject: extCdr.Subject,
+		RequestType: extCdr.RequestType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category, Account: extCdr.Account, Subject: extCdr.Subject,
 		Destination: extCdr.Destination, Supplier: extCdr.Supplier, DisconnectCause: extCdr.DisconnectCause,
 		RunID: extCdr.RunID, Cost: extCdr.Cost, Rated: extCdr.Rated}
 	if cdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime, timezone); err != nil {
@@ -67,7 +67,7 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 }
 
 func NewCDRWithDefaults(cfg *config.CGRConfig) *CDR {
-	return &CDR{TOR: utils.VOICE, ReqType: cfg.DefaultReqType, Direction: utils.OUT, Tenant: cfg.DefaultTenant, Category: cfg.DefaultCategory,
+	return &CDR{TOR: utils.VOICE, RequestType: cfg.DefaultReqType, Direction: utils.OUT, Tenant: cfg.DefaultTenant, Category: cfg.DefaultCategory,
 		ExtraFields: make(map[string]string), Cost: -1}
 }
 
@@ -79,7 +79,7 @@ type CDR struct {
 	Source          string            // formally identifies the source of the CDR (free form field)
 	OriginID        string            // represents the unique accounting id given by the telecom switch generating the CDR
 	TOR             string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
-	ReqType         string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
+	RequestType     string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
 	Direction       string            // matching the supported direction identifiers of the CGRateS <*out>
 	Tenant          string            // tenant whom this record belongs
 	Category        string            // free-form filter for this record, matching the category defined in rating profiles.
@@ -156,7 +156,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 	case utils.CDRSOURCE:
 		return rsrFld.ParseValue(cdr.Source)
 	case utils.REQTYPE:
-		return rsrFld.ParseValue(cdr.ReqType)
+		return rsrFld.ParseValue(cdr.RequestType)
 	case utils.DIRECTION:
 		return rsrFld.ParseValue(cdr.Direction)
 	case utils.TENANT:
@@ -203,7 +203,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 	case utils.ACCID:
 		cdr.OriginID += fieldVal
 	case utils.REQTYPE:
-		cdr.ReqType += fieldVal
+		cdr.RequestType += fieldVal
 	case utils.DIRECTION:
 		cdr.Direction += fieldVal
 	case utils.TENANT:
@@ -297,7 +297,7 @@ func (cdr *CDR) AsHttpForm() url.Values {
 	v.Set(utils.ACCID, cdr.OriginID)
 	v.Set(utils.CDRHOST, cdr.OriginHost)
 	v.Set(utils.CDRSOURCE, cdr.Source)
-	v.Set(utils.REQTYPE, cdr.ReqType)
+	v.Set(utils.REQTYPE, cdr.RequestType)
 	v.Set(utils.DIRECTION, cdr.Direction)
 	v.Set(utils.TENANT, cdr.Tenant)
 	v.Set(utils.CATEGORY, cdr.Category)
@@ -317,14 +317,14 @@ func (cdr *CDR) AsHttpForm() url.Values {
 }
 
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
-func (cdr *CDR) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, PDDFld,
+func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, PDDFld,
 	answerTimeFld, durationFld, supplierFld, disconnectCauseFld, ratedFld, costFld *utils.RSRField,
 	extraFlds []*utils.RSRField, primaryMandatory bool, timezone string) (*CDR, error) {
-	if reqTypeFld == nil {
-		reqTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
+	if RequestTypeFld == nil {
+		RequestTypeFld, _ = utils.NewRSRField(utils.META_DEFAULT)
 	}
-	if reqTypeFld.Id == utils.META_DEFAULT {
-		reqTypeFld.Id = utils.REQTYPE
+	if RequestTypeFld.Id == utils.META_DEFAULT {
+		RequestTypeFld.Id = utils.REQTYPE
 	}
 	if directionFld == nil {
 		directionFld, _ = utils.NewRSRField(utils.META_DEFAULT)
@@ -419,9 +419,9 @@ func (cdr *CDR) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categ
 	frkStorCdr.OriginID = cdr.OriginID
 	frkStorCdr.OriginHost = cdr.OriginHost
 	frkStorCdr.Source = cdr.Source
-	frkStorCdr.ReqType = cdr.FieldAsString(reqTypeFld)
-	if primaryMandatory && len(frkStorCdr.ReqType) == 0 {
-		return nil, utils.NewErrMandatoryIeMissing(utils.REQTYPE, reqTypeFld.Id)
+	frkStorCdr.RequestType = cdr.FieldAsString(RequestTypeFld)
+	if primaryMandatory && len(frkStorCdr.RequestType) == 0 {
+		return nil, utils.NewErrMandatoryIeMissing(utils.REQTYPE, RequestTypeFld.Id)
 	}
 	frkStorCdr.Direction = cdr.FieldAsString(directionFld)
 	if primaryMandatory && len(frkStorCdr.Direction) == 0 {
@@ -499,7 +499,7 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 		OriginID:        cdr.OriginID,
 		OriginHost:      cdr.OriginHost,
 		Source:          cdr.Source,
-		ReqType:         cdr.ReqType,
+		RequestType:     cdr.RequestType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
 		Category:        cdr.Category,
@@ -603,7 +603,7 @@ func (cdr *CDR) GetTenant(fieldName string) string {
 }
 func (cdr *CDR) GetReqType(fieldName string) string {
 	if utils.IsSliceMember([]string{utils.REQTYPE, utils.META_DEFAULT, ""}, fieldName) {
-		return cdr.ReqType
+		return cdr.RequestType
 	}
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
@@ -704,7 +704,7 @@ type ExternalCDR struct {
 	OriginID        string
 	OriginHost      string
 	Source          string
-	ReqType         string
+	RequestType     string
 	Direction       string
 	Tenant          string
 	Category        string
@@ -727,7 +727,7 @@ type ExternalCDR struct {
 // Used when authorizing requests from outside, eg ApierV1.GetMaxUsage
 type UsageRecord struct {
 	TOR         string
-	ReqType     string
+	RequestType string
 	Direction   string
 	Tenant      string
 	Category    string
@@ -742,7 +742,7 @@ type UsageRecord struct {
 
 func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 	var err error
-	cdr := &CDR{TOR: self.TOR, ReqType: self.ReqType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
+	cdr := &CDR{TOR: self.TOR, RequestType: self.RequestType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
 		Account: self.Account, Subject: self.Subject, Destination: self.Destination}
 	if cdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
 		return nil, err

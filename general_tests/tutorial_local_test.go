@@ -421,7 +421,7 @@ func TestTutLocalDerivedMaxSessionTime(t *testing.T) {
 		TOR:         utils.VOICE,
 		OriginID:    "testevent1",
 		OriginHost:  "127.0.0.1",
-		ReqType:     utils.META_PREPAID,
+		RequestType: utils.META_PREPAID,
 		Direction:   utils.OUT,
 		Tenant:      "cgrates.org",
 		Category:    "call",
@@ -447,7 +447,7 @@ func TestTutLocalMaxUsage(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	setupReq := &engine.UsageRecord{TOR: utils.VOICE, ReqType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+	setupReq := &engine.UsageRecord{TOR: utils.VOICE, RequestType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
 		Account: "1003", Subject: "1003", Destination: "1001",
 		SetupTime: "2014-08-04T13:00:00Z", Usage: "1",
 	}
@@ -457,7 +457,7 @@ func TestTutLocalMaxUsage(t *testing.T) {
 	} else if maxTime != 1 {
 		t.Errorf("Calling ApierV2.MaxUsage got maxTime: %f", maxTime)
 	}
-	setupReq = &engine.UsageRecord{TOR: utils.VOICE, ReqType: utils.META_RATED, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+	setupReq = &engine.UsageRecord{TOR: utils.VOICE, RequestType: utils.META_RATED, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
 		Account: "test_max_usage", Destination: "1001",
 		SetupTime: "2014-08-04T13:00:00Z",
 	}
@@ -473,7 +473,7 @@ func TestTutLocalDebitUsage(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	setupReq := &engine.UsageRecord{TOR: utils.VOICE, ReqType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
+	setupReq := &engine.UsageRecord{TOR: utils.VOICE, RequestType: utils.META_PREPAID, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call",
 		Account: "1003", Subject: "1003", Destination: "1001",
 		AnswerTime: "2014-08-04T13:00:00Z", Usage: "1",
 	}
@@ -491,7 +491,7 @@ func TestTutLocalProcessExternalCdr(t *testing.T) {
 		return
 	}
 	cdr := &engine.ExternalCDR{TOR: utils.VOICE,
-		OriginID: "testextcdr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: utils.OUT,
+		OriginID: "testextcdr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
 		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -511,7 +511,7 @@ func TestTutLocalProcessExternalCdrUP(t *testing.T) {
 	}
 	cdr := &engine.ExternalCDR{TOR: utils.VOICE,
 		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, Direction: utils.OUT,
-		ReqType: utils.USERS, Tenant: utils.USERS, Account: utils.USERS, Destination: "1001", Supplier: "SUPPL1",
+		RequestType: utils.USERS, Tenant: utils.USERS, Account: utils.USERS, Destination: "1001", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
 		Usage: "2", PDD: "0.2", DisconnectCause: "NORMAL_DISCONNECT",
 		ExtraFields: map[string]string{"Cli": "+4986517174964", "fieldextr2": "valextr2", "SysUserName": utils.USERS},
@@ -524,7 +524,7 @@ func TestTutLocalProcessExternalCdrUP(t *testing.T) {
 	}
 	eCdr := &engine.ExternalCDR{CGRID: "63a8d2bfeca2cfb790826c3ec461696d6574cfde", OrderID: 2,
 		TOR:      utils.VOICE,
-		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: utils.OUT,
+		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1004", Subject: "1004", Destination: "1001", Supplier: "SUPPL1",
 		SetupTime: time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC).Local().Format(time.RFC3339), AnswerTime: time.Date(2014, 8, 4, 13, 0, 7, 0, time.UTC).Local().Format(time.RFC3339),
 		Usage: "2", PDD: "0.2", DisconnectCause: "NORMAL_DISCONNECT",
@@ -546,8 +546,8 @@ func TestTutLocalProcessExternalCdrUP(t *testing.T) {
 		if cdrs[0].Source != eCdr.Source {
 			t.Errorf("Unexpected Source for CDR: %+v", cdrs[0])
 		}
-		if cdrs[0].ReqType != eCdr.ReqType {
-			t.Errorf("Unexpected ReqType for CDR: %+v", cdrs[0])
+		if cdrs[0].RequestType != eCdr.RequestType {
+			t.Errorf("Unexpected RequestType for CDR: %+v", cdrs[0])
 		}
 		if cdrs[0].Tenant != eCdr.Tenant {
 			t.Errorf("Unexpected Tenant for CDR: %+v", cdrs[0])
@@ -590,7 +590,7 @@ func TestTutLocalCostErrors(t *testing.T) {
 		return
 	}
 	cdr := &engine.ExternalCDR{TOR: utils.VOICE,
-		OriginID: "testtutlocal_1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: utils.OUT,
+		OriginID: "testtutlocal_1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "fake", Account: "2001", Subject: "2001", Destination: "1001", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
 		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -617,7 +617,7 @@ func TestTutLocalCostErrors(t *testing.T) {
 		}
 	}
 	cdr2 := &engine.ExternalCDR{TOR: utils.VOICE,
-		OriginID: "testtutlocal_2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_POSTPAID, Direction: utils.OUT,
+		OriginID: "testtutlocal_2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "fake", Account: "2002", Subject: "2002", Destination: "1001", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
 		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -642,7 +642,7 @@ func TestTutLocalCostErrors(t *testing.T) {
 		}
 	}
 	cdr3 := &engine.ExternalCDR{TOR: utils.VOICE,
-		OriginID: "testtutlocal_3", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_POSTPAID, Direction: utils.OUT,
+		OriginID: "testtutlocal_3", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "fake", Account: "1001", Subject: "1001", Destination: "2002", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
 		Usage: "1", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -821,13 +821,13 @@ func TestTutLocalLcrQos(t *testing.T) {
 	}
 	// Post some CDRs to influence stats
 	testCdr1 := &engine.CDR{CGRID: utils.Sha1("testcdr1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, OriginID: "testcdr1", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", ReqType: utils.META_RATED,
+		TOR: utils.VOICE, OriginID: "testcdr1", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(2) * time.Minute, Supplier: "suppl1",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
 	testCdr2 := &engine.CDR{CGRID: utils.Sha1("testcdr2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, OriginID: "testcdr2", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", ReqType: utils.META_RATED,
+		TOR: utils.VOICE, OriginID: "testcdr2", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1003",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(90) * time.Second, Supplier: "suppl2",
@@ -859,7 +859,7 @@ func TestTutLocalLcrQos(t *testing.T) {
 		//	t.Errorf("Expecting: %+v, %+v, received: %+v, %+v", eStLcr.SupplierCosts[0], eStLcr.SupplierCosts[1], lcr.SupplierCosts[0], lcr.SupplierCosts[1])
 	}
 	testCdr3 := &engine.CDR{CGRID: utils.Sha1("testcdr3", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, OriginID: "testcdr3", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", ReqType: utils.META_RATED,
+		TOR: utils.VOICE, OriginID: "testcdr3", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(180) * time.Second, Supplier: "suppl2"}
@@ -923,7 +923,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 		//	t.Errorf("Expecting: %+v, %+v received: %+v, %+v", eLcr.SupplierCosts[0], eLcr.SupplierCosts[1], lcr.SupplierCosts[0], lcr.SupplierCosts[1])
 	}
 	testCdr4 := &engine.CDR{CGRID: utils.Sha1("testcdr4", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, OriginID: "testcdr4", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", ReqType: utils.META_RATED,
+		TOR: utils.VOICE, OriginID: "testcdr4", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(60) * time.Second, Supplier: "suppl2"}
@@ -986,7 +986,7 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 		//	t.Errorf("Expecting: %+v, received: %+v", eLcr.SupplierCosts[1], lcr.SupplierCosts[1])
 	}
 	testCdr5 := &engine.CDR{CGRID: utils.Sha1("testcdr5", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, OriginID: "testcdr5", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", ReqType: utils.META_RATED,
+		TOR: utils.VOICE, OriginID: "testcdr5", OriginHost: "192.168.1.1", Source: "TEST_QOS_LCR", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1004",
 		SetupTime: time.Date(2014, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(1) * time.Second, Supplier: "suppl2"}

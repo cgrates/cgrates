@@ -112,7 +112,7 @@ const (
 	ACCID                        = "OriginID"
 	CDRSOURCE                    = "Source"
 	CDRHOST                      = "OriginHost"
-	REQTYPE                      = "ReqType"
+	REQTYPE                      = "RequestType"
 	DIRECTION                    = "Direction"
 	TENANT                       = "Tenant"
 	CATEGORY                     = "Category"

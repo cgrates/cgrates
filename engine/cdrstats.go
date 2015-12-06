@@ -64,7 +64,7 @@ type CdrStats struct {
 	TOR             []string        // CDRFieldFilter on TORs
 	CdrHost         []string        // CDRFieldFilter on CdrHosts
 	CdrSource       []string        // CDRFieldFilter on CdrSources
-	ReqType         []string        // CDRFieldFilter on ReqTypes
+	ReqType         []string        // CDRFieldFilter on RequestTypes
 	Direction       []string        // CDRFieldFilter on Directions
 	Tenant          []string        // CDRFieldFilter on Tenants
 	Category        []string        // CDRFieldFilter on Categories
@@ -103,7 +103,7 @@ func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 	if len(cs.CdrSource) > 0 && !utils.IsSliceMember(cs.CdrSource, cdr.Source) {
 		return false
 	}
-	if len(cs.ReqType) > 0 && !utils.IsSliceMember(cs.ReqType, cdr.ReqType) {
+	if len(cs.ReqType) > 0 && !utils.IsSliceMember(cs.ReqType, cdr.RequestType) {
 		return false
 	}
 	if len(cs.Direction) > 0 && !utils.IsSliceMember(cs.Direction, cdr.Direction) {

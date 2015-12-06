@@ -255,10 +255,10 @@ func TestApierTPDestination(t *testing.T) {
 	// Test getIds
 	var rplyDstIds []string
 	expectedDstIds := []string{"FS_USERS", "GERMANY", "GERMANY_MOBILE"}
-	if err := rater.Call("ApierV1.GetTPDestinationIDs", AttrGetTPDestinationIds{TPid: dstDe.TPid}, &rplyDstIds); err != nil {
-		t.Error("Calling ApierV1.GetTPDestinationIDs, got error: ", err.Error())
+	if err := rater.Call("ApierV1.GetTPDestinationIds", AttrGetTPDestinationIds{TPid: dstDe.TPid}, &rplyDstIds); err != nil {
+		t.Error("Calling ApierV1.GetTPDestinationIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedDstIds, rplyDstIds) {
-		t.Errorf("Calling ApierV1.GetTPDestinationIDs expected: %v, received: %v", expectedDstIds, rplyDstIds)
+		t.Errorf("Calling ApierV1.GetTPDestinationIds expected: %v, received: %v", expectedDstIds, rplyDstIds)
 	}
 }
 
@@ -1425,7 +1425,7 @@ func TestApierLocalProcessCdr(t *testing.T) {
 	}
 	var reply string
 	cdr := engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-		OriginHost: "192.168.1.1", Source: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
+		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 		Destination: "1002",
 		SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
@@ -1449,9 +1449,9 @@ func TestApierLocalSetDC(t *testing.T) {
 		return
 	}
 	dcs1 := []*utils.DerivedCharger{
-		&utils.DerivedCharger{RunID: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunID: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}
 	attrs := AttrSetDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: dcs1, Overwrite: true}
@@ -1470,9 +1470,9 @@ func TestApierLocalGetDC(t *testing.T) {
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
 	eDcs := utils.DerivedChargers{DestinationIDs: utils.NewStringMap(),
 		Chargers: []*utils.DerivedCharger{
-			&utils.DerivedCharger{RunID: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+			&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 				AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-			&utils.DerivedCharger{RunID: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 				AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		}}
 	var dcs utils.DerivedChargers

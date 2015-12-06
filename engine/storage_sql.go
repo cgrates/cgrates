@@ -579,9 +579,9 @@ func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (
 		return err
 	}
 	tx := self.db.Begin()
-	cd := &TblCdrs{
+	cd := &TBLCDRs{
 		Cgrid:       cgrid,
-		Runid:       runid,
+		RunID:       runid,
 		Tor:         cc.TOR,
 		Direction:   cc.Direction,
 		Tenant:      cc.Tenant,
@@ -598,7 +598,7 @@ func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (
 	if tx.Save(cd).Error != nil { // Check further since error does not properly reflect duplicates here (sql: no rows in result set)
 		tx.Rollback()
 		tx = self.db.Begin()
-		updated := tx.Model(TblCdrs{}).Where(&TblCdrs{Cgrid: cgrid, Runid: runid}).Updates(&TblCdrs{Tor: cc.TOR, Direction: cc.Direction, Tenant: cc.Tenant, Category: cc.Category,
+		updated := tx.Model(TBLCDRs{}).Where(&TBLCDRs{Cgrid: cgrid, RunID: runid}).Updates(&TBLCDRs{Tor: cc.TOR, Direction: cc.Direction, Tenant: cc.Tenant, Category: cc.Category,
 			Account: cc.Account, Subject: cc.Subject, Destination: cc.Destination, Cost: cc.Cost, Timespans: string(tss), CostSource: source, UpdatedAt: time.Now()})
 		if updated.Error != nil {
 			tx.Rollback()
@@ -610,8 +610,8 @@ func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (
 }
 
 func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (*CallCost, error) {
-	var tpCostDetail TblCdrs
-	if err := self.db.Where(&TblCdrs{Cgrid: cgrid, Runid: runid, CostSource: source}).First(&tpCostDetail).Error; err != nil {
+	var tpCostDetail TBLCDRs
+	if err := self.db.Where(&TBLCDRs{Cgrid: cgrid, RunID: runid, CostSource: source}).First(&tpCostDetail).Error; err != nil {
 		return nil, err
 	}
 	if len(tpCostDetail.Timespans) == 0 {
@@ -645,13 +645,13 @@ func (self *SQLStorage) SetCdr(cdr *CDR) error {
 		return err
 	}
 	tx := self.db.Begin()
-	saved := tx.Save(&TblCdrs{
+	saved := tx.Save(&TBLCDRs{
 		Cgrid:           cdr.CGRID,
 		Tor:             cdr.TOR,
-		Accid:           cdr.OriginID,
-		Cdrhost:         cdr.OriginHost,
-		Cdrsource:       cdr.Source,
-		Reqtype:         cdr.ReqType,
+		OriginID:        cdr.OriginID,
+		OriginHost:      cdr.OriginHost,
+		Source:          cdr.Source,
+		RequestType:     cdr.RequestType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
 		Category:        cdr.Category,
@@ -676,10 +676,10 @@ func (self *SQLStorage) SetCdr(cdr *CDR) error {
 
 func (self *SQLStorage) SetRatedCdr(cdr *CDR) (err error) {
 	tx := self.db.Begin()
-	saved := tx.Save(&TblCdrs{
+	saved := tx.Save(&TBLCDRs{
 		Cgrid:           cdr.CGRID,
-		Runid:           cdr.RunID,
-		Reqtype:         cdr.ReqType,
+		RunID:           cdr.RunID,
+		RequestType:     cdr.RequestType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
 		Category:        cdr.Category,
@@ -699,7 +699,7 @@ func (self *SQLStorage) SetRatedCdr(cdr *CDR) (err error) {
 	if saved.Error != nil {
 		tx.Rollback()
 		tx = self.db.Begin()
-		updated := tx.Model(TblCdrs{}).Where(&TblCdrs{Cgrid: cdr.CGRID, Runid: cdr.RunID}).Updates(&TblCdrs{Reqtype: cdr.ReqType,
+		updated := tx.Model(TBLCDRs{}).Where(&TBLCDRs{Cgrid: cdr.CGRID, RunID: cdr.RunID}).Updates(&TBLCDRs{RequestType: cdr.RequestType,
 			Direction: cdr.Direction, Tenant: cdr.Tenant, Category: cdr.Category, Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination,
 			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Pdd: cdr.PDD.Seconds(), Supplier: cdr.Supplier, DisconnectCause: cdr.DisconnectCause,
 			Cost: cdr.Cost, ExtraInfo: cdr.ExtraInfo,
@@ -755,11 +755,11 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	if len(qryFltr.NotSources) != 0 {
 		q = q.Where("cdrsource not in (?)", qryFltr.NotSources)
 	}
-	if len(qryFltr.ReqTypes) != 0 {
-		q = q.Where("reqtype in (?)", qryFltr.ReqTypes)
+	if len(qryFltr.RequestTypes) != 0 {
+		q = q.Where("reqtype in (?)", qryFltr.RequestTypes)
 	}
-	if len(qryFltr.NotReqTypes) != 0 {
-		q = q.Where("reqtype not in (?)", qryFltr.NotReqTypes)
+	if len(qryFltr.NotRequestTypes) != 0 {
+		q = q.Where("reqtype not in (?)", qryFltr.NotRequestTypes)
 	}
 	if len(qryFltr.Directions) != 0 {
 		q = q.Where("direction in (?)", qryFltr.Directions)
@@ -932,7 +932,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	}
 
 	// Execute query
-	results := make([]*TblCdrs, 0)
+	results := make([]*TBLCDRs, 0)
 	q.Find(&results)
 
 	for _, result := range results {
@@ -940,24 +940,24 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		var ccTimespans TimeSpans
 		if len(result.ExtraFields) != 0 {
 			if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
-				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.Runid, err.Error())
+				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
 		}
 		if len(result.Timespans) != 0 {
 			if err := json.Unmarshal([]byte(result.Timespans), &ccTimespans); err != nil {
-				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.Runid, err.Error())
+				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
 		}
 		usageDur, _ := time.ParseDuration(strconv.FormatFloat(result.Usage, 'f', -1, 64) + "s")
 		pddDur, _ := time.ParseDuration(strconv.FormatFloat(result.Pdd, 'f', -1, 64) + "s")
 		storCdr := &CDR{
 			CGRID:           result.Cgrid,
-			OrderID:         result.Id,
+			OrderID:         result.ID,
 			TOR:             result.Tor,
-			OriginID:        result.Accid,
-			OriginHost:      result.Cdrhost,
-			Source:          result.Cdrsource,
-			ReqType:         result.Reqtype,
+			OriginID:        result.OriginID,
+			OriginHost:      result.OriginHost,
+			Source:          result.Source,
+			RequestType:     result.RequestType,
 			Direction:       result.Direction,
 			Tenant:          result.Tenant,
 			Category:        result.Category,
@@ -971,7 +971,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 			Supplier:        result.Supplier,
 			DisconnectCause: result.DisconnectCause,
 			ExtraFields:     extraFieldsMp,
-			RunID:           result.Runid,
+			RunID:           result.RunID,
 			Cost:            result.Cost,
 			ExtraInfo:       result.ExtraInfo,
 		}

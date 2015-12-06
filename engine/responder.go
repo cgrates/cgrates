@@ -300,7 +300,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	for _, dc := range dcs.Chargers {
-		if utils.IsSliceMember([]string{utils.META_RATED, utils.RATED}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
+		if utils.IsSliceMember([]string{utils.META_RATED, utils.RATED}, ev.GetReqType(dc.RequestTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
 			continue
 		}
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
@@ -341,7 +341,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 			*reply = 0
 			return err
 		}
-		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.ReqTypeField)) {
+		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.RequestTypeField)) {
 			// Only consider prepaid and pseudoprepaid for MaxSessionTime, do it here for unauthorized destination error check
 			continue
 		}
@@ -393,7 +393,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	dcs, _ = dcs.AppendDefaultRun()
 	sesRuns := make([]*SessionRun, 0)
 	for _, dc := range dcs.Chargers {
-		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.ReqTypeField)) {
+		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.RequestTypeField)) {
 			continue // We only consider prepaid sessions
 		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)

@@ -144,7 +144,7 @@ const CGRATES_CFG_JSON = `
 			{"tag":"RunID", "field_id": "RunID", "type": "*composed", "value": "RunID"},
 			{"tag":"TOR", "field_id": "TOR", "type": "*composed", "value": "TOR"},
 			{"tag":"OriginID", "field_id": "OriginID", "type": "*composed", "value": "OriginID"},
-			{"tag":"ReqType", "field_id": "ReqType", "type": "*composed", "value": "ReqType"},
+			{"tag":"RequestType", "field_id": "RequestType", "type": "*composed", "value": "RequestType"},
 			{"tag":"Direction", "field_id": "Direction", "type": "*composed", "value": "Direction"},
 			{"tag":"Tenant", "field_id": "Tenant", "type": "*composed", "value": "Tenant"},
 			{"tag":"Category", "field_id": "Category", "type": "*composed", "value": "Category"},
@@ -183,7 +183,7 @@ const CGRATES_CFG_JSON = `
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 			{"tag": "TOR", "field_id": "TOR", "type": "*composed", "value": "2", "mandatory": true},
 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "3", "mandatory": true},
-			{"tag": "ReqType", "field_id": "ReqType", "type": "*composed", "value": "4", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "4", "mandatory": true},
 			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "5", "mandatory": true},
 			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "6", "mandatory": true},
 			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "7", "mandatory": true},
@@ -280,7 +280,7 @@ const CGRATES_CFG_JSON = `
 			"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "TOR", "type": "*composed", "value": "^*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
-				{"tag": "ReqType", "field_id": "ReqType", "type": "*composed", "value": "^*users", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "^*users", "mandatory": true},
 				{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
 				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "^*users", "mandatory": true},
 				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},

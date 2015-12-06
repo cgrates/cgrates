@@ -6,12 +6,12 @@ DROP TABLE IF EXISTS cdrs;
 CREATE TABLE cdrs (
  id SERIAL PRIMARY KEY,
  cgrid CHAR(40) NOT NULL,
- runid VARCHAR(64) NOT NULL,
+ run_id VARCHAR(64) NOT NULL,
+ origin_host VARCHAR(64) NOT NULL,
+ origin_host VARCHAR(64) NOT NULL,
+ origin_id VARCHAR(64) NOT NULL,
  tor VARCHAR(16) NOT NULL,
- accid VARCHAR(64) NOT NULL,
- cdrhost VARCHAR(64) NOT NULL,
- cdrsource VARCHAR(64) NOT NULL,
- reqtype VARCHAR(24) NOT NULL,
+ request_type VARCHAR(24) NOT NULL,
  direction VARCHAR(8) NOT NULL,
  tenant VARCHAR(64) NOT NULL,
  category VARCHAR(32) NOT NULL,
@@ -34,3 +34,5 @@ CREATE TABLE cdrs (
  deleted_at TIMESTAMP,
  UNIQUE (cgrid)
 );
+
+CREATE INDEX deleted_at_cp_idx ON cdrs_primary (deleted_at);

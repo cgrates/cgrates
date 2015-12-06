@@ -344,7 +344,7 @@ func (fsev FSEvent) AsStoredCdr(timezone string) *engine.CDR {
 	storCdr.OriginID = fsev.GetUUID()
 	storCdr.OriginHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = "FS_" + fsev.GetName()
-	storCdr.ReqType = fsev.GetReqType(utils.META_DEFAULT)
+	storCdr.RequestType = fsev.GetReqType(utils.META_DEFAULT)
 	storCdr.Direction = fsev.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = fsev.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = fsev.GetCategory(utils.META_DEFAULT)

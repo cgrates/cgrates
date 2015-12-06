@@ -91,7 +91,7 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	testCdr1 := &CDR{CGRID: utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
-		TOR: utils.VOICE, OriginID: "httpjsonrpc1", OriginHost: "192.168.1.1", Source: "UNKNOWN", ReqType: utils.META_PSEUDOPREPAID,
+		TOR: utils.VOICE, OriginID: "httpjsonrpc1", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_PSEUDOPREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -121,7 +121,7 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 			rcvedCdrs[0].TOR != testCdr1.TOR ||
 			rcvedCdrs[0].OriginHost != testCdr1.OriginHost ||
 			rcvedCdrs[0].Source != testCdr1.Source ||
-			rcvedCdrs[0].ReqType != testCdr1.ReqType ||
+			rcvedCdrs[0].RequestType != testCdr1.RequestType ||
 			rcvedCdrs[0].Direction != testCdr1.Direction ||
 			rcvedCdrs[0].Tenant != testCdr1.Tenant ||
 			rcvedCdrs[0].Category != testCdr1.Category ||

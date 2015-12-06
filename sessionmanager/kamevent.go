@@ -323,7 +323,7 @@ func (kev KamEvent) AsStoredCdr(timezone string) *engine.CDR {
 	storCdr.OriginID = kev.GetUUID()
 	storCdr.OriginHost = kev.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = kev.GetCdrSource()
-	storCdr.ReqType = kev.GetReqType(utils.META_DEFAULT)
+	storCdr.RequestType = kev.GetReqType(utils.META_DEFAULT)
 	storCdr.Direction = kev.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = kev.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = kev.GetCategory(utils.META_DEFAULT)

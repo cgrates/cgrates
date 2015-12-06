@@ -113,7 +113,7 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 	} else if rcvedCdrs[0].TOR != utils.MONETARY ||
 		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
 		rcvedCdrs[0].Source != CDRLOG ||
-		rcvedCdrs[0].ReqType != utils.META_PREPAID ||
+		rcvedCdrs[0].RequestType != utils.META_PREPAID ||
 		rcvedCdrs[0].Tenant != "cgrates.org" ||
 		rcvedCdrs[0].Account != "dan2904" ||
 		rcvedCdrs[0].Subject != "dan2904" ||

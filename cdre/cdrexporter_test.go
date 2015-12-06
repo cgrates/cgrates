@@ -31,23 +31,23 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cdrs := []*engine.CDR{
 		&engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, RunID: "RUN_RTL", Cost: 1.01},
 		&engine.CDR{CGRID: utils.Sha1("dsafdsaf2", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, RunID: "CUSTOMER1", Cost: 2.01},
 		&engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, RunID: "CUSTOMER1", Cost: 3.01},
 		&engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 4.01},
 		&engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1000", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, RunID: "RETAIL1", Cost: 5.01},
 	}
@@ -77,7 +77,7 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 func TestGetDateTimeFieldVal(t *testing.T) {
 	cdreTst := new(CdrExporter)
 	cdrTst := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-		ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
@@ -106,7 +106,7 @@ func TestGetDateTimeFieldVal(t *testing.T) {
 func TestCdreCdrFieldValue(t *testing.T) {
 	cdre := new(CdrExporter)
 	cdr := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
-		ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID, Cost: 1.01}
 	val, _ := utils.ParseRSRFields(utils.DESTINATION, utils.INFIELD_SEP)

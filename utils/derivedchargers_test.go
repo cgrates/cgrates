@@ -49,7 +49,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	edc1 := &DerivedCharger{
 		RunID:                "test1",
 		RunFilters:           "",
-		ReqTypeField:         "reqtype1",
+		RequestTypeField:     "reqtype1",
 		DirectionField:       "direction1",
 		TenantField:          "tenant1",
 		CategoryField:        "tor1",
@@ -74,7 +74,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	edc2 := &DerivedCharger{
 		RunID:                "test2",
 		RunFilters:           "^cdr_source/tdm_cdrs/",
-		ReqTypeField:         "~reqtype2:s/sip:(.+)/$1/",
+		RequestTypeField:     "~reqtype2:s/sip:(.+)/$1/",
 		DirectionField:       "~direction2:s/sip:(.+)/$1/",
 		TenantField:          "~tenant2:s/sip:(.+)/$1/",
 		CategoryField:        "~tor2:s/sip:(.+)/$1/",
@@ -91,7 +91,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		RatedField:           "~cgr_rated:s/(.+)/$1/",
 	}
 	edc2.rsrRunFilters, _ = ParseRSRFields("^cdr_source/tdm_cdrs/", INFIELD_SEP)
-	edc2.rsrReqTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
+	edc2.rsrRequestTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
 	edc2.rsrDirectionField, _ = NewRSRField("~direction2:s/sip:(.+)/$1/")
 	edc2.rsrTenantField, _ = NewRSRField("~tenant2:s/sip:(.+)/$1/")
 	edc2.rsrCategoryField, _ = NewRSRField("~tor2:s/sip:(.+)/$1/")
@@ -137,7 +137,7 @@ func TestDerivedChargersKey(t *testing.T) {
 
 func TestAppendDefaultRun(t *testing.T) {
 	dc1 := &DerivedChargers{}
-	dcDf := &DerivedCharger{RunID: DEFAULT_RUNID, RunFilters: "", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
+	dcDf := &DerivedCharger{RunID: DEFAULT_RUNID, RunFilters: "", RequestTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
 		TenantField: META_DEFAULT, CategoryField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
 		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PDDField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT, SupplierField: META_DEFAULT,
 		DisconnectCauseField: META_DEFAULT, CostField: META_DEFAULT, RatedField: META_DEFAULT}
@@ -146,10 +146,10 @@ func TestAppendDefaultRun(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eDc1.Chargers[0], dc1.Chargers[0])
 	}
 	dc2 := &DerivedChargers{Chargers: []*DerivedCharger{
-		&DerivedCharger{RunID: "extra1", RunFilters: "", ReqTypeField: "reqtype2", DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
+		&DerivedCharger{RunID: "extra1", RunFilters: "", RequestTypeField: "reqtype2", DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
 			AccountField: "rif", SubjectField: "rif", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PDDField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT,
 			DisconnectCauseField: META_DEFAULT},
-		&DerivedCharger{RunID: "extra2", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
+		&DerivedCharger{RunID: "extra2", RequestTypeField: META_DEFAULT, DirectionField: META_DEFAULT, TenantField: META_DEFAULT, CategoryField: META_DEFAULT,
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, PDDField: META_DEFAULT, AnswerTimeField: META_DEFAULT,
 			UsageField: META_DEFAULT, SupplierField: META_DEFAULT, DisconnectCauseField: META_DEFAULT}},
 	}

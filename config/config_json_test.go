@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"encoding/json"
 	"reflect"
 	"strings"
 	"testing"
@@ -194,7 +195,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Field_id: utils.StringPointer(utils.ACCID),
 			Type:     utils.StringPointer(utils.META_COMPOSED),
 			Value:    utils.StringPointer(utils.ACCID)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("ReqType"),
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"),
 			Field_id: utils.StringPointer(utils.REQTYPE),
 			Type:     utils.StringPointer(utils.META_COMPOSED),
 			Value:    utils.StringPointer(utils.REQTYPE)},
@@ -262,7 +263,9 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 	if cfg, err := dfCgrJsonCfg.CdreJsonCfgs(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		expect, _ := json.Marshal(eCfg)
+		received, _ := json.Marshal(cfg)
+		t.Errorf("Expecting: %s, received: %s", string(expect), string(received))
 	}
 }
 
@@ -273,7 +276,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Value: utils.StringPointer("2"), Mandatory: utils.BoolPointer(true)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"), Field_id: utils.StringPointer(utils.ACCID), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("3"), Mandatory: utils.BoolPointer(true)},
-		&CdrFieldJsonCfg{Tag: utils.StringPointer("ReqType"), Field_id: utils.StringPointer(utils.REQTYPE), Type: utils.StringPointer(utils.META_COMPOSED),
+		&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"), Field_id: utils.StringPointer(utils.REQTYPE), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("4"), Mandatory: utils.BoolPointer(true)},
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Direction"), Field_id: utils.StringPointer(utils.DIRECTION), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("5"), Mandatory: utils.BoolPointer(true)},
@@ -438,7 +441,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 						Value: utils.StringPointer("^*voice"), Mandatory: utils.BoolPointer(true)},
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("OriginID"), Field_id: utils.StringPointer(utils.ACCID), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("Session-Id"), Mandatory: utils.BoolPointer(true)},
-					&CdrFieldJsonCfg{Tag: utils.StringPointer("ReqType"), Field_id: utils.StringPointer(utils.REQTYPE), Type: utils.StringPointer(utils.META_COMPOSED),
+					&CdrFieldJsonCfg{Tag: utils.StringPointer("RequestType"), Field_id: utils.StringPointer(utils.REQTYPE), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("^*users"), Mandatory: utils.BoolPointer(true)},
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("Direction"), Field_id: utils.StringPointer(utils.DIRECTION), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("^*out"), Mandatory: utils.BoolPointer(true)},

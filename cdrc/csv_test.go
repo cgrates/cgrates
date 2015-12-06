@@ -54,7 +54,7 @@ func TestCsvRecordForkCdr(t *testing.T) {
 		OriginID:        cdrRow[3],
 		OriginHost:      "0.0.0.0", // Got it over internal interface
 		Source:          "TEST_CDRC",
-		ReqType:         cdrRow[4],
+		RequestType:     cdrRow[4],
 		Direction:       cdrRow[5],
 		Tenant:          cdrRow[6],
 		Category:        cdrRow[7],

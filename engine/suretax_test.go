@@ -31,7 +31,7 @@ import (
 func TestNewSureTaxRequest(t *testing.T) {
 	CGRID := utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String())
 	cdr := &CDR{CGRID: CGRID, OrderID: 123, TOR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(12) * time.Second, PDD: time.Duration(7) * time.Second,

@@ -766,7 +766,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		"tor":              bson.M{"$in": qryFltr.TORs, "$nin": qryFltr.NotTORs},
 		"cdrhost":          bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
 		"cdrsource":        bson.M{"$in": qryFltr.Sources, "$nin": qryFltr.NotSources},
-		"reqtype":          bson.M{"$in": qryFltr.ReqTypes, "$nin": qryFltr.NotReqTypes},
+		"reqtype":          bson.M{"$in": qryFltr.RequestTypes, "$nin": qryFltr.NotRequestTypes},
 		"direction":        bson.M{"$in": qryFltr.Directions, "$nin": qryFltr.NotDirections},
 		"tenant":           bson.M{"$in": qryFltr.Tenants, "$nin": qryFltr.NotTenants},
 		"category":         bson.M{"$in": qryFltr.Categories, "$nin": qryFltr.NotCategories},

@@ -123,7 +123,7 @@ func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 }
 
 // Called by rate/re-rate API
-func (self *CdrServer) RateCDRs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
+func (self *CdrServer) RateCDRs(cgrIds, runIds, tors, cdrHosts, cdrSources, RequestTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
 	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
 	var costStart, costEnd *float64
 	if rerateErrors {
@@ -135,7 +135,7 @@ func (self *CdrServer) RateCDRs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqT
 		costStart = utils.Float64Pointer(0.0)
 	}
 	cdrs, _, err := self.cdrDb.GetCDRs(&utils.CDRsFilter{CGRIDs: cgrIds, RunIDs: runIds, TORs: tors, Sources: cdrSources,
-		ReqTypes: reqTypes, Directions: directions, Tenants: tenants, Categories: categories, Accounts: accounts,
+		RequestTypes: RequestTypes, Directions: directions, Tenants: tenants, Categories: categories, Accounts: accounts,
 		Subjects: subjects, DestinationPrefixes: destPrefixes,
 		OrderIDStart: orderIdStart, OrderIDEnd: orderIdEnd, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd,
 		MinCost: costStart, MaxCost: costEnd})
@@ -171,8 +171,8 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	if cdr.Direction == "" {
 		cdr.Direction = utils.OUT
 	}
-	if cdr.ReqType == "" {
-		cdr.ReqType = self.cgrCfg.DefaultReqType
+	if cdr.RequestType == "" {
+		cdr.RequestType = self.cgrCfg.DefaultReqType
 	}
 	if cdr.Tenant == "" {
 		cdr.Tenant = self.cgrCfg.DefaultTenant
@@ -260,7 +260,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR) error {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", cdr, err.Error()))
 		}
 		// Store CostDetails
-		if cdr.Rated || utils.IsSliceMember([]string{utils.RATED, utils.META_RATED}, cdr.ReqType) { // Account related CDRs are saved automatically, so save the others here if requested
+		if cdr.Rated || utils.IsSliceMember([]string{utils.RATED, utils.META_RATED}, cdr.RequestType) { // Account related CDRs are saved automatically, so save the others here if requested
 			if err := self.cdrDb.LogCallCost(cdr.CGRID, utils.CDRS_SOURCE, cdr.RunID, cdr.CostDetails); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<CDRS> Storing costs for CDR %+v, costDetails: %+v, got error: %s", cdr, cdr.CostDetails, err.Error()))
 			}
@@ -305,7 +305,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
 			continue
 		}
-		dcReqTypeFld, _ := utils.NewRSRField(dc.ReqTypeField)
+		dcRequestTypeFld, _ := utils.NewRSRField(dc.RequestTypeField)
 		dcDirFld, _ := utils.NewRSRField(dc.DirectionField)
 		dcTenantFld, _ := utils.NewRSRField(dc.TenantField)
 		dcCategoryFld, _ := utils.NewRSRField(dc.CategoryField)
@@ -320,7 +320,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 		dcDCauseFld, _ := utils.NewRSRField(dc.DisconnectCauseField)
 		dcRatedFld, _ := utils.NewRSRField(dc.RatedField)
 		dcCostFld, _ := utils.NewRSRField(dc.CostField)
-		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
+		forkedCdr, err := cdr.ForkCdr(dc.RunID, dcRequestTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld,
 			dcSTimeFld, dcPddFld, dcATimeFld, dcDurFld, dcSupplFld, dcDCauseFld, dcRatedFld, dcCostFld, []*utils.RSRField{}, true, self.cgrCfg.DefaultTimezone)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not fork CGR with cgrid %s, run: %s, error: %s", cdr.CGRID, dc.RunID, err.Error()))
@@ -354,7 +354,7 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 		TimeEnd:       timeStart.Add(cdr.Usage),
 		DurationIndex: cdr.Usage,
 	}
-	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.ReqType) { // Prepaid - Cost can be recalculated in case of missing records from SM
+	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
 			self.cdrDb.LogCallCost(cdr.CGRID, utils.CDRS_SOURCE, cdr.RunID, cc)
 		}
@@ -370,10 +370,10 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 func (self *CdrServer) rateCDR(cdr *CDR) error {
 	var qryCC *CallCost
 	var err error
-	if cdr.ReqType == utils.META_NONE {
+	if cdr.RequestType == utils.META_NONE {
 		return nil
 	}
-	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.ReqType) && cdr.Usage != 0 { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
+	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) && cdr.Usage != 0 { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		for i := 0; i < 4; i++ {

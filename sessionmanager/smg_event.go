@@ -306,7 +306,7 @@ func (self SMGenericEvent) AsStoredCdr(cfg *config.CGRConfig, timezone string) *
 	storCdr.OriginID = self.GetUUID()
 	storCdr.OriginHost = self.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = self.GetCdrSource()
-	storCdr.ReqType = utils.FirstNonEmpty(self.GetReqType(utils.META_DEFAULT), storCdr.ReqType)
+	storCdr.RequestType = utils.FirstNonEmpty(self.GetReqType(utils.META_DEFAULT), storCdr.RequestType)
 	storCdr.Direction = utils.FirstNonEmpty(self.GetDirection(utils.META_DEFAULT), storCdr.Direction)
 	storCdr.Tenant = utils.FirstNonEmpty(self.GetTenant(utils.META_DEFAULT), storCdr.Tenant)
 	storCdr.Category = utils.FirstNonEmpty(self.GetCategory(utils.META_DEFAULT), storCdr.Category)

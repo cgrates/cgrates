@@ -125,7 +125,7 @@ func (fsCdr FSCdr) AsStoredCdr(timezone string) *CDR {
 	storCdr.OriginID = fsCdr.vars[FS_UUID]
 	storCdr.OriginHost = fsCdr.vars[FS_IP]
 	storCdr.Source = FS_CDR_SOURCE
-	storCdr.ReqType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
+	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
 	storCdr.Direction = utils.OUT
 	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)
 	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_CATEGORY], fsCdr.cgrCfg.DefaultCategory)

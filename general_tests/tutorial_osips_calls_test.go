@@ -343,8 +343,8 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
-		if reply[0].ReqType != utils.META_PREPAID {
-			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		if reply[0].RequestType != utils.META_PREPAID {
+			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0])
 		}
 		if reply[0].Usage != "67" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
@@ -370,8 +370,8 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
 		cgrId = reply[0].CGRID
-		if reply[0].ReqType != utils.META_PREPAID {
-			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		if reply[0].RequestType != utils.META_PREPAID {
+			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0])
 		}
 		if reply[0].Usage != "65" && reply[0].Usage != "66" { // Usage as seconds
 			t.Errorf("Unexpected Usage for CDR: %+v", reply[0])
@@ -392,8 +392,8 @@ func TestTutOsipsCalls1001Cdrs(t *testing.T) {
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	} else {
-		if reply[0].ReqType != utils.META_RATED {
-			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		if reply[0].RequestType != utils.META_RATED {
+			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0])
 		}
 		if reply[0].Subject != "1002" {
 			t.Errorf("Unexpected Subject for CDR: %+v", reply[0])
@@ -417,8 +417,8 @@ func TestTutOsipsCalls1002Cdrs(t *testing.T) {
 		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
-		if reply[0].ReqType != utils.META_POSTPAID {
-			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		if reply[0].RequestType != utils.META_POSTPAID {
+			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0])
 		}
 		if reply[0].Destination != "1001" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
@@ -444,8 +444,8 @@ func TestTutOsipsCalls1003Cdrs(t *testing.T) {
 		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
-		if reply[0].ReqType != utils.META_PSEUDOPREPAID {
-			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		if reply[0].RequestType != utils.META_PSEUDOPREPAID {
+			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0])
 		}
 		if reply[0].Destination != "1001" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
@@ -472,8 +472,8 @@ func TestTutOsipsCalls1004Cdrs(t *testing.T) {
 		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
-		if reply[0].ReqType != utils.META_RATED {
-			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		if reply[0].RequestType != utils.META_RATED {
+			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0])
 		}
 		if reply[0].Destination != "1001" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
@@ -514,8 +514,8 @@ func TestTutOsipsCalls1007Cdrs(t *testing.T) {
 		if reply[0].Source != "OSIPS_E_ACC_EVENT" {
 			t.Errorf("Unexpected Source for CDR: %+v", reply[0])
 		}
-		if reply[0].ReqType != utils.META_PREPAID {
-			t.Errorf("Unexpected ReqType for CDR: %+v", reply[0])
+		if reply[0].RequestType != utils.META_PREPAID {
+			t.Errorf("Unexpected RequestType for CDR: %+v", reply[0])
 		}
 		if reply[0].Destination != "1002" {
 			t.Errorf("Unexpected Destination for CDR: %+v", reply[0])
