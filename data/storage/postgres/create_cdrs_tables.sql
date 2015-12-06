@@ -8,7 +8,7 @@ CREATE TABLE cdrs (
  cgrid CHAR(40) NOT NULL,
  run_id VARCHAR(64) NOT NULL,
  origin_host VARCHAR(64) NOT NULL,
- origin_host VARCHAR(64) NOT NULL,
+ source VARCHAR(64) NOT NULL,
  origin_id VARCHAR(64) NOT NULL,
  tor VARCHAR(16) NOT NULL,
  request_type VARCHAR(24) NOT NULL,
@@ -34,5 +34,6 @@ CREATE TABLE cdrs (
  deleted_at TIMESTAMP,
  UNIQUE (cgrid)
 );
-
+;
+DROP INDEX IF EXISTS deleted_at_cp_idx;
 CREATE INDEX deleted_at_cp_idx ON cdrs_primary (deleted_at);

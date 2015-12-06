@@ -732,10 +732,10 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		q = q.Where("cgrid not in (?)", qryFltr.NotCGRIDs)
 	}
 	if len(qryFltr.RunIDs) != 0 {
-		q = q.Where("runid in (?)", qryFltr.RunIDs)
+		q = q.Where("run_id in (?)", qryFltr.RunIDs)
 	}
 	if len(qryFltr.NotRunIDs) != 0 {
-		q = q.Where("runid not in (?)", qryFltr.NotRunIDs)
+		q = q.Where("run_id not in (?)", qryFltr.NotRunIDs)
 	}
 	if len(qryFltr.TORs) != 0 {
 		q = q.Where("tor in (?)", qryFltr.TORs)
@@ -744,22 +744,22 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		q = q.Where("tor not in (?)", qryFltr.NotTORs)
 	}
 	if len(qryFltr.OriginHosts) != 0 {
-		q = q.Where("cdrhost in (?)", qryFltr.OriginHosts)
+		q = q.Where("origin_host in (?)", qryFltr.OriginHosts)
 	}
 	if len(qryFltr.NotOriginHosts) != 0 {
-		q = q.Where("cdrhost not in (?)", qryFltr.NotOriginHosts)
+		q = q.Where("origin_host not in (?)", qryFltr.NotOriginHosts)
 	}
 	if len(qryFltr.Sources) != 0 {
-		q = q.Where("cdrsource in (?)", qryFltr.Sources)
+		q = q.Where("source in (?)", qryFltr.Sources)
 	}
 	if len(qryFltr.NotSources) != 0 {
-		q = q.Where("cdrsource not in (?)", qryFltr.NotSources)
+		q = q.Where("source not in (?)", qryFltr.NotSources)
 	}
 	if len(qryFltr.RequestTypes) != 0 {
-		q = q.Where("reqtype in (?)", qryFltr.RequestTypes)
+		q = q.Where("request_type in (?)", qryFltr.RequestTypes)
 	}
 	if len(qryFltr.NotRequestTypes) != 0 {
-		q = q.Where("reqtype not in (?)", qryFltr.NotRequestTypes)
+		q = q.Where("request_type not in (?)", qryFltr.NotRequestTypes)
 	}
 	if len(qryFltr.Directions) != 0 {
 		q = q.Where("direction in (?)", qryFltr.Directions)
