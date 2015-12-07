@@ -237,6 +237,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	accountId := utils.AccountKey(attr.Tenant, attr.Account)
+	var schedulerReloadNeeded bool
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
 		allATs, err := self.RatingDb.GetAllActionPlans()
@@ -257,10 +258,17 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 				}
 			}
 			if changed {
-				// save action plan
-				self.RatingDb.SetActionPlans(key, ats)
-				// cache
-				self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
+				schedulerReloadNeeded = true
+				_, err := engine.Guardian.Guard(func() (interface{}, error) {
+					// save action plan
+					self.RatingDb.SetActionPlans(key, ats)
+					// cache
+					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
+					return 0, nil
+				}, 0, utils.ACTION_PLAN_PREFIX)
+				if err != nil {
+					return 0, err
+				}
 			}
 		}
 		if err := self.AccountDb.RemoveAccount(accountId); err != nil {
@@ -272,7 +280,13 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-
+	if schedulerReloadNeeded {
+		// reload scheduler
+		if self.Sched != nil {
+			self.Sched.LoadActionPlans(self.RatingDb)
+			self.Sched.Restart()
+		}
+	}
 	*reply = OK
 	return nil
 }
