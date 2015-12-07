@@ -129,18 +129,23 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 		if !attrs.TimeEnd.IsZero() && (sas.NextRunTime.After(attrs.TimeEnd) || sas.NextRunTime.Equal(attrs.TimeEnd)) {
 			continue
 		}
+		// add the accounts
+		for _, accID := range qActions.AccountIds {
+			split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
+			if len(split) != 2 {
+				continue // malformed account id
+			}
+			sas.Accounts = append(sas.Accounts, &utils.TenantAccount{Tenant: split[0], Account: split[1]})
+		}
 		// filter on account
 		if attrs.Tenant != "" || attrs.Account != "" {
 			found := false
-			for _, accID := range qActions.AccountIds {
-				split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
-				if len(split) != 2 {
-					continue // malformed account id
-				}
-				if attrs.Tenant != "" && attrs.Tenant != split[0] {
+			for _, accPair := range sas.Accounts {
+
+				if attrs.Tenant != "" && attrs.Tenant != accPair.Tenant {
 					continue
 				}
-				if attrs.Account != "" && attrs.Account != split[1] {
+				if attrs.Account != "" && attrs.Account != accPair.Account {
 					continue
 				}
 				found = true
@@ -150,7 +155,9 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 				continue
 			}
 		}
+
 		// we have a winner
+
 		schedActions = append(schedActions, sas)
 	}
 	if attrs.Paginator.Offset != nil {
