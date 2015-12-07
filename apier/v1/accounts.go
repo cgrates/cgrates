@@ -161,6 +161,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	var schedulerReloadNeeded = false
 	accId := utils.AccountKey(attr.Tenant, attr.Account)
 	var ub *engine.Account
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
@@ -183,15 +184,12 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 					at.AccountIds = append(at.AccountIds, accId)
 				}
 				if len(ats) != 0 {
+					schedulerReloadNeeded = true
 					if err := self.RatingDb.SetActionPlans(attr.ActionPlanId, ats); err != nil {
 						return 0, err
 					}
 					// update cache
 					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
-					if self.Sched != nil {
-						self.Sched.LoadActionPlans(self.RatingDb)
-						self.Sched.Restart()
-					}
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
@@ -223,7 +221,13 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-
+	if schedulerReloadNeeded {
+		// reload scheduler
+		if self.Sched != nil {
+			self.Sched.LoadActionPlans(self.RatingDb)
+			self.Sched.Restart()
+		}
+	}
 	*reply = OK // This will mark saving of the account, error still can show up in actionTimingsId
 	return nil
 }
