@@ -24,7 +24,7 @@ func init() {
 	c := &CmdGetScheduledActions{
 		name:      "scheduler_queue",
 		rpcMethod: "ApierV1.GetScheduledActions",
-		rpcParams: []*v1.AttrsGetScheduledActions{},
+		rpcParams: &[]*v1.AttrsGetScheduledActions{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +34,7 @@ func init() {
 type CmdGetScheduledActions struct {
 	name      string
 	rpcMethod string
-	rpcParams []*v1.AttrsGetScheduledActions
+	rpcParams *[]*v1.AttrsGetScheduledActions
 	*CommandExecuter
 }
 
@@ -48,7 +48,8 @@ func (self *CmdGetScheduledActions) RpcMethod() string {
 
 func (self *CmdGetScheduledActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = make([]*v1.AttrsGetScheduledActions, 0)
+		scha := make([]*v1.AttrsGetScheduledActions, 0)
+		self.rpcParams = &scha
 	}
 	return self.rpcParams
 }
