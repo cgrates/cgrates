@@ -59,3 +59,10 @@ func TestProcessReSearchReplace4(t *testing.T) {
 		t.Error("Unexpected output from SearchReplace: ", outStr)
 	}
 }
+
+func TestProcessReSearchReplace5(t *testing.T) {
+	rsr := &ReSearchReplace{SearchRegexp: regexp.MustCompile(`^(.*)_`), ReplaceTemplate: "$1"}
+	if outStr := rsr.Process("TEST_EVENT"); outStr != "TEST" {
+		t.Error("Unexpected output from SearchReplace: ", outStr)
+	}
+}

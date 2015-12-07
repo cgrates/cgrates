@@ -130,9 +130,9 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	balanceId := utils.AccountKey(attrs.Tenant, attrs.Account)
+	accId := utils.AccountKey(attrs.Tenant, attrs.Account)
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		ub, err := self.AccountDb.GetAccount(balanceId)
+		ub, err := self.AccountDb.GetAccount(accId)
 		if err != nil {
 			return 0, err
 		}
@@ -148,7 +148,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 			return 0, err
 		}
 		return 0, nil
-	}, 0, balanceId)
+	}, 0, accId)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -161,28 +161,45 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	balanceId := utils.AccountKey(attr.Tenant, attr.Account)
+	accId := utils.AccountKey(attr.Tenant, attr.Account)
 	var ub *engine.Account
-	var ats engine.ActionPlans
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		if bal, _ := self.AccountDb.GetAccount(balanceId); bal != nil {
+		if bal, _ := self.AccountDb.GetAccount(accId); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
-				Id: balanceId,
+				Id: accId,
 			}
 		}
-
 		if len(attr.ActionPlanId) != 0 {
-			var err error
-			ats, err = self.RatingDb.GetActionPlans(attr.ActionPlanId, false)
+			_, err := engine.Guardian.Guard(func() (interface{}, error) {
+				var ats engine.ActionPlans
+				var err error
+				ats, err = self.RatingDb.GetActionPlans(attr.ActionPlanId, false)
+				if err != nil {
+					return 0, err
+				}
+				for _, at := range ats {
+					at.AccountIds = append(at.AccountIds, accId)
+				}
+				if len(ats) != 0 {
+					if err := self.RatingDb.SetActionPlans(attr.ActionPlanId, ats); err != nil {
+						return 0, err
+					}
+					// update cache
+					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
+					if self.Sched != nil {
+						self.Sched.LoadActionPlans(self.RatingDb)
+						self.Sched.Restart()
+					}
+				}
+				return 0, nil
+			}, 0, utils.ACTION_PLAN_PREFIX)
 			if err != nil {
 				return 0, err
 			}
-			for _, at := range ats {
-				at.AccountIds = append(at.AccountIds, balanceId)
-			}
 		}
+
 		if len(attr.ActionTriggersId) != 0 {
 			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId)
 			if err != nil {
@@ -202,25 +219,11 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			return 0, err
 		}
 		return 0, nil
-	}, 0, balanceId)
+	}, 0, accId)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if len(ats) != 0 {
-		_, err := engine.Guardian.Guard(func() (interface{}, error) { // ToDo: Try locking it above on read somehow
-			if err := self.RatingDb.SetActionPlans(attr.ActionPlanId, ats); err != nil {
-				return 0, err
-			}
-			return 0, nil
-		}, 0, utils.ACTION_PLAN_PREFIX)
-		if err != nil {
-			return utils.NewErrServerError(err)
-		}
-		if self.Sched != nil {
-			self.Sched.LoadActionPlans(self.RatingDb)
-			self.Sched.Restart()
-		}
-	}
+
 	*reply = OK // This will mark saving of the account, error still can show up in actionTimingsId
 	return nil
 }

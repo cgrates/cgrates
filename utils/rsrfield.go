@@ -28,13 +28,19 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 	if len(fldStr) == 0 {
 		return nil, nil
 	}
-	var filterVal string
+	var filters []*RSRFilter
 	if strings.HasSuffix(fldStr, FILTER_VAL_END) { // Has filter, populate the var
 		fltrStart := strings.LastIndex(fldStr, FILTER_VAL_START)
 		if fltrStart < 1 {
 			return nil, fmt.Errorf("Invalid FilterStartValue in string: %s", fldStr)
 		}
-		filterVal = fldStr[fltrStart+1 : len(fldStr)-1]
+		for _, fltrVal := range strings.Split(fldStr[fltrStart+1:len(fldStr)-1], INFIELD_SEP) {
+			if rsrFltr, err := NewRSRFilter(fltrVal); err != nil {
+				return nil, fmt.Errorf("Invalid FilterValue in string: %s, err: %s", fltrVal, err.Error())
+			} else {
+				filters = append(filters, rsrFltr)
+			}
+		}
 		fldStr = fldStr[:fltrStart] // Take the filter part out before compiling further
 
 	}
@@ -51,17 +57,17 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 		} else {
 			staticHdr, staticVal = splt[0][1:], splt[0][1:] // If no split, header will remain as original, value as header without the prefix
 		}
-		return &RSRField{Id: staticHdr, staticValue: staticVal, filterValue: filterVal}, nil
+		return &RSRField{Id: staticHdr, staticValue: staticVal, filters: filters}, nil
 	}
 	if !strings.HasPrefix(fldStr, REGEXP_PREFIX) {
-		return &RSRField{Id: fldStr, filterValue: filterVal}, nil
+		return &RSRField{Id: fldStr, filters: filters}, nil
 	}
 	spltRgxp := regexp.MustCompile(`:s\/`)
 	spltRules := spltRgxp.Split(fldStr, -1)
 	if len(spltRules) < 2 {
 		return nil, fmt.Errorf("Invalid Split of Search&Replace field rule. %s", fldStr)
 	}
-	rsrField := &RSRField{Id: spltRules[0][1:], filterValue: filterVal} // Original id in form ~hdr_name
+	rsrField := &RSRField{Id: spltRules[0][1:], filters: filters} // Original id in form ~hdr_name
 	rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.*[^\\])*\/){1,}`)
 	for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
 		allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
@@ -81,7 +87,7 @@ type RSRField struct {
 	Id          string             //  Identifier
 	RSRules     []*ReSearchReplace // Rules to use when processing field value
 	staticValue string             // If defined, enforces parsing always to this value
-	filterValue string             // The value to compare when used as filter
+	filters     []*RSRFilter       // The value to compare when used as filter
 }
 
 // Parse the field value from a string
@@ -111,7 +117,63 @@ func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a reg
 }
 
 func (rsrf *RSRField) FilterPasses(value string) bool {
-	return len(rsrf.filterValue) == 0 || rsrf.ParseValue(value) == rsrf.filterValue
+	if len(rsrf.filters) == 0 { // No filters
+		return true
+	}
+	parsedVal := rsrf.ParseValue(value)
+	filterPasses := false
+	for _, fltr := range rsrf.filters {
+		if fltr.Pass(parsedVal) {
+			filterPasses = true
+		}
+	}
+	return filterPasses
+}
+
+// NewRSRFilter instantiates a new RSRFilter, setting it's properties
+func NewRSRFilter(fltrVal string) (rsrFltr *RSRFilter, err error) {
+	rsrFltr = new(RSRFilter)
+	if fltrVal == "" {
+		return rsrFltr, nil
+	}
+	if fltrVal[:1] == NegativePrefix {
+		rsrFltr.negative = true
+		fltrVal = fltrVal[1:]
+		if fltrVal == "" {
+			return rsrFltr, nil
+		}
+	}
+	rsrFltr.filterRule = fltrVal
+	if fltrVal[:1] == REGEXP_PREFIX {
+		if rsrFltr.fltrRgxp, err = regexp.Compile(fltrVal[1:]); err != nil {
+			return nil, err
+		}
+	}
+	return rsrFltr, nil
+}
+
+// One filter rule
+type RSRFilter struct {
+	filterRule string // Value in raw format
+	fltrRgxp   *regexp.Regexp
+	negative   bool // Rule should not match
+}
+
+func (rsrFltr *RSRFilter) Pass(val string) bool {
+	if rsrFltr.filterRule == "" {
+		return !rsrFltr.negative
+	}
+	if rsrFltr.filterRule[:1] == REGEXP_PREFIX {
+		return rsrFltr.fltrRgxp.MatchString(val) != rsrFltr.negative
+	}
+	if rsrFltr.filterRule[:1] == MatchStartPrefix {
+		return strings.HasPrefix(val, rsrFltr.filterRule[1:]) != rsrFltr.negative
+	}
+	lastIdx := len(rsrFltr.filterRule) - 1
+	if rsrFltr.filterRule[lastIdx:] == MatchEndPrefix {
+		return strings.HasSuffix(val, rsrFltr.filterRule[:lastIdx]) != rsrFltr.negative
+	}
+	return val == rsrFltr.filterRule != rsrFltr.negative
 }
 
 // Parses list of RSRFields, used for example as multiple filters in derived charging
