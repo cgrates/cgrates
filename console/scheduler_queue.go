@@ -58,6 +58,6 @@ func (self *CmdGetScheduledActions) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetScheduledActions) RpcResult() interface{} {
-	s := v1.ScheduledActions{}
+	s := make([]*v1.ScheduledActions, 0)
 	return &s
 }
