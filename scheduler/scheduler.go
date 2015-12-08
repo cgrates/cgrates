@@ -46,13 +46,15 @@ func (s *Scheduler) Loop() {
 		}
 		s.Lock()
 		a0 := s.queue[0]
-		//utils.Logger.Info(fmt.Sprintf("Scheduler qeue length: %v", len(s.qeue)))
+		utils.Logger.Info(fmt.Sprintf("<Scheduler> Action: %s", a0.Id))
+		utils.Logger.Info(fmt.Sprintf("<Scheduler> Scheduler queue length: %v", len(s.queue)))
 		now := time.Now()
 		start := a0.GetNextStartTime(now)
 		if start.Equal(now) || start.Before(now) {
 			go a0.Execute()
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
+			a0.ResetStartTimeCache()
 			now = time.Now().Add(time.Second)
 			start = a0.GetNextStartTime(now)
 			if start.Before(now) {
@@ -71,7 +73,7 @@ func (s *Scheduler) Loop() {
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for action on %v", a0))
+				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for action on %v", a0.Id))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
@@ -87,6 +89,7 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> processing %d action plans", len(actionPlans)))
 	// recreate the queue
 	s.Lock()
+	defer s.Unlock()
 	s.queue = engine.ActionPlanPriotityList{}
 	for key, aps := range actionPlans {
 		toBeSaved := false
@@ -128,7 +131,6 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 	}
 	sort.Sort(s.queue)
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> queued %d action plans", len(s.queue)))
-	s.Unlock()
 }
 
 func (s *Scheduler) Restart() {
