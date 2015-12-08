@@ -792,14 +792,6 @@ type AttrDerivedChargers struct {
 	Direction, Tenant, Category, Account, Subject, Destination string
 }
 
-func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
-	accountSplt := strings.Split(accountKey, CONCATENATED_KEY_SEP)
-	if len(accountSplt) != 2 {
-		return nil, fmt.Errorf("Unsupported format for TenantAccount: %s", accountKey)
-	}
-	return &TenantAccount{accountSplt[0], accountSplt[1]}, nil
-}
-
 func NewDTCSFromRPKey(rpKey string) (*DirectionTenantCategorySubject, error) {
 	rpSplt := strings.Split(rpKey, CONCATENATED_KEY_SEP)
 	if len(rpSplt) != 4 {
