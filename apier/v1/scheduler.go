@@ -105,7 +105,7 @@ type AttrsGetScheduledActions struct {
 
 type ScheduledActions struct {
 	NextRunTime                             time.Time
-	Accounts                                []*utils.TenantAccount
+	Accounts                                int
 	ActionsId, ActionPlanId, ActionPlanUuid string
 }
 
@@ -116,7 +116,7 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 	schedActions := make([]*ScheduledActions, 0) // needs to be initialized if remains empty
 	scheduledActions := self.Sched.GetQueue()
 	for _, qActions := range scheduledActions {
-		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid}
+		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid, Accounts: len(qActions.ActionsId)}
 		if attrs.SearchTerm != "" &&
 			!(strings.Contains(sas.ActionPlanId, attrs.SearchTerm) ||
 				strings.Contains(sas.ActionsId, attrs.SearchTerm)) {
@@ -129,23 +129,18 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 		if !attrs.TimeEnd.IsZero() && (sas.NextRunTime.After(attrs.TimeEnd) || sas.NextRunTime.Equal(attrs.TimeEnd)) {
 			continue
 		}
-		// add the accounts
-		for _, accID := range qActions.AccountIds {
-			split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
-			if len(split) != 2 {
-				continue // malformed account id
-			}
-			sas.Accounts = append(sas.Accounts, &utils.TenantAccount{Tenant: split[0], Account: split[1]})
-		}
 		// filter on account
 		if attrs.Tenant != "" || attrs.Account != "" {
 			found := false
-			for _, accPair := range sas.Accounts {
-
-				if attrs.Tenant != "" && attrs.Tenant != accPair.Tenant {
+			for _, accID := range qActions.AccountIds {
+				split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
+				if len(split) != 2 {
+					continue // malformed account id
+				}
+				if attrs.Tenant != "" && attrs.Tenant != split[0] {
 					continue
 				}
-				if attrs.Account != "" && attrs.Account != accPair.Account {
+				if attrs.Account != "" && attrs.Account != split[1] {
 					continue
 				}
 				found = true

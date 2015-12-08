@@ -800,10 +800,6 @@ func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
 	return &TenantAccount{accountSplt[0], accountSplt[1]}, nil
 }
 
-type TenantAccount struct {
-	Tenant, Account string
-}
-
 func NewDTCSFromRPKey(rpKey string) (*DirectionTenantCategorySubject, error) {
 	rpSplt := strings.Split(rpKey, CONCATENATED_KEY_SEP)
 	if len(rpSplt) != 4 {
