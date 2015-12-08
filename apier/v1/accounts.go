@@ -252,7 +252,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 						// delete without preserving order
 						at.AccountIds[i] = at.AccountIds[len(at.AccountIds)-1]
 						at.AccountIds = at.AccountIds[:len(at.AccountIds)-1]
-						i -= 1
+						i--
 						changed = true
 					}
 				}

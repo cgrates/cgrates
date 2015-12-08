@@ -775,6 +775,31 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 	return nil
 }
 
+type AttrGetActionPlan struct {
+	Id string
+}
+
+func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]engine.ActionPlans) error {
+	var result []engine.ActionPlans
+	if attr.Id == "" || attr.Id == "*" {
+		aplsMap, err := self.RatingDb.GetAllActionPlans()
+		if err != nil {
+			return err
+		}
+		for _, apls := range aplsMap {
+			result = append(result, apls)
+		}
+	} else {
+		apls, err := self.RatingDb.GetActionPlans(attr.Id, false)
+		if err != nil {
+			return err
+		}
+		result = append(result, apls)
+	}
+	*reply = result
+	return nil
+}
+
 type AttrAddActionTrigger struct {
 	ActionTriggersId      string
 	Tenant                string
