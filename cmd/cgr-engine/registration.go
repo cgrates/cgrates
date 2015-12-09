@@ -126,9 +126,7 @@ func reloadSchedulerSingnalHandler(sched *scheduler.Scheduler, getter engine.Rat
 		sig := <-c
 
 		utils.Logger.Info(fmt.Sprintf("Caught signal %v, reloading action timings.\n", sig))
-		sched.LoadActionPlans(getter)
-		// check the tip of the queue for new actions
-		sched.Restart()
+		sched.Reload(true)
 	}
 }
 

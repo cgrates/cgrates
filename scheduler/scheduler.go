@@ -33,26 +33,37 @@ type Scheduler struct {
 	timer       *time.Timer
 	restartLoop chan bool
 	sync.Mutex
+	storage          engine.RatingStorage
+	waitingReload    bool
+	loopChecker      chan int
+	schedulerStarted bool
 }
 
-func NewScheduler() *Scheduler {
-	return &Scheduler{restartLoop: make(chan bool)}
+func NewScheduler(storage engine.RatingStorage) *Scheduler {
+	return &Scheduler{
+		restartLoop: make(chan bool),
+		storage:     storage,
+		loopChecker: make(chan int),
+	}
 }
 
 func (s *Scheduler) Loop() {
+	s.schedulerStarted = true
 	for {
 		for len(s.queue) == 0 { //hang here if empty
 			<-s.restartLoop
 		}
+		utils.Logger.Info(fmt.Sprintf("<Scheduler> Scheduler queue length: %v", len(s.queue)))
 		s.Lock()
 		a0 := s.queue[0]
-		//utils.Logger.Info(fmt.Sprintf("Scheduler qeue length: %v", len(s.qeue)))
+		utils.Logger.Info(fmt.Sprintf("<Scheduler> Action: %s", a0.Id))
 		now := time.Now()
 		start := a0.GetNextStartTime(now)
 		if start.Equal(now) || start.Before(now) {
 			go a0.Execute()
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
+			a0.ResetStartTimeCache()
 			now = time.Now().Add(time.Second)
 			start = a0.GetNextStartTime(now)
 			if start.Before(now) {
@@ -71,7 +82,7 @@ func (s *Scheduler) Loop() {
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for action on %v", a0))
+				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for action on %v", a0.Id))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
@@ -79,14 +90,44 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
-	actionPlans, err := storage.GetAllActionPlans()
+func (s *Scheduler) Reload(protect bool) {
+	s.Lock()
+	defer s.Unlock()
+
+	if protect {
+		if s.waitingReload {
+			s.loopChecker <- 1
+		}
+		s.waitingReload = true
+		go func() {
+			t := time.NewTicker(100 * time.Millisecond) // wait for loops before start
+			select {
+			case <-s.loopChecker:
+				t.Stop() // cancel reload
+			case <-t.C:
+				s.loadActionPlans()
+				s.restart()
+				t.Stop()
+				s.waitingReload = false
+			}
+		}()
+	} else {
+		go func() {
+			s.loadActionPlans()
+			s.restart()
+		}()
+	}
+}
+
+func (s *Scheduler) loadActionPlans() {
+	actionPlans, err := s.storage.GetAllActionPlans()
 	if err != nil && err != utils.ErrNotFound {
 		utils.Logger.Warning(fmt.Sprintf("<Scheduler> Cannot get action plans: %v", err))
 	}
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> processing %d action plans", len(actionPlans)))
 	// recreate the queue
 	s.Lock()
+	defer s.Unlock()
 	s.queue = engine.ActionPlanPriotityList{}
 	for key, aps := range actionPlans {
 		toBeSaved := false
@@ -120,19 +161,20 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 		}
 		if toBeSaved {
 			engine.Guardian.Guard(func() (interface{}, error) {
-				storage.SetActionPlans(key, newApls)
-				storage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
+				s.storage.SetActionPlans(key, newApls)
+				s.storage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
 		}
 	}
 	sort.Sort(s.queue)
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> queued %d action plans", len(s.queue)))
-	s.Unlock()
 }
 
-func (s *Scheduler) Restart() {
-	s.restartLoop <- true
+func (s *Scheduler) restart() {
+	if s.schedulerStarted {
+		s.restartLoop <- true
+	}
 	if s.timer != nil {
 		s.timer.Stop()
 	}
