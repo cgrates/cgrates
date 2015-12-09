@@ -735,8 +735,8 @@ func TestApierSetRatingProfile(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
-	// Calling the second time should raise EXISTS
-	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err == nil || err.Error() != "EXISTS" {
+	// Calling the second time should not raise EXISTS
+	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 	time.Sleep(10 * time.Millisecond) // Give time for cache reload
