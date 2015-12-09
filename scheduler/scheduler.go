@@ -105,25 +105,27 @@ func (s *Scheduler) Reload(protect bool) {
 			case <-s.loopChecker:
 				t.Stop() // cancel reload
 			case <-t.C:
-				s.LoadActionPlans()
-				s.Restart()
+				s.loadActionPlans()
+				s.restart()
 				t.Stop()
 				s.waitingReload = false
 			}
 		}()
 	} else {
-		s.LoadActionPlans()
-		s.Restart()
+		s.loadActionPlans()
+		s.restart()
 	}
 }
 
-func (s *Scheduler) LoadActionPlans() {
+func (s *Scheduler) loadActionPlans() {
 	actionPlans, err := s.storage.GetAllActionPlans()
 	if err != nil && err != utils.ErrNotFound {
 		utils.Logger.Warning(fmt.Sprintf("<Scheduler> Cannot get action plans: %v", err))
 	}
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> processing %d action plans", len(actionPlans)))
 	// recreate the queue
+	s.Lock()
+	defer s.Unlock()
 	s.queue = engine.ActionPlanPriotityList{}
 	for key, aps := range actionPlans {
 		toBeSaved := false
@@ -167,7 +169,7 @@ func (s *Scheduler) LoadActionPlans() {
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> queued %d action plans", len(s.queue)))
 }
 
-func (s *Scheduler) Restart() {
+func (s *Scheduler) restart() {
 	if s.schedulerStarted {
 		s.restartLoop <- true
 	}
