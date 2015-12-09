@@ -112,8 +112,10 @@ func (s *Scheduler) Reload(protect bool) {
 			}
 		}()
 	} else {
-		s.loadActionPlans()
-		s.restart()
+		go func() {
+			s.loadActionPlans()
+			s.restart()
+		}()
 	}
 }
 
