@@ -489,11 +489,11 @@ func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneCh
 	cacheDone := <-cacheDoneChan
 	cacheDoneChan <- cacheDone
 	utils.Logger.Info("Starting CGRateS Scheduler.")
-	sched := scheduler.NewScheduler()
+	sched := scheduler.NewScheduler(ratingDb)
 	go reloadSchedulerSingnalHandler(sched, ratingDb)
 	time.Sleep(1)
 	internalSchedulerChan <- sched
-	sched.LoadActionPlans(ratingDb)
+	sched.Reload(true)
 	sched.Loop()
 	exitChan <- true // Should not get out of loop though
 }

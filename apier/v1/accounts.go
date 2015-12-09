@@ -99,8 +99,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler && self.Sched != nil {
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 	*reply = OK
 	return nil
@@ -224,8 +223,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 	if schedulerReloadNeeded {
 		// reload scheduler
 		if self.Sched != nil {
-			self.Sched.LoadActionPlans(self.RatingDb)
-			self.Sched.Restart()
+			self.Sched.Reload(true)
 		}
 	}
 	*reply = OK // This will mark saving of the account, error still can show up in actionTimingsId
@@ -283,8 +281,7 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if schedulerReloadNeeded {
 		// reload scheduler
 		if self.Sched != nil {
-			self.Sched.LoadActionPlans(self.RatingDb)
-			self.Sched.Restart()
+			self.Sched.Reload(true)
 		}
 	}
 	*reply = OK

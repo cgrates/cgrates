@@ -22,7 +22,7 @@ import "github.com/cgrates/cgrates/utils"
 
 func init() {
 	c := &CmdAddAccount{
-		name:      "account_add",
+		name:      "account_set",
 		rpcMethod: "ApierV1.SetAccount",
 	}
 	commands[c.Name()] = c

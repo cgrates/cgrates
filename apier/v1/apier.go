@@ -519,8 +519,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 
 	if len(aps) != 0 && self.Sched != nil {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
@@ -768,8 +767,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		if self.Sched == nil {
 			return errors.New("SCHEDULER_NOT_ENABLED")
 		}
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 	*reply = OK
 	return nil
@@ -952,8 +950,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return err
 	}
 	if self.Sched != nil {
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 	*reply = OK
 	return nil
@@ -963,8 +960,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	if self.Sched == nil {
 		return utils.ErrNotFound
 	}
-	self.Sched.LoadActionPlans(self.RatingDb)
-	self.Sched.Restart()
+	self.Sched.Reload(true)
 	*reply = OK
 	return nil
 }
@@ -1208,8 +1204,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 	if len(aps) != 0 && self.Sched != nil {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
 		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {

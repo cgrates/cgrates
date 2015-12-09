@@ -33,21 +33,30 @@ type Scheduler struct {
 	timer       *time.Timer
 	restartLoop chan bool
 	sync.Mutex
+	storage          engine.RatingStorage
+	waitingReload    bool
+	loopChecker      chan int
+	schedulerStarted bool
 }
 
-func NewScheduler() *Scheduler {
-	return &Scheduler{restartLoop: make(chan bool)}
+func NewScheduler(storage engine.RatingStorage) *Scheduler {
+	return &Scheduler{
+		restartLoop: make(chan bool),
+		storage:     storage,
+		loopChecker: make(chan int),
+	}
 }
 
 func (s *Scheduler) Loop() {
+	s.schedulerStarted = true
 	for {
 		for len(s.queue) == 0 { //hang here if empty
 			<-s.restartLoop
 		}
+		utils.Logger.Info(fmt.Sprintf("<Scheduler> Scheduler queue length: %v", len(s.queue)))
 		s.Lock()
 		a0 := s.queue[0]
 		utils.Logger.Info(fmt.Sprintf("<Scheduler> Action: %s", a0.Id))
-		utils.Logger.Info(fmt.Sprintf("<Scheduler> Scheduler queue length: %v", len(s.queue)))
 		now := time.Now()
 		start := a0.GetNextStartTime(now)
 		if start.Equal(now) || start.Before(now) {
@@ -81,15 +90,40 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
-	actionPlans, err := storage.GetAllActionPlans()
+func (s *Scheduler) Reload(protect bool) {
+	s.Lock()
+	defer s.Unlock()
+
+	if protect {
+		if s.waitingReload {
+			s.loopChecker <- 1
+		}
+		s.waitingReload = true
+		go func() {
+			t := time.NewTicker(time.Second) // wait 1 second before start
+			select {
+			case <-s.loopChecker:
+				t.Stop() // cancel reload
+			case <-t.C:
+				s.LoadActionPlans()
+				s.Restart()
+				t.Stop()
+				s.waitingReload = false
+			}
+		}()
+	} else {
+		s.LoadActionPlans()
+		s.Restart()
+	}
+}
+
+func (s *Scheduler) LoadActionPlans() {
+	actionPlans, err := s.storage.GetAllActionPlans()
 	if err != nil && err != utils.ErrNotFound {
 		utils.Logger.Warning(fmt.Sprintf("<Scheduler> Cannot get action plans: %v", err))
 	}
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> processing %d action plans", len(actionPlans)))
 	// recreate the queue
-	s.Lock()
-	defer s.Unlock()
 	s.queue = engine.ActionPlanPriotityList{}
 	for key, aps := range actionPlans {
 		toBeSaved := false
@@ -123,8 +157,8 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 		}
 		if toBeSaved {
 			engine.Guardian.Guard(func() (interface{}, error) {
-				storage.SetActionPlans(key, newApls)
-				storage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
+				s.storage.SetActionPlans(key, newApls)
+				s.storage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
 		}
@@ -134,7 +168,9 @@ func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
 }
 
 func (s *Scheduler) Restart() {
-	s.restartLoop <- true
+	if s.schedulerStarted {
+		s.restartLoop <- true
+	}
 	if s.timer != nil {
 		s.timer.Stop()
 	}
