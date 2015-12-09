@@ -599,7 +599,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	}
 	var rpfl *engine.RatingProfile
 	if attrs.Overwrite {
-		rpfl, err = self.RatingDb.GetRatingProfile(keyId, false)
+		rpfl, _ = self.RatingDb.GetRatingProfile(keyId, false)
 	}
 	if rpfl == nil {
 		rpfl = &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, 0)}
