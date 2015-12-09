@@ -100,7 +100,7 @@ func (s *Scheduler) Reload(protect bool) {
 		}
 		s.waitingReload = true
 		go func() {
-			t := time.NewTicker(time.Second) // wait 1 second before start
+			t := time.NewTicker(100 * time.Millisecond) // wait for loops before start
 			select {
 			case <-s.loopChecker:
 				t.Stop() // cancel reload
