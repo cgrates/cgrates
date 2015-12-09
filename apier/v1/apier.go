@@ -597,9 +597,17 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 			return utils.ErrExists
 		}
 	}
-	rpfl := &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, len(attrs.RatingPlanActivations))}
-	for idx, ra := range attrs.RatingPlanActivations {
-		at, err := utils.ParseDate(ra.ActivationTime)
+	var rpfl *engine.RatingProfile
+	if attrs.Overwrite {
+		rpfl = &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, 0)}
+	} else {
+		var err error
+		if rpfl, err = self.RatingDb.GetRatingProfile(keyId, false); err != nil {
+			return utils.NewErrServerError(err)
+		}
+	}
+	for _, ra := range attrs.RatingPlanActivations {
+		at, err := utils.ParseTimeDetectLayout(ra.ActivationTime, self.Config.DefaultTimezone)
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ErrServerError.Error(), ra.ActivationTime))
 		}
@@ -608,8 +616,8 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		} else if !exists {
 			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ErrNotFound.Error(), ra.RatingPlanId))
 		}
-		rpfl.RatingPlanActivations[idx] = &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
-			FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, ra.FallbackSubjects)}
+		rpfl.RatingPlanActivations = append(rpfl.RatingPlanActivations, &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
+			FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, ra.FallbackSubjects)})
 	}
 	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
 		return utils.NewErrServerError(err)
