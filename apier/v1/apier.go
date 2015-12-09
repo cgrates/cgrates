@@ -590,16 +590,16 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	}
 	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, Category: attrs.Category, Direction: attrs.Direction, Subject: attrs.Subject}
 	keyId := tpRpf.KeyId()
+	var rpfl *engine.RatingProfile
 	if !attrs.Overwrite {
 		if exists, err := self.RatingDb.HasData(utils.RATING_PROFILE_PREFIX, keyId); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
-			return utils.ErrExists
+			var err error
+			if rpfl, err = self.RatingDb.GetRatingProfile(keyId, false); err != nil {
+				return utils.NewErrServerError(err)
+			}
 		}
-	}
-	var rpfl *engine.RatingProfile
-	if attrs.Overwrite {
-		rpfl, _ = self.RatingDb.GetRatingProfile(keyId, false)
 	}
 	if rpfl == nil {
 		rpfl = &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, 0)}
