@@ -112,6 +112,7 @@ type AttrAddBalance struct {
 	Value          float64
 	ExpiryTime     string
 	RatingSubject  string
+	Categories     string
 	DestinationIds string
 	Weight         float64
 	SharedGroups   string
@@ -127,7 +128,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	}
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
-		// create user balance if not exists
+		// create account if not exists
 		account := &engine.Account{
 			Id: tag,
 		}
@@ -158,6 +159,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				RatingSubject:  attr.RatingSubject,
 				Directions:     utils.ParseStringMap(attr.Directions),
 				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
+				Categories:     utils.ParseStringMap(attr.Categories),
 				Weight:         attr.Weight,
 				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
 				Disabled:       attr.Disabled,
