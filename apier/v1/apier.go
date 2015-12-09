@@ -121,7 +121,7 @@ type AttrAddBalance struct {
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	expTime, err := utils.ParseDate(attr.ExpiryTime)
+	expTime, err := utils.ParseTimeDetectLayout(attr.ExpiryTime, self.Config.DefaultTimezone)
 	if err != nil {
 		*reply = err.Error()
 		return err
