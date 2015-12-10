@@ -148,7 +148,7 @@ func TestSMGenericEventAsStoredCdr(t *testing.T) {
 	smGev["Extra1"] = "Value1"
 	smGev["Extra2"] = 5
 	eStoredCdr := &engine.StoredCdr{CgrId: "0711eaa78e53937f1593dabc08c83ea04a915f2e",
-		TOR: utils.VOICE, AccId: "12345", CdrHost: "10.0.3.15", CdrSource: "SM_GENERIC_TEST_EVENT", ReqType: utils.META_PREPAID,
+		TOR: utils.VOICE, AccId: "12345", CdrHost: "10.0.3.15", CdrSource: "SMG", ReqType: utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "account1", Subject: "subject1",
 		Destination: "+4986517174963", SetupTime: time.Date(2015, 11, 9, 14, 21, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 9, 14, 22, 2, 0, time.UTC),
 		Usage: time.Duration(83) * time.Second, Pdd: time.Duration(300) * time.Millisecond, Supplier: "supplier1", DisconnectCause: "NORMAL_DISCONNECT",

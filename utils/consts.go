@@ -261,6 +261,7 @@ const (
 	NegativePrefix              = "!"
 	MatchStartPrefix            = "^"
 	MatchEndPrefix              = "$"
+	SessionManagerGeneric       = "SMG"
 )
 
 var (

@@ -206,7 +206,7 @@ func (self *SMGSession) saveOperations() error {
 	var reply string
 	err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
 		CgrId:          self.eventStart.GetCgrId(self.timezone),
-		Source:         utils.SESSION_MANAGER_SOURCE,
+		Source:         utils.SessionManagerGeneric,
 		RunId:          self.runId,
 		CallCost:       firstCC,
 		CheckDuplicate: true,
