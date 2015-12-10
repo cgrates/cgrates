@@ -21,43 +21,43 @@ package console
 import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdGetScheduledActions{
-		name:      "scheduler_queue",
-		rpcMethod: "ApierV1.GetScheduledActions",
-		rpcParams: &v1.AttrsGetScheduledActions{},
+	c := &CmdGetAccountActionPlan{
+		name:      "account_actionplan_get",
+		rpcMethod: "ApierV1.GetAccountActionPlan",
+		rpcParams: &v1.AttrAcntAction{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetScheduledActions struct {
+type CmdGetAccountActionPlan struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrsGetScheduledActions
+	rpcParams *v1.AttrAcntAction
 	*CommandExecuter
 }
 
-func (self *CmdGetScheduledActions) Name() string {
+func (self *CmdGetAccountActionPlan) Name() string {
 	return self.name
 }
 
-func (self *CmdGetScheduledActions) RpcMethod() string {
+func (self *CmdGetAccountActionPlan) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetScheduledActions) RpcParams(reset bool) interface{} {
+func (self *CmdGetAccountActionPlan) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrsGetScheduledActions{}
+		self.rpcParams = &v1.AttrAcntAction{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetScheduledActions) PostprocessRpcParams() error {
+func (self *CmdGetAccountActionPlan) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetScheduledActions) RpcResult() interface{} {
-	s := make([]*v1.ScheduledActions, 0)
+func (self *CmdGetAccountActionPlan) RpcResult() interface{} {
+	s := make([]*v1.AccountActionTiming, 0)
 	return &s
 }

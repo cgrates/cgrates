@@ -105,7 +105,7 @@ type AttrsGetScheduledActions struct {
 
 type ScheduledActions struct {
 	NextRunTime                             time.Time
-	Accounts                                []*utils.TenantAccount
+	Accounts                                int
 	ActionsId, ActionPlanId, ActionPlanUuid string
 }
 
@@ -116,7 +116,7 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 	schedActions := make([]*ScheduledActions, 0) // needs to be initialized if remains empty
 	scheduledActions := self.Sched.GetQueue()
 	for _, qActions := range scheduledActions {
-		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid}
+		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid, Accounts: len(qActions.AccountIds)}
 		if attrs.SearchTerm != "" &&
 			!(strings.Contains(sas.ActionPlanId, attrs.SearchTerm) ||
 				strings.Contains(sas.ActionsId, attrs.SearchTerm)) {
@@ -150,7 +150,9 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 				continue
 			}
 		}
+
 		// we have a winner
+
 		schedActions = append(schedActions, sas)
 	}
 	if attrs.Paginator.Offset != nil {

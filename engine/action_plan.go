@@ -218,7 +218,7 @@ YEARS:
 	return
 }
 
-func (at *ActionPlan) resetStartTimeCache() {
+func (at *ActionPlan) ResetStartTimeCache() {
 	at.stCache = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
@@ -238,7 +238,7 @@ func (at *ActionPlan) Execute() (err error) {
 	if len(at.AccountIds) == 0 { // nothing to do if no accounts set
 		return
 	}
-	at.resetStartTimeCache()
+	at.ResetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsId, err))
@@ -283,7 +283,7 @@ func (at *ActionPlan) Execute() (err error) {
 									// delete without preserving order
 									at.AccountIds[i] = at.AccountIds[len(at.AccountIds)-1]
 									at.AccountIds = at.AccountIds[:len(at.AccountIds)-1]
-									i -= 1
+									i--
 									changed = true
 								}
 							}

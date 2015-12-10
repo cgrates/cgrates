@@ -58,10 +58,11 @@ func (rit *RITiming) CronString() string {
 		hour, min, sec = "*", "*", "*"
 	} else {
 		hms := strings.Split(rit.StartTime, ":")
-		if len(hms) != 3 {
+		if len(hms) == 3 {
+			hour, min, sec = hms[0], hms[1], hms[2]
+		} else {
 			hour, min, sec = "*", "*", "*"
 		}
-		hour, min, sec = hms[0], hms[1], hms[2]
 		if strings.HasPrefix(hour, "0") {
 			hour = hour[1:]
 		}
