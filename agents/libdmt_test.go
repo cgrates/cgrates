@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -66,6 +67,11 @@ func TestUsageFromCCR(t *testing.T) {
 	}
 	if usage := usageFromCCR(3, 1, 35, time.Duration(300)*time.Second); usage != time.Duration(35)*time.Second {
 		t.Error(usage)
+	}
+	if usage := usageFromCCR(1, 0, 360, time.Duration(360)*time.Second); usage != time.Duration(360)*time.Second {
+		t.Error(usage)
+	} else {
+		fmt.Printf("Usage: %v", usage)
 	}
 }
 

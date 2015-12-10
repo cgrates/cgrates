@@ -70,13 +70,20 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 type DiameterClient struct {
 	conn     diam.Conn
 	handlers diam.Handler
+	received chan *diam.Message
 }
 
-func (self *DiameterClient) SendMessage(m *diam.Message) error {
-	_, err := m.WriteTo(self.conn)
+func (dc *DiameterClient) SendMessage(m *diam.Message) error {
+	_, err := m.WriteTo(dc.conn)
 	return err
 }
 
-func (self *DiameterClient) handleALL(c diam.Conn, m *diam.Message) {
+func (dc *DiameterClient) handleALL(c diam.Conn, m *diam.Message) {
 	utils.Logger.Warning(fmt.Sprintf("<DiameterClient> Received unexpected message from %s:\n%s", c.RemoteAddr(), m))
+	dc.received <- m
+}
+
+// Returns the message out of received buffer
+func (dc *DiameterClient) ReceivedMessage() *diam.Message {
+	return <-dc.received
 }
