@@ -64,7 +64,7 @@ To verify that all actions successfully performed, we use following *cgr-console
   cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1002"]'
   cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1003"]'
   cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1004"]'
-  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1005"]'
+  cgr-console 'accounts Tenant="cgrates.org" AccountIds=["1007"]'
 
 - Query call costs so we can see our calls will have expected costs (final cost will result as sum of *ConnectFee* and *Cost* fields):
 
