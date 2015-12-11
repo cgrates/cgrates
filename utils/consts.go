@@ -261,7 +261,8 @@ const (
 	NegativePrefix              = "!"
 	MatchStartPrefix            = "^"
 	MatchEndPrefix              = "$"
-	SessionManagerGeneric       = "SMG"
+	SMG                         = "SMG"
+	MetaGrouped                 = "*grouped"
 )
 
 var (

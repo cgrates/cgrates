@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
 	"github.com/fiorix/go-diameter/diam/datatype"
@@ -70,8 +71,6 @@ func TestUsageFromCCR(t *testing.T) {
 	}
 	if usage := usageFromCCR(1, 0, 360, time.Duration(360)*time.Second); usage != time.Duration(360)*time.Second {
 		t.Error(usage)
-	} else {
-		fmt.Printf("Usage: %v", usage)
 	}
 }
 
@@ -80,5 +79,60 @@ func TestAvpValAsString(t *testing.T) {
 	a := diam.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(originHostStr))
 	if avpValStr := avpValAsString(a); avpValStr != originHostStr {
 		t.Errorf("Expected: %s, received: %s", originHostStr, avpValStr)
+	}
+}
+
+func TestFieldOutVal(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
+		}})
+	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(1)),              // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000003")), // Subscription-Id-Data
+		}})
+	m.NewAVP("Service-Identifier", avp.Mbit, 0, datatype.Unsigned32(0))
+	m.NewAVP("Requested-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(360))}}) // CC-Time
+	ccr := &CCR{diamMessage: m}
+	cfgFld := &config.CfgCdrField{Tag: "StaticTest", Type: utils.META_COMPOSED, FieldId: utils.TOR,
+		Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true}
+	eOut := "*voice"
+	if fldOut, err := ccr.fieldOutVal(cfgFld); err != nil {
+		t.Error(err)
+	} else if fldOut != eOut {
+		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+	}
+	cfgFld = &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
+		Value: utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Time", utils.INFIELD_SEP), Mandatory: true}
+	eOut = "360"
+	if fldOut, err := ccr.fieldOutVal(cfgFld); err != nil {
+		t.Error(err)
+	} else if fldOut != eOut {
+		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+	}
+	// Without filter, we shoud get always the first subscriptionId
+	cfgFld = &config.CfgCdrField{Tag: "Grouped1", Type: utils.MetaGrouped, FieldId: "Account",
+		Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
+	eOut = "33708000003"
+	if fldOut, err := ccr.fieldOutVal(cfgFld); err != nil {
+		t.Error(err)
+	} else if fldOut != eOut {
+		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+	}
+	// Without groupedAVP, we shoud get the first subscriptionId
+	cfgFld = &config.CfgCdrField{Tag: "Grouped2", Type: utils.MetaGrouped, FieldId: "Account",
+		FieldFilter: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type(1)", utils.INFIELD_SEP),
+		Value:       utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
+	eOut = "208708000003"
+	if fldOut, err := ccr.fieldOutVal(cfgFld); err != nil {
+		t.Error(err)
+	} else if fldOut != eOut {
+		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
 	}
 }

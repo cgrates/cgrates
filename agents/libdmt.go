@@ -282,14 +282,6 @@ func avpValAsString(a *diam.AVP) string {
 	return dataVal[startIdx+1 : endIdx]
 }
 
-// Follows the implementation in the StorCdr
-func (self *CCR) passesFieldFilter(fieldFilter *utils.RSRField) bool {
-	if fieldFilter == nil {
-		return true
-	}
-	return fieldFilter.FilterPasses(self.eventFieldValue(utils.RSRFields{fieldFilter}))
-}
-
 // Handler for meta functions
 func (self *CCR) metaHandler(tag, arg string) (string, error) {
 	switch tag {
@@ -300,30 +292,97 @@ func (self *CCR) metaHandler(tag, arg string) (string, error) {
 	return "", nil
 }
 
-func (self *CCR) eventFieldValue(fldTpl utils.RSRFields) string {
+func (self *CCR) avpsWithPath(rsrFld *utils.RSRField) ([]*diam.AVP, error) {
+	hierarchyPath := strings.Split(rsrFld.Id, utils.HIERARCHY_SEP)
+	hpIf := make([]interface{}, len(hierarchyPath))
+	for i, val := range hierarchyPath {
+		hpIf[i] = val
+	}
+	return self.diamMessage.FindAVPsWithPath(hpIf, dict.UndefinedVendorID)
+}
+
+// Follows the implementation in the StorCdr
+func (self *CCR) passesFieldFilter(fieldFilter *utils.RSRField) (bool, int) {
+	if fieldFilter == nil {
+		return true, 0
+	}
+	avps, err := self.avpsWithPath(fieldFilter)
+	if err != nil {
+		return false, 0
+	} else if len(avps) == 0 {
+		return true, 0
+	}
+	for avpIdx, avpVal := range avps {
+		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
+			return true, avpIdx
+		}
+	}
+	return false, 0
+}
+
+func (self *CCR) eventFieldValue(fldTpl utils.RSRFields, avpIdx int) string {
 	var outVal string
 	for _, rsrTpl := range fldTpl {
 		if rsrTpl.IsStatic() {
 			outVal += rsrTpl.ParseValue("")
 		} else {
-			hierarchyPath := strings.Split(rsrTpl.Id, utils.HIERARCHY_SEP)
-			hpIf := make([]interface{}, len(hierarchyPath))
-			for i, val := range hierarchyPath {
-				hpIf[i] = val
-			}
-			matchingAvps, err := self.diamMessage.FindAVPsWithPath(hpIf, dict.UndefinedVendorID)
+			matchingAvps, err := self.avpsWithPath(rsrTpl)
 			if err != nil || len(matchingAvps) == 0 {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
 				continue // Filter not matching
+			}
+			if len(matchingAvps) <= avpIdx {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot retrieve AVP with index %d for field template with id: %s", avpIdx, rsrTpl.Id))
+				continue // Not convertible, ignore
 			}
 			if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, ignoring.", rsrTpl.Id))
 				continue // Not convertible, ignore
 			}
-			outVal += avpValAsString(matchingAvps[0])
+			outVal += avpValAsString(matchingAvps[avpIdx])
 		}
 	}
 	return outVal
+}
+
+func (self *CCR) fieldOutVal(cfgFld *config.CfgCdrField) (fmtValOut string, err error) {
+	var outVal string
+	switch cfgFld.Type {
+	case utils.META_FILLER:
+		outVal = cfgFld.Value.Id()
+		cfgFld.Padding = "right"
+	case utils.META_CONSTANT:
+		outVal = cfgFld.Value.Id()
+	case utils.META_HANDLER:
+		outVal, err = self.metaHandler(cfgFld.HandlerId, cfgFld.Layout)
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
+		}
+	case utils.META_COMPOSED:
+		outVal = self.eventFieldValue(cfgFld.Value, 0)
+	case utils.MetaGrouped: // GroupedAVP
+		passAtIndex := -1
+		matchedAllFilters := true
+		for _, fldFilter := range cfgFld.FieldFilter {
+			var pass bool
+			if pass, passAtIndex = self.passesFieldFilter(fldFilter); !pass {
+				matchedAllFilters = false
+				break
+			}
+		}
+		if !matchedAllFilters {
+			return "", nil // Not matching field filters, will have it empty
+		}
+		if passAtIndex == -1 {
+			passAtIndex = 0 // No filter
+		}
+		outVal = self.eventFieldValue(cfgFld.Value, passAtIndex)
+	}
+	if fmtValOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
+		return "", err
+	}
+	return fmtValOut, nil
 }
 
 // Extracts data out of CCR into a SMGenericEvent based on the configured template
@@ -331,25 +390,8 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = DIAMETER_CCR
 	for _, cfgFld := range cfgFlds {
-		var outVal string
-		var err error
-		switch cfgFld.Type {
-		case utils.META_FILLER:
-			outVal = cfgFld.Value.Id()
-			cfgFld.Padding = "right"
-		case utils.META_CONSTANT:
-			outVal = cfgFld.Value.Id()
-		case utils.META_HANDLER:
-			outVal, err = self.metaHandler(cfgFld.HandlerId, cfgFld.Layout)
-			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
-			}
-		case utils.META_COMPOSED:
-			outVal = self.eventFieldValue(cfgFld.Value)
-		}
-		fmtOut := outVal
-		if fmtOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
+		fmtOut, err := self.fieldOutVal(cfgFld)
+		if err != nil {
 			return nil, err
 		}
 		if _, hasKey := outMap[cfgFld.FieldId]; !hasKey {
