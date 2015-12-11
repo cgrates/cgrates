@@ -38,6 +38,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Returns first non empty string out of vals. Useful to extract defaults
@@ -252,7 +254,8 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 }
 
 func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
-	if rateSubj == "" {
+	rateSubj = strings.TrimSpace(rateSubj)
+	if rateSubj == "" || rateSubj == utils.ANY {
 		rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1s"
 	}
 	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {
