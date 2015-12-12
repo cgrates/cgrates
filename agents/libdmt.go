@@ -85,7 +85,7 @@ func loadDictionaries(dictsDir, componentId string) error {
 }
 
 // Returns reqType, requestNr and ccTime in seconds
-func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnded bool) (reqType, reqNr, ccTime int) {
+func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnded bool) (reqType, reqNr, reqCCTime, usedCCTime int) {
 	usageSecs := usage.Seconds()
 	debitIntervalSecs := debitInterval.Seconds()
 	reqType = 1
@@ -103,14 +103,23 @@ func disectUsageForCCR(usage time.Duration, debitInterval time.Duration, callEnd
 	if callEnded {
 		ccTimeFloat = math.Mod(usageSecs, debitIntervalSecs)
 	}
-	return reqType, reqNr, int(ccTimeFloat)
+	if reqType == 1 { // Initial does not have usedCCTime
+		reqCCTime = int(ccTimeFloat)
+	} else if reqType == 2 {
+		reqCCTime = int(ccTimeFloat)
+		usedCCTime = int(math.Mod(usageSecs, debitIntervalSecs))
+	} else if reqType == 3 {
+		usedCCTime = int(ccTimeFloat) // Termination does not have requestCCTime
+	}
+	return
 }
 
-func usageFromCCR(reqType, reqNr, ccTime int, debitIterval time.Duration) time.Duration {
+func usageFromCCR(reqType, reqNr, reqCCTime, usedCCTime int, debitIterval time.Duration) time.Duration {
 	dISecs := debitIterval.Seconds()
+	var ccTime int
 	if reqType == 3 {
 		reqNr -= 1 // decrease request number to reach the real number
-		ccTime += int(dISecs) * reqNr
+		ccTime = usedCCTime + (int(dISecs) * reqNr)
 	} else {
 		ccTime = int(dISecs)
 	}
@@ -121,7 +130,7 @@ func usageFromCCR(reqType, reqNr, ccTime int, debitIterval time.Duration) time.D
 func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendorId int, productName string,
 	firmwareRev int, debitInterval time.Duration, callEnded bool) *CCR {
 	//sid := "session;" + strconv.Itoa(int(rand.Uint32()))
-	reqType, reqNr, ccTime := disectUsageForCCR(cdr.Usage, debitInterval, callEnded)
+	reqType, reqNr, reqCCTime, usedCCTime := disectUsageForCCR(cdr.Usage, debitInterval, callEnded)
 	ccr := &CCR{SessionId: cdr.CgrId, OriginHost: originHost, OriginRealm: originRealm, DestinationHost: originHost, DestinationRealm: originRealm,
 		AuthApplicationId: 4, ServiceContextId: cdr.ExtraFields["Service-Context-Id"], CCRequestType: reqType, CCRequestNumber: reqNr, EventTimestamp: cdr.AnswerTime,
 		ServiceIdentifier: 0}
@@ -131,7 +140,8 @@ func storedCdrToCCR(cdr *engine.StoredCdr, originHost, originRealm string, vendo
 	}, 1)
 	ccr.SubscriptionId[0].SubscriptionIdType = 0
 	ccr.SubscriptionId[0].SubscriptionIdData = cdr.Account
-	ccr.RequestedServiceUnit.CCTime = ccTime
+	ccr.RequestedServiceUnit.CCTime = reqCCTime
+	ccr.UsedServiceUnit.CCTime = usedCCTime
 	ccr.ServiceInformation.INInformation.CallingPartyAddress = cdr.Account
 	ccr.ServiceInformation.INInformation.CalledPartyAddress = cdr.Destination
 	ccr.ServiceInformation.INInformation.RealCalledNumber = cdr.Destination
@@ -176,6 +186,9 @@ type CCR struct {
 	RequestedServiceUnit struct {
 		CCTime int `avp:"CC-Time"`
 	} `avp:"Requested-Service-Unit"`
+	UsedServiceUnit struct {
+		CCTime int `avp:"CC-Time"`
+	} `avp:"Used-Service-Unit"`
 	ServiceInformation struct {
 		INInformation struct {
 			CallingPartyAddress string `avp:"Calling-Party-Address"`
@@ -246,6 +259,11 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(self.RequestedServiceUnit.CCTime))}}); err != nil { // CC-Time
 		return nil, err
 	}
+	if _, err := m.NewAVP("Used-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(self.UsedServiceUnit.CCTime))}}); err != nil { // CC-Time
+		return nil, err
+	}
 	if _, err := m.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
@@ -286,7 +304,7 @@ func avpValAsString(a *diam.AVP) string {
 func (self *CCR) metaHandler(tag, arg string) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
-		usage := usageFromCCR(self.CCRequestType, self.CCRequestNumber, self.RequestedServiceUnit.CCTime, self.debitInterval)
+		usage := usageFromCCR(self.CCRequestType, self.CCRequestNumber, self.RequestedServiceUnit.CCTime, self.UsedServiceUnit.CCTime, self.debitInterval)
 		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
 	}
 	return "", nil

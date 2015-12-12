@@ -204,7 +204,7 @@ func (self SMGenericEvent) GetOriginatorIP(fieldName string) string {
 }
 
 func (self SMGenericEvent) GetCdrSource() string {
-	return utils.SMG // Needs to match the one in the SMGEvent.saveOperations
+	return utils.SMG + "_" + self.GetName()
 }
 
 func (self SMGenericEvent) GetExtraFields() map[string]string {
