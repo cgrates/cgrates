@@ -21,10 +21,12 @@ echo 'go test github.com/cgrates/cgrates/utils -local'
 echo 'go test github.com/cgrates/cgrates/general_tests -local'
 go test github.com/cgrates/cgrates/general_tests -local
 gnr=$?
+echo 'go test github.com/cgrates/cgrates/agents -integration'
+go test github.com/cgrates/cgrates/agents -integration
+agts=$?
 
 
 
 
 
-
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $gnr
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $gnr && $agts

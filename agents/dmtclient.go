@@ -62,7 +62,7 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 	if err != nil {
 		return nil, err
 	}
-	dc := &DiameterClient{conn: conn, handlers: dSM}
+	dc := &DiameterClient{conn: conn, handlers: dSM, received: make(chan *diam.Message)}
 	dSM.HandleFunc("ALL", dc.handleALL)
 	return dc, nil
 }

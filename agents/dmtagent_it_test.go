@@ -31,9 +31,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/fiorix/go-diameter/diam"
-	"github.com/fiorix/go-diameter/diam/avp"
-	"github.com/fiorix/go-diameter/diam/datatype"
+	"github.com/fiorix/go-diameter/diam/dict"
 )
 
 var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
@@ -124,6 +122,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 		debitInterval: time.Duration(300) * time.Second,
 	}
 	ccr.RequestedServiceUnit.CCTime = 300
+	ccr.UsedServiceUnit.CCTime = 0
 	ccr.ServiceInformation.INInformation.CallingPartyAddress = "4986517174963"
 	ccr.ServiceInformation.INInformation.CalledPartyAddress = "4986517174964"
 	ccr.ServiceInformation.INInformation.RealCalledNumber = "4986517174964"
@@ -202,6 +201,14 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Granted-Service-Unit not found")
+	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "300" {
+		t.Errorf("Expecting 300, received: %s", strCCTime)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.484
@@ -233,6 +240,14 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Granted-Service-Unit not found")
+	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "300" {
+		t.Errorf("Expecting 300, received: %s", strCCTime)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.214
@@ -264,6 +279,14 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Granted-Service-Unit not found")
+	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "300" {
+		t.Errorf("Expecting 300, received: %s", strCCTime)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 8.944
@@ -294,6 +317,14 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Granted-Service-Unit not found")
+	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "0" {
+		t.Errorf("Expecting 0, received: %s", strCCTime)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.205
@@ -321,59 +352,6 @@ func TestDmtAgentCdrs(t *testing.T) {
 		if cdrs[0].Cost != 0.795 {
 			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
 		}
-	}
-}
-
-func TestDmtAgentHuaweiSim1(t *testing.T) {
-	if !*testIntegration {
-		return
-	}
-	m := diam.NewRequest(diam.CreditControl, 4, nil)
-	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
-	m.NewAVP("Origin-Host", avp.Mbit, 0, datatype.DiameterIdentity("simuhuawei"))
-	m.NewAVP("Origin-Realm", avp.Mbit, 0, datatype.DiameterIdentity("routing1.huawei.com"))
-	m.NewAVP("Destination-Host", avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
-	m.NewAVP("Destination-Realm", avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-	m.NewAVP("Auth-Application-Id", avp.Mbit, 0, datatype.Unsigned32(4))
-	m.NewAVP("Service-Context-Id", avp.Mbit, 0, datatype.UTF8String("voice@huawei.com"))
-	m.NewAVP("CC-Request-Type", avp.Mbit, 0, datatype.Enumerated(1))
-	m.NewAVP("CC-Request-Number", avp.Mbit, 0, datatype.Enumerated(0))
-	m.NewAVP("Event-Timestamp", avp.Mbit, 0, datatype.Time(time.Now()))
-	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
-		AVP: []*diam.AVP{
-			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
-			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
-		}})
-	m.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
-		AVP: []*diam.AVP{
-			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(1)),              // Subscription-Id-Type
-			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("208708000003")), // Subscription-Id-Data
-		}})
-	m.NewAVP("Service-Identifier", avp.Mbit, 0, datatype.Unsigned32(0))
-	m.NewAVP("Requested-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
-		AVP: []*diam.AVP{
-			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(360))}}) // CC-Time
-	m.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{
-		AVP: []*diam.AVP{
-			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
-				AVP: []*diam.AVP{
-					diam.NewAVP(831, avp.Mbit, 10415, datatype.UTF8String("33708000003")),           // Calling-Party-Address
-					diam.NewAVP(832, avp.Mbit, 10415, datatype.UTF8String("780029555")),             // Called-Party-Address
-					diam.NewAVP(20327, avp.Mbit, 2011, datatype.UTF8String("33780029555")),          // Real-Called-Number
-					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                      // Charge-Flow-Type
-					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("33609")),                // Calling-Vlr-Number
-					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("208102000018370")),      // Calling-CellID-Or-SAI
-					diam.NewAVP(20313, avp.Mbit, 2011, datatype.UTF8String("80:90:a3")),             // Bearer-Capability
-					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("40:04:41:31:06:46:18")), // Call-Reference-Number
-					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("3333609")),              // MSC-Address
-					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(8)),                      // Time-Zone
-					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("6002")),                 // Called-Party-NP
-					diam.NewAVP(20386, avp.Mbit, 2011, datatype.UTF8String("20151208121752")),       // SSP-Time
-				},
-			}),
-		}})
-	if err := dmtClient.SendMessage(m); err != nil {
-		t.Error(err)
 	}
 }
 
