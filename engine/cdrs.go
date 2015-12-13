@@ -192,7 +192,6 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", cdr, err.Error()))
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
 		}
-
 	}
 	go self.deriveRateStoreStatsReplicate(cdr)
 	return nil
@@ -213,6 +212,9 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR) error {
 }
 
 func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR) error {
+	if cdr.RunID == utils.MetaRaw { // Overwrite *raw with *default for rating
+		cdr.RunID = utils.META_DEFAULT
+	}
 	if err := LoadAlias(&AttrMatchingAlias{
 		Destination: cdr.Destination,
 		Direction:   cdr.Direction,

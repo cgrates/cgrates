@@ -39,7 +39,7 @@ var cdrsCfgPath string
 var cdrsCfg *config.CGRConfig
 var cdrsRpc *rpc.Client
 
-func TestV2CdrsMysqlAInitConfig(t *testing.T) {
+func TestV2CDRsMySQLInitConfig(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -50,7 +50,7 @@ func TestV2CdrsMysqlAInitConfig(t *testing.T) {
 	}
 }
 
-func TestV2CdrsMysqAlInitDataDb(t *testing.T) {
+func TestV2CDRsMySQLInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -60,7 +60,7 @@ func TestV2CdrsMysqAlInitDataDb(t *testing.T) {
 }
 
 // InitDb so we can rely on count
-func TestV2CdrsMysqlAInitCdrDb(t *testing.T) {
+func TestV2CDRsMySQLInitCdrDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -69,7 +69,7 @@ func TestV2CdrsMysqlAInitCdrDb(t *testing.T) {
 	}
 }
 
-func TestV2CdrsMysqlAInjectUnratedCdr(t *testing.T) {
+func TestV2CDRsMySQLInjectUnratedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -80,17 +80,17 @@ func TestV2CdrsMysqlAInjectUnratedCdr(t *testing.T) {
 		return
 	}
 	strCdr1 := &engine.CDR{CGRID: utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String()), RunID: utils.MetaRaw,
-		TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_RATED,
+		TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "TestV2CDRsMySQLInjectUnratedCdr", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 21, 10, 47, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		Cost: 1.201}
+		Cost: -1}
 	if err := mysqlDb.SetCDR(strCdr1, false); err != nil {
 		t.Error(err.Error())
 	}
 }
 
-func TestV2CdrsMysqlStartEngine(t *testing.T) {
+func TestV2CDRsMySQLStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -100,7 +100,7 @@ func TestV2CdrsMysqlStartEngine(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestV2CdrsMysqlRpcConn(t *testing.T) {
+func TestV2CDRsMySQLRpcConn(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -111,39 +111,49 @@ func TestV2CdrsMysqlRpcConn(t *testing.T) {
 	}
 }
 
-// Insert some CDRs
-func TestV2CdrsMysqlProcessCdr(t *testing.T) {
+func TestV2CDRsMySQLProcessCdrRated(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply string
-	cdrs := []*engine.CDR{
-		&engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
-		},
-		&engine.CDR{CGRID: utils.Sha1("abcdeftg", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-		},
-		&engine.CDR{CGRID: utils.Sha1("aererfddf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
-			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
-		},
+	cdr := &engine.CDR{
+		CGRID: utils.Sha1("dsafdsaf", time.Date(2015, 12, 13, 18, 15, 26, 0, time.UTC).String()), RunID: utils.DEFAULT_RUNID,
+		OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: "TestV2CDRsMySQLProcessCdrRated", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call",
+		Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2015, 12, 13, 18, 15, 26, 0, time.UTC), AnswerTime: time.Date(2015, 12, 13, 18, 15, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Cost: 1.01, CostSource: "TestV2CDRsMySQLProcessCdrRated", Rated: true,
 	}
-	for _, cdr := range cdrs {
-		if err := cdrsRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
-			t.Error("Unexpected error: ", err.Error())
-		} else if reply != utils.OK {
-			t.Error("Unexpected reply received: ", reply)
-		}
+	var reply string
+	if err := cdrsRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
 	}
 }
 
-func TestV2CdrsMysqlGetCdrs(t *testing.T) {
+func TestV2CDRsMySQLProcessCdrRaw(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.CDR{
+		CGRID: utils.Sha1("abcdeftg", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, RunID: utils.MetaRaw,
+		TOR: utils.VOICE, OriginID: "abcdeftg",
+		OriginHost: "192.168.1.1", Source: "TestV2CDRsMySQLProcessCdrRaw", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call",
+		Account: "1002", Subject: "1002", Destination: "1002",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+	}
+	var reply string
+	if err := cdrsRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+}
+
+func TestV2CDRsMySQLGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -151,40 +161,40 @@ func TestV2CdrsMysqlGetCdrs(t *testing.T) {
 	req := utils.RPCCDRsFilter{}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 4 {
+	} else if len(reply) != 4 { // 1 injected, 1 rated, 1 *raw and it's pair in *default run
 		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
-	// CDRs with errors
-	req = utils.RPCCDRsFilter{MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 2 {
-		t.Error("Unexpected number of CDRs returned: ", reply)
-	}
-	// CDRs Rated
-	req = utils.RPCCDRsFilter{MinCost: utils.Float64Pointer(-1.0)}
-	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if len(reply) != 3 {
-		t.Error("Unexpected number of CDRs returned: ", reply)
-	}
-	// CDRs non rated OR SkipRated
-	req = utils.RPCCDRsFilter{MaxCost: utils.Float64Pointer(-1.0)}
+	// CDRs with rating errors
+	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, MinCost: utils.Float64Pointer(-1.0), MaxCost: utils.Float64Pointer(0.0)}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
-	// Skip Errors
-	req = utils.RPCCDRsFilter{MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
+	// CDRs Rated
+	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
 		t.Error("Unexpected number of CDRs returned: ", reply)
 	}
+	// Raw CDRs
+	req = utils.RPCCDRsFilter{RunIDs: []string{utils.MetaRaw}}
+	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", reply)
+	}
+	// Skip Errors
+	req = utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, MinCost: utils.Float64Pointer(0.0), MaxCost: utils.Float64Pointer(-1.0)}
+	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", reply)
+	}
 }
 
-func TestV2CdrsMysqlCountCdrs(t *testing.T) {
+func TestV2CDRsMySQLCountCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -197,25 +207,25 @@ func TestV2CdrsMysqlCountCdrs(t *testing.T) {
 	}
 }
 
-// Test Prepaid CDRs without previous costs being calculated
-func TestV2CdrsMysqlProcessPrepaidCdr(t *testing.T) {
+// Make sure *prepaid does not block until finding previous costs
+func TestV2CDRsMySQLProcessPrepaidCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var reply string
 	cdrs := []*engine.CDR{
 		&engine.CDR{CGRID: utils.Sha1("dsafdsaf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+			OriginHost: "192.168.1.1", Source: "TestV2CDRsMySQLProcessPrepaidCdr1", RequestType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
 		},
 		&engine.CDR{CGRID: utils.Sha1("abcdeftg2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
+			OriginHost: "192.168.1.1", Source: "TestV2CDRsMySQLProcessPrepaidCdr2", RequestType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1002", Subject: "1002", Destination: "1002",
 			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 		&engine.CDR{CGRID: utils.Sha1("aererfddf2", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, TOR: utils.VOICE, OriginID: "dsafdsaf",
-			OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
+			OriginHost: "192.168.1.1", Source: "TestV2CDRsMySQLProcessPrepaidCdr3", RequestType: utils.META_PREPAID, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1002",
 			SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
@@ -233,7 +243,7 @@ func TestV2CdrsMysqlProcessPrepaidCdr(t *testing.T) {
 	}
 }
 
-func TestV2CdrsMysqlRateWithoutTP(t *testing.T) {
+func TestV2CDRsMySQLRateWithoutTP(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -247,11 +257,11 @@ func TestV2CdrsMysqlRateWithoutTP(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{CGRIDs: []string{rawCdrCGRID}}
+	req := utils.RPCCDRsFilter{CGRIDs: []string{rawCdrCGRID}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(cdrs) != 1 {
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
+	} else if len(cdrs) != 1 { // Injected CDR did not have a charging run
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
 		if cdrs[0].Cost != -1 {
 			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
@@ -259,7 +269,7 @@ func TestV2CdrsMysqlRateWithoutTP(t *testing.T) {
 	}
 }
 
-func TestV2CdrsMysqloadTariffPlanFromFolder(t *testing.T) {
+func TestV2CDRsMySQLLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -273,7 +283,7 @@ func TestV2CdrsMysqloadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestV2CdrsMysqlRateWithTP(t *testing.T) {
+func TestV2CDRsMySQLRateWithTP(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -286,11 +296,11 @@ func TestV2CdrsMysqlRateWithTP(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{CGRIDs: []string{rawCdrCGRID}}
+	req := utils.RPCCDRsFilter{CGRIDs: []string{rawCdrCGRID}, RunIDs: []string{utils.META_DEFAULT}}
 	if err := cdrsRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
-		t.Error("Unexpected number of CDRs returned: ", len(reply))
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
 		if cdrs[0].Cost != 0.3 {
 			t.Errorf("Unexpected CDR returned: %+v", cdrs[0])
@@ -300,7 +310,7 @@ func TestV2CdrsMysqlRateWithTP(t *testing.T) {
 
 /*
 // Benchmark speed of processing 1000 CDRs
-func TestV2CdrsMysqlProcessRatedExternalCdrBenchmark(t *testing.T) {
+func TestV2CDRsMySQLProcessRatedExternalCdrBenchmark(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -308,7 +318,7 @@ func TestV2CdrsMysqlProcessRatedExternalCdrBenchmark(t *testing.T) {
 		OriginID: "benchratedcdr", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "1001", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
-		Usage: "15", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Usage: "15", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
 	tStart := time.Now()
@@ -327,7 +337,7 @@ func TestV2CdrsMysqlProcessRatedExternalCdrBenchmark(t *testing.T) {
 }
 
 // Benchmark speed of re-rating 1000 CDRs
-func TestV2CdrsMysqlReRateWithTPBenchmark(t *testing.T) {
+func TestV2CDRsMySQLReRateWithTPBenchmark(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -349,7 +359,7 @@ func TestV2CdrsMysqlReRateWithTPBenchmark(t *testing.T) {
 }
 
 // Benchmark speed of processing 1000 postpaid CDRs
-func TestV2CdrsMysqlProcessPostpaidExternalCdrBenchmark(t *testing.T) {
+func TestV2CDRsMySQLProcessPostpaidExternalCdrBenchmark(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -357,7 +367,7 @@ func TestV2CdrsMysqlProcessPostpaidExternalCdrBenchmark(t *testing.T) {
 		OriginID: "benchpostpaidcdr", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_POSTPAID, Direction: utils.OUT,
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
 		SetupTime: "2014-08-04T13:00:00Z", AnswerTime: "2014-08-04T13:00:07Z",
-		Usage: "15", Pdd: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		Usage: "15", PDD: "7.0", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	var reply string
 	tStart := time.Now()
@@ -376,7 +386,7 @@ func TestV2CdrsMysqlProcessPostpaidExternalCdrBenchmark(t *testing.T) {
 }
 */
 
-func TestV2CdrsMysqlKillEngine(t *testing.T) {
+func TestV2CDRsMySQLKillEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
