@@ -126,8 +126,8 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 }
 
 func TestExecuteActions3(t *testing.T) {
-	scheduler.NewScheduler().LoadActionPlans(ratingDb3)
-	time.Sleep(time.Millisecond) // Give time to scheduler to topup the account
+	scheduler.NewScheduler(ratingDb3).Reload(false)
+	time.Sleep(10 * time.Millisecond) // Give time to scheduler to topup the account
 	if acnt, err := acntDb3.GetAccount("cgrates.org:12346"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 {

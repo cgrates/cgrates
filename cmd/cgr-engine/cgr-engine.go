@@ -485,15 +485,15 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 }
 
 func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneChan chan struct{}, ratingDb engine.RatingStorage, exitChan chan bool) {
-        // Wait for cache to load data before starting
-        cacheDone := <- cacheDoneChan
-        cacheDoneChan <- cacheDone
+	// Wait for cache to load data before starting
+	cacheDone := <-cacheDoneChan
+	cacheDoneChan <- cacheDone
 	utils.Logger.Info("Starting CGRateS Scheduler.")
-	sched := scheduler.NewScheduler()
+	sched := scheduler.NewScheduler(ratingDb)
 	go reloadSchedulerSingnalHandler(sched, ratingDb)
 	time.Sleep(1)
 	internalSchedulerChan <- sched
-	sched.LoadActionPlans(ratingDb)
+	sched.Reload(true)
 	sched.Loop()
 	exitChan <- true // Should not get out of loop though
 }

@@ -252,7 +252,8 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 }
 
 func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
-	if rateSubj == "" {
+	rateSubj = strings.TrimSpace(rateSubj)
+	if rateSubj == "" || rateSubj == ANY {
 		rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1s"
 	}
 	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {

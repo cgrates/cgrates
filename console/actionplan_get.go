@@ -18,45 +18,49 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
+)
 
 func init() {
-	c := &CmdSetAccountActions{
-		name:      "accountactions_set",
-		rpcMethod: "ApierV1.SetAccountActions",
+	c := &CmdGetActionPlan{
+		name:      "actionplan_get",
+		rpcMethod: "ApierV1.GetActionPlan",
+		rpcParams: &v1.AttrGetActionPlan{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSetAccountActions struct {
+type CmdGetActionPlan struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TPAccountActions
+	rpcParams *v1.AttrGetActionPlan
 	*CommandExecuter
 }
 
-func (self *CmdSetAccountActions) Name() string {
+func (self *CmdGetActionPlan) Name() string {
 	return self.name
 }
 
-func (self *CmdSetAccountActions) RpcMethod() string {
+func (self *CmdGetActionPlan) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetAccountActions) RpcParams(reset bool) interface{} {
+func (self *CmdGetActionPlan) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.TPAccountActions{}
+		self.rpcParams = &v1.AttrGetActionPlan{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetAccountActions) PostprocessRpcParams() error {
+func (self *CmdGetActionPlan) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetAccountActions) RpcResult() interface{} {
-	var s string
+func (self *CmdGetActionPlan) RpcResult() interface{} {
+	s := make([]*engine.ActionPlans, 0)
 	return &s
 }

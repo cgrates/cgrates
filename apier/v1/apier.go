@@ -112,6 +112,7 @@ type AttrAddBalance struct {
 	Value          float64
 	ExpiryTime     string
 	RatingSubject  string
+	Categories     string
 	DestinationIds string
 	Weight         float64
 	SharedGroups   string
@@ -120,14 +121,14 @@ type AttrAddBalance struct {
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	expTime, err := utils.ParseDate(attr.ExpiryTime)
+	expTime, err := utils.ParseTimeDetectLayout(attr.ExpiryTime, self.Config.DefaultTimezone)
 	if err != nil {
 		*reply = err.Error()
 		return err
 	}
 	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
-		// create user balance if not exists
+		// create account if not exists
 		account := &engine.Account{
 			Id: tag,
 		}
@@ -158,6 +159,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				RatingSubject:  attr.RatingSubject,
 				Directions:     utils.ParseStringMap(attr.Directions),
 				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
+				Categories:     utils.ParseStringMap(attr.Categories),
 				Weight:         attr.Weight,
 				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
 				Disabled:       attr.Disabled,
@@ -519,8 +521,7 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 
 	if len(aps) != 0 && self.Sched != nil {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromStorDb, reloading scheduler.")
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
@@ -589,16 +590,22 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	}
 	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, Category: attrs.Category, Direction: attrs.Direction, Subject: attrs.Subject}
 	keyId := tpRpf.KeyId()
+	var rpfl *engine.RatingProfile
 	if !attrs.Overwrite {
 		if exists, err := self.RatingDb.HasData(utils.RATING_PROFILE_PREFIX, keyId); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
-			return utils.ErrExists
+			var err error
+			if rpfl, err = self.RatingDb.GetRatingProfile(keyId, false); err != nil {
+				return utils.NewErrServerError(err)
+			}
 		}
 	}
-	rpfl := &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, len(attrs.RatingPlanActivations))}
-	for idx, ra := range attrs.RatingPlanActivations {
-		at, err := utils.ParseDate(ra.ActivationTime)
+	if rpfl == nil {
+		rpfl = &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, 0)}
+	}
+	for _, ra := range attrs.RatingPlanActivations {
+		at, err := utils.ParseTimeDetectLayout(ra.ActivationTime, self.Config.DefaultTimezone)
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ErrServerError.Error(), ra.ActivationTime))
 		}
@@ -607,8 +614,8 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		} else if !exists {
 			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ErrNotFound.Error(), ra.RatingPlanId))
 		}
-		rpfl.RatingPlanActivations[idx] = &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
-			FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, ra.FallbackSubjects)}
+		rpfl.RatingPlanActivations = append(rpfl.RatingPlanActivations, &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
+			FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, ra.FallbackSubjects)})
 	}
 	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
 		return utils.NewErrServerError(err)
@@ -768,10 +775,34 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		if self.Sched == nil {
 			return errors.New("SCHEDULER_NOT_ENABLED")
 		}
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 	*reply = OK
+	return nil
+}
+
+type AttrGetActionPlan struct {
+	Id string
+}
+
+func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]engine.ActionPlans) error {
+	var result []engine.ActionPlans
+	if attr.Id == "" || attr.Id == "*" {
+		aplsMap, err := self.RatingDb.GetAllActionPlans()
+		if err != nil {
+			return err
+		}
+		for _, apls := range aplsMap {
+			result = append(result, apls)
+		}
+	} else {
+		apls, err := self.RatingDb.GetActionPlans(attr.Id, false)
+		if err != nil {
+			return err
+		}
+		result = append(result, apls)
+	}
+	*reply = result
 	return nil
 }
 
@@ -927,8 +958,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return err
 	}
 	if self.Sched != nil {
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 	*reply = OK
 	return nil
@@ -938,8 +968,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	if self.Sched == nil {
 		return utils.ErrNotFound
 	}
-	self.Sched.LoadActionPlans(self.RatingDb)
-	self.Sched.Restart()
+	self.Sched.Reload(true)
 	*reply = OK
 	return nil
 }
@@ -1183,8 +1212,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	}
 	if len(aps) != 0 && self.Sched != nil {
 		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
-		self.Sched.LoadActionPlans(self.RatingDb)
-		self.Sched.Restart()
+		self.Sched.Reload(true)
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
 		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {

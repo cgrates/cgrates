@@ -40,6 +40,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @kjcsb1   | Cameron Beattie |
 | @rinor    | Rinor Hoxha |
 | @bhepp    | Brice Heppner |
+| @noahmehl | Noah Mehl |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->

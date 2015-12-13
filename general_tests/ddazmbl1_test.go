@@ -129,8 +129,8 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 }
 
 func TestExecuteActions(t *testing.T) {
-	scheduler.NewScheduler().LoadActionPlans(ratingDb)
-	time.Sleep(time.Millisecond) // Give time to scheduler to topup the account
+	scheduler.NewScheduler(ratingDb).Reload(false)
+	time.Sleep(10 * time.Millisecond) // Give time to scheduler to topup the account
 	if acnt, err := acntDb.GetAccount("cgrates.org:12344"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {

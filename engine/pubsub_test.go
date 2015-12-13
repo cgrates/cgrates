@@ -215,7 +215,7 @@ func TestCgrEventPassFilters(t *testing.T) {
 	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("^EventName::DUMMY", utils.INFIELD_SEP)) { // Should pass since we have no filter defined
 		t.Error("Not passing no filter")
 	}
-	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("~EventName:s/^(\\w*)_/$1/(TEST)", utils.INFIELD_SEP)) {
+	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("~EventName:s/^(.*)_/$1/(TEST)", utils.INFIELD_SEP)) {
 		t.Error("Not passing filter")
 	}
 	if !ev.PassFilters(utils.ParseRSRFieldsMustCompile("~EventName:s/^(\\w*)_/$1/:s/^(\\w)(\\w)(\\w)(\\w)/$1$3$4/(TST)", utils.INFIELD_SEP)) {

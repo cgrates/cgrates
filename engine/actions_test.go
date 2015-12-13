@@ -56,6 +56,17 @@ func TestActionPlanNothing(t *testing.T) {
 	}
 }
 
+func TestActionTimingMidnight(t *testing.T) {
+	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}}}
+	y, m, d := referenceDate.Date()
+	now := time.Date(y, m, d, 0, 0, 1, 0, time.Local)
+	st := at.GetNextStartTime(now)
+	expected := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
+	if !st.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, st)
+	}
+}
+
 func TestActionPlanOnlyHour(t *testing.T) {
 	at := &ActionPlan{Timing: &RateInterval{Timing: &RITiming{StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
