@@ -262,6 +262,7 @@ const (
 	MatchEndPrefix              = "$"
 	SMG                         = "SMG"
 	MetaGrouped                 = "*grouped"
+	MetaRaw                     = "*raw"
 )
 
 var (

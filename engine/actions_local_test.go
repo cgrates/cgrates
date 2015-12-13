@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -32,6 +33,8 @@ import (
 var actsLclCfg *config.CGRConfig
 var actsLclRpc *rpc.Client
 var actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions")
+
+var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 
 func TestActionsLocalInitCfg(t *testing.T) {
 	if !*testLocal {
@@ -61,7 +64,7 @@ func TestActionsLocalStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if _, err := StartEngine(actsLclCfgPath, waitRater); err != nil {
+	if _, err := StartEngine(actsLclCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -129,7 +132,7 @@ func TestActionsLocalStopCgrEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := KillEngine(waitRater); err != nil {
+	if err := KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

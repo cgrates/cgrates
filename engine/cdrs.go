@@ -201,7 +201,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 		return err
 	}
 	if self.cgrCfg.CDRSStoreCdrs { // Store RawCDRs, this we do sync so we can reply with the status
-		if err := self.cdrDb.SetCdr(cdr); err != nil { // Only original CDR stored in primary table, no derived
+		if err := self.cdrDb.SetCDR(cdr, false); err != nil { // Only original CDR stored in primary table, no derived
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing primary CDR %+v, got error: %s", cdr, err.Error()))
 			return err // Error is propagated back and we don't continue processing the CDR if we cannot store it
 		}
@@ -257,7 +257,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR) error {
 	}
 	if self.cgrCfg.CDRSStoreCdrs { // Store CDRs
 		// Store RatedCDR
-		if err := self.cdrDb.SetRatedCdr(cdr); err != nil {
+		if err := self.cdrDb.SetCDR(cdr, true); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Storing rated CDR %+v, got error: %s", cdr, err.Error()))
 		}
 		// Store CostDetails

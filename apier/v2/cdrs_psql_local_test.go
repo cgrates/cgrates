@@ -82,7 +82,7 @@ func TestV2CdrsPsqlInjectUnratedCdr(t *testing.T) {
 		SetupTime: time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 21, 10, 47, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		RunID: utils.DEFAULT_RUNID, Cost: 1.201}
-	if err := psqlDb.SetCdr(strCdr1); err != nil {
+	if err := psqlDb.SetCDR(strCdr1, false); err != nil {
 		t.Error(err.Error())
 	}
 }

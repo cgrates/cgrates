@@ -590,7 +590,7 @@ func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (
 		Subject:     cc.Subject,
 		Destination: cc.Destination,
 		Cost:        cc.Cost,
-		Timespans:   string(tss),
+		CostDetails: string(tss),
 		CostSource:  source,
 		CreatedAt:   time.Now(),
 	}
@@ -599,7 +599,7 @@ func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (
 		tx.Rollback()
 		tx = self.db.Begin()
 		updated := tx.Model(TBLCDRs{}).Where(&TBLCDRs{Cgrid: cgrid, RunID: runid}).Updates(&TBLCDRs{Tor: cc.TOR, Direction: cc.Direction, Tenant: cc.Tenant, Category: cc.Category,
-			Account: cc.Account, Subject: cc.Subject, Destination: cc.Destination, Cost: cc.Cost, Timespans: string(tss), CostSource: source, UpdatedAt: time.Now()})
+			Account: cc.Account, Subject: cc.Subject, Destination: cc.Destination, Cost: cc.Cost, CostDetails: string(tss), CostSource: source, UpdatedAt: time.Now()})
 		if updated.Error != nil {
 			tx.Rollback()
 			return updated.Error
@@ -614,7 +614,7 @@ func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (*CallCost, 
 	if err := self.db.Where(&TBLCDRs{Cgrid: cgrid, RunID: runid, CostSource: source}).First(&tpCostDetail).Error; err != nil {
 		return nil, err
 	}
-	if len(tpCostDetail.Timespans) == 0 {
+	if len(tpCostDetail.CostDetails) == 0 {
 		return nil, nil // No costs returned
 	}
 	cc := new(CallCost)
@@ -626,7 +626,7 @@ func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (*CallCost, 
 	cc.Subject = tpCostDetail.Subject
 	cc.Destination = tpCostDetail.Destination
 	cc.Cost = tpCostDetail.Cost
-	if err := json.Unmarshal([]byte(tpCostDetail.Timespans), &cc.Timespans); err != nil {
+	if err := json.Unmarshal([]byte(tpCostDetail.CostDetails), &cc.Timespans); err != nil {
 		return nil, err
 	}
 	return cc, nil
@@ -639,7 +639,7 @@ func (self *SQLStorage) LogActionPlan(source string, at *ActionPlan, as Actions)
 	return
 }
 
-func (self *SQLStorage) SetCdr(cdr *CDR) error {
+func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	extraFields, err := json.Marshal(cdr.ExtraFields)
 	if err != nil {
 		return err
@@ -647,10 +647,11 @@ func (self *SQLStorage) SetCdr(cdr *CDR) error {
 	tx := self.db.Begin()
 	saved := tx.Save(&TBLCDRs{
 		Cgrid:           cdr.CGRID,
-		Tor:             cdr.TOR,
-		OriginID:        cdr.OriginID,
+		RunID:           cdr.RunID,
 		OriginHost:      cdr.OriginHost,
 		Source:          cdr.Source,
+		OriginID:        cdr.OriginID,
+		Tor:             cdr.TOR,
 		RequestType:     cdr.RequestType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
@@ -659,51 +660,51 @@ func (self *SQLStorage) SetCdr(cdr *CDR) error {
 		Subject:         cdr.Subject,
 		Destination:     cdr.Destination,
 		SetupTime:       cdr.SetupTime,
+		Pdd:             cdr.PDD.Seconds(),
 		AnswerTime:      cdr.AnswerTime,
 		Usage:           cdr.Usage.Seconds(),
-		Pdd:             cdr.PDD.Seconds(),
 		Supplier:        cdr.Supplier,
 		DisconnectCause: cdr.DisconnectCause,
 		ExtraFields:     string(extraFields),
-		CreatedAt:       time.Now()})
-	if saved.Error != nil {
-		tx.Rollback()
-		return saved.Error
-	}
-	tx.Commit()
-	return nil
-}
-
-func (self *SQLStorage) SetRatedCdr(cdr *CDR) (err error) {
-	tx := self.db.Begin()
-	saved := tx.Save(&TBLCDRs{
-		Cgrid:           cdr.CGRID,
-		RunID:           cdr.RunID,
-		RequestType:     cdr.RequestType,
-		Direction:       cdr.Direction,
-		Tenant:          cdr.Tenant,
-		Category:        cdr.Category,
-		Account:         cdr.Account,
-		Subject:         cdr.Subject,
-		Destination:     cdr.Destination,
-		SetupTime:       cdr.SetupTime,
-		AnswerTime:      cdr.AnswerTime,
-		Usage:           cdr.Usage.Seconds(),
-		Pdd:             cdr.PDD.Seconds(),
-		Supplier:        cdr.Supplier,
-		DisconnectCause: cdr.DisconnectCause,
+		CostSource:      cdr.CostSource,
 		Cost:            cdr.Cost,
+		CostDetails:     cdr.CostDetailsJson(),
 		ExtraInfo:       cdr.ExtraInfo,
 		CreatedAt:       time.Now(),
 	})
 	if saved.Error != nil {
 		tx.Rollback()
+		if !allowUpdate {
+			return saved.Error
+		}
 		tx = self.db.Begin()
-		updated := tx.Model(TBLCDRs{}).Where(&TBLCDRs{Cgrid: cdr.CGRID, RunID: cdr.RunID}).Updates(&TBLCDRs{RequestType: cdr.RequestType,
-			Direction: cdr.Direction, Tenant: cdr.Tenant, Category: cdr.Category, Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination,
-			SetupTime: cdr.SetupTime, AnswerTime: cdr.AnswerTime, Usage: cdr.Usage.Seconds(), Pdd: cdr.PDD.Seconds(), Supplier: cdr.Supplier, DisconnectCause: cdr.DisconnectCause,
-			Cost: cdr.Cost, ExtraInfo: cdr.ExtraInfo,
-			UpdatedAt: time.Now()})
+		updated := tx.Model(TBLCDRs{}).Where(&TBLCDRs{Cgrid: cdr.CGRID, RunID: cdr.RunID}).Updates(
+			&TBLCDRs{
+				OriginHost:      cdr.OriginHost,
+				Source:          cdr.Source,
+				OriginID:        cdr.OriginID,
+				Tor:             cdr.TOR,
+				RequestType:     cdr.RequestType,
+				Direction:       cdr.Direction,
+				Tenant:          cdr.Tenant,
+				Category:        cdr.Category,
+				Account:         cdr.Account,
+				Subject:         cdr.Subject,
+				Destination:     cdr.Destination,
+				SetupTime:       cdr.SetupTime,
+				Pdd:             cdr.PDD.Seconds(),
+				AnswerTime:      cdr.AnswerTime,
+				Usage:           cdr.Usage.Seconds(),
+				Supplier:        cdr.Supplier,
+				DisconnectCause: cdr.DisconnectCause,
+				ExtraFields:     string(extraFields),
+				CostSource:      cdr.CostSource,
+				Cost:            cdr.Cost,
+				CostDetails:     cdr.CostDetailsJson(),
+				ExtraInfo:       cdr.ExtraInfo,
+				UpdatedAt:       time.Now(),
+			},
+		)
 		if updated.Error != nil {
 			tx.Rollback()
 			return updated.Error
@@ -711,7 +712,6 @@ func (self *SQLStorage) SetRatedCdr(cdr *CDR) (err error) {
 	}
 	tx.Commit()
 	return nil
-
 }
 
 func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error) {
@@ -937,14 +937,12 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 
 	for _, result := range results {
 		var extraFieldsMp map[string]string
-		var ccTimespans TimeSpans
-		if len(result.ExtraFields) != 0 {
-			if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
-				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
-			}
+		if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
+			return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 		}
-		if len(result.Timespans) != 0 {
-			if err := json.Unmarshal([]byte(result.Timespans), &ccTimespans); err != nil {
+		var callCost CallCost
+		if len(result.CostDetails) != 0 {
+			if err := json.Unmarshal([]byte(result.CostDetails), &callCost); err != nil {
 				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
 		}
@@ -952,11 +950,12 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		pddDur, _ := time.ParseDuration(strconv.FormatFloat(result.Pdd, 'f', -1, 64) + "s")
 		storCdr := &CDR{
 			CGRID:           result.Cgrid,
+			RunID:           result.RunID,
 			OrderID:         result.ID,
-			TOR:             result.Tor,
-			OriginID:        result.OriginID,
 			OriginHost:      result.OriginHost,
 			Source:          result.Source,
+			OriginID:        result.OriginID,
+			TOR:             result.Tor,
 			RequestType:     result.RequestType,
 			Direction:       result.Direction,
 			Tenant:          result.Tenant,
@@ -971,26 +970,11 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 			Supplier:        result.Supplier,
 			DisconnectCause: result.DisconnectCause,
 			ExtraFields:     extraFieldsMp,
-			RunID:           result.RunID,
+			CostSource:      result.CostSource,
 			Cost:            result.Cost,
+			CostDetails:     &callCost,
 			ExtraInfo:       result.ExtraInfo,
 		}
-		if ccTimespans != nil {
-			storCdr.CostDetails = &CallCost{
-				Direction:   result.Direction,
-				Category:    result.Category,
-				Tenant:      result.Tenant,
-				Subject:     result.Subject,
-				Account:     result.Account,
-				Destination: result.Destination,
-				TOR:         result.Tor,
-				Cost:        result.Cost,
-				Timespans:   ccTimespans,
-			}
-		}
-		//if !result.Cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating
-		storCdr.Cost = -1
-		//}
 		cdrs = append(cdrs, storCdr)
 	}
 	return cdrs, 0, nil

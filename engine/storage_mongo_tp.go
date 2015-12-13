@@ -716,12 +716,7 @@ func (ms *MongoStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCos
 	return
 }
 
-func (ms *MongoStorage) SetCdr(cdr *CDR) error {
-	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CGRID, "mediationrunid": cdr.RunID}, cdr)
-	return err
-}
-
-func (ms *MongoStorage) SetRatedCdr(cdr *CDR) error {
+func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CGRID, "mediationrunid": cdr.RunID}, cdr)
 	return err
 }

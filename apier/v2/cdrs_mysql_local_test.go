@@ -39,7 +39,7 @@ var cdrsCfgPath string
 var cdrsCfg *config.CGRConfig
 var cdrsRpc *rpc.Client
 
-func TestV2CdrsMysqlInitConfig(t *testing.T) {
+func TestV2CdrsMysqlAInitConfig(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -50,7 +50,7 @@ func TestV2CdrsMysqlInitConfig(t *testing.T) {
 	}
 }
 
-func TestV2CdrsMysqlInitDataDb(t *testing.T) {
+func TestV2CdrsMysqAlInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -60,7 +60,7 @@ func TestV2CdrsMysqlInitDataDb(t *testing.T) {
 }
 
 // InitDb so we can rely on count
-func TestV2CdrsMysqlInitCdrDb(t *testing.T) {
+func TestV2CdrsMysqlAInitCdrDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -69,7 +69,7 @@ func TestV2CdrsMysqlInitCdrDb(t *testing.T) {
 	}
 }
 
-func TestV2CdrsMysqlInjectUnratedCdr(t *testing.T) {
+func TestV2CdrsMysqlAInjectUnratedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -79,13 +79,13 @@ func TestV2CdrsMysqlInjectUnratedCdr(t *testing.T) {
 		t.Error("Error on opening database connection: ", err)
 		return
 	}
-	strCdr1 := &engine.CDR{CGRID: utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String()),
+	strCdr1 := &engine.CDR{CGRID: utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String()), RunID: utils.MetaRaw,
 		TOR: utils.VOICE, OriginID: "bbb1", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_RATED,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC), AnswerTime: time.Date(2015, 11, 21, 10, 47, 26, 0, time.UTC),
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		RunID: utils.DEFAULT_RUNID, Cost: 1.201}
-	if err := mysqlDb.SetCdr(strCdr1); err != nil {
+		Cost: 1.201}
+	if err := mysqlDb.SetCDR(strCdr1, false); err != nil {
 		t.Error(err.Error())
 	}
 }

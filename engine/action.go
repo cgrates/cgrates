@@ -253,10 +253,7 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 		if cdrStorage == nil { // Only save if the cdrStorage is defined
 			continue
 		}
-		if err := cdrStorage.SetCdr(cdr); err != nil {
-			return err
-		}
-		if err := cdrStorage.SetRatedCdr(cdr); err != nil {
+		if err := cdrStorage.SetCDR(cdr, true); err != nil {
 			return err
 		}
 		// FixMe

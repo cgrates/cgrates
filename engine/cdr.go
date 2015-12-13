@@ -33,10 +33,10 @@ import (
 
 func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 	var err error
-	cdr := &CDR{CGRID: extCdr.CGRID, OrderID: extCdr.OrderID, TOR: extCdr.TOR, OriginID: extCdr.OriginID, OriginHost: extCdr.OriginHost, Source: extCdr.Source,
-		RequestType: extCdr.RequestType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category, Account: extCdr.Account, Subject: extCdr.Subject,
-		Destination: extCdr.Destination, Supplier: extCdr.Supplier, DisconnectCause: extCdr.DisconnectCause,
-		RunID: extCdr.RunID, Cost: extCdr.Cost, Rated: extCdr.Rated}
+	cdr := &CDR{CGRID: extCdr.CGRID, RunID: extCdr.RunID, OrderID: extCdr.OrderID, TOR: extCdr.TOR, OriginID: extCdr.OriginID, OriginHost: extCdr.OriginHost,
+		Source: extCdr.Source, RequestType: extCdr.RequestType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category,
+		Account: extCdr.Account, Subject: extCdr.Subject, Destination: extCdr.Destination, Supplier: extCdr.Supplier,
+		DisconnectCause: extCdr.DisconnectCause, CostSource: extCdr.CostSource, Cost: extCdr.Cost, Rated: extCdr.Rated}
 	if cdr.SetupTime, err = utils.ParseTimeDetectLayout(extCdr.SetupTime, timezone); err != nil {
 		return nil, err
 	}
@@ -93,16 +93,14 @@ type CDR struct {
 	Supplier        string            // Supplier information when available
 	DisconnectCause string            // Disconnect cause of the event
 	ExtraFields     map[string]string // Extra fields to be stored in CDR
+	CostSource      string            // The source of this cost
 	Cost            float64
-	ExtraInfo       string    // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
 	CostDetails     *CallCost // Attach the cost details to CDR when possible
+	ExtraInfo       string    // Container for extra information related to this CDR, eg: populated with error reason in case of error on calculation
 	Rated           bool      // Mark the CDR as rated so we do not process it during rating
 }
 
 func (cdr *CDR) CostDetailsJson() string {
-	if cdr.CostDetails == nil {
-		return ""
-	}
 	mrshled, _ := json.Marshal(cdr.CostDetails)
 	return string(mrshled)
 }
@@ -494,11 +492,12 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, directionFld, tenantFld, c
 
 func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 	return &ExternalCDR{CGRID: cdr.CGRID,
+		RunID:           cdr.RunID,
 		OrderID:         cdr.OrderID,
-		TOR:             cdr.TOR,
-		OriginID:        cdr.OriginID,
 		OriginHost:      cdr.OriginHost,
 		Source:          cdr.Source,
+		OriginID:        cdr.OriginID,
+		TOR:             cdr.TOR,
 		RequestType:     cdr.RequestType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
@@ -507,15 +506,17 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 		Subject:         cdr.Subject,
 		Destination:     cdr.Destination,
 		SetupTime:       cdr.SetupTime.Format(time.RFC3339),
+		PDD:             cdr.FieldAsString(&utils.RSRField{Id: utils.PDD}),
 		AnswerTime:      cdr.AnswerTime.Format(time.RFC3339),
 		Usage:           cdr.FormatUsage(utils.SECONDS),
-		PDD:             cdr.FieldAsString(&utils.RSRField{Id: utils.PDD}),
 		Supplier:        cdr.Supplier,
 		DisconnectCause: cdr.DisconnectCause,
 		ExtraFields:     cdr.ExtraFields,
-		RunID:           cdr.RunID,
+		CostSource:      cdr.CostSource,
 		Cost:            cdr.Cost,
 		CostDetails:     cdr.CostDetailsJson(),
+		ExtraInfo:       cdr.ExtraInfo,
+		Rated:           cdr.Rated,
 	}
 }
 
@@ -699,11 +700,12 @@ func (cdr *CDR) String() string {
 
 type ExternalCDR struct {
 	CGRID           string
+	RunID           string
 	OrderID         int64
-	TOR             string
-	OriginID        string
 	OriginHost      string
 	Source          string
+	OriginID        string
+	TOR             string
 	RequestType     string
 	Direction       string
 	Tenant          string
@@ -712,15 +714,16 @@ type ExternalCDR struct {
 	Subject         string
 	Destination     string
 	SetupTime       string
+	PDD             string
 	AnswerTime      string
 	Usage           string
-	PDD             string
 	Supplier        string
 	DisconnectCause string
 	ExtraFields     map[string]string
-	RunID           string
+	CostSource      string
 	Cost            float64
 	CostDetails     string
+	ExtraInfo       string
 	Rated           bool // Mark the CDR as rated so we do not process it during mediation
 }
 

@@ -415,7 +415,7 @@ type TBLCDRs struct {
 	DisconnectCause string
 	ExtraFields     string
 	Cost            float64
-	Timespans       string
+	CostDetails     string
 	CostSource      string
 	ExtraInfo       string
 	CreatedAt       time.Time

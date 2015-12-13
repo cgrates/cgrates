@@ -24,15 +24,15 @@ CREATE TABLE cdrs (
  usage NUMERIC(30,9) NOT NULL,
  supplier VARCHAR(128) NOT NULL,
  disconnect_cause VARCHAR(64) NOT NULL,
- extra_fields jsonb NOT NULL,
- cost NUMERIC(20,4) DEFAULT NULL,
- timespans jsonb,
+ extra_fields jsonb,
  cost_source VARCHAR(64) NOT NULL,
+ cost NUMERIC(20,4) DEFAULT NULL,
+ cost_details jsonb,
  extra_info text,
  created_at TIMESTAMP,
  updated_at TIMESTAMP,
  deleted_at TIMESTAMP,
- UNIQUE (cgrid)
+ UNIQUE (cgrid, run_id)
 );
 ;
 DROP INDEX IF EXISTS deleted_at_cp_idx;

@@ -16,14 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package general_tests
 
 import (
+	"flag"
 	"path"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -31,12 +33,10 @@ import (
 var cdrsMasterCfgPath, cdrsSlaveCfgPath string
 var cdrsMasterCfg, cdrsSlaveCfg *config.CGRConfig
 
-//var cdrsHttpJsonRpc *rpcclient.RpcClient
-
-var waitRater = 500
+var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
 
 func TestCdrsInitConfig(t *testing.T) {
-	if !*testLocal {
+	if !*testIntegration {
 		return
 	}
 	var err error
@@ -52,45 +52,45 @@ func TestCdrsInitConfig(t *testing.T) {
 
 // InitDb so we can rely on count
 func TestCdrsInitCdrDb(t *testing.T) {
-	if !*testLocal {
+	if !*testIntegration {
 		return
 	}
-	if err := InitStorDb(cdrsMasterCfg); err != nil {
+	if err := engine.InitStorDb(cdrsMasterCfg); err != nil {
 		t.Fatal(err)
 	}
-	if err := InitStorDb(cdrsSlaveCfg); err != nil {
+	if err := engine.InitStorDb(cdrsSlaveCfg); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCdrsStartMasterEngine(t *testing.T) {
-	if !*testLocal {
+	if !*testIntegration {
 		return
 	}
-	if _, err := StopStartEngine(cdrsMasterCfgPath, waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrsMasterCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCdrsStartSlaveEngine(t *testing.T) {
-	if !*testLocal {
+	if !*testIntegration {
 		return
 	}
-	if _, err := StartEngine(cdrsSlaveCfgPath, waitRater); err != nil {
+	if _, err := engine.StartEngine(cdrsSlaveCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Connect rpc client to rater
 func TestCdrsHttpCdrReplication(t *testing.T) {
-	if !*testLocal {
+	if !*testIntegration {
 		return
 	}
 	cdrsMasterRpc, err := rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1, "json", nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
-	testCdr1 := &CDR{CGRID: utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+	testCdr1 := &engine.CDR{CGRID: utils.Sha1("httpjsonrpc1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
 		TOR: utils.VOICE, OriginID: "httpjsonrpc1", OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_PSEUDOPREPAID,
 		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
@@ -102,13 +102,13 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	time.Sleep(time.Duration(waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	cdrsSlaveRpc, err := rpcclient.NewRpcClient("tcp", "127.0.0.1:12012", 1, 1, "json", nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
 	// ToDo: Fix cdr_http to be compatible with rest of processCdr methods
-	var rcvedCdrs []*ExternalCDR
+	var rcvedCdrs []*engine.ExternalCDR
 	if err := cdrsSlaveRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{CGRIDs: []string{testCdr1.CGRID}, RunIDs: []string{utils.META_DEFAULT}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {

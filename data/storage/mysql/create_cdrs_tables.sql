@@ -1,4 +1,3 @@
-
 --
 -- Table structure for table `cdrs`
 --
@@ -28,13 +27,11 @@ CREATE TABLE cdrs (
   extra_fields text NOT NULL,
   cost_source varchar(64) NOT NULL,
   cost DECIMAL(20,4) NOT NULL,
-  timespans text,
+  cost_details text,
   extra_info text,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
   deleted_at TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY cgrid (cgrid),
-  KEY answer_time_idx (answer_time),
-  KEY deleted_at_idx (deleted_at)
+  UNIQUE KEY cdrrun (cgrid, run_id)
 );
