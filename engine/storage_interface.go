@@ -63,9 +63,9 @@ type RatingStorage interface {
 	SetSharedGroup(*SharedGroup) error
 	GetActionTriggers(string) (ActionTriggers, error)
 	SetActionTriggers(string, ActionTriggers) error
-	GetActionPlans(string, bool) (ActionPlans, error)
-	SetActionPlans(string, ActionPlans) error
-	GetAllActionPlans() (map[string]ActionPlans, error)
+	GetActionPlan(string, bool) (*ActionPlan, error)
+	SetActionPlan(string, *ActionPlan) error
+	GetAllActionPlans() (map[string]*ActionPlan, error)
 }
 
 type AccountingStorage interface {
@@ -106,7 +106,7 @@ type LogStorage interface {
 	Storage
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
 	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
-	LogActionPlan(source string, at *ActionPlan, as Actions) error
+	LogActionTiming(source string, at *ActionTiming, as Actions) error
 }
 
 type LoadStorage interface {

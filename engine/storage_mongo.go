@@ -451,7 +451,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	for _, key := range aplKeys {
 		cache2go.RemKey(key)
-		if _, err = ms.GetActionPlans(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
+		if _, err = ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -1026,17 +1026,17 @@ func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 	return err
 }
 
-func (ms *MongoStorage) GetActionPlans(key string, skipCache bool) (ats ActionPlans, err error) {
+func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	if !skipCache {
 		if x, err := cache2go.Get(utils.ACTION_PLAN_PREFIX + key); err == nil {
-			return x.(ActionPlans), nil
+			return x.(*ActionPlan), nil
 		} else {
 			return nil, err
 		}
 	}
 	var kv struct {
 		Key   string
-		Value ActionPlans
+		Value *ActionPlan
 	}
 	err = ms.db.C(colApl).Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
@@ -1046,8 +1046,8 @@ func (ms *MongoStorage) GetActionPlans(key string, skipCache bool) (ats ActionPl
 	return
 }
 
-func (ms *MongoStorage) SetActionPlans(key string, ats ActionPlans) error {
-	if len(ats) == 0 {
+func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan) error {
+	if len(ats.ActionTimings) == 0 {
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		err := ms.db.C(colApl).Remove(bson.M{"key": key})
 		if err != mgo.ErrNotFound {
@@ -1057,20 +1057,20 @@ func (ms *MongoStorage) SetActionPlans(key string, ats ActionPlans) error {
 	}
 	_, err := ms.db.C(colApl).Upsert(bson.M{"key": key}, &struct {
 		Key   string
-		Value ActionPlans
+		Value *ActionPlan
 	}{Key: key, Value: ats})
 	return err
 }
 
-func (ms *MongoStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
+func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
 
-	ats = make(map[string]ActionPlans, len(apls))
+	ats = make(map[string]*ActionPlan, len(apls))
 	for key, value := range apls {
-		apl := value.(ActionPlans)
+		apl := value.(*ActionPlan)
 		ats[key] = apl
 	}
 

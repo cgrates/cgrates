@@ -21,7 +21,6 @@ package engine
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -32,20 +31,31 @@ const (
 	FORMAT = "2006-1-2 15:04:05 MST"
 )
 
-type ActionPlan struct {
-	Uuid       string // uniquely identify the timing
-	Id         string // informative purpose only
-	AccountIds []string
+type ActionTiming struct {
+	Uuid       string
 	Timing     *RateInterval
-	Weight     float64
 	ActionsId  string
+	Weight     float64
 	actions    Actions
+	accountIDs map[string]struct{}
 	stCache    time.Time // cached time of the next start
 }
 
-type ActionPlans []*ActionPlan
+type ActionPlan struct {
+	Uuid          string // uniquely identify the timing
+	Id            string // informative purpose only
+	AccountIDs    map[string]struct{}
+	ActionTimings []*ActionTiming
+}
 
-func (at *ActionPlan) GetNextStartTime(now time.Time) (t time.Time) {
+func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
+	if _, found = apl.AccountIDs[accID]; found {
+		delete(apl.AccountIDs, accID)
+	}
+	return
+}
+
+func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
@@ -68,7 +78,7 @@ func (at *ActionPlan) GetNextStartTime(now time.Time) (t time.Time) {
 }
 
 // To be deleted after the above solution proves reliable
-func (at *ActionPlan) GetNextStartTimeOld(now time.Time) (t time.Time) {
+func (at *ActionTiming) GetNextStartTimeOld(now time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
@@ -218,15 +228,15 @@ YEARS:
 	return
 }
 
-func (at *ActionPlan) ResetStartTimeCache() {
+func (at *ActionTiming) ResetStartTimeCache() {
 	at.stCache = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
-func (at *ActionPlan) SetActions(as Actions) {
+func (at *ActionTiming) SetActions(as Actions) {
 	at.actions = as
 }
 
-func (at *ActionPlan) getActions() (as []*Action, err error) {
+func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
 		at.actions, err = ratingStorage.GetActions(at.ActionsId, false)
 	}
@@ -234,8 +244,8 @@ func (at *ActionPlan) getActions() (as []*Action, err error) {
 	return at.actions, err
 }
 
-func (at *ActionPlan) Execute() (err error) {
-	if len(at.AccountIds) == 0 { // nothing to do if no accounts set
+func (at *ActionTiming) Execute() (err error) {
+	if len(at.accountIDs) == 0 { // nothing to do if no accounts set
 		return
 	}
 	at.ResetStartTimeCache()
@@ -244,8 +254,8 @@ func (at *ActionPlan) Execute() (err error) {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsId, err))
 		return
 	}
-	_, err = Guardian.Guard(func() (interface{}, error) {
-		for _, accId := range at.AccountIds {
+	for accId, _ := range at.accountIDs {
+		_, err = Guardian.Guard(func() (interface{}, error) {
 			ub, err := accountingStorage.GetAccount(accId)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", accId))
@@ -261,45 +271,7 @@ func (at *ActionPlan) Execute() (err error) {
 				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
 					a.Balance.ExpirationDate = expDate
 				}
-				// handle remove action
-				if a.ActionType == REMOVE_ACCOUNT {
-					if err := accountingStorage.RemoveAccount(accId); err != nil {
-						utils.Logger.Err(fmt.Sprintf("Could not remove account Id: %s: %v", accId, err))
-						transactionFailed = true
-						break
-					}
-					// clean the account id from all action plans
-					allATs, err := ratingStorage.GetAllActionPlans()
-					if err != nil && err != utils.ErrNotFound {
-						utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accId, err))
-						transactionFailed = true
-						break
-					}
-					for key, ats := range allATs {
-						changed := false
-						for _, at := range ats {
-							for i := 0; i < len(at.AccountIds); i++ {
-								if at.AccountIds[i] == accId {
-									// delete without preserving order
-									at.AccountIds[i] = at.AccountIds[len(at.AccountIds)-1]
-									at.AccountIds = at.AccountIds[:len(at.AccountIds)-1]
-									i--
-									changed = true
-								}
-							}
-						}
-						if changed {
-							// save action plan
-							ratingStorage.SetActionPlans(key, ats)
-							// cache
-							ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
-						}
-					}
-					toBeSaved = false
-					continue // do not go to getActionFunc
-					// TODO: maybe we should break here as the account is gone
-					// will leave continue for now as the next action can create another acount
-				}
+
 				actionFunction, exists := getActionFunc(a.ActionType)
 				if !exists {
 					// do not allow the action plan to be rescheduled
@@ -318,18 +290,18 @@ func (at *ActionPlan) Execute() (err error) {
 			if !transactionFailed && toBeSaved {
 				accountingStorage.SetAccount(ub)
 			}
-		}
-		return 0, nil
-	}, 0, at.AccountIds...)
+			return 0, nil
+		}, 0, accId)
+	}
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
 		return err
 	}
-	storageLogger.LogActionPlan(utils.SCHED_SOURCE, at, aac)
+	storageLogger.LogActionTiming(utils.SCHED_SOURCE, at, aac)
 	return
 }
 
-func (at *ActionPlan) IsASAP() bool {
+func (at *ActionTiming) IsASAP() bool {
 	if at.Timing == nil {
 		return false
 	}
@@ -337,17 +309,17 @@ func (at *ActionPlan) IsASAP() bool {
 }
 
 // Structure to store actions according to weight
-type ActionPlanPriotityList []*ActionPlan
+type ActionTimingPriorityList []*ActionTiming
 
-func (atpl ActionPlanPriotityList) Len() int {
+func (atpl ActionTimingPriorityList) Len() int {
 	return len(atpl)
 }
 
-func (atpl ActionPlanPriotityList) Swap(i, j int) {
+func (atpl ActionTimingPriorityList) Swap(i, j int) {
 	atpl[i], atpl[j] = atpl[j], atpl[i]
 }
 
-func (atpl ActionPlanPriotityList) Less(i, j int) bool {
+func (atpl ActionTimingPriorityList) Less(i, j int) bool {
 	if atpl[i].GetNextStartTime(time.Now()).Equal(atpl[j].GetNextStartTime(time.Now())) {
 		// higher weights earlyer in the list
 		return atpl[i].Weight > atpl[j].Weight
@@ -355,20 +327,16 @@ func (atpl ActionPlanPriotityList) Less(i, j int) bool {
 	return atpl[i].GetNextStartTime(time.Now()).Before(atpl[j].GetNextStartTime(time.Now()))
 }
 
-func (atpl ActionPlanPriotityList) Sort() {
+func (atpl ActionTimingPriorityList) Sort() {
 	sort.Sort(atpl)
 }
 
-func (at *ActionPlan) String_DISABLED() string {
-	return at.Id + " " + at.GetNextStartTime(time.Now()).String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
-}
-
 // Helper to remove ActionPlan members based on specific filters, empty data means no always match
-func RemActionPlan(ats ActionPlans, actionTimingId, accountId string) ActionPlans {
-	for idx, at := range ats {
-		if len(actionTimingId) != 0 && at.Uuid != actionTimingId { // No Match for ActionPlanId, no need to move further
-			continue
-		}
+/*func RemActionPlan(apl ActionPlan, actionTimingId, accountId string) ActionPlan {
+	if len(actionTimingId) != 0 && apl.Uuid != actionTimingId { // No Match for ActionPlanId, no need to move further
+		continue
+	}
+	for idx, ats := range apl.ActionTimings {
 		if len(accountId) == 0 { // No account defined, considered match for complete removal
 			if len(ats) == 1 { // Removing last item, by init empty
 				return make([]*ActionPlan, 0)
@@ -392,4 +360,4 @@ func RemActionPlan(ats ActionPlans, actionTimingId, accountId string) ActionPlan
 		}
 	}
 	return ats
-}
+}*/

@@ -79,47 +79,6 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 			a.Balance = &Balance{}
 		}
 		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
-		// handle remove action
-		if a.ActionType == REMOVE_ACCOUNT {
-			accId := ub.Id
-			if err := accountingStorage.RemoveAccount(accId); err != nil {
-				utils.Logger.Err(fmt.Sprintf("Could not remove account Id: %s: %v", accId, err))
-				transactionFailed = true
-				break
-			}
-			// clean the account id from all action plans
-			allATs, err := ratingStorage.GetAllActionPlans()
-			if err != nil && err != utils.ErrNotFound {
-				utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accId, err))
-				transactionFailed = true
-				break
-			}
-			for key, ats := range allATs {
-				changed := false
-				for _, at := range ats {
-					for i := 0; i < len(at.AccountIds); i++ {
-						if at.AccountIds[i] == accId {
-							// delete without preserving order
-							at.AccountIds[i] = at.AccountIds[len(at.AccountIds)-1]
-							at.AccountIds = at.AccountIds[:len(at.AccountIds)-1]
-							i -= 1
-							changed = true
-						}
-					}
-				}
-				if changed {
-					// save action plan
-					ratingStorage.SetActionPlans(key, ats)
-					// cache
-					ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
-				}
-			}
-			toBeSaved = false
-			continue // do not go to getActionFunc
-			// TODO: maybe we should break here as the account is gone
-			// will leave continue for now as the next action can create another acount
-		}
-
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))

@@ -282,7 +282,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	for _, key := range aplKeys {
 		cache2go.RemKey(key)
-		if _, err = rs.GetActionPlans(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
+		if _, err = rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -893,11 +893,11 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 	return conn.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
 }
 
-func (rs *RedisStorage) GetActionPlans(key string, skipCache bool) (ats ActionPlans, err error) {
+func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
-			return x.(ActionPlans), nil
+			return x.(*ActionPlan), nil
 		} else {
 			return nil, err
 		}
@@ -911,8 +911,8 @@ func (rs *RedisStorage) GetActionPlans(key string, skipCache bool) (ats ActionPl
 	return
 }
 
-func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
-	if len(ats) == 0 {
+func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
+	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		err = rs.db.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
@@ -925,15 +925,15 @@ func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) 
 	return rs.db.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, result).Err
 }
 
-func (rs *RedisStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
+func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
 
-	ats = make(map[string]ActionPlans, len(apls))
+	ats = make(map[string]*ActionPlan, len(apls))
 	for key, value := range apls {
-		apl := value.(ActionPlans)
+		apl := value.(*ActionPlan)
 		ats[key] = apl
 	}
 
