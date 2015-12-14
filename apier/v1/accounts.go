@@ -202,7 +202,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			if err != nil {
 				return 0, err
 			}
-			ub.ActionTriggers = atrs
+			ub.ActionTriggers = atrs.Clone()
 			ub.InitCounters()
 		}
 		if attr.AllowNegative != nil {

@@ -615,6 +615,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				return err
 			}
 			atrs[idx] = &ActionTrigger{
+				Id:                    key,
 				ThresholdType:         atr.ThresholdType,
 				ThresholdValue:        atr.ThresholdValue,
 				Recurrent:             atr.Recurrent,
@@ -754,6 +755,8 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 					expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
 					atrs[idx] = &ActionTrigger{
+						Id:                    key,
+						Uuid:                  utils.GenUUID(),
 						ThresholdType:         apiAtr.ThresholdType,
 						ThresholdValue:        apiAtr.ThresholdValue,
 						Recurrent:             apiAtr.Recurrent,
@@ -964,6 +967,8 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 							minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 							expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
 							atrs[idx] = &ActionTrigger{
+								Id:                    triggerTag,
+								Uuid:                  utils.GenUUID(),
 								ThresholdType:         apiAtr.ThresholdType,
 								ThresholdValue:        apiAtr.ThresholdValue,
 								Recurrent:             apiAtr.Recurrent,
