@@ -1013,6 +1013,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
+		Id:                    "STANDARD_TRIGGER",
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdType:         utils.TRIGGER_MIN_EVENT_COUNTER,
@@ -1030,6 +1031,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
+		Id:                    "STANDARD_TRIGGER",
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdType:         utils.TRIGGER_MAX_BALANCE,
