@@ -601,7 +601,7 @@ func TestApierTPActionTriggers(t *testing.T) {
 	}
 	reply := ""
 	at := &utils.TPActionTriggers{TPid: utils.TEST_SQL, ActionTriggersId: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
-		&utils.TPActionTrigger{Id: "MYFIRSTTRIGGER", BalanceType: "*monetary", BalanceDirections: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
+		&utils.TPActionTrigger{Id: "STANDARD_TRIGGERS", UniqueID: "MYFIRSTTRIGGER", BalanceType: "*monetary", BalanceDirections: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
 	}}
 	atTst := new(utils.TPActionTriggers)
 	*atTst = *at
@@ -625,12 +625,13 @@ func TestApierTPActionTriggers(t *testing.T) {
 	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionTriggersId]" {
 		t.Error("Calling ApierV1.SetTPActionTriggers got unexpected error: ", err.Error())
 	}
+	atTst.ActionTriggers[0].Id = utils.TEST_SQL
 	// Test get
 	var rplyActs *utils.TPActionTriggers
 	if err := rater.Call("ApierV1.GetTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ActionTriggersId: atTst.ActionTriggersId}, &rplyActs); err != nil {
-		t.Error("Calling ApierV1.GetTPActionTriggers, got error: ", err.Error())
+		t.Errorf("Calling ApierV1.GetTPActionTriggers %s, got error: %s", atTst.ActionTriggersId, err.Error())
 	} else if !reflect.DeepEqual(atTst, rplyActs) {
-		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %v, received: %v", atTst.ActionTriggers[0], rplyActs.ActionTriggers[0])
+		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %+v, received: %+v", atTst.ActionTriggers[0], rplyActs.ActionTriggers[0])
 	}
 	// Test remove
 	if err := rater.Call("ApierV1.RemTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ActionTriggersId: atTst.ActionTriggersId}, &reply); err != nil {
@@ -1009,7 +1010,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	}
 	reply := ""
 	// Add balance to a previously known account
-	attrs := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan2", BalanceDirection: "*out", BalanceType: "*monetary",
+	attrs := &AttrAddActionTrigger{ActionTriggersId: "STTR", ActionTriggersUniqueId: "1", Tenant: "cgrates.org", Account: "dan2", BalanceDirection: "*out", BalanceType: "*monetary",
 		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
 	if err := rater.Call("ApierV1.AddTriggeredAction", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
@@ -1054,7 +1055,7 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var rmReply string
-	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", ActionTriggersId: reply[0].UniqueID}
+	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", ActionTriggersUniqueId: reply[0].UniqueID}
 	if err := rater.Call("ApierV1.RemAccountActionTriggers", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
 	} else if rmReply != OK {
@@ -1063,7 +1064,7 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTriggers: ", err.Error())
 	} else if len(reply) != 0 {
-		t.Errorf("Unexpected action triggers received %v", reply)
+		t.Errorf("Unexpected action triggers received %+v", reply[0])
 	}
 }
 

@@ -29,7 +29,9 @@ func (self *ApierV1) SetTPActionTriggers(attrs utils.TPActionTriggers, reply *st
 		[]string{"TPid", "ActionTriggersId"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-
+	for _, at := range attrs.ActionTriggers {
+		at.Id = attrs.ActionTriggersId
+	}
 	ats := engine.APItoModelActionTrigger(&attrs)
 	if err := self.StorDb.SetTpActionTriggers(ats); err != nil {
 		return utils.NewErrServerError(err)
