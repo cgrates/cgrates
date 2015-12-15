@@ -783,7 +783,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 	for i, at := range acc.ActionTriggers {
 		result.ActionTriggers[i] = &ActionTrigger{
-			Id:                    at.Id,
+			Id:                    at.ID,
 			ThresholdType:         at.ThresholdType,
 			ThresholdValue:        at.ThresholdValue,
 			Recurrent:             at.Recurrent,

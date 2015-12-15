@@ -1012,7 +1012,7 @@ func TestActionResetCounterCredit(t *testing.T) {
 
 func TestActionTriggerLogging(t *testing.T) {
 	at := &ActionTrigger{
-		Id:                    "some_uuid",
+		ID:                    "some_uuid",
 		BalanceType:           utils.MONETARY,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdValue:        100.0,

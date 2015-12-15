@@ -471,7 +471,8 @@ type TPActionTriggers struct {
 }
 
 type TPActionTrigger struct {
-	Id                    string
+	Id                    string  // group id
+	UniqueID              string  // individual id
 	ThresholdType         string  // This threshold type
 	ThresholdValue        float64 // Threshold
 	Recurrent             bool    // reset executed flag each run

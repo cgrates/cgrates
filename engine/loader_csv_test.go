@@ -1013,7 +1013,8 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
-		Id:                    "STANDARD_TRIGGER",
+		ID:                    "STANDARD_TRIGGER",
+		UniqueID:              "st0",
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdType:         utils.TRIGGER_MIN_EVENT_COUNTER,
@@ -1031,7 +1032,8 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
-		Id:                    "STANDARD_TRIGGER",
+		ID:                    "STANDARD_TRIGGER",
+		UniqueID:              "st1",
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdType:         utils.TRIGGER_MAX_BALANCE,
@@ -1077,7 +1079,7 @@ func TestLoadAccountActions(t *testing.T) {
 	}
 	// set propper uuid
 	for i, atr := range aa.ActionTriggers {
-		csvr.actionsTriggers["STANDARD_TRIGGER"][i].Id = atr.Id
+		csvr.actionsTriggers["STANDARD_TRIGGER"][i].ID = atr.ID
 	}
 	for i, b := range aa.UnitCounters[0].Balances {
 		expected.UnitCounters[0].Balances[i].Id = b.Id

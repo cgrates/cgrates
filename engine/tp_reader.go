@@ -614,8 +614,12 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 			if err != nil {
 				return err
 			}
+			if atr.UniqueID == "" {
+				atr.UniqueID = utils.GenUUID()
+			}
 			atrs[idx] = &ActionTrigger{
-				Id:                    key,
+				ID:                    key,
+				UniqueID:              atr.UniqueID,
 				ThresholdType:         atr.ThresholdType,
 				ThresholdValue:        atr.ThresholdValue,
 				Recurrent:             atr.Recurrent,
@@ -754,9 +758,12 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				for idx, apiAtr := range atrsLst {
 					minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 					expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+					if apiAtr.UniqueID == "" {
+						apiAtr.UniqueID = utils.GenUUID()
+					}
 					atrs[idx] = &ActionTrigger{
-						Id:                    key,
-						Uuid:                  utils.GenUUID(),
+						ID:                    key,
+						UniqueID:              apiAtr.UniqueID,
 						ThresholdType:         apiAtr.ThresholdType,
 						ThresholdValue:        apiAtr.ThresholdValue,
 						Recurrent:             apiAtr.Recurrent,
@@ -836,7 +843,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				Id: id,
 			}
 		}
-		ub.ActionTriggers = actionTriggers.Clone()
+		ub.ActionTriggers = actionTriggers
 		// init counters
 		ub.InitCounters()
 		if err := tpr.accountingStorage.SetAccount(ub); err != nil {
@@ -870,7 +877,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 
 		ub := &Account{
 			Id:             aa.KeyId(),
-			ActionTriggers: aTriggers.Clone(),
+			ActionTriggers: aTriggers,
 			AllowNegative:  aa.AllowNegative,
 			Disabled:       aa.Disabled,
 		}
@@ -966,9 +973,12 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						for idx, apiAtr := range atrsLst {
 							minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 							expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+							if apiAtr.UniqueID == "" {
+								apiAtr.UniqueID = utils.GenUUID()
+							}
 							atrs[idx] = &ActionTrigger{
-								Id:                    triggerTag,
-								Uuid:                  utils.GenUUID(),
+								ID:                    triggerTag,
+								UniqueID:              apiAtr.UniqueID,
 								ThresholdType:         apiAtr.ThresholdType,
 								ThresholdValue:        apiAtr.ThresholdValue,
 								Recurrent:             apiAtr.Recurrent,
