@@ -216,7 +216,7 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result []TpActionTrig
 		result = append(result, TpActionTrigger{
 			Tpid:                   ats.TPid,
 			Tag:                    ats.ActionTriggersId,
-			UniqueId:               at.Id,
+			UniqueId:               at.UniqueID,
 			ThresholdType:          at.ThresholdType,
 			ThresholdValue:         at.ThresholdValue,
 			Recurrent:              at.Recurrent,
