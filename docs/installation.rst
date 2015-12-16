@@ -41,7 +41,7 @@ To manage this vendor folder we use a tool named glide_ which will download spec
    export GO15VENDOREXPERIMENT=1 #this should be placed in the rc script of your shell
    go get github.com/cgrates/cgrates
    cd $GOPATH/src/github.com/cgrates/cgrates
-   glide up
+   glide install
 
 The glide up command will install the external dependencies versions specified in the glide.yaml file in the vendor folder. There are different versions for each CGRateS branch, versions that are recorded in the yaml file when the GCRateS releases are made (using glide pin command).
 
