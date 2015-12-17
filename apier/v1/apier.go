@@ -807,21 +807,22 @@ func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]engine.Actio
 }
 
 type AttrAddActionTrigger struct {
-	ActionTriggersId      string
-	Tenant                string
-	Account               string
-	ThresholdType         string
-	ThresholdValue        float64
-	BalanceId             string
-	BalanceType           string
-	BalanceDirection      string
-	BalanceDestinationIds string
-	BalanceRatingSubject  string //ToDo
-	BalanceWeight         float64
-	BalanceExpiryTime     string
-	BalanceSharedGroup    string //ToDo
-	Weight                float64
-	ActionsId             string
+	ActionTriggersId       string
+	ActionTriggersUniqueId string
+	Tenant                 string
+	Account                string
+	ThresholdType          string
+	ThresholdValue         float64
+	BalanceId              string
+	BalanceType            string
+	BalanceDirection       string
+	BalanceDestinationIds  string
+	BalanceRatingSubject   string //ToDo
+	BalanceWeight          float64
+	BalanceExpiryTime      string
+	BalanceSharedGroup     string //ToDo
+	Weight                 float64
+	ActionsId              string
 }
 
 func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
@@ -833,7 +834,8 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		return utils.NewErrServerError(err)
 	}
 	at := &engine.ActionTrigger{
-		Id:                    attr.ActionTriggersId,
+		ID:                    attr.ActionTriggersId,
+		UniqueID:              attr.ActionTriggersUniqueId,
 		ThresholdType:         attr.ThresholdType,
 		ThresholdValue:        attr.ThresholdValue,
 		BalanceId:             attr.BalanceId,

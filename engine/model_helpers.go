@@ -421,7 +421,8 @@ func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTri
 	ats := make(map[string][]*utils.TPActionTrigger)
 	for _, tpAt := range tps {
 		at := &utils.TPActionTrigger{
-			Id:                    tpAt.UniqueId,
+			Id:                    tpAt.Tag,
+			UniqueID:              tpAt.UniqueId,
 			ThresholdType:         tpAt.ThresholdType,
 			ThresholdValue:        tpAt.ThresholdValue,
 			Recurrent:             tpAt.Recurrent,

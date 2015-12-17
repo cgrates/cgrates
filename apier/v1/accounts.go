@@ -119,9 +119,10 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 }
 
 type AttrRemAcntActionTriggers struct {
-	Tenant           string // Tenant he account belongs to
-	Account          string // Account name
-	ActionTriggersId string // Id filtering only specific id to remove (can be regexp pattern)
+	Tenant                 string // Tenant he account belongs to
+	Account                string // Account name
+	ActionTriggersId       string // Id filtering only specific id to remove (can be regexp pattern)
+	ActionTriggersUniqueId string
 }
 
 // Returns a list of ActionTriggers on an account
@@ -137,10 +138,14 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 		}
 		nactrs := make(engine.ActionTriggers, 0)
 		for _, actr := range ub.ActionTriggers {
-			match, _ := regexp.MatchString(attrs.ActionTriggersId, actr.Id)
-			if len(attrs.ActionTriggersId) != 0 && !match {
-				nactrs = append(nactrs, actr)
+			match, _ := regexp.MatchString(attrs.ActionTriggersId, actr.ID)
+			if len(attrs.ActionTriggersId) != 0 && match {
+				continue
 			}
+			if len(attrs.ActionTriggersUniqueId) != 0 && attrs.ActionTriggersUniqueId == actr.UniqueID {
+				continue
+			}
+			nactrs = append(nactrs, actr)
 		}
 		ub.ActionTriggers = nactrs
 		if err := self.AccountDb.SetAccount(ub); err != nil {
@@ -202,7 +207,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			if err != nil {
 				return 0, err
 			}
-			ub.ActionTriggers = atrs.Clone()
+			ub.ActionTriggers = atrs
 			ub.InitCounters()
 		}
 		if attr.AllowNegative != nil {

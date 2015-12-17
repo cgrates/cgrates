@@ -29,8 +29,8 @@ import (
 )
 
 type ActionTrigger struct {
-	Id            string // for visual identification
-	Uuid          string
+	ID            string // original csv tag
+	UniqueID      string // individual id
 	ThresholdType string //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *exp_balance
 	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc, *min_ddc, *max_ddc
 	ThresholdValue        float64
@@ -154,7 +154,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	}
 	// if we have Id than we can draw an early conclusion
 	if a.Id != "" {
-		match, _ := regexp.MatchString(a.Id, at.Id)
+		match, _ := regexp.MatchString(a.Id, at.ID)
 		return match
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
@@ -196,7 +196,7 @@ func (at *ActionTrigger) Clone() *ActionTrigger {
 
 func (at *ActionTrigger) CreateBalance() *Balance {
 	return &Balance{
-		Id:             at.Id,
+		Id:             at.UniqueID,
 		Directions:     at.BalanceDirections,
 		ExpirationDate: at.BalanceExpirationDate,
 		DestinationIds: at.BalanceDestinationIds,
@@ -227,16 +227,4 @@ func (atpl ActionTriggers) Less(j, i int) bool {
 
 func (atpl ActionTriggers) Sort() {
 	sort.Sort(atpl)
-}
-
-// clone with new id(uuid)
-func (atrs ActionTriggers) Clone() ActionTriggers {
-	// set ids to action triggers
-	var newATriggers ActionTriggers
-	for _, atr := range atrs {
-		newAtr := atr.Clone()
-		newAtr.Uuid = utils.GenUUID()
-		newATriggers = append(newATriggers, newAtr)
-	}
-	return newATriggers
 }

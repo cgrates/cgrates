@@ -307,14 +307,14 @@ func TestPSQLSetGetTPActionTriggers(t *testing.T) {
 	}
 	atrgs := &utils.TPActionTriggers{
 		TPid:             utils.TEST_SQL,
-		ActionTriggersId: utils.TEST_SQL,
+		ActionTriggersId: "MY_FIRST_ATGR",
 		ActionTriggers:   []*utils.TPActionTrigger{atrg},
 	}
 	matrg := APItoModelActionTrigger(atrgs)
 	if err := psqlDb.SetTpActionTriggers(matrg); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
-	if rcvMpAtrgs, err := psqlDb.GetTpActionTriggers(utils.TEST_SQL, utils.TEST_SQL); err != nil {
+	if rcvMpAtrgs, err := psqlDb.GetTpActionTriggers(utils.TEST_SQL, "MY_FIRST_ATGR"); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !modelEqual(matrg[0], rcvMpAtrgs[0]) {
 		t.Errorf("Expecting: %+v, received: %+v", matrg, rcvMpAtrgs)

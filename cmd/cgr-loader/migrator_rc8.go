@@ -223,7 +223,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		// action triggers
 		for index, oldAtr := range oldAcc.ActionTriggers {
 			newAcc.ActionTriggers[index] = &engine.ActionTrigger{
-				Id:                    oldAtr.Id,
+				UniqueID:              oldAtr.Id,
 				ThresholdType:         oldAtr.ThresholdType,
 				ThresholdValue:        oldAtr.ThresholdValue,
 				Recurrent:             oldAtr.Recurrent,
@@ -295,7 +295,7 @@ func (mig MigratorRC8) migrateActionTriggers() error {
 		newAtrs := make(engine.ActionTriggers, len(oldAtrs))
 		for index, oldAtr := range oldAtrs {
 			newAtrs[index] = &engine.ActionTrigger{
-				Id:                    oldAtr.Id,
+				UniqueID:              oldAtr.Id,
 				ThresholdType:         oldAtr.ThresholdType,
 				ThresholdValue:        oldAtr.ThresholdValue,
 				Recurrent:             oldAtr.Recurrent,
