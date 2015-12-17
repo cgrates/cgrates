@@ -257,7 +257,8 @@ type DARequestProcessorJsnCfg struct {
 	Dry_run             *bool
 	Request_filter      *string
 	Continue_on_success *bool
-	Content_fields      *[]*CdrFieldJsonCfg
+	CCR_fields          *[]*CdrFieldJsonCfg
+	CCA_fields          *[]*CdrFieldJsonCfg
 }
 
 // History server config section

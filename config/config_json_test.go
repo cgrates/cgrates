@@ -433,7 +433,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 				Dry_run:             utils.BoolPointer(false),
 				Request_filter:      utils.StringPointer("Subscription-Id>Subscription-Id-Type(0)"),
 				Continue_on_success: utils.BoolPointer(false),
-				Content_fields: &[]*CdrFieldJsonCfg{
+				CCR_fields: &[]*CdrFieldJsonCfg{
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("tor"), Field_id: utils.StringPointer(utils.TOR), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("^*voice"), Mandatory: utils.BoolPointer(true)},
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("accid"), Field_id: utils.StringPointer(utils.ACCID), Type: utils.StringPointer(utils.META_COMPOSED),
@@ -461,13 +461,15 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("subscriber_id"), Field_id: utils.StringPointer("SubscriberId"), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("Subscription-Id>Subscription-Id-Data"), Mandatory: utils.BoolPointer(true)},
 				},
+				CCA_fields: &[]*CdrFieldJsonCfg{},
 			},
 		},
 	}
 	if cfg, err := dfCgrJsonCfg.DiameterAgentJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
+		rcv := *cfg.Request_processors
+		t.Errorf("Received: %+v", rcv[0].CCA_fields)
 	}
 }
 

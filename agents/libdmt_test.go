@@ -99,11 +99,10 @@ func TestFieldOutVal(t *testing.T) {
 	m.NewAVP("Requested-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(360))}}) // CC-Time
-	ccr := &CCR{diamMessage: m}
 	cfgFld := &config.CfgCdrField{Tag: "StaticTest", Type: utils.META_COMPOSED, FieldId: utils.TOR,
 		Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true}
 	eOut := "*voice"
-	if fldOut, err := ccr.fieldOutVal(cfgFld); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0)); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
@@ -111,7 +110,7 @@ func TestFieldOutVal(t *testing.T) {
 	cfgFld = &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
 		Value: utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Time", utils.INFIELD_SEP), Mandatory: true}
 	eOut = "360"
-	if fldOut, err := ccr.fieldOutVal(cfgFld); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0)); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
@@ -120,7 +119,7 @@ func TestFieldOutVal(t *testing.T) {
 	cfgFld = &config.CfgCdrField{Tag: "Grouped1", Type: utils.MetaGrouped, FieldId: "Account",
 		Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
 	eOut = "33708000003"
-	if fldOut, err := ccr.fieldOutVal(cfgFld); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0)); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
@@ -130,7 +129,7 @@ func TestFieldOutVal(t *testing.T) {
 		FieldFilter: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type(1)", utils.INFIELD_SEP),
 		Value:       utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
 	eOut = "208708000003"
-	if fldOut, err := ccr.fieldOutVal(cfgFld); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0)); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
