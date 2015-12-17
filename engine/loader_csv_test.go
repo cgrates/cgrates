@@ -1002,7 +1002,7 @@ func TestLoadActionTimings(t *testing.T) {
 					},
 				},
 				Weight:    10,
-				ActionsId: "MINI",
+				ActionsID: "MINI",
 			},
 			&ActionTiming{
 				Timing: &RateInterval{
@@ -1015,7 +1015,7 @@ func TestLoadActionTimings(t *testing.T) {
 					},
 				},
 				Weight:    10,
-				ActionsId: "SHARED",
+				ActionsID: "SHARED",
 			},
 		},
 	}

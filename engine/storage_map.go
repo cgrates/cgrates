@@ -33,8 +33,9 @@ import (
 )
 
 type MapStorage struct {
-	dict map[string][]byte
-	ms   Marshaler
+	dict  map[string][]byte
+	tasks [][]byte
+	ms    Marshaler
 }
 
 func NewMapStorage() (*MapStorage, error) {
@@ -687,6 +688,27 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error
 		ats[key] = apl
 	}
 
+	return
+}
+
+func (ms *MapStorage) PushTask(t *Task) error {
+	result, err := ms.ms.Marshal(t)
+	if err != nil {
+		return err
+	}
+	ms.tasks = append(ms.tasks, result)
+	return nil
+}
+
+func (ms *MapStorage) PopTask() (t *Task, err error) {
+	if len(ms.tasks) > 0 {
+		var values []byte
+		values, ms.tasks = ms.tasks[0], ms.tasks[1:]
+		t = &Task{}
+		err = ms.ms.Unmarshal(values, t)
+	} else {
+		err = utils.ErrNotFound
+	}
 	return
 }
 

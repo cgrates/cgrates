@@ -73,7 +73,6 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	}
 	at.Executed = true
 	transactionFailed := false
-	toBeSaved := true
 	for _, a := range aac {
 		if a.Balance == nil {
 			a.Balance = &Balance{}
@@ -91,16 +90,13 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 			transactionFailed = false
 			break
 		}
-		toBeSaved = true
 	}
 	if transactionFailed || at.Recurrent {
 		at.Executed = false
 	}
 	if !transactionFailed && ub != nil {
 		storageLogger.LogActionTrigger(ub.Id, utils.RATER_SOURCE, at, aac)
-		if toBeSaved {
-			accountingStorage.SetAccount(ub)
-		}
+		accountingStorage.SetAccount(ub)
 	}
 	return
 }

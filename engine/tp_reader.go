@@ -593,7 +593,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 						StartTime: t.StartTime,
 					},
 				},
-				ActionsId: at.ActionsId,
+				ActionsID: at.ActionsId,
 			})
 
 			tpr.actionPlans[atId] = actPln
@@ -724,7 +724,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 							StartTime: t.StartTime,
 						},
 					},
-					ActionsId: at.ActionsId,
+					ActionsID: at.ActionsId,
 				})
 				// collect action ids from timings
 				actionsIds = append(actionsIds, at.ActionsId)
@@ -873,7 +873,6 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 				return fmt.Errorf("could not get action triggers for tag %s", aa.ActionTriggersId)
 			}
 		}
-
 		ub := &Account{
 			Id:             aa.KeyId(),
 			ActionTriggers: aTriggers,
@@ -1318,8 +1317,22 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Action Plans:")
 	}
-	for k, ats := range tpr.actionPlans {
-		err = tpr.ratingStorage.SetActionPlan(k, ats)
+	for k, ap := range tpr.actionPlans {
+		for _, at := range ap.ActionTimings {
+			if at.IsASAP() {
+				for accID := range ap.AccountIDs {
+					t := &Task{
+						Uuid:      utils.GenUUID(),
+						AccountID: accID,
+						ActionsID: at.ActionsID,
+					}
+					if err = tpr.ratingStorage.PushTask(t); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		err = tpr.ratingStorage.SetActionPlan(k, ap)
 		if err != nil {
 			return err
 		}

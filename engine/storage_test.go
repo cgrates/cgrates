@@ -272,6 +272,41 @@ func TestDifferentUuid(t *testing.T) {
 	}
 }
 
+func TestStorageTask(t *testing.T) {
+	// clean previous unused tasks
+	for i := 0; i < 16; i++ {
+		ratingStorage.PopTask()
+	}
+
+	if err := ratingStorage.PushTask(&Task{Uuid: "1"}); err != nil {
+		t.Error("Error pushing task: ", err)
+	}
+	if err := ratingStorage.PushTask(&Task{Uuid: "2"}); err != nil {
+		t.Error("Error pushing task: ", err)
+	}
+	if err := ratingStorage.PushTask(&Task{Uuid: "3"}); err != nil {
+		t.Error("Error pushing task: ", err)
+	}
+	if err := ratingStorage.PushTask(&Task{Uuid: "4"}); err != nil {
+		t.Error("Error pushing task: ", err)
+	}
+	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "1" {
+		t.Error("Error poping task: ", task, err)
+	}
+	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "2" {
+		t.Error("Error poping task: ", task, err)
+	}
+	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "3" {
+		t.Error("Error poping task: ", task, err)
+	}
+	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "4" {
+		t.Error("Error poping task: ", task, err)
+	}
+	if task, err := ratingStorage.PopTask(); err == nil && task != nil {
+		t.Errorf("Error poping task %+v, %v: ", task, err)
+	}
+}
+
 /************************** Benchmarks *****************************/
 
 func GetUB() *Account {

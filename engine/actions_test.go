@@ -1061,9 +1061,9 @@ func TestActionPlanLogging(t *testing.T) {
 		accountIDs: map[string]struct{}{"one": struct{}{}, "two": struct{}{}, "three": struct{}{}},
 		Timing:     i,
 		Weight:     10.0,
-		ActionsId:  "TEST_ACTIONS",
+		ActionsID:  "TEST_ACTIONS",
 	}
-	as, err := ratingStorage.GetActions(at.ActionsId, false)
+	as, err := ratingStorage.GetActions(at.ActionsID, false)
 	if err != nil {
 		t.Error("Error getting actions for the action trigger: ", err)
 	}

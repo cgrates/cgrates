@@ -66,6 +66,8 @@ type RatingStorage interface {
 	GetActionPlan(string, bool) (*ActionPlan, error)
 	SetActionPlan(string, *ActionPlan) error
 	GetAllActionPlans() (map[string]*ActionPlan, error)
+	PushTask(*Task) error
+	PopTask() (*Task, error)
 }
 
 type AccountingStorage interface {

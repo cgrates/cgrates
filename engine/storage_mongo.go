@@ -34,6 +34,7 @@ const (
 	colDst    = "destinations"
 	colAct    = "actions"
 	colApl    = "actionplans"
+	colTsk    = "tasks"
 	colAtr    = "actiontriggers"
 	colRpl    = "ratingplans"
 	colRpf    = "ratingprofiles"
@@ -1043,10 +1044,13 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 		ats = kv.Value
 		cache2go.Cache(utils.ACTION_PLAN_PREFIX+key, ats)
 	}
+	ats.AccountIDs = utils.YesDots(ats.AccountIDs)
 	return
 }
 
 func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan) error {
+	// clean dots from account ids map
+	ats.AccountIDs = utils.NoDots(ats.AccountIDs)
 	if len(ats.ActionTimings) == 0 {
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		err := ms.db.C(colApl).Remove(bson.M{"key": key})
@@ -1071,7 +1075,27 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 	ats = make(map[string]*ActionPlan, len(apls))
 	for key, value := range apls {
 		apl := value.(*ActionPlan)
+		apl.AccountIDs = utils.YesDots(apl.AccountIDs)
 		ats[key] = apl
+	}
+
+	return
+}
+
+func (ms *MongoStorage) PushTask(t *Task) error {
+	return ms.db.C(colTsk).Insert(bson.M{"_id": bson.NewObjectId(), "task": t})
+}
+
+func (ms *MongoStorage) PopTask() (t *Task, err error) {
+	v := struct {
+		ID   bson.ObjectId `bson:"_id"`
+		Task *Task
+	}{}
+	if err = ms.db.C(colTsk).Find(nil).One(&v); err == nil {
+		if remErr := ms.db.C(colTsk).Remove(bson.M{"_id": v.ID}); remErr != nil {
+			return nil, remErr
+		}
+		t = v.Task
 	}
 
 	return

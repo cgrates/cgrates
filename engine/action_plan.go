@@ -34,11 +34,17 @@ const (
 type ActionTiming struct {
 	Uuid       string
 	Timing     *RateInterval
-	ActionsId  string
+	ActionsID  string
 	Weight     float64
 	actions    Actions
-	accountIDs map[string]struct{}
-	stCache    time.Time // cached time of the next start
+	accountIDs map[string]struct{} // copy of action plans accounts
+	stCache    time.Time           // cached time of the next start
+}
+
+type Task struct {
+	Uuid      string
+	AccountID string
+	ActionsID string
 }
 
 type ActionPlan struct {
@@ -53,6 +59,14 @@ func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
 		delete(apl.AccountIDs, accID)
 	}
 	return
+}
+
+func (t *Task) Execute() error {
+	return (&ActionTiming{
+		Uuid:       t.Uuid,
+		ActionsID:  t.ActionsID,
+		accountIDs: map[string]struct{}{t.AccountID: struct{}{}},
+	}).Execute()
 }
 
 func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
@@ -236,37 +250,37 @@ func (at *ActionTiming) SetActions(as Actions) {
 	at.actions = as
 }
 
+func (at *ActionTiming) SetAccountIDs(accIDs map[string]struct{}) {
+	at.accountIDs = accIDs
+}
+
 func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		at.actions, err = ratingStorage.GetActions(at.ActionsId, false)
+		at.actions, err = ratingStorage.GetActions(at.ActionsID, false)
 	}
 	at.actions.Sort()
 	return at.actions, err
 }
 
 func (at *ActionTiming) Execute() (err error) {
-	if len(at.accountIDs) == 0 { // nothing to do if no accounts set
-		return
-	}
 	at.ResetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsId, err))
+		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsID, err))
 		return
 	}
-	for accId, _ := range at.accountIDs {
+	for accID, _ := range at.accountIDs {
 		_, err = Guardian.Guard(func() (interface{}, error) {
-			ub, err := accountingStorage.GetAccount(accId)
+			ub, err := accountingStorage.GetAccount(accID)
 			if err != nil {
-				utils.Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", accId))
+				utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))
 				return 0, err
 			}
 			transactionFailed := false
-			toBeSaved := true
 			for _, a := range aac {
 				if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
 					continue // disabled acocunts are not removed from action  plan
-					//return 0, fmt.Errorf("Account %s is disabled", accId)
+					//return 0, fmt.Errorf("Account %s is disabled", accID)
 				}
 				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
 					a.Balance.ExpirationDate = expDate
@@ -285,13 +299,33 @@ func (at *ActionTiming) Execute() (err error) {
 					transactionFailed = true
 					break
 				}
-				toBeSaved = true
 			}
-			if !transactionFailed && toBeSaved {
+			if !transactionFailed {
 				accountingStorage.SetAccount(ub)
 			}
 			return 0, nil
-		}, 0, accId)
+		}, 0, accID)
+	}
+	if len(at.accountIDs) == 0 { // action timing executing without accounts
+		for _, a := range aac {
+
+			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) &&
+				parseErr == nil && !expDate.IsZero() {
+				a.Balance.ExpirationDate = expDate
+			}
+
+			actionFunction, exists := getActionFunc(a.ActionType)
+			if !exists {
+				// do not allow the action plan to be rescheduled
+				at.Timing = nil
+				utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+				break
+			}
+			if err := actionFunction(nil, nil, a, aac); err != nil {
+				utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
+				break
+			}
+		}
 	}
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
@@ -344,8 +378,8 @@ func (atpl ActionTimingPriorityList) Sort() {
 			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 			continue
 		}
-		for iAcc, accId := range at.AccountIds {
-			if accId == accountId {
+		for iAcc, accID := range at.AccountIds {
+			if accID == accountId {
 				if len(at.AccountIds) == 1 { // Only one balance, remove complete at
 					if len(ats) == 1 { // Removing last item, by init empty
 						return make([]*ActionPlan, 0)

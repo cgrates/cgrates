@@ -886,7 +886,7 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 		// delete the key
 		return conn.Cmd("DEL", utils.ACTION_TRIGGER_PREFIX+key).Err
 	}
-	result, err := rs.ms.Marshal(&atrs)
+	result, err := rs.ms.Marshal(atrs)
 	if err != nil {
 		return err
 	}
@@ -937,6 +937,23 @@ func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 		ats[key] = apl
 	}
 
+	return
+}
+
+func (rs *RedisStorage) PushTask(t *Task) error {
+	result, err := rs.ms.Marshal(t)
+	if err != nil {
+		return err
+	}
+	return rs.db.Cmd("RPUSH", utils.TASKS_KEY, result).Err
+}
+
+func (rs *RedisStorage) PopTask() (t *Task, err error) {
+	var values []byte
+	if values, err = rs.db.Cmd("LPOP", utils.TASKS_KEY).Bytes(); err == nil {
+		t = &Task{}
+		err = rs.ms.Unmarshal(values, t)
+	}
 	return
 }
 
@@ -1037,7 +1054,7 @@ func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	return rs.db.Cmd("SET", utils.LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v*%v", ubId, string(mat), string(mas)))).Err
 }
 
-func (rs *RedisStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
+func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
