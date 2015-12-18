@@ -73,6 +73,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	}
 	at.Executed = true
 	transactionFailed := false
+	removeAccountActionFound := false
 	for _, a := range aac {
 		if a.Balance == nil {
 			a.Balance = &Balance{}
@@ -90,11 +91,14 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 			transactionFailed = false
 			break
 		}
+		if a.ActionType == REMOVE_ACCOUNT {
+			removeAccountActionFound = true
+		}
 	}
 	if transactionFailed || at.Recurrent {
 		at.Executed = false
 	}
-	if !transactionFailed && ub != nil {
+	if !transactionFailed && ub != nil && !removeAccountActionFound {
 		storageLogger.LogActionTrigger(ub.Id, utils.RATER_SOURCE, at, aac)
 		accountingStorage.SetAccount(ub)
 	}

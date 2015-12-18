@@ -991,6 +991,7 @@ func TestLoadActionTimings(t *testing.T) {
 		AccountIDs: map[string]struct{}{"vdf:minitsboy": struct{}{}},
 		ActionTimings: []*ActionTiming{
 			&ActionTiming{
+				Uuid: atm.ActionTimings[0].Uuid,
 				Timing: &RateInterval{
 					Timing: &RITiming{
 						Years:     utils.Years{2012},
@@ -1004,6 +1005,7 @@ func TestLoadActionTimings(t *testing.T) {
 				ActionsID: "MINI",
 			},
 			&ActionTiming{
+				Uuid: atm.ActionTimings[1].Uuid,
 				Timing: &RateInterval{
 					Timing: &RITiming{
 						Years:     utils.Years{2012},
@@ -1019,7 +1021,7 @@ func TestLoadActionTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(atm, expected) {
-		t.Errorf("Error loading action timing:\n%+v", atm.ActionTimings[1].Timing)
+		t.Errorf("Error loading action timing:\n%+v", atm.ActionTimings[1])
 	}
 }
 

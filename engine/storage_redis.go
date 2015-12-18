@@ -903,9 +903,18 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 		}
 	}
 	var values []byte
-
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &ats)
+		b := bytes.NewBuffer(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return nil, err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		r.Close()
+		err = rs.ms.Unmarshal(out, &ats)
 		cache2go.Cache(key, ats)
 	}
 	return
@@ -922,7 +931,11 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
 	if err != nil {
 		return err
 	}
-	return rs.db.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, result).Err
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	w.Write(result)
+	w.Close()
+	return rs.db.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, b.Bytes()).Err
 }
 
 func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {

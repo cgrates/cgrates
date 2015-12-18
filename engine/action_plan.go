@@ -289,6 +289,7 @@ func (at *ActionTiming) Execute() (err error) {
 				return 0, err
 			}
 			transactionFailed := false
+			removeAccountActionFound := false
 			for _, a := range aac {
 				if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
 					continue // disabled acocunts are not removed from action  plan
@@ -311,8 +312,11 @@ func (at *ActionTiming) Execute() (err error) {
 					transactionFailed = true
 					break
 				}
+				if a.ActionType == REMOVE_ACCOUNT {
+					removeAccountActionFound = true
+				}
 			}
-			if !transactionFailed {
+			if !transactionFailed && !removeAccountActionFound {
 				accountingStorage.SetAccount(ub)
 			}
 			return 0, nil

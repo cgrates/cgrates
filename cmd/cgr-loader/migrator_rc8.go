@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/zlib"
 	"fmt"
 	"log"
 	"strings"
@@ -505,7 +507,11 @@ func (mig MigratorRC8) migrateActionPlans() error {
 		if err != nil {
 			return err
 		}
-		if err = mig.db.Cmd("SET", key, result).Err; err != nil {
+		var b bytes.Buffer
+		w := zlib.NewWriter(&b)
+		w.Write(result)
+		w.Close()
+		if err = mig.db.Cmd("SET", key, b.Bytes()).Err; err != nil {
 			return err
 		}
 	}
