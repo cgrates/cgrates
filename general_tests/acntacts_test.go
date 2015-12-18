@@ -91,7 +91,7 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 
 func TestAcntActsEnableAcnt(t *testing.T) {
 	acnt1Tag := "cgrates.org:1"
-	at := &engine.ActionPlan{
+	at := &engine.ActionTiming{
 		ActionsID: "ENABLE_ACNT",
 	}
 	at.SetAccountIDs(map[string]struct{}{acnt1Tag: struct{}{}})
