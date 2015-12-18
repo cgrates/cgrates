@@ -211,6 +211,9 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 					return 0, err
 				}
 				if _, exists := ap.AccountIDs[accID]; !exists {
+					if ap.AccountIDs == nil {
+						ap.AccountIDs = make(map[string]struct{})
+					}
 					ap.AccountIDs[accID] = struct{}{}
 					schedulerReloadNeeded = true
 					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap); err != nil {
