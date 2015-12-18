@@ -96,7 +96,7 @@ func (s *Scheduler) loadActionPlans() {
 	s.Lock()
 	defer s.Unlock()
 	// limit the number of concurrent tasks
-	var limit = make(chan bool, 10)
+	limit := make(chan bool, 10)
 	// execute existing tasks
 	for {
 		task, err := s.storage.PopTask()

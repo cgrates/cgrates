@@ -732,6 +732,21 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				actionPlan.AccountIDs = exitingAccountIds
 			}
 
+			// write tasks
+			for _, at := range actionPlan.ActionTimings {
+				if at.IsASAP() {
+					for accID := range actionPlan.AccountIDs {
+						t := &Task{
+							Uuid:      utils.GenUUID(),
+							AccountID: accID,
+							ActionsID: at.ActionsID,
+						}
+						if err = tpr.ratingStorage.PushTask(t); err != nil {
+							return err
+						}
+					}
+				}
+			}
 			// write action plan
 			err = tpr.ratingStorage.SetActionPlan(accountAction.ActionPlanId, actionPlan)
 			if err != nil {
