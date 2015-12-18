@@ -740,7 +740,6 @@ func TestApierSetRatingProfile(t *testing.T) {
 	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
-	time.Sleep(10 * time.Millisecond) // Give time for cache reload
 	// Make sure rates were loaded for account dan
 	// Test here ResponderGetCost
 	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
@@ -1074,7 +1073,7 @@ func TestApierSetAccount(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanId: "ATMS_1"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanId: "ATMS_1", ReloadScheduler: true}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1174,7 +1173,7 @@ func TestApierTriggersExecute(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan8"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan8", ReloadScheduler: true}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {

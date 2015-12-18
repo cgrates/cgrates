@@ -491,7 +491,9 @@ func (mig MigratorRC8) migrateActionPlans() error {
 			}
 			if !apl.IsASAP() {
 				for _, accID := range apl.AccountIds {
-					newApl.AccountIDs[accID] = struct{}{}
+					if _, exists := newApl.AccountIDs[accID]; !exists {
+						newApl.AccountIDs[accID] = struct{}{}
+					}
 				}
 			}
 			newApl.ActionTimings = append(newApl.ActionTimings, &engine.ActionTiming{

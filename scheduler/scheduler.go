@@ -105,6 +105,7 @@ func (s *Scheduler) loadActionPlans() {
 		}
 		limit <- true
 		go func() {
+			utils.Logger.Info(fmt.Sprintf("<Scheduler> executing task %s on account %s", task.ActionsID, task.AccountID))
 			task.Execute()
 			<-limit
 		}()
