@@ -1044,7 +1044,7 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 		ats = kv.Value
 		cache2go.Cache(utils.ACTION_PLAN_PREFIX+key, ats)
 	}
-	if ats.AccountIDs != nil {
+	if ats != nil && ats.AccountIDs != nil {
 		ats.AccountIDs = utils.YesDots(ats.AccountIDs)
 	}
 	return
@@ -1052,7 +1052,7 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 
 func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan) error {
 	// clean dots from account ids map
-	if ats.AccountIDs != nil {
+	if ats != nil && ats.AccountIDs != nil {
 		ats.AccountIDs = utils.NoDots(ats.AccountIDs)
 	}
 	if len(ats.ActionTimings) == 0 {
