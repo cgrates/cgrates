@@ -104,9 +104,9 @@ type AttrsGetScheduledActions struct {
 }
 
 type ScheduledActions struct {
-	NextRunTime                             time.Time
-	Accounts                                int
-	ActionsId, ActionPlanId, ActionPlanUuid string
+	NextRunTime                               time.Time
+	Accounts                                  int
+	ActionsId, ActionPlanId, ActionTimingUuid string
 }
 
 func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *[]*ScheduledActions) error {
@@ -116,7 +116,7 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 	schedActions := make([]*ScheduledActions, 0) // needs to be initialized if remains empty
 	scheduledActions := self.Sched.GetQueue()
 	for _, qActions := range scheduledActions {
-		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid, Accounts: len(qActions.AccountIds)}
+		sas := &ScheduledActions{ActionsId: qActions.ActionsID, ActionPlanId: qActions.GetActionPlanID(), ActionTimingUuid: qActions.Uuid, Accounts: len(qActions.GetAccountIDs())}
 		if attrs.SearchTerm != "" &&
 			!(strings.Contains(sas.ActionPlanId, attrs.SearchTerm) ||
 				strings.Contains(sas.ActionsId, attrs.SearchTerm)) {
@@ -132,7 +132,7 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 		// filter on account
 		if attrs.Tenant != "" || attrs.Account != "" {
 			found := false
-			for _, accID := range qActions.AccountIds {
+			for accID := range qActions.GetAccountIDs() {
 				split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
 				if len(split) != 2 {
 					continue // malformed account id

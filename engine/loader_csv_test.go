@@ -985,25 +985,43 @@ func TestLoadActionTimings(t *testing.T) {
 	if len(csvr.actionPlans) != 6 {
 		t.Error("Failed to load action timings: ", len(csvr.actionPlans))
 	}
-	atm := csvr.actionPlans["MORE_MINUTES"][0]
+	atm := csvr.actionPlans["MORE_MINUTES"]
 	expected := &ActionPlan{
-		Uuid:       atm.Uuid,
 		Id:         "MORE_MINUTES",
-		AccountIds: []string{"vdf:minitsboy"},
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				Years:     utils.Years{2012},
-				Months:    utils.Months{},
-				MonthDays: utils.MonthDays{},
-				WeekDays:  utils.WeekDays{},
-				StartTime: utils.ASAP,
+		AccountIDs: map[string]struct{}{"vdf:minitsboy": struct{}{}},
+		ActionTimings: []*ActionTiming{
+			&ActionTiming{
+				Uuid: atm.ActionTimings[0].Uuid,
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "MINI",
+			},
+			&ActionTiming{
+				Uuid: atm.ActionTimings[1].Uuid,
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "SHARED",
 			},
 		},
-		Weight:    10,
-		ActionsId: "MINI",
 	}
 	if !reflect.DeepEqual(atm, expected) {
-		t.Errorf("Error loading action timing:\n%+v", atm)
+		t.Errorf("Error loading action timing:\n%+v", atm.ActionTimings[1])
 	}
 }
 

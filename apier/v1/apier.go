@@ -102,162 +102,12 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 	return nil
 }
 
-type AttrAddBalance struct {
-	Tenant         string
-	Account        string
-	BalanceUuid    string
-	BalanceId      string
-	BalanceType    string
-	Directions     string
-	Value          float64
-	ExpiryTime     string
-	RatingSubject  string
-	Categories     string
-	DestinationIds string
-	Weight         float64
-	SharedGroups   string
-	Overwrite      bool // When true it will reset if the balance is already there
-	Disabled       bool
-}
-
-func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	expTime, err := utils.ParseTimeDetectLayout(attr.ExpiryTime, self.Config.DefaultTimezone)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetAccount(tag); err != nil {
-		// create account if not exists
-		account := &engine.Account{
-			Id: tag,
-		}
-		if err := self.AccountDb.SetAccount(account); err != nil {
-			*reply = err.Error()
-			return err
-		}
-	}
-	at := &engine.ActionPlan{
-		AccountIds: []string{tag},
-	}
-	aType := engine.DEBIT
-	// reverse the sign as it is a debit
-	attr.Value = -attr.Value
-
-	if attr.Overwrite {
-		aType = engine.DEBIT_RESET
-	}
-	at.SetActions(engine.Actions{
-		&engine.Action{
-			ActionType:  aType,
-			BalanceType: attr.BalanceType,
-			Balance: &engine.Balance{
-				Uuid:           attr.BalanceUuid,
-				Id:             attr.BalanceId,
-				Value:          attr.Value,
-				ExpirationDate: expTime,
-				RatingSubject:  attr.RatingSubject,
-				Directions:     utils.ParseStringMap(attr.Directions),
-				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
-				Categories:     utils.ParseStringMap(attr.Categories),
-				Weight:         attr.Weight,
-				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
-				Disabled:       attr.Disabled,
-			},
-		},
-	})
-	if err := at.Execute(); err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = OK
-	return nil
-}
-
-func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) error {
-	expTime, err := utils.ParseDate(attr.ExpiryTime)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	tag := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetAccount(tag); err != nil {
-		return utils.ErrNotFound
-	}
-	at := &engine.ActionPlan{
-		AccountIds: []string{tag},
-	}
-	at.SetActions(engine.Actions{
-		&engine.Action{
-			ActionType:  engine.ENABLE_DISABLE_BALANCE,
-			BalanceType: attr.BalanceType,
-			Balance: &engine.Balance{
-				Uuid:           attr.BalanceUuid,
-				Id:             attr.BalanceId,
-				Value:          attr.Value,
-				ExpirationDate: expTime,
-				RatingSubject:  attr.RatingSubject,
-				Directions:     utils.ParseStringMap(attr.Directions),
-				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
-				Weight:         attr.Weight,
-				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
-				Disabled:       attr.Disabled,
-			},
-		},
-	})
-	if err := at.Execute(); err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = OK
-	return nil
-}
-
-func (self *ApierV1) RemoveBalances(attr *AttrAddBalance, reply *string) error {
-	expTime, err := utils.ParseDate(attr.ExpiryTime)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	accId := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetAccount(accId); err != nil {
-		return utils.ErrNotFound
-	}
-	at := &engine.ActionPlan{
-		AccountIds: []string{accId},
-	}
-	at.SetActions(engine.Actions{
-		&engine.Action{
-			ActionType:  engine.REMOVE_BALANCE,
-			BalanceType: attr.BalanceType,
-			Balance: &engine.Balance{
-				Uuid:           attr.BalanceUuid,
-				Id:             attr.BalanceId,
-				Value:          attr.Value,
-				ExpirationDate: expTime,
-				RatingSubject:  attr.RatingSubject,
-				Directions:     utils.ParseStringMap(attr.Directions),
-				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
-				Weight:         attr.Weight,
-				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
-				Disabled:       attr.Disabled,
-			},
-		},
-	})
-	if err := at.Execute(); err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = OK
-	return nil
-}
-
 func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
-	accId := utils.AccountKey(attr.Tenant, attr.Account)
-	at := &engine.ActionPlan{
-		AccountIds: []string{accId},
-		ActionsId:  attr.ActionsId,
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	at := &engine.ActionTiming{
+		ActionsID: attr.ActionsId,
 	}
+	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
@@ -745,8 +595,10 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 			return utils.ErrExists
 		}
 	}
-	storeAtms := make(engine.ActionPlans, len(attrs.ActionPlan))
-	for idx, apiAtm := range attrs.ActionPlan {
+	ap := &engine.ActionPlan{
+		Id: attrs.Id,
+	}
+	for _, apiAtm := range attrs.ActionPlan {
 		if exists, err := self.RatingDb.HasData(utils.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return utils.NewErrServerError(err)
 		} else if !exists {
@@ -758,16 +610,14 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		timing.MonthDays.Parse(apiAtm.MonthDays, ";")
 		timing.WeekDays.Parse(apiAtm.WeekDays, ";")
 		timing.StartTime = apiAtm.Time
-		at := &engine.ActionPlan{
+		ap.ActionTimings = append(ap.ActionTimings, &engine.ActionTiming{
 			Uuid:      utils.GenUUID(),
-			Id:        attrs.Id,
 			Weight:    apiAtm.Weight,
 			Timing:    &engine.RateInterval{Timing: timing},
-			ActionsId: apiAtm.ActionsId,
-		}
-		storeAtms[idx] = at
+			ActionsID: apiAtm.ActionsId,
+		})
 	}
-	if err := self.RatingDb.SetActionPlans(attrs.Id, storeAtms); err != nil {
+	if err := self.RatingDb.SetActionPlan(ap.Id, ap); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.Id}})
@@ -785,8 +635,8 @@ type AttrGetActionPlan struct {
 	Id string
 }
 
-func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]engine.ActionPlans) error {
-	var result []engine.ActionPlans
+func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.ActionPlan) error {
+	var result []*engine.ActionPlan
 	if attr.Id == "" || attr.Id == "*" {
 		aplsMap, err := self.RatingDb.GetAllActionPlans()
 		if err != nil {
@@ -796,7 +646,7 @@ func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]engine.Actio
 			result = append(result, apls)
 		}
 	} else {
-		apls, err := self.RatingDb.GetActionPlans(attr.Id, false)
+		apls, err := self.RatingDb.GetActionPlan(attr.Id, false)
 		if err != nil {
 			return err
 		}
@@ -956,7 +806,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.RatingDb.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.SHARED_GROUP_PREFIX); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.SHARED_GROUP_PREFIX, utils.ACTION_PLAN_PREFIX); err != nil {
 		return err
 	}
 	if self.Sched != nil {

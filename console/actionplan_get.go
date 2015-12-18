@@ -61,6 +61,6 @@ func (self *CmdGetActionPlan) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetActionPlan) RpcResult() interface{} {
-	s := make([]*engine.ActionPlans, 0)
+	s := make([]*engine.ActionPlan, 0)
 	return &s
 }
