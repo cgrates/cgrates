@@ -133,6 +133,7 @@ func (s *Scheduler) loadActionPlans() {
 				continue
 			}
 			at.SetAccountIDs(actionPlan.AccountIDs) // copy the accounts
+			at.SetActionPlanID(actionPlan.Id)
 			s.queue = append(s.queue, at)
 
 		}

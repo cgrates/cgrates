@@ -582,6 +582,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 				}
 			}
 			actPln.ActionTimings = append(actPln.ActionTimings, &ActionTiming{
+				Uuid:   utils.GenUUID(),
 				Weight: at.Weight,
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -713,6 +714,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					}
 				}
 				actionPlan.ActionTimings = append(actionPlan.ActionTimings, &ActionTiming{
+					Uuid:   utils.GenUUID(),
 					Weight: at.Weight,
 					Timing: &RateInterval{
 						Timing: &RITiming{

@@ -125,6 +125,26 @@ type Action struct {
 	Balance          *Balance
 }
 
+type ActionPlan struct {
+	Uuid       string // uniquely identify the timing
+	Id         string // informative purpose only
+	AccountIds []string
+	Timing     *engine.RateInterval
+	Weight     float64
+	ActionsId  string
+	actions    Actions
+	stCache    time.Time // cached time of the next start
+}
+
+func (at *ActionPlan) IsASAP() bool {
+	if at.Timing == nil {
+		return false
+	}
+	return at.Timing.Timing.StartTime == utils.ASAP
+}
+
+type ActionPlans []*ActionPlan
+
 func (mig MigratorRC8) migrateAccounts() error {
 	keys, err := mig.db.Cmd("KEYS", OLD_ACCOUNT_PREFIX+"*").List()
 	if err != nil {
@@ -431,10 +451,10 @@ func (mig MigratorRC8) migrateActionPlans() error {
 	if err != nil {
 		return err
 	}
-	aplsMap := make(map[string]engine.ActionPlans, len(keys))
+	aplsMap := make(map[string]ActionPlans, len(keys))
 	for _, key := range keys {
 		log.Printf("Migrating action plans: %s...", key)
-		var apls engine.ActionPlans
+		var apls ActionPlans
 		var values []byte
 		if values, err = mig.db.Cmd("GET", key).Bytes(); err == nil {
 			if err := mig.ms.Unmarshal(values, &apls); err != nil {
@@ -456,7 +476,31 @@ func (mig MigratorRC8) migrateActionPlans() error {
 		aplsMap[key] = apls
 	}
 	// write data back
-	for key, apl := range aplsMap {
+	newAplMap := make(map[string]*engine.ActionPlan)
+	for key, apls := range aplsMap {
+		for _, apl := range apls {
+			newApl, exists := newAplMap[key]
+			if !exists {
+				newApl = &engine.ActionPlan{
+					Id:         apl.Id,
+					AccountIDs: make(map[string]struct{}),
+				}
+				newAplMap[key] = newApl
+			}
+			if !apl.IsASAP() {
+				for _, accID := range apl.AccountIds {
+					newApl.AccountIDs[accID] = struct{}{}
+				}
+			}
+			newApl.ActionTimings = append(newApl.ActionTimings, &engine.ActionTiming{
+				Uuid:      utils.GenUUID(),
+				Timing:    apl.Timing,
+				ActionsID: apl.ActionsId,
+				Weight:    apl.Weight,
+			})
+		}
+	}
+	for key, apl := range newAplMap {
 		result, err := mig.ms.Marshal(apl)
 		if err != nil {
 			return err

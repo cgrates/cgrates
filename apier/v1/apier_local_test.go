@@ -1134,7 +1134,6 @@ func TestApierGetAccount(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	time.Sleep(100 * time.Millisecond) // give scheduler time to react
 	var reply *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
