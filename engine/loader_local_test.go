@@ -21,6 +21,7 @@ package engine
 import (
 	"flag"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -395,7 +396,7 @@ func TestMatchLoadCsvWithStorRating(t *testing.T) {
 	for _, key := range keysCsv {
 		var refVal []byte
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
-			if key == utils.TASKS_KEY {
+			if key == utils.TASKS_KEY || strings.HasPrefix(key, utils.ACTION_PLAN_PREFIX) { // action plans are not consistent
 				continue
 			}
 			qVal, err := rs.db.Cmd("GET", key).Bytes()
