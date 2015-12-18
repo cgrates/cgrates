@@ -689,9 +689,9 @@ func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	}{ubId, at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
+func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	return ms.db.C(colLogApl).Insert(&struct {
-		ActionPlan *ActionPlan
+		ActionPlan *ActionTiming
 		Actions    Actions
 		LogTime    time.Time
 		Source     string

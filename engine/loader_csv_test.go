@@ -985,25 +985,43 @@ func TestLoadActionTimings(t *testing.T) {
 	if len(csvr.actionPlans) != 6 {
 		t.Error("Failed to load action timings: ", len(csvr.actionPlans))
 	}
-	atm := csvr.actionPlans["MORE_MINUTES"][0]
+	atm := csvr.actionPlans["MORE_MINUTES"]
 	expected := &ActionPlan{
-		Uuid:       atm.Uuid,
 		Id:         "MORE_MINUTES",
-		AccountIds: []string{"vdf:minitsboy"},
-		Timing: &RateInterval{
-			Timing: &RITiming{
-				Years:     utils.Years{2012},
-				Months:    utils.Months{},
-				MonthDays: utils.MonthDays{},
-				WeekDays:  utils.WeekDays{},
-				StartTime: utils.ASAP,
+		AccountIDs: map[string]struct{}{"vdf:minitsboy": struct{}{}},
+		ActionTimings: []*ActionTiming{
+			&ActionTiming{
+				Uuid: atm.ActionTimings[0].Uuid,
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "MINI",
+			},
+			&ActionTiming{
+				Uuid: atm.ActionTimings[1].Uuid,
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						Years:     utils.Years{2012},
+						Months:    utils.Months{},
+						MonthDays: utils.MonthDays{},
+						WeekDays:  utils.WeekDays{},
+						StartTime: utils.ASAP,
+					},
+				},
+				Weight:    10,
+				ActionsID: "SHARED",
 			},
 		},
-		Weight:    10,
-		ActionsId: "MINI",
 	}
 	if !reflect.DeepEqual(atm, expected) {
-		t.Errorf("Error loading action timing:\n%+v", atm)
+		t.Errorf("Error loading action timing:\n%+v", atm.ActionTimings[1])
 	}
 }
 
@@ -1013,6 +1031,8 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
+		ID:                    "STANDARD_TRIGGER",
+		UniqueID:              "st0",
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdType:         utils.TRIGGER_MIN_EVENT_COUNTER,
@@ -1030,6 +1050,8 @@ func TestLoadActionTriggers(t *testing.T) {
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
+		ID:                    "STANDARD_TRIGGER",
+		UniqueID:              "st1",
 		BalanceType:           utils.VOICE,
 		BalanceDirections:     utils.NewStringMap(utils.OUT),
 		ThresholdType:         utils.TRIGGER_MAX_BALANCE,
@@ -1075,7 +1097,7 @@ func TestLoadAccountActions(t *testing.T) {
 	}
 	// set propper uuid
 	for i, atr := range aa.ActionTriggers {
-		csvr.actionsTriggers["STANDARD_TRIGGER"][i].Id = atr.Id
+		csvr.actionsTriggers["STANDARD_TRIGGER"][i].ID = atr.ID
 	}
 	for i, b := range aa.UnitCounters[0].Balances {
 		expected.UnitCounters[0].Balances[i].Id = b.Id

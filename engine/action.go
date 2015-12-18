@@ -129,6 +129,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return mailAsync, true
 	case SET_DDESTINATIONS:
 		return setddestinations, true
+	case REMOVE_ACCOUNT:
+		return removeAccount, true
 	case REMOVE_BALANCE:
 		return removeBalance, true
 	}
@@ -524,6 +526,52 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 		ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.DESTINATION_PREFIX: []string{utils.DESTINATION_PREFIX + ddcDestId}})
 	} else {
 		return utils.ErrNotFound
+	}
+	return nil
+}
+
+func removeAccount(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	var accID string
+	if ub != nil {
+		accID = ub.Id
+	} else {
+		accountInfo := struct {
+			Tenant  string
+			Account string
+		}{}
+		if a.ExtraParameters != "" {
+			if err := json.Unmarshal([]byte(a.ExtraParameters), &accountInfo); err != nil {
+				return err
+			}
+		}
+		accID = utils.AccountKey(accountInfo.Tenant, accountInfo.Account)
+	}
+	if accID == "" {
+		return utils.ErrInvalidKey
+	}
+	if err := accountingStorage.RemoveAccount(accID); err != nil {
+		utils.Logger.Err(fmt.Sprintf("Could not remove account Id: %s: %v", accID, err))
+		return err
+	}
+	// clean the account id from all action plans
+	allAPs, err := ratingStorage.GetAllActionPlans()
+	if err != nil && err != utils.ErrNotFound {
+		utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
+		return err
+	}
+	for key, ap := range allAPs {
+		if _, exists := ap.AccountIDs[accID]; !exists {
+			_, err := Guardian.Guard(func() (interface{}, error) {
+				// save action plan
+				ratingStorage.SetActionPlan(key, ap)
+				// cache
+				ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
+				return 0, nil
+			}, 0, utils.ACTION_PLAN_PREFIX)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }

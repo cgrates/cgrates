@@ -282,7 +282,7 @@ func (rs *RedisStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	for _, key := range aplKeys {
 		cache2go.RemKey(key)
-		if _, err = rs.GetActionPlans(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
+		if _, err = rs.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
 			return err
 		}
@@ -886,33 +886,42 @@ func (rs *RedisStorage) SetActionTriggers(key string, atrs ActionTriggers) (err 
 		// delete the key
 		return conn.Cmd("DEL", utils.ACTION_TRIGGER_PREFIX+key).Err
 	}
-	result, err := rs.ms.Marshal(&atrs)
+	result, err := rs.ms.Marshal(atrs)
 	if err != nil {
 		return err
 	}
 	return conn.Cmd("SET", utils.ACTION_TRIGGER_PREFIX+key, result).Err
 }
 
-func (rs *RedisStorage) GetActionPlans(key string, skipCache bool) (ats ActionPlans, err error) {
+func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
-			return x.(ActionPlans), nil
+			return x.(*ActionPlan), nil
 		} else {
 			return nil, err
 		}
 	}
 	var values []byte
-
 	if values, err = rs.db.Cmd("GET", key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &ats)
+		b := bytes.NewBuffer(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return nil, err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		r.Close()
+		err = rs.ms.Unmarshal(out, &ats)
 		cache2go.Cache(key, ats)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
-	if len(ats) == 0 {
+func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
+	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		err = rs.db.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
@@ -922,21 +931,42 @@ func (rs *RedisStorage) SetActionPlans(key string, ats ActionPlans) (err error) 
 	if err != nil {
 		return err
 	}
-	return rs.db.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, result).Err
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	w.Write(result)
+	w.Close()
+	return rs.db.Cmd("SET", utils.ACTION_PLAN_PREFIX+key, b.Bytes()).Err
 }
 
-func (rs *RedisStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
+func (rs *RedisStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
 
-	ats = make(map[string]ActionPlans, len(apls))
+	ats = make(map[string]*ActionPlan, len(apls))
 	for key, value := range apls {
-		apl := value.(ActionPlans)
+		apl := value.(*ActionPlan)
 		ats[key] = apl
 	}
 
+	return
+}
+
+func (rs *RedisStorage) PushTask(t *Task) error {
+	result, err := rs.ms.Marshal(t)
+	if err != nil {
+		return err
+	}
+	return rs.db.Cmd("RPUSH", utils.TASKS_KEY, result).Err
+}
+
+func (rs *RedisStorage) PopTask() (t *Task, err error) {
+	var values []byte
+	if values, err = rs.db.Cmd("LPOP", utils.TASKS_KEY).Bytes(); err == nil {
+		t = &Task{}
+		err = rs.ms.Unmarshal(values, t)
+	}
 	return
 }
 
@@ -1037,7 +1067,7 @@ func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	return rs.db.Cmd("SET", utils.LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v*%v", ubId, string(mat), string(mas)))).Err
 }
 
-func (rs *RedisStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
+func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return

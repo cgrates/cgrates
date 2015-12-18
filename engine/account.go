@@ -267,8 +267,8 @@ func (account *Account) getAlldBalancesForPrefix(destination, category, directio
 func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun bool, goNegative bool) (cc *CallCost, err error) {
 	usefulUnitBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR)
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY)
-	//log.Print(usefulMoneyBalances, usefulUnitBalances)
-	//log.Print("STARTCD: ", cd)
+	//utils.Logger.Info(fmt.Sprintf("%+v, %+v", usefulMoneyBalances, usefulUnitBalances))
+	//utils.Logger.Info(fmt.Sprintf("STARTCD: %+v", cd))
 	var leftCC *CallCost
 	cc = cd.CreateCallCost()
 
@@ -283,14 +283,14 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			unitBalanceChecker = false
 			//log.Printf("InitialCD: %+v", cd)
 			for _, balance := range usefulUnitBalances {
-				//log.Printf("Unit balance: %+v", balance)
-				// log.Printf("CD BEFORE UNIT: %+v", cd)
+				//utils.Logger.Info(fmt.Sprintf("Unit balance: %+v", balance))
+				//utils.Logger.Info(fmt.Sprintf("CD BEFORE UNIT: %+v", cd))
 
 				partCC, debitErr := balance.debitUnits(cd, balance.account, usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
 					return nil, debitErr
 				}
-				//log.Printf("CD AFTER UNIT: %+v", cd)
+				//utils.Logger.Info(fmt.Sprintf("CD AFTER UNIT: %+v", cd))
 				if partCC != nil {
 					//log.Printf("partCC: %+v", partCC.Timespans[0])
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
@@ -322,13 +322,13 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 			// try every balance multiple times in case one becomes active or ratig changes
 			moneyBalanceChecker = false
 			for _, balance := range usefulMoneyBalances {
-				//log.Printf("Money balance: %+v", balance)
-				//log.Printf("CD BEFORE MONEY: %+v", cd)
+				//utils.Logger.Info(fmt.Sprintf("Money balance: %+v", balance))
+				//utils.Logger.Info(fmt.Sprintf("CD BEFORE MONEY: %+v", cd))
 				partCC, debitErr := balance.debitMoney(cd, balance.account, usefulMoneyBalances, count, dryRun, len(cc.Timespans) == 0)
 				if debitErr != nil {
 					return nil, debitErr
 				}
-				//log.Printf("CD AFTER MONEY: %+v", cd)
+				//utils.Logger.Info(fmt.Sprintf("CD AFTER MONEY: %+v", cd))
 				//log.Printf("partCC: %+v", partCC)
 				if partCC != nil {
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
@@ -783,7 +783,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 	for i, at := range acc.ActionTriggers {
 		result.ActionTriggers[i] = &ActionTrigger{
-			Id:                    at.Id,
+			Id:                    at.ID,
 			ThresholdType:         at.ThresholdType,
 			ThresholdValue:        at.ThresholdValue,
 			Recurrent:             at.Recurrent,

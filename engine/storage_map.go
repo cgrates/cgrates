@@ -33,8 +33,9 @@ import (
 )
 
 type MapStorage struct {
-	dict map[string][]byte
-	ms   Marshaler
+	dict  map[string][]byte
+	tasks [][]byte
+	ms    Marshaler
 }
 
 func NewMapStorage() (*MapStorage, error) {
@@ -178,7 +179,7 @@ func (ms *MapStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, actK
 		}
 		if strings.HasPrefix(k, utils.ACTION_PLAN_PREFIX) {
 			cache2go.RemKey(k)
-			if _, err := ms.GetActionPlans(k[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
+			if _, err := ms.GetActionPlan(k[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
 				cache2go.RollbackTransaction()
 				return err
 			}
@@ -645,11 +646,11 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err er
 	return
 }
 
-func (ms *MapStorage) GetActionPlans(key string, skipCache bool) (ats ActionPlans, err error) {
+func (ms *MapStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
-			return x.(ActionPlans), nil
+			return x.(*ActionPlan), nil
 		} else {
 			return nil, err
 		}
@@ -663,8 +664,8 @@ func (ms *MapStorage) GetActionPlans(key string, skipCache bool) (ats ActionPlan
 	return
 }
 
-func (ms *MapStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
-	if len(ats) == 0 {
+func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
+	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
@@ -675,18 +676,39 @@ func (ms *MapStorage) SetActionPlans(key string, ats ActionPlans) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetAllActionPlans() (ats map[string]ActionPlans, err error) {
+func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
 	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
 	}
 
-	ats = make(map[string]ActionPlans, len(apls))
+	ats = make(map[string]*ActionPlan, len(apls))
 	for key, value := range apls {
-		apl := value.(ActionPlans)
+		apl := value.(*ActionPlan)
 		ats[key] = apl
 	}
 
+	return
+}
+
+func (ms *MapStorage) PushTask(t *Task) error {
+	result, err := ms.ms.Marshal(t)
+	if err != nil {
+		return err
+	}
+	ms.tasks = append(ms.tasks, result)
+	return nil
+}
+
+func (ms *MapStorage) PopTask() (t *Task, err error) {
+	if len(ms.tasks) > 0 {
+		var values []byte
+		values, ms.tasks = ms.tasks[0], ms.tasks[1:]
+		t = &Task{}
+		err = ms.ms.Unmarshal(values, t)
+	} else {
+		err = utils.ErrNotFound
+	}
 	return
 }
 
@@ -774,7 +796,7 @@ func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, a
 	return
 }
 
-func (ms *MapStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
+func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	mat, err := ms.ms.Marshal(at)
 	if err != nil {
 		return

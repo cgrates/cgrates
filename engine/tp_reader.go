@@ -19,7 +19,7 @@ type TpReader struct {
 	accountingStorage AccountingStorage
 	lr                LoadReader
 	actions           map[string][]*Action
-	actionPlans       map[string][]*ActionPlan
+	actionPlans       map[string]*ActionPlan
 	actionsTriggers   map[string]ActionTriggers
 	accountActions    map[string]*Account
 	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
@@ -73,7 +73,7 @@ func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, ti
 
 func (tpr *TpReader) Init() {
 	tpr.actions = make(map[string][]*Action)
-	tpr.actionPlans = make(map[string][]*ActionPlan)
+	tpr.actionPlans = make(map[string]*ActionPlan)
 	tpr.actionsTriggers = make(map[string]ActionTriggers)
 	tpr.rates = make(map[string]*utils.TPRate)
 	tpr.destinations = make(map[string]*Destination)
@@ -575,9 +575,14 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 			if !exists {
 				return fmt.Errorf("[ActionPlans] Could not load the timing for tag: %v", at.TimingId)
 			}
-			actPln := &ActionPlan{
+			var actPln *ActionPlan
+			if actPln, exists = tpr.actionPlans[atId]; !exists {
+				actPln = &ActionPlan{
+					Id: atId,
+				}
+			}
+			actPln.ActionTimings = append(actPln.ActionTimings, &ActionTiming{
 				Uuid:   utils.GenUUID(),
-				Id:     atId,
 				Weight: at.Weight,
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -588,9 +593,10 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 						StartTime: t.StartTime,
 					},
 				},
-				ActionsId: at.ActionsId,
-			}
-			tpr.actionPlans[atId] = append(tpr.actionPlans[atId], actPln)
+				ActionsID: at.ActionsId,
+			})
+
+			tpr.actionPlans[atId] = actPln
 		}
 	}
 
@@ -614,7 +620,12 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 			if err != nil {
 				return err
 			}
+			if atr.UniqueID == "" {
+				atr.UniqueID = utils.GenUUID()
+			}
 			atrs[idx] = &ActionTrigger{
+				ID:                    key,
+				UniqueID:              atr.UniqueID,
 				ThresholdType:         atr.ThresholdType,
 				ThresholdValue:        atr.ThresholdValue,
 				Recurrent:             atr.Recurrent,
@@ -655,11 +666,10 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 		// action timings
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
-			var exitingAccountIds []string
-			existingActionPlans, err := tpr.ratingStorage.GetActionPlans(accountAction.ActionPlanId, true)
-			if err == nil && len(existingActionPlans) > 0 {
-				// all action timings from a specific tag shuld have the same list of user balances from the first one
-				exitingAccountIds = existingActionPlans[0].AccountIds
+			exitingAccountIds := make(map[string]struct{})
+			existingActionPlan, err := tpr.ratingStorage.GetActionPlan(accountAction.ActionPlanId, true)
+			if err == nil && existingActionPlan != nil {
+				exitingAccountIds = existingActionPlan.AccountIDs
 			}
 
 			tpap, err := tpr.lr.GetTpActionPlans(tpr.tpid, accountAction.ActionPlanId)
@@ -672,7 +682,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			if err != nil {
 				return err
 			}
-			var actionTimings []*ActionPlan
+			var actionPlan *ActionPlan
 			ats := aps[accountAction.ActionPlanId]
 			for _, at := range ats {
 				// Check action exists before saving it inside actionTiming key
@@ -698,9 +708,13 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				} else {
 					t = tpr.timings[at.TimingId] // *asap
 				}
-				actPln := &ActionPlan{
+				if actionPlan == nil {
+					actionPlan = &ActionPlan{
+						Id: accountAction.ActionPlanId,
+					}
+				}
+				actionPlan.ActionTimings = append(actionPlan.ActionTimings, &ActionTiming{
 					Uuid:   utils.GenUUID(),
-					Id:     accountAction.ActionPlanId,
 					Weight: at.Weight,
 					Timing: &RateInterval{
 						Timing: &RITiming{
@@ -710,26 +724,31 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 							StartTime: t.StartTime,
 						},
 					},
-					ActionsId: at.ActionsId,
-				}
+					ActionsID: at.ActionsId,
+				})
 				// collect action ids from timings
-				actionsIds = append(actionsIds, actPln.ActionsId)
-				//add user balance id if no already in
-				found := false
-				for _, ubId := range exitingAccountIds {
-					if ubId == id {
-						found = true
-						break
-					}
-				}
-				if !found {
-					actPln.AccountIds = append(exitingAccountIds, id)
-				}
-				actionTimings = append(actionTimings, actPln)
+				actionsIds = append(actionsIds, at.ActionsId)
+				exitingAccountIds[id] = struct{}{}
+				actionPlan.AccountIDs = exitingAccountIds
 			}
 
-			// write action triggers
-			err = tpr.ratingStorage.SetActionPlans(accountAction.ActionPlanId, actionTimings)
+			// write tasks
+			for _, at := range actionPlan.ActionTimings {
+				if at.IsASAP() {
+					for accID := range actionPlan.AccountIDs {
+						t := &Task{
+							Uuid:      utils.GenUUID(),
+							AccountID: accID,
+							ActionsID: at.ActionsID,
+						}
+						if err = tpr.ratingStorage.PushTask(t); err != nil {
+							return err
+						}
+					}
+				}
+			}
+			// write action plan
+			err = tpr.ratingStorage.SetActionPlan(accountAction.ActionPlanId, actionPlan)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
 			}
@@ -753,7 +772,12 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				for idx, apiAtr := range atrsLst {
 					minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 					expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+					if apiAtr.UniqueID == "" {
+						apiAtr.UniqueID = utils.GenUUID()
+					}
 					atrs[idx] = &ActionTrigger{
+						ID:                    key,
+						UniqueID:              apiAtr.UniqueID,
 						ThresholdType:         apiAtr.ThresholdType,
 						ThresholdValue:        apiAtr.ThresholdValue,
 						Recurrent:             apiAtr.Recurrent,
@@ -833,7 +857,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				Id: id,
 			}
 		}
-		ub.ActionTriggers = actionTriggers.Clone()
+		ub.ActionTriggers = actionTriggers
 		// init counters
 		ub.InitCounters()
 		if err := tpr.accountingStorage.SetAccount(ub); err != nil {
@@ -864,23 +888,23 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 				return fmt.Errorf("could not get action triggers for tag %s", aa.ActionTriggersId)
 			}
 		}
-
 		ub := &Account{
 			Id:             aa.KeyId(),
-			ActionTriggers: aTriggers.Clone(),
+			ActionTriggers: aTriggers,
 			AllowNegative:  aa.AllowNegative,
 			Disabled:       aa.Disabled,
 		}
 		ub.InitCounters()
 		tpr.accountActions[aa.KeyId()] = ub
-		aTimings, exists := tpr.actionPlans[aa.ActionPlanId]
+		actionPlan, exists := tpr.actionPlans[aa.ActionPlanId]
 		if !exists {
 			log.Printf("could not get action plan for tag %v", aa.ActionPlanId)
 			// must not continue here
 		}
-		for _, at := range aTimings {
-			at.AccountIds = append(at.AccountIds, aa.KeyId())
+		if actionPlan.AccountIDs == nil {
+			actionPlan.AccountIDs = make(map[string]struct{})
 		}
+		actionPlan.AccountIDs[aa.KeyId()] = struct{}{}
 	}
 	return nil
 }
@@ -963,7 +987,12 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						for idx, apiAtr := range atrsLst {
 							minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 							expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+							if apiAtr.UniqueID == "" {
+								apiAtr.UniqueID = utils.GenUUID()
+							}
 							atrs[idx] = &ActionTrigger{
+								ID:                    triggerTag,
+								UniqueID:              apiAtr.UniqueID,
 								ThresholdType:         apiAtr.ThresholdType,
 								ThresholdValue:        apiAtr.ThresholdValue,
 								Recurrent:             apiAtr.Recurrent,
@@ -1303,8 +1332,22 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Action Plans:")
 	}
-	for k, ats := range tpr.actionPlans {
-		err = tpr.ratingStorage.SetActionPlans(k, ats)
+	for k, ap := range tpr.actionPlans {
+		for _, at := range ap.ActionTimings {
+			if at.IsASAP() {
+				for accID := range ap.AccountIDs {
+					t := &Task{
+						Uuid:      utils.GenUUID(),
+						AccountID: accID,
+						ActionsID: at.ActionsID,
+					}
+					if err = tpr.ratingStorage.PushTask(t); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		err = tpr.ratingStorage.SetActionPlan(k, ap)
 		if err != nil {
 			return err
 		}

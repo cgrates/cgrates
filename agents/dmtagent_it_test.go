@@ -31,6 +31,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/fiorix/go-diameter/diam/dict"
 )
 
 var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
@@ -121,6 +122,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 		debitInterval: time.Duration(300) * time.Second,
 	}
 	ccr.RequestedServiceUnit.CCTime = 300
+	ccr.UsedServiceUnit.CCTime = 0
 	ccr.ServiceInformation.INInformation.CallingPartyAddress = "4986517174963"
 	ccr.ServiceInformation.INInformation.CalledPartyAddress = "4986517174964"
 	ccr.ServiceInformation.INInformation.RealCalledNumber = "4986517174964"
@@ -137,11 +139,11 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	if ccr.diamMessage, err = ccr.AsDiameterMessage(); err != nil {
 		t.Error(err)
 	}
-	eSMGE := sessionmanager.SMGenericEvent{"EventName": "DIAMETER_CCR", "AccId": "routinga;1442095190;1476802709",
+	eSMGE := sessionmanager.SMGenericEvent{"EventName": DIAMETER_CCR, "AccId": "routinga;1442095190;1476802709",
 		"Account": "*users", "AnswerTime": "2015-11-23 12:22:24 +0000 UTC", "Category": "call",
 		"Destination": "4986517174964", "Direction": "*out", "ReqType": "*users", "SetupTime": "2015-11-23 12:22:24 +0000 UTC",
 		"Subject": "*users", "SubscriberId": "4986517174963", "TOR": "*voice", "Tenant": "*users", "Usage": "300"}
-	if smge, err := ccr.AsSMGenericEvent(cfgDefaults.DiameterAgentCfg().RequestProcessors[0].ContentFields); err != nil {
+	if smge, err := ccr.AsSMGenericEvent(cfgDefaults.DiameterAgentCfg().RequestProcessors[0].CCRFields); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSMGE, smge) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGE, smge)
@@ -199,6 +201,14 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Granted-Service-Unit not found")
+	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "300" {
+		t.Errorf("Expecting 300, received: %s", strCCTime)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.484
@@ -230,6 +240,14 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Granted-Service-Unit not found")
+	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "300" {
+		t.Errorf("Expecting 300, received: %s", strCCTime)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.214
@@ -261,6 +279,14 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Granted-Service-Unit not found")
+	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "300" {
+		t.Errorf("Expecting 300, received: %s", strCCTime)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 8.944
@@ -291,6 +317,14 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Granted-Service-Unit not found")
+	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "0" {
+		t.Errorf("Expecting 0, received: %s", strCCTime)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.205

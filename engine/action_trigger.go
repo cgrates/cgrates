@@ -29,7 +29,8 @@ import (
 )
 
 type ActionTrigger struct {
-	Id            string // for visual identification
+	ID            string // original csv tag
+	UniqueID      string // individual id
 	ThresholdType string //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *exp_balance
 	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc, *min_ddc, *max_ddc
 	ThresholdValue        float64
@@ -72,53 +73,12 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	}
 	at.Executed = true
 	transactionFailed := false
-	toBeSaved := true
+	removeAccountActionFound := false
 	for _, a := range aac {
 		if a.Balance == nil {
 			a.Balance = &Balance{}
 		}
 		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
-		// handle remove action
-		if a.ActionType == REMOVE_ACCOUNT {
-			accId := ub.Id
-			if err := accountingStorage.RemoveAccount(accId); err != nil {
-				utils.Logger.Err(fmt.Sprintf("Could not remove account Id: %s: %v", accId, err))
-				transactionFailed = true
-				break
-			}
-			// clean the account id from all action plans
-			allATs, err := ratingStorage.GetAllActionPlans()
-			if err != nil && err != utils.ErrNotFound {
-				utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accId, err))
-				transactionFailed = true
-				break
-			}
-			for key, ats := range allATs {
-				changed := false
-				for _, at := range ats {
-					for i := 0; i < len(at.AccountIds); i++ {
-						if at.AccountIds[i] == accId {
-							// delete without preserving order
-							at.AccountIds[i] = at.AccountIds[len(at.AccountIds)-1]
-							at.AccountIds = at.AccountIds[:len(at.AccountIds)-1]
-							i -= 1
-							changed = true
-						}
-					}
-				}
-				if changed {
-					// save action plan
-					ratingStorage.SetActionPlans(key, ats)
-					// cache
-					ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
-				}
-			}
-			toBeSaved = false
-			continue // do not go to getActionFunc
-			// TODO: maybe we should break here as the account is gone
-			// will leave continue for now as the next action can create another acount
-		}
-
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
@@ -131,16 +91,16 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 			transactionFailed = false
 			break
 		}
-		toBeSaved = true
+		if a.ActionType == REMOVE_ACCOUNT {
+			removeAccountActionFound = true
+		}
 	}
 	if transactionFailed || at.Recurrent {
 		at.Executed = false
 	}
-	if !transactionFailed && ub != nil {
+	if !transactionFailed && ub != nil && !removeAccountActionFound {
 		storageLogger.LogActionTrigger(ub.Id, utils.RATER_SOURCE, at, aac)
-		if toBeSaved {
-			accountingStorage.SetAccount(ub)
-		}
+		accountingStorage.SetAccount(ub)
 	}
 	return
 }
@@ -153,7 +113,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	}
 	// if we have Id than we can draw an early conclusion
 	if a.Id != "" {
-		match, _ := regexp.MatchString(a.Id, at.Id)
+		match, _ := regexp.MatchString(a.Id, at.ID)
 		return match
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
@@ -195,7 +155,7 @@ func (at *ActionTrigger) Clone() *ActionTrigger {
 
 func (at *ActionTrigger) CreateBalance() *Balance {
 	return &Balance{
-		Id:             at.Id,
+		Id:             at.UniqueID,
 		Directions:     at.BalanceDirections,
 		ExpirationDate: at.BalanceExpirationDate,
 		DestinationIds: at.BalanceDestinationIds,
@@ -226,16 +186,4 @@ func (atpl ActionTriggers) Less(j, i int) bool {
 
 func (atpl ActionTriggers) Sort() {
 	sort.Sort(atpl)
-}
-
-// clone with new id(uuid)
-func (atrs ActionTriggers) Clone() ActionTriggers {
-	// set ids to action triggers
-	var newATriggers ActionTriggers
-	for _, atr := range atrs {
-		newAtr := atr.Clone()
-		newAtr.Id = utils.GenUUID()
-		newATriggers = append(newATriggers, newAtr)
-	}
-	return newATriggers
 }

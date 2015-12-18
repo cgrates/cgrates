@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 	"github.com/jinzhu/gorm"
+	mgov2 "gopkg.in/mgo.v2"
 )
 
 var cdrServer *CdrServer // Share the server so we can use it in http handlers
@@ -66,8 +67,8 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, client rpcclient.RpcClientConnection, pubsub rpcclient.RpcClientConnection, users rpcclient.RpcClientConnection, aliases rpcclient.RpcClientConnection, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, client: client, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{queue: make(map[string]chan bool)}}, nil
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater rpcclient.RpcClientConnection, pubsub rpcclient.RpcClientConnection, users rpcclient.RpcClientConnection, aliases rpcclient.RpcClientConnection, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{locksMap: make(map[string]chan bool)}}, nil
 }
 
 type CdrServer struct {
@@ -110,7 +111,7 @@ func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 	if ccl.CheckDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
 			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
-			if err != nil && err != gorm.RecordNotFound {
+			if err != nil && err != gorm.RecordNotFound && err != mgov2.ErrNotFound {
 				return nil, err
 			}
 			if cc != nil {
@@ -389,7 +390,7 @@ func (self *CdrServer) rateCDR(storedCdr *StoredCdr) error {
 			}
 			time.Sleep(delay())
 		}
-		if err != nil && err == gorm.RecordNotFound { //calculate CDR as for pseudoprepaid
+		if err != nil && (err == gorm.RecordNotFound || err == mgov2.ErrNotFound) { //calculate CDR as for pseudoprepaid
 			utils.Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", storedCdr.CgrId, utils.SESSION_MANAGER_SOURCE, storedCdr.MediationRunId))
 			qryCC, err = self.getCostFromRater(storedCdr)
 		}

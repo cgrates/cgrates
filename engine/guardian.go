@@ -24,28 +24,35 @@ import (
 )
 
 // global package variable
-var Guardian = &GuardianLock{queue: make(map[string]chan bool)}
+var Guardian = &GuardianLock{locksMap: make(map[string]chan bool)}
 
 func NewGuardianLock() *GuardianLock {
-	return &GuardianLock{queue: make(map[string]chan bool)}
+	return &GuardianLock{locksMap: make(map[string]chan bool)}
 }
 
 type GuardianLock struct {
-	queue map[string]chan bool
-	mu    sync.Mutex
+	locksMap map[string]chan bool
+	mu       sync.RWMutex
 }
 
 func (cm *GuardianLock) Guard(handler func() (interface{}, error), timeout time.Duration, names ...string) (reply interface{}, err error) {
+	var locks []chan bool // take existing locks out of the mutex
 	cm.mu.Lock()
 	for _, name := range names {
-		lock, exists := Guardian.queue[name]
-		if !exists {
+		if lock, exists := Guardian.locksMap[name]; !exists {
 			lock = make(chan bool, 1)
-			Guardian.queue[name] = lock
+			Guardian.locksMap[name] = lock
+			lock <- true
+		} else {
+			locks = append(locks, lock)
 		}
-		lock <- true
 	}
 	cm.mu.Unlock()
+
+	for _, lock := range locks {
+		lock <- true
+	}
+
 	funcWaiter := make(chan bool)
 	go func() {
 		// execute
@@ -62,9 +69,10 @@ func (cm *GuardianLock) Guard(handler func() (interface{}, error), timeout time.
 		<-funcWaiter
 	}
 	// release
+	cm.mu.RLock()
 	for _, name := range names {
-		lock := Guardian.queue[name]
-		<-lock
+		<-Guardian.locksMap[name]
 	}
+	cm.mu.RUnlock()
 	return
 }
