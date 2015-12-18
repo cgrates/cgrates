@@ -395,6 +395,9 @@ func TestMatchLoadCsvWithStorRating(t *testing.T) {
 	for _, key := range keysCsv {
 		var refVal []byte
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
+			if key == utils.TASKS_KEY {
+				continue
+			}
 			qVal, err := rs.db.Cmd("GET", key).Bytes()
 			if err != nil {
 				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
