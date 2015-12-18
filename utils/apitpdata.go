@@ -1099,11 +1099,13 @@ type AttrSetAccount struct {
 	ActionTriggersId string
 	AllowNegative    *bool
 	Disabled         *bool
+	ReloadScheduler  bool
 }
 
 type AttrRemoveAccount struct {
-	Tenant  string
-	Account string
+	Tenant          string
+	Account         string
+	ReloadScheduler bool
 }
 
 type AttrGetSMASessions struct {

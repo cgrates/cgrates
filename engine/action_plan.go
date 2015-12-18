@@ -32,13 +32,14 @@ const (
 )
 
 type ActionTiming struct {
-	Uuid       string
-	Timing     *RateInterval
-	ActionsID  string
-	Weight     float64
-	actions    Actions
-	accountIDs map[string]struct{} // copy of action plans accounts
-	stCache    time.Time           // cached time of the next start
+	Uuid         string
+	Timing       *RateInterval
+	ActionsID    string
+	Weight       float64
+	actions      Actions
+	accountIDs   map[string]struct{} // copy of action plans accounts
+	actionPlanID string              // the id of the belonging action plan (info only)
+	stCache      time.Time           // cached time of the next start
 }
 
 type Task struct {
@@ -48,7 +49,6 @@ type Task struct {
 }
 
 type ActionPlan struct {
-	Uuid          string // uniquely identify the timing
 	Id            string // informative purpose only
 	AccountIDs    map[string]struct{}
 	ActionTimings []*ActionTiming
@@ -254,6 +254,18 @@ func (at *ActionTiming) SetAccountIDs(accIDs map[string]struct{}) {
 	at.accountIDs = accIDs
 }
 
+func (at *ActionTiming) GetAccountIDs() map[string]struct{} {
+	return at.accountIDs
+}
+
+func (at *ActionTiming) SetActionPlanID(id string) {
+	at.actionPlanID = id
+}
+
+func (at *ActionTiming) GetActionPlanID() string {
+	return at.actionPlanID
+}
+
 func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
 		at.actions, err = ratingStorage.GetActions(at.ActionsID, false)
@@ -364,34 +376,3 @@ func (atpl ActionTimingPriorityList) Less(i, j int) bool {
 func (atpl ActionTimingPriorityList) Sort() {
 	sort.Sort(atpl)
 }
-
-// Helper to remove ActionPlan members based on specific filters, empty data means no always match
-/*func RemActionPlan(apl ActionPlan, actionTimingId, accountId string) ActionPlan {
-	if len(actionTimingId) != 0 && apl.Uuid != actionTimingId { // No Match for ActionPlanId, no need to move further
-		continue
-	}
-	for idx, ats := range apl.ActionTimings {
-		if len(accountId) == 0 { // No account defined, considered match for complete removal
-			if len(ats) == 1 { // Removing last item, by init empty
-				return make([]*ActionPlan, 0)
-			}
-			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
-			continue
-		}
-		for iAcc, accID := range at.AccountIds {
-			if accID == accountId {
-				if len(at.AccountIds) == 1 { // Only one balance, remove complete at
-					if len(ats) == 1 { // Removing last item, by init empty
-						return make([]*ActionPlan, 0)
-					}
-					ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
-				} else {
-					at.AccountIds[iAcc], at.AccountIds = at.AccountIds[len(at.AccountIds)-1], at.AccountIds[:len(at.AccountIds)-1]
-				}
-				// only remove the first one matching
-				break
-			}
-		}
-	}
-	return ats
-}*/

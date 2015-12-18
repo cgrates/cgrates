@@ -34,8 +34,6 @@ type Scheduler struct {
 	restartLoop chan bool
 	sync.Mutex
 	storage          engine.RatingStorage
-	waitingReload    bool
-	loopChecker      chan int
 	schedulerStarted bool
 }
 
@@ -43,7 +41,6 @@ func NewScheduler(storage engine.RatingStorage) *Scheduler {
 	return &Scheduler{
 		restartLoop: make(chan bool),
 		storage:     storage,
-		loopChecker: make(chan int),
 	}
 }
 
@@ -91,35 +88,13 @@ func (s *Scheduler) Loop() {
 }
 
 func (s *Scheduler) Reload(protect bool) {
-	s.Lock()
-	defer s.Unlock()
-
-	if protect {
-		if s.waitingReload {
-			s.loopChecker <- 1
-		}
-		s.waitingReload = true
-		go func() {
-			t := time.NewTicker(100 * time.Millisecond) // wait for loops before start
-			select {
-			case <-s.loopChecker:
-				t.Stop() // cancel reload
-			case <-t.C:
-				s.loadActionPlans()
-				s.restart()
-				t.Stop()
-				s.waitingReload = false
-			}
-		}()
-	} else {
-		go func() {
-			s.loadActionPlans()
-			s.restart()
-		}()
-	}
+	s.loadActionPlans()
+	s.restart()
 }
 
 func (s *Scheduler) loadActionPlans() {
+	s.Lock()
+	defer s.Unlock()
 	// limit the number of concurrent tasks
 	var limit = make(chan bool, 10)
 	// execute existing tasks
@@ -141,8 +116,6 @@ func (s *Scheduler) loadActionPlans() {
 	}
 	utils.Logger.Info(fmt.Sprintf("<Scheduler> processing %d action plans", len(actionPlans)))
 	// recreate the queue
-	s.Lock()
-	defer s.Unlock()
 	s.queue = engine.ActionTimingPriorityList{}
 	for _, actionPlan := range actionPlans {
 		for _, at := range actionPlan.ActionTimings {

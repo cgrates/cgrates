@@ -74,10 +74,10 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,false,10`
 
 func TestAcntActsDisableAcnt(t *testing.T) {
 	acnt1Tag := "cgrates.org:1"
-	at := &engine.ActionPlan{
-		AccountIds: []string{acnt1Tag},
-		ActionsId:  "DISABLE_ACNT",
+	at := &engine.ActionTiming{
+		ActionsID: "DISABLE_ACNT",
 	}
+	at.SetAccountIDs(map[string]struct{}{acnt1Tag: struct{}{}})
 	if err := at.Execute(); err != nil {
 		t.Error(err)
 	}
@@ -92,9 +92,9 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 func TestAcntActsEnableAcnt(t *testing.T) {
 	acnt1Tag := "cgrates.org:1"
 	at := &engine.ActionPlan{
-		AccountIds: []string{acnt1Tag},
-		ActionsId:  "ENABLE_ACNT",
+		ActionsID: "ENABLE_ACNT",
 	}
+	at.SetAccountIDs(map[string]struct{}{acnt1Tag: struct{}{}})
 	if err := at.Execute(); err != nil {
 		t.Error(err)
 	}

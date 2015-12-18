@@ -578,8 +578,7 @@ func (tpr *TpReader) LoadActionPlans() (err error) {
 			var actPln *ActionPlan
 			if actPln, exists = tpr.actionPlans[atId]; !exists {
 				actPln = &ActionPlan{
-					Uuid: utils.GenUUID(),
-					Id:   atId,
+					Id: atId,
 				}
 			}
 			actPln.ActionTimings = append(actPln.ActionTimings, &ActionTiming{
@@ -710,8 +709,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				}
 				if actionPlan == nil {
 					actionPlan = &ActionPlan{
-						Uuid: utils.GenUUID(),
-						Id:   accountAction.ActionPlanId,
+						Id: accountAction.ActionPlanId,
 					}
 				}
 				actionPlan.ActionTimings = append(actionPlan.ActionTimings, &ActionTiming{
