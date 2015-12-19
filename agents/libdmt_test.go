@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package agents
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -133,5 +134,19 @@ func TestFieldOutVal(t *testing.T) {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+	}
+}
+
+func TestMessageAddAVPsWithPath(t *testing.T) {
+	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
+		}})
+	m := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+	if err := messageAddAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Data"}, []byte("33708000003")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMessage, m) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 	}
 }

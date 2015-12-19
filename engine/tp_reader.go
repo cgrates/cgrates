@@ -1341,6 +1341,21 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 						AccountID: accID,
 						ActionsID: at.ActionsID,
 					}
+					if verbose {
+						log.Println("\tTask: ", t)
+					}
+					if err = tpr.ratingStorage.PushTask(t); err != nil {
+						return err
+					}
+				}
+				if len(ap.AccountIDs) == 0 {
+					t := &Task{
+						Uuid:      utils.GenUUID(),
+						ActionsID: at.ActionsID,
+					}
+					if verbose {
+						log.Println("\tTask: ", t)
+					}
 					if err = tpr.ratingStorage.PushTask(t); err != nil {
 						return err
 					}

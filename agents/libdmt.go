@@ -204,13 +204,19 @@ func metaHandler(m *diam.Message, tag, arg string, debitInterval time.Duration) 
 	return "", nil
 }
 
-func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) {
-	hierarchyPath := strings.Split(rsrFld.Id, utils.HIERARCHY_SEP)
-	hpIf := make([]interface{}, len(hierarchyPath))
-	for i, val := range hierarchyPath {
-		hpIf[i] = val
+// splitIntoInterface is used to split a string into []interface{} instead of []string
+func splitIntoInterface(content, sep string) []interface{} {
+	spltStr := strings.Split(content, sep)
+	spltIf := make([]interface{}, len(spltStr))
+	for i, val := range spltStr {
+		spltIf[i] = val
 	}
-	return m.FindAVPsWithPath(hpIf, dict.UndefinedVendorID)
+	return spltIf
+}
+
+// avpsWithPath is used to find AVPs by specifying RSRField as filter
+func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) {
+	return m.FindAVPsWithPath(splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
 }
 
 // Follows the implementation in the StorCdr
@@ -295,6 +301,44 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, debitInterval time
 		return "", err
 	}
 	return fmtValOut, nil
+}
+
+// messageAddAVPsWithPath will dynamically add AVPs into the message
+func messageAddAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []byte) error {
+	if len(path) == 0 {
+		return errors.New("Empty path as AVP filter")
+	}
+	dictAVPs := make([]*dict.AVP, len(path)) // for each subpath, one dictionary AVP
+	for i, subpath := range path {
+		if dictAVP, err := m.Dictionary().FindAVP(m.Header.ApplicationID, subpath); err != nil {
+			return err
+		} else if dictAVP == nil {
+			return fmt.Errorf("Cannot find AVP with id: %s", path[len(path)-1])
+		} else {
+			dictAVPs[i] = dictAVP
+		}
+	}
+	if dictAVPs[len(path)-1].Data.Type == diam.GroupedAVPType {
+		return errors.New("Last AVP in path needs not to be GroupedAVP")
+	}
+	var msgAVP *diam.AVP // Keep a reference here towards last AVP
+	for i := len(path) - 1; i >= 0; i-- {
+		var typeVal datatype.Type
+		var err error
+		if msgAVP == nil {
+			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte)
+			if err != nil {
+				return err
+			}
+		} else {
+			typeVal = &diam.GroupedAVP{
+				AVP: []*diam.AVP{msgAVP}}
+		}
+		msgAVP = diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
+	}
+	m.AVP = append(m.AVP, msgAVP)
+	m.Header.MessageLength += uint32(msgAVP.Len())
+	return nil
 }
 
 // debitInterval is the configured debitInterval, in sync with the diameter client one
@@ -455,7 +499,7 @@ func NewCCAFromCCR(ccr *CCR) *CCA {
 	}
 }
 
-// Call Control Answer
+// Call Control Answer, bare structure so we can dynamically manage adding it's fields
 type CCA struct {
 	SessionId          string `avp:"Session-Id"`
 	OriginHost         string `avp:"Origin-Host"`

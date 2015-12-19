@@ -927,7 +927,7 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		return err
 	}
-	result, err := rs.ms.Marshal(&ats)
+	result, err := rs.ms.Marshal(ats)
 	if err != nil {
 		return err
 	}
