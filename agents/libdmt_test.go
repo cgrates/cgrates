@@ -212,3 +212,39 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 		}
 	}
 }
+
+func TestCCASetProcessorAVPs(t *testing.T) {
+	ccr := &CCR{ // Bare information, just the one needed for answer
+		SessionId:         "routinga;1442095190;1476802709",
+		AuthApplicationId: 4,
+		CCRequestType:     1,
+		CCRequestNumber:   0,
+	}
+	ccr.diamMessage = ccr.AsBareDiameterMessage()
+	ccr.diamMessage.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
+		}})
+	ccr.debitInterval = time.Duration(300) * time.Second
+	cca := NewBareCCAFromCCR(ccr)
+	reqProcessor := &config.DARequestProcessor{Id: "UNIT_TEST", // Set template for tests
+		CCAFields: []*config.CfgCdrField{
+			&config.CfgCdrField{Tag: "Subscription-Id/Subscription-Id-Type", Type: utils.META_COMPOSED,
+				Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type", utils.INFIELD_SEP), Mandatory: true},
+			&config.CfgCdrField{Tag: "Subscription-Id/Subscription-Id-Data", Type: utils.META_COMPOSED,
+				Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true},
+		},
+	}
+	eMessage := cca.AsDiameterMessage()
+	eMessage.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
+		}})
+	if err := cca.SetProcessorAVPs(reqProcessor); err != nil {
+		t.Error(err)
+	} else if ccaMsg := cca.AsDiameterMessage(); !reflect.DeepEqual(eMessage, ccaMsg) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, ccaMsg)
+	}
+}

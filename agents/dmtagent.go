@@ -92,7 +92,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			err = errCdr
 		}
 	}
-	cca := NewCCAFromCCR(ccr)
+	cca := NewBareCCAFromCCR(ccr)
 	cca.OriginHost = self.cgrCfg.DiameterAgentCfg().OriginHost
 	cca.OriginRealm = self.cgrCfg.DiameterAgentCfg().OriginRealm
 	if err != nil {
