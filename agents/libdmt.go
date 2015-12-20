@@ -304,7 +304,8 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, debitInterval time
 }
 
 // messageAddAVPsWithPath will dynamically add AVPs into the message
-func messageAddAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []byte) error {
+// 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
+func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []byte, appnd bool) error {
 	if len(path) == 0 {
 		return errors.New("Empty path as AVP filter")
 	}
@@ -322,10 +323,11 @@ func messageAddAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []by
 		return errors.New("Last AVP in path needs not to be GroupedAVP")
 	}
 	var msgAVP *diam.AVP // Keep a reference here towards last AVP
-	for i := len(path) - 1; i >= 0; i-- {
+	lastAVPIdx := len(path) - 1
+	for i := lastAVPIdx; i >= 0; i-- {
 		var typeVal datatype.Type
 		var err error
-		if msgAVP == nil {
+		if i == lastAVPIdx {
 			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte)
 			if err != nil {
 				return err
@@ -334,7 +336,26 @@ func messageAddAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []by
 			typeVal = &diam.GroupedAVP{
 				AVP: []*diam.AVP{msgAVP}}
 		}
-		msgAVP = diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
+		newMsgAVP := diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
+		if i == lastAVPIdx-1 && !appnd {                                                    // last AVP needs to be appended in group
+			avps, _ := m.FindAVPsWithPath(path[:lastAVPIdx], dict.UndefinedVendorID)
+			if len(avps) != 0 { // Group AVP already in the message
+				prevGrpData := avps[0].Data.(*diam.GroupedAVP)
+				prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
+				m.Header.MessageLength += uint32(msgAVP.Len())
+				return nil
+			}
+		}
+		msgAVP = newMsgAVP
+	}
+	if !appnd { // Not group AVP, replace the previous set one with this one
+		avps, _ := m.FindAVPsWithPath(path, dict.UndefinedVendorID)
+		if len(avps) != 0 { // Group AVP already in the message
+			m.Header.MessageLength -= uint32(avps[0].Len()) // decrease message length since we overwrite
+			*avps[0] = *msgAVP
+			m.Header.MessageLength += uint32(msgAVP.Len())
+			return nil
+		}
 	}
 	m.AVP = append(m.AVP, msgAVP)
 	m.Header.MessageLength += uint32(msgAVP.Len())

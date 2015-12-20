@@ -111,6 +111,7 @@ type CdrFieldJsonCfg struct {
 	Field_id     *string
 	Handler_id   *string
 	Value        *string
+	Append       *bool
 	Width        *int
 	Strip        *string
 	Padding      *string

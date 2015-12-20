@@ -42,6 +42,9 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 			return nil, err
 		}
 	}
+	if jsnCfgFld.Append != nil {
+		cfgFld.Append = *jsnCfgFld.Append
+	}
 	if jsnCfgFld.Field_filter != nil {
 		if cfgFld.FieldFilter, err = utils.ParseRSRFields(*jsnCfgFld.Field_filter, utils.INFIELD_SEP); err != nil {
 			return nil, err
@@ -71,6 +74,7 @@ type CfgCdrField struct {
 	FieldId     string // Field identifier
 	HandlerId   string
 	Value       utils.RSRFields
+	Append      bool
 	FieldFilter utils.RSRFields
 	Width       int
 	Strip       string
