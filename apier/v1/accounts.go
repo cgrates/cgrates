@@ -216,6 +216,19 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 					}
 					ap.AccountIDs[accID] = struct{}{}
 					schedulerReloadNeeded = true
+					// create tasks
+					for _, at := range actionPlan.ActionTimings {
+						if at.IsASAP() {
+							t := &Task{
+								Uuid:      utils.GenUUID(),
+								AccountID: accID,
+								ActionsID: at.ActionsID,
+							}
+							if err = tpr.ratingStorage.PushTask(t); err != nil {
+								return err
+							}
+						}
+					}
 					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap); err != nil {
 						return 0, err
 					}
