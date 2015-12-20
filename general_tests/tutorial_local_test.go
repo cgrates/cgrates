@@ -1098,7 +1098,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		Offset     int // Set the item offset
 		Limit      int // Limit number of items retrieved
 	}
-	//time.Sleep(500*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var acnts []*engine.Account
 	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 		t.Error(err)
