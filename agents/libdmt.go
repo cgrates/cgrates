@@ -48,8 +48,9 @@ func init() {
 }
 
 const (
-	META_CCR_USAGE = "*ccr_usage"
-	DIAMETER_CCR   = "DIAMETER_CCR"
+	META_CCR_USAGE       = "*ccr_usage"
+	DIAMETER_CCR         = "DIAMETER_CCR"
+	DiameterRatingFailed = 5031
 )
 
 func loadDictionaries(dictsDir, componentId string) error {
@@ -168,7 +169,7 @@ func avpValAsString(a *diam.AVP) string {
 }
 
 // Handler for meta functions
-func metaHandler(m *diam.Message, tag, arg string, debitInterval time.Duration) (string, error) {
+func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
 		ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", dict.UndefinedVendorID)
@@ -198,7 +199,7 @@ func metaHandler(m *diam.Message, tag, arg string, debitInterval time.Duration) 
 		usage := usageFromCCR(int(ccReqTypeAvp.Data.(datatype.Enumerated)),
 			int(ccReqNrAvp.Data.(datatype.Enumerated)),
 			int(reqUnitAVPs[0].Data.(datatype.Unsigned32)),
-			int(usedUnitAVPs[0].Data.(datatype.Unsigned32)), debitInterval)
+			int(usedUnitAVPs[0].Data.(datatype.Unsigned32)), dur)
 		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
 	}
 	return "", nil
@@ -504,10 +505,11 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 		if err != nil {
 			return nil, err
 		}
-		if _, hasKey := outMap[cfgFld.FieldId]; !hasKey {
-			outMap[cfgFld.FieldId] = fmtOut
-		} else { // If already there, postpend
+		if _, hasKey := outMap[cfgFld.FieldId]; hasKey && cfgFld.Append {
 			outMap[cfgFld.FieldId] += fmtOut
+		} else {
+			outMap[cfgFld.FieldId] = fmtOut
+
 		}
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
@@ -516,7 +518,7 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 func NewCCAFromCCR(ccr *CCR) *CCA {
 	return &CCA{SessionId: ccr.SessionId, AuthApplicationId: ccr.AuthApplicationId, CCRequestType: ccr.CCRequestType, CCRequestNumber: ccr.CCRequestNumber,
 		diamMessage: diam.NewMessage(ccr.diamMessage.Header.CommandCode, ccr.diamMessage.Header.CommandFlags&^diam.RequestFlag, ccr.diamMessage.Header.ApplicationID,
-			ccr.diamMessage.Header.HopByHopID, ccr.diamMessage.Header.EndToEndID, ccr.diamMessage.Dictionary()),
+			ccr.diamMessage.Header.HopByHopID, ccr.diamMessage.Header.EndToEndID, ccr.diamMessage.Dictionary()), ccrMessage: ccr.diamMessage, debitInterval: ccr.debitInterval,
 	}
 }
 
@@ -532,10 +534,12 @@ type CCA struct {
 	GrantedServiceUnit struct {
 		CCTime int `avp:"CC-Time"`
 	} `avp:"Granted-Service-Unit"`
-	diamMessage *diam.Message
+	ccrMessage    *diam.Message
+	diamMessage   *diam.Message
+	debitInterval time.Duration
 }
 
-// Converts itself into DiameterMessage
+// AsBareDiameterMessage converts CCA into a bare DiameterMessage
 func (self *CCA) AsBareDiameterMessage() (*diam.Message, error) {
 	if _, err := self.diamMessage.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String(self.SessionId)); err != nil {
 		return nil, err
@@ -558,16 +562,24 @@ func (self *CCA) AsBareDiameterMessage() (*diam.Message, error) {
 	if _, err := self.diamMessage.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(self.ResultCode)); err != nil {
 		return nil, err
 	}
-	/*
-		ccTimeAvp, err := self.diamMessage.Dictionary().FindAVP(self.diamMessage.Header.ApplicationID, "CC-Time")
-		if err != nil {
-			return nil, err
-		}
-		if _, err := self.diamMessage.NewAVP("Granted-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
-			AVP: []*diam.AVP{
-				diam.NewAVP(ccTimeAvp.Code, avp.Mbit, 0, datatype.Unsigned32(self.GrantedServiceUnit.CCTime))}}); err != nil {
-			return nil, err
-		}
-	*/
 	return self.diamMessage, nil
+}
+
+// AsDiameterMessage returns the diameter.Message which can be later written on network
+func (self *CCA) AsDiameterMessage() *diam.Message {
+	return self.diamMessage
+}
+
+// SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
+func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor) error {
+	for _, cfgFld := range reqProcessor.CCAFields {
+		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, self.debitInterval)
+		if err != nil {
+			return err
+		}
+		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.Value.Id(), utils.HIERARCHY_SEP), []byte(fmtOut), cfgFld.Append); err != nil {
+			return err
+		}
+	}
+	return nil
 }

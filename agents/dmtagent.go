@@ -92,14 +92,21 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			err = errCdr
 		}
 	}
-	if err != nil {
-		return nil, err
-	}
 	cca := NewCCAFromCCR(ccr)
 	cca.OriginHost = self.cgrCfg.DiameterAgentCfg().OriginHost
 	cca.OriginRealm = self.cgrCfg.DiameterAgentCfg().OriginRealm
+	if err != nil {
+		cca.ResultCode = DiameterRatingFailed
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, error: %s", ccr.diamMessage, err))
+		return cca, nil
+	}
 	cca.ResultCode = diam.Success
 	cca.GrantedServiceUnit.CCTime = int(maxUsage)
+	if err := cca.SetProcessorAVPs(reqProcessor); err != nil {
+		cca.ResultCode = DiameterRatingFailed
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, error: %s", ccr.diamMessage, err))
+		return cca, nil
+	}
 	return cca, nil
 }
 
@@ -124,11 +131,8 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %+v, ignoring request", ccr))
 		return
 	}
-	if dmtA, err := cca.AsBareDiameterMessage(); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to convert cca as diameter message, error: %s", err.Error()))
-		return
-	} else if _, err := dmtA.WriteTo(c); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to write message to %s: %s\n%s\n", c.RemoteAddr(), err, dmtA))
+	if _, err := cca.AsDiameterMessage().WriteTo(c); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Failed to write message to %s: %s\n%s\n", c.RemoteAddr(), err, cca.AsDiameterMessage()))
 		return
 	}
 }
