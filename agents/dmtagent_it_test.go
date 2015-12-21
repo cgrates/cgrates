@@ -95,6 +95,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	}
 	cfgDefaults, _ := config.NewDefaultCGRConfig()
 	loadDictionaries(cfgDefaults.DiameterAgentCfg().DictionariesDir, "UNIT_TEST")
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	ccr := &CCR{
 		SessionId:         "routinga;1442095190;1476802709",
 		OriginHost:        cfgDefaults.DiameterAgentCfg().OriginHost,
