@@ -68,7 +68,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater rpcclient.RpcClientConnection, pubsub rpcclient.RpcClientConnection, users rpcclient.RpcClientConnection, aliases rpcclient.RpcClientConnection, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
-	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{locksMap: make(map[string]chan bool)}}, nil
+	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, client: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{locksMap: make(map[string]chan bool)}}, nil
 }
 
 type CdrServer struct {
