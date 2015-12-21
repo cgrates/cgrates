@@ -102,7 +102,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	}
 	cca.ResultCode = diam.Success
 	cca.GrantedServiceUnit.CCTime = int(maxUsage)
-	if err := cca.SetProcessorAVPs(reqProcessor); err != nil {
+	if err := cca.SetProcessorAVPs(reqProcessor, maxUsage); err != nil {
 		cca.ResultCode = DiameterRatingFailed
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, error: %s", ccr.diamMessage, err))
 		return cca, nil

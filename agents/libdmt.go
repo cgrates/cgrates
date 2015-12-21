@@ -49,6 +49,7 @@ func init() {
 
 const (
 	META_CCR_USAGE       = "*ccr_usage"
+	META_CCA_USAGE       = "*cca_usage"
 	DIAMETER_CCR         = "DIAMETER_CCR"
 	DiameterRatingFailed = 5031
 )
@@ -277,7 +278,7 @@ func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int) str
 	return outVal
 }
 
-func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, debitInterval time.Duration) (fmtValOut string, err error) {
+func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}) (fmtValOut string, err error) {
 	var outVal string
 	switch cfgFld.Type {
 	case utils.META_FILLER:
@@ -286,9 +287,13 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, debitInterval time
 	case utils.META_CONSTANT:
 		outVal = cfgFld.Value.Id()
 	case utils.META_HANDLER:
-		outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, debitInterval)
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
+		if cfgFld.HandlerId == META_CCA_USAGE { // Exception, usage is passed in the dur variable by CCA
+			outVal = strconv.FormatFloat(extraParam.(float64), 'f', -1, 64)
+		} else {
+			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
+			}
 		}
 	case utils.META_COMPOSED:
 		outVal = composedFieldvalue(m, cfgFld.Value, 0)
@@ -570,9 +575,9 @@ func (self *CCA) AsDiameterMessage() *diam.Message {
 }
 
 // SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
-func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor) error {
+func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUsage float64) error {
 	for _, cfgFld := range reqProcessor.CCAFields {
-		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, self.debitInterval)
+		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, maxUsage)
 		if err != nil {
 			return err
 		}
