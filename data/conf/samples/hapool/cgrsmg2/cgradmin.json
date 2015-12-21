@@ -1,0 +1,23 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"sm_generic": {
+	"enabled": true,
+	"rater_conns": [
+	      {"server": "127.0.0.1:2014"},
+	      {"server": "127.0.0.1:2016"}
+	],
+	"cdrs_conns": [
+	      {"server": "internal"}     // address where to reach CDR Server, empty to disable CDR capturing <internal|x.y.z.y:1234>
+	],
+},
+
+"diameter_agent": {
+	"enabled": true,
+},
+
+
+}
