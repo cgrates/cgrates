@@ -25,7 +25,7 @@ binary-arch: clean
 	mkdir -p src/github.com/cgrates
 	ln -sf $(CURDIR) src/github.com/cgrates
 	go get -v github.com/Masterminds/glide
-	$(GOPATH)/bin/glide up
+	$(GOPATH)/bin/glide install
 	exec $(CURDIR)/build.sh
 	mkdir -p $(PKGDIR)/usr/bin
 	cp $(GOPATH)/bin/cgr-* $(PKGDIR)/usr/bin/
