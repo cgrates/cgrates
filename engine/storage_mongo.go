@@ -1158,7 +1158,6 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 	ats = make(map[string]*ActionPlan, len(apls))
 	for key, value := range apls {
 		apl := value.(*ActionPlan)
-		apl.AccountIDs = utils.YesDots(apl.AccountIDs)
 		ats[key] = apl
 	}
 

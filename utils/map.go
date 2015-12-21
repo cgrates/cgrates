@@ -144,6 +144,7 @@ func (sm StringMap) GetOne() string {
 	return ""
 }
 
+/*
 func NoDots(m map[string]struct{}) map[string]struct{} {
 	return MapKeysReplace(m, ".", "．")
 }
@@ -160,3 +161,4 @@ func MapKeysReplace(m map[string]struct{}, old, new string) map[string]struct{} 
 	}
 	return m
 }
+*/
