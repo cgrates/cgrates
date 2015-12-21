@@ -23,6 +23,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -453,4 +455,32 @@ func (self *CdrServer) replicateCdr(cdr *StoredCdr) error {
 
 	}
 	return nil
+}
+
+func (cdrsrv *CdrServer) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
+	}
+	// get method
+	method := reflect.ValueOf(cdrsrv).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
+
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }
