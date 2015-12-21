@@ -88,6 +88,10 @@ func TestHaPoolStartEngine(t *testing.T) {
 	if _, err := engine.StartEngine(cgrSmg2, *waitRater); err != nil {
 		t.Fatal("cgrSmg2: ", err)
 	}
+	cgrDa := path.Join(*dataDir, "conf", "samples", "hapool", "dagent")
+	if _, err := engine.StartEngine(cgrDa, *waitRater); err != nil {
+		t.Fatal("cgrSmg2: ", err)
+	}
 
 }
 

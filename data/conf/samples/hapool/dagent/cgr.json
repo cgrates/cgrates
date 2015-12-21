@@ -1,0 +1,10 @@
+{
+"diameter_agent": {
+	"enabled": true,
+	"listen": "127.0.0.1:3868",
+	"sm_generic_conns": [
+        	{"server": "127.0.0.1:3014"},
+        	{"server": "127.0.0.1:3015"},
+    	],
+},
+}

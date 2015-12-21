@@ -1,13 +1,8 @@
 {
-// CGRateS Configuration file
-//
-// Used for cgradmin
-// Starts rater, scheduler
-
 "listen": {
-	"rpc_json": ":2016",			// RPC JSON listening address
-	"rpc_gob": ":2017",			// RPC GOB listening address
-	"http": ":2082",				// HTTP listening address
+	"rpc_json": ":2014",			// RPC JSON listening address
+	"rpc_gob": ":2015",			// RPC GOB listening address
+	"http": ":2081",				// HTTP listening address
 },
 
 "rater": {

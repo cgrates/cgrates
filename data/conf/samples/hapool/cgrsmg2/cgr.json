@@ -1,10 +1,4 @@
 {
-// CGRateS Configuration file
-//
-// Used for cgradmin
-// Starts rater, scheduler
-
-
 "cdrs": {
 	"enabled": true,					// start the CDR Server service:  <true|false>
 	"rater": "127.0.0.1:2014",				// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
@@ -13,6 +7,7 @@
 
 "sm_generic": {
 	"enabled": true,
+	"listen_bijson": "127.0.0.1:3015",
 	"rater_conns": [
 	      {"server": "127.0.0.1:2014"},
 	      {"server": "127.0.0.1:2016"}
@@ -21,10 +16,5 @@
 	      {"server": "internal"}     // address where to reach CDR Server, empty to disable CDR capturing <internal|x.y.z.y:1234>
 	],
 },
-
-"diameter_agent": {
-	"enabled": true,
-},
-
 
 }
