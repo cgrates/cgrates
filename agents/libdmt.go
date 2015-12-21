@@ -48,8 +48,9 @@ func init() {
 }
 
 const (
-	META_CCR_USAGE = "*ccr_usage"
-	DIAMETER_CCR   = "DIAMETER_CCR"
+	META_CCR_USAGE       = "*ccr_usage"
+	DIAMETER_CCR         = "DIAMETER_CCR"
+	DiameterRatingFailed = 5031
 )
 
 func loadDictionaries(dictsDir, componentId string) error {
@@ -168,7 +169,7 @@ func avpValAsString(a *diam.AVP) string {
 }
 
 // Handler for meta functions
-func metaHandler(m *diam.Message, tag, arg string, debitInterval time.Duration) (string, error) {
+func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
 		ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", dict.UndefinedVendorID)
@@ -198,7 +199,7 @@ func metaHandler(m *diam.Message, tag, arg string, debitInterval time.Duration) 
 		usage := usageFromCCR(int(ccReqTypeAvp.Data.(datatype.Enumerated)),
 			int(ccReqNrAvp.Data.(datatype.Enumerated)),
 			int(reqUnitAVPs[0].Data.(datatype.Unsigned32)),
-			int(usedUnitAVPs[0].Data.(datatype.Unsigned32)), debitInterval)
+			int(usedUnitAVPs[0].Data.(datatype.Unsigned32)), dur)
 		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
 	}
 	return "", nil
@@ -304,7 +305,8 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, debitInterval time
 }
 
 // messageAddAVPsWithPath will dynamically add AVPs into the message
-func messageAddAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []byte) error {
+// 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
+func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []byte, appnd bool) error {
 	if len(path) == 0 {
 		return errors.New("Empty path as AVP filter")
 	}
@@ -322,10 +324,11 @@ func messageAddAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []by
 		return errors.New("Last AVP in path needs not to be GroupedAVP")
 	}
 	var msgAVP *diam.AVP // Keep a reference here towards last AVP
-	for i := len(path) - 1; i >= 0; i-- {
+	lastAVPIdx := len(path) - 1
+	for i := lastAVPIdx; i >= 0; i-- {
 		var typeVal datatype.Type
 		var err error
-		if msgAVP == nil {
+		if i == lastAVPIdx {
 			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte)
 			if err != nil {
 				return err
@@ -334,7 +337,26 @@ func messageAddAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []by
 			typeVal = &diam.GroupedAVP{
 				AVP: []*diam.AVP{msgAVP}}
 		}
-		msgAVP = diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
+		newMsgAVP := diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
+		if i == lastAVPIdx-1 && !appnd {                                                    // last AVP needs to be appended in group
+			avps, _ := m.FindAVPsWithPath(path[:lastAVPIdx], dict.UndefinedVendorID)
+			if len(avps) != 0 { // Group AVP already in the message
+				prevGrpData := avps[0].Data.(*diam.GroupedAVP)
+				prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
+				m.Header.MessageLength += uint32(msgAVP.Len())
+				return nil
+			}
+		}
+		msgAVP = newMsgAVP
+	}
+	if !appnd { // Not group AVP, replace the previous set one with this one
+		avps, _ := m.FindAVPsWithPath(path, dict.UndefinedVendorID)
+		if len(avps) != 0 { // Group AVP already in the message
+			m.Header.MessageLength -= uint32(avps[0].Len()) // decrease message length since we overwrite
+			*avps[0] = *msgAVP
+			m.Header.MessageLength += uint32(msgAVP.Len())
+			return nil
+		}
 	}
 	m.AVP = append(m.AVP, msgAVP)
 	m.Header.MessageLength += uint32(msgAVP.Len())
@@ -353,6 +375,7 @@ func NewCCRFromDiameterMessage(m *diam.Message, debitInterval time.Duration) (*C
 }
 
 // CallControl Request
+// FixMe: strip it down to mandatory bare structure format by RFC 4006
 type CCR struct {
 	SessionId         string    `avp:"Session-Id"`
 	OriginHost        string    `avp:"Origin-Host"`
@@ -395,34 +418,29 @@ type CCR struct {
 	debitInterval time.Duration // Configured debit interval
 }
 
+// AsBareDiameterMessage converts CCR into a bare DiameterMessage
+// Compatible with the required fields of CCA
+func (self *CCR) AsBareDiameterMessage() *diam.Message {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(self.SessionId))
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginHost))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm))
+	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId))
+	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(self.CCRequestType))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Enumerated(self.CCRequestNumber))
+	return m
+}
+
 // Used when sending from client to agent
 func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
-	m := diam.NewRequest(diam.CreditControl, 4, nil)
-	if _, err := m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String(self.SessionId)); err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("Origin-Host", avp.Mbit, 0, datatype.DiameterIdentity(self.OriginHost)); err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("Origin-Realm", avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm)); err != nil {
-		return nil, err
-	}
+	m := self.AsBareDiameterMessage()
 	if _, err := m.NewAVP("Destination-Host", avp.Mbit, 0, datatype.DiameterIdentity(self.DestinationHost)); err != nil {
 		return nil, err
 	}
 	if _, err := m.NewAVP("Destination-Realm", avp.Mbit, 0, datatype.DiameterIdentity(self.DestinationRealm)); err != nil {
 		return nil, err
 	}
-	if _, err := m.NewAVP("Auth-Application-Id", avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId)); err != nil {
-		return nil, err
-	}
 	if _, err := m.NewAVP("Service-Context-Id", avp.Mbit, 0, datatype.UTF8String(self.ServiceContextId)); err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("CC-Request-Type", avp.Mbit, 0, datatype.Enumerated(self.CCRequestType)); err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("CC-Request-Number", avp.Mbit, 0, datatype.Enumerated(self.CCRequestNumber)); err != nil {
 		return nil, err
 	}
 	if _, err := m.NewAVP("Event-Timestamp", avp.Mbit, 0, datatype.Time(self.EventTimestamp)); err != nil {
@@ -483,20 +501,23 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 		if err != nil {
 			return nil, err
 		}
-		if _, hasKey := outMap[cfgFld.FieldId]; !hasKey {
-			outMap[cfgFld.FieldId] = fmtOut
-		} else { // If already there, postpend
+		if _, hasKey := outMap[cfgFld.FieldId]; hasKey && cfgFld.Append {
 			outMap[cfgFld.FieldId] += fmtOut
+		} else {
+			outMap[cfgFld.FieldId] = fmtOut
+
 		}
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
 
-func NewCCAFromCCR(ccr *CCR) *CCA {
-	return &CCA{SessionId: ccr.SessionId, AuthApplicationId: ccr.AuthApplicationId, CCRequestType: ccr.CCRequestType, CCRequestNumber: ccr.CCRequestNumber,
+func NewBareCCAFromCCR(ccr *CCR) *CCA {
+	cca := &CCA{SessionId: ccr.SessionId, AuthApplicationId: ccr.AuthApplicationId, CCRequestType: ccr.CCRequestType, CCRequestNumber: ccr.CCRequestNumber,
 		diamMessage: diam.NewMessage(ccr.diamMessage.Header.CommandCode, ccr.diamMessage.Header.CommandFlags&^diam.RequestFlag, ccr.diamMessage.Header.ApplicationID,
-			ccr.diamMessage.Header.HopByHopID, ccr.diamMessage.Header.EndToEndID, ccr.diamMessage.Dictionary()),
+			ccr.diamMessage.Header.HopByHopID, ccr.diamMessage.Header.EndToEndID, ccr.diamMessage.Dictionary()), ccrMessage: ccr.diamMessage, debitInterval: ccr.debitInterval,
 	}
+	cca.diamMessage = cca.AsBareDiameterMessage() // Add the required fields to the diameterMessage
+	return cca
 }
 
 // Call Control Answer, bare structure so we can dynamically manage adding it's fields
@@ -511,42 +532,40 @@ type CCA struct {
 	GrantedServiceUnit struct {
 		CCTime int `avp:"CC-Time"`
 	} `avp:"Granted-Service-Unit"`
-	diamMessage *diam.Message
+	ccrMessage    *diam.Message
+	diamMessage   *diam.Message
+	debitInterval time.Duration
 }
 
-// Converts itself into DiameterMessage
-func (self *CCA) AsBareDiameterMessage() (*diam.Message, error) {
-	if _, err := self.diamMessage.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String(self.SessionId)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("Origin-Host", avp.Mbit, 0, datatype.DiameterIdentity(self.OriginHost)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("Origin-Realm", avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("Auth-Application-Id", avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("CC-Request-Type", avp.Mbit, 0, datatype.Enumerated(self.CCRequestType)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("CC-Request-Number", avp.Mbit, 0, datatype.Enumerated(self.CCRequestNumber)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(self.ResultCode)); err != nil {
-		return nil, err
-	}
-	/*
-		ccTimeAvp, err := self.diamMessage.Dictionary().FindAVP(self.diamMessage.Header.ApplicationID, "CC-Time")
+// AsBareDiameterMessage converts CCA into a bare DiameterMessage
+func (self *CCA) AsBareDiameterMessage() *diam.Message {
+	var m diam.Message
+	utils.Clone(self.diamMessage, &m)
+	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(self.SessionId))
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginHost))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm))
+	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId))
+	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(self.CCRequestType))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Enumerated(self.CCRequestNumber))
+	m.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(self.ResultCode))
+	return &m
+}
+
+// AsDiameterMessage returns the diameter.Message which can be later written on network
+func (self *CCA) AsDiameterMessage() *diam.Message {
+	return self.diamMessage
+}
+
+// SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
+func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor) error {
+	for _, cfgFld := range reqProcessor.CCAFields {
+		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, self.debitInterval)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		if _, err := self.diamMessage.NewAVP("Granted-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
-			AVP: []*diam.AVP{
-				diam.NewAVP(ccTimeAvp.Code, avp.Mbit, 0, datatype.Unsigned32(self.GrantedServiceUnit.CCTime))}}); err != nil {
-			return nil, err
+		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.Value.Id(), utils.HIERARCHY_SEP), []byte(fmtOut), cfgFld.Append); err != nil {
+			return err
 		}
-	*/
-	return self.diamMessage, nil
+	}
+	return nil
 }
