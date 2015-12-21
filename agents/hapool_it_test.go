@@ -20,6 +20,7 @@ package agents
 
 import (
 	"net/rpc/jsonrpc"
+	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -29,6 +30,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam/dict"
 )
+
+var cgrRater1Cmd, cgrSmg1Cmd *exec.Cmd
 
 func TestHaPoolInitCfg(t *testing.T) {
 	if !*testIntegration {
@@ -71,26 +74,26 @@ func TestHaPoolStartEngine(t *testing.T) {
 		return
 	}
 	engine.KillEngine(*waitRater) // just to make sure
-
+	var err error
 	cgrRater1 := path.Join(*dataDir, "conf", "samples", "hapool", "cgrrater1")
-	if _, err := engine.StartEngine(cgrRater1, *waitRater); err != nil {
+	if cgrRater1Cmd, err = engine.StartEngine(cgrRater1, *waitRater); err != nil {
 		t.Fatal("cgrRater1: ", err)
 	}
 	cgrRater2 := path.Join(*dataDir, "conf", "samples", "hapool", "cgrrater2")
-	if _, err := engine.StartEngine(cgrRater2, *waitRater); err != nil {
+	if _, err = engine.StartEngine(cgrRater2, *waitRater); err != nil {
 		t.Fatal("cgrRater2: ", err)
 	}
 	cgrSmg1 := path.Join(*dataDir, "conf", "samples", "hapool", "cgrsmg1")
-	if _, err := engine.StartEngine(cgrSmg1, *waitRater); err != nil {
+	if cgrSmg1Cmd, err = engine.StartEngine(cgrSmg1, *waitRater); err != nil {
 		t.Fatal("cgrSmg1: ", err)
 	}
 	cgrSmg2 := path.Join(*dataDir, "conf", "samples", "hapool", "cgrsmg2")
-	if _, err := engine.StartEngine(cgrSmg2, *waitRater); err != nil {
+	if _, err = engine.StartEngine(cgrSmg2, *waitRater); err != nil {
 		t.Fatal("cgrSmg2: ", err)
 	}
 	cgrDa := path.Join(*dataDir, "conf", "samples", "hapool", "dagent")
-	if _, err := engine.StartEngine(cgrDa, *waitRater); err != nil {
-		t.Fatal("cgrSmg2: ", err)
+	if _, err = engine.StartEngine(cgrDa, *waitRater); err != nil {
+		t.Fatal("cgrDa: ", err)
 	}
 
 }
