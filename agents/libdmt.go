@@ -173,47 +173,38 @@ func avpValAsString(a *diam.AVP) string {
 func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
-		ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", 0)
-		if err != nil {
+		var ok bool
+		var reqType datatype.Enumerated
+		var reqNr, reqUnit, usedUnit datatype.Unsigned32
+		if ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", 0); err != nil {
 			return "", err
 		} else if ccReqTypeAvp == nil {
 			return "", errors.New("CC-Request-Type not found")
+		} else if reqType, ok = ccReqTypeAvp.Data.(datatype.Enumerated); !ok {
+			return "", fmt.Errorf("CC-Request-Type must be Enumerated and not %v", ccReqTypeAvp.Data.Type())
 		}
-		ccReqNrAvp, err := m.FindAVP("CC-Request-Number", 0)
-		if err != nil {
+		if ccReqNrAvp, err := m.FindAVP("CC-Request-Number", 0); err != nil {
 			return "", err
 		} else if ccReqNrAvp == nil {
 			return "", errors.New("CC-Request-Number not found")
+		} else if reqNr, ok = ccReqNrAvp.Data.(datatype.Unsigned32); !ok {
+			return "", fmt.Errorf("CC-Request-Number must be Unsigned32 and not %v", ccReqNrAvp.Data.Type())
 		}
-		reqUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Requested-Service-Unit", "CC-Time"}, dict.UndefinedVendorID)
-		if err != nil {
+		if reqUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Requested-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 			return "", err
 		} else if len(reqUnitAVPs) == 0 {
 			return "", errors.New("Requested-Service-Unit>CC-Time not found")
-		}
-		usedUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Used-Service-Unit", "CC-Time"}, dict.UndefinedVendorID)
-		if err != nil {
-			return "", err
-		} else if len(usedUnitAVPs) == 0 {
-			return "", errors.New("Used-Service-Unit>CC-Time not found")
-		}
-		reqType, ok := ccReqTypeAvp.Data.(datatype.Enumerated)
-		if !ok {
-			return "", fmt.Errorf("CC-Request-Type must be Enumerated and not %v", ccReqTypeAvp.Data.Type())
-		}
-		reqNr, ok := ccReqNrAvp.Data.(datatype.Unsigned32)
-		if !ok {
-			return "", fmt.Errorf("CC-Request-Number must be Unsigned32 and not %v", ccReqNrAvp.Data.Type())
-		}
-		reqUnitAVP, ok := reqUnitAVPs[0].Data.(datatype.Unsigned32)
-		if !ok {
+		} else if reqUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
 			return "", fmt.Errorf("Requested-Service-Unit>CC-Time must be Unsigned32 and not %v", reqUnitAVPs[0].Data.Type())
 		}
-		usedUnitAVP, ok := usedUnitAVPs[0].Data.(datatype.Unsigned32)
-		if !ok {
-			return "", fmt.Errorf("Used-Service-Unit>CC-Time must be Unsigned32 and not %v", usedUnitAVPs[0].Data.Type())
+		if usedUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Used-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+			return "", err
+		} else if len(usedUnitAVPs) != 0 {
+			if usedUnit, ok = usedUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+				return "", fmt.Errorf("Used-Service-Unit>CC-Time must be Unsigned32 and not %v", usedUnitAVPs[0].Data.Type())
+			}
 		}
-		usage := usageFromCCR(int(reqType), int(reqNr), int(reqUnitAVP), int(usedUnitAVP), dur)
+		usage := usageFromCCR(int(reqType), int(reqNr), int(reqUnit), int(usedUnit), dur)
 		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
 	}
 	return "", nil
