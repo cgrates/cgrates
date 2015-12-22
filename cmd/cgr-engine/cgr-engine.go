@@ -388,19 +388,21 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	var err error
 	var client *rpcclient.RpcClient
 	// Rater connection init
-	var raterConn rpcclient.RpcClientConnection
-	if cfg.CDRSRater == utils.INTERNAL {
-		responder := <-internalRaterChan // Wait for rater to come up before start querying
-		raterConn = responder
-		internalRaterChan <- responder // Put back the connection since there might be other entities waiting for it
-	} else if len(cfg.CDRSRater) != 0 {
-		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSRater, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to rater: %s", err.Error()))
-			exitChan <- true
-			return
+	raterConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
+	for _, raterCfg := range cfg.SmOsipsConfig.RaterConns {
+		if raterCfg.Server == utils.INTERNAL {
+			responder := <-internalRaterChan // Wait for rater to come up before start querying
+			raterConn.AddClient(responder)
+			internalRaterChan <- responder // Put back the connection since there might be other entities waiting for it
+		} else if len(raterCfg.Server) != 0 {
+			client, err = rpcclient.NewRpcClient("tcp", raterCfg.Server, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to rater: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			raterConn.AddClient(client)
 		}
-		raterConn = client
 	}
 	// Pubsub connection init
 	var pubSubConn rpcclient.RpcClientConnection
@@ -409,17 +411,13 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		pubSubConn = pubSubs
 		internalPubSubSChan <- pubSubs
 	} else if len(cfg.CDRSPubSub) != 0 {
-		if cfg.CDRSRater == cfg.CDRSPubSub {
-			pubSubConn = client
-		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to pubsub server: %s", err.Error()))
-				exitChan <- true
-				return
-			}
-			pubSubConn = client
+		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to pubsub server: %s", err.Error()))
+			exitChan <- true
+			return
 		}
+		pubSubConn = client
 	}
 	// Users connection init
 	var usersConn rpcclient.RpcClientConnection
@@ -428,17 +426,13 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		usersConn = userS
 		internalUserSChan <- userS
 	} else if len(cfg.CDRSUsers) != 0 {
-		if cfg.CDRSRater == cfg.CDRSUsers {
-			usersConn = client
-		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSUsers, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to users server: %s", err.Error()))
-				exitChan <- true
-				return
-			}
-			usersConn = client
+		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSUsers, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to users server: %s", err.Error()))
+			exitChan <- true
+			return
 		}
+		usersConn = client
 	}
 	// Aliases connection init
 	var aliasesConn rpcclient.RpcClientConnection
@@ -447,17 +441,13 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		aliasesConn = aliaseS
 		internalAliaseSChan <- aliaseS
 	} else if len(cfg.CDRSAliases) != 0 {
-		if cfg.CDRSRater == cfg.CDRSAliases {
-			aliasesConn = client
-		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSAliases, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to aliases server: %s", err.Error()))
-				exitChan <- true
-				return
-			}
-			aliasesConn = client
+		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSAliases, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to aliases server: %s", err.Error()))
+			exitChan <- true
+			return
 		}
+		aliasesConn = client
 	}
 	// Stats connection init
 	var statsConn rpcclient.RpcClientConnection
@@ -466,17 +456,13 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		statsConn = statS
 		internalCdrStatSChan <- statS
 	} else if len(cfg.CDRSStats) != 0 {
-		if cfg.CDRSRater == cfg.CDRSStats {
-			statsConn = client
-		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
-				exitChan <- true
-				return
-			}
-			statsConn = client
+		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSStats, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to stats server: %s", err.Error()))
+			exitChan <- true
+			return
 		}
+		statsConn = client
 	}
 
 	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, raterConn, pubSubConn, usersConn, aliasesConn, statsConn)

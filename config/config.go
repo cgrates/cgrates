@@ -218,7 +218,7 @@ type CGRConfig struct {
 	CDRSEnabled          bool                 // Enable CDR Server service
 	CDRSExtraFields      []*utils.RSRField    // Extra fields to store in CDRs
 	CDRSStoreCdrs        bool                 // store cdrs in storDb
-	CDRSRater            string               // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
+	CDRSRaterConns       []*HaPoolConfig      // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
 	CDRSPubSub           string               // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
 	CDRSUsers            string               // address where to reach the users service: <""|internal|x.y.z.y:1234>
 	CDRSAliases          string               // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
@@ -277,7 +277,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// CDRServer checks
 	if self.CDRSEnabled {
-		if self.CDRSRater == utils.INTERNAL && !self.RaterEnabled {
+		if self.CDRSRaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
 			return errors.New("Rater not enabled but requested by CDRS component.")
 		}
 		if self.CDRSPubSub == utils.INTERNAL && !self.PubSubServerEnabled {
@@ -684,8 +684,13 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnCdrsCfg.Store_cdrs != nil {
 			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
 		}
-		if jsnCdrsCfg.Rater != nil {
-			self.CDRSRater = *jsnCdrsCfg.Rater
+
+		if jsnCdrsCfg.Rater_conns != nil {
+			self.CDRSRaterConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Rater_conns))
+			for idx, jsnHaCfg := range *jsnCdrsCfg.Rater_conns {
+				self.CDRSRaterConns[idx] = NewDfltHaPoolConfig()
+				self.CDRSRaterConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
 		}
 		if jsnCdrsCfg.Pubsubs != nil {
 			self.CDRSPubSub = *jsnCdrsCfg.Pubsubs

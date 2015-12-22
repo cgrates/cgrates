@@ -82,7 +82,7 @@ type CdrsJsonCfg struct {
 	Enabled         *bool
 	Extra_fields    *[]string
 	Store_cdrs      *bool
-	Rater           *string
+	Rater_conns     *[]*HaPoolJsonCfg
 	Pubsubs         *string
 	Users           *string
 	Aliases         *string

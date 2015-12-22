@@ -17,12 +17,6 @@
 	"enabled": true,					// start Scheduler service: <true|false>
 },
 
-"cdrs": {
-	"enabled": true,					// start the CDR Server service:  <true|false>
-	"rater": "internal",				// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
-	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-},
-
 "cdrstats": {
 	"enabled": true,					// starts the cdrstats service: <true|false>
 },
