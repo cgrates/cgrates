@@ -263,7 +263,7 @@ func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int) str
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, ignoring.", rsrTpl.Id))
 				continue // Not convertible, ignore
 			}
-			outVal += avpValAsString(matchingAvps[avpIdx])
+			outVal += rsrTpl.ParseValue(avpValAsString(matchingAvps[avpIdx]))
 		}
 	}
 	return outVal
