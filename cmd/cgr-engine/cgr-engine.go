@@ -466,6 +466,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	}
 
 	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, raterConn, pubSubConn, usersConn, aliasesConn, statsConn)
+	cdrServer.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	utils.Logger.Info("Registering CDRS HTTP Handlers.")
 	cdrServer.RegisterHandlersToServer(server)
 	utils.Logger.Info("Registering CDRS RPC service.")
@@ -475,7 +476,6 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	// Make the cdr server available for internal communication
 	server.RpcRegister(cdrServer)    // register CdrServer for internal usage (TODO: refactor this)
 	responder := <-internalRaterChan // Retrieve again the responder
-	responder.CdrSrv = cdrServer     // Attach connection to cdrServer in responder, so it can be used later
 	internalRaterChan <- responder   // Put back the connection for the rest of the system
 	internalCdrSChan <- cdrServer    // Signal that cdrS is operational
 }
