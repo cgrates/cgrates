@@ -572,7 +572,7 @@ func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUs
 		if err != nil {
 			return err
 		}
-		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.Value.Id(), utils.HIERARCHY_SEP), []byte(fmtOut), cfgFld.Append); err != nil {
+		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), []byte(fmtOut), cfgFld.Append); err != nil {
 			return err
 		}
 	}
