@@ -50,7 +50,6 @@ type AttrGetLcr struct {
 type Responder struct {
 	Bal           *balancer2go.Balancer
 	ExitChan      chan bool
-	CdrSrv        *CdrServer
 	Stats         rpcclient.RpcClientConnection
 	Timezone      string
 	cnt           int64
@@ -441,46 +440,6 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 	} else if dcsH != nil {
 		*dcs = *dcsH
 	}
-	return nil
-}
-
-func (rs *Responder) ProcessCdr(cdr *StoredCdr, reply *string) error {
-	cacheKey := "ProcessCdr" + cdr.CgrId
-	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = item.Value.(string)
-		return item.Err
-	}
-	if rs.CdrSrv == nil {
-		err := errors.New("CDR_SERVER_NOT_RUNNING")
-		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
-		return err
-	}
-	if err := rs.CdrSrv.ProcessCdr(cdr); err != nil {
-		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
-		return err
-	}
-	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
-	*reply = utils.OK
-	return nil
-}
-
-func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
-	cacheKey := "LogCallCost" + ccl.CgrId
-	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = item.Value.(string)
-		return item.Err
-	}
-	if rs.CdrSrv == nil {
-		err := errors.New("CDR_SERVER_NOT_RUNNING")
-		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
-		return err
-	}
-	if err := rs.CdrSrv.LogCallCost(ccl); err != nil {
-		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
-		return err
-	}
-	*reply = utils.OK
-	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
 	return nil
 }
 

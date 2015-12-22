@@ -205,7 +205,7 @@ func (self *SMGSession) saveOperations() error {
 		firstCC.Merge(cc)
 	}
 	var reply string
-	err := self.cdrsrv.Call("Responder.LogCallCost", &engine.CallCostLog{
+	err := self.cdrsrv.Call("CdrServer.LogCallCost", &engine.CallCostLog{
 		CgrId:          self.eventStart.GetCgrId(self.timezone),
 		Source:         utils.SESSION_MANAGER_SOURCE,
 		RunId:          self.runId,

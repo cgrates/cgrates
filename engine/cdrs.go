@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
@@ -74,18 +75,30 @@ func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater rpcclient.Rp
 }
 
 type CdrServer struct {
-	cgrCfg  *config.CGRConfig
-	cdrDb   CdrStorage
-	client  rpcclient.RpcClientConnection
-	pubsub  rpcclient.RpcClientConnection
-	users   rpcclient.RpcClientConnection
-	aliases rpcclient.RpcClientConnection
-	stats   rpcclient.RpcClientConnection
-	guard   *GuardianLock
+	cgrCfg        *config.CGRConfig
+	cdrDb         CdrStorage
+	client        rpcclient.RpcClientConnection
+	pubsub        rpcclient.RpcClientConnection
+	users         rpcclient.RpcClientConnection
+	aliases       rpcclient.RpcClientConnection
+	stats         rpcclient.RpcClientConnection
+	guard         *GuardianLock
+	responseCache *cache2go.ResponseCache
 }
 
 func (self *CdrServer) Timezone() string {
 	return self.cgrCfg.DefaultTimezone
+}
+func (self *CdrServer) SetTimeToLive(timeToLive time.Duration, out *int) error {
+	self.responseCache = cache2go.NewResponseCache(timeToLive)
+	return nil
+}
+
+func (self *CdrServer) getCache() *cache2go.ResponseCache {
+	if self.responseCache == nil {
+		self.responseCache = cache2go.NewResponseCache(0)
+	}
+	return self.responseCache
 }
 
 func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
@@ -94,8 +107,23 @@ func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
 }
 
+func (self *CdrServer) ProcessCdr(cdr *StoredCdr, reply *string) error {
+	cacheKey := "ProcessCdr" + cdr.CgrId
+	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
+		*reply = item.Value.(string)
+		return item.Err
+	}
+	if err := self.LocalProcessCdr(cdr); err != nil {
+		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+		return utils.NewErrServerError(err)
+	}
+	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
+	*reply = utils.OK
+	return nil
+}
+
 // RPC method, used to internally process CDR
-func (self *CdrServer) ProcessCdr(cdr *StoredCdr) error {
+func (self *CdrServer) LocalProcessCdr(cdr *StoredCdr) error {
 	return self.processCdr(cdr)
 }
 
@@ -108,8 +136,23 @@ func (self *CdrServer) ProcessExternalCdr(cdr *ExternalCdr) error {
 	return self.processCdr(storedCdr)
 }
 
+func (self *CdrServer) LogCallCost(ccl *CallCostLog, reply *string) error {
+	cacheKey := "LogCallCost" + ccl.CgrId
+	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
+		*reply = item.Value.(string)
+		return item.Err
+	}
+	if err := self.LocalLogCallCost(ccl); err != nil {
+		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
+	return nil
+}
+
 // RPC method, used to log callcosts to db
-func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+func (self *CdrServer) LocalLogCallCost(ccl *CallCostLog) error {
 	if ccl.CheckDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
 			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)

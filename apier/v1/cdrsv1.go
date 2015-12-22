@@ -32,7 +32,7 @@ type CdrsV1 struct {
 
 // Designed for CGR internal usage
 func (self *CdrsV1) ProcessCdr(cdr *engine.StoredCdr, reply *string) error {
-	if err := self.CdrSrv.ProcessCdr(cdr); err != nil {
+	if err := self.CdrSrv.LocalProcessCdr(cdr); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -74,7 +74,7 @@ func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
 }
 
 func (self *CdrsV1) LogCallCost(ccl *engine.CallCostLog, reply *string) error {
-	if err := self.CdrSrv.LogCallCost(ccl); err != nil {
+	if err := self.CdrSrv.LocalLogCallCost(ccl); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

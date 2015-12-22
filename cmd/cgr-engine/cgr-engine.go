@@ -473,6 +473,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	server.RpcRegister(&cdrSrv)
 	server.RpcRegister(&v2.CdrsV2{CdrsV1: cdrSrv})
 	// Make the cdr server available for internal communication
+	server.RpcRegister(cdrServer)    // register CdrServer for internal usage (TODO: refactor this)
 	responder := <-internalRaterChan // Retrieve again the responder
 	responder.CdrSrv = cdrServer     // Attach connection to cdrServer in responder, so it can be used later
 	internalRaterChan <- responder   // Put back the connection for the rest of the system

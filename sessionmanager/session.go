@@ -234,7 +234,7 @@ func (s *Session) SaveOperations() {
 		}
 
 		var reply string
-		err := s.sessionManager.CdrSrv().Call("Responder.LogCallCost", &engine.CallCostLog{
+		err := s.sessionManager.CdrSrv().Call("CdrServer.LogCallCost", &engine.CallCostLog{
 			CgrId:          s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			Source:         utils.SESSION_MANAGER_SOURCE,
 			RunId:          sr.DerivedCharger.RunId,

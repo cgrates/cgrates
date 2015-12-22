@@ -201,7 +201,7 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
 	var reply string
-	if err := self.cdrsrv.Call("Responder.ProcessCdr", gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrServer.ProcessCdr", gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
 		return err
 	}
 	return nil
