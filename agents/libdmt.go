@@ -49,6 +49,7 @@ func init() {
 
 const (
 	META_CCR_USAGE       = "*ccr_usage"
+	META_CCA_USAGE       = "*cca_usage"
 	DIAMETER_CCR         = "DIAMETER_CCR"
 	DiameterRatingFailed = 5031
 )
@@ -172,34 +173,38 @@ func avpValAsString(a *diam.AVP) string {
 func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, error) {
 	switch tag {
 	case META_CCR_USAGE:
-		ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", dict.UndefinedVendorID)
-		if err != nil {
+		var ok bool
+		var reqType datatype.Enumerated
+		var reqNr, reqUnit, usedUnit datatype.Unsigned32
+		if ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", 0); err != nil {
 			return "", err
 		} else if ccReqTypeAvp == nil {
 			return "", errors.New("CC-Request-Type not found")
+		} else if reqType, ok = ccReqTypeAvp.Data.(datatype.Enumerated); !ok {
+			return "", fmt.Errorf("CC-Request-Type must be Enumerated and not %v", ccReqTypeAvp.Data.Type())
 		}
-		ccReqNrAvp, err := m.FindAVP("CC-Request-Number", dict.UndefinedVendorID)
-		if err != nil {
+		if ccReqNrAvp, err := m.FindAVP("CC-Request-Number", 0); err != nil {
 			return "", err
 		} else if ccReqNrAvp == nil {
 			return "", errors.New("CC-Request-Number not found")
+		} else if reqNr, ok = ccReqNrAvp.Data.(datatype.Unsigned32); !ok {
+			return "", fmt.Errorf("CC-Request-Number must be Unsigned32 and not %v", ccReqNrAvp.Data.Type())
 		}
-		reqUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Requested-Service-Unit", "CC-Time"}, dict.UndefinedVendorID)
-		if err != nil {
+		if reqUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Requested-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 			return "", err
 		} else if len(reqUnitAVPs) == 0 {
-			return "", errors.New("Requested-Service-Unit/CC-Time not found")
+			return "", errors.New("Requested-Service-Unit>CC-Time not found")
+		} else if reqUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+			return "", fmt.Errorf("Requested-Service-Unit>CC-Time must be Unsigned32 and not %v", reqUnitAVPs[0].Data.Type())
 		}
-		usedUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Used-Service-Unit", "CC-Time"}, dict.UndefinedVendorID)
-		if err != nil {
+		if usedUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Used-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 			return "", err
-		} else if len(usedUnitAVPs) == 0 {
-			return "", errors.New("Used-Service-Unit/CC-Time not found")
+		} else if len(usedUnitAVPs) != 0 {
+			if usedUnit, ok = usedUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+				return "", fmt.Errorf("Used-Service-Unit>CC-Time must be Unsigned32 and not %v", usedUnitAVPs[0].Data.Type())
+			}
 		}
-		usage := usageFromCCR(int(ccReqTypeAvp.Data.(datatype.Enumerated)),
-			int(ccReqNrAvp.Data.(datatype.Enumerated)),
-			int(reqUnitAVPs[0].Data.(datatype.Unsigned32)),
-			int(usedUnitAVPs[0].Data.(datatype.Unsigned32)), dur)
+		usage := usageFromCCR(int(reqType), int(reqNr), int(reqUnit), int(usedUnit), dur)
 		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
 	}
 	return "", nil
@@ -258,13 +263,13 @@ func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int) str
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, ignoring.", rsrTpl.Id))
 				continue // Not convertible, ignore
 			}
-			outVal += avpValAsString(matchingAvps[avpIdx])
+			outVal += rsrTpl.ParseValue(avpValAsString(matchingAvps[avpIdx]))
 		}
 	}
 	return outVal
 }
 
-func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, debitInterval time.Duration) (fmtValOut string, err error) {
+func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}) (fmtValOut string, err error) {
 	var outVal string
 	switch cfgFld.Type {
 	case utils.META_FILLER:
@@ -273,9 +278,13 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, debitInterval time
 	case utils.META_CONSTANT:
 		outVal = cfgFld.Value.Id()
 	case utils.META_HANDLER:
-		outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, debitInterval)
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
+		if cfgFld.HandlerId == META_CCA_USAGE { // Exception, usage is passed in the dur variable by CCA
+			outVal = strconv.FormatFloat(extraParam.(float64), 'f', -1, 64)
+		} else {
+			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
+			}
 		}
 	case utils.META_COMPOSED:
 		outVal = composedFieldvalue(m, cfgFld.Value, 0)
@@ -427,7 +436,7 @@ func (self *CCR) AsBareDiameterMessage() *diam.Message {
 	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm))
 	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId))
 	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(self.CCRequestType))
-	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Enumerated(self.CCRequestNumber))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(self.CCRequestNumber))
 	return m
 }
 
@@ -557,13 +566,13 @@ func (self *CCA) AsDiameterMessage() *diam.Message {
 }
 
 // SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
-func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor) error {
+func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUsage float64) error {
 	for _, cfgFld := range reqProcessor.CCAFields {
-		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, self.debitInterval)
+		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, maxUsage)
 		if err != nil {
 			return err
 		}
-		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.Value.Id(), utils.HIERARCHY_SEP), []byte(fmtOut), cfgFld.Append); err != nil {
+		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), []byte(fmtOut), cfgFld.Append); err != nil {
 			return err
 		}
 	}

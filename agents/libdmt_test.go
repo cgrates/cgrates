@@ -211,6 +211,19 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 		}
 	}
+	/*
+		eMessage = diam.NewRequest(diam.CreditControl, 4, nil)
+		eMessage.NewAVP("Granted-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
+			AVP: []*diam.AVP{
+				diam.NewAVP(420, avp.Mbit, 0, datatype.UTF8String("300")), // Subscription-Id-Data
+			}})
+		m = diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+		if err := messageSetAVPsWithPath(m, []interface{}{"Granted-Service-Unit", "CC-Time"}, []byte("300"), false); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(eMessage, m) {
+			t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
+		}
+	*/
 }
 
 func TestCCASetProcessorAVPs(t *testing.T) {
@@ -242,7 +255,7 @@ func TestCCASetProcessorAVPs(t *testing.T) {
 			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
 		}})
-	if err := cca.SetProcessorAVPs(reqProcessor); err != nil {
+	if err := cca.SetProcessorAVPs(reqProcessor, 0); err != nil {
 		t.Error(err)
 	} else if ccaMsg := cca.AsDiameterMessage(); !reflect.DeepEqual(eMessage, ccaMsg) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, ccaMsg)
