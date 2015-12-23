@@ -389,7 +389,7 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	var client *rpcclient.RpcClient
 	// Rater connection init
 	raterConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
-	for _, raterCfg := range cfg.SmOsipsConfig.RaterConns {
+	for _, raterCfg := range cfg.CDRSRaterConns {
 		if raterCfg.Server == utils.INTERNAL {
 			responder := <-internalRaterChan // Wait for rater to come up before start querying
 			raterConn.AddClient(responder)

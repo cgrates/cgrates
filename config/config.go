@@ -277,8 +277,10 @@ func (self *CGRConfig) checkConfigSanity() error {
 	}
 	// CDRServer checks
 	if self.CDRSEnabled {
-		if self.CDRSRaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
-			return errors.New("Rater not enabled but requested by CDRS component.")
+		for _, cdrsRaterConn := range self.CDRSRaterConns {
+			if cdrsRaterConn.Server == utils.INTERNAL && !self.RaterEnabled {
+				return errors.New("Rater not enabled but requested by CDRS component.")
+			}
 		}
 		if self.CDRSPubSub == utils.INTERNAL && !self.PubSubServerEnabled {
 			return errors.New("PubSub service not enabled but requested by CDRS component.")
@@ -326,11 +328,15 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if len(self.SmGenericConfig.CdrsConns) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmGenericConfig.RaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
-			return errors.New("Rater not enabled but requested by SM-Generic component.")
+		for _, smgRaterConn := range self.SmGenericConfig.RaterConns {
+			if smgRaterConn.Server == utils.INTERNAL && !self.RaterEnabled {
+				return errors.New("Rater not enabled but requested by SM-Generic component.")
+			}
 		}
-		if self.SmGenericConfig.CdrsConns[0].Server == utils.INTERNAL && !self.CDRSEnabled {
-			return errors.New("CDRS not enabled but referenced by SM-Generic component")
+		for _, smgCDRSConn := range self.SmGenericConfig.CdrsConns {
+			if smgCDRSConn.Server == utils.INTERNAL && !self.CDRSEnabled {
+				return errors.New("CDRS not enabled but referenced by SM-Generic component")
+			}
 		}
 	}
 	// SM-FreeSWITCH checks
@@ -339,13 +345,17 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return errors.New("Rater definition is mandatory!")
 		}
 		if len(self.SmFsConfig.CdrsConns) == 0 {
-			return errors.New("Cdrs definition is mandatory!")
+			return errors.New("CDRS definition is mandatory!")
 		}
-		if self.SmFsConfig.RaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
-			return errors.New("Rater not enabled but requested by SM-FreeSWITCH component.")
+		for _, smFSRaterConn := range self.SmFsConfig.RaterConns {
+			if smFSRaterConn.Server == utils.INTERNAL && !self.RaterEnabled {
+				return errors.New("Rater not enabled but requested by SM-FreeSWITCH component.")
+			}
 		}
-		if self.SmFsConfig.CdrsConns[0].Server == utils.INTERNAL && !self.CDRSEnabled {
-			return errors.New("CDRS not enabled but referenced by SM-FreeSWITCH component")
+		for _, smFSCDRSConn := range self.SmFsConfig.CdrsConns {
+			if smFSCDRSConn.Server == utils.INTERNAL && !self.CDRSEnabled {
+				return errors.New("CDRS not enabled but referenced by SM-FreeSWITCH component")
+			}
 		}
 	}
 	// SM-Kamailio checks
@@ -356,11 +366,15 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if len(self.SmKamConfig.CdrsConns) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmKamConfig.RaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
-			return errors.New("Rater not enabled but requested by SM-Kamailio component.")
+		for _, smKamRaterConn := range self.SmKamConfig.RaterConns {
+			if smKamRaterConn.Server == utils.INTERNAL && !self.RaterEnabled {
+				return errors.New("Rater not enabled but requested by SM-Kamailio component.")
+			}
 		}
-		if self.SmKamConfig.CdrsConns[0].Server == utils.INTERNAL && !self.CDRSEnabled {
-			return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
+		for _, smKamCDRSConn := range self.SmKamConfig.CdrsConns {
+			if smKamCDRSConn.Server == utils.INTERNAL && !self.CDRSEnabled {
+				return errors.New("CDRS not enabled but referenced by SM-Kamailio component")
+			}
 		}
 	}
 	// SM-OpenSIPS checks
@@ -371,17 +385,23 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if len(self.SmOsipsConfig.CdrsConns) == 0 {
 			return errors.New("Cdrs definition is mandatory!")
 		}
-		if self.SmOsipsConfig.RaterConns[0].Server == utils.INTERNAL && !self.RaterEnabled {
-			return errors.New("Rater not enabled but requested by SM-OpenSIPS component.")
+		for _, smOsipsRaterConn := range self.SmOsipsConfig.RaterConns {
+			if smOsipsRaterConn.Server == utils.INTERNAL && !self.RaterEnabled {
+				return errors.New("Rater not enabled but requested by SM-OpenSIPS component.")
+			}
 		}
-		if self.SmOsipsConfig.CdrsConns[0].Server == utils.INTERNAL && !self.CDRSEnabled {
-			return errors.New("CDRS not enabled but referenced by SM-OpenSIPS component")
+		for _, smOsipsCDRSConn := range self.SmOsipsConfig.CdrsConns {
+			if smOsipsCDRSConn.Server == utils.INTERNAL && !self.CDRSEnabled {
+				return errors.New("CDRS not enabled but referenced by SM-OpenSIPS component")
+			}
 		}
 	}
 	// DAgent checks
 	if self.diameterAgentCfg.Enabled {
-		if self.diameterAgentCfg.SMGenericConns[0].Server == utils.INTERNAL && !self.SmGenericConfig.Enabled {
-			return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
+		for _, daSMGConn := range self.diameterAgentCfg.SMGenericConns {
+			if daSMGConn.Server == utils.INTERNAL && !self.SmGenericConfig.Enabled {
+				return errors.New("SMGeneric not enabled but referenced by DiameterAgent component")
+			}
 		}
 	}
 	return nil
