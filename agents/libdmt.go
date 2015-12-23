@@ -312,6 +312,21 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 
 func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}) (fmtValOut string, err error) {
 	var outVal string
+	passAtIndex := -1
+	passedAllFilters := true
+	for _, fldFilter := range cfgFld.FieldFilter {
+		var pass bool
+		if pass, passAtIndex = passesFieldFilter(m, fldFilter); !pass {
+			passedAllFilters = false
+			break
+		}
+	}
+	if !passedAllFilters {
+		return "", nil // Not matching field filters, will have it empty
+	}
+	if passAtIndex == -1 {
+		passAtIndex = 0 // No filter
+	}
 	switch cfgFld.Type {
 	case utils.META_FILLER:
 		outVal = cfgFld.Value.Id()
@@ -330,21 +345,6 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.META_COMPOSED:
 		outVal = composedFieldvalue(m, cfgFld.Value, 0)
 	case utils.MetaGrouped: // GroupedAVP
-		passAtIndex := -1
-		matchedAllFilters := true
-		for _, fldFilter := range cfgFld.FieldFilter {
-			var pass bool
-			if pass, passAtIndex = passesFieldFilter(m, fldFilter); !pass {
-				matchedAllFilters = false
-				break
-			}
-		}
-		if !matchedAllFilters {
-			return "", nil // Not matching field filters, will have it empty
-		}
-		if passAtIndex == -1 {
-			passAtIndex = 0 // No filter
-		}
 		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex)
 	}
 	if fmtValOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
