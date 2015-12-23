@@ -564,8 +564,9 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
 
-func NewBareCCAFromCCR(ccr *CCR) *CCA {
+func NewBareCCAFromCCR(ccr *CCR, originHost, originRealm string) *CCA {
 	cca := &CCA{SessionId: ccr.SessionId, AuthApplicationId: ccr.AuthApplicationId, CCRequestType: ccr.CCRequestType, CCRequestNumber: ccr.CCRequestNumber,
+		OriginHost: originHost, OriginRealm: originRealm,
 		diamMessage: diam.NewMessage(ccr.diamMessage.Header.CommandCode, ccr.diamMessage.Header.CommandFlags&^diam.RequestFlag, ccr.diamMessage.Header.ApplicationID,
 			ccr.diamMessage.Header.HopByHopID, ccr.diamMessage.Header.EndToEndID, ccr.diamMessage.Dictionary()), ccrMessage: ccr.diamMessage, debitInterval: ccr.debitInterval,
 	}

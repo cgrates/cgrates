@@ -79,6 +79,14 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	if err != nil {
 		return nil, err
 	}
+	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+	if reqProcessor.DryRun { // DryRun does not send over network
+		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> RequestProcessor: %s", reqProcessor.Id))
+		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %+v", ccr))
+		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
+		cca.ResultCode = diam.LimitedSuccess
+		return cca, nil
+	}
 	var maxUsage float64
 	switch ccr.CCRequestType {
 	case 1:
@@ -92,9 +100,6 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			err = errCdr
 		}
 	}
-	cca := NewBareCCAFromCCR(ccr)
-	cca.OriginHost = self.cgrCfg.DiameterAgentCfg().OriginHost
-	cca.OriginRealm = self.cgrCfg.DiameterAgentCfg().OriginRealm
 	if err != nil {
 		cca.ResultCode = DiameterRatingFailed
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, error: %s", ccr.diamMessage, err))
