@@ -423,7 +423,8 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 			Subject:     ev.GetSubject(dc.SubjectField),
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
-			TimeStart:   startTime}
+			TimeStart:   startTime,
+			ExtraFields: ev.GetExtraFields()}
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
 	*sRuns = sesRuns
