@@ -356,7 +356,7 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 
 // messageAddAVPsWithPath will dynamically add AVPs into the message
 // 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
-func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []byte, appnd bool) error {
+func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr string, appnd bool, timezone string) error {
 	if len(path) == 0 {
 		return errors.New("Empty path as AVP filter")
 	}
@@ -377,8 +377,11 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValByte []by
 	lastAVPIdx := len(path) - 1
 	for i := lastAVPIdx; i >= 0; i-- {
 		var typeVal datatype.Type
-		var err error
 		if i == lastAVPIdx {
+			avpValByte, err := serializeAVPValueFromString(dictAVPs[i], avpValStr, timezone)
+			if err != nil {
+				return err
+			}
 			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte)
 			if err != nil {
 				return err
@@ -585,6 +588,7 @@ type CCA struct {
 	ccrMessage    *diam.Message
 	diamMessage   *diam.Message
 	debitInterval time.Duration
+	timezone      string
 }
 
 // AsBareDiameterMessage converts CCA into a bare DiameterMessage
@@ -613,7 +617,7 @@ func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUs
 		if err != nil {
 			return err
 		}
-		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), []byte(fmtOut), cfgFld.Append); err != nil {
+		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), fmtOut, cfgFld.Append, self.timezone); err != nil {
 			return err
 		}
 	}
