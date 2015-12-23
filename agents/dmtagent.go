@@ -85,6 +85,11 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %s", ccr.diamMessage))
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
 		cca.ResultCode = diam.LimitedSuccess
+		if err := cca.SetProcessorAVPs(reqProcessor, 0); err != nil {
+			cca.ResultCode = DiameterRatingFailed
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, error: %s", ccr.diamMessage, err))
+			return cca, nil
+		}
 		return cca, nil
 	}
 	var maxUsage float64
