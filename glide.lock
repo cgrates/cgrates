@@ -1,5 +1,5 @@
 hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-updated: 2015-12-18T18:02:12.669823411+02:00
+updated: 2015-12-23T11:12:22.098552467+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
@@ -36,20 +36,20 @@ imports:
 - name: github.com/lib/pq
   version: 11fc39a580a008f1f39bb3d11d984fb34ed778d9
 - name: github.com/mediocregopher/radix.v2
-  version: b49c6f79790ba8a13a70b42e6a53d72f2239cf63
+  version: 91435107718b55ff544323a2b0f25fdd8475d283
   subpackages:
   - /pool
   - redis
 - name: github.com/peterh/liner
   version: 3f1c20449d1836aa4cbe38731b96f95cdf89634d
 - name: github.com/ugorji/go
-  version: cd43bdd6be4b5675a0d1e75c4af55ee1dc0d9c5e
+  version: 646ae4a518c1c3be0739df898118d9bccf993858
   subpackages:
   - /codec
 - name: golang.org/x/crypto
   version: f18420efc3b4f8e9f3d51f6bd2476e92c46260e9
 - name: golang.org/x/net
-  version: 28273ec927bee3bea305f112fc28ceee575ea893
+  version: 6c89489cafabcbc76df9dbf84ebf07204673fecf
   subpackages:
   - /websocket
 - name: golang.org/x/text

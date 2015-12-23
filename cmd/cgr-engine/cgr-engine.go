@@ -474,10 +474,8 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 	server.RpcRegister(&cdrSrv)
 	server.RpcRegister(&v2.CdrsV2{CdrsV1: cdrSrv})
 	// Make the cdr server available for internal communication
-	server.RpcRegister(cdrServer)    // register CdrServer for internal usage (TODO: refactor this)
-	responder := <-internalRaterChan // Retrieve again the responder
-	internalRaterChan <- responder   // Put back the connection for the rest of the system
-	internalCdrSChan <- cdrServer    // Signal that cdrS is operational
+	server.RpcRegister(cdrServer) // register CdrServer for internal usage (TODO: refactor this)
+	internalCdrSChan <- cdrServer // Signal that cdrS is operational
 }
 
 func startScheduler(internalSchedulerChan chan *scheduler.Scheduler, cacheDoneChan chan struct{}, ratingDb engine.RatingStorage, exitChan chan bool) {
