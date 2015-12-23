@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -267,6 +268,46 @@ func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int) str
 		}
 	}
 	return outVal
+}
+
+// Used to return the encoded value based on what AVP understands for it's type
+func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]byte, error) {
+	switch dictAVP.Data.Type {
+	case datatype.OctetStringType, datatype.DiameterIdentityType, datatype.DiameterURIType, datatype.IPFilterRuleType, datatype.QoSFilterRuleType, datatype.UTF8StringType:
+		return []byte(valStr), nil
+	case datatype.AddressType:
+		return []byte(net.ParseIP(valStr)), nil
+	case datatype.EnumeratedType, datatype.Integer32Type, datatype.Integer64Type, datatype.Unsigned32Type, datatype.Unsigned64Type:
+		i, err := strconv.Atoi(valStr)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Enumerated(i).Serialize(), nil
+	case datatype.Float32Type:
+		f, err := strconv.ParseFloat(valStr, 32)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Float32(f).Serialize(), nil
+	case datatype.Float64Type:
+		f, err := strconv.ParseFloat(valStr, 64)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Float64(f).Serialize(), nil
+	case datatype.GroupedType:
+		return nil, errors.New("GroupedType not supported for serialization")
+	case datatype.IPv4Type:
+		return datatype.IPv4(net.ParseIP(valStr)).Serialize(), nil
+	case datatype.TimeType:
+		t, err := utils.ParseTimeDetectLayout(valStr, timezone)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Time(t).Serialize(), nil
+	default:
+		return nil, fmt.Errorf("Unsupported type for serialization: %v", dictAVP.Data.Type)
+	}
 }
 
 func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}) (fmtValOut string, err error) {

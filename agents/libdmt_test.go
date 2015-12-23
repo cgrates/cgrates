@@ -20,6 +20,7 @@ package agents
 
 import (
 	"bytes"
+	"encoding/binary"
 	"reflect"
 	"testing"
 	"time"
@@ -29,6 +30,7 @@ import (
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
 	"github.com/fiorix/go-diameter/diam/datatype"
+	"github.com/fiorix/go-diameter/diam/dict"
 )
 
 func TestDisectUsageForCCR(t *testing.T) {
@@ -138,6 +140,24 @@ func TestFieldOutVal(t *testing.T) {
 	}
 }
 
+func TestSerializeAVPValueFromString(t *testing.T) {
+	dictAVP, _ := dict.Default.FindAVP(4, "Session-Id")
+	eValByte := []byte("simuhuawei;1449573472;00002")
+	if valByte, err := serializeAVPValueFromString(dictAVP, "simuhuawei;1449573472;00002", "UTC"); err != nil {
+		t.Error(err)
+	} else if !bytes.Equal(eValByte, valByte) {
+		t.Errorf("Expecting: %+v, received: %+v", eValByte, valByte)
+	}
+	dictAVP, _ = dict.Default.FindAVP(4, "Result-Code")
+	eValByte = make([]byte, 4)
+	binary.BigEndian.PutUint32(eValByte, uint32(5031))
+	if valByte, err := serializeAVPValueFromString(dictAVP, "5031", "UTC"); err != nil {
+		t.Error(err)
+	} else if !bytes.Equal(eValByte, valByte) {
+		t.Errorf("Expecting: %+v, received: %+v", eValByte, valByte)
+	}
+}
+
 func TestMessageSetAVPsWithPath(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
@@ -244,9 +264,11 @@ func TestCCASetProcessorAVPs(t *testing.T) {
 	reqProcessor := &config.DARequestProcessor{Id: "UNIT_TEST", // Set template for tests
 		CCAFields: []*config.CfgCdrField{
 			&config.CfgCdrField{Tag: "Subscription-Id/Subscription-Id-Type", Type: utils.META_COMPOSED,
-				Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type", utils.INFIELD_SEP), Mandatory: true},
+				FieldId: "Subscription-Id>Subscription-Id-Type",
+				Value:   utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type", utils.INFIELD_SEP), Mandatory: true},
 			&config.CfgCdrField{Tag: "Subscription-Id/Subscription-Id-Data", Type: utils.META_COMPOSED,
-				Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true},
+				FieldId: "Subscription-Id>Subscription-Id-Data",
+				Value:   utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true},
 		},
 	}
 	eMessage := cca.AsDiameterMessage()
