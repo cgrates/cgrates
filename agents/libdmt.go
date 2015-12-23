@@ -310,6 +310,8 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 	}
 }
 
+var ErrFilterNotPassing = errors.New("Filter not passing")
+
 func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}) (fmtValOut string, err error) {
 	var outVal string
 	passAtIndex := -1
@@ -322,7 +324,7 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 		}
 	}
 	if !passedAllFilters {
-		return "", nil // Not matching field filters, will have it empty
+		return "", ErrFilterNotPassing // Not matching field filters, will have it empty
 	}
 	if passAtIndex == -1 {
 		passAtIndex = 0 // No filter
@@ -552,6 +554,9 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 	for _, cfgFld := range cfgFlds {
 		fmtOut, err := fieldOutVal(self.diamMessage, cfgFld, self.debitInterval)
 		if err != nil {
+			if err == ErrFilterNotPassing {
+				continue // Do nothing in case of Filter not passing
+			}
 			return nil, err
 		}
 		if _, hasKey := outMap[cfgFld.FieldId]; hasKey && cfgFld.Append {
@@ -616,6 +621,9 @@ func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUs
 	for _, cfgFld := range reqProcessor.CCAFields {
 		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, maxUsage)
 		if err != nil {
+			if err == ErrFilterNotPassing {
+				continue
+			}
 			return err
 		}
 		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), fmtOut, cfgFld.Append, self.timezone); err != nil {
