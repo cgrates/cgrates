@@ -257,7 +257,7 @@ func TestCCASetProcessorAVPs(t *testing.T) {
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
 		}})
 	ccr.debitInterval = time.Duration(300) * time.Second
-	cca := NewBareCCAFromCCR(ccr)
+	cca := NewBareCCAFromCCR(ccr, "CGR-DA", "cgrates.org")
 	reqProcessor := &config.DARequestProcessor{Id: "UNIT_TEST", // Set template for tests
 		CCAFields: []*config.CfgCdrField{
 			&config.CfgCdrField{Tag: "Subscription-Id/Subscription-Id-Type", Type: utils.META_COMPOSED,

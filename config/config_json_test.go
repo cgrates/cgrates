@@ -463,7 +463,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 				},
 				CCA_fields: &[]*CdrFieldJsonCfg{
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("GrantedUnits"), Type: utils.StringPointer(utils.META_HANDLER), Handler_id: utils.StringPointer("*cca_usage"),
-						Value: utils.StringPointer("Granted-Service-Unit>CC-Time"), Mandatory: utils.BoolPointer(true)},
+						Field_id: utils.StringPointer("Granted-Service-Unit>CC-Time"), Mandatory: utils.BoolPointer(true)},
 				},
 			},
 		},
