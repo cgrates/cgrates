@@ -293,7 +293,7 @@ const CGRATES_CFG_JSON = `
 				{"tag": "SubscriberID", "field_id": "SubscriberId", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
 			],
 			"cca_fields":[								// fields returned in CCA
-				{"tag": "GrantedUnits", "type": "*handler", "handler_id": "*cca_usage", "value": "Granted-Service-Unit>CC-Time", "mandatory": true},
+				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit>CC-Time", "type": "*handler", "handler_id": "*cca_usage", "mandatory": true},
 			],
 		},
 	],

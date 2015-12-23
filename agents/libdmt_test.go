@@ -162,17 +162,17 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
 	m := diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
-	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id", "Unknown"}, []byte("simuhuawei;1449573472;00002"), false); err == nil || err.Error() != "Could not find AVP Unknown" {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id", "Unknown"}, "simuhuawei;1449573472;00002", false, "UTC"); err == nil || err.Error() != "Could not find AVP Unknown" {
 		t.Error(err)
 	}
-	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id"}, []byte("simuhuawei;1449573472;00002"), false); err != nil {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id"}, "simuhuawei;1449573472;00002", false, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMessage, m) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 	}
 	// test append
 	eMessage.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00003"))
-	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id"}, []byte("simuhuawei;1449573472;00003"), true); err != nil {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id"}, "simuhuawei;1449573472;00003", true, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMessage, m) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
@@ -181,10 +181,10 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 	eMessage = diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
 	m = diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
-	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id"}, []byte("simuhuawei;1449573472;00001"), false); err != nil {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id"}, "simuhuawei;1449573472;00001", false, "UTC"); err != nil {
 		t.Error(err)
 	}
-	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id"}, []byte("simuhuawei;1449573472;00002"), false); err != nil {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Session-Id"}, "simuhuawei;1449573472;00002", false, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMessage, m) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
@@ -195,18 +195,17 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
 		}})
 	m = diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
-	if err := messageSetAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Data"}, []byte("33708000003"), false); err != nil {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Data"}, "33708000003", false, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMessage, m) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 	}
-	// diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(subscriptionId.SubscriptionIdType)), // Subscription-Id-Type
 	// test append
 	eMessage.NewAVP("Subscription-Id", avp.Mbit, 0, &diam.GroupedAVP{
 		AVP: []*diam.AVP{
 			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)), // Subscription-Id-Data
 		}})
-	if err := messageSetAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Type"}, []byte("0"), true); err != nil {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Type"}, "0", true, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMessage, m) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
@@ -220,10 +219,10 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 		}})
 	eMsgSrl, _ := eMessage.Serialize()
 	m = diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
-	if err := messageSetAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Type"}, []byte("0"), false); err != nil {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Type"}, "0", false, "UTC"); err != nil {
 		t.Error(err)
 	}
-	if err := messageSetAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Data"}, []byte("33708000003"), false); err != nil {
+	if err := messageSetAVPsWithPath(m, []interface{}{"Subscription-Id", "Subscription-Id-Data"}, "33708000003", false, "UTC"); err != nil {
 		t.Error(err)
 	} else {
 		mSrl, _ := m.Serialize()
@@ -231,19 +230,17 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 			t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 		}
 	}
-	/*
-		eMessage = diam.NewRequest(diam.CreditControl, 4, nil)
-		eMessage.NewAVP("Granted-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
-			AVP: []*diam.AVP{
-				diam.NewAVP(420, avp.Mbit, 0, datatype.UTF8String("300")), // Subscription-Id-Data
-			}})
-		m = diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
-		if err := messageSetAVPsWithPath(m, []interface{}{"Granted-Service-Unit", "CC-Time"}, []byte("300"), false); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(eMessage, m) {
-			t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
-		}
-	*/
+	eMessage = diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Granted-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(300)), // Subscription-Id-Data
+		}})
+	m = diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+	if err := messageSetAVPsWithPath(m, []interface{}{"Granted-Service-Unit", "CC-Time"}, "300", false, "UTC"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eMessage, m) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
+	}
 }
 
 func TestCCASetProcessorAVPs(t *testing.T) {
