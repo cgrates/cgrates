@@ -1,5 +1,5 @@
-hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-updated: 2015-12-23T11:12:22.098552467+02:00
+hash: 0ca45753122a2e205a1b401e7f38b17e58ea22d3b105894604e504aeace503cb
+updated: 2015-12-24T18:29:52.686317738+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
@@ -28,9 +28,10 @@ imports:
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/jinzhu/gorm
-  version: d209be3138acbe304daffee637bc495499c1e70e
+  version: 4a821a5beff551a4f445283fc232e892e2cff324
 - name: github.com/jinzhu/inflection
   version: 3272df6c21d04180007eb3349844c89a3856bc25
+  repo: https://github.com/jinzhu/inflection
 - name: github.com/kr/pty
   version: f7ee69f31298ecbe5d2b349c711e2547a617d398
 - name: github.com/lib/pq
@@ -49,11 +50,12 @@ imports:
 - name: golang.org/x/crypto
   version: f18420efc3b4f8e9f3d51f6bd2476e92c46260e9
 - name: golang.org/x/net
-  version: 6c89489cafabcbc76df9dbf84ebf07204673fecf
+  version: ea6dba8c93880aa07d6ebed83c3c680cd9faa63a
   subpackages:
   - /websocket
 - name: golang.org/x/text
   version: cf4986612c83df6c55578ba198316d1684a9a287
+  repo: https://golang.org/x/text
 - name: gopkg.in/fsnotify.v1
   version: 508915b7500b6e42a87132e4afeb4729cebc7cbb
 - name: gopkg.in/mgo.v2
@@ -62,4 +64,5 @@ imports:
   - bson
 - name: gopkg.in/tomb.v2
   version: 14b3d72120e8d10ea6e6b7f87f7175734b1faab8
+  repo: https://gopkg.in/tomb.v2
 devImports: []
