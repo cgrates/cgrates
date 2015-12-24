@@ -151,9 +151,7 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 }
 
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
-	utils.Logger.Debug(fmt.Sprintf("### MaxDebit 1 cd: %+v", arg))
 	if item, err := rs.getCache().Get(utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrId); err == nil && item != nil {
-		utils.Logger.Debug(fmt.Sprintf("### MaxDebit out of cache, cd: %+v, error: %+v", arg, item.Err))
 		*reply = *(item.Value.(*CallCost))
 		return item.Err
 	}
@@ -173,17 +171,14 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("### MaxDebit after aliasing, cd: %+v", arg))
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("### MaxDebit after users, cd: %+v", arg))
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.MaxDebit")
 		*reply, err = *r, e
 	} else {
-		utils.Logger.Debug(fmt.Sprintf("### MaxDebit, cd: %+v", arg))
 		r, e := arg.MaxDebit()
 		if e != nil {
 			rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
