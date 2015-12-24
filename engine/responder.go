@@ -152,6 +152,7 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if item, err := rs.getCache().Get(utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrId); err == nil && item != nil {
+		utils.Logger.Debug(fmt.Sprintf("### MaxDebit out of cache, cd: %+v, error: %+v", arg, item.Err))
 		*reply = *(item.Value.(*CallCost))
 		return item.Err
 	}
