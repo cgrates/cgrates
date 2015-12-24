@@ -404,6 +404,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 			return errors.New("Error parsing answer event start time")
 		}
 		cd := &CallDescriptor{
+			CgrId:       ev.GetCgrId(rs.Timezone),
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
 			Category:    ev.GetCategory(dc.CategoryField),
