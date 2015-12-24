@@ -179,6 +179,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 		r, e := rs.getCallCost(arg, "Responder.MaxDebit")
 		*reply, err = *r, e
 	} else {
+		utils.Logger.Debug(fmt.Sprintf("### MaxDebit, cd: %+v", arg))
 		r, e := arg.MaxDebit()
 		if e != nil {
 			rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
