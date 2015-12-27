@@ -37,3 +37,18 @@ CREATE TABLE cdrs (
 ;
 DROP INDEX IF EXISTS deleted_at_cp_idx;
 CREATE INDEX deleted_at_cp_idx ON cdrs_primary (deleted_at);
+
+
+DROP TABLE IF EXISTS sm_costs;
+CREATE TABLE sm_costs (
+  id SERIAL PRIMARY KEY,
+  cgrid CHAR(40) NOT NULL,
+  run_id  VARCHAR(64) NOT NULL,
+  cost_source VARCHAR(64) NOT NULL,
+  cost_details jsonb,
+  created_at TIMESTAMP,
+  deleted_at TIMESTAMP,
+  UNIQUE (cgrid, run_id)
+);
+DROP INDEX IF EXISTS deleted_at_smcost_idx;
+CREATE INDEX deleted_at_smcost_idx ON sm_costs (deleted_at);

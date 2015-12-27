@@ -35,3 +35,17 @@ CREATE TABLE cdrs (
   PRIMARY KEY (id),
   UNIQUE KEY cdrrun (cgrid, run_id)
 );
+
+DROP TABLE IF EXISTS sm_costs;
+CREATE TABLE sm_costs (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  cgrid char(40) NOT NULL,
+  run_id  varchar(64) NOT NULL,
+  cost_source varchar(64) NOT NULL,
+  cost_details text,
+  created_at TIMESTAMP,
+  deleted_at TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY costid (cgrid,run_id),
+  KEY deleted_at_idx (deleted_at)
+);

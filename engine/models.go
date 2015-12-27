@@ -426,3 +426,13 @@ type TBLCDRs struct {
 func (t TBLCDRs) TableName() string {
 	return utils.TBL_CDRS
 }
+
+type TBLSMCosts struct {
+	ID          int64
+	Cgrid       string
+	RunID       string
+	CostSource  string
+	CostDetails string
+	CreatedAt   time.Time
+	DeletedAt   time.Time
+}
