@@ -45,17 +45,24 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(strings.Join(missing, ","), "")
 	}
-	accountATs := make([]*AccountActionTiming, 0)
-	allATs, err := self.RatingDb.GetAllActionPlans()
+	accountATs := make([]*AccountActionTiming, 0) // needs to be initialized if remains empty
+	allAPs, err := self.RatingDb.GetAllActionPlans()
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	for _, ats := range allATs {
-		for _, at := range ats {
-			if utils.IsSliceMember(at.AccountIds, utils.AccountKey(attrs.Tenant, attrs.Account)) {
-				accountATs = append(accountATs, &AccountActionTiming{Uuid: at.Uuid, ActionPlanId: at.Id, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime(time.Now())})
+	accID := utils.AccountKey(attrs.Tenant, attrs.Account)
+	for _, ap := range allAPs {
+		if _, exists := ap.AccountIDs[accID]; exists {
+			for _, at := range ap.ActionTimings {
+				accountATs = append(accountATs, &AccountActionTiming{
+					ActionPlanId: ap.Id,
+					Uuid:         at.Uuid,
+					ActionsId:    at.ActionsID,
+					NextExecTime: at.GetNextStartTime(time.Now()),
+				})
 			}
 		}
+
 	}
 	*reply = accountATs
 	return nil
@@ -80,22 +87,41 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		}
 	}
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		ats, err := self.RatingDb.GetActionPlans(attrs.ActionPlanId, false)
+		ap, err := self.RatingDb.GetActionPlan(attrs.ActionPlanId, false)
 		if err != nil {
 			return 0, err
-		} else if len(ats) == 0 {
+		} else if ap == nil {
 			return 0, utils.ErrNotFound
 		}
-		ats = engine.RemActionPlan(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account))
-		if err := self.RatingDb.SetActionPlans(attrs.ActionPlanId, ats); err != nil {
-			return 0, err
+
+		if attrs.ActionPlanId != "" { // delete the entire action plan
+			ap.ActionTimings = nil // will delete the action plan
+			return 0, self.RatingDb.SetActionPlan(ap.Id, ap)
 		}
-		if len(ats) > 0 { // update cache
-			self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
+
+		if attrs.ActionTimingId != "" { // delete only a action timing from action plan
+			for i, at := range ap.ActionTimings {
+				if at.Uuid == attrs.ActionTimingId {
+					ap.ActionTimings[i] = ap.ActionTimings[len(ap.ActionTimings)-1]
+					ap.ActionTimings = ap.ActionTimings[:len(ap.ActionTimings)-1]
+					break
+				}
+			}
+			return 0, self.RatingDb.SetActionPlan(ap.Id, ap)
 		}
+
+		if attrs.Tenant != "" && attrs.Account != "" {
+			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
+			delete(ap.AccountIDs, accID)
+			return 0, self.RatingDb.SetActionPlan(ap.Id, ap)
+		}
+
+		// update cache
+		self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
 		return 0, nil
 	}, 0, utils.ACTION_PLAN_PREFIX)
 	if err != nil {
+		*reply = err.Error()
 		return utils.NewErrServerError(err)
 	}
 	if attrs.ReloadScheduler && self.Sched != nil {
@@ -119,9 +145,10 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 }
 
 type AttrRemAcntActionTriggers struct {
-	Tenant           string // Tenant he account belongs to
-	Account          string // Account name
-	ActionTriggersId string // Id filtering only specific id to remove (can be regexp pattern)
+	Tenant                 string // Tenant he account belongs to
+	Account                string // Account name
+	ActionTriggersId       string // Id filtering only specific id to remove (can be regexp pattern)
+	ActionTriggersUniqueId string
 }
 
 // Returns a list of ActionTriggers on an account
@@ -129,25 +156,29 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accId := utils.AccountKey(attrs.Tenant, attrs.Account)
+	accID := utils.AccountKey(attrs.Tenant, attrs.Account)
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		ub, err := self.AccountDb.GetAccount(accId)
+		ub, err := self.AccountDb.GetAccount(accID)
 		if err != nil {
 			return 0, err
 		}
 		nactrs := make(engine.ActionTriggers, 0)
 		for _, actr := range ub.ActionTriggers {
-			match, _ := regexp.MatchString(attrs.ActionTriggersId, actr.Id)
-			if len(attrs.ActionTriggersId) != 0 && !match {
-				nactrs = append(nactrs, actr)
+			match, _ := regexp.MatchString(attrs.ActionTriggersId, actr.ID)
+			if len(attrs.ActionTriggersId) != 0 && match {
+				continue
 			}
+			if len(attrs.ActionTriggersUniqueId) != 0 && attrs.ActionTriggersUniqueId == actr.UniqueID {
+				continue
+			}
+			nactrs = append(nactrs, actr)
 		}
 		ub.ActionTriggers = nactrs
 		if err := self.AccountDb.SetAccount(ub); err != nil {
 			return 0, err
 		}
 		return 0, nil
-	}, 0, accId)
+	}, 0, accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -161,30 +192,44 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	var schedulerReloadNeeded = false
-	accId := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var ub *engine.Account
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		if bal, _ := self.AccountDb.GetAccount(accId); bal != nil {
+		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
-				Id: accId,
+				Id: accID,
 			}
 		}
 		if len(attr.ActionPlanId) != 0 {
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
-				var ats engine.ActionPlans
+				var ap *engine.ActionPlan
 				var err error
-				ats, err = self.RatingDb.GetActionPlans(attr.ActionPlanId, false)
+				ap, err = self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
 				if err != nil {
 					return 0, err
 				}
-				for _, at := range ats {
-					at.AccountIds = append(at.AccountIds, accId)
-				}
-				if len(ats) != 0 {
+				if _, exists := ap.AccountIDs[accID]; !exists {
+					if ap.AccountIDs == nil {
+						ap.AccountIDs = make(map[string]struct{})
+					}
+					ap.AccountIDs[accID] = struct{}{}
 					schedulerReloadNeeded = true
-					if err := self.RatingDb.SetActionPlans(attr.ActionPlanId, ats); err != nil {
+					// create tasks
+					for _, at := range ap.ActionTimings {
+						if at.IsASAP() {
+							t := &engine.Task{
+								Uuid:      utils.GenUUID(),
+								AccountID: accID,
+								ActionsID: at.ActionsID,
+							}
+							if err = self.RatingDb.PushTask(t); err != nil {
+								return 0, err
+							}
+						}
+					}
+					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap); err != nil {
 						return 0, err
 					}
 					// update cache
@@ -216,11 +261,11 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			return 0, err
 		}
 		return 0, nil
-	}, 0, accId)
+	}, 0, accID)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if schedulerReloadNeeded {
+	if attr.ReloadScheduler && schedulerReloadNeeded {
 		// reload scheduler
 		if self.Sched != nil {
 			self.Sched.Reload(true)
@@ -234,32 +279,20 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	accountId := utils.AccountKey(attr.Tenant, attr.Account)
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var schedulerReloadNeeded bool
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
-		allATs, err := self.RatingDb.GetAllActionPlans()
+		allAPs, err := self.RatingDb.GetAllActionPlans()
 		if err != nil && err != utils.ErrNotFound {
 			return 0, err
 		}
-		for key, ats := range allATs {
-			changed := false
-			for _, at := range ats {
-				for i := 0; i < len(at.AccountIds); i++ {
-					if at.AccountIds[i] == accountId {
-						// delete without preserving order
-						at.AccountIds[i] = at.AccountIds[len(at.AccountIds)-1]
-						at.AccountIds = at.AccountIds[:len(at.AccountIds)-1]
-						i--
-						changed = true
-					}
-				}
-			}
-			if changed {
+		for key, ap := range allAPs {
+			if _, exists := ap.AccountIDs[accID]; !exists {
 				schedulerReloadNeeded = true
 				_, err := engine.Guardian.Guard(func() (interface{}, error) {
 					// save action plan
-					self.RatingDb.SetActionPlans(key, ats)
+					self.RatingDb.SetActionPlan(key, ap)
 					// cache
 					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
 					return 0, nil
@@ -269,11 +302,11 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 				}
 			}
 		}
-		if err := self.AccountDb.RemoveAccount(accountId); err != nil {
+		if err := self.AccountDb.RemoveAccount(accID); err != nil {
 			return 0, err
 		}
 		return 0, nil
-	}, 0, accountId)
+	}, 0, accID)
 	// FIXME: remove from all actionplans?
 	if err != nil {
 		return utils.NewErrServerError(err)
@@ -337,5 +370,155 @@ func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) 
 	}
 
 	*reply = userBalance.AsOldStructure()
+	return nil
+}
+
+type AttrAddBalance struct {
+	Tenant         string
+	Account        string
+	BalanceUuid    string
+	BalanceId      string
+	BalanceType    string
+	Directions     string
+	Value          float64
+	ExpiryTime     string
+	RatingSubject  string
+	Categories     string
+	DestinationIds string
+	Weight         float64
+	SharedGroups   string
+	Overwrite      bool // When true it will reset if the balance is already there
+	Disabled       bool
+}
+
+func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
+	expTime, err := utils.ParseTimeDetectLayout(attr.ExpiryTime, self.Config.DefaultTimezone)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	if _, err := self.AccountDb.GetAccount(accID); err != nil {
+		// create account if not exists
+		account := &engine.Account{
+			Id: accID,
+		}
+		if err := self.AccountDb.SetAccount(account); err != nil {
+			*reply = err.Error()
+			return err
+		}
+	}
+	at := &engine.ActionTiming{}
+	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
+
+	aType := engine.DEBIT
+	// reverse the sign as it is a debit
+	attr.Value = -attr.Value
+
+	if attr.Overwrite {
+		aType = engine.DEBIT_RESET
+	}
+	at.SetActions(engine.Actions{
+		&engine.Action{
+			ActionType:  aType,
+			BalanceType: attr.BalanceType,
+			Balance: &engine.Balance{
+				Uuid:           attr.BalanceUuid,
+				Id:             attr.BalanceId,
+				Value:          attr.Value,
+				ExpirationDate: expTime,
+				RatingSubject:  attr.RatingSubject,
+				Directions:     utils.ParseStringMap(attr.Directions),
+				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
+				Categories:     utils.ParseStringMap(attr.Categories),
+				Weight:         attr.Weight,
+				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
+				Disabled:       attr.Disabled,
+			},
+		},
+	})
+	if err := at.Execute(); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) error {
+	expTime, err := utils.ParseDate(attr.ExpiryTime)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	if _, err := self.AccountDb.GetAccount(accID); err != nil {
+		return utils.ErrNotFound
+	}
+	at := &engine.ActionTiming{}
+	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
+
+	at.SetActions(engine.Actions{
+		&engine.Action{
+			ActionType:  engine.ENABLE_DISABLE_BALANCE,
+			BalanceType: attr.BalanceType,
+			Balance: &engine.Balance{
+				Uuid:           attr.BalanceUuid,
+				Id:             attr.BalanceId,
+				Value:          attr.Value,
+				ExpirationDate: expTime,
+				RatingSubject:  attr.RatingSubject,
+				Directions:     utils.ParseStringMap(attr.Directions),
+				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
+				Weight:         attr.Weight,
+				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
+				Disabled:       attr.Disabled,
+			},
+		},
+	})
+	if err := at.Execute(); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+func (self *ApierV1) RemoveBalances(attr *AttrAddBalance, reply *string) error {
+	expTime, err := utils.ParseDate(attr.ExpiryTime)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	if _, err := self.AccountDb.GetAccount(accID); err != nil {
+		return utils.ErrNotFound
+	}
+
+	at := &engine.ActionTiming{}
+	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
+	at.SetActions(engine.Actions{
+		&engine.Action{
+			ActionType:  engine.REMOVE_BALANCE,
+			BalanceType: attr.BalanceType,
+			Balance: &engine.Balance{
+				Uuid:           attr.BalanceUuid,
+				Id:             attr.BalanceId,
+				Value:          attr.Value,
+				ExpirationDate: expTime,
+				RatingSubject:  attr.RatingSubject,
+				Directions:     utils.ParseStringMap(attr.Directions),
+				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
+				Weight:         attr.Weight,
+				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
+				Disabled:       attr.Disabled,
+			},
+		},
+	})
+	if err := at.Execute(); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
 	return nil
 }

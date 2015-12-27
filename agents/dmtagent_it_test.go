@@ -95,6 +95,7 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	}
 	cfgDefaults, _ := config.NewDefaultCGRConfig()
 	loadDictionaries(cfgDefaults.DiameterAgentCfg().DictionariesDir, "UNIT_TEST")
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	ccr := &CCR{
 		SessionId:         "routinga;1442095190;1476802709",
 		OriginHost:        cfgDefaults.DiameterAgentCfg().OriginHost,
@@ -139,11 +140,11 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	if ccr.diamMessage, err = ccr.AsDiameterMessage(); err != nil {
 		t.Error(err)
 	}
-	eSMGE := sessionmanager.SMGenericEvent{"EventName": "DIAMETER_CCR", "OriginID": "routinga;1442095190;1476802709",
+	eSMGE := sessionmanager.SMGenericEvent{"EventName": DIAMETER_CCR, "OriginID": "routinga;1442095190;1476802709",
 		"Account": "*users", "AnswerTime": "2015-11-23 12:22:24 +0000 UTC", "Category": "call",
 		"Destination": "4986517174964", "Direction": "*out", "RequestType": "*users", "SetupTime": "2015-11-23 12:22:24 +0000 UTC",
 		"Subject": "*users", "SubscriberId": "4986517174963", "TOR": "*voice", "Tenant": "*users", "Usage": "300"}
-	if smge, err := ccr.AsSMGenericEvent(cfgDefaults.DiameterAgentCfg().RequestProcessors[0].ContentFields); err != nil {
+	if smge, err := ccr.AsSMGenericEvent(cfgDefaults.DiameterAgentCfg().RequestProcessors[0].CCRFields); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSMGE, smge) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGE, smge)

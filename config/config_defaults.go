@@ -277,7 +277,7 @@ const CGRATES_CFG_JSON = `
 			"dry_run": false,									// do not send the CDRs to CDRS, just parse them
 			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
 			"continue_on_success": false,				// continue to the next template if executed
-			"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "TOR", "type": "*composed", "value": "^*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "^*users", "mandatory": true},
@@ -290,7 +290,10 @@ const CGRATES_CFG_JSON = `
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
 				{"tag": "Usage", "field_id": "Usage", "type": "*handler", "handler_id": "*ccr_usage", "mandatory": true},
-				{"tag": "subscriber_id", "field_id": "SubscriberId", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
+				{"tag": "SubscriberID", "field_id": "SubscriberId", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "mandatory": true},
+			],
+			"cca_fields":[								// fields returned in CCA
+				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit>CC-Time", "type": "*handler", "handler_id": "*cca_usage", "mandatory": true},
 			],
 		},
 	],

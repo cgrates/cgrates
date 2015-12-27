@@ -23,9 +23,11 @@ Build various type of packets here
 */
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"math/rand"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -47,9 +49,10 @@ func init() {
 }
 
 const (
-	META_CCR_USAGE          = "*ccr_usage"
-	META_CCR_SMG_EVENT_NAME = "*ccr_smg_event_name"
-	DIAMETER_CCR            = "DIAMETER_CCR"
+	META_CCR_USAGE       = "*ccr_usage"
+	META_CCA_USAGE       = "*cca_usage"
+	DIAMETER_CCR         = "DIAMETER_CCR"
+	DiameterRatingFailed = 5031
 )
 
 func loadDictionaries(dictsDir, componentId string) error {
@@ -155,6 +158,266 @@ func storedCdrToCCR(cdr *engine.CDR, originHost, originRealm string, vendorId in
 	return ccr
 }
 
+// Not the cleanest but most efficient way to retrieve a string from AVP since there are string methods on all datatypes
+// and the output is always in teh form "DataType{real_string}Padding:x"
+func avpValAsString(a *diam.AVP) string {
+	dataVal := a.Data.String()
+	startIdx := strings.Index(dataVal, "{")
+	endIdx := strings.Index(dataVal, "}")
+	if startIdx == 0 || endIdx == 0 {
+		return ""
+	}
+	return dataVal[startIdx+1 : endIdx]
+}
+
+// Handler for meta functions
+func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, error) {
+	switch tag {
+	case META_CCR_USAGE:
+		var ok bool
+		var reqType datatype.Enumerated
+		var reqNr, reqUnit, usedUnit datatype.Unsigned32
+		if ccReqTypeAvp, err := m.FindAVP("CC-Request-Type", 0); err != nil {
+			return "", err
+		} else if ccReqTypeAvp == nil {
+			return "", errors.New("CC-Request-Type not found")
+		} else if reqType, ok = ccReqTypeAvp.Data.(datatype.Enumerated); !ok {
+			return "", fmt.Errorf("CC-Request-Type must be Enumerated and not %v", ccReqTypeAvp.Data.Type())
+		}
+		if ccReqNrAvp, err := m.FindAVP("CC-Request-Number", 0); err != nil {
+			return "", err
+		} else if ccReqNrAvp == nil {
+			return "", errors.New("CC-Request-Number not found")
+		} else if reqNr, ok = ccReqNrAvp.Data.(datatype.Unsigned32); !ok {
+			return "", fmt.Errorf("CC-Request-Number must be Unsigned32 and not %v", ccReqNrAvp.Data.Type())
+		}
+		if reqUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Requested-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+			return "", err
+		} else if len(reqUnitAVPs) == 0 {
+			return "", errors.New("Requested-Service-Unit>CC-Time not found")
+		} else if reqUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+			return "", fmt.Errorf("Requested-Service-Unit>CC-Time must be Unsigned32 and not %v", reqUnitAVPs[0].Data.Type())
+		}
+		if usedUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Used-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+			return "", err
+		} else if len(usedUnitAVPs) != 0 {
+			if usedUnit, ok = usedUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+				return "", fmt.Errorf("Used-Service-Unit>CC-Time must be Unsigned32 and not %v", usedUnitAVPs[0].Data.Type())
+			}
+		}
+		usage := usageFromCCR(int(reqType), int(reqNr), int(reqUnit), int(usedUnit), dur)
+		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
+	}
+	return "", nil
+}
+
+// splitIntoInterface is used to split a string into []interface{} instead of []string
+func splitIntoInterface(content, sep string) []interface{} {
+	spltStr := strings.Split(content, sep)
+	spltIf := make([]interface{}, len(spltStr))
+	for i, val := range spltStr {
+		spltIf[i] = val
+	}
+	return spltIf
+}
+
+// avpsWithPath is used to find AVPs by specifying RSRField as filter
+func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) {
+	return m.FindAVPsWithPath(splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
+}
+
+// Follows the implementation in the StorCdr
+func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField) (bool, int) {
+	if fieldFilter == nil {
+		return true, 0
+	}
+	avps, err := avpsWithPath(m, fieldFilter)
+	if err != nil {
+		return false, 0
+	} else if len(avps) == 0 {
+		return true, 0
+	}
+	for avpIdx, avpVal := range avps {
+		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
+			return true, avpIdx
+		}
+	}
+	return false, 0
+}
+
+func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int) string {
+	var outVal string
+	for _, rsrTpl := range outTpl {
+		if rsrTpl.IsStatic() {
+			outVal += rsrTpl.ParseValue("")
+		} else {
+			matchingAvps, err := avpsWithPath(m, rsrTpl)
+			if err != nil || len(matchingAvps) == 0 {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
+				continue // Filter not matching
+			}
+			if len(matchingAvps) <= avpIdx {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot retrieve AVP with index %d for field template with id: %s", avpIdx, rsrTpl.Id))
+				continue // Not convertible, ignore
+			}
+			if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, ignoring.", rsrTpl.Id))
+				continue // Not convertible, ignore
+			}
+			outVal += rsrTpl.ParseValue(avpValAsString(matchingAvps[avpIdx]))
+		}
+	}
+	return outVal
+}
+
+// Used to return the encoded value based on what AVP understands for it's type
+func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]byte, error) {
+	switch dictAVP.Data.Type {
+	case datatype.OctetStringType, datatype.DiameterIdentityType, datatype.DiameterURIType, datatype.IPFilterRuleType, datatype.QoSFilterRuleType, datatype.UTF8StringType:
+		return []byte(valStr), nil
+	case datatype.AddressType:
+		return []byte(net.ParseIP(valStr)), nil
+	case datatype.EnumeratedType, datatype.Integer32Type, datatype.Integer64Type, datatype.Unsigned32Type, datatype.Unsigned64Type:
+		i, err := strconv.Atoi(valStr)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Enumerated(i).Serialize(), nil
+	case datatype.Float32Type:
+		f, err := strconv.ParseFloat(valStr, 32)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Float32(f).Serialize(), nil
+	case datatype.Float64Type:
+		f, err := strconv.ParseFloat(valStr, 64)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Float64(f).Serialize(), nil
+	case datatype.GroupedType:
+		return nil, errors.New("GroupedType not supported for serialization")
+	case datatype.IPv4Type:
+		return datatype.IPv4(net.ParseIP(valStr)).Serialize(), nil
+	case datatype.TimeType:
+		t, err := utils.ParseTimeDetectLayout(valStr, timezone)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Time(t).Serialize(), nil
+	default:
+		return nil, fmt.Errorf("Unsupported type for serialization: %v", dictAVP.Data.Type)
+	}
+}
+
+var ErrFilterNotPassing = errors.New("Filter not passing")
+
+func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}) (fmtValOut string, err error) {
+	var outVal string
+	passAtIndex := -1
+	passedAllFilters := true
+	for _, fldFilter := range cfgFld.FieldFilter {
+		var pass bool
+		if pass, passAtIndex = passesFieldFilter(m, fldFilter); !pass {
+			passedAllFilters = false
+			break
+		}
+	}
+	if !passedAllFilters {
+		return "", ErrFilterNotPassing // Not matching field filters, will have it empty
+	}
+	if passAtIndex == -1 {
+		passAtIndex = 0 // No filter
+	}
+	switch cfgFld.Type {
+	case utils.META_FILLER:
+		outVal = cfgFld.Value.Id()
+		cfgFld.Padding = "right"
+	case utils.META_CONSTANT:
+		outVal = cfgFld.Value.Id()
+	case utils.META_HANDLER:
+		if cfgFld.HandlerId == META_CCA_USAGE { // Exception, usage is passed in the dur variable by CCA
+			outVal = strconv.FormatFloat(extraParam.(float64), 'f', -1, 64)
+		} else {
+			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
+			}
+		}
+	case utils.META_COMPOSED:
+		outVal = composedFieldvalue(m, cfgFld.Value, 0)
+	case utils.MetaGrouped: // GroupedAVP
+		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex)
+	}
+	if fmtValOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
+		return "", err
+	}
+	return fmtValOut, nil
+}
+
+// messageAddAVPsWithPath will dynamically add AVPs into the message
+// 	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
+func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr string, appnd bool, timezone string) error {
+	if len(path) == 0 {
+		return errors.New("Empty path as AVP filter")
+	}
+	dictAVPs := make([]*dict.AVP, len(path)) // for each subpath, one dictionary AVP
+	for i, subpath := range path {
+		if dictAVP, err := m.Dictionary().FindAVP(m.Header.ApplicationID, subpath); err != nil {
+			return err
+		} else if dictAVP == nil {
+			return fmt.Errorf("Cannot find AVP with id: %s", path[len(path)-1])
+		} else {
+			dictAVPs[i] = dictAVP
+		}
+	}
+	if dictAVPs[len(path)-1].Data.Type == diam.GroupedAVPType {
+		return errors.New("Last AVP in path needs not to be GroupedAVP")
+	}
+	var msgAVP *diam.AVP // Keep a reference here towards last AVP
+	lastAVPIdx := len(path) - 1
+	for i := lastAVPIdx; i >= 0; i-- {
+		var typeVal datatype.Type
+		if i == lastAVPIdx {
+			avpValByte, err := serializeAVPValueFromString(dictAVPs[i], avpValStr, timezone)
+			if err != nil {
+				return err
+			}
+			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte)
+			if err != nil {
+				return err
+			}
+		} else {
+			typeVal = &diam.GroupedAVP{
+				AVP: []*diam.AVP{msgAVP}}
+		}
+		newMsgAVP := diam.NewAVP(dictAVPs[i].Code, avp.Mbit, dictAVPs[i].VendorID, typeVal) // FixMe: maybe Mbit with dictionary one
+		if i == lastAVPIdx-1 && !appnd {                                                    // last AVP needs to be appended in group
+			avps, _ := m.FindAVPsWithPath(path[:lastAVPIdx], dict.UndefinedVendorID)
+			if len(avps) != 0 { // Group AVP already in the message
+				prevGrpData := avps[0].Data.(*diam.GroupedAVP)
+				prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
+				m.Header.MessageLength += uint32(msgAVP.Len())
+				return nil
+			}
+		}
+		msgAVP = newMsgAVP
+	}
+	if !appnd { // Not group AVP, replace the previous set one with this one
+		avps, _ := m.FindAVPsWithPath(path, dict.UndefinedVendorID)
+		if len(avps) != 0 { // Group AVP already in the message
+			m.Header.MessageLength -= uint32(avps[0].Len()) // decrease message length since we overwrite
+			*avps[0] = *msgAVP
+			m.Header.MessageLength += uint32(msgAVP.Len())
+			return nil
+		}
+	}
+	m.AVP = append(m.AVP, msgAVP)
+	m.Header.MessageLength += uint32(msgAVP.Len())
+	return nil
+}
+
 // debitInterval is the configured debitInterval, in sync with the diameter client one
 func NewCCRFromDiameterMessage(m *diam.Message, debitInterval time.Duration) (*CCR, error) {
 	var ccr CCR
@@ -167,6 +430,7 @@ func NewCCRFromDiameterMessage(m *diam.Message, debitInterval time.Duration) (*C
 }
 
 // CallControl Request
+// FixMe: strip it down to mandatory bare structure format by RFC 4006
 type CCR struct {
 	SessionId         string    `avp:"Session-Id"`
 	OriginHost        string    `avp:"Origin-Host"`
@@ -209,34 +473,29 @@ type CCR struct {
 	debitInterval time.Duration // Configured debit interval
 }
 
+// AsBareDiameterMessage converts CCR into a bare DiameterMessage
+// Compatible with the required fields of CCA
+func (self *CCR) AsBareDiameterMessage() *diam.Message {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(self.SessionId))
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginHost))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm))
+	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId))
+	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(self.CCRequestType))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(self.CCRequestNumber))
+	return m
+}
+
 // Used when sending from client to agent
 func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
-	m := diam.NewRequest(diam.CreditControl, 4, nil)
-	if _, err := m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String(self.SessionId)); err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("Origin-Host", avp.Mbit, 0, datatype.DiameterIdentity(self.OriginHost)); err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("Origin-Realm", avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm)); err != nil {
-		return nil, err
-	}
+	m := self.AsBareDiameterMessage()
 	if _, err := m.NewAVP("Destination-Host", avp.Mbit, 0, datatype.DiameterIdentity(self.DestinationHost)); err != nil {
 		return nil, err
 	}
 	if _, err := m.NewAVP("Destination-Realm", avp.Mbit, 0, datatype.DiameterIdentity(self.DestinationRealm)); err != nil {
 		return nil, err
 	}
-	if _, err := m.NewAVP("Auth-Application-Id", avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId)); err != nil {
-		return nil, err
-	}
 	if _, err := m.NewAVP("Service-Context-Id", avp.Mbit, 0, datatype.UTF8String(self.ServiceContextId)); err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("CC-Request-Type", avp.Mbit, 0, datatype.Enumerated(self.CCRequestType)); err != nil {
-		return nil, err
-	}
-	if _, err := m.NewAVP("CC-Request-Number", avp.Mbit, 0, datatype.Enumerated(self.CCRequestNumber)); err != nil {
 		return nil, err
 	}
 	if _, err := m.NewAVP("Event-Timestamp", avp.Mbit, 0, datatype.Time(self.EventTimestamp)); err != nil {
@@ -288,147 +547,39 @@ func (self *CCR) AsDiameterMessage() (*diam.Message, error) {
 	return m, nil
 }
 
-// Not the cleanest but most efficient way to retrieve a string from AVP since there are string methods on all datatypes
-// and the output is always in teh form "DataType{real_string}Padding:x"
-func avpValAsString(a *diam.AVP) string {
-	dataVal := a.Data.String()
-	startIdx := strings.Index(dataVal, "{")
-	endIdx := strings.Index(dataVal, "}")
-	if startIdx == 0 || endIdx == 0 {
-		return ""
-	}
-	return dataVal[startIdx+1 : endIdx]
-}
-
-// Handler for meta functions
-func (self *CCR) metaHandler(tag, arg string) (string, error) {
-	switch tag {
-	case META_CCR_USAGE:
-		usage := usageFromCCR(self.CCRequestType, self.CCRequestNumber, self.RequestedServiceUnit.CCTime, self.UsedServiceUnit.CCTime, self.debitInterval)
-		return strconv.FormatFloat(usage.Seconds(), 'f', -1, 64), nil
-	}
-	return "", nil
-}
-
-func (self *CCR) avpsWithPath(rsrFld *utils.RSRField) ([]*diam.AVP, error) {
-	hierarchyPath := strings.Split(rsrFld.Id, utils.HIERARCHY_SEP)
-	hpIf := make([]interface{}, len(hierarchyPath))
-	for i, val := range hierarchyPath {
-		hpIf[i] = val
-	}
-	return self.diamMessage.FindAVPsWithPath(hpIf, dict.UndefinedVendorID)
-}
-
-// Follows the implementation in the StorCdr
-func (self *CCR) passesFieldFilter(fieldFilter *utils.RSRField) (bool, int) {
-	if fieldFilter == nil {
-		return true, 0
-	}
-	avps, err := self.avpsWithPath(fieldFilter)
-	if err != nil {
-		return false, 0
-	} else if len(avps) == 0 {
-		return true, 0
-	}
-	for avpIdx, avpVal := range avps {
-		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
-			return true, avpIdx
-		}
-	}
-	return false, 0
-}
-
-func (self *CCR) eventFieldValue(fldTpl utils.RSRFields, avpIdx int) string {
-	var outVal string
-	for _, rsrTpl := range fldTpl {
-		if rsrTpl.IsStatic() {
-			outVal += rsrTpl.ParseValue("")
-		} else {
-			matchingAvps, err := self.avpsWithPath(rsrTpl)
-			if err != nil || len(matchingAvps) == 0 {
-				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
-				continue // Filter not matching
-			}
-			if len(matchingAvps) <= avpIdx {
-				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot retrieve AVP with index %d for field template with id: %s", avpIdx, rsrTpl.Id))
-				continue // Not convertible, ignore
-			}
-			if matchingAvps[0].Data.Type() == diam.GroupedAVPType {
-				utils.Logger.Warning(fmt.Sprintf("<Diameter> Value for field template with id: %s is matching a group AVP, ignoring.", rsrTpl.Id))
-				continue // Not convertible, ignore
-			}
-			outVal += avpValAsString(matchingAvps[avpIdx])
-		}
-	}
-	return outVal
-}
-
-func (self *CCR) fieldOutVal(cfgFld *config.CfgCdrField) (fmtValOut string, err error) {
-	var outVal string
-	switch cfgFld.Type {
-	case utils.META_FILLER:
-		outVal = cfgFld.Value.Id()
-		cfgFld.Padding = "right"
-	case utils.META_CONSTANT:
-		outVal = cfgFld.Value.Id()
-	case utils.META_HANDLER:
-		outVal, err = self.metaHandler(cfgFld.HandlerId, cfgFld.Layout)
-		if err != nil {
-			utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
-		}
-	case utils.META_COMPOSED:
-		outVal = self.eventFieldValue(cfgFld.Value, 0)
-	case utils.MetaGrouped: // GroupedAVP
-		passAtIndex := -1
-		matchedAllFilters := true
-		for _, fldFilter := range cfgFld.FieldFilter {
-			var pass bool
-			if pass, passAtIndex = self.passesFieldFilter(fldFilter); !pass {
-				matchedAllFilters = false
-				break
-			}
-		}
-		if !matchedAllFilters {
-			return "", nil // Not matching field filters, will have it empty
-		}
-		if passAtIndex == -1 {
-			passAtIndex = 0 // No filter
-		}
-		outVal = self.eventFieldValue(cfgFld.Value, passAtIndex)
-	}
-	if fmtValOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
-		return "", err
-	}
-	return fmtValOut, nil
-}
-
 // Extracts data out of CCR into a SMGenericEvent based on the configured template
 func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager.SMGenericEvent, error) {
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = DIAMETER_CCR
 	for _, cfgFld := range cfgFlds {
-		fmtOut, err := self.fieldOutVal(cfgFld)
+		fmtOut, err := fieldOutVal(self.diamMessage, cfgFld, self.debitInterval)
 		if err != nil {
+			if err == ErrFilterNotPassing {
+				continue // Do nothing in case of Filter not passing
+			}
 			return nil, err
 		}
-		if _, hasKey := outMap[cfgFld.FieldId]; !hasKey {
-			outMap[cfgFld.FieldId] = fmtOut
-		} else { // If already there, postpend
+		if _, hasKey := outMap[cfgFld.FieldId]; hasKey && cfgFld.Append {
 			outMap[cfgFld.FieldId] += fmtOut
+		} else {
+			outMap[cfgFld.FieldId] = fmtOut
+
 		}
 	}
 	return sessionmanager.SMGenericEvent(utils.ConvertMapValStrIf(outMap)), nil
 }
 
-func NewCCAFromCCR(ccr *CCR) *CCA {
-	return &CCA{SessionId: ccr.SessionId, AuthApplicationId: ccr.AuthApplicationId, CCRequestType: ccr.CCRequestType, CCRequestNumber: ccr.CCRequestNumber,
+func NewBareCCAFromCCR(ccr *CCR, originHost, originRealm string) *CCA {
+	cca := &CCA{SessionId: ccr.SessionId, AuthApplicationId: ccr.AuthApplicationId, CCRequestType: ccr.CCRequestType, CCRequestNumber: ccr.CCRequestNumber,
+		OriginHost: originHost, OriginRealm: originRealm,
 		diamMessage: diam.NewMessage(ccr.diamMessage.Header.CommandCode, ccr.diamMessage.Header.CommandFlags&^diam.RequestFlag, ccr.diamMessage.Header.ApplicationID,
-			ccr.diamMessage.Header.HopByHopID, ccr.diamMessage.Header.EndToEndID, ccr.diamMessage.Dictionary()),
+			ccr.diamMessage.Header.HopByHopID, ccr.diamMessage.Header.EndToEndID, ccr.diamMessage.Dictionary()), ccrMessage: ccr.diamMessage, debitInterval: ccr.debitInterval,
 	}
+	cca.diamMessage = cca.AsBareDiameterMessage() // Add the required fields to the diameterMessage
+	return cca
 }
 
-// Call Control Answer
+// Call Control Answer, bare structure so we can dynamically manage adding it's fields
 type CCA struct {
 	SessionId          string `avp:"Session-Id"`
 	OriginHost         string `avp:"Origin-Host"`
@@ -440,40 +591,44 @@ type CCA struct {
 	GrantedServiceUnit struct {
 		CCTime int `avp:"CC-Time"`
 	} `avp:"Granted-Service-Unit"`
-	diamMessage *diam.Message
+	ccrMessage    *diam.Message
+	diamMessage   *diam.Message
+	debitInterval time.Duration
+	timezone      string
 }
 
-// Converts itself into DiameterMessage
-func (self *CCA) AsDiameterMessage() (*diam.Message, error) {
-	if _, err := self.diamMessage.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String(self.SessionId)); err != nil {
-		return nil, err
+// AsBareDiameterMessage converts CCA into a bare DiameterMessage
+func (self *CCA) AsBareDiameterMessage() *diam.Message {
+	var m diam.Message
+	utils.Clone(self.diamMessage, &m)
+	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(self.SessionId))
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginHost))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm))
+	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId))
+	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(self.CCRequestType))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Enumerated(self.CCRequestNumber))
+	m.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(self.ResultCode))
+	return &m
+}
+
+// AsDiameterMessage returns the diameter.Message which can be later written on network
+func (self *CCA) AsDiameterMessage() *diam.Message {
+	return self.diamMessage
+}
+
+// SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
+func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUsage float64) error {
+	for _, cfgFld := range reqProcessor.CCAFields {
+		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, maxUsage)
+		if err != nil {
+			if err == ErrFilterNotPassing {
+				continue
+			}
+			return err
+		}
+		if err := messageSetAVPsWithPath(self.diamMessage, splitIntoInterface(cfgFld.FieldId, utils.HIERARCHY_SEP), fmtOut, cfgFld.Append, self.timezone); err != nil {
+			return err
+		}
 	}
-	if _, err := self.diamMessage.NewAVP("Origin-Host", avp.Mbit, 0, datatype.DiameterIdentity(self.OriginHost)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("Origin-Realm", avp.Mbit, 0, datatype.DiameterIdentity(self.OriginRealm)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("Auth-Application-Id", avp.Mbit, 0, datatype.Unsigned32(self.AuthApplicationId)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("CC-Request-Type", avp.Mbit, 0, datatype.Enumerated(self.CCRequestType)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("CC-Request-Number", avp.Mbit, 0, datatype.Enumerated(self.CCRequestNumber)); err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(self.ResultCode)); err != nil {
-		return nil, err
-	}
-	ccTimeAvp, err := self.diamMessage.Dictionary().FindAVP(self.diamMessage.Header.ApplicationID, "CC-Time")
-	if err != nil {
-		return nil, err
-	}
-	if _, err := self.diamMessage.NewAVP("Granted-Service-Unit", avp.Mbit, 0, &diam.GroupedAVP{
-		AVP: []*diam.AVP{
-			diam.NewAVP(ccTimeAvp.Code, avp.Mbit, 0, datatype.Unsigned32(self.GrantedServiceUnit.CCTime))}}); err != nil {
-		return nil, err
-	}
-	return self.diamMessage, nil
+	return nil
 }

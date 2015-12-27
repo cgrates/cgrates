@@ -404,13 +404,15 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			return errors.New("Error parsing answer event start time")
 		}
 		cd := &CallDescriptor{
+			CgrId:       ev.GetCgrId(rs.Timezone),
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
 			Category:    ev.GetCategory(dc.CategoryField),
 			Subject:     ev.GetSubject(dc.SubjectField),
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
-			TimeStart:   startTime}
+			TimeStart:   startTime,
+			ExtraFields: ev.GetExtraFields()}
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
 	*sRuns = sesRuns

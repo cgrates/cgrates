@@ -100,7 +100,8 @@ type DARequestProcessor struct {
 	DryRun            bool
 	RequestFilter     utils.RSRFields
 	ContinueOnSuccess bool
-	ContentFields     []*CfgCdrField
+	CCRFields         []*CfgCdrField
+	CCAFields         []*CfgCdrField
 }
 
 func (self *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg) error {
@@ -119,8 +120,13 @@ func (self *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg
 			return err
 		}
 	}
-	if jsnCfg.Content_fields != nil {
-		if self.ContentFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.Content_fields); err != nil {
+	if jsnCfg.CCR_fields != nil {
+		if self.CCRFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.CCR_fields); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.CCA_fields != nil {
+		if self.CCAFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.CCA_fields); err != nil {
 			return err
 		}
 	}

@@ -143,3 +143,22 @@ func (sm StringMap) GetOne() string {
 	}
 	return ""
 }
+
+/*
+func NoDots(m map[string]struct{}) map[string]struct{} {
+	return MapKeysReplace(m, ".", "．")
+}
+
+func YesDots(m map[string]struct{}) map[string]struct{} {
+	return MapKeysReplace(m, "．", ".")
+}
+
+func MapKeysReplace(m map[string]struct{}, old, new string) map[string]struct{} {
+	for key, val := range m {
+		delete(m, key)
+		key = strings.Replace(key, old, new, -1)
+		m[key] = val
+	}
+	return m
+}
+*/

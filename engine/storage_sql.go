@@ -635,7 +635,7 @@ func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (*CallCost, 
 func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	return
 }
-func (self *SQLStorage) LogActionPlan(source string, at *ActionPlan, as Actions) (err error) {
+func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	return
 }
 

@@ -1085,7 +1085,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		return
 	}
 	var reply string
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanId: "PACKAGE_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanId: "PACKAGE_10", ActionTriggersId: "STANDARD_TRIGGERS", ReloadScheduler: true}
 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1098,7 +1098,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		Offset     int // Set the item offset
 		Limit      int // Limit number of items retrieved
 	}
-	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var acnts []*engine.Account
 	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
 		t.Error(err)
@@ -1123,7 +1123,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 			t.Error("Disabled should not be set")
 		}
 	}
-	attrs = &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true)}
+	attrs = &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 	} else if reply != "OK" {
