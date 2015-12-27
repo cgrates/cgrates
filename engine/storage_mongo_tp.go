@@ -698,7 +698,7 @@ func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	}{at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
+func (ms *MongoStorage) LogCallCost(cgrid, runid, source string, cc *CallCost) error {
 	s := &CDR{
 		CGRID:       cgrid,
 		Source:      source,
@@ -709,9 +709,9 @@ func (ms *MongoStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) e
 	return err
 }
 
-func (ms *MongoStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
+func (ms *MongoStorage) GetCallCostLog(cgrid, runid string) (cc *CallCost, err error) {
 	result := CDR{}
-	err = ms.db.C(colCdrs).Find(bson.M{"cgrid": cgrid, "cdrsource": source, "mediationrunid": runid}).One(&result)
+	err = ms.db.C(colCdrs).Find(bson.M{"cgrid": cgrid, "mediationrunid": runid}).One(&result)
 	cc = result.CostDetails
 	return
 }

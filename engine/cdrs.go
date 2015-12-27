@@ -109,18 +109,18 @@ func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 	if ccl.CheckDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
-			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.Source, ccl.RunId)
+			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.RunId)
 			if err != nil && err != gorm.RecordNotFound && err != mgov2.ErrNotFound {
 				return nil, err
 			}
 			if cc != nil {
 				return nil, utils.ErrExists
 			}
-			return nil, self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
+			return nil, self.cdrDb.LogCallCost(ccl.CgrId, ccl.RunId, ccl.Source, ccl.CallCost)
 		}, 0, ccl.CgrId)
 		return err
 	}
-	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.Source, ccl.RunId, ccl.CallCost)
+	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.RunId, ccl.Source, ccl.CallCost)
 }
 
 // Called by rate/re-rate API
@@ -323,7 +323,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) error {
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		for i := 0; i < 4; i++ {
-			qryCC, err = self.cdrDb.GetCallCostLog(cdr.CGRID, utils.SESSION_MANAGER_SOURCE, cdr.RunID)
+			qryCC, err = self.cdrDb.GetCallCostLog(cdr.CGRID, cdr.RunID)
 			if err == nil {
 				break
 			}
@@ -368,7 +368,7 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
-			self.cdrDb.LogCallCost(cdr.CGRID, utils.CDRS_SOURCE, cdr.RunID, cc)
+			self.cdrDb.LogCallCost(cdr.CGRID, cdr.RunID, utils.CDRS_SOURCE, cc)
 		}
 	} else {
 		err = self.rater.GetCost(cd, cc)

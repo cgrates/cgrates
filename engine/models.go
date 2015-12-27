@@ -436,3 +436,7 @@ type TBLSMCosts struct {
 	CreatedAt   time.Time
 	DeletedAt   time.Time
 }
+
+func (t TBLSMCosts) TableName() string {
+	return utils.TBLSMCosts
+}

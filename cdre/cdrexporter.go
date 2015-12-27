@@ -114,7 +114,7 @@ type CdrExporter struct {
 // Return Json marshaled callCost attached to
 // Keep it separately so we test only this part in local tests
 func (cdre *CdrExporter) getCdrCostDetails(CGRID, runId string) (string, error) {
-	cc, err := cdre.cdrDb.GetCallCostLog(CGRID, "", runId)
+	cc, err := cdre.cdrDb.GetCallCostLog(CGRID, runId)
 	if err != nil {
 		return "", err
 	} else if cc == nil {

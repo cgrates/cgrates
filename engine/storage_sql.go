@@ -569,67 +569,44 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 	return nil
 
 }
-func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
+func (self *SQLStorage) LogCallCost(cgrid, runid, source string, cc *CallCost) (err error) { //
 	if cc == nil {
 		return nil
 	}
-	tss, err := json.Marshal(cc.Timespans)
+	tss, err := json.Marshal(cc)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 		return err
 	}
 	tx := self.db.Begin()
-	cd := &TBLCDRs{
+	cd := &TBLSMCosts{
 		Cgrid:       cgrid,
 		RunID:       runid,
-		Tor:         cc.TOR,
-		Direction:   cc.Direction,
-		Tenant:      cc.Tenant,
-		Category:    cc.Category,
-		Account:     cc.Account,
-		Subject:     cc.Subject,
-		Destination: cc.Destination,
-		Cost:        cc.Cost,
-		CostDetails: string(tss),
 		CostSource:  source,
+		CostDetails: string(tss),
 		CreatedAt:   time.Now(),
 	}
-
 	if tx.Save(cd).Error != nil { // Check further since error does not properly reflect duplicates here (sql: no rows in result set)
 		tx.Rollback()
-		tx = self.db.Begin()
-		updated := tx.Model(TBLCDRs{}).Where(&TBLCDRs{Cgrid: cgrid, RunID: runid}).Updates(&TBLCDRs{Tor: cc.TOR, Direction: cc.Direction, Tenant: cc.Tenant, Category: cc.Category,
-			Account: cc.Account, Subject: cc.Subject, Destination: cc.Destination, Cost: cc.Cost, CostDetails: string(tss), CostSource: source, UpdatedAt: time.Now()})
-		if updated.Error != nil {
-			tx.Rollback()
-			return updated.Error
-		}
+		return tx.Error
 	}
 	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (*CallCost, error) {
-	var tpCostDetail TBLCDRs
-	if err := self.db.Where(&TBLCDRs{Cgrid: cgrid, RunID: runid, CostSource: source}).First(&tpCostDetail).Error; err != nil {
+func (self *SQLStorage) GetCallCostLog(cgrid, runid string) (*CallCost, error) {
+	var tpCostDetail TBLSMCosts
+	if err := self.db.Where(&TBLSMCosts{Cgrid: cgrid, RunID: runid}).First(&tpCostDetail).Error; err != nil {
 		return nil, err
 	}
 	if len(tpCostDetail.CostDetails) == 0 {
 		return nil, nil // No costs returned
 	}
-	cc := new(CallCost)
-	cc.TOR = tpCostDetail.Tor
-	cc.Direction = tpCostDetail.Direction
-	cc.Category = tpCostDetail.Category
-	cc.Tenant = tpCostDetail.Tenant
-	cc.Account = tpCostDetail.Account
-	cc.Subject = tpCostDetail.Subject
-	cc.Destination = tpCostDetail.Destination
-	cc.Cost = tpCostDetail.Cost
-	if err := json.Unmarshal([]byte(tpCostDetail.CostDetails), &cc.Timespans); err != nil {
+	var cc CallCost
+	if err := json.Unmarshal([]byte(tpCostDetail.CostDetails), &cc); err != nil {
 		return nil, err
 	}
-	return cc, nil
+	return &cc, nil
 }
 
 func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {

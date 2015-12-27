@@ -31,7 +31,7 @@ func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.
 	if attrs.RunId == "" {
 		attrs.RunId = utils.META_DEFAULT
 	}
-	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, "", attrs.RunId); err != nil {
+	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, attrs.RunId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if cc == nil {
 		return utils.ErrNotFound
