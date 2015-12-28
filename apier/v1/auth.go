@@ -32,8 +32,8 @@ func (self *ApierV1) GetMaxUsage(usageRecord engine.UsageRecord, maxUsage *float
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if usageRecord.TOR == "" {
-		usageRecord.TOR = utils.VOICE
+	if usageRecord.ToR == "" {
+		usageRecord.ToR = utils.VOICE
 	}
 	if usageRecord.RequestType == "" {
 		usageRecord.RequestType = self.Config.DefaultReqType

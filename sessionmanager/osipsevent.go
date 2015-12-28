@@ -267,7 +267,7 @@ func (osipsev *OsipsEvent) DialogId() string {
 func (osipsEv *OsipsEvent) AsStoredCdr(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.CGRID = osipsEv.GetCgrId(timezone)
-	storCdr.TOR = utils.VOICE
+	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = osipsEv.GetUUID()
 	storCdr.OriginHost = osipsEv.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = "OSIPS_" + osipsEv.GetName()

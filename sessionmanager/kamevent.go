@@ -319,7 +319,7 @@ func (kev KamEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 func (kev KamEvent) AsStoredCdr(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.CGRID = kev.GetCgrId(timezone)
-	storCdr.TOR = utils.VOICE
+	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = kev.GetUUID()
 	storCdr.OriginHost = kev.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = kev.GetCdrSource()

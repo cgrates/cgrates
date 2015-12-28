@@ -56,7 +56,7 @@ func TestStatsValue(t *testing.T) {
 
 func TestStatsSimplifyCDR(t *testing.T) {
 	cdr := &CDR{
-		TOR:         "tor",
+		ToR:         "tor",
 		OriginID:    "accid",
 		OriginHost:  "cdrhost",
 		Source:      "cdrsource",
@@ -85,7 +85,7 @@ func TestStatsSimplifyCDR(t *testing.T) {
 func TestAcceptCdr(t *testing.T) {
 	sq := NewStatsQueue(nil)
 	cdr := &CDR{
-		TOR:             "tor",
+		ToR:             "tor",
 		OriginID:        "accid",
 		OriginHost:      "cdrhost",
 		Source:          "cdrsource",

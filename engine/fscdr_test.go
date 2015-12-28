@@ -55,7 +55,7 @@ func TestCDRFields(t *testing.T) {
 	}
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	answerTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
-	expctCDR := &CDR{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", TOR: utils.VOICE, OriginID: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad",
+	expctCDR := &CDR{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", ToR: utils.VOICE, OriginID: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad",
 		OriginHost: "127.0.0.1", Source: "freeswitch_json", Direction: utils.OUT, Category: "call", RequestType: utils.META_PREPAID, Tenant: "cgrates.org", Account: "1001", Subject: "1001",
 		Destination: "1003", SetupTime: setupTime, PDD: time.Duration(28) * time.Millisecond, AnswerTime: answerTime, Usage: time.Duration(66) * time.Second, Supplier: "supplier1",
 		DisconnectCause: "NORMAL_CLEARING", ExtraFields: map[string]string{"sip_user_agent": "PJSUA v2.3 Linux-3.2.0.4/x86_64/glibc-2.13"}, Cost: -1}

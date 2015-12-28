@@ -302,7 +302,7 @@ func (self SMGenericEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 func (self SMGenericEvent) AsStoredCdr(cfg *config.CGRConfig, timezone string) *engine.CDR {
 	storCdr := engine.NewCDRWithDefaults(cfg)
 	storCdr.CGRID = self.GetCgrId(timezone)
-	storCdr.TOR = utils.FirstNonEmpty(self.GetTOR(utils.META_DEFAULT), storCdr.TOR) // Keep default if none in the event
+	storCdr.ToR = utils.FirstNonEmpty(self.GetTOR(utils.META_DEFAULT), storCdr.ToR) // Keep default if none in the event
 	storCdr.OriginID = self.GetUUID()
 	storCdr.OriginHost = self.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = self.GetCdrSource()

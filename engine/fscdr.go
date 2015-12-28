@@ -121,7 +121,7 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 func (fsCdr FSCdr) AsStoredCdr(timezone string) *CDR {
 	storCdr := new(CDR)
 	storCdr.CGRID = fsCdr.getCGRID(timezone)
-	storCdr.TOR = utils.VOICE
+	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsCdr.vars[FS_UUID]
 	storCdr.OriginHost = fsCdr.vars[FS_IP]
 	storCdr.Source = FS_CDR_SOURCE

@@ -340,7 +340,7 @@ func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string
 func (fsev FSEvent) AsStoredCdr(timezone string) *engine.CDR {
 	storCdr := new(engine.CDR)
 	storCdr.CGRID = fsev.GetCgrId(timezone)
-	storCdr.TOR = utils.VOICE
+	storCdr.ToR = utils.VOICE
 	storCdr.OriginID = fsev.GetUUID()
 	storCdr.OriginHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.Source = "FS_" + fsev.GetName()

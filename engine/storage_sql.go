@@ -628,7 +628,7 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 		OriginHost:      cdr.OriginHost,
 		Source:          cdr.Source,
 		OriginID:        cdr.OriginID,
-		Tor:             cdr.TOR,
+		Tor:             cdr.ToR,
 		RequestType:     cdr.RequestType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
@@ -660,7 +660,7 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 				OriginHost:      cdr.OriginHost,
 				Source:          cdr.Source,
 				OriginID:        cdr.OriginID,
-				Tor:             cdr.TOR,
+				Tor:             cdr.ToR,
 				RequestType:     cdr.RequestType,
 				Direction:       cdr.Direction,
 				Tenant:          cdr.Tenant,
@@ -714,11 +714,11 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	if len(qryFltr.NotRunIDs) != 0 {
 		q = q.Where("run_id not in (?)", qryFltr.NotRunIDs)
 	}
-	if len(qryFltr.TORs) != 0 {
-		q = q.Where("tor in (?)", qryFltr.TORs)
+	if len(qryFltr.ToRs) != 0 {
+		q = q.Where("tor in (?)", qryFltr.ToRs)
 	}
-	if len(qryFltr.NotTORs) != 0 {
-		q = q.Where("tor not in (?)", qryFltr.NotTORs)
+	if len(qryFltr.NotToRs) != 0 {
+		q = q.Where("tor not in (?)", qryFltr.NotToRs)
 	}
 	if len(qryFltr.OriginHosts) != 0 {
 		q = q.Where("origin_host in (?)", qryFltr.OriginHosts)
@@ -932,7 +932,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 			OriginHost:      result.OriginHost,
 			Source:          result.Source,
 			OriginID:        result.OriginID,
-			TOR:             result.Tor,
+			ToR:             result.Tor,
 			RequestType:     result.RequestType,
 			Direction:       result.Direction,
 			Tenant:          result.Tenant,

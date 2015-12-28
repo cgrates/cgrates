@@ -34,7 +34,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
 	storedCdr1 := &engine.CDR{
-		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+		CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID,
@@ -62,7 +62,7 @@ func TestCsvCdrWriter(t *testing.T) {
 func TestAlternativeFieldSeparator(t *testing.T) {
 	writer := &bytes.Buffer{}
 	cfg, _ := config.NewDefaultCGRConfig()
-	storedCdr1 := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
+	storedCdr1 := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), ToR: utils.VOICE, OriginID: "dsafdsaf", OriginHost: "192.168.1.1",
 		RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID,

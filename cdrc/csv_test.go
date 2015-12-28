@@ -50,7 +50,7 @@ func TestCsvRecordForkCdr(t *testing.T) {
 	}
 	expectedCdr := &engine.CDR{
 		CGRID:           utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
-		TOR:             cdrRow[2],
+		ToR:             cdrRow[2],
 		OriginID:        cdrRow[3],
 		OriginHost:      "0.0.0.0", // Got it over internal interface
 		Source:          "TEST_CDRC",
@@ -90,7 +90,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	var sTime time.Time
 	expectedCdr := &engine.CDR{
 		CGRID:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
+		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
 		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1) * time.Second,
@@ -103,7 +103,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	csvProcessor.cdrcCfgs["*default"].DataUsageMultiplyFactor = 1024
 	expectedCdr = &engine.CDR{
 		CGRID:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
+		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
 		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1024) * time.Second,
@@ -116,7 +116,7 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	cdrRow = []string{"*voice", "1"}
 	expectedCdr = &engine.CDR{
 		CGRID:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
+		ToR:         cdrRow[0],
 		OriginHost:  "0.0.0.0",
 		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1) * time.Second,

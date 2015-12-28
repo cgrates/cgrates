@@ -40,7 +40,7 @@ func TestCgrCdrAsCDR(t *testing.T) {
 		utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-07T08:42:20Z", utils.ANSWER_TIME: "2013-11-07T08:42:26Z",
 		utils.USAGE: "10", utils.SUPPLIER: "SUPPL1", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	setupTime, _ := utils.ParseTimeDetectLayout(cgrCdr[utils.SETUP_TIME], "")
-	expctRtCdr := &CDR{CGRID: utils.Sha1(cgrCdr[utils.ACCID], setupTime.String()), TOR: utils.VOICE, OriginID: cgrCdr[utils.ACCID], OriginHost: cgrCdr[utils.CDRHOST],
+	expctRtCdr := &CDR{CGRID: utils.Sha1(cgrCdr[utils.ACCID], setupTime.String()), ToR: utils.VOICE, OriginID: cgrCdr[utils.ACCID], OriginHost: cgrCdr[utils.CDRHOST],
 		Source:      cgrCdr[utils.CDRSOURCE],
 		RequestType: cgrCdr[utils.REQTYPE],
 		Direction:   cgrCdr[utils.DIRECTION], Tenant: cgrCdr[utils.TENANT], Category: cgrCdr[utils.CATEGORY], Account: cgrCdr[utils.ACCOUNT], Subject: cgrCdr[utils.SUBJECT],
@@ -60,7 +60,7 @@ func TestReplicatedCgrCdrAsCDR(t *testing.T) {
 		utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-07T08:42:20Z", utils.PDD: "0.200", utils.ANSWER_TIME: "2013-11-07T08:42:26Z",
 		utils.USAGE: "10", utils.SUPPLIER: "SUPPL1", utils.DISCONNECT_CAUSE: "NORMAL_CLEARING", utils.COST: "0.12", utils.RATED: "true", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	expctRtCdr := &CDR{CGRID: cgrCdr[utils.CGRID],
-		TOR:             cgrCdr[utils.TOR],
+		ToR:             cgrCdr[utils.TOR],
 		OriginID:        cgrCdr[utils.ACCID],
 		OriginHost:      cgrCdr[utils.CDRHOST],
 		Source:          cgrCdr[utils.CDRSOURCE],

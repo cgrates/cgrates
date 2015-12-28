@@ -758,7 +758,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	filters := bson.M{
 		"cgrid":            bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
 		"mediationrunid":   bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
-		"tor":              bson.M{"$in": qryFltr.TORs, "$nin": qryFltr.NotTORs},
+		"tor":              bson.M{"$in": qryFltr.ToRs, "$nin": qryFltr.NotToRs},
 		"cdrhost":          bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
 		"cdrsource":        bson.M{"$in": qryFltr.Sources, "$nin": qryFltr.NotSources},
 		"reqtype":          bson.M{"$in": qryFltr.RequestTypes, "$nin": qryFltr.NotRequestTypes},

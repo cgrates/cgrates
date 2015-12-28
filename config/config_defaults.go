@@ -142,7 +142,7 @@ const CGRATES_CFG_JSON = `
 		"content_fields": [								// template of the exported content fields
 			{"tag": "CGRID", "field_id": "CGRID", "type": "*composed", "value": "CGRID"},
 			{"tag":"RunID", "field_id": "RunID", "type": "*composed", "value": "RunID"},
-			{"tag":"TOR", "field_id": "TOR", "type": "*composed", "value": "TOR"},
+			{"tag":"TOR", "field_id": "ToR", "type": "*composed", "value": "ToR"},
 			{"tag":"OriginID", "field_id": "OriginID", "type": "*composed", "value": "OriginID"},
 			{"tag":"RequestType", "field_id": "RequestType", "type": "*composed", "value": "RequestType"},
 			{"tag":"Direction", "field_id": "Direction", "type": "*composed", "value": "Direction"},
@@ -181,7 +181,7 @@ const CGRATES_CFG_JSON = `
 		"partial_record_cache": "10s",				// duration to cache partial records when not pairing
 		"header_fields": [],						// template of the import header fields
 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"tag": "TOR", "field_id": "TOR", "type": "*composed", "value": "2", "mandatory": true},
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "2", "mandatory": true},
 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "3", "mandatory": true},
 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "4", "mandatory": true},
 			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "5", "mandatory": true},
@@ -278,7 +278,7 @@ const CGRATES_CFG_JSON = `
 			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
 			"continue_on_success": false,				// continue to the next template if executed
 			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-				{"tag": "TOR", "field_id": "TOR", "type": "*composed", "value": "^*voice", "mandatory": true},
+				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
 				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "^*users", "mandatory": true},
 				{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},

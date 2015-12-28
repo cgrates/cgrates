@@ -113,7 +113,7 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
-	} else if rcvedCdrs[0].TOR != utils.MONETARY ||
+	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
 		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
 		rcvedCdrs[0].Source != CDRLOG ||
 		rcvedCdrs[0].RequestType != utils.META_PREPAID ||

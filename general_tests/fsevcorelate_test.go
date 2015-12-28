@@ -561,8 +561,8 @@ func TestEvCdrCorelate(t *testing.T) {
 	if evStoredCdr.CGRID != jsnStoredCdr.CGRID {
 		t.Errorf("evStoredCdr.CGRID: %s, jsnStoredCdr.CGRID: %s", evStoredCdr.CGRID, jsnStoredCdr.CGRID)
 	}
-	if evStoredCdr.TOR != jsnStoredCdr.TOR {
-		t.Errorf("evStoredCdr.TOR: %s, jsnStoredCdr.TOR: %s", evStoredCdr.TOR, jsnStoredCdr.TOR)
+	if evStoredCdr.ToR != jsnStoredCdr.ToR {
+		t.Errorf("evStoredCdr.ToR: %s, jsnStoredCdr.ToR: %s", evStoredCdr.ToR, jsnStoredCdr.ToR)
 	}
 	if evStoredCdr.OriginID != jsnStoredCdr.OriginID {
 		t.Errorf("evStoredCdr.OriginID: %s, jsnStoredCdr.OriginID: %s", evStoredCdr.OriginID, jsnStoredCdr.OriginID)

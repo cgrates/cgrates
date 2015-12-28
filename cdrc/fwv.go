@@ -205,7 +205,7 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 	if storedCdr.CGRID == "" && storedCdr.OriginID != "" && cfgKey != "*header" {
 		storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.SetupTime.UTC().String())
 	}
-	if storedCdr.TOR == utils.DATA && duMultiplyFactor != 0 {
+	if storedCdr.ToR == utils.DATA && duMultiplyFactor != 0 {
 		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * duMultiplyFactor)
 	}
 	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields

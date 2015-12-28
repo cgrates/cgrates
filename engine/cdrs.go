@@ -135,7 +135,7 @@ func (self *CdrServer) RateCDRs(cgrIds, runIds, tors, cdrHosts, cdrSources, Requ
 	} else if rerateRated {
 		costStart = utils.Float64Pointer(0.0)
 	}
-	cdrs, _, err := self.cdrDb.GetCDRs(&utils.CDRsFilter{CGRIDs: cgrIds, RunIDs: runIds, TORs: tors, Sources: cdrSources,
+	cdrs, _, err := self.cdrDb.GetCDRs(&utils.CDRsFilter{CGRIDs: cgrIds, RunIDs: runIds, ToRs: tors, Sources: cdrSources,
 		RequestTypes: RequestTypes, Directions: directions, Tenants: tenants, Categories: categories, Accounts: accounts,
 		Subjects: subjects, DestinationPrefixes: destPrefixes,
 		OrderIDStart: orderIdStart, OrderIDEnd: orderIdEnd, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd,
@@ -355,7 +355,7 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 		timeStart = cdr.SetupTime
 	}
 	cd := &CallDescriptor{
-		TOR:           cdr.TOR,
+		TOR:           cdr.ToR,
 		Direction:     cdr.Direction,
 		Tenant:        cdr.Tenant,
 		Category:      cdr.Category,

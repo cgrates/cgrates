@@ -314,7 +314,7 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 		}
 	}
 	storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.SetupTime.UTC().String())
-	if storedCdr.TOR == utils.DATA && self.cdrcCfgs[cdrcId].DataUsageMultiplyFactor != 0 {
+	if storedCdr.ToR == utils.DATA && self.cdrcCfgs[cdrcId].DataUsageMultiplyFactor != 0 {
 		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * self.cdrcCfgs[cdrcId].DataUsageMultiplyFactor)
 	}
 	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields

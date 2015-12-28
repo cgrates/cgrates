@@ -33,7 +33,7 @@ import (
 
 func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 	var err error
-	cdr := &CDR{CGRID: extCdr.CGRID, RunID: extCdr.RunID, OrderID: extCdr.OrderID, TOR: extCdr.TOR, OriginID: extCdr.OriginID, OriginHost: extCdr.OriginHost,
+	cdr := &CDR{CGRID: extCdr.CGRID, RunID: extCdr.RunID, OrderID: extCdr.OrderID, ToR: extCdr.ToR, OriginID: extCdr.OriginID, OriginHost: extCdr.OriginHost,
 		Source: extCdr.Source, RequestType: extCdr.RequestType, Direction: extCdr.Direction, Tenant: extCdr.Tenant, Category: extCdr.Category,
 		Account: extCdr.Account, Subject: extCdr.Subject, Destination: extCdr.Destination, Supplier: extCdr.Supplier,
 		DisconnectCause: extCdr.DisconnectCause, CostSource: extCdr.CostSource, Cost: extCdr.Cost, Rated: extCdr.Rated}
@@ -67,7 +67,7 @@ func NewCDRFromExternalCDR(extCdr *ExternalCDR, timezone string) (*CDR, error) {
 }
 
 func NewCDRWithDefaults(cfg *config.CGRConfig) *CDR {
-	return &CDR{TOR: utils.VOICE, RequestType: cfg.DefaultReqType, Direction: utils.OUT, Tenant: cfg.DefaultTenant, Category: cfg.DefaultCategory,
+	return &CDR{ToR: utils.VOICE, RequestType: cfg.DefaultReqType, Direction: utils.OUT, Tenant: cfg.DefaultTenant, Category: cfg.DefaultCategory,
 		ExtraFields: make(map[string]string), Cost: -1}
 }
 
@@ -78,7 +78,7 @@ type CDR struct {
 	OriginHost      string            // represents the IP address of the host generating the CDR (automatically populated by the server)
 	Source          string            // formally identifies the source of the CDR (free form field)
 	OriginID        string            // represents the unique accounting id given by the telecom switch generating the CDR
-	TOR             string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
+	ToR             string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
 	RequestType     string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
 	Direction       string            // matching the supported direction identifiers of the CGRateS <*out>
 	Tenant          string            // tenant whom this record belongs
@@ -126,7 +126,7 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 
 // Formats usage on export
 func (cdr *CDR) FormatUsage(layout string) string {
-	if utils.IsSliceMember([]string{utils.DATA, utils.SMS, utils.GENERIC}, cdr.TOR) {
+	if utils.IsSliceMember([]string{utils.DATA, utils.SMS, utils.GENERIC}, cdr.ToR) {
 		return strconv.FormatFloat(utils.Round(cdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	}
 	switch layout {
@@ -146,7 +146,7 @@ func (cdr *CDR) FieldAsString(rsrFld *utils.RSRField) string {
 	case utils.ORDERID:
 		return rsrFld.ParseValue(strconv.FormatInt(cdr.OrderID, 10))
 	case utils.TOR:
-		return rsrFld.ParseValue(cdr.TOR)
+		return rsrFld.ParseValue(cdr.ToR)
 	case utils.ACCID:
 		return rsrFld.ParseValue(cdr.OriginID)
 	case utils.CDRHOST:
@@ -197,7 +197,7 @@ func (cdr *CDR) ParseFieldValue(fieldId, fieldVal, timezone string) error {
 	var err error
 	switch fieldId {
 	case utils.TOR:
-		cdr.TOR += fieldVal
+		cdr.ToR += fieldVal
 	case utils.ACCID:
 		cdr.OriginID += fieldVal
 	case utils.REQTYPE:
@@ -291,7 +291,7 @@ func (cdr *CDR) AsHttpForm() url.Values {
 	for fld, val := range cdr.ExtraFields {
 		v.Set(fld, val)
 	}
-	v.Set(utils.TOR, cdr.TOR)
+	v.Set(utils.TOR, cdr.ToR)
 	v.Set(utils.ACCID, cdr.OriginID)
 	v.Set(utils.CDRHOST, cdr.OriginHost)
 	v.Set(utils.CDRSOURCE, cdr.Source)
@@ -411,7 +411,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, directionFld, tenantFld, c
 	var err error
 	frkStorCdr := new(CDR)
 	frkStorCdr.CGRID = cdr.CGRID
-	frkStorCdr.TOR = cdr.TOR
+	frkStorCdr.ToR = cdr.ToR
 	frkStorCdr.RunID = runId
 	frkStorCdr.Cost = -1.0 // Default for non-rated CDR
 	frkStorCdr.OriginID = cdr.OriginID
@@ -442,7 +442,7 @@ func (cdr *CDR) ForkCdr(runId string, RequestTypeFld, directionFld, tenantFld, c
 		return nil, utils.NewErrMandatoryIeMissing(utils.SUBJECT, subjectFld.Id)
 	}
 	frkStorCdr.Destination = cdr.FieldAsString(destFld)
-	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.TOR == utils.VOICE {
+	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.ToR == utils.VOICE {
 		return nil, utils.NewErrMandatoryIeMissing(utils.DESTINATION, destFld.Id)
 	}
 	sTimeStr := cdr.FieldAsString(setupTimeFld)
@@ -497,7 +497,7 @@ func (cdr *CDR) AsExternalCDR() *ExternalCDR {
 		OriginHost:      cdr.OriginHost,
 		Source:          cdr.Source,
 		OriginID:        cdr.OriginID,
-		TOR:             cdr.TOR,
+		ToR:             cdr.ToR,
 		RequestType:     cdr.RequestType,
 		Direction:       cdr.Direction,
 		Tenant:          cdr.Tenant,
@@ -705,7 +705,7 @@ type ExternalCDR struct {
 	OriginHost      string
 	Source          string
 	OriginID        string
-	TOR             string
+	ToR             string
 	RequestType     string
 	Direction       string
 	Tenant          string
@@ -729,7 +729,7 @@ type ExternalCDR struct {
 
 // Used when authorizing requests from outside, eg ApierV1.GetMaxUsage
 type UsageRecord struct {
-	TOR         string
+	ToR         string
 	RequestType string
 	Direction   string
 	Tenant      string
@@ -745,7 +745,7 @@ type UsageRecord struct {
 
 func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 	var err error
-	cdr := &CDR{TOR: self.TOR, RequestType: self.RequestType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
+	cdr := &CDR{ToR: self.ToR, RequestType: self.RequestType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
 		Account: self.Account, Subject: self.Subject, Destination: self.Destination}
 	if cdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
 		return nil, err
@@ -768,7 +768,7 @@ func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
 	var err error
 	cd := &CallDescriptor{
-		TOR:         self.TOR,
+		TOR:         self.ToR,
 		Direction:   self.Direction,
 		Tenant:      self.Tenant,
 		Category:    self.Category,

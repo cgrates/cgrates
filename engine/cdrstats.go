@@ -94,7 +94,7 @@ func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 			return false
 		}
 	}
-	if len(cs.TOR) > 0 && !utils.IsSliceMember(cs.TOR, cdr.TOR) {
+	if len(cs.TOR) > 0 && !utils.IsSliceMember(cs.TOR, cdr.ToR) {
 		return false
 	}
 	if len(cs.CdrHost) > 0 && !utils.IsSliceMember(cs.CdrHost, cdr.OriginHost) {

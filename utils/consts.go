@@ -104,7 +104,7 @@ const (
 	MSGPACK                      = "msgpack"
 	CSV_LOAD                     = "CSVLOAD"
 	CGRID                        = "CGRID"
-	TOR                          = "TOR"
+	TOR                          = "ToR"
 	ORDERID                      = "OrderID"
 	ACCID                        = "OriginID"
 	CDRSOURCE                    = "Source"

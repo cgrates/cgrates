@@ -229,16 +229,16 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	case META_NRCDRS:
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case META_DURCDRS:
-		emulatedCdr := &engine.CDR{TOR: utils.VOICE, Usage: cdre.totalDuration}
+		emulatedCdr := &engine.CDR{ToR: utils.VOICE, Usage: cdre.totalDuration}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_SMSUSAGE:
-		emulatedCdr := &engine.CDR{TOR: utils.SMS, Usage: cdre.totalSmsUsage}
+		emulatedCdr := &engine.CDR{ToR: utils.SMS, Usage: cdre.totalSmsUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_GENERICUSAGE:
-		emulatedCdr := &engine.CDR{TOR: utils.GENERIC, Usage: cdre.totalGenericUsage}
+		emulatedCdr := &engine.CDR{ToR: utils.GENERIC, Usage: cdre.totalGenericUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_DATAUSAGE:
-		emulatedCdr := &engine.CDR{TOR: utils.DATA, Usage: cdre.totalDataUsage}
+		emulatedCdr := &engine.CDR{ToR: utils.DATA, Usage: cdre.totalDataUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
@@ -318,11 +318,11 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 		cdr.ExtraFields = make(map[string]string)
 	}
 	// Cost multiply
-	if cdre.dataUsageMultiplyFactor != 0.0 && cdr.TOR == utils.DATA {
+	if cdre.dataUsageMultiplyFactor != 0.0 && cdr.ToR == utils.DATA {
 		cdr.UsageMultiply(cdre.dataUsageMultiplyFactor, cdre.cgrPrecision)
-	} else if cdre.smsUsageMultiplyFactor != 0 && cdr.TOR == utils.SMS {
+	} else if cdre.smsUsageMultiplyFactor != 0 && cdr.ToR == utils.SMS {
 		cdr.UsageMultiply(cdre.smsUsageMultiplyFactor, cdre.cgrPrecision)
-	} else if cdre.genericUsageMultiplyFactor != 0 && cdr.TOR == utils.GENERIC {
+	} else if cdre.genericUsageMultiplyFactor != 0 && cdr.ToR == utils.GENERIC {
 		cdr.UsageMultiply(cdre.genericUsageMultiplyFactor, cdre.cgrPrecision)
 	}
 	if cdre.costMultiplyFactor != 0.0 {
@@ -386,16 +386,16 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 		cdre.lastCdrATime = cdr.AnswerTime
 	}
 	cdre.numberOfRecords += 1
-	if cdr.TOR == utils.VOICE { // Only count duration for non data cdrs
+	if cdr.ToR == utils.VOICE { // Only count duration for non data cdrs
 		cdre.totalDuration += cdr.Usage
 	}
-	if cdr.TOR == utils.SMS { // Count usage for SMS
+	if cdr.ToR == utils.SMS { // Count usage for SMS
 		cdre.totalSmsUsage += cdr.Usage
 	}
-	if cdr.TOR == utils.GENERIC { // Count usage for GENERIC
+	if cdr.ToR == utils.GENERIC { // Count usage for GENERIC
 		cdre.totalGenericUsage += cdr.Usage
 	}
-	if cdr.TOR == utils.DATA { // Count usage for DATA
+	if cdr.ToR == utils.DATA { // Count usage for DATA
 		cdre.totalDataUsage += cdr.Usage
 	}
 	if cdr.Cost != -1 {

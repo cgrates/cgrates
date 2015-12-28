@@ -61,7 +61,7 @@ func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 func (cgrCdr CgrCdr) AsStoredCdr(timezone string) *CDR {
 	storCdr := new(CDR)
 	storCdr.CGRID = cgrCdr.getCGRID(timezone)
-	storCdr.TOR = cgrCdr[utils.TOR]
+	storCdr.ToR = cgrCdr[utils.TOR]
 	storCdr.OriginID = cgrCdr[utils.ACCID]
 	storCdr.OriginHost = cgrCdr[utils.CDRHOST]
 	storCdr.Source = cgrCdr[utils.CDRSOURCE]
