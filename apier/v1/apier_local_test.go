@@ -1411,7 +1411,7 @@ func TestApierLocalGetCdrs(t *testing.T) {
 		return
 	}
 	var reply []*engine.ExternalCDR
-	req := utils.AttrGetCdrs{}
+	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
 	if err := rater.Call("ApierV1.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
@@ -1436,7 +1436,7 @@ func TestApierLocalProcessCdr(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*engine.ExternalCDR
-	req := utils.AttrGetCdrs{}
+	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
 	if err := rater.Call("ApierV1.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {

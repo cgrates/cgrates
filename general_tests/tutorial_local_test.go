@@ -522,6 +522,7 @@ func TestTutLocalProcessExternalCdrUP(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	eCdr := &engine.ExternalCDR{CGRID: "63a8d2bfeca2cfb790826c3ec461696d6574cfde", OrderID: 2,
 		TOR:      utils.VOICE,
 		OriginID: "testextcdr2", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: utils.OUT,

@@ -367,9 +367,7 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 		DurationIndex: cdr.Usage,
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
-		if err = self.rater.Debit(cd, cc); err == nil { // Debit has occured, we are forced to write the log, even if CDR store is disabled
-			self.cdrDb.LogCallCost(cdr.CGRID, cdr.RunID, utils.CDRS_SOURCE, cc)
-		}
+		err = self.rater.Debit(cd, cc)
 	} else {
 		err = self.rater.GetCost(cd, cc)
 	}
