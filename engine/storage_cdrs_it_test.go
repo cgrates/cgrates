@@ -22,7 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"path"
-	//"reflect"
+	"reflect"
 	"testing"
 	"time"
 
@@ -51,6 +51,9 @@ func TestITCDRsMySQL(t *testing.T) {
 	if err := testSetCDR(mysqlDb); err != nil {
 		t.Error(err)
 	}
+	if err := testSMCosts(mysqlDb); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestITCDRsPSQL(t *testing.T) {
@@ -70,6 +73,9 @@ func TestITCDRsPSQL(t *testing.T) {
 		t.Error("Error on opening database connection: ", err)
 	}
 	if err := testSetCDR(psqlDb); err != nil {
+		t.Error(err)
+	}
+	if err := testSMCosts(psqlDb); err != nil {
 		t.Error(err)
 	}
 }
@@ -172,6 +178,31 @@ func testSetCDR(cdrStorage CdrStorage) error {
 		if cdrs[0].Cost != ratedCDR.Cost {
 			return fmt.Errorf("Unexpected ratedCDR received after rerating: %+v", cdrs[0])
 		}
+	}
+	return nil
+}
+
+func testSMCosts(cdrStorage CdrStorage) error {
+	cc := &CallCost{
+		Direction:   utils.OUT,
+		Destination: "+4986517174963",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:     time.Date(2015, 12, 28, 8, 53, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2015, 12, 28, 8, 54, 40, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		TOR: utils.VOICE,
+	}
+	if err := cdrStorage.LogCallCost("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT, utils.UNIT_TEST, cc); err != nil {
+		return err
+	}
+	if rcvCC, err := cdrStorage.GetCallCostLog("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT); err != nil {
+		return err
+	} else if !reflect.DeepEqual(cc, rcvCC) {
+		return fmt.Errorf("Expecting: %+v, received: %+v", cc, rcvCC)
 	}
 	return nil
 }

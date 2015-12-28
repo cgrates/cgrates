@@ -569,7 +569,7 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 	return nil
 
 }
-func (self *SQLStorage) LogCallCost(cgrid, runid, source string, cc *CallCost) (err error) { //
+func (self *SQLStorage) LogCallCost(cgrid, runid, source string, cc *CallCost) error {
 	if cc == nil {
 		return nil
 	}
