@@ -261,6 +261,8 @@ const (
 	SMG                         = "SMG"
 	MetaGrouped                 = "*grouped"
 	MetaRaw                     = "*raw"
+	CreatedAt                   = "CreatedAt"
+	UpdatedAt                   = "UpdatedAt"
 )
 
 var (

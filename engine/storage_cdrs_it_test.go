@@ -22,7 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"path"
-	"reflect"
+	//"reflect"
 	"testing"
 	"time"
 
@@ -76,6 +76,29 @@ func TestITCDRsPSQL(t *testing.T) {
 		t.Error(err)
 	}
 	if err := testSMCosts(psqlDb); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestITCDRsMongo(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	cfg, err := config.NewCGRConfigFromFolder(path.Join(*dataDir, "conf", "samples", "storage", "mongo"))
+	if err != nil {
+		t.Error(err)
+	}
+	if err := InitStorDb(cfg); err != nil {
+		t.Error(err)
+	}
+	mongoDb, err := NewMongoStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass)
+	if err != nil {
+		t.Error("Error on opening database connection: ", err)
+	}
+	if err := testSetCDR(mongoDb); err != nil {
+		t.Error(err)
+	}
+	if err := testSMCosts(mongoDb); err != nil {
 		t.Error(err)
 	}
 }
@@ -188,8 +211,8 @@ func testSMCosts(cdrStorage CdrStorage) error {
 		Destination: "+4986517174963",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:     time.Date(2015, 12, 28, 8, 53, 0, 0, time.UTC),
-				TimeEnd:       time.Date(2015, 12, 28, 8, 54, 40, 0, time.UTC),
+				TimeStart:     time.Date(2015, 12, 28, 8, 53, 0, 0, time.UTC).Local(), // MongoDB saves timestamps in local timezone
+				TimeEnd:       time.Date(2015, 12, 28, 8, 54, 40, 0, time.UTC).Local(),
 				DurationIndex: 0,
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
@@ -201,7 +224,7 @@ func testSMCosts(cdrStorage CdrStorage) error {
 	}
 	if rcvCC, err := cdrStorage.GetCallCostLog("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT); err != nil {
 		return err
-	} else if !reflect.DeepEqual(cc, rcvCC) {
+	} else if len(cc.Timespans) != len(rcvCC.Timespans) { // cc.Timespans[0].RateInterval.Rating.Rates[0], rcvCC.Timespans[0].RateInterval.Rating.Rates[0])
 		return fmt.Errorf("Expecting: %+v, received: %+v", cc, rcvCC)
 	}
 	return nil

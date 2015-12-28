@@ -145,3 +145,11 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 	}
 	return d, nil
 }
+
+// Stores one Cost coming from SM
+type SMCost struct {
+	CGRID       string
+	RunID       string
+	CostSource  string
+	CostDetails *CallCost
+}
