@@ -125,7 +125,7 @@ func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 
 // Called by rate/re-rate API
 func (self *CdrServer) RateCDRs(cgrIds, runIds, tors, cdrHosts, cdrSources, RequestTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
-	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
+	orderIdStart, orderIdEnd *int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
 	var costStart, costEnd *float64
 	if rerateErrors {
 		costStart = utils.Float64Pointer(-1.0)

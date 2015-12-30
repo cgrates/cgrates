@@ -785,7 +785,7 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 			if idx != 0 {
 				qIds.WriteString(" AND")
 			}
-			qIds.WriteString(fmt.Sprintf(" destination not LIKE '%%%s%%'", destPrefix))
+			qIds.WriteString(fmt.Sprintf(" destination not LIKE '%s%%'", destPrefix))
 		}
 		qIds.WriteString(" )")
 		q = q.Where(qIds.String())
@@ -834,11 +834,11 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		qIds.WriteString(" )")
 		q = q.Where(qIds.String())
 	}
-	if qryFltr.OrderIDStart != 0 { // Keep backwards compatible by testing 0 value
-		q = q.Where(utils.TBL_CDRS+".id >= ?", qryFltr.OrderIDStart)
+	if qryFltr.OrderIDStart != nil { // Keep backwards compatible by testing 0 value
+		q = q.Where(utils.TBL_CDRS+".id >= ?", *qryFltr.OrderIDStart)
 	}
-	if qryFltr.OrderIDEnd != 0 {
-		q = q.Where(utils.TBL_CDRS+".id < ?", qryFltr.OrderIDEnd)
+	if qryFltr.OrderIDEnd != nil {
+		q = q.Where(utils.TBL_CDRS+".id < ?", *qryFltr.OrderIDEnd)
 	}
 	if qryFltr.SetupTimeStart != nil {
 		q = q.Where("setup_time >= ?", qryFltr.SetupTimeStart)

@@ -711,6 +711,9 @@ func (ms *MongoStorage) GetCallCostLog(cgrid, runid string) (cc *CallCost, err e
 }
 
 func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
+	if cdr.OrderID == 0 {
+		cdr.OrderID = time.Now().UnixNano()
+	}
 	if allowUpdate {
 		_, err = ms.db.C(utils.TBL_CDRS).Upsert(bson.M{CGRIDLow: cdr.CGRID, RunIDLow: cdr.RunID}, cdr)
 	} else {
@@ -731,6 +734,10 @@ func (ms *MongoStorage) RemCDRs(cgrIds []string) error {
 func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	for k, v := range filters {
 		switch value := v.(type) {
+		case *int64:
+			if value == nil {
+				delete(filters, k)
+			}
 		case *float64:
 			if value == nil {
 				delete(filters, k)
@@ -789,6 +796,7 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	filters := bson.M{
 		CGRIDLow:           bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
 		RunIDLow:           bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
+		OrderIDLow:         bson.M{"$gte": qryFltr.OrderIDStart, "$lt": qryFltr.OrderIDEnd},
 		ToRLow:             bson.M{"$in": qryFltr.ToRs, "$nin": qryFltr.NotToRs},
 		CDRHostLow:         bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
 		CDRSourceLow:       bson.M{"$in": qryFltr.Sources, "$nin": qryFltr.NotSources},
@@ -813,17 +821,6 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	//file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
 	//file.WriteString(fmt.Sprintf("BEFORE: %v\n", utils.ToIJSON(filters)))
 	ms.cleanEmptyFilters(filters)
-
-	/*if qryFltr.OrderIdStart != 0 {
-		filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
-	}
-	if qryFltr.OrderIdEnd != 0 {
-		if m, ok := filters["id"]; ok {
-			m.(bson.M)["$gte"] = qryFltr.OrderIdStart
-		} else {
-			filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
-		}
-	}*/
 	if len(qryFltr.DestinationPrefixes) != 0 {
 		var regexpRule string
 		for _, prefix := range qryFltr.DestinationPrefixes {

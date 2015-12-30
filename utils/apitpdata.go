@@ -612,8 +612,8 @@ type AttrExpFileCdrs struct {
 	Accounts                   []string // If provided, it will filter account
 	Subjects                   []string // If provided, it will filter the rating subject
 	DestinationPrefixes        []string // If provided, it will filter on destination prefix
-	OrderIdStart               int64    // Export from this order identifier
-	OrderIdEnd                 int64    // Export smaller than this order identifier
+	OrderIdStart               *int64   // Export from this order identifier
+	OrderIdEnd                 *int64   // Export smaller than this order identifier
 	TimeStart                  string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd                    string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors                 bool     // Do not export errored CDRs
@@ -687,8 +687,8 @@ type AttrGetCdrs struct {
 	DestinationPrefixes []string // If provided, it will filter on destination prefix
 	RatedAccounts       []string // If provided, it will filter ratedaccount
 	RatedSubjects       []string // If provided, it will filter the ratedsubject
-	OrderIdStart        int64    // Export from this order identifier
-	OrderIdEnd          int64    // Export smaller than this order identifier
+	OrderIdStart        *int64   // Export from this order identifier
+	OrderIdEnd          *int64   // Export smaller than this order identifier
 	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors          bool     // Do not export errored CDRs
@@ -756,8 +756,8 @@ type AttrRateCdrs struct {
 	DestinationPrefixes []string // If provided, it will filter on destination prefix
 	RatedAccounts       []string // If provided, it will filter ratedaccount
 	RatedSubjects       []string // If provided, it will filter the ratedsubject
-	OrderIdStart        int64    // Export from this order identifier
-	OrderIdEnd          int64    // Export smaller than this order identifier
+	OrderIdStart        *int64   // Export from this order identifier
+	OrderIdEnd          *int64   // Export smaller than this order identifier
 	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
 	RerateErrors        bool     // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
@@ -863,8 +863,8 @@ type CDRsFilter struct {
 	NotCosts               []float64         // Filter out specific costs out from result
 	ExtraFields            map[string]string // Query based on extra fields content
 	NotExtraFields         map[string]string // Filter out based on extra fields content
-	OrderIDStart           int64             // Export from this order identifier
-	OrderIDEnd             int64             // Export smaller than this order identifier
+	OrderIDStart           *int64            // Export from this order identifier
+	OrderIDEnd             *int64            // Export smaller than this order identifier
 	SetupTimeStart         *time.Time        // Start of interval, bigger or equal than configured
 	SetupTimeEnd           *time.Time        // End interval, smaller than setupTime
 	AnswerTimeStart        *time.Time        // Start of interval, bigger or equal than configured
@@ -920,8 +920,8 @@ type RPCCDRsFilter struct {
 	NotCosts               []float64         // Filter out specific costs out from result
 	ExtraFields            map[string]string // Query based on extra fields content
 	NotExtraFields         map[string]string // Filter out based on extra fields content
-	OrderIDStart           int64             // Export from this order identifier
-	OrderIDEnd             int64             // Export smaller than this order identifier
+	OrderIDStart           *int64            // Export from this order identifier
+	OrderIDEnd             *int64            // Export smaller than this order identifier
 	SetupTimeStart         string            // Start of interval, bigger or equal than configured
 	SetupTimeEnd           string            // End interval, smaller than setupTime
 	AnswerTimeStart        string            // Start of interval, bigger or equal than configured

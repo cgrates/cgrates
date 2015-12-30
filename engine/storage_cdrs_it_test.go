@@ -43,12 +43,14 @@ func TestITCDRsMySQL(t *testing.T) {
 	if err := testGetCDRs(cfg); err != nil {
 		t.Error(err)
 	}
-	if err := testSetCDR(cfg); err != nil {
-		t.Error(err)
-	}
-	if err := testSMCosts(cfg); err != nil {
-		t.Error(err)
-	}
+	/*
+		if err := testSetCDR(cfg); err != nil {
+			t.Error(err)
+		}
+		if err := testSMCosts(cfg); err != nil {
+			t.Error(err)
+		}
+	*/
 }
 
 func TestITCDRsPSQL(t *testing.T) {
@@ -104,6 +106,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	rawCDR := &CDR{
 		CGRID:           utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
 		RunID:           utils.MetaRaw,
+		OrderID:         time.Now().UnixNano(),
 		OriginHost:      "127.0.0.1",
 		Source:          "testSetCDRs",
 		OriginID:        "testevent1",
@@ -502,7 +505,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if CDRs, _, err := cdrStorage.GetCDRs(new(utils.CDRsFilter)); err != nil {
 		return err
 	} else if len(CDRs) != 10 {
-		return fmt.Errorf("GetCDRs, unexpected number of CDRs returned: ", CDRs)
+		return fmt.Errorf("GetCDRs, unexpected number of CDRs returned: %d", len(CDRs))
 	}
 	// Count ALL
 	if CDRs, count, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Count: true}); err != nil {
@@ -708,42 +711,43 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	}
 
 	// Filter on MaxCost
-	//var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
+	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Filter on MaxCost, unexpected number of CDRs returned: ", CDRs)
-	}
-	/*else {
-		for _, cdr := range CDRs {
-			if cdr.OrderId < orderIdStart {
-				orderIdStart = cdr.OrderId
+	} else {
+		for i, cdr := range CDRs {
+			if i == 0 {
+				orderIdStart = cdr.OrderID
 			}
-			if cdr.OrderId > orderIdEnd {
-				orderIdEnd = cdr.OrderId
+			if cdr.OrderID < orderIdStart {
+				orderIdStart = cdr.OrderID
+			}
+			if cdr.OrderID > orderIdEnd {
+				orderIdEnd = cdr.OrderID
 			}
 		}
 	}
 	// Filter on orderIdStart
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderIdStart: orderIdStart}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderIDStart: &orderIdStart}); err != nil {
 		return err
-	} else if len(CDRs) != 8 {
-		t.Error("Unexpected number of CDRs returned: ", CDRs)
+	} else if len(CDRs) != 10 {
+		return fmt.Errorf("Filter on OrderIDStart, unexpected number of CDRs returned: %d", len(CDRs))
 	}
 	// Filter on orderIdStart and orderIdEnd
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderIdStart: orderIdStart, OrderIdEnd: orderIdEnd}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderIDStart: &orderIdStart, OrderIDEnd: &orderIdEnd}); err != nil {
 		return err
-	} else if len(CDRs) != 4 {
-		t.Error("Unexpected number of CDRs returned: ", CDRs)
+	} else if len(CDRs) != 8 {
+		return fmt.Errorf("Filter on OrderIDStart OrderIDEnd, unexpected number of CDRs returned: %d", len(CDRs))
 	}
-	*/
 	var timeStart, timeEnd time.Time
 	// Filter on timeStart
 	timeStart = time.Date(2015, 12, 28, 0, 0, 0, 0, time.UTC)
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{AnswerTimeStart: &timeStart}); err != nil {
 		return err
 	} else if len(CDRs) != 3 {
-		return fmt.Errorf("Filter on AnswerTimeStart, unexpected number of CDRs returned: %+v", CDRs)
+		return fmt.Errorf("Filter on AnswerTimeStart, unexpected number of CDRs returned: %d", len(CDRs))
 	}
 	// Filter on timeStart and timeEnd
 	timeEnd = time.Date(2015, 12, 29, 0, 0, 0, 0, time.UTC)

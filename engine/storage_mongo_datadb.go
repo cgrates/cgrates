@@ -58,6 +58,7 @@ const (
 var (
 	CGRIDLow           = strings.ToLower(utils.CGRID)
 	RunIDLow           = strings.ToLower(utils.MEDI_RUNID)
+	OrderIDLow         = strings.ToLower(utils.ORDERID)
 	ToRLow             = strings.ToLower(utils.TOR)
 	CDRHostLow         = strings.ToLower(utils.CDRHOST)
 	CDRSourceLow       = strings.ToLower(utils.CDRSOURCE)
