@@ -33,7 +33,7 @@ func TestHaPoolInitCfg(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	daCfgPath = path.Join(*dataDir, "conf", "samples", "hapool", "dagent")
+	daCfgPath = path.Join(*dataDir, "conf", "samples", "hapool", "cgrrater1")
 	// Init config first
 	var err error
 	daCfg, err = config.NewCGRConfigFromFolder(daCfgPath)
