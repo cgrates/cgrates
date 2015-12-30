@@ -739,6 +739,10 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 			if value == nil {
 				delete(filters, k)
 			}
+		case *time.Duration:
+			if value == nil {
+				delete(filters, k)
+			}
 		case []string:
 			if len(value) == 0 {
 				delete(filters, k)
@@ -753,6 +757,35 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 }
 
 func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error) {
+	var minPDD, maxPDD, minUsage, maxUsage *time.Duration
+	if len(qryFltr.MinPDD) != 0 {
+		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MinPDD); err != nil {
+			return nil, 0, err
+		} else {
+			minPDD = &parsed
+		}
+	}
+	if len(qryFltr.MaxPDD) != 0 {
+		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MaxPDD); err != nil {
+			return nil, 0, err
+		} else {
+			maxPDD = &parsed
+		}
+	}
+	if len(qryFltr.MinUsage) != 0 {
+		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MinUsage); err != nil {
+			return nil, 0, err
+		} else {
+			minUsage = &parsed
+		}
+	}
+	if len(qryFltr.MaxUsage) != 0 {
+		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MaxUsage); err != nil {
+			return nil, 0, err
+		} else {
+			maxUsage = &parsed
+		}
+	}
 	filters := bson.M{
 		CGRIDLow:           bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
 		RunIDLow:           bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
@@ -771,10 +804,10 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		AnswerTimeLow:      bson.M{"$gte": qryFltr.AnswerTimeStart, "$lt": qryFltr.AnswerTimeEnd},
 		CreatedAtLow:       bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
 		UpdatedAtLow:       bson.M{"$gte": qryFltr.UpdatedAtStart, "$lt": qryFltr.UpdatedAtEnd},
-		UsageLow:           bson.M{"$gte": qryFltr.MinUsage, "$lt": qryFltr.MaxUsage},
-		PDDLow:             bson.M{"$gte": qryFltr.MinPDD, "$lt": qryFltr.MaxPDD},
-		CostDetailsLow + "." + AccountLow: bson.M{"$in": qryFltr.Accounts, "$nin": qryFltr.NotAccounts},
-		CostDetailsLow + "." + SubjectLow: bson.M{"$in": qryFltr.Subjects, "$nin": qryFltr.NotSubjects},
+		UsageLow:           bson.M{"$gte": minUsage, "$lt": maxUsage},
+		PDDLow:             bson.M{"$gte": minPDD, "$lt": maxPDD},
+		//CostDetailsLow + "." + AccountLow: bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
+		//CostDetailsLow + "." + SubjectLow: bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
 	}
 	//file, _ := ioutil.TempFile(os.TempDir(), "debug")
 	//file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
@@ -791,23 +824,31 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 			filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
 		}
 	}*/
-
 	if len(qryFltr.DestinationPrefixes) != 0 {
-		var regexes []bson.RegEx
+		var regexpRule string
 		for _, prefix := range qryFltr.DestinationPrefixes {
-			regexes = append(regexes, bson.RegEx{Pattern: regexp.QuoteMeta("^" + prefix)})
+			if len(prefix) == 0 {
+				continue
+			}
+			if len(regexpRule) != 0 {
+				regexpRule += "|"
+			}
+			regexpRule += "^(" + prefix + ")"
 		}
-		filters[DestinationLow] = bson.M{"$in": regexes}
+		if _, hasIt := filters["$and"]; !hasIt {
+			filters["$and"] = make([]bson.M, 0)
+		}
+		filters["$and"] = append(filters["$and"].([]bson.M), bson.M{DestinationLow: bson.RegEx{Pattern: regexpRule}}) // $and gathers all rules not fitting top level query
 	}
 	if len(qryFltr.NotDestinationPrefixes) != 0 {
-		var notRegexes []bson.RegEx
-		for _, prefix := range qryFltr.NotDestinationPrefixes {
-			notRegexes = append(notRegexes, bson.RegEx{Pattern: regexp.QuoteMeta("^" + prefix)})
+		if _, hasIt := filters["$and"]; !hasIt {
+			filters["$and"] = make([]bson.M, 0)
 		}
-		if m, ok := filters[DestinationLow]; ok {
-			m.(bson.M)["$nin"] = notRegexes
-		} else {
-			filters[DestinationLow] = bson.M{"$nin": notRegexes}
+		for _, prefix := range qryFltr.NotDestinationPrefixes {
+			if len(prefix) == 0 {
+				continue
+			}
+			filters["$and"] = append(filters["$and"].([]bson.M), bson.M{DestinationLow: bson.RegEx{Pattern: "^(?!" + prefix + ")"}})
 		}
 	}
 
@@ -860,7 +901,6 @@ func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		}
 		return nil, int64(cnt), nil
 	}
-
 	// Execute query
 	iter := q.Iter()
 	var cdrs []*CDR

@@ -864,17 +864,35 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	if qryFltr.UpdatedAtEnd != nil && !qryFltr.UpdatedAtEnd.IsZero() {
 		q = q.Where("updated_at < ?", qryFltr.UpdatedAtEnd)
 	}
-	if qryFltr.MinUsage != nil {
-		q = q.Where("usage >= ?", qryFltr.MinUsage)
+	if len(qryFltr.MinUsage) != 0 {
+		if minUsage, err := utils.ParseDurationWithSecs(qryFltr.MinUsage); err != nil {
+			return nil, 0, err
+		} else {
+			q = q.Where("usage >= ?", minUsage.Seconds())
+		}
 	}
-	if qryFltr.MaxUsage != nil {
-		q = q.Where("usage < ?", qryFltr.MaxUsage)
+	if len(qryFltr.MaxUsage) != 0 {
+		if maxUsage, err := utils.ParseDurationWithSecs(qryFltr.MaxUsage); err != nil {
+			return nil, 0, err
+		} else {
+			q = q.Where("usage < ?", maxUsage.Seconds())
+		}
+
 	}
-	if qryFltr.MinPDD != nil {
-		q = q.Where("pdd >= ?", qryFltr.MinPDD)
+	if len(qryFltr.MinPDD) != 0 {
+		if minPDD, err := utils.ParseDurationWithSecs(qryFltr.MinPDD); err != nil {
+			return nil, 0, err
+		} else {
+			q = q.Where("pdd >= ?", minPDD.Seconds())
+		}
+
 	}
-	if qryFltr.MaxPDD != nil {
-		q = q.Where("pdd < ?", qryFltr.MaxPDD)
+	if len(qryFltr.MaxPDD) != 0 {
+		if maxPDD, err := utils.ParseDurationWithSecs(qryFltr.MaxPDD); err != nil {
+			return nil, 0, err
+		} else {
+			q = q.Where("pdd < ?", maxPDD.Seconds())
+		}
 	}
 
 	if qryFltr.MinCost != nil {

@@ -873,10 +873,10 @@ type CDRsFilter struct {
 	CreatedAtEnd           *time.Time        // End interval, smaller than
 	UpdatedAtStart         *time.Time        // Start of interval, bigger or equal than configured
 	UpdatedAtEnd           *time.Time        // End interval, smaller than
-	MinUsage               *float64          // Start of the usage interval (>=)
-	MaxUsage               *float64          // End of the usage interval (<)
-	MinPDD                 *float64          // Start of the pdd interval (>=)
-	MaxPDD                 *float64          // End of the pdd interval (<)
+	MinUsage               string            // Start of the usage interval (>=)
+	MaxUsage               string            // End of the usage interval (<)
+	MinPDD                 string            // Start of the pdd interval (>=)
+	MaxPDD                 string            // End of the pdd interval (<)
 	MinCost                *float64          // Start of the cost interval (>=)
 	MaxCost                *float64          // End of the usage interval (<)
 	FilterOnRated          bool              // Do not consider rated CDRs but raw one
@@ -930,10 +930,10 @@ type RPCCDRsFilter struct {
 	CreatedAtEnd           string            // End interval, smaller than
 	UpdatedAtStart         string            // Start of interval, bigger or equal than configured
 	UpdatedAtEnd           string            // End interval, smaller than
-	MinUsage               *float64          // Start of the usage interval (>=)
-	MaxUsage               *float64          // End of the usage interval (<)
-	MinPDD                 *float64          // Start of the pdd interval (>=)
-	MaxPDD                 *float64          // End of the pdd interval (<)
+	MinUsage               string            // Start of the usage interval (>=)
+	MaxUsage               string            // End of the usage interval (<)
+	MinPDD                 string            // Start of the pdd interval (>=)
+	MaxPDD                 string            // End of the pdd interval (<)
 	MinCost                *float64          // Start of the cost interval (>=)
 	MaxCost                *float64          // End of the usage interval (<)
 	Paginator                                // Add pagination
