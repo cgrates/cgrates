@@ -43,14 +43,12 @@ func TestITCDRsMySQL(t *testing.T) {
 	if err := testGetCDRs(cfg); err != nil {
 		t.Error(err)
 	}
-	/*
-		if err := testSetCDR(cfg); err != nil {
-			t.Error(err)
-		}
-		if err := testSMCosts(cfg); err != nil {
-			t.Error(err)
-		}
-	*/
+	if err := testSetCDR(cfg); err != nil {
+		t.Error(err)
+	}
+	if err := testSMCosts(cfg); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestITCDRsPSQL(t *testing.T) {
@@ -83,14 +81,12 @@ func TestITCDRsMongo(t *testing.T) {
 	if err := testGetCDRs(cfg); err != nil {
 		t.Error(err)
 	}
-	/*
-		if err := testSetCDR(cfg); err != nil {
-			t.Error(err)
-		}
-		if err := testSMCosts(cfg); err != nil {
-			t.Error(err)
-		}
-	*/
+	if err := testSetCDR(cfg); err != nil {
+		t.Error(err)
+	}
+	if err := testSMCosts(cfg); err != nil {
+		t.Error(err)
+	}
 }
 
 // helper function to populate CDRs and check if they were stored in storDb

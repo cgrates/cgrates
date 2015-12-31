@@ -754,8 +754,6 @@ type AttrRateCdrs struct {
 	Accounts            []string // If provided, it will filter account
 	Subjects            []string // If provided, it will filter the rating subject
 	DestinationPrefixes []string // If provided, it will filter on destination prefix
-	RatedAccounts       []string // If provided, it will filter ratedaccount
-	RatedSubjects       []string // If provided, it will filter the ratedsubject
 	OrderIdStart        *int64   // Export from this order identifier
 	OrderIdEnd          *int64   // Export smaller than this order identifier
 	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
@@ -763,6 +761,44 @@ type AttrRateCdrs struct {
 	RerateErrors        bool     // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
 	RerateRated         bool     // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
 	SendToStats         bool     // Set to true if the CDRs should be sent to stats server
+}
+
+func (attrRateCDRs *AttrRateCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
+	cdrFltr := &CDRsFilter{
+		CGRIDs:              attrRateCDRs.CgrIds,
+		RunIDs:              attrRateCDRs.MediationRunIds,
+		OriginHosts:         attrRateCDRs.CdrHosts,
+		Sources:             attrRateCDRs.CdrSources,
+		ToRs:                attrRateCDRs.TORs,
+		RequestTypes:        attrRateCDRs.ReqTypes,
+		Directions:          attrRateCDRs.Directions,
+		Tenants:             attrRateCDRs.Tenants,
+		Categories:          attrRateCDRs.Categories,
+		Accounts:            attrRateCDRs.Accounts,
+		Subjects:            attrRateCDRs.Subjects,
+		DestinationPrefixes: attrRateCDRs.DestinationPrefixes,
+		OrderIDStart:        attrRateCDRs.OrderIdStart,
+		OrderIDEnd:          attrRateCDRs.OrderIdEnd,
+	}
+	if aTime, err := ParseTimeDetectLayout(attrRateCDRs.TimeStart, timezone); err != nil {
+		return nil, err
+	} else {
+		cdrFltr.AnswerTimeStart = &aTime
+	}
+	if aTimeEnd, err := ParseTimeDetectLayout(attrRateCDRs.TimeEnd, timezone); err != nil {
+		return nil, err
+	} else {
+		cdrFltr.AnswerTimeEnd = &aTimeEnd
+	}
+	if attrRateCDRs.RerateErrors {
+		cdrFltr.MinCost = Float64Pointer(-1.0)
+		if !attrRateCDRs.RerateRated {
+			cdrFltr.MaxCost = Float64Pointer(0.0)
+		}
+	} else if attrRateCDRs.RerateRated {
+		cdrFltr.MinCost = Float64Pointer(0.0)
+	}
+	return cdrFltr, nil
 }
 
 type AttrLoadTpFromFolder struct {
@@ -879,7 +915,6 @@ type CDRsFilter struct {
 	MaxPDD                 string            // End of the pdd interval (<)
 	MinCost                *float64          // Start of the cost interval (>=)
 	MaxCost                *float64          // End of the usage interval (<)
-	FilterOnRated          bool              // Do not consider rated CDRs but raw one
 	Unscoped               bool              // Include soft-deleted records in results
 	Count                  bool              // If true count the items instead of returning data
 	Paginator

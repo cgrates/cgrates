@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"time"
-
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -50,23 +48,11 @@ func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCDR, reply *string) e
 
 // Remotely start mediation with specific runid, runs asynchronously, it's status will be displayed in syslog
 func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
-	var tStart, tEnd time.Time
-	var err error
-	if len(attrs.TimeStart) != 0 {
-		if tStart, err = utils.ParseTimeDetectLayout(attrs.TimeStart, self.CdrSrv.Timezone()); err != nil {
-			return err
-		}
+	cdrsFltr, err := attrs.AsCDRsFilter(self.CdrSrv.Timezone())
+	if err != nil {
+		return utils.NewErrServerError(err)
 	}
-	if len(attrs.TimeEnd) != 0 {
-		if tEnd, err = utils.ParseTimeDetectLayout(attrs.TimeEnd, self.CdrSrv.Timezone()); err != nil {
-			return err
-		}
-	}
-	//RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes []string,
-	//orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated bool)
-	if err := self.CdrSrv.RateCDRs(attrs.CgrIds, attrs.MediationRunIds, attrs.TORs, attrs.CdrHosts, attrs.CdrSources, attrs.ReqTypes, attrs.Directions,
-		attrs.Tenants, attrs.Categories, attrs.Accounts, attrs.Subjects, attrs.DestinationPrefixes, attrs.RatedAccounts, attrs.RatedSubjects,
-		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.RerateErrors, attrs.RerateRated, attrs.SendToStats); err != nil {
+	if err := self.CdrSrv.RateCDRs(cdrsFltr, attrs.SendToStats); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

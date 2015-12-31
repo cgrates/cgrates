@@ -124,25 +124,12 @@ func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 }
 
 // Called by rate/re-rate API
-func (self *CdrServer) RateCDRs(cgrIds, runIds, tors, cdrHosts, cdrSources, RequestTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
-	orderIdStart, orderIdEnd *int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
-	var costStart, costEnd *float64
-	if rerateErrors {
-		costStart = utils.Float64Pointer(-1.0)
-		if !rerateRated {
-			costEnd = utils.Float64Pointer(0.0)
-		}
-	} else if rerateRated {
-		costStart = utils.Float64Pointer(0.0)
-	}
-	cdrs, _, err := self.cdrDb.GetCDRs(&utils.CDRsFilter{CGRIDs: cgrIds, RunIDs: runIds, ToRs: tors, Sources: cdrSources,
-		RequestTypes: RequestTypes, Directions: directions, Tenants: tenants, Categories: categories, Accounts: accounts,
-		Subjects: subjects, DestinationPrefixes: destPrefixes,
-		OrderIDStart: orderIdStart, OrderIDEnd: orderIdEnd, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd,
-		MinCost: costStart, MaxCost: costEnd})
+func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) error {
+	cdrs, _, err := self.cdrDb.GetCDRs(cdrFltr)
 	if err != nil {
 		return err
 	}
+	utils.Logger.Debug(fmt.Sprintf("CDRServer.RateCDRs, got CDRs: %+v", cdrs))
 	for _, cdr := range cdrs {
 		// replace aliases for cases they were loaded after CDR received
 		if err := LoadAlias(&AttrMatchingAlias{
@@ -160,7 +147,7 @@ func (self *CdrServer) RateCDRs(cgrIds, runIds, tors, cdrHosts, cdrSources, Requ
 		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
 			return err
 		}
-		if err := self.rateStoreStatsReplicate(cdr); err != nil {
+		if err := self.rateStoreStatsReplicate(cdr, sendToStats); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
 		}
 	}
@@ -204,14 +191,14 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR) error {
 		return err
 	}
 	for _, cdrRun := range cdrRuns {
-		if err := self.rateStoreStatsReplicate(cdrRun); err != nil {
+		if err := self.rateStoreStatsReplicate(cdrRun, true); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR) error {
+func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR, sendToStats bool) error {
 	if cdr.RunID == utils.MetaRaw { // Overwrite *raw with *default for rating
 		cdr.RunID = utils.META_DEFAULT
 	}
@@ -249,7 +236,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR) error {
 		}
 	}
 	// Attach CDR to stats
-	if self.stats != nil { // Send CDR to stats
+	if self.stats != nil && sendToStats { // Send CDR to stats
 		if err := self.stats.AppendCDR(cdr, nil); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> Could not append CDR to stats: %s", err.Error()))
 		}
