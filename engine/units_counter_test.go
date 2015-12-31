@@ -246,6 +246,7 @@ func TestUnitCountersCountAllVoiceDestinationEvent(t *testing.T) {
 	}
 }
 
+/*
 func TestUnitCountersResetCounterById(t *testing.T) {
 	a := &Account{
 		ActionTriggers: ActionTriggers{
@@ -327,3 +328,4 @@ func TestUnitCountersResetCounterById(t *testing.T) {
 		t.Errorf("Error Initializing adding unit counters: %v", len(a.UnitCounters))
 	}
 }
+*/
