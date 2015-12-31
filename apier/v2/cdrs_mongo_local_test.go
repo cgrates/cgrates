@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
-	"fmt"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -246,7 +245,6 @@ func TestV2CdrsMongoRateWithoutTP(t *testing.T) {
 		return
 	}
 	rawCdrCGRID := utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String())
-	fmt.Printf("RawCdrCGRID: %s\n", rawCdrCGRID)
 	// Rate the injected CDR, should not rate it since we have no TP loaded
 	attrs := utils.AttrRateCdrs{CgrIds: []string{rawCdrCGRID}}
 	var reply string

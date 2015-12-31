@@ -782,12 +782,12 @@ func (attrRateCDRs *AttrRateCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, er
 	}
 	if aTime, err := ParseTimeDetectLayout(attrRateCDRs.TimeStart, timezone); err != nil {
 		return nil, err
-	} else {
+	} else if !aTime.IsZero() {
 		cdrFltr.AnswerTimeStart = &aTime
 	}
 	if aTimeEnd, err := ParseTimeDetectLayout(attrRateCDRs.TimeEnd, timezone); err != nil {
 		return nil, err
-	} else {
+	} else if !aTimeEnd.IsZero() {
 		cdrFltr.AnswerTimeEnd = &aTimeEnd
 	}
 	if attrRateCDRs.RerateErrors {

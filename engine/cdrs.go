@@ -129,7 +129,6 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 	if err != nil {
 		return err
 	}
-	utils.Logger.Debug(fmt.Sprintf("CDRServer.RateCDRs, got CDRs: %+v", cdrs))
 	for _, cdr := range cdrs {
 		// replace aliases for cases they were loaded after CDR received
 		if err := LoadAlias(&AttrMatchingAlias{
