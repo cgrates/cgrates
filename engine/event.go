@@ -33,6 +33,7 @@ type Event interface {
 	GetAccount(string) string
 	GetDestination(string) string
 	GetCallDestNr(string) string
+	GetOriginatorIP(string) string
 	GetCategory(string) string
 	GetTenant(string) string
 	GetReqType(string) string
@@ -43,12 +44,11 @@ type Event interface {
 	GetPdd(string) (time.Duration, error)
 	GetSupplier(string) string
 	GetDisconnectCause(string) string
-	GetOriginatorIP(string) string
 	GetExtraFields() map[string]string
 	MissingParameter(string) bool
 	ParseEventValue(*utils.RSRField, string) string
 	PassesFieldFilter(*utils.RSRField) (bool, string)
-	AsStoredCdr(timezone string) *StoredCdr
+	AsStoredCdr(timezone string) *CDR
 	String() string
 	AsEvent(string) Event
 	ComputeLcr() bool

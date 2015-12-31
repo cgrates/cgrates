@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"flag"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
@@ -32,6 +33,8 @@ import (
 var actsLclCfg *config.CGRConfig
 var actsLclRpc *rpc.Client
 var actsLclCfgPath = path.Join(*dataDir, "conf", "samples", "actions")
+
+var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
 
 func TestActionsLocalInitCfg(t *testing.T) {
 	if !*testLocal {
@@ -61,7 +64,7 @@ func TestActionsLocalStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if _, err := StartEngine(actsLclCfgPath, waitRater); err != nil {
+	if _, err := StartEngine(actsLclCfgPath, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -105,20 +108,20 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
-	var rcvedCdrs []*ExternalCdr
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RpcCdrsFilter{CdrSources: []string{CDRLOG}}, &rcvedCdrs); err != nil {
+	var rcvedCdrs []*ExternalCDR
+	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
-	} else if rcvedCdrs[0].TOR != utils.MONETARY ||
-		rcvedCdrs[0].CdrHost != "127.0.0.1" ||
-		rcvedCdrs[0].CdrSource != CDRLOG ||
-		rcvedCdrs[0].ReqType != utils.META_PREPAID ||
+	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
+		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
+		rcvedCdrs[0].Source != CDRLOG ||
+		rcvedCdrs[0].RequestType != utils.META_PREPAID ||
 		rcvedCdrs[0].Tenant != "cgrates.org" ||
 		rcvedCdrs[0].Account != "dan2904" ||
 		rcvedCdrs[0].Subject != "dan2904" ||
 		rcvedCdrs[0].Usage != "1" ||
-		rcvedCdrs[0].MediationRunId != utils.META_DEFAULT ||
+		rcvedCdrs[0].RunID != utils.META_DEFAULT ||
 		rcvedCdrs[0].Cost != attrsAA.Actions[0].Units {
 		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}
@@ -129,7 +132,7 @@ func TestActionsLocalStopCgrEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := KillEngine(waitRater); err != nil {
+	if err := KillEngine(*waitRater); err != nil {
 		t.Error(err)
 	}
 }

@@ -29,16 +29,16 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
-	dc = &DerivedCharger{RunId: runId}
+	dc = &DerivedCharger{RunID: runId}
 	dc.RunFilters = runFilters
 	if strings.HasPrefix(dc.RunFilters, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilters, STATIC_VALUE_PREFIX) {
 		if dc.rsrRunFilters, err = ParseRSRFields(dc.RunFilters, INFIELD_SEP); err != nil {
 			return nil, err
 		}
 	}
-	dc.ReqTypeField = reqTypeFld
-	if strings.HasPrefix(dc.ReqTypeField, REGEXP_PREFIX) || strings.HasPrefix(dc.ReqTypeField, STATIC_VALUE_PREFIX) {
-		if dc.rsrReqTypeField, err = NewRSRField(dc.ReqTypeField); err != nil {
+	dc.RequestTypeField = reqTypeFld
+	if strings.HasPrefix(dc.RequestTypeField, REGEXP_PREFIX) || strings.HasPrefix(dc.RequestTypeField, STATIC_VALUE_PREFIX) {
+		if dc.rsrRequestTypeField, err = NewRSRField(dc.RequestTypeField); err != nil {
 			return nil, err
 		}
 	}
@@ -84,9 +84,9 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 			return nil, err
 		}
 	}
-	dc.PddField = pddFld
-	if strings.HasPrefix(dc.PddField, REGEXP_PREFIX) || strings.HasPrefix(dc.PddField, STATIC_VALUE_PREFIX) {
-		if dc.rsrPddField, err = NewRSRField(dc.PddField); err != nil {
+	dc.PDDField = pddFld
+	if strings.HasPrefix(dc.PDDField, REGEXP_PREFIX) || strings.HasPrefix(dc.PDDField, STATIC_VALUE_PREFIX) {
+		if dc.rsrPddField, err = NewRSRField(dc.PDDField); err != nil {
 			return nil, err
 		}
 	}
@@ -130,9 +130,9 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 }
 
 type DerivedCharger struct {
-	RunId                   string      // Unique runId in the chain
+	RunID                   string      // Unique runId in the chain
 	RunFilters              string      // Only run the charger if all the filters match
-	ReqTypeField            string      // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
+	RequestTypeField        string      // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
 	DirectionField          string      // Field containing direction info
 	TenantField             string      // Field containing tenant info
 	CategoryField           string      // Field containing tor info
@@ -140,7 +140,7 @@ type DerivedCharger struct {
 	SubjectField            string      // Field containing subject information
 	DestinationField        string      // Field containing destination information
 	SetupTimeField          string      // Field containing setup time information
-	PddField                string      // Field containing setup time information
+	PDDField                string      // Field containing setup time information
 	AnswerTimeField         string      // Field containing answer time information
 	UsageField              string      // Field containing usage information
 	SupplierField           string      // Field containing supplier information
@@ -148,7 +148,7 @@ type DerivedCharger struct {
 	CostField               string      // Field containing cost information
 	RatedField              string      // Field marking rated request in CDR
 	rsrRunFilters           []*RSRField // Storage for compiled Regexp in case of RSRFields
-	rsrReqTypeField         *RSRField
+	rsrRequestTypeField     *RSRField
 	rsrDirectionField       *RSRField
 	rsrTenantField          *RSRField
 	rsrCategoryField        *RSRField
@@ -166,9 +166,9 @@ type DerivedCharger struct {
 }
 
 func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
-	return dc.RunId == other.RunId &&
+	return dc.RunID == other.RunID &&
 		dc.RunFilters == other.RunFilters &&
-		dc.ReqTypeField == other.ReqTypeField &&
+		dc.RequestTypeField == other.RequestTypeField &&
 		dc.DirectionField == other.DirectionField &&
 		dc.TenantField == other.TenantField &&
 		dc.CategoryField == other.CategoryField &&
@@ -176,7 +176,7 @@ func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
 		dc.SubjectField == other.SubjectField &&
 		dc.DestinationField == other.DestinationField &&
 		dc.SetupTimeField == other.SetupTimeField &&
-		dc.PddField == other.PddField &&
+		dc.PDDField == other.PDDField &&
 		dc.AnswerTimeField == other.AnswerTimeField &&
 		dc.UsageField == other.UsageField &&
 		dc.SupplierField == other.SupplierField &&
@@ -190,17 +190,17 @@ func DerivedChargersKey(direction, tenant, category, account, subject string) st
 }
 
 type DerivedChargers struct {
-	DestinationIds StringMap
+	DestinationIDs StringMap
 	Chargers       []*DerivedCharger
 }
 
 // Precheck that RunId is unique
 func (dcs *DerivedChargers) Append(dc *DerivedCharger) (*DerivedChargers, error) {
-	if dc.RunId == DEFAULT_RUNID {
+	if dc.RunID == DEFAULT_RUNID {
 		return nil, errors.New("Reserved RunId")
 	}
 	for _, dcLocal := range dcs.Chargers {
-		if dcLocal.RunId == dc.RunId {
+		if dcLocal.RunID == dc.RunID {
 			return nil, errors.New("Duplicated RunId")
 		}
 	}
@@ -216,7 +216,7 @@ func (dcs *DerivedChargers) AppendDefaultRun() (*DerivedChargers, error) {
 }
 
 func (dcs *DerivedChargers) Equal(other *DerivedChargers) bool {
-	dcs.DestinationIds.Equal(other.DestinationIds)
+	dcs.DestinationIDs.Equal(other.DestinationIDs)
 	for i, dc := range dcs.Chargers {
 		if !dc.Equal(other.Chargers[i]) {
 			return false

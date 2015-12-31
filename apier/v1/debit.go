@@ -32,11 +32,11 @@ func (self *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) e
 		*reply = err.Error()
 		return err
 	}
-	if usageRecord.TOR == "" {
-		usageRecord.TOR = utils.VOICE
+	if usageRecord.ToR == "" {
+		usageRecord.ToR = utils.VOICE
 	}
-	if usageRecord.ReqType == "" {
-		usageRecord.ReqType = self.Config.DefaultReqType
+	if usageRecord.RequestType == "" {
+		usageRecord.RequestType = self.Config.DefaultReqType
 	}
 	if usageRecord.Direction == "" {
 		usageRecord.Direction = utils.OUT

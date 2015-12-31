@@ -430,7 +430,7 @@ func (mig MigratorRC8) migrateDerivedChargers() error {
 			}
 		}
 		newDcs := &utils.DerivedChargers{
-			DestinationIds: make(utils.StringMap),
+			DestinationIDs: make(utils.StringMap),
 			Chargers:       oldDcs,
 		}
 		newDcsMap[key] = newDcs

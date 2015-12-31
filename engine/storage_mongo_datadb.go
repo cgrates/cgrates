@@ -24,37 +24,61 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
-
 	"gopkg.in/mgo.v2"
-
 	"gopkg.in/mgo.v2/bson"
 )
 
 const (
 	colDst    = "destinations"
 	colAct    = "actions"
-	colApl    = "actionplans"
+	colApl    = "action_plans"
 	colTsk    = "tasks"
-	colAtr    = "actiontriggers"
-	colRpl    = "ratingplans"
-	colRpf    = "ratingprofiles"
+	colAtr    = "action_triggers"
+	colRpl    = "rating_plans"
+	colRpf    = "rating_profiles"
 	colAcc    = "accounts"
-	colShg    = "sharedgroups"
-	colLcr    = "lcrrules"
-	colDcs    = "derivedchargers"
+	colShg    = "shared_groups"
+	colLcr    = "lcr_rules"
+	colDcs    = "derived_chargers"
 	colAls    = "aliases"
-	colStq    = "statsqeues"
+	colStq    = "stat_qeues"
 	colPbs    = "pubsub"
 	colUsr    = "users"
-	colCrs    = "cdrstats"
-	colLht    = "loadhistory"
-	colLogAtr = "actiontriggerslogs"
-	colLogApl = "actionplanlogs"
-	colLogErr = "errorlogs"
-	colCdrs   = "cdrs"
+	colCrs    = "cdr_stats"
+	colLht    = "load_history"
+	colLogAtr = "action_trigger_logs"
+	colLogApl = "action_plan_logs"
+	colLogErr = "error_logs"
+)
+
+var (
+	CGRIDLow           = strings.ToLower(utils.CGRID)
+	RunIDLow           = strings.ToLower(utils.MEDI_RUNID)
+	OrderIDLow         = strings.ToLower(utils.ORDERID)
+	ToRLow             = strings.ToLower(utils.TOR)
+	CDRHostLow         = strings.ToLower(utils.CDRHOST)
+	CDRSourceLow       = strings.ToLower(utils.CDRSOURCE)
+	RequestTypeLow     = strings.ToLower(utils.REQTYPE)
+	DirectionLow       = strings.ToLower(utils.DIRECTION)
+	TenantLow          = strings.ToLower(utils.TENANT)
+	CategoryLow        = strings.ToLower(utils.CATEGORY)
+	AccountLow         = strings.ToLower(utils.ACCOUNT)
+	SubjectLow         = strings.ToLower(utils.SUBJECT)
+	SupplierLow        = strings.ToLower(utils.SUPPLIER)
+	DisconnectCauseLow = strings.ToLower(utils.DISCONNECT_CAUSE)
+	SetupTimeLow       = strings.ToLower(utils.SETUP_TIME)
+	AnswerTimeLow      = strings.ToLower(utils.ANSWER_TIME)
+	CreatedAtLow       = strings.ToLower(utils.CreatedAt)
+	UpdatedAtLow       = strings.ToLower(utils.UpdatedAt)
+	UsageLow           = strings.ToLower(utils.USAGE)
+	PDDLow             = strings.ToLower(utils.PDD)
+	CostDetailsLow     = strings.ToLower(utils.COST_DETAILS)
+	DestinationLow     = strings.ToLower(utils.DESTINATION)
+	CostLow            = strings.ToLower(utils.COST)
 )
 
 type MongoStorage struct {
@@ -192,13 +216,13 @@ func NewMongoStorage(host, port, db, user, pass string) (*MongoStorage, error) {
 		}
 	}
 	index = mgo.Index{
-		Key:        []string{"cgrid", "cdrsource", "mediationrunid"},
+		Key:        []string{CGRIDLow, RunIDLow},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{colCdrs}
+	collections = []string{utils.TBL_CDRS}
 	for _, col := range collections {
 		if err = ndb.C(col).EnsureIndex(index); err != nil {
 			return nil, err

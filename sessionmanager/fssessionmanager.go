@@ -296,10 +296,10 @@ func (sm *FSSessionManager) DisconnectSession(ev engine.Event, connId, notify st
 	return nil
 }
 
-func (sm *FSSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
+func (sm *FSSessionManager) ProcessCdr(storedCdr *engine.CDR) error {
 	var reply string
 	if err := sm.cdrsrv.Call("CdrServer.ProcessCdr", storedCdr, &reply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CGRID, storedCdr.OriginID, err.Error()))
 	}
 	return nil
 }

@@ -499,7 +499,6 @@ func (ub *Account) executeActionTriggers(a *Action) {
 				}
 				switch at.ThresholdType {
 				case utils.TRIGGER_MAX_BALANCE:
-
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
 						at.Execute(ub, nil)
 					}

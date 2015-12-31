@@ -182,7 +182,7 @@ func (fsev FSEvent) MissingParameter(timezone string) bool {
 func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err error) {
 	fsSTimeStr, hasKey := fsev[SETUP_TIME]
 	if hasKey && fsSTimeStr != "0" {
-		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so cgrid will not corelate
+		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so CGRID will not corelate
 		fsSTimeStr = fsSTimeStr[:len(fsSTimeStr)-6]
 	}
 	sTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsSTimeStr)
@@ -194,7 +194,7 @@ func (fsev FSEvent) GetSetupTime(fieldName, timezone string) (t time.Time, err e
 func (fsev FSEvent) GetAnswerTime(fieldName, timezone string) (t time.Time, err error) {
 	fsATimeStr, hasKey := fsev[ANSWER_TIME]
 	if hasKey && fsATimeStr != "0" {
-		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so cgrid will not corelate
+		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so CGRID will not corelate
 		fsATimeStr = fsATimeStr[:len(fsATimeStr)-6]
 	}
 	aTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsATimeStr)
@@ -217,18 +217,18 @@ func (fsev FSEvent) GetDuration(fieldName string) (time.Duration, error) {
 }
 
 func (fsev FSEvent) GetPdd(fieldName string) (time.Duration, error) {
-	var pddStr string
+	var PDDStr string
 	if utils.IsSliceMember([]string{utils.PDD, utils.META_DEFAULT}, fieldName) {
-		pddStr = utils.FirstNonEmpty(fsev[PDD_MEDIA_MS], fsev[PDD_NOMEDIA_MS])
-		if len(pddStr) != 0 {
-			pddStr = pddStr + "ms" // PDD is in milliseconds and CGR expects it in seconds
+		PDDStr = utils.FirstNonEmpty(fsev[PDD_MEDIA_MS], fsev[PDD_NOMEDIA_MS])
+		if len(PDDStr) != 0 {
+			PDDStr = PDDStr + "ms" // PDD is in milliseconds and CGR expects it in seconds
 		}
 	} else if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
-		pddStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+		PDDStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else {
-		pddStr = fsev[fieldName]
+		PDDStr = fsev[fieldName]
 	}
-	return utils.ParseDurationWithSecs(pddStr)
+	return utils.ParseDurationWithSecs(PDDStr)
 }
 
 func (fsev FSEvent) GetSupplier(fieldName string) string {
@@ -297,8 +297,8 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) str
 		dur, _ := fsev.GetDuration("")
 		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
 	case utils.PDD:
-		pdd, _ := fsev.GetPdd(utils.META_DEFAULT)
-		return rsrFld.ParseValue(strconv.FormatFloat(pdd.Seconds(), 'f', -1, 64))
+		PDD, _ := fsev.GetPdd(utils.META_DEFAULT)
+		return rsrFld.ParseValue(strconv.FormatFloat(PDD.Seconds(), 'f', -1, 64))
 	case utils.SUPPLIER:
 		return rsrFld.ParseValue(fsev.GetSupplier(""))
 	case utils.DISCONNECT_CAUSE:
@@ -337,14 +337,14 @@ func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string
 	return false, ""
 }
 
-func (fsev FSEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
-	storCdr := new(engine.StoredCdr)
-	storCdr.CgrId = fsev.GetCgrId(timezone)
-	storCdr.TOR = utils.VOICE
-	storCdr.AccId = fsev.GetUUID()
-	storCdr.CdrHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
-	storCdr.CdrSource = "FS_" + fsev.GetName()
-	storCdr.ReqType = fsev.GetReqType(utils.META_DEFAULT)
+func (fsev FSEvent) AsStoredCdr(timezone string) *engine.CDR {
+	storCdr := new(engine.CDR)
+	storCdr.CGRID = fsev.GetCgrId(timezone)
+	storCdr.ToR = utils.VOICE
+	storCdr.OriginID = fsev.GetUUID()
+	storCdr.OriginHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
+	storCdr.Source = "FS_" + fsev.GetName()
+	storCdr.RequestType = fsev.GetReqType(utils.META_DEFAULT)
 	storCdr.Direction = fsev.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = fsev.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = fsev.GetCategory(utils.META_DEFAULT)
@@ -354,7 +354,7 @@ func (fsev FSEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
 	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
-	storCdr.Pdd, _ = fsev.GetPdd(utils.META_DEFAULT)
+	storCdr.PDD, _ = fsev.GetPdd(utils.META_DEFAULT)
 	storCdr.ExtraFields = fsev.GetExtraFields()
 	storCdr.Cost = -1
 	storCdr.Supplier = fsev.GetSupplier(utils.META_DEFAULT)

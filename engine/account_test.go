@@ -867,9 +867,9 @@ func TestAccountAddMinuteNil(t *testing.T) {
 }
 
 func TestAccountAddMinutBucketEmpty(t *testing.T) {
-	mb1 := &Balance{Value: -10, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}
-	mb2 := &Balance{Value: -10, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}
-	mb3 := &Balance{Value: -10, DestinationIds: utils.StringMap{"OTHER": true}, Directions: utils.StringMap{utils.OUT: true}}
+	mb1 := &Balance{Value: -10, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}
+	mb2 := &Balance{Value: -10, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}
+	mb3 := &Balance{Value: -10, DestinationIds: utils.StringMap{"OTHER": true}, Directions: utils.NewStringMap(utils.OUT)}
 	ub := &Account{}
 	a := &Action{BalanceType: utils.VOICE, Balance: mb1}
 	ub.debitBalanceAction(a, false)

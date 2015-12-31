@@ -257,7 +257,7 @@ func (s *Stats) setupQueueSaver(sq *StatsQueue) {
 	}
 }
 
-func (s *Stats) AppendCDR(cdr *StoredCdr, out *int) error {
+func (s *Stats) AppendCDR(cdr *CDR, out *int) error {
 	s.mux.RLock()
 	defer s.mux.RUnlock()
 	for _, sq := range s.queues {

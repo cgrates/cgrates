@@ -31,7 +31,7 @@ func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.
 	if attrs.RunId == "" {
 		attrs.RunId = utils.META_DEFAULT
 	}
-	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, "", attrs.RunId); err != nil {
+	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, attrs.RunId); err != nil {
 		return utils.NewErrServerError(err)
 	} else if cc == nil {
 		return utils.ErrNotFound
@@ -42,18 +42,18 @@ func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.
 }
 
 // Retrieves CDRs based on the filters
-func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCdr) error {
-	cdrsFltr, err := attrs.AsCdrsFilter(apier.Config.DefaultTimezone)
+func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.ExternalCDR) error {
+	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if cdrs, _, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
+	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(cdrs) == 0 {
-		*reply = make([]*engine.ExternalCdr, 0)
+		*reply = make([]*engine.ExternalCDR, 0)
 	} else {
 		for _, cdr := range cdrs {
-			*reply = append(*reply, cdr.AsExternalCdr())
+			*reply = append(*reply, cdr.AsExternalCDR())
 		}
 	}
 	return nil

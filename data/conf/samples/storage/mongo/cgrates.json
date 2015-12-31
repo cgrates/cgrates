@@ -1,0 +1,10 @@
+{
+// CGRateS Configuration file used for testing mongo implementation
+
+"stor_db": {
+	"db_type": "mongo",					// stor database type to use: <mysql|postgres>
+	"db_port": 27017, 						// the port to reach the stordb
+},
+
+
+}

@@ -40,7 +40,7 @@ type Session struct {
 
 func (s *Session) GetSessionRun(runid string) *engine.SessionRun {
 	for _, sr := range s.sessionRuns {
-		if sr.DerivedCharger.RunId == runid {
+		if sr.DerivedCharger.RunID == runid {
 			return sr
 		}
 	}
@@ -237,7 +237,7 @@ func (s *Session) SaveOperations() {
 		err := s.sessionManager.CdrSrv().Call("CdrServer.LogCallCost", &engine.CallCostLog{
 			CgrId:          s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			Source:         utils.SESSION_MANAGER_SOURCE,
-			RunId:          sr.DerivedCharger.RunId,
+			RunId:          sr.DerivedCharger.RunID,
 			CallCost:       firstCC,
 			CheckDuplicate: true,
 		}, &reply)
@@ -283,7 +283,7 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 			SMId:        "UNKNOWN",
 		}
 		if sessionRun.DerivedCharger != nil {
-			aSession.RunId = sessionRun.DerivedCharger.RunId
+			aSession.RunId = sessionRun.DerivedCharger.RunID
 		}
 		if sessionRun.CallDescriptor != nil {
 			aSession.LoopIndex = sessionRun.CallDescriptor.LoopIndex

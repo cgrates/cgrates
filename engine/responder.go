@@ -260,8 +260,8 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 }
 
 // Returns MaxSessionTime for an event received in SessionManager, considering DerivedCharging for it
-func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) error {
-	cacheKey := "GetDerivedMaxSessionTime" + ev.CgrId
+func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
+	cacheKey := "GetDerivedMaxSessionTime" + ev.CGRID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		*reply = item.Value.(float64)
 		return item.Err
@@ -303,7 +303,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	for _, dc := range dcs.Chargers {
-		if utils.IsSliceMember([]string{utils.META_RATED, utils.RATED}, ev.GetReqType(dc.ReqTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
+		if utils.IsSliceMember([]string{utils.META_RATED, utils.RATED}, ev.GetReqType(dc.RequestTypeField)) { // Only consider prepaid and pseudoprepaid for MaxSessionTime
 			continue
 		}
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
@@ -347,7 +347,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 			return err
 		}
-		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.ReqTypeField)) {
+		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.RequestTypeField)) {
 			// Only consider prepaid and pseudoprepaid for MaxSessionTime, do it here for unauthorized destination error check
 			continue
 		}
@@ -364,8 +364,8 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *StoredCdr, reply *float64) err
 }
 
 // Used by SM to get all the prepaid CallDescriptors attached to a session
-func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
-	cacheKey := "GetSessionRuns" + ev.CgrId
+func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
+	cacheKey := "GetSessionRuns" + ev.CGRID
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		*sRuns = item.Value.([]*SessionRun)
 		return item.Err
@@ -407,7 +407,7 @@ func (rs *Responder) GetSessionRuns(ev *StoredCdr, sRuns *[]*SessionRun) error {
 	dcs, _ = dcs.AppendDefaultRun()
 	sesRuns := make([]*SessionRun, 0)
 	for _, dc := range dcs.Chargers {
-		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.ReqTypeField)) {
+		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.RequestTypeField)) {
 			continue // We only consider prepaid sessions
 		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)
@@ -613,7 +613,6 @@ func (rs *Responder) Call(serviceMethod string, args interface{}, reply interfac
 	if !method.IsValid() {
 		return utils.ErrNotImplemented
 	}
-
 	// construct the params
 	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 

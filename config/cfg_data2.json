@@ -8,7 +8,7 @@
 		"data_usage_multiply_factor": 0.000976563,
 		"cdr_source_id": "csv2",					// free form field, tag identifying the source of the CDRs within CDRS database
 		"content_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"field_id": "TOR", "value": "~7:s/^(voice|data|sms|generic)$/*$1/"},
+			{"field_id": "ToR", "value": "~7:s/^(voice|data|sms|generic)$/*$1/"},
 			{"field_id": "AnswerTime", "value": "2"},
 		],
 	},

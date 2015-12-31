@@ -698,51 +698,55 @@ func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	}{at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
-	s := &StoredCdr{
-		CgrId:          cgrid,
-		CdrSource:      source,
-		MediationRunId: runid,
-		CostDetails:    cc,
+func (ms *MongoStorage) LogCallCost(cgrid, runid, source string, cc *CallCost) error {
+	return ms.db.C(utils.TBLSMCosts).Insert(&SMCost{CGRID: cgrid, RunID: runid, CostSource: source, CostDetails: cc})
+}
+
+func (ms *MongoStorage) GetCallCostLog(cgrid, runid string) (cc *CallCost, err error) {
+	var result SMCost
+	if err = ms.db.C(utils.TBLSMCosts).Find(bson.M{CGRIDLow: cgrid, RunIDLow: runid}).One(&result); err != nil {
+		return nil, err
 	}
-	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cgrid, "cdrsource": source, "mediationrunid": runid}, s)
-	return err
+	return result.CostDetails, nil
 }
 
-func (ms *MongoStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	result := StoredCdr{}
-	err = ms.db.C(colCdrs).Find(bson.M{"cgrid": cgrid, "cdrsource": source, "mediationrunid": runid}).One(&result)
-	cc = result.CostDetails
-	return
-}
-
-func (ms *MongoStorage) SetCdr(cdr *StoredCdr) error {
-	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": cdr.CgrId, "mediationrunid": cdr.MediationRunId}, cdr)
-	return err
-}
-
-func (ms *MongoStorage) SetRatedCdr(storedCdr *StoredCdr) error {
-	_, err := ms.db.C(colCdrs).Upsert(bson.M{"cgrid": storedCdr.CgrId, "mediationrunid": storedCdr.MediationRunId}, storedCdr)
+func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
+	if cdr.OrderID == 0 {
+		cdr.OrderID = time.Now().UnixNano()
+	}
+	if allowUpdate {
+		_, err = ms.db.C(utils.TBL_CDRS).Upsert(bson.M{CGRIDLow: cdr.CGRID, RunIDLow: cdr.RunID}, cdr)
+	} else {
+		err = ms.db.C(utils.TBL_CDRS).Insert(cdr)
+	}
 	return err
 }
 
 // Remove CDR data out of all CDR tables based on their cgrid
-func (ms *MongoStorage) RemStoredCdrs(cgrIds []string) error {
+func (ms *MongoStorage) RemCDRs(cgrIds []string) error {
 	if len(cgrIds) == 0 {
 		return nil
 	}
-	_, err := ms.db.C(colCdrs).UpdateAll(bson.M{"cgrid": bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
+	_, err := ms.db.C(utils.TBL_CDRS).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
 	return err
 }
 
 func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	for k, v := range filters {
 		switch value := v.(type) {
+		case *int64:
+			if value == nil {
+				delete(filters, k)
+			}
 		case *float64:
 			if value == nil {
 				delete(filters, k)
 			}
 		case *time.Time:
+			if value == nil {
+				delete(filters, k)
+			}
+		case *time.Duration:
 			if value == nil {
 				delete(filters, k)
 			}
@@ -759,62 +763,89 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	}
 }
 
-func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, int64, error) {
+func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error) {
+	var minPDD, maxPDD, minUsage, maxUsage *time.Duration
+	if len(qryFltr.MinPDD) != 0 {
+		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MinPDD); err != nil {
+			return nil, 0, err
+		} else {
+			minPDD = &parsed
+		}
+	}
+	if len(qryFltr.MaxPDD) != 0 {
+		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MaxPDD); err != nil {
+			return nil, 0, err
+		} else {
+			maxPDD = &parsed
+		}
+	}
+	if len(qryFltr.MinUsage) != 0 {
+		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MinUsage); err != nil {
+			return nil, 0, err
+		} else {
+			minUsage = &parsed
+		}
+	}
+	if len(qryFltr.MaxUsage) != 0 {
+		if parsed, err := utils.ParseDurationWithSecs(qryFltr.MaxUsage); err != nil {
+			return nil, 0, err
+		} else {
+			maxUsage = &parsed
+		}
+	}
 	filters := bson.M{
-		"cgrid":            bson.M{"$in": qryFltr.CgrIds, "$nin": qryFltr.NotCgrIds},
-		"mediationrunid":   bson.M{"$in": qryFltr.RunIds, "$nin": qryFltr.NotRunIds},
-		"tor":              bson.M{"$in": qryFltr.Tors, "$nin": qryFltr.NotTors},
-		"cdrhost":          bson.M{"$in": qryFltr.CdrHosts, "$nin": qryFltr.NotCdrHosts},
-		"cdrsource":        bson.M{"$in": qryFltr.CdrSources, "$nin": qryFltr.NotCdrSources},
-		"reqtype":          bson.M{"$in": qryFltr.ReqTypes, "$nin": qryFltr.NotReqTypes},
-		"direction":        bson.M{"$in": qryFltr.Directions, "$nin": qryFltr.NotDirections},
-		"tenant":           bson.M{"$in": qryFltr.Tenants, "$nin": qryFltr.NotTenants},
-		"category":         bson.M{"$in": qryFltr.Categories, "$nin": qryFltr.NotCategories},
-		"account":          bson.M{"$in": qryFltr.Accounts, "$nin": qryFltr.NotAccounts},
-		"subject":          bson.M{"$in": qryFltr.Subjects, "$nin": qryFltr.NotSubjects},
-		"supplier":         bson.M{"$in": qryFltr.Suppliers, "$nin": qryFltr.NotSuppliers},
-		"disconnect_cause": bson.M{"$in": qryFltr.DisconnectCauses, "$nin": qryFltr.NotDisconnectCauses},
-		"setuptime":        bson.M{"$gte": qryFltr.SetupTimeStart, "$lt": qryFltr.SetupTimeEnd},
-		"answertime":       bson.M{"$gte": qryFltr.AnswerTimeStart, "$lt": qryFltr.AnswerTimeEnd},
-		"created_at":       bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
-		"updated_at":       bson.M{"$gte": qryFltr.UpdatedAtStart, "$lt": qryFltr.UpdatedAtEnd},
-		"usage":            bson.M{"$gte": qryFltr.MinUsage, "$lt": qryFltr.MaxUsage},
-		"pdd":              bson.M{"$gte": qryFltr.MinPdd, "$lt": qryFltr.MaxPdd},
-		"costdetails.account": bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
-		"costdetails.subject": bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
+		CGRIDLow:           bson.M{"$in": qryFltr.CGRIDs, "$nin": qryFltr.NotCGRIDs},
+		RunIDLow:           bson.M{"$in": qryFltr.RunIDs, "$nin": qryFltr.NotRunIDs},
+		OrderIDLow:         bson.M{"$gte": qryFltr.OrderIDStart, "$lt": qryFltr.OrderIDEnd},
+		ToRLow:             bson.M{"$in": qryFltr.ToRs, "$nin": qryFltr.NotToRs},
+		CDRHostLow:         bson.M{"$in": qryFltr.OriginHosts, "$nin": qryFltr.NotOriginHosts},
+		CDRSourceLow:       bson.M{"$in": qryFltr.Sources, "$nin": qryFltr.NotSources},
+		RequestTypeLow:     bson.M{"$in": qryFltr.RequestTypes, "$nin": qryFltr.NotRequestTypes},
+		DirectionLow:       bson.M{"$in": qryFltr.Directions, "$nin": qryFltr.NotDirections},
+		TenantLow:          bson.M{"$in": qryFltr.Tenants, "$nin": qryFltr.NotTenants},
+		CategoryLow:        bson.M{"$in": qryFltr.Categories, "$nin": qryFltr.NotCategories},
+		AccountLow:         bson.M{"$in": qryFltr.Accounts, "$nin": qryFltr.NotAccounts},
+		SubjectLow:         bson.M{"$in": qryFltr.Subjects, "$nin": qryFltr.NotSubjects},
+		SupplierLow:        bson.M{"$in": qryFltr.Suppliers, "$nin": qryFltr.NotSuppliers},
+		DisconnectCauseLow: bson.M{"$in": qryFltr.DisconnectCauses, "$nin": qryFltr.NotDisconnectCauses},
+		SetupTimeLow:       bson.M{"$gte": qryFltr.SetupTimeStart, "$lt": qryFltr.SetupTimeEnd},
+		AnswerTimeLow:      bson.M{"$gte": qryFltr.AnswerTimeStart, "$lt": qryFltr.AnswerTimeEnd},
+		CreatedAtLow:       bson.M{"$gte": qryFltr.CreatedAtStart, "$lt": qryFltr.CreatedAtEnd},
+		UpdatedAtLow:       bson.M{"$gte": qryFltr.UpdatedAtStart, "$lt": qryFltr.UpdatedAtEnd},
+		UsageLow:           bson.M{"$gte": minUsage, "$lt": maxUsage},
+		PDDLow:             bson.M{"$gte": minPDD, "$lt": maxPDD},
+		//CostDetailsLow + "." + AccountLow: bson.M{"$in": qryFltr.RatedAccounts, "$nin": qryFltr.NotRatedAccounts},
+		//CostDetailsLow + "." + SubjectLow: bson.M{"$in": qryFltr.RatedSubjects, "$nin": qryFltr.NotRatedSubjects},
 	}
 	//file, _ := ioutil.TempFile(os.TempDir(), "debug")
 	//file.WriteString(fmt.Sprintf("FILTER: %v\n", utils.ToIJSON(qryFltr)))
 	//file.WriteString(fmt.Sprintf("BEFORE: %v\n", utils.ToIJSON(filters)))
 	ms.cleanEmptyFilters(filters)
-
-	/*if qryFltr.OrderIdStart != 0 {
-		filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
+	if len(qryFltr.DestinationPrefixes) != 0 {
+		var regexpRule string
+		for _, prefix := range qryFltr.DestinationPrefixes {
+			if len(prefix) == 0 {
+				continue
+			}
+			if len(regexpRule) != 0 {
+				regexpRule += "|"
+			}
+			regexpRule += "^(" + prefix + ")"
+		}
+		if _, hasIt := filters["$and"]; !hasIt {
+			filters["$and"] = make([]bson.M, 0)
+		}
+		filters["$and"] = append(filters["$and"].([]bson.M), bson.M{DestinationLow: bson.RegEx{Pattern: regexpRule}}) // $and gathers all rules not fitting top level query
 	}
-	if qryFltr.OrderIdEnd != 0 {
-		if m, ok := filters["id"]; ok {
-			m.(bson.M)["$gte"] = qryFltr.OrderIdStart
-		} else {
-			filters["id"] = bson.M{"$gte": qryFltr.OrderIdStart}
+	if len(qryFltr.NotDestinationPrefixes) != 0 {
+		if _, hasIt := filters["$and"]; !hasIt {
+			filters["$and"] = make([]bson.M, 0)
 		}
-	}*/
-
-	if len(qryFltr.DestPrefixes) != 0 {
-		var regexes []bson.RegEx
-		for _, prefix := range qryFltr.DestPrefixes {
-			regexes = append(regexes, bson.RegEx{Pattern: regexp.QuoteMeta(prefix) + ".*"})
-		}
-		filters["destination"] = bson.M{"$in": regexes}
-	}
-	if len(qryFltr.NotDestPrefixes) != 0 {
-		var notRegexes []bson.RegEx
-		for _, prefix := range qryFltr.DestPrefixes {
-			notRegexes = append(notRegexes, bson.RegEx{Pattern: regexp.QuoteMeta(prefix) + ".*"})
-		}
-		if m, ok := filters["destination"]; ok {
-			m.(bson.M)["$nin"] = notRegexes
-		} else {
-			filters["destination"] = bson.M{"$nin": notRegexes}
+		for _, prefix := range qryFltr.NotDestinationPrefixes {
+			if len(prefix) == 0 {
+				continue
+			}
+			filters["$and"] = append(filters["$and"].([]bson.M), bson.M{DestinationLow: bson.RegEx{Pattern: "^(?!" + prefix + ")"}})
 		}
 	}
 
@@ -836,24 +867,24 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 
 	if qryFltr.MinCost != nil {
 		if qryFltr.MaxCost == nil {
-			filters["cost"] = bson.M{"$gte": *qryFltr.MinCost}
+			filters[CostLow] = bson.M{"$gte": *qryFltr.MinCost}
 		} else if *qryFltr.MinCost == 0.0 && *qryFltr.MaxCost == -1.0 { // Special case when we want to skip errors
 			filters["$or"] = []bson.M{
-				bson.M{"cost": bson.M{"$gte": 0.0}},
+				bson.M{CostLow: bson.M{"$gte": 0.0}},
 			}
 		} else {
-			filters["cost"] = bson.M{"$gte": *qryFltr.MinCost, "$lt": *qryFltr.MaxCost}
+			filters[CostLow] = bson.M{"$gte": *qryFltr.MinCost, "$lt": *qryFltr.MaxCost}
 		}
 	} else if qryFltr.MaxCost != nil {
 		if *qryFltr.MaxCost == -1.0 { // Non-rated CDRs
-			filters["cost"] = 0.0 // Need to include it otherwise all CDRs will be returned
+			filters[CostLow] = 0.0 // Need to include it otherwise all CDRs will be returned
 		} else { // Above limited CDRs, since MinCost is empty, make sure we query also NULL cost
-			filters["cost"] = bson.M{"$lt": *qryFltr.MaxCost}
+			filters[CostLow] = bson.M{"$lt": *qryFltr.MaxCost}
 		}
 	}
 	//file.WriteString(fmt.Sprintf("AFTER: %v\n", utils.ToIJSON(filters)))
 	//file.Close()
-	q := ms.db.C(colCdrs).Find(filters)
+	q := ms.db.C(utils.TBL_CDRS).Find(filters)
 	if qryFltr.Paginator.Limit != nil {
 		q = q.Limit(*qryFltr.Paginator.Limit)
 	}
@@ -867,11 +898,10 @@ func (ms *MongoStorage) GetStoredCdrs(qryFltr *utils.CdrsFilter) ([]*StoredCdr, 
 		}
 		return nil, int64(cnt), nil
 	}
-
 	// Execute query
 	iter := q.Iter()
-	var cdrs []*StoredCdr
-	cdr := StoredCdr{}
+	var cdrs []*CDR
+	cdr := CDR{}
 	for iter.Next(&cdr) {
 		clone := cdr
 		cdrs = append(cdrs, &clone)

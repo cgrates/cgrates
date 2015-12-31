@@ -66,10 +66,8 @@ const (
 	TBL_TP_DERIVED_CHARGERS      = "tp_derived_chargers"
 	TBL_TP_USERS                 = "tp_users"
 	TBL_TP_ALIASES               = "tp_aliases"
-	TBL_CDRS_PRIMARY             = "cdrs_primary"
-	TBL_CDRS_EXTRA               = "cdrs_extra"
-	TBL_COST_DETAILS             = "cost_details"
-	TBL_RATED_CDRS               = "rated_cdrs"
+	TBLSMCosts                   = "sm_costs"
+	TBL_CDRS                     = "cdrs"
 	TIMINGS_CSV                  = "Timings.csv"
 	DESTINATIONS_CSV             = "Destinations.csv"
 	RATES_CSV                    = "Rates.csv"
@@ -105,13 +103,13 @@ const (
 	GOB                          = "gob"
 	MSGPACK                      = "msgpack"
 	CSV_LOAD                     = "CSVLOAD"
-	CGRID                        = "CgrId"
-	TOR                          = "TOR"
-	ORDERID                      = "OrderId"
-	ACCID                        = "AccId"
-	CDRHOST                      = "CdrHost"
-	CDRSOURCE                    = "CdrSource"
-	REQTYPE                      = "ReqType"
+	CGRID                        = "CGRID"
+	TOR                          = "ToR"
+	ORDERID                      = "OrderID"
+	ACCID                        = "OriginID"
+	CDRSOURCE                    = "Source"
+	CDRHOST                      = "OriginHost"
+	REQTYPE                      = "RequestType"
 	DIRECTION                    = "Direction"
 	TENANT                       = "Tenant"
 	CATEGORY                     = "Category"
@@ -121,11 +119,9 @@ const (
 	SETUP_TIME                   = "SetupTime"
 	ANSWER_TIME                  = "AnswerTime"
 	USAGE                        = "Usage"
-	PDD                          = "Pdd"
+	PDD                          = "PDD"
 	SUPPLIER                     = "Supplier"
-	MEDI_RUNID                   = "MediationRunId"
-	RATED_ACCOUNT                = "RatedAccount"
-	RATED_SUBJECT                = "RatedSubject"
+	MEDI_RUNID                   = "RunID"
 	COST                         = "Cost"
 	COST_DETAILS                 = "CostDetails"
 	RATED                        = "rated"
@@ -260,10 +256,13 @@ const (
 	MatchEndPrefix              = "$"
 	SMG                         = "SMG"
 	MetaGrouped                 = "*grouped"
+	MetaRaw                     = "*raw"
+	CreatedAt                   = "CreatedAt"
+	UpdatedAt                   = "UpdatedAt"
 )
 
 var (
 	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
-	PrimaryCdrFields = []string{CGRID, TOR, ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
+	PrimaryCdrFields = []string{CGRID, CDRSOURCE, CDRHOST, ACCID, TOR, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, PDD, ANSWER_TIME, USAGE,
 		SUPPLIER, DISCONNECT_CAUSE, COST, RATED}
 )

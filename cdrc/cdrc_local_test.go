@@ -121,10 +121,8 @@ func TestCsvLclEmptyTables(t *testing.T) {
 			return // No point in going further
 		}
 	}
-	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
-		if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
-			t.Fatal(err.Error())
-		}
+	if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", utils.TBL_CDRS)); err != nil {
+		t.Fatal(err.Error())
 	}
 }
 

@@ -120,7 +120,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError.Error(), "Invalid")
 		}
 	}
-	exportDir := exportTemplate.ExportDir
+	exportDir := exportTemplate.ExportFolder
 	if attr.ExportDir != nil && len(*attr.ExportDir) != 0 {
 		exportDir = *attr.ExportDir
 	}
@@ -140,7 +140,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
 		dataUsageMultiplyFactor = *attr.DataUsageMultiplyFactor
 	}
-	smsUsageMultiplyFactor := exportTemplate.SmsUsageMultiplyFactor
+	smsUsageMultiplyFactor := exportTemplate.SMSUsageMultiplyFactor
 	if attr.SmsUsageMultiplyFactor != nil && *attr.SmsUsageMultiplyFactor != 0.0 {
 		smsUsageMultiplyFactor = *attr.SmsUsageMultiplyFactor
 	}
@@ -160,7 +160,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.RoundDecimals != nil {
 		roundingDecimals = *attr.RoundDecimals
 	}
-	maskDestId := exportTemplate.MaskDestId
+	maskDestId := exportTemplate.MaskDestinationID
 	if attr.MaskDestinationId != nil && len(*attr.MaskDestinationId) != 0 {
 		maskDestId = *attr.MaskDestinationId
 	}
@@ -168,11 +168,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.MaskLength != nil {
 		maskLen = *attr.MaskLength
 	}
-	cdrsFltr, err := attr.AsCdrsFilter(self.Config.DefaultTimezone)
+	cdrsFltr, err := attr.AsCDRsFilter(self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	cdrs, _, err := self.CdrDb.GetStoredCdrs(cdrsFltr)
+	cdrs, _, err := self.CdrDb.GetCDRs(cdrsFltr)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
@@ -204,7 +204,7 @@ func (self *ApierV1) RemCdrs(attrs utils.AttrRemCdrs, reply *string) error {
 	if len(attrs.CgrIds) == 0 {
 		return fmt.Errorf("%s:CgrIds", utils.ErrMandatoryIeMissing.Error())
 	}
-	if err := self.CdrDb.RemStoredCdrs(attrs.CgrIds); err != nil {
+	if err := self.CdrDb.RemCDRs(attrs.CgrIds); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = "OK"

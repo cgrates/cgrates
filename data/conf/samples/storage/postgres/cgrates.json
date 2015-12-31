@@ -1,0 +1,13 @@
+{
+// CGRateS Configuration file used for testing mysql implementation
+
+"stor_db": {								// database used to store offline tariff plans and CDRs
+	"db_type": "postgres",						// stor database type to use: <mysql|postgres>
+	"db_host": "127.0.0.1",					// the host to connect to
+	"db_port": 5432,						// the port to reach the stordb
+	"db_name": "cgrates",					// stor database name
+	"db_user": "cgrates",					// username to use when connecting to stordb
+	"db_passwd": "CGRateS.org",				// password to use when connecting to stordb
+},
+
+}

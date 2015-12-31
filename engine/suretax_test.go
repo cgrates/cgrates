@@ -29,12 +29,13 @@ import (
 )
 
 func TestNewSureTaxRequest(t *testing.T) {
-	cgrId := utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String())
-	cdr := &StoredCdr{CgrId: cgrId, OrderId: 123, TOR: utils.VOICE,
-		AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: utils.UNIT_TEST, ReqType: utils.META_RATED, Direction: "*out",
+	CGRID := utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String())
+	cdr := &CDR{CGRID: CGRID, OrderID: 123, ToR: utils.VOICE,
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002", Supplier: "SUPPL1",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(12) * time.Second, Pdd: time.Duration(7) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans", Rated: true,
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(12) * time.Second, PDD: time.Duration(7) * time.Second,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, Rated: true,
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
 	stCfg := cfg.SureTaxCfg()
@@ -48,7 +49,7 @@ func TestNewSureTaxRequest(t *testing.T) {
 		DataMonth:      "11",
 		TotalRevenue:   1.01,
 		ReturnFileCode: "0",
-		ClientTracking: cgrId,
+		ClientTracking: CGRID,
 		ResponseGroup:  "03",
 		ResponseType:   "D4",
 		ItemList: []*STRequestItem{

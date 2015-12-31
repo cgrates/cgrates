@@ -316,14 +316,14 @@ func (kev KamEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return false, ""
 }
 
-func (kev KamEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
-	storCdr := new(engine.StoredCdr)
-	storCdr.CgrId = kev.GetCgrId(timezone)
-	storCdr.TOR = utils.VOICE
-	storCdr.AccId = kev.GetUUID()
-	storCdr.CdrHost = kev.GetOriginatorIP(utils.META_DEFAULT)
-	storCdr.CdrSource = kev.GetCdrSource()
-	storCdr.ReqType = kev.GetReqType(utils.META_DEFAULT)
+func (kev KamEvent) AsStoredCdr(timezone string) *engine.CDR {
+	storCdr := new(engine.CDR)
+	storCdr.CGRID = kev.GetCgrId(timezone)
+	storCdr.ToR = utils.VOICE
+	storCdr.OriginID = kev.GetUUID()
+	storCdr.OriginHost = kev.GetOriginatorIP(utils.META_DEFAULT)
+	storCdr.Source = kev.GetCdrSource()
+	storCdr.RequestType = kev.GetReqType(utils.META_DEFAULT)
 	storCdr.Direction = kev.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = kev.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = kev.GetCategory(utils.META_DEFAULT)
@@ -333,7 +333,7 @@ func (kev KamEvent) AsStoredCdr(timezone string) *engine.StoredCdr {
 	storCdr.SetupTime, _ = kev.GetSetupTime(utils.META_DEFAULT, timezone)
 	storCdr.AnswerTime, _ = kev.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = kev.GetDuration(utils.META_DEFAULT)
-	storCdr.Pdd, _ = kev.GetPdd(utils.META_DEFAULT)
+	storCdr.PDD, _ = kev.GetPdd(utils.META_DEFAULT)
 	storCdr.Supplier = kev.GetSupplier(utils.META_DEFAULT)
 	storCdr.DisconnectCause = kev.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = kev.GetExtraFields()

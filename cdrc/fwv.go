@@ -58,11 +58,11 @@ type FwvRecordsProcessor struct {
 	httpClient         *http.Client
 	httpSkipTlsCheck   bool
 	timezone           string
-	lineLen            int64             // Length of the line in the file
-	offset             int64             // Index of the next byte to process
-	processedRecordsNr int64             // Number of content records in file
-	trailerOffset      int64             // Index where trailer starts, to be used as boundary when reading cdrs
-	headerCdr          *engine.StoredCdr // Cache here the general purpose stored CDR
+	lineLen            int64       // Length of the line in the file
+	offset             int64       // Index of the next byte to process
+	processedRecordsNr int64       // Number of content records in file
+	trailerOffset      int64       // Index where trailer starts, to be used as boundary when reading cdrs
+	headerCdr          *engine.CDR // Cache here the general purpose stored CDR
 }
 
 // Sets the line length based on first line, sets offset back to initial after reading
@@ -83,7 +83,7 @@ func (self *FwvRecordsProcessor) ProcessedRecordsNr() int64 {
 	return self.processedRecordsNr
 }
 
-func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error) {
+func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	defer func() { self.offset += self.lineLen }() // Schedule increasing the offset once we are out from processing the record
 	if self.offset == 0 {                          // First time, set the necessary offsets
 		if err := self.setLineLen(); err != nil {
@@ -106,7 +106,7 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.StoredCdr, error
 			return nil, nil
 		}
 	}
-	recordCdrs := make([]*engine.StoredCdr, 0) // More CDRs based on the number of filters and field templates
+	recordCdrs := make([]*engine.CDR, 0) // More CDRs based on the number of filters and field templates
 	if self.trailerOffset != 0 && self.offset >= self.trailerOffset {
 		if err := self.processTrailer(); err != nil && err != io.EOF {
 			utils.Logger.Err(fmt.Sprintf("<Cdrc> Read trailer error: %s ", err.Error()))
@@ -157,24 +157,24 @@ func (self *FwvRecordsProcessor) recordPassesCfgFilter(record, configKey string)
 }
 
 // Converts a record (header or normal) to StoredCdr
-func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string) (*engine.StoredCdr, error) {
+func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string) (*engine.CDR, error) {
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	var cfgFields []*config.CfgCdrField
 	var duMultiplyFactor float64
-	var storedCdr *engine.StoredCdr
+	var storedCdr *engine.CDR
 	if self.headerCdr != nil { // Clone the header CDR so we can use it as base to future processing (inherit fields defined there)
 		storedCdr = self.headerCdr.Clone()
 	} else {
-		storedCdr = &engine.StoredCdr{CdrHost: "0.0.0.0", ExtraFields: make(map[string]string), Cost: -1}
+		storedCdr = &engine.CDR{OriginHost: "0.0.0.0", ExtraFields: make(map[string]string), Cost: -1}
 	}
 	if cfgKey == "*header" {
 		cfgFields = self.dfltCfg.HeaderFields
-		storedCdr.CdrSource = self.dfltCfg.CdrSourceId
+		storedCdr.Source = self.dfltCfg.CdrSourceId
 		duMultiplyFactor = self.dfltCfg.DataUsageMultiplyFactor
 	} else {
 		cfgFields = self.cdrcCfgs[cfgKey].ContentFields
-		storedCdr.CdrSource = self.cdrcCfgs[cfgKey].CdrSourceId
+		storedCdr.Source = self.cdrcCfgs[cfgKey].CdrSourceId
 		duMultiplyFactor = self.cdrcCfgs[cfgKey].DataUsageMultiplyFactor
 	}
 	for _, cdrFldCfg := range cfgFields {
@@ -202,10 +202,10 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 			return nil, err
 		}
 	}
-	if storedCdr.CgrId == "" && storedCdr.AccId != "" && cfgKey != "*header" {
-		storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.UTC().String())
+	if storedCdr.CGRID == "" && storedCdr.OriginID != "" && cfgKey != "*header" {
+		storedCdr.CGRID = utils.Sha1(storedCdr.OriginID, storedCdr.SetupTime.UTC().String())
 	}
-	if storedCdr.TOR == utils.DATA && duMultiplyFactor != 0 {
+	if storedCdr.ToR == utils.DATA && duMultiplyFactor != 0 {
 		storedCdr.Usage = time.Duration(float64(storedCdr.Usage.Nanoseconds()) * duMultiplyFactor)
 	}
 	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields

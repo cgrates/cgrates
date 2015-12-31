@@ -1,14 +1,14 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can redistribute it and/or modify
+This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITH*out ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -392,14 +392,15 @@ func (ta *TpAlias) GetId() string {
 	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
 }
 
-type TblCdrsPrimary struct {
-	Id              int64
+type TBLCDRs struct {
+	ID              int64
 	Cgrid           string
+	RunID           string
+	OriginHost      string
+	Source          string
+	OriginID        string
 	Tor             string
-	Accid           string
-	Cdrhost         string
-	Cdrsource       string
-	Reqtype         string
+	RequestType     string
 	Direction       string
 	Tenant          string
 	Category        string
@@ -412,73 +413,30 @@ type TblCdrsPrimary struct {
 	Usage           float64
 	Supplier        string
 	DisconnectCause string
-	CreatedAt       time.Time
-	DeletedAt       time.Time
-}
-
-func (t TblCdrsPrimary) TableName() string {
-	return utils.TBL_CDRS_PRIMARY
-}
-
-type TblCdrsExtra struct {
-	Id          int64
-	Cgrid       string
-	ExtraFields string
-	CreatedAt   time.Time
-	DeletedAt   time.Time
-}
-
-func (t TblCdrsExtra) TableName() string {
-	return utils.TBL_CDRS_EXTRA
-}
-
-type TblCostDetail struct {
-	Id          int64
-	Cgrid       string
-	Runid       string
-	Tor         string
-	Direction   string
-	Tenant      string
-	Category    string
-	Account     string
-	Subject     string
-	Destination string
-	Cost        float64
-	Timespans   string
-	CostSource  string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   time.Time
-}
-
-func (t TblCostDetail) TableName() string {
-	return utils.TBL_COST_DETAILS
-}
-
-type TblRatedCdr struct {
-	Id              int64
-	Cgrid           string
-	Runid           string
-	Reqtype         string
-	Direction       string
-	Tenant          string
-	Category        string
-	Account         string
-	Subject         string
-	Destination     string
-	SetupTime       time.Time
-	Pdd             float64
-	AnswerTime      time.Time
-	Usage           float64
-	Supplier        string
-	DisconnectCause string
+	ExtraFields     string
 	Cost            float64
+	CostDetails     string
+	CostSource      string
 	ExtraInfo       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       time.Time
 }
 
-func (t TblRatedCdr) TableName() string {
-	return utils.TBL_RATED_CDRS
+func (t TBLCDRs) TableName() string {
+	return utils.TBL_CDRS
+}
+
+type TBLSMCosts struct {
+	ID          int64
+	Cgrid       string
+	RunID       string
+	CostSource  string
+	CostDetails string
+	CreatedAt   time.Time
+	DeletedAt   time.Time
+}
+
+func (t TBLSMCosts) TableName() string {
+	return utils.TBLSMCosts
 }

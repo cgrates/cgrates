@@ -633,11 +633,12 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 	ev := new(FSEvent).AsEvent(hangupEv)
 	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
 	aTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
-	eStoredCdr := &engine.StoredCdr{CgrId: "164b0422fdc6a5117031b427439482c6a4f90e41",
-		TOR: utils.VOICE, AccId: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad", CdrHost: "10.0.3.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.META_PREPAID,
+	eStoredCdr := &engine.CDR{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41",
+		ToR: utils.VOICE, OriginID: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad", OriginHost: "10.0.3.15", Source: "FS_CHANNEL_HANGUP_COMPLETE", RequestType: utils.META_PREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
 		Destination: "1003", SetupTime: setupTime, AnswerTime: aTime,
-		Usage: time.Duration(66) * time.Second, Pdd: time.Duration(28) * time.Millisecond, Supplier: "supplier1", DisconnectCause: "NORMAL_CLEARING", ExtraFields: make(map[string]string), Cost: -1}
+		Usage: time.Duration(66) * time.Second, PDD: time.Duration(28) * time.Millisecond, Supplier: "supplier1",
+		DisconnectCause: "NORMAL_CLEARING", ExtraFields: make(map[string]string), Cost: -1}
 	if storedCdr := ev.AsStoredCdr(""); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}

@@ -64,7 +64,7 @@ type CdrStats struct {
 	TOR             []string        // CDRFieldFilter on TORs
 	CdrHost         []string        // CDRFieldFilter on CdrHosts
 	CdrSource       []string        // CDRFieldFilter on CdrSources
-	ReqType         []string        // CDRFieldFilter on ReqTypes
+	ReqType         []string        // CDRFieldFilter on RequestTypes
 	Direction       []string        // CDRFieldFilter on Directions
 	Tenant          []string        // CDRFieldFilter on Tenants
 	Category        []string        // CDRFieldFilter on Categories
@@ -82,7 +82,7 @@ type CdrStats struct {
 	Triggers        ActionTriggers
 }
 
-func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
+func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 	if cdr == nil {
 		return false
 	}
@@ -94,16 +94,16 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 			return false
 		}
 	}
-	if len(cs.TOR) > 0 && !utils.IsSliceMember(cs.TOR, cdr.TOR) {
+	if len(cs.TOR) > 0 && !utils.IsSliceMember(cs.TOR, cdr.ToR) {
 		return false
 	}
-	if len(cs.CdrHost) > 0 && !utils.IsSliceMember(cs.CdrHost, cdr.CdrHost) {
+	if len(cs.CdrHost) > 0 && !utils.IsSliceMember(cs.CdrHost, cdr.OriginHost) {
 		return false
 	}
-	if len(cs.CdrSource) > 0 && !utils.IsSliceMember(cs.CdrSource, cdr.CdrSource) {
+	if len(cs.CdrSource) > 0 && !utils.IsSliceMember(cs.CdrSource, cdr.Source) {
 		return false
 	}
-	if len(cs.ReqType) > 0 && !utils.IsSliceMember(cs.ReqType, cdr.ReqType) {
+	if len(cs.ReqType) > 0 && !utils.IsSliceMember(cs.ReqType, cdr.RequestType) {
 		return false
 	}
 	if len(cs.Direction) > 0 && !utils.IsSliceMember(cs.Direction, cdr.Direction) {
@@ -153,10 +153,10 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 		}
 	}
 	if len(cs.PddInterval) > 0 {
-		if cdr.Pdd < cs.PddInterval[0] {
+		if cdr.PDD < cs.PddInterval[0] {
 			return false
 		}
-		if len(cs.PddInterval) > 1 && cdr.Pdd >= cs.PddInterval[1] {
+		if len(cs.PddInterval) > 1 && cdr.PDD >= cs.PddInterval[1] {
 			return false
 		}
 	}
@@ -166,7 +166,7 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 	if len(cs.DisconnectCause) > 0 && !utils.IsSliceMember(cs.DisconnectCause, cdr.DisconnectCause) {
 		return false
 	}
-	if len(cs.MediationRunIds) > 0 && !utils.IsSliceMember(cs.MediationRunIds, cdr.MediationRunId) {
+	if len(cs.MediationRunIds) > 0 && !utils.IsSliceMember(cs.MediationRunIds, cdr.RunID) {
 		return false
 	}
 	if len(cs.CostInterval) > 0 {
@@ -176,12 +176,6 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 		if len(cs.CostInterval) > 1 && cdr.Cost >= cs.CostInterval[1] {
 			return false
 		}
-	}
-	if len(cs.RatedAccount) > 0 && !utils.IsSliceMember(cs.RatedAccount, cdr.RatedAccount) {
-		return false
-	}
-	if len(cs.RatedSubject) > 0 && !utils.IsSliceMember(cs.RatedSubject, cdr.RatedSubject) {
-		return false
 	}
 	return true
 }

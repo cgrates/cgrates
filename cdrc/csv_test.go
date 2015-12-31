@@ -48,13 +48,13 @@ func TestCsvRecordForkCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
-	expectedCdr := &engine.StoredCdr{
-		CgrId:           utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
-		TOR:             cdrRow[2],
-		AccId:           cdrRow[3],
-		CdrHost:         "0.0.0.0", // Got it over internal interface
-		CdrSource:       "TEST_CDRC",
-		ReqType:         cdrRow[4],
+	expectedCdr := &engine.CDR{
+		CGRID:           utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
+		ToR:             cdrRow[2],
+		OriginID:        cdrRow[3],
+		OriginHost:      "0.0.0.0", // Got it over internal interface
+		Source:          "TEST_CDRC",
+		RequestType:     cdrRow[4],
 		Direction:       cdrRow[5],
 		Tenant:          cdrRow[6],
 		Category:        cdrRow[7],
@@ -88,11 +88,11 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	var sTime time.Time
-	expectedCdr := &engine.StoredCdr{
-		CgrId:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
-		CdrHost:     "0.0.0.0",
-		CdrSource:   "TEST_CDRC",
+	expectedCdr := &engine.CDR{
+		CGRID:       utils.Sha1("", sTime.String()),
+		ToR:         cdrRow[0],
+		OriginHost:  "0.0.0.0",
+		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1) * time.Second,
 		ExtraFields: map[string]string{},
 		Cost:        -1,
@@ -101,11 +101,11 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	csvProcessor.cdrcCfgs["*default"].DataUsageMultiplyFactor = 1024
-	expectedCdr = &engine.StoredCdr{
-		CgrId:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
-		CdrHost:     "0.0.0.0",
-		CdrSource:   "TEST_CDRC",
+	expectedCdr = &engine.CDR{
+		CGRID:       utils.Sha1("", sTime.String()),
+		ToR:         cdrRow[0],
+		OriginHost:  "0.0.0.0",
+		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1024) * time.Second,
 		ExtraFields: map[string]string{},
 		Cost:        -1,
@@ -114,11 +114,11 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	cdrRow = []string{"*voice", "1"}
-	expectedCdr = &engine.StoredCdr{
-		CgrId:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
-		CdrHost:     "0.0.0.0",
-		CdrSource:   "TEST_CDRC",
+	expectedCdr = &engine.CDR{
+		CGRID:       utils.Sha1("", sTime.String()),
+		ToR:         cdrRow[0],
+		OriginHost:  "0.0.0.0",
+		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1) * time.Second,
 		ExtraFields: map[string]string{},
 		Cost:        -1,

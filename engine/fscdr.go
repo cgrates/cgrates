@@ -70,7 +70,7 @@ type FSCdr struct {
 	body   map[string]interface{} // keeps the loaded body for extra field search
 }
 
-func (fsCdr FSCdr) getCgrId(timezone string) string {
+func (fsCdr FSCdr) getCGRID(timezone string) string {
 	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone)
 	return utils.Sha1(fsCdr.vars[FS_UUID], setupTime.UTC().String())
 }
@@ -118,14 +118,14 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 	return
 }
 
-func (fsCdr FSCdr) AsStoredCdr(timezone string) *StoredCdr {
-	storCdr := new(StoredCdr)
-	storCdr.CgrId = fsCdr.getCgrId(timezone)
-	storCdr.TOR = utils.VOICE
-	storCdr.AccId = fsCdr.vars[FS_UUID]
-	storCdr.CdrHost = fsCdr.vars[FS_IP]
-	storCdr.CdrSource = FS_CDR_SOURCE
-	storCdr.ReqType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
+func (fsCdr FSCdr) AsStoredCdr(timezone string) *CDR {
+	storCdr := new(CDR)
+	storCdr.CGRID = fsCdr.getCGRID(timezone)
+	storCdr.ToR = utils.VOICE
+	storCdr.OriginID = fsCdr.vars[FS_UUID]
+	storCdr.OriginHost = fsCdr.vars[FS_IP]
+	storCdr.Source = FS_CDR_SOURCE
+	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
 	storCdr.Direction = utils.OUT
 	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)
 	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_CATEGORY], fsCdr.cgrCfg.DefaultCategory)
@@ -134,8 +134,8 @@ func (fsCdr FSCdr) AsStoredCdr(timezone string) *StoredCdr {
 	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
 	pddStr := utils.FirstNonEmpty(fsCdr.vars[FS_PROGRESS_MEDIAMSEC], fsCdr.vars[FS_PROGRESSMS])
-	pddStr = pddStr + "ms"
-	storCdr.Pdd, _ = time.ParseDuration(pddStr)
+	pddStr += "ms"
+	storCdr.PDD, _ = time.ParseDuration(pddStr)
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME], timezone)
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
 	storCdr.Supplier = fsCdr.vars[utils.CGR_SUPPLIER]

@@ -245,3 +245,87 @@ func TestUnitCountersCountAllVoiceDestinationEvent(t *testing.T) {
 		t.Errorf("Error adding unit counters: %v", len(a.UnitCounters))
 	}
 }
+
+/*
+func TestUnitCountersResetCounterById(t *testing.T) {
+	a := &Account{
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				ID:                "TestTR1",
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.MONETARY,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				ID:                "TestTR11",
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.MONETARY,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				ID:                "TestTR2",
+				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:       utils.VOICE,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				ID:                "TestTR3",
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.VOICE,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				ID:                "TestTR4",
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.SMS,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				ID:                "TestTR5",
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE,
+				BalanceType:       utils.SMS,
+				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
+				BalanceWeight:     10,
+			},
+		},
+	}
+	a.InitCounters()
+	a.UnitCounters.addUnits(10, utils.MONETARY, &CallCost{}, nil)
+
+	if len(a.UnitCounters) != 4 ||
+		len(a.UnitCounters[0].Balances) != 2 ||
+		a.UnitCounters[0].Balances[0].Value != 10 ||
+		a.UnitCounters[0].Balances[1].Value != 10 {
+		for _, uc := range a.UnitCounters {
+			t.Logf("UC: %+v", uc)
+			for _, b := range uc.Balances {
+				t.Logf("B: %+v", b)
+			}
+		}
+		t.Errorf("Error Initializing adding unit counters: %v", len(a.UnitCounters))
+	}
+	a.UnitCounters.resetCounters(&Action{
+		BalanceType: utils.MONETARY,
+		Balance: &Balance{
+			Id: "TestTR11",
+		},
+	})
+	if len(a.UnitCounters) != 4 ||
+		len(a.UnitCounters[0].Balances) != 2 ||
+		a.UnitCounters[0].Balances[0].Value != 10 ||
+		a.UnitCounters[0].Balances[1].Value != 0 {
+		for _, uc := range a.UnitCounters {
+			t.Logf("UC: %+v", uc)
+			for _, b := range uc.Balances {
+				t.Logf("B: %+v", b)
+			}
+		}
+		t.Errorf("Error Initializing adding unit counters: %v", len(a.UnitCounters))
+	}
+}
+*/

@@ -44,9 +44,9 @@ func TestCdreCfgClone(t *testing.T) {
 		CostMultiplyFactor:      1.0,
 		CostRoundingDecimals:    -1,
 		CostShiftDigits:         0,
-		MaskDestId:              "MASKED_DESTINATIONS",
+		MaskDestinationID:       "MASKED_DESTINATIONS",
 		MaskLength:              0,
-		ExportDir:               "/var/log/cgrates/cdre",
+		ExportFolder:            "/var/log/cgrates/cdre",
 		ContentFields:           initContentFlds,
 	}
 	eClnContentFlds := []*CfgCdrField{
@@ -66,9 +66,9 @@ func TestCdreCfgClone(t *testing.T) {
 		CostMultiplyFactor:      1.0,
 		CostRoundingDecimals:    -1,
 		CostShiftDigits:         0,
-		MaskDestId:              "MASKED_DESTINATIONS",
+		MaskDestinationID:       "MASKED_DESTINATIONS",
 		MaskLength:              0,
-		ExportDir:               "/var/log/cgrates/cdre",
+		ExportFolder:            "/var/log/cgrates/cdre",
 		HeaderFields:            emptyFields,
 		ContentFields:           eClnContentFlds,
 		TrailerFields:           emptyFields,

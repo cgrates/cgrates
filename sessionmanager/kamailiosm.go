@@ -205,13 +205,13 @@ func (self *KamailioSessionManager) Rater() rpcclient.RpcClientConnection {
 	return self.rater
 }
 
-func (self *KamailioSessionManager) ProcessCdr(cdr *engine.StoredCdr) error {
+func (self *KamailioSessionManager) ProcessCdr(cdr *engine.CDR) error {
 	if !self.cfg.CreateCdr {
 		return nil
 	}
 	var reply string
 	if err := self.cdrsrv.Call("CdrServer.ProcessCdr", cdr, &reply); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", cdr.CgrId, cdr.AccId, err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", cdr.CGRID, cdr.OriginID, err.Error()))
 	}
 	return nil
 }
