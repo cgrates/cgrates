@@ -174,20 +174,21 @@ type CGRConfig struct {
 	TpDbUser             string // The user to sign in as.
 	TpDbPass             string // The user's password.
 	DataDbType           string
-	DataDbHost           string        // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDbPort           string        // The port to bind to.
-	DataDbName           string        // The name of the database to connect to.
-	DataDbUser           string        // The user to sign in as.
-	DataDbPass           string        // The user's password.
-	LoadHistorySize      int           // Maximum number of records to archive in load history
-	StorDBType           string        // Should reflect the database type used to store logs
-	StorDBHost           string        // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort           string        // Th e port to bind to.
-	StorDBName           string        // The name of the database to connect to.
-	StorDBUser           string        // The user to sign in as.
-	StorDBPass           string        // The user's password.
-	StorDBMaxOpenConns   int           // Maximum database connections opened
-	StorDBMaxIdleConns   int           // Maximum idle connections to keep opened
+	DataDbHost           string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDbPort           string // The port to bind to.
+	DataDbName           string // The name of the database to connect to.
+	DataDbUser           string // The user to sign in as.
+	DataDbPass           string // The user's password.
+	LoadHistorySize      int    // Maximum number of records to archive in load history
+	StorDBType           string // Should reflect the database type used to store logs
+	StorDBHost           string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort           string // Th e port to bind to.
+	StorDBName           string // The name of the database to connect to.
+	StorDBUser           string // The user to sign in as.
+	StorDBPass           string // The user's password.
+	StorDBMaxOpenConns   int    // Maximum database connections opened
+	StorDBMaxIdleConns   int    // Maximum idle connections to keep opened
+	StorDBCDRSIndexes    []string
 	DBDataEncoding       string        // The encoding used to store object data in strings: <msgpack|json>
 	RPCJSONListen        string        // RPC JSON listening address
 	RPCGOBListen         string        // RPC GOB listening address
@@ -576,6 +577,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnStorDbCfg.Max_idle_conns != nil {
 			self.StorDBMaxIdleConns = *jsnStorDbCfg.Max_idle_conns
+		}
+		if jsnStorDbCfg.Cdrs_indexes != nil {
+			self.StorDBCDRSIndexes = *jsnStorDbCfg.Cdrs_indexes
 		}
 	}
 

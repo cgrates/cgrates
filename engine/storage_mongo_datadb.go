@@ -87,7 +87,7 @@ type MongoStorage struct {
 	ms      Marshaler
 }
 
-func NewMongoStorage(host, port, db, user, pass string) (*MongoStorage, error) {
+func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*MongoStorage, error) {
 	address := fmt.Sprintf("%s:%s", host, port)
 	if user != "" && pass != "" {
 		address = fmt.Sprintf("%s:%s@%s", user, pass, address)
@@ -222,13 +222,21 @@ func NewMongoStorage(host, port, db, user, pass string) (*MongoStorage, error) {
 		Background: false,
 		Sparse:     false,
 	}
-	collections = []string{utils.TBL_CDRS}
-	for _, col := range collections {
-		if err = ndb.C(col).EnsureIndex(index); err != nil {
+	if err = ndb.C(utils.TBL_CDRS).EnsureIndex(index); err != nil {
+		return nil, err
+	}
+	for _, idxKey := range cdrsIndexes {
+		index = mgo.Index{
+			Key:        []string{idxKey},
+			Unique:     false,
+			DropDups:   false,
+			Background: false,
+			Sparse:     false,
+		}
+		if err = ndb.C(utils.TBL_CDRS).EnsureIndex(index); err != nil {
 			return nil, err
 		}
 	}
-
 	return &MongoStorage{db: ndb, session: session, ms: NewCodecMsgpackMarshaler()}, err
 }
 

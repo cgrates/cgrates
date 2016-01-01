@@ -95,7 +95,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		return err
 	}
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}
@@ -205,7 +205,7 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		return err
 	}
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}
@@ -238,7 +238,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return err
 	}
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}

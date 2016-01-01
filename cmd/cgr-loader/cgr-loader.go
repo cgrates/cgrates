@@ -157,10 +157,10 @@ func main() {
 				*tpdb_user, *tpdb_pass, *dbdata_encoding)
 			accountDb, errAccDb = engine.ConfigureAccountingStorage(*datadb_type, *datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass, *dbdata_encoding)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
-				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns)
+				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		} else if *toStorDb { // Import from csv files to storDb
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding,
-				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns)
+				cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns, cgrConfig.StorDBCDRSIndexes)
 		} else { // Default load from csv files to dataDb
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*tpdb_type, *tpdb_host, *tpdb_port, *tpdb_name,
 				*tpdb_user, *tpdb_pass, *dbdata_encoding)
