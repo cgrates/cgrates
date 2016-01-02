@@ -691,9 +691,10 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	return nil
 }
 
-func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error) {
+// GetCDRs has ability to remove the selected CDRs, count them or simply return them
+// qryFltr.Unscoped will ignore soft deletes or delete records permanently
+func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var cdrs []*CDR
-
 	q := self.db.Table(utils.TBL_CDRS).Select("*")
 	if qryFltr.Unscoped {
 		q = q.Unscoped()
@@ -917,7 +918,13 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	if qryFltr.Paginator.Offset != nil {
 		q = q.Offset(*qryFltr.Paginator.Offset)
 	}
-	if qryFltr.Count {
+	if remove { // Remove CDRs instead of querying them
+		if err := q.Delete(nil).Error; err != nil {
+			q.Rollback()
+			return nil, 0, err
+		}
+	}
+	if qryFltr.Count { // Count CDRs
 		var cnt int64
 		if err := q.Count(&cnt).Error; err != nil {
 			//if err := q.Debug().Count(&cnt).Error; err != nil {
@@ -925,7 +932,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		}
 		return nil, cnt, nil
 	}
-
 	// Execute query
 	results := make([]*TBLCDRs, 0)
 	q.Find(&results)

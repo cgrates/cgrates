@@ -47,7 +47,7 @@ func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.External
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr); err != nil {
+	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr, false); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(cdrs) == 0 {
 		*reply = make([]*engine.ExternalCDR, 0)

@@ -99,7 +99,7 @@ type CdrStorage interface {
 	SetCDR(*CDR, bool) error
 	LogCallCost(cgrid, runid, source string, cc *CallCost) error
 	GetCallCostLog(cgrid, runid string) (*CallCost, error)
-	GetCDRs(*utils.CDRsFilter) ([]*CDR, int64, error)
+	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 	RemCDRs([]string) error
 }
 
