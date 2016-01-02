@@ -981,29 +981,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	return cdrs, 0, nil
 }
 
-// Remove CDR data out of all CDR tables based on their cgrid
-func (self *SQLStorage) RemCDRs(cgrIds []string) error {
-	if len(cgrIds) == 0 {
-		return nil
-	}
-	tx := self.db.Begin()
-
-	txI := tx.Table(utils.TBL_CDRS)
-	for idx, cgrId := range cgrIds {
-		if idx == 0 {
-			txI = txI.Where("cgrid = ?", cgrId)
-		} else {
-			txI = txI.Or("cgrid = ?", cgrId)
-		}
-	}
-	if err := txI.Update("deleted_at", time.Now()).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
-}
-
 func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, error) {
 	var tpDests []TpDestination
 	q := self.db.Where("tpid = ?", tpid)

@@ -199,18 +199,6 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	return nil
 }
 
-// Remove Cdrs out of CDR storage
-func (self *ApierV1) RemCdrs(attrs utils.AttrRemCdrs, reply *string) error {
-	if len(attrs.CgrIds) == 0 {
-		return fmt.Errorf("%s:CgrIds", utils.ErrMandatoryIeMissing.Error())
-	}
-	if err := self.CdrDb.RemCDRs(attrs.CgrIds); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = "OK"
-	return nil
-}
-
 // Reloads CDRE configuration out of folder specified
 func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) error {
 	if attrs.ConfigDir == "" {

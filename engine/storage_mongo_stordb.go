@@ -722,15 +722,6 @@ func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
 	return err
 }
 
-// Remove CDR data out of all CDR tables based on their cgrid
-func (ms *MongoStorage) RemCDRs(cgrIds []string) error {
-	if len(cgrIds) == 0 {
-		return nil
-	}
-	_, err := ms.db.C(utils.TBL_CDRS).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
-	return err
-}
-
 func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	for k, v := range filters {
 		switch value := v.(type) {
@@ -763,6 +754,7 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 	}
 }
 
+//  _, err := ms.db.C(utils.TBL_CDRS).UpdateAll(bson.M{CGRIDLow: bson.M{"$in": cgrIds}}, bson.M{"$set": bson.M{"deleted_at": time.Now()}})
 func (ms *MongoStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var minPDD, maxPDD, minUsage, maxUsage *time.Duration
 	if len(qryFltr.MinPDD) != 0 {
