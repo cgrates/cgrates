@@ -1212,7 +1212,7 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 	acnt := &Account{Id: "cgrates.org:dan2904"}
 	cdrlog := &Action{
 		ActionType:      CDRLOG,
-		ExtraParameters: `{"Subject":"^rif","Destination":"^1234","ToR":"~action_tag:s/^at(.)$/0$1/","AccountId":"~account_id:s/^\\*(.*)$/$1/"}`,
+		ExtraParameters: `{"Subject":"^rif","Destination":"^1234","ToR":"~ActionTag:s/^at(.)$/0$1/","AccountID":"~AccountID:s/^\\*(.*)$/$1/"}`,
 	}
 	err := cdrLogAction(acnt, nil, cdrlog, Actions{
 		&Action{
@@ -1230,14 +1230,14 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 	cdrs := make([]*CDR, 0)
 	json.Unmarshal([]byte(cdrlog.ExpirationString), &cdrs)
 	expectedExtraFields := map[string]string{
-		"AccountId": "cgrates.org:dan2904",
+		"AccountID": "cgrates.org:dan2904",
 	}
 	if len(cdrs) != 2 ||
 		cdrs[0].Subject != "rif" {
 		t.Errorf("Wrong cdrlogs: %+v", cdrs[0])
 	}
 	if !reflect.DeepEqual(cdrs[0].ExtraFields, expectedExtraFields) {
-		t.Errorf("Received extra_fields: %+v %+v", cdrs[0].ExtraFields, expectedExtraFields)
+		t.Errorf("Expecting extra fields: %+v, received: %+v", expectedExtraFields, cdrs[0].ExtraFields)
 	}
 }
 

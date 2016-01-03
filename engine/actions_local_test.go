@@ -82,7 +82,7 @@ func TestActionsLocalRpcConn(t *testing.T) {
 	}
 }
 
-func TestActionsLocalSetCdrlogActions(t *testing.T) {
+func TestActionsLocalSetCdrlogDebit(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -109,7 +109,7 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
 	}
 	var rcvedCdrs []*ExternalCDR
-	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG}}, &rcvedCdrs); err != nil {
+	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG}, Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(rcvedCdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
@@ -121,11 +121,55 @@ func TestActionsLocalSetCdrlogActions(t *testing.T) {
 		rcvedCdrs[0].Account != "dan2904" ||
 		rcvedCdrs[0].Subject != "dan2904" ||
 		rcvedCdrs[0].Usage != "1" ||
-		rcvedCdrs[0].RunID != utils.META_DEFAULT ||
+		rcvedCdrs[0].RunID != DEBIT ||
 		rcvedCdrs[0].Cost != attrsAA.Actions[0].Units {
 		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}
+}
 
+func TestActionsLocalSetCdrlogTopup(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply string
+	attrsSetAccount := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan2905"}
+	if err := actsLclRpc.Call("ApierV1.SetAccount", attrsSetAccount, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+	}
+	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_2", Actions: []*utils.TPAction{
+		&utils.TPAction{Identifier: TOPUP, BalanceType: utils.MONETARY, Units: 5.0, ExpiryTime: UNLIMITED, Weight: 20.0},
+		&utils.TPAction{Identifier: CDRLOG},
+	}}
+	if err := actsLclRpc.Call("ApierV1.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
+		t.Error("Got error on ApierV1.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.SetActions received: %s", reply)
+	}
+	attrsEA := &utils.AttrExecuteAction{Tenant: attrsSetAccount.Tenant, Account: attrsSetAccount.Account, ActionsId: attrsAA.ActionsId}
+	if err := actsLclRpc.Call("ApierV1.ExecuteAction", attrsEA, &reply); err != nil {
+		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+	}
+	var rcvedCdrs []*ExternalCDR
+	if err := actsLclRpc.Call("ApierV2.GetCdrs", utils.RPCCDRsFilter{Sources: []string{CDRLOG}, Accounts: []string{attrsSetAccount.Account}}, &rcvedCdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(rcvedCdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(rcvedCdrs))
+	} else if rcvedCdrs[0].ToR != utils.MONETARY ||
+		rcvedCdrs[0].OriginHost != "127.0.0.1" ||
+		rcvedCdrs[0].Source != CDRLOG ||
+		rcvedCdrs[0].RequestType != utils.META_PREPAID ||
+		rcvedCdrs[0].Tenant != "cgrates.org" ||
+		rcvedCdrs[0].Account != "dan2905" ||
+		rcvedCdrs[0].Subject != "dan2905" ||
+		rcvedCdrs[0].Usage != "1" ||
+		rcvedCdrs[0].RunID != TOPUP ||
+		rcvedCdrs[0].Cost != attrsAA.Actions[0].Units {
+		t.Errorf("Received: %+v", rcvedCdrs[0])
+	}
 }
 
 func TestActionsLocalStopCgrEngine(t *testing.T) {
