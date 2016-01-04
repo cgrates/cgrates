@@ -189,6 +189,7 @@ type SmFsJsonCfg struct {
 	Empty_balance_ann_file *string
 	Subscribe_park         *bool
 	Channel_sync_interval  *string
+	Max_wait_connection    *string
 	Connections            *[]*FsConnJsonCfg
 }
 

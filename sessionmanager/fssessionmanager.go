@@ -242,7 +242,7 @@ func (sm *FSSessionManager) Connect() error {
 				errChan <- err
 			}
 		}()
-		if fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Server, connCfg.Password, 1,
+		if fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Server, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
 			make(map[string][]func(string, string)), make(map[string]string), utils.Logger.(*syslog.Writer), connId); err != nil {
 			return fmt.Errorf("Cannot connect FreeSWITCH senders pool, error: %s", err.Error())
 		} else if fsSenderPool == nil {
@@ -354,6 +354,7 @@ application_data:+10800 alloted_timeout uuid:3427e500-10e5-4864-a589-e306b70419a
 */
 func (sm *FSSessionManager) SyncSessions() error {
 	for connId, senderPool := range sm.senderPools {
+		utils.Logger.Debug(fmt.Sprintf("### connID: %s, senderPool: %+v", connId, senderPool))
 		fsConn, err := senderPool.PopFSock()
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on syncing active calls, senderPool: %+v, error: %s", senderPool, err.Error()))

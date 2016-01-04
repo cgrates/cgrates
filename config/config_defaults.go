@@ -225,6 +225,7 @@ const CGRATES_CFG_JSON = `
 	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
 	"subscribe_park": true,			// subscribe via fsock to receive park events
 	"channel_sync_interval": "5m",	// sync channels with freeswitch regularly
+	"max_wait_connection": "2s",	// maximum duration to wait for a connection to be retrieved from the pool
 	"connections":[					// instantiate connections to multiple FreeSWITCH servers
 		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
 	],
