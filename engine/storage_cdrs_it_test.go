@@ -95,7 +95,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 		return err
 	}
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	if err := cdrStorage.SetCDR(rawCDR, false); err != nil {
 		return fmt.Errorf("rawCDR: %+v, SetCDR err: %s", rawCDR, err.Error())
 	}
-	if cdrs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{rawCDR.CGRID}, RunIDs: []string{utils.MetaRaw}}); err != nil {
+	if cdrs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{rawCDR.CGRID}, RunIDs: []string{utils.MetaRaw}}, false); err != nil {
 		return fmt.Errorf("rawCDR: %+v, GetCDRs err: %s", rawCDR, err.Error())
 	} else if len(cdrs) != 1 {
 		return fmt.Errorf("rawCDR %+v, Unexpected number of CDRs returned: %d", rawCDR, len(cdrs))
@@ -158,7 +158,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	if err := cdrStorage.SetCDR(ratedCDR, false); err != nil {
 		return fmt.Errorf("ratedCDR: %+v, SetCDR err: %s", ratedCDR, err.Error())
 	}
-	if cdrs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{ratedCDR.CGRID}, RunIDs: []string{ratedCDR.RunID}}); err != nil {
+	if cdrs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{ratedCDR.CGRID}, RunIDs: []string{ratedCDR.RunID}}, false); err != nil {
 		return fmt.Errorf("ratedCDR: %+v, GetCDRs err: %s", ratedCDR, err.Error())
 	} else if len(cdrs) != 1 {
 		return fmt.Errorf("ratedCDR %+v, Unexpected number of CDRs returned: %d", ratedCDR, len(cdrs))
@@ -182,7 +182,7 @@ func testSetCDR(cfg *config.CGRConfig) error {
 	if err := cdrStorage.SetCDR(ratedCDR, true); err != nil {
 		return fmt.Errorf("Rerating ratedCDR: %+v, SetCDR err: %s", ratedCDR, err.Error())
 	}
-	if cdrs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{ratedCDR.CGRID}, RunIDs: []string{ratedCDR.RunID}}); err != nil {
+	if cdrs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{ratedCDR.CGRID}, RunIDs: []string{ratedCDR.RunID}}, false); err != nil {
 		return fmt.Errorf("Rerating ratedCDR: %+v, GetCDRs err: %s", ratedCDR, err.Error())
 	} else if len(cdrs) != 1 {
 		return fmt.Errorf("Rerating ratedCDR %+v, Unexpected number of CDRs returned: %d", ratedCDR, len(cdrs))
@@ -205,7 +205,7 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		return err
 	}
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}
@@ -238,12 +238,12 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return err
 	}
 	cdrStorage, err := ConfigureCdrStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}
 	// All CDRs, no filter
-	if CDRs, _, err := cdrStorage.GetCDRs(new(utils.CDRsFilter)); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(new(utils.CDRsFilter), false); err != nil {
 		return err
 	} else if len(CDRs) != 0 {
 		return fmt.Errorf("Unexpected number of CDRs returned: ", CDRs)
@@ -498,13 +498,13 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		}
 	}
 	// All CDRs, no filter
-	if CDRs, _, err := cdrStorage.GetCDRs(new(utils.CDRsFilter)); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(new(utils.CDRsFilter), false); err != nil {
 		return err
 	} else if len(CDRs) != 10 {
 		return fmt.Errorf("GetCDRs, unexpected number of CDRs returned: %d", len(CDRs))
 	}
 	// Count ALL
-	if CDRs, count, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Count: true}); err != nil {
+	if CDRs, count, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Count: true}, false); err != nil {
 		return err
 	} else if len(CDRs) != 0 {
 		return fmt.Errorf("CountCDRs, unexpected number of CDRs returned: %+v", CDRs)
@@ -512,19 +512,19 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		return fmt.Errorf("CountCDRs, unexpected count of CDRs returned: %+v", count)
 	}
 	// Limit 5
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Limit 5, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Offset 5
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(5), Offset: utils.IntPointer(0)}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Offset 5, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Offset with limit 2
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(2), Offset: utils.IntPointer(5)}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Paginator: utils.Paginator{Limit: utils.IntPointer(2), Offset: utils.IntPointer(5)}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("Offset with limit 2, unexpected number of CDRs returned: %+v", CDRs)
@@ -533,7 +533,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{
 		utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
 		utils.Sha1("testevent3", time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC).String()),
-	}}); err != nil {
+	}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Filter on CGRIDs, unexpected number of CDRs returned: %+v", CDRs)
@@ -542,7 +542,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if _, count, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{
 		utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
 		utils.Sha1("testevent3", time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC).String()),
-	}, Count: true}); err != nil {
+	}, Count: true}, false); err != nil {
 		return err
 	} else if count != 5 {
 		return fmt.Errorf("Count on CGRIDs, unexpected count of CDRs returned: %d", count)
@@ -551,7 +551,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{
 		utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
 		utils.Sha1("testevent3", time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC).String()),
-	}, RequestTypes: []string{utils.META_PREPAID}}); err != nil {
+	}, RequestTypes: []string{utils.META_PREPAID}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("Filter on cgrids plus reqType, unexpected number of CDRs returned: %+v", CDRs)
@@ -560,147 +560,147 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	if _, count, err := cdrStorage.GetCDRs(&utils.CDRsFilter{CGRIDs: []string{
 		utils.Sha1("testevent1", time.Date(2015, 12, 12, 14, 52, 0, 0, time.UTC).String()),
 		utils.Sha1("testevent3", time.Date(2015, 12, 28, 12, 58, 0, 0, time.UTC).String()),
-	}, RequestTypes: []string{utils.META_PREPAID}, Count: true}); err != nil {
+	}, RequestTypes: []string{utils.META_PREPAID}, Count: true}, false); err != nil {
 		return err
 	} else if count != 2 {
 		return fmt.Errorf("Count on multiple filter, unexpected count of CDRs returned: %d", count)
 	}
 	// Filter on RunID
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RunIDs: []string{utils.DEFAULT_RUNID}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RunIDs: []string{utils.DEFAULT_RUNID}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Filter on RunID, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on TOR
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("Filter on TOR, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on multiple TOR
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS, utils.VOICE}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{ToRs: []string{utils.SMS, utils.VOICE}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 10 {
 		return fmt.Errorf("Filter on multiple TOR, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on OriginHost
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OriginHosts: []string{"127.0.0.1"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OriginHosts: []string{"127.0.0.1"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Filter on OriginHost, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on multiple OriginHost
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OriginHosts: []string{"127.0.0.1", "192.168.1.12"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OriginHosts: []string{"127.0.0.1", "192.168.1.12"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 6 {
 		return fmt.Errorf("Filter on OriginHosts, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on Source
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Sources: []string{"testGetCDRs"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Sources: []string{"testGetCDRs"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 6 {
 		return fmt.Errorf("Filter on Source, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on multiple Sources
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Sources: []string{"testGetCDRs", "testGetCDRs5"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Sources: []string{"testGetCDRs", "testGetCDRs5"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 8 {
 		return fmt.Errorf("Filter on Sources, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on reqType
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_PREPAID}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_PREPAID}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 4 {
 		return fmt.Errorf("Filter on RequestType, unexpected number of CDRs returned: %+v", len(CDRs))
 	}
 	// Filter on multiple reqType
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_PREPAID, utils.META_PSEUDOPREPAID}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 6 {
 		return fmt.Errorf("Filter on RequestTypes, unexpected number of CDRs returned: %+v", CDRs)
 	}
 
 	// Filter on direction
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Directions: []string{utils.OUT}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Directions: []string{utils.OUT}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 10 {
 		return fmt.Errorf("Filter on Direction, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on Tenant
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Tenants: []string{"itsyscom.com"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Tenants: []string{"itsyscom.com"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 3 {
 		return fmt.Errorf("Filter on Tenant, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on multiple tenants
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Tenants: []string{"itsyscom.com", "cgrates.org"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Tenants: []string{"itsyscom.com", "cgrates.org"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 10 {
 		return fmt.Errorf("Filter on Tenants, Unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on Category
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Categories: []string{"call"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Categories: []string{"call"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 7 {
 		return fmt.Errorf("Filter on Category, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on multiple categories
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Categories: []string{"sms", "call_derived"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Categories: []string{"sms", "call_derived"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 3 {
 		return fmt.Errorf("Filter on Categories, unexpected number of CDRs returned:  %+v", CDRs)
 	}
 	// Filter on account
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Accounts: []string{"1002"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Accounts: []string{"1002"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("Filter on Account, unexpected number of CDRs returned:  %+v", CDRs)
 	}
 	// Filter on multiple account
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Accounts: []string{"1001", "1002"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Accounts: []string{"1001", "1002"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 7 {
 		return fmt.Errorf("Filter on Accounts, unexpected number of CDRs returned:  %+v", CDRs)
 	}
 	// Filter on subject
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Subjects: []string{"1004"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Subjects: []string{"1004"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 1 {
 		return fmt.Errorf("Filter on Subject, unexpected number of CDRs returned:  %+v", CDRs)
 	}
 	// Filter on multiple subject
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Subjects: []string{"1002", "1003"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{Subjects: []string{"1002", "1003"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Filter on Subjects, unexpected number of CDRs returned:  %+v", CDRs)
 	}
 	// Filter on destPrefix
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{DestinationPrefixes: []string{"10"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{DestinationPrefixes: []string{"10"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 10 {
 		return fmt.Errorf("Filter on DestinationPrefix, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on multiple destPrefixes
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{DestinationPrefixes: []string{"1002", "1003"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{DestinationPrefixes: []string{"1002", "1003"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 7 {
 		return fmt.Errorf("Filter on DestinationPrefix, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on not destPrefix
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{NotDestinationPrefixes: []string{"10"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{NotDestinationPrefixes: []string{"10"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 0 {
 		return fmt.Errorf("Filter on NotDestinationPrefix, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on not destPrefixes
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{NotDestinationPrefixes: []string{"1001", "1002"}}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{NotDestinationPrefixes: []string{"1001", "1002"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Filter on NotDestinationPrefix, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on hasPrefix and not HasPrefix
 	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{DestinationPrefixes: []string{"1002", "1003"},
-		NotDestinationPrefixes: []string{"1002"}}); err != nil {
+		NotDestinationPrefixes: []string{"1002"}}, false); err != nil {
 		return err
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("Filter on DestinationPrefix and NotDestinationPrefix, unexpected number of CDRs returned: %+v", CDRs)
@@ -708,7 +708,7 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 
 	// Filter on MaxCost
 	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxCost: utils.Float64Pointer(0.0)}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxCost: utils.Float64Pointer(0.0)}, false); err != nil {
 		return err
 	} else if len(CDRs) != 5 {
 		return fmt.Errorf("Filter on MaxCost, unexpected number of CDRs returned: ", CDRs)
@@ -726,13 +726,13 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 		}
 	}
 	// Filter on orderIdStart
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderIDStart: &orderIdStart}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderIDStart: &orderIdStart}, false); err != nil {
 		return err
 	} else if len(CDRs) != 10 {
 		return fmt.Errorf("Filter on OrderIDStart, unexpected number of CDRs returned: %d", len(CDRs))
 	}
 	// Filter on orderIdStart and orderIdEnd
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderIDStart: &orderIdStart, OrderIDEnd: &orderIdEnd}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{OrderIDStart: &orderIdStart, OrderIDEnd: &orderIdEnd}, false); err != nil {
 		return err
 	} else if len(CDRs) != 8 {
 		return fmt.Errorf("Filter on OrderIDStart OrderIDEnd, unexpected number of CDRs returned: %d", len(CDRs))
@@ -740,41 +740,51 @@ func testGetCDRs(cfg *config.CGRConfig) error {
 	var timeStart, timeEnd time.Time
 	// Filter on timeStart
 	timeStart = time.Date(2015, 12, 28, 0, 0, 0, 0, time.UTC)
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{AnswerTimeStart: &timeStart}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{AnswerTimeStart: &timeStart}, false); err != nil {
 		return err
 	} else if len(CDRs) != 3 {
 		return fmt.Errorf("Filter on AnswerTimeStart, unexpected number of CDRs returned: %d", len(CDRs))
 	}
 	// Filter on timeStart and timeEnd
 	timeEnd = time.Date(2015, 12, 29, 0, 0, 0, 0, time.UTC)
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}, false); err != nil {
 		return err
 	} else if len(CDRs) != 2 {
 		return fmt.Errorf("Filter on AnswerTimeStart AnswerTimeEnd, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on MinPDD
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinPDD: "20ms"}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinPDD: "20ms"}, false); err != nil {
 		return err
 	} else if len(CDRs) != 7 {
 		return fmt.Errorf("Filter on MinPDD, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on maxPdd
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxPDD: "1s"}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MaxPDD: "1s"}, false); err != nil {
 		return err
 	} else if len(CDRs) != 8 {
 		return fmt.Errorf("Filter on MaxPDD, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Filter on minPdd, maxPdd
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinPDD: "10ms", MaxPDD: "1s"}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{MinPDD: "10ms", MaxPDD: "1s"}, false); err != nil {
 		return err
 	} else if len(CDRs) != 6 {
 		return fmt.Errorf("Filter on MinPDD MaxPDD, unexpected number of CDRs returned: %+v", CDRs)
 	}
 	// Combined filter
-	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}); err != nil {
+	if CDRs, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}, false); err != nil {
 		return err
 	} else if len(CDRs) != 1 {
 		return fmt.Errorf("Filter on RequestTypes AnswerTimeStart AnswerTimeEnd, unexpected number of CDRs returned: %+v", CDRs)
+	}
+	// Remove CDRs
+	if _, _, err := cdrStorage.GetCDRs(&utils.CDRsFilter{RequestTypes: []string{utils.META_RATED}, AnswerTimeStart: &timeStart, AnswerTimeEnd: &timeEnd}, true); err != nil {
+		return err
+	}
+	// All CDRs, no filter
+	if cdrs, _, err := cdrStorage.GetCDRs(new(utils.CDRsFilter), false); err != nil {
+		return err
+	} else if len(cdrs) != 9 {
+		return fmt.Errorf("GetCDRs, unexpected number of CDRs returned after remove: %d", len(cdrs))
 	}
 	return nil
 }

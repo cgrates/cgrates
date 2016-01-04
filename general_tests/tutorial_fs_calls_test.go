@@ -24,7 +24,6 @@ import (
 	"os"
 	"path"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -168,8 +167,8 @@ func TestTutFsCallsAccountsBefore(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetBalance received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005"}
-	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err == nil || !strings.HasSuffix(err.Error(), "does not exist") {
-		t.Error("Got error on ApierV2.GetAccount: %v", err)
+	if err := tutFsCallsRpc.Call("ApierV2.GetAccount", attrs, &reply); err == nil || err.Error() != engine.ErrRedisNotFound.Error() {
+		t.Errorf("Got error on ApierV2.GetAccount: %v", err)
 	}
 }
 

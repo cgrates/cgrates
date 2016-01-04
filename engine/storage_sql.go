@@ -691,9 +691,10 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 	return nil
 }
 
-func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error) {
+// GetCDRs has ability to remove the selected CDRs, count them or simply return them
+// qryFltr.Unscoped will ignore soft deletes or delete records permanently
+func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR, int64, error) {
 	var cdrs []*CDR
-
 	q := self.db.Table(utils.TBL_CDRS).Select("*")
 	if qryFltr.Unscoped {
 		q = q.Unscoped()
@@ -917,7 +918,13 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 	if qryFltr.Paginator.Offset != nil {
 		q = q.Offset(*qryFltr.Paginator.Offset)
 	}
-	if qryFltr.Count {
+	if remove { // Remove CDRs instead of querying them
+		if err := q.Delete(nil).Error; err != nil {
+			q.Rollback()
+			return nil, 0, err
+		}
+	}
+	if qryFltr.Count { // Count CDRs
 		var cnt int64
 		if err := q.Count(&cnt).Error; err != nil {
 			//if err := q.Debug().Count(&cnt).Error; err != nil {
@@ -925,7 +932,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		}
 		return nil, cnt, nil
 	}
-
 	// Execute query
 	results := make([]*TBLCDRs, 0)
 	q.Find(&results)
@@ -973,29 +979,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter) ([]*CDR, int64, error
 		cdrs = append(cdrs, storCdr)
 	}
 	return cdrs, 0, nil
-}
-
-// Remove CDR data out of all CDR tables based on their cgrid
-func (self *SQLStorage) RemCDRs(cgrIds []string) error {
-	if len(cgrIds) == 0 {
-		return nil
-	}
-	tx := self.db.Begin()
-
-	txI := tx.Table(utils.TBL_CDRS)
-	for idx, cgrId := range cgrIds {
-		if idx == 0 {
-			txI = txI.Where("cgrid = ?", cgrId)
-		} else {
-			txI = txI.Or("cgrid = ?", cgrId)
-		}
-	}
-	if err := txI.Update("deleted_at", time.Now()).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-	tx.Commit()
-	return nil
 }
 
 func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]TpDestination, error) {

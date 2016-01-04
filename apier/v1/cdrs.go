@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"fmt"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -47,7 +49,7 @@ func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.External
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr); err != nil {
+	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr, false); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(cdrs) == 0 {
 		*reply = make([]*engine.ExternalCDR, 0)
@@ -56,5 +58,30 @@ func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*engine.External
 			*reply = append(*reply, cdr.AsExternalCDR())
 		}
 	}
+	return nil
+}
+
+// Remove Cdrs out of CDR storage
+func (apier *ApierV1) RemCdrs(attrs utils.AttrRemCdrs, reply *string) error {
+	if len(attrs.CgrIds) == 0 {
+		return fmt.Errorf("%s:CgrIds", utils.ErrMandatoryIeMissing.Error())
+	}
+	if _, _, err := apier.CdrDb.GetCDRs(&utils.CDRsFilter{CGRIDs: attrs.CgrIds}, true); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = "OK"
+	return nil
+}
+
+// New way of removing CDRs
+func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error {
+	cdrsFilter, err := attrs.AsCDRsFilter(apier.Config.DefaultTimezone)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if _, _, err := apier.CdrDb.GetCDRs(cdrsFilter, true); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = "OK"
 	return nil
 }

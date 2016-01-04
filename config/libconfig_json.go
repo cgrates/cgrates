@@ -54,6 +54,7 @@ type DbJsonCfg struct {
 	Max_open_conns    *int // Used only in case of storDb
 	Max_idle_conns    *int
 	Load_history_size *int // Used in case of dataDb to limit the length of the loads history
+	Cdrs_indexes      *[]string
 }
 
 // Balancer config section

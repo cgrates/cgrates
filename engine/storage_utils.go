@@ -42,7 +42,7 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler str
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass)
+		d, err = NewMongoStorage(host, port, name, user, pass, nil)
 		db = d.(RatingStorage)
 	default:
 		err = errors.New("unknown db")
@@ -68,7 +68,7 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler, utils.REDIS_MAX_CONNS)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass)
+		d, err = NewMongoStorage(host, port, name, user, pass, nil)
 		db = d.(AccountingStorage)
 	default:
 		err = errors.New("unknown db")
@@ -79,7 +79,7 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 	return d, nil
 }
 
-func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int) (db LogStorage, err error) {
+func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int, cdrsIndexes []string) (db LogStorage, err error) {
 	var d LogStorage
 	switch db_type {
 	/*
@@ -96,7 +96,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 			d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 	*/
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass)
+		d, err = NewMongoStorage(host, port, name, user, pass, nil)
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MYSQL:
@@ -110,7 +110,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 	return d, nil
 }
 
-func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int) (db LoadStorage, err error) {
+func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int, cdrsIndexes []string) (db LoadStorage, err error) {
 	var d LoadStorage
 	switch db_type {
 	case utils.POSTGRES:
@@ -118,7 +118,7 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass)
+		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes)
 	default:
 		err = errors.New("unknown db")
 	}
@@ -128,7 +128,7 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	return d, nil
 }
 
-func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn int) (db CdrStorage, err error) {
+func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn int, cdrsIndexes []string) (db CdrStorage, err error) {
 	var d CdrStorage
 	switch db_type {
 	case utils.POSTGRES:
@@ -136,7 +136,7 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MONGO:
-		d, err = NewMongoStorage(host, port, name, user, pass)
+		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes)
 	default:
 		err = errors.New("unknown db")
 	}

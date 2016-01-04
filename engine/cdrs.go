@@ -171,7 +171,7 @@ func (self *CdrServer) LocalLogCallCost(ccl *CallCostLog) error {
 
 // Called by rate/re-rate API
 func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) error {
-	cdrs, _, err := self.cdrDb.GetCDRs(cdrFltr)
+	cdrs, _, err := self.cdrDb.GetCDRs(cdrFltr, false)
 	if err != nil {
 		return err
 	}

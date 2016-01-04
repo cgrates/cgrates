@@ -109,6 +109,7 @@ func TestDfDbJsonCfg(t *testing.T) {
 		Db_passwd:      utils.StringPointer("CGRateS.org"),
 		Max_open_conns: utils.IntPointer(100),
 		Max_idle_conns: utils.IntPointer(10),
+		Cdrs_indexes:   utils.StringSlicePointer([]string{}),
 	}
 	if cfg, err := dfCgrJsonCfg.DbJsonCfg(STORDB_JSN); err != nil {
 		t.Error(err)

@@ -31,7 +31,7 @@ func (apier *ApierV2) GetCdrs(attrs utils.RPCCDRsFilter, reply *[]*engine.Extern
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr); err != nil {
+	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr, false); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(cdrs) == 0 {
 		*reply = make([]*engine.ExternalCDR, 0)
@@ -49,7 +49,7 @@ func (apier *ApierV2) CountCdrs(attrs utils.RPCCDRsFilter, reply *int64) error {
 		return utils.NewErrServerError(err)
 	}
 	cdrsFltr.Count = true
-	if _, count, err := apier.CdrDb.GetCDRs(cdrsFltr); err != nil {
+	if _, count, err := apier.CdrDb.GetCDRs(cdrsFltr, false); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = count
