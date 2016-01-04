@@ -355,21 +355,27 @@ application_data:+10800 alloted_timeout uuid:3427e500-10e5-4864-a589-e306b70419a
 func (sm *FSSessionManager) SyncSessions() error {
 	for connId, senderPool := range sm.senderPools {
 		utils.Logger.Debug(fmt.Sprintf("### connID: %s, senderPool: %+v", connId, senderPool))
+		var aChans []map[string]string
 		fsConn, err := senderPool.PopFSock()
 		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on syncing active calls, senderPool: %+v, error: %s", senderPool, err.Error()))
-			continue
-		}
-		activeChanStr, err := fsConn.SendApiCmd("show channels")
-		senderPool.PushFSock(fsConn)
-		if err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on syncing active calls, senderPool: %+v, error: %s", senderPool, err.Error()))
-			continue
-		}
-		aChans := fsock.MapChanData(activeChanStr)
-		if len(aChans) == 0 && strings.HasPrefix(activeChanStr, "uuid,direction") { // Failed converting output from FS
-			utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Syncing active calls, failed converting output from FS: %s", activeChanStr))
-			continue
+			if err == fsock.ErrConnectionPoolTimeout { // Timeout waiting for connections to re-establish, cleanup calls
+				aChans = make([]map[string]string, 0) // Emulate no call information so we can disconnect bellow
+			} else {
+				utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on syncing active calls, senderPool: %+v, error: %s", senderPool, err.Error()))
+				continue
+			}
+		} else {
+			activeChanStr, err := fsConn.SendApiCmd("show channels")
+			senderPool.PushFSock(fsConn)
+			if err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Error on syncing active calls, senderPool: %+v, error: %s", senderPool, err.Error()))
+				continue
+			}
+			aChans = fsock.MapChanData(activeChanStr)
+			if len(aChans) == 0 && strings.HasPrefix(activeChanStr, "uuid,direction") { // Failed converting output from FS
+				utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Syncing active calls, failed converting output from FS: %s", activeChanStr))
+				continue
+			}
 		}
 		for _, session := range sm.sessions.getSessions() {
 			if session.connId != connId { // This session belongs to another connectionId
