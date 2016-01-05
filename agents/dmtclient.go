@@ -85,5 +85,10 @@ func (dc *DiameterClient) handleALL(c diam.Conn, m *diam.Message) {
 
 // Returns the message out of received buffer
 func (dc *DiameterClient) ReceivedMessage() *diam.Message {
-	return <-dc.received
+	select {
+	case rcv := <-dc.received:
+		return rcv
+	case <-time.After(time.Duration(1) * time.Second): // Timeout reading
+		return nil
+	}
 }
