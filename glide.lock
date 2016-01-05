@@ -1,12 +1,12 @@
 hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-updated: 2015-12-18T18:02:12.669823411+02:00
+updated: 2016-01-05T14:15:26.840209805+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
 - name: github.com/cenkalti/rpc2
   version: 2d1be381ce47537e9e076b2b76dc70933162e4e9
 - name: github.com/cgrates/fsock
-  version: f0d40ceb94f8bd15223a05466fe221df20ff5444
+  version: c3b1d274ae0e42742ba1bce2bf3a138d72fb82ee
 - name: github.com/cgrates/kamevapi
   version: a376b1f937ba959857929fa3e111c0f3243278c0
 - name: github.com/cgrates/osipsdagram
@@ -28,7 +28,7 @@ imports:
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/jinzhu/gorm
-  version: d209be3138acbe304daffee637bc495499c1e70e
+  version: 5e23d7013eabb9f28c263f64eebacdcbf9786ded
 - name: github.com/jinzhu/inflection
   version: 3272df6c21d04180007eb3349844c89a3856bc25
 - name: github.com/kr/pty
@@ -36,20 +36,20 @@ imports:
 - name: github.com/lib/pq
   version: 11fc39a580a008f1f39bb3d11d984fb34ed778d9
 - name: github.com/mediocregopher/radix.v2
-  version: b49c6f79790ba8a13a70b42e6a53d72f2239cf63
+  version: 91435107718b55ff544323a2b0f25fdd8475d283
   subpackages:
   - /pool
   - redis
 - name: github.com/peterh/liner
   version: 3f1c20449d1836aa4cbe38731b96f95cdf89634d
 - name: github.com/ugorji/go
-  version: cd43bdd6be4b5675a0d1e75c4af55ee1dc0d9c5e
+  version: 646ae4a518c1c3be0739df898118d9bccf993858
   subpackages:
   - /codec
 - name: golang.org/x/crypto
-  version: f18420efc3b4f8e9f3d51f6bd2476e92c46260e9
+  version: 552e9d568fde9701ea1944fb01c8aadaceaa7353
 - name: golang.org/x/net
-  version: 28273ec927bee3bea305f112fc28ceee575ea893
+  version: 3b90a77d2885fb0429e8a21ab72fc73ca6f8b401
   subpackages:
   - /websocket
 - name: golang.org/x/text
