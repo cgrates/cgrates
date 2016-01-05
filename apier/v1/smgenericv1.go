@@ -70,6 +70,15 @@ func (self *SMGenericV1) SessionEnd(ev sessionmanager.SMGenericEvent, reply *str
 	return nil
 }
 
+// Called on individual Events (eg SMS)
+func (self *SMGenericV1) ChargeEvent(ev sessionmanager.SMGenericEvent, reply *string) error {
+	if err := self.sm.ChargeEvent(ev, nil); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
 // Called on session end, should send the CDR to CDRS
 func (self *SMGenericV1) ProcessCdr(ev sessionmanager.SMGenericEvent, reply *string) error {
 	if err := self.sm.ProcessCdr(ev); err != nil {
@@ -132,6 +141,16 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 			return rpcclient.ErrWrongReplyType
 		}
 		return self.SessionEnd(argsConverted, replyConverted)
+	case "SMGenericV1.ChargeEvent":
+		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return self.ChargeEvent(argsConverted, replyConverted)
 	case "SMGenericV1.ProcessCdr":
 		argsConverted, canConvert := args.(sessionmanager.SMGenericEvent)
 		if !canConvert {

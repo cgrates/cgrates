@@ -94,9 +94,13 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			err = self.smg.Call("SMGenericV1.SessionStart", smgEv, &maxUsage)
 		case 2:
 			err = self.smg.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage)
-		case 3:
+		case 3, 4:
 			var rpl string
-			err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
+			if ccr.CCRequestType == 3 {
+				err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
+			} else if ccr.CCRequestType == 4 {
+				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &rpl)
+			}
 			if self.cgrCfg.DiameterAgentCfg().CreateCDR {
 				if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
 					err = errCdr
