@@ -214,7 +214,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,				// starts SessionManager service: <true|false>
 	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
+	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
 	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
@@ -236,7 +236,7 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,				// starts SessionManager service: <true|false>
 	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"create_cdr": false,			// create CDR out of events and sends them to CDRS component
+	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
 	"debit_interval": "10s",		// interval to perform debits on.
 	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
@@ -252,7 +252,7 @@ const CGRATES_CFG_JSON = `
 	"rater": "internal",				// address where to reach the Rater <""|internal|127.0.0.1:2013>
 	"cdrs": "internal",					// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"reconnects": 5,					// number of reconnects if connection is lost
-	"create_cdr": false,				// create CDR out of events and sends them to CDRS component
+	"create_cdr": false,				// create CDR out of events and sends it to CDRS component
 	"debit_interval": "10s",			// interval to perform debits on.
 	"min_call_duration": "0s",			// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",			// maximum call duration a prepaid call can last
@@ -266,6 +266,7 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sm_generic": "internal",									// connection towards SMG component for session management
+	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
 	"debit_interval": "5m",										// interval for CCR updates
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
 	"dialect": "huawei",										// the diameter dialect used in the communication, supported: <huawei>
@@ -276,7 +277,7 @@ const CGRATES_CFG_JSON = `
 	"request_processors": [
 		{
 			"id": "*default",									// formal identifier of this processor
-			"dry_run": false,									// do not send the CDRs to CDRS, just parse them
+			"dry_run": false,									// do not send the events to SMG, just log them
 			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
 			"continue_on_success": false,				// continue to the next template if executed
 			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value

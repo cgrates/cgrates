@@ -354,7 +354,6 @@ application_data:+10800 alloted_timeout uuid:3427e500-10e5-4864-a589-e306b70419a
 */
 func (sm *FSSessionManager) SyncSessions() error {
 	for connId, senderPool := range sm.senderPools {
-		utils.Logger.Debug(fmt.Sprintf("### connID: %s, senderPool: %+v", connId, senderPool))
 		var aChans []map[string]string
 		fsConn, err := senderPool.PopFSock()
 		if err != nil {

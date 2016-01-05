@@ -425,6 +425,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Listen:           utils.StringPointer("127.0.0.1:3868"),
 		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		Sm_generic:       utils.StringPointer("internal"),
+		Create_cdr:       utils.BoolPointer(true),
 		Debit_interval:   utils.StringPointer("5m"),
 		Timezone:         utils.StringPointer(""),
 		Dialect:          utils.StringPointer("huawei"),
