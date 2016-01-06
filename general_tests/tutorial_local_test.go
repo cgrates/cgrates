@@ -371,7 +371,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.327 { //
+	} else if cc.Cost != 0.354 { //
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
 }
