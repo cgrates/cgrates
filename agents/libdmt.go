@@ -191,18 +191,22 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 		} else if reqNr, ok = ccReqNrAvp.Data.(datatype.Unsigned32); !ok {
 			return "", fmt.Errorf("CC-Request-Number must be Unsigned32 and not %v", ccReqNrAvp.Data.Type())
 		}
-		if reqUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Requested-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
-			return "", err
-		} else if len(reqUnitAVPs) == 0 {
-			return "", errors.New("Requested-Service-Unit>CC-Time not found")
-		} else if reqUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
-			return "", fmt.Errorf("Requested-Service-Unit>CC-Time must be Unsigned32 and not %v", reqUnitAVPs[0].Data.Type())
-		}
-		if usedUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Used-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
-			return "", err
-		} else if len(usedUnitAVPs) != 0 {
-			if usedUnit, ok = usedUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
-				return "", fmt.Errorf("Used-Service-Unit>CC-Time must be Unsigned32 and not %v", usedUnitAVPs[0].Data.Type())
+		switch reqType {
+		case datatype.Enumerated(1), datatype.Enumerated(2):
+			if reqUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Requested-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+				return "", err
+			} else if len(reqUnitAVPs) == 0 {
+				return "", errors.New("Requested-Service-Unit>CC-Time not found")
+			} else if reqUnit, ok = reqUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+				return "", fmt.Errorf("Requested-Service-Unit>CC-Time must be Unsigned32 and not %v", reqUnitAVPs[0].Data.Type())
+			}
+		case datatype.Enumerated(3), datatype.Enumerated(4):
+			if usedUnitAVPs, err := m.FindAVPsWithPath([]interface{}{"Used-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+				return "", err
+			} else if len(usedUnitAVPs) != 0 {
+				if usedUnit, ok = usedUnitAVPs[0].Data.(datatype.Unsigned32); !ok {
+					return "", fmt.Errorf("Used-Service-Unit>CC-Time must be Unsigned32 and not %v", usedUnitAVPs[0].Data.Type())
+				}
 			}
 		}
 		usage := usageFromCCR(int(reqType), int(reqNr), int(reqUnit), int(usedUnit), dur)
