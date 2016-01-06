@@ -89,6 +89,7 @@ type RatingInfo struct {
 	FallbackKeys   []string
 }
 
+// SelectRatingIntevalsForTimespan orders rate intervals in time preserving only those which aply to the specified timestamp
 func (ri RatingInfo) SelectRatingIntevalsForTimespan(ts *TimeSpan) (result RateIntervalList) {
 	ri.RateIntervals.Sort()
 	sorter := &RateIntervalTimeSorter{referenceTime: ts.TimeStart, ris: ri.RateIntervals}
@@ -97,6 +98,9 @@ func (ri RatingInfo) SelectRatingIntevalsForTimespan(ts *TimeSpan) (result RateI
 	var delta time.Duration = -1
 	var bestRateIntervalIndex int
 	for index, rateInterval := range rateIntervals {
+		if !rateInterval.Contains(ts.TimeStart, false) {
+			continue
+		}
 		startTime := rateInterval.Timing.getLeftMargin(ts.TimeStart)
 		tmpDelta := ts.TimeStart.Sub(startTime)
 		if (startTime.Before(ts.TimeStart) ||

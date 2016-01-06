@@ -186,7 +186,7 @@ func TestRatingProfileRIforTSTwo(t *testing.T) {
 	}
 }
 
-func TestRatingProfileRIforTSThre(t *testing.T) {
+func TestRatingProfileRIforTSThree(t *testing.T) {
 	ri := &RatingInfo{
 		RateIntervals: RateIntervalList{
 			&RateInterval{
@@ -215,6 +215,37 @@ func TestRatingProfileRIforTSThre(t *testing.T) {
 		rIntervals[0].Timing.StartTime != "00:00:00" ||
 		rIntervals[1].Timing.StartTime != "09:00:00" ||
 		rIntervals[2].Timing.StartTime != "19:00:00" {
+		t.Error("Wrong interval list: ", utils.ToIJSON(rIntervals))
+	}
+}
+
+func TestRatingProfileRIforTSMidnight(t *testing.T) {
+	ri := &RatingInfo{
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "09:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "00:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "19:00:00",
+				},
+			},
+		},
+	}
+	ts := &TimeSpan{
+		TimeStart: time.Date(2016, 1, 6, 23, 40, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2016, 1, 7, 1, 1, 30, 0, time.UTC),
+	}
+	rIntervals := ri.SelectRatingIntevalsForTimespan(ts)
+	if len(rIntervals) != 1 ||
+		rIntervals[0].Timing.StartTime != "19:00:00" {
 		t.Error("Wrong interval list: ", utils.ToIJSON(rIntervals))
 	}
 }
