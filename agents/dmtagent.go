@@ -75,6 +75,10 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	if !passesAllFilters { // Not going with this processor further
 		return nil
 	}
+	if reqProcessor.DryRun { // DryRun should log the matching processor as well as the received CCR
+		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> RequestProcessor: %s", reqProcessor.Id))
+		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %s", ccr.diamMessage))
+	}
 	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.CCRFields)
 	if err != nil {
@@ -84,8 +88,6 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	}
 	var maxUsage float64
 	if reqProcessor.DryRun { // DryRun does not send over network
-		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> RequestProcessor: %s", reqProcessor.Id))
-		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %s", ccr.diamMessage))
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
 		cca.ResultCode = diam.LimitedSuccess
 	} else { // Find out maxUsage over APIs
