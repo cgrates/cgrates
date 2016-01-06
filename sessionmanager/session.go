@@ -201,6 +201,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			Subject:     lastCC.Subject,
 			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
+			TOR:         lastCC.TOR,
 			Increments:  refundIncrements,
 		}
 		var response float64

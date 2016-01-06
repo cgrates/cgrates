@@ -111,6 +111,9 @@ func TestSMGTPFromFolder(t *testing.T) {
 }
 
 func TestSMGMonetaryRefound(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
@@ -171,6 +174,9 @@ func TestSMGMonetaryRefound(t *testing.T) {
 }
 
 func TestSMGVoiceRefound(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
