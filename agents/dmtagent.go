@@ -143,7 +143,7 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		}
 	}
 	if cca == nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %+v, ignoring request", ccr))
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %s, ignoring request", ccr.diamMessage))
 		return
 	}
 	if _, err := cca.AsDiameterMessage().WriteTo(c); err != nil {
