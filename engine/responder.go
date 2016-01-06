@@ -220,10 +220,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
 	} else {
-		r, e := Guardian.Guard(func() (interface{}, error) {
-			return arg.RefundIncrements()
-		}, 0, arg.GetAccountKey())
-		*reply, err = r.(float64), e
+		*reply, err = arg.RefundIncrements()
 	}
 	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: reply, Err: err})
 	return

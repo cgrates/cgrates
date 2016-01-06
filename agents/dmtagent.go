@@ -65,7 +65,7 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	return dSM
 }
 
-func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor) (*CCA, error) {
+func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor) *CCA {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
 		if passes, _ := passesFieldFilter(ccr.diamMessage, fldFilter); !passes {
@@ -73,51 +73,58 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		}
 	}
 	if !passesAllFilters { // Not going with this processor further
-		return nil, nil
-	}
-	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.CCRFields)
-	if err != nil {
-		return nil, err
+		return nil
 	}
 	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.CCRFields)
+	if err != nil {
+		cca.ResultCode = DiameterRatingFailed
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v AsSMGenericEvent, error: %s", ccr.diamMessage, err))
+		return cca
+	}
+	var maxUsage float64
 	if reqProcessor.DryRun { // DryRun does not send over network
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> RequestProcessor: %s", reqProcessor.Id))
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %s", ccr.diamMessage))
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
 		cca.ResultCode = diam.LimitedSuccess
-		if err := cca.SetProcessorAVPs(reqProcessor, 0); err != nil {
+	} else { // Find out maxUsage over APIs
+		switch ccr.CCRequestType {
+		case 1:
+			err = self.smg.Call("SMGenericV1.SessionStart", smgEv, &maxUsage)
+		case 2:
+			err = self.smg.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage)
+		case 3, 4:
+			var rpl string
+			if ccr.CCRequestType == 3 {
+				err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
+			} else if ccr.CCRequestType == 4 {
+				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &rpl)
+			}
+			if self.cgrCfg.DiameterAgentCfg().CreateCDR {
+				if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
+					err = errCdr
+				}
+			}
+		}
+		if err != nil {
 			cca.ResultCode = DiameterRatingFailed
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, error: %s", ccr.diamMessage, err))
-			return cca, nil
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
+			return cca
 		}
-		return cca, nil
-	}
-	var maxUsage float64
-	switch ccr.CCRequestType {
-	case 1:
-		err = self.smg.Call("SMGenericV1.SessionStart", smgEv, &maxUsage)
-	case 2:
-		err = self.smg.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage)
-	case 3:
-		var rpl string
-		err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
-		if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
-			err = errCdr
+		if ccr.CCRequestType != 3 && maxUsage == 0 { // Not enough balance, RFC demands 4012
+			cca.ResultCode = 4012
+		} else {
+			cca.ResultCode = diam.Success
 		}
+		cca.GrantedServiceUnit.CCTime = int(maxUsage)
 	}
-	if err != nil {
-		cca.ResultCode = DiameterRatingFailed
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, error: %s", ccr.diamMessage, err))
-		return cca, nil
-	}
-	cca.ResultCode = diam.Success
-	cca.GrantedServiceUnit.CCTime = int(maxUsage)
 	if err := cca.SetProcessorAVPs(reqProcessor, maxUsage); err != nil {
 		cca.ResultCode = DiameterRatingFailed
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, error: %s", ccr.diamMessage, err))
-		return cca, nil
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> CCA SetProcessorAVPs for message: %+v, error: %s", ccr.diamMessage, err))
+		return cca
 	}
-	return cca, nil
+	return cca
 }
 
 func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
@@ -128,16 +135,12 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 	}
 	var cca *CCA // For now we simply overload in loop, maybe we will find some other use of this
 	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
-		if cca, err = self.processCCR(ccr, reqProcessor); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Error processing CCR %+v, processor id: %s, error: %s", ccr, reqProcessor.Id, err.Error()))
-		}
+		cca = self.processCCR(ccr, reqProcessor)
 		if cca != nil && !reqProcessor.ContinueOnSuccess {
 			break
 		}
 	}
-	if err != nil { //ToDo: return standard diameter error
-		return
-	} else if cca == nil {
+	if cca == nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %+v, ignoring request", ccr))
 		return
 	}

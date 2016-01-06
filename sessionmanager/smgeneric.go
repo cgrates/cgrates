@@ -31,7 +31,10 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
+var ErrPartiallyExecuted = errors.New("Partially executed")
+
 func NewSMGeneric(cgrCfg *config.CGRConfig, rater rpcclient.RpcClientConnection, cdrsrv rpcclient.RpcClientConnection, timezone string, extconns *SMGExternalConnections) *SMGeneric {
+
 	gsm := &SMGeneric{cgrCfg: cgrCfg, rater: rater, cdrsrv: cdrsrv, extconns: extconns, timezone: timezone,
 		sessions: make(map[string][]*SMGSession), sessionsMux: new(sync.Mutex), guard: engine.NewGuardianLock()}
 	return gsm
@@ -195,6 +198,40 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 	}
 	if err := self.sessionEnd(gev.GetUUID(), endTime); err != nil {
 		return err
+	}
+	return nil
+}
+
+// Processes one time events (eg: SMS)
+func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) error {
+	var sessionRuns []*engine.SessionRun
+	if err := self.rater.Call("Responder.GetSessionRuns", gev.AsStoredCdr(self.cgrCfg, self.timezone), &sessionRuns); err != nil {
+		return err
+	} else if len(sessionRuns) == 0 {
+		return nil
+	}
+	var withErrors bool
+	for _, sR := range sessionRuns {
+		cc := new(engine.CallCost)
+		if err := self.rater.Call("Responder.Debit", sR.CallDescriptor, cc); err != nil {
+			withErrors = true
+			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not Debit CD: %+v, RunID: %s, error: %s", sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
+			continue
+		}
+		var reply string
+		if err := self.cdrsrv.Call("CdrServer.LogCallCost", &engine.CallCostLog{
+			CgrId:          gev.GetCgrId(self.timezone),
+			Source:         utils.SESSION_MANAGER_SOURCE,
+			RunId:          sR.DerivedCharger.RunID,
+			CallCost:       cc,
+			CheckDuplicate: true,
+		}, &reply); err != nil && err != utils.ErrExists {
+			withErrors = true
+			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save CC: %+v, RunID: %s error: %s", cc, sR.DerivedCharger.RunID, err.Error()))
+		}
+	}
+	if withErrors {
+		return ErrPartiallyExecuted
 	}
 	return nil
 }

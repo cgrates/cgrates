@@ -246,47 +246,46 @@ func TestUnitCountersCountAllVoiceDestinationEvent(t *testing.T) {
 	}
 }
 
-/*
 func TestUnitCountersResetCounterById(t *testing.T) {
 	a := &Account{
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
-				ID:                "TestTR1",
+				UniqueID:          "TestTR1",
 				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.MONETARY,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
-				ID:                "TestTR11",
+				UniqueID:          "TestTR11",
 				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.MONETARY,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
-				ID:                "TestTR2",
+				UniqueID:          "TestTR2",
 				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
 				BalanceType:       utils.VOICE,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
-				ID:                "TestTR3",
+				UniqueID:          "TestTR3",
 				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
 				BalanceType:       utils.VOICE,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
-				ID:                "TestTR4",
+				UniqueID:          "TestTR4",
 				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
 				BalanceType:       utils.SMS,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
 				BalanceWeight:     10,
 			},
 			&ActionTrigger{
-				ID:                "TestTR5",
+				UniqueID:          "TestTR5",
 				ThresholdType:     utils.TRIGGER_MAX_BALANCE,
 				BalanceType:       utils.SMS,
 				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
@@ -328,4 +327,3 @@ func TestUnitCountersResetCounterById(t *testing.T) {
 		t.Errorf("Error Initializing adding unit counters: %v", len(a.UnitCounters))
 	}
 }
-*/

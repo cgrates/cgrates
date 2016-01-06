@@ -99,6 +99,15 @@ func (self *SMGenericBiRpcV1) SessionEnd(clnt *rpc2.Client, ev sessionmanager.SM
 	return nil
 }
 
+// Called on individual Events (eg SMS)
+func (self *SMGenericBiRpcV1) ChargeEvent(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, reply *string) error {
+	if err := self.sm.ChargeEvent(ev, clnt); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
 // Called on session end, should send the CDR to CDRS
 func (self *SMGenericBiRpcV1) ProcessCdr(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, reply *string) error {
 	if err := self.sm.ProcessCdr(ev); err != nil {

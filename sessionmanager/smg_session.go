@@ -153,6 +153,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 			Subject:     lastCC.Subject,
 			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
+			TOR:         lastCC.TOR,
 			Increments:  refundIncrements,
 		}
 		var response float64

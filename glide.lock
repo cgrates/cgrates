@@ -1,12 +1,17 @@
+<<<<<<< HEAD
 hash: 0ca45753122a2e205a1b401e7f38b17e58ea22d3b105894604e504aeace503cb
 updated: 2015-12-24T18:29:52.686317738+02:00
+=======
+hash: 330fc999239d5766f033409be2335338cfd172d0dcf18ad752b8613f45e9f451
+updated: 2016-01-06T13:35:12.445693385+02:00
+>>>>>>> master
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
 - name: github.com/cenkalti/rpc2
   version: 2d1be381ce47537e9e076b2b76dc70933162e4e9
 - name: github.com/cgrates/fsock
-  version: f0d40ceb94f8bd15223a05466fe221df20ff5444
+  version: c3b1d274ae0e42742ba1bce2bf3a138d72fb82ee
 - name: github.com/cgrates/kamevapi
   version: a376b1f937ba959857929fa3e111c0f3243278c0
 - name: github.com/cgrates/osipsdagram
@@ -24,11 +29,11 @@ imports:
   - diam/dict
   - diam/sm
 - name: github.com/go-sql-driver/mysql
-  version: d512f204a577a4ab037a1816604c48c9c13210be
+  version: bb006fd699a123d3eb514561dbefc352e978949d
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/jinzhu/gorm
-  version: 4a821a5beff551a4f445283fc232e892e2cff324
+  version: 2f7811c55f286c55cfc3a2aefb5c4049b9cd5214
 - name: github.com/jinzhu/inflection
   version: 3272df6c21d04180007eb3349844c89a3856bc25
   repo: https://github.com/jinzhu/inflection
@@ -48,9 +53,9 @@ imports:
   subpackages:
   - /codec
 - name: golang.org/x/crypto
-  version: f18420efc3b4f8e9f3d51f6bd2476e92c46260e9
+  version: 552e9d568fde9701ea1944fb01c8aadaceaa7353
 - name: golang.org/x/net
-  version: ea6dba8c93880aa07d6ebed83c3c680cd9faa63a
+  version: 961116aeebe66bfb58bb4d51818c70d256acbbb8
   subpackages:
   - /websocket
 - name: golang.org/x/text

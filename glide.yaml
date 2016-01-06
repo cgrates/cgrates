@@ -16,6 +16,7 @@ import:
 - package: github.com/go-sql-driver/mysql
 - package: github.com/gorhill/cronexpr
 - package: github.com/jinzhu/gorm
+- package: github.com/jinzhu/inflection
 - package: github.com/kr/pty
 - package: github.com/lib/pq
 - package: github.com/mediocregopher/radix.v2

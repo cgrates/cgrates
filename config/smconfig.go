@@ -148,6 +148,7 @@ type SmFsConfig struct {
 	EmptyBalanceAnnFile string
 	SubscribePark       bool
 	ChannelSyncInterval time.Duration
+	MaxWaitConnection   time.Duration
 	Connections         []*FsConnConfig
 }
 
@@ -215,6 +216,11 @@ func (self *SmFsConfig) loadFromJsonCfg(jsnCfg *SmFsJsonCfg) error {
 	}
 	if jsnCfg.Channel_sync_interval != nil {
 		if self.ChannelSyncInterval, err = utils.ParseDurationWithSecs(*jsnCfg.Channel_sync_interval); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Max_wait_connection != nil {
+		if self.MaxWaitConnection, err = utils.ParseDurationWithSecs(*jsnCfg.Max_wait_connection); err != nil {
 			return err
 		}
 	}

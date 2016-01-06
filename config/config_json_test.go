@@ -376,6 +376,7 @@ func TestSmFsJsonCfg(t *testing.T) {
 		Empty_balance_ann_file: utils.StringPointer(""),
 		Subscribe_park:         utils.BoolPointer(true),
 		Channel_sync_interval:  utils.StringPointer("5m"),
+		Max_wait_connection:    utils.StringPointer("2s"),
 		Connections: &[]*FsConnJsonCfg{
 			&FsConnJsonCfg{
 				Server:     utils.StringPointer("127.0.0.1:8021"),
@@ -454,6 +455,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
+		Create_cdr:     utils.BoolPointer(true),
 		Debit_interval: utils.StringPointer("5m"),
 		Timezone:       utils.StringPointer(""),
 		Dialect:        utils.StringPointer("huawei"),

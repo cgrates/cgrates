@@ -189,6 +189,7 @@ type SmFsJsonCfg struct {
 	Empty_balance_ann_file *string
 	Subscribe_park         *bool
 	Channel_sync_interval  *string
+	Max_wait_connection    *string
 	Connections            *[]*FsConnJsonCfg
 }
 
@@ -248,6 +249,7 @@ type DiameterAgentJsonCfg struct {
 	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
 	Dictionaries_dir   *string           // path towards additional dictionaries
 	Sm_generic_conns   *[]*HaPoolJsonCfg // Connections towards generic SM
+	Create_cdr         *bool
 	Debit_interval     *string
 	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	Dialect            *string

@@ -265,6 +265,9 @@ func TestRSRFilterPass(t *testing.T) {
 	if fltr.Pass("full_match1") {
 		t.Error("Passing!")
 	}
+	if fltr.Pass("") {
+		t.Error("Passing!")
+	}
 	fltr, err = NewRSRFilter("^prefixMatch") // Prefix pass
 	if err != nil {
 		t.Error(err)

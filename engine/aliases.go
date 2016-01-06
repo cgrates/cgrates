@@ -172,6 +172,7 @@ type AttrAddAlias struct {
 	Overwrite bool
 }
 
+// SetAlias will set/overwrite specified alias
 func (am *AliasHandler) SetAlias(attr *AttrAddAlias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()

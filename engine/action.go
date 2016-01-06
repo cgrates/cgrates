@@ -257,7 +257,6 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 			return err
 		}
 	}
-
 	b, _ := json.Marshal(cdrs)
 	a.ExpirationString = string(b) // testing purpose only
 	return
