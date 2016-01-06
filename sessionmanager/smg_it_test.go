@@ -110,7 +110,7 @@ func TestSMGTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSMGMonetaryRefound(t *testing.T) {
+func TestSMGMonetaryRefund(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -165,7 +165,7 @@ func TestSMGMonetaryRefound(t *testing.T) {
 	}
 
 	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal = 8.733201
+	eAcntVal = 8.8
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -173,7 +173,7 @@ func TestSMGMonetaryRefound(t *testing.T) {
 	}
 }
 
-func TestSMGVoiceRefound(t *testing.T) {
+func TestSMGVoiceRefund(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
