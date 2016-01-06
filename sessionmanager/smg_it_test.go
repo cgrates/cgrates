@@ -32,7 +32,7 @@ import (
 )
 
 var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
-var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
+var waitRater = flag.Int("wait_rater", 150, "Number of miliseconds to wait for rater to start and cache")
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 
 var daCfgPath string
