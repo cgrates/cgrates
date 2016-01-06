@@ -1073,7 +1073,7 @@ func TestAccountRefund(t *testing.T) {
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 13 ||
 		ub.BalanceMap[utils.VOICE][1].GetValue() != 14 {
-		t.Error("Error refounding money: ", ub.BalanceMap[utils.VOICE][1].GetValue())
+		t.Error("Error refunding money: ", ub.BalanceMap[utils.VOICE][1].GetValue())
 	}
 }
 

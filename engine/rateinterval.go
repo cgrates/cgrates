@@ -136,9 +136,7 @@ func (rit *RITiming) getRightMargin(t time.Time) (rigthtTime time.Time) {
 	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
 }
 
-/*
-Returns a time object that represents the start of the interval realtive to the received time
-*/
+//Returns a time object that represents the start of the interval realtive to the received time
 func (rit *RITiming) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 0, 0, 0, 0
@@ -368,4 +366,30 @@ func (il RateIntervalList) Less(j, i int) bool {
 
 func (il RateIntervalList) Sort() {
 	sort.Sort(il)
+}
+
+// Structure to store intervals according to weight
+type RateIntervalTimeSorter struct {
+	referenceTime time.Time
+	ris           []*RateInterval
+}
+
+func (il *RateIntervalTimeSorter) Len() int {
+	return len(il.ris)
+}
+
+func (il *RateIntervalTimeSorter) Swap(i, j int) {
+	il.ris[i], il.ris[j] = il.ris[j], il.ris[i]
+}
+
+// we need higher weights earlyer in the list
+func (il *RateIntervalTimeSorter) Less(j, i int) bool {
+	t1 := il.ris[i].Timing.getLeftMargin(il.referenceTime)
+	t2 := il.ris[j].Timing.getLeftMargin(il.referenceTime)
+	return t1.After(t2)
+}
+
+func (il *RateIntervalTimeSorter) Sort() []*RateInterval {
+	sort.Sort(il)
+	return il.ris
 }

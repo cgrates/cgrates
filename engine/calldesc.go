@@ -362,7 +362,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		rp := timespans[i].ratingInfo
 		// utils.Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
-		rp.RateIntervals.Sort()
+		rateIntervals := rp.SelectRatingIntevalsForTimespan(timespans[i])
 		/*for _, interval := range rp.RateIntervals {
 			if !timespans[i].hasBetterRateIntervalThan(interval) {
 				timespans[i].SetRateInterval(interval)
@@ -370,7 +370,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		}*/
 		//log.Print("ORIG TS: ", timespans[i].TimeStart, timespans[i].TimeEnd)
 		//log.Print(timespans[i].RateInterval)
-		for _, interval := range rp.RateIntervals {
+		for _, interval := range rateIntervals {
 			//log.Printf("\tINTERVAL: %+v", interval.Timing)
 			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != utils.VOICE)
 			//utils.PrintFull(timespans[i])

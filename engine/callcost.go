@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -150,8 +149,7 @@ func (cc *CallCost) GetLongestRounding() (roundingDecimals int, roundingMethod s
 }
 
 func (cc *CallCost) AsJSON() string {
-	ccJson, _ := json.Marshal(cc)
-	return string(ccJson)
+	return utils.ToJSON(cc)
 }
 
 func (cc *CallCost) updateCost() {
