@@ -746,16 +746,20 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 	accountsCache := make(map[string]*Account)
 	for _, increment := range cd.Increments {
 		account, found := accountsCache[increment.BalanceInfo.AccountId]
-		if !found {
-			if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountId); err == nil && acc != nil {
-				account = acc
-				accountsCache[increment.BalanceInfo.AccountId] = account
-				defer accountingStorage.SetAccount(account)
+		Guardian.Guard(func() (interface{}, error) {
+			if !found {
+				if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountId); err == nil && acc != nil {
+					account = acc
+					accountsCache[increment.BalanceInfo.AccountId] = account
+					defer accountingStorage.SetAccount(account)
+				}
 			}
-		}
-		account.refundIncrement(increment, cd, true)
+			utils.Logger.Info(fmt.Sprintf("Refunding increment %+v", increment))
+			account.refundIncrement(increment, cd, true)
+			return 0, err
+		}, 0, increment.BalanceInfo.AccountId)
 	}
-	return 0.0, err
+	return 0, err
 }
 
 func (cd *CallDescriptor) FlushCache() (err error) {

@@ -177,6 +177,7 @@ func NewAliasHandler(accountingDb AccountingStorage) *AliasHandler {
 	}
 }
 
+// SetAlias will set/overwrite specified alias
 func (am *AliasHandler) SetAlias(al Alias, reply *string) error {
 	am.mu.Lock()
 	defer am.mu.Unlock()
