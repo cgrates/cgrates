@@ -235,9 +235,9 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField) (bool, int)
 	if err != nil {
 		return false, 0
 	} else if len(avps) == 0 {
-		return true, 0
+		return false, 0 // No AVPs with field filter ID
 	}
-	for avpIdx, avpVal := range avps {
+	for avpIdx, avpVal := range avps { // First match wins due to index
 		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
 			return true, avpIdx
 		}
@@ -620,6 +620,9 @@ func (self *CCA) AsDiameterMessage() *diam.Message {
 func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUsage float64) error {
 	for _, cfgFld := range reqProcessor.CCAFields {
 		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, maxUsage)
+		if err == ErrFilterNotPassing { // Field not in or filter not passing, try match in answer
+			fmtOut, err = fieldOutVal(self.diamMessage, cfgFld, maxUsage)
+		}
 		if err != nil {
 			if err == ErrFilterNotPassing {
 				continue
