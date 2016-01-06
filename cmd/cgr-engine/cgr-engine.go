@@ -138,8 +138,8 @@ func startCdrc(internalCdrSChan chan *engine.CdrServer, internalRaterChan chan *
 
 func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internalRaterChan chan *engine.Responder, internalCDRSChan chan *engine.CdrServer, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS SM-Generic service.")
-	raterConn := rpcclient.NewRpcClientPool(rpcclient.POOL_BROADCAST)
-	cdrsConn := rpcclient.NewRpcClientPool(rpcclient.POOL_BROADCAST)
+	raterConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
+	cdrsConn := rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
 	var client *rpcclient.RpcClient
 	var err error
 	// Connect to rater
@@ -253,9 +253,7 @@ func startSmFreeSWITCH(internalRaterChan chan *engine.Responder, internalCDRSCha
 		}
 	}
 	// Connect to CDRS
-	if reflect.DeepEqual(cfg.SmFsConfig.CdrsConns, cfg.SmFsConfig.RaterConns) {
-		cdrsConn = raterConn
-	} else if len(cfg.SmFsConfig.CdrsConns) != 0 {
+	if len(cfg.SmFsConfig.CdrsConns) != 0 {
 		for _, cdrsCfg := range cfg.SmFsConfig.CdrsConns {
 			if cdrsCfg.Server == utils.INTERNAL {
 				resp := <-internalCDRSChan
