@@ -89,6 +89,34 @@ type RatingInfo struct {
 	FallbackKeys   []string
 }
 
+func (ri RatingInfo) SelectRatingIntevalsForTimespan(ts *TimeSpan) (result RateIntervalList) {
+	ri.RateIntervals.Sort()
+	sorter := &RateIntervalTimeSorter{referenceTime: ts.TimeStart, ris: ri.RateIntervals}
+	rateIntervals := sorter.Sort()
+	// get the rating interval closest to begining of timespan
+	var delta time.Duration = -1
+	var bestRateIntervalIndex int
+	for index, rateInterval := range rateIntervals {
+		startTime := rateInterval.Timing.getLeftMargin(ts.TimeStart)
+		tmpDelta := ts.TimeStart.Sub(startTime)
+		if (startTime.Before(ts.TimeStart) ||
+			startTime.Equal(ts.TimeStart)) &&
+			(delta == -1 || tmpDelta < delta) {
+			bestRateIntervalIndex = index
+			delta = tmpDelta
+		}
+	}
+	result = append(result, rateIntervals[bestRateIntervalIndex])
+	// check if later rating intervals influence this timespan
+	for i := bestRateIntervalIndex + 1; i < len(rateIntervals); i++ {
+		startTime := rateIntervals[i].Timing.getLeftMargin(ts.TimeStart)
+		if startTime.Before(ts.TimeEnd) {
+			result = append(result, rateIntervals[i])
+		}
+	}
+	return
+}
+
 type RatingInfos []*RatingInfo
 
 func (ris RatingInfos) Len() int {
