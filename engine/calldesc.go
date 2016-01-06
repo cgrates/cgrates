@@ -745,10 +745,15 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 	cd.account = nil // make sure it's not cached
 	// get account list for locking
 	// all must be locked in order to use cache
+	accMap := make(map[string]struct{})
 	var accountIDs []string
 	for _, increment := range cd.Increments {
-		accountIDs = append(accountIDs, increment.BalanceInfo.AccountId)
+		accMap[increment.BalanceInfo.AccountId] = struct{}{}
 	}
+	for key := range accMap {
+		accountIDs = append(accountIDs, key)
+	}
+	// start increment refunding loop
 	Guardian.Guard(func() (interface{}, error) {
 		accountsCache := make(map[string]*Account)
 		for _, increment := range cd.Increments {
