@@ -689,6 +689,25 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	}
 }
 
+func (cd *CallDescriptor) FakeDebit() (cc *CallCost, err error) {
+	cd.account = nil // make sure it's not cached
+	// lock all group members
+	if account, err := cd.getAccount(); err != nil || account == nil {
+		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
+		return nil, utils.ErrAccountNotFound
+	} else {
+		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
+			_, err = Guardian.Guard(func() (interface{}, error) {
+				cc, err = cd.debit(account, true, true)
+				return 0, err
+			}, 0, memberIds...)
+		} else {
+			return nil, sgerr
+		}
+		return cc, err
+	}
+}
+
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
