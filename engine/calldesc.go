@@ -362,7 +362,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		rp := timespans[i].ratingInfo
 		// utils.Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
-		rp.RateIntervals.Sort()
+		rateIntervals := rp.SelectRatingIntevalsForTimespan(timespans[i])
 		/*for _, interval := range rp.RateIntervals {
 			if !timespans[i].hasBetterRateIntervalThan(interval) {
 				timespans[i].SetRateInterval(interval)
@@ -370,7 +370,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		}*/
 		//log.Print("ORIG TS: ", timespans[i].TimeStart, timespans[i].TimeEnd)
 		//log.Print(timespans[i].RateInterval)
-		for _, interval := range rp.RateIntervals {
+		for _, interval := range rateIntervals {
 			//log.Printf("\tINTERVAL: %+v", interval.Timing)
 			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != utils.VOICE)
 			//utils.PrintFull(timespans[i])
@@ -680,6 +680,25 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
 				cc, err = cd.debit(account, false, true)
+				return 0, err
+			}, 0, memberIds...)
+		} else {
+			return nil, sgerr
+		}
+		return cc, err
+	}
+}
+
+func (cd *CallDescriptor) FakeDebit() (cc *CallCost, err error) {
+	cd.account = nil // make sure it's not cached
+	// lock all group members
+	if account, err := cd.getAccount(); err != nil || account == nil {
+		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
+		return nil, utils.ErrAccountNotFound
+	} else {
+		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
+			_, err = Guardian.Guard(func() (interface{}, error) {
+				cc, err = cd.debit(account, true, true)
 				return 0, err
 			}, 0, memberIds...)
 		} else {

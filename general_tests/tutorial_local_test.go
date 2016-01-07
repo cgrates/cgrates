@@ -329,6 +329,51 @@ func TestTutLocalGetCosts(t *testing.T) {
 	} else if cc.Cost != 0.7 { // In case of *disconnect strategy, it will not be applied so we can go on negative costs
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1004",
+		TimeStart:   time.Date(2016, 1, 6, 19, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2016, 1, 6, 19, 1, 30, 0, time.UTC),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.327 { //
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1004",
+		TimeStart:   time.Date(2016, 1, 6, 18, 31, 5, 0, time.UTC),
+		TimeEnd:     time.Date(2016, 1, 6, 18, 32, 35, 0, time.UTC),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 1.3002 { //
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		TimeStart:   time.Date(2014, 12, 7, 8, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 12, 7, 8, 44, 26, 0, time.UTC),
+	}
+	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0.354 { //
+		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
+	}
 }
 
 // Check call costs

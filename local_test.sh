@@ -26,9 +26,8 @@ gnr=$?
 echo 'go test github.com/cgrates/cgrates/agents -integration'
 go test github.com/cgrates/cgrates/agents -integration
 agts=$?
+echo 'go test github.com/cgrates/cgrates/sessionmanager -integration'
+go test github.com/cgrates/cgrates/sessionmanager -integration
+smg=$?
 
-
-
-
-
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr && $agts && $smg

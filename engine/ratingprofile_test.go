@@ -95,3 +95,157 @@ func TestGetRatingProfileFoundButNoDestination(t *testing.T) {
 		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
 	}
 }
+
+func TestRatingProfileRISorter(t *testing.T) {
+	ris := RateIntervalList{
+		&RateInterval{
+			Timing: &RITiming{
+				StartTime: "09:00:00",
+			},
+		},
+		&RateInterval{
+			Timing: &RITiming{
+				StartTime: "00:00:00",
+			},
+		},
+		&RateInterval{
+			Timing: &RITiming{
+				StartTime: "19:00:00",
+			},
+		},
+	}
+	sorter := &RateIntervalTimeSorter{referenceTime: time.Date(2016, 1, 6, 19, 0, 0, 0, time.UTC), ris: ris}
+	rIntervals := sorter.Sort()
+	if len(rIntervals) != 3 ||
+		rIntervals[0].Timing.StartTime != "00:00:00" ||
+		rIntervals[1].Timing.StartTime != "09:00:00" ||
+		rIntervals[2].Timing.StartTime != "19:00:00" {
+		t.Error("Wrong interval list: ", utils.ToIJSON(rIntervals))
+	}
+}
+
+func TestRatingProfileRIforTSOne(t *testing.T) {
+	ri := &RatingInfo{
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "09:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "00:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "19:00:00",
+				},
+			},
+		},
+	}
+	ts := &TimeSpan{
+		TimeStart: time.Date(2016, 1, 6, 19, 0, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2016, 1, 6, 19, 1, 30, 0, time.UTC),
+	}
+	rIntervals := ri.SelectRatingIntevalsForTimespan(ts)
+	if len(rIntervals) != 1 || rIntervals[0].Timing.StartTime != "19:00:00" {
+		t.Error("Wrong interval list: ", utils.ToIJSON(rIntervals))
+	}
+}
+
+func TestRatingProfileRIforTSTwo(t *testing.T) {
+	ri := &RatingInfo{
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "09:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "00:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "19:00:00",
+				},
+			},
+		},
+	}
+	ts := &TimeSpan{
+		TimeStart: time.Date(2016, 1, 6, 10, 0, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2016, 1, 6, 19, 1, 30, 0, time.UTC),
+	}
+	rIntervals := ri.SelectRatingIntevalsForTimespan(ts)
+	if len(rIntervals) != 2 ||
+		rIntervals[0].Timing.StartTime != "09:00:00" ||
+		rIntervals[1].Timing.StartTime != "19:00:00" {
+		t.Error("Wrong interval list: ", utils.ToIJSON(rIntervals))
+	}
+}
+
+func TestRatingProfileRIforTSThree(t *testing.T) {
+	ri := &RatingInfo{
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "09:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "00:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "19:00:00",
+				},
+			},
+		},
+	}
+	ts := &TimeSpan{
+		TimeStart: time.Date(2016, 1, 6, 8, 0, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2016, 1, 6, 19, 1, 30, 0, time.UTC),
+	}
+	rIntervals := ri.SelectRatingIntevalsForTimespan(ts)
+	if len(rIntervals) != 3 ||
+		rIntervals[0].Timing.StartTime != "00:00:00" ||
+		rIntervals[1].Timing.StartTime != "09:00:00" ||
+		rIntervals[2].Timing.StartTime != "19:00:00" {
+		t.Error("Wrong interval list: ", utils.ToIJSON(rIntervals))
+	}
+}
+
+func TestRatingProfileRIforTSMidnight(t *testing.T) {
+	ri := &RatingInfo{
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "09:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "00:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "19:00:00",
+				},
+			},
+		},
+	}
+	ts := &TimeSpan{
+		TimeStart: time.Date(2016, 1, 6, 23, 40, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2016, 1, 7, 1, 1, 30, 0, time.UTC),
+	}
+	rIntervals := ri.SelectRatingIntevalsForTimespan(ts)
+	if len(rIntervals) != 1 ||
+		rIntervals[0].Timing.StartTime != "19:00:00" {
+		t.Error("Wrong interval list: ", utils.ToIJSON(rIntervals))
+	}
+}

@@ -110,7 +110,7 @@ func TestSMGTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSMGMonetaryRefound(t *testing.T) {
+func TestSMGMonetaryRefund(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -163,9 +163,7 @@ func TestSMGMonetaryRefound(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal = 8.733201
+	eAcntVal = 8.8
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -173,7 +171,7 @@ func TestSMGMonetaryRefound(t *testing.T) {
 	}
 }
 
-func TestSMGVoiceRefound(t *testing.T) {
+func TestSMGVoiceRefund(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -226,12 +224,84 @@ func TestSMGVoiceRefound(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal = 150.0
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
+}
+
+func TestSMGMixedRefund(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	}
+	t.Logf("Initial monetary: %f", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	t.Logf("Initial voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	smgEv := SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.TOR:         utils.VOICE,
+		utils.ACCID:       "12345",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     "1001",
+		utils.SUBJECT:     "1001",
+		utils.DESTINATION: "1002",
+		utils.CATEGORY:    "call",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.USAGE:       "1m30s",
+	}
+	var maxUsage float64
+	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+		t.Error(err)
+	}
+	if maxUsage != 90 {
+		t.Error("Bad max usage: ", maxUsage)
+	}
+	//var acnt *engine.Account
+	//attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	eVoiceVal := 90.0
+	eMoneyVal := 8.739
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eVoiceVal ||
+		acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eMoneyVal {
+		t.Errorf("Expected: %f, received: %f, expetced money: %f, recieved money : %f", eVoiceVal, acnt.BalanceMap[utils.VOICE].GetTotalValue(), eMoneyVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	smgEv = SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.TOR:         utils.VOICE,
+		utils.ACCID:       "12345",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     "1001",
+		utils.SUBJECT:     "1001",
+		utils.DESTINATION: "1002",
+		utils.CATEGORY:    "call",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.USAGE:       "1m",
+	}
+	var rpl string
+	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+		t.Error(err)
+	}
+	eVoiceVal = 90.0
+	eMoneyVal = 8.79
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eVoiceVal ||
+		acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eMoneyVal {
+		t.Errorf("Expected voice: %f, received voice : %f, expected money: %f, received money: %f", eVoiceVal, acnt.BalanceMap[utils.VOICE].GetTotalValue(), eMoneyVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	t.Logf("After monetary: %f", acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	t.Logf("After voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 }

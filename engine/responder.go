@@ -145,6 +145,41 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
+func (rs *Responder) FakeDebit(arg *CallDescriptor, reply *CallCost) (err error) {
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
+	// replace aliases
+	if err := LoadAlias(
+		&AttrMatchingAlias{
+			Destination: arg.Destination,
+			Direction:   arg.Direction,
+			Tenant:      arg.Tenant,
+			Category:    arg.Category,
+			Account:     arg.Account,
+			Subject:     arg.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
+		return err
+	}
+	if rs.Bal != nil {
+		r, e := rs.getCallCost(arg, "Responder.FakeDebit")
+		*reply, err = *r, e
+	} else {
+		r, e := arg.FakeDebit()
+		if e != nil {
+			return e
+		} else if r != nil {
+			*reply = *r
+		}
+	}
+	return
+}
+
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
 	cacheKey := "MaxDebit" + arg.CgrId + strconv.FormatFloat(arg.LoopIndex, 'f', -1, 64)
 	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
