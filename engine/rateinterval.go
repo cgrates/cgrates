@@ -301,6 +301,9 @@ func (i *RateInterval) String_DISABLED() string {
 }
 
 func (i *RateInterval) Equal(o *RateInterval) bool {
+	if i == nil && o == nil {
+		return true
+	}
 	if i.Timing == nil && o.Timing == nil {
 		return true
 	}

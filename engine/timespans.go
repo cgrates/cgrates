@@ -38,6 +38,7 @@ type TimeSpan struct {
 	DurationIndex                                              time.Duration // the call duration so far till TimeEnd
 	Increments                                                 Increments
 	MatchedSubject, MatchedPrefix, MatchedDestId, RatingPlanId string
+	CompressFactor                                             int
 }
 
 type Increment struct {
@@ -60,7 +61,8 @@ type UnitInfo struct {
 
 func (mi *UnitInfo) Equal(other *UnitInfo) bool {
 	return mi.DestinationId == other.DestinationId &&
-		mi.Quantity == other.Quantity
+		mi.Quantity == other.Quantity &&
+		mi.TOR == other.TOR
 }
 
 // Holds information about the balance that made a specific payment
@@ -162,31 +164,47 @@ func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSp
 	return false
 }
 
-func (tss TimeSpans) Compress() {
-	for _, ts := range tss {
-		var cIncrs Increments
-		for _, incr := range ts.Increments {
-			if len(cIncrs) == 0 || !cIncrs[len(cIncrs)-1].Equal(incr) {
-				incr.GetCompressFactor() // sideefect
-				cIncrs = append(cIncrs, incr)
-			} else {
-				cIncrs[len(cIncrs)-1].CompressFactor++
-			}
-		}
-		ts.Increments = cIncrs
+func (tss *TimeSpans) Compress() { // must be pointer receiver
+	for _, ts := range *tss {
+		ts.Increments.Compress()
 	}
+	var cTss TimeSpans
+	for _, ts := range *tss {
+		if len(cTss) == 0 || !cTss[len(cTss)-1].Equal(ts) {
+			ts.GetCompressFactor() // sideefect
+			cTss = append(cTss, ts)
+		} else {
+			cTs := cTss[len(cTss)-1]
+			cTs.CompressFactor++
+			cTs.TimeEnd = ts.TimeEnd
+			cTs.DurationIndex = ts.DurationIndex
+		}
+	}
+	*tss = cTss
 }
 
-func (tss TimeSpans) Decompress() {
-	for _, ts := range tss {
-		var incrs Increments
-		for _, cIncr := range ts.Increments {
-			for i := 0; i < cIncr.GetCompressFactor(); i++ {
-				incrs = append(incrs, cIncr.Clone())
-			}
-		}
-		ts.Increments = incrs
+func (tss *TimeSpans) Decompress() { // must be pointer receiver
+	for _, ts := range *tss {
+		ts.Increments.Decompress()
 	}
+	var cTss TimeSpans
+	for _, cTs := range *tss {
+		var duration time.Duration
+		if cTs.GetCompressFactor() > 1 {
+			duration = cTs.GetUnitDuration()
+		}
+		for i := cTs.GetCompressFactor(); i > 1; i-- {
+			uTs := &TimeSpan{}
+			*uTs = *cTs // cloned by copy
+			uTs.TimeEnd = cTs.TimeStart.Add(duration)
+			uTs.DurationIndex = cTs.DurationIndex - time.Duration((i-1)*int(duration))
+			uTs.CompressFactor = 1
+			cTs.TimeStart = uTs.TimeEnd
+			cTss = append(cTss, uTs)
+		}
+		cTss = append(cTss, cTs)
+	}
+	*tss = cTss
 }
 
 func (incr *Increment) Clone() *Increment {
@@ -217,6 +235,38 @@ func (incr *Increment) GetCompressFactor() int {
 
 type Increments []*Increment
 
+func (incs Increments) Equal(other Increments) bool {
+	for index, i := range incs {
+		if !i.Equal(other[index]) || i.GetCompressFactor() != other[index].GetCompressFactor() {
+			return false
+		}
+	}
+	return true
+}
+
+func (incs *Increments) Compress() { // must be pointer receiver
+	var cIncrs Increments
+	for _, incr := range *incs {
+		if len(cIncrs) == 0 || !cIncrs[len(cIncrs)-1].Equal(incr) {
+			incr.GetCompressFactor() // sideefect
+			cIncrs = append(cIncrs, incr)
+		} else {
+			cIncrs[len(cIncrs)-1].CompressFactor++
+		}
+	}
+	*incs = cIncrs
+}
+
+func (incs *Increments) Decompress() { // must be pointer receiver
+	var cIncrs Increments
+	for _, cIncr := range *incs {
+		for i := 0; i < cIncr.GetCompressFactor(); i++ {
+			cIncrs = append(cIncrs, cIncr.Clone())
+		}
+	}
+	*incs = cIncrs
+}
+
 func (incs Increments) GetTotalCost() float64 {
 	cost := 0.0
 	for _, increment := range incs {
@@ -235,6 +285,11 @@ func (incs Increments) Length() (length int) {
 // Returns the duration of the timespan
 func (ts *TimeSpan) GetDuration() time.Duration {
 	return ts.TimeEnd.Sub(ts.TimeStart)
+}
+
+//Returns the duration of a unitary timespan in a compressed set
+func (ts *TimeSpan) GetUnitDuration() time.Duration {
+	return time.Duration(int(ts.TimeEnd.Sub(ts.TimeStart)) / ts.GetCompressFactor())
 }
 
 // Returns true if the given time is inside timespan range.
@@ -572,4 +627,22 @@ func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
 		return true
 	}
 	return true
+}
+
+func (ts *TimeSpan) Equal(other *TimeSpan) bool {
+	return ts.Increments.Equal(other.Increments) &&
+		ts.RateInterval.Equal(other.RateInterval) &&
+		ts.Cost == other.Cost &&
+		ts.GetUnitDuration() == other.GetUnitDuration() &&
+		ts.MatchedSubject == other.MatchedSubject &&
+		ts.MatchedPrefix == other.MatchedPrefix &&
+		ts.MatchedDestId == other.MatchedDestId &&
+		ts.RatingPlanId == other.RatingPlanId
+}
+
+func (ts *TimeSpan) GetCompressFactor() int {
+	if ts.CompressFactor == 0 {
+		ts.CompressFactor = 1
+	}
+	return ts.CompressFactor
 }

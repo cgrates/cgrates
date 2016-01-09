@@ -204,6 +204,8 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			TOR:         lastCC.TOR,
 			Increments:  refundIncrements,
 		}
+		cd.Increments.Compress()
+		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
 		var response float64
 		err := s.sessionManager.Rater().RefundIncrements(cd, &response)
 		if err != nil {

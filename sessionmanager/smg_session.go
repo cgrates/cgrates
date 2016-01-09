@@ -155,6 +155,8 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 			TOR:         lastCC.TOR,
 			Increments:  refundIncrements,
 		}
+		cd.Increments.Compress()
+		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
 		var response float64
 		err := self.rater.RefundIncrements(cd, &response)
 		if err != nil {
