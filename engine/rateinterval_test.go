@@ -191,6 +191,14 @@ func TestRateIntervalEqual(t *testing.T) {
 	}
 }
 
+func TestRateIntervalEqualWeight(t *testing.T) {
+	i1 := &RateInterval{Weight: 1}
+	i2 := &RateInterval{Weight: 2}
+	if i1.Equal(i2) {
+		t.Errorf("%v and %v should not be equal", i1, i2)
+	}
+}
+
 func TestRateIntervalNotEqual(t *testing.T) {
 	i1 := &RateInterval{
 		Timing: &RITiming{

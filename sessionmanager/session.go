@@ -234,6 +234,7 @@ func (s *Session) SaveOperations() {
 		for _, cc := range sr.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
+		firstCC.Timespans.Compress()
 
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{

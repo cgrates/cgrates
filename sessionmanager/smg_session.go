@@ -206,6 +206,7 @@ func (self *SMGSession) saveOperations() error {
 	for _, cc := range self.callCosts[1:] {
 		firstCC.Merge(cc)
 	}
+	firstCC.Timespans.Compress()
 	var reply string
 	err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
 		CgrId:          self.eventStart.GetCgrId(self.timezone),
