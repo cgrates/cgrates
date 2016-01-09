@@ -176,6 +176,7 @@ func (tss *TimeSpans) Compress() { // must be pointer receiver
 		} else {
 			cTs := cTss[len(cTss)-1]
 			cTs.CompressFactor++
+			cTs.Cost += ts.Cost
 			cTs.TimeEnd = ts.TimeEnd
 			cTs.DurationIndex = ts.DurationIndex
 		}
@@ -199,9 +200,12 @@ func (tss *TimeSpans) Decompress() { // must be pointer receiver
 			uTs.TimeEnd = cTs.TimeStart.Add(duration)
 			uTs.DurationIndex = cTs.DurationIndex - time.Duration((i-1)*int(duration))
 			uTs.CompressFactor = 1
+			uTs.Cost = cTs.Cost / float64(cTs.GetCompressFactor())
 			cTs.TimeStart = uTs.TimeEnd
 			cTss = append(cTss, uTs)
 		}
+		cTs.Cost = cTs.GetUnitCost()
+		cTs.CompressFactor = 1
 		cTss = append(cTss, cTs)
 	}
 	*tss = cTss
@@ -231,6 +235,10 @@ func (incr *Increment) GetCompressFactor() int {
 		incr.CompressFactor = 1
 	}
 	return incr.CompressFactor
+}
+
+func (incr *Increment) GetCost() float64 {
+	return float64(incr.GetCompressFactor()) * incr.Cost
 }
 
 type Increments []*Increment
@@ -270,7 +278,7 @@ func (incs *Increments) Decompress() { // must be pointer receiver
 func (incs Increments) GetTotalCost() float64 {
 	cost := 0.0
 	for _, increment := range incs {
-		cost += (float64(increment.GetCompressFactor()) * increment.Cost)
+		cost += increment.GetCost()
 	}
 	return cost
 }
@@ -290,6 +298,10 @@ func (ts *TimeSpan) GetDuration() time.Duration {
 //Returns the duration of a unitary timespan in a compressed set
 func (ts *TimeSpan) GetUnitDuration() time.Duration {
 	return time.Duration(int(ts.TimeEnd.Sub(ts.TimeStart)) / ts.GetCompressFactor())
+}
+
+func (ts *TimeSpan) GetUnitCost() float64 {
+	return ts.Cost / float64(ts.GetCompressFactor())
 }
 
 // Returns true if the given time is inside timespan range.
@@ -632,7 +644,7 @@ func (ts *TimeSpan) hasBetterRateIntervalThan(interval *RateInterval) bool {
 func (ts *TimeSpan) Equal(other *TimeSpan) bool {
 	return ts.Increments.Equal(other.Increments) &&
 		ts.RateInterval.Equal(other.RateInterval) &&
-		ts.Cost == other.Cost &&
+		ts.GetUnitCost() == other.GetUnitCost() &&
 		ts.GetUnitDuration() == other.GetUnitDuration() &&
 		ts.MatchedSubject == other.MatchedSubject &&
 		ts.MatchedPrefix == other.MatchedPrefix &&

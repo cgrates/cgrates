@@ -1700,21 +1700,25 @@ func TestTSCompressDecompress(t *testing.T) {
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
+			Cost:          1.2,
 			DurationIndex: 1 * time.Minute,
 		},
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC),
+			Cost:          1.2,
 			DurationIndex: 2 * time.Minute,
 		},
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 21, 0, 0, time.UTC),
+			Cost:          1.2,
 			DurationIndex: 3 * time.Minute,
 		},
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 21, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 22, 0, 0, time.UTC),
+			Cost:          1.2,
 			DurationIndex: 4 * time.Minute,
 		},
 	}
@@ -1722,9 +1726,11 @@ func TestTSCompressDecompress(t *testing.T) {
 	if len(tss) != 1 ||
 		!tss[0].TimeStart.Equal(time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC)) ||
 		!tss[0].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 22, 0, 0, time.UTC)) ||
-		tss[0].DurationIndex != 4*time.Minute {
+		tss[0].DurationIndex != 4*time.Minute ||
+		tss[0].Cost != 4.8 ||
+		tss[0].CompressFactor != 4 {
 		for _, ts := range tss {
-			t.Logf("TS: %v", ts)
+			t.Logf("TS: %+v", ts)
 		}
 		t.Error("Error compressing timespans: ", tss)
 	}
@@ -1733,17 +1739,25 @@ func TestTSCompressDecompress(t *testing.T) {
 		!tss[0].TimeStart.Equal(time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC)) ||
 		!tss[0].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
 		tss[0].DurationIndex != 1*time.Minute ||
+		tss[0].CompressFactor != 1 ||
+		tss[0].Cost != 1.2 ||
 		!tss[1].TimeStart.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
 		!tss[1].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC)) ||
 		tss[1].DurationIndex != 2*time.Minute ||
+		tss[1].CompressFactor != 1 ||
+		tss[1].Cost != 1.2 ||
 		!tss[2].TimeStart.Equal(time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC)) ||
 		!tss[2].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 21, 0, 0, time.UTC)) ||
 		tss[2].DurationIndex != 3*time.Minute ||
+		tss[2].CompressFactor != 1 ||
+		tss[2].Cost != 1.2 ||
 		!tss[3].TimeStart.Equal(time.Date(2015, 1, 9, 16, 21, 0, 0, time.UTC)) ||
 		!tss[3].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 22, 0, 0, time.UTC)) ||
-		tss[3].DurationIndex != 4*time.Minute {
+		tss[3].DurationIndex != 4*time.Minute ||
+		tss[3].CompressFactor != 1 ||
+		tss[3].Cost != 1.2 {
 		for i, ts := range tss {
-			t.Logf("TS(%d): %v", i, ts)
+			t.Logf("TS(%d): %+v", i, ts)
 		}
 		t.Error("Error decompressing timespans: ", tss)
 	}
@@ -1755,24 +1769,28 @@ func TestTSDifferentCompressDecompress(t *testing.T) {
 			TimeStart:     time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
 			RateInterval:  &RateInterval{Weight: 1},
+			Cost:          1.2,
 			DurationIndex: 1 * time.Minute,
 		},
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC),
 			RateInterval:  &RateInterval{Weight: 2},
+			Cost:          1.2,
 			DurationIndex: 2 * time.Minute,
 		},
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 21, 0, 0, time.UTC),
 			RateInterval:  &RateInterval{Weight: 1},
+			Cost:          1.2,
 			DurationIndex: 3 * time.Minute,
 		},
 		&TimeSpan{
 			TimeStart:     time.Date(2015, 1, 9, 16, 21, 0, 0, time.UTC),
 			TimeEnd:       time.Date(2015, 1, 9, 16, 22, 0, 0, time.UTC),
 			RateInterval:  &RateInterval{Weight: 1},
+			Cost:          1.2,
 			DurationIndex: 4 * time.Minute,
 		},
 	}
@@ -1781,14 +1799,17 @@ func TestTSDifferentCompressDecompress(t *testing.T) {
 		!tss[0].TimeStart.Equal(time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC)) ||
 		!tss[0].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
 		tss[0].DurationIndex != 1*time.Minute ||
+		tss[0].Cost != 1.2 ||
 		!tss[1].TimeStart.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
 		!tss[1].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC)) ||
 		tss[1].DurationIndex != 2*time.Minute ||
+		tss[1].Cost != 1.2 ||
 		!tss[2].TimeStart.Equal(time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC)) ||
 		!tss[2].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 22, 0, 0, time.UTC)) ||
-		tss[2].DurationIndex != 4*time.Minute {
+		tss[2].DurationIndex != 4*time.Minute ||
+		tss[2].Cost != 2.4 {
 		for _, ts := range tss {
-			t.Logf("TS: %v", ts)
+			t.Logf("TS: %+v", ts)
 		}
 		t.Error("Error compressing timespans: ", tss)
 	}
@@ -1797,17 +1818,25 @@ func TestTSDifferentCompressDecompress(t *testing.T) {
 		!tss[0].TimeStart.Equal(time.Date(2015, 1, 9, 16, 18, 0, 0, time.UTC)) ||
 		!tss[0].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
 		tss[0].DurationIndex != 1*time.Minute ||
+		tss[0].CompressFactor != 1 ||
+		tss[0].Cost != 1.2 ||
 		!tss[1].TimeStart.Equal(time.Date(2015, 1, 9, 16, 19, 0, 0, time.UTC)) ||
 		!tss[1].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC)) ||
 		tss[1].DurationIndex != 2*time.Minute ||
+		tss[1].CompressFactor != 1 ||
+		tss[1].Cost != 1.2 ||
 		!tss[2].TimeStart.Equal(time.Date(2015, 1, 9, 16, 20, 0, 0, time.UTC)) ||
 		!tss[2].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 21, 0, 0, time.UTC)) ||
 		tss[2].DurationIndex != 3*time.Minute ||
+		tss[2].CompressFactor != 1 ||
+		tss[2].Cost != 1.2 ||
 		!tss[3].TimeStart.Equal(time.Date(2015, 1, 9, 16, 21, 0, 0, time.UTC)) ||
 		!tss[3].TimeEnd.Equal(time.Date(2015, 1, 9, 16, 22, 0, 0, time.UTC)) ||
-		tss[3].DurationIndex != 4*time.Minute {
+		tss[3].DurationIndex != 4*time.Minute ||
+		tss[3].CompressFactor != 1 ||
+		tss[3].Cost != 1.2 {
 		for i, ts := range tss {
-			t.Logf("TS(%d): %v", i, ts)
+			t.Logf("TS(%d): %+v", i, ts)
 		}
 		t.Error("Error decompressing timespans: ", tss)
 	}
