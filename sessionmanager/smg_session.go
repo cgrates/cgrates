@@ -169,10 +169,12 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 
 // Session has ended, check debits and refund the extra charged duration
 func (self *SMGSession) close(endTime time.Time) error {
-	lastCC := self.callCosts[len(self.callCosts)-1]
-	end := lastCC.GetEndTime()
-	refundDuration := end.Sub(endTime)
-	self.refund(refundDuration)
+	if len(self.callCosts) != 0 { // We have had at least one cost calculation
+		lastCC := self.callCosts[len(self.callCosts)-1]
+		end := lastCC.GetEndTime()
+		refundDuration := end.Sub(endTime)
+		self.refund(refundDuration)
+	}
 	return nil
 }
 
