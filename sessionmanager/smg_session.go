@@ -155,6 +155,8 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 			TOR:         lastCC.TOR,
 			Increments:  refundIncrements,
 		}
+		cd.Increments.Compress()
+		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
 		var response float64
 		err := self.rater.RefundIncrements(cd, &response)
 		if err != nil {
@@ -206,6 +208,7 @@ func (self *SMGSession) saveOperations() error {
 	for _, cc := range self.callCosts[1:] {
 		firstCC.Merge(cc)
 	}
+	firstCC.Timespans.Compress()
 	var reply string
 	err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
 		CgrId:          self.eventStart.GetCgrId(self.timezone),

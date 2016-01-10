@@ -204,6 +204,8 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			TOR:         lastCC.TOR,
 			Increments:  refundIncrements,
 		}
+		cd.Increments.Compress()
+		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
 		var response float64
 		err := s.sessionManager.Rater().RefundIncrements(cd, &response)
 		if err != nil {
@@ -232,6 +234,7 @@ func (s *Session) SaveOperations() {
 		for _, cc := range sr.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
+		firstCC.Timespans.Compress()
 
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
