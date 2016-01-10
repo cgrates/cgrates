@@ -450,6 +450,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 		}
 		cd := &CallDescriptor{
 			CgrId:       ev.GetCgrId(rs.Timezone),
+			TOR:         ev.ToR,
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
 			Category:    ev.GetCategory(dc.CategoryField),

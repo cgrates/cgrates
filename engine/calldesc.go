@@ -766,6 +766,7 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 	// all must be locked in order to use cache
 	accMap := make(map[string]struct{})
 	var accountIDs []string
+	cd.Increments.Decompress()
 	for _, increment := range cd.Increments {
 		accMap[increment.BalanceInfo.AccountId] = struct{}{}
 	}

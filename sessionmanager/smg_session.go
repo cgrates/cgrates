@@ -156,6 +156,8 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 			TOR:         lastCC.TOR,
 			Increments:  refundIncrements,
 		}
+		cd.Increments.Compress()
+		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
 		var response float64
 		err := self.rater.Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {
@@ -170,10 +172,12 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 
 // Session has ended, check debits and refund the extra charged duration
 func (self *SMGSession) close(endTime time.Time) error {
-	lastCC := self.callCosts[len(self.callCosts)-1]
-	end := lastCC.GetEndTime()
-	refundDuration := end.Sub(endTime)
-	self.refund(refundDuration)
+	if len(self.callCosts) != 0 { // We have had at least one cost calculation
+		lastCC := self.callCosts[len(self.callCosts)-1]
+		end := lastCC.GetEndTime()
+		refundDuration := end.Sub(endTime)
+		self.refund(refundDuration)
+	}
 	return nil
 }
 
@@ -205,6 +209,7 @@ func (self *SMGSession) saveOperations() error {
 	for _, cc := range self.callCosts[1:] {
 		firstCC.Merge(cc)
 	}
+	firstCC.Timespans.Compress()
 	var reply string
 	err := self.cdrsrv.Call("CdrServer.LogCallCost", &engine.CallCostLog{
 		CgrId:          self.eventStart.GetCgrId(self.timezone),
