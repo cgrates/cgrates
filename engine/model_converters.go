@@ -179,6 +179,8 @@ func APItoModelAction(as *utils.TPActions) (result []TpAction) {
 			Categories:      a.Categories,
 			SharedGroups:    a.SharedGroups,
 			BalanceWeight:   a.BalanceWeight,
+			BalanceBlocker:  a.BalanceBlocker,
+			BalanceDisabled: a.BalanceDisabled,
 			ExtraParameters: a.ExtraParameters,
 			Weight:          a.Weight,
 		})
@@ -231,6 +233,7 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result []TpActionTrig
 			BalanceRatingSubject:   at.BalanceRatingSubject,
 			BalanceCategories:      at.BalanceCategories,
 			BalanceSharedGroups:    at.BalanceSharedGroups,
+			BalanceBlocker:         at.BalanceBlocker,
 			BalanceDisabled:        at.BalanceDisabled,
 			MinQueuedItems:         at.MinQueuedItems,
 			ActionsTag:             at.ActionsId,

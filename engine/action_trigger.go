@@ -46,7 +46,8 @@ type ActionTrigger struct {
 	BalanceRatingSubject  string          // filter for balance
 	BalanceCategories     utils.StringMap // filter for balance
 	BalanceSharedGroups   utils.StringMap // filter for balance
-	BalanceDisabled       bool            // filter for balance
+	BalanceBlocker        bool
+	BalanceDisabled       bool // filter for balance
 	Weight                float64
 	ActionsId             string
 	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
@@ -117,7 +118,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		return match
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
-	thresholdType, thresholdValue, direction, destinationId, weight, ratingSubject, categories, sharedGroup, timings, disabled := true, true, true, true, true, true, true, true, true, true
+	thresholdType, thresholdValue, direction, destinationId, weight, ratingSubject, categories, sharedGroup, timings, blocker, disabled := true, true, true, true, true, true, true, true, true, true, true
 	if a.ExtraParameters != "" {
 		t := struct {
 			ThresholdType        string
@@ -129,6 +130,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 			BalanceCategories    string
 			BalanceSharedGroups  string
 			BalanceTimingTags    string
+			BalanceBlocker       bool
 			BalanceDisabled      bool
 		}{}
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
@@ -141,9 +143,10 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		sharedGroup = len(t.BalanceSharedGroups) == 0 || at.BalanceSharedGroups.Equal(utils.ParseStringMap(t.BalanceSharedGroups))
 		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
 		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
+		blocker = at.BalanceBlocker == t.BalanceBlocker
 		disabled = at.BalanceDisabled == t.BalanceDisabled
 	}
-	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && categories && sharedGroup && timings && disabled
+	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && categories && sharedGroup && timings && blocker && disabled
 }
 
 // makes a shallow copy of the receiver
@@ -163,6 +166,7 @@ func (at *ActionTrigger) CreateBalance() *Balance {
 		Categories:     at.BalanceCategories,
 		SharedGroups:   at.BalanceSharedGroups,
 		TimingIDs:      at.BalanceTimingTags,
+		Blocker:        at.BalanceBlocker,
 		Disabled:       at.BalanceDisabled,
 		Weight:         at.BalanceWeight,
 	}

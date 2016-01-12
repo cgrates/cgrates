@@ -42,7 +42,7 @@ type Action struct {
 	ActionType       string
 	BalanceType      string
 	ExtraParameters  string
-	ExpirationString string
+	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
 	Balance          *Balance
 }

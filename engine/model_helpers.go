@@ -396,6 +396,8 @@ func (tps TpActions) GetActions() (map[string][]*utils.TPAction, error) {
 			Categories:      tpAc.Categories,
 			SharedGroups:    tpAc.SharedGroups,
 			BalanceWeight:   tpAc.BalanceWeight,
+			BalanceBlocker:  tpAc.BalanceBlocker,
+			BalanceDisabled: tpAc.BalanceDisabled,
 			ExtraParameters: tpAc.ExtraParameters,
 			Weight:          tpAc.Weight,
 		}
@@ -437,6 +439,7 @@ func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTri
 			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
 			BalanceCategories:     tpAt.BalanceCategories,
 			BalanceSharedGroups:   tpAt.BalanceSharedGroups,
+			BalanceBlocker:        tpAt.BalanceBlocker,
 			BalanceDisabled:       tpAt.BalanceDisabled,
 			Weight:                tpAt.Weight,
 			ActionsId:             tpAt.ActionsTag,
