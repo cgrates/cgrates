@@ -40,7 +40,7 @@ const (
 type SharedGroup struct {
 	Id                string
 	AccountParameters map[string]*SharingParameters
-	MemberIds         []string
+	MemberIds         utils.StringMap
 	//members           []*Account // accounts caching
 }
 
@@ -92,7 +92,7 @@ func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChai
 // Returns all shared group's balances collected from user accounts'
 func (sg *SharedGroup) GetBalances(destination, category, direction, balanceType string, ub *Account) (bc BalanceChain) {
 	//	if len(sg.members) == 0 {
-	for _, ubId := range sg.MemberIds {
+	for ubId := range sg.MemberIds {
 		var nUb *Account
 		if ubId == ub.Id { // skip the initiating user
 			nUb = ub

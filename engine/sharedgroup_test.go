@@ -21,6 +21,8 @@ package engine
 import (
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestSharedSetGet(t *testing.T) {
@@ -30,7 +32,7 @@ func TestSharedSetGet(t *testing.T) {
 		AccountParameters: map[string]*SharingParameters{
 			"test": &SharingParameters{Strategy: STRATEGY_HIGHEST},
 		},
-		MemberIds: []string{"1", "2", "3"},
+		MemberIds: utils.NewStringMap("1", "2", "3"),
 	}
 	err := ratingStorage.SetSharedGroup(sg)
 	if err != nil {
