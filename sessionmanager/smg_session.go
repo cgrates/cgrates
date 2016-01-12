@@ -107,6 +107,7 @@ func (self *SMGSession) debit(dur time.Duration) (time.Duration, error) {
 
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
+	initialRefundDuration := refundDuration
 	lastCC := self.callCosts[len(self.callCosts)-1]
 	lastCC.Timespans.Decompress()
 	var refundIncrements engine.Increments
@@ -156,7 +157,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 			Increments:  refundIncrements,
 		}
 		cd.Increments.Compress()
-		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
+		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", initialRefundDuration, utils.ToJSON(cd)))
 		var response float64
 		err := self.rater.RefundIncrements(cd, &response)
 		if err != nil {
