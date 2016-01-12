@@ -145,6 +145,12 @@ func (at *ActionPlan) IsASAP() bool {
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
 
+type SharedGroup struct {
+	Id                string
+	AccountParameters map[string]*engine.SharingParameters
+	MemberIds         []string
+}
+
 type ActionPlans []*ActionPlan
 
 func (mig MigratorRC8) migrateAccounts() error {
@@ -514,6 +520,44 @@ func (mig MigratorRC8) migrateActionPlans() error {
 		w.Write(result)
 		w.Close()
 		if err = mig.db.Cmd("SET", key, b.Bytes()).Err; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (mig MigratorRC8) migrateSharedGroups() error {
+	keys, err := mig.db.Cmd("KEYS", utils.SHARED_GROUP_PREFIX+"*").List()
+	if err != nil {
+		return err
+	}
+	newShgMap := make(map[string]*engine.SharedGroup, len(keys))
+	for _, key := range keys {
+		log.Printf("Migrating shared groups: %s...", key)
+		oldShg := SharedGroup{}
+		var values []byte
+		if values, err = mig.db.Cmd("GET", key).Bytes(); err == nil {
+			if err := mig.ms.Unmarshal(values, &oldShg); err != nil {
+				return err
+			}
+		}
+		newShg := &engine.SharedGroup{
+			Id:                oldShg.Id,
+			AccountParameters: oldShg.AccountParameters,
+			MemberIds:         make(utils.StringMap),
+		}
+		for _, accID := range oldShg.MemberIds {
+			newShg.MemberIds[accID] = true
+		}
+		newShgMap[key] = newShg
+	}
+	// write data back
+	for key, shg := range newShgMap {
+		result, err := mig.ms.Marshal(&shg)
+		if err != nil {
+			return err
+		}
+		if err = mig.db.Cmd("SET", key, result).Err; err != nil {
 			return err
 		}
 	}

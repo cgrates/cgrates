@@ -149,12 +149,15 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		// add shared group member
 		sg, err := ratingStorage.GetSharedGroup(sgId, false)
 		if err != nil || sg == nil {
-			//than problem
+			//than is problem
 			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 		} else {
-			if !utils.IsSliceMember(sg.MemberIds, ub.Id) {
+			if _, found := sg.MemberIds[ub.Id]; !found {
 				// add member and save
-				sg.MemberIds = append(sg.MemberIds, ub.Id)
+				if sg.MemberIds == nil {
+					sg.MemberIds = make(utils.StringMap)
+				}
+				sg.MemberIds[ub.Id] = true
 				ratingStorage.SetSharedGroup(sg)
 			}
 		}
@@ -610,7 +613,7 @@ func (acc *Account) GetSharedGroups() (groups []string) {
 	return
 }
 
-func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]string, error) {
+func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) (utils.StringMap, error) {
 	var balances []*Balance
 	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")...)
 	balances = append(balances, account.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")...)
@@ -621,17 +624,15 @@ func (account *Account) GetUniqueSharedGroupMembers(cd *CallDescriptor) ([]strin
 			sharedGroupIds = append(sharedGroupIds, sg)
 		}
 	}
-	var memberIds []string
+	memberIds := make(utils.StringMap)
 	for _, sgID := range sharedGroupIds {
 		sharedGroup, err := ratingStorage.GetSharedGroup(sgID, false)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 			return nil, err
 		}
-		for _, memberId := range sharedGroup.MemberIds {
-			if !utils.IsSliceMember(memberIds, memberId) {
-				memberIds = append(memberIds, memberId)
-			}
+		for memberID := range sharedGroup.MemberIds {
+			memberIds[memberID] = true
 		}
 	}
 	return memberIds, nil

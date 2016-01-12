@@ -1111,7 +1111,7 @@ func TestDebitShared(t *testing.T) {
 		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 
-	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
+	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.Id, groupie.Id), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
 	ratingStorage.SetSharedGroup(sg)
@@ -1181,7 +1181,7 @@ func TestMaxDurationShared(t *testing.T) {
 		utils.MONETARY: BalanceChain{&Balance{Uuid: "moneyc", Value: 130, SharedGroups: utils.NewStringMap("SG_TEST")}},
 	}}
 
-	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
+	sg := &SharedGroup{Id: "SG_TEST", MemberIds: utils.NewStringMap(rif.Id, groupie.Id), AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
 	ratingStorage.SetSharedGroup(sg)
