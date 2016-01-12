@@ -48,29 +48,30 @@ type Action struct {
 }
 
 const (
-	LOG                    = "*log"
-	RESET_TRIGGERS         = "*reset_triggers"
-	SET_RECURRENT          = "*set_recurrent"
-	UNSET_RECURRENT        = "*unset_recurrent"
-	ALLOW_NEGATIVE         = "*allow_negative"
-	DENY_NEGATIVE          = "*deny_negative"
-	RESET_ACCOUNT          = "*reset_account"
-	REMOVE_ACCOUNT         = "*remove_account"
-	REMOVE_BALANCE         = "*remove_balance"
-	TOPUP_RESET            = "*topup_reset"
-	TOPUP                  = "*topup"
-	DEBIT_RESET            = "*debit_reset"
-	DEBIT                  = "*debit"
-	RESET_COUNTERS         = "*reset_counters"
-	ENABLE_ACCOUNT         = "*enable_account"
-	DISABLE_ACCOUNT        = "*disable_account"
-	ENABLE_DISABLE_BALANCE = "*enable_disable_balance"
-	CALL_URL               = "*call_url"
-	CALL_URL_ASYNC         = "*call_url_async"
-	MAIL_ASYNC             = "*mail_async"
-	UNLIMITED              = "*unlimited"
-	CDRLOG                 = "*cdrlog"
-	SET_DDESTINATIONS      = "*set_ddestinations"
+	LOG                       = "*log"
+	RESET_TRIGGERS            = "*reset_triggers"
+	SET_RECURRENT             = "*set_recurrent"
+	UNSET_RECURRENT           = "*unset_recurrent"
+	ALLOW_NEGATIVE            = "*allow_negative"
+	DENY_NEGATIVE             = "*deny_negative"
+	RESET_ACCOUNT             = "*reset_account"
+	REMOVE_ACCOUNT            = "*remove_account"
+	REMOVE_BALANCE            = "*remove_balance"
+	TOPUP_RESET               = "*topup_reset"
+	TOPUP                     = "*topup"
+	DEBIT_RESET               = "*debit_reset"
+	DEBIT                     = "*debit"
+	RESET_COUNTERS            = "*reset_counters"
+	ENABLE_ACCOUNT            = "*enable_account"
+	DISABLE_ACCOUNT           = "*disable_account"
+	ENABLE_DISABLE_BALANCE    = "*enable_disable_balance"
+	CALL_URL                  = "*call_url"
+	CALL_URL_ASYNC            = "*call_url_async"
+	MAIL_ASYNC                = "*mail_async"
+	UNLIMITED                 = "*unlimited"
+	CDRLOG                    = "*cdrlog"
+	SET_DDESTINATIONS         = "*set_ddestinations"
+	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
 )
 
 func (a *Action) Clone() *Action {
@@ -133,6 +134,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return removeAccount, true
 	case REMOVE_BALANCE:
 		return removeBalance, true
+	case TRANSFER_MONETARY_DEFAULT:
+		return transferMonetaryDefault, true
 	}
 	return nil, false
 }
@@ -586,6 +589,25 @@ func removeBalance(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 	}
 	// update account in storage
 	return accountingStorage.SetAccount(ub)
+}
+
+func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if _, exists := acc.BalanceMap[utils.MONETARY]; !exists {
+		return utils.ErrNotFound
+	}
+	defaultBalance := acc.GetDefaultMoneyBalance()
+	bChain := acc.BalanceMap[utils.MONETARY]
+	for _, balance := range bChain {
+		if balance.Uuid != defaultBalance.Uuid &&
+			balance.Id != defaultBalance.Id { // extra caution
+			if balance.Value > 0 {
+				defaultBalance.Value += balance.Value
+				balance.Value = 0
+			}
+		}
+	}
+	// update account in storage
+	return accountingStorage.SetAccount(acc)
 }
 
 // Structure to store actions according to weight

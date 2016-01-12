@@ -1451,6 +1451,62 @@ func TestActionRemoveBalance(t *testing.T) {
 	}
 }
 
+func TestActionTransferMonetaryDefault(t *testing.T) {
+	err := accountingStorage.SetAccount(
+		&Account{
+			Id: "cgrates.org:trans",
+			BalanceMap: map[string]BalanceChain{
+				utils.MONETARY: BalanceChain{
+					&Balance{
+						Uuid:  utils.GenUUID(),
+						Id:    utils.META_DEFAULT,
+						Value: 10,
+					},
+					&Balance{
+						Uuid:  utils.GenUUID(),
+						Value: 3,
+					},
+					&Balance{
+						Uuid:  utils.GenUUID(),
+						Value: 6,
+					},
+					&Balance{
+						Uuid:  utils.GenUUID(),
+						Value: -2,
+					},
+				},
+			},
+		})
+	if err != nil {
+		t.Errorf("error setting account: %v", err)
+	}
+
+	a := &Action{
+		ActionType: TRANSFER_MONETARY_DEFAULT,
+	}
+
+	at := &ActionTiming{
+		accountIDs: map[string]struct{}{"cgrates.org:trans": struct{}{}},
+		actions:    Actions{a},
+	}
+	at.Execute()
+
+	afterUb, err := accountingStorage.GetAccount("cgrates.org:trans")
+	if err != nil {
+		t.Error("account not found: ", err, afterUb)
+	}
+	if afterUb.BalanceMap[utils.MONETARY].GetTotalValue() != 17 ||
+		afterUb.BalanceMap[utils.MONETARY][0].Value != 19 ||
+		afterUb.BalanceMap[utils.MONETARY][1].Value != 0 ||
+		afterUb.BalanceMap[utils.MONETARY][2].Value != 0 ||
+		afterUb.BalanceMap[utils.MONETARY][3].Value != -2 {
+		for _, b := range afterUb.BalanceMap[utils.MONETARY] {
+			t.Logf("B: %+v", b)
+		}
+		t.Error("ransfer balance value: ", afterUb.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+}
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {
