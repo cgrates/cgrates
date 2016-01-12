@@ -46,6 +46,7 @@ type Balance struct {
 	TimingIDs      utils.StringMap
 	Disabled       bool
 	Factor         ValueFactor
+	Blocker        bool
 	precision      int
 	account        *Account // used to store ub reference for shared balances
 	dirty          bool
@@ -67,7 +68,9 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.RatingSubject == o.RatingSubject &&
 		b.Categories.Equal(o.Categories) &&
 		b.SharedGroups.Equal(o.SharedGroups) &&
-		b.Disabled == o.Disabled
+		b.Disabled == o.Disabled &&
+
+		b.Blocker == o.Blocker
 }
 
 func (b *Balance) MatchFilter(o *Balance, skipIds bool) bool {

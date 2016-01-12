@@ -316,6 +316,10 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 						return
 					}
 				}
+				// check for blocker
+				if dryRun && balance.Blocker {
+					return // don't go to next balances
+				}
 			}
 		}
 
@@ -353,6 +357,10 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 						// only return if we are in dry run (max call duration)
 						return
 					}
+				}
+				// check for blocker
+				if dryRun && balance.Blocker {
+					return // don't go to next balances
 				}
 			}
 		}
