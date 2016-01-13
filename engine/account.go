@@ -697,6 +697,19 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 	}
 }
 
+func (acc *Account) matchConditions(condition string) (bool, error) {
+	condMap := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(condition), condMap); err != nil {
+		return false, err
+	}
+	operator, found := condMap["Operator"]
+	if !found {
+		return false, errors.New("operator not found")
+	}
+	_ = operator
+	return true, nil
+}
+
 // used in some api for transition
 func (acc *Account) AsOldStructure() interface{} {
 	type Balance struct {

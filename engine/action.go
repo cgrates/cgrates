@@ -72,6 +72,10 @@ const (
 	CDRLOG                    = "*cdrlog"
 	SET_DDESTINATIONS         = "*set_ddestinations"
 	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
+	CONDITIONAL_TOPUP         = "*conditional_topup"
+	CONDITIONAL_TOPUP_RESET   = "*conditional_topup_reset"
+	CONDITIONAL_DEBIT         = "*conditional_debit"
+	CONDITIONAL_DEBIT_RESET   = "*conditional_debit_reset"
 )
 
 func (a *Action) Clone() *Action {
@@ -131,11 +135,19 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	case SET_DDESTINATIONS:
 		return setddestinations, true
 	case REMOVE_ACCOUNT:
-		return removeAccount, true
+		return removeAccountAction, true
 	case REMOVE_BALANCE:
-		return removeBalance, true
+		return removeBalanceAction, true
 	case TRANSFER_MONETARY_DEFAULT:
 		return transferMonetaryDefault, true
+	case CONDITIONAL_DEBIT:
+		return conditionalDebitAction, true
+	case CONDITIONAL_DEBIT_RESET:
+		return conditionalDebitResetAction, true
+	case CONDITIONAL_TOPUP:
+		return conditionalTopupAction, true
+	case CONDITIONAL_TOPUP_RESET:
+		return conditionalTopupResetAction, true
 	}
 	return nil, false
 }
@@ -522,7 +534,7 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 	return nil
 }
 
-func removeAccount(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	var accID string
 	if ub != nil {
 		accID = ub.Id
@@ -568,7 +580,7 @@ func removeAccount(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 	return nil
 }
 
-func removeBalance(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	if _, exists := ub.BalanceMap[a.BalanceType]; !exists {
 		return utils.ErrNotFound
 	}
@@ -608,6 +620,38 @@ func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, a
 	}
 	// update account in storage
 	return accountingStorage.SetAccount(acc)
+}
+
+func conditionalDebitAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
+		return debitAction(acc, sq, a, acs)
+	} else {
+		return err
+	}
+}
+
+func conditionalDebitResetAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
+		return debitResetAction(acc, sq, a, acs)
+	} else {
+		return err
+	}
+}
+
+func conditionalTopupAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
+		return topupAction(acc, sq, a, acs)
+	} else {
+		return err
+	}
+}
+
+func conditionalTopupResetAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
+		return topupResetAction(acc, sq, a, acs)
+	} else {
+		return err
+	}
 }
 
 // Structure to store actions according to weight
