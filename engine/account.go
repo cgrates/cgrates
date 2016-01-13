@@ -318,11 +318,11 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				}
 				// check for blocker
 				if dryRun && balance.Blocker {
+					//log.Print("BLOCKER!")
 					return // don't go to next balances
 				}
 			}
 		}
-
 		// debit money
 		moneyBalanceChecker := true
 		for moneyBalanceChecker {
@@ -336,14 +336,13 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					return nil, debitErr
 				}
 				//utils.Logger.Info(fmt.Sprintf("CD AFTER MONEY: %+v", cd))
-				//log.Printf("partCC: %+v", partCC)
 				if partCC != nil {
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
 					cc.negativeConnectFee = partCC.negativeConnectFee
 
-					//for i, ts := range cc.Timespans {
-					//log.Printf("cc.times[an[%d]: %+v\n", i, ts)
-					//}
+					/*for i, ts := range cc.Timespans {
+						log.Printf("cc.times[an[%d]: %+v\n", i, ts)
+					}*/
 					cd.TimeStart = cc.GetEndTime()
 					//log.Printf("CD: %+v", cd)
 					//log.Printf("CD: %+v - %+v", cd.TimeStart, cd.TimeEnd)
@@ -360,6 +359,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				}
 				// check for blocker
 				if dryRun && balance.Blocker {
+					//log.Print("BLOCKER!")
 					return // don't go to next balances
 				}
 			}

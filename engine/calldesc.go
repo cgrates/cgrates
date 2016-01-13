@@ -555,7 +555,6 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	//utils.Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
 	//utils.Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
 
-	//
 	cc, err := cd.debit(account, true, false)
 	//utils.Logger.Debug("CC: " + utils.ToJSON(cc))
 	//log.Print("CC: ", utils.ToIJSON(cc))

@@ -234,6 +234,7 @@ func (b *Balance) Clone() *Balance {
 		SharedGroups:   b.SharedGroups,
 		TimingIDs:      b.TimingIDs,
 		Timings:        b.Timings, // should not be a problem with aliasing
+		Blocker:        b.Blocker,
 		Disabled:       b.Disabled,
 		dirty:          b.dirty,
 	}
