@@ -176,9 +176,11 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	}
 	found := false
 	id := a.BalanceType
+	disabled := a.Balance.Disabled
+	a.Balance.Disabled = !disabled // match for the opposite
 	for _, b := range ub.BalanceMap[id] {
 		if b.MatchFilter(a.Balance, false) {
-			b.Disabled = a.Balance.Disabled
+			b.Disabled = disabled
 			b.dirty = true
 			found = true
 		}
