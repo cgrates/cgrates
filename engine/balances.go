@@ -73,6 +73,9 @@ func (b *Balance) Equal(o *Balance) bool {
 }
 
 func (b *Balance) MatchFilter(o *Balance, skipIds bool) bool {
+	if o == nil {
+		return true
+	}
 	if !skipIds && o.Uuid != "" {
 		return b.Uuid == o.Uuid
 	}

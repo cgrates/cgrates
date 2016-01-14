@@ -611,7 +611,8 @@ func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, a
 	bChain := acc.BalanceMap[utils.MONETARY]
 	for _, balance := range bChain {
 		if balance.Uuid != defaultBalance.Uuid &&
-			balance.Id != defaultBalance.Id { // extra caution
+			balance.Id != defaultBalance.Id && // extra caution
+			balance.MatchFilter(a.Balance, false) {
 			if balance.Value > 0 {
 				defaultBalance.Value += balance.Value
 				balance.Value = 0
