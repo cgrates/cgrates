@@ -704,7 +704,7 @@ func (acc *Account) matchConditions(condition string) (bool, error) {
 	}
 	operator, found := condMap["Operator"]
 	if !found {
-		return false, errors.New("operator not found")
+		operator = utils.COND_EQ
 	}
 	_ = operator
 	return true, nil
