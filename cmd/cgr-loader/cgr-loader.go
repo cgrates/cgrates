@@ -36,7 +36,7 @@ import (
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
-	migrateRC8   = flag.String("migrate_rc8", "", "Migrate Accounts, Actions, ActionTriggers and DerivedChargers to RC8 structures, possible values: *all,acc,atr,act,dcs,apl")
+	migrateRC8   = flag.String("migrate_rc8", "", "Migrate Accounts, Actions, ActionTriggers, DerivedChargers, ActionPlans and SharedGroups to RC8 structures, possible values: *all,acc,atr,act,dcs,apl,shg")
 	tpdb_type    = flag.String("tpdb_type", cgrConfig.TpDbType, "The type of the TariffPlan database <redis>")
 	tpdb_host    = flag.String("tpdb_host", cgrConfig.TpDbHost, "The TariffPlan host to connect to.")
 	tpdb_port    = flag.String("tpdb_port", cgrConfig.TpDbPort, "The TariffPlan port to bind to.")
@@ -144,6 +144,11 @@ func main() {
 		}
 		if strings.Contains(*migrateRC8, "apl") || strings.Contains(*migrateRC8, "*all") {
 			if err := migratorRC8rat.migrateActionPlans(); err != nil {
+				log.Print(err.Error())
+			}
+		}
+		if strings.Contains(*migrateRC8, "shg") || strings.Contains(*migrateRC8, "*all") {
+			if err := migratorRC8rat.migrateSharedGroups(); err != nil {
 				log.Print(err.Error())
 			}
 		}
