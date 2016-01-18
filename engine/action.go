@@ -605,7 +605,8 @@ func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 
 func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	if acc == nil {
-		return utils.NewErrAccountNotFound("", "*transfer_monetary_default")
+		utils.Logger.Err("*transfer_monetary_default called without account")
+		return utils.ErrAccountNotFound
 	}
 	if _, exists := acc.BalanceMap[utils.MONETARY]; !exists {
 		return utils.ErrNotFound

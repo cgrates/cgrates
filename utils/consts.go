@@ -13,10 +13,6 @@ func NewErrServerError(err error) error {
 	return fmt.Errorf("SERVER_ERROR: %s", err)
 }
 
-func NewErrAccountNotFound(accID, context string) error {
-	return fmt.Errorf("ACCOUNT_NOT_FOUND: %s in %s", accID, context)
-}
-
 var (
 	ErrNotImplemented          = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound                = errors.New("NOT_FOUND")
@@ -30,7 +26,8 @@ var (
 	ErrInvalidPath             = errors.New("INVALID_PATH")
 	ErrInvalidKey              = errors.New("INVALID_KEY")
 	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
-	ErrAccountNotFound         = errors.New("AccountNotFound")
+	ErrRatingPlanNotFound      = errors.New("RATING_PLAN_NOT_FOUND")
+	ErrAccountNotFound         = errors.New("ACCOUNT_NOT_FOUND")
 )
 
 const (
