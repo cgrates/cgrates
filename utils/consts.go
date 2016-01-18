@@ -13,6 +13,10 @@ func NewErrServerError(err error) error {
 	return fmt.Errorf("SERVER_ERROR: %s", err)
 }
 
+func NewErrAccountNotFound(accID, context string) error {
+	return fmt.Errorf("ACCOUNT_NOT_FOUND: %s in %s", accID, context)
+}
+
 var (
 	ErrNotImplemented          = errors.New("NOT_IMPLEMENTED")
 	ErrNotFound                = errors.New("NOT_FOUND")
