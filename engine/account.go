@@ -697,17 +697,20 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 	}
 }
 
-func (acc *Account) matchConditions(condition string) (bool, error) {
-	condMap := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(condition), condMap); err != nil {
-		return false, err
+func (acc *Account) matchConditions(condition, balanceType string) (bool, error) {
+
+	cl := &utils.CondLoader{}
+	cl.Parse(condition)
+	for _, b := range acc.BalanceMap[balanceType] {
+		check, err := cl.Check(b)
+		if err != nil {
+			return false, err
+		}
+		if check {
+			return true, nil
+		}
 	}
-	operator, found := condMap["Operator"]
-	if !found {
-		operator = utils.COND_EQ
-	}
-	_ = operator
-	return true, nil
+	return false, nil
 }
 
 // used in some api for transition
