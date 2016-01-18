@@ -57,9 +57,7 @@ func isOperator(s string) bool {
 	return strings.HasPrefix(s, "*")
 }
 
-type CondLoader struct {
-	RootElement CondElement
-}
+type CondLoader struct{}
 
 func (cp *CondLoader) Load(a map[string]interface{}, parentElement CondElement) (CondElement, error) {
 	for key, value := range a {
@@ -93,9 +91,10 @@ func (cp *CondLoader) Load(a map[string]interface{}, parentElement CondElement) 
 	return nil, nil
 }
 
-func (cp *CondLoader) Parse(s string) (err error) {
+func (cp *CondLoader) Parse(s string) (root CondElement, err error) {
 	a := make(map[string]interface{})
-	json.Unmarshal([]byte([]byte(s)), &a)
-	cp.RootElement, err = cp.Load(a, nil)
-	return
+	if err := json.Unmarshal([]byte([]byte(s)), &a); err != nil {
+		return nil, err
+	}
+	return cp.Load(a, nil)
 }
