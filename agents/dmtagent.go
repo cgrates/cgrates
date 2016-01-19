@@ -140,10 +140,12 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				return nil
 			}
 		}
-		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Granted-Service-Unit", "CC-Time"}, strconv.FormatFloat(maxUsage, 'f', 0, 64),
-			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Granted-Service-Unit, error: %s", ccr.diamMessage, err))
-			return nil
+		if ccr.CCRequestType != 3 { // For terminate, we don't add granted-service-unit AVP
+			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Granted-Service-Unit", "CC-Time"}, strconv.FormatFloat(maxUsage, 'f', 0, 64),
+				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Granted-Service-Unit, error: %s", ccr.diamMessage, err))
+				return nil
+			}
 		}
 	}
 	if err := cca.SetProcessorAVPs(reqProcessor, maxUsage); err != nil {
