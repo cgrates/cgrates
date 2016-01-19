@@ -1,5 +1,29 @@
 package utils
 
+/*
+When an action is using *conditional_ form before the execution the engine is checking the ExtraParameters field for condition filter, loads it and checks all the balances in the account for one that is satisfying the condition. If one is fond the action is executed, otherwise it will do nothing for this account.
+
+The condition syntax is a json encoded document similar to mongodb query language.
+
+Examples:
+- {"Weight":{"*gt":50}} checks for a balance with weight greater than 50
+- {"*or":[{"Value":{"*eq":0}},{"Value":{"*gte":100}}] checks for a balance with value equal to 0 or equal or highr than 100
+
+Available operators:
+- *eq: equal
+- *gt: greater than
+- *gte: greater or equal than
+- *lt: less then
+- *lte: less or equal than
+- *or: logical or
+- *and: logical and
+- *has: logical has
+
+Equal (*eq) and local and (*and) operators are implicit for shortcuts. In this way:
+
+{"*and":[{"Value":{"*eq":3}},{"Weight":{"*eq":10}}]} is equivalent to: {"Value":3, "Weight":10}.
+*/
+
 import (
 	"encoding/json"
 	"fmt"
@@ -13,7 +37,7 @@ const (
 	CondGTE = "*gte"
 	CondLT  = "*lt"
 	CondLTE = "*lte"
-	CondEXP = "*exp"
+	//CondEXP = "*exp"
 	CondOR  = "*or"
 	CondAND = "*and"
 	CondHAS = "*has"
