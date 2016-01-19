@@ -628,7 +628,7 @@ func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, a
 }
 
 func conditionalDebitAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters, a.BalanceType); matched {
+	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
 		return debitAction(acc, sq, a, acs)
 	} else {
 		return err
@@ -636,7 +636,7 @@ func conditionalDebitAction(acc *Account, sq *StatsQueueTriggered, a *Action, ac
 }
 
 func conditionalDebitResetAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters, a.BalanceType); matched {
+	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
 		return debitResetAction(acc, sq, a, acs)
 	} else {
 		return err
@@ -644,7 +644,7 @@ func conditionalDebitResetAction(acc *Account, sq *StatsQueueTriggered, a *Actio
 }
 
 func conditionalTopupAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters, a.BalanceType); matched {
+	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
 		return topupAction(acc, sq, a, acs)
 	} else {
 		return err
@@ -652,7 +652,7 @@ func conditionalTopupAction(acc *Account, sq *StatsQueueTriggered, a *Action, ac
 }
 
 func conditionalTopupResetAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters, a.BalanceType); matched {
+	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
 		return topupResetAction(acc, sq, a, acs)
 	} else {
 		return err
