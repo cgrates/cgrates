@@ -20,6 +20,10 @@ func TestCondLoader(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
 	}
+	err = cl.Parse(``)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
 }
 
 func TestCondKeyValue(t *testing.T) {
@@ -66,6 +70,27 @@ func TestCondKeyValue(t *testing.T) {
 		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
 	}
 	if check, err := cl.Check(o); check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"Field":6, "Other":false}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"Other":true, "Field":{"*gt":5}}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(``)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
 	}
 }

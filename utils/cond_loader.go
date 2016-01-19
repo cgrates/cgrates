@@ -148,6 +148,13 @@ func (kv *keyValue) checkStruct(o interface{}) (bool, error) {
 	return value.Interface() == kv.value, nil
 }
 
+type trueElement struct{}
+
+func (te *trueElement) addChild(condElement) error { return ErrNotImplemented }
+func (te *trueElement) checkStruct(o interface{}) (bool, error) {
+	return true, nil
+}
+
 func isOperator(s string) bool {
 	return strings.HasPrefix(s, "*")
 }
@@ -186,18 +193,27 @@ func (cp *CondLoader) load(a map[string]interface{}, parentElement condElement) 
 		if parentElement != nil {
 			parentElement.addChild(currentElement)
 		} else {
-			return currentElement, nil
+			if len(a) > 1 {
+				parentElement = &operatorSlice{operator: CondAND}
+				parentElement.addChild(currentElement)
+			} else {
+				return currentElement, nil
+			}
 		}
 	}
-	return nil, nil
+	return parentElement, nil
 }
 
 func (cp *CondLoader) Parse(s string) (err error) {
 	a := make(map[string]interface{})
-	if err := json.Unmarshal([]byte([]byte(s)), &a); err != nil {
-		return err
+	if len(s) != 0 {
+		if err := json.Unmarshal([]byte([]byte(s)), &a); err != nil {
+			return err
+		}
+		cp.rootElement, err = cp.load(a, nil)
+	} else {
+		cp.rootElement = &trueElement{}
 	}
-	cp.rootElement, err = cp.load(a, nil)
 	return
 }
 
