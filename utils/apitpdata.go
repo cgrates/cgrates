@@ -597,6 +597,7 @@ type AttrExpFileCdrs struct {
 	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
 	SmsUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	MmsUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
 	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
@@ -1089,6 +1090,7 @@ type AttrExportCdrsToFile struct {
 	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
 	SMSUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
 	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones

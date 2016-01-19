@@ -40,7 +40,7 @@ func TestCsvCdrWriter(t *testing.T) {
 		Usage: time.Duration(10) * time.Second, RunID: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
 	}
-	cdre, err := NewCdrExporter([]*engine.CDR{storedCdr1}, nil, cfg.CdreProfiles["*default"], utils.CSV, ',', "firstexport", 0.0, 0.0, 0.0, 0.0, 0, 4,
+	cdre, err := NewCdrExporter([]*engine.CDR{storedCdr1}, nil, cfg.CdreProfiles["*default"], utils.CSV, ',', "firstexport", 0.0, 0.0, 0.0, 0.0, 0.0, 0, 4,
 		cfg.RoundingDecimals, "", 0, cfg.HttpSkipTlsVerify, "")
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
@@ -69,7 +69,7 @@ func TestAlternativeFieldSeparator(t *testing.T) {
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
 	}
 	cdre, err := NewCdrExporter([]*engine.CDR{storedCdr1}, nil, cfg.CdreProfiles["*default"], utils.CSV, '|',
-		"firstexport", 0.0, 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", 0, cfg.HttpSkipTlsVerify, "")
+		"firstexport", 0.0, 0.0, 0.0, 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", 0, cfg.HttpSkipTlsVerify, "")
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}

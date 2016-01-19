@@ -24,6 +24,7 @@ type CdreConfig struct {
 	FieldSeparator             rune
 	DataUsageMultiplyFactor    float64
 	SMSUsageMultiplyFactor     float64
+	MMSUsageMultiplyFactor     float64
 	GenericUsageMultiplyFactor float64
 	CostMultiplyFactor         float64
 	CostRoundingDecimals       int
@@ -53,6 +54,9 @@ func (self *CdreConfig) loadFromJsonCfg(jsnCfg *CdreJsonCfg) error {
 	}
 	if jsnCfg.Sms_usage_multiply_factor != nil {
 		self.SMSUsageMultiplyFactor = *jsnCfg.Sms_usage_multiply_factor
+	}
+	if jsnCfg.Mms_usage_multiply_factor != nil {
+		self.MMSUsageMultiplyFactor = *jsnCfg.Mms_usage_multiply_factor
 	}
 	if jsnCfg.Generic_usage_multiply_factor != nil {
 		self.GenericUsageMultiplyFactor = *jsnCfg.Generic_usage_multiply_factor
@@ -100,6 +104,7 @@ func (self *CdreConfig) Clone() *CdreConfig {
 	clnCdre.FieldSeparator = self.FieldSeparator
 	clnCdre.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor
 	clnCdre.SMSUsageMultiplyFactor = self.SMSUsageMultiplyFactor
+	clnCdre.MMSUsageMultiplyFactor = self.MMSUsageMultiplyFactor
 	clnCdre.GenericUsageMultiplyFactor = self.GenericUsageMultiplyFactor
 	clnCdre.CostMultiplyFactor = self.CostMultiplyFactor
 	clnCdre.CostRoundingDecimals = self.CostRoundingDecimals
