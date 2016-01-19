@@ -604,6 +604,10 @@ func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if acc == nil {
+		utils.Logger.Err("*transfer_monetary_default called without account")
+		return utils.ErrAccountNotFound
+	}
 	if _, exists := acc.BalanceMap[utils.MONETARY]; !exists {
 		return utils.ErrNotFound
 	}
@@ -624,7 +628,7 @@ func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, a
 }
 
 func conditionalDebitAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
+	if matched, err := acc.matchConditions(a.ExtraParameters, a.BalanceType); matched {
 		return debitAction(acc, sq, a, acs)
 	} else {
 		return err
@@ -632,7 +636,7 @@ func conditionalDebitAction(acc *Account, sq *StatsQueueTriggered, a *Action, ac
 }
 
 func conditionalDebitResetAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
+	if matched, err := acc.matchConditions(a.ExtraParameters, a.BalanceType); matched {
 		return debitResetAction(acc, sq, a, acs)
 	} else {
 		return err
@@ -640,7 +644,7 @@ func conditionalDebitResetAction(acc *Account, sq *StatsQueueTriggered, a *Actio
 }
 
 func conditionalTopupAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
+	if matched, err := acc.matchConditions(a.ExtraParameters, a.BalanceType); matched {
 		return topupAction(acc, sq, a, acs)
 	} else {
 		return err
@@ -648,7 +652,7 @@ func conditionalTopupAction(acc *Account, sq *StatsQueueTriggered, a *Action, ac
 }
 
 func conditionalTopupResetAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
+	if matched, err := acc.matchConditions(a.ExtraParameters, a.BalanceType); matched {
 		return topupResetAction(acc, sq, a, acs)
 	} else {
 		return err

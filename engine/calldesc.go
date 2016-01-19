@@ -195,7 +195,11 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
-	if err != nil || !cd.continousRatingInfos() {
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("Rating plan not found for destination %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
+		err = utils.ErrRatingPlanNotFound
+	}
+	if !cd.continousRatingInfos() {
 		utils.Logger.Err(fmt.Sprintf("Destination %s not authorized for account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
 		err = utils.ErrUnauthorizedDestination
 	}

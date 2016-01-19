@@ -2,90 +2,164 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
+	"reflect"
 	"strings"
 )
 
 const (
-	COND_EQ  = "*eq"
-	COND_GT  = "*gt"
-	COND_LT  = "*lt"
-	COND_EXP = "*exp"
+	CondEQ  = "*eq"
+	CondGT  = "*gt"
+	CondGTE = "*gte"
+	CondLT  = "*lt"
+	CondLTE = "*lte"
+	CondEXP = "*exp"
+	CondOR  = "*or"
+	CondAND = "*and"
 )
 
-type CondElement interface {
-	AddChild(CondElement)
-	CheckStruct(interface{}) (bool, error)
+var (
+	ErrNotNumerical = errors.New("NOT_NUMERICAL")
+)
+
+type condElement interface {
+	addChild(condElement) error
+	checkStruct(interface{}) (bool, error)
 }
 
-type OperatorSlice struct {
-	Operator string
-	Slice    []CondElement
+type operatorSlice struct {
+	operator string
+	slice    []condElement
 }
 
-func (os *OperatorSlice) AddChild(ce CondElement) {
-	os.Slice = append(os.Slice, ce)
+func (os *operatorSlice) addChild(ce condElement) error {
+	os.slice = append(os.slice, ce)
+	return nil
 }
-func (os *OperatorSlice) CheckStruct(o interface{}) (bool, error) { return true, nil }
-
-type KeyStruct struct {
-	Key    string
-	Struct CondElement
+func (os *operatorSlice) checkStruct(o interface{}) (bool, error) {
+	switch os.operator {
+	case CondOR:
+		for _, cond := range os.slice {
+			check, err := cond.checkStruct(o)
+			if err != nil {
+				return false, err
+			}
+			if check {
+				return true, nil
+			}
+		}
+	case CondAND:
+		accumulator := true
+		for _, cond := range os.slice {
+			check, err := cond.checkStruct(o)
+			if err != nil {
+				return false, err
+			}
+			accumulator = accumulator && check
+		}
+		return accumulator, nil
+	}
+	return false, nil
 }
 
-func (ks *KeyStruct) AddChild(ce CondElement) {
-	ks.Struct = ce
-}
-func (ks *KeyStruct) CheckStruct(o interface{}) (bool, error) { return true, nil }
-
-type OperatorValue struct {
-	Operator string
-	Value    interface{}
+type keyStruct struct {
+	key  string
+	elem condElement
 }
 
-func (ov *OperatorValue) AddChild(CondElement)                    {}
-func (ov *OperatorValue) CheckStruct(o interface{}) (bool, error) { return true, nil }
-
-type KeyValue struct {
-	Key   string
-	Value interface{}
+func (ks *keyStruct) addChild(ce condElement) error {
+	ks.elem = ce
+	return nil
+}
+func (ks *keyStruct) checkStruct(o interface{}) (bool, error) {
+	obj := reflect.ValueOf(o)
+	if obj.Kind() == reflect.Ptr {
+		obj = obj.Elem()
+	}
+	value := obj.FieldByName(ks.key)
+	return ks.elem.checkStruct(value.Interface())
 }
 
-func (os *KeyValue) AddChild(CondElement)                    {}
-func (os *KeyValue) CheckStruct(o interface{}) (bool, error) { return true, nil }
+type operatorValue struct {
+	operator string
+	value    interface{}
+}
+
+func (ov *operatorValue) addChild(condElement) error { return ErrNotImplemented }
+func (ov *operatorValue) checkStruct(o interface{}) (bool, error) {
+	if ov.operator == CondEQ {
+		return ov.value == o, nil
+	}
+	var of, vf float64
+	var ok bool
+	if of, ok = o.(float64); !ok {
+		return false, ErrNotNumerical
+	}
+	if vf, ok = ov.value.(float64); !ok {
+		return false, ErrNotNumerical
+	}
+	switch ov.operator {
+	case CondGT:
+		return of > vf, nil
+	case CondGTE:
+		return of >= vf, nil
+	case CondLT:
+		return of < vf, nil
+	case CondLTE:
+		return of <= vf, nil
+
+	}
+	return true, nil
+}
+
+type keyValue struct {
+	key   string
+	value interface{}
+}
+
+func (kv *keyValue) addChild(condElement) error { return ErrNotImplemented }
+func (kv *keyValue) checkStruct(o interface{}) (bool, error) {
+	obj := reflect.ValueOf(o)
+	if obj.Kind() == reflect.Ptr {
+		obj = obj.Elem()
+	}
+	value := obj.FieldByName(kv.key)
+	return value.Interface() == kv.value, nil
+}
 
 func isOperator(s string) bool {
 	return strings.HasPrefix(s, "*")
 }
 
 type CondLoader struct {
-	RootElement CondElement
+	rootElement condElement
 }
 
-func (cp *CondLoader) Load(a map[string]interface{}, parentElement CondElement) (CondElement, error) {
+func (cp *CondLoader) load(a map[string]interface{}, parentElement condElement) (condElement, error) {
 	for key, value := range a {
-		var currentElement CondElement
+		var currentElement condElement
 		switch t := value.(type) {
 		case []interface{}:
-			currentElement = &OperatorSlice{Operator: key}
+			currentElement = &operatorSlice{operator: key}
 			for _, e := range t {
-				cp.Load(e.(map[string]interface{}), currentElement)
+				cp.load(e.(map[string]interface{}), currentElement)
 			}
 		case map[string]interface{}:
-			currentElement = &KeyStruct{Key: key}
+			currentElement = &keyStruct{key: key}
 			//log.Print("map: ", t)
-			cp.Load(t, currentElement)
+			cp.load(t, currentElement)
 		case interface{}:
 			if isOperator(key) {
-				currentElement = &OperatorValue{Operator: key, Value: t}
+				currentElement = &operatorValue{operator: key, value: t}
 			} else {
-				currentElement = &KeyValue{Key: key, Value: t}
+				currentElement = &keyValue{key: key, value: t}
 			}
 			//log.Print("generic interface: ", t)
 		default:
 			return nil, ErrParserError
 		}
 		if parentElement != nil {
-			parentElement.AddChild(currentElement)
+			parentElement.addChild(currentElement)
 		} else {
 			return currentElement, nil
 		}
@@ -95,7 +169,13 @@ func (cp *CondLoader) Load(a map[string]interface{}, parentElement CondElement) 
 
 func (cp *CondLoader) Parse(s string) (err error) {
 	a := make(map[string]interface{})
-	json.Unmarshal([]byte([]byte(s)), &a)
-	cp.RootElement, err = cp.Load(a, nil)
+	if err := json.Unmarshal([]byte([]byte(s)), &a); err != nil {
+		return err
+	}
+	cp.rootElement, err = cp.load(a, nil)
 	return
+}
+
+func (cp *CondLoader) Check(o interface{}) (bool, error) {
+	return cp.rootElement.checkStruct(o)
 }

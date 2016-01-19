@@ -22,7 +22,7 @@ import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
 	c := &CmdGetScheduledActions{
-		name:      "scheduler_queue",
+		name:      "2",
 		rpcMethod: "ApierV1.GetScheduledActions",
 		rpcParams: &v1.AttrsGetScheduledActions{},
 	}
