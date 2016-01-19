@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 )
 
 const (
@@ -37,7 +38,7 @@ const (
 	CondGTE = "*gte"
 	CondLT  = "*lt"
 	CondLTE = "*lte"
-	//CondEXP = "*exp"
+	CondEXP = "*exp"
 	CondOR  = "*or"
 	CondAND = "*and"
 	CondHAS = "*has"
@@ -134,6 +135,24 @@ func (ov *operatorValue) checkStruct(o interface{}) (bool, error) {
 		}
 		return true, nil
 	}
+	// date conversion
+	if ov.operator == CondEXP {
+		var expDate time.Time
+		var ok bool
+		if expDate, ok = o.(time.Time); !ok {
+			return false, NewErrInvalidArgument(o)
+		}
+		var expired bool
+		if expired, ok = ov.value.(bool); !ok {
+			return false, NewErrInvalidArgument(ov.value)
+		}
+		if expired { // check for expiration
+			return !expDate.IsZero() && expDate.Before(time.Now()), nil
+		} else { // check not expired
+			return expDate.IsZero() || expDate.After(time.Now()), nil
+		}
+	}
+
 	// float conversion
 	var of, vf float64
 	var ok bool
