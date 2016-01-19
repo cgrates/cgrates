@@ -106,7 +106,7 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 }
 
 // End a session from outside
-func (self *SMGeneric) sessionEnd(sessionId string, endTime time.Time) error {
+func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
 		ss := self.getSession(sessionId)
 		if len(ss) == 0 { // Not handled by us
@@ -119,7 +119,12 @@ func (self *SMGeneric) sessionEnd(sessionId string, endTime time.Time) error {
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
 			}
-			if err := s.close(endTime); err != nil {
+			aTime, err := s.eventStart.GetAnswerTime(utils.META_DEFAULT, self.cgrCfg.DefaultTimezone)
+			if err != nil || aTime.IsZero() {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %s",
+					sessionId, s.runId, aTime, err.Error()))
+			}
+			if err := s.close(aTime.Add(usage)); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
 			if err := s.saveOperations(); err != nil {
@@ -189,11 +194,11 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
-	endTime, err := gev.GetEndTime(utils.META_DEFAULT, self.timezone)
+	usage, err := gev.GetUsage(utils.META_DEFAULT)
 	if err != nil {
 		return err
 	}
-	if err := self.sessionEnd(gev.GetUUID(), endTime); err != nil {
+	if err := self.sessionEnd(gev.GetUUID(), usage); err != nil {
 		return err
 	}
 	return nil
@@ -248,7 +253,7 @@ func (self *SMGeneric) Connect() error {
 // System shutdown
 func (self *SMGeneric) Shutdown() error {
 	for ssId := range self.getSessions() { // Force sessions shutdown
-		self.sessionEnd(ssId, time.Now())
+		self.sessionEnd(ssId, time.Duration(self.cgrCfg.MaxCallDuration))
 	}
 	return nil
 }
