@@ -1,10 +1,22 @@
 package utils
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestCondLoader(t *testing.T) {
 	cl := &CondLoader{}
 	err := cl.Parse(`{"*or":[{"test":1},{"field":{"*gt":1}},{"best":"coco"}]}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+
+	err = cl.Parse(`{"*has":["NAT","RET","EUR"]}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	err = cl.Parse(`{"Field":7, "Other":true}`)
 	if err != nil {
 		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
 	}
@@ -40,6 +52,20 @@ func TestCondKeyValue(t *testing.T) {
 		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
 	}
 	if check, err := cl.Check(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"Field":6, "Other":true}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"Field":7, "Other":true}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
 	}
 }
@@ -79,21 +105,25 @@ func TestCondKeyValuePointer(t *testing.T) {
 }
 
 func TestCondOperatorValue(t *testing.T) {
-	root := &operatorValue{operator: "*gt", value: 3.4}
+	root := &operatorValue{operator: CondGT, value: 3.4}
 	if check, err := root.checkStruct(3.5); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(root))
 	}
-	root = &operatorValue{operator: "*eq", value: 3.4}
+	root = &operatorValue{operator: CondEQ, value: 3.4}
 	if check, err := root.checkStruct(3.5); check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(root))
 	}
-	root = &operatorValue{operator: "*eq", value: 3.4}
+	root = &operatorValue{operator: CondEQ, value: 3.4}
 	if check, err := root.checkStruct(3.4); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(root))
 	}
-	root = &operatorValue{operator: "*eq", value: "zinc"}
+	root = &operatorValue{operator: CondEQ, value: "zinc"}
 	if check, err := root.checkStruct("zinc"); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(root))
+	}
+	root = &operatorValue{operator: CondHAS, value: []interface{}{"NAT", "RET", "EUR"}}
+	if check, err := root.checkStruct(StringMap{"WOR": true, "EUR": true, "NAT": true, "RET": true, "ROM": true}); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", !check, err, ToIJSON(root))
 	}
 }
 
@@ -119,7 +149,7 @@ func TestCondKeyStruct(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
 	}
-	if check, err := cl.Check(o); check || err != ErrNotNumerical {
+	if check, err := cl.Check(o); check || !strings.HasPrefix(err.Error(), "INVALID_ARGUMENT") {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
 	}
 	err = cl.Parse(`{"Field":{"*gte": 6}}`)
@@ -181,7 +211,7 @@ func TestCondKeyStructPointer(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
 	}
-	if check, err := cl.Check(o); check || err != ErrNotNumerical {
+	if check, err := cl.Check(o); check || !strings.HasPrefix(err.Error(), "INVALID_ARGUMENT") {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
 	}
 	err = cl.Parse(`{"Field":{"*gte": 6}}`)
@@ -259,5 +289,49 @@ func TestCondOperatorSlice(t *testing.T) {
 	}
 	if check, err := cl.Check(o); check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+}
+
+func TestCondMixed(t *testing.T) {
+	o := &struct {
+		Test       string
+		Field      float64
+		Categories StringMap
+		Other      bool
+	}{
+		Test:       "test",
+		Field:      6.0,
+		Categories: StringMap{"call": true, "data": true, "voice": true},
+		Other:      true,
+	}
+	cl := &CondLoader{}
+	err := cl.Parse(`{"*and":[{"Test":"test"},{"Field":{"*gt":5}},{"Other":true},{"Categories":{"*has":["data", "call"]}}]}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+}
+
+func TestCondBalanceType(t *testing.T) {
+	type Balance struct {
+		Value float64
+	}
+
+	o := &struct {
+		BalanceType string
+		Balance
+	}{
+		BalanceType: MONETARY,
+		Balance:     Balance{Value: 10},
+	}
+	cl := &CondLoader{}
+	err := cl.Parse(`{"BalanceType":"*monetary","Value":10}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", !check, err, ToIJSON(cl.rootElement))
 	}
 }

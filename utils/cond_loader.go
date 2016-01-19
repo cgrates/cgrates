@@ -2,7 +2,7 @@ package utils
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 )
@@ -16,11 +16,12 @@ const (
 	CondEXP = "*exp"
 	CondOR  = "*or"
 	CondAND = "*and"
+	CondHAS = "*has"
 )
 
-var (
-	ErrNotNumerical = errors.New("NOT_NUMERICAL")
-)
+func NewErrInvalidArgument(arg interface{}) error {
+	return fmt.Errorf("INVALID_ARGUMENT: %v", arg)
+}
 
 type condElement interface {
 	addChild(condElement) error
@@ -87,16 +88,36 @@ type operatorValue struct {
 
 func (ov *operatorValue) addChild(condElement) error { return ErrNotImplemented }
 func (ov *operatorValue) checkStruct(o interface{}) (bool, error) {
+	// no conversion
 	if ov.operator == CondEQ {
 		return ov.value == o, nil
 	}
+	// StringMap conversion
+	if ov.operator == CondHAS {
+		var strMap StringMap
+		var ok bool
+		if strMap, ok = o.(StringMap); !ok {
+			return false, NewErrInvalidArgument(o)
+		}
+		var strSlice []interface{}
+		if strSlice, ok = ov.value.([]interface{}); !ok {
+			return false, NewErrInvalidArgument(ov.value)
+		}
+		for _, str := range strSlice {
+			if !strMap[str.(string)] {
+				return false, nil
+			}
+		}
+		return true, nil
+	}
+	// float conversion
 	var of, vf float64
 	var ok bool
 	if of, ok = o.(float64); !ok {
-		return false, ErrNotNumerical
+		return false, NewErrInvalidArgument(o)
 	}
 	if vf, ok = ov.value.(float64); !ok {
-		return false, ErrNotNumerical
+		return false, NewErrInvalidArgument(ov.value)
 	}
 	switch ov.operator {
 	case CondGT:
@@ -140,9 +161,13 @@ func (cp *CondLoader) load(a map[string]interface{}, parentElement condElement) 
 		var currentElement condElement
 		switch t := value.(type) {
 		case []interface{}:
-			currentElement = &operatorSlice{operator: key}
-			for _, e := range t {
-				cp.load(e.(map[string]interface{}), currentElement)
+			if key == CondHAS {
+				currentElement = &operatorValue{operator: key, value: t}
+			} else {
+				currentElement = &operatorSlice{operator: key}
+				for _, e := range t {
+					cp.load(e.(map[string]interface{}), currentElement)
+				}
 			}
 		case map[string]interface{}:
 			currentElement = &keyStruct{key: key}
@@ -177,5 +202,8 @@ func (cp *CondLoader) Parse(s string) (err error) {
 }
 
 func (cp *CondLoader) Check(o interface{}) (bool, error) {
+	if cp.rootElement == nil {
+		return false, ErrParserError
+	}
 	return cp.rootElement.checkStruct(o)
 }
