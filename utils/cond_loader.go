@@ -15,6 +15,7 @@ Available operators:
 - *gte: greater or equal than
 - *lt: less then
 - *lte: less or equal than
+- *exp: expired
 - *or: logical or
 - *and: logical and
 - *has: logical has
