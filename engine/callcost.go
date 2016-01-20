@@ -63,6 +63,9 @@ func (cc *CallCost) GetDuration() (td time.Duration) {
 }
 
 func (cc *CallCost) UpdateRatedUsage() time.Duration {
+	if cc == nil {
+		return 0
+	}
 	totalDuration := cc.GetDuration()
 	cc.RatedUsage = totalDuration.Seconds()
 	return totalDuration
