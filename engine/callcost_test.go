@@ -50,6 +50,10 @@ func TestSingleResultMerge(t *testing.T) {
 	if cc1.Cost != 122 {
 		t.Errorf("Exdpected 120 was %v", cc1.Cost)
 	}
+	d := cc1.UpdateRatedUsage()
+	if d != 2*time.Minute || cc1.RatedUsage != 120.0 {
+		t.Errorf("error updating rating usage: %v, %v", d, cc1.RatedUsage)
+	}
 }
 
 func TestMultipleResultMerge(t *testing.T) {

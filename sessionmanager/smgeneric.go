@@ -228,18 +228,54 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 	}
 	if err != nil { // Refund the ones already taken since we have error on one of the debits
 		for _, sR := range sessionRuns {
-			for _, cc := range sR.CallCosts {
-				utils.Logger.Debug(fmt.Sprintf("%+v", cc)) // Refund here
+			if len(sR.CallCosts) == 0 {
 				continue
+			}
+			cc := sR.CallCosts[0]
+			if len(sR.CallCosts) > 1 {
+				for _, ccSR := range sR.CallCosts {
+					cc.Merge(ccSR)
+				}
+			}
+			// collect increments
+			var refundIncrements engine.Increments
+			cc.Timespans.Decompress()
+			for _, ts := range cc.Timespans {
+				refundIncrements = append(refundIncrements, ts.Increments...)
+			}
+			// refund cc
+			if len(refundIncrements) > 0 {
+				cd := &engine.CallDescriptor{
+					Direction:   cc.Direction,
+					Tenant:      cc.Tenant,
+					Category:    cc.Category,
+					Subject:     cc.Subject,
+					Account:     cc.Account,
+					Destination: cc.Destination,
+					TOR:         cc.TOR,
+					Increments:  refundIncrements,
+				}
+				cd.Increments.Compress()
+				utils.Logger.Info(fmt.Sprintf("Refunding session run callcost: %s", utils.ToJSON(cd)))
+				var response float64
+				err := self.rater.RefundIncrements(cd, &response)
+				if err != nil {
+					return nilDuration, err
+				}
 			}
 		}
 		return nilDuration, err
 	}
 	var withErrors bool
 	for _, sR := range sessionRuns {
-		var cc *engine.CallCost
-		for _, ccSR := range sR.CallCosts {
-			cc.Merge(ccSR)
+		if len(sR.CallCosts) == 0 {
+			continue
+		}
+		cc := sR.CallCosts[0]
+		if len(sR.CallCosts) > 1 {
+			for _, ccSR := range sR.CallCosts[1:] {
+				cc.Merge(ccSR)
+			}
 		}
 		var reply string
 		if err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
