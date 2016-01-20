@@ -110,7 +110,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			if ccr.CCRequestType == 3 {
 				err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
 			} else if ccr.CCRequestType == 4 {
-				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &rpl)
+				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &maxUsage)
 			}
 			if self.cgrCfg.DiameterAgentCfg().CreateCDR {
 				if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
@@ -127,7 +127,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
 			return cca
 		}
-		if ccr.CCRequestType != 3 && maxUsage == 0 { // Not enough balance, RFC demands 4012
+		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && maxUsage == 0 { // Not enough balance, RFC demands 4012
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "4012",
 				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))

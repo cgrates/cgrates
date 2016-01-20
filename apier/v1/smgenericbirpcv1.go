@@ -100,11 +100,12 @@ func (self *SMGenericBiRpcV1) SessionEnd(clnt *rpc2.Client, ev sessionmanager.SM
 }
 
 // Called on individual Events (eg SMS)
-func (self *SMGenericBiRpcV1) ChargeEvent(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, reply *string) error {
-	if err := self.sm.ChargeEvent(ev, clnt); err != nil {
+func (self *SMGenericBiRpcV1) ChargeEvent(clnt *rpc2.Client, ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+	if minMaxUsage, err := self.sm.ChargeEvent(ev, clnt); err != nil {
 		return utils.NewErrServerError(err)
+	} else {
+		*maxUsage = minMaxUsage.Seconds()
 	}
-	*reply = utils.OK
 	return nil
 }
 

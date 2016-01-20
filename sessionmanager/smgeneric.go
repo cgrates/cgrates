@@ -205,14 +205,13 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 }
 
 // Processes one time events (eg: SMS)
-func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) error {
+func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDur time.Duration, err error) {
 	var sessionRuns []*engine.SessionRun
 	if err := self.rater.GetSessionRuns(gev.AsStoredCdr(self.cgrCfg, self.timezone), &sessionRuns); err != nil {
-		return err
+		return nilDuration, err
 	} else if len(sessionRuns) == 0 {
-		return nil
+		return nilDuration, nil
 	}
-	var err error
 	for _, sR := range sessionRuns {
 		cc := new(engine.CallCost)
 		if err = self.rater.MaxDebit(sR.CallDescriptor, cc); err != nil {
@@ -220,19 +219,21 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) error 
 			break
 		}
 		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
-		if cc.GetDuration() == 0 {
+		if ccDur := cc.GetDuration(); ccDur == 0 {
 			err = errors.New("INSUFFICIENT_FUNDS")
 			break
+		} else if ccDur < maxDur {
+			maxDur = ccDur
 		}
 	}
 	if err != nil { // Refund the ones already taken since we have error on one of the debits
 		for _, sR := range sessionRuns {
 			for _, cc := range sR.CallCosts {
-				utils.Logger.Debug(fmt.Sprintf("%+v", cc))
-				continue // Refund here
+				utils.Logger.Debug(fmt.Sprintf("%+v", cc)) // Refund here
+				continue
 			}
 		}
-		return err
+		return nilDuration, err
 	}
 	var withErrors bool
 	for _, sR := range sessionRuns {
@@ -253,9 +254,9 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) error 
 		}
 	}
 	if withErrors {
-		return ErrPartiallyExecuted
+		return nilDuration, ErrPartiallyExecuted
 	}
-	return nil
+	return maxDur, nil
 }
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
