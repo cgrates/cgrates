@@ -127,20 +127,20 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
 			return cca
 		}
-		var notAuthrizedResultCode bool
+		var unauthorizedResultCode bool
 		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && maxUsage == 0 { // Not enough balance, RFC demands 4012
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "4012",
 				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
 				return nil
 			}
-			notAuthrizedResultCode = true
+			unauthorizedResultCode = true
 		} else if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(diam.Success),
 			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
 			return nil
 		}
-		if ccr.CCRequestType != 3 && !notAuthrizedResultCode { // For terminate, we don't add granted-service-unit AVP
+		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && !unauthorizedResultCode { // For terminate or previously marked unauthorized, we don't add granted-service-unit AVP
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Granted-Service-Unit", "CC-Time"}, strconv.FormatFloat(maxUsage, 'f', 0, 64),
 				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Granted-Service-Unit, error: %s", ccr.diamMessage, err))
