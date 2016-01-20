@@ -212,13 +212,33 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) error 
 	} else if len(sessionRuns) == 0 {
 		return nil
 	}
-	var withErrors bool
+	var err error
 	for _, sR := range sessionRuns {
 		cc := new(engine.CallCost)
-		if err := self.rater.Debit(sR.CallDescriptor, cc); err != nil {
-			withErrors = true
+		if err = self.rater.MaxDebit(sR.CallDescriptor, cc); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not Debit CD: %+v, RunID: %s, error: %s", sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
-			continue
+			break
+		}
+		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
+		if cc.GetDuration() == 0 {
+			err = errors.New("INSUFFICIENT_FUNDS")
+			break
+		}
+	}
+	if err != nil { // Refund the ones already taken since we have error on one of the debits
+		for _, sR := range sessionRuns {
+			for _, cc := range sR.CallCosts {
+				utils.Logger.Debug(fmt.Sprintf("%+v", cc))
+				continue // Refund here
+			}
+		}
+		return err
+	}
+	var withErrors bool
+	for _, sR := range sessionRuns {
+		var cc *engine.CallCost
+		for _, ccSR := range sR.CallCosts {
+			cc.Merge(ccSR)
 		}
 		var reply string
 		if err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
