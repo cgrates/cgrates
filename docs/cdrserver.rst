@@ -11,7 +11,7 @@ CDR-CGR
 
 Available as handler within http server.
 
-To feed CDRs in via this interface, one must use url of the form: <http://$ip_configured:$port_configured/cgr>.
+To feed CDRs in via this interface, one must use url of the form: <http://$ip_configured:$port_configured/cdr_http>.
 
 The CDR fields are received via http form (although for simplicity we support inserting them within query parameters as well) and are expected to be urlencoded in order to transport special characters reliably. All fields are expected by CGRateS as string, particular conversions being done on processing each CDR.
 The fields received are split into two different categories based on CGRateS interest in them:
@@ -38,7 +38,7 @@ Extra fields: any field coming in via the http request and not a member of prima
 Example of sample CDR generated simply using curl:
 ::
 
- curl --data "curl --data "tor=*voice&accid=iiaasbfdsaf&cdrhost=192.168.1.1&cdrsource=curl_cdr&reqtype=rated&direction=*out&tenant=192.168.56.66&category=call&account=dan&subject=dan&destination=%2B4986517174963&answer_time=1383813746&usage=1&sip_user=Jitsi&subject2=1003" http://127.0.0.1:2080/cgr
+ curl --data "curl --data "tor=*voice&accid=iiaasbfdsaf&cdrhost=192.168.1.1&cdrsource=curl_cdr&reqtype=rated&direction=*out&tenant=192.168.56.66&category=call&account=dan&subject=dan&destination=%2B4986517174963&answer_time=1383813746&usage=1&sip_user=Jitsi&subject2=1003" http://127.0.0.1:2080/cdr_http
 
 
 CDR-FS_JSON 
