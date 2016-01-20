@@ -237,9 +237,14 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 	}
 	var withErrors bool
 	for _, sR := range sessionRuns {
-		var cc *engine.CallCost
-		for _, ccSR := range sR.CallCosts {
-			cc.Merge(ccSR)
+		if len(sR.CallCosts) == 0 {
+			continue
+		}
+		cc := sR.CallCosts[0]
+		if len(sR.CallCosts) > 1 {
+			for _, ccSR := range sR.CallCosts[1:] {
+				cc.Merge(ccSR)
+			}
 		}
 		var reply string
 		if err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
