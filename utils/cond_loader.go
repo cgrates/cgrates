@@ -18,7 +18,7 @@ Available operators:
 - *exp: expired
 - *or: logical or
 - *and: logical and
-- *has: logical has
+- *has: receives a list of elements and checks that the elements are present in the specified field (also a list)
 
 Equal (*eq) and local and (*and) operators are implicit for shortcuts. In this way:
 
