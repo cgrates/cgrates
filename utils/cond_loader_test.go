@@ -117,6 +117,20 @@ func TestCondKeyValue(t *testing.T) {
 	if check, err := cl.Check(o); check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
 	}
+	err = cl.Parse(`{"*and":[{"Field":{"*gte":50}},{"Test":{"*eq":"test"}}]}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"WrongFieldName":{"*eq":1}}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); check || err == nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
 }
 
 func TestCondKeyValuePointer(t *testing.T) {

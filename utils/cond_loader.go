@@ -104,6 +104,9 @@ func (ks *keyStruct) checkStruct(o interface{}) (bool, error) {
 		obj = obj.Elem()
 	}
 	value := obj.FieldByName(ks.key)
+	if !value.IsValid() {
+		return false, NewErrInvalidArgument(ks.key)
+	}
 	return ks.elem.checkStruct(value.Interface())
 }
 
@@ -201,6 +204,10 @@ func (te *trueElement) checkStruct(o interface{}) (bool, error) {
 
 func isOperator(s string) bool {
 	return strings.HasPrefix(s, "*")
+}
+
+func notEmpty(x interface{}) bool {
+	return !reflect.DeepEqual(x, reflect.Zero(reflect.TypeOf(x)).Interface())
 }
 
 type CondLoader struct {
