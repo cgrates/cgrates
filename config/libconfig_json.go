@@ -127,6 +127,7 @@ type CdreJsonCfg struct {
 	Field_separator               *string
 	Data_usage_multiply_factor    *float64
 	Sms_usage_multiply_factor     *float64
+	Mms_usage_multiply_factor     *float64
 	Generic_usage_multiply_factor *float64
 	Cost_multiply_factor          *float64
 	Cost_rounding_decimals        *int

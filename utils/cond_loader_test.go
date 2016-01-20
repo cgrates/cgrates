@@ -3,6 +3,7 @@ package utils
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestCondLoader(t *testing.T) {
@@ -20,17 +21,23 @@ func TestCondLoader(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
 	}
+	err = cl.Parse(``)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
 }
 
 func TestCondKeyValue(t *testing.T) {
 	o := struct {
-		Test  string
-		Field float64
-		Other bool
+		Test    string
+		Field   float64
+		Other   bool
+		ExpDate time.Time
 	}{
-		Test:  "test",
-		Field: 6.0,
-		Other: true,
+		Test:    "test",
+		Field:   6.0,
+		Other:   true,
+		ExpDate: time.Date(2016, 1, 19, 20, 47, 0, 0, time.UTC),
 	}
 	cl := &CondLoader{}
 	err := cl.Parse(`{"Test":"test"}`)
@@ -62,6 +69,41 @@ func TestCondKeyValue(t *testing.T) {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
 	}
 	err = cl.Parse(`{"Field":7, "Other":true}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"Field":6, "Other":false}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"Other":true, "Field":{"*gt":5}}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(``)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"ExpDate":{"*exp":true}}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Check(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, ToIJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"ExpDate":{"*exp":false}}`)
 	if err != nil {
 		t.Errorf("Error loading structure: %+v (%v)", ToIJSON(cl.rootElement), err)
 	}

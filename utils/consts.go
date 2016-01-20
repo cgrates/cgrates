@@ -148,6 +148,7 @@ const (
 	HDR_VAL_SEP                  = "/"
 	MONETARY                     = "*monetary"
 	SMS                          = "*sms"
+	MMS                          = "*mms"
 	GENERIC                      = "*generic"
 	DATA                         = "*data"
 	VOICE                        = "*voice"

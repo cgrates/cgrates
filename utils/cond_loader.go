@@ -1,10 +1,36 @@
 package utils
 
+/*
+When an action is using *conditional_ form before the execution the engine is checking the ExtraParameters field for condition filter, loads it and checks all the balances in the account for one that is satisfying the condition. If one is fond the action is executed, otherwise it will do nothing for this account.
+
+The condition syntax is a json encoded document similar to mongodb query language.
+
+Examples:
+- {"Weight":{"*gt":50}} checks for a balance with weight greater than 50
+- {"*or":[{"Value":{"*eq":0}},{"Value":{"*gte":100}}] checks for a balance with value equal to 0 or equal or highr than 100
+
+Available operators:
+- *eq: equal
+- *gt: greater than
+- *gte: greater or equal than
+- *lt: less then
+- *lte: less or equal than
+- *exp: expired
+- *or: logical or
+- *and: logical and
+- *has: receives a list of elements and checks that the elements are present in the specified field (also a list)
+
+Equal (*eq) and local and (*and) operators are implicit for shortcuts. In this way:
+
+{"*and":[{"Value":{"*eq":3}},{"Weight":{"*eq":10}}]} is equivalent to: {"Value":3, "Weight":10}.
+*/
+
 import (
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 )
 
 const (
@@ -110,6 +136,24 @@ func (ov *operatorValue) checkStruct(o interface{}) (bool, error) {
 		}
 		return true, nil
 	}
+	// date conversion
+	if ov.operator == CondEXP {
+		var expDate time.Time
+		var ok bool
+		if expDate, ok = o.(time.Time); !ok {
+			return false, NewErrInvalidArgument(o)
+		}
+		var expired bool
+		if expired, ok = ov.value.(bool); !ok {
+			return false, NewErrInvalidArgument(ov.value)
+		}
+		if expired { // check for expiration
+			return !expDate.IsZero() && expDate.Before(time.Now()), nil
+		} else { // check not expired
+			return expDate.IsZero() || expDate.After(time.Now()), nil
+		}
+	}
+
 	// float conversion
 	var of, vf float64
 	var ok bool
@@ -146,6 +190,13 @@ func (kv *keyValue) checkStruct(o interface{}) (bool, error) {
 	}
 	value := obj.FieldByName(kv.key)
 	return value.Interface() == kv.value, nil
+}
+
+type trueElement struct{}
+
+func (te *trueElement) addChild(condElement) error { return ErrNotImplemented }
+func (te *trueElement) checkStruct(o interface{}) (bool, error) {
+	return true, nil
 }
 
 func isOperator(s string) bool {
@@ -186,18 +237,27 @@ func (cp *CondLoader) load(a map[string]interface{}, parentElement condElement) 
 		if parentElement != nil {
 			parentElement.addChild(currentElement)
 		} else {
-			return currentElement, nil
+			if len(a) > 1 {
+				parentElement = &operatorSlice{operator: CondAND}
+				parentElement.addChild(currentElement)
+			} else {
+				return currentElement, nil
+			}
 		}
 	}
-	return nil, nil
+	return parentElement, nil
 }
 
 func (cp *CondLoader) Parse(s string) (err error) {
 	a := make(map[string]interface{})
-	if err := json.Unmarshal([]byte([]byte(s)), &a); err != nil {
-		return err
+	if len(s) != 0 {
+		if err := json.Unmarshal([]byte([]byte(s)), &a); err != nil {
+			return err
+		}
+		cp.rootElement, err = cp.load(a, nil)
+	} else {
+		cp.rootElement = &trueElement{}
 	}
-	cp.rootElement, err = cp.load(a, nil)
 	return
 }
 

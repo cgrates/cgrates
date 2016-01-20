@@ -699,7 +699,9 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 
 func (acc *Account) matchConditions(condition string) (bool, error) {
 	cl := &utils.CondLoader{}
-	cl.Parse(condition)
+	if err := cl.Parse(condition); err != nil {
+		return false, err
+	}
 	for balanceType, balanceChain := range acc.BalanceMap {
 		for _, b := range balanceChain {
 			check, err := cl.Check(&struct {
