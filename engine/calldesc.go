@@ -526,6 +526,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
 	//utils.Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	cc.Timespans.Compress()
+	cc.UpdateRatedUsage()
 	return cc, err
 }
 
@@ -668,6 +669,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		return nil, err
 	}
 	cc.updateCost()
+	cc.UpdateRatedUsage()
 	cc.Timespans.Compress()
 	//log.Printf("OUT CC: ", cc)
 	return

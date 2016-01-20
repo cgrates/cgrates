@@ -107,6 +107,7 @@ func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	ccl.CallCost.UpdateRatedUsage() // make sure rated usage is updated
 	if ccl.CheckDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
 			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.RunId)
