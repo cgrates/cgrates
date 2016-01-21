@@ -6,6 +6,7 @@ import:
 - package: github.com/cgrates/kamevapi
 - package: github.com/cgrates/osipsdagram
 - package: github.com/cgrates/rpcclient
+- package: github.com/cgrates/structmatcher
 - package: github.com/fiorix/go-diameter
   subpackages:
   - /diam

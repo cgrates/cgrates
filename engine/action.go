@@ -42,7 +42,8 @@ type Action struct {
 	ActionType       string
 	BalanceType      string
 	ExtraParameters  string
-	ExpirationString string
+	Filter           string
+	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
 	Balance          *Balance
 }
@@ -131,9 +132,9 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	case SET_DDESTINATIONS:
 		return setddestinations, true
 	case REMOVE_ACCOUNT:
-		return removeAccount, true
+		return removeAccountAction, true
 	case REMOVE_BALANCE:
-		return removeBalance, true
+		return removeBalanceAction, true
 	case TRANSFER_MONETARY_DEFAULT:
 		return transferMonetaryDefault, true
 	}
@@ -522,7 +523,7 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 	return nil
 }
 
-func removeAccount(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	var accID string
 	if ub != nil {
 		accID = ub.Id
@@ -568,7 +569,7 @@ func removeAccount(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 	return nil
 }
 
-func removeBalance(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	if _, exists := ub.BalanceMap[a.BalanceType]; !exists {
 		return utils.ErrNotFound
 	}
@@ -592,6 +593,10 @@ func removeBalance(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 }
 
 func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	if acc == nil {
+		utils.Logger.Err("*transfer_monetary_default called without account")
+		return utils.ErrAccountNotFound
+	}
 	if _, exists := acc.BalanceMap[utils.MONETARY]; !exists {
 		return utils.ErrNotFound
 	}
@@ -599,7 +604,8 @@ func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, a
 	bChain := acc.BalanceMap[utils.MONETARY]
 	for _, balance := range bChain {
 		if balance.Uuid != defaultBalance.Uuid &&
-			balance.Id != defaultBalance.Id { // extra caution
+			balance.Id != defaultBalance.Id && // extra caution
+			balance.MatchFilter(a.Balance, false) {
 			if balance.Value > 0 {
 				defaultBalance.Value += balance.Value
 				balance.Value = 0

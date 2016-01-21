@@ -147,6 +147,7 @@ DY_PLAN,RT_DY,*any,10
 *in,cgrates.org,LCR_STANDARD,max,2013-03-23T00:00:00Z,RP_MX,,
 *out,cgrates.org,call,money,2015-02-28T00:00:00Z,EVENING,,
 *out,cgrates.org,call,dy,2015-02-28T00:00:00Z,DY_PLAN,,
+*out,cgrates.org,call,block,2015-02-28T00:00:00Z,DY_PLAN,,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -159,18 +160,20 @@ SG3,*any,*lowest,
 *in,cgrates.org,call,*any,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
 `
 	actions = `
-MINI,*topup_reset,,,*monetary,*out,,,,,*unlimited,,10,10,false,10
-MINI,*topup,,,*voice,*out,,NAT,test,,*unlimited,,100,10,false,10
-SHARED,*topup,,,*monetary,*out,,,,SG1,*unlimited,,100,10,false,10
-TOPUP10_AC,*topup_reset,,,*monetary,*out,,*any,,,*unlimited,,1,10,false,10
-TOPUP10_AC1,*topup_reset,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,false,10
-SE0,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,0,10,false,10
-SE10,*topup_reset,,,*monetary,*out,,,,SG2,*unlimited,,10,5,false,10
-SE10,*topup,,,*monetary,*out,,,,,*unlimited,,10,10,false,10
-EE0,*topup_reset,,,*monetary,*out,,,,SG3,*unlimited,,0,10,false,10
-EE0,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,false,10
-DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,false,10
-NEG,*allow_negative,,,*monetary,*out,,,,,*unlimited,,0,10,false,10
+MINI,*topup_reset,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
+MINI,*topup,,,,*voice,*out,,NAT,test,,*unlimited,,100,10,false,false,10
+SHARED,*topup,,,,*monetary,*out,,,,SG1,*unlimited,,100,10,false,false,10
+TOPUP10_AC,*topup_reset,,,,*monetary,*out,,*any,,,*unlimited,,1,10,false,false,10
+TOPUP10_AC1,*topup_reset,,,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,,40,10,false,false,10
+SE0,*topup_reset,,,,*monetary,*out,,,,SG2,*unlimited,,0,10,false,false,10
+SE10,*topup_reset,,,,*monetary,*out,,,,SG2,*unlimited,,10,5,false,false,10
+SE10,*topup,,,,*monetary,*out,,,,,*unlimited,,10,10,false,false,10
+EE0,*topup_reset,,,,*monetary,*out,,,,SG3,*unlimited,,0,10,false,false,10
+EE0,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
+DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,,false,false,10
+NEG,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
+BLOCK,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,10,20,true,false,20
+BLOCK,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 `
 	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -181,19 +184,20 @@ TOPUP_SHARED0_AT,SE0,*asap,10
 TOPUP_SHARED10_AT,SE10,*asap,10
 TOPUP_EMPTY_AT,EE0,*asap,10
 POST_AT,NEG,*asap,10
+BLOCK_AT,BLOCK,*asap,10
 `
 
 	actionTriggers = `
-STANDARD_TRIGGER,st0,*min_event_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,,,SOME_1,10
-STANDARD_TRIGGER,st1,*max_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,,,SOME_2,10
-STANDARD_TRIGGERS,,*min_balance,2,false,0,,*monetary,*out,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_event_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,,3,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+STANDARD_TRIGGER,st0,*min_event_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,,,,SOME_1,10
+STANDARD_TRIGGER,st1,*max_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,,,,SOME_2,10
+STANDARD_TRIGGERS,,*min_balance,2,false,0,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_event_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,,,3,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
 vdf,minitsboy,MORE_MINUTES,STANDARD_TRIGGER,,
@@ -207,6 +211,7 @@ vdf,emptyX,TOPUP_EMPTY_AT,,,
 vdf,emptyY,TOPUP_EMPTY_AT,,,
 vdf,post,POST_AT,,,
 cgrates.org,alodis,TOPUP_EMPTY_AT,,true,true
+cgrates.org,block,BLOCK_AT,,false,false
 `
 
 	derivedCharges = `
@@ -790,7 +795,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 22 {
+	if len(csvr.ratingProfiles) != 23 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
@@ -809,7 +814,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 9 {
+	if len(csvr.actions) != 10 {
 		t.Error("Failed to load actions: ", len(csvr.actions))
 	}
 	as1 := csvr.actions["MINI"]
@@ -822,12 +827,14 @@ func TestLoadActions(t *testing.T) {
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &Balance{
-				Uuid:         as1[0].Balance.Uuid,
-				Directions:   utils.NewStringMap(utils.OUT),
-				Value:        10,
-				Weight:       10,
-				TimingIDs:    utils.StringMap{},
-				SharedGroups: utils.StringMap{},
+				Uuid:           as1[0].Balance.Uuid,
+				Directions:     utils.NewStringMap(utils.OUT),
+				Value:          10,
+				Weight:         10,
+				DestinationIds: utils.StringMap{},
+				TimingIDs:      utils.StringMap{},
+				SharedGroups:   utils.StringMap{},
+				Categories:     utils.StringMap{},
 			},
 		},
 		&Action{
@@ -846,10 +853,11 @@ func TestLoadActions(t *testing.T) {
 				DestinationIds: utils.NewStringMap("NAT"),
 				TimingIDs:      utils.StringMap{},
 				SharedGroups:   utils.StringMap{},
+				Categories:     utils.StringMap{},
 			},
 		},
 	}
-	if !reflect.DeepEqual(as1[1], expected[1]) {
+	if !reflect.DeepEqual(as1, expected) {
 		t.Errorf("Error loading action1: %+v", as1[0].Balance)
 	}
 	as2 := csvr.actions["SHARED"]
@@ -868,10 +876,11 @@ func TestLoadActions(t *testing.T) {
 				Weight:         10,
 				SharedGroups:   utils.NewStringMap("SG1"),
 				TimingIDs:      utils.StringMap{},
+				Categories:     utils.StringMap{},
 			},
 		},
 	}
-	if !reflect.DeepEqual(as2[0], expected[0]) {
+	if !reflect.DeepEqual(as2, expected) {
 		t.Errorf("Error loading action: %+v", as2[0].Balance)
 	}
 	as3 := csvr.actions["DEFEE"]
@@ -886,7 +895,9 @@ func TestLoadActions(t *testing.T) {
 				Directions:     utils.StringMap{},
 				DestinationIds: utils.StringMap{},
 				TimingIDs:      utils.StringMap{},
+				Categories:     utils.StringMap{},
 				SharedGroups:   utils.StringMap{},
+				Blocker:        false,
 			},
 		},
 	}
@@ -982,7 +993,7 @@ func TestLoadLCRs(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionPlans) != 6 {
+	if len(csvr.actionPlans) != 7 {
 		t.Error("Failed to load action timings: ", len(csvr.actionPlans))
 	}
 	atm := csvr.actionPlans["MORE_MINUTES"]
@@ -1070,7 +1081,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 11 {
+	if len(csvr.accountActions) != 12 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]

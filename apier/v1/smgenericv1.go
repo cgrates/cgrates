@@ -71,11 +71,12 @@ func (self *SMGenericV1) SessionEnd(ev sessionmanager.SMGenericEvent, reply *str
 }
 
 // Called on individual Events (eg SMS)
-func (self *SMGenericV1) ChargeEvent(ev sessionmanager.SMGenericEvent, reply *string) error {
-	if err := self.sm.ChargeEvent(ev, nil); err != nil {
+func (self *SMGenericV1) ChargeEvent(ev sessionmanager.SMGenericEvent, maxUsage *float64) error {
+	if minMaxUsage, err := self.sm.ChargeEvent(ev, nil); err != nil {
 		return utils.NewErrServerError(err)
+	} else {
+		*maxUsage = minMaxUsage.Seconds()
 	}
-	*reply = utils.OK
 	return nil
 }
 
@@ -146,7 +147,7 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 		if !canConvert {
 			return rpcclient.ErrWrongArgsType
 		}
-		replyConverted, canConvert := reply.(*string)
+		replyConverted, canConvert := reply.(*float64)
 		if !canConvert {
 			return rpcclient.ErrWrongReplyType
 		}

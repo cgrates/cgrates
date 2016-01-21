@@ -510,6 +510,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
 			ExtraParameters:  apiAct.ExtraParameters,
+			Filter:           apiAct.Filter,
 			Balance: &engine.Balance{
 				Uuid:           utils.GenUUID(),
 				Id:             apiAct.BalanceId,
@@ -546,6 +547,7 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 			BalanceType:     engAct.BalanceType,
 			ExpiryTime:      engAct.ExpirationString,
 			ExtraParameters: engAct.ExtraParameters,
+			Filter:          engAct.Filter,
 			Weight:          engAct.Weight,
 		}
 		if engAct.Balance != nil {
@@ -739,7 +741,7 @@ type AttrResetTriggeredAction struct {
 func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply *string) error {
 	var a *engine.Action
 	if attr.Id != "" {
-		// we can identify the trigge by the id
+		// we can identify the trigger by the id
 		a = &engine.Action{Id: attr.Id}
 	} else {
 		extraParameters, err := json.Marshal(struct {

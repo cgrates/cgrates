@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/structmatcher"
 
 	"strings"
 )
@@ -176,9 +177,11 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	}
 	found := false
 	id := a.BalanceType
+	disabled := a.Balance.Disabled
+	a.Balance.Disabled = !disabled // match for the opposite
 	for _, b := range ub.BalanceMap[id] {
 		if b.MatchFilter(a.Balance, false) {
-			b.Disabled = a.Balance.Disabled
+			b.Disabled = disabled
 			b.dirty = true
 			found = true
 		}
@@ -316,9 +319,13 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 						return
 					}
 				}
+				// check for blocker
+				if dryRun && balance.Blocker {
+					//log.Print("BLOCKER!")
+					return // don't go to next balances
+				}
 			}
 		}
-
 		// debit money
 		moneyBalanceChecker := true
 		for moneyBalanceChecker {
@@ -332,14 +339,13 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 					return nil, debitErr
 				}
 				//utils.Logger.Info(fmt.Sprintf("CD AFTER MONEY: %+v", cd))
-				//log.Printf("partCC: %+v", partCC)
 				if partCC != nil {
 					cc.Timespans = append(cc.Timespans, partCC.Timespans...)
 					cc.negativeConnectFee = partCC.negativeConnectFee
 
-					//for i, ts := range cc.Timespans {
-					//log.Printf("cc.times[an[%d]: %+v\n", i, ts)
-					//}
+					/*for i, ts := range cc.Timespans {
+						log.Printf("cc.times[an[%d]: %+v\n", i, ts)
+					}*/
 					cd.TimeStart = cc.GetEndTime()
 					//log.Printf("CD: %+v", cd)
 					//log.Printf("CD: %+v - %+v", cd.TimeStart, cd.TimeEnd)
@@ -353,6 +359,11 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 						// only return if we are in dry run (max call duration)
 						return
 					}
+				}
+				// check for blocker
+				if dryRun && balance.Blocker {
+					//log.Print("BLOCKER!")
+					return // don't go to next balances
 				}
 			}
 		}
@@ -685,6 +696,31 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 			}
 		}
 	}
+}
+
+func (acc *Account) matchActionFilter(condition string) (bool, error) {
+	sm, err := structmatcher.NewStructMatcher(condition)
+	if err != nil {
+		return false, err
+	}
+	for balanceType, balanceChain := range acc.BalanceMap {
+		for _, b := range balanceChain {
+			check, err := sm.Match(&struct {
+				Type string
+				*Balance
+			}{
+				Type:    balanceType,
+				Balance: b,
+			})
+			if err != nil {
+				return false, err
+			}
+			if check {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }
 
 // used in some api for transition

@@ -195,7 +195,11 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
-	if err != nil || !cd.continousRatingInfos() {
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("Rating plan not found for destination %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
+		err = utils.ErrRatingPlanNotFound
+	}
+	if !cd.continousRatingInfos() {
 		utils.Logger.Err(fmt.Sprintf("Destination %s not authorized for account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
 		err = utils.ErrUnauthorizedDestination
 	}
@@ -522,6 +526,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
 	//utils.Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	cc.Timespans.Compress()
+	cc.UpdateRatedUsage()
 	return cc, err
 }
 
@@ -555,7 +560,6 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 	//utils.Logger.Debug("ACCOUNT: " + utils.ToJSON(account))
 	//utils.Logger.Debug("DEFAULT_BALANCE: " + utils.ToJSON(defaultBalance))
 
-	//
 	cc, err := cd.debit(account, true, false)
 	//utils.Logger.Debug("CC: " + utils.ToJSON(cc))
 	//log.Print("CC: ", utils.ToIJSON(cc))
@@ -665,6 +669,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		return nil, err
 	}
 	cc.updateCost()
+	cc.UpdateRatedUsage()
 	cc.Timespans.Compress()
 	//log.Printf("OUT CC: ", cc)
 	return

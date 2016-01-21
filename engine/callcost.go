@@ -29,6 +29,7 @@ type CallCost struct {
 	Direction, Category, Tenant, Subject, Account, Destination, TOR string
 	Cost                                                            float64
 	Timespans                                                       TimeSpans
+	RatedUsage                                                      float64
 	deductConnectFee                                                bool
 	negativeConnectFee                                              bool // the connect fee went negative on default balance
 	maxCostDisconect                                                bool
@@ -59,6 +60,15 @@ func (cc *CallCost) GetDuration() (td time.Duration) {
 		td += ts.GetDuration()
 	}
 	return
+}
+
+func (cc *CallCost) UpdateRatedUsage() time.Duration {
+	if cc == nil {
+		return 0
+	}
+	totalDuration := cc.GetDuration()
+	cc.RatedUsage = totalDuration.Seconds()
+	return totalDuration
 }
 
 func (cc *CallCost) GetConnectFee() float64 {

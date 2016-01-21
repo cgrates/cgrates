@@ -279,6 +279,7 @@ type TPAction struct {
 	Directions      string  // Balance direction
 	Units           float64 // Number of units to add/deduct
 	ExpiryTime      string  // Time when the units will expire
+	Filter          string  // The condition on balances that is checked before the action
 	TimingTags      string  // Timing when balance is active
 	DestinationIds  string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
@@ -286,6 +287,8 @@ type TPAction struct {
 	SharedGroups    string  // Reference to a shared group
 	BalanceWeight   float64 // Balance weight
 	ExtraParameters string
+	BalanceBlocker  bool
+	BalanceDisabled bool
 	Weight          float64 // Action's weight
 }
 
@@ -487,6 +490,7 @@ type TPActionTrigger struct {
 	BalanceRatingSubject  string  // filter for balance
 	BalanceCategories     string  // filter for balance
 	BalanceSharedGroups   string  // filter for balance
+	BalanceBlocker        bool    // filter for balance
 	BalanceDisabled       bool    // filter for balance
 	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached
@@ -594,6 +598,7 @@ type AttrExpFileCdrs struct {
 	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
 	SmsUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	MmsUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
 	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
@@ -1086,6 +1091,7 @@ type AttrExportCdrsToFile struct {
 	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
 	SMSUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
 	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones

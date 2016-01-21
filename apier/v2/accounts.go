@@ -77,3 +77,101 @@ func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 	*reply = *account
 	return nil
 }
+
+type AttrSetAccount struct {
+	Tenant           string
+	Account          string
+	ActionPlanId     string
+	ActionTriggersId string
+	AllowNegative    *bool
+	Disabled         *bool
+	ReloadScheduler  bool
+}
+
+func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
+	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	var schedulerReloadNeeded = false
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	var ub *engine.Account
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {
+			ub = bal
+		} else { // Not found in db, create it here
+			ub = &engine.Account{
+				Id: accID,
+			}
+		}
+		if len(attr.ActionPlanId) != 0 {
+			_, err := engine.Guardian.Guard(func() (interface{}, error) {
+				var ap *engine.ActionPlan
+				var err error
+				ap, err = self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
+				if err != nil {
+					return 0, err
+				}
+				if _, exists := ap.AccountIDs[accID]; !exists {
+					if ap.AccountIDs == nil {
+						ap.AccountIDs = make(map[string]struct{})
+					}
+					ap.AccountIDs[accID] = struct{}{}
+					schedulerReloadNeeded = true
+					// create tasks
+					for _, at := range ap.ActionTimings {
+						if at.IsASAP() {
+							t := &engine.Task{
+								Uuid:      utils.GenUUID(),
+								AccountID: accID,
+								ActionsID: at.ActionsID,
+							}
+							if err = self.RatingDb.PushTask(t); err != nil {
+								return 0, err
+							}
+						}
+					}
+					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap); err != nil {
+						return 0, err
+					}
+					// update cache
+					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
+				}
+				return 0, nil
+			}, 0, utils.ACTION_PLAN_PREFIX)
+			if err != nil {
+				return 0, err
+			}
+		}
+
+		if len(attr.ActionTriggersId) != 0 {
+			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId)
+			if err != nil {
+				return 0, err
+			}
+			ub.ActionTriggers = atrs
+			ub.InitCounters()
+		}
+		if attr.AllowNegative != nil {
+			ub.AllowNegative = *attr.AllowNegative
+		}
+		if attr.Disabled != nil {
+			ub.Disabled = *attr.Disabled
+		}
+		// All prepared, save account
+		if err := self.AccountDb.SetAccount(ub); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	}, 0, accID)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	if attr.ReloadScheduler && schedulerReloadNeeded {
+		// reload scheduler
+		if self.Sched != nil {
+			self.Sched.Reload(true)
+		}
+	}
+	*reply = utils.OK // This will mark saving of the account, error still can show up in actionTimingsId
+	return nil
+}

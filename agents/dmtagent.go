@@ -20,6 +20,7 @@ package agents
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -82,14 +83,22 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.CCRFields)
 	if err != nil {
-		cca.ResultCode = DiameterRatingFailed
+		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
+			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA reply-code, error: %s", ccr.diamMessage, err))
+			return nil
+		}
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v AsSMGenericEvent, error: %s", ccr.diamMessage, err))
 		return cca
 	}
 	var maxUsage float64
 	if reqProcessor.DryRun { // DryRun does not send over network
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
-		cca.ResultCode = diam.LimitedSuccess
+		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(diam.LimitedSuccess),
+			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+			return nil
+		}
 	} else { // Find out maxUsage over APIs
 		switch ccr.CCRequestType {
 		case 1:
@@ -101,7 +110,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			if ccr.CCRequestType == 3 {
 				err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
 			} else if ccr.CCRequestType == 4 {
-				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &rpl)
+				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &maxUsage)
 			}
 			if self.cgrCfg.DiameterAgentCfg().CreateCDR {
 				if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
@@ -110,19 +119,41 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			}
 		}
 		if err != nil {
-			cca.ResultCode = DiameterRatingFailed
+			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
+				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+				return nil
+			}
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
 			return cca
 		}
-		if ccr.CCRequestType != 3 && maxUsage == 0 { // Not enough balance, RFC demands 4012
-			cca.ResultCode = 4012
-		} else {
-			cca.ResultCode = diam.Success
+		var unauthorizedResultCode bool
+		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && maxUsage == 0 { // Not enough balance, RFC demands 4012
+			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "4012",
+				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+				return nil
+			}
+			unauthorizedResultCode = true
+		} else if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(diam.Success),
+			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+			return nil
 		}
-		cca.GrantedServiceUnit.CCTime = int(maxUsage)
+		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && !unauthorizedResultCode { // For terminate or previously marked unauthorized, we don't add granted-service-unit AVP
+			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Granted-Service-Unit", "CC-Time"}, strconv.FormatFloat(maxUsage, 'f', 0, 64),
+				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Granted-Service-Unit, error: %s", ccr.diamMessage, err))
+				return nil
+			}
+		}
 	}
 	if err := cca.SetProcessorAVPs(reqProcessor, maxUsage); err != nil {
-		cca.ResultCode = DiameterRatingFailed
+		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
+			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+			return nil
+		}
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> CCA SetProcessorAVPs for message: %+v, error: %s", ccr.diamMessage, err))
 		return cca
 	}

@@ -108,7 +108,7 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 }
 
 // End a session from outside
-func (self *SMGeneric) sessionEnd(sessionId string, endTime time.Time) error {
+func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
 		ss := self.getSession(sessionId)
 		if len(ss) == 0 { // Not handled by us
@@ -121,7 +121,12 @@ func (self *SMGeneric) sessionEnd(sessionId string, endTime time.Time) error {
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
 			}
-			if err := s.close(endTime); err != nil {
+			aTime, err := s.eventStart.GetAnswerTime(utils.META_DEFAULT, self.cgrCfg.DefaultTimezone)
+			if err != nil || aTime.IsZero() {
+				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not retrieve answer time for session: %s, runId: %s, aTime: %+v, error: %s",
+					sessionId, s.runId, aTime, err.Error()))
+			}
+			if err := s.close(aTime.Add(usage)); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
 			if err := s.saveOperations(); err != nil {
@@ -192,31 +197,89 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
-	endTime, err := gev.GetEndTime(utils.META_DEFAULT, self.timezone)
+	usage, err := gev.GetUsage(utils.META_DEFAULT)
 	if err != nil {
 		return err
 	}
-	if err := self.sessionEnd(gev.GetUUID(), endTime); err != nil {
+	if err := self.sessionEnd(gev.GetUUID(), usage); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Processes one time events (eg: SMS)
-func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) error {
+func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDur time.Duration, err error) {
 	var sessionRuns []*engine.SessionRun
 	if err := self.rater.Call("Responder.GetSessionRuns", gev.AsStoredCdr(self.cgrCfg, self.timezone), &sessionRuns); err != nil {
-		return err
+		return nilDuration, err
 	} else if len(sessionRuns) == 0 {
-		return nil
+		return nilDuration, nil
+	}
+	for _, sR := range sessionRuns {
+		cc := new(engine.CallCost)
+		if err := self.rater.Call("Responder.MaxDebit", sR.CallDescriptor, cc); err != nil {
+			withErrors = true
+			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not Debit CD: %+v, RunID: %s, error: %s", sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
+			break
+		}
+		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
+		if ccDur := cc.GetDuration(); ccDur == 0 {
+			err = errors.New("INSUFFICIENT_FUNDS")
+			break
+		} else if ccDur < maxDur {
+			maxDur = ccDur
+		}
+	}
+	if err != nil { // Refund the ones already taken since we have error on one of the debits
+		for _, sR := range sessionRuns {
+			if len(sR.CallCosts) == 0 {
+				continue
+			}
+			cc := sR.CallCosts[0]
+			if len(sR.CallCosts) > 1 {
+				for _, ccSR := range sR.CallCosts {
+					cc.Merge(ccSR)
+				}
+			}
+			// collect increments
+			var refundIncrements engine.Increments
+			cc.Timespans.Decompress()
+			for _, ts := range cc.Timespans {
+				refundIncrements = append(refundIncrements, ts.Increments...)
+			}
+			// refund cc
+			if len(refundIncrements) > 0 {
+				cd := &engine.CallDescriptor{
+					Direction:   cc.Direction,
+					Tenant:      cc.Tenant,
+					Category:    cc.Category,
+					Subject:     cc.Subject,
+					Account:     cc.Account,
+					Destination: cc.Destination,
+					TOR:         cc.TOR,
+					Increments:  refundIncrements,
+				}
+				cd.Increments.Compress()
+				utils.Logger.Info(fmt.Sprintf("Refunding session run callcost: %s", utils.ToJSON(cd)))
+				var response float64
+				err := self.rater.RefundIncrements(cd, &response)
+				if err != nil {
+					return nilDuration, err
+				}
+			}
+		}
+		return nilDuration, err
 	}
 	var withErrors bool
 	for _, sR := range sessionRuns {
-		cc := new(engine.CallCost)
-		if err := self.rater.Call("Responder.Debit", sR.CallDescriptor, cc); err != nil {
-			withErrors = true
-			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not Debit CD: %+v, RunID: %s, error: %s", sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
+		if len(sR.CallCosts) == 0 {
 			continue
+		}
+		cc := sR.CallCosts[0]
+		if len(sR.CallCosts) > 1 {
+			for _, ccSR := range sR.CallCosts[1:] {
+				cc.Merge(ccSR)
+			}
 		}
 		var reply string
 		if err := self.cdrsrv.Call("CdrServer.LogCallCost", &engine.CallCostLog{
@@ -231,9 +294,9 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) error 
 		}
 	}
 	if withErrors {
-		return ErrPartiallyExecuted
+		return nilDuration, ErrPartiallyExecuted
 	}
-	return nil
+	return maxDur, nil
 }
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
@@ -251,7 +314,7 @@ func (self *SMGeneric) Connect() error {
 // System shutdown
 func (self *SMGeneric) Shutdown() error {
 	for ssId := range self.getSessions() { // Force sessions shutdown
-		self.sessionEnd(ssId, time.Now())
+		self.sessionEnd(ssId, time.Duration(self.cgrCfg.MaxCallDuration))
 	}
 	return nil
 }

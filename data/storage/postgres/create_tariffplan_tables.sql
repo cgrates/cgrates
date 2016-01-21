@@ -155,8 +155,10 @@ CREATE TABLE tp_actions (
   categories VARCHAR(32) NOT NULL,
   shared_groups VARCHAR(64) NOT NULL,
   balance_weight NUMERIC(8,2) NOT NULL,
+  balance_blocker BOOLEAN NOT NULL,
   balance_disabled BOOLEAN NOT NULL,
   extra_parameters VARCHAR(256) NOT NULL,
+  filter VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, action, balance_tag, balance_type, directions, expiry_time, timing_tags, destination_tags, shared_groups, balance_weight, weight)
@@ -206,6 +208,7 @@ CREATE TABLE tp_action_triggers (
   balance_expiry_time VARCHAR(24) NOT NULL,
   balance_timing_tags VARCHAR(128) NOT NULL,
   balance_weight NUMERIC(8,2) NOT NULL,
+  balance_blocker BOOL NOT NULL,
   balance_disabled BOOL NOT NULL,
   min_queued_items INTEGER NOT NULL,
   actions_tag VARCHAR(64) NOT NULL,

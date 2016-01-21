@@ -213,6 +213,11 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "300" {
 		t.Errorf("Expecting 300, received: %s", strCCTime)
 	}
+	if result, err := msg.FindAVP("Result-Code", dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if resultStr := avpValAsString(result); resultStr != "2001" {
+		t.Errorf("Expecting 2001, received: %s", resultStr)
+	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal := 9.484
@@ -434,7 +439,7 @@ func TestDmtAgentCdrs(t *testing.T) {
 		if cdrs[0].Usage != "610" {
 			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
 		}
-		if cdrs[0].Cost != 0.795 {
+		if cdrs[0].Cost != 0.5349 {
 			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
 		}
 	}

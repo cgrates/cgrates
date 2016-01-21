@@ -134,6 +134,7 @@ const CGRATES_CFG_JSON = `
 		"field_separator": ",",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
+        "mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding

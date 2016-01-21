@@ -291,6 +291,16 @@ func (at *ActionTiming) Execute() (err error) {
 			transactionFailed := false
 			removeAccountActionFound := false
 			for _, a := range aac {
+				// check action filter
+				if len(a.Filter) > 0 {
+					matched, err := ub.matchActionFilter(a.Filter)
+					if err != nil {
+						return 0, err
+					}
+					if !matched {
+						continue
+					}
+				}
 				if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
 					continue // disabled acocunts are not removed from action  plan
 					//return 0, fmt.Errorf("Account %s is disabled", accID)

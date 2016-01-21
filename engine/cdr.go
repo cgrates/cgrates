@@ -126,7 +126,7 @@ func (cdr *CDR) FormatCost(shiftDecimals, roundDecimals int) string {
 
 // Formats usage on export
 func (cdr *CDR) FormatUsage(layout string) string {
-	if utils.IsSliceMember([]string{utils.DATA, utils.SMS, utils.GENERIC}, cdr.ToR) {
+	if utils.IsSliceMember([]string{utils.DATA, utils.SMS, utils.MMS, utils.GENERIC}, cdr.ToR) {
 		return strconv.FormatFloat(utils.Round(cdr.Usage.Seconds(), 0, utils.ROUNDING_MIDDLE), 'f', -1, 64)
 	}
 	switch layout {

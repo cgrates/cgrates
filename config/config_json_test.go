@@ -252,6 +252,7 @@ func TestDfCdreJsonCfgs(t *testing.T) {
 			Field_separator:               utils.StringPointer(","),
 			Data_usage_multiply_factor:    utils.Float64Pointer(1.0),
 			Sms_usage_multiply_factor:     utils.Float64Pointer(1.0),
+			Mms_usage_multiply_factor:     utils.Float64Pointer(1.0),
 			Generic_usage_multiply_factor: utils.Float64Pointer(1.0),
 			Cost_multiply_factor:          utils.Float64Pointer(1.0),
 			Cost_rounding_decimals:        utils.IntPointer(-1),
@@ -621,7 +622,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 		t.Error("Received: ", gCfg)
 	}
 	cdrFields := []*CdrFieldJsonCfg{
-		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.TOR), Value: utils.StringPointer("~7:s/^(voice|data|sms|generic)$/*$1/")},
+		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.TOR), Value: utils.StringPointer("~7:s/^(voice|data|sms|mms|generic)$/*$1/")},
 		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.ANSWER_TIME), Value: utils.StringPointer("1")},
 		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.USAGE), Value: utils.StringPointer(`~9:s/^(\d+)$/${1}s/`)},
 	}
@@ -645,7 +646,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	if cfg, err := cgrJsonCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfgCdrc, cfg) {
-		t.Error("Received: ", cfg["CDRC-CSV2"])
+		t.Error("Received: ", utils.ToIJSON(cfg["CDRC-CSV2"]))
 	}
 	eCfgSmFs := &SmFsJsonCfg{
 		Enabled: utils.BoolPointer(true),
