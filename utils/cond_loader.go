@@ -45,21 +45,108 @@ const (
 	CondHAS = "*has"
 )
 
+var operatorMap = map[string]func(field, value interface{}) (bool, error){
+	CondEQ: func(field, value interface{}) (bool, error) {
+		return value == field, nil
+	},
+	CondGT: func(field, value interface{}) (bool, error) {
+		var of, vf float64
+		var ok bool
+		if of, ok = field.(float64); !ok {
+			return false, NewErrInvalidArgument(field)
+		}
+		if vf, ok = value.(float64); !ok {
+			return false, NewErrInvalidArgument(value)
+		}
+		return of > vf, nil
+	},
+	CondGTE: func(field, value interface{}) (bool, error) {
+		var of, vf float64
+		var ok bool
+		if of, ok = field.(float64); !ok {
+			return false, NewErrInvalidArgument(field)
+		}
+		if vf, ok = value.(float64); !ok {
+			return false, NewErrInvalidArgument(value)
+		}
+		return of >= vf, nil
+	},
+	CondLT: func(field, value interface{}) (bool, error) {
+		var of, vf float64
+		var ok bool
+		if of, ok = field.(float64); !ok {
+			return false, NewErrInvalidArgument(field)
+		}
+		if vf, ok = value.(float64); !ok {
+			return false, NewErrInvalidArgument(value)
+		}
+		return of < vf, nil
+	},
+	CondLTE: func(field, value interface{}) (bool, error) {
+		var of, vf float64
+		var ok bool
+		if of, ok = field.(float64); !ok {
+			return false, NewErrInvalidArgument(field)
+		}
+		if vf, ok = value.(float64); !ok {
+			return false, NewErrInvalidArgument(value)
+		}
+		return of <= vf, nil
+	},
+	CondEXP: func(field, value interface{}) (bool, error) {
+		var expDate time.Time
+		var ok bool
+		if expDate, ok = field.(time.Time); !ok {
+			return false, NewErrInvalidArgument(field)
+		}
+		var expired bool
+		if expired, ok = value.(bool); !ok {
+			return false, NewErrInvalidArgument(value)
+		}
+		if expired { // check for expiration
+			return !expDate.IsZero() && expDate.Before(time.Now()), nil
+		} else { // check not expired
+			return expDate.IsZero() || expDate.After(time.Now()), nil
+		}
+	},
+	CondHAS: func(field, value interface{}) (bool, error) {
+		var strMap StringMap
+		var ok bool
+		if strMap, ok = field.(StringMap); !ok {
+			return false, NewErrInvalidArgument(field)
+		}
+		var strSlice []interface{}
+		if strSlice, ok = value.([]interface{}); !ok {
+			return false, NewErrInvalidArgument(value)
+		}
+		for _, str := range strSlice {
+			if !strMap[str.(string)] {
+				return false, nil
+			}
+		}
+		return true, nil
+	},
+}
+
 func NewErrInvalidArgument(arg interface{}) error {
 	return fmt.Errorf("INVALID_ARGUMENT: %v", arg)
 }
 
-type condElement interface {
-	addChild(condElement) error
+type compositeElement interface {
+	element
+	addChild(element) error
+}
+
+type element interface {
 	checkStruct(interface{}) (bool, error)
 }
 
 type operatorSlice struct {
 	operator string
-	slice    []condElement
+	slice    []element
 }
 
-func (os *operatorSlice) addChild(ce condElement) error {
+func (os *operatorSlice) addChild(ce element) error {
 	os.slice = append(os.slice, ce)
 	return nil
 }
@@ -91,10 +178,10 @@ func (os *operatorSlice) checkStruct(o interface{}) (bool, error) {
 
 type keyStruct struct {
 	key  string
-	elem condElement
+	elem element
 }
 
-func (ks *keyStruct) addChild(ce condElement) error {
+func (ks *keyStruct) addChild(ce element) error {
 	ks.elem = ce
 	return nil
 }
@@ -115,69 +202,11 @@ type operatorValue struct {
 	value    interface{}
 }
 
-func (ov *operatorValue) addChild(condElement) error { return ErrNotImplemented }
 func (ov *operatorValue) checkStruct(o interface{}) (bool, error) {
-	// no conversion
-	if ov.operator == CondEQ {
-		return ov.value == o, nil
+	if f, ok := operatorMap[ov.operator]; ok {
+		return f(o, ov.value)
 	}
-	// StringMap conversion
-	if ov.operator == CondHAS {
-		var strMap StringMap
-		var ok bool
-		if strMap, ok = o.(StringMap); !ok {
-			return false, NewErrInvalidArgument(o)
-		}
-		var strSlice []interface{}
-		if strSlice, ok = ov.value.([]interface{}); !ok {
-			return false, NewErrInvalidArgument(ov.value)
-		}
-		for _, str := range strSlice {
-			if !strMap[str.(string)] {
-				return false, nil
-			}
-		}
-		return true, nil
-	}
-	// date conversion
-	if ov.operator == CondEXP {
-		var expDate time.Time
-		var ok bool
-		if expDate, ok = o.(time.Time); !ok {
-			return false, NewErrInvalidArgument(o)
-		}
-		var expired bool
-		if expired, ok = ov.value.(bool); !ok {
-			return false, NewErrInvalidArgument(ov.value)
-		}
-		if expired { // check for expiration
-			return !expDate.IsZero() && expDate.Before(time.Now()), nil
-		} else { // check not expired
-			return expDate.IsZero() || expDate.After(time.Now()), nil
-		}
-	}
-
-	// float conversion
-	var of, vf float64
-	var ok bool
-	if of, ok = o.(float64); !ok {
-		return false, NewErrInvalidArgument(o)
-	}
-	if vf, ok = ov.value.(float64); !ok {
-		return false, NewErrInvalidArgument(ov.value)
-	}
-	switch ov.operator {
-	case CondGT:
-		return of > vf, nil
-	case CondGTE:
-		return of >= vf, nil
-	case CondLT:
-		return of < vf, nil
-	case CondLTE:
-		return of <= vf, nil
-
-	}
-	return true, nil
+	return false, nil
 }
 
 type keyValue struct {
@@ -185,19 +214,20 @@ type keyValue struct {
 	value interface{}
 }
 
-func (kv *keyValue) addChild(condElement) error { return ErrNotImplemented }
 func (kv *keyValue) checkStruct(o interface{}) (bool, error) {
 	obj := reflect.ValueOf(o)
 	if obj.Kind() == reflect.Ptr {
 		obj = obj.Elem()
 	}
 	value := obj.FieldByName(kv.key)
+	if !value.IsValid() {
+		return false, NewErrInvalidArgument(kv.key)
+	}
 	return value.Interface() == kv.value, nil
 }
 
 type trueElement struct{}
 
-func (te *trueElement) addChild(condElement) error { return ErrNotImplemented }
 func (te *trueElement) checkStruct(o interface{}) (bool, error) {
 	return true, nil
 }
@@ -211,12 +241,12 @@ func notEmpty(x interface{}) bool {
 }
 
 type CondLoader struct {
-	rootElement condElement
+	rootElement element
 }
 
-func (cp *CondLoader) load(a map[string]interface{}, parentElement condElement) (condElement, error) {
+func (cp *CondLoader) load(a map[string]interface{}, parentElement compositeElement) (element, error) {
 	for key, value := range a {
-		var currentElement condElement
+		var currentElement element
 		switch t := value.(type) {
 		case []interface{}:
 			if key == CondHAS {
@@ -224,13 +254,13 @@ func (cp *CondLoader) load(a map[string]interface{}, parentElement condElement) 
 			} else {
 				currentElement = &operatorSlice{operator: key}
 				for _, e := range t {
-					cp.load(e.(map[string]interface{}), currentElement)
+					cp.load(e.(map[string]interface{}), currentElement.(compositeElement))
 				}
 			}
 		case map[string]interface{}:
 			currentElement = &keyStruct{key: key}
 			//log.Print("map: ", t)
-			cp.load(t, currentElement)
+			cp.load(t, currentElement.(compositeElement))
 		case interface{}:
 			if isOperator(key) {
 				currentElement = &operatorValue{operator: key, value: t}
@@ -241,13 +271,13 @@ func (cp *CondLoader) load(a map[string]interface{}, parentElement condElement) 
 		default:
 			return nil, ErrParserError
 		}
-		if parentElement != nil {
+		if parentElement != nil { // normal recurrent action
 			parentElement.addChild(currentElement)
 		} else {
-			if len(a) > 1 {
+			if len(a) > 1 { // we have more keys in the map
 				parentElement = &operatorSlice{operator: CondAND}
 				parentElement.addChild(currentElement)
-			} else {
+			} else { // it was only one key value
 				return currentElement, nil
 			}
 		}
