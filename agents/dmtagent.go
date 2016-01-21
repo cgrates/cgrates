@@ -111,6 +111,9 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
 			} else if ccr.CCRequestType == 4 {
 				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &maxUsage)
+				if maxUsage == 0 {
+					smgEv[utils.USAGE] = 0 // For CDR not to debit
+				}
 			}
 			if self.cgrCfg.DiameterAgentCfg().CreateCDR {
 				if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
