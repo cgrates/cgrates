@@ -1603,9 +1603,9 @@ func TestActionConditionalTopup(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType:      CONDITIONAL_TOPUP,
-		BalanceType:     utils.MONETARY,
-		ExtraParameters: `{"Type":"*monetary","Value":1,"Weight":10}`,
+		ActionType:  TOPUP,
+		BalanceType: utils.MONETARY,
+		Filter:      `{"Type":"*monetary","Value":1,"Weight":10}`,
 		Balance: &Balance{
 			Value:  11,
 			Weight: 30,
@@ -1667,9 +1667,9 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType:      CONDITIONAL_TOPUP,
-		BalanceType:     utils.MONETARY,
-		ExtraParameters: `{"Type":"*monetary","Value":2,"Weight":10}`,
+		ActionType:  TOPUP,
+		BalanceType: utils.MONETARY,
+		Filter:      `{"Type":"*monetary","Value":2,"Weight":10}`,
 		Balance: &Balance{
 			Value:  11,
 			Weight: 30,
@@ -1731,9 +1731,9 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType:      CONDITIONAL_TOPUP,
-		BalanceType:     utils.MONETARY,
-		ExtraParameters: `{"Type":"*voice","Value":{"*gte":100}}`,
+		ActionType:  TOPUP,
+		BalanceType: utils.MONETARY,
+		Filter:      `{"Type":"*voice","Value":{"*gte":100}}`,
 		Balance: &Balance{
 			Value:  11,
 			Weight: 10,

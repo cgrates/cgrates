@@ -390,6 +390,7 @@ func (tps TpActions) GetActions() (map[string][]*utils.TPAction, error) {
 			Directions:      tpAc.Directions,
 			Units:           tpAc.Units,
 			ExpiryTime:      tpAc.ExpiryTime,
+			Filter:          tpAc.Filter,
 			TimingTags:      tpAc.TimingTags,
 			DestinationIds:  tpAc.DestinationTags,
 			RatingSubject:   tpAc.RatingSubject,

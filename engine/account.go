@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/structmatcher"
 
 	"strings"
 )
@@ -697,14 +698,14 @@ func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balance
 	}
 }
 
-func (acc *Account) matchConditions(condition string) (bool, error) {
-	cl := &utils.CondLoader{}
-	if err := cl.Parse(condition); err != nil {
+func (acc *Account) matchActionFilter(condition string) (bool, error) {
+	sm, err := structmatcher.NewStructMatcher(condition)
+	if err != nil {
 		return false, err
 	}
 	for balanceType, balanceChain := range acc.BalanceMap {
 		for _, b := range balanceChain {
-			check, err := cl.Check(&struct {
+			check, err := sm.Match(&struct {
 				Type string
 				*Balance
 			}{

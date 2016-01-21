@@ -1,5 +1,5 @@
-hash: 330fc999239d5766f033409be2335338cfd172d0dcf18ad752b8613f45e9f451
-updated: 2016-01-06T13:35:12.445693385+02:00
+hash: 855bc23b0e58452edf1d31f228430476a2602b79d225397d33b805b252cebb83
+updated: 2016-01-21T12:30:17.296295607+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
@@ -13,6 +13,8 @@ imports:
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/rpcclient
   version: 79661b1e514823a9ac93b2b9e97e037ee190ba47
+- name: github.com/cgrates/structmatcher
+  version: 98feee0bab15ce165540fe5f0fa006db2e9f898c
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter

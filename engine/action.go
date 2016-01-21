@@ -42,6 +42,7 @@ type Action struct {
 	ActionType       string
 	BalanceType      string
 	ExtraParameters  string
+	Filter           string
 	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
 	Balance          *Balance
@@ -72,10 +73,6 @@ const (
 	CDRLOG                    = "*cdrlog"
 	SET_DDESTINATIONS         = "*set_ddestinations"
 	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
-	CONDITIONAL_TOPUP         = "*conditional_topup"
-	CONDITIONAL_TOPUP_RESET   = "*conditional_topup_reset"
-	CONDITIONAL_DEBIT         = "*conditional_debit"
-	CONDITIONAL_DEBIT_RESET   = "*conditional_debit_reset"
 )
 
 func (a *Action) Clone() *Action {
@@ -140,14 +137,6 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return removeBalanceAction, true
 	case TRANSFER_MONETARY_DEFAULT:
 		return transferMonetaryDefault, true
-	case CONDITIONAL_DEBIT:
-		return conditionalDebitAction, true
-	case CONDITIONAL_DEBIT_RESET:
-		return conditionalDebitResetAction, true
-	case CONDITIONAL_TOPUP:
-		return conditionalTopupAction, true
-	case CONDITIONAL_TOPUP_RESET:
-		return conditionalTopupResetAction, true
 	}
 	return nil, false
 }
@@ -625,38 +614,6 @@ func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, a
 	}
 	// update account in storage
 	return accountingStorage.SetAccount(acc)
-}
-
-func conditionalDebitAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
-		return debitAction(acc, sq, a, acs)
-	} else {
-		return err
-	}
-}
-
-func conditionalDebitResetAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
-		return debitResetAction(acc, sq, a, acs)
-	} else {
-		return err
-	}
-}
-
-func conditionalTopupAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
-		return topupAction(acc, sq, a, acs)
-	} else {
-		return err
-	}
-}
-
-func conditionalTopupResetAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if matched, err := acc.matchConditions(a.ExtraParameters); matched {
-		return topupResetAction(acc, sq, a, acs)
-	} else {
-		return err
-	}
 }
 
 // Structure to store actions according to weight

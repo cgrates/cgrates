@@ -156,20 +156,21 @@ type TpAction struct {
 	Tag             string  `index:"0" re:"\w+\s*"`
 	Action          string  `index:"1" re:"\*\w+\s*"`
 	ExtraParameters string  `index:"2" re:"\S+\s*"`
-	BalanceTag      string  `index:"3" re:"\w+\s*"`
-	BalanceType     string  `index:"4" re:"\*\w+\s*"`
-	Directions      string  `index:"5" re:""`
-	Categories      string  `index:"6" re:""`
-	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
-	RatingSubject   string  `index:"8" re:"\w+\s*"`
-	SharedGroups    string  `index:"9" re:"[0-9A-Za-z_;]*"`
-	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
-	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
-	Units           float64 `index:"12" re:"\d+\s*"`
-	BalanceWeight   float64 `index:"13" re:"\d+\.?\d*\s*"`
-	BalanceBlocker  bool    `index:"14" re:""`
-	BalanceDisabled bool    `index:"15" re:""`
-	Weight          float64 `index:"16" re:"\d+\.?\d*\s*"`
+	Filter          string  `index:"3" re:"\S+\s*"`
+	BalanceTag      string  `index:"4" re:"\w+\s*"`
+	BalanceType     string  `index:"5" re:"\*\w+\s*"`
+	Directions      string  `index:"6" re:""`
+	Categories      string  `index:"7" re:""`
+	DestinationTags string  `index:"8" re:"\*any|\w+\s*"`
+	RatingSubject   string  `index:"9" re:"\w+\s*"`
+	SharedGroups    string  `index:"10" re:"[0-9A-Za-z_;]*"`
+	ExpiryTime      string  `index:"11" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
+	TimingTags      string  `index:"12" re:"[0-9A-Za-z_;]*|\*any"`
+	Units           float64 `index:"13" re:"\d+\s*"`
+	BalanceWeight   float64 `index:"14" re:"\d+\.?\d*\s*"`
+	BalanceBlocker  bool    `index:"15" re:""`
+	BalanceDisabled bool    `index:"16" re:""`
+	Weight          float64 `index:"17" re:"\d+\.?\d*\s*"`
 	CreatedAt       time.Time
 }
 

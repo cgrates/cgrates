@@ -513,6 +513,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				Weight:           tpact.Weight,
 				ExtraParameters:  tpact.ExtraParameters,
 				ExpirationString: tpact.ExpiryTime,
+				Filter:           tpact.Filter,
 				Balance: &Balance{
 					Id:             tpact.BalanceId,
 					Value:          tpact.Units,
@@ -837,6 +838,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						Weight:           tpact.Weight,
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
+						Filter:           tpact.Filter,
 						Balance: &Balance{
 							Id:             tpact.BalanceId,
 							Value:          tpact.Units,
@@ -1066,6 +1068,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						Weight:           tpact.Weight,
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
+						Filter:           tpact.Filter,
 						Balance: &Balance{
 							Id:             tpact.BalanceId,
 							Value:          tpact.Units,

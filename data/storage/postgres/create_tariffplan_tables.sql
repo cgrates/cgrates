@@ -158,6 +158,7 @@ CREATE TABLE tp_actions (
   balance_blocker BOOLEAN NOT NULL,
   balance_disabled BOOLEAN NOT NULL,
   extra_parameters VARCHAR(256) NOT NULL,
+  filter VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
   UNIQUE (tpid, tag, action, balance_tag, balance_type, directions, expiry_time, timing_tags, destination_tags, shared_groups, balance_weight, weight)
