@@ -279,6 +279,7 @@ type TPAction struct {
 	Directions      string  // Balance direction
 	Units           float64 // Number of units to add/deduct
 	ExpiryTime      string  // Time when the units will expire
+	Filter          string  // The condition on balances that is checked before the action
 	TimingTags      string  // Timing when balance is active
 	DestinationIds  string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles

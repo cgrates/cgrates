@@ -173,6 +173,7 @@ func APItoModelAction(as *utils.TPActions) (result []TpAction) {
 			Directions:      a.Directions,
 			Units:           a.Units,
 			ExpiryTime:      a.ExpiryTime,
+			Filter:          a.Filter,
 			TimingTags:      a.TimingTags,
 			DestinationTags: a.DestinationIds,
 			RatingSubject:   a.RatingSubject,

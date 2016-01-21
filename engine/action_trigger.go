@@ -76,6 +76,17 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	transactionFailed := false
 	removeAccountActionFound := false
 	for _, a := range aac {
+		// check action filter
+		if len(a.Filter) > 0 {
+			matched, err := ub.matchActionFilter(a.Filter)
+			if err != nil {
+				return err
+			}
+			if !matched {
+				continue
+			}
+		}
+
 		if a.Balance == nil {
 			a.Balance = &Balance{}
 		}
