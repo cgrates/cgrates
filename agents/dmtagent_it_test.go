@@ -401,9 +401,10 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 	if err := dmtClient.SendMessage(ccr); err != nil {
 		t.Error(err)
 	}
+
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	dmtClient.ReceivedMessage() // Discard the received message so we can test next one
 	/*
-		time.Sleep(time.Duration(100) * time.Millisecond)
-		msg := dmtClient.ReceivedMessage()
 		if msg == nil {
 			t.Fatal("No message returned")
 		}
@@ -430,7 +431,7 @@ func TestDmtAgentCdrs(t *testing.T) {
 		return
 	}
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}}
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, ToRs: []string{utils.VOICE}}
 	if err := apierRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 1 {
@@ -463,6 +464,18 @@ func TestDmtAgentDryRun1(t *testing.T) {
 	}
 	if err := dmtClient.SendMessage(ccr); err != nil {
 		t.Error(err)
+	}
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Result-Code")
+	} else if strResult := avpValAsString(avps[0]); strResult != "300" { // Result-Code set in the template
+		t.Errorf("Expecting 200, received: %s", strResult)
 	}
 }
 
