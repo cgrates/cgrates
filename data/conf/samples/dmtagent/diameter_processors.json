@@ -3,6 +3,29 @@
 "diameter_agent": {
 	"request_processors": [
 		{
+			"id": "dryrun1",									// formal identifier of this processor
+			"dry_run": true,									// do not send the events to SMG, just log them
+			"request_filter": "Service-Context-Id(dryrun1)",		// filter requests processed by this processor
+			"continue_on_success": false,				// continue to the next template if executed
+			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*sms", "mandatory": true},
+				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},
+				{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "^*prepaid", "mandatory": true},
+				{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
+				{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "^cgrates.org", "mandatory": true},
+				{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
+				{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "field_filter":"Subscription-Id>Subscription-Id-Type(0)", "mandatory": true},
+				{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "Subscription-Id>Subscription-Id-Data", "field_filter":"Subscription-Id>Subscription-Id-Type(0)", "mandatory": true},
+				{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "Service-Information>SMS-Information>Recipient-Address>Address-Data", "mandatory": true},
+				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
+				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "Requested-Service-Unit>CC-Time", "mandatory": true},
+			],
+			"cca_fields":[								// fields returned in CCA
+				{"tag": "GrantedUnits", "field_id": "Granted-Service-Unit>CC-Time", "type": "*handler", "handler_id": "*cca_usage", "mandatory": true},
+			],
+		},
+		{
 			"id": "*default",									// formal identifier of this processor
 			"dry_run": false,									// do not send the events to SMG, just log them
 			"request_filter": "Service-Context-Id(^voice)",		// filter requests processed by this processor
