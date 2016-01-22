@@ -491,14 +491,14 @@ func (mig MigratorRC8) migrateActionPlans() error {
 			if !exists {
 				newApl = &engine.ActionPlan{
 					Id:         apl.Id,
-					AccountIDs: make(map[string]struct{}),
+					AccountIDs: make(utils.StringMap),
 				}
 				newAplMap[key] = newApl
 			}
 			if !apl.IsASAP() {
 				for _, accID := range apl.AccountIds {
 					if _, exists := newApl.AccountIDs[accID]; !exists {
-						newApl.AccountIDs[accID] = struct{}{}
+						newApl.AccountIDs[accID] = true
 					}
 				}
 			}

@@ -1166,6 +1166,12 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan) error {
 		}
 		return nil
 	}
+	// get existing action plan to merge the account ids
+	if existingAts, _ := ms.GetActionPlan(utils.ACTION_PLAN_PREFIX, true); existingAts != nil {
+		for accID := range existingAts.AccountIDs {
+			ats.AccountIDs[accID] = true
+		}
+	}
 	result, err := ms.ms.Marshal(ats)
 	if err != nil {
 		return err

@@ -107,7 +107,7 @@ func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string)
 	at := &engine.ActionTiming{
 		ActionsID: attr.ActionsId,
 	}
-	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
+	at.SetAccountIDs(utils.StringMap{accID: true})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err

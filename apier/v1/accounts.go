@@ -212,9 +212,9 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 				}
 				if _, exists := ap.AccountIDs[accID]; !exists {
 					if ap.AccountIDs == nil {
-						ap.AccountIDs = make(map[string]struct{})
+						ap.AccountIDs = make(utils.StringMap)
 					}
-					ap.AccountIDs[accID] = struct{}{}
+					ap.AccountIDs[accID] = true
 					schedulerReloadNeeded = true
 					// create tasks
 					for _, at := range ap.ActionTimings {
@@ -409,7 +409,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 		}
 	}
 	at := &engine.ActionTiming{}
-	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
+	at.SetAccountIDs(utils.StringMap{accID: true})
 
 	aType := engine.DEBIT
 	// reverse the sign as it is a debit
@@ -456,7 +456,7 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 		return utils.ErrNotFound
 	}
 	at := &engine.ActionTiming{}
-	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
+	at.SetAccountIDs(utils.StringMap{accID: true})
 
 	at.SetActions(engine.Actions{
 		&engine.Action{
@@ -496,7 +496,7 @@ func (self *ApierV1) RemoveBalances(attr *AttrAddBalance, reply *string) error {
 	}
 
 	at := &engine.ActionTiming{}
-	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
+	at.SetAccountIDs(utils.StringMap{accID: true})
 	at.SetActions(engine.Actions{
 		&engine.Action{
 			ActionType:  engine.REMOVE_BALANCE,

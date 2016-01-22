@@ -37,9 +37,9 @@ type ActionTiming struct {
 	ActionsID    string
 	Weight       float64
 	actions      Actions
-	accountIDs   map[string]struct{} // copy of action plans accounts
-	actionPlanID string              // the id of the belonging action plan (info only)
-	stCache      time.Time           // cached time of the next start
+	accountIDs   utils.StringMap // copy of action plans accounts
+	actionPlanID string          // the id of the belonging action plan (info only)
+	stCache      time.Time       // cached time of the next start
 }
 
 type Task struct {
@@ -50,7 +50,7 @@ type Task struct {
 
 type ActionPlan struct {
 	Id            string // informative purpose only
-	AccountIDs    map[string]struct{}
+	AccountIDs    utils.StringMap
 	ActionTimings []*ActionTiming
 }
 
@@ -65,7 +65,7 @@ func (t *Task) Execute() error {
 	return (&ActionTiming{
 		Uuid:       t.Uuid,
 		ActionsID:  t.ActionsID,
-		accountIDs: map[string]struct{}{t.AccountID: struct{}{}},
+		accountIDs: utils.StringMap{t.AccountID: true},
 	}).Execute()
 }
 
@@ -250,11 +250,11 @@ func (at *ActionTiming) SetActions(as Actions) {
 	at.actions = as
 }
 
-func (at *ActionTiming) SetAccountIDs(accIDs map[string]struct{}) {
+func (at *ActionTiming) SetAccountIDs(accIDs utils.StringMap) {
 	at.accountIDs = accIDs
 }
 
-func (at *ActionTiming) GetAccountIDs() map[string]struct{} {
+func (at *ActionTiming) GetAccountIDs() utils.StringMap {
 	return at.accountIDs
 }
 

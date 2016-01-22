@@ -927,6 +927,13 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		return err
 	}
+	// get existing action plan to merge the account ids
+	if existingAts, _ := rs.GetActionPlan(utils.ACTION_PLAN_PREFIX, true); existingAts != nil {
+		for accID := range existingAts.AccountIDs {
+			ats.AccountIDs[accID] = true
+		}
+	}
+
 	result, err := rs.ms.Marshal(ats)
 	if err != nil {
 		return err
