@@ -29,6 +29,7 @@ type DiameterAgentCfg struct {
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesDir   string
 	SMGeneric         string // connection towards SMG component
+	PubSubS           string // connection towards pubsubs
 	CreateCDR         bool
 	DebitInterval     time.Duration
 	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -55,6 +56,9 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 	}
 	if jsnCfg.Sm_generic != nil {
 		self.SMGeneric = *jsnCfg.Sm_generic
+	}
+	if jsnCfg.Pubsubs != nil {
+		self.PubSubS = *jsnCfg.Pubsubs
 	}
 	if jsnCfg.Create_cdr != nil {
 		self.CreateCDR = *jsnCfg.Create_cdr
@@ -102,6 +106,7 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 type DARequestProcessor struct {
 	Id                string
 	DryRun            bool
+	PublishEvent      bool
 	RequestFilter     utils.RSRFields
 	ContinueOnSuccess bool
 	CCRFields         []*CfgCdrField
@@ -117,6 +122,9 @@ func (self *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg
 	}
 	if jsnCfg.Dry_run != nil {
 		self.DryRun = *jsnCfg.Dry_run
+	}
+	if jsnCfg.Publish_event != nil {
+		self.PublishEvent = *jsnCfg.Publish_event
 	}
 	var err error
 	if jsnCfg.Request_filter != nil {

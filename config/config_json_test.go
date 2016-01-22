@@ -426,6 +426,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 		Listen:           utils.StringPointer("127.0.0.1:3868"),
 		Dictionaries_dir: utils.StringPointer("/usr/share/cgrates/diameter/dict/"),
 		Sm_generic:       utils.StringPointer("internal"),
+		Pubsubs:          utils.StringPointer(""),
 		Create_cdr:       utils.BoolPointer(true),
 		Debit_interval:   utils.StringPointer("5m"),
 		Timezone:         utils.StringPointer(""),
@@ -438,6 +439,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 			&DARequestProcessorJsnCfg{
 				Id:                  utils.StringPointer("*default"),
 				Dry_run:             utils.BoolPointer(false),
+				Publish_event:       utils.BoolPointer(false),
 				Request_filter:      utils.StringPointer("Subscription-Id>Subscription-Id-Type(0)"),
 				Continue_on_success: utils.BoolPointer(false),
 				CCR_fields: &[]*CdrFieldJsonCfg{

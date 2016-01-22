@@ -267,6 +267,7 @@ const CGRATES_CFG_JSON = `
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
 	"sm_generic": "internal",									// connection towards SMG component for session management
+	"pubsubs": "",												// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
 	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
 	"debit_interval": "5m",										// interval for CCR updates
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
@@ -279,6 +280,7 @@ const CGRATES_CFG_JSON = `
 		{
 			"id": "*default",									// formal identifier of this processor
 			"dry_run": false,									// do not send the events to SMG, just log them
+			"publish_event": false,								// if enabled, it will publish internal event to pubsub
 			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
 			"continue_on_success": false,				// continue to the next template if executed
 			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
