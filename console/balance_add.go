@@ -24,42 +24,42 @@ import (
 )
 
 func init() {
-	c := &CmdSetBalance{
-		name:      "balance_set",
-		rpcMethod: "ApierV1.SetBalance",
+	c := &CmdAddBalance{
+		name:      "balance_add",
+		rpcMethod: "ApierV1.AddBalance",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSetBalance struct {
+type CmdAddBalance struct {
 	name      string
 	rpcMethod string
 	rpcParams *v1.AttrAddBalance
 	*CommandExecuter
 }
 
-func (self *CmdSetBalance) Name() string {
+func (self *CmdAddBalance) Name() string {
 	return self.name
 }
 
-func (self *CmdSetBalance) RpcMethod() string {
+func (self *CmdAddBalance) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetBalance) RpcParams(reset bool) interface{} {
+func (self *CmdAddBalance) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
 		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MONETARY, Overwrite: false}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetBalance) PostprocessRpcParams() error {
+func (self *CmdAddBalance) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetBalance) RpcResult() interface{} {
+func (self *CmdAddBalance) RpcResult() interface{} {
 	var s string
 	return &s
 }

@@ -57,6 +57,7 @@ const (
 	DENY_NEGATIVE             = "*deny_negative"
 	RESET_ACCOUNT             = "*reset_account"
 	REMOVE_ACCOUNT            = "*remove_account"
+	SET_BALANCE               = "*set_balance"
 	REMOVE_BALANCE            = "*remove_balance"
 	TOPUP_RESET               = "*topup_reset"
 	TOPUP                     = "*topup"
@@ -135,8 +136,10 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return removeAccountAction, true
 	case REMOVE_BALANCE:
 		return removeBalanceAction, true
+	case SET_BALANCE:
+		return setBalanceAction, true
 	case TRANSFER_MONETARY_DEFAULT:
-		return transferMonetaryDefault, true
+		return transferMonetaryDefaultAction, true
 	}
 	return nil, false
 }
@@ -588,11 +591,14 @@ func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 	if !found {
 		return utils.ErrNotFound
 	}
-	// update account in storage
-	return accountingStorage.SetAccount(ub)
+	return nil
 }
 
-func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+func setBalanceAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	return acc.setBalanceAction(a)
+}
+
+func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	if acc == nil {
 		utils.Logger.Err("*transfer_monetary_default called without account")
 		return utils.ErrAccountNotFound
@@ -612,8 +618,7 @@ func transferMonetaryDefault(acc *Account, sq *StatsQueueTriggered, a *Action, a
 			}
 		}
 	}
-	// update account in storage
-	return accountingStorage.SetAccount(acc)
+	return nil
 }
 
 // Structure to store actions according to weight

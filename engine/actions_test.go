@@ -1759,6 +1759,75 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	}
 }
 
+func TestActionSetBalance(t *testing.T) {
+	err := accountingStorage.SetAccount(
+		&Account{
+			Id: "cgrates.org:setb",
+			BalanceMap: map[string]BalanceChain{
+				utils.MONETARY: BalanceChain{
+					&Balance{
+						Id:     "m1",
+						Uuid:   utils.GenUUID(),
+						Value:  1,
+						Weight: 10,
+					},
+					&Balance{
+						Id:     "m2",
+						Uuid:   utils.GenUUID(),
+						Value:  6,
+						Weight: 20,
+					},
+				},
+				utils.VOICE: BalanceChain{
+					&Balance{
+						Id:     "v1",
+						Uuid:   utils.GenUUID(),
+						Value:  10,
+						Weight: 10,
+					},
+					&Balance{
+						Id:     "v2",
+						Uuid:   utils.GenUUID(),
+						Value:  100,
+						Weight: 20,
+					},
+				},
+			},
+		})
+	if err != nil {
+		t.Errorf("error setting account: %v", err)
+	}
+
+	a := &Action{
+		ActionType:  SET_BALANCE,
+		BalanceType: utils.MONETARY,
+		Balance: &Balance{
+			Id:     "m2",
+			Value:  11,
+			Weight: 10,
+		},
+	}
+
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:setb": true},
+		actions:    Actions{a},
+	}
+	at.Execute()
+
+	afterUb, err := accountingStorage.GetAccount("cgrates.org:setb")
+	if err != nil {
+		t.Error("account not found: ", err, afterUb)
+	}
+	if len(afterUb.BalanceMap[utils.MONETARY]) != 2 ||
+		afterUb.BalanceMap[utils.MONETARY][1].Value != 11 ||
+		afterUb.BalanceMap[utils.MONETARY][1].Weight != 10 {
+		for _, b := range afterUb.BalanceMap[utils.MONETARY] {
+			t.Logf("B: %+v", b)
+		}
+		t.Errorf("Balance: %+v", afterUb.BalanceMap[utils.MONETARY][1])
+	}
+}
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {

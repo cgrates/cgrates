@@ -88,6 +88,83 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	return
 }
 
+// sets all the fields of the balance
+func (ub *Account) setBalanceAction(a *Action) error {
+	if a == nil {
+		return errors.New("nil action")
+	}
+	bClone := a.Balance.Clone()
+	if bClone == nil {
+		return errors.New("nil balance")
+	}
+	// load ValueFactor if defined in extra parametrs
+	if a.ExtraParameters != "" {
+		vf := ValueFactor{}
+		err := json.Unmarshal([]byte(a.ExtraParameters), &vf)
+		if err == nil {
+			bClone.Factor = vf
+		} else {
+			utils.Logger.Warning(fmt.Sprintf("Could load value factor from actions: extra parametrs: %s", a.ExtraParameters))
+		}
+	}
+	if ub.BalanceMap == nil {
+		ub.BalanceMap = make(map[string]BalanceChain, 1)
+	}
+	found := false
+	balanceType := a.BalanceType
+	var previousSharedGroups utils.StringMap // kept for comparison
+	for _, b := range ub.BalanceMap[balanceType] {
+		if b.IsExpired() {
+			continue // just to be safe (cleaned expired balances above)
+		}
+		b.account = ub
+		if b.MatchFilter(a.Balance, false) { // for Id or Uuid only
+			bClone.Id = b.Id
+			bClone.Uuid = b.Uuid
+			previousSharedGroups = b.SharedGroups
+			*b = *bClone
+			found = true
+			break // only set one balance
+		}
+	}
+	// if it is not found then we add it to the list
+	if !found {
+		// check if the Id is *default (user trying to create the default balance)
+		// use only it's value value
+		if bClone.Id == utils.META_DEFAULT {
+			bClone = &Balance{
+				Id:    utils.META_DEFAULT,
+				Value: bClone.GetValue(),
+			}
+		}
+		bClone.dirty = true           // Mark the balance as dirty since we have modified and it should be checked by action triggers
+		bClone.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
+		ub.BalanceMap[balanceType] = append(ub.BalanceMap[balanceType], bClone)
+	}
+	if !found || !previousSharedGroups.Equal(bClone.SharedGroups) {
+		for sgId := range a.Balance.SharedGroups {
+			// add shared group member
+			sg, err := ratingStorage.GetSharedGroup(sgId, false)
+			if err != nil || sg == nil {
+				//than is problem
+				utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+			} else {
+				if _, found := sg.MemberIds[ub.Id]; !found {
+					// add member and save
+					if sg.MemberIds == nil {
+						sg.MemberIds = make(utils.StringMap)
+					}
+					sg.MemberIds[ub.Id] = true
+					ratingStorage.SetSharedGroup(sg)
+				}
+			}
+		}
+	}
+	ub.InitCounters()
+	ub.executeActionTriggers(nil)
+	return nil
+}
+
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
 func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
@@ -102,8 +179,8 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)
 	}
 	found := false
-	id := a.BalanceType
-	for _, b := range ub.BalanceMap[id] {
+	balanceType := a.BalanceType
+	for _, b := range ub.BalanceMap[balanceType] {
 		if b.IsExpired() {
 			continue // just to be safe (cleaned expired balances above)
 		}
@@ -113,6 +190,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 				b.SetValue(0)
 			}
 			b.SubstractValue(bClone.GetValue())
+			b.dirty = true
 			found = true
 		}
 	}
@@ -131,9 +209,8 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			}
 		}
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
-		if bClone.Uuid == "" {
-			bClone.Uuid = utils.GenUUID()
-		}
+
+		bClone.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
 		// load ValueFactor if defined in extra parametrs
 		if a.ExtraParameters != "" {
 			vf := ValueFactor{}
@@ -144,27 +221,28 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 				utils.Logger.Warning(fmt.Sprintf("Could load value factor from actions: extra parametrs: %s", a.ExtraParameters))
 			}
 		}
-		ub.BalanceMap[id] = append(ub.BalanceMap[id], bClone)
-	}
-	for sgId := range a.Balance.SharedGroups {
-		// add shared group member
-		sg, err := ratingStorage.GetSharedGroup(sgId, false)
-		if err != nil || sg == nil {
-			//than is problem
-			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
-		} else {
-			if _, found := sg.MemberIds[ub.Id]; !found {
-				// add member and save
-				if sg.MemberIds == nil {
-					sg.MemberIds = make(utils.StringMap)
+		ub.BalanceMap[balanceType] = append(ub.BalanceMap[balanceType], bClone)
+
+		for sgId := range a.Balance.SharedGroups {
+			// add shared group member
+			sg, err := ratingStorage.GetSharedGroup(sgId, false)
+			if err != nil || sg == nil {
+				//than is problem
+				utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+			} else {
+				if _, found := sg.MemberIds[ub.Id]; !found {
+					// add member and save
+					if sg.MemberIds == nil {
+						sg.MemberIds = make(utils.StringMap)
+					}
+					sg.MemberIds[ub.Id] = true
+					ratingStorage.SetSharedGroup(sg)
 				}
-				sg.MemberIds[ub.Id] = true
-				ratingStorage.SetSharedGroup(sg)
 			}
 		}
 	}
 	ub.executeActionTriggers(nil)
-	return nil //ub.BalanceMap[id].GetTotalValue()
+	return nil
 }
 
 func (ub *Account) enableDisableBalanceAction(a *Action) error {
