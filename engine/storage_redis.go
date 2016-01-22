@@ -928,7 +928,10 @@ func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
 		return err
 	}
 	// get existing action plan to merge the account ids
-	if existingAts, _ := rs.GetActionPlan(utils.ACTION_PLAN_PREFIX, true); existingAts != nil {
+	if existingAts, _ := rs.GetActionPlan(key, true); existingAts != nil {
+		if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
+			ats.AccountIDs = make(utils.StringMap)
+		}
 		for accID := range existingAts.AccountIDs {
 			ats.AccountIDs[accID] = true
 		}
