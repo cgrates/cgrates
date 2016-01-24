@@ -429,7 +429,7 @@ func TestActionPlanFunctionNotAvailable(t *testing.T) {
 		Balance:     &Balance{Value: 1.1},
 	}
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:dy": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:dy": true},
 		Timing:     &RateInterval{},
 		actions:    []*Action{a},
 	}
@@ -1058,7 +1058,7 @@ func TestActionPlanLogging(t *testing.T) {
 		},
 	}
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"one": struct{}{}, "two": struct{}{}, "three": struct{}{}},
+		accountIDs: utils.StringMap{"one": true, "two": true, "three": true},
 		Timing:     i,
 		Weight:     10.0,
 		ActionsID:  "TEST_ACTIONS",
@@ -1104,7 +1104,7 @@ func TestRemoveAction(t *testing.T) {
 	}
 
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:remo": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:remo": true},
 		actions:    Actions{a},
 	}
 	at.Execute()
@@ -1123,7 +1123,7 @@ func TestTopupAction(t *testing.T) {
 	}
 
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"vdf:minu": struct{}{}},
+		accountIDs: utils.StringMap{"vdf:minu": true},
 		actions:    Actions{a},
 	}
 
@@ -1145,7 +1145,7 @@ func TestTopupActionLoaded(t *testing.T) {
 	}
 
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"vdf:minitsboy": struct{}{}},
+		accountIDs: utils.StringMap{"vdf:minitsboy": true},
 		actions:    Actions{a},
 	}
 
@@ -1297,7 +1297,7 @@ func TestActionTransactionFuncType(t *testing.T) {
 		t.Error("Error setting account: ", err)
 	}
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:trans": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:trans": true},
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
@@ -1335,7 +1335,7 @@ func TestActionTransactionBalanceType(t *testing.T) {
 		t.Error("Error setting account: ", err)
 	}
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:trans": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:trans": true},
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
@@ -1373,7 +1373,7 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 		t.Error("Error setting account: ", err)
 	}
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:exp": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:exp": true},
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
@@ -1428,7 +1428,7 @@ func TestActionRemoveBalance(t *testing.T) {
 		t.Error("Error setting account: ", err)
 	}
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:rembal": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:rembal": true},
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
@@ -1486,7 +1486,7 @@ func TestActionTransferMonetaryDefault(t *testing.T) {
 	}
 
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:trans": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:trans": true},
 		actions:    Actions{a},
 	}
 	at.Execute()
@@ -1547,7 +1547,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 	}
 
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:trans": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:trans": true},
 		actions:    Actions{a},
 	}
 	at.Execute()
@@ -1613,7 +1613,7 @@ func TestActionConditionalTopup(t *testing.T) {
 	}
 
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:cond": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:cond": true},
 		actions:    Actions{a},
 	}
 	at.Execute()
@@ -1677,7 +1677,7 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 	}
 
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:cond": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:cond": true},
 		actions:    Actions{a},
 	}
 	at.Execute()
@@ -1741,7 +1741,7 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	}
 
 	at := &ActionTiming{
-		accountIDs: map[string]struct{}{"cgrates.org:cond": struct{}{}},
+		accountIDs: utils.StringMap{"cgrates.org:cond": true},
 		actions:    Actions{a},
 	}
 	at.Execute()

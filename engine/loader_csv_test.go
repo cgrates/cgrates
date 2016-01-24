@@ -999,7 +999,7 @@ func TestLoadActionTimings(t *testing.T) {
 	atm := csvr.actionPlans["MORE_MINUTES"]
 	expected := &ActionPlan{
 		Id:         "MORE_MINUTES",
-		AccountIDs: map[string]struct{}{"vdf:minitsboy": struct{}{}},
+		AccountIDs: utils.StringMap{"vdf:minitsboy": true},
 		ActionTimings: []*ActionTiming{
 			&ActionTiming{
 				Uuid: atm.ActionTimings[0].Uuid,

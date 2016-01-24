@@ -671,6 +671,15 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		return
 	}
+	// get existing action plan to merge the account ids
+	if existingAts, _ := ms.GetActionPlan(key, true); existingAts != nil {
+		if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
+			ats.AccountIDs = make(utils.StringMap)
+		}
+		for accID := range existingAts.AccountIDs {
+			ats.AccountIDs[accID] = true
+		}
+	}
 	result, err := ms.ms.Marshal(&ats)
 	ms.dict[utils.ACTION_PLAN_PREFIX+key] = result
 	return

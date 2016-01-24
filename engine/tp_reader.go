@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/structmatcher"
 )
 
 type TpReader struct {
@@ -506,6 +507,12 @@ func (tpr *TpReader) LoadActions() (err error) {
 	for tag, tpacts := range storActs {
 		acts := make([]*Action, len(tpacts))
 		for idx, tpact := range tpacts {
+			// check filter field
+			if len(tpact.Filter) > 0 {
+				if _, err := structmatcher.NewStructMatcher(tpact.Filter); err != nil {
+					return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
+				}
+			}
 			acts[idx] = &Action{
 				Id:               tag + strconv.Itoa(idx),
 				ActionType:       tpact.Identifier,
@@ -671,7 +678,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 		// action timings
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
-			exitingAccountIds := make(map[string]struct{})
+			exitingAccountIds := make(utils.StringMap)
 			existingActionPlan, err := tpr.ratingStorage.GetActionPlan(accountAction.ActionPlanId, true)
 			if err == nil && existingActionPlan != nil {
 				exitingAccountIds = existingActionPlan.AccountIDs
@@ -733,7 +740,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				})
 				// collect action ids from timings
 				actionsIds = append(actionsIds, at.ActionsId)
-				exitingAccountIds[id] = struct{}{}
+				exitingAccountIds[id] = true
 				actionPlan.AccountIDs = exitingAccountIds
 			}
 
@@ -831,6 +838,12 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			for tag, tpacts := range as {
 				enacts := make([]*Action, len(tpacts))
 				for idx, tpact := range tpacts {
+					// check filter field
+					if len(tpact.Filter) > 0 {
+						if _, err := structmatcher.NewStructMatcher(tpact.Filter); err != nil {
+							return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
+						}
+					}
 					enacts[idx] = &Action{
 						Id:               tag + strconv.Itoa(idx),
 						ActionType:       tpact.Identifier,
@@ -915,9 +928,9 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 			// must not continue here
 		}
 		if actionPlan.AccountIDs == nil {
-			actionPlan.AccountIDs = make(map[string]struct{})
+			actionPlan.AccountIDs = make(utils.StringMap)
 		}
-		actionPlan.AccountIDs[aa.KeyId()] = struct{}{}
+		actionPlan.AccountIDs[aa.KeyId()] = true
 	}
 	return nil
 }
@@ -1061,6 +1074,12 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 			for tag, tpacts := range as {
 				enacts := make([]*Action, len(tpacts))
 				for idx, tpact := range tpacts {
+					// check filter field
+					if len(tpact.Filter) > 0 {
+						if _, err := structmatcher.NewStructMatcher(tpact.Filter); err != nil {
+							return fmt.Errorf("error parsing action %s filter field: %v", tag, err)
+						}
+					}
 					enacts[idx] = &Action{
 						Id:               tag + strconv.Itoa(idx),
 						ActionType:       tpact.Identifier,

@@ -113,9 +113,9 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				}
 				if _, exists := ap.AccountIDs[accID]; !exists {
 					if ap.AccountIDs == nil {
-						ap.AccountIDs = make(map[string]struct{})
+						ap.AccountIDs = make(utils.StringMap)
 					}
-					ap.AccountIDs[accID] = struct{}{}
+					ap.AccountIDs[accID] = true
 					schedulerReloadNeeded = true
 					// create tasks
 					for _, at := range ap.ActionTimings {
