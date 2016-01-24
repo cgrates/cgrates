@@ -455,7 +455,7 @@ func TestDmtAgentDryRun1(t *testing.T) {
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
 	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
 	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
-	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("dryrun1")) // Match specific DryRun profile
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("pubsub1")) // Match specific DryRun profile
 	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(4))
 	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(0))
 	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))

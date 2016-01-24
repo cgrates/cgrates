@@ -23,6 +23,7 @@ import (
 	"strconv"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 	"github.com/fiorix/go-diameter/diam"
@@ -99,7 +100,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			return nil
 		}
 		var reply string
-		if err := self.pubsubs.Call("PubSubV1.Publish", evt, reply); err != nil {
+		if err := self.pubsubs.Call("PubSubV1.Publish", engine.CgrEvent(evt), &reply); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v failed publishing event, error: %s", ccr.diamMessage, err))
 			return nil
 		}

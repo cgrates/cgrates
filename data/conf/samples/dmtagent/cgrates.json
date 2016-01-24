@@ -53,6 +53,7 @@
 
 "diameter_agent": {
 	"enabled": true,
+	"pubsubs": "internal",
 },
 
 }
