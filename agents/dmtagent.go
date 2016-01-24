@@ -30,8 +30,8 @@ import (
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
-func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient) (*DiameterAgent, error) {
-	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg}
+func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient, pubsubs *rpcclient.RpcClient) (*DiameterAgent, error) {
+	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg, pubsubs: pubsubs}
 	dictsDir := cgrCfg.DiameterAgentCfg().DictionariesDir
 	if len(dictsDir) != 0 {
 		if err := loadDictionaries(dictsDir, "DiameterAgent"); err != nil {
@@ -42,8 +42,9 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient) (*Diam
 }
 
 type DiameterAgent struct {
-	cgrCfg *config.CGRConfig
-	smg    *rpcclient.RpcClient // Connection towards CGR-SMG component
+	cgrCfg  *config.CGRConfig
+	smg     *rpcclient.RpcClient // Connection towards CGR-SMG component
+	pubsubs *rpcclient.RpcClient // Connection towards CGR-PubSub component
 }
 
 // Creates the message handlers
@@ -90,6 +91,18 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		}
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v AsSMGenericEvent, error: %s", ccr.diamMessage, err))
 		return cca
+	}
+	if reqProcessor.PublishEvent && self.pubsubs != nil {
+		evt, err := smgEv.AsMapStringString()
+		if err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v failed converting SMGEvent to pubsub one, error: %s", ccr.diamMessage, err))
+			return nil
+		}
+		var reply string
+		if err := self.pubsubs.Call("PubSubV1.Publish", evt, reply); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v failed publishing event, error: %s", ccr.diamMessage, err))
+			return nil
+		}
 	}
 	var maxUsage float64
 	if reqProcessor.DryRun { // DryRun does not send over network

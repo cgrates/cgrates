@@ -27,6 +27,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 	"github.com/jinzhu/gorm"
 	mgov2 "gopkg.in/mgo.v2"
 )
@@ -66,7 +67,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, pubsub PublisherSubscriber, users UserService, aliases AliasService, stats StatsInterface) (*CdrServer, error) {
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater Connector, pubsub rpcclient.RpcClientConnection, users UserService, aliases AliasService, stats StatsInterface) (*CdrServer, error) {
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, rater: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{locksMap: make(map[string]chan bool)}}, nil
 }
 
@@ -74,7 +75,7 @@ type CdrServer struct {
 	cgrCfg  *config.CGRConfig
 	cdrDb   CdrStorage
 	rater   Connector
-	pubsub  PublisherSubscriber
+	pubsub  rpcclient.RpcClientConnection
 	users   UserService
 	aliases AliasService
 	stats   StatsInterface

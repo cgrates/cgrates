@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -347,4 +348,17 @@ func (self SMGenericEvent) AsLcrRequest() *engine.LcrRequest {
 		SetupTime:   utils.FirstNonEmpty(setupTimeStr),
 		Duration:    usageStr,
 	}
+}
+
+// AsMapStringString Converts into map[string]string, used for example as pubsub event
+func (self SMGenericEvent) AsMapStringString() (map[string]string, error) {
+	mp := make(map[string]string)
+	for k, v := range self {
+		if strV, casts := utils.CastIfToString(v); !casts {
+			return nil, fmt.Errorf("Value %+v does not cast to string", v)
+		} else {
+			mp[k] = strV
+		}
+	}
+	return mp, nil
 }

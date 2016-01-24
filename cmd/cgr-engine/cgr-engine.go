@@ -196,9 +196,9 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 	server.BijsonRegisterOnDisconnect(smg_econns.OnClientDisconnect)
 }
 
-func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
+func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcClientConnection, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
-	var smgConn *rpcclient.RpcClient
+	var smgConn, pubsubConn *rpcclient.RpcClient
 	var err error
 	if cfg.DiameterAgentCfg().SMGeneric == utils.INTERNAL {
 		smgRpc := <-internalSMGChan
@@ -212,7 +212,19 @@ func startDiameterAgent(internalSMGChan chan rpcclient.RpcClientConnection, exit
 		exitChan <- true
 		return
 	}
-	da, err := agents.NewDiameterAgent(cfg, smgConn)
+	if cfg.DiameterAgentCfg().PubSubS == utils.INTERNAL {
+		pubSubRpc := <-internalPubSubSChan
+		internalPubSubSChan <- pubSubRpc
+		pubsubConn, err = rpcclient.NewRpcClient("", "", 0, 0, rpcclient.INTERNAL_RPC, pubSubRpc)
+	} else if len(cfg.DiameterAgentCfg().PubSubS) != 0 {
+		pubsubConn, err = rpcclient.NewRpcClient("tcp", cfg.DiameterAgentCfg().PubSubS, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+	}
+	if err != nil {
+		utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to PubSubS: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	da, err := agents.NewDiameterAgent(cfg, smgConn, pubsubConn)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> error: %s!", err))
 		exitChan <- true
@@ -372,7 +384,7 @@ func startSmOpenSIPS(internalRaterChan chan *engine.Responder, cdrDb engine.CdrS
 }
 
 func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage, cdrDb engine.CdrStorage,
-	internalRaterChan chan *engine.Responder, internalPubSubSChan chan engine.PublisherSubscriber,
+	internalRaterChan chan *engine.Responder, internalPubSubSChan chan rpcclient.RpcClientConnection,
 	internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
 	internalCdrStatSChan chan engine.StatsInterface, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS CDRS service.")
@@ -394,23 +406,19 @@ func startCDRS(internalCdrSChan chan *engine.CdrServer, logDb engine.LogStorage,
 		raterConn = &engine.RPCClientConnector{Client: client}
 	}
 	// Pubsub connection init
-	var pubSubConn engine.PublisherSubscriber
+	var pubSubConn rpcclient.RpcClientConnection
 	if cfg.CDRSPubSub == utils.INTERNAL {
 		pubSubs := <-internalPubSubSChan
 		pubSubConn = pubSubs
 		internalPubSubSChan <- pubSubs
 	} else if len(cfg.CDRSPubSub) != 0 {
-		if cfg.CDRSRater == cfg.CDRSPubSub {
-			pubSubConn = &engine.ProxyPubSub{Client: client}
-		} else {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
-			if err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to pubsub server: %s", err.Error()))
-				exitChan <- true
-				return
-			}
-			pubSubConn = &engine.ProxyPubSub{Client: client}
+		client, err = rpcclient.NewRpcClient("tcp", cfg.CDRSPubSub, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil)
+		if err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to pubsub server: %s", err.Error()))
+			exitChan <- true
+			return
 		}
+		pubSubConn = client
 	}
 	// Users connection init
 	var usersConn engine.UserService
@@ -515,7 +523,7 @@ func startHistoryServer(internalHistorySChan chan history.Scribe, server *utils.
 	internalHistorySChan <- scribeServer
 }
 
-func startPubSubServer(internalPubSubSChan chan engine.PublisherSubscriber, accountDb engine.AccountingStorage, server *utils.Server) {
+func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, accountDb engine.AccountingStorage, server *utils.Server) {
 	pubSubServer := engine.NewPubSub(accountDb, cfg.HttpSkipTlsVerify)
 	server.RpcRegisterName("PubSubV1", pubSubServer)
 	internalPubSubSChan <- pubSubServer
@@ -548,7 +556,7 @@ func startRpc(server *utils.Server, internalRaterChan chan *engine.Responder,
 	internalCdrSChan chan *engine.CdrServer,
 	internalCdrStatSChan chan engine.StatsInterface,
 	internalHistorySChan chan history.Scribe,
-	internalPubSubSChan chan engine.PublisherSubscriber,
+	internalPubSubSChan chan rpcclient.RpcClientConnection,
 	internalUserSChan chan engine.UserService,
 	internalAliaseSChan chan engine.AliasService) {
 	select { // Any of the rpc methods will unlock listening to rpc requests
@@ -674,7 +682,7 @@ func main() {
 	internalCdrSChan := make(chan *engine.CdrServer, 1)
 	internalCdrStatSChan := make(chan engine.StatsInterface, 1)
 	internalHistorySChan := make(chan history.Scribe, 1)
-	internalPubSubSChan := make(chan engine.PublisherSubscriber, 1)
+	internalPubSubSChan := make(chan rpcclient.RpcClientConnection, 1)
 	internalUserSChan := make(chan engine.UserService, 1)
 	internalAliaseSChan := make(chan engine.AliasService, 1)
 	internalSMGChan := make(chan rpcclient.RpcClientConnection, 1)
@@ -735,7 +743,7 @@ func main() {
 	}
 
 	if cfg.DiameterAgentCfg().Enabled {
-		go startDiameterAgent(internalSMGChan, exitChan)
+		go startDiameterAgent(internalSMGChan, internalPubSubSChan, exitChan)
 	}
 
 	// Start HistoryS service

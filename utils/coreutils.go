@@ -474,3 +474,32 @@ func FmtFieldWidth(source string, width int, strip, padding string, mandatory bo
 	}
 	return source, nil
 }
+
+// Returns the string representation of iface or error if not convertible
+func CastIfToString(iface interface{}) (strVal string, casts bool) {
+	switch iface.(type) {
+	case string:
+		strVal = iface.(string)
+		casts = true
+	case int:
+		strVal = strconv.Itoa(iface.(int))
+		casts = true
+	case int64:
+		strVal = strconv.FormatInt(iface.(int64), 10)
+		casts = true
+	case float64:
+		strVal = strconv.FormatFloat(iface.(float64), 'f', -1, 64)
+		casts = true
+	case bool:
+		strVal = strconv.FormatBool(iface.(bool))
+		casts = true
+	case []uint8:
+		var byteVal []byte
+		if byteVal, casts = iface.([]byte); casts {
+			strVal = string(byteVal)
+		}
+	default: // Maybe we are lucky and the value converts to string
+		strVal, casts = iface.(string)
+	}
+	return strVal, casts
+}

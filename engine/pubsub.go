@@ -165,6 +165,53 @@ func (ps *PubSub) ShowSubscribers(in string, out *map[string]*SubscriberData) er
 	return nil
 }
 
+// rpcclient.RpcClientConnection interface
+func (ps *PubSub) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	switch serviceMethod {
+	case "PubSubV1.Subscribe":
+		argsConverted, canConvert := args.(SubscribeInfo)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Subscribe(argsConverted, replyConverted)
+	case "PubSubV1.Unsubscribe":
+		argsConverted, canConvert := args.(SubscribeInfo)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Unsubscribe(argsConverted, replyConverted)
+	case "PubSubV1.Publish":
+		argsConverted, canConvert := args.(CgrEvent)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Publish(argsConverted, replyConverted)
+	case "PubSubV1.ShowSubscribers":
+		argsConverted, canConvert := args.(string)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*map[string]*SubscriberData)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.ShowSubscribers(argsConverted, replyConverted)
+	}
+	return rpcclient.ErrUnsupporteServiceMethod
+}
+
 type ProxyPubSub struct {
 	Client *rpcclient.RpcClient
 }

@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled *bool, exitChan chan bool) {
@@ -41,7 +42,7 @@ func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled 
 // Starts rater and reports on chan
 func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan struct{}, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
 	internalCdrStatSChan chan engine.StatsInterface, internalHistorySChan chan history.Scribe,
-	internalPubSubSChan chan engine.PublisherSubscriber, internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
+	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
 	server *utils.Server,
 	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
 	stopHandled *bool, exitChan chan bool) {
@@ -163,7 +164,7 @@ func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan str
 		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
 			defer close(pubsubTaskChan)
-			var pubSubServer engine.PublisherSubscriber
+			var pubSubServer rpcclient.RpcClientConnection
 			if cfg.RaterPubSubServer == utils.INTERNAL {
 				select {
 				case pubSubServer = <-internalPubSubSChan:
@@ -173,7 +174,7 @@ func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan str
 					exitChan <- true
 					return
 				}
-			} else if pubSubServer, err = engine.NewProxyPubSub(cfg.RaterPubSubServer, cfg.ConnectAttempts, -1); err != nil {
+			} else if pubSubServer, err = rpcclient.NewRpcClient("tcp", cfg.RaterPubSubServer, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to pubsubs: %s", err.Error()))
 				exitChan <- true
 				return

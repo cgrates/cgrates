@@ -579,3 +579,24 @@ func TestPaddingNotAllowed(t *testing.T) {
 		t.Error("Expected error")
 	}
 }
+
+func TestCastIfToString(t *testing.T) {
+	v := interface{}("somestr")
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "somestr" {
+		t.Errorf("Received: %+v", sOut)
+	}
+	v = interface{}(1)
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "1" {
+		t.Errorf("Received: %+v", sOut)
+	}
+	v = interface{}(1.2)
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "1.2" {
+		t.Errorf("Received: %+v", sOut)
+	}
+}

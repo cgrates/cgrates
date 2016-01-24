@@ -30,6 +30,7 @@ import (
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -76,7 +77,7 @@ var (
 	debitPeriod            = 10 * time.Second
 	globalRoundingDecimals = 5
 	historyScribe          history.Scribe
-	pubSubServer           PublisherSubscriber
+	pubSubServer           rpcclient.RpcClientConnection
 	userService            UserService
 	aliasService           AliasService
 )
@@ -114,7 +115,7 @@ func SetHistoryScribe(scribe history.Scribe) {
 	historyScribe = scribe
 }
 
-func SetPubSub(ps PublisherSubscriber) {
+func SetPubSub(ps rpcclient.RpcClientConnection) {
 	pubSubServer = ps
 }
 
@@ -129,7 +130,7 @@ func SetAliasService(as AliasService) {
 func Publish(event CgrEvent) {
 	if pubSubServer != nil {
 		var s string
-		pubSubServer.Publish(event, &s)
+		pubSubServer.Call("PubSubV1.Publish", event, &s)
 	}
 }
 
