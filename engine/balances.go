@@ -359,6 +359,10 @@ func (b *Balance) SetValue(amount float64) {
 	b.dirty = true
 }
 
+func (b *Balance) SetDirty() {
+	b.dirty = true
+}
+
 func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return

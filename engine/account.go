@@ -122,7 +122,11 @@ func (ub *Account) setBalanceAction(a *Action) error {
 			bClone.Id = b.Id
 			bClone.Uuid = b.Uuid
 			previousSharedGroups = b.SharedGroups
-			*b = *bClone
+			if bClone.Id != utils.META_DEFAULT {
+				*b = *bClone
+			} else {
+				b.Value = bClone.GetValue()
+			}
 			found = true
 			break // only set one balance
 		}
@@ -141,27 +145,34 @@ func (ub *Account) setBalanceAction(a *Action) error {
 		bClone.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
 		ub.BalanceMap[balanceType] = append(ub.BalanceMap[balanceType], bClone)
 	}
+
 	if !found || !previousSharedGroups.Equal(bClone.SharedGroups) {
-		for sgId := range a.Balance.SharedGroups {
-			// add shared group member
-			sg, err := ratingStorage.GetSharedGroup(sgId, false)
-			if err != nil || sg == nil {
-				//than is problem
-				utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
-			} else {
-				if _, found := sg.MemberIds[ub.Id]; !found {
-					// add member and save
-					if sg.MemberIds == nil {
-						sg.MemberIds = make(utils.StringMap)
+		_, err := Guardian.Guard(func() (interface{}, error) {
+			for sgId := range bClone.SharedGroups {
+				// add shared group member
+				sg, err := ratingStorage.GetSharedGroup(sgId, false)
+				if err != nil || sg == nil {
+					//than is problem
+					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+				} else {
+					if _, found := sg.MemberIds[ub.Id]; !found {
+						// add member and save
+						if sg.MemberIds == nil {
+							sg.MemberIds = make(utils.StringMap)
+						}
+						sg.MemberIds[ub.Id] = true
+						ratingStorage.SetSharedGroup(sg)
 					}
-					sg.MemberIds[ub.Id] = true
-					ratingStorage.SetSharedGroup(sg)
 				}
 			}
+			return 0, nil
+		}, 0, bClone.SharedGroups.Slice()...)
+		if err != nil {
+			return err
 		}
 	}
 	ub.InitCounters()
-	ub.executeActionTriggers(nil)
+	ub.ExecuteActionTriggers(nil)
 	return nil
 }
 
@@ -222,26 +233,31 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			}
 		}
 		ub.BalanceMap[balanceType] = append(ub.BalanceMap[balanceType], bClone)
-
-		for sgId := range a.Balance.SharedGroups {
-			// add shared group member
-			sg, err := ratingStorage.GetSharedGroup(sgId, false)
-			if err != nil || sg == nil {
-				//than is problem
-				utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
-			} else {
-				if _, found := sg.MemberIds[ub.Id]; !found {
-					// add member and save
-					if sg.MemberIds == nil {
-						sg.MemberIds = make(utils.StringMap)
+		_, err := Guardian.Guard(func() (interface{}, error) {
+			for sgId := range bClone.SharedGroups {
+				// add shared group member
+				sg, err := ratingStorage.GetSharedGroup(sgId, false)
+				if err != nil || sg == nil {
+					//than is problem
+					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+				} else {
+					if _, found := sg.MemberIds[ub.Id]; !found {
+						// add member and save
+						if sg.MemberIds == nil {
+							sg.MemberIds = make(utils.StringMap)
+						}
+						sg.MemberIds[ub.Id] = true
+						ratingStorage.SetSharedGroup(sg)
 					}
-					sg.MemberIds[ub.Id] = true
-					ratingStorage.SetSharedGroup(sg)
 				}
 			}
+			return 0, nil
+		}, 0, bClone.SharedGroups.Slice()...)
+		if err != nil {
+			return err
 		}
 	}
-	ub.executeActionTriggers(nil)
+	ub.ExecuteActionTriggers(nil)
 	return nil
 }
 
@@ -552,7 +568,7 @@ func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, cou
 }
 
 // Scans the action trigers and execute the actions for which trigger is met
-func (ub *Account) executeActionTriggers(a *Action) {
+func (ub *Account) ExecuteActionTriggers(a *Action) {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
 		// sanity check
@@ -618,7 +634,7 @@ func (acc *Account) ResetActionTriggers(a *Action) {
 		}
 		at.Executed = false
 	}
-	acc.executeActionTriggers(a)
+	acc.ExecuteActionTriggers(a)
 }
 
 // Sets/Unsets recurrent flag for action triggers
@@ -634,7 +650,7 @@ func (acc *Account) SetRecurrent(a *Action, recurrent bool) {
 // Increments the counter for the type
 func (acc *Account) countUnits(amount float64, kind string, cc *CallCost, b *Balance) {
 	acc.UnitCounters.addUnits(amount, kind, cc, b)
-	acc.executeActionTriggers(nil)
+	acc.ExecuteActionTriggers(nil)
 }
 
 // Create counters for all triggered actions

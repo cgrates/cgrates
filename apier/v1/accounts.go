@@ -385,6 +385,7 @@ type AttrAddBalance struct {
 	RatingSubject  string
 	Categories     string
 	DestinationIds string
+	TimingIds      string
 	Weight         float64
 	SharedGroups   string
 	Overwrite      bool // When true it will reset if the balance is already there
@@ -434,6 +435,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				Categories:     utils.ParseStringMap(attr.Categories),
 				Weight:         attr.Weight,
 				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
+				TimingIDs:      utils.ParseStringMap(attr.TimingIds),
 				Blocker:        attr.Blocker,
 				Disabled:       attr.Disabled,
 			},
@@ -478,6 +480,7 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
 				Weight:         attr.Weight,
 				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
+				TimingIDs:      utils.ParseStringMap(attr.TimingIds),
 				Blocker:        attr.Blocker,
 				Disabled:       attr.Disabled,
 			},
@@ -522,6 +525,7 @@ func (self *ApierV1) RemoveBalances(attr *AttrAddBalance, reply *string) error {
 				Categories:     utils.ParseStringMap(attr.Categories),
 				Weight:         attr.Weight,
 				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
+				TimingIDs:      utils.ParseStringMap(attr.TimingIds),
 				Blocker:        attr.Blocker,
 				Disabled:       attr.Disabled,
 			},
@@ -535,6 +539,65 @@ func (self *ApierV1) RemoveBalances(attr *AttrAddBalance, reply *string) error {
 	return nil
 }
 
+type AttrSetBalance struct {
+	Tenant         string
+	Account        string
+	BalanceType    string
+	BalanceUuid    *string
+	BalanceId      *string
+	Directions     *string
+	Value          *float64
+	ExpiryTime     *string
+	RatingSubject  *string
+	Categories     *string
+	DestinationIds *string
+	SharedGroups   *string
+	TimingIds      *string
+	Weight         *float64
+	Blocker        *bool
+	Disabled       *bool
+	expTime        time.Time
+}
+
+func (attr *AttrSetBalance) SetBalance(b *engine.Balance) {
+	if attr.Directions != nil {
+		b.Directions = utils.ParseStringMap(*attr.Directions)
+	}
+	if attr.Value != nil {
+		b.Value = *attr.Value
+	}
+	if attr.ExpiryTime != nil {
+		b.ExpirationDate = attr.expTime
+	}
+	if attr.RatingSubject != nil {
+		b.RatingSubject = *attr.RatingSubject
+	}
+	if attr.Categories != nil {
+		b.Categories = utils.ParseStringMap(*attr.Categories)
+	}
+	if attr.DestinationIds != nil {
+		b.DestinationIds = utils.ParseStringMap(*attr.DestinationIds)
+	}
+	if attr.SharedGroups != nil {
+		b.SharedGroups = utils.ParseStringMap(*attr.SharedGroups)
+	}
+	if attr.TimingIds != nil {
+		b.TimingIDs = utils.ParseStringMap(*attr.TimingIds)
+	}
+	if attr.Weight != nil {
+		b.Weight = *attr.Weight
+	}
+	if attr.Blocker != nil {
+		b.Blocker = *attr.Blocker
+	}
+	if attr.Disabled != nil {
+		b.Disabled = *attr.Disabled
+	}
+	b.SetDirty() // Mark the balance as dirty since we have modified and it should be checked by action triggers
+}
+
+/* // SetAccount api using action and action timing to set balance,
+//to be uncommented when using pointers in action.balance
 func (self *ApierV1) SetBalance(attr *AttrAddBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -551,6 +614,7 @@ func (self *ApierV1) SetBalance(attr *AttrAddBalance, reply *string) error {
 	if _, err := self.AccountDb.GetAccount(accID); err != nil {
 		return utils.ErrNotFound
 	}
+
 	at := &engine.ActionTiming{}
 	at.SetAccountIDs(utils.StringMap{accID: true})
 
@@ -569,6 +633,7 @@ func (self *ApierV1) SetBalance(attr *AttrAddBalance, reply *string) error {
 				Categories:     utils.ParseStringMap(attr.Categories),
 				Weight:         attr.Weight,
 				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
+                TimingIDs:      utils.ParseStringMap(attr.TimingIds),
 				Blocker:        true,
 				Disabled:       attr.Disabled,
 			},
@@ -579,5 +644,100 @@ func (self *ApierV1) SetBalance(attr *AttrAddBalance, reply *string) error {
 		return err
 	}
 	*reply = OK
+	return nil
+}
+*/
+
+func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if (attr.BalanceId == nil || *attr.BalanceId == "") &&
+		(attr.BalanceUuid == nil || *attr.BalanceUuid == "") {
+		return utils.NewErrMandatoryIeMissing("BalanceId", "or", "BalanceUuid")
+	}
+	var err error
+	if attr.ExpiryTime != nil {
+		attr.expTime, err = utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+	}
+	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
+	_, err = engine.Guardian.Guard(func() (interface{}, error) {
+		account, err := self.AccountDb.GetAccount(accID)
+		if err != nil {
+			return 0, utils.ErrNotFound
+		}
+
+		if account.BalanceMap == nil {
+			account.BalanceMap = make(map[string]engine.BalanceChain, 1)
+		}
+		var previousSharedGroups utils.StringMap // kept for comparison
+		var balance *engine.Balance
+		var found bool
+		for _, b := range account.BalanceMap[attr.BalanceType] {
+			if b.IsExpired() {
+				continue
+			}
+			if (attr.BalanceUuid != nil && b.Uuid == *attr.BalanceUuid) ||
+				(attr.BalanceId != nil && b.Id == *attr.BalanceId) {
+				previousSharedGroups = b.SharedGroups
+				balance = b
+				found = true
+				break // only set one balance
+			}
+		}
+
+		// if it is not found then we add it to the list
+		if balance == nil {
+			balance := &engine.Balance{}
+			balance.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
+			account.BalanceMap[attr.BalanceType] = append(account.BalanceMap[attr.BalanceType], balance)
+		}
+
+		if attr.BalanceId != nil && *attr.BalanceId == utils.META_DEFAULT {
+			balance.Id = utils.META_DEFAULT
+			if attr.Value != nil {
+				balance.Value = *attr.Value
+			}
+		} else {
+			attr.SetBalance(balance)
+		}
+
+		if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
+			_, err = engine.Guardian.Guard(func() (interface{}, error) {
+				for sgId := range balance.SharedGroups {
+					// add shared group member
+					sg, err := self.RatingDb.GetSharedGroup(sgId, false)
+					if err != nil || sg == nil {
+						//than is problem
+						utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+					} else {
+						if _, found := sg.MemberIds[account.Id]; !found {
+							// add member and save
+							if sg.MemberIds == nil {
+								sg.MemberIds = make(utils.StringMap)
+							}
+							sg.MemberIds[account.Id] = true
+							self.RatingDb.SetSharedGroup(sg)
+						}
+					}
+				}
+				return 0, nil
+			}, 0, balance.SharedGroups.Slice()...)
+		}
+
+		account.InitCounters()
+		account.ExecuteActionTriggers(nil)
+		self.AccountDb.SetAccount(account)
+		return 0, nil
+	}, 0, accID)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = utils.OK
 	return nil
 }

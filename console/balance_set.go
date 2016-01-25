@@ -36,7 +36,7 @@ func init() {
 type CmdSetBalance struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrAddBalance
+	rpcParams *v1.AttrSetBalance
 	*CommandExecuter
 }
 
@@ -50,7 +50,7 @@ func (self *CmdSetBalance) RpcMethod() string {
 
 func (self *CmdSetBalance) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MONETARY, Overwrite: false}
+		self.rpcParams = &v1.AttrSetBalance{BalanceType: utils.MONETARY}
 	}
 	return self.rpcParams
 }

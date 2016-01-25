@@ -976,7 +976,7 @@ func TestAccountExpActionTrigger(t *testing.T) {
 			&ActionTrigger{ID: "check expired balances", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
 		},
 	}
-	ub.executeActionTriggers(nil)
+	ub.ExecuteActionTriggers(nil)
 	if ub.BalanceMap[utils.MONETARY][0].IsExpired() ||
 		ub.BalanceMap[utils.MONETARY][0].GetValue() != 10 || // expired was cleaned
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 20 ||
