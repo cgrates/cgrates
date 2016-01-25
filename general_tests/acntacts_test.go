@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var ratingDbAcntActs engine.RatingStorage
@@ -77,7 +78,7 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 	at := &engine.ActionTiming{
 		ActionsID: "DISABLE_ACNT",
 	}
-	at.SetAccountIDs(map[string]struct{}{acnt1Tag: struct{}{}})
+	at.SetAccountIDs(utils.StringMap{acnt1Tag: true})
 	if err := at.Execute(); err != nil {
 		t.Error(err)
 	}
@@ -94,7 +95,7 @@ func TestAcntActsEnableAcnt(t *testing.T) {
 	at := &engine.ActionTiming{
 		ActionsID: "ENABLE_ACNT",
 	}
-	at.SetAccountIDs(map[string]struct{}{acnt1Tag: struct{}{}})
+	at.SetAccountIDs(utils.StringMap{acnt1Tag: true})
 	if err := at.Execute(); err != nil {
 		t.Error(err)
 	}
