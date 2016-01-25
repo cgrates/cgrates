@@ -94,8 +94,8 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	var ub *engine.Account
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {

@@ -194,7 +194,11 @@ func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, 
 
 				at.SetAccountIDs(apl.AccountIDs) // copy the accounts
 				at.SetActionPlanID(apl.Id)
-				go at.Execute()
+				err := at.Execute()
+				if err != nil {
+					*reply = err.Error()
+					return err
+				}
 				utils.Logger.Info(fmt.Sprintf("<Force Scheduler> Executing action %s ", at.ActionsID))
 			}
 		}
@@ -235,7 +239,11 @@ func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, 
 			current = a0.GetNextStartTime(current)
 			if current.Before(attr.TimeEnd) || current.Equal(attr.TimeEnd) {
 				utils.Logger.Info(fmt.Sprintf("<Replay Scheduler> Executing action %s for time %v", a0.ActionsID, current))
-				go a0.Execute()
+				err := a0.Execute()
+				if err != nil {
+					*reply = err.Error()
+					return err
+				}
 				// if after execute the next start time is in the past then
 				// do not add it to the queue
 				a0.ResetStartTimeCache()
