@@ -368,7 +368,7 @@ func (at *ActionTiming) IsASAP() bool {
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
 
-// Structure to store actions according to weight
+// Structure to store actions according to execution time and weight
 type ActionTimingPriorityList []*ActionTiming
 
 func (atpl ActionTimingPriorityList) Len() int {
@@ -388,5 +388,24 @@ func (atpl ActionTimingPriorityList) Less(i, j int) bool {
 }
 
 func (atpl ActionTimingPriorityList) Sort() {
+	sort.Sort(atpl)
+}
+
+// Structure to store actions according to weight
+type ActionTimingWeightOnlyPriorityList []*ActionTiming
+
+func (atpl ActionTimingWeightOnlyPriorityList) Len() int {
+	return len(atpl)
+}
+
+func (atpl ActionTimingWeightOnlyPriorityList) Swap(i, j int) {
+	atpl[i], atpl[j] = atpl[j], atpl[i]
+}
+
+func (atpl ActionTimingWeightOnlyPriorityList) Less(i, j int) bool {
+	return atpl[i].Weight > atpl[j].Weight
+}
+
+func (atpl ActionTimingWeightOnlyPriorityList) Sort() {
 	sort.Sort(atpl)
 }

@@ -5,3 +5,4 @@ PEAK,*any,*any,*any,1;2;3;4;5,08:00:00
 OFFPEAK_MORNING,*any,*any,*any,1;2;3;4;5,00:00:00
 OFFPEAK_EVENING,*any,*any,*any,1;2;3;4;5,19:00:00
 OFFPEAK_WEEKEND,*any,*any,*any,6;7,00:00:00
+DAILY,*any,*any,*any,*any,00:00:00

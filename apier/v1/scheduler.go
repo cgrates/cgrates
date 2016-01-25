@@ -20,9 +20,12 @@ package v1
 
 import (
 	"errors"
+	"fmt"
+	"sort"
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -166,5 +169,88 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 		}
 	}
 	*reply = schedActions
+	return nil
+}
+
+type AttrsExecuteScheduledActions struct {
+	ActionPlanID       string
+	TimeStart, TimeEnd time.Time // replay the action timings between the two dates
+}
+
+func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, reply *string) error {
+	if attr.ActionPlanID != "" { // execute by ActionPlanID
+		apl, err := self.RatingDb.GetActionPlan(attr.ActionPlanID, false)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		if apl != nil {
+			// order by weight
+			engine.ActionTimingWeightOnlyPriorityList(apl.ActionTimings).Sort()
+			for _, at := range apl.ActionTimings {
+				if at.IsASAP() {
+					continue
+				}
+
+				at.SetAccountIDs(apl.AccountIDs) // copy the accounts
+				at.SetActionPlanID(apl.Id)
+				go at.Execute()
+				utils.Logger.Info(fmt.Sprintf("<Force Scheduler> Executing action %s ", at.ActionsID))
+			}
+		}
+	}
+	if !attr.TimeStart.IsZero() && !attr.TimeEnd.IsZero() { // execute between two dates
+		actionPlans, err := self.RatingDb.GetAllActionPlans()
+		if err != nil && err != utils.ErrNotFound {
+			err := fmt.Errorf("cannot get action plans: %v", err)
+			*reply = err.Error()
+			return err
+		}
+
+		// recreate the queue
+		queue := engine.ActionTimingPriorityList{}
+		for _, actionPlan := range actionPlans {
+			for _, at := range actionPlan.ActionTimings {
+				if at.Timing == nil {
+					continue
+				}
+				if at.IsASAP() {
+					continue
+				}
+				if at.GetNextStartTime(attr.TimeStart).Before(attr.TimeStart) {
+					// the task is obsolete, do not add it to the queue
+					continue
+				}
+				at.SetAccountIDs(actionPlan.AccountIDs) // copy the accounts
+				at.SetActionPlanID(actionPlan.Id)
+				at.ResetStartTimeCache()
+				queue = append(queue, at)
+			}
+		}
+		sort.Sort(queue)
+		// start playback execution loop
+		current := attr.TimeStart
+		for len(queue) > 0 && current.Before(attr.TimeEnd) {
+			a0 := queue[0]
+			current = a0.GetNextStartTime(current)
+			if current.Before(attr.TimeEnd) || current.Equal(attr.TimeEnd) {
+				utils.Logger.Info(fmt.Sprintf("<Replay Scheduler> Executing action %s for time %v", a0.ActionsID, current))
+				go a0.Execute()
+				// if after execute the next start time is in the past then
+				// do not add it to the queue
+				a0.ResetStartTimeCache()
+				current = current.Add(time.Second)
+				start := a0.GetNextStartTime(current)
+				if start.Before(current) || start.After(attr.TimeEnd) {
+					queue = queue[1:]
+				} else {
+					queue = append(queue, a0)
+					queue = queue[1:]
+					sort.Sort(queue)
+				}
+			}
+		}
+	}
+	*reply = utils.OK
 	return nil
 }
