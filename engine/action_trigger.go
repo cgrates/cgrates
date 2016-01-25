@@ -183,6 +183,11 @@ func (at *ActionTrigger) CreateBalance() *Balance {
 	}
 }
 
+func (at *ActionTrigger) Equals(oat *ActionTrigger) bool {
+	// ids only
+	return at.ID == oat.ID && at.UniqueID == oat.UniqueID
+}
+
 // Structure to store actions according to weight
 type ActionTriggers []*ActionTrigger
 

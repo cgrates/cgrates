@@ -74,15 +74,7 @@ func NewStringMap(s ...string) StringMap {
 }
 
 func ParseStringMap(s string) StringMap {
-	slice := strings.Split(s, INFIELD_SEP)
-	result := make(StringMap)
-	for _, v := range slice {
-		v = strings.TrimSpace(v)
-		if v != "" {
-			result[v] = true
-		}
-	}
-	return result
+	return StringMapFromSlice(strings.Split(s, INFIELD_SEP))
 }
 
 func (sm StringMap) Equal(om StringMap) bool {
@@ -126,6 +118,17 @@ func (sm StringMap) Slice() []string {
 	for k := range sm {
 		result[i] = k
 		i++
+	}
+	return result
+}
+
+func StringMapFromSlice(s []string) StringMap {
+	result := make(StringMap)
+	for _, v := range s {
+		v = strings.TrimSpace(v)
+		if v != "" {
+			result[v] = true
+		}
 	}
 	return result
 }

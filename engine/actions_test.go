@@ -1833,7 +1833,7 @@ func TestActionCSVFilter(t *testing.T) {
 	if err != nil {
 		t.Error("error getting actions: ", err)
 	}
-	if len(act) != 1 || act[0].Filter != `{"Type":"*voice","Value":{"*gte":100}}` {
+	if len(act) != 1 || act[0].Filter != `{"*and":[{"Value":{"*lt":0}},{"Id":{"*eq":"*default"}}]}` {
 		t.Error("Error loading actions: ", act[0].Filter)
 	}
 }
