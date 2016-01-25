@@ -83,7 +83,7 @@ type AttrSetAccount struct {
 	Account                string
 	ActionPlanIds          string
 	ActionPlansOverwrite   bool
-	ActionTriggersId       string
+	ActionTriggersIds      string
 	ActionTriggerOverwrite bool
 	AllowNegative          *bool
 	Disabled               *bool
@@ -105,11 +105,11 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				Id: accID,
 			}
 		}
-		if len(attr.ActionPlanId) != 0 {
+		if len(attr.ActionPlanIds) != 0 {
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
 				var ap *engine.ActionPlan
 				var err error
-				ap, err = self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
+				ap, err = self.RatingDb.GetActionPlan(attr.ActionPlanIds, false)
 				if err != nil {
 					return 0, err
 				}
@@ -132,11 +132,11 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 							}
 						}
 					}
-					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap); err != nil {
+					if err := self.RatingDb.SetActionPlan(attr.ActionPlanIds, ap); err != nil {
 						return 0, err
 					}
 					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
+					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanIds}})
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
@@ -145,8 +145,8 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			}
 		}
 
-		if len(attr.ActionTriggersId) != 0 {
-			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId)
+		if len(attr.ActionTriggersIds) != 0 {
+			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersIds)
 			if err != nil {
 				return 0, err
 			}
