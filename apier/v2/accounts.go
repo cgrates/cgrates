@@ -79,13 +79,15 @@ func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 }
 
 type AttrSetAccount struct {
-	Tenant           string
-	Account          string
-	ActionPlanId     string
-	ActionTriggersId string
-	AllowNegative    *bool
-	Disabled         *bool
-	ReloadScheduler  bool
+	Tenant                 string
+	Account                string
+	ActionPlanIds          string
+	ActionPlansOverwrite   bool
+	ActionTriggersId       string
+	ActionTriggerOverwrite bool
+	AllowNegative          *bool
+	Disabled               *bool
+	ReloadScheduler        bool
 }
 
 func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {

@@ -174,6 +174,7 @@ DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,
 NEG,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
 BLOCK,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,10,20,true,false,20
 BLOCK,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
+FILTER,*topup,,"{""Type"":""*voice"",""Value"":{""*gte"":100}}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 `
 	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -814,7 +815,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 10 {
+	if len(csvr.actions) != 11 {
 		t.Error("Failed to load actions: ", len(csvr.actions))
 	}
 	as1 := csvr.actions["MINI"]

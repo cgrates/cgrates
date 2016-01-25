@@ -1828,6 +1828,16 @@ func TestActionSetBalance(t *testing.T) {
 	}
 }
 
+func TestActionCSVFilter(t *testing.T) {
+	act, err := ratingStorage.GetActions("FILTER", false)
+	if err != nil {
+		t.Error("error getting actions: ", err)
+	}
+	if len(act) != 1 || act[0].Filter != `{"Type":"*voice","Value":{"*gte":100}}` {
+		t.Error("Error loading actions: ", act[0].Filter)
+	}
+}
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {
