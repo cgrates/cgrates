@@ -158,8 +158,12 @@ func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (er
 
 // Used by cdrLogAction to dynamically parse values out of account and action
 func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) string {
-	dta, err := utils.NewTAFromAccountKey(acnt.Id) // Account information should be valid
-	if err != nil {
+	var err error
+	var dta *utils.TenantAccount
+	if acnt != nil {
+		dta, err = utils.NewTAFromAccountKey(acnt.Id) // Account information should be valid
+	}
+	if err != nil || acnt == nil {
 		dta = new(utils.TenantAccount) // Init with empty values
 	}
 	var parsedValue string // Template values
