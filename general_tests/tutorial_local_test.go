@@ -1170,7 +1170,8 @@ func TestTutLocalSetAccount(t *testing.T) {
 			t.Error("Disabled should not be set")
 		}
 	}
-	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
+	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
+
 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 	} else if reply != "OK" {
