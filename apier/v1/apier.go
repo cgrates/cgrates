@@ -556,6 +556,11 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 			act.RatingSubject = engAct.Balance.RatingSubject
 			act.SharedGroups = engAct.Balance.SharedGroups.String()
 			act.BalanceWeight = engAct.Balance.Weight
+			act.TimingTags = engAct.Balance.TimingIDs.String()
+			act.BalanceId = engAct.Balance.Id
+			act.Categories = engAct.Balance.Categories.String()
+			act.BalanceBlocker = engAct.Balance.Blocker
+			act.BalanceDisabled = engAct.Balance.Disabled
 		}
 		acts = append(acts, act)
 	}
@@ -655,71 +660,6 @@ func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.Acti
 		result = append(result, apls)
 	}
 	*reply = result
-	return nil
-}
-
-type AttrAddActionTrigger struct {
-	ActionTriggersId       string
-	ActionTriggersUniqueId string
-	Tenant                 string
-	Account                string
-	ThresholdType          string
-	ThresholdValue         float64
-	BalanceId              string
-	BalanceType            string
-	BalanceDirection       string
-	BalanceDestinationIds  string
-	BalanceRatingSubject   string //ToDo
-	BalanceWeight          float64
-	BalanceExpiryTime      string
-	BalanceSharedGroup     string //ToDo
-	Weight                 float64
-	ActionsId              string
-}
-
-func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
-	if attr.BalanceDirection == "" {
-		attr.BalanceDirection = utils.OUT
-	}
-	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime, self.Config.DefaultTimezone)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	at := &engine.ActionTrigger{
-		ID:                    attr.ActionTriggersId,
-		UniqueID:              attr.ActionTriggersUniqueId,
-		ThresholdType:         attr.ThresholdType,
-		ThresholdValue:        attr.ThresholdValue,
-		BalanceId:             attr.BalanceId,
-		BalanceType:           attr.BalanceType,
-		BalanceDirections:     utils.ParseStringMap(attr.BalanceDirection),
-		BalanceDestinationIds: utils.ParseStringMap(attr.BalanceDestinationIds),
-		BalanceWeight:         attr.BalanceWeight,
-		BalanceExpirationDate: balExpiryTime,
-		Weight:                attr.Weight,
-		ActionsId:             attr.ActionsId,
-		Executed:              false,
-	}
-
-	tag := utils.AccountKey(attr.Tenant, attr.Account)
-	_, err = engine.Guardian.Guard(func() (interface{}, error) {
-		userBalance, err := self.AccountDb.GetAccount(tag)
-		if err != nil {
-			return 0, err
-		}
-
-		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
-
-		if err = self.AccountDb.SetAccount(userBalance); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, tag)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = OK
 	return nil
 }
 

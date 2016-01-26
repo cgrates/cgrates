@@ -294,6 +294,7 @@ func (at *ActionTiming) Execute() (err error) {
 				// check action filter
 				if len(a.Filter) > 0 {
 					matched, err := ub.matchActionFilter(a.Filter)
+					//log.Print("Checkng: ", a.Filter, matched)
 					if err != nil {
 						return 0, err
 					}

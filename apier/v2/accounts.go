@@ -81,9 +81,9 @@ func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 type AttrSetAccount struct {
 	Tenant                 string
 	Account                string
-	ActionPlanIds          *[]string
+	ActionPlanIDs          *[]string
 	ActionPlansOverwrite   bool
-	ActionTriggersIds      *[]string
+	ActionTriggerIDs       *[]string
 	ActionTriggerOverwrite bool
 	AllowNegative          *bool
 	Disabled               *bool
@@ -105,7 +105,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 				Id: accID,
 			}
 		}
-		if attr.ActionPlanIds != nil {
+		if attr.ActionPlanIDs != nil {
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
 				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
 				if err != nil {
@@ -121,7 +121,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 					}
 				}
 
-				for _, actionPlanID := range *attr.ActionPlanIds {
+				for _, actionPlanID := range *attr.ActionPlanIDs {
 					ap, ok := actionPlansMap[actionPlanID]
 					if !ok {
 						return 0, utils.ErrNotFound
@@ -162,11 +162,11 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			}
 		}
 
-		if attr.ActionTriggersIds != nil {
+		if attr.ActionTriggerIDs != nil {
 			if attr.ActionTriggerOverwrite {
 				ub.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
-			for _, actionTriggerID := range *attr.ActionTriggersIds {
+			for _, actionTriggerID := range *attr.ActionTriggerIDs {
 				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID)
 				if err != nil {
 					return 0, err

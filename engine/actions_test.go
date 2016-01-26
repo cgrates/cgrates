@@ -1759,6 +1759,144 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	}
 }
 
+func TestActionConditionalDisabledIfNegative(t *testing.T) {
+	err := accountingStorage.SetAccount(
+		&Account{
+			Id: "cgrates.org:af",
+			BalanceMap: map[string]BalanceChain{
+				"*data": BalanceChain{
+					&Balance{
+						Uuid:          "fc927edb-1bd6-425e-a2a3-9fd8bafaa524",
+						Id:            "for_v3hsillmilld500m_data_500_m",
+						Value:         5.242,
+						Weight:        10,
+						RatingSubject: "for_v3hsillmilld500m_data_forfait",
+						Categories: utils.StringMap{
+							"data_france": true,
+						},
+					},
+				},
+				"*monetary": BalanceChain{
+					&Balance{
+						Uuid:  "9fa1847a-f36a-41a7-8ec0-dfaab370141e",
+						Id:    "*default",
+						Value: -1.95001,
+					},
+				},
+				"*sms": BalanceChain{
+					&Balance{
+						Uuid:   "d348d15d-2988-4ee4-b847-6a552f94e2ec",
+						Id:     "for_v3hsillmilld500m_mms_ill",
+						Value:  20000,
+						Weight: 10,
+						DestinationIds: utils.StringMap{
+							"FRANCE_NATIONAL": true,
+						},
+						Categories: utils.StringMap{
+							"mms_france":  true,
+							"tmms_france": true,
+							"vmms_france": true,
+						},
+					},
+					&Balance{
+						Uuid:   "f4643517-31f6-4199-980f-04cf535471ed",
+						Id:     "for_v3hsillmilld500m_sms_ill",
+						Value:  20000,
+						Weight: 10,
+						DestinationIds: utils.StringMap{
+							"FRANCE_NATIONAL": true,
+						},
+						Categories: utils.StringMap{
+							"ms_france": true,
+						},
+					},
+				},
+				"*voice": BalanceChain{
+					&Balance{
+						Uuid:   "079ab190-77f4-44f3-9c6f-3a0dd1a59dfd",
+						Id:     "for_v3hsillmilld500m_voice_3_h",
+						Value:  10800,
+						Weight: 10,
+						DestinationIds: utils.StringMap{
+							"FRANCE_NATIONAL": true,
+						},
+						Categories: utils.StringMap{
+							"call_france": true,
+						},
+					},
+				},
+			},
+		})
+	if err != nil {
+		t.Errorf("error setting account: %v", err)
+	}
+
+	a1 := &Action{
+		ActionType:  "*enable_disable_balance",
+		BalanceType: "*sms",
+		Filter:      "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &Balance{
+			Weight:   10,
+			Disabled: true,
+		},
+		Weight: 9,
+	}
+	a2 := &Action{
+		ActionType:  "*enable_disable_balance",
+		BalanceType: "*sms",
+		Filter:      "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &Balance{
+			DestinationIds: utils.NewStringMap("FRANCE_NATIONAL"),
+			Weight:         10,
+			Disabled:       true,
+		},
+		Weight: 8,
+	}
+	a3 := &Action{
+		ActionType:  "*enable_disable_balance",
+		BalanceType: "*data",
+		Filter:      "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &Balance{
+			RatingSubject: "for_v3hsillmilld500m_data_forfait",
+			Weight:        10,
+			Disabled:      true,
+		},
+		Weight: 7,
+	}
+	a4 := &Action{
+		ActionType:  "*enable_disable_balance",
+		BalanceType: "*voice",
+		Filter:      "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &Balance{
+			DestinationIds: utils.NewStringMap("FRANCE_NATIONAL"),
+			Weight:         10,
+			Disabled:       true,
+		},
+		Weight: 6,
+	}
+
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:af": true},
+		actions:    Actions{a1, a2, a3, a4},
+	}
+	at.Execute()
+
+	afterUb, err := accountingStorage.GetAccount("cgrates.org:af")
+	if err != nil {
+		t.Error("account not found: ", err, afterUb)
+	}
+
+	for btype, chain := range afterUb.BalanceMap {
+		if btype != utils.MONETARY {
+			for _, b := range chain {
+				if b.Disabled != true {
+					t.Errorf("Failed to disabled balance (%s): %+v", btype, b)
+				}
+			}
+		}
+	}
+}
+
 func TestActionSetBalance(t *testing.T) {
 	err := accountingStorage.SetAccount(
 		&Account{
