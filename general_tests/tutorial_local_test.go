@@ -1221,7 +1221,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 1 {
 			t.Errorf("Unexpected balances found: %+v", balances)
 		}
-		if len(acnt.ActionTriggers) != 4 {
+		if len(acnt.ActionTriggers) != 7 {
 			t.Errorf("Unexpected action triggers for account: %+v", acnt.ActionTriggers)
 		}
 		if !acnt.AllowNegative {
