@@ -67,7 +67,10 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 	for i := 0; i < typ.NumField(); i++ {
 		valField := val.Field(i)
 		typeField := typ.Field(i)
-		//log.Printf("%v (%v)", typeField.Name, valField.Kind())
+		//log.Printf("%v (%v : %v)", typeField.Name, valField.Kind(), typeField.PkgPath)
+		if len(typeField.PkgPath) > 0 { //unexported field
+			continue
+		}
 		switch valField.Kind() {
 		case reflect.Ptr, reflect.Struct:
 			if valField.Kind() == reflect.Ptr {
@@ -79,6 +82,7 @@ func (ce *CommandExecuter) clientArgs(iface interface{}) (args []string) {
 				}
 			}
 			args = append(args, ce.clientArgs(valField.Interface())...)
+
 		default:
 			args = append(args, typeField.Name)
 		}
