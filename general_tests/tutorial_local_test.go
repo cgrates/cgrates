@@ -1200,6 +1200,37 @@ func TestTutLocalSetAccount(t *testing.T) {
 			t.Error("Disabled should be set")
 		}
 	}
+
+	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_1001"}, ActionTriggerIDs: &[]string{"CDRST1_WARN"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
+
+	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
+	}
+	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+		t.Error(err)
+	} else if len(acnts) != 1 {
+		t.Errorf("Accounts received: %+v", acnts)
+	} else {
+		acnt := acnts[0]
+		dta, _ := utils.NewTAFromAccountKey(acnt.Id)
+		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
+			t.Error("Unexpected account id received: ", acnt.Id)
+		}
+		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 1 {
+			t.Errorf("Unexpected balances found: %+v", balances)
+		}
+		if len(acnt.ActionTriggers) != 4 {
+			t.Errorf("Unexpected action triggers for account: %+v", acnt.ActionTriggers)
+		}
+		if !acnt.AllowNegative {
+			t.Error("AllowNegative should be set")
+		}
+		if !acnt.Disabled {
+			t.Error("Disabled should be set")
+		}
+	}
 }
 
 /*
