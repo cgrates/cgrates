@@ -34,7 +34,7 @@ type ActionTrigger struct {
 	ThresholdType string //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *exp_balance
 	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc, *min_ddc, *max_ddc
 	ThresholdValue        float64
-	Recurrent             bool          // reset eexcuted flag each run
+	Recurrent             bool          // reset excuted flag each run
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
 	BalanceId             string
 	BalanceType           string          // *monetary/*voice etc
