@@ -50,8 +50,9 @@ func (self SMGenericEvent) GetTOR(fieldName string) string {
 }
 
 func (self SMGenericEvent) GetCgrId(timezone string) string {
-	setupTime, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
-	return utils.Sha1(self.GetUUID(), setupTime.UTC().String())
+	//setupTime, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
+	//return utils.Sha1(self.GetUUID(), setupTime.UTC().String())
+	return utils.Sha1(self.GetUUID())
 }
 
 func (self SMGenericEvent) GetUUID() string {
