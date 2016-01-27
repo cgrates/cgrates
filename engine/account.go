@@ -280,6 +280,7 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 			found = true
 		}
 	}
+	a.Balance.Disabled = disabled // restore balance aaction as it is cached
 	if !found {
 		return utils.ErrNotFound
 	}

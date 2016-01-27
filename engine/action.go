@@ -275,7 +275,7 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 
 func resetTriggersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	ub.ResetActionTriggers(a)
 	return
@@ -283,7 +283,7 @@ func resetTriggersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 
 func setRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	ub.SetRecurrent(a, true)
 	return
@@ -291,7 +291,7 @@ func setRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Act
 
 func unsetRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	ub.SetRecurrent(a, false)
 	return
@@ -299,7 +299,7 @@ func unsetRecurrentAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs A
 
 func allowNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	ub.AllowNegative = true
 	return
@@ -307,7 +307,7 @@ func allowNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 
 func denyNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	ub.AllowNegative = false
 	return
@@ -315,14 +315,14 @@ func denyNegativeAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Act
 
 func resetAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	return genericReset(ub)
 }
 
 func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
@@ -334,7 +334,7 @@ func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 
 func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
@@ -343,7 +343,7 @@ func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (
 
 func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
@@ -353,7 +353,7 @@ func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 
 func debitAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	err = genericDebit(ub, a, false)
 	return
@@ -361,7 +361,7 @@ func debitAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (
 
 func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	if ub.UnitCounters != nil {
 		ub.UnitCounters.resetCounters(a)
@@ -377,7 +377,7 @@ func genericMakeNegative(a *Action) {
 
 func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
@@ -387,7 +387,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 
 func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	ub.Disabled = false
 	return
@@ -395,7 +395,7 @@ func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 
 func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	ub.Disabled = true
 	return
@@ -403,7 +403,7 @@ func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 
 func enableDisableBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
-		return errors.New("nil user balance")
+		return errors.New("nil account")
 	}
 	ub.enableDisableBalanceAction(a)
 	return
