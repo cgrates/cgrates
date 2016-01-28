@@ -280,7 +280,7 @@ func (incs Increments) GetTotalCost() float64 {
 	for _, increment := range incs {
 		cost += increment.GetCost()
 	}
-	return cost
+	return utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
 
 func (incs Increments) Length() (length int) {
@@ -321,15 +321,14 @@ func (ts *TimeSpan) SetRateInterval(interval *RateInterval) {
 // Returns the cost of the timespan according to the relevant cost interval.
 // It also sets the Cost field of this timespan (used for refund on session
 // manager debit loop where the cost cannot be recalculated)
-func (ts *TimeSpan) calculateCost() float64 {
+func (ts *TimeSpan) CalculateCost() float64 {
 	if ts.Increments.Length() == 0 {
 		if ts.RateInterval == nil {
 			return 0
 		}
 		return ts.RateInterval.GetCost(ts.GetDuration(), ts.GetGroupStart())
 	} else {
-		cost := ts.Increments.GetTotalCost()
-		return utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+		return ts.Increments.GetTotalCost()
 	}
 }
 
@@ -352,7 +351,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	// because ts cost is rounded
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
-	incrementCost := ts.calculateCost() / float64(nbIncrements)
+	incrementCost := ts.CalculateCost() / float64(nbIncrements)
 	incrementCost = utils.Round(incrementCost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{

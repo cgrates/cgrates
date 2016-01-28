@@ -458,7 +458,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		// handle max cost
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 
-		ts.Cost = ts.calculateCost()
+		ts.Cost = ts.CalculateCost()
 		cost += ts.Cost
 		cd.MaxCostSoFar += cost
 		//log.Print("Before: ", cost)
@@ -517,7 +517,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
 			cost += ts.RateInterval.Rating.ConnectFee
 		}
-		cost += ts.calculateCost()
+		cost += ts.CalculateCost()
 	}
 
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
