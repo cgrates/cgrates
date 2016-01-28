@@ -22,7 +22,7 @@ import "github.com/cgrates/cgrates/engine"
 
 func init() {
 	c := &CmdMaxDebit{
-		name:       "debit",
+		name:       "debit_max",
 		rpcMethod:  "Responder.MaxDebit",
 		clientArgs: []string{"Direction", "Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
