@@ -358,6 +358,8 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 			usage = config.CgrConfig().MaxCallDuration
 		}
 		cd := &CallDescriptor{
+			CgrId:       ev.GetCgrId(rs.Timezone),
+			TOR:         ev.ToR,
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
 			Category:    ev.GetCategory(dc.CategoryField),
@@ -435,6 +437,13 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			})
 			return errors.New("Error parsing answer event start time")
 		}
+		endTime, err := ev.GetEndTime("", rs.Timezone)
+		if err != nil {
+			rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
+				Err: err,
+			})
+			return errors.New("Error parsing answer event end time")
+		}
 		cd := &CallDescriptor{
 			CgrId:       ev.GetCgrId(rs.Timezone),
 			TOR:         ev.ToR,
@@ -445,6 +454,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime,
+			endTime:     endTime,
 			ExtraFields: ev.GetExtraFields()}
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
