@@ -394,6 +394,13 @@ type AttrAddBalance struct {
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
+	return self.modifyBalance(engine.TOPUP, attr, reply)
+}
+func (self *ApierV1) DebitBalance(attr *AttrAddBalance, reply *string) error {
+	return self.modifyBalance(engine.DEBIT, attr, reply)
+}
+
+func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -416,9 +423,8 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	at := &engine.ActionTiming{}
 	at.SetAccountIDs(utils.StringMap{accID: true})
 
-	aType := engine.TOPUP
 	if attr.Overwrite {
-		aType = engine.TOPUP_RESET
+		aType += "_reset" // => *topup_reset/*debit_reset
 	}
 	at.SetActions(engine.Actions{
 		&engine.Action{
