@@ -193,16 +193,18 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	if err == utils.ErrNotFound && rec == 1 {
 		//if err != nil || !cd.continousRatingInfos() {
 		// use the default subject only if the initial one was not found
+		//utils.Logger.Debug(fmt.Sprintf("Try the default subject for %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
 		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Rating plan not found for destination %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
-		err = utils.ErrRatingPlanNotFound
+		return utils.ErrRatingPlanNotFound
+
 	}
 	if !cd.continousRatingInfos() {
 		utils.Logger.Err(fmt.Sprintf("Destination %s not authorized for account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
-		err = utils.ErrUnauthorizedDestination
+		return utils.ErrUnauthorizedDestination
 	}
 	return
 }
