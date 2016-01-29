@@ -21,7 +21,6 @@ package v1
 import (
 	"fmt"
 	"math"
-	"regexp"
 	"strings"
 	"time"
 
@@ -126,61 +125,6 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 	}
 	if attrs.ReloadScheduler && self.Sched != nil {
 		self.Sched.Reload(true)
-	}
-	*reply = OK
-	return nil
-}
-
-// Returns a list of ActionTriggers on an account
-func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engine.ActionTriggers) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	if balance, err := self.AccountDb.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account)); err != nil {
-		return utils.NewErrServerError(err)
-	} else {
-		*reply = balance.ActionTriggers
-	}
-	return nil
-}
-
-type AttrRemAcntActionTriggers struct {
-	Tenant                 string // Tenant he account belongs to
-	Account                string // Account name
-	ActionTriggersId       string // Id filtering only specific id to remove (can be regexp pattern)
-	ActionTriggersUniqueId string
-}
-
-// Returns a list of ActionTriggers on an account
-func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	accID := utils.AccountKey(attrs.Tenant, attrs.Account)
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		ub, err := self.AccountDb.GetAccount(accID)
-		if err != nil {
-			return 0, err
-		}
-		nactrs := make(engine.ActionTriggers, 0)
-		for _, actr := range ub.ActionTriggers {
-			match, _ := regexp.MatchString(attrs.ActionTriggersId, actr.ID)
-			if len(attrs.ActionTriggersId) != 0 && match {
-				continue
-			}
-			if len(attrs.ActionTriggersUniqueId) != 0 && attrs.ActionTriggersUniqueId == actr.UniqueID {
-				continue
-			}
-			nactrs = append(nactrs, actr)
-		}
-		ub.ActionTriggers = nactrs
-		if err := self.AccountDb.SetAccount(ub); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, accID)
-	if err != nil {
-		return utils.NewErrServerError(err)
 	}
 	*reply = OK
 	return nil

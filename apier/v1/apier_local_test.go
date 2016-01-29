@@ -1009,20 +1009,19 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	}
 	reply := ""
 	// Add balance to a previously known account
-	attrs := &AttrAddActionTrigger{ActionTriggersId: "STTR", ActionTriggersUniqueId: "1", Tenant: "cgrates.org", Account: "dan2", BalanceDirection: "*out", BalanceType: "*monetary",
-		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
-	if err := rater.Call("ApierV1.AddTriggeredAction", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
+	attrs := &AttrSetAccountActionTriggers{ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
+	if err := rater.Call("ApierV1.SetAccountActionTriggers", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetAccountActionTriggers: ", err.Error())
 	} else if reply != "OK" {
-		t.Errorf("Calling ApierV1.AddTriggeredAction received: %s", reply)
+		t.Errorf("Calling ApierV1.SetAccountActionTriggers received: %s", reply)
 	}
 	reply2 := ""
-	attrs2 := new(AttrAddActionTrigger)
+	attrs2 := new(AttrSetAccountActionTriggers)
 	*attrs2 = *attrs
 	attrs2.Account = "dan10" // Does not exist so it should error when adding triggers on it
 	// Add trigger to an account which does n exist
-	if err := rater.Call("ApierV1.AddTriggeredAction", attrs2, &reply2); err == nil || reply2 == "OK" {
-		t.Error("Expecting error on ApierV1.AddTriggeredAction.", err, reply2)
+	if err := rater.Call("ApierV1.SetAccountActionTriggers", attrs2, &reply2); err == nil || reply2 == "OK" {
+		t.Error("Expecting error on ApierV1.SetAccountActionTriggers.", err, reply2)
 	}
 }
 
