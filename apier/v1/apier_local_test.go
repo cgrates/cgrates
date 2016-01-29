@@ -52,7 +52,7 @@ README:
   * Flush tables in storDb to start clean.
   * Start engine with default configuration and give it some time to listen (here caching can slow down, hence the command argument parameter).
   * Connect rpc client depending on encoding defined in configuration.
-  * Execute remote Apis and test their replies(follow prepaid1cent scenario so we can test load in dataDb also).
+  * Execute remote Apis and test their replies(follow testtp scenario so we can test load in dataDb also).
 */
 
 var cfgPath string
@@ -1226,7 +1226,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 		t.Error(err)
 	}
 	// Simple test that command is executed without errors
-	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
+	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
 	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {
