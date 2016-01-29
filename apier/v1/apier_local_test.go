@@ -1034,7 +1034,7 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
-	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
+	} else if len(reply) != 1 || reply[0].ActionsId != "LOG_BALANCE" {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 }
@@ -1049,13 +1049,16 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
-	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
+	} else if len(reply) != 1 || reply[0].ActionsId != "LOG_BALANCE" {
+		for _, atr := range reply {
+			t.Logf("ATR: %+v", atr)
+		}
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var rmReply string
-	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", ActionTriggersUniqueId: reply[0].UniqueID}
-	if err := rater.Call("ApierV1.RemAccountActionTriggers", rmReq, &rmReply); err != nil {
-		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
+	rmReq := AttrRemoveAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID}
+	if err := rater.Call("ApierV1.RemoveAccountActionTriggers", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
 	} else if rmReply != OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
@@ -1101,13 +1104,13 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 		t.Error("Unexpected action plan received")
 	} else {
 		if reply[0].ActionPlanId != "ATMS_1" {
-			t.Errorf("Unexpected ActionPlanId received")
+			t.Errorf("Unexpected ActionoveAccountPlanId received")
 		}
 	}
 }
 
-// Test here RemActionTiming
-func TestApierRemActionTiming(t *testing.T) {
+// Test here RemoveActionTiming
+func TestApierRemUniqueIDActionTiming(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1254,9 +1257,9 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		if rcvStats.Destinations != 4 ||
 			rcvStats.RatingPlans != 3 ||
 			rcvStats.RatingProfiles != 3 ||
-			rcvStats.Actions != 5 ||
+			rcvStats.Actions != 6 ||
 			rcvStats.DerivedChargers != 2 {
-			t.Errorf("Calling ApierV1.GetCacheStats received: %v", rcvStats)
+			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 		}
 	}
 }
