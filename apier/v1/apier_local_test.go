@@ -1057,6 +1057,11 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 	}
 	var rmReply string
 	rmReq := AttrRemoveAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID}
+	if err := rater.Call("ApierV1.ResetAccountActionTriggers", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
+	} else if rmReply != OK {
+		t.Error("Unexpected answer received", rmReply)
+	}
 	if err := rater.Call("ApierV1.RemoveAccountActionTriggers", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
 	} else if rmReply != OK {

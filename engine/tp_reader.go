@@ -760,7 +760,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				}
 			}
 			// write action plan
-			err = tpr.ratingStorage.SetActionPlan(accountAction.ActionPlanId, actionPlan)
+			err = tpr.ratingStorage.SetActionPlan(accountAction.ActionPlanId, actionPlan, false)
 			if err != nil {
 				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
 			}
@@ -1399,7 +1399,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 				}
 			}
 		}
-		err = tpr.ratingStorage.SetActionPlan(k, ap)
+		err = tpr.ratingStorage.SetActionPlan(k, ap, false)
 		if err != nil {
 			return err
 		}

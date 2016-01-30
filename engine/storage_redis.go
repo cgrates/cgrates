@@ -920,20 +920,22 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 	return
 }
 
-func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
+func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) (err error) {
 	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		err = rs.db.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		return err
 	}
-	// get existing action plan to merge the account ids
-	if existingAts, _ := rs.GetActionPlan(key, true); existingAts != nil {
-		if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
-			ats.AccountIDs = make(utils.StringMap)
-		}
-		for accID := range existingAts.AccountIDs {
-			ats.AccountIDs[accID] = true
+	if !overwrite {
+		// get existing action plan to merge the account ids
+		if existingAts, _ := rs.GetActionPlan(key, true); existingAts != nil {
+			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
+				ats.AccountIDs = make(utils.StringMap)
+			}
+			for accID := range existingAts.AccountIDs {
+				ats.AccountIDs[accID] = true
+			}
 		}
 	}
 

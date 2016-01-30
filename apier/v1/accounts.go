@@ -95,7 +95,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 
 		if attrs.ActionPlanId != "" { // delete the entire action plan
 			ap.ActionTimings = nil // will delete the action plan
-			return 0, self.RatingDb.SetActionPlan(ap.Id, ap)
+			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
 		}
 
 		if attrs.ActionTimingId != "" { // delete only a action timing from action plan
@@ -106,13 +106,13 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 					break
 				}
 			}
-			return 0, self.RatingDb.SetActionPlan(ap.Id, ap)
+			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
 		}
 
 		if attrs.Tenant != "" && attrs.Account != "" {
 			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
 			delete(ap.AccountIDs, accID)
-			return 0, self.RatingDb.SetActionPlan(ap.Id, ap)
+			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
 		}
 
 		// update cache
@@ -148,8 +148,30 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 		}
 		if len(attr.ActionPlanId) != 0 {
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
+				// clean previous action plans
+				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
+				if err != nil {
+					return 0, err
+				}
+				var dirtyAps []string
+				for actionPlanID, ap := range actionPlansMap {
+					if actionPlanID == attr.ActionPlanId {
+						// don't remove it if it's the current one
+						continue
+					}
+					if _, exists := ap.AccountIDs[accID]; exists {
+						delete(ap.AccountIDs, accID)
+						dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+actionPlanID)
+					}
+				}
+
+				if len(dirtyAps) > 0 {
+					// update cache
+					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: dirtyAps})
+					schedulerReloadNeeded = true
+				}
+
 				var ap *engine.ActionPlan
-				var err error
 				ap, err = self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
 				if err != nil {
 					return 0, err
@@ -173,7 +195,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 							}
 						}
 					}
-					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap); err != nil {
+					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, false); err != nil {
 						return 0, err
 					}
 					// update cache
@@ -223,39 +245,50 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	var schedulerReloadNeeded bool
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		// remove it from all action plans
-		allAPs, err := self.RatingDb.GetAllActionPlans()
-		if err != nil && err != utils.ErrNotFound {
-			return 0, err
-		}
-		for key, ap := range allAPs {
-			if _, exists := ap.AccountIDs[accID]; !exists {
-				schedulerReloadNeeded = true
-				_, err := engine.Guardian.Guard(func() (interface{}, error) {
-					// save action plan
-					self.RatingDb.SetActionPlan(key, ap)
-					// cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
-					return 0, nil
-				}, 0, utils.ACTION_PLAN_PREFIX)
-				if err != nil {
-					return 0, err
+		_, err := engine.Guardian.Guard(func() (interface{}, error) {
+			actionPlansMap, err := self.RatingDb.GetAllActionPlans()
+			if err != nil {
+				return 0, err
+			}
+
+			for actionPlanID, ap := range actionPlansMap {
+				if _, exists := ap.AccountIDs[accID]; exists {
+					delete(ap.AccountIDs, accID)
+					dirtyActionPlans[actionPlanID] = ap
 				}
 			}
+
+			var actionPlansCacheIds []string
+			for actionPlanID, ap := range dirtyActionPlans {
+				if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
+					return 0, err
+				}
+				actionPlansCacheIds = append(actionPlansCacheIds, utils.ACTION_PLAN_PREFIX+actionPlanID)
+			}
+			if len(actionPlansCacheIds) > 0 {
+				// update cache
+				self.RatingDb.CacheRatingPrefixValues(map[string][]string{
+					utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
+			}
+			return 0, nil
+		}, 0, utils.ACTION_PLAN_PREFIX)
+		if err != nil {
+			return 0, err
 		}
+
 		if err := self.AccountDb.RemoveAccount(accID); err != nil {
 			return 0, err
 		}
 		return 0, nil
 	}, 0, accID)
-	// FIXME: remove from all actionplans?
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if schedulerReloadNeeded {
+	if attr.ReloadScheduler && len(dirtyActionPlans) > 0 {
 		// reload scheduler
 		if self.Sched != nil {
 			self.Sched.Reload(true)

@@ -559,20 +559,28 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 		utils.Logger.Err(fmt.Sprintf("Could not get action plans: %s: %v", accID, err))
 		return err
 	}
-	for key, ap := range allAPs {
-		if _, exists := ap.AccountIDs[accID]; !exists {
-			_, err := Guardian.Guard(func() (interface{}, error) {
+	var dirtyAps []string
+	_, err = Guardian.Guard(func() (interface{}, error) {
+		for key, ap := range allAPs {
+			if _, exists := ap.AccountIDs[accID]; !exists {
 				// save action plan
-				ratingStorage.SetActionPlan(key, ap)
-				// cache
-				ratingStorage.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + key}})
-				return 0, nil
-			}, 0, utils.ACTION_PLAN_PREFIX)
-			if err != nil {
-				return err
+				delete(ap.AccountIDs, key)
+				ratingStorage.SetActionPlan(key, ap, true)
+				dirtyAps = append(dirtyAps, utils.ACTION_PLAN_PREFIX+key)
 			}
 		}
+		if len(dirtyAps) > 0 {
+			// cache
+			ratingStorage.CacheRatingPrefixValues(map[string][]string{
+				utils.ACTION_PLAN_PREFIX: dirtyAps})
+		}
+		return 0, nil
+
+	}, 0, utils.ACTION_PLAN_PREFIX)
+	if err != nil {
+		return err
 	}
+	// TODO: no scheduler reload?
 	return nil
 }
 
