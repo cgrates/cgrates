@@ -541,7 +541,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	if err != nil {
 		return err
 	}
-	if lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
+	if lcrCost.Entry != nil && lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
 		for _, suppl := range lcrCost.SupplierCosts {
 			suppl.Cost = -1 // In case of load distribution we don't calculate costs
 		}
