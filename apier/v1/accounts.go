@@ -195,7 +195,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 							}
 						}
 					}
-					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, false); err != nil {
+					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap, true); err != nil {
 						return 0, err
 					}
 					// update cache
