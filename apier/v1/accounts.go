@@ -543,6 +543,9 @@ type AttrSetBalance struct {
 }
 
 func (attr *AttrSetBalance) SetBalance(b *engine.Balance) {
+	if b == nil {
+		return
+	}
 	if attr.Directions != nil {
 		b.Directions = utils.StringMapFromSlice(*attr.Directions)
 	}
@@ -675,7 +678,7 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 
 		// if it is not found then we add it to the list
 		if balance == nil {
-			balance := &engine.Balance{}
+			balance = &engine.Balance{}
 			balance.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
 			account.BalanceMap[attr.BalanceType] = append(account.BalanceMap[attr.BalanceType], balance)
 		}
