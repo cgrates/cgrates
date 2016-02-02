@@ -27,6 +27,23 @@ type UnitCounter struct {
 	Balances    BalanceChain // first balance is the general one (no destination)
 }
 
+// Returns true if the counters were of the same type
+// Copies the value from old balances
+func (uc *UnitCounter) CopyCounterValues(oldUc *UnitCounter) bool {
+	if uc.BalanceType+uc.CounterType != oldUc.BalanceType+oldUc.CounterType { // type check
+		return false
+	}
+	for _, b := range uc.Balances {
+		for _, oldB := range oldUc.Balances {
+			if b.Equal(oldB) {
+				b.Value = oldB.Value
+				break
+			}
+		}
+	}
+	return true
+}
+
 type UnitCounters []*UnitCounter
 
 func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *Balance) {
