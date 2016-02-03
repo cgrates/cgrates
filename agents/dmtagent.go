@@ -21,6 +21,7 @@ package agents
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -135,16 +136,27 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				}
 			}
 		}
-		if err != nil {
-			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
-				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-				return nil
-			}
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
-			return cca
-		}
 		var unauthorizedResultCode bool
+		if err != nil {
+			utils.Logger.Debug(fmt.Sprintf("Received error from rater: %+v", err))
+			if strings.HasSuffix(err.Error(), utils.ErrAccountNotFound.Error()) { // 5030 in case of AccountNotFound
+				if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "5030",
+					false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+					return nil
+				}
+				unauthorizedResultCode = true
+			} else {
+				if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
+					false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+					utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+					return nil
+				}
+				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
+				return cca
+			}
+
+		}
 		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && maxUsage == 0 { // Not enough balance, RFC demands 4012
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "4012",
 				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
@@ -152,10 +164,12 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				return nil
 			}
 			unauthorizedResultCode = true
-		} else if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(diam.Success),
-			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-			return nil
+		} else if !unauthorizedResultCode {
+			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(diam.Success),
+				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+				return nil
+			}
 		}
 		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && !unauthorizedResultCode { // For terminate or previously marked unauthorized, we don't add granted-service-unit AVP
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Granted-Service-Unit", "CC-Time"}, strconv.FormatFloat(maxUsage, 'f', 0, 64),
