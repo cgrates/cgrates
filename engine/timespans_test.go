@@ -214,7 +214,7 @@ func TestTSTimespanGetCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	ts1 := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	if ts1.calculateCost() != 0 {
+	if ts1.CalculateCost() != 0 {
 		t.Error("No interval and still kicking")
 	}
 	ts1.SetRateInterval(
@@ -223,12 +223,12 @@ func TestTSTimespanGetCost(t *testing.T) {
 			Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}},
 		},
 	)
-	if ts1.calculateCost() != 600 {
+	if ts1.CalculateCost() != 600 {
 		t.Error("Expected 10 got ", ts1.Cost)
 	}
 	ts1.RateInterval = nil
 	ts1.SetRateInterval(&RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 60 * time.Second}}}})
-	if ts1.calculateCost() != 10 {
+	if ts1.CalculateCost() != 10 {
 		t.Error("Expected 6000 got ", ts1.Cost)
 	}
 }
@@ -239,8 +239,8 @@ func TestTSTimespanGetCostIntervals(t *testing.T) {
 	for i := 0; i < 11; i++ {
 		ts.Increments[i] = &Increment{Cost: 0.02}
 	}
-	if ts.calculateCost() != 0.22 {
-		t.Error("Error caclulating timespan cost: ", ts.calculateCost())
+	if ts.CalculateCost() != 0.22 {
+		t.Error("Error caclulating timespan cost: ", ts.CalculateCost())
 	}
 }
 

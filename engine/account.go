@@ -280,6 +280,7 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 			found = true
 		}
 	}
+	a.Balance.Disabled = disabled // restore balance aaction as it is cached
 	if !found {
 		return utils.ErrNotFound
 	}
@@ -568,9 +569,9 @@ func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, cou
 }
 
 // Scans the action trigers and execute the actions for which trigger is met
-func (ub *Account) ExecuteActionTriggers(a *Action) {
-	ub.ActionTriggers.Sort()
-	for _, at := range ub.ActionTriggers {
+func (acc *Account) ExecuteActionTriggers(a *Action) {
+	acc.ActionTriggers.Sort()
+	for _, at := range acc.ActionTriggers {
 		// sanity check
 		if !strings.Contains(at.ThresholdType, "counter") && !strings.Contains(at.ThresholdType, "balance") {
 			continue
@@ -584,45 +585,45 @@ func (ub *Account) ExecuteActionTriggers(a *Action) {
 			continue
 		}
 		if strings.Contains(at.ThresholdType, "counter") {
-			for _, uc := range ub.UnitCounters {
+			for _, uc := range acc.UnitCounters {
 				if uc.BalanceType == at.BalanceType &&
 					strings.Contains(at.ThresholdType, uc.CounterType[1:]) {
-					for _, mb := range uc.Balances {
+					for _, b := range uc.Balances {
 						if strings.HasPrefix(at.ThresholdType, "*max") {
-							if mb.MatchActionTrigger(at) && mb.GetValue() >= at.ThresholdValue {
-								at.Execute(ub, nil)
+							if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
+								at.Execute(acc, nil)
 							}
 						} else { //MIN
-							if mb.MatchActionTrigger(at) && mb.GetValue() <= at.ThresholdValue {
-								at.Execute(ub, nil)
+							if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
+								at.Execute(acc, nil)
 							}
 						}
 					}
 				}
 			}
 		} else { // BALANCE
-			for _, b := range ub.BalanceMap[at.BalanceType] {
+			for _, b := range acc.BalanceMap[at.BalanceType] {
 				if !b.dirty && at.ThresholdType != utils.TRIGGER_BALANCE_EXPIRED { // do not check clean balances
 					continue
 				}
 				switch at.ThresholdType {
 				case utils.TRIGGER_MAX_BALANCE:
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
-						at.Execute(ub, nil)
+						at.Execute(acc, nil)
 					}
 				case utils.TRIGGER_MIN_BALANCE:
 					if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
-						at.Execute(ub, nil)
+						at.Execute(acc, nil)
 					}
 				case utils.TRIGGER_BALANCE_EXPIRED:
 					if b.MatchActionTrigger(at) && b.IsExpired() {
-						at.Execute(ub, nil)
+						at.Execute(acc, nil)
 					}
 				}
 			}
 		}
 	}
-	ub.CleanExpiredBalances()
+	acc.CleanExpiredBalances()
 }
 
 // Mark all action trigers as ready for execution
@@ -655,6 +656,7 @@ func (acc *Account) countUnits(amount float64, kind string, cc *CallCost, b *Bal
 
 // Create counters for all triggered actions
 func (acc *Account) InitCounters() {
+	oldUcs := acc.UnitCounters
 	acc.UnitCounters = nil
 	ucTempMap := make(map[string]*UnitCounter)
 	for _, at := range acc.ActionTriggers {
@@ -679,6 +681,14 @@ func (acc *Account) InitCounters() {
 		b := at.CreateBalance()
 		if !uc.Balances.HasBalance(b) {
 			uc.Balances = append(uc.Balances, b)
+		}
+	}
+	// copy old counter values
+	for _, uc := range acc.UnitCounters {
+		for _, oldUc := range oldUcs {
+			if uc.CopyCounterValues(oldUc) {
+				break
+			}
 		}
 	}
 }

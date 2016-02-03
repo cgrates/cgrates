@@ -186,7 +186,7 @@ func (rs *Responder) FakeDebit(arg *CallDescriptor, reply *CallCost) (err error)
 }
 
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
-	if item, err := rs.getCache().Get(utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrId); err == nil && item != nil {
+	if item, err := rs.getCache().Get(utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrID + arg.RunID); err == nil && item != nil {
 		*reply = *(item.Value.(*CallCost))
 		return item.Err
 	}
@@ -216,7 +216,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 	} else {
 		r, e := arg.MaxDebit()
 		if e != nil {
-			rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
+			rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrID+arg.RunID, &cache2go.CacheItem{
 				Err: e,
 			})
 			return e
@@ -224,7 +224,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 			*reply = *r
 		}
 	}
-	rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrID+arg.RunID, &cache2go.CacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -232,7 +232,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 }
 
 func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
-	if item, err := rs.getCache().Get(utils.REFUND_INCR_CACHE_PREFIX + arg.CgrId); err == nil && item != nil {
+	if item, err := rs.getCache().Get(utils.REFUND_INCR_CACHE_PREFIX + arg.CgrID + arg.RunID); err == nil && item != nil {
 		*reply = *(item.Value.(*float64))
 		return item.Err
 	}
@@ -261,7 +261,7 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	} else {
 		*reply, err = arg.RefundIncrements()
 	}
-	rs.getCache().Cache(utils.REFUND_INCR_CACHE_PREFIX+arg.CgrId, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.REFUND_INCR_CACHE_PREFIX+arg.CgrID+arg.RunID, &cache2go.CacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -358,6 +358,9 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 			usage = config.CgrConfig().MaxCallDuration
 		}
 		cd := &CallDescriptor{
+			CgrID:       ev.GetCgrId(rs.Timezone),
+			RunID:       ev.RunID,
+			TOR:         ev.ToR,
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
 			Category:    ev.GetCategory(dc.CategoryField),
@@ -435,8 +438,16 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			})
 			return errors.New("Error parsing answer event start time")
 		}
+		endTime, err := ev.GetEndTime("", rs.Timezone)
+		if err != nil {
+			rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
+				Err: err,
+			})
+			return errors.New("Error parsing answer event end time")
+		}
 		cd := &CallDescriptor{
-			CgrId:       ev.GetCgrId(rs.Timezone),
+			CgrID:       ev.GetCgrId(rs.Timezone),
+			RunID:       ev.RunID,
 			TOR:         ev.ToR,
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
@@ -445,6 +456,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime,
+			TimeEnd:     endTime,
 			ExtraFields: ev.GetExtraFields()}
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
@@ -529,7 +541,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	if err != nil {
 		return err
 	}
-	if lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
+	if lcrCost.Entry != nil && lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
 		for _, suppl := range lcrCost.SupplierCosts {
 			suppl.Cost = -1 // In case of load distribution we don't calculate costs
 		}

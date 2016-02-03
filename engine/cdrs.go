@@ -108,6 +108,7 @@ func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 
 // RPC method, used to log callcosts to db
 func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	ccl.CallCost.UpdateCost()       // make sure the total cost reflect the increments
 	ccl.CallCost.UpdateRatedUsage() // make sure rated usage is updated
 	if ccl.CheckDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
@@ -177,6 +178,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	}
 	if self.cgrCfg.CDRSStoreCdrs { // Store RawCDRs, this we do sync so we can reply with the status
 		if cdr.CostDetails != nil {
+			cdr.CostDetails.UpdateCost()
 			cdr.CostDetails.UpdateRatedUsage()
 		}
 		if err := self.cdrDb.SetCDR(cdr, false); err != nil { // Only original CDR stored in primary table, no derived
@@ -236,6 +238,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR, sendToStats bool) error
 	if self.cgrCfg.CDRSStoreCdrs { // Store CDRs
 		// Store RatedCDR
 		if cdr.CostDetails != nil {
+			cdr.CostDetails.UpdateCost()
 			cdr.CostDetails.UpdateRatedUsage()
 		}
 		if err := self.cdrDb.SetCDR(cdr, true); err != nil {

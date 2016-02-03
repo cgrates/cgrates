@@ -148,12 +148,16 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 						}
 					}
 				}
+				var actionPlansCacheIds []string
 				for actionPlanID, ap := range dirtyActionPlans {
-					if err := self.RatingDb.SetActionPlan(actionPlanID, ap); err != nil {
+					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
 						return 0, err
 					}
+					actionPlansCacheIds = append(actionPlansCacheIds, utils.ACTION_PLAN_PREFIX+actionPlanID)
+				}
+				if len(actionPlansCacheIds) > 0 {
 					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + actionPlanID}})
+					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)

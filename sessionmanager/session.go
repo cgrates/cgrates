@@ -70,7 +70,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 // the debit loop method (to be stoped by sending somenthing on stopDebit channel)
 func (s *Session) debitLoop(runIdx int) {
 	nextCd := s.sessionRuns[runIdx].CallDescriptor
-	nextCd.CgrId = s.eventStart.GetCgrId("")
+	nextCd.CgrID = s.eventStart.GetCgrId("")
 	index := 0.0
 	debitPeriod := s.sessionManager.DebitInterval()
 	for {
@@ -180,6 +180,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 				lastCC.Timespans = lastCC.Timespans[:i]
 			} else {
 				ts.SplitByIncrement(lastRefundedIncrementIndex)
+				ts.Cost = ts.CalculateCost()
 			}
 			break // do not go to other timespans
 		} else {
@@ -214,6 +215,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 	}
 	//utils.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
 	lastCC.Cost -= refundIncrements.GetTotalCost()
+	lastCC.UpdateRatedUsage()
 	lastCC.Timespans.Compress()
 	return nil
 }

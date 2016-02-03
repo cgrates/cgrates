@@ -246,6 +246,92 @@ func TestUnitCountersCountAllVoiceDestinationEvent(t *testing.T) {
 	}
 }
 
+func TestUnitCountersKeepValuesAfterInit(t *testing.T) {
+	a := &Account{
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				UniqueID:          "TestTR1",
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.MONETARY,
+				BalanceDirections: utils.NewStringMap(utils.OUT),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				UniqueID:          "TestTR11",
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.MONETARY,
+				BalanceDirections: utils.NewStringMap(utils.OUT),
+				BalanceWeight:     20,
+			},
+			&ActionTrigger{
+				UniqueID:              "TestTR2",
+				ThresholdType:         utils.TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:           utils.VOICE,
+				BalanceDirections:     utils.NewStringMap(utils.OUT),
+				BalanceDestinationIds: utils.NewStringMap("NAT"),
+				BalanceWeight:         10,
+			},
+			&ActionTrigger{
+				UniqueID:              "TestTR22",
+				ThresholdType:         utils.TRIGGER_MAX_EVENT_COUNTER,
+				BalanceType:           utils.VOICE,
+				BalanceDestinationIds: utils.NewStringMap("RET"),
+				BalanceWeight:         10,
+			},
+			&ActionTrigger{
+				UniqueID:          "TestTR3",
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.VOICE,
+				BalanceDirections: utils.NewStringMap(utils.OUT),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				UniqueID:          "TestTR4",
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
+				BalanceType:       utils.SMS,
+				BalanceDirections: utils.NewStringMap(utils.OUT),
+				BalanceWeight:     10,
+			},
+			&ActionTrigger{
+				UniqueID:          "TestTR5",
+				ThresholdType:     utils.TRIGGER_MAX_BALANCE,
+				BalanceType:       utils.SMS,
+				BalanceDirections: utils.NewStringMap(utils.OUT),
+				BalanceWeight:     10,
+			},
+		},
+	}
+	a.InitCounters()
+	a.UnitCounters.addUnits(10, utils.VOICE, &CallCost{Destination: "0723045326"}, nil)
+
+	if len(a.UnitCounters) != 4 ||
+		len(a.UnitCounters[1].Balances) != 2 ||
+		a.UnitCounters[1].Balances[0].Value != 10 ||
+		a.UnitCounters[1].Balances[1].Value != 10 {
+		for _, uc := range a.UnitCounters {
+			t.Logf("UC: %+v", uc)
+			for _, b := range uc.Balances {
+				t.Logf("B: %+v", b)
+			}
+		}
+		t.Errorf("Error adding unit counters: %v", len(a.UnitCounters))
+	}
+	a.InitCounters()
+
+	if len(a.UnitCounters) != 4 ||
+		len(a.UnitCounters[1].Balances) != 2 ||
+		a.UnitCounters[1].Balances[0].Value != 10 ||
+		a.UnitCounters[1].Balances[1].Value != 10 {
+		for _, uc := range a.UnitCounters {
+			t.Logf("UC: %+v", uc)
+			for _, b := range uc.Balances {
+				t.Logf("B: %+v", b)
+			}
+		}
+		t.Errorf("Error keeping counter values after init: %v", len(a.UnitCounters))
+	}
+}
+
 func TestUnitCountersResetCounterById(t *testing.T) {
 	a := &Account{
 		ActionTriggers: ActionTriggers{

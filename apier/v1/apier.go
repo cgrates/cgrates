@@ -624,7 +624,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 			ActionsID: apiAtm.ActionsId,
 		})
 	}
-	if err := self.RatingDb.SetActionPlan(ap.Id, ap); err != nil {
+	if err := self.RatingDb.SetActionPlan(ap.Id, ap, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.Id}})

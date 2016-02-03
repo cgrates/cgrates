@@ -5,75 +5,27 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AttrAddActionTrigger struct {
-	ActionTriggersId       string
-	ActionTriggersUniqueId string
-	Tenant                 string
-	Account                string
-	ThresholdType          string
-	ThresholdValue         float64
-	BalanceId              string
-	BalanceType            string
-	BalanceDirection       string
-	BalanceDestinationIds  string
-	BalanceRatingSubject   string //ToDo
-	BalanceWeight          float64
-	BalanceExpiryTime      string
-	BalanceSharedGroup     string //ToDo
-	Weight                 float64
-	ActionsId              string
-}
-
-func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
-	if attr.BalanceDirection == "" {
-		attr.BalanceDirection = utils.OUT
+// Returns a list of ActionTriggers on an account
+func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engine.ActionTriggers) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime, self.Config.DefaultTimezone)
-	if err != nil {
+	if account, err := self.AccountDb.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account)); err != nil {
 		return utils.NewErrServerError(err)
-	}
-	at := &engine.ActionTrigger{
-		ID:                    attr.ActionTriggersId,
-		UniqueID:              attr.ActionTriggersUniqueId,
-		ThresholdType:         attr.ThresholdType,
-		ThresholdValue:        attr.ThresholdValue,
-		BalanceId:             attr.BalanceId,
-		BalanceType:           attr.BalanceType,
-		BalanceDirections:     utils.ParseStringMap(attr.BalanceDirection),
-		BalanceDestinationIds: utils.ParseStringMap(attr.BalanceDestinationIds),
-		BalanceWeight:         attr.BalanceWeight,
-		BalanceExpirationDate: balExpiryTime,
-		Weight:                attr.Weight,
-		ActionsId:             attr.ActionsId,
-		Executed:              false,
-	}
-
-	tag := utils.AccountKey(attr.Tenant, attr.Account)
-	_, err = engine.Guardian.Guard(func() (interface{}, error) {
-		userBalance, err := self.AccountDb.GetAccount(tag)
-		if err != nil {
-			return 0, err
+	} else {
+		ats := account.ActionTriggers
+		if ats == nil {
+			ats = engine.ActionTriggers{}
 		}
-
-		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
-
-		if err = self.AccountDb.SetAccount(userBalance); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, tag)
-	if err != nil {
-		*reply = err.Error()
-		return err
+		*reply = ats
 	}
-	*reply = OK
 	return nil
 }
 
 type AttrSetAccountActionTriggers struct {
 	Tenant                 string
 	Account                string
-	ActionTriggersIDs      *[]string
+	ActionTriggerIDs       *[]string
 	ActionTriggerOverwrite bool
 }
 
@@ -89,11 +41,11 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 		} else {
 			return 0, err
 		}
-		if attr.ActionTriggersIDs != nil {
+		if attr.ActionTriggerIDs != nil {
 			if attr.ActionTriggerOverwrite {
 				account.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
-			for _, actionTriggerID := range *attr.ActionTriggersIDs {
+			for _, actionTriggerID := range *attr.ActionTriggerIDs {
 				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID)
 				if err != nil {
 

@@ -291,6 +291,7 @@ func (at *ActionTiming) Execute() (err error) {
 			transactionFailed := false
 			removeAccountActionFound := false
 			for _, a := range aac {
+				//log.Print("A: ", utils.ToJSON(a))
 				// check action filter
 				if len(a.Filter) > 0 {
 					matched, err := ub.matchActionFilter(a.Filter)
@@ -349,7 +350,7 @@ func (at *ActionTiming) Execute() (err error) {
 				break
 			}
 			if err := actionFunction(nil, nil, a, aac); err != nil {
-				utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
+				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
 				break
 			}
 		}

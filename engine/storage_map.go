@@ -664,20 +664,22 @@ func (ms *MapStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan
 	return
 }
 
-func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
+func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) (err error) {
 	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		return
 	}
-	// get existing action plan to merge the account ids
-	if existingAts, _ := ms.GetActionPlan(key, true); existingAts != nil {
-		if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
-			ats.AccountIDs = make(utils.StringMap)
-		}
-		for accID := range existingAts.AccountIDs {
-			ats.AccountIDs[accID] = true
+	if !overwrite {
+		// get existing action plan to merge the account ids
+		if existingAts, _ := ms.GetActionPlan(key, true); existingAts != nil {
+			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
+				ats.AccountIDs = make(utils.StringMap)
+			}
+			for accID := range existingAts.AccountIDs {
+				ats.AccountIDs[accID] = true
+			}
 		}
 	}
 	result, err := ms.ms.Marshal(&ats)

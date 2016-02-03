@@ -132,6 +132,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 				lastCC.Timespans = lastCC.Timespans[:i]
 			} else {
 				ts.SplitByIncrement(lastRefundedIncrementIndex)
+				ts.Cost = ts.CalculateCost()
 			}
 			break // do not go to other timespans
 		} else {
@@ -166,6 +167,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	}
 	//utils.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
 	lastCC.Cost -= refundIncrements.GetTotalCost()
+	lastCC.UpdateRatedUsage()
 	lastCC.Timespans.Compress()
 	return nil
 }

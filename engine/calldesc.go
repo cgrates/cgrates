@@ -153,7 +153,8 @@ type CallDescriptor struct {
 	MaxRate      float64
 	MaxRateUnit  time.Duration
 	MaxCostSoFar float64
-	CgrId        string
+	CgrID        string
+	RunID        string
 	account      *Account
 	testCallcost *CallCost // testing purpose only!
 }
@@ -193,16 +194,18 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	if err == utils.ErrNotFound && rec == 1 {
 		//if err != nil || !cd.continousRatingInfos() {
 		// use the default subject only if the initial one was not found
+		//utils.Logger.Debug(fmt.Sprintf("Try the default subject for %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
 		err, _ = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Rating plan not found for destination %s and account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
-		err = utils.ErrRatingPlanNotFound
+		return utils.ErrRatingPlanNotFound
+
 	}
 	if !cd.continousRatingInfos() {
 		utils.Logger.Err(fmt.Sprintf("Destination %s not authorized for account: %s, subject: %s", cd.Destination, cd.GetAccountKey(), cd.GetKey(cd.Subject)))
-		err = utils.ErrUnauthorizedDestination
+		return utils.ErrUnauthorizedDestination
 	}
 	return
 }
@@ -455,7 +458,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		// handle max cost
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
 
-		ts.Cost = ts.calculateCost()
+		ts.Cost = ts.CalculateCost()
 		cost += ts.Cost
 		cd.MaxCostSoFar += cost
 		//log.Print("Before: ", cost)
@@ -514,7 +517,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
 			cost += ts.RateInterval.Rating.ConnectFee
 		}
-		cost += ts.calculateCost()
+		cost += ts.CalculateCost()
 	}
 
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
