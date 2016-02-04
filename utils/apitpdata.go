@@ -480,6 +480,8 @@ type TPActionTrigger struct {
 	ThresholdValue        float64 // Threshold
 	Recurrent             bool    // reset executed flag each run
 	MinSleep              string  // Minimum duration between two executions in case of recurrent triggers
+	ExpirationDate        string  // Trigger expiration
+	ActivationDate        string  // Trigger activation
 	BalanceId             string  // The id of the balance in the account
 	BalanceType           string  // Type of balance this trigger monitors
 	BalanceDirections     string  // Traffic direction

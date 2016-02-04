@@ -597,8 +597,8 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"STANDARD_TRIGGERS", "1", "*min_balance", "2", "false", "0", "b1", "*monetary", "*out", "call", "", "special1", "SHARED_1", "*never", "T1", "0", "false", "false", "0", "LOG_WARNING", "10"},
-		[]string{"STANDARD_TRIGGERS", "2", "*max_event_counter", "5", "false", "0", "b2", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "T1", "0", "false", "false", "0", "LOG_WARNING", "10"},
+		[]string{"STANDARD_TRIGGERS", "1", "*min_balance", "2", "false", "0", "", "", "b1", "*monetary", "*out", "call", "", "special1", "SHARED_1", "*never", "T1", "0", "false", "false", "0", "LOG_WARNING", "10"},
+		[]string{"STANDARD_TRIGGERS", "2", "*max_event_counter", "5", "false", "0", "", "", "b2", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "T1", "0", "false", "false", "0", "LOG_WARNING", "10"},
 	}
 	ms := APItoModelActionTrigger(at)
 	var slc [][]string

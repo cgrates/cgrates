@@ -572,6 +572,11 @@ func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, cou
 func (acc *Account) ExecuteActionTriggers(a *Action) {
 	acc.ActionTriggers.Sort()
 	for _, at := range acc.ActionTriggers {
+		// check is effective
+		if at.IsExpired(time.Now()) || !at.IsActive(time.Now()) {
+			continue
+		}
+
 		// sanity check
 		if !strings.Contains(at.ThresholdType, "counter") && !strings.Contains(at.ThresholdType, "balance") {
 			continue
@@ -623,7 +628,7 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 			}
 		}
 	}
-	acc.CleanExpiredBalances()
+	acc.CleanExpiredStuff()
 }
 
 // Mark all action trigers as ready for execution
@@ -693,7 +698,7 @@ func (acc *Account) InitCounters() {
 	}
 }
 
-func (acc *Account) CleanExpiredBalances() {
+func (acc *Account) CleanExpiredStuff() {
 	for key, bm := range acc.BalanceMap {
 		for i := 0; i < len(bm); i++ {
 			if bm[i].IsExpired() {
@@ -702,6 +707,12 @@ func (acc *Account) CleanExpiredBalances() {
 			}
 		}
 		acc.BalanceMap[key] = bm
+	}
+
+	for i := 0; i < len(acc.ActionTriggers); i++ {
+		if acc.ActionTriggers[i].IsExpired(time.Now()) {
+			acc.ActionTriggers = append(acc.ActionTriggers[:i], acc.ActionTriggers[i+1:]...)
+		}
 	}
 }
 

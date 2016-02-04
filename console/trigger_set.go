@@ -23,8 +23,8 @@ import "github.com/cgrates/cgrates/apier/v1"
 func init() {
 	c := &CmdSetTriggers{
 		name:      "triggers_set",
-		rpcMethod: "ApierV1.SetAccountActionTriggers",
-		rpcParams: &v1.AttrSetAccountActionTriggers{},
+		rpcMethod: "ApierV1.AddAccountActionTriggers",
+		rpcParams: &v1.AttrAddAccountActionTriggers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -34,7 +34,7 @@ func init() {
 type CmdSetTriggers struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrSetAccountActionTriggers
+	rpcParams *v1.AttrAddAccountActionTriggers
 	*CommandExecuter
 }
 
@@ -48,7 +48,7 @@ func (self *CmdSetTriggers) RpcMethod() string {
 
 func (self *CmdSetTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrSetAccountActionTriggers{}
+		self.rpcParams = &v1.AttrAddAccountActionTriggers{}
 	}
 	return self.rpcParams
 }

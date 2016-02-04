@@ -36,6 +36,8 @@ type ActionTrigger struct {
 	ThresholdValue        float64
 	Recurrent             bool          // reset excuted flag each run
 	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
+	ExpirationDate        time.Time
+	ActivationDate        time.Time
 	BalanceId             string
 	BalanceType           string          // *monetary/*voice etc
 	BalanceDirections     utils.StringMap // filter for balance
@@ -186,6 +188,14 @@ func (at *ActionTrigger) CreateBalance() *Balance {
 func (at *ActionTrigger) Equals(oat *ActionTrigger) bool {
 	// ids only
 	return at.ID == oat.ID && at.UniqueID == oat.UniqueID
+}
+
+func (at *ActionTrigger) IsActive(t time.Time) bool {
+	return at.ActivationDate.IsZero() || t.After(at.ActivationDate)
+}
+
+func (at *ActionTrigger) IsExpired(t time.Time) bool {
+	return !at.ExpirationDate.IsZero() && t.After(at.ExpirationDate)
 }
 
 // Structure to store actions according to weight

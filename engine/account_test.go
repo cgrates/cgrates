@@ -997,7 +997,7 @@ func TestCleanExpired(t *testing.T) {
 			&Balance{ExpirationDate: time.Now().Add(10 * time.Second)},
 		}},
 	}
-	ub.CleanExpiredBalances()
+	ub.CleanExpiredStuff()
 	if len(ub.BalanceMap[utils.MONETARY]) != 2 {
 		t.Error("Error cleaning expired balances!")
 	}

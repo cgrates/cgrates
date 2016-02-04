@@ -625,7 +625,18 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 	for key, atrsLst := range storAts {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, atr := range atrsLst {
-			balanceExpirationDate, _ := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
+			balanceExpirationDate, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
+			if err != nil {
+				return err
+			}
+			expirationDate, err := utils.ParseTimeDetectLayout(atr.ExpirationDate, tpr.timezone)
+			if err != nil {
+				return err
+			}
+			activationDate, err := utils.ParseTimeDetectLayout(atr.ActivationDate, tpr.timezone)
+			if err != nil {
+				return err
+			}
 			minSleep, err := utils.ParseDurationWithSecs(atr.MinSleep)
 			if err != nil {
 				return err
@@ -640,6 +651,8 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				ThresholdValue:        atr.ThresholdValue,
 				Recurrent:             atr.Recurrent,
 				MinSleep:              minSleep,
+				ExpirationDate:        expirationDate,
+				ActivationDate:        activationDate,
 				BalanceId:             atr.BalanceId,
 				BalanceType:           atr.BalanceType,
 				BalanceDirections:     utils.ParseStringMap(atr.BalanceDirections),
@@ -783,7 +796,9 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				atrs := make([]*ActionTrigger, len(atrsLst))
 				for idx, apiAtr := range atrsLst {
 					minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
-					expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+					balanceExpTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+					expTime, _ := utils.ParseDate(apiAtr.ExpirationDate)
+					actTime, _ := utils.ParseDate(apiAtr.ActivationDate)
 					if apiAtr.UniqueID == "" {
 						apiAtr.UniqueID = utils.GenUUID()
 					}
@@ -794,12 +809,14 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						ThresholdValue:        apiAtr.ThresholdValue,
 						Recurrent:             apiAtr.Recurrent,
 						MinSleep:              minSleep,
+						ExpirationDate:        expTime,
+						ActivationDate:        actTime,
 						BalanceId:             apiAtr.BalanceId,
 						BalanceType:           apiAtr.BalanceType,
 						BalanceDirections:     utils.ParseStringMap(apiAtr.BalanceDirections),
 						BalanceDestinationIds: utils.ParseStringMap(apiAtr.BalanceDestinationIds),
 						BalanceWeight:         apiAtr.BalanceWeight,
-						BalanceExpirationDate: expTime,
+						BalanceExpirationDate: balanceExpTime,
 						BalanceTimingTags:     utils.ParseStringMap(apiAtr.BalanceTimingTags),
 						BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
 						BalanceCategories:     utils.ParseStringMap(apiAtr.BalanceCategories),
@@ -1012,7 +1029,9 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						atrs := make([]*ActionTrigger, len(atrsLst))
 						for idx, apiAtr := range atrsLst {
 							minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
-							expTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+							balanceExpTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
+							expTime, _ := utils.ParseDate(apiAtr.ExpirationDate)
+							actTime, _ := utils.ParseDate(apiAtr.ActivationDate)
 							if apiAtr.UniqueID == "" {
 								apiAtr.UniqueID = utils.GenUUID()
 							}
@@ -1023,12 +1042,14 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 								ThresholdValue:        apiAtr.ThresholdValue,
 								Recurrent:             apiAtr.Recurrent,
 								MinSleep:              minSleep,
+								ExpirationDate:        expTime,
+								ActivationDate:        actTime,
 								BalanceId:             apiAtr.BalanceId,
 								BalanceType:           apiAtr.BalanceType,
 								BalanceDirections:     utils.ParseStringMap(apiAtr.BalanceDirections),
 								BalanceDestinationIds: utils.ParseStringMap(apiAtr.BalanceDestinationIds),
 								BalanceWeight:         apiAtr.BalanceWeight,
-								BalanceExpirationDate: expTime,
+								BalanceExpirationDate: balanceExpTime,
 								BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
 								BalanceCategories:     utils.ParseStringMap(apiAtr.BalanceCategories),
 								BalanceSharedGroups:   utils.ParseStringMap(apiAtr.BalanceSharedGroups),

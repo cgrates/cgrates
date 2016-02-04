@@ -203,6 +203,8 @@ CREATE TABLE `tp_action_triggers` (
   `threshold_value` DECIMAL(20,4) NOT NULL,
   `recurrent` BOOLEAN NOT NULL,
   `min_sleep` varchar(16) NOT NULL,
+  `expiry_time` varchar(24) NOT NULL,
+  `activation_time` varchar(24) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
   `balance_directions` varchar(8) NOT NULL,

@@ -1009,19 +1009,19 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	}
 	reply := ""
 	// Add balance to a previously known account
-	attrs := &AttrSetAccountActionTriggers{ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
-	if err := rater.Call("ApierV1.SetAccountActionTriggers", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetAccountActionTriggers: ", err.Error())
+	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
+	if err := rater.Call("ApierV1.AddAccountActionTriggers", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddAccountActionTriggers: ", err.Error())
 	} else if reply != "OK" {
-		t.Errorf("Calling ApierV1.SetAccountActionTriggers received: %s", reply)
+		t.Errorf("Calling ApierV1.AddAccountActionTriggers received: %s", reply)
 	}
 	reply2 := ""
-	attrs2 := new(AttrSetAccountActionTriggers)
+	attrs2 := new(AttrAddAccountActionTriggers)
 	*attrs2 = *attrs
 	attrs2.Account = "dan10" // Does not exist so it should error when adding triggers on it
 	// Add trigger to an account which does n exist
-	if err := rater.Call("ApierV1.SetAccountActionTriggers", attrs2, &reply2); err == nil || reply2 == "OK" {
-		t.Error("Expecting error on ApierV1.SetAccountActionTriggers.", err, reply2)
+	if err := rater.Call("ApierV1.AddAccountActionTriggers", attrs2, &reply2); err == nil || reply2 == "OK" {
+		t.Error("Expecting error on ApierV1.AddAccountActionTriggers.", err, reply2)
 	}
 }
 

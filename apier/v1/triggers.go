@@ -22,14 +22,14 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 	return nil
 }
 
-type AttrSetAccountActionTriggers struct {
+type AttrAddAccountActionTriggers struct {
 	Tenant                 string
 	Account                string
 	ActionTriggerIDs       *[]string
 	ActionTriggerOverwrite bool
 }
 
-func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
+func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -140,6 +140,143 @@ func (self *ApierV1) ResetAccountActionTriggers(attr AttrRemoveAccountActionTrig
 				(attr.GroupID == "" || at.ID == attr.GroupID) {
 				// reset action trigger
 				at.Executed = false
+			}
+
+		}
+		account.ExecuteActionTriggers(nil)
+		if err := self.AccountDb.SetAccount(account); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	}, 0, accID)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = utils.OK
+	return nil
+}
+
+type AttrSetAccountActionTriggers struct {
+	Tenant                string
+	Account               string
+	GroupID               string
+	UniqueID              string
+	ThresholdType         *string
+	ThresholdValue        *float64
+	Recurrent             *bool
+	MinSleep              *string
+	ExpirationDate        *string
+	ActivationDate        *string
+	BalanceId             *string
+	BalanceType           *string
+	BalanceDirections     *[]string
+	BalanceDestinationIds *[]string
+	BalanceWeight         *float64
+	BalanceExpirationDate *string
+	BalanceTimingTags     *[]string
+	BalanceRatingSubject  *string
+	BalanceCategories     *[]string
+	BalanceSharedGroups   *[]string
+	BalanceBlocker        *bool
+	BalanceDisabled       *bool
+	MinQueuedItems        *int
+	ActionsId             *string
+}
+
+func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
+
+	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	var account *engine.Account
+	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+		if acc, err := self.AccountDb.GetAccount(accID); err == nil {
+			account = acc
+		} else {
+			return 0, err
+		}
+		for _, at := range account.ActionTriggers {
+			if (attr.UniqueID == "" || at.UniqueID == attr.UniqueID) &&
+				(attr.GroupID == "" || at.ID == attr.GroupID) {
+				// we have a winner
+				if attr.ThresholdType != nil {
+					at.ThresholdType = *attr.ThresholdType
+				}
+				if attr.ThresholdValue != nil {
+					at.ThresholdValue = *attr.ThresholdValue
+				}
+				if attr.Recurrent != nil {
+					at.Recurrent = *attr.Recurrent
+				}
+				if attr.MinSleep != nil {
+					minSleep, err := utils.ParseDurationWithSecs(*attr.MinSleep)
+					if err != nil {
+						return 0, err
+					}
+					at.MinSleep = minSleep
+				}
+				if attr.ExpirationDate != nil {
+					expTime, err := utils.ParseDate(*attr.ExpirationDate)
+					if err != nil {
+						return 0, err
+					}
+					at.ExpirationDate = expTime
+				}
+				if attr.ActivationDate != nil {
+					actTime, err := utils.ParseDate(*attr.ActivationDate)
+					if err != nil {
+						return 0, err
+					}
+					at.ActivationDate = actTime
+				}
+				if attr.BalanceId != nil {
+					at.BalanceId = *attr.BalanceId
+				}
+				if attr.BalanceType != nil {
+					at.BalanceType = *attr.BalanceType
+				}
+				if attr.BalanceDirections != nil {
+					at.BalanceDirections = utils.NewStringMap(*attr.BalanceDirections...)
+				}
+				if attr.BalanceDestinationIds != nil {
+					at.BalanceDestinationIds = utils.NewStringMap(*attr.BalanceDestinationIds...)
+				}
+				if attr.BalanceWeight != nil {
+					at.BalanceWeight = *attr.BalanceWeight
+				}
+				if attr.BalanceExpirationDate != nil {
+					balanceExpTime, err := utils.ParseDate(*attr.BalanceExpirationDate)
+					if err != nil {
+						return 0, err
+					}
+					at.BalanceExpirationDate = balanceExpTime
+				}
+				if attr.BalanceTimingTags != nil {
+					at.BalanceTimingTags = utils.NewStringMap(*attr.BalanceTimingTags...)
+				}
+				if attr.BalanceRatingSubject != nil {
+					at.BalanceRatingSubject = *attr.BalanceRatingSubject
+				}
+				if attr.BalanceCategories != nil {
+					at.BalanceCategories = utils.NewStringMap(*attr.BalanceCategories...)
+				}
+				if attr.BalanceSharedGroups != nil {
+					at.BalanceSharedGroups = utils.NewStringMap(*attr.BalanceSharedGroups...)
+				}
+				if attr.BalanceBlocker != nil {
+					at.BalanceBlocker = *attr.BalanceBlocker
+				}
+				if attr.BalanceDisabled != nil {
+					at.BalanceDisabled = *attr.BalanceDisabled
+				}
+				if attr.MinQueuedItems != nil {
+					at.MinQueuedItems = *attr.MinQueuedItems
+				}
+				if attr.ActionsId != nil {
+					at.ActionsId = *attr.ActionsId
+				}
 			}
 
 		}

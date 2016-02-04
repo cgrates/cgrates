@@ -189,16 +189,16 @@ BLOCK_AT,BLOCK,*asap,10
 `
 
 	actionTriggers = `
-STANDARD_TRIGGER,st0,*min_event_counter,10,false,0,,*voice,*out,,GERMANY_O2,,,,,,,,,SOME_1,10
-STANDARD_TRIGGER,st1,*max_balance,200,false,0,,*voice,*out,,GERMANY,,,,,,,,,SOME_2,10
-STANDARD_TRIGGERS,,*min_balance,2,false,0,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_balance,20,false,0,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,,*max_event_counter,5,false,0,,*monetary,*out,,FS_USERS,,,,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,,,3,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+STANDARD_TRIGGER,st0,*min_event_counter,10,false,0,,,,*voice,*out,,GERMANY_O2,,,,,,,,,SOME_1,10
+STANDARD_TRIGGER,st1,*max_balance,200,false,0,,,,*voice,*out,,GERMANY,,,,,,,,,SOME_2,10
+STANDARD_TRIGGERS,,*min_balance,2,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_balance,20,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,,*max_event_counter,5,false,0,,,,*monetary,*out,,FS_USERS,,,,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,,,,,3,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ASR,,*min_asr,30,true,0,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ACD,,*min_acd,3,true,0,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
 vdf,minitsboy,MORE_MINUTES,STANDARD_TRIGGER,,

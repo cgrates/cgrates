@@ -198,6 +198,8 @@ CREATE TABLE tp_action_triggers (
   threshold_value NUMERIC(20,4) NOT NULL,
   recurrent BOOLEAN NOT NULL,
   min_sleep VARCHAR(16) NOT NULL,
+  expiry_time VARCHAR(24) NOT NULL,
+  activation_time VARCHAR(24) NOT NULL,
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
   balance_directions VARCHAR(8) NOT NULL,
