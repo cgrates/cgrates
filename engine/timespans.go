@@ -347,12 +347,15 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	ts.Increments = make([]*Increment, 0)
 	// create rated units series
 	_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	// we will use the cost calculated cost and devide by nb of increments
+	// we will use the calculated cost and devide by nb of increments
 	// because ts cost is rounded
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
 	incrementCost := ts.CalculateCost() / float64(nbIncrements)
-	incrementCost = utils.Round(incrementCost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
+	// no more rounding at increment leve as it deviates from intended cost
+	// move rounding at highest point possible
+	//incrementCost = utils.Round(incrementCost, ts.RateInterval.Rating.RoundingDecimals,
+	//	ts.RateInterval.Rating.RoundingMethod)
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:    rateIncrement,
