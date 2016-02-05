@@ -986,6 +986,42 @@ func TestAccountExpActionTrigger(t *testing.T) {
 	}
 }
 
+func TestAccountExpActionTriggerNotActivated(t *testing.T) {
+	ub := &Account{
+		Id:         "TEST_UB",
+		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{ID: "check expired balances", ActivationDate: time.Date(2116, 2, 5, 18, 0, 0, 0, time.UTC), BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
+		},
+	}
+	ub.ExecuteActionTriggers(nil)
+	if ub.BalanceMap[utils.MONETARY][0].IsExpired() ||
+		ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
+		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
+		ub.ActionTriggers[0].Executed != false {
+		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpired())
+		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.VOICE][0].GetValue(), len(ub.BalanceMap[utils.MONETARY]))
+	}
+}
+
+func TestAccountExpActionTriggerExpired(t *testing.T) {
+	ub := &Account{
+		Id:         "TEST_UB",
+		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{ID: "check expired balances", ExpirationDate: time.Date(2016, 2, 4, 18, 0, 0, 0, time.UTC), BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
+		},
+	}
+	ub.ExecuteActionTriggers(nil)
+	if ub.BalanceMap[utils.MONETARY][0].IsExpired() ||
+		ub.BalanceMap[utils.MONETARY][0].GetValue() != 100 ||
+		ub.BalanceMap[utils.VOICE][0].GetValue() != 10 ||
+		len(ub.ActionTriggers) != 0 {
+		t.Log(ub.BalanceMap[utils.MONETARY][0].IsExpired())
+		t.Error("Error executing triggered actions", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.VOICE][0].GetValue(), len(ub.BalanceMap[utils.MONETARY]))
+	}
+}
+
 func TestCleanExpired(t *testing.T) {
 	ub := &Account{
 		Id: "TEST_UB_OREDER",
@@ -996,6 +1032,14 @@ func TestCleanExpired(t *testing.T) {
 			&Balance{ExpirationDate: time.Date(2013, 7, 18, 14, 33, 0, 0, time.UTC)},
 			&Balance{ExpirationDate: time.Now().Add(10 * time.Second)},
 		}},
+		ActionTriggers: ActionTriggers{
+			&ActionTrigger{
+				ExpirationDate: time.Date(2013, 7, 18, 14, 33, 0, 0, time.UTC),
+			},
+			&ActionTrigger{
+				ActivationDate: time.Date(2013, 7, 18, 14, 33, 0, 0, time.UTC),
+			},
+		},
 	}
 	ub.CleanExpiredStuff()
 	if len(ub.BalanceMap[utils.MONETARY]) != 2 {
@@ -1003,6 +1047,9 @@ func TestCleanExpired(t *testing.T) {
 	}
 	if len(ub.BalanceMap[utils.VOICE]) != 1 {
 		t.Error("Error cleaning expired minute buckets!")
+	}
+	if len(ub.ActionTriggers) != 1 {
+		t.Error("Error cleaning expired action triggers!")
 	}
 }
 
