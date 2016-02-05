@@ -797,8 +797,8 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 				for idx, apiAtr := range atrsLst {
 					minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 					balanceExpTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
-					expTime, _ := utils.ParseDate(apiAtr.ExpirationDate)
-					actTime, _ := utils.ParseDate(apiAtr.ActivationDate)
+					expTime, _ := utils.ParseTimeDetectLayout(apiAtr.ExpirationDate, tpr.timezone)
+					actTime, _ := utils.ParseTimeDetectLayout(apiAtr.ActivationDate, tpr.timezone)
 					if apiAtr.UniqueID == "" {
 						apiAtr.UniqueID = utils.GenUUID()
 					}
@@ -1030,8 +1030,8 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						for idx, apiAtr := range atrsLst {
 							minSleep, _ := utils.ParseDurationWithSecs(apiAtr.MinSleep)
 							balanceExpTime, _ := utils.ParseDate(apiAtr.BalanceExpirationDate)
-							expTime, _ := utils.ParseDate(apiAtr.ExpirationDate)
-							actTime, _ := utils.ParseDate(apiAtr.ActivationDate)
+							expTime, _ := utils.ParseTimeDetectLayout(apiAtr.ExpirationDate, tpr.timezone)
+							actTime, _ := utils.ParseTimeDetectLayout(apiAtr.ActivationDate, tpr.timezone)
 							if apiAtr.UniqueID == "" {
 								apiAtr.UniqueID = utils.GenUUID()
 							}
