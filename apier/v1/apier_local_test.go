@@ -1039,41 +1039,6 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 	}
 }
 
-// Test here RemAccountActionTriggers
-func TestApierRemAccountActionTriggers(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	// Test first get so we can steal the id which we need to remove
-	var reply engine.ActionTriggers
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
-	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
-	} else if len(reply) != 1 || reply[0].ActionsId != "LOG_BALANCE" {
-		for _, atr := range reply {
-			t.Logf("ATR: %+v", atr)
-		}
-		t.Errorf("Unexpected action triggers received %v", reply)
-	}
-	var rmReply string
-	rmReq := AttrRemoveAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID}
-	if err := rater.Call("ApierV1.ResetAccountActionTriggers", rmReq, &rmReply); err != nil {
-		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
-	} else if rmReply != OK {
-		t.Error("Unexpected answer received", rmReply)
-	}
-	if err := rater.Call("ApierV1.RemoveAccountActionTriggers", rmReq, &rmReply); err != nil {
-		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
-	} else if rmReply != OK {
-		t.Error("Unexpected answer received", rmReply)
-	}
-	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetAccountActionTriggers: ", err.Error())
-	} else if len(reply) != 0 {
-		t.Errorf("Unexpected action triggers received %+v", reply[0])
-	}
-}
-
 // Test here SetAccountActionTriggers
 func TestApierSetAccountActionTriggers(t *testing.T) {
 	if !*testLocal {
@@ -1105,6 +1070,41 @@ func TestApierSetAccountActionTriggers(t *testing.T) {
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTriggers: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActivationDate != time.Date(2016, 2, 5, 18, 0, 0, 0, time.UTC) {
+		t.Errorf("Unexpected action triggers received %+v", reply[0])
+	}
+}
+
+// Test here RemAccountActionTriggers
+func TestApierRemAccountActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	// Test first get so we can steal the id which we need to remove
+	var reply engine.ActionTriggers
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
+	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
+	} else if len(reply) != 1 || reply[0].ActionsId != "LOG_BALANCE" {
+		for _, atr := range reply {
+			t.Logf("ATR: %+v", atr)
+		}
+		t.Errorf("Unexpected action triggers received %v", reply)
+	}
+	var rmReply string
+	rmReq := AttrRemoveAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID}
+	if err := rater.Call("ApierV1.ResetAccountActionTriggers", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
+	} else if rmReply != OK {
+		t.Error("Unexpected answer received", rmReply)
+	}
+	if err := rater.Call("ApierV1.RemoveAccountActionTriggers", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
+	} else if rmReply != OK {
+		t.Error("Unexpected answer received", rmReply)
+	}
+	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTriggers: ", err.Error())
+	} else if len(reply) != 0 {
 		t.Errorf("Unexpected action triggers received %+v", reply[0])
 	}
 }
