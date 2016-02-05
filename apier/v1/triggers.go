@@ -218,14 +218,14 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 					at.MinSleep = minSleep
 				}
 				if attr.ExpirationDate != nil {
-					expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate)
+					expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate, self.Config.DefaultTimezone)
 					if err != nil {
 						return 0, err
 					}
 					at.ExpirationDate = expTime
 				}
 				if attr.ActivationDate != nil {
-					actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate)
+					actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate, self.Config.DefaultTimezone)
 					if err != nil {
 						return 0, err
 					}
