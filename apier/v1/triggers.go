@@ -40,7 +40,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var account *engine.Account
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
+	_, err = engine.Guardian.Guard(func() (interface{}, error) {
 		if acc, err := self.AccountDb.GetAccount(accID); err == nil {
 			account = acc
 		} else {
