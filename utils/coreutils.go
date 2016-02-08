@@ -129,7 +129,7 @@ func Round(x float64, prec int, method string) float64 {
 func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	var nilTime time.Time
 	if len(tmStr) == 0 {
-		return nilTime
+		return nilTime, nil
 	}
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {
