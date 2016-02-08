@@ -128,6 +128,9 @@ func Round(x float64, prec int, method string) float64 {
 
 func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	var nilTime time.Time
+	if len(tmStr) == 0 {
+		return nilTime
+	}
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {
 		return nilTime, err
@@ -359,6 +362,10 @@ func StringSlicePointer(slc []string) *[]string {
 
 func Float64SlicePointer(slc []float64) *[]float64 {
 	return &slc
+}
+
+func StringMapPointer(sm StringMap) *StringMap {
+	return &sm
 }
 
 func ReflectFuncLocation(handler interface{}) (file string, line int) {

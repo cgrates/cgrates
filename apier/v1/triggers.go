@@ -27,11 +27,16 @@ type AttrAddAccountActionTriggers struct {
 	Account                string
 	ActionTriggerIDs       *[]string
 	ActionTriggerOverwrite bool
+	ActivationDate         string
 }
 
 func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	actTime, err := utils.ParseTimeDetectLayout(attr.ActivationDate, self.Config.DefaultTimezone)
+	if err != nil {
+		return err
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	var account *engine.Account
@@ -59,6 +64,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 							break
 						}
 					}
+					at.ActivationDate = actTime
 					if !found {
 						account.ActionTriggers = append(account.ActionTriggers, at)
 					}
