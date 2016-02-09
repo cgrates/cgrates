@@ -74,6 +74,9 @@ func NewStringMap(s ...string) StringMap {
 }
 
 func ParseStringMap(s string) StringMap {
+	if s == ZERO {
+		return make(StringMap)
+	}
 	return StringMapFromSlice(strings.Split(s, INFIELD_SEP))
 }
 

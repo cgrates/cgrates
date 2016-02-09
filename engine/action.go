@@ -45,28 +45,93 @@ type Action struct {
 	Filter           string
 	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
-	Balance          *Balance
+	Balance          *BalancePointer
+}
+
+type BalancePointer struct {
+	Uuid           *string
+	Id             *string
+	Value          *float64
+	Directions     *utils.StringMap
+	ExpirationDate *time.Time
+	Weight         *float64
+	DestinationIds *utils.StringMap
+	RatingSubject  *string
+	Categories     *utils.StringMap
+	SharedGroups   *utils.StringMap
+	TimingIDs      *utils.StringMap
+	Timings        []*RITiming
+	Disabled       *bool
+	Factor         *ValueFactor
+	Blocker        *bool
+}
+
+func (bp *BalancePointer) CreateBalance() *Balance {
+	b := &Balance{}
+	if bp.Uuid != nil {
+		b.Uuid = *bp.Uuid
+	}
+	if bp.Id != nil {
+		b.Id = *bp.Id
+	}
+	if bp.Value != nil {
+		b.Value = *bp.Value
+	}
+	if bp.Directions != nil {
+		b.Directions = *bp.Directions
+	}
+	if bp.ExpirationDate != nil {
+		b.ExpirationDate = *bp.ExpirationDate
+	}
+	if bp.Weight != nil {
+		b.Weight = *bp.Weight
+	}
+	if bp.DestinationIds != nil {
+		b.DestinationIds = *bp.DestinationIds
+	}
+	if bp.RatingSubject != nil {
+		b.RatingSubject = *bp.RatingSubject
+	}
+	if bp.Categories != nil {
+		b.Categories = *bp.Categories
+	}
+	if bp.SharedGroups != nil {
+		b.SharedGroups = *bp.SharedGroups
+	}
+	if bp.TimingIDs != nil {
+		b.TimingIDs = *bp.TimingIDs
+	}
+	if bp.Disabled != nil {
+		b.Disabled = *bp.Disabled
+	}
+	if bp.Factor != nil {
+		b.Factor = *bp.Factor
+	}
+	if bp.Blocker != nil {
+		b.Blocker = *bp.Blocker
+	}
+	return b.Clone()
 }
 
 const (
-	LOG                       = "*log"
-	RESET_TRIGGERS            = "*reset_triggers"
-	SET_RECURRENT             = "*set_recurrent"
-	UNSET_RECURRENT           = "*unset_recurrent"
-	ALLOW_NEGATIVE            = "*allow_negative"
-	DENY_NEGATIVE             = "*deny_negative"
-	RESET_ACCOUNT             = "*reset_account"
-	REMOVE_ACCOUNT            = "*remove_account"
-	SET_BALANCE               = "*set_balance" // not ready for production until switching to pointers
-	REMOVE_BALANCE            = "*remove_balance"
-	TOPUP_RESET               = "*topup_reset"
-	TOPUP                     = "*topup"
-	DEBIT_RESET               = "*debit_reset"
-	DEBIT                     = "*debit"
-	RESET_COUNTERS            = "*reset_counters"
-	ENABLE_ACCOUNT            = "*enable_account"
-	DISABLE_ACCOUNT           = "*disable_account"
-	ENABLE_DISABLE_BALANCE    = "*enable_disable_balance"
+	LOG             = "*log"
+	RESET_TRIGGERS  = "*reset_triggers"
+	SET_RECURRENT   = "*set_recurrent"
+	UNSET_RECURRENT = "*unset_recurrent"
+	ALLOW_NEGATIVE  = "*allow_negative"
+	DENY_NEGATIVE   = "*deny_negative"
+	RESET_ACCOUNT   = "*reset_account"
+	REMOVE_ACCOUNT  = "*remove_account"
+	SET_BALANCE     = "*set_balance" // not ready for production until switching to pointers
+	REMOVE_BALANCE  = "*remove_balance"
+	TOPUP_RESET     = "*topup_reset"
+	TOPUP           = "*topup"
+	DEBIT_RESET     = "*debit_reset"
+	DEBIT           = "*debit"
+	RESET_COUNTERS  = "*reset_counters"
+	ENABLE_ACCOUNT  = "*enable_account"
+	DISABLE_ACCOUNT = "*disable_account"
+	//ENABLE_DISABLE_BALANCE    = "*enable_disable_balance"
 	CALL_URL                  = "*call_url"
 	CALL_URL_ASYNC            = "*call_url_async"
 	MAIL_ASYNC                = "*mail_async"
@@ -84,7 +149,7 @@ func (a *Action) Clone() *Action {
 		ExtraParameters:  a.ExtraParameters,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
-		Balance:          a.Balance.Clone(),
+		Balance:          a.Balance,
 	}
 }
 
@@ -122,8 +187,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return enableUserAction, true
 	case DISABLE_ACCOUNT:
 		return disableUserAction, true
-	case ENABLE_DISABLE_BALANCE:
-		return enableDisableBalanceAction, true
+	//case ENABLE_DISABLE_BALANCE:
+	//	return enableDisableBalanceAction, true
 	case CALL_URL:
 		return callUrl, true
 	case CALL_URL_ASYNC:
@@ -167,6 +232,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		dta = new(utils.TenantAccount) // Init with empty values
 	}
 	var parsedValue string // Template values
+	b := action.Balance.CreateBalance()
 	for _, rsrFld := range rsrFlds {
 		switch rsrFld.Id {
 		case "AccountID":
@@ -184,17 +250,17 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "BalanceType":
 			parsedValue += rsrFld.ParseValue(action.BalanceType)
 		case "BalanceUUID":
-			parsedValue += rsrFld.ParseValue(action.Balance.Uuid)
+			parsedValue += rsrFld.ParseValue(b.Uuid)
 		case "BalanceID":
-			parsedValue += rsrFld.ParseValue(action.Balance.Id)
+			parsedValue += rsrFld.ParseValue(b.Id)
 		case "BalanceValue":
-			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.GetValue(), 'f', -1, 64))
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
 		case "DestinationIDs":
-			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds.String())
+			parsedValue += rsrFld.ParseValue(b.DestinationIds.String())
 		case "ExtraParameters":
 			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
 		case "RatingSubject":
-			parsedValue += rsrFld.ParseValue(action.Balance.RatingSubject)
+			parsedValue += rsrFld.ParseValue(b.RatingSubject)
 		case utils.CATEGORY:
 			parsedValue += rsrFld.ParseValue(action.Balance.Categories.String())
 		case "SharedGroups":
@@ -370,8 +436,9 @@ func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Balance != nil && a.Balance.GetValue() >= 0 { // only apply if not allready negative
-		a.Balance.SetValue(-a.Balance.GetValue())
+	b := a.Balance.CreateBalance()
+	if a.Balance != nil && b.GetValue() >= 0 { // only apply if not allready negative
+		b.SetValue(-b.GetValue())
 	}
 }
 
@@ -401,13 +468,13 @@ func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	return
 }
 
-func enableDisableBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+/*func enableDisableBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
 	ub.enableDisableBalanceAction(a)
 	return
-}
+}*/
 
 func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {

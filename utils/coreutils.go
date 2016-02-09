@@ -337,6 +337,10 @@ func Fib() func() time.Duration {
 
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
+	if str == ZERO {
+		str = ""
+		return &str
+	}
 	return &str
 }
 

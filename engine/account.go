@@ -93,7 +93,7 @@ func (ub *Account) setBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
-	bClone := a.Balance.Clone()
+	bClone := a.Balance.CreateBalance()
 	if bClone == nil {
 		return errors.New("nil balance")
 	}
@@ -182,7 +182,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
-	bClone := a.Balance.Clone()
+	bClone := a.Balance.CreateBalance()
 	if bClone == nil {
 		return errors.New("nil balance")
 	}
@@ -261,6 +261,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	return nil
 }
 
+/*
 func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil action")
@@ -286,7 +287,7 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	}
 	return nil
 }
-
+*/
 func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) BalanceChain {
 	var balances BalanceChain
 	balances = append(balances, ub.BalanceMap[tor]...)
@@ -933,23 +934,24 @@ func (acc *Account) AsOldStructure() interface{} {
 		}
 	}
 	for i, at := range acc.ActionTriggers {
+		b := at.Balance.CreateBalance()
 		result.ActionTriggers[i] = &ActionTrigger{
 			Id:                    at.ID,
 			ThresholdType:         at.ThresholdType,
 			ThresholdValue:        at.ThresholdValue,
 			Recurrent:             at.Recurrent,
 			MinSleep:              at.MinSleep,
-			BalanceId:             at.BalanceId,
 			BalanceType:           at.BalanceType,
-			BalanceDirection:      at.BalanceDirections.String(),
-			BalanceDestinationIds: at.BalanceDestinationIds.String(),
-			BalanceWeight:         at.BalanceWeight,
-			BalanceExpirationDate: at.BalanceExpirationDate,
-			BalanceTimingTags:     at.BalanceTimingTags.String(),
-			BalanceRatingSubject:  at.BalanceRatingSubject,
-			BalanceCategory:       at.BalanceCategories.String(),
-			BalanceSharedGroup:    at.BalanceSharedGroups.String(),
-			BalanceDisabled:       at.BalanceDisabled,
+			BalanceId:             b.Id,
+			BalanceDirection:      b.Directions.String(),
+			BalanceDestinationIds: b.DestinationIds.String(),
+			BalanceWeight:         b.Weight,
+			BalanceExpirationDate: b.ExpirationDate,
+			BalanceTimingTags:     b.TimingIDs.String(),
+			BalanceRatingSubject:  b.RatingSubject,
+			BalanceCategory:       b.Categories.String(),
+			BalanceSharedGroup:    b.SharedGroups.String(),
+			BalanceDisabled:       b.Disabled,
 			Weight:                at.Weight,
 			ActionsId:             at.ActionsId,
 			MinQueuedItems:        at.MinQueuedItems,

@@ -521,20 +521,61 @@ func (tpr *TpReader) LoadActions() (err error) {
 				ExtraParameters:  tpact.ExtraParameters,
 				ExpirationString: tpact.ExpiryTime,
 				Filter:           tpact.Filter,
-				Balance: &Balance{
-					Id:             tpact.BalanceId,
-					Value:          tpact.Units,
-					Weight:         tpact.BalanceWeight,
-					RatingSubject:  tpact.RatingSubject,
-					Categories:     utils.ParseStringMap(tpact.Categories),
-					Directions:     utils.ParseStringMap(tpact.Directions),
-					DestinationIds: utils.ParseStringMap(tpact.DestinationIds),
-					SharedGroups:   utils.ParseStringMap(tpact.SharedGroups),
-					TimingIDs:      utils.ParseStringMap(tpact.TimingTags),
-					Blocker:        tpact.BalanceBlocker,
-					Disabled:       tpact.BalanceDisabled,
-				},
+				Balance:          &BalancePointer{},
 			}
+			if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
+				acts[idx].Balance.Id = utils.StringPointer(tpact.BalanceId)
+			}
+
+			if tpact.Units != "" && tpact.Units != utils.ANY {
+				u, err := strconv.ParseFloat(tpact.Units, 64)
+				if err != nil {
+					return err
+				}
+				acts[idx].Balance.Value = utils.Float64Pointer(u)
+			}
+
+			if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {
+				u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
+				if err != nil {
+					return err
+				}
+				acts[idx].Balance.Weight = utils.Float64Pointer(u)
+			}
+			if tpact.RatingSubject != "" && tpact.RatingSubject != utils.ANY {
+				acts[idx].Balance.RatingSubject = utils.StringPointer(tpact.RatingSubject)
+			}
+
+			if tpact.Categories != "" && tpact.Categories != utils.ANY {
+				acts[idx].Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(tpact.Categories))
+			}
+			if tpact.Directions != "" && tpact.Directions != utils.ANY {
+				acts[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(tpact.Directions))
+			}
+			if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
+				acts[idx].Balance.DestinationIds = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
+			}
+			if tpact.SharedGroups != "" && tpact.SharedGroups != utils.ANY {
+				acts[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(tpact.SharedGroups))
+			}
+			if tpact.TimingTags != "" && tpact.TimingTags != utils.ANY {
+				acts[idx].Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.TimingTags))
+			}
+			if tpact.BalanceBlocker != "" && tpact.BalanceBlocker != utils.ANY {
+				u, err := strconv.ParseBool(tpact.BalanceBlocker)
+				if err != nil {
+					return err
+				}
+				acts[idx].Balance.Blocker = utils.BoolPointer(u)
+			}
+			if tpact.BalanceDisabled != "" && tpact.BalanceDisabled != utils.ANY {
+				u, err := strconv.ParseBool(tpact.BalanceDisabled)
+				if err != nil {
+					return err
+				}
+				acts[idx].Balance.Disabled = utils.BoolPointer(u)
+			}
+
 			// load action timings from tags
 			if tpact.TimingTags != "" {
 				timingIds := strings.Split(tpact.TimingTags, utils.INFIELD_SEP)
