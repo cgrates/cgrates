@@ -91,6 +91,7 @@ const (
 	ROUNDING_MIDDLE              = "*middle"
 	ROUNDING_DOWN                = "*down"
 	ANY                          = "*any"
+	ZERO                         = "*zero"
 	ASAP                         = "*asap"
 	USERS                        = "*users"
 	COMMENT_CHAR                 = '#'

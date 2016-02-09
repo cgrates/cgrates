@@ -308,7 +308,8 @@ func (at *ActionTiming) Execute() (err error) {
 					//return 0, fmt.Errorf("Account %s is disabled", accID)
 				}
 				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
-					a.Balance.ExpirationDate = expDate
+					a.Balance.ExpirationDate = &time.Time{}
+					*a.Balance.ExpirationDate = expDate
 				}
 
 				actionFunction, exists := getActionFunc(a.ActionType)
@@ -339,7 +340,8 @@ func (at *ActionTiming) Execute() (err error) {
 
 			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) &&
 				parseErr == nil && !expDate.IsZero() {
-				a.Balance.ExpirationDate = expDate
+				a.Balance.ExpirationDate = &time.Time{}
+				*a.Balance.ExpirationDate = expDate
 			}
 
 			actionFunction, exists := getActionFunc(a.ActionType)
