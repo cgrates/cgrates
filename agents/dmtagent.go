@@ -139,7 +139,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		var unauthorizedResultCode bool
 		if err != nil {
 			utils.Logger.Debug(fmt.Sprintf("Received error from rater: %+v", err))
-			if strings.HasSuffix(err.Error(), utils.ErrAccountNotFound.Error()) || strings.HasSuffix(err.Error(), utils.ErrUsersNotFound.Error()) { // 5030 in case of AccountNotFound
+			if strings.HasSuffix(err.Error(), utils.ErrAccountNotFound.Error()) || strings.HasSuffix(err.Error(), utils.ErrUserNotFound.Error()) { // 5030 in case of AccountNotFound
 				if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "5030",
 					false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))

@@ -708,7 +708,7 @@ func TestUsersExternalCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 	}
 
 	err := LoadUserProfile(ur, "ExtraFields")
-	if err != utils.ErrUsersNotFound {
+	if err != utils.ErrUserNotFound {
 		t.Error("Error detecting err in loading user profile: ", err)
 	}
 }
