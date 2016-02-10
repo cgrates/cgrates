@@ -495,5 +495,5 @@ func LoadUserProfile(in interface{}, extraFields string) error {
 		utils.SetMapExtraFields(in, m, extraFields)
 		return nil
 	}
-	return utils.ErrNotFound
+	return utils.ErrUsersNotFound
 }
