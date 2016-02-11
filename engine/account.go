@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -587,6 +588,7 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 			// the next reset (see RESET_TRIGGERS action type)
 			continue
 		}
+
 		if !at.Match(a) {
 			continue
 		}
@@ -673,9 +675,10 @@ func (acc *Account) InitCounters() {
 		if strings.Contains(at.ThresholdType, "balance") {
 			ct = utils.COUNTER_BALANCE
 		}
-
+		log.Print(at.Balance.GetType() + ct)
 		uc, exists := ucTempMap[at.Balance.GetType()+ct]
 		if !exists {
+			log.Print("HERE!")
 			uc = &UnitCounter{
 				BalanceType: at.Balance.GetType(),
 				CounterType: ct,

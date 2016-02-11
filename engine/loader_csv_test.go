@@ -826,7 +826,7 @@ func TestLoadActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
 			Weight:           10,
-			Balance: &BalancePointer{
+			Balance: &BalanceFilter{
 				Type:           utils.StringPointer(utils.MONETARY),
 				Uuid:           as1[0].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
@@ -844,7 +844,7 @@ func TestLoadActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
 			Weight:           10,
-			Balance: &BalancePointer{
+			Balance: &BalanceFilter{
 				Type:           utils.StringPointer(utils.VOICE),
 				Uuid:           as1[1].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
@@ -868,7 +868,7 @@ func TestLoadActions(t *testing.T) {
 			ActionType:       TOPUP,
 			ExpirationString: UNLIMITED,
 			Weight:           10,
-			Balance: &BalancePointer{
+			Balance: &BalanceFilter{
 				Type:           utils.StringPointer(utils.MONETARY),
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				DestinationIds: nil,
@@ -891,7 +891,7 @@ func TestLoadActions(t *testing.T) {
 			ActionType:      CDRLOG,
 			ExtraParameters: `{"Category":"^ddi","MediationRunId":"^did_run"}`,
 			Weight:          10,
-			Balance: &BalancePointer{
+			Balance: &BalanceFilter{
 				Uuid:           as3[0].Balance.Uuid,
 				Directions:     nil,
 				DestinationIds: nil,
@@ -1047,7 +1047,7 @@ func TestLoadActionTriggers(t *testing.T) {
 		UniqueID:       "st0",
 		ThresholdType:  utils.TRIGGER_MIN_EVENT_COUNTER,
 		ThresholdValue: 10,
-		Balance: &BalancePointer{
+		Balance: &BalanceFilter{
 			Type:           utils.StringPointer(utils.VOICE),
 			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			DestinationIds: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
@@ -1068,7 +1068,7 @@ func TestLoadActionTriggers(t *testing.T) {
 		UniqueID:       "st1",
 		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
 		ThresholdValue: 200,
-		Balance: &BalancePointer{
+		Balance: &BalanceFilter{
 			Type:           utils.StringPointer(utils.VOICE),
 			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			DestinationIds: utils.StringMapPointer(utils.NewStringMap("GERMANY")),
