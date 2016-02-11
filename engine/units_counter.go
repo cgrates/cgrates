@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"log"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 // Amount of a trafic of a certain type
 type UnitCounter struct {
@@ -58,11 +62,13 @@ func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *B
 			uc.CounterType = utils.COUNTER_EVENT
 		}
 		for _, bal := range uc.Balances {
+			log.Print(b)
 			if uc.CounterType == utils.COUNTER_EVENT && cc != nil && bal.MatchCCFilter(cc) {
+				log.Print("HERE")
 				bal.AddValue(amount)
 				continue
 			}
-			bp := &BalancePointer{}
+			bp := &BalanceFilter{}
 			bp.LoadFromBalance(bal)
 			if uc.CounterType == utils.COUNTER_BALANCE && b != nil && b.MatchFilter(bp, true) {
 				bal.AddValue(amount)

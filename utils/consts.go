@@ -89,6 +89,7 @@ const (
 	ROUNDING_MIDDLE              = "*middle"
 	ROUNDING_DOWN                = "*down"
 	ANY                          = "*any"
+	UNLIMITED                    = "*unlimited"
 	ZERO                         = "*zero"
 	ASAP                         = "*asap"
 	USERS                        = "*users"

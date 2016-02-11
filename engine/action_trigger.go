@@ -37,7 +37,7 @@ type ActionTrigger struct {
 	ExpirationDate time.Time
 	ActivationDate time.Time
 	//BalanceType       string // *monetary/*voice etc
-	Balance           *BalancePointer
+	Balance           *BalanceFilter
 	Weight            float64
 	ActionsId         string
 	MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
@@ -76,9 +76,8 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 				continue
 			}
 		}
-
 		if a.Balance == nil {
-			a.Balance = &BalancePointer{}
+			a.Balance = &BalanceFilter{}
 		}
 		if a.ExpirationString != "" {
 			a.Balance.ExpirationDate = &time.Time{}

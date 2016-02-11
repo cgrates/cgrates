@@ -521,7 +521,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				ExtraParameters:  tpact.ExtraParameters,
 				ExpirationString: tpact.ExpiryTime,
 				Filter:           tpact.Filter,
-				Balance:          &BalancePointer{},
+				Balance:          &BalanceFilter{},
 			}
 			if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
 				acts[idx].Balance.Id = utils.StringPointer(tpact.BalanceId)
@@ -545,7 +545,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				}
 				acts[idx].Balance.Weight = utils.Float64Pointer(u)
 			}
-			if tpact.ExpiryTime != "" && tpact.ExpiryTime != utils.ANY {
+			if tpact.ExpiryTime != "" && tpact.ExpiryTime != utils.ANY && tpact.ExpiryTime != utils.UNLIMITED {
 				u, err := utils.ParseTimeDetectLayout(tpact.ExpiryTime, tpr.timezone)
 				if err != nil {
 					return err
@@ -700,7 +700,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				MinSleep:       minSleep,
 				ExpirationDate: expirationDate,
 				ActivationDate: activationDate,
-				Balance:        &BalancePointer{},
+				Balance:        &BalanceFilter{},
 				Weight:         atr.Weight,
 				ActionsId:      atr.ActionsId,
 				MinQueuedItems: atr.MinQueuedItems,
@@ -720,7 +720,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				}
 				atrs[idx].Balance.Weight = utils.Float64Pointer(u)
 			}
-			if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY {
+			if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY && atr.ExpirationDate != utils.UNLIMITED {
 				u, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 				if err != nil {
 					return err
@@ -901,7 +901,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						MinSleep:       minSleep,
 						ExpirationDate: expTime,
 						ActivationDate: actTime,
-						Balance:        &BalancePointer{},
+						Balance:        &BalanceFilter{},
 						Weight:         atr.Weight,
 						ActionsId:      atr.ActionsId,
 					}
@@ -920,7 +920,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						}
 						atrs[idx].Balance.Weight = utils.Float64Pointer(u)
 					}
-					if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY {
+					if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY && atr.ExpirationDate != utils.UNLIMITED {
 						u, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 						if err != nil {
 							return err
@@ -1003,7 +1003,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
 						Filter:           tpact.Filter,
-						Balance:          &BalancePointer{},
+						Balance:          &BalanceFilter{},
 					}
 					if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
 						acts[idx].Balance.Id = utils.StringPointer(tpact.BalanceId)
@@ -1238,7 +1238,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 								MinSleep:       minSleep,
 								ExpirationDate: expTime,
 								ActivationDate: actTime,
-								Balance:        &BalancePointer{},
+								Balance:        &BalanceFilter{},
 								Weight:         atr.Weight,
 								ActionsId:      atr.ActionsId,
 							}
@@ -1257,7 +1257,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 								}
 								atrs[idx].Balance.Weight = utils.Float64Pointer(u)
 							}
-							if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY {
+							if atr.BalanceExpirationDate != "" && atr.BalanceExpirationDate != utils.ANY && atr.ExpirationDate != utils.UNLIMITED {
 								u, err := utils.ParseTimeDetectLayout(atr.BalanceExpirationDate, tpr.timezone)
 								if err != nil {
 									return err
@@ -1349,7 +1349,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						ExtraParameters:  tpact.ExtraParameters,
 						ExpirationString: tpact.ExpiryTime,
 						Filter:           tpact.Filter,
-						Balance:          &BalancePointer{},
+						Balance:          &BalanceFilter{},
 					}
 					if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
 						acts[idx].Balance.Id = utils.StringPointer(tpact.BalanceId)

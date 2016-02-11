@@ -72,7 +72,7 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.Blocker == o.Blocker
 }
 
-func (b *Balance) MatchFilter(o *BalancePointer, skipIds bool) bool {
+func (b *Balance) MatchFilter(o *BalanceFilter, skipIds bool) bool {
 	if o == nil {
 		return true
 	}
@@ -84,7 +84,7 @@ func (b *Balance) MatchFilter(o *BalancePointer, skipIds bool) bool {
 	}
 	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
 		(o.Weight == nil || b.Weight == *o.Weight) &&
-		(o.Blocker != nil || b.Blocker == *o.Blocker) &&
+		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
 		(o.DestinationIds == nil || b.DestinationIds.Includes(*o.DestinationIds)) &&
 		(o.Directions == nil || b.Directions.Includes(*o.Directions)) &&
@@ -94,7 +94,7 @@ func (b *Balance) MatchFilter(o *BalancePointer, skipIds bool) bool {
 		(o.RatingSubject == nil || b.RatingSubject == *o.RatingSubject)
 }
 
-func (b *Balance) HardMatchFilter(o *BalancePointer, skipIds bool) bool {
+func (b *Balance) HardMatchFilter(o *BalanceFilter, skipIds bool) bool {
 	if o == nil {
 		return true
 	}
@@ -106,7 +106,7 @@ func (b *Balance) HardMatchFilter(o *BalancePointer, skipIds bool) bool {
 	}
 	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
 		(o.Weight == nil || b.Weight == *o.Weight) &&
-		(o.Blocker != nil || b.Blocker == *o.Blocker) &&
+		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
 		(o.DestinationIds == nil || b.DestinationIds.Equal(*o.DestinationIds)) &&
 		(o.Directions == nil || b.Directions.Equal(*o.Directions)) &&

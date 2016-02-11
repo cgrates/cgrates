@@ -45,10 +45,10 @@ type Action struct {
 	Filter           string
 	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
-	Balance          *BalancePointer
+	Balance          *BalanceFilter
 }
 
-type BalancePointer struct {
+type BalanceFilter struct {
 	Uuid           *string
 	Id             *string
 	Type           *string
@@ -67,7 +67,7 @@ type BalancePointer struct {
 	Blocker        *bool
 }
 
-func (bp *BalancePointer) CreateBalance() *Balance {
+func (bp *BalanceFilter) CreateBalance() *Balance {
 	b := &Balance{}
 	if bp.Uuid != nil {
 		b.Uuid = *bp.Uuid
@@ -114,7 +114,7 @@ func (bp *BalancePointer) CreateBalance() *Balance {
 	return b.Clone()
 }
 
-func (bp *BalancePointer) LoadFromBalance(b *Balance) {
+func (bp *BalanceFilter) LoadFromBalance(b *Balance) {
 	if b.Uuid != "" {
 		bp.Uuid = &b.Uuid
 	}
@@ -155,18 +155,25 @@ func (bp *BalancePointer) LoadFromBalance(b *Balance) {
 	bp.Blocker = &b.Blocker
 }
 
-func (bp *BalancePointer) GetType() string {
+func (bp *BalanceFilter) GetType() string {
 	if bp.Type == nil {
 		return ""
 	}
 	return *bp.Type
 }
 
-func (bp *BalancePointer) GetValue() float64 {
+func (bp *BalanceFilter) GetValue() float64 {
 	if bp.Value == nil {
 		return 0.0
 	}
 	return *bp.Value
+}
+
+func (bp *BalanceFilter) SetValue(v float64) {
+	if bp.Value == nil {
+		bp.Value = new(float64)
+	}
+	*bp.Value = v
 }
 
 const (
@@ -492,9 +499,8 @@ func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func genericMakeNegative(a *Action) {
-	b := a.Balance.CreateBalance()
-	if a.Balance != nil && b.GetValue() >= 0 { // only apply if not allready negative
-		b.SetValue(-b.GetValue())
+	if a.Balance != nil && a.Balance.GetValue() >= 0 { // only apply if not allready negative
+		a.Balance.SetValue(-a.Balance.GetValue())
 	}
 }
 

@@ -317,7 +317,7 @@ func GetUB() *Account {
 	at := &ActionTrigger{
 		ID:             "some_uuid",
 		ThresholdValue: 100.0,
-		Balance: &BalancePointer{
+		Balance: &BalanceFilter{
 			Type:           utils.StringPointer(utils.MONETARY),
 			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			DestinationIds: utils.StringMapPointer(utils.NewStringMap("NAT")),
