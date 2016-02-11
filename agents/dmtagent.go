@@ -157,7 +157,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			}
 
 		}
-		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && maxUsage == 0 { // Not enough balance, RFC demands 4012
+		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && maxUsage == 0 && !unauthorizedResultCode { // Not enough balance, RFC demands 4012
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "4012",
 				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
