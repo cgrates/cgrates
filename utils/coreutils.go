@@ -372,6 +372,10 @@ func StringMapPointer(sm StringMap) *StringMap {
 	return &sm
 }
 
+func TimePointer(t time.Time) *time.Time {
+	return &t
+}
+
 func ReflectFuncLocation(handler interface{}) (file string, line int) {
 	f := runtime.FuncForPC(reflect.ValueOf(handler).Pointer())
 	entry := f.Entry()

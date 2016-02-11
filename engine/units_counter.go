@@ -62,7 +62,9 @@ func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *B
 				bal.AddValue(amount)
 				continue
 			}
-			if uc.CounterType == utils.COUNTER_BALANCE && b != nil && b.MatchFilter(bal, true) {
+			bp := &BalancePointer{}
+			bp.LoadFromBalance(bal)
+			if uc.CounterType == utils.COUNTER_BALANCE && b != nil && b.MatchFilter(bp, true) {
 				bal.AddValue(amount)
 				continue
 			}
@@ -76,7 +78,7 @@ func (ucs UnitCounters) resetCounters(a *Action) {
 		if uc == nil { // safeguard
 			continue
 		}
-		if a != nil && a.BalanceType != "" && a.BalanceType != uc.BalanceType {
+		if a != nil && a.Balance.Type != nil && a.Balance.GetType() != uc.BalanceType {
 			continue
 		}
 		for _, b := range uc.Balances {

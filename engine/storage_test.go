@@ -315,13 +315,15 @@ func GetUB() *Account {
 		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}},
 	}
 	at := &ActionTrigger{
-		ID:                    "some_uuid",
-		BalanceType:           utils.MONETARY,
-		BalanceDirections:     utils.NewStringMap(utils.OUT),
-		ThresholdValue:        100.0,
-		BalanceDestinationIds: utils.NewStringMap("NAT"),
-		Weight:                10.0,
-		ActionsId:             "Commando",
+		ID:             "some_uuid",
+		ThresholdValue: 100.0,
+		Balance: &BalancePointer{
+			Type:           utils.StringPointer(utils.MONETARY),
+			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+			DestinationIds: utils.StringMapPointer(utils.NewStringMap("NAT")),
+		},
+		Weight:    10.0,
+		ActionsId: "Commando",
 	}
 	var zeroTime time.Time
 	zeroTime = zeroTime.UTC() // for deep equal to find location

@@ -94,6 +94,28 @@ func (b *Balance) MatchFilter(o *BalancePointer, skipIds bool) bool {
 		(o.RatingSubject == nil || b.RatingSubject == *o.RatingSubject)
 }
 
+func (b *Balance) HardMatchFilter(o *BalancePointer, skipIds bool) bool {
+	if o == nil {
+		return true
+	}
+	if !skipIds && o.Uuid != nil && *o.Uuid != "" {
+		return b.Uuid == *o.Uuid
+	}
+	if !skipIds && o.Id != nil && *o.Id != "" {
+		return b.Id == *o.Id
+	}
+	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
+		(o.Weight == nil || b.Weight == *o.Weight) &&
+		(o.Blocker != nil || b.Blocker == *o.Blocker) &&
+		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
+		(o.DestinationIds == nil || b.DestinationIds.Equal(*o.DestinationIds)) &&
+		(o.Directions == nil || b.Directions.Equal(*o.Directions)) &&
+		(o.Categories == nil || b.Categories.Equal(*o.Categories)) &&
+		(o.TimingIDs == nil || b.TimingIDs.Equal(*o.TimingIDs)) &&
+		(o.SharedGroups == nil || b.SharedGroups.Equal(*o.SharedGroups)) &&
+		(o.RatingSubject == nil || b.RatingSubject == *o.RatingSubject)
+}
+
 func (b *Balance) MatchCCFilter(cc *CallCost) bool {
 	if len(b.Categories) > 0 && cc.Category != "" && b.Categories[cc.Category] == false {
 		return false
@@ -174,47 +196,7 @@ func (b *Balance) MatchDestination(destinationId string) bool {
 }
 
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
-	if at.BalanceId != "" {
-		return b.Id == at.BalanceId
-	}
-	matchesDestination := true
-	if len(at.BalanceDestinationIds) != 0 {
-		matchesDestination = (b.DestinationIds.Equal(at.BalanceDestinationIds))
-	}
-	matchesDirection := true
-	if len(at.BalanceDirections) != 0 {
-		matchesDirection = (b.Directions.Equal(at.BalanceDirections))
-	}
-	matchesExpirationDate := true
-	if !at.BalanceExpirationDate.IsZero() {
-		matchesExpirationDate = (at.BalanceExpirationDate.Equal(b.ExpirationDate))
-	}
-	matchesWeight := true
-	if at.BalanceWeight > 0 {
-		matchesWeight = (at.BalanceWeight == b.Weight)
-	}
-	matchesRatingSubject := true
-	if at.BalanceRatingSubject != "" {
-		matchesRatingSubject = (at.BalanceRatingSubject == b.RatingSubject)
-	}
-
-	matchesSharedGroup := true
-	if len(at.BalanceSharedGroups) != 0 {
-		matchesSharedGroup = at.BalanceSharedGroups.Equal(b.SharedGroups)
-	}
-
-	matchesTiming := true
-	if len(at.BalanceTimingTags) != 0 {
-		matchesTiming = at.BalanceTimingTags.Equal(b.TimingIDs)
-	}
-
-	return matchesDestination &&
-		matchesDirection &&
-		matchesExpirationDate &&
-		matchesWeight &&
-		matchesRatingSubject &&
-		matchesSharedGroup &&
-		matchesTiming
+	return b.HardMatchFilter(at.Balance, false)
 }
 
 func (b *Balance) Clone() *Balance {

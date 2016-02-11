@@ -111,7 +111,7 @@ func (ub *Account) setBalanceAction(a *Action) error {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)
 	}
 	found := false
-	balanceType := a.BalanceType
+	balanceType := a.Balance.GetType()
 	var previousSharedGroups utils.StringMap // kept for comparison
 	for _, b := range ub.BalanceMap[balanceType] {
 		if b.IsExpired() {
@@ -190,7 +190,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)
 	}
 	found := false
-	balanceType := a.BalanceType
+	balanceType := a.Balance.GetType()
 	for _, b := range ub.BalanceMap[balanceType] {
 		if b.IsExpired() {
 			continue // just to be safe (cleaned expired balances above)
@@ -592,7 +592,7 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 		}
 		if strings.Contains(at.ThresholdType, "counter") {
 			for _, uc := range acc.UnitCounters {
-				if uc.BalanceType == at.BalanceType &&
+				if uc.BalanceType == at.Balance.GetType() &&
 					strings.Contains(at.ThresholdType, uc.CounterType[1:]) {
 					for _, b := range uc.Balances {
 						if strings.HasPrefix(at.ThresholdType, "*max") {
@@ -608,7 +608,7 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 				}
 			}
 		} else { // BALANCE
-			for _, b := range acc.BalanceMap[at.BalanceType] {
+			for _, b := range acc.BalanceMap[at.Balance.GetType()] {
 				if !b.dirty && at.ThresholdType != utils.TRIGGER_BALANCE_EXPIRED { // do not check clean balances
 					continue
 				}
@@ -674,17 +674,17 @@ func (acc *Account) InitCounters() {
 			ct = utils.COUNTER_BALANCE
 		}
 
-		uc, exists := ucTempMap[at.BalanceType+ct]
+		uc, exists := ucTempMap[at.Balance.GetType()+ct]
 		if !exists {
 			uc = &UnitCounter{
-				BalanceType: at.BalanceType,
+				BalanceType: at.Balance.GetType(),
 				CounterType: ct,
 			}
-			ucTempMap[at.BalanceType+ct] = uc
+			ucTempMap[at.Balance.GetType()+ct] = uc
 			uc.Balances = BalanceChain{}
 			acc.UnitCounters = append(acc.UnitCounters, uc)
 		}
-		b := at.CreateBalance()
+		b := at.Balance.CreateBalance()
 		if !uc.Balances.HasBalance(b) {
 			uc.Balances = append(uc.Balances, b)
 		}
@@ -941,7 +941,7 @@ func (acc *Account) AsOldStructure() interface{} {
 			ThresholdValue:        at.ThresholdValue,
 			Recurrent:             at.Recurrent,
 			MinSleep:              at.MinSleep,
-			BalanceType:           at.BalanceType,
+			BalanceType:           at.Balance.GetType(),
 			BalanceId:             b.Id,
 			BalanceDirection:      b.Directions.String(),
 			BalanceDestinationIds: b.DestinationIds.String(),

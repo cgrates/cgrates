@@ -23,6 +23,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+	"strconv"
 	"testing"
 	"time"
 
@@ -94,7 +95,7 @@ func TestActionsLocalSetCdrlogDebit(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, Units: 5.0, ExpiryTime: UNLIMITED, Weight: 20.0},
+		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, Units: "5.0", ExpiryTime: UNLIMITED, Weight: 20.0},
 		&utils.TPAction{Identifier: CDRLOG},
 	}}
 	if err := actsLclRpc.Call("ApierV1.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -122,7 +123,7 @@ func TestActionsLocalSetCdrlogDebit(t *testing.T) {
 		rcvedCdrs[0].Subject != "dan2904" ||
 		rcvedCdrs[0].Usage != "1" ||
 		rcvedCdrs[0].RunID != DEBIT ||
-		rcvedCdrs[0].Cost != attrsAA.Actions[0].Units {
+		strconv.FormatFloat(rcvedCdrs[0].Cost, 'f', -1, 64) != attrsAA.Actions[0].Units {
 		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}
 }
@@ -139,7 +140,7 @@ func TestActionsLocalSetCdrlogTopup(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_2", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: TOPUP, BalanceType: utils.MONETARY, Units: 5.0, ExpiryTime: UNLIMITED, Weight: 20.0},
+		&utils.TPAction{Identifier: TOPUP, BalanceType: utils.MONETARY, Units: "5.0", ExpiryTime: UNLIMITED, Weight: 20.0},
 		&utils.TPAction{Identifier: CDRLOG},
 	}}
 	if err := actsLclRpc.Call("ApierV1.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -167,7 +168,7 @@ func TestActionsLocalSetCdrlogTopup(t *testing.T) {
 		rcvedCdrs[0].Subject != "dan2905" ||
 		rcvedCdrs[0].Usage != "1" ||
 		rcvedCdrs[0].RunID != TOPUP ||
-		rcvedCdrs[0].Cost != attrsAA.Actions[0].Units {
+		strconv.FormatFloat(rcvedCdrs[0].Cost, 'f', -1, 64) != attrsAA.Actions[0].Units {
 		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}
 }

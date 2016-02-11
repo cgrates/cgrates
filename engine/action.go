@@ -38,9 +38,9 @@ import (
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id               string
-	ActionType       string
-	BalanceType      string
+	Id         string
+	ActionType string
+	//BalanceType      string
 	ExtraParameters  string
 	Filter           string
 	ExpirationString string // must stay as string because it can have relative values like 1month
@@ -51,6 +51,7 @@ type Action struct {
 type BalancePointer struct {
 	Uuid           *string
 	Id             *string
+	Type           *string
 	Value          *float64
 	Directions     *utils.StringMap
 	ExpirationDate *time.Time
@@ -113,6 +114,61 @@ func (bp *BalancePointer) CreateBalance() *Balance {
 	return b.Clone()
 }
 
+func (bp *BalancePointer) LoadFromBalance(b *Balance) {
+	if b.Uuid != "" {
+		bp.Uuid = &b.Uuid
+	}
+	if b.Id != "" {
+		bp.Id = &b.Id
+	}
+	if b.Value != 0 {
+		bp.Value = &b.Value
+	}
+	if len(b.Directions) != 0 {
+		bp.Directions = &b.Directions
+	}
+	if !b.ExpirationDate.IsZero() {
+		bp.ExpirationDate = &b.ExpirationDate
+	}
+	if b.Weight != 0 {
+		bp.Weight = &b.Weight
+	}
+	if len(b.DestinationIds) != 0 {
+		bp.DestinationIds = &b.DestinationIds
+	}
+	if b.RatingSubject != "" {
+		bp.RatingSubject = &b.RatingSubject
+	}
+	if len(b.Categories) != 0 {
+		bp.Categories = &b.Categories
+	}
+	if len(b.SharedGroups) != 0 {
+		bp.SharedGroups = &b.SharedGroups
+	}
+	if len(b.TimingIDs) != 0 {
+		bp.TimingIDs = &b.TimingIDs
+	}
+	if len(b.Factor) != 0 {
+		bp.Factor = &b.Factor
+	}
+	bp.Disabled = &b.Disabled
+	bp.Blocker = &b.Blocker
+}
+
+func (bp *BalancePointer) GetType() string {
+	if bp.Type == nil {
+		return ""
+	}
+	return *bp.Type
+}
+
+func (bp *BalancePointer) GetValue() float64 {
+	if bp.Value == nil {
+		return 0.0
+	}
+	return *bp.Value
+}
+
 const (
 	LOG             = "*log"
 	RESET_TRIGGERS  = "*reset_triggers"
@@ -143,9 +199,9 @@ const (
 
 func (a *Action) Clone() *Action {
 	return &Action{
-		Id:               a.Id,
-		ActionType:       a.ActionType,
-		BalanceType:      a.BalanceType,
+		Id:         a.Id,
+		ActionType: a.ActionType,
+		//BalanceType:      a.BalanceType,
 		ExtraParameters:  a.ExtraParameters,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
@@ -248,7 +304,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "ActionType":
 			parsedValue += rsrFld.ParseValue(action.ActionType)
 		case "BalanceType":
-			parsedValue += rsrFld.ParseValue(action.BalanceType)
+			parsedValue += rsrFld.ParseValue(action.Balance.GetType())
 		case "BalanceUUID":
 			parsedValue += rsrFld.ParseValue(b.Uuid)
 		case "BalanceID":
@@ -651,10 +707,10 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if _, exists := ub.BalanceMap[a.BalanceType]; !exists {
+	if _, exists := ub.BalanceMap[a.Balance.GetType()]; !exists {
 		return utils.ErrNotFound
 	}
-	bChain := ub.BalanceMap[a.BalanceType]
+	bChain := ub.BalanceMap[a.Balance.GetType()]
 	found := false
 	for i := 0; i < len(bChain); i++ {
 		if bChain[i].MatchFilter(a.Balance, false) {
@@ -665,7 +721,7 @@ func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 			found = true
 		}
 	}
-	ub.BalanceMap[a.BalanceType] = bChain
+	ub.BalanceMap[a.Balance.GetType()] = bChain
 	if !found {
 		return utils.ErrNotFound
 	}

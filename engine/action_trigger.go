@@ -19,9 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
-	"regexp"
 	"sort"
 	"time"
 
@@ -33,12 +31,12 @@ type ActionTrigger struct {
 	UniqueID      string // individual id
 	ThresholdType string //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *exp_balance
 	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc, *min_ddc, *max_ddc
-	ThresholdValue    float64
-	Recurrent         bool          // reset excuted flag each run
-	MinSleep          time.Duration // Minimum duration between two executions in case of recurrent triggers
-	ExpirationDate    time.Time
-	ActivationDate    time.Time
-	BalanceType       string // *monetary/*voice etc
+	ThresholdValue float64
+	Recurrent      bool          // reset excuted flag each run
+	MinSleep       time.Duration // Minimum duration between two executions in case of recurrent triggers
+	ExpirationDate time.Time
+	ActivationDate time.Time
+	//BalanceType       string // *monetary/*voice etc
 	Balance           *BalancePointer
 	Weight            float64
 	ActionsId         string
@@ -118,41 +116,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	if a == nil {
 		return true
 	}
-	// if we have Id than we can draw an early conclusion
-	if a.Id != "" {
-		match, _ := regexp.MatchString(a.Id, at.ID)
-		return match
-	}
-	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
-	thresholdType, thresholdValue, direction, destinationID, weight, ratingSubject, categories, sharedGroup, timings, blocker, disabled := true, true, true, true, true, true, true, true, true, true, true
-	if a.ExtraParameters != "" {
-		t := struct {
-			ThresholdType        string
-			ThresholdValue       float64
-			DestinationIds       string
-			BalanceDirections    string
-			BalanceWeight        float64
-			BalanceRatingSubject string
-			BalanceCategories    string
-			BalanceSharedGroups  string
-			BalanceTimingTags    string
-			BalanceBlocker       bool
-			BalanceDisabled      bool
-		}{}
-		json.Unmarshal([]byte(a.ExtraParameters), &t)
-		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
-		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
-		direction = t.Balance.Directions == nil || at.Balance.Directions.Equal(utils.ParseStringMap(t.BalanceDirections))
-		destinationID = len(t.DestinationIds) == 0 || at.BalanceDestinationIds.Equal(utils.ParseStringMap(t.DestinationIds))
-		categories = len(t.BalanceCategories) == 0 || at.BalanceCategories.Equal(utils.ParseStringMap(t.BalanceCategories))
-		timings = len(t.BalanceTimingTags) == 0 || at.BalanceTimingTags.Equal(utils.ParseStringMap(t.BalanceTimingTags))
-		sharedGroup = len(t.BalanceSharedGroups) == 0 || at.BalanceSharedGroups.Equal(utils.ParseStringMap(t.BalanceSharedGroups))
-		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
-		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
-		blocker = at.BalanceBlocker == t.BalanceBlocker
-		disabled = at.BalanceDisabled == t.BalanceDisabled
-	}
-	return id && direction && thresholdType && thresholdValue && destinationID && weight && ratingSubject && categories && sharedGroup && timings && blocker && disabled
+	return at.Balance.CreateBalance().MatchFilter(a.Balance, false)
 }
 
 // makes a shallow copy of the receiver
@@ -160,22 +124,6 @@ func (at *ActionTrigger) Clone() *ActionTrigger {
 	clone := new(ActionTrigger)
 	*clone = *at
 	return clone
-}
-
-func (at *ActionTrigger) CreateBalance() *Balance {
-	return &Balance{
-		Id:             at.UniqueID,
-		Directions:     at.BalanceDirections,
-		ExpirationDate: at.BalanceExpirationDate,
-		DestinationIds: at.BalanceDestinationIds,
-		RatingSubject:  at.BalanceRatingSubject,
-		Categories:     at.BalanceCategories,
-		SharedGroups:   at.BalanceSharedGroups,
-		TimingIDs:      at.BalanceTimingTags,
-		Blocker:        at.BalanceBlocker,
-		Disabled:       at.BalanceDisabled,
-		Weight:         at.BalanceWeight,
-	}
 }
 
 func (at *ActionTrigger) Equals(oat *ActionTrigger) bool {
