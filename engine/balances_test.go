@@ -90,7 +90,7 @@ func TestBalanceEqual(t *testing.T) {
 
 func TestBalanceMatchFilter(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: utils.StringMap{}}
-	mb2 := &Balance{Weight: 1, precision: 1, RatingSubject: "", DestinationIds: utils.StringMap{}}
+	mb2 := &BalancePointer{Weight: utils.Float64Pointer(1), RatingSubject: nil, DestinationIds: nil}
 	if !mb1.MatchFilter(mb2, false) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
@@ -98,7 +98,7 @@ func TestBalanceMatchFilter(t *testing.T) {
 
 func TestBalanceMatchFilterEmpty(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: utils.StringMap{}}
-	mb2 := &Balance{}
+	mb2 := &BalancePointer{}
 	if !mb1.MatchFilter(mb2, false) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
@@ -106,7 +106,7 @@ func TestBalanceMatchFilterEmpty(t *testing.T) {
 
 func TestBalanceMatchFilterId(t *testing.T) {
 	mb1 := &Balance{Id: "T1", Weight: 2, precision: 2, RatingSubject: "2", DestinationIds: utils.NewStringMap("NAT")}
-	mb2 := &Balance{Id: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: utils.StringMap{}}
+	mb2 := &BalancePointer{Id: utils.StringPointer("T1"), Weight: utils.Float64Pointer(1), RatingSubject: utils.StringPointer("1"), DestinationIds: nil}
 	if !mb1.MatchFilter(mb2, false) {
 		t.Errorf("Match filter failure: %+v == %+v", mb1, mb2)
 	}
@@ -114,7 +114,7 @@ func TestBalanceMatchFilterId(t *testing.T) {
 
 func TestBalanceMatchFilterDiffId(t *testing.T) {
 	mb1 := &Balance{Id: "T1", Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: utils.StringMap{}}
-	mb2 := &Balance{Id: "T2", Weight: 1, precision: 1, RatingSubject: "1", DestinationIds: utils.StringMap{}}
+	mb2 := &BalancePointer{Id: utils.StringPointer("T2"), Weight: utils.Float64Pointer(1), RatingSubject: utils.StringPointer("1"), DestinationIds: nil}
 	if mb1.MatchFilter(mb2, false) {
 		t.Errorf("Match filter failure: %+v != %+v", mb1, mb2)
 	}
@@ -129,7 +129,7 @@ func TestBalanceClone(t *testing.T) {
 }
 
 func TestBalanceMatchActionTriggerId(t *testing.T) {
-	at := &ActionTrigger{BalanceId: "test"}
+	at := &ActionTrigger{Balance: &BalancePointer{Id: utils.StringPointer("test")}}
 	b := &Balance{Id: "test"}
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
@@ -143,14 +143,14 @@ func TestBalanceMatchActionTriggerId(t *testing.T) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 	b.Id = "test"
-	at.BalanceId = ""
+	at.Balance.Id = nil
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 }
 
 func TestBalanceMatchActionTriggerDestination(t *testing.T) {
-	at := &ActionTrigger{BalanceDestinationIds: utils.NewStringMap("test")}
+	at := &ActionTrigger{Balance: &BalancePointer{DestinationIds: utils.StringMapPointer(utils.NewStringMap("test"))}}
 	b := &Balance{DestinationIds: utils.NewStringMap("test")}
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
@@ -164,14 +164,14 @@ func TestBalanceMatchActionTriggerDestination(t *testing.T) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 	b.DestinationIds = utils.NewStringMap("test")
-	at.BalanceDestinationIds = utils.NewStringMap("")
+	at.Balance.DestinationIds = nil
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 }
 
 func TestBalanceMatchActionTriggerWeight(t *testing.T) {
-	at := &ActionTrigger{BalanceWeight: 1}
+	at := &ActionTrigger{Balance: &BalancePointer{Weight: utils.Float64Pointer(1)}}
 	b := &Balance{Weight: 1}
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
@@ -185,14 +185,14 @@ func TestBalanceMatchActionTriggerWeight(t *testing.T) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 	b.Weight = 1
-	at.BalanceWeight = 0
+	at.Balance.Weight = nil
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 }
 
 func TestBalanceMatchActionTriggerRatingSubject(t *testing.T) {
-	at := &ActionTrigger{BalanceRatingSubject: "test"}
+	at := &ActionTrigger{Balance: &BalancePointer{RatingSubject: utils.StringPointer("test")}}
 	b := &Balance{RatingSubject: "test"}
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
@@ -206,14 +206,14 @@ func TestBalanceMatchActionTriggerRatingSubject(t *testing.T) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 	b.RatingSubject = "test"
-	at.BalanceRatingSubject = ""
+	at.Balance.RatingSubject = nil
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 }
 
 func TestBalanceMatchActionTriggerSharedGroup(t *testing.T) {
-	at := &ActionTrigger{BalanceSharedGroups: utils.NewStringMap("test")}
+	at := &ActionTrigger{Balance: &BalancePointer{SharedGroups: utils.StringMapPointer(utils.NewStringMap("test"))}}
 	b := &Balance{SharedGroups: utils.NewStringMap("test")}
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
@@ -227,7 +227,7 @@ func TestBalanceMatchActionTriggerSharedGroup(t *testing.T) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
 	b.SharedGroups = utils.NewStringMap("test")
-	at.BalanceSharedGroups = utils.NewStringMap("")
+	at.Balance.SharedGroups = nil
 	if !b.MatchActionTrigger(at) {
 		t.Errorf("Error matching action trigger: %+v %+v", b, at)
 	}
