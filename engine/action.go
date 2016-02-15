@@ -48,134 +48,6 @@ type Action struct {
 	Balance          *BalanceFilter
 }
 
-type BalanceFilter struct {
-	Uuid           *string
-	Id             *string
-	Type           *string
-	Value          *float64
-	Directions     *utils.StringMap
-	ExpirationDate *time.Time
-	Weight         *float64
-	DestinationIds *utils.StringMap
-	RatingSubject  *string
-	Categories     *utils.StringMap
-	SharedGroups   *utils.StringMap
-	TimingIDs      *utils.StringMap
-	Timings        []*RITiming
-	Disabled       *bool
-	Factor         *ValueFactor
-	Blocker        *bool
-}
-
-func (bp *BalanceFilter) CreateBalance() *Balance {
-	b := &Balance{}
-	if bp.Uuid != nil {
-		b.Uuid = *bp.Uuid
-	}
-	if bp.Id != nil {
-		b.Id = *bp.Id
-	}
-	if bp.Value != nil {
-		b.Value = *bp.Value
-	}
-	if bp.Directions != nil {
-		b.Directions = *bp.Directions
-	}
-	if bp.ExpirationDate != nil {
-		b.ExpirationDate = *bp.ExpirationDate
-	}
-	if bp.Weight != nil {
-		b.Weight = *bp.Weight
-	}
-	if bp.DestinationIds != nil {
-		b.DestinationIds = *bp.DestinationIds
-	}
-	if bp.RatingSubject != nil {
-		b.RatingSubject = *bp.RatingSubject
-	}
-	if bp.Categories != nil {
-		b.Categories = *bp.Categories
-	}
-	if bp.SharedGroups != nil {
-		b.SharedGroups = *bp.SharedGroups
-	}
-	if bp.TimingIDs != nil {
-		b.TimingIDs = *bp.TimingIDs
-	}
-	if bp.Disabled != nil {
-		b.Disabled = *bp.Disabled
-	}
-	if bp.Factor != nil {
-		b.Factor = *bp.Factor
-	}
-	if bp.Blocker != nil {
-		b.Blocker = *bp.Blocker
-	}
-	return b.Clone()
-}
-
-func (bp *BalanceFilter) LoadFromBalance(b *Balance) {
-	if b.Uuid != "" {
-		bp.Uuid = &b.Uuid
-	}
-	if b.Id != "" {
-		bp.Id = &b.Id
-	}
-	if b.Value != 0 {
-		bp.Value = &b.Value
-	}
-	if len(b.Directions) != 0 {
-		bp.Directions = &b.Directions
-	}
-	if !b.ExpirationDate.IsZero() {
-		bp.ExpirationDate = &b.ExpirationDate
-	}
-	if b.Weight != 0 {
-		bp.Weight = &b.Weight
-	}
-	if len(b.DestinationIds) != 0 {
-		bp.DestinationIds = &b.DestinationIds
-	}
-	if b.RatingSubject != "" {
-		bp.RatingSubject = &b.RatingSubject
-	}
-	if len(b.Categories) != 0 {
-		bp.Categories = &b.Categories
-	}
-	if len(b.SharedGroups) != 0 {
-		bp.SharedGroups = &b.SharedGroups
-	}
-	if len(b.TimingIDs) != 0 {
-		bp.TimingIDs = &b.TimingIDs
-	}
-	if len(b.Factor) != 0 {
-		bp.Factor = &b.Factor
-	}
-	bp.Disabled = &b.Disabled
-	bp.Blocker = &b.Blocker
-}
-
-func (bp *BalanceFilter) GetType() string {
-	if bp.Type == nil {
-		return ""
-	}
-	return *bp.Type
-}
-
-func (bp *BalanceFilter) GetValue() float64 {
-	if bp.Value == nil {
-		return 0.0
-	}
-	return *bp.Value
-}
-
-func (bp *BalanceFilter) SetValue(v float64) {
-	if bp.Value == nil {
-		bp.Value = new(float64)
-	}
-	*bp.Value = v
-}
-
 const (
 	LOG             = "*log"
 	RESET_TRIGGERS  = "*reset_triggers"
@@ -301,7 +173,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "AccountID":
 			parsedValue += rsrFld.ParseValue(acnt.Id)
 		case "Directions":
-			parsedValue += rsrFld.ParseValue(action.Balance.Directions.String())
+			parsedValue += rsrFld.ParseValue(b.Directions.String())
 		case utils.TENANT:
 			parsedValue += rsrFld.ParseValue(dta.Tenant)
 		case utils.ACCOUNT:

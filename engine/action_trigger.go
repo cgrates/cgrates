@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"time"
@@ -112,10 +113,37 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 // returns true if the field of the action timing are equeal to the non empty
 // fields of the action
 func (at *ActionTrigger) Match(a *Action) bool {
-	if a == nil {
+	if a == nil || a.Balance == nil {
 		return true
 	}
-	return at.Balance.CreateBalance().MatchFilter(a.Balance, false)
+	if a.Balance.Type != nil && a.Balance.GetType() != at.Balance.GetType() {
+		return false
+	}
+	var thresholdType bool
+	if a.ExtraParameters != "" {
+		t := struct {
+			GroupID       string
+			UniqueID      string
+			ThresholdType string
+		}{}
+		json.Unmarshal([]byte(a.ExtraParameters), &t)
+		// check Ids first
+		if t.GroupID != "" {
+			return at.ID == t.GroupID
+		}
+		if t.UniqueID != "" {
+			return at.UniqueID == t.UniqueID
+		}
+		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
+	}
+
+	return thresholdType && at.Balance.CreateBalance().MatchFilter(a.Balance, false)
+}
+
+func (at *ActionTrigger) CreateBalance() *Balance {
+	b := at.Balance.CreateBalance()
+	b.Id = at.UniqueID
+	return b
 }
 
 // makes a shallow copy of the receiver

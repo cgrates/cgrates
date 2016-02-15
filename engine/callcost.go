@@ -21,6 +21,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -179,4 +180,41 @@ func (cc *CallCost) updateCost() {
 		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	}
 	cc.Cost = cost
+}
+
+func (cc *CallCost) MatchCCFilter(bf *BalanceFilter) bool {
+	if bf == nil {
+		return true
+	}
+	if bf.Categories != nil && cc.Category != "" && (*bf.Categories)[cc.Category] == false {
+		return false
+	}
+	if bf.Directions != nil && cc.Direction != "" && (*bf.Directions)[cc.Direction] == false {
+		return false
+	}
+
+	// match destination ids
+	foundMatchingDestID := false
+	if bf.DestinationIDs != nil && cc.Destination != "" {
+		for _, p := range utils.SplitPrefix(cc.Destination, MIN_PREFIX_MATCH) {
+			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
+				destIds := x.(map[interface{}]struct{})
+				for filterDestID := range *bf.DestinationIDs {
+					if _, ok := destIds[filterDestID]; ok {
+						foundMatchingDestID = true
+						break
+					}
+				}
+			}
+			if foundMatchingDestID {
+				break
+			}
+		}
+	} else {
+		foundMatchingDestID = true
+	}
+	if !foundMatchingDestID {
+		return false
+	}
+	return true
 }

@@ -79,14 +79,14 @@ func (b *Balance) MatchFilter(o *BalanceFilter, skipIds bool) bool {
 	if !skipIds && o.Uuid != nil && *o.Uuid != "" {
 		return b.Uuid == *o.Uuid
 	}
-	if !skipIds && o.Id != nil && *o.Id != "" {
-		return b.Id == *o.Id
+	if !skipIds && o.ID != nil && *o.ID != "" {
+		return b.Id == *o.ID
 	}
 	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
 		(o.Weight == nil || b.Weight == *o.Weight) &&
 		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
-		(o.DestinationIds == nil || b.DestinationIds.Includes(*o.DestinationIds)) &&
+		(o.DestinationIDs == nil || b.DestinationIds.Includes(*o.DestinationIDs)) &&
 		(o.Directions == nil || b.Directions.Includes(*o.Directions)) &&
 		(o.Categories == nil || b.Categories.Includes(*o.Categories)) &&
 		(o.TimingIDs == nil || b.TimingIDs.Includes(*o.TimingIDs)) &&
@@ -101,53 +101,19 @@ func (b *Balance) HardMatchFilter(o *BalanceFilter, skipIds bool) bool {
 	if !skipIds && o.Uuid != nil && *o.Uuid != "" {
 		return b.Uuid == *o.Uuid
 	}
-	if !skipIds && o.Id != nil && *o.Id != "" {
-		return b.Id == *o.Id
+	if !skipIds && o.ID != nil && *o.ID != "" {
+		return b.Id == *o.ID
 	}
 	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
 		(o.Weight == nil || b.Weight == *o.Weight) &&
 		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
-		(o.DestinationIds == nil || b.DestinationIds.Equal(*o.DestinationIds)) &&
+		(o.DestinationIDs == nil || b.DestinationIds.Equal(*o.DestinationIDs)) &&
 		(o.Directions == nil || b.Directions.Equal(*o.Directions)) &&
 		(o.Categories == nil || b.Categories.Equal(*o.Categories)) &&
 		(o.TimingIDs == nil || b.TimingIDs.Equal(*o.TimingIDs)) &&
 		(o.SharedGroups == nil || b.SharedGroups.Equal(*o.SharedGroups)) &&
 		(o.RatingSubject == nil || b.RatingSubject == *o.RatingSubject)
-}
-
-func (b *Balance) MatchCCFilter(cc *CallCost) bool {
-	if len(b.Categories) > 0 && cc.Category != "" && b.Categories[cc.Category] == false {
-		return false
-	}
-	if len(b.Directions) > 0 && cc.Direction != "" && b.Directions[cc.Direction] == false {
-		return false
-	}
-
-	// match destination ids
-	foundMatchingDestId := false
-	if len(b.DestinationIds) > 0 && cc.Destination != "" {
-		for _, p := range utils.SplitPrefix(cc.Destination, MIN_PREFIX_MATCH) {
-			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-				destIds := x.(map[interface{}]struct{})
-				for filterDestId := range b.DestinationIds {
-					if _, ok := destIds[filterDestId]; ok {
-						foundMatchingDestId = true
-						break
-					}
-				}
-			}
-			if foundMatchingDestId {
-				break
-			}
-		}
-	} else {
-		foundMatchingDestId = true
-	}
-	if !foundMatchingDestId {
-		return false
-	}
-	return true
 }
 
 // the default balance has standard Id

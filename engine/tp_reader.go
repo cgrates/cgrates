@@ -524,7 +524,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				Balance:          &BalanceFilter{},
 			}
 			if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
-				acts[idx].Balance.Id = utils.StringPointer(tpact.BalanceId)
+				acts[idx].Balance.ID = utils.StringPointer(tpact.BalanceId)
 			}
 			if tpact.BalanceType != "" && tpact.BalanceType != utils.ANY {
 				acts[idx].Balance.Type = utils.StringPointer(tpact.BalanceType)
@@ -563,7 +563,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				acts[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(tpact.Directions))
 			}
 			if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
-				acts[idx].Balance.DestinationIds = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
+				acts[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
 			}
 			if tpact.SharedGroups != "" && tpact.SharedGroups != utils.ANY {
 				acts[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(tpact.SharedGroups))
@@ -706,7 +706,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				MinQueuedItems: atr.MinQueuedItems,
 			}
 			if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
-				atrs[idx].Balance.Id = utils.StringPointer(atr.BalanceId)
+				atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
 			}
 
 			if atr.BalanceType != "" && atr.BalanceType != utils.ANY {
@@ -738,7 +738,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				atrs[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDirections))
 			}
 			if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.ANY {
-				atrs[idx].Balance.DestinationIds = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
+				atrs[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
 			}
 			if atr.BalanceSharedGroups != "" && atr.BalanceSharedGroups != utils.ANY {
 				atrs[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceSharedGroups))
@@ -906,7 +906,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						ActionsId:      atr.ActionsId,
 					}
 					if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
-						atrs[idx].Balance.Id = utils.StringPointer(atr.BalanceId)
+						atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
 					}
 
 					if atr.BalanceType != "" && atr.BalanceType != utils.ANY {
@@ -938,7 +938,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						atrs[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDirections))
 					}
 					if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.ANY {
-						atrs[idx].Balance.DestinationIds = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
+						atrs[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
 					}
 					if atr.BalanceSharedGroups != "" && atr.BalanceSharedGroups != utils.ANY {
 						atrs[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceSharedGroups))
@@ -1006,7 +1006,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						Balance:          &BalanceFilter{},
 					}
 					if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
-						acts[idx].Balance.Id = utils.StringPointer(tpact.BalanceId)
+						acts[idx].Balance.ID = utils.StringPointer(tpact.BalanceId)
 					}
 					if tpact.BalanceType != "" && tpact.BalanceType != utils.ANY {
 						acts[idx].Balance.Type = utils.StringPointer(tpact.BalanceType)
@@ -1038,7 +1038,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						acts[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(tpact.Directions))
 					}
 					if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
-						acts[idx].Balance.DestinationIds = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
+						acts[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
 					}
 					if tpact.SharedGroups != "" && tpact.SharedGroups != utils.ANY {
 						acts[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(tpact.SharedGroups))
@@ -1243,7 +1243,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 								ActionsId:      atr.ActionsId,
 							}
 							if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
-								atrs[idx].Balance.Id = utils.StringPointer(atr.BalanceId)
+								atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
 							}
 
 							if atr.BalanceType != "" && atr.BalanceType != utils.ANY {
@@ -1275,7 +1275,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 								atrs[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDirections))
 							}
 							if atr.BalanceDestinationIds != "" && atr.BalanceDestinationIds != utils.ANY {
-								atrs[idx].Balance.DestinationIds = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
+								atrs[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceDestinationIds))
 							}
 							if atr.BalanceSharedGroups != "" && atr.BalanceSharedGroups != utils.ANY {
 								atrs[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(atr.BalanceSharedGroups))
@@ -1352,7 +1352,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						Balance:          &BalanceFilter{},
 					}
 					if tpact.BalanceId != "" && tpact.BalanceId != utils.ANY {
-						acts[idx].Balance.Id = utils.StringPointer(tpact.BalanceId)
+						acts[idx].Balance.ID = utils.StringPointer(tpact.BalanceId)
 					}
 					if tpact.BalanceType != "" && tpact.BalanceType != utils.ANY {
 						acts[idx].Balance.Type = utils.StringPointer(tpact.BalanceType)
@@ -1384,7 +1384,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						acts[idx].Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(tpact.Directions))
 					}
 					if tpact.DestinationIds != "" && tpact.DestinationIds != utils.ANY {
-						acts[idx].Balance.DestinationIds = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
+						acts[idx].Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(tpact.DestinationIds))
 					}
 					if tpact.SharedGroups != "" && tpact.SharedGroups != utils.ANY {
 						acts[idx].Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(tpact.SharedGroups))
