@@ -311,8 +311,7 @@ func TestStorageTask(t *testing.T) {
 
 func GetUB() *Account {
 	uc := &UnitCounter{
-		BalanceType: utils.SMS,
-		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}},
+		Counters: CounterFilters{&CounterFilter{Value: 1}, &CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(20), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}, &CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(10), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET"))}}},
 	}
 	at := &ActionTrigger{
 		ID:             "some_uuid",
@@ -320,7 +319,7 @@ func GetUB() *Account {
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer(utils.MONETARY),
 			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-			DestinationIds: utils.StringMapPointer(utils.NewStringMap("NAT")),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 		},
 		Weight:    10.0,
 		ActionsId: "Commando",
@@ -331,7 +330,7 @@ func GetUB() *Account {
 		Id:             "rif",
 		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{utils.SMS: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{uc, uc},
+		UnitCounters:   UnitCounters{utils.SMS: []*UnitCounter{uc, uc}},
 		ActionTriggers: ActionTriggers{at, at, at},
 	}
 	return ub

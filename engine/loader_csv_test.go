@@ -832,10 +832,12 @@ func TestLoadActions(t *testing.T) {
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				Value:          utils.Float64Pointer(10),
 				Weight:         utils.Float64Pointer(10),
-				DestinationIds: nil,
+				DestinationIDs: nil,
 				TimingIDs:      nil,
 				SharedGroups:   nil,
 				Categories:     nil,
+				Disabled:       utils.BoolPointer(false),
+				Blocker:        utils.BoolPointer(false),
 			},
 		},
 		&Action{
@@ -851,10 +853,12 @@ func TestLoadActions(t *testing.T) {
 				Value:          utils.Float64Pointer(100),
 				Weight:         utils.Float64Pointer(10),
 				RatingSubject:  utils.StringPointer("test"),
-				DestinationIds: utils.StringMapPointer(utils.NewStringMap("NAT")),
+				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 				TimingIDs:      nil,
 				SharedGroups:   nil,
 				Categories:     nil,
+				Disabled:       utils.BoolPointer(false),
+				Blocker:        utils.BoolPointer(false),
 			},
 		},
 	}
@@ -871,13 +875,15 @@ func TestLoadActions(t *testing.T) {
 			Balance: &BalanceFilter{
 				Type:           utils.StringPointer(utils.MONETARY),
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				DestinationIds: nil,
+				DestinationIDs: nil,
 				Uuid:           as2[0].Balance.Uuid,
 				Value:          utils.Float64Pointer(100),
 				Weight:         utils.Float64Pointer(10),
 				SharedGroups:   utils.StringMapPointer(utils.NewStringMap("SG1")),
 				TimingIDs:      nil,
 				Categories:     nil,
+				Disabled:       utils.BoolPointer(false),
+				Blocker:        utils.BoolPointer(false),
 			},
 		},
 	}
@@ -894,11 +900,12 @@ func TestLoadActions(t *testing.T) {
 			Balance: &BalanceFilter{
 				Uuid:           as3[0].Balance.Uuid,
 				Directions:     nil,
-				DestinationIds: nil,
+				DestinationIDs: nil,
 				TimingIDs:      nil,
 				Categories:     nil,
 				SharedGroups:   nil,
 				Blocker:        utils.BoolPointer(false),
+				Disabled:       utils.BoolPointer(false),
 			},
 		},
 	}
@@ -1048,19 +1055,22 @@ func TestLoadActionTriggers(t *testing.T) {
 		ThresholdType:  utils.TRIGGER_MIN_EVENT_COUNTER,
 		ThresholdValue: 10,
 		Balance: &BalanceFilter{
+			ID:             utils.StringPointer("st0"),
 			Type:           utils.StringPointer(utils.VOICE),
 			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-			DestinationIds: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
 			Categories:     nil,
 			TimingIDs:      nil,
 			SharedGroups:   nil,
+			Disabled:       nil,
+			Blocker:        nil,
 		},
 		Weight:    10,
 		ActionsId: "SOME_1",
 		Executed:  false,
 	}
 	if !reflect.DeepEqual(atr, expected) {
-		t.Errorf("Error loading action trigger: %+v", atr)
+		t.Errorf("Error loading action trigger: %+v", utils.ToIJSON(atr.Balance))
 	}
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
@@ -1071,7 +1081,7 @@ func TestLoadActionTriggers(t *testing.T) {
 		Balance: &BalanceFilter{
 			Type:           utils.StringPointer(utils.VOICE),
 			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-			DestinationIds: utils.StringMapPointer(utils.NewStringMap("GERMANY")),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY")),
 			Categories:     nil,
 			TimingIDs:      nil,
 			SharedGroups:   nil,
@@ -1093,18 +1103,22 @@ func TestLoadAccountActions(t *testing.T) {
 	expected := &Account{
 		Id: "vdf:minitsboy",
 		UnitCounters: UnitCounters{
-			&UnitCounter{
-				BalanceType: "*voice",
-				CounterType: "*event",
-				Balances: BalanceChain{
-					&Balance{
-						Id:             "2c2ce3c9-d62b-49dc-82a5-2a17bdc6eb4e",
-						Value:          0,
-						Directions:     utils.NewStringMap("*out"),
-						DestinationIds: utils.NewStringMap("GERMANY_O2"),
-						SharedGroups:   nil,
-						Categories:     nil,
-						TimingIDs:      nil,
+			utils.VOICE: []*UnitCounter{
+				&UnitCounter{
+					CounterType: "*event",
+					Counters: CounterFilters{
+						&CounterFilter{
+							Value: 0,
+							Filter: &BalanceFilter{
+								ID:             utils.StringPointer("st0"),
+								Type:           utils.StringPointer(utils.VOICE),
+								Directions:     utils.StringMapPointer(utils.NewStringMap("*out")),
+								DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
+								SharedGroups:   nil,
+								Categories:     nil,
+								TimingIDs:      nil,
+							},
+						},
 					},
 				},
 			},
@@ -1115,11 +1129,11 @@ func TestLoadAccountActions(t *testing.T) {
 	for i, atr := range aa.ActionTriggers {
 		csvr.actionsTriggers["STANDARD_TRIGGER"][i].ID = atr.ID
 	}
-	for i, b := range aa.UnitCounters[0].Balances {
-		expected.UnitCounters[0].Balances[i].Id = b.Id
+	for i, b := range aa.UnitCounters[utils.VOICE][0].Counters {
+		expected.UnitCounters[utils.VOICE][0].Counters[i].Filter.ID = b.Filter.ID
 	}
-	if !reflect.DeepEqual(aa.UnitCounters[0].Balances[0], expected.UnitCounters[0].Balances[0]) {
-		t.Errorf("Error loading account action: %+v \n %+v", aa.UnitCounters[0].Balances[0], expected.UnitCounters[0].Balances[0])
+	if !reflect.DeepEqual(aa.UnitCounters[utils.VOICE][0].Counters[0], expected.UnitCounters[utils.VOICE][0].Counters[0]) {
+		t.Errorf("Error loading account action: %+v", utils.ToIJSON(aa.UnitCounters[utils.VOICE][0].Counters[0].Filter))
 	}
 	// test that it does not overwrite balances
 	existing, err := accountingStorage.GetAccount(aa.Id)

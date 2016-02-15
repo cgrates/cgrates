@@ -307,7 +307,7 @@ func (at *ActionTiming) Execute() (err error) {
 					continue // disabled acocunts are not removed from action  plan
 					//return 0, fmt.Errorf("Account %s is disabled", accID)
 				}
-				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
+				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.HasExpirationDate()) && parseErr == nil && !expDate.IsZero() {
 					a.Balance.ExpirationDate = &time.Time{}
 					*a.Balance.ExpirationDate = expDate
 				}
@@ -337,8 +337,7 @@ func (at *ActionTiming) Execute() (err error) {
 	}
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
 		for _, a := range aac {
-
-			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) &&
+			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.HasExpirationDate()) &&
 				parseErr == nil && !expDate.IsZero() {
 				a.Balance.ExpirationDate = &time.Time{}
 				*a.Balance.ExpirationDate = expDate

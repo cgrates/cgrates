@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -817,12 +816,12 @@ func TestAccountdebitBalance(t *testing.T) {
 	newMb := &BalanceFilter{
 		Type:           utils.StringPointer(utils.VOICE),
 		Weight:         utils.Float64Pointer(20),
-		DestinationIds: utils.StringMapPointer(utils.StringMap{"NEW": true}),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NEW": true}),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	a := &Action{Balance: newMb}
 	ub.debitBalanceAction(a, false)
-	if len(ub.BalanceMap[utils.VOICE]) != 3 || !ub.BalanceMap[utils.VOICE][2].DestinationIds.Equal(*newMb.DestinationIds) {
+	if len(ub.BalanceMap[utils.VOICE]) != 3 || !ub.BalanceMap[utils.VOICE][2].DestinationIds.Equal(*newMb.DestinationIDs) {
 		t.Errorf("Error adding minute bucket! %d %+v %+v", len(ub.BalanceMap[utils.VOICE]), ub.BalanceMap[utils.VOICE][2], newMb)
 	}
 }
@@ -860,7 +859,7 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 		Value:          utils.Float64Pointer(-10),
 		Type:           utils.StringPointer(utils.VOICE),
 		Weight:         utils.Float64Pointer(20),
-		DestinationIds: utils.StringMapPointer(utils.StringMap{"NAT": true}),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	a := &Action{Balance: newMb}
@@ -886,19 +885,19 @@ func TestAccountAddMinutBucketEmpty(t *testing.T) {
 	mb1 := &BalanceFilter{
 		Value:          utils.Float64Pointer(-10),
 		Type:           utils.StringPointer(utils.VOICE),
-		DestinationIds: utils.StringMapPointer(utils.StringMap{"NAT": true}),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	mb2 := &BalanceFilter{
 		Value:          utils.Float64Pointer(-10),
 		Type:           utils.StringPointer(utils.VOICE),
-		DestinationIds: utils.StringMapPointer(utils.StringMap{"NAT": true}),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	mb3 := &BalanceFilter{
 		Value:          utils.Float64Pointer(-10),
 		Type:           utils.StringPointer(utils.VOICE),
-		DestinationIds: utils.StringMapPointer(utils.StringMap{"OTHER": true}),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"OTHER": true}),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	ub := &Account{}
@@ -923,7 +922,7 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.StringMap{utils.OUT: true}}}}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.StringMap{utils.OUT: true})}}}}}},
 		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
@@ -947,7 +946,7 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}}, &Balance{Directions: utils.NewStringMap(utils.OUT), Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 1}}}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Filter: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, Value: 1.0}}}}},
 		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 100, ThresholdType: utils.TRIGGER_MIN_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(1, utils.MONETARY, nil, nil)
@@ -960,14 +959,14 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Type: utils.StringPointer(utils.MONETARY)}}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.BalanceMap[utils.MONETARY]) != 1 || ub.BalanceMap[utils.MONETARY][0].GetValue() != 10 {
 
-		t.Errorf("Error executing triggered actions in order %v BAL: %+v", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.MONETARY][1])
+		t.Errorf("Error executing triggered actions in order %v", ub.BalanceMap[utils.MONETARY][0].GetValue())
 	}
 }
 
@@ -980,24 +979,22 @@ func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
 			&ActionTrigger{UniqueID: "week_trigger", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 100, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
 		},
 	}
-	log.Print("==============")
 	ub.InitCounters()
-	log.Print("==============")
-	if len(ub.UnitCounters) != 1 || len(ub.UnitCounters[0].Balances) != 2 {
-		log.Print("Error initializing counters: ", ub.UnitCounters[0].Balances[0])
+	if len(ub.UnitCounters) != 1 || len(ub.UnitCounters[utils.MONETARY][0].Counters) != 2 {
+		t.Error("Error initializing counters: ", ub.UnitCounters[utils.MONETARY][0].Counters[0])
 	}
 
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if ub.UnitCounters[0].Balances[0].Value != 1 ||
-		ub.UnitCounters[0].Balances[1].Value != 1 {
-		t.Error("Error incrementing both counters", ub.UnitCounters[0].Balances[0].Value, ub.UnitCounters[0].Balances[1].Value)
+	if ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 1 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[1].Value != 1 {
+		t.Error("Error incrementing both counters", ub.UnitCounters[utils.MONETARY][0].Counters[0].Value, ub.UnitCounters[utils.MONETARY][0].Counters[1].Value)
 	}
 
 	// we can reset them
-	resetCountersAction(ub, nil, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Id: utils.StringPointer("day_trigger")}}, nil)
-	if ub.UnitCounters[0].Balances[0].Value != 0 ||
-		ub.UnitCounters[0].Balances[1].Value != 1 {
-		t.Error("Error reseting both counters", ub.UnitCounters[0].Balances[0].Value, ub.UnitCounters[0].Balances[1].Value)
+	resetCountersAction(ub, nil, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), ID: utils.StringPointer("day_trigger")}}, nil)
+	if ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 0 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[1].Value != 1 {
+		t.Error("Error reseting both counters", ub.UnitCounters[utils.MONETARY][0].Counters[0].Value, ub.UnitCounters[utils.MONETARY][0].Counters[1].Value)
 	}
 }
 
@@ -1087,45 +1084,45 @@ func TestCleanExpired(t *testing.T) {
 }
 
 func TestAccountUnitCounting(t *testing.T) {
-	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0}}}}}
+	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
 	ub.countUnits(10, utils.MONETARY, &CallCost{}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 }
 
 func TestAccountUnitCountingOutbound(t *testing.T) {
-	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0, Directions: utils.NewStringMap(utils.OUT)}}}}}
+	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}}}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 30 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 30 {
 		t.Error("Error counting units")
 	}
 }
 
 func TestAccountUnitCountingOutboundInbound(t *testing.T) {
-	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0, Directions: utils.NewStringMap(utils.OUT)}}}}}
+	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}}}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
-		t.Errorf("Error counting units: %+v", ub.UnitCounters[0].Balances[0])
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
+		t.Errorf("Error counting units: %+v", ub.UnitCounters[utils.MONETARY][0].Counters[0])
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.IN}, nil)
-	if len(ub.UnitCounters) != 1 || (ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20) {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 }
@@ -1654,15 +1651,18 @@ func TestAccountInitCounters(t *testing.T) {
 		},
 	}
 	a.InitCounters()
-	if len(a.UnitCounters) != 4 ||
-		len(a.UnitCounters[0].Balances) != 2 ||
-		len(a.UnitCounters[1].Balances) != 1 ||
-		len(a.UnitCounters[2].Balances) != 1 ||
-		len(a.UnitCounters[3].Balances) != 1 {
-		for _, uc := range a.UnitCounters {
-			t.Logf("UC: %+v", uc)
-			for _, b := range uc.Balances {
-				t.Logf("B: %+v", b)
+	if len(a.UnitCounters) != 3 ||
+		len(a.UnitCounters[utils.MONETARY][0].Counters) != 2 ||
+		len(a.UnitCounters[utils.VOICE][0].Counters) != 1 ||
+		len(a.UnitCounters[utils.VOICE][1].Counters) != 1 ||
+		len(a.UnitCounters[utils.SMS][0].Counters) != 1 {
+		for key, counters := range a.UnitCounters {
+			t.Log(key)
+			for _, uc := range counters {
+				t.Logf("UC: %+v", uc)
+				for _, c := range uc.Counters {
+					t.Logf("B: %+v", c)
+				}
 			}
 		}
 		t.Errorf("Error Initializing unit counters: %v", len(a.UnitCounters))
@@ -1730,15 +1730,18 @@ func TestAccountDoubleInitCounters(t *testing.T) {
 	}
 	a.InitCounters()
 	a.InitCounters()
-	if len(a.UnitCounters) != 4 ||
-		len(a.UnitCounters[0].Balances) != 2 ||
-		len(a.UnitCounters[1].Balances) != 1 ||
-		len(a.UnitCounters[2].Balances) != 1 ||
-		len(a.UnitCounters[3].Balances) != 1 {
-		for _, uc := range a.UnitCounters {
-			t.Logf("UC: %+v", uc)
-			for _, b := range uc.Balances {
-				t.Logf("B: %+v", b)
+	if len(a.UnitCounters) != 3 ||
+		len(a.UnitCounters[utils.MONETARY][0].Counters) != 2 ||
+		len(a.UnitCounters[utils.VOICE][0].Counters) != 1 ||
+		len(a.UnitCounters[utils.VOICE][1].Counters) != 1 ||
+		len(a.UnitCounters[utils.SMS][0].Counters) != 1 {
+		for key, counters := range a.UnitCounters {
+			t.Log(key)
+			for _, uc := range counters {
+				t.Logf("UC: %+v", uc)
+				for _, c := range uc.Counters {
+					t.Logf("B: %+v", c)
+				}
 			}
 		}
 		t.Errorf("Error Initializing unit counters: %v", len(a.UnitCounters))
