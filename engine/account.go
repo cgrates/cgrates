@@ -36,12 +36,13 @@ Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
 */
 type Account struct {
-	Id             string
-	BalanceMap     map[string]BalanceChain
-	UnitCounters   UnitCounters
-	ActionTriggers ActionTriggers
-	AllowNegative  bool
-	Disabled       bool
+	Id                string
+	BalanceMap        map[string]BalanceChain
+	UnitCounters      UnitCounters
+	ActionTriggers    ActionTriggers
+	AllowNegative     bool
+	Disabled          bool
+	executingTriggers bool
 }
 
 // User's available minutes for the specified destination
@@ -572,6 +573,14 @@ func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, cou
 
 // Scans the action trigers and execute the actions for which trigger is met
 func (acc *Account) ExecuteActionTriggers(a *Action) {
+	if acc.executingTriggers {
+		return
+	}
+	acc.executingTriggers = true
+	defer func() {
+		acc.executingTriggers = false
+	}()
+
 	acc.ActionTriggers.Sort()
 	for _, at := range acc.ActionTriggers {
 		// check is effective
@@ -648,7 +657,7 @@ func (acc *Account) ResetActionTriggers(a *Action) {
 		}
 		at.Executed = false
 	}
-	acc.ExecuteActionTriggers(a) //will trigger infinite loop when executed from ExecuteActionTriggers
+	acc.ExecuteActionTriggers(a)
 }
 
 // Sets/Unsets recurrent flag for action triggers
