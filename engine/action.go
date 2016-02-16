@@ -57,7 +57,7 @@ const (
 	DENY_NEGATIVE   = "*deny_negative"
 	RESET_ACCOUNT   = "*reset_account"
 	REMOVE_ACCOUNT  = "*remove_account"
-	SET_BALANCE     = "*set_balance" // not ready for production until switching to pointers
+	SET_BALANCE     = "*set_balance"
 	REMOVE_BALANCE  = "*remove_balance"
 	TOPUP_RESET     = "*topup_reset"
 	TOPUP           = "*topup"
