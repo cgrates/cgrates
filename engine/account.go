@@ -723,6 +723,9 @@ func (acc *Account) InitCounters() {
 			}
 		}
 	}
+	if len(acc.UnitCounters) == 0 {
+		acc.UnitCounters = nil // leave it nil if empty
+	}
 }
 
 func (acc *Account) CleanExpiredStuff() {

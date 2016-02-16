@@ -238,44 +238,44 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 					at.ActivationDate = actTime
 				}
 				if attr.BalanceId != nil {
-					at.BalanceId = *attr.BalanceId
+					at.Balance.ID = attr.BalanceId
 				}
 				if attr.BalanceType != nil {
-					at.BalanceType = *attr.BalanceType
+					at.Balance.Type = attr.BalanceType
 				}
 				if attr.BalanceDirections != nil {
-					at.BalanceDirections = utils.NewStringMap(*attr.BalanceDirections...)
+					at.Balance.Directions = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDirections...))
 				}
 				if attr.BalanceDestinationIds != nil {
-					at.BalanceDestinationIds = utils.NewStringMap(*attr.BalanceDestinationIds...)
+					at.Balance.DestinationIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDestinationIds...))
 				}
 				if attr.BalanceWeight != nil {
-					at.BalanceWeight = *attr.BalanceWeight
+					at.Balance.Weight = attr.BalanceWeight
 				}
 				if attr.BalanceExpirationDate != nil {
 					balanceExpTime, err := utils.ParseDate(*attr.BalanceExpirationDate)
 					if err != nil {
 						return 0, err
 					}
-					at.BalanceExpirationDate = balanceExpTime
+					at.Balance.ExpirationDate = &balanceExpTime
 				}
 				if attr.BalanceTimingTags != nil {
-					at.BalanceTimingTags = utils.NewStringMap(*attr.BalanceTimingTags...)
+					at.Balance.TimingIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceTimingTags...))
 				}
 				if attr.BalanceRatingSubject != nil {
-					at.BalanceRatingSubject = *attr.BalanceRatingSubject
+					at.Balance.RatingSubject = attr.BalanceRatingSubject
 				}
 				if attr.BalanceCategories != nil {
-					at.BalanceCategories = utils.NewStringMap(*attr.BalanceCategories...)
+					at.Balance.Categories = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceCategories...))
 				}
 				if attr.BalanceSharedGroups != nil {
-					at.BalanceSharedGroups = utils.NewStringMap(*attr.BalanceSharedGroups...)
+					at.Balance.SharedGroups = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceSharedGroups...))
 				}
 				if attr.BalanceBlocker != nil {
-					at.BalanceBlocker = *attr.BalanceBlocker
+					at.Balance.Blocker = attr.BalanceBlocker
 				}
 				if attr.BalanceDisabled != nil {
-					at.BalanceDisabled = *attr.BalanceDisabled
+					at.Balance.Disabled = attr.BalanceDisabled
 				}
 				if attr.MinQueuedItems != nil {
 					at.MinQueuedItems = *attr.MinQueuedItems

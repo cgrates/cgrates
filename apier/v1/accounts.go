@@ -353,21 +353,21 @@ func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *interface{}) 
 type AttrAddBalance struct {
 	Tenant         string
 	Account        string
-	BalanceUuid    string
-	BalanceId      string
+	BalanceUuid    *string
+	BalanceId      *string
 	BalanceType    string
-	Directions     string
+	Directions     *string
 	Value          float64
-	ExpiryTime     string
-	RatingSubject  string
-	Categories     string
-	DestinationIds string
-	TimingIds      string
-	Weight         float64
-	SharedGroups   string
+	ExpiryTime     *string
+	RatingSubject  *string
+	Categories     *string
+	DestinationIds *string
+	TimingIds      *string
+	Weight         *float64
+	SharedGroups   *string
 	Overwrite      bool // When true it will reset if the balance is already there
-	Blocker        bool
-	Disabled       bool
+	Blocker        *bool
+	Disabled       *bool
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
@@ -378,13 +378,17 @@ func (self *ApierV1) DebitBalance(attr *AttrAddBalance, reply *string) error {
 }
 
 func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType", "Value"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	expTime, err := utils.ParseTimeDetectLayout(attr.ExpiryTime, self.Config.DefaultTimezone)
-	if err != nil {
-		*reply = err.Error()
-		return err
+	var expTime *time.Time
+	if attr.ExpiryTime != nil {
+		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		expTime = &expTimeVal
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(accID); err != nil {
@@ -403,27 +407,36 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	if attr.Overwrite {
 		aType += "_reset" // => *topup_reset/*debit_reset
 	}
-	at.SetActions(engine.Actions{
-		&engine.Action{
-			ActionType:  aType,
-			BalanceType: attr.BalanceType,
-			Balance: &engine.Balance{
-				Uuid:           attr.BalanceUuid,
-				Id:             attr.BalanceId,
-				Value:          attr.Value,
-				ExpirationDate: expTime,
-				RatingSubject:  attr.RatingSubject,
-				Directions:     utils.ParseStringMap(attr.Directions),
-				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
-				Categories:     utils.ParseStringMap(attr.Categories),
-				Weight:         attr.Weight,
-				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
-				TimingIDs:      utils.ParseStringMap(attr.TimingIds),
-				Blocker:        attr.Blocker,
-				Disabled:       attr.Disabled,
-			},
+	a := &engine.Action{
+		ActionType: aType,
+		Balance: &engine.BalanceFilter{
+			Uuid:           attr.BalanceUuid,
+			ID:             attr.BalanceId,
+			Type:           utils.StringPointer(attr.BalanceType),
+			Value:          utils.Float64Pointer(attr.Value),
+			ExpirationDate: expTime,
+			RatingSubject:  attr.RatingSubject,
+			Weight:         attr.Weight,
+			Blocker:        attr.Blocker,
+			Disabled:       attr.Disabled,
 		},
-	})
+	}
+	if attr.Directions != nil {
+		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))
+	}
+	if attr.DestinationIds != nil {
+		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
+	}
+	if attr.Categories != nil {
+		a.Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(*attr.Categories))
+	}
+	if attr.SharedGroups != nil {
+		a.Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(*attr.SharedGroups))
+	}
+	if attr.TimingIds != nil {
+		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
+	}
+	at.SetActions(engine.Actions{a})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
@@ -432,7 +445,95 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	return nil
 }
 
-func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) error {
+type AttrSetBalance struct {
+	Tenant         string
+	Account        string
+	BalanceType    string
+	BalanceUUID    *string
+	BalanceID      *string
+	Directions     *string
+	Value          *float64
+	ExpiryTime     *string
+	RatingSubject  *string
+	Categories     *string
+	DestinationIds *string
+	TimingIds      *string
+	Weight         *float64
+	SharedGroups   *string
+	Blocker        *bool
+	Disabled       *bool
+}
+
+func (self *ApierV1) SetBalance(aType string, attr *AttrSetBalance, reply *string) error {
+	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if (attr.BalanceID == nil || *attr.BalanceID == "") &&
+		(attr.BalanceUUID == nil || *attr.BalanceUUID == "") {
+		return utils.NewErrMandatoryIeMissing("BalanceID", "or", "BalanceUUID")
+	}
+	var expTime *time.Time
+	if attr.ExpiryTime != nil {
+		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		expTime = &expTimeVal
+	}
+	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	if _, err := self.AccountDb.GetAccount(accID); err != nil {
+		// create account if not exists
+		account := &engine.Account{
+			Id: accID,
+		}
+		if err := self.AccountDb.SetAccount(account); err != nil {
+			*reply = err.Error()
+			return err
+		}
+	}
+	at := &engine.ActionTiming{}
+	at.SetAccountIDs(utils.StringMap{accID: true})
+
+	a := &engine.Action{
+		ActionType: engine.SET_BALANCE,
+		Balance: &engine.BalanceFilter{
+			Uuid:           attr.BalanceUUID,
+			ID:             attr.BalanceID,
+			Type:           utils.StringPointer(attr.BalanceType),
+			Value:          attr.Value,
+			ExpirationDate: expTime,
+			RatingSubject:  attr.RatingSubject,
+			Weight:         attr.Weight,
+			Blocker:        attr.Blocker,
+			Disabled:       attr.Disabled,
+		},
+	}
+	if attr.Directions != nil {
+		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))
+	}
+	if attr.DestinationIds != nil {
+		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
+	}
+	if attr.Categories != nil {
+		a.Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(*attr.Categories))
+	}
+	if attr.SharedGroups != nil {
+		a.Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(*attr.SharedGroups))
+	}
+	if attr.TimingIds != nil {
+		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
+	}
+	at.SetActions(engine.Actions{a})
+	if err := at.Execute(); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+/*func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -475,16 +576,20 @@ func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) e
 	}
 	*reply = OK
 	return nil
-}
+}*/
 
-func (self *ApierV1) RemoveBalances(attr *AttrAddBalance, reply *string) error {
+func (self *ApierV1) RemoveBalances(attr *AttrSetBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	expTime, err := utils.ParseTimeDetectLayout(attr.ExpiryTime, self.Config.DefaultTimezone)
-	if err != nil {
-		*reply = err.Error()
-		return err
+	var expTime *time.Time
+	if attr.ExpiryTime != nil {
+		expTimeVal, err := utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		expTime = &expTimeVal
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(accID); err != nil {
@@ -493,138 +598,36 @@ func (self *ApierV1) RemoveBalances(attr *AttrAddBalance, reply *string) error {
 
 	at := &engine.ActionTiming{}
 	at.SetAccountIDs(utils.StringMap{accID: true})
-	at.SetActions(engine.Actions{
-		&engine.Action{
-			ActionType:  engine.REMOVE_BALANCE,
-			BalanceType: attr.BalanceType,
-			Balance: &engine.Balance{
-				Uuid:           attr.BalanceUuid,
-				Id:             attr.BalanceId,
-				Value:          attr.Value,
-				ExpirationDate: expTime,
-				RatingSubject:  attr.RatingSubject,
-				Directions:     utils.ParseStringMap(attr.Directions),
-				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
-				Categories:     utils.ParseStringMap(attr.Categories),
-				Weight:         attr.Weight,
-				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
-				TimingIDs:      utils.ParseStringMap(attr.TimingIds),
-				Blocker:        attr.Blocker,
-				Disabled:       attr.Disabled,
-			},
+	a := &engine.Action{
+		ActionType: engine.SET_BALANCE,
+		Balance: &engine.BalanceFilter{
+			Uuid:           attr.BalanceUUID,
+			ID:             attr.BalanceID,
+			Type:           utils.StringPointer(attr.BalanceType),
+			Value:          attr.Value,
+			ExpirationDate: expTime,
+			RatingSubject:  attr.RatingSubject,
+			Weight:         attr.Weight,
+			Blocker:        attr.Blocker,
+			Disabled:       attr.Disabled,
 		},
-	})
-	if err := at.Execute(); err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = OK
-	return nil
-}
-
-type AttrSetBalance struct {
-	Tenant         string
-	Account        string
-	BalanceType    string
-	BalanceUUID    *string
-	BalanceID      *string
-	Directions     *[]string
-	Value          *float64
-	ExpiryTime     *string
-	RatingSubject  *string
-	Categories     *[]string
-	DestinationIDs *[]string
-	SharedGroups   *[]string
-	TimingIDs      *[]string
-	Weight         *float64
-	Blocker        *bool
-	Disabled       *bool
-	expTime        time.Time
-}
-
-func (attr *AttrSetBalance) SetBalance(b *engine.Balance) {
-	if b == nil {
-		return
 	}
 	if attr.Directions != nil {
-		b.Directions = utils.StringMapFromSlice(*attr.Directions)
+		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))
 	}
-	if attr.Value != nil {
-		b.Value = *attr.Value
-	}
-	if attr.ExpiryTime != nil {
-		b.ExpirationDate = attr.expTime
-	}
-	if attr.RatingSubject != nil {
-		b.RatingSubject = *attr.RatingSubject
+	if attr.DestinationIds != nil {
+		a.Balance.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.DestinationIds))
 	}
 	if attr.Categories != nil {
-		b.Categories = utils.StringMapFromSlice(*attr.Categories)
-	}
-	if attr.DestinationIDs != nil {
-		b.DestinationIds = utils.StringMapFromSlice(*attr.DestinationIDs)
+		a.Balance.Categories = utils.StringMapPointer(utils.ParseStringMap(*attr.Categories))
 	}
 	if attr.SharedGroups != nil {
-		b.SharedGroups = utils.StringMapFromSlice(*attr.SharedGroups)
+		a.Balance.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(*attr.SharedGroups))
 	}
-	if attr.TimingIDs != nil {
-		b.TimingIDs = utils.StringMapFromSlice(*attr.TimingIDs)
+	if attr.TimingIds != nil {
+		a.Balance.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(*attr.TimingIds))
 	}
-	if attr.Weight != nil {
-		b.Weight = *attr.Weight
-	}
-	if attr.Blocker != nil {
-		b.Blocker = *attr.Blocker
-	}
-	if attr.Disabled != nil {
-		b.Disabled = *attr.Disabled
-	}
-	b.SetDirty() // Mark the balance as dirty since we have modified and it should be checked by action triggers
-}
-
-/* // SetAccount api using action and action timing to set balance,
-//to be uncommented when using pointers in action.balance
-func (self *ApierV1) SetBalance(attr *AttrAddBalance, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	if attr.BalanceID == "" && attr.BalanceUUID == "" {
-		return utils.NewErrMandatoryIeMissing("BalanceID", "or", "BalanceUUID")
-	}
-	expTime, err := utils.ParseTimeDetectLayout(attr.ExpiryTime, self.Config.DefaultTimezone)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetAccount(accID); err != nil {
-		return utils.ErrNotFound
-	}
-
-	at := &engine.ActionTiming{}
-	at.SetAccountIDs(utils.StringMap{accID: true})
-
-	at.SetActions(engine.Actions{
-		&engine.Action{
-			ActionType:  engine.SET_BALANCE,
-			BalanceType: attr.BalanceType,
-			Balance: &engine.Balance{
-				Uuuid:           attr.BalanceUUID,
-				ID:             attr.BalanceID,
-				Value:          attr.Value,
-				ExpirationDate: expTime,
-				RatingSubject:  attr.RatingSubject,
-				Directions:     utils.ParseStringMap(attr.Directions),
-				DestinationIDs: utils.ParseStringMap(attr.DestinationIDs),
-				Categories:     utils.ParseStringMap(attr.Categories),
-				Weight:         attr.Weight,
-				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
-                TimingIDs:      utils.ParseStringMap(attr.TimingIDs),
-				Blocker:        true,
-				Disabled:       attr.Disabled,
-			},
-		},
-	})
+	at.SetActions(engine.Actions{a})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
@@ -632,16 +635,13 @@ func (self *ApierV1) SetBalance(attr *AttrAddBalance, reply *string) error {
 	*reply = OK
 	return nil
 }
-*/
 
+/* To be removed after the above one proves reliable
 func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if (attr.BalanceID == nil || *attr.BalanceID == "") &&
-		(attr.BalanceUUID == nil || *attr.BalanceUUID == "") {
-		return utils.NewErrMandatoryIeMissing("BalanceID", "or", "BalanceUUID")
-	}
+
 	var err error
 	if attr.ExpiryTime != nil {
 		attr.expTime, err = utils.ParseTimeDetectLayout(*attr.ExpiryTime, self.Config.DefaultTimezone)
@@ -727,3 +727,4 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 	*reply = utils.OK
 	return nil
 }
+*/

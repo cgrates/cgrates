@@ -86,7 +86,7 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 	if acnt, err := acntDbAcntActs.GetAccount(acnt1Tag); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectAcnt, acnt) {
-		t.Errorf("Expecting: %+v, received: %+v", expectAcnt, acnt)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectAcnt), utils.ToJSON(acnt))
 	}
 }
 
