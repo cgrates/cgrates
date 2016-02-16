@@ -28,6 +28,8 @@ var (
 	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
 	ErrRatingPlanNotFound      = errors.New("RATING_PLAN_NOT_FOUND")
 	ErrAccountNotFound         = errors.New("ACCOUNT_NOT_FOUND")
+	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
+	ErrCreditInsufficient      = errors.New("CREDIT_INSUFFICIENT")
 )
 
 const (

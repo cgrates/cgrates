@@ -500,6 +500,40 @@ func TestDmtAgentSendCCRSMSWrongAccount(t *testing.T) {
 	}
 }
 
+// cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2015-11-07T08:42:26Z" TimeEnd="2015-11-07T08:47:26Z"'
+func TestDmtAgentSendCCRInitWrongAccount(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	cdr := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
+		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
+		Tenant: "cgrates.org", Category: "call", Account: "non_existent", Subject: "non_existent", Destination: "1004", Supplier: "SUPPL1",
+		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(0) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
+	}
+	ccr := storedCdrToCCR(cdr, "UNIT_TEST", daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorId,
+		daCfg.DiameterAgentCfg().ProductName, utils.DIAMETER_FIRMWARE_REVISION, daCfg.DiameterAgentCfg().DebitInterval, false)
+	m, err := ccr.AsDiameterMessage()
+	if err != nil {
+		t.Error(err)
+	}
+	if err := dmtClient.SendMessage(m); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Result-Code")
+	} else if strResult := avpValAsString(avps[0]); strResult != "5030" { // Result-Code set in the template
+		t.Errorf("Expecting 5030, received: %s", strResult)
+	}
+}
+
 func TestDmtAgentCdrs(t *testing.T) {
 	if !*testIntegration {
 		return
