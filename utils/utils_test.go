@@ -600,3 +600,31 @@ func TestCastIfToString(t *testing.T) {
 		t.Errorf("Received: %+v", sOut)
 	}
 }
+
+func TestEndOfMonth(t *testing.T) {
+	eom := GetEndOfMonth(time.Date(2016, time.February, 5, 10, 1, 2, 3, time.UTC))
+	expected := time.Date(2016, time.February, 29, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2015, time.February, 5, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2015, time.February, 28, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.January, 31, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2016, time.January, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.December, 31, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2016, time.December, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC))
+	expected = time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+}

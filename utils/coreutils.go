@@ -518,3 +518,18 @@ func CastIfToString(iface interface{}) (strVal string, casts bool) {
 	}
 	return strVal, casts
 }
+
+func GetEndOfMonth(ref time.Time) time.Time {
+	if ref.IsZero() {
+		return time.Now()
+	}
+	year, month, _ := ref.Date()
+	if month == time.December {
+		year++
+		month = time.January
+	} else {
+		month++
+	}
+	eom := time.Date(year, month, 1, 0, 0, 0, 0, ref.Location())
+	return eom.Add(-time.Second)
+}
