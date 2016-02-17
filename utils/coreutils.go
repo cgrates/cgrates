@@ -193,7 +193,7 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
 	case date == "*yearly":
 		expDate = time.Now().AddDate(1, 0, 0) // add one year
-	case date == "*end_month":
+	case date == "*month_end":
 		expDate = GetEndOfMonth(time.Now())
 	case strings.HasSuffix(date, "Z"):
 		expDate, err = time.Parse(time.RFC3339, date)
