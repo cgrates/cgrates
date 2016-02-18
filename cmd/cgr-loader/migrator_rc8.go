@@ -278,6 +278,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 				}
 				newUc.Counters[index] = cf
 			}
+			newAcc.UnitCounters[oldUc.BalanceType] = append(newAcc.UnitCounters[oldUc.BalanceType], newUc)
 		}
 		// action triggers
 		for index, oldAtr := range oldAcc.ActionTriggers {
