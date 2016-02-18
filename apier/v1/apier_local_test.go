@@ -980,7 +980,7 @@ func TestApierGetActions(t *testing.T) {
 	if err := rater.Call("ApierV1.GetActions", "ACTS_1", &reply); err != nil {
 		t.Error("Got error on ApierV1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(expectActs, reply) {
-		t.Errorf("Expected: %v, received: %v", expectActs, reply)
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
 	}
 }
 

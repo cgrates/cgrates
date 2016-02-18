@@ -95,7 +95,7 @@ func TestActionsLocalSetCdrlogDebit(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, Units: "5.0", ExpiryTime: UNLIMITED, Weight: 20.0},
+		&utils.TPAction{Identifier: DEBIT, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
 		&utils.TPAction{Identifier: CDRLOG},
 	}}
 	if err := actsLclRpc.Call("ApierV1.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
@@ -140,7 +140,7 @@ func TestActionsLocalSetCdrlogTopup(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
 	attrsAA := &utils.AttrSetActions{ActionsId: "ACTS_2", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: TOPUP, BalanceType: utils.MONETARY, Units: "5.0", ExpiryTime: UNLIMITED, Weight: 20.0},
+		&utils.TPAction{Identifier: TOPUP, BalanceType: utils.MONETARY, Units: "5", ExpiryTime: UNLIMITED, Weight: 20.0},
 		&utils.TPAction{Identifier: CDRLOG},
 	}}
 	if err := actsLclRpc.Call("ApierV1.SetActions", attrsAA, &reply); err != nil && err.Error() != utils.ErrExists.Error() {
