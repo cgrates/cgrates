@@ -503,17 +503,21 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
 		var units *float64
-		if x, err := strconv.ParseFloat(apiAct.Units, 64); err == nil {
-			units = &x
-		} else {
-			return err
+		if apiAct.Units != "" {
+			if x, err := strconv.ParseFloat(apiAct.Units, 64); err == nil {
+				units = &x
+			} else {
+				return err
+			}
 		}
 
 		var weight *float64
-		if x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64); err == nil {
-			weight = &x
-		} else {
-			return err
+		if apiAct.BalanceWeight != "" {
+			if x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64); err == nil {
+				weight = &x
+			} else {
+				return err
+			}
 		}
 
 		a := &engine.Action{
