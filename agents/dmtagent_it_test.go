@@ -534,6 +534,81 @@ func TestDmtAgentSendCCRInitWrongAccount(t *testing.T) {
 	}
 }
 
+func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00084"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("routing1.huawei.com"))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("simpa@huawei.com"))
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(4))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 13, 16, 47, 58, 0, time.UTC)))
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.RequestedAction, avp.Mbit, 0, datatype.Enumerated(1))
+	ccr.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.CCMoney, avp.Mbit, 0, &diam.GroupedAVP{
+				AVP: []*diam.AVP{
+					diam.NewAVP(avp.UnitValue, avp.Mbit, 0, &diam.GroupedAVP{
+						AVP: []*diam.AVP{
+							diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(10000)),
+							diam.NewAVP(avp.Exponent, avp.Mbit, 0, datatype.Integer32(-5)),
+						},
+					}),
+					diam.NewAVP(avp.CurrencyCode, avp.Mbit, 0, datatype.Unsigned32(33)),
+				},
+			}),
+		},
+	})
+	ccr.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{ // Service-Information
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("22509")), // Calling-Vlr-Number
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("4002")),  // Called-Party-NP
+				},
+			}),
+			diam.NewAVP(29000, avp.Mbit, 2011, &diam.GroupedAVP{ // MC-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(29001, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
+					diam.NewAVP(29002, avp.Mbit, 2011, datatype.UTF8String("12928471313847173")), // MC-Service-Id
+					diam.NewAVP(29003, avp.Mbit, 2011, datatype.UTF8String("SPV123456012123")),   // TransparentData
+					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // MC-Information
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(0)),             // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("33780029555")), // Address-Data
+						},
+					}),
+				},
+			}),
+		}})
+	if err := dmtClient.SendMessage(ccr); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(100) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Result-Code")
+	} else if strResult := avpValAsString(avps[0]); strResult != "5030" { // Result-Code set in the template
+		t.Errorf("Expecting 5030, received: %s", strResult)
+	}
+}
+
 func TestDmtAgentCdrs(t *testing.T) {
 	if !*testIntegration {
 		return
