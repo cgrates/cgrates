@@ -168,7 +168,7 @@ func TestActionsLocalSetCdrlogTopup(t *testing.T) {
 		rcvedCdrs[0].Subject != "dan2905" ||
 		rcvedCdrs[0].Usage != "1" ||
 		rcvedCdrs[0].RunID != TOPUP ||
-		strconv.FormatFloat(rcvedCdrs[0].Cost, 'f', -1, 64) != attrsAA.Actions[0].Units {
+		strconv.FormatFloat(-rcvedCdrs[0].Cost, 'f', -1, 64) != attrsAA.Actions[0].Units {
 		t.Errorf("Received: %+v", rcvedCdrs[0])
 	}
 }
