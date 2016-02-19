@@ -1055,7 +1055,7 @@ func TestLoadActionTriggers(t *testing.T) {
 		ThresholdType:  utils.TRIGGER_MIN_EVENT_COUNTER,
 		ThresholdValue: 10,
 		Balance: &BalanceFilter{
-			ID:             utils.StringPointer("st0"),
+			ID:             nil,
 			Type:           utils.StringPointer(utils.VOICE),
 			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
@@ -1133,7 +1133,7 @@ func TestLoadAccountActions(t *testing.T) {
 		expected.UnitCounters[utils.VOICE][0].Counters[i].Filter.ID = b.Filter.ID
 	}
 	if !reflect.DeepEqual(aa.UnitCounters[utils.VOICE][0].Counters[0], expected.UnitCounters[utils.VOICE][0].Counters[0]) {
-		t.Errorf("Error loading account action: %+v", utils.ToIJSON(aa.UnitCounters[utils.VOICE][0].Counters[0].Filter))
+		t.Errorf("Error loading account action: %+v %+v", utils.ToIJSON(aa.UnitCounters[utils.VOICE][0].Counters[0].Filter), utils.ToIJSON(expected.UnitCounters[utils.VOICE][0].Counters[0].Filter))
 	}
 	// test that it does not overwrite balances
 	existing, err := accountingStorage.GetAccount(aa.Id)
