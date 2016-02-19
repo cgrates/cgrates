@@ -166,10 +166,10 @@ type TpAction struct {
 	SharedGroups    string  `index:"10" re:"[0-9A-Za-z_;]*"`
 	ExpiryTime      string  `index:"11" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	TimingTags      string  `index:"12" re:"[0-9A-Za-z_;]*|\*any"`
-	Units           float64 `index:"13" re:"\d+\s*"`
-	BalanceWeight   float64 `index:"14" re:"\d+\.?\d*\s*"`
-	BalanceBlocker  bool    `index:"15" re:""`
-	BalanceDisabled bool    `index:"16" re:""`
+	Units           string  `index:"13" re:"\d+\s*"`
+	BalanceWeight   string  `index:"14" re:"\d+\.?\d*\s*"`
+	BalanceBlocker  string  `index:"15" re:""`
+	BalanceDisabled string  `index:"16" re:""`
 	Weight          float64 `index:"17" re:"\d+\.?\d*\s*"`
 	CreatedAt       time.Time
 }
@@ -204,9 +204,9 @@ type TpActionTrigger struct {
 	BalanceSharedGroups    string  `index:"14" re:"\w+|\*any"`
 	BalanceExpiryTime      string  `index:"15" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	BalanceTimingTags      string  `index:"16" re:"[0-9A-Za-z_;]*|\*any"`
-	BalanceWeight          float64 `index:"17" re:"\d+\.?\d*"`
-	BalanceBlocker         bool    `index:"18" re:""`
-	BalanceDisabled        bool    `index:"19" re:""`
+	BalanceWeight          string  `index:"17" re:"\d+\.?\d*"`
+	BalanceBlocker         string  `index:"18" re:""`
+	BalanceDisabled        string  `index:"19" re:""`
 	MinQueuedItems         int     `index:"20" re:"\d+"`
 	ActionsTag             string  `index:"21" re:"\w+"`
 	Weight                 float64 `index:"22" re:"\d+\.?\d*"`

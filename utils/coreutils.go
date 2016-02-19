@@ -193,6 +193,8 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
 	case date == "*yearly":
 		expDate = time.Now().AddDate(1, 0, 0) // add one year
+	case date == "*month_end":
+		expDate = GetEndOfMonth(time.Now())
 	case strings.HasSuffix(date, "Z"):
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
@@ -337,6 +339,10 @@ func Fib() func() time.Duration {
 
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
+	if str == ZERO {
+		str = ""
+		return &str
+	}
 	return &str
 }
 
@@ -366,6 +372,10 @@ func Float64SlicePointer(slc []float64) *[]float64 {
 
 func StringMapPointer(sm StringMap) *StringMap {
 	return &sm
+}
+
+func TimePointer(t time.Time) *time.Time {
+	return &t
 }
 
 func ReflectFuncLocation(handler interface{}) (file string, line int) {
@@ -509,4 +519,19 @@ func CastIfToString(iface interface{}) (strVal string, casts bool) {
 		strVal, casts = iface.(string)
 	}
 	return strVal, casts
+}
+
+func GetEndOfMonth(ref time.Time) time.Time {
+	if ref.IsZero() {
+		return time.Now()
+	}
+	year, month, _ := ref.Date()
+	if month == time.December {
+		year++
+		month = time.January
+	} else {
+		month++
+	}
+	eom := time.Date(year, month, 1, 0, 0, 0, 0, ref.Location())
+	return eom.Add(-time.Second)
 }

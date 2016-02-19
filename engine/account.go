@@ -36,12 +36,13 @@ Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
 */
 type Account struct {
-	Id             string
-	BalanceMap     map[string]BalanceChain
-	UnitCounters   UnitCounters
-	ActionTriggers ActionTriggers
-	AllowNegative  bool
-	Disabled       bool
+	Id                string
+	BalanceMap        map[string]BalanceChain
+	UnitCounters      UnitCounters
+	ActionTriggers    ActionTriggers
+	AllowNegative     bool
+	Disabled          bool
+	executingTriggers bool
 }
 
 // User's available minutes for the specified destination
@@ -93,7 +94,7 @@ func (ub *Account) setBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
-	bClone := a.Balance.Clone()
+	bClone := a.Balance.CreateBalance()
 	if bClone == nil {
 		return errors.New("nil balance")
 	}
@@ -111,7 +112,7 @@ func (ub *Account) setBalanceAction(a *Action) error {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)
 	}
 	found := false
-	balanceType := a.BalanceType
+	balanceType := a.Balance.GetType()
 	var previousSharedGroups utils.StringMap // kept for comparison
 	for _, b := range ub.BalanceMap[balanceType] {
 		if b.IsExpired() {
@@ -182,7 +183,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
-	bClone := a.Balance.Clone()
+	bClone := a.Balance.CreateBalance()
 	if bClone == nil {
 		return errors.New("nil balance")
 	}
@@ -190,7 +191,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		ub.BalanceMap = make(map[string]BalanceChain, 1)
 	}
 	found := false
-	balanceType := a.BalanceType
+	balanceType := a.Balance.GetType()
 	for _, b := range ub.BalanceMap[balanceType] {
 		if b.IsExpired() {
 			continue // just to be safe (cleaned expired balances above)
@@ -257,10 +258,12 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			return err
 		}
 	}
+	ub.InitCounters()
 	ub.ExecuteActionTriggers(nil)
 	return nil
 }
 
+/*
 func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil action")
@@ -286,7 +289,7 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	}
 	return nil
 }
-
+*/
 func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) BalanceChain {
 	var balances BalanceChain
 	balances = append(balances, ub.BalanceMap[tor]...)
@@ -570,6 +573,14 @@ func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, cou
 
 // Scans the action trigers and execute the actions for which trigger is met
 func (acc *Account) ExecuteActionTriggers(a *Action) {
+	if acc.executingTriggers {
+		return
+	}
+	acc.executingTriggers = true
+	defer func() {
+		acc.executingTriggers = false
+	}()
+
 	acc.ActionTriggers.Sort()
 	for _, at := range acc.ActionTriggers {
 		// check is effective
@@ -590,24 +601,30 @@ func (acc *Account) ExecuteActionTriggers(a *Action) {
 			continue
 		}
 		if strings.Contains(at.ThresholdType, "counter") {
-			for _, uc := range acc.UnitCounters {
-				if uc.BalanceType == at.BalanceType &&
-					strings.Contains(at.ThresholdType, uc.CounterType[1:]) {
-					for _, b := range uc.Balances {
-						if strings.HasPrefix(at.ThresholdType, "*max") {
-							if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
-								at.Execute(acc, nil)
-							}
-						} else { //MIN
-							if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
-								at.Execute(acc, nil)
+			if (at.Balance.ID == nil || *at.Balance.ID != "") && at.UniqueID != "" {
+				at.Balance.ID = utils.StringPointer(at.UniqueID)
+			}
+			for _, counters := range acc.UnitCounters {
+				for _, uc := range counters {
+					if strings.Contains(at.ThresholdType, uc.CounterType[1:]) {
+						for _, c := range uc.Counters {
+							//log.Print("C: ", utils.ToJSON(c))
+							if strings.HasPrefix(at.ThresholdType, "*max") {
+								if c.Filter.Equal(at.Balance) && c.Value >= at.ThresholdValue {
+									//log.Print("HERE")
+									at.Execute(acc, nil)
+								}
+							} else { //MIN
+								if c.Filter.Equal(at.Balance) && c.Value <= at.ThresholdValue {
+									at.Execute(acc, nil)
+								}
 							}
 						}
 					}
 				}
 			}
 		} else { // BALANCE
-			for _, b := range acc.BalanceMap[at.BalanceType] {
+			for _, b := range acc.BalanceMap[at.Balance.GetType()] {
 				if !b.dirty && at.ThresholdType != utils.TRIGGER_BALANCE_EXPIRED { // do not check clean balances
 					continue
 				}
@@ -662,9 +679,10 @@ func (acc *Account) countUnits(amount float64, kind string, cc *CallCost, b *Bal
 // Create counters for all triggered actions
 func (acc *Account) InitCounters() {
 	oldUcs := acc.UnitCounters
-	acc.UnitCounters = nil
+	acc.UnitCounters = make(UnitCounters)
 	ucTempMap := make(map[string]*UnitCounter)
 	for _, at := range acc.ActionTriggers {
+		//log.Print("AT: ", utils.ToJSON(at))
 		if !strings.Contains(at.ThresholdType, "counter") {
 			continue
 		}
@@ -672,29 +690,42 @@ func (acc *Account) InitCounters() {
 		if strings.Contains(at.ThresholdType, "balance") {
 			ct = utils.COUNTER_BALANCE
 		}
-
-		uc, exists := ucTempMap[at.BalanceType+ct]
+		uc, exists := ucTempMap[at.Balance.GetType()+ct]
+		//log.Print("CT: ", at.Balance.GetType()+ct)
 		if !exists {
 			uc = &UnitCounter{
-				BalanceType: at.BalanceType,
 				CounterType: ct,
 			}
-			ucTempMap[at.BalanceType+ct] = uc
-			uc.Balances = BalanceChain{}
-			acc.UnitCounters = append(acc.UnitCounters, uc)
+			ucTempMap[at.Balance.GetType()+ct] = uc
+			uc.Counters = make(CounterFilters, 0)
+			acc.UnitCounters[at.Balance.GetType()] = append(acc.UnitCounters[at.Balance.GetType()], uc)
 		}
-		b := at.CreateBalance()
-		if !uc.Balances.HasBalance(b) {
-			uc.Balances = append(uc.Balances, b)
+
+		c := &CounterFilter{Filter: at.Balance.Clone()}
+		if (c.Filter.ID == nil || *c.Filter.ID == "") && at.UniqueID != "" {
+			c.Filter.ID = utils.StringPointer(at.UniqueID)
+		}
+		//log.Print("C: ", utils.ToJSON(c))
+		if !uc.Counters.HasCounter(c) {
+			uc.Counters = append(uc.Counters, c)
 		}
 	}
 	// copy old counter values
-	for _, uc := range acc.UnitCounters {
-		for _, oldUc := range oldUcs {
-			if uc.CopyCounterValues(oldUc) {
-				break
+	for key, counters := range acc.UnitCounters {
+		oldCounters, found := oldUcs[key]
+		if !found {
+			continue
+		}
+		for _, uc := range counters {
+			for _, oldUc := range oldCounters {
+				if uc.CopyCounterValues(oldUc) {
+					break
+				}
 			}
 		}
+	}
+	if len(acc.UnitCounters) == 0 {
+		acc.UnitCounters = nil // leave it nil if empty
 	}
 }
 
@@ -904,52 +935,55 @@ func (acc *Account) AsOldStructure() interface{} {
 		AllowNegative:  acc.AllowNegative,
 		Disabled:       acc.Disabled,
 	}
-	for i, uc := range acc.UnitCounters {
-		if uc == nil {
-			continue
-		}
-		result.UnitCounters[i] = &UnitsCounter{
-			BalanceType: uc.BalanceType,
-			Balances:    make(BalanceChain, len(uc.Balances)),
-		}
-		if len(uc.Balances) > 0 {
-			result.UnitCounters[i].Direction = uc.Balances[0].Directions.String()
-			for j, b := range uc.Balances {
-				result.UnitCounters[i].Balances[j] = &Balance{
-					Uuid:           b.Uuid,
-					Id:             b.Id,
-					Value:          b.Value,
-					ExpirationDate: b.ExpirationDate,
-					Weight:         b.Weight,
-					DestinationIds: b.DestinationIds.String(),
-					RatingSubject:  b.RatingSubject,
-					Category:       b.Categories.String(),
-					SharedGroup:    b.SharedGroups.String(),
-					Timings:        b.Timings,
-					TimingIDs:      b.TimingIDs.String(),
-					Disabled:       b.Disabled,
+	for balanceType, counters := range acc.UnitCounters {
+		for i, uc := range counters {
+			if uc == nil {
+				continue
+			}
+			result.UnitCounters[i] = &UnitsCounter{
+				BalanceType: balanceType,
+				Balances:    make(BalanceChain, len(uc.Counters)),
+			}
+			if len(uc.Counters) > 0 {
+				result.UnitCounters[i].Direction = (*uc.Counters[0].Filter.Directions).String()
+				for j, c := range uc.Counters {
+					result.UnitCounters[i].Balances[j] = &Balance{
+						Uuid:           c.Filter.GetUuid(),
+						Id:             c.Filter.GetID(),
+						Value:          c.Filter.GetValue(),
+						ExpirationDate: c.Filter.GetExpirationDate(),
+						Weight:         c.Filter.GetWeight(),
+						DestinationIds: c.Filter.GetDestinationIDs().String(),
+						RatingSubject:  c.Filter.GetRatingSubject(),
+						Category:       c.Filter.GetCategories().String(),
+						SharedGroup:    c.Filter.GetSharedGroups().String(),
+						Timings:        c.Filter.Timings,
+						TimingIDs:      c.Filter.GetTimingIDs().String(),
+						Disabled:       c.Filter.GetDisabled(),
+					}
 				}
 			}
 		}
 	}
 	for i, at := range acc.ActionTriggers {
+		b := at.Balance.CreateBalance()
 		result.ActionTriggers[i] = &ActionTrigger{
 			Id:                    at.ID,
 			ThresholdType:         at.ThresholdType,
 			ThresholdValue:        at.ThresholdValue,
 			Recurrent:             at.Recurrent,
 			MinSleep:              at.MinSleep,
-			BalanceId:             at.BalanceId,
-			BalanceType:           at.BalanceType,
-			BalanceDirection:      at.BalanceDirections.String(),
-			BalanceDestinationIds: at.BalanceDestinationIds.String(),
-			BalanceWeight:         at.BalanceWeight,
-			BalanceExpirationDate: at.BalanceExpirationDate,
-			BalanceTimingTags:     at.BalanceTimingTags.String(),
-			BalanceRatingSubject:  at.BalanceRatingSubject,
-			BalanceCategory:       at.BalanceCategories.String(),
-			BalanceSharedGroup:    at.BalanceSharedGroups.String(),
-			BalanceDisabled:       at.BalanceDisabled,
+			BalanceType:           at.Balance.GetType(),
+			BalanceId:             b.Id,
+			BalanceDirection:      b.Directions.String(),
+			BalanceDestinationIds: b.DestinationIds.String(),
+			BalanceWeight:         b.Weight,
+			BalanceExpirationDate: b.ExpirationDate,
+			BalanceTimingTags:     b.TimingIDs.String(),
+			BalanceRatingSubject:  b.RatingSubject,
+			BalanceCategory:       b.Categories.String(),
+			BalanceSharedGroup:    b.SharedGroups.String(),
+			BalanceDisabled:       b.Disabled,
 			Weight:                at.Weight,
 			ActionsId:             at.ActionsId,
 			MinQueuedItems:        at.MinQueuedItems,

@@ -328,7 +328,7 @@ func (ts *TimeSpan) CalculateCost() float64 {
 		}
 		return ts.RateInterval.GetCost(ts.GetDuration(), ts.GetGroupStart())
 	} else {
-		return ts.Increments.GetTotalCost()
+		return ts.Increments.GetTotalCost() * float64(ts.GetCompressFactor())
 	}
 }
 

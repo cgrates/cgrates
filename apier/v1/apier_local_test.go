@@ -488,8 +488,8 @@ func TestApierTPActions(t *testing.T) {
 	}
 	reply := ""
 	act := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Directions: "*out", Units: 10, ExpiryTime: "*unlimited",
-			DestinationIds: "*any", BalanceWeight: 10, Weight: 10},
+		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Directions: "*out", Units: "10", ExpiryTime: "*unlimited",
+			DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
 	}}
 	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
@@ -955,7 +955,7 @@ func TestApierSetActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	act1 := &utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}
+	act1 := &utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "75", ExpiryTime: engine.UNLIMITED, Weight: 20.0}
 	attrs1 := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{act1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err != nil {
@@ -974,13 +974,13 @@ func TestApierGetActions(t *testing.T) {
 		return
 	}
 	expectActs := []*utils.TPAction{
-		&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
+		&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "75", BalanceWeight: "0", BalanceBlocker: "false", BalanceDisabled: "false", ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
 
 	var reply []*utils.TPAction
 	if err := rater.Call("ApierV1.GetActions", "ACTS_1", &reply); err != nil {
 		t.Error("Got error on ApierV1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(expectActs, reply) {
-		t.Errorf("Expected: %v, received: %v", expectActs, reply)
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
 	}
 }
 

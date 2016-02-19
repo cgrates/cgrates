@@ -38,35 +38,35 @@ import (
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id               string
-	ActionType       string
-	BalanceType      string
+	Id         string
+	ActionType string
+	//BalanceType      string
 	ExtraParameters  string
 	Filter           string
 	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
-	Balance          *Balance
+	Balance          *BalanceFilter
 }
 
 const (
-	LOG                       = "*log"
-	RESET_TRIGGERS            = "*reset_triggers"
-	SET_RECURRENT             = "*set_recurrent"
-	UNSET_RECURRENT           = "*unset_recurrent"
-	ALLOW_NEGATIVE            = "*allow_negative"
-	DENY_NEGATIVE             = "*deny_negative"
-	RESET_ACCOUNT             = "*reset_account"
-	REMOVE_ACCOUNT            = "*remove_account"
-	SET_BALANCE               = "*set_balance" // not ready for production until switching to pointers
-	REMOVE_BALANCE            = "*remove_balance"
-	TOPUP_RESET               = "*topup_reset"
-	TOPUP                     = "*topup"
-	DEBIT_RESET               = "*debit_reset"
-	DEBIT                     = "*debit"
-	RESET_COUNTERS            = "*reset_counters"
-	ENABLE_ACCOUNT            = "*enable_account"
-	DISABLE_ACCOUNT           = "*disable_account"
-	ENABLE_DISABLE_BALANCE    = "*enable_disable_balance"
+	LOG             = "*log"
+	RESET_TRIGGERS  = "*reset_triggers"
+	SET_RECURRENT   = "*set_recurrent"
+	UNSET_RECURRENT = "*unset_recurrent"
+	ALLOW_NEGATIVE  = "*allow_negative"
+	DENY_NEGATIVE   = "*deny_negative"
+	RESET_ACCOUNT   = "*reset_account"
+	REMOVE_ACCOUNT  = "*remove_account"
+	SET_BALANCE     = "*set_balance"
+	REMOVE_BALANCE  = "*remove_balance"
+	TOPUP_RESET     = "*topup_reset"
+	TOPUP           = "*topup"
+	DEBIT_RESET     = "*debit_reset"
+	DEBIT           = "*debit"
+	RESET_COUNTERS  = "*reset_counters"
+	ENABLE_ACCOUNT  = "*enable_account"
+	DISABLE_ACCOUNT = "*disable_account"
+	//ENABLE_DISABLE_BALANCE    = "*enable_disable_balance"
 	CALL_URL                  = "*call_url"
 	CALL_URL_ASYNC            = "*call_url_async"
 	MAIL_ASYNC                = "*mail_async"
@@ -78,13 +78,13 @@ const (
 
 func (a *Action) Clone() *Action {
 	return &Action{
-		Id:               a.Id,
-		ActionType:       a.ActionType,
-		BalanceType:      a.BalanceType,
+		Id:         a.Id,
+		ActionType: a.ActionType,
+		//BalanceType:      a.BalanceType,
 		ExtraParameters:  a.ExtraParameters,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
-		Balance:          a.Balance.Clone(),
+		Balance:          a.Balance,
 	}
 }
 
@@ -122,8 +122,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return enableUserAction, true
 	case DISABLE_ACCOUNT:
 		return disableUserAction, true
-	case ENABLE_DISABLE_BALANCE:
-		return enableDisableBalanceAction, true
+	//case ENABLE_DISABLE_BALANCE:
+	//	return enableDisableBalanceAction, true
 	case CALL_URL:
 		return callUrl, true
 	case CALL_URL_ASYNC:
@@ -167,12 +167,13 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		dta = new(utils.TenantAccount) // Init with empty values
 	}
 	var parsedValue string // Template values
+	b := action.Balance.CreateBalance()
 	for _, rsrFld := range rsrFlds {
 		switch rsrFld.Id {
 		case "AccountID":
 			parsedValue += rsrFld.ParseValue(acnt.Id)
 		case "Directions":
-			parsedValue += rsrFld.ParseValue(action.Balance.Directions.String())
+			parsedValue += rsrFld.ParseValue(b.Directions.String())
 		case utils.TENANT:
 			parsedValue += rsrFld.ParseValue(dta.Tenant)
 		case utils.ACCOUNT:
@@ -182,19 +183,19 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "ActionType":
 			parsedValue += rsrFld.ParseValue(action.ActionType)
 		case "BalanceType":
-			parsedValue += rsrFld.ParseValue(action.BalanceType)
+			parsedValue += rsrFld.ParseValue(action.Balance.GetType())
 		case "BalanceUUID":
-			parsedValue += rsrFld.ParseValue(action.Balance.Uuid)
+			parsedValue += rsrFld.ParseValue(b.Uuid)
 		case "BalanceID":
-			parsedValue += rsrFld.ParseValue(action.Balance.Id)
+			parsedValue += rsrFld.ParseValue(b.Id)
 		case "BalanceValue":
-			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.GetValue(), 'f', -1, 64))
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
 		case "DestinationIDs":
-			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds.String())
+			parsedValue += rsrFld.ParseValue(b.DestinationIds.String())
 		case "ExtraParameters":
 			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
 		case "RatingSubject":
-			parsedValue += rsrFld.ParseValue(action.Balance.RatingSubject)
+			parsedValue += rsrFld.ParseValue(b.RatingSubject)
 		case utils.CATEGORY:
 			parsedValue += rsrFld.ParseValue(action.Balance.Categories.String())
 		case "SharedGroups":
@@ -401,13 +402,13 @@ func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	return
 }
 
-func enableDisableBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+/*func enableDisableBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
 	ub.enableDisableBalanceAction(a)
 	return
-}
+}*/
 
 func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {
@@ -584,10 +585,10 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if _, exists := ub.BalanceMap[a.BalanceType]; !exists {
+	if _, exists := ub.BalanceMap[a.Balance.GetType()]; !exists {
 		return utils.ErrNotFound
 	}
-	bChain := ub.BalanceMap[a.BalanceType]
+	bChain := ub.BalanceMap[a.Balance.GetType()]
 	found := false
 	for i := 0; i < len(bChain); i++ {
 		if bChain[i].MatchFilter(a.Balance, false) {
@@ -598,7 +599,7 @@ func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 			found = true
 		}
 	}
-	ub.BalanceMap[a.BalanceType] = bChain
+	ub.BalanceMap[a.Balance.GetType()] = bChain
 	if !found {
 		return utils.ErrNotFound
 	}

@@ -21,7 +21,6 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
 	"sort"
 	"time"
 
@@ -33,28 +32,18 @@ type ActionTrigger struct {
 	UniqueID      string // individual id
 	ThresholdType string //*min_event_counter, *max_event_counter, *min_balance_counter, *max_balance_counter, *min_balance, *max_balance, *exp_balance
 	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_tcd, *max_tcd, *min_acc, *max_acc, *min_tcc, *max_tcc, *min_ddc, *max_ddc
-	ThresholdValue        float64
-	Recurrent             bool          // reset excuted flag each run
-	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
-	ExpirationDate        time.Time
-	ActivationDate        time.Time
-	BalanceId             string
-	BalanceType           string          // *monetary/*voice etc
-	BalanceDirections     utils.StringMap // filter for balance
-	BalanceDestinationIds utils.StringMap // filter for balance
-	BalanceWeight         float64         // filter for balance
-	BalanceExpirationDate time.Time       // filter for balance
-	BalanceTimingTags     utils.StringMap // filter for balance
-	BalanceRatingSubject  string          // filter for balance
-	BalanceCategories     utils.StringMap // filter for balance
-	BalanceSharedGroups   utils.StringMap // filter for balance
-	BalanceBlocker        bool
-	BalanceDisabled       bool // filter for balance
-	Weight                float64
-	ActionsId             string
-	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
-	Executed              bool
-	lastExecutionTime     time.Time
+	ThresholdValue float64
+	Recurrent      bool          // reset excuted flag each run
+	MinSleep       time.Duration // Minimum duration between two executions in case of recurrent triggers
+	ExpirationDate time.Time
+	ActivationDate time.Time
+	//BalanceType       string // *monetary/*voice etc
+	Balance           *BalanceFilter
+	Weight            float64
+	ActionsId         string
+	MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
+	Executed          bool
+	lastExecutionTime time.Time
 }
 
 func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err error) {
@@ -88,11 +77,13 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 				continue
 			}
 		}
-
 		if a.Balance == nil {
-			a.Balance = &Balance{}
+			a.Balance = &BalanceFilter{}
 		}
-		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
+		if a.ExpirationString != "" {
+			a.Balance.ExpirationDate = &time.Time{}
+			*a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
+		}
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
@@ -122,44 +113,37 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 // returns true if the field of the action timing are equeal to the non empty
 // fields of the action
 func (at *ActionTrigger) Match(a *Action) bool {
-	if a == nil {
+	if a == nil || a.Balance == nil {
 		return true
 	}
-	// if we have Id than we can draw an early conclusion
-	if a.Id != "" {
-		match, _ := regexp.MatchString(a.Id, at.ID)
-		return match
+	if a.Balance.Type != nil && a.Balance.GetType() != at.Balance.GetType() {
+		return false
 	}
-	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
-	thresholdType, thresholdValue, direction, destinationId, weight, ratingSubject, categories, sharedGroup, timings, blocker, disabled := true, true, true, true, true, true, true, true, true, true, true
+	var thresholdType bool
 	if a.ExtraParameters != "" {
 		t := struct {
-			ThresholdType        string
-			ThresholdValue       float64
-			DestinationIds       string
-			BalanceDirections    string
-			BalanceWeight        float64
-			BalanceRatingSubject string
-			BalanceCategories    string
-			BalanceSharedGroups  string
-			BalanceTimingTags    string
-			BalanceBlocker       bool
-			BalanceDisabled      bool
+			GroupID       string
+			UniqueID      string
+			ThresholdType string
 		}{}
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
+		// check Ids first
+		if t.GroupID != "" {
+			return at.ID == t.GroupID
+		}
+		if t.UniqueID != "" {
+			return at.UniqueID == t.UniqueID
+		}
 		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
-		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
-		direction = len(t.BalanceDirections) == 0 || at.BalanceDirections.Equal(utils.ParseStringMap(t.BalanceDirections))
-		destinationId = len(t.DestinationIds) == 0 || at.BalanceDestinationIds.Equal(utils.ParseStringMap(t.DestinationIds))
-		categories = len(t.BalanceCategories) == 0 || at.BalanceCategories.Equal(utils.ParseStringMap(t.BalanceCategories))
-		timings = len(t.BalanceTimingTags) == 0 || at.BalanceTimingTags.Equal(utils.ParseStringMap(t.BalanceTimingTags))
-		sharedGroup = len(t.BalanceSharedGroups) == 0 || at.BalanceSharedGroups.Equal(utils.ParseStringMap(t.BalanceSharedGroups))
-		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
-		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
-		blocker = at.BalanceBlocker == t.BalanceBlocker
-		disabled = at.BalanceDisabled == t.BalanceDisabled
 	}
-	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && categories && sharedGroup && timings && blocker && disabled
+
+	return thresholdType && at.Balance.CreateBalance().MatchFilter(a.Balance, false)
+}
+
+func (at *ActionTrigger) CreateBalance() *Balance {
+	b := at.Balance.CreateBalance()
+	b.Id = at.UniqueID
+	return b
 }
 
 // makes a shallow copy of the receiver
@@ -167,22 +151,6 @@ func (at *ActionTrigger) Clone() *ActionTrigger {
 	clone := new(ActionTrigger)
 	*clone = *at
 	return clone
-}
-
-func (at *ActionTrigger) CreateBalance() *Balance {
-	return &Balance{
-		Id:             at.UniqueID,
-		Directions:     at.BalanceDirections,
-		ExpirationDate: at.BalanceExpirationDate,
-		DestinationIds: at.BalanceDestinationIds,
-		RatingSubject:  at.BalanceRatingSubject,
-		Categories:     at.BalanceCategories,
-		SharedGroups:   at.BalanceSharedGroups,
-		TimingIDs:      at.BalanceTimingTags,
-		Blocker:        at.BalanceBlocker,
-		Disabled:       at.BalanceDisabled,
-		Weight:         at.BalanceWeight,
-	}
 }
 
 func (at *ActionTrigger) Equals(oat *ActionTrigger) bool {

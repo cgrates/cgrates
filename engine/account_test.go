@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"log"
 	"testing"
 	"time"
 
@@ -814,22 +813,32 @@ func TestAccountdebitBalance(t *testing.T) {
 		AllowNegative: true,
 		BalanceMap:    map[string]BalanceChain{utils.SMS: BalanceChain{&Balance{Value: 14}}, utils.DATA: BalanceChain{&Balance{Value: 1204}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: utils.StringMap{"NAT": true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
 	}
-	newMb := &Balance{Weight: 20, DestinationIds: utils.StringMap{"NEW": true}, Directions: utils.NewStringMap(utils.OUT)}
-	a := &Action{BalanceType: utils.VOICE, Balance: newMb}
+	newMb := &BalanceFilter{
+		Type:           utils.StringPointer(utils.VOICE),
+		Weight:         utils.Float64Pointer(20),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NEW": true}),
+		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+	}
+	a := &Action{Balance: newMb}
 	ub.debitBalanceAction(a, false)
-	if len(ub.BalanceMap[utils.VOICE]) != 3 || !ub.BalanceMap[utils.VOICE][2].DestinationIds.Equal(newMb.DestinationIds) {
+	if len(ub.BalanceMap[utils.VOICE]) != 3 || !ub.BalanceMap[utils.VOICE][2].DestinationIds.Equal(*newMb.DestinationIDs) {
 		t.Errorf("Error adding minute bucket! %d %+v %+v", len(ub.BalanceMap[utils.VOICE]), ub.BalanceMap[utils.VOICE][2], newMb)
 	}
 }
 
-func TestAccountDisableBalance(t *testing.T) {
+/*func TestAccountDisableBalance(t *testing.T) {
 	ub := &Account{
 		Id:            "rif",
 		AllowNegative: true,
 		BalanceMap:    map[string]BalanceChain{utils.SMS: BalanceChain{&Balance{Value: 14}}, utils.DATA: BalanceChain{&Balance{Value: 1204}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
 	}
-	newMb := &Balance{Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT), Disabled: true}
-	a := &Action{BalanceType: utils.VOICE, Balance: newMb}
+	newMb := &BalanceFilter{
+		Type:           utils.StringPointer(utils.VOICE),
+		Weight:         utils.Float64Pointer(20),
+		DestinationIds: utils.StringMapPointer(utils.StringMap{"NAT": true}),
+		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+	}
+	a := &Action{Balance: newMb}
 	ub.enableDisableBalanceAction(a)
 	if len(ub.BalanceMap[utils.VOICE]) != 2 || ub.BalanceMap[utils.VOICE][0].Disabled != true {
 		for _, b := range ub.BalanceMap[utils.VOICE] {
@@ -837,7 +846,7 @@ func TestAccountDisableBalance(t *testing.T) {
 		}
 		t.Errorf("Error disabling balance! %d %+v %+v", len(ub.BalanceMap[utils.VOICE]), ub.BalanceMap[utils.VOICE][0], newMb)
 	}
-}
+}*/
 
 func TestAccountdebitBalanceExists(t *testing.T) {
 
@@ -846,8 +855,14 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 		AllowNegative: true,
 		BalanceMap:    map[string]BalanceChain{utils.SMS: BalanceChain{&Balance{Value: 14}}, utils.DATA: BalanceChain{&Balance{Value: 1024}}, utils.VOICE: BalanceChain{&Balance{Value: 15, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
 	}
-	newMb := &Balance{Value: -10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}
-	a := &Action{BalanceType: utils.VOICE, Balance: newMb}
+	newMb := &BalanceFilter{
+		Value:          utils.Float64Pointer(-10),
+		Type:           utils.StringPointer(utils.VOICE),
+		Weight:         utils.Float64Pointer(20),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
+		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+	}
+	a := &Action{Balance: newMb}
 	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 2 || ub.BalanceMap[utils.VOICE][0].GetValue() != 25 {
 		t.Error("Error adding minute bucket!")
@@ -867,21 +882,36 @@ func TestAccountAddMinuteNil(t *testing.T) {
 }
 
 func TestAccountAddMinutBucketEmpty(t *testing.T) {
-	mb1 := &Balance{Value: -10, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}
-	mb2 := &Balance{Value: -10, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}
-	mb3 := &Balance{Value: -10, DestinationIds: utils.StringMap{"OTHER": true}, Directions: utils.NewStringMap(utils.OUT)}
+	mb1 := &BalanceFilter{
+		Value:          utils.Float64Pointer(-10),
+		Type:           utils.StringPointer(utils.VOICE),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
+		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+	}
+	mb2 := &BalanceFilter{
+		Value:          utils.Float64Pointer(-10),
+		Type:           utils.StringPointer(utils.VOICE),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
+		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+	}
+	mb3 := &BalanceFilter{
+		Value:          utils.Float64Pointer(-10),
+		Type:           utils.StringPointer(utils.VOICE),
+		DestinationIDs: utils.StringMapPointer(utils.StringMap{"OTHER": true}),
+		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+	}
 	ub := &Account{}
-	a := &Action{BalanceType: utils.VOICE, Balance: mb1}
+	a := &Action{Balance: mb1}
 	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 1 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.VOICE])
 	}
-	a = &Action{BalanceType: utils.VOICE, Balance: mb2}
+	a = &Action{Balance: mb2}
 	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 1 || ub.BalanceMap[utils.VOICE][0].GetValue() != 20 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.VOICE])
 	}
-	a = &Action{BalanceType: utils.VOICE, Balance: mb3}
+	a = &Action{Balance: mb3}
 	ub.debitBalanceAction(a, false)
 	if len(ub.BalanceMap[utils.VOICE]) != 2 {
 		t.Error("Error adding minute bucket: ", ub.BalanceMap[utils.VOICE])
@@ -892,8 +922,8 @@ func TestAccountExecuteTriggeredActions(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.StringMap{utils.OUT: true}}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.StringMap{utils.OUT: true})}}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 110 || ub.BalanceMap[utils.VOICE][0].GetValue() != 20 {
@@ -916,8 +946,8 @@ func TestAccountExecuteTriggeredActionsBalance(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}}, &Balance{Directions: utils.NewStringMap(utils.OUT), Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 100, ThresholdType: utils.TRIGGER_MIN_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Filter: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, Value: 1.0}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 100, ThresholdType: utils.TRIGGER_MIN_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(1, utils.MONETARY, nil, nil)
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 110 || ub.BalanceMap[utils.VOICE][0].GetValue() != 20 {
@@ -929,14 +959,14 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Type: utils.StringPointer(utils.MONETARY)}}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
 	if len(ub.BalanceMap[utils.MONETARY]) != 1 || ub.BalanceMap[utils.MONETARY][0].GetValue() != 10 {
 
-		t.Errorf("Error executing triggered actions in order %v BAL: %+v", ub.BalanceMap[utils.MONETARY][0].GetValue(), ub.BalanceMap[utils.MONETARY][1])
+		t.Errorf("Error executing triggered actions in order %v", ub.BalanceMap[utils.MONETARY][0].GetValue())
 	}
 }
 
@@ -945,26 +975,26 @@ func TestAccountExecuteTriggeredDayWeek(t *testing.T) {
 		Id:         "TEST_UB",
 		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{UniqueID: "day_trigger", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
-			&ActionTrigger{UniqueID: "week_trigger", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 100, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
+			&ActionTrigger{UniqueID: "day_trigger", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
+			&ActionTrigger{UniqueID: "week_trigger", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 100, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ActionsId: "TEST_ACTIONS"},
 		},
 	}
 	ub.InitCounters()
-	if len(ub.UnitCounters) != 1 || len(ub.UnitCounters[0].Balances) != 2 {
-		log.Print("Error initializing counters: ", ub.UnitCounters[0].Balances[0])
+	if len(ub.UnitCounters) != 1 || len(ub.UnitCounters[utils.MONETARY][0].Counters) != 2 {
+		t.Error("Error initializing counters: ", ub.UnitCounters[utils.MONETARY][0].Counters[0])
 	}
 
 	ub.countUnits(1, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if ub.UnitCounters[0].Balances[0].Value != 1 ||
-		ub.UnitCounters[0].Balances[1].Value != 1 {
-		t.Error("Error incrementing both counters", ub.UnitCounters[0].Balances[0].Value, ub.UnitCounters[0].Balances[1].Value)
+	if ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 1 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[1].Value != 1 {
+		t.Error("Error incrementing both counters", ub.UnitCounters[utils.MONETARY][0].Counters[0].Value, ub.UnitCounters[utils.MONETARY][0].Counters[1].Value)
 	}
 
 	// we can reset them
-	resetCountersAction(ub, nil, &Action{BalanceType: utils.MONETARY, Balance: &Balance{Id: "day_trigger"}}, nil)
-	if ub.UnitCounters[0].Balances[0].Value != 0 ||
-		ub.UnitCounters[0].Balances[1].Value != 1 {
-		t.Error("Error reseting both counters", ub.UnitCounters[0].Balances[0].Value, ub.UnitCounters[0].Balances[1].Value)
+	resetCountersAction(ub, nil, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), ID: utils.StringPointer("day_trigger")}}, nil)
+	if ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 0 ||
+		ub.UnitCounters[utils.MONETARY][0].Counters[1].Value != 1 {
+		t.Error("Error reseting both counters", ub.UnitCounters[utils.MONETARY][0].Counters[0].Value, ub.UnitCounters[utils.MONETARY][0].Counters[1].Value)
 	}
 }
 
@@ -973,7 +1003,7 @@ func TestAccountExpActionTrigger(t *testing.T) {
 		Id:         "TEST_UB",
 		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100, ExpirationDate: time.Date(2015, time.November, 9, 9, 48, 0, 0, time.UTC)}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{ID: "check expired balances", BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
+			&ActionTrigger{ID: "check expired balances", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
 		},
 	}
 	ub.ExecuteActionTriggers(nil)
@@ -991,7 +1021,7 @@ func TestAccountExpActionTriggerNotActivated(t *testing.T) {
 		Id:         "TEST_UB",
 		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{ID: "check expired balances", ActivationDate: time.Date(2116, 2, 5, 18, 0, 0, 0, time.UTC), BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
+			&ActionTrigger{ID: "check expired balances", ActivationDate: time.Date(2116, 2, 5, 18, 0, 0, 0, time.UTC), Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
 		},
 	}
 	ub.ExecuteActionTriggers(nil)
@@ -1009,7 +1039,7 @@ func TestAccountExpActionTriggerExpired(t *testing.T) {
 		Id:         "TEST_UB",
 		BalanceMap: map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.StringMap{"NAT": true}, Directions: utils.StringMap{utils.OUT: true}}, &Balance{Weight: 10, DestinationIds: utils.StringMap{"RET": true}}}},
 		ActionTriggers: ActionTriggers{
-			&ActionTrigger{ID: "check expired balances", ExpirationDate: time.Date(2016, 2, 4, 18, 0, 0, 0, time.UTC), BalanceType: utils.MONETARY, BalanceDirections: utils.StringMap{utils.OUT: true}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
+			&ActionTrigger{ID: "check expired balances", ExpirationDate: time.Date(2016, 2, 4, 18, 0, 0, 0, time.UTC), Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 10, ThresholdType: utils.TRIGGER_BALANCE_EXPIRED, ActionsId: "TEST_ACTIONS"},
 		},
 	}
 	ub.ExecuteActionTriggers(nil)
@@ -1054,45 +1084,45 @@ func TestCleanExpired(t *testing.T) {
 }
 
 func TestAccountUnitCounting(t *testing.T) {
-	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0}}}}}
+	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0}}}}}}
 	ub.countUnits(10, utils.MONETARY, &CallCost{}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 }
 
 func TestAccountUnitCountingOutbound(t *testing.T) {
-	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0, Directions: utils.NewStringMap(utils.OUT)}}}}}
+	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}}}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 30 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 30 {
 		t.Error("Error counting units")
 	}
 }
 
 func TestAccountUnitCountingOutboundInbound(t *testing.T) {
-	ub := &Account{UnitCounters: UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 0, Directions: utils.NewStringMap(utils.OUT)}}}}}
+	ub := &Account{UnitCounters: UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 0, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}}}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 10 {
-		t.Errorf("Error counting units: %+v", ub.UnitCounters[0].Balances[0])
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 10 {
+		t.Errorf("Error counting units: %+v", ub.UnitCounters[utils.MONETARY][0].Counters[0])
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.OUT}, nil)
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20 {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(10, utils.MONETARY, &CallCost{Direction: utils.IN}, nil)
-	if len(ub.UnitCounters) != 1 || (ub.UnitCounters[0].BalanceType != utils.MONETARY || ub.UnitCounters[0].Balances[0].GetValue() != 20) {
+	if len(ub.UnitCounters[utils.MONETARY]) != 1 || ub.UnitCounters[utils.MONETARY][0].Counters[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 }
@@ -1565,59 +1595,74 @@ func TestAccountInitCounters(t *testing.T) {
 	a := &Account{
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
-				UniqueID:          "TestTR1",
-				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
-				BalanceType:       utils.MONETARY,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR1",
+				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.MONETARY),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR11",
-				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
-				BalanceType:       utils.MONETARY,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR11",
+				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.MONETARY),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR2",
-				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
-				BalanceType:       utils.VOICE,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR2",
+				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.VOICE),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR3",
-				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
-				BalanceType:       utils.VOICE,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR3",
+				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.VOICE),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR4",
-				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
-				BalanceType:       utils.SMS,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR4",
+				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.SMS),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR5",
-				ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-				BalanceType:       utils.SMS,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR5",
+				ThresholdType: utils.TRIGGER_MAX_BALANCE,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.SMS),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 		},
 	}
 	a.InitCounters()
-	if len(a.UnitCounters) != 4 ||
-		len(a.UnitCounters[0].Balances) != 2 ||
-		len(a.UnitCounters[1].Balances) != 1 ||
-		len(a.UnitCounters[2].Balances) != 1 ||
-		len(a.UnitCounters[3].Balances) != 1 {
-		for _, uc := range a.UnitCounters {
-			t.Logf("UC: %+v", uc)
-			for _, b := range uc.Balances {
-				t.Logf("B: %+v", b)
+	if len(a.UnitCounters) != 3 ||
+		len(a.UnitCounters[utils.MONETARY][0].Counters) != 2 ||
+		len(a.UnitCounters[utils.VOICE][0].Counters) != 1 ||
+		len(a.UnitCounters[utils.VOICE][1].Counters) != 1 ||
+		len(a.UnitCounters[utils.SMS][0].Counters) != 1 {
+		for key, counters := range a.UnitCounters {
+			t.Log(key)
+			for _, uc := range counters {
+				t.Logf("UC: %+v", uc)
+				for _, c := range uc.Counters {
+					t.Logf("B: %+v", c)
+				}
 			}
 		}
 		t.Errorf("Error Initializing unit counters: %v", len(a.UnitCounters))
@@ -1628,60 +1673,75 @@ func TestAccountDoubleInitCounters(t *testing.T) {
 	a := &Account{
 		ActionTriggers: ActionTriggers{
 			&ActionTrigger{
-				UniqueID:          "TestTR1",
-				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
-				BalanceType:       utils.MONETARY,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR1",
+				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.MONETARY),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR11",
-				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
-				BalanceType:       utils.MONETARY,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR11",
+				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.MONETARY),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR2",
-				ThresholdType:     utils.TRIGGER_MAX_EVENT_COUNTER,
-				BalanceType:       utils.VOICE,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR2",
+				ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.VOICE),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR3",
-				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
-				BalanceType:       utils.VOICE,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR3",
+				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.VOICE),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR4",
-				ThresholdType:     utils.TRIGGER_MAX_BALANCE_COUNTER,
-				BalanceType:       utils.SMS,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR4",
+				ThresholdType: utils.TRIGGER_MAX_BALANCE_COUNTER,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.SMS),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 			&ActionTrigger{
-				UniqueID:          "TestTR5",
-				ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-				BalanceType:       utils.SMS,
-				BalanceDirections: utils.NewStringMap(utils.OUT, utils.IN),
-				BalanceWeight:     10,
+				UniqueID:      "TestTR5",
+				ThresholdType: utils.TRIGGER_MAX_BALANCE,
+				Balance: &BalanceFilter{
+					Type:       utils.StringPointer(utils.SMS),
+					Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT, utils.IN)),
+					Weight:     utils.Float64Pointer(10),
+				},
 			},
 		},
 	}
 	a.InitCounters()
 	a.InitCounters()
-	if len(a.UnitCounters) != 4 ||
-		len(a.UnitCounters[0].Balances) != 2 ||
-		len(a.UnitCounters[1].Balances) != 1 ||
-		len(a.UnitCounters[2].Balances) != 1 ||
-		len(a.UnitCounters[3].Balances) != 1 {
-		for _, uc := range a.UnitCounters {
-			t.Logf("UC: %+v", uc)
-			for _, b := range uc.Balances {
-				t.Logf("B: %+v", b)
+	if len(a.UnitCounters) != 3 ||
+		len(a.UnitCounters[utils.MONETARY][0].Counters) != 2 ||
+		len(a.UnitCounters[utils.VOICE][0].Counters) != 1 ||
+		len(a.UnitCounters[utils.VOICE][1].Counters) != 1 ||
+		len(a.UnitCounters[utils.SMS][0].Counters) != 1 {
+		for key, counters := range a.UnitCounters {
+			t.Log(key)
+			for _, uc := range counters {
+				t.Logf("UC: %+v", uc)
+				for _, c := range uc.Counters {
+					t.Logf("B: %+v", c)
+				}
 			}
 		}
 		t.Errorf("Error Initializing unit counters: %v", len(a.UnitCounters))

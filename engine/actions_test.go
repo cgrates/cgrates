@@ -409,9 +409,11 @@ func TestActionPlanCheckForASAP(t *testing.T) {
 
 func TestActionPlanLogFunction(t *testing.T) {
 	a := &Action{
-		ActionType:  "*log",
-		BalanceType: "test",
-		Balance:     &Balance{Value: 1.1},
+		ActionType: "*log",
+		Balance: &BalanceFilter{
+			Type:  utils.StringPointer("test"),
+			Value: utils.Float64Pointer(1.1),
+		},
 	}
 	at := &ActionTiming{
 		actions: []*Action{a},
@@ -424,9 +426,11 @@ func TestActionPlanLogFunction(t *testing.T) {
 
 func TestActionPlanFunctionNotAvailable(t *testing.T) {
 	a := &Action{
-		ActionType:  "VALID_FUNCTION_TYPE",
-		BalanceType: "test",
-		Balance:     &Balance{Value: 1.1},
+		ActionType: "VALID_FUNCTION_TYPE",
+		Balance: &BalanceFilter{
+			Type:  utils.StringPointer("test"),
+			Value: utils.Float64Pointer(1.1),
+		},
 	}
 	at := &ActionTiming{
 		accountIDs: utils.StringMap{"cgrates.org:dy": true},
@@ -527,10 +531,12 @@ func TestActionPlansRemoveMember(t *testing.T) {
 
 func TestActionTriggerMatchNil(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections: utils.NewStringMap(utils.OUT),
-		BalanceType:       utils.MONETARY,
-		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:    2,
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		},
+		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
 	}
 	var a *Action
 	if !at.Match(a) {
@@ -540,10 +546,12 @@ func TestActionTriggerMatchNil(t *testing.T) {
 
 func TestActionTriggerMatchAllBlank(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections: utils.NewStringMap(utils.OUT),
-		BalanceType:       utils.MONETARY,
-		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:    2,
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		},
+		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
 	}
 	a := &Action{}
 	if !at.Match(a) {
@@ -553,12 +561,14 @@ func TestActionTriggerMatchAllBlank(t *testing.T) {
 
 func TestActionTriggerMatchMinuteBucketBlank(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections: utils.NewStringMap(utils.OUT),
-		BalanceType:       utils.MONETARY,
-		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:    2,
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		},
+		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: `{"BalanceDirections":"*out"}`}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ExtraParameters: `{"BalanceDirections":"*out"}`}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -566,10 +576,12 @@ func TestActionTriggerMatchMinuteBucketBlank(t *testing.T) {
 
 func TestActionTriggerMatchMinuteBucketFull(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections: utils.NewStringMap(utils.OUT),
-		BalanceType:       utils.MONETARY,
-		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:    2,
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		},
+		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
 	}
 	a := &Action{ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v}`, utils.TRIGGER_MAX_BALANCE, 2)}
 	if !at.Match(a) {
@@ -579,12 +591,14 @@ func TestActionTriggerMatchMinuteBucketFull(t *testing.T) {
 
 func TestActionTriggerMatchAllFull(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections: utils.NewStringMap(utils.OUT),
-		BalanceType:       utils.MONETARY,
-		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:    2,
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		},
+		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*out"}`, utils.TRIGGER_MAX_BALANCE, 2)}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*out"}`, utils.TRIGGER_MAX_BALANCE, 2)}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -592,12 +606,14 @@ func TestActionTriggerMatchAllFull(t *testing.T) {
 
 func TestActionTriggerMatchSomeFalse(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections: utils.NewStringMap(utils.OUT),
-		BalanceType:       utils.MONETARY,
-		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:    2,
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		},
+		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*in"}`, utils.TRIGGER_MAX_BALANCE, 2)}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%s"}`, utils.TRIGGER_MAX_BALANCE_COUNTER)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -605,12 +621,14 @@ func TestActionTriggerMatchSomeFalse(t *testing.T) {
 
 func TestActionTriggerMatcBalanceFalse(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections: utils.NewStringMap(utils.OUT),
-		BalanceType:       utils.MONETARY,
-		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:    2,
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		},
+		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*out"}`, utils.TRIGGER_MAX_BALANCE, 3.0)}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ExtraParameters: fmt.Sprintf(`{"GroupID":"%s", "ThresholdType":"%s"}`, "TEST", utils.TRIGGER_MAX_BALANCE)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -618,12 +636,14 @@ func TestActionTriggerMatcBalanceFalse(t *testing.T) {
 
 func TestActionTriggerMatcAllFalse(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections: utils.NewStringMap(utils.OUT),
-		BalanceType:       utils.MONETARY,
-		ThresholdType:     utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:    2,
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		},
+		ThresholdType:  utils.TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
 	}
-	a := &Action{BalanceType: utils.VOICE, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "BalanceDirections":"*in"}`, utils.TRIGGER_MAX_EVENT_COUNTER, 3)}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ExtraParameters: fmt.Sprintf(`{"UniqueID":"ZIP", "GroupID":"%s", "ThresholdType":"%s"}`, "TEST", utils.TRIGGER_MAX_BALANCE)}
 	if at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -631,16 +651,28 @@ func TestActionTriggerMatcAllFalse(t *testing.T) {
 
 func TestActionTriggerMatchAll(t *testing.T) {
 	at := &ActionTrigger{
-		BalanceDirections:     utils.NewStringMap(utils.OUT),
-		BalanceType:           utils.MONETARY,
-		ThresholdType:         utils.TRIGGER_MAX_BALANCE,
-		ThresholdValue:        2,
-		BalanceDestinationIds: utils.NewStringMap("NAT"),
-		BalanceWeight:         1.0,
-		BalanceRatingSubject:  "test1",
-		BalanceSharedGroups:   utils.NewStringMap("test2"),
+		ID:            "TEST",
+		UniqueID:      "ZIP",
+		ThresholdType: "TT",
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer(utils.MONETARY),
+			RatingSubject:  utils.StringPointer("test1"),
+			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+			Value:          utils.Float64Pointer(2),
+			Weight:         utils.Float64Pointer(1.0),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
+			SharedGroups:   utils.StringMapPointer(utils.NewStringMap("test2")),
+		},
 	}
-	a := &Action{BalanceType: utils.MONETARY, ExtraParameters: fmt.Sprintf(`{"BalanceDirections":"*out", "ThresholdType":"%v", "ThresholdValue": %v, "DestinationIds": "%v", "BalanceWeight": %v, "BalanceRatingSubject": "%v", "BalanceSharedGroup": "%v"}`, utils.TRIGGER_MAX_BALANCE, 2, "NAT", 1.0, "test1", "test2")}
+	a := &Action{Balance: &BalanceFilter{
+		Type:           utils.StringPointer(utils.MONETARY),
+		RatingSubject:  utils.StringPointer("test1"),
+		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+		Value:          utils.Float64Pointer(2),
+		Weight:         utils.Float64Pointer(1.0),
+		DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
+		SharedGroups:   utils.StringMapPointer(utils.NewStringMap("test2")),
+	}, ExtraParameters: fmt.Sprintf(`{"UniqueID":"ZIP", "GroupID":"TEST", "ThresholdType":"TT"}`)}
 	if !at.Match(a) {
 		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
 	}
@@ -662,8 +694,8 @@ func TestActionResetTriggres(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 10}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetTriggersAction(ub, nil, nil, nil)
 	if ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
@@ -675,8 +707,8 @@ func TestActionResetTriggresExecutesThem(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 10}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetTriggersAction(ub, nil, nil, nil)
 	if ub.ActionTriggers[0].Executed == true || ub.BalanceMap[utils.MONETARY][0].GetValue() == 12 {
@@ -688,10 +720,10 @@ func TestActionResetTriggresActionFilter(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 10}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	resetTriggersAction(ub, nil, &Action{BalanceType: utils.SMS}, nil)
+	resetTriggersAction(ub, nil, &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}}, nil)
 	if ub.ActionTriggers[0].Executed == false || ub.ActionTriggers[1].Executed == false {
 		t.Error("Reset triggers action failed!")
 	}
@@ -701,8 +733,8 @@ func TestActionSetPostpaid(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	allowNegativeAction(ub, nil, nil, nil)
 	if !ub.AllowNegative {
@@ -715,8 +747,8 @@ func TestActionSetPrepaid(t *testing.T) {
 		Id:             "TEST_UB",
 		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	denyNegativeAction(ub, nil, nil, nil)
 	if ub.AllowNegative {
@@ -729,8 +761,8 @@ func TestActionResetPrepaid(t *testing.T) {
 		Id:             "TEST_UB",
 		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.SMS, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.SMS, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetAccountAction(ub, nil, nil, nil)
 	if !ub.AllowNegative ||
@@ -739,7 +771,7 @@ func TestActionResetPrepaid(t *testing.T) {
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 0 ||
 		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
 		t.Log(ub.BalanceMap)
-		t.Error("Reset prepaid action failed!")
+		t.Error("Reset account action failed!")
 	}
 }
 
@@ -747,15 +779,15 @@ func TestActionResetPostpaid(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.SMS, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.SMS, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.SMS)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetAccountAction(ub, nil, nil, nil)
 	if ub.BalanceMap[utils.MONETARY].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 0 ||
 		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
-		t.Error("Reset postpaid action failed!")
+		t.Error("Reset account action failed!")
 	}
 }
 
@@ -763,17 +795,17 @@ func TestActionTopupResetCredit(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Directions: utils.NewStringMap(utils.OUT), Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: 10, Directions: utils.NewStringMap(utils.OUT)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(10), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
 	topupResetAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 10 ||
-		len(ub.UnitCounters) != 1 ||
+		len(ub.UnitCounters) != 0 || // InitCounters finds no counters
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Errorf("Topup reset action failed: %+v", ub.BalanceMap[utils.MONETARY][0])
+		t.Errorf("Topup reset action failed: %+s", utils.ToIJSON(ub))
 	}
 }
 
@@ -783,10 +815,10 @@ func TestActionTopupValueFactor(t *testing.T) {
 		BalanceMap: map[string]BalanceChain{},
 	}
 	a := &Action{
-		BalanceType: utils.MONETARY,
-		Balance: &Balance{
-			Value:      10,
-			Directions: utils.NewStringMap(utils.OUT),
+		Balance: &BalanceFilter{
+			Type:       utils.StringPointer(utils.MONETARY),
+			Value:      utils.Float64Pointer(10),
+			Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 		},
 		ExtraParameters: `{"*monetary":2.0}`,
 	}
@@ -806,7 +838,7 @@ func TestActionTopupResetCreditId(t *testing.T) {
 			},
 		},
 	}
-	a := &Action{BalanceType: utils.MONETARY, Balance: &Balance{Id: "TEST_B", Value: 10, Directions: utils.NewStringMap(utils.OUT)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), ID: utils.StringPointer("TEST_B"), Value: utils.Float64Pointer(10), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
 	topupResetAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 110 ||
@@ -825,7 +857,7 @@ func TestActionTopupResetCreditNoId(t *testing.T) {
 			},
 		},
 	}
-	a := &Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: 10, Directions: utils.NewStringMap(utils.OUT)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(10), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
 	topupResetAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 20 ||
@@ -840,15 +872,15 @@ func TestActionTopupResetMinutes(t *testing.T) {
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY: BalanceChain{&Balance{Value: 100}},
 			utils.VOICE:    BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.VOICE, Balance: &Balance{Value: 5, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Value: utils.Float64Pointer(5), Weight: utils.Float64Pointer(20), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
 	topupResetAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.VOICE].GetTotalValue() != 5 ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
-		len(ub.UnitCounters) != 1 ||
+		len(ub.UnitCounters) != 0 ||
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Errorf("Topup reset minutes action failed: %+v", ub.BalanceMap[utils.VOICE][0])
@@ -859,14 +891,14 @@ func TestActionTopupCredit(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: 10, Directions: utils.NewStringMap(utils.OUT)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(10), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
 	topupAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 110 ||
-		len(ub.UnitCounters) != 1 ||
+		len(ub.UnitCounters) != 0 ||
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Error("Topup action failed!", ub.BalanceMap[utils.MONETARY].GetTotalValue())
@@ -877,15 +909,15 @@ func TestActionTopupMinutes(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.VOICE, Balance: &Balance{Value: 5, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Value: utils.Float64Pointer(5), Weight: utils.Float64Pointer(20), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
 	topupAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.VOICE].GetTotalValue() != 15 ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
-		len(ub.UnitCounters) != 1 ||
+		len(ub.UnitCounters) != 0 ||
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Error("Topup minutes action failed!", ub.BalanceMap[utils.VOICE])
@@ -896,17 +928,17 @@ func TestActionDebitCredit(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.MONETARY, Balance: &Balance{Value: 10, Directions: utils.NewStringMap(utils.OUT)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(10), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
 	debitAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 90 ||
-		len(ub.UnitCounters) != 1 ||
+		len(ub.UnitCounters) != 0 ||
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Error("Debit action failed!", ub.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Error("Debit action failed!", utils.ToIJSON(ub))
 	}
 }
 
@@ -914,15 +946,15 @@ func TestActionDebitMinutes(t *testing.T) {
 	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceType: utils.MONETARY, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.VOICE, Balance: &Balance{Value: 5, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)}}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Value: utils.Float64Pointer(5), Weight: utils.Float64Pointer(20), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}
 	debitAction(ub, nil, a, nil)
 	if ub.AllowNegative ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 5 ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
-		len(ub.UnitCounters) != 1 ||
+		len(ub.UnitCounters) != 0 ||
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Error("Debit minutes action failed!", ub.BalanceMap[utils.VOICE][0])
@@ -939,24 +971,24 @@ func TestActionResetAllCounters(t *testing.T) {
 				&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT"), Directions: utils.NewStringMap(utils.OUT)},
 				&Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET"), Directions: utils.NewStringMap(utils.OUT)}}},
 
-		ActionTriggers: ActionTriggers{&ActionTrigger{ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, BalanceType: utils.MONETARY, ThresholdValue: 2, BalanceDestinationIds: utils.NewStringMap("NAT"), BalanceWeight: 20, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ThresholdValue: 2, Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")), Weight: utils.Float64Pointer(20)}, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	ub.InitCounters()
 	resetCountersAction(ub, nil, nil, nil)
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.UnitCounters[0].Balances) != 1 ||
+		len(ub.UnitCounters[utils.MONETARY][0].Counters) != 1 ||
 		len(ub.BalanceMap[utils.MONETARY]) != 1 ||
 		ub.ActionTriggers[0].Executed != true {
-		t.Errorf("Reset counters action failed: %+v %+v %+v", ub.UnitCounters, ub.UnitCounters[0], ub.UnitCounters[0].Balances[0])
+		t.Errorf("Reset counters action failed: %+v %+v %+v", ub.UnitCounters, ub.UnitCounters[utils.MONETARY][0], ub.UnitCounters[utils.MONETARY][0].Counters[0])
 	}
 	if len(ub.UnitCounters) < 1 {
 		t.FailNow()
 	}
-	mb := ub.UnitCounters[0].Balances[0]
-	if mb.Weight != 20 || mb.GetValue() != 0 || mb.DestinationIds["NAT"] == false {
-		t.Errorf("Balance cloned incorrectly: %+v", mb)
+	c := ub.UnitCounters[utils.MONETARY][0].Counters[0]
+	if c.Filter.GetWeight() != 20 || c.Value != 0 || c.Filter.GetDestinationIDs()["NAT"] == false {
+		t.Errorf("Balance cloned incorrectly: %+v", c)
 	}
 }
 
@@ -967,28 +999,28 @@ func TestActionResetCounterOnlyDefault(t *testing.T) {
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY: BalanceChain{&Balance{Value: 100}},
 			utils.VOICE:    BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}, ThresholdType: utils.TRIGGER_MAX_EVENT_COUNTER, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.MONETARY}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}}
 	ub.InitCounters()
 	resetCountersAction(ub, nil, a, nil)
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.UnitCounters[0].Balances) != 1 ||
+		len(ub.UnitCounters[utils.MONETARY][0].Counters) != 1 ||
 		len(ub.BalanceMap[utils.VOICE]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
-		for _, b := range ub.UnitCounters[0].Balances {
+		for _, b := range ub.UnitCounters[utils.MONETARY][0].Counters {
 			t.Logf("B: %+v", b)
 		}
 		t.Errorf("Reset counters action failed: %+v", ub.UnitCounters)
 	}
-	if len(ub.UnitCounters) < 1 || len(ub.UnitCounters[0].Balances) < 1 {
+	if len(ub.UnitCounters) < 1 || len(ub.UnitCounters[utils.MONETARY][0].Counters) < 1 {
 		t.FailNow()
 	}
-	mb := ub.UnitCounters[0].Balances[0]
-	if mb.Weight != 0 || mb.GetValue() != 0 || len(mb.DestinationIds) != 0 {
-		t.Errorf("Balance cloned incorrectly: %+v!", mb)
+	c := ub.UnitCounters[utils.MONETARY][0].Counters[0]
+	if c.Filter.GetWeight() != 0 || c.Value != 0 || len(c.Filter.GetDestinationIDs()) != 0 {
+		t.Errorf("Balance cloned incorrectly: %+v!", c)
 	}
 }
 
@@ -997,10 +1029,10 @@ func TestActionResetCounterCredit(t *testing.T) {
 		Id:             "TEST_UB",
 		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{utils.MONETARY: BalanceChain{&Balance{Value: 100}}, utils.VOICE: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationIds: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIds: utils.NewStringMap("RET")}}},
-		UnitCounters:   UnitCounters{&UnitCounter{BalanceType: utils.MONETARY, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}, &UnitCounter{BalanceType: utils.SMS, Balances: BalanceChain{&Balance{Value: 1, Directions: utils.NewStringMap(utils.OUT)}}}},
-		ActionTriggers: ActionTriggers{&ActionTrigger{BalanceType: utils.MONETARY, BalanceDirections: utils.NewStringMap(utils.OUT), ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		UnitCounters:   UnitCounters{utils.MONETARY: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}, utils.SMS: []*UnitCounter{&UnitCounter{Counters: CounterFilters{&CounterFilter{Value: 1, Filter: &BalanceFilter{Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}}}}}},
+		ActionTriggers: ActionTriggers{&ActionTrigger{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT))}, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceType: utils.MONETARY}
+	a := &Action{Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY)}}
 	resetCountersAction(ub, nil, a, nil)
 	if !ub.AllowNegative ||
 		ub.BalanceMap[utils.MONETARY].GetTotalValue() != 100 ||
@@ -1013,13 +1045,15 @@ func TestActionResetCounterCredit(t *testing.T) {
 
 func TestActionTriggerLogging(t *testing.T) {
 	at := &ActionTrigger{
-		ID:                    "some_uuid",
-		BalanceType:           utils.MONETARY,
-		BalanceDirections:     utils.NewStringMap(utils.OUT),
-		ThresholdValue:        100.0,
-		BalanceDestinationIds: utils.NewStringMap("NAT"),
-		Weight:                10.0,
-		ActionsId:             "TEST_ACTIONS",
+		ID: "some_uuid",
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer(utils.MONETARY),
+			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
+		},
+		ThresholdValue: 100.0,
+		Weight:         10.0,
+		ActionsId:      "TEST_ACTIONS",
 	}
 	as, err := ratingStorage.GetActions(at.ActionsId, false)
 	if err != nil {
@@ -1084,7 +1118,7 @@ func TestActionPlanLogging(t *testing.T) {
 }
 
 func TestActionMakeNegative(t *testing.T) {
-	a := &Action{Balance: &Balance{Value: 10}}
+	a := &Action{Balance: &BalanceFilter{Value: utils.Float64Pointer(10)}}
 	genericMakeNegative(a)
 	if a.Balance.GetValue() > 0 {
 		t.Error("Failed to make negative: ", a)
@@ -1117,9 +1151,8 @@ func TestRemoveAction(t *testing.T) {
 func TestTopupAction(t *testing.T) {
 	initialUb, _ := accountingStorage.GetAccount("vdf:minu")
 	a := &Action{
-		ActionType:  TOPUP,
-		BalanceType: utils.MONETARY,
-		Balance:     &Balance{Value: 25, DestinationIds: utils.NewStringMap("RET"), Directions: utils.NewStringMap(utils.OUT), Weight: 20},
+		ActionType: TOPUP,
+		Balance:    &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(25), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Weight: utils.Float64Pointer(20)},
 	}
 
 	at := &ActionTiming{
@@ -1139,9 +1172,8 @@ func TestTopupAction(t *testing.T) {
 func TestTopupActionLoaded(t *testing.T) {
 	initialUb, _ := accountingStorage.GetAccount("vdf:minitsboy")
 	a := &Action{
-		ActionType:  TOPUP,
-		BalanceType: utils.MONETARY,
-		Balance:     &Balance{Value: 25, DestinationIds: utils.NewStringMap("RET"), Directions: utils.NewStringMap(utils.OUT), Weight: 20},
+		ActionType: TOPUP,
+		Balance:    &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(25), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Directions: utils.StringMapPointer(utils.NewStringMap(utils.OUT)), Weight: utils.Float64Pointer(20)},
 	}
 
 	at := &ActionTiming{
@@ -1168,7 +1200,7 @@ func TestActionCdrlogEmpty(t *testing.T) {
 	err := cdrLogAction(acnt, nil, cdrlog, Actions{
 		&Action{
 			ActionType: DEBIT,
-			Balance:    &Balance{Value: 25, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+			Balance:    &BalanceFilter{Value: utils.Float64Pointer(25), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
 		},
 	})
 	if err != nil {
@@ -1190,11 +1222,11 @@ func TestActionCdrlogWithParams(t *testing.T) {
 	err := cdrLogAction(acnt, nil, cdrlog, Actions{
 		&Action{
 			ActionType: DEBIT,
-			Balance:    &Balance{Value: 25, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+			Balance:    &BalanceFilter{Value: utils.Float64Pointer(25), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
 		},
 		&Action{
 			ActionType: DEBIT_RESET,
-			Balance:    &Balance{Value: 25, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+			Balance:    &BalanceFilter{Value: utils.Float64Pointer(25), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
 		},
 	})
 	if err != nil {
@@ -1217,11 +1249,11 @@ func TestActionCdrLogParamsWithOverload(t *testing.T) {
 	err := cdrLogAction(acnt, nil, cdrlog, Actions{
 		&Action{
 			ActionType: DEBIT,
-			Balance:    &Balance{Value: 25, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+			Balance:    &BalanceFilter{Value: utils.Float64Pointer(25), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
 		},
 		&Action{
 			ActionType: DEBIT_RESET,
-			Balance:    &Balance{Value: 25, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+			Balance:    &BalanceFilter{Value: utils.Float64Pointer(25), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET")), Weight: utils.Float64Pointer(20)},
 		},
 	})
 	if err != nil {
@@ -1301,14 +1333,12 @@ func TestActionTransactionFuncType(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType:  TOPUP,
-				BalanceType: utils.MONETARY,
-				Balance:     &Balance{Value: 1.1},
+				ActionType: TOPUP,
+				Balance:    &BalanceFilter{Value: utils.Float64Pointer(1.1), Type: utils.StringPointer(utils.MONETARY)},
 			},
 			&Action{
-				ActionType:  "VALID_FUNCTION_TYPE",
-				BalanceType: "test",
-				Balance:     &Balance{Value: 1.1},
+				ActionType: "VALID_FUNCTION_TYPE",
+				Balance:    &BalanceFilter{Value: utils.Float64Pointer(1.1), Type: utils.StringPointer("test")},
 			},
 		},
 	}
@@ -1339,14 +1369,12 @@ func TestActionTransactionBalanceType(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType:  TOPUP,
-				BalanceType: utils.MONETARY,
-				Balance:     &Balance{Value: 1.1},
+				ActionType: TOPUP,
+				Balance:    &BalanceFilter{Value: utils.Float64Pointer(1.1), Type: utils.StringPointer(utils.MONETARY)},
 			},
 			&Action{
-				ActionType:  TOPUP,
-				BalanceType: "test",
-				Balance:     nil,
+				ActionType: TOPUP,
+				Balance:    &BalanceFilter{Type: utils.StringPointer("test")},
 			},
 		},
 	}
@@ -1355,7 +1383,43 @@ func TestActionTransactionBalanceType(t *testing.T) {
 	if err != nil || acc == nil {
 		t.Error("Error getting account: ", acc, err)
 	}
-	if acc.BalanceMap[utils.MONETARY][0].Value != 10 {
+	if acc.BalanceMap[utils.MONETARY][0].Value != 11.1 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	}
+}
+
+func TestActionTransactionBalanceNotType(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		Id: "cgrates.org:trans",
+		BalanceMap: map[string]BalanceChain{
+			utils.MONETARY: BalanceChain{&Balance{
+				Value: 10,
+			}},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:trans": true},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType: TOPUP,
+				Balance:    &BalanceFilter{Value: utils.Float64Pointer(1.1), Type: utils.StringPointer(utils.VOICE)},
+			},
+			&Action{
+				ActionType: TOPUP,
+				Balance:    &BalanceFilter{Type: utils.StringPointer("test")},
+			},
+		},
+	}
+	err = at.Execute()
+	acc, err := accountingStorage.GetAccount("cgrates.org:trans")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	if acc.BalanceMap[utils.MONETARY][0].Value != 10.0 {
 		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
 	}
 }
@@ -1377,18 +1441,18 @@ func TestActionWithExpireWithoutExpire(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType:  TOPUP,
-				BalanceType: utils.VOICE,
-				Balance: &Balance{
-					Value: 15,
+				ActionType: TOPUP,
+				Balance: &BalanceFilter{
+					Type:  utils.StringPointer(utils.VOICE),
+					Value: utils.Float64Pointer(15),
 				},
 			},
 			&Action{
-				ActionType:  TOPUP,
-				BalanceType: utils.VOICE,
-				Balance: &Balance{
-					Value:          30,
-					ExpirationDate: time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC),
+				ActionType: TOPUP,
+				Balance: &BalanceFilter{
+					Type:           utils.StringPointer(utils.VOICE),
+					Value:          utils.Float64Pointer(30),
+					ExpirationDate: utils.TimePointer(time.Date(2025, time.November, 11, 22, 39, 0, 0, time.UTC)),
 				},
 			},
 		},
@@ -1432,10 +1496,10 @@ func TestActionRemoveBalance(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
-				ActionType:  REMOVE_BALANCE,
-				BalanceType: utils.MONETARY,
-				Balance: &Balance{
-					DestinationIds: utils.NewStringMap("NAT", "RET"),
+				ActionType: REMOVE_BALANCE,
+				Balance: &BalanceFilter{
+					Type:           utils.StringPointer(utils.MONETARY),
+					DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT", "RET")),
 				},
 			},
 		},
@@ -1543,7 +1607,7 @@ func TestActionTransferMonetaryDefaultFilter(t *testing.T) {
 
 	a := &Action{
 		ActionType: TRANSFER_MONETARY_DEFAULT,
-		Balance:    &Balance{Weight: 20},
+		Balance:    &BalanceFilter{Weight: utils.Float64Pointer(20)},
 	}
 
 	at := &ActionTiming{
@@ -1603,12 +1667,12 @@ func TestActionConditionalTopup(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType:  TOPUP,
-		BalanceType: utils.MONETARY,
-		Filter:      `{"Type":"*monetary","Value":1,"Weight":10}`,
-		Balance: &Balance{
-			Value:  11,
-			Weight: 30,
+		ActionType: TOPUP,
+		Filter:     `{"Type":"*monetary","Value":1,"Weight":10}`,
+		Balance: &BalanceFilter{
+			Type:   utils.StringPointer(utils.MONETARY),
+			Value:  utils.Float64Pointer(11),
+			Weight: utils.Float64Pointer(30),
 		},
 	}
 
@@ -1667,12 +1731,12 @@ func TestActionConditionalTopupNoMatch(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType:  TOPUP,
-		BalanceType: utils.MONETARY,
-		Filter:      `{"Type":"*monetary","Value":2,"Weight":10}`,
-		Balance: &Balance{
-			Value:  11,
-			Weight: 30,
+		ActionType: TOPUP,
+		Filter:     `{"Type":"*monetary","Value":2,"Weight":10}`,
+		Balance: &BalanceFilter{
+			Type:   utils.StringPointer(utils.MONETARY),
+			Value:  utils.Float64Pointer(11),
+			Weight: utils.Float64Pointer(30),
 		},
 	}
 
@@ -1731,12 +1795,12 @@ func TestActionConditionalTopupExistingBalance(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType:  TOPUP,
-		BalanceType: utils.MONETARY,
-		Filter:      `{"Type":"*voice","Value":{"*gte":100}}`,
-		Balance: &Balance{
-			Value:  11,
-			Weight: 10,
+		ActionType: TOPUP,
+		Filter:     `{"Type":"*voice","Value":{"*gte":100}}`,
+		Balance: &BalanceFilter{
+			Type:   utils.StringPointer(utils.MONETARY),
+			Value:  utils.Float64Pointer(11),
+			Weight: utils.Float64Pointer(10),
 		},
 	}
 
@@ -1832,52 +1896,67 @@ func TestActionConditionalDisabledIfNegative(t *testing.T) {
 	}
 
 	a1 := &Action{
-		ActionType:  "*enable_disable_balance",
-		BalanceType: "*sms",
-		Filter:      "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
-		Balance: &Balance{
-			Weight:   10,
-			Disabled: true,
+		ActionType: "*set_balance",
+		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &BalanceFilter{
+			Type:     utils.StringPointer("*sms"),
+			ID:       utils.StringPointer("for_v3hsillmilld500m_sms_ill"),
+			Disabled: utils.BoolPointer(true),
 		},
 		Weight: 9,
 	}
 	a2 := &Action{
-		ActionType:  "*enable_disable_balance",
-		BalanceType: "*sms",
-		Filter:      "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
-		Balance: &Balance{
-			DestinationIds: utils.NewStringMap("FRANCE_NATIONAL"),
-			Weight:         10,
-			Disabled:       true,
+		ActionType: "*set_balance",
+		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer("*sms"),
+			ID:             utils.StringPointer("for_v3hsillmilld500m_mms_ill"),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("FRANCE_NATIONAL")),
+			Weight:         utils.Float64Pointer(10),
+			Disabled:       utils.BoolPointer(true),
 		},
 		Weight: 8,
 	}
 	a3 := &Action{
-		ActionType:  "*enable_disable_balance",
-		BalanceType: "*data",
-		Filter:      "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
-		Balance: &Balance{
-			RatingSubject: "for_v3hsillmilld500m_data_forfait",
-			Weight:        10,
-			Disabled:      true,
+		ActionType: "*set_balance",
+		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer("*sms"),
+			ID:             utils.StringPointer("for_v3hsillmilld500m_sms_ill"),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("FRANCE_NATIONAL")),
+			Weight:         utils.Float64Pointer(10),
+			Disabled:       utils.BoolPointer(true),
+		},
+		Weight: 8,
+	}
+	a4 := &Action{
+		ActionType: "*set_balance",
+		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &BalanceFilter{
+			Type:          utils.StringPointer("*data"),
+			Uuid:          utils.StringPointer("fc927edb-1bd6-425e-a2a3-9fd8bafaa524"),
+			RatingSubject: utils.StringPointer("for_v3hsillmilld500m_data_forfait"),
+			Weight:        utils.Float64Pointer(10),
+			Disabled:      utils.BoolPointer(true),
 		},
 		Weight: 7,
 	}
-	a4 := &Action{
-		ActionType:  "*enable_disable_balance",
-		BalanceType: "*voice",
-		Filter:      "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
-		Balance: &Balance{
-			DestinationIds: utils.NewStringMap("FRANCE_NATIONAL"),
-			Weight:         10,
-			Disabled:       true,
+	a5 := &Action{
+		ActionType: "*set_balance",
+		Filter:     "{\"*and\":[{\"Value\":{\"*lt\":0}},{\"Id\":{\"*eq\":\"*default\"}}]}",
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer("*voice"),
+			ID:             utils.StringPointer("for_v3hsillmilld500m_voice_3_h"),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("FRANCE_NATIONAL")),
+			Weight:         utils.Float64Pointer(10),
+			Disabled:       utils.BoolPointer(true),
 		},
 		Weight: 6,
 	}
 
 	at := &ActionTiming{
 		accountIDs: utils.StringMap{"cgrates.org:af": true},
-		actions:    Actions{a1, a2, a3, a4},
+		actions:    Actions{a1, a2, a3, a4, a5},
 	}
 	at.Execute()
 
@@ -1937,12 +2016,12 @@ func TestActionSetBalance(t *testing.T) {
 	}
 
 	a := &Action{
-		ActionType:  SET_BALANCE,
-		BalanceType: utils.MONETARY,
-		Balance: &Balance{
-			Id:     "m2",
-			Value:  11,
-			Weight: 10,
+		ActionType: SET_BALANCE,
+		Balance: &BalanceFilter{
+			ID:     utils.StringPointer("m2"),
+			Type:   utils.StringPointer(utils.MONETARY),
+			Value:  utils.Float64Pointer(11),
+			Weight: utils.Float64Pointer(10),
 		},
 	}
 
