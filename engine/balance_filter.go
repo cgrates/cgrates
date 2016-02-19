@@ -47,6 +47,67 @@ func (bp *BalanceFilter) CreateBalance() *Balance {
 	return b.Clone()
 }
 
+func (bf *BalanceFilter) Clone() *BalanceFilter {
+	result := &BalanceFilter{}
+	if bf.Uuid != nil {
+		result.Uuid = new(string)
+		*result.Uuid = *bf.Uuid
+	}
+	if bf.ID != nil {
+		result.ID = new(string)
+		*result.ID = *bf.ID
+	}
+	if bf.Value != nil {
+		result.Value = new(float64)
+		*result.Value = *bf.Value
+	}
+	if bf.RatingSubject != nil {
+		result.RatingSubject = new(string)
+		*result.RatingSubject = *bf.RatingSubject
+	}
+	if bf.Type != nil {
+		result.Type = new(string)
+		*result.Type = *bf.Type
+	}
+	if bf.ExpirationDate != nil {
+		result.ExpirationDate = new(time.Time)
+		*result.ExpirationDate = *bf.ExpirationDate
+	}
+	if bf.Weight != nil {
+		result.Weight = new(float64)
+		*result.Weight = *bf.Weight
+	}
+	if bf.Disabled != nil {
+		result.Disabled = new(bool)
+		*result.Disabled = *bf.Disabled
+	}
+	if bf.Blocker != nil {
+		result.Blocker = new(bool)
+		*result.Blocker = *bf.Blocker
+	}
+	if bf.Factor != nil {
+		result.Factor = new(ValueFactor)
+		*result.Factor = *bf.Factor
+	}
+	if bf.Directions != nil {
+		result.Directions = utils.StringMapPointer(bf.Directions.Clone())
+	}
+	if bf.DestinationIDs != nil {
+		result.DestinationIDs = utils.StringMapPointer(bf.DestinationIDs.Clone())
+	}
+	if bf.Categories != nil {
+		result.Categories = utils.StringMapPointer(bf.Categories.Clone())
+	}
+	if bf.SharedGroups != nil {
+		result.SharedGroups = utils.StringMapPointer(bf.SharedGroups.Clone())
+	}
+	if bf.TimingIDs != nil {
+		result.TimingIDs = utils.StringMapPointer(bf.TimingIDs.Clone())
+	}
+
+	return result
+}
+
 func (bp *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 	if b.Uuid != "" {
 		bp.Uuid = &b.Uuid

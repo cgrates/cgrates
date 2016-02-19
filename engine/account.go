@@ -700,6 +700,7 @@ func (acc *Account) InitCounters() {
 			uc.Counters = make(CounterFilters, 0)
 			acc.UnitCounters[at.Balance.GetType()] = append(acc.UnitCounters[at.Balance.GetType()], uc)
 		}
+
 		c := &CounterFilter{Filter: at.Balance}
 		if (c.Filter.ID == nil || *c.Filter.ID == "") && at.UniqueID != "" {
 			c.Filter.ID = utils.StringPointer(at.UniqueID)

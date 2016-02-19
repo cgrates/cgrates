@@ -107,14 +107,6 @@ func (sm StringMap) Includes(om StringMap) bool {
 	return true
 }
 
-func (sm StringMap) Clone() StringMap {
-	result := make(StringMap, len(sm))
-	for k := range sm {
-		result[k] = true
-	}
-	return result
-}
-
 func (sm StringMap) Slice() []string {
 	result := make([]string, len(sm))
 	i := 0
@@ -140,6 +132,12 @@ func (sm StringMap) Copy(o StringMap) {
 	for k, v := range o {
 		sm[k] = v
 	}
+}
+
+func (sm StringMap) Clone() StringMap {
+	result := make(StringMap, len(sm))
+	result.Copy(sm)
+	return result
 }
 
 func (sm StringMap) String() string {

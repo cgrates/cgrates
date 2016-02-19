@@ -1055,7 +1055,7 @@ func TestLoadActionTriggers(t *testing.T) {
 		ThresholdType:  utils.TRIGGER_MIN_EVENT_COUNTER,
 		ThresholdValue: 10,
 		Balance: &BalanceFilter{
-			ID:             utils.StringPointer("st0"),
+			ID:             nil,
 			Type:           utils.StringPointer(utils.VOICE),
 			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("GERMANY_O2")),
