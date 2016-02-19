@@ -9,8 +9,8 @@ OpenSIPS_
 We got OpenSIPS_ installed via following commands:
 ::
 
- wget -O - http://apt.opensips.org/key.asc | apt-key add -
- echo "deb http://apt.opensips.org/debian/stable-2.1/jessie opensips-2.1-jessie main" > /etc/apt/sources.list.d/opensips.list
+ apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5F2FBB7C
+ echo "deb http://apt.opensips.org jessie 2.1-releases" >>/etc/apt/sources.list
  apt-get update
  apt-get install opensips opensips-json-module opensips-restclient-module
 
