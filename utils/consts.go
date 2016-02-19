@@ -267,6 +267,7 @@ const (
 	MetaRaw                     = "*raw"
 	CreatedAt                   = "CreatedAt"
 	UpdatedAt                   = "UpdatedAt"
+	HandlerArgSep               = "|"
 )
 
 var (

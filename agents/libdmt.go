@@ -51,6 +51,7 @@ func init() {
 const (
 	META_CCR_USAGE       = "*ccr_usage"
 	META_CCA_USAGE       = "*cca_usage"
+	META_VALUE_EXPONENT  = "*value_exponent"
 	DIAMETER_CCR         = "DIAMETER_CCR"
 	DiameterRatingFailed = 5031
 )
@@ -215,6 +216,24 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 	return "", nil
 }
 
+func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, 0)
+	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
+	if len(handlerArgs) != 2 {
+		return "", errors.New("Unexpected number of arguments")
+	}
+	val, err := strconv.ParseFloat(handlerArgs[0], 64)
+	if err != nil {
+		return "", err
+	}
+	exp, err := strconv.ParseFloat(handlerArgs[1], 64)
+	if err != nil {
+		return "", err
+	}
+	res := val * math.Exp(exp)
+	return strconv.FormatFloat(utils.Round(res, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+}
+
 // splitIntoInterface is used to split a string into []interface{} instead of []string
 func splitIntoInterface(content, sep string) []interface{} {
 	spltStr := strings.Split(content, sep)
@@ -342,6 +361,8 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.META_HANDLER:
 		if cfgFld.HandlerId == META_CCA_USAGE { // Exception, usage is passed in the dur variable by CCA
 			outVal = strconv.FormatFloat(extraParam.(float64), 'f', -1, 64)
+		} else if cfgFld.HandlerId == META_VALUE_EXPONENT {
+			outVal, err = metaValueExponent(m, cfgFld.Value, 10) // FixMe: add here configured number of decimals
 		} else {
 			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
 			if err != nil {
