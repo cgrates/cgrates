@@ -90,90 +90,76 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 }
 
 // sets all the fields of the balance
-func (ub *Account) setBalanceAction(a *Action) error {
+func (acc *Account) setBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
-	bClone := a.Balance.CreateBalance()
-	if bClone == nil {
-		return errors.New("nil balance")
+	if a.Balance.Type == nil {
+		return errors.New("missing balance type")
 	}
-	// load ValueFactor if defined in extra parametrs
-	if a.ExtraParameters != "" {
-		vf := ValueFactor{}
-		err := json.Unmarshal([]byte(a.ExtraParameters), &vf)
-		if err == nil {
-			bClone.Factor = vf
-		} else {
-			utils.Logger.Warning(fmt.Sprintf("Could load value factor from actions: extra parametrs: %s", a.ExtraParameters))
-		}
+	balanceType := *a.Balance.Type
+	if acc.BalanceMap == nil {
+		acc.BalanceMap = make(map[string]BalanceChain, 1)
 	}
-	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain, 1)
-	}
-	found := false
-	balanceType := a.Balance.GetType()
 	var previousSharedGroups utils.StringMap // kept for comparison
-	for _, b := range ub.BalanceMap[balanceType] {
+	var balance *Balance
+	var found bool
+	for _, b := range acc.BalanceMap[balanceType] {
 		if b.IsExpired() {
-			continue // just to be safe (cleaned expired balances above)
+			continue
 		}
-		b.account = ub
-		if b.MatchFilter(a.Balance, false) { // for Id or Uuid only
-			bClone.Id = b.Id
-			bClone.Uuid = b.Uuid
+		if (a.Balance.Uuid != nil && b.Uuid == *a.Balance.Uuid) ||
+			(a.Balance.ID != nil && b.Id == *a.Balance.ID) {
 			previousSharedGroups = b.SharedGroups
-			if bClone.Id != utils.META_DEFAULT {
-				*b = *bClone
-			} else {
-				b.Value = bClone.GetValue()
-			}
+			balance = b
 			found = true
 			break // only set one balance
 		}
 	}
+
 	// if it is not found then we add it to the list
-	if !found {
-		// check if the Id is *default (user trying to create the default balance)
-		// use only it's value value
-		if bClone.Id == utils.META_DEFAULT {
-			bClone = &Balance{
-				Id:    utils.META_DEFAULT,
-				Value: bClone.GetValue(),
-			}
-		}
-		bClone.dirty = true           // Mark the balance as dirty since we have modified and it should be checked by action triggers
-		bClone.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
-		ub.BalanceMap[balanceType] = append(ub.BalanceMap[balanceType], bClone)
+	if balance == nil {
+		balance = &Balance{}
+		balance.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
+		acc.BalanceMap[balanceType] = append(acc.BalanceMap[balanceType], balance)
 	}
 
-	if !found || !previousSharedGroups.Equal(bClone.SharedGroups) {
+	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT {
+		balance.Id = utils.META_DEFAULT
+		if a.Balance.Value != nil {
+			balance.Value = *a.Balance.Value
+		}
+	} else {
+		a.Balance.ModifyBalance(balance)
+	}
+
+	if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
 		_, err := Guardian.Guard(func() (interface{}, error) {
-			for sgId := range bClone.SharedGroups {
+			for sgID := range balance.SharedGroups {
 				// add shared group member
-				sg, err := ratingStorage.GetSharedGroup(sgId, false)
+				sg, err := ratingStorage.GetSharedGroup(sgID, false)
 				if err != nil || sg == nil {
 					//than is problem
-					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 				} else {
-					if _, found := sg.MemberIds[ub.Id]; !found {
+					if _, found := sg.MemberIds[acc.Id]; !found {
 						// add member and save
 						if sg.MemberIds == nil {
 							sg.MemberIds = make(utils.StringMap)
 						}
-						sg.MemberIds[ub.Id] = true
+						sg.MemberIds[acc.Id] = true
 						ratingStorage.SetSharedGroup(sg)
 					}
 				}
 			}
 			return 0, nil
-		}, 0, bClone.SharedGroups.Slice()...)
+		}, 0, balance.SharedGroups.Slice()...)
 		if err != nil {
 			return err
 		}
 	}
-	ub.InitCounters()
-	ub.ExecuteActionTriggers(nil)
+	acc.InitCounters()
+	acc.ExecuteActionTriggers(nil)
 	return nil
 }
 
