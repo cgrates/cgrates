@@ -464,7 +464,7 @@ type AttrSetBalance struct {
 	Disabled       *bool
 }
 
-func (self *ApierV1) SetBalance(aType string, attr *AttrSetBalance, reply *string) error {
+func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
