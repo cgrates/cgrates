@@ -545,13 +545,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				}
 				acts[idx].Balance.Weight = utils.Float64Pointer(u)
 			}
-			if tpact.ExpiryTime != "" && tpact.ExpiryTime != utils.ANY && tpact.ExpiryTime != utils.UNLIMITED {
-				u, err := utils.ParseTimeDetectLayout(tpact.ExpiryTime, tpr.timezone)
-				if err != nil {
-					return err
-				}
-				acts[idx].Balance.ExpirationDate = utils.TimePointer(u)
-			}
+
 			if tpact.RatingSubject != "" && tpact.RatingSubject != utils.ANY {
 				acts[idx].Balance.RatingSubject = utils.StringPointer(tpact.RatingSubject)
 			}
