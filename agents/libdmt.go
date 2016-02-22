@@ -216,6 +216,8 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 	return "", nil
 }
 
+// metaValueExponent will multiply the float value with the exponent provided.
+// Expects 2 arguments in template separated by |
 func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
 	valStr := composedFieldvalue(m, argsTpl, 0)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)

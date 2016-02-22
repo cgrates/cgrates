@@ -604,8 +604,8 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Result-Code")
-	} else if strResult := avpValAsString(avps[0]); strResult != "5030" { // Result-Code set in the template
-		t.Errorf("Expecting 5030, received: %s", strResult)
+	} else if strResult := avpValAsString(avps[0]); strResult != "2001" { // Result-Code set in the template
+		t.Errorf("Expecting 2001, received: %s", strResult)
 	}
 }
 
