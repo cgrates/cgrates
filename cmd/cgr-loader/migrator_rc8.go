@@ -173,7 +173,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		}
 		// transfer data into new structurse
 		newAcc := &engine.Account{
-			Id:             oldAcc.Id,
+			ID:             oldAcc.Id,
 			BalanceMap:     make(map[string]engine.BalanceChain, len(oldAcc.BalanceMap)),
 			UnitCounters:   make(engine.UnitCounters, len(oldAcc.UnitCounters)),
 			ActionTriggers: make(engine.ActionTriggers, len(oldAcc.ActionTriggers)),
@@ -181,12 +181,12 @@ func (mig MigratorRC8) migrateAccounts() error {
 			Disabled:       oldAcc.Disabled,
 		}
 		// fix id
-		idElements := strings.Split(newAcc.Id, utils.CONCATENATED_KEY_SEP)
+		idElements := strings.Split(newAcc.ID, utils.CONCATENATED_KEY_SEP)
 		if len(idElements) != 3 {
 			log.Printf("Malformed account ID %s", oldAcc.Id)
 			continue
 		}
-		newAcc.Id = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
+		newAcc.ID = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
 		// balances
 		balanceErr := false
 		for oldBalKey, oldBalChain := range oldAcc.BalanceMap {
@@ -344,7 +344,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		if err != nil {
 			return err
 		}
-		if err := mig.db.Cmd("SET", utils.ACCOUNT_PREFIX+newAcc.Id, result).Err; err != nil {
+		if err := mig.db.Cmd("SET", utils.ACCOUNT_PREFIX+newAcc.ID, result).Err; err != nil {
 			return err
 		}
 	}

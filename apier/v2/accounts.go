@@ -102,7 +102,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
-				Id: accID,
+				ID: accID,
 			}
 		}
 		if attr.ActionPlanIDs != nil {
