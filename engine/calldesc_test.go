@@ -51,7 +51,7 @@ func populateDB() {
 	}
 
 	minu := &Account{
-		Id: "vdf:minu",
+		ID: "vdf:minu",
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY: BalanceChain{&Balance{Value: 50}},
 			utils.VOICE: BalanceChain{
@@ -60,7 +60,7 @@ func populateDB() {
 			}},
 	}
 	broker := &Account{
-		Id: "vdf:broker",
+		ID: "vdf:broker",
 		BalanceMap: map[string]BalanceChain{
 			utils.VOICE: BalanceChain{
 				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
@@ -68,7 +68,7 @@ func populateDB() {
 			}},
 	}
 	luna := &Account{
-		Id: "vdf:luna",
+		ID: "vdf:luna",
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY: BalanceChain{
 				&Balance{Value: 0, Weight: 20},
@@ -76,7 +76,7 @@ func populateDB() {
 	}
 	// this is added to test if csv load tests account will not overwrite balances
 	minitsboy := &Account{
-		Id: "vdf:minitsboy",
+		ID: "vdf:minitsboy",
 		BalanceMap: map[string]BalanceChain{
 			utils.VOICE: BalanceChain{
 				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
@@ -88,14 +88,14 @@ func populateDB() {
 		},
 	}
 	max := &Account{
-		Id: "cgrates.org:max",
+		ID: "cgrates.org:max",
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY: BalanceChain{
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
 	money := &Account{
-		Id: "cgrates.org:money",
+		ID: "cgrates.org:money",
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY: BalanceChain{
 				&Balance{Value: 10000, Weight: 10},

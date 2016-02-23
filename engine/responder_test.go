@@ -73,8 +73,8 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 	}
 	b10 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
 	b20 := &Balance{Value: 20, Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
-	rifsAccount := &Account{Id: utils.ConcatenatedKey(testTenant, "rif"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{b10}}}
-	dansAccount := &Account{Id: utils.ConcatenatedKey(testTenant, "dan"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{b20}}}
+	rifsAccount := &Account{ID: utils.ConcatenatedKey(testTenant, "rif"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{b10}}}
+	dansAccount := &Account{ID: utils.ConcatenatedKey(testTenant, "dan"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{b20}}}
 	if err := accountingStorage.SetAccount(rifsAccount); err != nil {
 		t.Error(err)
 	}
@@ -437,8 +437,8 @@ func TestResponderGetLCR(t *testing.T) {
 	}
 	bRif12 := &Balance{Value: 40, Weight: 10, DestinationIDs: utils.NewStringMap(dstDe.Id)}
 	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationIDs: utils.NewStringMap(dstDe.Id)}
-	rif12sAccount := &Account{Id: utils.ConcatenatedKey("tenant12", "rif12"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{bRif12}}, AllowNegative: true}
-	ivo12sAccount := &Account{Id: utils.ConcatenatedKey("tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{bIvo12}}, AllowNegative: true}
+	rif12sAccount := &Account{ID: utils.ConcatenatedKey("tenant12", "rif12"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{bRif12}}, AllowNegative: true}
+	ivo12sAccount := &Account{ID: utils.ConcatenatedKey("tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{bIvo12}}, AllowNegative: true}
 	for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {
 		if err := accountingStorage.SetAccount(acnt); err != nil {
 			t.Error(err)

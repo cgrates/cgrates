@@ -51,7 +51,7 @@ type SharingParameters struct {
 
 func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChain) BalanceChain {
 	sharingParameters := sg.AccountParameters[utils.ANY]
-	if sp, hasParamsForAccount := sg.AccountParameters[myBalance.account.Id]; hasParamsForAccount {
+	if sp, hasParamsForAccount := sg.AccountParameters[myBalance.account.ID]; hasParamsForAccount {
 		sharingParameters = sp
 	}
 
@@ -94,7 +94,7 @@ func (sg *SharedGroup) GetBalances(destination, category, direction, balanceType
 	//	if len(sg.members) == 0 {
 	for ubId := range sg.MemberIds {
 		var nUb *Account
-		if ubId == ub.Id { // skip the initiating user
+		if ubId == ub.ID { // skip the initiating user
 			nUb = ub
 		} else {
 			nUb, _ = accountingStorage.GetAccount(ubId)

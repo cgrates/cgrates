@@ -36,7 +36,7 @@ Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
 */
 type Account struct {
-	Id                string
+	ID                string
 	BalanceMap        map[string]BalanceChain
 	UnitCounters      UnitCounters
 	ActionTriggers    ActionTriggers
@@ -142,12 +142,12 @@ func (acc *Account) setBalanceAction(a *Action) error {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 				} else {
-					if _, found := sg.MemberIds[acc.Id]; !found {
+					if _, found := sg.MemberIds[acc.ID]; !found {
 						// add member and save
 						if sg.MemberIds == nil {
 							sg.MemberIds = make(utils.StringMap)
 						}
-						sg.MemberIds[acc.Id] = true
+						sg.MemberIds[acc.ID] = true
 						ratingStorage.SetSharedGroup(sg)
 					}
 				}
@@ -228,12 +228,12 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 				} else {
-					if _, found := sg.MemberIds[ub.Id]; !found {
+					if _, found := sg.MemberIds[ub.ID]; !found {
 						// add member and save
 						if sg.MemberIds == nil {
 							sg.MemberIds = make(utils.StringMap)
 						}
-						sg.MemberIds[ub.Id] = true
+						sg.MemberIds[ub.ID] = true
 						ratingStorage.SetSharedGroup(sg)
 					}
 				}
@@ -487,7 +487,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				defaultBalance := ub.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
 				increment.BalanceInfo.MoneyBalanceUuid = defaultBalance.Uuid
-				increment.BalanceInfo.AccountId = ub.Id
+				increment.BalanceInfo.AccountId = ub.ID
 				increment.paid = true
 				if count {
 					ub.countUnits(
@@ -787,7 +787,7 @@ type TenantAccount struct {
 
 func (acc *Account) Clone() *Account {
 	newAcc := &Account{
-		Id:             acc.Id,
+		ID:             acc.ID,
 		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
 		UnitCounters:   nil, // not used when cloned (dryRun)
 		ActionTriggers: nil, // not used when cloned (dryRun)
@@ -914,7 +914,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 
 	result := &Account{
-		Id:             utils.OUT + ":" + acc.Id,
+		Id:             utils.OUT + ":" + acc.ID,
 		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),

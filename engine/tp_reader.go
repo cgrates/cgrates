@@ -1086,7 +1086,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 		ub, err := tpr.accountingStorage.GetAccount(id)
 		if err != nil {
 			ub = &Account{
-				Id: id,
+				ID: id,
 			}
 		}
 		ub.ActionTriggers = actionTriggers
@@ -1121,7 +1121,7 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 			}
 		}
 		ub := &Account{
-			Id:             aa.KeyId(),
+			ID:             aa.KeyId(),
 			ActionTriggers: aTriggers,
 			AllowNegative:  aa.AllowNegative,
 			Disabled:       aa.Disabled,
@@ -1763,7 +1763,7 @@ func (tpr *TpReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Println("\t", ub.Id)
+			log.Println("\t", ub.ID)
 		}
 	}
 	if verbose {

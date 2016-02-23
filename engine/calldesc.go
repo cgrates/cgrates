@@ -180,7 +180,7 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 		cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey())
 	}
 	if cd.account != nil && cd.account.Disabled {
-		return nil, fmt.Errorf("User %s is disabled", cd.account.Id)
+		return nil, fmt.Errorf("User %s is disabled", cd.account.ID)
 	}
 	return cd.account, err
 }

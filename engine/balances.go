@@ -356,7 +356,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
 				inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.Id
+				inc.BalanceInfo.AccountId = ub.ID
 				inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
 				inc.Cost = 0
 				inc.paid = true
@@ -427,7 +427,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 					cost, inc.Cost = 0.0, 0.0
 					inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.Id
+					inc.BalanceInfo.AccountId = ub.ID
 					inc.paid = true
 					if count {
 						ub.countUnits(cost, utils.MONETARY, cc, b)
@@ -445,7 +445,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				if (cost == 0 || moneyBal != nil) && b.GetValue() >= amount {
 					b.SubstractValue(amount)
 					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.Id
+					inc.BalanceInfo.AccountId = ub.ID
 					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
 					if cost != 0 {
 						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
@@ -534,7 +534,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 				amount, inc.Cost = 0.0, 0.0
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.Id
+				inc.BalanceInfo.AccountId = ub.ID
 				inc.paid = true
 				if count {
 					ub.countUnits(amount, utils.MONETARY, cc, b)
@@ -549,7 +549,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				b.SubstractValue(amount)
 				cd.MaxCostSoFar += amount
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.Id
+				inc.BalanceInfo.AccountId = ub.ID
 				inc.paid = true
 				if count {
 					ub.countUnits(amount, utils.MONETARY, cc, b)
@@ -661,7 +661,7 @@ func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 			disabled := ""
 			if b.account != nil { // only publish modifications for balances with account set
 				//utils.LogStack()
-				accountId = b.account.Id
+				accountId = b.account.ID
 				allowNegative = strconv.FormatBool(b.account.AllowNegative)
 				disabled = strconv.FormatBool(b.account.Disabled)
 				Publish(CgrEvent{
@@ -683,9 +683,9 @@ func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 				})
 			}
 		}
-		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.Id] == false {
+		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == false {
 			accountingStorage.SetAccount(b.account)
-			savedAccounts[b.account.Id] = true
+			savedAccounts[b.account.ID] = true
 		}
 	}
 }
