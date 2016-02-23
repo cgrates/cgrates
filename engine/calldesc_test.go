@@ -1271,6 +1271,31 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 	}
 }
 
+func TestMaxDebitForceDuration(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd1 := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "12345",
+		Account:       "12345",
+		Destination:   "447956",
+		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 40, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 0,
+		ForceDuration: true,
+	}
+	_, err := cd1.MaxDebit()
+	if err != utils.ErrInsufficientCredit {
+		t.Fatal("Error forcing duration: ", err)
+	}
+}
+
 func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
 	for _, at := range ap.ActionTimings {
