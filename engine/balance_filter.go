@@ -279,3 +279,43 @@ func (bp *BalanceFilter) HasExpirationDate() bool {
 	}
 	return (*bp.ExpirationDate).IsZero()
 }
+
+func (bf *BalanceFilter) ModifyBalance(b *Balance) {
+	if b == nil {
+		return
+	}
+	if bf.Directions != nil {
+		b.Directions = *bf.Directions
+	}
+	if bf.Value != nil {
+		b.Value = *bf.Value
+	}
+	if bf.ExpirationDate != nil {
+		b.ExpirationDate = *bf.ExpirationDate
+	}
+	if bf.RatingSubject != nil {
+		b.RatingSubject = *bf.RatingSubject
+	}
+	if bf.Categories != nil {
+		b.Categories = *bf.Categories
+	}
+	if bf.DestinationIDs != nil {
+		b.DestinationIds = *bf.DestinationIDs
+	}
+	if bf.SharedGroups != nil {
+		b.SharedGroups = *bf.SharedGroups
+	}
+	if bf.TimingIDs != nil {
+		b.TimingIDs = *bf.TimingIDs
+	}
+	if bf.Weight != nil {
+		b.Weight = *bf.Weight
+	}
+	if bf.Blocker != nil {
+		b.Blocker = *bf.Blocker
+	}
+	if bf.Disabled != nil {
+		b.Disabled = *bf.Disabled
+	}
+	b.SetDirty() // Mark the balance as dirty since we have modified and it should be checked by action triggers
+}

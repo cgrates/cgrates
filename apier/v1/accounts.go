@@ -20,6 +20,7 @@ package v1
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"strings"
 	"time"
@@ -482,6 +483,7 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 		expTime = &expTimeVal
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	log.Print("ACC: ", utils.ToIJSON(attr))
 	if _, err := self.AccountDb.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
@@ -532,51 +534,6 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 	*reply = OK
 	return nil
 }
-
-/*func (self *ApierV1) EnableDisableBalance(attr *AttrAddBalance, reply *string) error {
-	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	expTime, err := utils.ParseTimeDetectLayout(attr.ExpiryTime, self.Config.DefaultTimezone)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	accID := utils.ConcatenatedKey(attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetAccount(accID); err != nil {
-		return utils.ErrNotFound
-	}
-	at := &engine.ActionTiming{}
-	at.SetAccountIDs(utils.StringMap{accID: true})
-
-	at.SetActions(engine.Actions{
-		&engine.Action{
-			ActionType:  engine.ENABLE_DISABLE_BALANCE,
-			BalanceType: attr.BalanceType,
-			Balance: &engine.Balance{
-				Uuid:           attr.BalanceUuid,
-				Id:             attr.BalanceId,
-				Value:          attr.Value,
-				ExpirationDate: expTime,
-				RatingSubject:  attr.RatingSubject,
-				Categories:     utils.ParseStringMap(attr.Categories),
-				Directions:     utils.ParseStringMap(attr.Directions),
-				DestinationIds: utils.ParseStringMap(attr.DestinationIds),
-				Weight:         attr.Weight,
-				SharedGroups:   utils.ParseStringMap(attr.SharedGroups),
-				TimingIDs:      utils.ParseStringMap(attr.TimingIds),
-				Blocker:        attr.Blocker,
-				Disabled:       attr.Disabled,
-			},
-		},
-	})
-	if err := at.Execute(); err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = OK
-	return nil
-}*/
 
 func (self *ApierV1) RemoveBalances(attr *AttrSetBalance, reply *string) error {
 	if missing := utils.MissingStructFields(attr, []string{"Tenant", "Account", "BalanceType"}); len(missing) != 0 {
