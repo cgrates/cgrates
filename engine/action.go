@@ -187,11 +187,11 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "BalanceUUID":
 			parsedValue += rsrFld.ParseValue(b.Uuid)
 		case "BalanceID":
-			parsedValue += rsrFld.ParseValue(b.Id)
+			parsedValue += rsrFld.ParseValue(b.ID)
 		case "BalanceValue":
 			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
 		case "DestinationIDs":
-			parsedValue += rsrFld.ParseValue(b.DestinationIds.String())
+			parsedValue += rsrFld.ParseValue(b.DestinationIDs.String())
 		case "ExtraParameters":
 			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
 		case "RatingSubject":
@@ -497,7 +497,7 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 	var ddcDestId string
 	for _, bchain := range ub.BalanceMap {
 		for _, b := range bchain {
-			for destId := range b.DestinationIds {
+			for destId := range b.DestinationIDs {
 				if strings.HasPrefix(destId, "*ddc") {
 					ddcDestId = destId
 					break
@@ -622,7 +622,7 @@ func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Act
 	bChain := acc.BalanceMap[utils.MONETARY]
 	for _, balance := range bChain {
 		if balance.Uuid != defaultBalance.Uuid &&
-			balance.Id != defaultBalance.Id && // extra caution
+			balance.ID != defaultBalance.ID && // extra caution
 			balance.MatchFilter(a.Balance, false) {
 			if balance.Value > 0 {
 				defaultBalance.Value += balance.Value

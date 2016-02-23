@@ -55,16 +55,16 @@ func populateDB() {
 		BalanceMap: map[string]BalanceChain{
 			utils.MONETARY: BalanceChain{&Balance{Value: 50}},
 			utils.VOICE: BalanceChain{
-				&Balance{Value: 200, DestinationIds: utils.NewStringMap("NAT"), Weight: 10},
-				&Balance{Value: 100, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+				&Balance{Value: 200, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	broker := &Account{
 		Id: "vdf:broker",
 		BalanceMap: map[string]BalanceChain{
 			utils.VOICE: BalanceChain{
-				&Balance{Value: 20, DestinationIds: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	luna := &Account{
@@ -79,8 +79,8 @@ func populateDB() {
 		Id: "vdf:minitsboy",
 		BalanceMap: map[string]BalanceChain{
 			utils.VOICE: BalanceChain{
-				&Balance{Value: 20, DestinationIds: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			},
 			utils.MONETARY: BalanceChain{
 				&Balance{Value: 100, Weight: 10},

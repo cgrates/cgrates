@@ -29,12 +29,12 @@ type BalanceFilter struct {
 func (bp *BalanceFilter) CreateBalance() *Balance {
 	b := &Balance{
 		Uuid:           bp.GetUuid(),
-		Id:             bp.GetID(),
+		ID:             bp.GetID(),
 		Value:          bp.GetValue(),
 		Directions:     bp.GetDirections(),
 		ExpirationDate: bp.GetExpirationDate(),
 		Weight:         bp.GetWeight(),
-		DestinationIds: bp.GetDestinationIDs(),
+		DestinationIDs: bp.GetDestinationIDs(),
 		RatingSubject:  bp.GetRatingSubject(),
 		Categories:     bp.GetCategories(),
 		SharedGroups:   bp.GetSharedGroups(),
@@ -112,8 +112,8 @@ func (bp *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 	if b.Uuid != "" {
 		bp.Uuid = &b.Uuid
 	}
-	if b.Id != "" {
-		bp.ID = &b.Id
+	if b.ID != "" {
+		bp.ID = &b.ID
 	}
 	if b.Value != 0 {
 		bp.Value = &b.Value
@@ -127,8 +127,8 @@ func (bp *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 	if b.Weight != 0 {
 		bp.Weight = &b.Weight
 	}
-	if len(b.DestinationIds) != 0 {
-		bp.DestinationIDs = &b.DestinationIds
+	if len(b.DestinationIDs) != 0 {
+		bp.DestinationIDs = &b.DestinationIDs
 	}
 	if b.RatingSubject != "" {
 		bp.RatingSubject = &b.RatingSubject
@@ -300,7 +300,7 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 		b.Categories = *bf.Categories
 	}
 	if bf.DestinationIDs != nil {
-		b.DestinationIds = *bf.DestinationIDs
+		b.DestinationIDs = *bf.DestinationIDs
 	}
 	if bf.SharedGroups != nil {
 		b.SharedGroups = *bf.SharedGroups

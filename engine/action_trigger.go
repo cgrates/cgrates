@@ -142,7 +142,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 
 func (at *ActionTrigger) CreateBalance() *Balance {
 	b := at.Balance.CreateBalance()
-	b.Id = at.UniqueID
+	b.ID = at.UniqueID
 	return b
 }
 

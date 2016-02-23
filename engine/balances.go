@@ -33,12 +33,12 @@ import (
 // Can hold different units as seconds or monetary
 type Balance struct {
 	Uuid           string //system wide unique
-	Id             string // account wide unique
+	ID             string // account wide unique
 	Value          float64
 	Directions     utils.StringMap
 	ExpirationDate time.Time
 	Weight         float64
-	DestinationIds utils.StringMap
+	DestinationIDs utils.StringMap
 	RatingSubject  string
 	Categories     utils.StringMap
 	SharedGroups   utils.StringMap
@@ -53,17 +53,17 @@ type Balance struct {
 }
 
 func (b *Balance) Equal(o *Balance) bool {
-	if len(b.DestinationIds) == 0 {
-		b.DestinationIds = utils.StringMap{utils.ANY: true}
+	if len(b.DestinationIDs) == 0 {
+		b.DestinationIDs = utils.StringMap{utils.ANY: true}
 	}
-	if len(o.DestinationIds) == 0 {
-		o.DestinationIds = utils.StringMap{utils.ANY: true}
+	if len(o.DestinationIDs) == 0 {
+		o.DestinationIDs = utils.StringMap{utils.ANY: true}
 	}
 	return b.Uuid == o.Uuid &&
-		b.Id == o.Id &&
+		b.ID == o.ID &&
 		b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
-		b.DestinationIds.Equal(o.DestinationIds) &&
+		b.DestinationIDs.Equal(o.DestinationIDs) &&
 		b.Directions.Equal(o.Directions) &&
 		b.RatingSubject == o.RatingSubject &&
 		b.Categories.Equal(o.Categories) &&
@@ -80,13 +80,13 @@ func (b *Balance) MatchFilter(o *BalanceFilter, skipIds bool) bool {
 		return b.Uuid == *o.Uuid
 	}
 	if !skipIds && o.ID != nil && *o.ID != "" {
-		return b.Id == *o.ID
+		return b.ID == *o.ID
 	}
 	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
 		(o.Weight == nil || b.Weight == *o.Weight) &&
 		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
-		(o.DestinationIDs == nil || b.DestinationIds.Includes(*o.DestinationIDs)) &&
+		(o.DestinationIDs == nil || b.DestinationIDs.Includes(*o.DestinationIDs)) &&
 		(o.Directions == nil || b.Directions.Includes(*o.Directions)) &&
 		(o.Categories == nil || b.Categories.Includes(*o.Categories)) &&
 		(o.TimingIDs == nil || b.TimingIDs.Includes(*o.TimingIDs)) &&
@@ -102,13 +102,13 @@ func (b *Balance) HardMatchFilter(o *BalanceFilter, skipIds bool) bool {
 		return b.Uuid == *o.Uuid
 	}
 	if !skipIds && o.ID != nil && *o.ID != "" {
-		return b.Id == *o.ID
+		return b.ID == *o.ID
 	}
 	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
 		(o.Weight == nil || b.Weight == *o.Weight) &&
 		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
 		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
-		(o.DestinationIDs == nil || b.DestinationIds.Equal(*o.DestinationIDs)) &&
+		(o.DestinationIDs == nil || b.DestinationIDs.Equal(*o.DestinationIDs)) &&
 		(o.Directions == nil || b.Directions.Equal(*o.Directions)) &&
 		(o.Categories == nil || b.Categories.Equal(*o.Categories)) &&
 		(o.TimingIDs == nil || b.TimingIDs.Equal(*o.TimingIDs)) &&
@@ -118,7 +118,7 @@ func (b *Balance) HardMatchFilter(o *BalanceFilter, skipIds bool) bool {
 
 // the default balance has standard Id
 func (b *Balance) IsDefault() bool {
-	return b.Id == utils.META_DEFAULT
+	return b.ID == utils.META_DEFAULT
 }
 
 func (b *Balance) IsExpired() bool {
@@ -150,15 +150,15 @@ func (b *Balance) MatchCategory(category string) bool {
 }
 
 func (b *Balance) HasDestination() bool {
-	return len(b.DestinationIds) > 0 && b.DestinationIds[utils.ANY] == false
+	return len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false
 }
 
 func (b *Balance) HasDirection() bool {
 	return len(b.Directions) > 0
 }
 
-func (b *Balance) MatchDestination(destinationId string) bool {
-	return !b.HasDestination() || b.DestinationIds[destinationId] == true
+func (b *Balance) MatchDestination(destinationID string) bool {
+	return !b.HasDestination() || b.DestinationIDs[destinationID] == true
 }
 
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
@@ -171,7 +171,7 @@ func (b *Balance) Clone() *Balance {
 	}
 	n := &Balance{
 		Uuid:           b.Uuid,
-		Id:             b.Id,
+		ID:             b.ID,
 		Value:          b.Value, // this value is in seconds
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
@@ -184,8 +184,8 @@ func (b *Balance) Clone() *Balance {
 		Disabled:       b.Disabled,
 		dirty:          b.dirty,
 	}
-	if b.DestinationIds != nil {
-		n.DestinationIds = b.DestinationIds.Clone()
+	if b.DestinationIDs != nil {
+		n.DestinationIDs = b.DestinationIDs.Clone()
 	}
 	if b.Directions != nil {
 		n.Directions = b.Directions.Clone()
@@ -193,14 +193,14 @@ func (b *Balance) Clone() *Balance {
 	return n
 }
 
-func (b *Balance) getMatchingPrefixAndDestId(dest string) (prefix, destId string) {
-	if len(b.DestinationIds) != 0 && b.DestinationIds[utils.ANY] == false {
+func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destId string) {
+	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
 			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
-				destIds := x.(map[interface{}]struct{})
-				for dId, _ := range destIds {
-					if b.DestinationIds[dId.(string)] == true {
-						return p, dId.(string)
+				destIDs := x.(map[interface{}]struct{})
+				for dID := range destIDs {
+					if b.DestinationIDs[dID.(string)] == true {
+						return p, dID.(string)
 					}
 				}
 			}
@@ -331,7 +331,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				},
 			},
 		}
-		prefix, destid := b.getMatchingPrefixAndDestId(cd.Destination)
+		prefix, destid := b.getMatchingPrefixAndDestID(cd.Destination)
 		if prefix == "" {
 			prefix = cd.Destination
 		}
@@ -667,11 +667,11 @@ func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 				Publish(CgrEvent{
 					"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
 					"Uuid":                 b.Uuid,
-					"Id":                   b.Id,
+					"Id":                   b.ID,
 					"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
 					"ExpirationDate":       b.ExpirationDate.String(),
 					"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
-					"DestinationIds":       b.DestinationIds.String(),
+					"DestinationIDs":       b.DestinationIDs.String(),
 					"Directions":           b.Directions.String(),
 					"RatingSubject":        b.RatingSubject,
 					"Categories":           b.Categories.String(),

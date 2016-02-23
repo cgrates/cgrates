@@ -206,12 +206,12 @@ func (mig MigratorRC8) migrateAccounts() error {
 				}
 				newAcc.BalanceMap[newBalKey][index] = &engine.Balance{
 					Uuid:           oldBal.Uuid,
-					Id:             oldBal.Id,
+					ID:             oldBal.Id,
 					Value:          oldBal.Value,
 					Directions:     utils.ParseStringMap(newBalDirection),
 					ExpirationDate: oldBal.ExpirationDate,
 					Weight:         oldBal.Weight,
-					DestinationIds: utils.ParseStringMap(oldBal.DestinationIds),
+					DestinationIDs: utils.ParseStringMap(oldBal.DestinationIds),
 					RatingSubject:  oldBal.RatingSubject,
 					Categories:     utils.ParseStringMap(oldBal.Category),
 					SharedGroups:   utils.ParseStringMap(oldBal.SharedGroup),
