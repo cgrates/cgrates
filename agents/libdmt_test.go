@@ -106,7 +106,7 @@ func TestMetaValueExponent(t *testing.T) {
 	})
 	if val, err := metaValueExponent(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err != nil {
 		t.Error(err)
-	} else if val != "67.3794699909" {
+	} else if val != "0.1" {
 		t.Error("Received: ", val)
 	}
 	if _, err = metaValueExponent(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err == nil {

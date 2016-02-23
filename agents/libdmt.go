@@ -228,11 +228,11 @@ func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimal
 	if err != nil {
 		return "", err
 	}
-	exp, err := strconv.ParseFloat(handlerArgs[1], 64)
+	exp, err := strconv.Atoi(handlerArgs[1])
 	if err != nil {
 		return "", err
 	}
-	res := val * math.Exp(exp)
+	res := val * math.Pow10(exp)
 	return strconv.FormatFloat(utils.Round(res, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 }
 
