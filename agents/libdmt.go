@@ -54,6 +54,9 @@ const (
 	META_VALUE_EXPONENT  = "*value_exponent"
 	DIAMETER_CCR         = "DIAMETER_CCR"
 	DiameterRatingFailed = 5031
+	CGRError             = "CGRError"
+	CGRMaxUsage          = "CGRMaxUsage"
+	CGRResultCode        = "CGRResultCode"
 )
 
 func loadDictionaries(dictsDir, componentId string) error {
@@ -644,11 +647,11 @@ func (self *CCA) AsDiameterMessage() *diam.Message {
 }
 
 // SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
-func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUsage float64) error {
+func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, processorVars map[string]string) error {
 	for _, cfgFld := range reqProcessor.CCAFields {
-		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, maxUsage)
+		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, processorVars)
 		if err == ErrFilterNotPassing { // Field not in or filter not passing, try match in answer
-			fmtOut, err = fieldOutVal(self.diamMessage, cfgFld, maxUsage)
+			fmtOut, err = fieldOutVal(self.diamMessage, cfgFld, processorVars)
 		}
 		if err != nil {
 			if err == ErrFilterNotPassing {

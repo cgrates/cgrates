@@ -107,6 +107,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		}
 	}
 	var maxUsage float64
+	processorVars := make(map[string]string)
 	if reqProcessor.DryRun { // DryRun does not send over network
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
 		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(diam.LimitedSuccess),
@@ -136,57 +137,28 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				}
 			}
 		}
-		var populatedResultCode bool
+		processorVars[CGRResultCode] = strconv.Itoa(diam.Success)
 		if err != nil {
-			utils.Logger.Debug(fmt.Sprintf("Received error from rater: %+v", err))
-			if strings.HasSuffix(err.Error(), utils.ErrAccountNotFound.Error()) || strings.HasSuffix(err.Error(), utils.ErrUserNotFound.Error()) { // 5030 in case of AccountNotFound
-				if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "5030",
-					false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-					return nil
-				}
-				populatedResultCode = true
-			} else if strings.HasSuffix(err.Error(), utils.ErrCreditInsufficient.Error()) {
-				if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "4012",
-					false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-					return nil
-				}
-				populatedResultCode = true
-			} else {
-				if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
-					false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-					utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-					return nil
-				}
-				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
-				return cca
-			}
-
-		}
-		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && maxUsage == 0 && !populatedResultCode { // Not enough balance, RFC demands 4012
-			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, "4012",
-				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-				return nil
-			}
-			populatedResultCode = true
-		} else if !populatedResultCode {
-			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(diam.Success),
-				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-				return nil
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
+			switch { // Prettify some errors
+			case strings.HasSuffix(err.Error(), utils.ErrAccountNotFound.Error()):
+				processorVars[CGRError] = utils.ErrAccountNotFound.Error()
+			case strings.HasSuffix(err.Error(), utils.ErrUserNotFound.Error()):
+				processorVars[CGRError] = utils.ErrUserNotFound.Error()
+			case strings.HasSuffix(err.Error(), utils.ErrCreditInsufficient.Error()):
+				processorVars[CGRError] = utils.ErrCreditInsufficient.Error()
+			default: // Unknown error
+				processorVars[CGRError] = err.Error()
+				processorVars[CGRResultCode] = strconv.Itoa(DiameterRatingFailed)
 			}
 		}
-		if ccr.CCRequestType != 3 && ccr.CCRequestType != 4 && !populatedResultCode { // For terminate or previously marked unauthorized, we don't add granted-service-unit AVP
-			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Granted-Service-Unit", "CC-Time"}, strconv.FormatFloat(maxUsage, 'f', 0, 64),
-				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Granted-Service-Unit, error: %s", ccr.diamMessage, err))
-				return nil
-			}
+		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, processorVars[CGRResultCode],
+			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+			return nil
 		}
 	}
-	if err := cca.SetProcessorAVPs(reqProcessor, maxUsage); err != nil {
+	if err := cca.SetProcessorAVPs(reqProcessor, processorVars); err != nil {
 		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
 			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))

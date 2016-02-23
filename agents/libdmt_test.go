@@ -302,7 +302,7 @@ func TestCCASetProcessorAVPs(t *testing.T) {
 			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
 		}})
-	if err := cca.SetProcessorAVPs(reqProcessor, 0); err != nil {
+	if err := cca.SetProcessorAVPs(reqProcessor, map[string]string{}); err != nil {
 		t.Error(err)
 	} else if ccaMsg := cca.AsDiameterMessage(); !reflect.DeepEqual(eMessage, ccaMsg) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, ccaMsg)
