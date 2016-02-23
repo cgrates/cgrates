@@ -108,13 +108,10 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	}
 	var maxUsage float64
 	processorVars := make(map[string]string)
+	processorVars[CGRResultCode] = strconv.Itoa(diam.Success)
 	if reqProcessor.DryRun { // DryRun does not send over network
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
-		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(diam.LimitedSuccess),
-			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-			return nil
-		}
+		processorVars[CGRResultCode] = strconv.Itoa(diam.LimitedSuccess)
 	} else { // Find out maxUsage over APIs
 		switch ccr.CCRequestType {
 		case 1:
@@ -137,7 +134,6 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				}
 			}
 		}
-		processorVars[CGRResultCode] = strconv.Itoa(diam.Success)
 		if err != nil {
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v, API error: %s", ccr.diamMessage, err))
 			switch { // Prettify some errors
@@ -152,11 +148,12 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				processorVars[CGRResultCode] = strconv.Itoa(DiameterRatingFailed)
 			}
 		}
-		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, processorVars[CGRResultCode],
-			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-			return nil
-		}
+		processorVars[CGRMaxUsage] = strconv.FormatFloat(maxUsage, 'f', -1, 64)
+	}
+	if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, processorVars[CGRResultCode],
+		false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
+		return nil
 	}
 	if err := cca.SetProcessorAVPs(reqProcessor, processorVars); err != nil {
 		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
