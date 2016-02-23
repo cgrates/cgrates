@@ -72,7 +72,7 @@ func (self *DiameterAgent) handlers() diam.Handler {
 func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor) *CCA {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
-		if passes, _ := passesFieldFilter(ccr.diamMessage, fldFilter); !passes {
+		if passes, _ := passesFieldFilter(ccr.diamMessage, fldFilter, nil); !passes {
 			passesAllFilters = false
 		}
 	}

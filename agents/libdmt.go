@@ -50,7 +50,6 @@ func init() {
 
 const (
 	META_CCR_USAGE       = "*ccr_usage"
-	META_CCA_USAGE       = "*cca_usage"
 	META_VALUE_EXPONENT  = "*value_exponent"
 	DIAMETER_CCR         = "DIAMETER_CCR"
 	DiameterRatingFailed = 5031
@@ -255,15 +254,20 @@ func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) 
 }
 
 // Follows the implementation in the StorCdr
-func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField) (bool, int) {
+func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVars map[string]string) (bool, int) {
 	if fieldFilter == nil {
 		return true, 0
 	}
 	avps, err := avpsWithPath(m, fieldFilter)
 	if err != nil {
+		if strings.HasPrefix(err.Error(), "Could not find AVP") {
+			if val, hasIt := processorVars[fieldFilter.Id]; hasIt { // Could not find it in the message, try to match it in processorVars
+				if fieldFilter.FilterPasses(val) {
+					return true, -1
+				}
+			}
+		}
 		return false, 0
-	} else if len(avps) == 0 {
-		return false, 0 // No AVPs with field filter ID
 	}
 	for avpIdx, avpVal := range avps { // First match wins due to index
 		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
@@ -340,13 +344,13 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 
 var ErrFilterNotPassing = errors.New("Filter not passing")
 
-func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}) (fmtValOut string, err error) {
+func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}, processorVars map[string]string) (fmtValOut string, err error) {
 	var outVal string
 	passAtIndex := -1
 	passedAllFilters := true
 	for _, fldFilter := range cfgFld.FieldFilter {
 		var pass bool
-		if pass, passAtIndex = passesFieldFilter(m, fldFilter); !pass {
+		if pass, passAtIndex = passesFieldFilter(m, fldFilter, processorVars); !pass {
 			passedAllFilters = false
 			break
 		}
@@ -364,9 +368,7 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.META_CONSTANT:
 		outVal = cfgFld.Value.Id()
 	case utils.META_HANDLER:
-		if cfgFld.HandlerId == META_CCA_USAGE { // Exception, usage is passed in the dur variable by CCA
-			outVal = strconv.FormatFloat(extraParam.(float64), 'f', -1, 64)
-		} else if cfgFld.HandlerId == META_VALUE_EXPONENT {
+		if cfgFld.HandlerId == META_VALUE_EXPONENT {
 			outVal, err = metaValueExponent(m, cfgFld.Value, 10) // FixMe: add here configured number of decimals
 		} else {
 			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
@@ -582,7 +584,7 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = DIAMETER_CCR
 	for _, cfgFld := range cfgFlds {
-		fmtOut, err := fieldOutVal(self.diamMessage, cfgFld, self.debitInterval)
+		fmtOut, err := fieldOutVal(self.diamMessage, cfgFld, self.debitInterval, nil)
 		if err != nil {
 			if err == ErrFilterNotPassing {
 				continue // Do nothing in case of Filter not passing
@@ -649,9 +651,9 @@ func (self *CCA) AsDiameterMessage() *diam.Message {
 // SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
 func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, processorVars map[string]string) error {
 	for _, cfgFld := range reqProcessor.CCAFields {
-		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, processorVars)
+		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, nil, processorVars)
 		if err == ErrFilterNotPassing { // Field not in or filter not passing, try match in answer
-			fmtOut, err = fieldOutVal(self.diamMessage, cfgFld, processorVars)
+			fmtOut, err = fieldOutVal(self.diamMessage, cfgFld, nil, processorVars)
 		}
 		if err != nil {
 			if err == ErrFilterNotPassing {
