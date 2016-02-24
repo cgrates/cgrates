@@ -53,7 +53,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	}
 	at.lastExecutionTime = time.Now()
 	if ub != nil && ub.Disabled {
-		return fmt.Errorf("User %s is disabled and there are triggers in action!", ub.Id)
+		return fmt.Errorf("User %s is disabled and there are triggers in action!", ub.ID)
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
@@ -104,7 +104,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 		at.Executed = false
 	}
 	if !transactionFailed && ub != nil && !removeAccountActionFound {
-		storageLogger.LogActionTrigger(ub.Id, utils.RATER_SOURCE, at, aac)
+		storageLogger.LogActionTrigger(ub.ID, utils.RATER_SOURCE, at, aac)
 		accountingStorage.SetAccount(ub)
 	}
 	return
@@ -142,7 +142,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 
 func (at *ActionTrigger) CreateBalance() *Balance {
 	b := at.Balance.CreateBalance()
-	b.Id = at.UniqueID
+	b.ID = at.UniqueID
 	return b
 }
 

@@ -1101,7 +1101,7 @@ func TestLoadAccountActions(t *testing.T) {
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]
 	expected := &Account{
-		Id: "vdf:minitsboy",
+		ID: "vdf:minitsboy",
 		UnitCounters: UnitCounters{
 			utils.VOICE: []*UnitCounter{
 				&UnitCounter{
@@ -1136,12 +1136,12 @@ func TestLoadAccountActions(t *testing.T) {
 		t.Errorf("Error loading account action: %+v", utils.ToIJSON(aa.UnitCounters[utils.VOICE][0].Counters[0].Filter))
 	}
 	// test that it does not overwrite balances
-	existing, err := accountingStorage.GetAccount(aa.Id)
+	existing, err := accountingStorage.GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The account was not set before load: %+v", existing)
 	}
 	accountingStorage.SetAccount(aa)
-	existing, err = accountingStorage.GetAccount(aa.Id)
+	existing, err = accountingStorage.GetAccount(aa.ID)
 	if err != nil || len(existing.BalanceMap) != 2 {
 		t.Errorf("The set account altered the balances: %+v", existing)
 	}

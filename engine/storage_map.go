@@ -464,7 +464,7 @@ func (ms *MapStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 
 func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 	if values, ok := ms.dict[utils.ACCOUNT_PREFIX+key]; ok {
-		ub = &Account{Id: key}
+		ub = &Account{ID: key}
 		err = ms.ms.Unmarshal(values, ub)
 	} else {
 		return nil, utils.ErrNotFound
@@ -477,7 +477,7 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(ub.BalanceMap) == 0 {
-		if ac, err := ms.GetAccount(ub.Id); err == nil && !ac.allBalancesExpired() {
+		if ac, err := ms.GetAccount(ub.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = ub.ActionTriggers
 			ac.UnitCounters = ub.UnitCounters
 			ac.AllowNegative = ub.AllowNegative
@@ -486,7 +486,7 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 		}
 	}
 	result, err := ms.ms.Marshal(ub)
-	ms.dict[utils.ACCOUNT_PREFIX+ub.Id] = result
+	ms.dict[utils.ACCOUNT_PREFIX+ub.ID] = result
 	return
 }
 

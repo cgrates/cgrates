@@ -36,7 +36,7 @@ Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
 */
 type Account struct {
-	Id                string
+	ID                string
 	BalanceMap        map[string]BalanceChain
 	UnitCounters      UnitCounters
 	ActionTriggers    ActionTriggers
@@ -109,7 +109,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 			continue
 		}
 		if (a.Balance.Uuid != nil && b.Uuid == *a.Balance.Uuid) ||
-			(a.Balance.ID != nil && b.Id == *a.Balance.ID) {
+			(a.Balance.ID != nil && b.ID == *a.Balance.ID) {
 			previousSharedGroups = b.SharedGroups
 			balance = b
 			found = true
@@ -125,7 +125,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	}
 
 	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT {
-		balance.Id = utils.META_DEFAULT
+		balance.ID = utils.META_DEFAULT
 		if a.Balance.Value != nil {
 			balance.Value = *a.Balance.Value
 		}
@@ -142,12 +142,12 @@ func (acc *Account) setBalanceAction(a *Action) error {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
 				} else {
-					if _, found := sg.MemberIds[acc.Id]; !found {
+					if _, found := sg.MemberIds[acc.ID]; !found {
 						// add member and save
 						if sg.MemberIds == nil {
 							sg.MemberIds = make(utils.StringMap)
 						}
-						sg.MemberIds[acc.Id] = true
+						sg.MemberIds[acc.ID] = true
 						ratingStorage.SetSharedGroup(sg)
 					}
 				}
@@ -196,9 +196,9 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	if !found {
 		// check if the Id is *default (user trying to create the default balance)
 		// use only it's value value
-		if bClone.Id == utils.META_DEFAULT {
+		if bClone.ID == utils.META_DEFAULT {
 			bClone = &Balance{
-				Id:    utils.META_DEFAULT,
+				ID:    utils.META_DEFAULT,
 				Value: -bClone.GetValue(),
 			}
 		} else {
@@ -228,12 +228,12 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 					//than is problem
 					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
 				} else {
-					if _, found := sg.MemberIds[ub.Id]; !found {
+					if _, found := sg.MemberIds[ub.ID]; !found {
 						// add member and save
 						if sg.MemberIds == nil {
 							sg.MemberIds = make(utils.StringMap)
 						}
-						sg.MemberIds[ub.Id] = true
+						sg.MemberIds[ub.ID] = true
 						ratingStorage.SetSharedGroup(sg)
 					}
 				}
@@ -300,12 +300,12 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 			continue
 		}
 		b.account = ub
-		if len(b.DestinationIds) > 0 && b.DestinationIds[utils.ANY] == false {
+		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
-						if b.DestinationIds[dId.(string)] == true {
+						if b.DestinationIDs[dId.(string)] == true {
 							b.precision = len(p)
 							usefulBalances = append(usefulBalances, b)
 							break
@@ -487,7 +487,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				defaultBalance := ub.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
 				increment.BalanceInfo.MoneyBalanceUuid = defaultBalance.Uuid
-				increment.BalanceInfo.AccountId = ub.Id
+				increment.BalanceInfo.AccountId = ub.ID
 				increment.paid = true
 				if count {
 					ub.countUnits(
@@ -497,7 +497,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 						&Balance{
 							Directions:     utils.StringMap{leftCC.Direction: true},
 							Value:          cost,
-							DestinationIds: utils.NewStringMap(leftCC.Destination),
+							DestinationIDs: utils.NewStringMap(leftCC.Destination),
 						})
 				}
 			}
@@ -523,7 +523,7 @@ func (ub *Account) GetDefaultMoneyBalance() *Balance {
 	// create default balance
 	defaultBalance := &Balance{
 		Uuid: utils.GenUUID(),
-		Id:   utils.META_DEFAULT,
+		ID:   utils.META_DEFAULT,
 	} // minimum weight
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
@@ -787,7 +787,7 @@ type TenantAccount struct {
 
 func (acc *Account) Clone() *Account {
 	newAcc := &Account{
-		Id:             acc.Id,
+		ID:             acc.ID,
 		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
 		UnitCounters:   nil, // not used when cloned (dryRun)
 		ActionTriggers: nil, // not used when cloned (dryRun)
@@ -914,7 +914,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 
 	result := &Account{
-		Id:             utils.OUT + ":" + acc.Id,
+		Id:             utils.OUT + ":" + acc.ID,
 		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
@@ -960,9 +960,9 @@ func (acc *Account) AsOldStructure() interface{} {
 			Recurrent:             at.Recurrent,
 			MinSleep:              at.MinSleep,
 			BalanceType:           at.Balance.GetType(),
-			BalanceId:             b.Id,
+			BalanceId:             b.ID,
 			BalanceDirection:      b.Directions.String(),
-			BalanceDestinationIds: b.DestinationIds.String(),
+			BalanceDestinationIds: b.DestinationIDs.String(),
 			BalanceWeight:         b.Weight,
 			BalanceExpirationDate: b.ExpirationDate,
 			BalanceTimingTags:     b.TimingIDs.String(),
@@ -983,11 +983,11 @@ func (acc *Account) AsOldStructure() interface{} {
 			for i, b := range values {
 				result.BalanceMap[key][i] = &Balance{
 					Uuid:           b.Uuid,
-					Id:             b.Id,
+					Id:             b.ID,
 					Value:          b.Value,
 					ExpirationDate: b.ExpirationDate,
 					Weight:         b.Weight,
-					DestinationIds: b.DestinationIds.String(),
+					DestinationIds: b.DestinationIDs.String(),
 					RatingSubject:  b.RatingSubject,
 					Category:       b.Categories.String(),
 					SharedGroup:    b.SharedGroups.String(),

@@ -870,7 +870,7 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(acc.BalanceMap) == 0 {
-		if ac, err := ms.GetAccount(acc.Id); err == nil && !ac.allBalancesExpired() {
+		if ac, err := ms.GetAccount(acc.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = acc.ActionTriggers
 			ac.UnitCounters = acc.UnitCounters
 			ac.AllowNegative = acc.AllowNegative
@@ -878,7 +878,7 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 			acc = ac
 		}
 	}
-	_, err := ms.db.C(colAcc).Upsert(bson.M{"id": acc.Id}, acc)
+	_, err := ms.db.C(colAcc).Upsert(bson.M{"id": acc.ID}, acc)
 	return err
 }
 

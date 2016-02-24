@@ -52,7 +52,7 @@ func TestSharedSetGet(t *testing.T) {
 func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 	bc := BalanceChain{
 		&Balance{Value: 2.0},
-		&Balance{Uuid: "uuuu", Value: 1.0, account: &Account{Id: "test"}},
+		&Balance{Uuid: "uuuu", Value: 1.0, account: &Account{ID: "test"}},
 		&Balance{Value: 3.0},
 	}
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
@@ -68,7 +68,7 @@ func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 
 func TestSharedPopBalanceByStrategyHigh(t *testing.T) {
 	bc := BalanceChain{
-		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{Id: "test"}},
+		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{ID: "test"}},
 		&Balance{Value: 1.0},
 		&Balance{Value: 3.0},
 	}
@@ -85,7 +85,7 @@ func TestSharedPopBalanceByStrategyHigh(t *testing.T) {
 
 func TestSharedPopBalanceByStrategyMineHigh(t *testing.T) {
 	bc := BalanceChain{
-		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{Id: "test"}},
+		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{ID: "test"}},
 		&Balance{Value: 1.0},
 		&Balance{Value: 3.0},
 	}

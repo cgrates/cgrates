@@ -144,7 +144,7 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
-				Id: accID,
+				ID: accID,
 			}
 		}
 		if len(attr.ActionPlanId) != 0 {
@@ -395,7 +395,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 	if _, err := self.AccountDb.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
-			Id: accID,
+			ID: accID,
 		}
 		if err := self.AccountDb.SetAccount(account); err != nil {
 			*reply = err.Error()
@@ -487,7 +487,7 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 	if _, err := self.AccountDb.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
-			Id: accID,
+			ID: accID,
 		}
 		if err := self.AccountDb.SetAccount(account); err != nil {
 			*reply = err.Error()
