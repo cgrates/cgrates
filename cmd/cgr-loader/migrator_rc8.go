@@ -289,7 +289,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 				Recurrent:      oldAtr.Recurrent,
 				MinSleep:       oldAtr.MinSleep,
 				Weight:         oldAtr.Weight,
-				ActionsId:      oldAtr.ActionsId,
+				ActionsID:      oldAtr.ActionsId,
 				MinQueuedItems: oldAtr.MinQueuedItems,
 				Executed:       oldAtr.Executed,
 			}
@@ -386,7 +386,7 @@ func (mig MigratorRC8) migrateActionTriggers() error {
 				Recurrent:      oldAtr.Recurrent,
 				MinSleep:       oldAtr.MinSleep,
 				Weight:         oldAtr.Weight,
-				ActionsId:      oldAtr.ActionsId,
+				ActionsID:      oldAtr.ActionsId,
 				MinQueuedItems: oldAtr.MinQueuedItems,
 				Executed:       oldAtr.Executed,
 			}
