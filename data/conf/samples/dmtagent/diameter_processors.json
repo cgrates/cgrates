@@ -3,6 +3,10 @@
 "diameter_agent": {
 	"request_processors": [
 		{
+			"id": "*default",									// formal identifier of this processor
+			"request_filter": "Service-Context-Id(nonexistent)",		// cancel matching of this processor
+		},
+		{
 			"id": "dryrun1",									// formal identifier of this processor
 			"dry_run": true,									// do not send the events to SMG, just log them
 			"request_filter": "Service-Context-Id(dryrun1)",		// filter requests processed by this processor
@@ -59,6 +63,12 @@
 				{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
 				{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "Event-Timestamp", "mandatory": true},
 				{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "Requested-Service-Unit>CC-Time", "mandatory": true},
+			],
+			"cca_fields":[
+				{"tag": "ResultCode",  "field_filter":"CGRError(ACCOUNT_NOT_FOUND)", 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030"},
+				{"tag": "ResultCode",  "field_filter":"CGRError(USER_NOT_FOUND)", 
+					"field_id": "Result-Code", "type": "*constant", "value": "5030"},
 			],
 		},
 		

@@ -109,6 +109,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	var maxUsage float64
 	processorVars := make(map[string]string)
 	processorVars[CGRResultCode] = strconv.Itoa(diam.Success)
+	processorVars[CGRError] = ""
 	if reqProcessor.DryRun { // DryRun does not send over network
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> SMGenericEvent: %+v", smgEv))
 		processorVars[CGRResultCode] = strconv.Itoa(diam.LimitedSuccess)

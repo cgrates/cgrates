@@ -221,7 +221,7 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 // metaValueExponent will multiply the float value with the exponent provided.
 // Expects 2 arguments in template separated by |
 func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
-	valStr := composedFieldvalue(m, argsTpl, 0)
+	valStr := composedFieldvalue(m, argsTpl, 0, nil)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
 	if len(handlerArgs) != 2 {
 		return "", errors.New("Unexpected number of arguments")
@@ -258,15 +258,14 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVa
 	if fieldFilter == nil {
 		return true, 0
 	}
+	if val, hasIt := processorVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
+		if fieldFilter.FilterPasses(val) {
+			return true, 0
+		}
+		return false, 0
+	}
 	avps, err := avpsWithPath(m, fieldFilter)
 	if err != nil {
-		if strings.HasPrefix(err.Error(), "Could not find AVP") {
-			if val, hasIt := processorVars[fieldFilter.Id]; hasIt { // Could not find it in the message, try to match it in processorVars
-				if fieldFilter.FilterPasses(val) {
-					return true, -1
-				}
-			}
-		}
 		return false, 0
 	}
 	for avpIdx, avpVal := range avps { // First match wins due to index
@@ -277,12 +276,16 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVa
 	return false, 0
 }
 
-func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int) string {
+func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, processorVars map[string]string) string {
 	var outVal string
 	for _, rsrTpl := range outTpl {
 		if rsrTpl.IsStatic() {
 			outVal += rsrTpl.ParseValue("")
 		} else {
+			if val, hasIt := processorVars[rsrTpl.Id]; hasIt { // ProcessorVars have priority
+				outVal += rsrTpl.ParseValue(val)
+				continue
+			}
 			matchingAvps, err := avpsWithPath(m, rsrTpl)
 			if err != nil || len(matchingAvps) == 0 {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
@@ -377,9 +380,9 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 			}
 		}
 	case utils.META_COMPOSED:
-		outVal = composedFieldvalue(m, cfgFld.Value, 0)
+		outVal = composedFieldvalue(m, cfgFld.Value, 0, processorVars)
 	case utils.MetaGrouped: // GroupedAVP
-		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex)
+		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex, processorVars)
 	}
 	if fmtValOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
