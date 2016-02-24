@@ -37,7 +37,7 @@ This can represent a user or a shared group.
 */
 type Account struct {
 	ID                string
-	BalanceMap        map[string]BalanceChain
+	BalanceMap        map[string]Balances
 	UnitCounters      UnitCounters
 	ActionTriggers    ActionTriggers
 	AllowNegative     bool
@@ -46,12 +46,12 @@ type Account struct {
 }
 
 // User's available minutes for the specified destination
-func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
+func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances Balances) {
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")
 
 	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")
 	// gather all balances from shared groups
-	var extendedCreditBalances BalanceChain
+	var extendedCreditBalances Balances
 	for _, cb := range creditBalances {
 		if len(cb.SharedGroups) > 0 {
 			for sg := range cb.SharedGroups {
@@ -65,7 +65,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 			extendedCreditBalances = append(extendedCreditBalances, cb)
 		}
 	}
-	var extendedMinuteBalances BalanceChain
+	var extendedMinuteBalances Balances
 	for _, mb := range unitBalances {
 		if len(mb.SharedGroups) > 0 {
 			for sg := range mb.SharedGroups {
@@ -99,7 +99,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	}
 	balanceType := *a.Balance.Type
 	if acc.BalanceMap == nil {
-		acc.BalanceMap = make(map[string]BalanceChain, 1)
+		acc.BalanceMap = make(map[string]Balances, 1)
 	}
 	var previousSharedGroups utils.StringMap // kept for comparison
 	var balance *Balance
@@ -174,7 +174,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		return errors.New("nil balance")
 	}
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain, 1)
+		ub.BalanceMap = make(map[string]Balances, 1)
 	}
 	found := false
 	balanceType := a.Balance.GetType()
@@ -256,7 +256,7 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	}
 
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	found := false
 	id := a.BalanceType
@@ -276,13 +276,13 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	return nil
 }
 */
-func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) BalanceChain {
-	var balances BalanceChain
+func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) Balances {
+	var balances Balances
 	balances = append(balances, ub.BalanceMap[tor]...)
 	if tor != utils.MONETARY && tor != utils.GENERIC {
 		balances = append(balances, ub.BalanceMap[utils.GENERIC]...)
 	}
-	var usefulBalances BalanceChain
+	var usefulBalances Balances
 	for _, b := range balances {
 		if b.Disabled {
 			continue
@@ -333,7 +333,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 }
 
 // like getBalancesForPrefix but expanding shared balances
-func (account *Account) getAlldBalancesForPrefix(destination, category, direction, balanceType string) (bc BalanceChain) {
+func (account *Account) getAlldBalancesForPrefix(destination, category, direction, balanceType string) (bc Balances) {
 	balances := account.getBalancesForPrefix(destination, category, direction, balanceType, "")
 	for _, b := range balances {
 		if len(b.SharedGroups) > 0 {
@@ -526,7 +526,7 @@ func (ub *Account) GetDefaultMoneyBalance() *Balance {
 		ID:   utils.META_DEFAULT,
 	} // minimum weight
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	ub.BalanceMap[utils.MONETARY] = append(ub.BalanceMap[utils.MONETARY], defaultBalance)
 	return defaultBalance
@@ -788,7 +788,7 @@ type TenantAccount struct {
 func (acc *Account) Clone() *Account {
 	newAcc := &Account{
 		ID:             acc.ID,
-		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
+		BalanceMap:     make(map[string]Balances, len(acc.BalanceMap)),
 		UnitCounters:   nil, // not used when cloned (dryRun)
 		ActionTriggers: nil, // not used when cloned (dryRun)
 		AllowNegative:  acc.AllowNegative,
@@ -800,7 +800,7 @@ func (acc *Account) Clone() *Account {
 	return newAcc
 }
 
-func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances BalanceChain, count bool) {
+func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool) {
 	if cc.deductConnectFee {
 		connectFee := cc.GetConnectFee()
 		//log.Print("CONNECT FEE: %f", connectFee)
@@ -874,12 +874,12 @@ func (acc *Account) AsOldStructure() interface{} {
 		account        *Account
 		dirty          bool
 	}
-	type BalanceChain []*Balance
+	type Balances []*Balance
 	type UnitsCounter struct {
 		Direction   string
 		BalanceType string
 		//	Units     float64
-		Balances BalanceChain // first balance is the general one (no destination)
+		Balances Balances // first balance is the general one (no destination)
 	}
 	type ActionTrigger struct {
 		Id                    string
@@ -906,7 +906,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	type ActionTriggers []*ActionTrigger
 	type Account struct {
 		Id             string
-		BalanceMap     map[string]BalanceChain
+		BalanceMap     map[string]Balances
 		UnitCounters   []*UnitsCounter
 		ActionTriggers ActionTriggers
 		AllowNegative  bool
@@ -915,7 +915,7 @@ func (acc *Account) AsOldStructure() interface{} {
 
 	result := &Account{
 		Id:             utils.OUT + ":" + acc.ID,
-		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
+		BalanceMap:     make(map[string]Balances, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
 		AllowNegative:  acc.AllowNegative,
@@ -928,7 +928,7 @@ func (acc *Account) AsOldStructure() interface{} {
 			}
 			result.UnitCounters[i] = &UnitsCounter{
 				BalanceType: balanceType,
-				Balances:    make(BalanceChain, len(uc.Counters)),
+				Balances:    make(Balances, len(uc.Counters)),
 			}
 			if len(uc.Counters) > 0 {
 				result.UnitCounters[i].Direction = (*uc.Counters[0].Filter.Directions).String()
@@ -971,7 +971,7 @@ func (acc *Account) AsOldStructure() interface{} {
 			BalanceSharedGroup:    b.SharedGroups.String(),
 			BalanceDisabled:       b.Disabled,
 			Weight:                at.Weight,
-			ActionsId:             at.ActionsId,
+			ActionsId:             at.ActionsID,
 			MinQueuedItems:        at.MinQueuedItems,
 			Executed:              at.Executed,
 		}
@@ -979,7 +979,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	for key, values := range acc.BalanceMap {
 		if len(values) > 0 {
 			key += utils.OUT
-			result.BalanceMap[key] = make(BalanceChain, len(values))
+			result.BalanceMap[key] = make(Balances, len(values))
 			for i, b := range values {
 				result.BalanceMap[key][i] = &Balance{
 					Uuid:           b.Uuid,

@@ -174,7 +174,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		// transfer data into new structurse
 		newAcc := &engine.Account{
 			ID:             oldAcc.Id,
-			BalanceMap:     make(map[string]engine.BalanceChain, len(oldAcc.BalanceMap)),
+			BalanceMap:     make(map[string]engine.Balances, len(oldAcc.BalanceMap)),
 			UnitCounters:   make(engine.UnitCounters, len(oldAcc.UnitCounters)),
 			ActionTriggers: make(engine.ActionTriggers, len(oldAcc.ActionTriggers)),
 			AllowNegative:  oldAcc.AllowNegative,
@@ -198,7 +198,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 			}
 			newBalKey := "*" + keyElements[1]
 			newBalDirection := "*" + keyElements[2]
-			newAcc.BalanceMap[newBalKey] = make(engine.BalanceChain, len(oldBalChain))
+			newAcc.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 			for index, oldBal := range oldBalChain {
 				// check default to set new id
 				if oldBal.IsDefault() {

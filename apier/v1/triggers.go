@@ -281,7 +281,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 					at.MinQueuedItems = *attr.MinQueuedItems
 				}
 				if attr.ActionsId != nil {
-					at.ActionsId = *attr.ActionsId
+					at.ActionsID = *attr.ActionsId
 				}
 			}
 

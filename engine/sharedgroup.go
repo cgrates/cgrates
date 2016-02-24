@@ -49,7 +49,7 @@ type SharingParameters struct {
 	RatingSubject string
 }
 
-func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChain) BalanceChain {
+func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc Balances) Balances {
 	sharingParameters := sg.AccountParameters[utils.ANY]
 	if sp, hasParamsForAccount := sg.AccountParameters[myBalance.account.ID]; hasParamsForAccount {
 		sharingParameters = sp
@@ -61,18 +61,18 @@ func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChai
 	}
 	switch strategy {
 	case STRATEGY_LOWEST, STRATEGY_MINE_LOWEST:
-		sort.Sort(LowestBalanceChainSorter(bc))
+		sort.Sort(LowestBalancesSorter(bc))
 	case STRATEGY_HIGHEST, STRATEGY_MINE_HIGHEST:
-		sort.Sort(HighestBalanceChainSorter(bc))
+		sort.Sort(HighestBalancesSorter(bc))
 	case STRATEGY_RANDOM, STRATEGY_MINE_RANDOM:
-		rbc := RandomBalanceChainSorter(bc)
+		rbc := RandomBalancesSorter(bc)
 		(&rbc).Sort()
-		bc = BalanceChain(rbc)
+		bc = Balances(rbc)
 	default: // use mine random for anything else
 		strategy = STRATEGY_MINE_RANDOM
-		rbc := RandomBalanceChainSorter(bc)
+		rbc := RandomBalancesSorter(bc)
 		(&rbc).Sort()
-		bc = BalanceChain(rbc)
+		bc = Balances(rbc)
 	}
 	if strings.HasPrefix(strategy, MINE_PREFIX) {
 		// find index of my balance
@@ -90,7 +90,7 @@ func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChai
 }
 
 // Returns all shared group's balances collected from user accounts'
-func (sg *SharedGroup) GetBalances(destination, category, direction, balanceType string, ub *Account) (bc BalanceChain) {
+func (sg *SharedGroup) GetBalances(destination, category, direction, balanceType string, ub *Account) (bc Balances) {
 	//	if len(sg.members) == 0 {
 	for ubId := range sg.MemberIds {
 		var nUb *Account
@@ -115,37 +115,37 @@ func (sg *SharedGroup) GetBalances(destination, category, direction, balanceType
 	return
 }
 
-type LowestBalanceChainSorter []*Balance
+type LowestBalancesSorter []*Balance
 
-func (lbcs LowestBalanceChainSorter) Len() int {
+func (lbcs LowestBalancesSorter) Len() int {
 	return len(lbcs)
 }
 
-func (lbcs LowestBalanceChainSorter) Swap(i, j int) {
+func (lbcs LowestBalancesSorter) Swap(i, j int) {
 	lbcs[i], lbcs[j] = lbcs[j], lbcs[i]
 }
 
-func (lbcs LowestBalanceChainSorter) Less(i, j int) bool {
+func (lbcs LowestBalancesSorter) Less(i, j int) bool {
 	return lbcs[i].GetValue() < lbcs[j].GetValue()
 }
 
-type HighestBalanceChainSorter []*Balance
+type HighestBalancesSorter []*Balance
 
-func (hbcs HighestBalanceChainSorter) Len() int {
+func (hbcs HighestBalancesSorter) Len() int {
 	return len(hbcs)
 }
 
-func (hbcs HighestBalanceChainSorter) Swap(i, j int) {
+func (hbcs HighestBalancesSorter) Swap(i, j int) {
 	hbcs[i], hbcs[j] = hbcs[j], hbcs[i]
 }
 
-func (hbcs HighestBalanceChainSorter) Less(i, j int) bool {
+func (hbcs HighestBalancesSorter) Less(i, j int) bool {
 	return hbcs[i].GetValue() > hbcs[j].GetValue()
 }
 
-type RandomBalanceChainSorter []*Balance
+type RandomBalancesSorter []*Balance
 
-func (rbcs *RandomBalanceChainSorter) Sort() {
+func (rbcs *RandomBalancesSorter) Sort() {
 	src := *rbcs
 	// randomize balance chain
 	dest := make([]*Balance, len(src))

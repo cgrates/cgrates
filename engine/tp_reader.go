@@ -696,7 +696,7 @@ func (tpr *TpReader) LoadActionTriggers() (err error) {
 				ActivationDate: activationDate,
 				Balance:        &BalanceFilter{},
 				Weight:         atr.Weight,
-				ActionsId:      atr.ActionsId,
+				ActionsID:      atr.ActionsId,
 				MinQueuedItems: atr.MinQueuedItems,
 			}
 			if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
@@ -772,7 +772,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 	}
 	for _, accountAction := range storAas {
 		id := accountAction.KeyId()
-		var actionsIds []string // collects action ids
+		var actionIDs []string // collects action ids
 		// action timings
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
@@ -837,7 +837,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					ActionsID: at.ActionsId,
 				})
 				// collect action ids from timings
-				actionsIds = append(actionsIds, at.ActionsId)
+				actionIDs = append(actionIDs, at.ActionsId)
 				exitingAccountIds[id] = true
 				actionPlan.AccountIDs = exitingAccountIds
 			}
@@ -897,7 +897,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						ActivationDate: actTime,
 						Balance:        &BalanceFilter{},
 						Weight:         atr.Weight,
-						ActionsId:      atr.ActionsId,
+						ActionsID:      atr.ActionsId,
 					}
 					if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
 						atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
@@ -960,7 +960,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 			actionTriggers = atrsMap[accountAction.ActionTriggersId]
 			// collect action ids from triggers
 			for _, atr := range actionTriggers {
-				actionsIds = append(actionsIds, atr.ActionsId)
+				actionIDs = append(actionIDs, atr.ActionsID)
 			}
 			// write action triggers
 			err = tpr.ratingStorage.SetActionTriggers(accountAction.ActionTriggersId, actionTriggers)
@@ -971,7 +971,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 
 		// actions
 		facts := make(map[string][]*Action)
-		for _, actId := range actionsIds {
+		for _, actId := range actionIDs {
 			tpas, err := tpr.lr.GetTpActions(tpr.tpid, actId)
 			if err != nil {
 				return err
@@ -1192,7 +1192,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 	if err != nil {
 		return err
 	}
-	var actionsIds []string // collect action ids
+	var actionIDs []string // collect action ids
 	for tag, tpStats := range storStats {
 		for _, tpStat := range tpStats {
 			var cs *CdrStats
@@ -1234,7 +1234,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 								ActivationDate: actTime,
 								Balance:        &BalanceFilter{},
 								Weight:         atr.Weight,
-								ActionsId:      atr.ActionsId,
+								ActionsID:      atr.ActionsId,
 							}
 							if atr.BalanceId != "" && atr.BalanceId != utils.ANY {
 								atrs[idx].Balance.ID = utils.StringPointer(atr.BalanceId)
@@ -1297,7 +1297,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 				}
 				// collect action ids from triggers
 				for _, atr := range tpr.actionsTriggers[triggerTag] {
-					actionsIds = append(actionsIds, atr.ActionsId)
+					actionIDs = append(actionIDs, atr.ActionsID)
 				}
 			}
 			triggers, exists := tpr.actionsTriggers[triggerTag]
@@ -1315,7 +1315,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 		}
 	}
 	// actions
-	for _, actId := range actionsIds {
+	for _, actId := range actionIDs {
 		_, exists := tpr.actions[actId]
 		if !exists {
 			tpas, err := tpr.lr.GetTpActions(tpr.tpid, actId)

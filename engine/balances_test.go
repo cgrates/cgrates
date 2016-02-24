@@ -27,7 +27,7 @@ import (
 func TestBalanceSortPrecision(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 2}
 	mb2 := &Balance{Weight: 2, precision: 1}
-	var bs BalanceChain
+	var bs Balances
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb1 || bs[1] != mb2 {
@@ -38,7 +38,7 @@ func TestBalanceSortPrecision(t *testing.T) {
 func TestBalanceSortPrecisionWeightEqual(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 2}
 	mb2 := &Balance{Weight: 1, precision: 1}
-	var bs BalanceChain
+	var bs Balances
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb1 || bs[1] != mb2 {
@@ -49,7 +49,7 @@ func TestBalanceSortPrecisionWeightEqual(t *testing.T) {
 func TestBalanceSortPrecisionWeightGreater(t *testing.T) {
 	mb1 := &Balance{Weight: 2, precision: 2}
 	mb2 := &Balance{Weight: 1, precision: 1}
-	var bs BalanceChain
+	var bs Balances
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb1 || bs[1] != mb2 {
@@ -60,7 +60,7 @@ func TestBalanceSortPrecisionWeightGreater(t *testing.T) {
 func TestBalanceSortWeight(t *testing.T) {
 	mb1 := &Balance{Weight: 2, precision: 1}
 	mb2 := &Balance{Weight: 1, precision: 1}
-	var bs BalanceChain
+	var bs Balances
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb1 || bs[1] != mb2 {
@@ -71,7 +71,7 @@ func TestBalanceSortWeight(t *testing.T) {
 func TestBalanceSortWeightLess(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1}
 	mb2 := &Balance{Weight: 2, precision: 1}
-	var bs BalanceChain
+	var bs Balances
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb2 || bs[1] != mb1 {

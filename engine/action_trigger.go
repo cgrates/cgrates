@@ -40,7 +40,7 @@ type ActionTrigger struct {
 	//BalanceType       string // *monetary/*voice etc
 	Balance           *BalanceFilter
 	Weight            float64
-	ActionsId         string
+	ActionsID         string
 	MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
 	Executed          bool
 	lastExecutionTime time.Time
@@ -57,7 +57,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
-	aac, err = ratingStorage.GetActions(at.ActionsId, false)
+	aac, err = ratingStorage.GetActions(at.ActionsID, false)
 	aac.Sort()
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))

@@ -615,7 +615,7 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 		}
 
 		if account.BalanceMap == nil {
-			account.BalanceMap = make(map[string]engine.BalanceChain, 1)
+			account.BalanceMap = make(map[string]engine.Balances, 1)
 		}
 		var previousSharedGroups utils.StringMap // kept for comparison
 		var balance *engine.Balance

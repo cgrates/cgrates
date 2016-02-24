@@ -1066,7 +1066,7 @@ func TestLoadActionTriggers(t *testing.T) {
 			Blocker:        nil,
 		},
 		Weight:    10,
-		ActionsId: "SOME_1",
+		ActionsID: "SOME_1",
 		Executed:  false,
 	}
 	if !reflect.DeepEqual(atr, expected) {
@@ -1087,7 +1087,7 @@ func TestLoadActionTriggers(t *testing.T) {
 			SharedGroups:   nil,
 		},
 		Weight:    10,
-		ActionsId: "SOME_2",
+		ActionsID: "SOME_2",
 		Executed:  false,
 	}
 	if !reflect.DeepEqual(atr, expected) {

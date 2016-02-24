@@ -1034,7 +1034,7 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
-	} else if len(reply) != 1 || reply[0].ActionsId != "LOG_BALANCE" {
+	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 }
@@ -1049,7 +1049,7 @@ func TestApierSetAccountActionTriggers(t *testing.T) {
 	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
-	} else if len(reply) != 1 || reply[0].ActionsId != "LOG_BALANCE" {
+	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
 		for _, atr := range reply {
 			t.Logf("ATR: %+v", atr)
 		}
@@ -1084,7 +1084,7 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
-	} else if len(reply) != 1 || reply[0].ActionsId != "LOG_BALANCE" {
+	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
 		for _, atr := range reply {
 			t.Logf("ATR: %+v", atr)
 		}

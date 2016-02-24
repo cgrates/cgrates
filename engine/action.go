@@ -38,9 +38,8 @@ import (
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id         string
-	ActionType string
-	//BalanceType      string
+	Id               string
+	ActionType       string
 	ExtraParameters  string
 	Filter           string
 	ExpirationString string // must stay as string because it can have relative values like 1month
@@ -326,7 +325,7 @@ func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
-		ub.BalanceMap = make(map[string]BalanceChain, 0)
+		ub.BalanceMap = make(map[string]Balances, 0)
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
@@ -347,7 +346,7 @@ func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
-		ub.BalanceMap = make(map[string]BalanceChain, 0)
+		ub.BalanceMap = make(map[string]Balances, 0)
 	}
 	return genericDebit(ub, a, true)
 }
@@ -381,7 +380,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	return ub.debitBalanceAction(a, reset)
 }
@@ -412,7 +411,7 @@ func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 
 func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {
-		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
+		ub.BalanceMap[k] = Balances{&Balance{Value: 0}}
 	}
 	ub.InitCounters()
 	ub.ResetActionTriggers(nil)

@@ -117,6 +117,12 @@ func (sm StringMap) Slice() []string {
 	return result
 }
 
+func (sm StringMap) IsEmpty() bool {
+	return sm == nil ||
+		len(sm) == 0 ||
+		sm[ANY] == true
+}
+
 func StringMapFromSlice(s []string) StringMap {
 	result := make(StringMap)
 	for _, v := range s {

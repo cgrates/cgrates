@@ -52,52 +52,52 @@ func populateDB() {
 
 	minu := &Account{
 		ID: "vdf:minu",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY: BalanceChain{&Balance{Value: 50}},
-			utils.VOICE: BalanceChain{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{&Balance{Value: 50}},
+			utils.VOICE: Balances{
 				&Balance{Value: 200, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
 				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	broker := &Account{
 		ID: "vdf:broker",
-		BalanceMap: map[string]BalanceChain{
-			utils.VOICE: BalanceChain{
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{
 				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
 				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	luna := &Account{
 		ID: "vdf:luna",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY: BalanceChain{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 0, Weight: 20},
 			}},
 	}
 	// this is added to test if csv load tests account will not overwrite balances
 	minitsboy := &Account{
 		ID: "vdf:minitsboy",
-		BalanceMap: map[string]BalanceChain{
-			utils.VOICE: BalanceChain{
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{
 				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
 				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			},
-			utils.MONETARY: BalanceChain{
+			utils.MONETARY: Balances{
 				&Balance{Value: 100, Weight: 10},
 			},
 		},
 	}
 	max := &Account{
 		ID: "cgrates.org:max",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY: BalanceChain{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
 	money := &Account{
 		ID: "cgrates.org:money",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY: BalanceChain{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 10000, Weight: 10},
 			}},
 	}

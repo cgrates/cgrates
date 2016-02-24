@@ -305,7 +305,7 @@ func (b *Balance) SetDirty() {
 	b.dirty = true
 }
 
-func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
+func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -480,7 +480,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	return
 }
 
-func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
+func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -581,28 +581,28 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 /*
 Structure to store minute buckets according to weight, precision or price.
 */
-type BalanceChain []*Balance
+type Balances []*Balance
 
-func (bc BalanceChain) Len() int {
+func (bc Balances) Len() int {
 	return len(bc)
 }
 
-func (bc BalanceChain) Swap(i, j int) {
+func (bc Balances) Swap(i, j int) {
 	bc[i], bc[j] = bc[j], bc[i]
 }
 
 // we need the better ones at the beginning
-func (bc BalanceChain) Less(j, i int) bool {
+func (bc Balances) Less(j, i int) bool {
 	return bc[i].precision < bc[j].precision ||
 		(bc[i].precision == bc[j].precision && bc[i].Weight < bc[j].Weight)
 
 }
 
-func (bc BalanceChain) Sort() {
+func (bc Balances) Sort() {
 	sort.Sort(bc)
 }
 
-func (bc BalanceChain) GetTotalValue() (total float64) {
+func (bc Balances) GetTotalValue() (total float64) {
 	for _, b := range bc {
 		if !b.IsExpired() && b.IsActive() {
 			total += b.GetValue()
@@ -611,7 +611,7 @@ func (bc BalanceChain) GetTotalValue() (total float64) {
 	return
 }
 
-func (bc BalanceChain) Equal(o BalanceChain) bool {
+func (bc Balances) Equal(o Balances) bool {
 	if len(bc) != len(o) {
 		return false
 	}
@@ -625,15 +625,15 @@ func (bc BalanceChain) Equal(o BalanceChain) bool {
 	return true
 }
 
-func (bc BalanceChain) Clone() BalanceChain {
-	var newChain BalanceChain
+func (bc Balances) Clone() Balances {
+	var newChain Balances
 	for _, b := range bc {
 		newChain = append(newChain, b.Clone())
 	}
 	return newChain
 }
 
-func (bc BalanceChain) GetBalance(uuid string) *Balance {
+func (bc Balances) GetBalance(uuid string) *Balance {
 	for _, balance := range bc {
 		if balance.Uuid == uuid {
 			return balance
@@ -642,7 +642,7 @@ func (bc BalanceChain) GetBalance(uuid string) *Balance {
 	return nil
 }
 
-func (bc BalanceChain) HasBalance(balance *Balance) bool {
+func (bc Balances) HasBalance(balance *Balance) bool {
 	for _, b := range bc {
 		if b.Equal(balance) {
 			return true
@@ -651,7 +651,7 @@ func (bc BalanceChain) HasBalance(balance *Balance) bool {
 	return false
 }
 
-func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
+func (bc Balances) SaveDirtyBalances(acc *Account) {
 	savedAccounts := make(map[string]bool)
 	for _, b := range bc {
 		if b.dirty {

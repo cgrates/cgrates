@@ -322,14 +322,14 @@ func GetUB() *Account {
 			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
 		},
 		Weight:    10.0,
-		ActionsId: "Commando",
+		ActionsID: "Commando",
 	}
 	var zeroTime time.Time
 	zeroTime = zeroTime.UTC() // for deep equal to find location
 	ub := &Account{
 		ID:             "rif",
 		AllowNegative:  true,
-		BalanceMap:     map[string]BalanceChain{utils.SMS: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
+		BalanceMap:     map[string]Balances{utils.SMS: Balances{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA: Balances{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: Balances{&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
 		UnitCounters:   UnitCounters{utils.SMS: []*UnitCounter{uc, uc}},
 		ActionTriggers: ActionTriggers{at, at, at},
 	}
