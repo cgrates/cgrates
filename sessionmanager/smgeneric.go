@@ -220,7 +220,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 		}
 		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
 		if ccDur := cc.GetDuration(); ccDur == 0 {
-			err = utils.ErrCreditInsufficient
+			err = utils.ErrInsufficientCredit
 			break
 		} else if ccDur < maxDur {
 			maxDur = ccDur
