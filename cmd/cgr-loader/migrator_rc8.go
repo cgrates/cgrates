@@ -581,7 +581,7 @@ func (mig MigratorRC8) migrateActionPlans() error {
 				// fix id
 				idElements := strings.Split(actionId, utils.CONCATENATED_KEY_SEP)
 				if len(idElements) != 3 {
-					log.Printf("Malformed account ID %s", actionId)
+					//log.Printf("Malformed account ID %s", actionId)
 					continue
 				}
 				apl.AccountIds[idx] = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
