@@ -88,7 +88,7 @@ type ActionTrigger1 struct {
 type ActionTriggers1 []*ActionTrigger1
 
 func (mig MigratorRC8) migrateAccountsInt() error {
-	keys, err := mig.db.Cmd("KEYS", OLD_ACCOUNT_PREFIX+"*").List()
+	keys, err := mig.db.Cmd("KEYS", utils.ACCOUNT_PREFIX+"*").List()
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (mig MigratorRC8) migrateAccountsInt() error {
 		newAcc := &engine.Account{
 			ID:             oldAcc.Id,
 			BalanceMap:     make(map[string]engine.Balances, len(oldAcc.BalanceMap)),
-			UnitCounters:   make(engine.UnitCounters, len(oldAcc.UnitCounters)),
+			UnitCounters:   make(engine.UnitCounters),
 			ActionTriggers: make(engine.ActionTriggers, len(oldAcc.ActionTriggers)),
 			AllowNegative:  oldAcc.AllowNegative,
 			Disabled:       oldAcc.Disabled,
@@ -175,7 +175,7 @@ func (mig MigratorRC8) migrateAccountsInt() error {
 			newAcc.UnitCounters[oldUc.BalanceType] = append(newAcc.UnitCounters[oldUc.BalanceType], newUc)
 		}
 		// action triggers
-		for _, oldAtr := range oldAcc.ActionTriggers {
+		for index, oldAtr := range oldAcc.ActionTriggers {
 			at := &engine.ActionTrigger{
 				ID:             oldAtr.ID,
 				UniqueID:       oldAtr.UniqueID,
@@ -223,6 +223,7 @@ func (mig MigratorRC8) migrateAccountsInt() error {
 				bf.ExpirationDate = utils.TimePointer(oldAtr.BalanceExpirationDate)
 			}
 			at.Balance = bf
+			newAcc.ActionTriggers[index] = at
 		}
 		newAcc.InitCounters()
 		newAccounts = append(newAccounts, newAcc)
