@@ -108,50 +108,51 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 	return result
 }
 
-func (bp *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
+func (bf *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 	if b.Uuid != "" {
-		bp.Uuid = &b.Uuid
+		bf.Uuid = &b.Uuid
 	}
 	if b.ID != "" {
-		bp.ID = &b.ID
+		bf.ID = &b.ID
 	}
 	if b.Value != 0 {
-		bp.Value = &b.Value
+		bf.Value = &b.Value
 	}
-	if len(b.Directions) != 0 {
-		bp.Directions = &b.Directions
+	if !b.Directions.IsEmpty() {
+		bf.Directions = &b.Directions
 	}
 	if !b.ExpirationDate.IsZero() {
-		bp.ExpirationDate = &b.ExpirationDate
+		bf.ExpirationDate = &b.ExpirationDate
 	}
 	if b.Weight != 0 {
-		bp.Weight = &b.Weight
+		bf.Weight = &b.Weight
 	}
-	if len(b.DestinationIDs) != 0 {
-		bp.DestinationIDs = &b.DestinationIDs
+	if !b.DestinationIDs.IsEmpty() {
+		bf.DestinationIDs = &b.DestinationIDs
 	}
 	if b.RatingSubject != "" {
-		bp.RatingSubject = &b.RatingSubject
+		bf.RatingSubject = &b.RatingSubject
 	}
-	if len(b.Categories) != 0 {
-		bp.Categories = &b.Categories
+	if !b.Categories.IsEmpty() {
+		bf.Categories = &b.Categories
 	}
-	if len(b.SharedGroups) != 0 {
-		bp.SharedGroups = &b.SharedGroups
+	if !b.SharedGroups.IsEmpty() {
+		bf.SharedGroups = &b.SharedGroups
 	}
-	if len(b.TimingIDs) != 0 {
-		bp.TimingIDs = &b.TimingIDs
+	if !b.TimingIDs.IsEmpty() {
+		bf.TimingIDs = &b.TimingIDs
 	}
 	if len(b.Factor) != 0 {
-		bp.Factor = &b.Factor
+		bf.Factor = &b.Factor
 	}
 	if b.Disabled {
-		bp.Disabled = &b.Disabled
+		bf.Disabled = &b.Disabled
 	}
 	if b.Blocker {
-		bp.Blocker = &b.Blocker
+		bf.Blocker = &b.Blocker
 	}
-	return bp
+	bf.Timings = b.Timings
+	return bf
 }
 
 func (bp *BalanceFilter) Equal(o *BalanceFilter) bool {
