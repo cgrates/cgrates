@@ -34,6 +34,7 @@ type StatsInterface interface {
 	GetQueueTriggers(string, *ActionTriggers) error
 	AppendCDR(*CDR, *int) error
 	AddQueue(*CdrStats, *int) error
+	RemoveQueue(string, *int) error
 	ReloadQueues([]string, *int) error
 	ResetQueues([]string, *int) error
 	Stop(int, *int) error
@@ -159,6 +160,22 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 	if _, exists = s.queueSavers[sq.GetId()]; !exists {
 		s.setupQueueSaver(sq)
 	}
+	return nil
+}
+
+func (s *Stats) RemoveQueue(qID string, out *int) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	if s.queues == nil {
+		s.queues = make(map[string]*StatsQueue)
+	}
+	if s.queueSavers == nil {
+		s.queueSavers = make(map[string]*queueSaver)
+	}
+
+	delete(s.queues, qID)
+	delete(s.queueSavers, qID)
+
 	return nil
 }
 
@@ -320,6 +337,10 @@ func (ps *ProxyStats) GetQueueTriggers(id string, ats *ActionTriggers) error {
 
 func (ps *ProxyStats) AddQueue(cs *CdrStats, out *int) error {
 	return ps.Client.Call("Stats.AddQueue", cs, out)
+}
+
+func (ps *ProxyStats) RemoveQueue(qID string, out *int) error {
+	return ps.Client.Call("Stats.RemoveQueue", qID, out)
 }
 
 func (ps *ProxyStats) ReloadQueues(ids []string, out *int) error {

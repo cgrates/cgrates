@@ -273,22 +273,22 @@ type TPActions struct {
 }
 
 type TPAction struct {
-	Identifier      string  // Identifier mapped in the code
-	BalanceId       string  // Balance identification string (account scope)
-	BalanceType     string  // Type of balance the action will operate on
-	Directions      string  // Balance direction
-	Units           float64 // Number of units to add/deduct
-	ExpiryTime      string  // Time when the units will expire
-	Filter          string  // The condition on balances that is checked before the action
-	TimingTags      string  // Timing when balance is active
-	DestinationIds  string  // Destination profile id
-	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
-	Categories      string  // category filter for balances
-	SharedGroups    string  // Reference to a shared group
-	BalanceWeight   float64 // Balance weight
+	Identifier      string // Identifier mapped in the code
+	BalanceId       string // Balance identification string (account scope)
+	BalanceType     string // Type of balance the action will operate on
+	Directions      string // Balance direction
+	Units           string // Number of units to add/deduct
+	ExpiryTime      string // Time when the units will expire
+	Filter          string // The condition on balances that is checked before the action
+	TimingTags      string // Timing when balance is active
+	DestinationIds  string // Destination profile id
+	RatingSubject   string // Reference a rate subject defined in RatingProfiles
+	Categories      string // category filter for balances
+	SharedGroups    string // Reference to a shared group
+	BalanceWeight   string // Balance weight
 	ExtraParameters string
-	BalanceBlocker  bool
-	BalanceDisabled bool
+	BalanceBlocker  string
+	BalanceDisabled string
 	Weight          float64 // Action's weight
 }
 
@@ -480,18 +480,20 @@ type TPActionTrigger struct {
 	ThresholdValue        float64 // Threshold
 	Recurrent             bool    // reset executed flag each run
 	MinSleep              string  // Minimum duration between two executions in case of recurrent triggers
+	ExpirationDate        string  // Trigger expiration
+	ActivationDate        string  // Trigger activation
 	BalanceId             string  // The id of the balance in the account
 	BalanceType           string  // Type of balance this trigger monitors
 	BalanceDirections     string  // Traffic direction
 	BalanceDestinationIds string  // filter for balance
-	BalanceWeight         float64 // filter for balance
+	BalanceWeight         string  // filter for balance
 	BalanceExpirationDate string  // filter for balance
 	BalanceTimingTags     string  // filter for balance
 	BalanceRatingSubject  string  // filter for balance
 	BalanceCategories     string  // filter for balance
 	BalanceSharedGroups   string  // filter for balance
-	BalanceBlocker        bool    // filter for balance
-	BalanceDisabled       bool    // filter for balance
+	BalanceBlocker        string  // filter for balance
+	BalanceDisabled       string  // filter for balance
 	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached
 	Weight                float64 // weight

@@ -173,20 +173,20 @@ func (mig MigratorRC8) migrateAccounts() error {
 		}
 		// transfer data into new structurse
 		newAcc := &engine.Account{
-			Id:             oldAcc.Id,
-			BalanceMap:     make(map[string]engine.BalanceChain, len(oldAcc.BalanceMap)),
+			ID:             oldAcc.Id,
+			BalanceMap:     make(map[string]engine.Balances, len(oldAcc.BalanceMap)),
 			UnitCounters:   make(engine.UnitCounters, len(oldAcc.UnitCounters)),
 			ActionTriggers: make(engine.ActionTriggers, len(oldAcc.ActionTriggers)),
 			AllowNegative:  oldAcc.AllowNegative,
 			Disabled:       oldAcc.Disabled,
 		}
 		// fix id
-		idElements := strings.Split(newAcc.Id, utils.CONCATENATED_KEY_SEP)
+		idElements := strings.Split(newAcc.ID, utils.CONCATENATED_KEY_SEP)
 		if len(idElements) != 3 {
 			log.Printf("Malformed account ID %s", oldAcc.Id)
 			continue
 		}
-		newAcc.Id = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
+		newAcc.ID = fmt.Sprintf("%s:%s", idElements[1], idElements[2])
 		// balances
 		balanceErr := false
 		for oldBalKey, oldBalChain := range oldAcc.BalanceMap {
@@ -198,7 +198,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 			}
 			newBalKey := "*" + keyElements[1]
 			newBalDirection := "*" + keyElements[2]
-			newAcc.BalanceMap[newBalKey] = make(engine.BalanceChain, len(oldBalChain))
+			newAcc.BalanceMap[newBalKey] = make(engine.Balances, len(oldBalChain))
 			for index, oldBal := range oldBalChain {
 				// check default to set new id
 				if oldBal.IsDefault() {
@@ -206,12 +206,12 @@ func (mig MigratorRC8) migrateAccounts() error {
 				}
 				newAcc.BalanceMap[newBalKey][index] = &engine.Balance{
 					Uuid:           oldBal.Uuid,
-					Id:             oldBal.Id,
+					ID:             oldBal.Id,
 					Value:          oldBal.Value,
 					Directions:     utils.ParseStringMap(newBalDirection),
 					ExpirationDate: oldBal.ExpirationDate,
 					Weight:         oldBal.Weight,
-					DestinationIds: utils.ParseStringMap(oldBal.DestinationIds),
+					DestinationIDs: utils.ParseStringMap(oldBal.DestinationIds),
 					RatingSubject:  oldBal.RatingSubject,
 					Categories:     utils.ParseStringMap(oldBal.Category),
 					SharedGroups:   utils.ParseStringMap(oldBal.SharedGroup),
@@ -227,51 +227,108 @@ func (mig MigratorRC8) migrateAccounts() error {
 		// unit counters
 		for _, oldUc := range oldAcc.UnitCounters {
 			newUc := &engine.UnitCounter{
-				BalanceType: oldUc.BalanceType,
-				Balances:    make(engine.BalanceChain, len(oldUc.Balances)),
+				Counters: make(engine.CounterFilters, len(oldUc.Balances)),
 			}
 			for index, oldUcBal := range oldUc.Balances {
-				newUc.Balances[index] = &engine.Balance{
-					Uuid:           oldUcBal.Uuid,
-					Id:             oldUcBal.Id,
-					Value:          oldUcBal.Value,
-					Directions:     utils.ParseStringMap(oldUc.Direction),
-					ExpirationDate: oldUcBal.ExpirationDate,
-					Weight:         oldUcBal.Weight,
-					DestinationIds: utils.ParseStringMap(oldUcBal.DestinationIds),
-					RatingSubject:  oldUcBal.RatingSubject,
-					Categories:     utils.ParseStringMap(oldUcBal.Category),
-					SharedGroups:   utils.ParseStringMap(oldUcBal.SharedGroup),
-					Timings:        oldUcBal.Timings,
-					TimingIDs:      utils.ParseStringMap(oldUcBal.TimingIDs),
-					Disabled:       oldUcBal.Disabled,
+				bf := &engine.BalanceFilter{}
+				if oldUcBal.Uuid != "" {
+					bf.Uuid = utils.StringPointer(oldUcBal.Uuid)
 				}
+				if oldUcBal.Id != "" {
+					bf.ID = utils.StringPointer(oldUcBal.Id)
+				}
+				if oldUc.BalanceType != "" {
+					bf.Type = utils.StringPointer(oldUc.BalanceType)
+				}
+				// the value was used for counter value
+				/*if oldUcBal.Value != 0 {
+					bf.Value = utils.Float64Pointer(oldUcBal.Value)
+				}*/
+				if oldUc.Direction != "" {
+					bf.Directions = utils.StringMapPointer(utils.ParseStringMap(oldUc.Direction))
+				}
+				if !oldUcBal.ExpirationDate.IsZero() {
+					bf.ExpirationDate = utils.TimePointer(oldUcBal.ExpirationDate)
+				}
+				if oldUcBal.Weight != 0 {
+					bf.Weight = utils.Float64Pointer(oldUcBal.Weight)
+				}
+				if oldUcBal.DestinationIds != "" {
+					bf.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(oldUcBal.DestinationIds))
+				}
+				if oldUcBal.RatingSubject != "" {
+					bf.RatingSubject = utils.StringPointer(oldUcBal.RatingSubject)
+				}
+				if oldUcBal.Category != "" {
+					bf.Categories = utils.StringMapPointer(utils.ParseStringMap(oldUcBal.Category))
+				}
+				if oldUcBal.SharedGroup != "" {
+					bf.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(oldUcBal.SharedGroup))
+				}
+				if oldUcBal.TimingIDs != "" {
+					bf.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(oldUcBal.TimingIDs))
+				}
+				if oldUcBal.Disabled != false {
+					bf.Disabled = utils.BoolPointer(oldUcBal.Disabled)
+				}
+				bf.Timings = oldUcBal.Timings
+				cf := &engine.CounterFilter{
+					Value:  oldUcBal.Value,
+					Filter: bf,
+				}
+				newUc.Counters[index] = cf
 			}
+			newAcc.UnitCounters[oldUc.BalanceType] = append(newAcc.UnitCounters[oldUc.BalanceType], newUc)
 		}
 		// action triggers
 		for index, oldAtr := range oldAcc.ActionTriggers {
-			newAcc.ActionTriggers[index] = &engine.ActionTrigger{
-				UniqueID:              oldAtr.Id,
-				ThresholdType:         oldAtr.ThresholdType,
-				ThresholdValue:        oldAtr.ThresholdValue,
-				Recurrent:             oldAtr.Recurrent,
-				MinSleep:              oldAtr.MinSleep,
-				BalanceId:             oldAtr.BalanceId,
-				BalanceType:           oldAtr.BalanceType,
-				BalanceDirections:     utils.ParseStringMap(oldAtr.BalanceDirection),
-				BalanceDestinationIds: utils.ParseStringMap(oldAtr.BalanceDestinationIds),
-				BalanceWeight:         oldAtr.BalanceWeight,
-				BalanceExpirationDate: oldAtr.BalanceExpirationDate,
-				BalanceTimingTags:     utils.ParseStringMap(oldAtr.BalanceTimingTags),
-				BalanceRatingSubject:  oldAtr.BalanceRatingSubject,
-				BalanceCategories:     utils.ParseStringMap(oldAtr.BalanceCategory),
-				BalanceSharedGroups:   utils.ParseStringMap(oldAtr.BalanceSharedGroup),
-				BalanceDisabled:       oldAtr.BalanceDisabled,
-				Weight:                oldAtr.Weight,
-				ActionsId:             oldAtr.ActionsId,
-				MinQueuedItems:        oldAtr.MinQueuedItems,
-				Executed:              oldAtr.Executed,
+			at := &engine.ActionTrigger{
+				UniqueID:       oldAtr.Id,
+				ThresholdType:  oldAtr.ThresholdType,
+				ThresholdValue: oldAtr.ThresholdValue,
+				Recurrent:      oldAtr.Recurrent,
+				MinSleep:       oldAtr.MinSleep,
+				Weight:         oldAtr.Weight,
+				ActionsID:      oldAtr.ActionsId,
+				MinQueuedItems: oldAtr.MinQueuedItems,
+				Executed:       oldAtr.Executed,
 			}
+			bf := &engine.BalanceFilter{}
+			if oldAtr.BalanceId != "" {
+				bf.ID = utils.StringPointer(oldAtr.BalanceId)
+			}
+			if oldAtr.BalanceType != "" {
+				bf.Type = utils.StringPointer(oldAtr.BalanceType)
+			}
+			if oldAtr.BalanceRatingSubject != "" {
+				bf.RatingSubject = utils.StringPointer(oldAtr.BalanceRatingSubject)
+			}
+			if oldAtr.BalanceDirection != "" {
+				bf.Directions = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceDirection))
+			}
+			if oldAtr.BalanceDestinationIds != "" {
+				bf.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceDestinationIds))
+			}
+			if oldAtr.BalanceTimingTags != "" {
+				bf.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceTimingTags))
+			}
+			if oldAtr.BalanceCategory != "" {
+				bf.Categories = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceCategory))
+			}
+			if oldAtr.BalanceSharedGroup != "" {
+				bf.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceSharedGroup))
+			}
+			if oldAtr.BalanceWeight != 0 {
+				bf.Weight = utils.Float64Pointer(oldAtr.BalanceWeight)
+			}
+			if oldAtr.BalanceDisabled != false {
+				bf.Disabled = utils.BoolPointer(oldAtr.BalanceDisabled)
+			}
+			if !oldAtr.BalanceExpirationDate.IsZero() {
+				bf.ExpirationDate = utils.TimePointer(oldAtr.BalanceExpirationDate)
+			}
+			at.Balance = bf
+			newAcc.ActionTriggers[index] = at
 			if newAcc.ActionTriggers[index].ThresholdType == "*min_counter" ||
 				newAcc.ActionTriggers[index].ThresholdType == "*max_counter" {
 				newAcc.ActionTriggers[index].ThresholdType = strings.Replace(newAcc.ActionTriggers[index].ThresholdType, "_", "_event_", 1)
@@ -287,7 +344,7 @@ func (mig MigratorRC8) migrateAccounts() error {
 		if err != nil {
 			return err
 		}
-		if err := mig.db.Cmd("SET", utils.ACCOUNT_PREFIX+newAcc.Id, result).Err; err != nil {
+		if err := mig.db.Cmd("SET", utils.ACCOUNT_PREFIX+newAcc.ID, result).Err; err != nil {
 			return err
 		}
 	}
@@ -322,28 +379,53 @@ func (mig MigratorRC8) migrateActionTriggers() error {
 		}
 		newAtrs := make(engine.ActionTriggers, len(oldAtrs))
 		for index, oldAtr := range oldAtrs {
-			newAtrs[index] = &engine.ActionTrigger{
-				UniqueID:              oldAtr.Id,
-				ThresholdType:         oldAtr.ThresholdType,
-				ThresholdValue:        oldAtr.ThresholdValue,
-				Recurrent:             oldAtr.Recurrent,
-				MinSleep:              oldAtr.MinSleep,
-				BalanceId:             oldAtr.BalanceId,
-				BalanceType:           oldAtr.BalanceType,
-				BalanceDirections:     utils.ParseStringMap(oldAtr.BalanceDirection),
-				BalanceDestinationIds: utils.ParseStringMap(oldAtr.BalanceDestinationIds),
-				BalanceWeight:         oldAtr.BalanceWeight,
-				BalanceExpirationDate: oldAtr.BalanceExpirationDate,
-				BalanceTimingTags:     utils.ParseStringMap(oldAtr.BalanceTimingTags),
-				BalanceRatingSubject:  oldAtr.BalanceRatingSubject,
-				BalanceCategories:     utils.ParseStringMap(oldAtr.BalanceCategory),
-				BalanceSharedGroups:   utils.ParseStringMap(oldAtr.BalanceSharedGroup),
-				BalanceDisabled:       oldAtr.BalanceDisabled,
-				Weight:                oldAtr.Weight,
-				ActionsId:             oldAtr.ActionsId,
-				MinQueuedItems:        oldAtr.MinQueuedItems,
-				Executed:              oldAtr.Executed,
+			at := &engine.ActionTrigger{
+				UniqueID:       oldAtr.Id,
+				ThresholdType:  oldAtr.ThresholdType,
+				ThresholdValue: oldAtr.ThresholdValue,
+				Recurrent:      oldAtr.Recurrent,
+				MinSleep:       oldAtr.MinSleep,
+				Weight:         oldAtr.Weight,
+				ActionsID:      oldAtr.ActionsId,
+				MinQueuedItems: oldAtr.MinQueuedItems,
+				Executed:       oldAtr.Executed,
 			}
+			bf := &engine.BalanceFilter{}
+			if oldAtr.BalanceId != "" {
+				bf.ID = utils.StringPointer(oldAtr.BalanceId)
+			}
+			if oldAtr.BalanceType != "" {
+				bf.Type = utils.StringPointer(oldAtr.BalanceType)
+			}
+			if oldAtr.BalanceRatingSubject != "" {
+				bf.RatingSubject = utils.StringPointer(oldAtr.BalanceRatingSubject)
+			}
+			if oldAtr.BalanceDirection != "" {
+				bf.Directions = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceDirection))
+			}
+			if oldAtr.BalanceDestinationIds != "" {
+				bf.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceDestinationIds))
+			}
+			if oldAtr.BalanceTimingTags != "" {
+				bf.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceTimingTags))
+			}
+			if oldAtr.BalanceCategory != "" {
+				bf.Categories = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceCategory))
+			}
+			if oldAtr.BalanceSharedGroup != "" {
+				bf.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(oldAtr.BalanceSharedGroup))
+			}
+			if oldAtr.BalanceWeight != 0 {
+				bf.Weight = utils.Float64Pointer(oldAtr.BalanceWeight)
+			}
+			if oldAtr.BalanceDisabled != false {
+				bf.Disabled = utils.BoolPointer(oldAtr.BalanceDisabled)
+			}
+			if !oldAtr.BalanceExpirationDate.IsZero() {
+				bf.ExpirationDate = utils.TimePointer(oldAtr.BalanceExpirationDate)
+			}
+			at.Balance = bf
+			newAtrs[index] = at
 			if newAtrs[index].ThresholdType == "*min_counter" ||
 				newAtrs[index].ThresholdType == "*max_counter" {
 				newAtrs[index].ThresholdType = strings.Replace(newAtrs[index].ThresholdType, "_", "_event_", 1)
@@ -381,29 +463,53 @@ func (mig MigratorRC8) migrateActions() error {
 		}
 		newAcs := make(engine.Actions, len(oldAcs))
 		for index, oldAc := range oldAcs {
-			newAcs[index] = &engine.Action{
+			a := &engine.Action{
 				Id:               oldAc.Id,
 				ActionType:       oldAc.ActionType,
-				BalanceType:      oldAc.BalanceType,
 				ExtraParameters:  oldAc.ExtraParameters,
 				ExpirationString: oldAc.ExpirationString,
 				Weight:           oldAc.Weight,
-				Balance: &engine.Balance{
-					Uuid:           oldAc.Balance.Uuid,
-					Id:             oldAc.Balance.Id,
-					Value:          oldAc.Balance.Value,
-					Directions:     utils.ParseStringMap(oldAc.Direction),
-					ExpirationDate: oldAc.Balance.ExpirationDate,
-					Weight:         oldAc.Balance.Weight,
-					DestinationIds: utils.ParseStringMap(oldAc.Balance.DestinationIds),
-					RatingSubject:  oldAc.Balance.RatingSubject,
-					Categories:     utils.ParseStringMap(oldAc.Balance.Category),
-					SharedGroups:   utils.ParseStringMap(oldAc.Balance.SharedGroup),
-					Timings:        oldAc.Balance.Timings,
-					TimingIDs:      utils.ParseStringMap(oldAc.Balance.TimingIDs),
-					Disabled:       oldAc.Balance.Disabled,
-				},
+				Balance:          &engine.BalanceFilter{},
 			}
+			bf := a.Balance
+			if oldAc.Balance.Uuid != "" {
+				bf.Uuid = utils.StringPointer(oldAc.Balance.Uuid)
+			}
+			if oldAc.Balance.Id != "" {
+				bf.ID = utils.StringPointer(oldAc.Balance.Id)
+			}
+			if oldAc.BalanceType != "" {
+				bf.Type = utils.StringPointer(oldAc.BalanceType)
+			}
+			if oldAc.Balance.Value != 0 {
+				bf.Value = utils.Float64Pointer(oldAc.Balance.Value)
+			}
+			if oldAc.Balance.RatingSubject != "" {
+				bf.RatingSubject = utils.StringPointer(oldAc.Balance.RatingSubject)
+			}
+			if oldAc.Balance.DestinationIds != "" {
+				bf.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(oldAc.Balance.DestinationIds))
+			}
+			if oldAc.Balance.TimingIDs != "" {
+				bf.TimingIDs = utils.StringMapPointer(utils.ParseStringMap(oldAc.Balance.TimingIDs))
+			}
+			if oldAc.Balance.Category != "" {
+				bf.Categories = utils.StringMapPointer(utils.ParseStringMap(oldAc.Balance.Category))
+			}
+			if oldAc.Balance.SharedGroup != "" {
+				bf.SharedGroups = utils.StringMapPointer(utils.ParseStringMap(oldAc.Balance.SharedGroup))
+			}
+			if oldAc.Balance.Weight != 0 {
+				bf.Weight = utils.Float64Pointer(oldAc.Balance.Weight)
+			}
+			if oldAc.Balance.Disabled != false {
+				bf.Disabled = utils.BoolPointer(oldAc.Balance.Disabled)
+			}
+			if !oldAc.Balance.ExpirationDate.IsZero() {
+				bf.ExpirationDate = utils.TimePointer(oldAc.Balance.ExpirationDate)
+			}
+			bf.Timings = oldAc.Balance.Timings
+			newAcs[index] = a
 		}
 		newAcsMap[key] = newAcs
 	}
@@ -475,7 +581,7 @@ func (mig MigratorRC8) migrateActionPlans() error {
 				// fix id
 				idElements := strings.Split(actionId, utils.CONCATENATED_KEY_SEP)
 				if len(idElements) != 3 {
-					log.Printf("Malformed account ID %s", actionId)
+					//log.Printf("Malformed account ID %s", actionId)
 					continue
 				}
 				apl.AccountIds[idx] = fmt.Sprintf("%s:%s", idElements[1], idElements[2])

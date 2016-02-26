@@ -7,3 +7,4 @@
 *out,cgrates.org,lcr_profile2,suppl1,2014-01-14T00:00:00Z,RP_RETAIL2,,STATS_SUPPL1
 *out,cgrates.org,lcr_profile2,suppl2,2014-01-14T00:00:00Z,RP_RETAIL1,,STATS_SUPPL2
 *out,cgrates.org,lcr_profile2,suppl3,2014-01-14T00:00:00Z,RP_SPECIAL_1002,,
+*out,cgrates.org,generic,*any,2014-01-14T00:00:00Z,RP_GENERIC,,

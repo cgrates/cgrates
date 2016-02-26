@@ -86,6 +86,34 @@ func TestAvpValAsString(t *testing.T) {
 	}
 }
 
+func TestMetaValueExponent(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.CCMoney, avp.Mbit, 0, &diam.GroupedAVP{
+				AVP: []*diam.AVP{
+					diam.NewAVP(avp.UnitValue, avp.Mbit, 0, &diam.GroupedAVP{
+						AVP: []*diam.AVP{
+							diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(10000)),
+							diam.NewAVP(avp.Exponent, avp.Mbit, 0, datatype.Integer32(-5)),
+						},
+					}),
+					diam.NewAVP(avp.CurrencyCode, avp.Mbit, 0, datatype.Unsigned32(33)),
+				},
+			}),
+		},
+	})
+	if val, err := metaValueExponent(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err != nil {
+		t.Error(err)
+	} else if val != "0.1" {
+		t.Error("Received: ", val)
+	}
+	if _, err = metaValueExponent(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err == nil {
+		t.Error("Should have received error") // Insufficient number arguments
+	}
+}
+
 func TestFieldOutVal(t *testing.T) {
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
@@ -106,7 +134,7 @@ func TestFieldOutVal(t *testing.T) {
 	cfgFld := &config.CfgCdrField{Tag: "StaticTest", Type: utils.META_COMPOSED, FieldId: utils.TOR,
 		Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true}
 	eOut := "*voice"
-	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0)); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
@@ -114,7 +142,20 @@ func TestFieldOutVal(t *testing.T) {
 	cfgFld = &config.CfgCdrField{Tag: "ComposedTest", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
 		Value: utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Time", utils.INFIELD_SEP), Mandatory: true}
 	eOut = "360"
-	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0)); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
+		t.Error(err)
+	} else if fldOut != eOut {
+		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
+	}
+	// With filter on ProcessorVars
+	cfgFld = &config.CfgCdrField{Tag: "ComposedTestWithProcessorVarsFilter", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
+		FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(INSUFFICIENT_CREDIT)", utils.INFIELD_SEP),
+		Value:       utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Time", utils.INFIELD_SEP), Mandatory: true}
+	if _, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err == nil {
+		t.Error("Should have error")
+	}
+	eOut = "360"
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), map[string]string{"CGRError": "INSUFFICIENT_CREDIT"}); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
@@ -123,7 +164,7 @@ func TestFieldOutVal(t *testing.T) {
 	cfgFld = &config.CfgCdrField{Tag: "Grouped1", Type: utils.MetaGrouped, FieldId: "Account",
 		Value: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
 	eOut = "33708000003"
-	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0)); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
@@ -133,7 +174,7 @@ func TestFieldOutVal(t *testing.T) {
 		FieldFilter: utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Type(1)", utils.INFIELD_SEP),
 		Value:       utils.ParseRSRFieldsMustCompile("Subscription-Id>Subscription-Id-Data", utils.INFIELD_SEP), Mandatory: true}
 	eOut = "208708000003"
-	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0)); err != nil {
+	if fldOut, err := fieldOutVal(m, cfgFld, time.Duration(0), nil); err != nil {
 		t.Error(err)
 	} else if fldOut != eOut {
 		t.Errorf("Expecting: %s, received: %s", eOut, fldOut)
@@ -274,7 +315,7 @@ func TestCCASetProcessorAVPs(t *testing.T) {
 			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),             // Subscription-Id-Type
 			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("33708000003")), // Subscription-Id-Data
 		}})
-	if err := cca.SetProcessorAVPs(reqProcessor, 0); err != nil {
+	if err := cca.SetProcessorAVPs(reqProcessor, map[string]string{}); err != nil {
 		t.Error(err)
 	} else if ccaMsg := cca.AsDiameterMessage(); !reflect.DeepEqual(eMessage, ccaMsg) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, ccaMsg)

@@ -150,13 +150,14 @@ type CallDescriptor struct {
 	TOR                                   string            // used unit balances selector
 	ExtraFields                           map[string]string // Extra fields, mostly used for user profile matching
 	// session limits
-	MaxRate      float64
-	MaxRateUnit  time.Duration
-	MaxCostSoFar float64
-	CgrID        string
-	RunID        string
-	account      *Account
-	testCallcost *CallCost // testing purpose only!
+	MaxRate       float64
+	MaxRateUnit   time.Duration
+	MaxCostSoFar  float64
+	CgrID         string
+	RunID         string
+	ForceDuration bool // for Max debit if less than duration return err
+	account       *Account
+	testCallcost  *CallCost // testing purpose only!
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {
@@ -180,7 +181,7 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 		cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey())
 	}
 	if cd.account != nil && cd.account.Disabled {
-		return nil, fmt.Errorf("User %s is disabled", cd.account.Id)
+		return nil, fmt.Errorf("User %s is disabled", cd.account.ID)
 	}
 	return cd.account, err
 }
@@ -728,9 +729,16 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		return nil, utils.ErrAccountNotFound
 	} else {
 		//log.Printf("ACC: %+v", account)
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
+		if memberIDs, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
+				if err != nil && cd.GetDuration() > 0 {
+					return 0, err
+				}
+				// check ForceDuartion
+				if cd.ForceDuration && !account.AllowNegative && remainingDuration < cd.GetDuration() {
+					return 0, utils.ErrInsufficientCredit
+				}
 				//log.Print("AFTER MAX SESSION: ", cd)
 				if err != nil || remainingDuration == 0 {
 					cc = cd.CreateCallCost()
@@ -758,7 +766,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				cc, err = cd.debit(account, false, true)
 				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
-			}, 0, memberIds.Slice()...)
+			}, 0, memberIDs.Slice()...)
 			if err != nil {
 				return cc, err
 			}

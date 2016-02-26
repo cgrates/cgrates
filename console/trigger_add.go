@@ -18,48 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/apier/v1"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdEnableDisableBalance{
-		name:      "balance_enabledisable",
-		rpcMethod: "ApierV1.EnableDisableBalance",
+	c := &CmdAddTriggers{
+		name:      "triggers_add",
+		rpcMethod: "ApierV1.AddAccountActionTriggers",
+		rpcParams: &v1.AttrAddAccountActionTriggers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdEnableDisableBalance struct {
+type CmdAddTriggers struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrAddBalance
+	rpcParams *v1.AttrAddAccountActionTriggers
 	*CommandExecuter
 }
 
-func (self *CmdEnableDisableBalance) Name() string {
+func (self *CmdAddTriggers) Name() string {
 	return self.name
 }
 
-func (self *CmdEnableDisableBalance) RpcMethod() string {
+func (self *CmdAddTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdEnableDisableBalance) RpcParams(reset bool) interface{} {
+func (self *CmdAddTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrAddBalance{BalanceType: utils.MONETARY, Overwrite: false}
+		self.rpcParams = &v1.AttrAddAccountActionTriggers{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdEnableDisableBalance) PostprocessRpcParams() error {
+func (self *CmdAddTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdEnableDisableBalance) RpcResult() interface{} {
+func (self *CmdAddTriggers) RpcResult() interface{} {
 	var s string
 	return &s
 }

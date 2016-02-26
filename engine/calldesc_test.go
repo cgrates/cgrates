@@ -41,63 +41,63 @@ func init() {
 
 func populateDB() {
 	ats := []*Action{
-		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Balance: &Balance{Value: 10}},
-		&Action{ActionType: "*topup", BalanceType: utils.VOICE, Balance: &Balance{Weight: 20, Value: 10, DestinationIds: utils.NewStringMap("NAT")}},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(10)}},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Weight: utils.Float64Pointer(20), Value: utils.Float64Pointer(10), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
 	}
 
 	ats1 := []*Action{
-		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Balance: &Balance{Value: 10}, Weight: 10},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(10)}, Weight: 10},
 		&Action{ActionType: "*reset_account", Weight: 20},
 	}
 
 	minu := &Account{
-		Id: "vdf:minu",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY: BalanceChain{&Balance{Value: 50}},
-			utils.VOICE: BalanceChain{
-				&Balance{Value: 200, DestinationIds: utils.NewStringMap("NAT"), Weight: 10},
-				&Balance{Value: 100, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+		ID: "vdf:minu",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{&Balance{Value: 50}},
+			utils.VOICE: Balances{
+				&Balance{Value: 200, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	broker := &Account{
-		Id: "vdf:broker",
-		BalanceMap: map[string]BalanceChain{
-			utils.VOICE: BalanceChain{
-				&Balance{Value: 20, DestinationIds: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{
+				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	luna := &Account{
-		Id: "vdf:luna",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY: BalanceChain{
+		ID: "vdf:luna",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 0, Weight: 20},
 			}},
 	}
 	// this is added to test if csv load tests account will not overwrite balances
 	minitsboy := &Account{
-		Id: "vdf:minitsboy",
-		BalanceMap: map[string]BalanceChain{
-			utils.VOICE: BalanceChain{
-				&Balance{Value: 20, DestinationIds: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationIds: utils.NewStringMap("RET"), Weight: 20},
+		ID: "vdf:minitsboy",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{
+				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			},
-			utils.MONETARY: BalanceChain{
+			utils.MONETARY: Balances{
 				&Balance{Value: 100, Weight: 10},
 			},
 		},
 	}
 	max := &Account{
-		Id: "cgrates.org:max",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY: BalanceChain{
+		ID: "cgrates.org:max",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
 	money := &Account{
-		Id: "cgrates.org:money",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY: BalanceChain{
+		ID: "cgrates.org:money",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 10000, Weight: 10},
 			}},
 	}
@@ -1268,6 +1268,31 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 	}
 	if cc.Cost != 0.91 {
 		t.Error("Error in max debit cost: ", cc.Cost)
+	}
+}
+
+func TestMaxDebitForceDuration(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd1 := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "12345",
+		Account:       "12345",
+		Destination:   "447956",
+		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 40, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 0,
+		ForceDuration: true,
+	}
+	_, err := cd1.MaxDebit()
+	if err != utils.ErrInsufficientCredit {
+		t.Fatal("Error forcing duration: ", err)
 	}
 }
 

@@ -115,7 +115,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 4, RatingProfiles: 9, Actions: 7, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
@@ -1164,9 +1164,9 @@ func TestTutLocalSetAccount(t *testing.T) {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
-		dta, _ := utils.NewTAFromAccountKey(acnt.Id)
+		dta, _ := utils.NewTAFromAccountKey(acnt.ID)
 		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
-			t.Error("Unexpected account id received: ", acnt.Id)
+			t.Error("Unexpected account id received: ", acnt.ID)
 		}
 		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 1 {
 			t.Errorf("Unexpected balances found: %+v", balances)
@@ -1194,9 +1194,9 @@ func TestTutLocalSetAccount(t *testing.T) {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
-		dta, _ := utils.NewTAFromAccountKey(acnt.Id)
+		dta, _ := utils.NewTAFromAccountKey(acnt.ID)
 		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
-			t.Error("Unexpected account id received: ", acnt.Id)
+			t.Error("Unexpected account id received: ", acnt.ID)
 		}
 		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 1 {
 			t.Errorf("Unexpected balances found: %+v", balances)
@@ -1225,9 +1225,9 @@ func TestTutLocalSetAccount(t *testing.T) {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
-		dta, _ := utils.NewTAFromAccountKey(acnt.Id)
+		dta, _ := utils.NewTAFromAccountKey(acnt.ID)
 		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
-			t.Error("Unexpected account id received: ", acnt.Id)
+			t.Error("Unexpected account id received: ", acnt.ID)
 		}
 		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 1 {
 			t.Errorf("Unexpected balances found: %+v", balances)

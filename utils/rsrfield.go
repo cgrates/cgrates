@@ -166,6 +166,9 @@ func (rsrFltr *RSRFilter) Pass(val string) bool {
 	if rsrFltr.filterRule[:1] == REGEXP_PREFIX {
 		return rsrFltr.fltrRgxp.MatchString(val) != rsrFltr.negative
 	}
+	if rsrFltr.filterRule == "^$" { // Special case to test empty value
+		return len(val) == 0 != rsrFltr.negative
+	}
 	if rsrFltr.filterRule[:1] == MatchStartPrefix {
 		return strings.HasPrefix(val, rsrFltr.filterRule[1:]) != rsrFltr.negative
 	}

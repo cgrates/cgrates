@@ -1,4 +1,5 @@
 #! /usr/bin/env sh
+./build.sh
 
 go test -i github.com/cgrates/cgrates/apier/v1
 go test -i github.com/cgrates/cgrates/apier/v2

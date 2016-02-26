@@ -1,5 +1,5 @@
-hash: 855bc23b0e58452edf1d31f228430476a2602b79d225397d33b805b252cebb83
-updated: 2016-01-21T12:30:17.296295607+02:00
+hash: fde526f5fcd62d6b306dd6c4e30c6aa29ee3bfd625ffef3906c4d032eda7e9ec
+updated: 2016-02-19T13:46:35.353761268+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
@@ -20,11 +20,13 @@ imports:
 - name: github.com/fiorix/go-diameter
   version: 30569fd7282321ac213d8db9f39eac9321ab6bd5
   subpackages:
-  - /diam
+  - diam
   - diam/avp
   - diam/datatype
   - diam/dict
   - diam/sm
+  - diam/sm/smparser
+  - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
   version: bb006fd699a123d3eb514561dbefc352e978949d
 - name: github.com/gorhill/cronexpr
@@ -37,31 +39,30 @@ imports:
   version: f7ee69f31298ecbe5d2b349c711e2547a617d398
 - name: github.com/lib/pq
   version: 11fc39a580a008f1f39bb3d11d984fb34ed778d9
+  subpackages:
+  - hstore
+  - oid
 - name: github.com/mediocregopher/radix.v2
   version: 91435107718b55ff544323a2b0f25fdd8475d283
   subpackages:
-  - /pool
+  - pool
   - redis
 - name: github.com/peterh/liner
   version: 3f1c20449d1836aa4cbe38731b96f95cdf89634d
 - name: github.com/ugorji/go
   version: 646ae4a518c1c3be0739df898118d9bccf993858
   subpackages:
-  - /codec
-- name: golang.org/x/crypto
-  version: 552e9d568fde9701ea1944fb01c8aadaceaa7353
+  - codec
 - name: golang.org/x/net
   version: 961116aeebe66bfb58bb4d51818c70d256acbbb8
   subpackages:
-  - /websocket
-- name: golang.org/x/text
-  version: cf4986612c83df6c55578ba198316d1684a9a287
+  - websocket
+  - context
 - name: gopkg.in/fsnotify.v1
   version: 508915b7500b6e42a87132e4afeb4729cebc7cbb
 - name: gopkg.in/mgo.v2
   version: e30de8ac9ae3b30df7065f766c71f88bba7d4e49
   subpackages:
   - bson
-- name: gopkg.in/tomb.v2
-  version: 14b3d72120e8d10ea6e6b7f87f7175734b1faab8
+  - internal/scram
 devImports: []

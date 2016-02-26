@@ -166,10 +166,10 @@ type TpAction struct {
 	SharedGroups    string  `index:"10" re:"[0-9A-Za-z_;]*"`
 	ExpiryTime      string  `index:"11" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
 	TimingTags      string  `index:"12" re:"[0-9A-Za-z_;]*|\*any"`
-	Units           float64 `index:"13" re:"\d+\s*"`
-	BalanceWeight   float64 `index:"14" re:"\d+\.?\d*\s*"`
-	BalanceBlocker  bool    `index:"15" re:""`
-	BalanceDisabled bool    `index:"16" re:""`
+	Units           string  `index:"13" re:"\d+\s*"`
+	BalanceWeight   string  `index:"14" re:"\d+\.?\d*\s*"`
+	BalanceBlocker  string  `index:"15" re:""`
+	BalanceDisabled string  `index:"16" re:""`
 	Weight          float64 `index:"17" re:"\d+\.?\d*\s*"`
 	CreatedAt       time.Time
 }
@@ -193,21 +193,23 @@ type TpActionTrigger struct {
 	ThresholdValue         float64 `index:"3" re:"\d+\.?\d*"`
 	Recurrent              bool    `index:"4" re:"true|false"`
 	MinSleep               string  `index:"5" re:"\d+[smh]?"`
-	BalanceTag             string  `index:"6" re:"\w+\s*"`
-	BalanceType            string  `index:"7" re:"\*\w+"`
-	BalanceDirections      string  `index:"8" re:"\*out"`
-	BalanceCategories      string  `index:"9" re:""`
-	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
-	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
-	BalanceSharedGroups    string  `index:"12" re:"\w+|\*any"`
-	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
-	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*|\*any"`
-	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
-	BalanceBlocker         bool    `index:"16" re:""`
-	BalanceDisabled        bool    `index:"17" re:""`
-	MinQueuedItems         int     `index:"18" re:"\d+"`
-	ActionsTag             string  `index:"19" re:"\w+"`
-	Weight                 float64 `index:"20" re:"\d+\.?\d*"`
+	ExpiryTime             string  `index:"6" re:""`
+	ActivationTime         string  `index:"7" re:""`
+	BalanceTag             string  `index:"8" re:"\w+\s*"`
+	BalanceType            string  `index:"9" re:"\*\w+"`
+	BalanceDirections      string  `index:"10" re:"\*out"`
+	BalanceCategories      string  `index:"11" re:""`
+	BalanceDestinationTags string  `index:"12" re:"\w+|\*any"`
+	BalanceRatingSubject   string  `index:"13" re:"\w+|\*any"`
+	BalanceSharedGroups    string  `index:"14" re:"\w+|\*any"`
+	BalanceExpiryTime      string  `index:"15" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
+	BalanceTimingTags      string  `index:"16" re:"[0-9A-Za-z_;]*|\*any"`
+	BalanceWeight          string  `index:"17" re:"\d+\.?\d*"`
+	BalanceBlocker         string  `index:"18" re:""`
+	BalanceDisabled        string  `index:"19" re:""`
+	MinQueuedItems         int     `index:"20" re:"\d+"`
+	ActionsTag             string  `index:"21" re:"\w+"`
+	Weight                 float64 `index:"22" re:"\d+\.?\d*"`
 	CreatedAt              time.Time
 }
 

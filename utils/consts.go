@@ -28,6 +28,8 @@ var (
 	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
 	ErrRatingPlanNotFound      = errors.New("RATING_PLAN_NOT_FOUND")
 	ErrAccountNotFound         = errors.New("ACCOUNT_NOT_FOUND")
+	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
+	ErrInsufficientCredit      = errors.New("INSUFFICENT_CREDIT")
 )
 
 const (
@@ -89,6 +91,8 @@ const (
 	ROUNDING_MIDDLE              = "*middle"
 	ROUNDING_DOWN                = "*down"
 	ANY                          = "*any"
+	UNLIMITED                    = "*unlimited"
+	ZERO                         = "*zero"
 	ASAP                         = "*asap"
 	USERS                        = "*users"
 	COMMENT_CHAR                 = '#'
@@ -265,6 +269,7 @@ const (
 	MetaRaw                     = "*raw"
 	CreatedAt                   = "CreatedAt"
 	UpdatedAt                   = "UpdatedAt"
+	HandlerArgSep               = "|"
 )
 
 var (
