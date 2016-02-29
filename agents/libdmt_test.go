@@ -114,6 +114,34 @@ func TestMetaValueExponent(t *testing.T) {
 	}
 }
 
+func TestMetaSum(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))
+	m.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.CCMoney, avp.Mbit, 0, &diam.GroupedAVP{
+				AVP: []*diam.AVP{
+					diam.NewAVP(avp.UnitValue, avp.Mbit, 0, &diam.GroupedAVP{
+						AVP: []*diam.AVP{
+							diam.NewAVP(avp.ValueDigits, avp.Mbit, 0, datatype.Integer64(10000)),
+							diam.NewAVP(avp.Exponent, avp.Mbit, 0, datatype.Integer32(-5)),
+						},
+					}),
+					diam.NewAVP(avp.CurrencyCode, avp.Mbit, 0, datatype.Unsigned32(33)),
+				},
+			}),
+		},
+	})
+	if val, err := metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err != nil {
+		t.Error(err)
+	} else if val != "9995" {
+		t.Error("Received: ", val)
+	}
+	if _, err = metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err == nil {
+		t.Error("Should have received error") // Insufficient number arguments
+	}
+}
+
 func TestFieldOutVal(t *testing.T) {
 	m := diam.NewRequest(diam.CreditControl, 4, nil)
 	m.NewAVP("Session-Id", avp.Mbit, 0, datatype.UTF8String("simuhuawei;1449573472;00002"))

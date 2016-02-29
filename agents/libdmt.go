@@ -51,6 +51,7 @@ func init() {
 const (
 	META_CCR_USAGE       = "*ccr_usage"
 	META_VALUE_EXPONENT  = "*value_exponent"
+	META_SUM             = "*sum"
 	DIAMETER_CCR         = "DIAMETER_CCR"
 	DiameterRatingFailed = 5031
 	CGRError             = "CGRError"
@@ -238,6 +239,20 @@ func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimal
 	return strconv.FormatFloat(utils.Round(res, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 }
 
+func metaSum(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, 0, nil)
+	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
+	var summed float64
+	for _, arg := range handlerArgs {
+		val, err := strconv.ParseFloat(arg, 64)
+		if err != nil {
+			return "", err
+		}
+		summed += val
+	}
+	return strconv.FormatFloat(utils.Round(summed, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+}
+
 // splitIntoInterface is used to split a string into []interface{} instead of []string
 func splitIntoInterface(content, sep string) []interface{} {
 	spltStr := strings.Split(content, sep)
@@ -253,7 +268,6 @@ func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) 
 	return m.FindAVPsWithPath(splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
 }
 
-// Follows the implementation in the StorCdr
 func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVars map[string]string) (bool, int) {
 	if fieldFilter == nil {
 		return true, 0
@@ -371,9 +385,12 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.META_CONSTANT:
 		outVal = cfgFld.Value.Id()
 	case utils.META_HANDLER:
-		if cfgFld.HandlerId == META_VALUE_EXPONENT {
+		switch cfgFld.HandlerId {
+		case META_VALUE_EXPONENT:
 			outVal, err = metaValueExponent(m, cfgFld.Value, 10) // FixMe: add here configured number of decimals
-		} else {
+		case META_SUM:
+			outVal, err = metaSum(m, cfgFld.Value, 10)
+		default:
 			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
