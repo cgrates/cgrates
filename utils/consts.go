@@ -229,6 +229,7 @@ const (
 	CGR_DISCONNECT_CAUSE         = "cgr_disconnectcause"
 	CGR_COMPUTELCR               = "cgr_computelcr"
 	CGR_SUPPLIERS                = "cgr_suppliers"
+	CGRFlags                     = "cgr_flags"
 	KAM_FLATSTORE                = "kamailio_flatstore"
 	OSIPS_FLATSTORE              = "opensips_flatstore"
 	MAX_DEBIT_CACHE_PREFIX       = "MAX_DEBIT_"
@@ -270,6 +271,7 @@ const (
 	CreatedAt                   = "CreatedAt"
 	UpdatedAt                   = "UpdatedAt"
 	HandlerArgSep               = "|"
+	FlagForceDuration           = "fd"
 )
 
 var (

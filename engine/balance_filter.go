@@ -285,6 +285,9 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 	if b == nil {
 		return
 	}
+	if bf.ID != nil {
+		b.ID = *bf.ID
+	}
 	if bf.Directions != nil {
 		b.Directions = *bf.Directions
 	}

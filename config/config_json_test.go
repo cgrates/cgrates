@@ -441,6 +441,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 				Dry_run:             utils.BoolPointer(false),
 				Publish_event:       utils.BoolPointer(false),
 				Request_filter:      utils.StringPointer("Subscription-Id>Subscription-Id-Type(0)"),
+				Flags:               utils.StringSlicePointer([]string{}),
 				Continue_on_success: utils.BoolPointer(false),
 				CCR_fields: &[]*CdrFieldJsonCfg{
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"), Field_id: utils.StringPointer(utils.TOR), Type: utils.StringPointer(utils.META_COMPOSED),

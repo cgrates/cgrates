@@ -94,6 +94,9 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v AsSMGenericEvent, error: %s", ccr.diamMessage, err))
 		return cca
 	}
+	if len(reqProcessor.Flags) != 0 {
+		smgEv[utils.CGRFlags] = reqProcessor.Flags.String() // Populate CGRFlags automatically
+	}
 	if reqProcessor.PublishEvent && self.pubsubs != nil {
 		evt, err := smgEv.AsMapStringString()
 		if err != nil {

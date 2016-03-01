@@ -47,6 +47,12 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	if len(accountKeys) == 0 {
 		return nil
 	}
+	if attr.Offset > len(accountKeys) {
+		attr.Offset = len(accountKeys)
+	}
+	if attr.Offset < 0 {
+		attr.Offset = 0
+	}
 	var limitedAccounts []string
 	if attr.Limit != 0 {
 		max := math.Min(float64(attr.Offset+attr.Limit), float64(len(accountKeys)))
