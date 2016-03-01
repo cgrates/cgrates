@@ -303,10 +303,6 @@ func (at *ActionTiming) Execute() (err error) {
 						continue
 					}
 				}
-				if acc.Disabled && a.ActionType != ENABLE_ACCOUNT {
-					continue // disabled acocunts are not removed from action  plan
-					//return 0, fmt.Errorf("Account %s is disabled", accID)
-				}
 				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.HasExpirationDate()) && parseErr == nil && !expDate.IsZero() {
 					a.Balance.ExpirationDate = &time.Time{}
 					*a.Balance.ExpirationDate = expDate
