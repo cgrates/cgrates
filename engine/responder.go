@@ -445,6 +445,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			})
 			return errors.New("Error parsing answer event end time")
 		}
+		extraFields := ev.GetExtraFields()
 		cd := &CallDescriptor{
 			CgrID:       ev.GetCgrId(rs.Timezone),
 			RunID:       ev.RunID,
@@ -457,7 +458,13 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime,
 			TimeEnd:     endTime,
-			ExtraFields: ev.GetExtraFields()}
+			ExtraFields: extraFields}
+		if flagsStr, hasFlags := extraFields[utils.CGRFlags]; hasFlags { // Force duration from extra fields
+			flags := utils.StringMapFromSlice(strings.Split(flagsStr, utils.INFIELD_SEP))
+			if _, hasFD := flags[utils.FlagForceDuration]; hasFD {
+				cd.ForceDuration = true
+			}
+		}
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
 	*sRuns = sesRuns
