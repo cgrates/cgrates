@@ -278,10 +278,11 @@ const CGRATES_CFG_JSON = `
 	"product_name": "CGRateS",									// diameter Product-Name AVP used in replies
 	"request_processors": [
 		{
-			"id": "*default",									// formal identifier of this processor
-			"dry_run": false,									// do not send the events to SMG, just log them
-			"publish_event": false,								// if enabled, it will publish internal event to pubsub
-			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",		// filter requests processed by this processor
+			"id": "*default",												// formal identifier of this processor
+			"dry_run": false,												// do not send the events to SMG, just log them
+			"publish_event": false,											// if enabled, it will publish internal event to pubsub
+			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",	// filter requests processed by this processor
+			"flags": [],													// flags to influence processing behavior
 			"continue_on_success": false,				// continue to the next template if executed
 			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},

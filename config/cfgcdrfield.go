@@ -80,7 +80,6 @@ type CfgCdrField struct {
 	Strip       string
 	Padding     string
 	Layout      string
-	Flags       utils.StringMap // Various flags to influence behavior
 	Mandatory   bool
 }
 

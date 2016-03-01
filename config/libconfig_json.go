@@ -263,6 +263,7 @@ type DARequestProcessorJsnCfg struct {
 	Dry_run             *bool
 	Publish_event       *bool
 	Request_filter      *string
+	Flags               *[]string
 	Continue_on_success *bool
 	CCR_fields          *[]*CdrFieldJsonCfg
 	CCA_fields          *[]*CdrFieldJsonCfg

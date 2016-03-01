@@ -108,6 +108,7 @@ type DARequestProcessor struct {
 	DryRun            bool
 	PublishEvent      bool
 	RequestFilter     utils.RSRFields
+	Flags             utils.StringMap // Various flags to influence behavior
 	ContinueOnSuccess bool
 	CCRFields         []*CfgCdrField
 	CCAFields         []*CfgCdrField
@@ -131,6 +132,12 @@ func (self *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg
 		if self.RequestFilter, err = utils.ParseRSRFields(*jsnCfg.Request_filter, utils.INFIELD_SEP); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Flags != nil {
+		self.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
+	}
+	if jsnCfg.Continue_on_success != nil {
+		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
 	}
 	if jsnCfg.CCR_fields != nil {
 		if self.CCRFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.CCR_fields); err != nil {
