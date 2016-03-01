@@ -20,7 +20,6 @@ package v1
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"strings"
 	"time"
@@ -483,7 +482,6 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 		expTime = &expTimeVal
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	log.Print("ACC: ", utils.ToIJSON(attr))
 	if _, err := self.AccountDb.GetAccount(accID); err != nil {
 		// create account if not exists
 		account := &engine.Account{
