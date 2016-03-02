@@ -532,31 +532,6 @@ func (ub *Account) GetDefaultMoneyBalance() *Balance {
 	return defaultBalance
 }
 
-func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, count bool) {
-	var balance *Balance
-	unitType := cd.TOR
-	cc := cd.CreateCallCost()
-	if increment.BalanceInfo.UnitBalanceUuid != "" {
-		if balance = ub.BalanceMap[unitType].GetBalance(increment.BalanceInfo.UnitBalanceUuid); balance == nil {
-			return
-		}
-		balance.AddValue(increment.Duration.Seconds())
-		if count {
-			ub.countUnits(-increment.Duration.Seconds(), unitType, cc, balance)
-		}
-	}
-	// check money too
-	if increment.BalanceInfo.MoneyBalanceUuid != "" {
-		if balance = ub.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
-			return
-		}
-		balance.AddValue(increment.Cost)
-		if count {
-			ub.countUnits(-increment.Cost, utils.MONETARY, cc, balance)
-		}
-	}
-}
-
 // Scans the action trigers and execute the actions for which trigger is met
 func (acc *Account) ExecuteActionTriggers(a *Action) {
 	if acc.executingTriggers {
