@@ -93,9 +93,11 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return 0, utils.ErrNotFound
 		}
 
-		if attrs.ActionPlanId != "" { // delete the entire action plan
-			ap.ActionTimings = nil // will delete the action plan
-			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
+		if attrs.Tenant != "" && attrs.Account != "" {
+			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
+			delete(ap.AccountIDs, accID)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			goto UPDATE
 		}
 
 		if attrs.ActionTimingId != "" { // delete only a action timing from action plan
@@ -106,15 +108,19 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 					break
 				}
 			}
-			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			goto UPDATE
 		}
 
-		if attrs.Tenant != "" && attrs.Account != "" {
-			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
-			delete(ap.AccountIDs, accID)
-			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
+		if attrs.ActionPlanId != "" { // delete the entire action plan
+			ap.ActionTimings = nil // will delete the action plan
+			err = self.RatingDb.SetActionPlan(ap.Id, ap, true)
+			goto UPDATE
 		}
-
+	UPDATE:
+		if err != nil {
+			return 0, err
+		}
 		// update cache
 		self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.ActionPlanId}})
 		return 0, nil
