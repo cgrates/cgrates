@@ -93,8 +93,9 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return 0, utils.ErrNotFound
 		}
 
-		if attrs.ActionPlanId != "" { // delete the entire action plan
-			ap.ActionTimings = nil // will delete the action plan
+		if attrs.Tenant != "" && attrs.Account != "" {
+			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
+			delete(ap.AccountIDs, accID)
 			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
 		}
 
@@ -109,9 +110,8 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
 		}
 
-		if attrs.Tenant != "" && attrs.Account != "" {
-			accID := utils.AccountKey(attrs.Tenant, attrs.Account)
-			delete(ap.AccountIDs, accID)
+		if attrs.ActionPlanId != "" { // delete the entire action plan
+			ap.ActionTimings = nil // will delete the action plan
 			return 0, self.RatingDb.SetActionPlan(ap.Id, ap, true)
 		}
 
