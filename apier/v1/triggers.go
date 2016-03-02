@@ -36,6 +36,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 	}
 	actTime, err := utils.ParseTimeDetectLayout(attr.ActivationDate, self.Config.DefaultTimezone)
 	if err != nil {
+		*reply = err.Error()
 		return err
 	}
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
