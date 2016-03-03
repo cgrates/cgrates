@@ -91,6 +91,9 @@ func (mc *MockConnector) RefundIncrements(cd *engine.CallDescriptor, reply *floa
 	mc.refundCd = cd
 	return nil
 }
+func (mc *MockConnector) RefundRounding(cd *engine.CallDescriptor, reply *float64) error {
+	return nil
+}
 func (mc *MockConnector) GetMaxSessionTime(*engine.CallDescriptor, *float64) error { return nil }
 func (mc *MockConnector) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
 	return nil

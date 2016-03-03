@@ -90,6 +90,7 @@ func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
 		Subject:     cc.Subject,
 		Account:     cc.Account,
 		Destination: cc.Destination,
+		TOR:         cc.TOR,
 	}
 }
 

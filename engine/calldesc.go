@@ -684,7 +684,7 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 		cc.Round()
 		rcd := cc.CreateCallDescriptor()
 		rcd.Increments = cc.GetRoundIncrements()
-		rcd.Round()
+		rcd.RefundRounding()
 	}
 	//log.Printf("OUT CC: ", cc)
 	return
@@ -820,7 +820,7 @@ func (cd *CallDescriptor) RefundIncrements() error {
 	return err
 }
 
-func (cd *CallDescriptor) Round() error {
+func (cd *CallDescriptor) RefundRounding() error {
 	// get account list for locking
 	// all must be locked in order to use cache
 	accMap := make(utils.StringMap)

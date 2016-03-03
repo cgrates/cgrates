@@ -233,6 +233,43 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 	return
 }
 
+func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err error) {
+	if item, err := rs.getCache().Get(utils.REFUND_ROUND_CACHE_PREFIX + arg.CgrID + arg.RunID); err == nil && item != nil {
+		*reply = *(item.Value.(*float64))
+		return item.Err
+	}
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
+	}
+	// replace aliases
+	if err := LoadAlias(
+		&AttrMatchingAlias{
+			Destination: arg.Destination,
+			Direction:   arg.Direction,
+			Tenant:      arg.Tenant,
+			Category:    arg.Category,
+			Account:     arg.Account,
+			Subject:     arg.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return err
+	}
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
+		return err
+	}
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(arg, "Responder.RefundRounding")
+	} else {
+		err = arg.RefundRounding()
+	}
+	rs.getCache().Cache(utils.REFUND_ROUND_CACHE_PREFIX+arg.CgrID+arg.RunID, &cache2go.CacheItem{
+		Value: reply,
+		Err:   err,
+	})
+	return
+}
+
 func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
@@ -683,6 +720,7 @@ type Connector interface {
 	Debit(*CallDescriptor, *CallCost) error
 	MaxDebit(*CallDescriptor, *CallCost) error
 	RefundIncrements(*CallDescriptor, *float64) error
+	RefundRounding(*CallDescriptor, *float64) error
 	GetMaxSessionTime(*CallDescriptor, *float64) error
 	GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error
 	GetDerivedMaxSessionTime(*CDR, *float64) error
@@ -712,6 +750,10 @@ func (rcc *RPCClientConnector) MaxDebit(cd *CallDescriptor, cc *CallCost) error 
 
 func (rcc *RPCClientConnector) RefundIncrements(cd *CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.RefundIncrements", cd, resp)
+}
+
+func (rcc *RPCClientConnector) RefundRounding(cd *CallDescriptor, resp *float64) error {
+	return rcc.Client.Call("Responder.RefundRounding", cd, resp)
 }
 
 func (rcc *RPCClientConnector) GetMaxSessionTime(cd *CallDescriptor, resp *float64) error {
@@ -818,6 +860,26 @@ func (cp ConnectorPool) RefundIncrements(cd *CallDescriptor, resp *float64) erro
 		con.GetTimeout(0, &timeout)
 
 		go func() { c <- con.RefundIncrements(cd, &r) }()
+		select {
+		case err := <-c:
+			*resp = r
+			return err
+		case <-time.After(timeout):
+			// call timed out, continue
+		}
+	}
+	return utils.ErrTimedOut
+}
+
+func (cp ConnectorPool) RefundRounding(cd *CallDescriptor, resp *float64) error {
+	for _, con := range cp {
+		c := make(chan error, 1)
+		var r float64
+
+		var timeout time.Duration
+		con.GetTimeout(0, &timeout)
+
+		go func() { c <- con.RefundRounding(cd, &r) }()
 		select {
 		case err := <-c:
 			*resp = r
