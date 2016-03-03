@@ -154,6 +154,38 @@ func TestDmtAgentCCRAsSMGenericEvent(t *testing.T) {
 	}
 }
 
+func TestDmtAgentPopulateCCTotalOctets(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	daRP := &config.DARequestProcessor{CCAFields: []*config.CfgCdrField{
+		&config.CfgCdrField{Tag: "GrantedUnit", FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(^$)", utils.INFIELD_SEP),
+			FieldId: "Multiple-Services-Credit-Control>Granted-Service-Unit>CC-Time", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("CGRMaxUsage", utils.INFIELD_SEP), Mandatory: true},
+		&config.CfgCdrField{Tag: "GrantedOctet", FieldFilter: utils.ParseRSRFieldsMustCompile("CGRError(^$)", utils.INFIELD_SEP),
+			FieldId: "Multiple-Services-Credit-Control>Granted-Service-Unit>CC-Total-Octets", Type: utils.META_COMPOSED, Value: utils.ParseRSRFieldsMustCompile("CGRMaxUsage", utils.INFIELD_SEP), Mandatory: true},
+	}}
+	ccr := new(CCR)
+	ccr.diamMessage = ccr.AsBareDiameterMessage()
+	cca := NewBareCCAFromCCR(ccr, "cgr-da", "cgrates.org")
+	if err := cca.SetProcessorAVPs(daRP, map[string]string{CGRError: "", CGRMaxUsage: "153600"}); err != nil {
+		t.Error(err)
+	}
+	if avps, err := cca.diamMessage.FindAVPsWithPath([]interface{}{"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Not found")
+	} else if strResult := avpValAsString(avps[0]); strResult != "153600" { // Result-Code set in the template
+		t.Errorf("Expecting 153600, received: %s", strResult)
+	}
+	if avps, err := cca.diamMessage.FindAVPsWithPath([]interface{}{"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Total-Octets"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Not found")
+	} else if strResult := avpValAsString(avps[0]); strResult != "153600" { // Result-Code set in the template
+		t.Errorf("Expecting 153600, received: %s", strResult)
+	}
+}
+
 // Connect rpc client to rater
 func TestDmtAgentApierRpcConn(t *testing.T) {
 	if !*testIntegration {

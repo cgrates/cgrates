@@ -326,12 +326,18 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 		return []byte(valStr), nil
 	case datatype.AddressType:
 		return []byte(net.ParseIP(valStr)), nil
-	case datatype.EnumeratedType, datatype.Integer32Type, datatype.Integer64Type, datatype.Unsigned32Type, datatype.Unsigned64Type:
+	case datatype.EnumeratedType, datatype.Integer32Type, datatype.Integer64Type, datatype.Unsigned32Type:
 		i, err := strconv.Atoi(valStr)
 		if err != nil {
 			return nil, err
 		}
 		return datatype.Enumerated(i).Serialize(), nil
+	case datatype.Unsigned64Type:
+		i, err := strconv.ParseInt(valStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Unsigned64(i).Serialize(), nil
 	case datatype.Float32Type:
 		f, err := strconv.ParseFloat(valStr, 32)
 		if err != nil {
@@ -436,7 +442,7 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr strin
 			if err != nil {
 				return err
 			}
-			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte)
+			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte) // Check here
 			if err != nil {
 				return err
 			}
