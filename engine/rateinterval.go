@@ -304,6 +304,9 @@ func (i *RateInterval) Equal(o *RateInterval) bool {
 	if i == nil && o == nil {
 		return true
 	}
+	if i == nil || o == nil {
+		return false // considering the earlier test
+	}
 	if i.Weight != o.Weight {
 		return false
 	}

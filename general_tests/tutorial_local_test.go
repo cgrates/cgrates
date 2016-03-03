@@ -1229,7 +1229,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
 			t.Error("Unexpected account id received: ", acnt.ID)
 		}
-		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 1 {
+		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 3 {
 			t.Errorf("Unexpected balances found: %+v", balances)
 		}
 		if len(acnt.ActionTriggers) != 7 {
