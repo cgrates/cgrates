@@ -230,11 +230,14 @@ func (s *Session) SaveOperations() {
 		firstCC.Timespans.Compress()
 
 		firstCC.Round()
-		cd := firstCC.CreateCallDescriptor()
-		cd.Increments = firstCC.GetRoundIncrements()
-		var response float64
-		if err := s.sessionManager.Rater().RefundRounding(cd, &response); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
+		roundIncrements := firstCC.GetRoundIncrements()
+		if len(roundIncrements) != 0 {
+			cd := firstCC.CreateCallDescriptor()
+			cd.Increments = roundIncrements
+			var response float64
+			if err := s.sessionManager.Rater().RefundRounding(cd, &response); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
+			}
 		}
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{

@@ -36,7 +36,7 @@ type TimeSpan struct {
 	RateInterval                                               *RateInterval
 	DurationIndex                                              time.Duration // the call duration so far till TimeEnd
 	Increments                                                 Increments
-	RoundIncrements                                            Increments
+	RoundIncrement                                             *Increment
 	MatchedSubject, MatchedPrefix, MatchedDestId, RatingPlanId string
 	CompressFactor                                             int
 	ratingInfo                                                 *RatingInfo

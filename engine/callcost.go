@@ -201,20 +201,23 @@ func (cc *CallCost) Round() {
 			ts.RateInterval.Rating.RoundingMethod)
 		correctionCost := roundedCost - cost
 		//log.Print(cost, roundedCost, correctionCost)
-		roundInc := &Increment{
-			Cost:        correctionCost,
-			BalanceInfo: inc.BalanceInfo,
+		if correctionCost != 0 {
+			ts.RoundIncrement = &Increment{
+				Cost:        correctionCost,
+				BalanceInfo: inc.BalanceInfo,
+			}
+			totalCorrectionCost += correctionCost
+			ts.Cost += correctionCost
 		}
-		totalCorrectionCost += correctionCost
-		ts.Cost += correctionCost
-		ts.RoundIncrements = append(ts.RoundIncrements, roundInc)
 	}
 	cc.Cost += totalCorrectionCost
 }
 
 func (cc *CallCost) GetRoundIncrements() (roundIncrements Increments) {
 	for _, ts := range cc.Timespans {
-		roundIncrements = append(roundIncrements, ts.RoundIncrements...)
+		if ts.RoundIncrement != nil && ts.RoundIncrement.Cost != 0 {
+			roundIncrements = append(roundIncrements, ts.RoundIncrement)
+		}
 	}
 	return
 }

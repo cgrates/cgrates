@@ -682,9 +682,12 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 	}
 	if cd.PerformRounding {
 		cc.Round()
-		rcd := cc.CreateCallDescriptor()
-		rcd.Increments = cc.GetRoundIncrements()
-		rcd.RefundRounding()
+		roundIncrements := cc.GetRoundIncrements()
+		if len(roundIncrements) != 0 {
+			rcd := cc.CreateCallDescriptor()
+			rcd.Increments = roundIncrements
+			rcd.RefundRounding()
+		}
 	}
 	//log.Printf("OUT CC: ", cc)
 	return

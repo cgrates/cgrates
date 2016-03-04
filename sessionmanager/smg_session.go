@@ -205,11 +205,14 @@ func (self *SMGSession) saveOperations() error {
 	}
 	firstCC.Timespans.Compress()
 	firstCC.Round()
-	cd := firstCC.CreateCallDescriptor()
-	cd.Increments = firstCC.GetRoundIncrements()
-	var response float64
-	if err := self.rater.RefundRounding(cd, &response); err != nil {
-		return err
+	roundIncrements := firstCC.GetRoundIncrements()
+	if len(roundIncrements) != 0 {
+		cd := firstCC.CreateCallDescriptor()
+		cd.Increments = roundIncrements
+		var response float64
+		if err := self.rater.RefundRounding(cd, &response); err != nil {
+			return err
+		}
 	}
 
 	var reply string

@@ -278,11 +278,14 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 			}
 		}
 		cc.Round()
-		cd := cc.CreateCallDescriptor()
-		cd.Increments = cc.GetRoundIncrements()
-		var response float64
-		if err := self.rater.RefundRounding(cd, &response); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
+		roundIncrements := cc.GetRoundIncrements()
+		if len(roundIncrements) != 0 {
+			cd := cc.CreateCallDescriptor()
+			cd.Increments = roundIncrements
+			var response float64
+			if err := self.rater.RefundRounding(cd, &response); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
+			}
 		}
 
 		var reply string
