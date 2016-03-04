@@ -33,13 +33,13 @@ A unit in which a call will be split that has a specific price related interval 
 type TimeSpan struct {
 	TimeStart, TimeEnd                                         time.Time
 	Cost                                                       float64
-	ratingInfo                                                 *RatingInfo
 	RateInterval                                               *RateInterval
 	DurationIndex                                              time.Duration // the call duration so far till TimeEnd
 	Increments                                                 Increments
 	RoundIncrements                                            Increments
 	MatchedSubject, MatchedPrefix, MatchedDestId, RatingPlanId string
 	CompressFactor                                             int
+	ratingInfo                                                 *RatingInfo
 }
 
 type Increment struct {

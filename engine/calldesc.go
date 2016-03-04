@@ -777,7 +777,6 @@ func (cd *CallDescriptor) RefundIncrements() error {
 	for _, increment := range cd.Increments {
 		accMap[increment.BalanceInfo.AccountId] = true
 	}
-	accountIDs := accMap.Slice()
 	// start increment refunding loop
 	_, err := Guardian.Guard(func() (interface{}, error) {
 		accountsCache := make(map[string]*Account)
@@ -816,7 +815,7 @@ func (cd *CallDescriptor) RefundIncrements() error {
 			}
 		}
 		return 0, nil
-	}, 0, accountIDs...)
+	}, 0, accMap.Slice()...)
 	return err
 }
 
@@ -827,7 +826,6 @@ func (cd *CallDescriptor) RefundRounding() error {
 	for _, inc := range cd.Increments {
 		accMap[inc.BalanceInfo.AccountId] = true
 	}
-	accountIDs := accMap.Slice()
 	// start increment refunding loop
 	_, err := Guardian.Guard(func() (interface{}, error) {
 		accountsCache := make(map[string]*Account)
@@ -851,14 +849,12 @@ func (cd *CallDescriptor) RefundRounding() error {
 				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
 					return 0, nil
 				}
-				//log.Print("BEFORE: ", balance.GetValue(), increment.Cost)
 				balance.AddValue(-increment.Cost)
-				//log.Print("AFTER: ", balance.GetValue(), increment.Cost)
 				account.countUnits(increment.Cost, utils.MONETARY, cc, balance)
 			}
 		}
 		return 0, nil
-	}, 0, accountIDs...)
+	}, 0, accMap.Slice()...)
 	return err
 }
 
