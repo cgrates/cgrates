@@ -138,7 +138,7 @@ func TestSMGMonetaryRefund(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 8.70001
+	eAcntVal := 8.700010
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {

@@ -194,7 +194,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6425 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
+	} else if cc.Cost != 0.6418 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")

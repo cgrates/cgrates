@@ -345,7 +345,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.2435
+	eAcntVal := 9.243500
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // Should also consider derived charges which double the cost of 6m10s - 2x0.7584
