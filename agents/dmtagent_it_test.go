@@ -226,7 +226,7 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.484
+	eAcntVal := 9.5008
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -265,7 +265,7 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.214
+	eAcntVal := 9.2518
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -304,7 +304,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 8.944000
+	eAcntVal := 9.0028
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if utils.Round(acnt.BalanceMap[utils.MONETARY].GetTotalValue(), 5, utils.ROUNDING_MIDDLE) != eAcntVal {
@@ -345,7 +345,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.205
+	eAcntVal := 9.2435
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // Should also consider derived charges which double the cost of 6m10s - 2x0.7584

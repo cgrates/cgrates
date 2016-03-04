@@ -230,7 +230,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3002 {
+	} else if cc.Cost != 1.3 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -266,7 +266,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3002 {
+	} else if cc.Cost != 1.3 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart = time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
@@ -342,7 +342,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.327 { //
+	} else if cc.Cost != 0.3249 { //
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
 	cd = engine.CallDescriptor{
@@ -357,7 +357,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3002 { //
+	} else if cc.Cost != 1.3 { //
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
 	cd = engine.CallDescriptor{
@@ -372,7 +372,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.354 { //
+	} else if cc.Cost != 0.3498 { //
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
 }
