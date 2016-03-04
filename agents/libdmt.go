@@ -326,13 +326,13 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 		return []byte(valStr), nil
 	case datatype.AddressType:
 		return []byte(net.ParseIP(valStr)), nil
-	case datatype.EnumeratedType, datatype.Integer32Type, datatype.Integer64Type, datatype.Unsigned32Type:
+	case datatype.EnumeratedType, datatype.Integer32Type, datatype.Unsigned32Type:
 		i, err := strconv.Atoi(valStr)
 		if err != nil {
 			return nil, err
 		}
 		return datatype.Enumerated(i).Serialize(), nil
-	case datatype.Unsigned64Type:
+	case datatype.Unsigned64Type, datatype.Integer64Type:
 		i, err := strconv.ParseInt(valStr, 10, 64)
 		if err != nil {
 			return nil, err

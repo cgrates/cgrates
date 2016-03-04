@@ -122,7 +122,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 			err = self.smg.Call("SMGenericV1.SessionStart", smgEv, &maxUsage)
 		case 2:
 			err = self.smg.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage)
-		case 3, 4:
+		case 3, 4: // Handle them together since we generate CDR for them
 			var rpl string
 			if ccr.CCRequestType == 3 {
 				err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
