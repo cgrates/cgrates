@@ -50,6 +50,19 @@ func TestRoundUp(t *testing.T) {
 	}
 }
 
+func TestRoundUpTwice(t *testing.T) {
+	result := Round(0.641666666667, 4, ROUNDING_UP)
+	expected := 0.6417
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+	result = Round(result, 4, ROUNDING_UP)
+	expected = 0.6417
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
 func TestRoundUpMiddle(t *testing.T) {
 	result := Round(12.5, 0, ROUNDING_UP)
 	expected := 13.0

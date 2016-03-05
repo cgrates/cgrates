@@ -357,6 +357,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				b.SubstractValue(amount)
 				inc.BalanceInfo.UnitBalanceUuid = b.Uuid
 				inc.BalanceInfo.AccountId = ub.ID
+				inc.BalanceInfo.RateInterval = nil
 				inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
 				inc.Cost = 0
 				inc.paid = true
@@ -428,6 +429,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					cost, inc.Cost = 0.0, 0.0
 					inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 					inc.BalanceInfo.AccountId = ub.ID
+					inc.BalanceInfo.RateInterval = ts.RateInterval
 					inc.paid = true
 					if count {
 						ub.countUnits(cost, utils.MONETARY, cc, b)
@@ -446,6 +448,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					b.SubstractValue(amount)
 					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
 					inc.BalanceInfo.AccountId = ub.ID
+					inc.BalanceInfo.RateInterval = nil
 					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
 					if cost != 0 {
 						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
@@ -535,6 +538,9 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				amount, inc.Cost = 0.0, 0.0
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 				inc.BalanceInfo.AccountId = ub.ID
+				if b.RatingSubject != "" {
+					inc.BalanceInfo.RateInterval = ts.RateInterval
+				}
 				inc.paid = true
 				if count {
 					ub.countUnits(amount, utils.MONETARY, cc, b)
@@ -550,6 +556,9 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				cd.MaxCostSoFar += amount
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 				inc.BalanceInfo.AccountId = ub.ID
+				if b.RatingSubject != "" {
+					inc.BalanceInfo.RateInterval = ts.RateInterval
+				}
 				inc.paid = true
 				if count {
 					ub.countUnits(amount, utils.MONETARY, cc, b)
@@ -608,6 +617,7 @@ func (bc Balances) GetTotalValue() (total float64) {
 			total += b.GetValue()
 		}
 	}
+	total = utils.Round(total, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	return
 }
 

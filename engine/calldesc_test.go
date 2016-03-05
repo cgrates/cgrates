@@ -566,7 +566,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		MaxCostSoFar: 0,
 	}
 	result, err := cd.GetMaxSessionDuration()
-	expected := 985 * time.Second
+	expected := 30 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
 	}
@@ -630,7 +630,7 @@ func TestGetCostRoundingIssue(t *testing.T) {
 		MaxCostSoFar: 0,
 	}
 	cc, err := cd.GetCost()
-	expected := 0.39
+	expected := 0.17
 	if cc.Cost != expected || err != nil {
 		t.Log(utils.ToIJSON(cc))
 		t.Errorf("Expected %v was %+v", expected, cc)
@@ -745,32 +745,69 @@ func TestMaxDebitUnknowDest(t *testing.T) {
 	}
 }
 
-func TestGetCostMaxDebitRoundingIssue(t *testing.T) {
+func TestMaxDebitRoundingIssue(t *testing.T) {
 	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
 	for _, at := range ap.ActionTimings {
 		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd := &CallDescriptor{
-		Direction:    "*out",
-		Category:     "call",
-		Tenant:       "cgrates.org",
-		Subject:      "dy",
-		Account:      "dy",
-		Destination:  "0723123113",
-		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
-		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 51, 0, time.UTC),
-		MaxCostSoFar: 0,
+		Direction:       "*out",
+		Category:        "call",
+		Tenant:          "cgrates.org",
+		Subject:         "dy",
+		Account:         "dy",
+		Destination:     "0723123113",
+		TimeStart:       time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:         time.Date(2015, 10, 26, 13, 29, 51, 0, time.UTC),
+		MaxCostSoFar:    0,
+		PerformRounding: true,
 	}
 	acc, err := accountingStorage.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
 		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
 	}
+
 	cc, err := cd.MaxDebit()
-	expected := 0.39
+	expected := 0.17
 	if cc.Cost != expected || err != nil {
 		t.Log(utils.ToIJSON(cc))
-		t.Errorf("Expected %v was %+v", expected, cc)
+		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
+	}
+	acc, err = accountingStorage.GetAccount("cgrates.org:dy")
+	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
+		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
+	}
+}
+
+func TestDebitRoundingRefund(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:       "*out",
+		Category:        "call",
+		Tenant:          "cgrates.org",
+		Subject:         "dy",
+		Account:         "dy",
+		Destination:     "0723123113",
+		TimeStart:       time.Date(2016, 3, 4, 13, 50, 00, 0, time.UTC),
+		TimeEnd:         time.Date(2016, 3, 4, 13, 53, 00, 0, time.UTC),
+		MaxCostSoFar:    0,
+		PerformRounding: true,
+	}
+	acc, err := accountingStorage.GetAccount("cgrates.org:dy")
+	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
+		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
+	}
+
+	cc, err := cd.Debit()
+	expected := 0.3
+	if cc.Cost != expected || err != nil {
+		t.Log(utils.ToIJSON(cc))
+		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
 	}
 	acc, err = accountingStorage.GetAccount("cgrates.org:dy")
 	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
@@ -1399,6 +1436,35 @@ func TestCDDataGetCost(t *testing.T) {
 	cc, err := cd.GetCost()
 	if err != nil || cc.Cost != 65 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
+	}
+}
+
+func TestCDRefundIncrements(t *testing.T) {
+	ub := &Account{
+		ID: "test:ref",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Uuid: "moneya", Value: 100},
+			},
+			utils.VOICE: Balances{
+				&Balance{Uuid: "minutea", Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Uuid: "minuteb", Value: 10, DestinationIDs: utils.StringMap{"RET": true}},
+			},
+		},
+	}
+	accountingStorage.SetAccount(ub)
+	increments := Increments{
+		&Increment{Cost: 2, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "", MoneyBalanceUuid: "moneya", AccountId: ub.ID}},
+		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minutea", MoneyBalanceUuid: "moneya", AccountId: ub.ID}},
+		&Increment{Duration: 4 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minuteb", MoneyBalanceUuid: "", AccountId: ub.ID}},
+	}
+	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
+	cd.RefundIncrements()
+	ub, _ = accountingStorage.GetAccount(ub.ID)
+	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
+		ub.BalanceMap[utils.VOICE][0].GetValue() != 13 ||
+		ub.BalanceMap[utils.VOICE][1].GetValue() != 14 {
+		t.Error("Error refunding money: ", ub.BalanceMap[utils.VOICE][1].GetValue())
 	}
 }
 

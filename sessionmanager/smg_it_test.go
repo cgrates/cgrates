@@ -138,7 +138,7 @@ func TestSMGMonetaryRefund(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 8.699800
+	eAcntVal := 8.700010
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -268,7 +268,7 @@ func TestSMGMixedRefund(t *testing.T) {
 	//var acnt *engine.Account
 	//attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eVoiceVal := 90.0
-	eMoneyVal := 8.739
+	eMoneyVal := 8.7399
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eVoiceVal ||

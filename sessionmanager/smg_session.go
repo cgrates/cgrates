@@ -147,16 +147,8 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	// show only what was actualy refunded (stopped in timespan)
 	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
-		cd := &engine.CallDescriptor{
-			Direction:   lastCC.Direction,
-			Tenant:      lastCC.Tenant,
-			Category:    lastCC.Category,
-			Subject:     lastCC.Subject,
-			Account:     lastCC.Account,
-			Destination: lastCC.Destination,
-			TOR:         lastCC.TOR,
-			Increments:  refundIncrements,
-		}
+		cd := lastCC.CreateCallDescriptor()
+		cd.Increments = refundIncrements
 		cd.Increments.Compress()
 		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %s", initialRefundDuration, utils.ToJSON(cd)))
 		var response float64
@@ -212,6 +204,17 @@ func (self *SMGSession) saveOperations() error {
 		firstCC.Merge(cc)
 	}
 	firstCC.Timespans.Compress()
+	firstCC.Round()
+	roundIncrements := firstCC.GetRoundIncrements()
+	if len(roundIncrements) != 0 {
+		cd := firstCC.CreateCallDescriptor()
+		cd.Increments = roundIncrements
+		var response float64
+		if err := self.rater.RefundRounding(cd, &response); err != nil {
+			return err
+		}
+	}
+
 	var reply string
 	err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
 		CgrId:          self.eventStart.GetCgrId(self.timezone),

@@ -90,6 +90,7 @@ func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
 		Subject:     cc.Subject,
 		Account:     cc.Account,
 		Destination: cc.Destination,
+		TOR:         cc.TOR,
 	}
 }
 
@@ -136,13 +137,12 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 		dc.DataSpans[i].Increments = make([]*DataIncrement, len(ts.Increments))
 		for j, incr := range ts.Increments {
 			dc.DataSpans[i].Increments[j] = &DataIncrement{
-				Amount:              incr.Duration.Seconds(),
-				Cost:                incr.Cost,
-				BalanceInfo:         incr.BalanceInfo,
-				BalanceRateInterval: incr.BalanceRateInterval,
-				UnitInfo:            incr.UnitInfo,
-				CompressFactor:      incr.CompressFactor,
-				paid:                incr.paid,
+				Amount:         incr.Duration.Seconds(),
+				Cost:           incr.Cost,
+				BalanceInfo:    incr.BalanceInfo,
+				UnitInfo:       incr.UnitInfo,
+				CompressFactor: incr.CompressFactor,
+				paid:           incr.paid,
 			}
 		}
 	}
@@ -180,6 +180,46 @@ func (cc *CallCost) updateCost() {
 		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	}
 	cc.Cost = cost
+}
+
+func (cc *CallCost) Round() {
+	if len(cc.Timespans) == 0 || cc.Timespans[0] == nil {
+		return
+	}
+	var totalCorrectionCost float64
+	for _, ts := range cc.Timespans {
+		if len(ts.Increments) == 0 {
+			continue // safe check
+		}
+		inc := ts.Increments[0]
+		if inc.BalanceInfo.MoneyBalanceUuid == "" || inc.Cost == 0 {
+			// this is a unit payied timespan, nothing to round
+			continue
+		}
+		cost := ts.CalculateCost()
+		roundedCost := utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals,
+			ts.RateInterval.Rating.RoundingMethod)
+		correctionCost := roundedCost - cost
+		//log.Print(cost, roundedCost, correctionCost)
+		if correctionCost != 0 {
+			ts.RoundIncrement = &Increment{
+				Cost:        correctionCost,
+				BalanceInfo: inc.BalanceInfo,
+			}
+			totalCorrectionCost += correctionCost
+			ts.Cost += correctionCost
+		}
+	}
+	cc.Cost += totalCorrectionCost
+}
+
+func (cc *CallCost) GetRoundIncrements() (roundIncrements Increments) {
+	for _, ts := range cc.Timespans {
+		if ts.RoundIncrement != nil && ts.RoundIncrement.Cost != 0 {
+			roundIncrements = append(roundIncrements, ts.RoundIncrement)
+		}
+	}
+	return
 }
 
 func (cc *CallCost) MatchCCFilter(bf *BalanceFilter) bool {

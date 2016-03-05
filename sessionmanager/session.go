@@ -195,21 +195,12 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 	// show only what was actualy refunded (stopped in timespan)
 	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
-		cd := &engine.CallDescriptor{
-			Direction:   lastCC.Direction,
-			Tenant:      lastCC.Tenant,
-			Category:    lastCC.Category,
-			Subject:     lastCC.Subject,
-			Account:     lastCC.Account,
-			Destination: lastCC.Destination,
-			TOR:         lastCC.TOR,
-			Increments:  refundIncrements,
-		}
+		cd := lastCC.CreateCallDescriptor()
+		cd.Increments = refundIncrements
 		cd.Increments.Compress()
 		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
 		var response float64
-		err := s.sessionManager.Rater().RefundIncrements(cd, &response)
-		if err != nil {
+		if err := s.sessionManager.Rater().RefundIncrements(cd, &response); err != nil {
 			return err
 		}
 	}
@@ -238,6 +229,16 @@ func (s *Session) SaveOperations() {
 		}
 		firstCC.Timespans.Compress()
 
+		firstCC.Round()
+		roundIncrements := firstCC.GetRoundIncrements()
+		if len(roundIncrements) != 0 {
+			cd := firstCC.CreateCallDescriptor()
+			cd.Increments = roundIncrements
+			var response float64
+			if err := s.sessionManager.Rater().RefundRounding(cd, &response); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
+			}
+		}
 		var reply string
 		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
 			CgrId:          s.eventStart.GetCgrId(s.sessionManager.Timezone()),

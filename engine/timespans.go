@@ -33,22 +33,22 @@ A unit in which a call will be split that has a specific price related interval 
 type TimeSpan struct {
 	TimeStart, TimeEnd                                         time.Time
 	Cost                                                       float64
-	ratingInfo                                                 *RatingInfo
 	RateInterval                                               *RateInterval
 	DurationIndex                                              time.Duration // the call duration so far till TimeEnd
 	Increments                                                 Increments
+	RoundIncrement                                             *Increment
 	MatchedSubject, MatchedPrefix, MatchedDestId, RatingPlanId string
 	CompressFactor                                             int
+	ratingInfo                                                 *RatingInfo
 }
 
 type Increment struct {
-	Duration            time.Duration
-	Cost                float64
-	BalanceInfo         *BalanceInfo // need more than one for units with cost
-	BalanceRateInterval *RateInterval
-	UnitInfo            *UnitInfo
-	CompressFactor      int
-	paid                bool
+	Duration       time.Duration
+	Cost           float64
+	BalanceInfo    *BalanceInfo // need more than one for units with cost
+	UnitInfo       *UnitInfo
+	CompressFactor int
+	paid           bool
 }
 
 // Holds the minute information related to a specified timespan
@@ -69,12 +69,14 @@ func (mi *UnitInfo) Equal(other *UnitInfo) bool {
 type BalanceInfo struct {
 	UnitBalanceUuid  string
 	MoneyBalanceUuid string
+	RateInterval     *RateInterval
 	AccountId        string // used when debited from shared balance
 }
 
 func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
 	return bi.UnitBalanceUuid == other.UnitBalanceUuid &&
 		bi.MoneyBalanceUuid == other.MoneyBalanceUuid &&
+		reflect.DeepEqual(bi.RateInterval, other.RateInterval) &&
 		bi.AccountId == other.AccountId
 }
 
@@ -213,11 +215,10 @@ func (tss *TimeSpans) Decompress() { // must be pointer receiver
 
 func (incr *Increment) Clone() *Increment {
 	nIncr := &Increment{
-		Duration:            incr.Duration,
-		Cost:                incr.Cost,
-		BalanceRateInterval: incr.BalanceRateInterval,
-		UnitInfo:            incr.UnitInfo,
-		BalanceInfo:         incr.BalanceInfo,
+		Duration:    incr.Duration,
+		Cost:        incr.Cost,
+		UnitInfo:    incr.UnitInfo,
+		BalanceInfo: incr.BalanceInfo,
 	}
 	return nIncr
 }
@@ -226,7 +227,6 @@ func (incr *Increment) Equal(other *Increment) bool {
 	return incr.Duration == other.Duration &&
 		incr.Cost == other.Cost &&
 		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo)) &&
-		((incr.BalanceRateInterval == nil && other.BalanceRateInterval == nil) || reflect.DeepEqual(incr.BalanceRateInterval, other.BalanceRateInterval)) &&
 		((incr.UnitInfo == nil && other.UnitInfo == nil) || incr.UnitInfo.Equal(other.UnitInfo))
 }
 
@@ -347,12 +347,12 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	ts.Increments = make([]*Increment, 0)
 	// create rated units series
 	_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	// we will use the cost calculated cost and devide by nb of increments
+	// we will use the calculated cost and devide by nb of increments
 	// because ts cost is rounded
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
 	incrementCost := ts.CalculateCost() / float64(nbIncrements)
-	incrementCost = utils.Round(incrementCost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
+	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:    rateIncrement,

@@ -742,7 +742,7 @@ func TestTSTimespanCreateIncrements(t *testing.T) {
 	if len(ts.Increments) != 3 {
 		t.Error("Error creating increment slice: ", len(ts.Increments))
 	}
-	if len(ts.Increments) < 3 || ts.Increments[2].Cost != 20.07 {
+	if len(ts.Increments) < 3 || ts.Increments[2].Cost != 20.066667 {
 		t.Error("Wrong second slice: ", ts.Increments[2].Cost)
 	}
 }
@@ -1510,39 +1510,34 @@ func TestTSIncrementsCompressDecompress(t *testing.T) {
 		&TimeSpan{
 			Increments: Increments{
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 			},
 		},
@@ -1562,39 +1557,34 @@ func TestTSMultipleIncrementsCompressDecompress(t *testing.T) {
 		&TimeSpan{
 			Increments: Increments{
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 				&Increment{
-					Duration:            time.Minute,
-					Cost:                10.4,
-					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
-					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					UnitInfo:            &UnitInfo{"1", 2.3, utils.VOICE},
+					Duration:    time.Minute,
+					Cost:        10.4,
+					BalanceInfo: &BalanceInfo{"1", "2", &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}, "3"},
+					UnitInfo:    &UnitInfo{"1", 2.3, utils.VOICE},
 				},
 			},
 		},

@@ -1127,33 +1127,6 @@ func TestAccountUnitCountingOutboundInbound(t *testing.T) {
 	}
 }
 
-func TestAccountRefund(t *testing.T) {
-	ub := &Account{
-		BalanceMap: map[string]Balances{
-			utils.MONETARY: Balances{
-				&Balance{Uuid: "moneya", Value: 100},
-			},
-			utils.VOICE: Balances{
-				&Balance{Uuid: "minutea", Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
-				&Balance{Uuid: "minuteb", Value: 10, DestinationIDs: utils.StringMap{"RET": true}},
-			},
-		},
-	}
-	increments := Increments{
-		&Increment{Cost: 2, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "", MoneyBalanceUuid: "moneya"}},
-		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minutea", MoneyBalanceUuid: "moneya"}},
-		&Increment{Duration: 4 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minuteb", MoneyBalanceUuid: ""}},
-	}
-	for _, increment := range increments {
-		ub.refundIncrement(increment, &CallDescriptor{TOR: utils.VOICE}, false)
-	}
-	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
-		ub.BalanceMap[utils.VOICE][0].GetValue() != 13 ||
-		ub.BalanceMap[utils.VOICE][1].GetValue() != 14 {
-		t.Error("Error refunding money: ", ub.BalanceMap[utils.VOICE][1].GetValue())
-	}
-}
-
 func TestDebitShared(t *testing.T) {
 	cc := &CallCost{
 		Tenant:      "vdf",
@@ -1422,7 +1395,7 @@ func TestDebitGenericBalance(t *testing.T) {
 	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[utils.GENERIC][0].GetValue() != 99.4999 ||
+	if rifsBalance.BalanceMap[utils.GENERIC][0].GetValue() != 99.49999 ||
 		rifsBalance.BalanceMap[utils.MONETARY][0].GetValue() != 21 {
 		t.Logf("%+v", cc.Timespans[0].Increments[0])
 		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.GENERIC][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY][0].GetValue())
@@ -1465,7 +1438,7 @@ func TestDebitGenericBalanceWithRatingSubject(t *testing.T) {
 	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0])
 	}
-	if rifsBalance.BalanceMap[utils.GENERIC][0].GetValue() != 99.4999 ||
+	if rifsBalance.BalanceMap[utils.GENERIC][0].GetValue() != 99.49999 ||
 		rifsBalance.BalanceMap[utils.MONETARY][0].GetValue() != 21 {
 		t.Logf("%+v", cc.Timespans[0].Increments[0])
 		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[utils.GENERIC][0].GetValue(), rifsBalance.BalanceMap[utils.MONETARY][0].GetValue())
