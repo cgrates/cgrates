@@ -617,6 +617,7 @@ func (bc Balances) GetTotalValue() (total float64) {
 			total += b.GetValue()
 		}
 	}
+	total = utils.Round(total, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	return
 }
 

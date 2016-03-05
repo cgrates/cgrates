@@ -349,7 +349,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal { // Should also consider derived charges which double the cost of 6m10s - 2x0.7584
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+		t.Errorf("Expected: %v, received: %v", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 
