@@ -352,16 +352,17 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 		timeStart = cdr.SetupTime
 	}
 	cd := &CallDescriptor{
-		TOR:           cdr.ToR,
-		Direction:     cdr.Direction,
-		Tenant:        cdr.Tenant,
-		Category:      cdr.Category,
-		Subject:       cdr.Subject,
-		Account:       cdr.Account,
-		Destination:   cdr.Destination,
-		TimeStart:     timeStart,
-		TimeEnd:       timeStart.Add(cdr.Usage),
-		DurationIndex: cdr.Usage,
+		TOR:             cdr.ToR,
+		Direction:       cdr.Direction,
+		Tenant:          cdr.Tenant,
+		Category:        cdr.Category,
+		Subject:         cdr.Subject,
+		Account:         cdr.Account,
+		Destination:     cdr.Destination,
+		TimeStart:       timeStart,
+		TimeEnd:         timeStart.Add(cdr.Usage),
+		DurationIndex:   cdr.Usage,
+		PerformRounding: true,
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		err = self.rater.Debit(cd, cc)
