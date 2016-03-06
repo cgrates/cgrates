@@ -165,7 +165,11 @@ func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) 
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.LastUsed
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	valStr, hasVal := self[fieldName]
+	if !hasVal {
+		return nilDuration, nil
+	}
+	result, _ := utils.ConvertIfaceToString(valStr)
 	return utils.ParseDurationWithSecs(result)
 }
 

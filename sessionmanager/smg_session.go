@@ -41,6 +41,7 @@ type SMGSession struct {
 	sessionCds    []*engine.CallDescriptor
 	callCosts     []*engine.CallCost
 	extraDuration time.Duration // keeps the current duration debited on top of what heas been asked
+	lastUsage     time.Duration // Keep record of the last debit for LastUsed functionality
 }
 
 // Called in case of automatic debits
@@ -52,7 +53,7 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 			return
 		default:
 		}
-		if maxDebit, err := self.debit(debitInterval); err != nil {
+		if maxDebit, err := self.debit(debitInterval, nilDuration); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit opperation on session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
 			disconnectReason := SYSTEM_ERROR
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
@@ -75,7 +76,17 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 }
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
-func (self *SMGSession) debit(dur time.Duration) (time.Duration, error) {
+func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
+	if lastUsed != nilDuration &&
+		self.cd.DurationIndex != 0 &&
+		self.lastUsage != lastUsed {
+		if self.lastUsage > lastUsed { // We have debitted more than we have used, refund in the duration debitted
+			dur -= self.lastUsage - lastUsed
+		} else { // We have debitted less than we have consumed, add the difference to duration debitted
+			dur += lastUsed - self.lastUsage
+		}
+	}
+	self.lastUsage = dur // Reset the lastUsage for later reference
 	// apply correction from previous run
 	dur -= self.extraDuration
 	self.extraDuration = 0

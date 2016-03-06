@@ -167,18 +167,20 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
+	if err != nil {
+		return nilDuration, err
+	}
 	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.MaxCallDuration)
 	if err != nil {
 		return nilDuration, err
 	}
 	evUuid := gev.GetUUID()
 	for _, s := range self.getSession(evUuid) {
-		if maxDur, err := s.debit(evMaxUsage); err != nil {
+		if maxDur, err := s.debit(evMaxUsage, evLastUsed); err != nil {
 			return nilDuration, err
-		} else {
-			if maxDur < evMaxUsage {
-				evMaxUsage = maxDur
-			}
+		} else if maxDur < evMaxUsage {
+			evMaxUsage = maxDur
 		}
 	}
 	return evMaxUsage, nil
