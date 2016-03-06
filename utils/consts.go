@@ -124,6 +124,7 @@ const (
 	SETUP_TIME                   = "SetupTime"
 	ANSWER_TIME                  = "AnswerTime"
 	USAGE                        = "Usage"
+	LastUsed                     = "LastUsed"
 	PDD                          = "PDD"
 	SUPPLIER                     = "Supplier"
 	MEDI_RUNID                   = "RunID"

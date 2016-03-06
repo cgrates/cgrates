@@ -161,6 +161,14 @@ func (self SMGenericEvent) GetUsage(fieldName string) (time.Duration, error) {
 	return utils.ParseDurationWithSecs(result)
 }
 
+func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) {
+	if fieldName == utils.META_DEFAULT {
+		fieldName = utils.LastUsed
+	}
+	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	return utils.ParseDurationWithSecs(result)
+}
+
 func (self SMGenericEvent) GetMaxUsage(fieldName string, cfgMaxUsage time.Duration) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.USAGE
@@ -212,7 +220,7 @@ func (self SMGenericEvent) GetCdrSource() string {
 func (self SMGenericEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for key, val := range self {
-		primaryFields := append(utils.PrimaryCdrFields, utils.EVENT_NAME)
+		primaryFields := append(utils.PrimaryCdrFields, utils.EVENT_NAME, utils.LastUsed)
 		if utils.IsSliceMember(primaryFields, key) {
 			continue
 		}

@@ -45,6 +45,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	smGev[utils.SETUP_TIME] = "2015-11-09 14:21:24"
 	smGev[utils.ANSWER_TIME] = "2015-11-09 14:22:02"
 	smGev[utils.USAGE] = "1m23s"
+	smGev[utils.LastUsed] = "21s"
 	smGev[utils.PDD] = "300ms"
 	smGev[utils.SUPPLIER] = "supplier1"
 	smGev[utils.DISCONNECT_CAUSE] = "NORMAL_DISCONNECT"
@@ -106,6 +107,11 @@ func TestSMGenericEventParseFields(t *testing.T) {
 		t.Error(err)
 	} else if dur != time.Duration(83)*time.Second {
 		t.Error("Unexpected: ", dur)
+	}
+	if lastUsed, err := smGev.GetLastUsed(utils.META_DEFAULT); err != nil {
+		t.Error(err)
+	} else if lastUsed != time.Duration(21)*time.Second {
+		t.Error("Unexpected: ", lastUsed)
 	}
 	if pdd, err := smGev.GetPdd(utils.META_DEFAULT); err != nil {
 		t.Error(err)
