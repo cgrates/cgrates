@@ -1,5 +1,5 @@
 hash: fde526f5fcd62d6b306dd6c4e30c6aa29ee3bfd625ffef3906c4d032eda7e9ec
-updated: 2016-02-19T13:46:35.353761268+02:00
+updated: 2016-03-07T10:29:17.780762339+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
@@ -64,5 +64,6 @@ imports:
   version: e30de8ac9ae3b30df7065f766c71f88bba7d4e49
   subpackages:
   - bson
+  - internal/sasl
   - internal/scram
 devImports: []

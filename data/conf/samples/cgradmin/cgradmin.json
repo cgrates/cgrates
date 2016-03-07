@@ -10,11 +10,25 @@
 	"http": ":2080",				// HTTP listening address
 },
 
+//"tariffplan_db": {								// database used to store offline tariff plans and CDRs
+//	"db_type": "mongo",						// stor database type to use: <mysql|postgres>
+//	"db_host": "127.0.0.1",					// the host to connect to
+//	"db_port": 27017,						// the port to reach the stordb
+//    "db_name": "tpdb",
+//},
+//
+//"data_db": {								// database used to store offline tariff plans and CDRs
+//	"db_type": "mongo",						// stor database type to use: <mysql|postgres>
+//	"db_host": "127.0.0.1",					// the host to connect to
+//	"db_port": 27017,						// the port to reach the stordb
+//    "db_name": "datadb",
+//},
+
 "stor_db": {								// database used to store offline tariff plans and CDRs
 	"db_type": "mongo",						// stor database type to use: <mysql|postgres>
 	"db_host": "127.0.0.1",					// the host to connect to
 	"db_port": 27017,						// the port to reach the stordb
-    "db_name": "cgrates",
+    "db_name": "stordb",
 },
 
 "rater": {
