@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -243,4 +244,22 @@ func (rpf *RatingProfile) GetHistoryRecord(deleted bool) history.Record {
 
 type TenantRatingSubject struct {
 	Tenant, Subject string
+}
+
+func PrefixMatchRatingProfileSubject(key string) (rp *RatingProfile, err error) {
+	if !prefixMatchingRatingProfile {
+		return ratingStorage.GetRatingProfile(key, false)
+	}
+	if rp, err = ratingStorage.GetRatingProfile(key, false); err == nil {
+		return rp, err
+	}
+	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
+	baseKey := key[:lastIndex]
+	subject := key[lastIndex:]
+	for i := 1; i < len(subject)-1; i++ {
+		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:len(subject)-i], false); err == nil {
+			return rp, err
+		}
+	}
+	return
 }

@@ -70,16 +70,17 @@ func init() {
 }
 
 var (
-	ratingStorage          RatingStorage
-	accountingStorage      AccountingStorage
-	storageLogger          LogStorage
-	cdrStorage             CdrStorage
-	debitPeriod            = 10 * time.Second
-	globalRoundingDecimals = 6
-	historyScribe          history.Scribe
-	pubSubServer           rpcclient.RpcClientConnection
-	userService            UserService
-	aliasService           AliasService
+	ratingStorage               RatingStorage
+	accountingStorage           AccountingStorage
+	storageLogger               LogStorage
+	cdrStorage                  CdrStorage
+	debitPeriod                 = 10 * time.Second
+	globalRoundingDecimals      = 6
+	historyScribe               history.Scribe
+	pubSubServer                rpcclient.RpcClientConnection
+	userService                 UserService
+	aliasService                AliasService
+	prefixMatchingRatingProfile bool
 )
 
 // Exported method to set the storage getter.
@@ -94,6 +95,10 @@ func SetAccountingStorage(ag AccountingStorage) {
 // Sets the global rounding method and decimal precision for GetCost method
 func SetRoundingDecimals(rd int) {
 	globalRoundingDecimals = rd
+}
+
+func SetPrefixmatchingRatingProfile(flag bool) {
+	prefixMatchingRatingProfile = flag
 }
 
 /*
@@ -219,7 +224,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		return utils.ErrMaxRecursionDepth, recursionDepth
 	}
-	rpf, err := ratingStorage.GetRatingProfile(key, false)
+	rpf, err := PrefixMatchRatingProfileSubject(key)
 	if err != nil || rpf == nil {
 		return utils.ErrNotFound, recursionDepth
 	}
@@ -1034,7 +1039,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCR
 					continue
 				}
 				rpfKey := utils.ConcatenatedKey(ratingProfileSearchKey, supplier)
-				if rpf, err := ratingStorage.GetRatingProfile(rpfKey, false); err != nil {
+				if rpf, err := PrefixMatchRatingProfileSubject(rpfKey); err != nil {
 					lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 						Supplier: fullSupplier,
 						Error:    fmt.Sprintf("Rating plan error: %s", err.Error()),
