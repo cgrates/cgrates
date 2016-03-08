@@ -246,8 +246,8 @@ type TenantRatingSubject struct {
 	Tenant, Subject string
 }
 
-func PrefixMatchRatingProfileSubject(key string) (rp *RatingProfile, err error) {
-	if !prefixMatchingRatingProfile {
+func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
+	if !rpSubjectPrefixMatching || strings.HasSuffix(key, utils.ANY) {
 		return ratingStorage.GetRatingProfile(key, false)
 	}
 	if rp, err = ratingStorage.GetRatingProfile(key, false); err == nil {

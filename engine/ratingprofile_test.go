@@ -250,16 +250,16 @@ func TestRatingProfileRIforTSMidnight(t *testing.T) {
 	}
 }
 
-func TestPrefixMatchRatingProfileSubject(t *testing.T) {
-	prefixMatchingRatingProfile = true
-	rp, err := PrefixMatchRatingProfileSubject("*out:cgrates.org:data:rif")
+func TestRatingProfileSubjectPrefixMatching(t *testing.T) {
+	rpSubjectPrefixMatching = true
+	rp, err := RatingProfileSubjectPrefixMatching("*out:cgrates.org:data:rif")
 	if rp == nil || err != nil {
 		t.Errorf("Error getting rating profile by prefix: %+v (%v)", rp, err)
 	}
 
-	rp, err = PrefixMatchRatingProfileSubject("*out:cgrates.org:data:rifescu")
+	rp, err = RatingProfileSubjectPrefixMatching("*out:cgrates.org:data:rifescu")
 	if rp == nil || err != nil {
 		t.Errorf("Error getting rating profile by prefix: %+v (%v)", rp, err)
 	}
-	prefixMatchingRatingProfile = false
+	rpSubjectPrefixMatching = false
 }
