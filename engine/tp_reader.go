@@ -1128,15 +1128,17 @@ func (tpr *TpReader) LoadAccountActions() (err error) {
 		}
 		ub.InitCounters()
 		tpr.accountActions[aa.KeyId()] = ub
-		actionPlan, exists := tpr.actionPlans[aa.ActionPlanId]
-		if !exists {
-			log.Printf("could not get action plan for tag %v", aa.ActionPlanId)
-			// must not continue here
+		if aa.ActionPlanId != "" {
+			actionPlan, exists := tpr.actionPlans[aa.ActionPlanId]
+			if !exists {
+				log.Printf("could not get action plan for tag %v", aa.ActionPlanId)
+				// must not continue here
+			}
+			if actionPlan.AccountIDs == nil {
+				actionPlan.AccountIDs = make(utils.StringMap)
+			}
+			actionPlan.AccountIDs[aa.KeyId()] = true
 		}
-		if actionPlan.AccountIDs == nil {
-			actionPlan.AccountIDs = make(utils.StringMap)
-		}
-		actionPlan.AccountIDs[aa.KeyId()] = true
 	}
 	return nil
 }

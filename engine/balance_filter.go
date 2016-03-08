@@ -274,7 +274,7 @@ func (bp *BalanceFilter) GetFactor() ValueFactor {
 	return *bp.Factor
 }
 
-func (bp *BalanceFilter) HasExpirationDate() bool {
+func (bp *BalanceFilter) EmptyExpirationDate() bool {
 	if bp.ExpirationDate == nil {
 		return true
 	}

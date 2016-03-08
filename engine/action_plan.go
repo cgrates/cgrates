@@ -303,7 +303,10 @@ func (at *ActionTiming) Execute() (err error) {
 						continue
 					}
 				}
-				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.HasExpirationDate()) && parseErr == nil && !expDate.IsZero() {
+				if a.Balance == nil {
+					a.Balance = &BalanceFilter{}
+				}
+				if expDate, parseErr := utils.ParseDate(a.ExpirationString); parseErr == nil && !expDate.IsZero() {
 					a.Balance.ExpirationDate = &time.Time{}
 					*a.Balance.ExpirationDate = expDate
 				}
@@ -333,7 +336,7 @@ func (at *ActionTiming) Execute() (err error) {
 	}
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
 		for _, a := range aac {
-			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.HasExpirationDate()) &&
+			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.EmptyExpirationDate()) &&
 				parseErr == nil && !expDate.IsZero() {
 				a.Balance.ExpirationDate = &time.Time{}
 				*a.Balance.ExpirationDate = expDate

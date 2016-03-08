@@ -80,10 +80,11 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err erro
 		if a.Balance == nil {
 			a.Balance = &BalanceFilter{}
 		}
-		if a.ExpirationString != "" {
+		if expDate, parseErr := utils.ParseDate(a.ExpirationString); parseErr == nil && !expDate.IsZero() {
 			a.Balance.ExpirationDate = &time.Time{}
-			*a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
+			*a.Balance.ExpirationDate = expDate
 		}
+
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))

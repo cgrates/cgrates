@@ -2055,6 +2055,29 @@ func TestActionCSVFilter(t *testing.T) {
 	}
 }
 
+func TestActionExpirationTime(t *testing.T) {
+	if _, err := accountingStorage.GetAccount("cgrates.org:expo"); err != nil {
+		t.Errorf("account to be removed not found: %v", err)
+	}
+	a, err := ratingStorage.GetActions("EXP", false)
+	if err != nil || a == nil {
+		t.Error("Error getting actions: ", err)
+	}
+
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:expo": true},
+		actions:    a,
+	}
+	for rep := 0; rep < 5; rep++ {
+		at.Execute()
+		afterUb, err := accountingStorage.GetAccount("cgrates.org:expo")
+		if err != nil ||
+			len(afterUb.BalanceMap[utils.VOICE]) != rep+1 {
+			t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
+		}
+	}
+}
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {

@@ -175,6 +175,7 @@ NEG,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
 BLOCK,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,10,20,true,false,20
 BLOCK,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
+EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300,10,false,false,10
 `
 	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -186,6 +187,7 @@ TOPUP_SHARED10_AT,SE10,*asap,10
 TOPUP_EMPTY_AT,EE0,*asap,10
 POST_AT,NEG,*asap,10
 BLOCK_AT,BLOCK,*asap,10
+EXP_AT,EXP,*asap,10
 `
 
 	actionTriggers = `
@@ -213,6 +215,7 @@ vdf,emptyY,TOPUP_EMPTY_AT,,,
 vdf,post,POST_AT,,,
 cgrates.org,alodis,TOPUP_EMPTY_AT,,true,true
 cgrates.org,block,BLOCK_AT,,false,false
+cgrates.org,expo,EXP_AT,,false,false
 `
 
 	derivedCharges = `
@@ -815,7 +818,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 11 {
+	if len(csvr.actions) != 12 {
 		t.Error("Failed to load actions: ", len(csvr.actions))
 	}
 	as1 := csvr.actions["MINI"]
@@ -1001,7 +1004,7 @@ func TestLoadLCRs(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionPlans) != 7 {
+	if len(csvr.actionPlans) != 8 {
 		t.Error("Failed to load action timings: ", len(csvr.actionPlans))
 	}
 	atm := csvr.actionPlans["MORE_MINUTES"]
@@ -1096,7 +1099,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 12 {
+	if len(csvr.accountActions) != 13 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]
