@@ -1,12 +1,12 @@
 hash: fde526f5fcd62d6b306dd6c4e30c6aa29ee3bfd625ffef3906c4d032eda7e9ec
-updated: 2016-03-08T23:15:54.553132116+02:00
+updated: 2016-03-09T00:01:17.781232421+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
 - name: github.com/cenkalti/rpc2
   version: 2d1be381ce47537e9e076b2b76dc70933162e4e9
 - name: github.com/cgrates/fsock
-  version: c3b1d274ae0e42742ba1bce2bf3a138d72fb82ee
+  version: a8ffdbdfc8440016df008ba91e6f05f806d7a69f
 - name: github.com/cgrates/kamevapi
   version: a376b1f937ba959857929fa3e111c0f3243278c0
 - name: github.com/cgrates/osipsdagram
@@ -18,7 +18,7 @@ imports:
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
-  version: 30569fd7282321ac213d8db9f39eac9321ab6bd5
+  version: 1a8912836dee1f666f882b2e388e340a3a10ecdd
   subpackages:
   - diam
   - diam/avp
@@ -28,40 +28,39 @@ imports:
   - diam/sm/smparser
   - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
-  version: bb006fd699a123d3eb514561dbefc352e978949d
+  version: 0f2db9e6c9cff80a97ca5c2c5096242cc1554e16
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/jinzhu/gorm
-  version: 2f7811c55f286c55cfc3a2aefb5c4049b9cd5214
+  version: a0aa21aec5280d4394164fe1804629bc7507cb88
 - name: github.com/jinzhu/inflection
   version: 3272df6c21d04180007eb3349844c89a3856bc25
 - name: github.com/kr/pty
   version: f7ee69f31298ecbe5d2b349c711e2547a617d398
 - name: github.com/lib/pq
-  version: 11fc39a580a008f1f39bb3d11d984fb34ed778d9
+  version: 165a3529e799da61ab10faed1fabff3662d6193f
   subpackages:
-  - hstore
   - oid
 - name: github.com/mediocregopher/radix.v2
-  version: 91435107718b55ff544323a2b0f25fdd8475d283
+  version: 7bdaf7c45ec452ca691ab20535471e24460f0876
   subpackages:
   - pool
   - redis
 - name: github.com/peterh/liner
-  version: 3f1c20449d1836aa4cbe38731b96f95cdf89634d
+  version: ad1edfd30321d8f006ccf05f1e0524adeb943060
 - name: github.com/ugorji/go
-  version: 646ae4a518c1c3be0739df898118d9bccf993858
+  version: 187fa0f8af224437e08ecb3f208c4d1a94859a61
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: 961116aeebe66bfb58bb4d51818c70d256acbbb8
+  version: a4bbce9fcae005b22ae5443f6af064d80a6f5a55
   subpackages:
   - websocket
   - context
 - name: gopkg.in/fsnotify.v1
-  version: 508915b7500b6e42a87132e4afeb4729cebc7cbb
+  version: 875cf421b32f8f1b31bd43776297876d01542279
 - name: gopkg.in/mgo.v2
-  version: e30de8ac9ae3b30df7065f766c71f88bba7d4e49
+  version: d90005c5262a3463800497ea5a89aed5fe22c886
   subpackages:
   - bson
   - internal/sasl

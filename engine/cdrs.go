@@ -113,7 +113,7 @@ func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 	if ccl.CheckDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
 			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.RunId)
-			if err != nil && err != gorm.RecordNotFound && err != mgov2.ErrNotFound {
+			if err != nil && err != gorm.ErrRecordNotFound && err != mgov2.ErrNotFound {
 				return nil, err
 			}
 			if cc != nil {
@@ -326,7 +326,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) error {
 			}
 			time.Sleep(delay())
 		}
-		if err != nil && (err == gorm.RecordNotFound || err == mgov2.ErrNotFound) { //calculate CDR as for pseudoprepaid
+		if err != nil && (err == gorm.ErrRecordNotFound || err == mgov2.ErrNotFound) { //calculate CDR as for pseudoprepaid
 			utils.Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", cdr.CGRID, utils.SESSION_MANAGER_SOURCE, cdr.RunID))
 			qryCC, err = self.getCostFromRater(cdr)
 		}

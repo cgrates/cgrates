@@ -35,7 +35,7 @@ import (
 
 type SQLStorage struct {
 	Db *sql.DB
-	db gorm.DB
+	db *gorm.DB
 }
 
 func (self *SQLStorage) Close() {
