@@ -9,7 +9,7 @@ import:
 - package: github.com/cgrates/structmatcher
 - package: github.com/fiorix/go-diameter
   subpackages:
-  - /diam
+  - diam
   - diam/avp
   - diam/datatype
   - diam/dict
@@ -17,20 +17,19 @@ import:
 - package: github.com/go-sql-driver/mysql
 - package: github.com/gorhill/cronexpr
 - package: github.com/jinzhu/gorm
-- package: github.com/jinzhu/inflection
 - package: github.com/kr/pty
 - package: github.com/lib/pq
 - package: github.com/mediocregopher/radix.v2
   subpackages:
-  - /pool
+  - pool
   - redis
 - package: github.com/peterh/liner
 - package: github.com/ugorji/go
   subpackages:
-  - /codec
+  - codec
 - package: golang.org/x/net
   subpackages:
-  - /websocket
+  - websocket
 - package: gopkg.in/fsnotify.v1
 - package: gopkg.in/mgo.v2
   subpackages:

@@ -1,5 +1,5 @@
-hash: fde526f5fcd62d6b306dd6c4e30c6aa29ee3bfd625ffef3906c4d032eda7e9ec
-updated: 2016-03-09T00:01:17.781232421+02:00
+hash: c4e3a1bdd7452ec3af195e09b8b3b1b9a61e36edfad557aeb01686706019c352
+updated: 2016-03-09T00:08:37.493018177+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
