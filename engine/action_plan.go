@@ -306,9 +306,11 @@ func (at *ActionTiming) Execute() (err error) {
 				if a.Balance == nil {
 					a.Balance = &BalanceFilter{}
 				}
-				if expDate, parseErr := utils.ParseDate(a.ExpirationString); parseErr == nil && !expDate.IsZero() {
-					a.Balance.ExpirationDate = &time.Time{}
-					*a.Balance.ExpirationDate = expDate
+				if a.ExpirationString != "" { // if it's *unlimited then it has to be zero time
+					if expDate, parseErr := utils.ParseDate(a.ExpirationString); parseErr == nil {
+						a.Balance.ExpirationDate = &time.Time{}
+						*a.Balance.ExpirationDate = expDate
+					}
 				}
 
 				actionFunction, exists := getActionFunc(a.ActionType)

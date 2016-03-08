@@ -2056,9 +2056,6 @@ func TestActionCSVFilter(t *testing.T) {
 }
 
 func TestActionExpirationTime(t *testing.T) {
-	if _, err := accountingStorage.GetAccount("cgrates.org:expo"); err != nil {
-		t.Errorf("account to be removed not found: %v", err)
-	}
 	a, err := ratingStorage.GetActions("EXP", false)
 	if err != nil || a == nil {
 		t.Error("Error getting actions: ", err)
@@ -2075,6 +2072,28 @@ func TestActionExpirationTime(t *testing.T) {
 			len(afterUb.BalanceMap[utils.VOICE]) != rep+1 {
 			t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
 		}
+	}
+}
+
+func TestActionExpNoExp(t *testing.T) {
+	exp, err := ratingStorage.GetActions("EXP", false)
+	if err != nil || exp == nil {
+		t.Error("Error getting actions: ", err)
+	}
+	noexp, err := ratingStorage.GetActions("NOEXP", false)
+	if err != nil || noexp == nil {
+		t.Error("Error getting actions: ", err)
+	}
+	exp = append(exp, noexp...)
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:expnoexp": true},
+		actions:    exp,
+	}
+	at.Execute()
+	afterUb, err := accountingStorage.GetAccount("cgrates.org:expnoexp")
+	if err != nil ||
+		len(afterUb.BalanceMap[utils.VOICE]) != 2 {
+		t.Error("error topuping expiration balance: ", utils.ToIJSON(afterUb))
 	}
 }
 
