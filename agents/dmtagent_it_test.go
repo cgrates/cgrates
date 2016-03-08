@@ -293,11 +293,11 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 	} else if len(avps) == 0 {
 		t.Error("Granted-Service-Unit not found")
 	} else if strCCTime := avpValAsString(avps[0]); strCCTime != "300" {
-		t.Errorf("Expecting 300, received: %s", strCCTime)
+		t.Errorf("Expecting 300, received: %s, (%+v)", strCCTime, avps)
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.2518
+	eAcntVal := 9.5008
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -336,7 +336,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 9.0028
+	eAcntVal := 9.2016
 	if err := apierRpc.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if utils.Round(acnt.BalanceMap[utils.MONETARY].GetTotalValue(), 5, utils.ROUNDING_MIDDLE) != eAcntVal {
