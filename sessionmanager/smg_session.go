@@ -77,20 +77,20 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
-	if lastUsed != nilDuration &&
-		self.cd.DurationIndex != 0 &&
-		self.lastUsage != lastUsed {
+	self.lastUsage = dur                   // Reset the lastUsage for later reference
+	lastUsedCorrection := time.Duration(0) // Used if lastUsed influences the debit
+	if self.cd.DurationIndex != 0 {
 		if self.lastUsage > lastUsed { // We have debitted more than we have used, refund in the duration debitted
-			dur -= self.lastUsage - lastUsed
+			lastUsedCorrection = -(self.lastUsage - lastUsed)
 		} else { // We have debitted less than we have consumed, add the difference to duration debitted
-			dur += lastUsed - self.lastUsage
+			lastUsedCorrection = lastUsed - self.lastUsage
 		}
 	}
-	self.lastUsage = dur // Reset the lastUsage for later reference
+	// apply the lastUsed correction
+	dur += lastUsedCorrection
 	// apply correction from previous run
 	dur -= self.extraDuration
 	self.extraDuration = 0
-
 	if self.cd.LoopIndex > 0 {
 		self.cd.TimeStart = self.cd.TimeEnd
 	}
@@ -107,6 +107,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
+	dur -= lastUsedCorrection // Revert the correction to return the real duration reserved
 	self.cd.DurationIndex -= dur
 	self.cd.DurationIndex += ccDuration
 	self.cd.MaxCostSoFar += cc.Cost
