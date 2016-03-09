@@ -79,7 +79,7 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
 	self.lastUsage = dur                   // Reset the lastUsage for later reference
 	lastUsedCorrection := time.Duration(0) // Used if lastUsed influences the debit
-	if self.cd.DurationIndex != 0 {
+	if self.cd.DurationIndex != 0 && lastUsed != 0 {
 		if self.lastUsage > lastUsed { // We have debitted more than we have used, refund in the duration debitted
 			lastUsedCorrection = -(self.lastUsage - lastUsed)
 		} else { // We have debitted less than we have consumed, add the difference to duration debitted
@@ -169,7 +169,6 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 			return err
 		}
 	}
-	//utils.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
 	lastCC.Cost -= refundIncrements.GetTotalCost()
 	lastCC.UpdateRatedUsage()
 	lastCC.Timespans.Compress()
