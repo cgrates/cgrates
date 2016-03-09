@@ -45,41 +45,62 @@ type TimeSpan struct {
 type Increment struct {
 	Duration       time.Duration
 	Cost           float64
-	BalanceInfo    *BalanceInfo // need more than one for units with cost
-	UnitInfo       *UnitInfo
+	BalanceInfo    *DebitInfo // need more than one for units with cost
 	CompressFactor int
 	paid           bool
 }
 
-// Holds the minute information related to a specified timespan
-type UnitInfo struct {
-	DestinationId string
-	Quantity      float64
-	TOR           string
-	//Price         float64
-}
-
-func (mi *UnitInfo) Equal(other *UnitInfo) bool {
-	return mi.DestinationId == other.DestinationId &&
-		mi.Quantity == other.Quantity &&
-		mi.TOR == other.TOR
-}
-
 // Holds information about the balance that made a specific payment
-type BalanceInfo struct {
-	UnitBalanceUuid   string
-	MoneyBalanceUuid  string
-	UnitBalanceValue  float64
-	MoneyBalanceValue float64
-	RateInterval      *RateInterval
-	AccountID         string // used when debited from shared balance
+type DebitInfo struct {
+	Unit      *UnitInfo
+	Monetary  *MonetaryInfo
+	AccountID string // used when debited from shared balance
 }
 
-func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
-	return bi.UnitBalanceUuid == other.UnitBalanceUuid &&
-		bi.MoneyBalanceUuid == other.MoneyBalanceUuid &&
-		reflect.DeepEqual(bi.RateInterval, other.RateInterval) &&
+func (bi *DebitInfo) Equal(other *DebitInfo) bool {
+	return bi.Unit.Equal(other.Unit) &&
+		bi.Monetary.Equal(other.Monetary) &&
 		bi.AccountID == other.AccountID
+}
+
+type MonetaryInfo struct {
+	UUID         string
+	Value        float64
+	RateInterval *RateInterval
+}
+
+func (mi *MonetaryInfo) Equal(other *MonetaryInfo) bool {
+	if mi == nil && other == nil {
+		return true
+	}
+	if mi == nil || other == nil {
+		return false
+	}
+	return mi.UUID == other.UUID &&
+		reflect.DeepEqual(mi.RateInterval, other.RateInterval)
+}
+
+type UnitInfo struct {
+	UUID          string
+	Value         float64
+	DestinationID string
+	Consumed      float64
+	TOR           string
+	RateInterval  *RateInterval
+}
+
+func (ui *UnitInfo) Equal(other *UnitInfo) bool {
+	if ui == nil && other == nil {
+		return true
+	}
+	if ui == nil || other == nil {
+		return false
+	}
+	return ui.UUID == other.UUID &&
+		ui.DestinationID == other.DestinationID &&
+		ui.Consumed == other.Consumed &&
+		ui.TOR == other.TOR &&
+		reflect.DeepEqual(ui.RateInterval, other.RateInterval)
 }
 
 type TimeSpans []*TimeSpan
@@ -219,7 +240,6 @@ func (incr *Increment) Clone() *Increment {
 	nIncr := &Increment{
 		Duration:    incr.Duration,
 		Cost:        incr.Cost,
-		UnitInfo:    incr.UnitInfo,
 		BalanceInfo: incr.BalanceInfo,
 	}
 	return nIncr
@@ -228,8 +248,7 @@ func (incr *Increment) Clone() *Increment {
 func (incr *Increment) Equal(other *Increment) bool {
 	return incr.Duration == other.Duration &&
 		incr.Cost == other.Cost &&
-		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo)) &&
-		((incr.UnitInfo == nil && other.UnitInfo == nil) || incr.UnitInfo.Equal(other.UnitInfo))
+		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo))
 }
 
 func (incr *Increment) GetCompressFactor() int {
@@ -263,8 +282,12 @@ func (incs *Increments) Compress() { // must be pointer receiver
 		} else {
 			cIncrs[len(cIncrs)-1].CompressFactor++
 			if cIncrs[len(cIncrs)-1].BalanceInfo != nil && incr.BalanceInfo != nil {
-				cIncrs[len(cIncrs)-1].BalanceInfo.MoneyBalanceValue = incr.BalanceInfo.MoneyBalanceValue
-				cIncrs[len(cIncrs)-1].BalanceInfo.UnitBalanceValue = incr.BalanceInfo.UnitBalanceValue
+				if cIncrs[len(cIncrs)-1].BalanceInfo.Monetary != nil && incr.BalanceInfo.Monetary != nil {
+					cIncrs[len(cIncrs)-1].BalanceInfo.Monetary.Value = incr.BalanceInfo.Monetary.Value
+				}
+				if cIncrs[len(cIncrs)-1].BalanceInfo.Unit != nil && incr.BalanceInfo.Unit != nil {
+					cIncrs[len(cIncrs)-1].BalanceInfo.Unit.Value = incr.BalanceInfo.Unit.Value
+				}
 			}
 		}
 	}
@@ -363,7 +386,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 		inc := &Increment{
 			Duration:    rateIncrement,
 			Cost:        incrementCost,
-			BalanceInfo: &BalanceInfo{},
+			BalanceInfo: &DebitInfo{},
 		}
 		ts.Increments = append(ts.Increments, inc)
 	}

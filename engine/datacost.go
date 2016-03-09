@@ -35,11 +35,9 @@ type DataSpan struct {
 }
 
 type DataIncrement struct {
-	Amount              float64
-	Cost                float64
-	BalanceInfo         *BalanceInfo // need more than one for units with cost
-	BalanceRateInterval *RateInterval
-	UnitInfo            *UnitInfo
-	CompressFactor      int
-	paid                bool
+	Amount         float64
+	Cost           float64
+	BalanceInfo    *DebitInfo // need more than one for units with cost
+	CompressFactor int
+	paid           bool
 }

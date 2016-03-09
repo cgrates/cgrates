@@ -608,7 +608,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 		for _, incr := range ts.Increments {
 			//utils.Logger.Debug("INCR: " + utils.ToJSON(incr))
 			totalCost += incr.Cost
-			if incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
+			if incr.BalanceInfo.Monetary != nil && incr.BalanceInfo.Monetary.UUID == defaultBalance.Uuid {
 				initialDefaultBalanceValue -= incr.Cost
 				if initialDefaultBalanceValue < 0 {
 					// this increment was payed with debt
@@ -806,16 +806,16 @@ func (cd *CallDescriptor) RefundIncrements() error {
 			var balance *Balance
 			unitType := cd.TOR
 			cc := cd.CreateCallCost()
-			if increment.BalanceInfo.UnitBalanceUuid != "" {
-				if balance = account.BalanceMap[unitType].GetBalance(increment.BalanceInfo.UnitBalanceUuid); balance == nil {
+			if increment.BalanceInfo.Unit != nil && increment.BalanceInfo.Unit.UUID != "" {
+				if balance = account.BalanceMap[unitType].GetBalance(increment.BalanceInfo.Unit.UUID); balance == nil {
 					return 0, nil
 				}
 				balance.AddValue(increment.Duration.Seconds())
 				account.countUnits(-increment.Duration.Seconds(), unitType, cc, balance)
 			}
 			// check money too
-			if increment.BalanceInfo.MoneyBalanceUuid != "" {
-				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
+			if increment.BalanceInfo.Monetary != nil && increment.BalanceInfo.Monetary.UUID != "" {
+				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.Monetary.UUID); balance == nil {
 					return 0, nil
 				}
 				balance.AddValue(increment.Cost)
@@ -852,9 +852,9 @@ func (cd *CallDescriptor) RefundRounding() error {
 				continue
 			}
 			cc := cd.CreateCallCost()
-			if increment.BalanceInfo.MoneyBalanceUuid != "" {
+			if increment.BalanceInfo.Monetary != nil {
 				var balance *Balance
-				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
+				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.Monetary.UUID); balance == nil {
 					return 0, nil
 				}
 				balance.AddValue(-increment.Cost)

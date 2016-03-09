@@ -486,8 +486,10 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				cost := increment.Cost
 				defaultBalance := ub.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
-				increment.BalanceInfo.MoneyBalanceUuid = defaultBalance.Uuid
-				increment.BalanceInfo.MoneyBalanceValue = defaultBalance.Value
+				increment.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  defaultBalance.Uuid,
+					Value: defaultBalance.Value,
+				}
 				increment.BalanceInfo.AccountID = ub.ID
 				increment.paid = true
 				if count {

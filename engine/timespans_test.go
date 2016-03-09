@@ -1512,52 +1512,42 @@ func TestTSIncrementsCompressDecompress(t *testing.T) {
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 			},
 		},
@@ -1579,52 +1569,42 @@ func TestTSMultipleIncrementsCompressDecompress(t *testing.T) {
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
 					Cost:     10.4,
-					BalanceInfo: &BalanceInfo{
-						UnitBalanceUuid:  "1",
-						MoneyBalanceUuid: "2",
-						RateInterval:     &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-						AccountID:        "3"},
-					UnitInfo: &UnitInfo{"1", 2.3, utils.VOICE},
+					BalanceInfo: &DebitInfo{
+						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2"},
+						AccountID: "3"},
 				},
 			},
 		},
