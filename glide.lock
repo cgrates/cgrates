@@ -32,7 +32,7 @@ imports:
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/jinzhu/gorm
-  version: a0aa21aec5280d4394164fe1804629bc7507cb88
+  version: 2f7811c55f286c55cfc3a2aefb5c4049b9cd5214
 - name: github.com/jinzhu/inflection
   version: 3272df6c21d04180007eb3349844c89a3856bc25
 - name: github.com/kr/pty
