@@ -356,7 +356,8 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
 				inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.ID
+				inc.BalanceInfo.UnitBalanceValue = b.Value
+				inc.BalanceInfo.AccountID = ub.ID
 				inc.BalanceInfo.RateInterval = nil
 				inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
 				inc.Cost = 0
@@ -428,7 +429,8 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 					cost, inc.Cost = 0.0, 0.0
 					inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.ID
+					inc.BalanceInfo.MoneyBalanceValue = b.Value
+					inc.BalanceInfo.AccountID = ub.ID
 					inc.BalanceInfo.RateInterval = ts.RateInterval
 					inc.paid = true
 					if count {
@@ -447,11 +449,13 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				if (cost == 0 || moneyBal != nil) && b.GetValue() >= amount {
 					b.SubstractValue(amount)
 					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.ID
+					inc.BalanceInfo.UnitBalanceValue = b.Value
+					inc.BalanceInfo.AccountID = ub.ID
 					inc.BalanceInfo.RateInterval = nil
 					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
 					if cost != 0 {
 						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
+						inc.BalanceInfo.MoneyBalanceValue = moneyBal.Value
 						moneyBal.SubstractValue(cost)
 						cd.MaxCostSoFar += cost
 					}
@@ -537,7 +541,8 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 				amount, inc.Cost = 0.0, 0.0
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.ID
+				inc.BalanceInfo.MoneyBalanceValue = b.Value
+				inc.BalanceInfo.AccountID = ub.ID
 				if b.RatingSubject != "" {
 					inc.BalanceInfo.RateInterval = ts.RateInterval
 				}
@@ -555,7 +560,8 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				b.SubstractValue(amount)
 				cd.MaxCostSoFar += amount
 				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.ID
+				inc.BalanceInfo.MoneyBalanceValue = b.Value
+				inc.BalanceInfo.AccountID = ub.ID
 				if b.RatingSubject != "" {
 					inc.BalanceInfo.RateInterval = ts.RateInterval
 				}

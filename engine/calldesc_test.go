@@ -1096,15 +1096,16 @@ func TestDebitAndMaxDebit(t *testing.T) {
 	if err1 != nil || err2 != nil {
 		t.Error("Error debiting and/or maxdebiting: ", err1, err2)
 	}
+	if cc1.Timespans[0].Increments[0].BalanceInfo.UnitBalanceValue != 90 ||
+		cc2.Timespans[0].Increments[0].BalanceInfo.UnitBalanceValue != 80 {
+		t.Error("Error setting the UnitBalanceValue: ", cc1.Timespans[0].Increments[0].BalanceInfo.UnitBalanceValue, cc2.Timespans[0].Increments[0].BalanceInfo.UnitBalanceValue)
+	}
+	// make UnitBalanceValues have the same value
+	cc1.Timespans[0].Increments[0].BalanceInfo.UnitBalanceValue = 0
+	cc2.Timespans[0].Increments[0].BalanceInfo.UnitBalanceValue = 0
 	if !reflect.DeepEqual(cc1, cc2) {
-		t.Logf("CC1: %+v", cc1)
-		for _, ts := range cc1.Timespans {
-			t.Logf("TS: %+v", ts)
-		}
-		t.Logf("CC2: %+v", cc2)
-		for _, ts := range cc2.Timespans {
-			t.Logf("TS: %+v", ts)
-		}
+		t.Log("CC1: ", utils.ToIJSON(cc1))
+		t.Log("CC2: ", utils.ToIJSON(cc2))
 		t.Error("Debit and MaxDebit differ")
 	}
 }
@@ -1454,9 +1455,9 @@ func TestCDRefundIncrements(t *testing.T) {
 	}
 	accountingStorage.SetAccount(ub)
 	increments := Increments{
-		&Increment{Cost: 2, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "", MoneyBalanceUuid: "moneya", AccountId: ub.ID}},
-		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minutea", MoneyBalanceUuid: "moneya", AccountId: ub.ID}},
-		&Increment{Duration: 4 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minuteb", MoneyBalanceUuid: "", AccountId: ub.ID}},
+		&Increment{Cost: 2, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "", MoneyBalanceUuid: "moneya", AccountID: ub.ID}},
+		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minutea", MoneyBalanceUuid: "moneya", AccountID: ub.ID}},
+		&Increment{Duration: 4 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minuteb", MoneyBalanceUuid: "", AccountID: ub.ID}},
 	}
 	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()

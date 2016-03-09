@@ -67,17 +67,19 @@ func (mi *UnitInfo) Equal(other *UnitInfo) bool {
 
 // Holds information about the balance that made a specific payment
 type BalanceInfo struct {
-	UnitBalanceUuid  string
-	MoneyBalanceUuid string
-	RateInterval     *RateInterval
-	AccountId        string // used when debited from shared balance
+	UnitBalanceUuid   string
+	MoneyBalanceUuid  string
+	UnitBalanceValue  float64
+	MoneyBalanceValue float64
+	RateInterval      *RateInterval
+	AccountID         string // used when debited from shared balance
 }
 
 func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
 	return bi.UnitBalanceUuid == other.UnitBalanceUuid &&
 		bi.MoneyBalanceUuid == other.MoneyBalanceUuid &&
 		reflect.DeepEqual(bi.RateInterval, other.RateInterval) &&
-		bi.AccountId == other.AccountId
+		bi.AccountID == other.AccountID
 }
 
 type TimeSpans []*TimeSpan
@@ -260,6 +262,10 @@ func (incs *Increments) Compress() { // must be pointer receiver
 			cIncrs = append(cIncrs, incr)
 		} else {
 			cIncrs[len(cIncrs)-1].CompressFactor++
+			if cIncrs[len(cIncrs)-1].BalanceInfo != nil && incr.BalanceInfo != nil {
+				cIncrs[len(cIncrs)-1].BalanceInfo.MoneyBalanceValue = incr.BalanceInfo.MoneyBalanceValue
+				cIncrs[len(cIncrs)-1].BalanceInfo.UnitBalanceValue = incr.BalanceInfo.UnitBalanceValue
+			}
 		}
 	}
 	*incs = cIncrs

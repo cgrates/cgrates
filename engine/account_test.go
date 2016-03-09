@@ -1187,12 +1187,12 @@ func TestDebitShared(t *testing.T) {
 			t.Errorf("I%d: %+v (%+v)", index, incr, incr.BalanceInfo)
 		}
 	}
-	if cc.Timespans[0].Increments[0].BalanceInfo.AccountId != "groupie" ||
-		cc.Timespans[0].Increments[1].BalanceInfo.AccountId != "groupie" ||
-		cc.Timespans[0].Increments[2].BalanceInfo.AccountId != "groupie" ||
-		cc.Timespans[0].Increments[3].BalanceInfo.AccountId != "groupie" ||
-		cc.Timespans[0].Increments[4].BalanceInfo.AccountId != "groupie" ||
-		cc.Timespans[0].Increments[5].BalanceInfo.AccountId != "groupie" {
+	if cc.Timespans[0].Increments[0].BalanceInfo.AccountID != "groupie" ||
+		cc.Timespans[0].Increments[1].BalanceInfo.AccountID != "groupie" ||
+		cc.Timespans[0].Increments[2].BalanceInfo.AccountID != "groupie" ||
+		cc.Timespans[0].Increments[3].BalanceInfo.AccountID != "groupie" ||
+		cc.Timespans[0].Increments[4].BalanceInfo.AccountID != "groupie" ||
+		cc.Timespans[0].Increments[5].BalanceInfo.AccountID != "groupie" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
 }
