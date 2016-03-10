@@ -285,6 +285,7 @@ const CGRATES_CFG_JSON = `
 			"request_filter": "Subscription-Id>Subscription-Id-Type(0)",	// filter requests processed by this processor
 			"flags": [],													// flags to influence processing behavior
 			"continue_on_success": false,				// continue to the next template if executed
+			"append_cca": false,						// when continuing will append cca fields to the previous ones
 			"ccr_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
 				{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
 				{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "Session-Id", "mandatory": true},

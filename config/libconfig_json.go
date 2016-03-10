@@ -266,6 +266,7 @@ type DARequestProcessorJsnCfg struct {
 	Request_filter      *string
 	Flags               *[]string
 	Continue_on_success *bool
+	Append_cca          *bool
 	CCR_fields          *[]*CdrFieldJsonCfg
 	CCA_fields          *[]*CdrFieldJsonCfg
 }
