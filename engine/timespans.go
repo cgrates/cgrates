@@ -57,16 +57,34 @@ type DebitInfo struct {
 	AccountID string // used when debited from shared balance
 }
 
-func (bi *DebitInfo) Equal(other *DebitInfo) bool {
-	return bi.Unit.Equal(other.Unit) &&
-		bi.Monetary.Equal(other.Monetary) &&
-		bi.AccountID == other.AccountID
+func (di *DebitInfo) Equal(other *DebitInfo) bool {
+	return di.Unit.Equal(other.Unit) &&
+		di.Monetary.Equal(other.Monetary) &&
+		di.AccountID == other.AccountID
+}
+
+func (di *DebitInfo) Clone() *DebitInfo {
+	nDi := &DebitInfo{
+		AccountID: di.AccountID,
+	}
+	if di.Unit != nil {
+		nDi.Unit = di.Unit.Clone()
+	}
+	if di.Monetary != nil {
+		nDi.Monetary = di.Monetary.Clone()
+	}
+	return nDi
 }
 
 type MonetaryInfo struct {
 	UUID         string
 	Value        float64
 	RateInterval *RateInterval
+}
+
+func (mi *MonetaryInfo) Clone() *MonetaryInfo {
+	newMi := *mi
+	return &newMi
 }
 
 func (mi *MonetaryInfo) Equal(other *MonetaryInfo) bool {
@@ -87,6 +105,11 @@ type UnitInfo struct {
 	Consumed      float64
 	TOR           string
 	RateInterval  *RateInterval
+}
+
+func (ui *UnitInfo) Clone() *UnitInfo {
+	newUi := *ui
+	return &newUi
 }
 
 func (ui *UnitInfo) Equal(other *UnitInfo) bool {
@@ -237,12 +260,14 @@ func (tss *TimeSpans) Decompress() { // must be pointer receiver
 }
 
 func (incr *Increment) Clone() *Increment {
-	nIncr := &Increment{
-		Duration:    incr.Duration,
-		Cost:        incr.Cost,
-		BalanceInfo: incr.BalanceInfo,
+	nInc := &Increment{
+		Duration: incr.Duration,
+		Cost:     incr.Cost,
 	}
-	return nIncr
+	if incr.BalanceInfo != nil {
+		nInc.BalanceInfo = incr.BalanceInfo.Clone()
+	}
+	return nInc
 }
 
 func (incr *Increment) Equal(other *Increment) bool {
@@ -297,8 +322,19 @@ func (incs *Increments) Compress() { // must be pointer receiver
 func (incs *Increments) Decompress() { // must be pointer receiver
 	var cIncrs Increments
 	for _, cIncr := range *incs {
-		for i := 0; i < cIncr.GetCompressFactor(); i++ {
-			cIncrs = append(cIncrs, cIncr.Clone())
+		cf := cIncr.GetCompressFactor()
+		for i := 0; i < cf; i++ {
+			incr := cIncr.Clone()
+			// set right Values
+			if incr.BalanceInfo != nil {
+				if incr.BalanceInfo.Monetary != nil {
+					incr.BalanceInfo.Monetary.Value += (float64(cf-(i+1)) * incr.Cost)
+				}
+				if incr.BalanceInfo.Unit != nil {
+					incr.BalanceInfo.Unit.Value += (float64(cf-(i+1)) * incr.BalanceInfo.Unit.Consumed)
+				}
+			}
+			cIncrs = append(cIncrs, incr)
 		}
 	}
 	*incs = cIncrs
