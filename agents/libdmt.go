@@ -59,6 +59,8 @@ const (
 	CGRResultCode        = "CGRResultCode"
 )
 
+var ErrFilterNotPassing = errors.New("Filter not passing")
+
 func loadDictionaries(dictsDir, componentId string) error {
 	fi, err := os.Stat(dictsDir)
 	if err != nil {
@@ -364,8 +366,6 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 		return nil, fmt.Errorf("Unsupported type for serialization: %v", dictAVP.Data.Type)
 	}
 }
-
-var ErrFilterNotPassing = errors.New("Filter not passing")
 
 func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}, processorVars map[string]string) (fmtValOut string, err error) {
 	var outVal string

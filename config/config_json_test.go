@@ -443,7 +443,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 				Request_filter:      utils.StringPointer("Subscription-Id>Subscription-Id-Type(0)"),
 				Flags:               utils.StringSlicePointer([]string{}),
 				Continue_on_success: utils.BoolPointer(false),
-				Append_cca:          utils.BoolPointer(false),
+				Append_cca:          utils.BoolPointer(true),
 				CCR_fields: &[]*CdrFieldJsonCfg{
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"), Field_id: utils.StringPointer(utils.TOR), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("^*voice"), Mandatory: utils.BoolPointer(true)},

@@ -69,7 +69,7 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	return dSM
 }
 
-func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor) *CCA {
+func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor, cca *CCA) *CCA {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
 		if passes, _ := passesFieldFilter(ccr.diamMessage, fldFilter, nil); !passes {
@@ -83,9 +83,12 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> RequestProcessor: %s", reqProcessor.Id))
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %s", ccr.diamMessage))
 	}
-	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+	if cca == nil || !reqProcessor.AppendCCA {
+		cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+	}
 	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.CCRFields)
 	if err != nil {
+		cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
 			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA reply-code, error: %s", ccr.diamMessage, err))
@@ -100,13 +103,25 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	if reqProcessor.PublishEvent && self.pubsubs != nil {
 		evt, err := smgEv.AsMapStringString()
 		if err != nil {
+			cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
+				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA reply-code, error: %s", ccr.diamMessage, err))
+				return nil
+			}
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v failed converting SMGEvent to pubsub one, error: %s", ccr.diamMessage, err))
-			return nil
+			return cca
 		}
 		var reply string
 		if err := self.pubsubs.Call("PubSubV1.Publish", engine.CgrEvent(evt), &reply); err != nil {
+			cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
+				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA reply-code, error: %s", ccr.diamMessage, err))
+				return nil
+			}
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v failed publishing event, error: %s", ccr.diamMessage, err))
-			return nil
+			return cca
 		}
 	}
 	var maxUsage float64
@@ -168,6 +183,9 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> CCA SetProcessorAVPs for message: %+v, error: %s", ccr.diamMessage, err))
 		return cca
 	}
+	if reqProcessor.ContinueOnSuccess {
+		return nil
+	}
 	return cca
 }
 
@@ -177,10 +195,11 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", m, err))
 		return
 	}
-	var cca *CCA // For now we simply overload in loop, maybe we will find some other use of this
+	var cca *CCA
 	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
-		cca = self.processCCR(ccr, reqProcessor)
-		if cca != nil && !reqProcessor.ContinueOnSuccess {
+		ccaRcv := self.processCCR(ccr, reqProcessor, cca)
+		if ccaRcv != nil { // Received final answer, break processing
+			cca = ccaRcv
 			break
 		}
 	}
