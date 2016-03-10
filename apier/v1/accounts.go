@@ -257,6 +257,10 @@ func (self *ApierV1) RemoveAccount(attr utils.AttrRemoveAccount, reply *string) 
 		// remove it from all action plans
 		_, err := engine.Guardian.Guard(func() (interface{}, error) {
 			actionPlansMap, err := self.RatingDb.GetAllActionPlans()
+			if err == utils.ErrNotFound {
+				// no action plans
+				return 0, nil
+			}
 			if err != nil {
 				return 0, err
 			}

@@ -355,10 +355,15 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			}
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
-				inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.ID
-				inc.BalanceInfo.RateInterval = nil
-				inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
+				inc.BalanceInfo.Unit = &UnitInfo{
+					UUID:          b.Uuid,
+					Value:         b.Value,
+					DestinationID: cc.Destination,
+					Consumed:      amount,
+					TOR:           cc.TOR,
+					RateInterval:  nil,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
 				inc.Cost = 0
 				inc.paid = true
 				if count {
@@ -427,9 +432,12 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 				if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 					cost, inc.Cost = 0.0, 0.0
-					inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.ID
-					inc.BalanceInfo.RateInterval = ts.RateInterval
+					inc.BalanceInfo.Monetary = &MonetaryInfo{
+						UUID:         b.Uuid,
+						Value:        b.Value,
+						RateInterval: ts.RateInterval,
+					}
+					inc.BalanceInfo.AccountID = ub.ID
 					inc.paid = true
 					if count {
 						ub.countUnits(cost, utils.MONETARY, cc, b)
@@ -446,12 +454,20 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 				if (cost == 0 || moneyBal != nil) && b.GetValue() >= amount {
 					b.SubstractValue(amount)
-					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.ID
-					inc.BalanceInfo.RateInterval = nil
-					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
+					inc.BalanceInfo.Unit = &UnitInfo{
+						UUID:          b.Uuid,
+						Value:         b.Value,
+						DestinationID: cc.Destination,
+						Consumed:      amount,
+						TOR:           cc.TOR,
+						RateInterval:  ts.RateInterval,
+					}
+					inc.BalanceInfo.AccountID = ub.ID
 					if cost != 0 {
-						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
+						inc.BalanceInfo.Monetary = &MonetaryInfo{
+							UUID:  moneyBal.Uuid,
+							Value: moneyBal.Value,
+						}
 						moneyBal.SubstractValue(cost)
 						cd.MaxCostSoFar += cost
 					}
@@ -536,10 +552,13 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			}
 			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 				amount, inc.Cost = 0.0, 0.0
-				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.ID
+				inc.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  b.Uuid,
+					Value: b.Value,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
 				if b.RatingSubject != "" {
-					inc.BalanceInfo.RateInterval = ts.RateInterval
+					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
 				}
 				inc.paid = true
 				if count {
@@ -554,10 +573,13 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
 				cd.MaxCostSoFar += amount
-				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.ID
+				inc.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  b.Uuid,
+					Value: b.Value,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
 				if b.RatingSubject != "" {
-					inc.BalanceInfo.RateInterval = ts.RateInterval
+					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
 				}
 				inc.paid = true
 				if count {

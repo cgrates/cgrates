@@ -608,7 +608,7 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 		for _, incr := range ts.Increments {
 			//utils.Logger.Debug("INCR: " + utils.ToJSON(incr))
 			totalCost += incr.Cost
-			if incr.BalanceInfo.MoneyBalanceUuid == defaultBalance.Uuid {
+			if incr.BalanceInfo.Monetary != nil && incr.BalanceInfo.Monetary.UUID == defaultBalance.Uuid {
 				initialDefaultBalanceValue -= incr.Cost
 				if initialDefaultBalanceValue < 0 {
 					// this increment was payed with debt
@@ -783,39 +783,39 @@ func (cd *CallDescriptor) RefundIncrements() error {
 	accMap := make(utils.StringMap)
 	cd.Increments.Decompress()
 	for _, increment := range cd.Increments {
-		accMap[increment.BalanceInfo.AccountId] = true
+		accMap[increment.BalanceInfo.AccountID] = true
 	}
 	// start increment refunding loop
 	_, err := Guardian.Guard(func() (interface{}, error) {
 		accountsCache := make(map[string]*Account)
 		for _, increment := range cd.Increments {
-			account, found := accountsCache[increment.BalanceInfo.AccountId]
+			account, found := accountsCache[increment.BalanceInfo.AccountID]
 			if !found {
-				if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountId); err == nil && acc != nil {
+				if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
 					account = acc
-					accountsCache[increment.BalanceInfo.AccountId] = account
+					accountsCache[increment.BalanceInfo.AccountID] = account
 					// will save the account only once at the end of the function
 					defer accountingStorage.SetAccount(account)
 				}
 			}
 			if account == nil {
-				utils.Logger.Warning(fmt.Sprintf("Could not get the account to be refunded: %s", increment.BalanceInfo.AccountId))
+				utils.Logger.Warning(fmt.Sprintf("Could not get the account to be refunded: %s", increment.BalanceInfo.AccountID))
 				continue
 			}
 			//utils.Logger.Info(fmt.Sprintf("Refunding increment %+v", increment))
 			var balance *Balance
 			unitType := cd.TOR
 			cc := cd.CreateCallCost()
-			if increment.BalanceInfo.UnitBalanceUuid != "" {
-				if balance = account.BalanceMap[unitType].GetBalance(increment.BalanceInfo.UnitBalanceUuid); balance == nil {
+			if increment.BalanceInfo.Unit != nil && increment.BalanceInfo.Unit.UUID != "" {
+				if balance = account.BalanceMap[unitType].GetBalance(increment.BalanceInfo.Unit.UUID); balance == nil {
 					return 0, nil
 				}
 				balance.AddValue(increment.Duration.Seconds())
 				account.countUnits(-increment.Duration.Seconds(), unitType, cc, balance)
 			}
 			// check money too
-			if increment.BalanceInfo.MoneyBalanceUuid != "" {
-				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
+			if increment.BalanceInfo.Monetary != nil && increment.BalanceInfo.Monetary.UUID != "" {
+				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.Monetary.UUID); balance == nil {
 					return 0, nil
 				}
 				balance.AddValue(increment.Cost)
@@ -832,29 +832,29 @@ func (cd *CallDescriptor) RefundRounding() error {
 	// all must be locked in order to use cache
 	accMap := make(utils.StringMap)
 	for _, inc := range cd.Increments {
-		accMap[inc.BalanceInfo.AccountId] = true
+		accMap[inc.BalanceInfo.AccountID] = true
 	}
 	// start increment refunding loop
 	_, err := Guardian.Guard(func() (interface{}, error) {
 		accountsCache := make(map[string]*Account)
 		for _, increment := range cd.Increments {
-			account, found := accountsCache[increment.BalanceInfo.AccountId]
+			account, found := accountsCache[increment.BalanceInfo.AccountID]
 			if !found {
-				if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountId); err == nil && acc != nil {
+				if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountID); err == nil && acc != nil {
 					account = acc
-					accountsCache[increment.BalanceInfo.AccountId] = account
+					accountsCache[increment.BalanceInfo.AccountID] = account
 					// will save the account only once at the end of the function
 					defer accountingStorage.SetAccount(account)
 				}
 			}
 			if account == nil {
-				utils.Logger.Warning(fmt.Sprintf("Could not get the account to be refunded: %s", increment.BalanceInfo.AccountId))
+				utils.Logger.Warning(fmt.Sprintf("Could not get the account to be refunded: %s", increment.BalanceInfo.AccountID))
 				continue
 			}
 			cc := cd.CreateCallCost()
-			if increment.BalanceInfo.MoneyBalanceUuid != "" {
+			if increment.BalanceInfo.Monetary != nil {
 				var balance *Balance
-				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
+				if balance = account.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.Monetary.UUID); balance == nil {
 					return 0, nil
 				}
 				balance.AddValue(-increment.Cost)

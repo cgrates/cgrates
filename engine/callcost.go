@@ -140,7 +140,6 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 				Amount:         incr.Duration.Seconds(),
 				Cost:           incr.Cost,
 				BalanceInfo:    incr.BalanceInfo,
-				UnitInfo:       incr.UnitInfo,
 				CompressFactor: incr.CompressFactor,
 				paid:           incr.paid,
 			}
@@ -192,7 +191,7 @@ func (cc *CallCost) Round() {
 			continue // safe check
 		}
 		inc := ts.Increments[0]
-		if inc.BalanceInfo.MoneyBalanceUuid == "" || inc.Cost == 0 {
+		if inc.BalanceInfo.Monetary == nil || inc.Cost == 0 {
 			// this is a unit payied timespan, nothing to round
 			continue
 		}

@@ -1096,15 +1096,16 @@ func TestDebitAndMaxDebit(t *testing.T) {
 	if err1 != nil || err2 != nil {
 		t.Error("Error debiting and/or maxdebiting: ", err1, err2)
 	}
+	if cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value != 90 ||
+		cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value != 80 {
+		t.Error("Error setting the Unit.Value: ", cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value, cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value)
+	}
+	// make Unit.Values have the same value
+	cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value = 0
+	cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value = 0
 	if !reflect.DeepEqual(cc1, cc2) {
-		t.Logf("CC1: %+v", cc1)
-		for _, ts := range cc1.Timespans {
-			t.Logf("TS: %+v", ts)
-		}
-		t.Logf("CC2: %+v", cc2)
-		for _, ts := range cc2.Timespans {
-			t.Logf("TS: %+v", ts)
-		}
+		t.Log("CC1: ", utils.ToIJSON(cc1))
+		t.Log("CC2: ", utils.ToIJSON(cc2))
 		t.Error("Debit and MaxDebit differ")
 	}
 }
@@ -1454,9 +1455,9 @@ func TestCDRefundIncrements(t *testing.T) {
 	}
 	accountingStorage.SetAccount(ub)
 	increments := Increments{
-		&Increment{Cost: 2, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "", MoneyBalanceUuid: "moneya", AccountId: ub.ID}},
-		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minutea", MoneyBalanceUuid: "moneya", AccountId: ub.ID}},
-		&Increment{Duration: 4 * time.Second, BalanceInfo: &BalanceInfo{UnitBalanceUuid: "minuteb", MoneyBalanceUuid: "", AccountId: ub.ID}},
+		&Increment{Cost: 2, BalanceInfo: &DebitInfo{Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
+		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{Unit: &UnitInfo{UUID: "minutea"}, Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
+		&Increment{Duration: 4 * time.Second, BalanceInfo: &DebitInfo{Unit: &UnitInfo{UUID: "minuteb"}, AccountID: ub.ID}},
 	}
 	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
 	cd.RefundIncrements()
@@ -1464,7 +1465,7 @@ func TestCDRefundIncrements(t *testing.T) {
 	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
 		ub.BalanceMap[utils.VOICE][0].GetValue() != 13 ||
 		ub.BalanceMap[utils.VOICE][1].GetValue() != 14 {
-		t.Error("Error refunding money: ", ub.BalanceMap[utils.VOICE][1].GetValue())
+		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
 	}
 }
 
