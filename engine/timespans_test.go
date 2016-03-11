@@ -1511,42 +1511,42 @@ func TestTSIncrementsCompressDecompress(t *testing.T) {
 			Increments: Increments{
 				&Increment{
 					Duration: time.Minute,
-					Cost:     10.4,
+					Cost:     2,
 					BalanceInfo: &DebitInfo{
-						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
-						Monetary:  &MonetaryInfo{UUID: "2"},
+						Unit:      &UnitInfo{UUID: "1", Value: 25, DestinationID: "1", Consumed: 1, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2", Value: 98},
 						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
-					Cost:     10.4,
+					Cost:     2,
 					BalanceInfo: &DebitInfo{
-						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
-						Monetary:  &MonetaryInfo{UUID: "2"},
+						Unit:      &UnitInfo{UUID: "1", Value: 24, DestinationID: "1", Consumed: 1, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2", Value: 96},
 						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
-					Cost:     10.4,
+					Cost:     2,
 					BalanceInfo: &DebitInfo{
-						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
-						Monetary:  &MonetaryInfo{UUID: "2"},
+						Unit:      &UnitInfo{UUID: "1", Value: 23, DestinationID: "1", Consumed: 1, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2", Value: 94},
 						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
-					Cost:     10.4,
+					Cost:     2,
 					BalanceInfo: &DebitInfo{
-						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}}},
-						Monetary:  &MonetaryInfo{UUID: "2"},
+						Unit:      &UnitInfo{UUID: "1", Value: 22, DestinationID: "1", Consumed: 1, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2", Value: 92},
 						AccountID: "3"},
 				},
 				&Increment{
 					Duration: time.Minute,
-					Cost:     10.4,
+					Cost:     2,
 					BalanceInfo: &DebitInfo{
-						Unit:      &UnitInfo{UUID: "1", DestinationID: "1", Consumed: 2.3, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
-						Monetary:  &MonetaryInfo{UUID: "2"},
+						Unit:      &UnitInfo{UUID: "1", Value: 21, DestinationID: "1", Consumed: 1, TOR: utils.VOICE, RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}}},
+						Monetary:  &MonetaryInfo{UUID: "2", Value: 90},
 						AccountID: "3"},
 				},
 			},
@@ -1554,11 +1554,11 @@ func TestTSIncrementsCompressDecompress(t *testing.T) {
 	}
 	tss.Compress()
 	if len(tss[0].Increments) != 3 {
-		t.Error("Error compressing timespan: ", tss[0].Increments)
+		t.Error("Error compressing timespan: ", utils.ToIJSON(tss[0]))
 	}
 	tss.Decompress()
 	if len(tss[0].Increments) != 5 {
-		t.Error("Error decompressing timespans: ", tss[0].Increments)
+		t.Error("Error decompressing timespans: ", utils.ToIJSON(tss[0]))
 	}
 }
 

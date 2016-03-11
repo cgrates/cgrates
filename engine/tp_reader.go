@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/structmatcher"
 )
 
 type TpReader struct {
