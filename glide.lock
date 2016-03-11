@@ -13,8 +13,6 @@ imports:
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/rpcclient
   version: 79661b1e514823a9ac93b2b9e97e037ee190ba47
-- name: github.com/cgrates/structmatcher
-  version: 98feee0bab15ce165540fe5f0fa006db2e9f898c
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
