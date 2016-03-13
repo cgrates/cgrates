@@ -21,6 +21,7 @@ package agents
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"reflect"
 	"testing"
 	"time"
@@ -308,6 +309,44 @@ func TestMessageSetAVPsWithPath(t *testing.T) {
 	if err := messageSetAVPsWithPath(m, []interface{}{"Granted-Service-Unit", "CC-Time"}, "300", false, "UTC"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eMessage, m) {
+		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
+	}
+	// Multiple append
+	eMessage = diam.NewRequest(diam.CreditControl, 4, nil)
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(431, avp.Mbit, 0, &diam.GroupedAVP{ // Granted-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(3600)),
+					diam.NewAVP(421, avp.Mbit, 0, datatype.Unsigned64(153600)), // "CC-Total-Octets"
+				},
+			}),
+		},
+	})
+	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(431, avp.Mbit, 0, &diam.GroupedAVP{ // Granted-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(2600)),
+					diam.NewAVP(421, avp.Mbit, 0, datatype.Unsigned64(143600)), // "CC-Total-Octets"
+				},
+			}),
+		},
+	})
+	m = diam.NewMessage(diam.CreditControl, diam.RequestFlag, 4, eMessage.Header.HopByHopID, eMessage.Header.EndToEndID, nil)
+	if err := messageSetAVPsWithPath(m, []interface{}{"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Time"}, "3600", false, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if err := messageSetAVPsWithPath(m, []interface{}{"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Total-Octets"}, "153600", false, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if err := messageSetAVPsWithPath(m, []interface{}{"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Time"}, "2600", true, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if err := messageSetAVPsWithPath(m, []interface{}{"Multiple-Services-Credit-Control", "Granted-Service-Unit", "CC-Total-Octets"}, "143600", false, "UTC"); err != nil {
+		t.Error(err)
+	}
+	if fmt.Sprintf("%q", eMessage) != fmt.Sprintf("%q", m) { // test with fmt since reflect.DeepEqual does not perform properly here
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, m)
 	}
 }

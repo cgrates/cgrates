@@ -431,7 +431,7 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr strin
 		}
 	}
 	if dictAVPs[len(path)-1].Data.Type == diam.GroupedAVPType {
-		return errors.New("Last AVP in path needs not to be GroupedAVP")
+		return errors.New("Last AVP in path cannot be GroupedAVP")
 	}
 	var msgAVP *diam.AVP // Keep a reference here towards last AVP
 	lastAVPIdx := len(path) - 1
@@ -454,7 +454,7 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr strin
 		if i == lastAVPIdx-1 && !appnd {                                                    // last AVP needs to be appended in group
 			avps, _ := m.FindAVPsWithPath(path[:lastAVPIdx], dict.UndefinedVendorID)
 			if len(avps) != 0 { // Group AVP already in the message
-				prevGrpData := avps[0].Data.(*diam.GroupedAVP)
+				prevGrpData := avps[len(avps)-1].Data.(*diam.GroupedAVP) // Take the last avp found to append there
 				prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
 				m.Header.MessageLength += uint32(msgAVP.Len())
 				return nil
@@ -465,8 +465,8 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr strin
 	if !appnd { // Not group AVP, replace the previous set one with this one
 		avps, _ := m.FindAVPsWithPath(path, dict.UndefinedVendorID)
 		if len(avps) != 0 { // Group AVP already in the message
-			m.Header.MessageLength -= uint32(avps[0].Len()) // decrease message length since we overwrite
-			*avps[0] = *msgAVP
+			m.Header.MessageLength -= uint32(avps[len(avps)-1].Len()) // decrease message length since we overwrite
+			*avps[len(avps)-1] = *msgAVP
 			m.Header.MessageLength += uint32(msgAVP.Len())
 			return nil
 		}
