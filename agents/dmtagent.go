@@ -83,6 +83,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> RequestProcessor: %s", reqProcessor.Id))
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %s", ccr.diamMessage))
 	}
+	utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.processCCR: %+v, reqProcessor: %+v, cca: %+v", ccr, reqProcessor, cca))
 	if cca == nil || !reqProcessor.AppendCCA {
 		cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 	}

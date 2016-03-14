@@ -89,7 +89,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	}
 	// apply the lastUsed correction
 	dur += lastUsedCorrection
-	utils.Logger.Debug(fmt.Sprintf("### After lastUsedCorrection, durationIndex: %v,  dur: %v, lastUsed: %v, lastUsedCorrection", self.cd.DurationIndex, dur, lastUsed, lastUsedCorrection))
+	utils.Logger.Debug(fmt.Sprintf("### After lastUsedCorrection, durationIndex: %+v,  dur: %+v, lastUsed: %+v, lastUsedCorrection: %+v", self.cd.DurationIndex, dur, lastUsed, lastUsedCorrection))
 	// apply correction from previous run
 	dur -= self.extraDuration
 	self.extraDuration = 0
