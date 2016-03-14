@@ -59,7 +59,10 @@ const (
 	CGRResultCode        = "CGRResultCode"
 )
 
-var ErrFilterNotPassing = errors.New("Filter not passing")
+var (
+	ErrFilterNotPassing     = errors.New("Filter not passing")
+	ErrDiameterRatingFailed = errors.New("Diameter rating failed")
+)
 
 func loadDictionaries(dictsDir, componentId string) error {
 	fi, err := os.Stat(dictsDir)

@@ -69,7 +69,7 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	return dSM
 }
 
-func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor, cca *CCA) *CCA {
+func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor, cca *CCA) (bool, error) {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
 		if passes, _ := passesFieldFilter(ccr.diamMessage, fldFilter, nil); !passes {
@@ -77,26 +77,25 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		}
 	}
 	if !passesAllFilters { // Not going with this processor further
-		return nil
+		return false, nil
 	}
 	if reqProcessor.DryRun { // DryRun should log the matching processor as well as the received CCR
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> RequestProcessor: %s", reqProcessor.Id))
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %s", ccr.diamMessage))
 	}
 	utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.processCCR: %+v, reqProcessor: %+v, cca: %+v", ccr, reqProcessor, cca))
-	if cca == nil || !reqProcessor.AppendCCA {
-		cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+	if !reqProcessor.AppendCCA {
+		*cca = *NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 	}
 	smgEv, err := ccr.AsSMGenericEvent(reqProcessor.CCRFields)
 	if err != nil {
-		cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+		*cca = *NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
 			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA reply-code, error: %s", ccr.diamMessage, err))
-			return nil
+			return false, err
 		}
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v AsSMGenericEvent, error: %s", ccr.diamMessage, err))
-		return cca
+		return false, ErrDiameterRatingFailed
 	}
 	if len(reqProcessor.Flags) != 0 {
 		smgEv[utils.CGRFlags] = reqProcessor.Flags.String() // Populate CGRFlags automatically
@@ -104,25 +103,23 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	if reqProcessor.PublishEvent && self.pubsubs != nil {
 		evt, err := smgEv.AsMapStringString()
 		if err != nil {
-			cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+			*cca = *NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
 				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA reply-code, error: %s", ccr.diamMessage, err))
-				return nil
+				return false, err
 			}
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v failed converting SMGEvent to pubsub one, error: %s", ccr.diamMessage, err))
-			return cca
+			return false, ErrDiameterRatingFailed
 		}
 		var reply string
 		if err := self.pubsubs.Call("PubSubV1.Publish", engine.CgrEvent(evt), &reply); err != nil {
-			cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+			*cca = *NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 			if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
 				false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA reply-code, error: %s", ccr.diamMessage, err))
-				return nil
+				return false, err
 			}
 			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v failed publishing event, error: %s", ccr.diamMessage, err))
-			return cca
+			return false, ErrDiameterRatingFailed
 		}
 	}
 	var maxUsage float64
@@ -172,22 +169,17 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	}
 	if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, processorVars[CGRResultCode],
 		false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-		return nil
+		return false, err
 	}
 	if err := cca.SetProcessorAVPs(reqProcessor, processorVars); err != nil {
 		if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, strconv.Itoa(DiameterRatingFailed),
 			false, self.cgrCfg.DiameterAgentCfg().Timezone); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Processing message: %+v set CCA Reply-Code, error: %s", ccr.diamMessage, err))
-			return nil
+			return false, err
 		}
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> CCA SetProcessorAVPs for message: %+v, error: %s", ccr.diamMessage, err))
-		return cca
+		return false, ErrDiameterRatingFailed
 	}
-	if reqProcessor.ContinueOnSuccess {
-		return nil
-	}
-	return cca
+	return true, nil
 }
 
 func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
@@ -196,18 +188,18 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> Unmarshaling message: %s, error: %s", m, err))
 		return
 	}
-	var cca *CCA
+	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
+	var processed bool
 	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
-		utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.handleCCR before processCCR cca: %+v", cca))
-		ccaRcv := self.processCCR(ccr, reqProcessor, cca)
-		if ccaRcv != nil { // Received final answer, break processing
-			cca = ccaRcv
-			utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.handleCCR after processCCR returned cca: %+v", cca))
+		processed, err = self.processCCR(ccr, reqProcessor, cca)
+		if err != nil || (processed && !reqProcessor.ContinueOnSuccess) {
 			break
 		}
-		utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.handleCCR after processCCR cca: %+v", cca))
 	}
-	if cca == nil {
+	if err != nil && err != ErrDiameterRatingFailed {
+		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> CCA SetProcessorAVPs for message: %+v, error: %s", ccr.diamMessage, err))
+		return
+	} else if !processed {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %s, ignoring request", ccr.diamMessage))
 		return
 	}
