@@ -157,6 +157,9 @@ func (self *ApierV1) SetAccount(attr utils.AttrSetAccount, reply *string) error 
 				// clean previous action plans
 				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
 				if err != nil {
+					if err == utils.ErrNotFound { // if no action plans just continue
+						return 0, nil
+					}
 					return 0, err
 				}
 				var dirtyAps []string
