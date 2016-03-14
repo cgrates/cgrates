@@ -83,7 +83,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> RequestProcessor: %s", reqProcessor.Id))
 		utils.Logger.Info(fmt.Sprintf("<DiameterAgent> CCR message: %s", ccr.diamMessage))
 	}
-	utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.processCCR: %+v, reqProcessor: %+v, cca: %+v, cca message: %+v", ccr, reqProcessor, cca, cca.diamMessage))
+	utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.processCCR: %+v, reqProcessor: %+v, cca: %+v", ccr, reqProcessor, cca))
 	if cca == nil || !reqProcessor.AppendCCA {
 		cca = NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 	}
@@ -198,11 +198,14 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 	}
 	var cca *CCA
 	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
+		utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.handleCCR before processCCR cca: %+v", cca))
 		ccaRcv := self.processCCR(ccr, reqProcessor, cca)
 		if ccaRcv != nil { // Received final answer, break processing
 			cca = ccaRcv
+			utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.handleCCR after processCCR returned cca: %+v", cca))
 			break
 		}
+		utils.Logger.Debug(fmt.Sprintf("### DiameterAgent.handleCCR after processCCR cca: %+v", cca))
 	}
 	if cca == nil {
 		utils.Logger.Err(fmt.Sprintf("<DiameterAgent> No request processor enabled for CCR: %s, ignoring request", ccr.diamMessage))
