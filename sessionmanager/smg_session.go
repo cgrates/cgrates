@@ -77,7 +77,7 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
-	utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit durationIndex: %v, dur: %v, lastUsed: %v", self.cd.DurationIndex, dur, lastUsed))
+	utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit durationIndex: %v, dur: %v, lastUsed: %v, lastUsage: %v", self.cd.DurationIndex, dur, lastUsed, self.lastUsage))
 	self.lastUsage = dur                   // Reset the lastUsage for later reference
 	lastUsedCorrection := time.Duration(0) // Used if lastUsed influences the debit
 	if self.cd.DurationIndex != 0 && lastUsed != 0 {
@@ -86,10 +86,11 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 		} else { // We have debitted less than we have consumed, add the difference to duration debitted
 			lastUsedCorrection = lastUsed - self.lastUsage
 		}
+		utils.Logger.Debug(fmt.Sprintf("### Calculated lastUsedCorrection: %+v for lastUsage: %v, lastUsed: %v", lastUsedCorrection, self.lastUsage, lastUsed))
 	}
 	// apply the lastUsed correction
 	dur += lastUsedCorrection
-	utils.Logger.Debug(fmt.Sprintf("### After lastUsedCorrection, durationIndex: %+v,  dur: %+v, lastUsed: %+v, lastUsedCorrection: %+v", self.cd.DurationIndex, dur, lastUsed, lastUsedCorrection))
+	utils.Logger.Debug(fmt.Sprintf("### After lastUsedCorrection dur: %+v, lastUsedCorrection: %+v", dur, lastUsedCorrection))
 	// apply correction from previous run
 	dur -= self.extraDuration
 	self.extraDuration = 0
