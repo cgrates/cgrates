@@ -78,6 +78,7 @@ func (di *DebitInfo) Clone() *DebitInfo {
 
 type MonetaryInfo struct {
 	UUID         string
+	ID           string
 	Value        float64
 	RateInterval *RateInterval
 }
@@ -100,6 +101,7 @@ func (mi *MonetaryInfo) Equal(other *MonetaryInfo) bool {
 
 type UnitInfo struct {
 	UUID          string
+	ID            string
 	Value         float64
 	DestinationID string
 	Consumed      float64

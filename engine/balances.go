@@ -357,6 +357,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				b.SubstractValue(amount)
 				inc.BalanceInfo.Unit = &UnitInfo{
 					UUID:          b.Uuid,
+					ID:            b.ID,
 					Value:         b.Value,
 					DestinationID: cc.Destination,
 					Consumed:      amount,
@@ -434,6 +435,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					cost, inc.Cost = 0.0, 0.0
 					inc.BalanceInfo.Monetary = &MonetaryInfo{
 						UUID:         b.Uuid,
+						ID:           b.ID,
 						Value:        b.Value,
 						RateInterval: ts.RateInterval,
 					}
@@ -456,6 +458,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					b.SubstractValue(amount)
 					inc.BalanceInfo.Unit = &UnitInfo{
 						UUID:          b.Uuid,
+						ID:            b.ID,
 						Value:         b.Value,
 						DestinationID: cc.Destination,
 						Consumed:      amount,
@@ -466,6 +469,7 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					if cost != 0 {
 						inc.BalanceInfo.Monetary = &MonetaryInfo{
 							UUID:  moneyBal.Uuid,
+							ID:    moneyBal.ID,
 							Value: moneyBal.Value,
 						}
 						moneyBal.SubstractValue(cost)
@@ -554,6 +558,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				amount, inc.Cost = 0.0, 0.0
 				inc.BalanceInfo.Monetary = &MonetaryInfo{
 					UUID:  b.Uuid,
+					ID:    b.ID,
 					Value: b.Value,
 				}
 				inc.BalanceInfo.AccountID = ub.ID
@@ -575,6 +580,7 @@ func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				cd.MaxCostSoFar += amount
 				inc.BalanceInfo.Monetary = &MonetaryInfo{
 					UUID:  b.Uuid,
+					ID:    b.ID,
 					Value: b.Value,
 				}
 				inc.BalanceInfo.AccountID = ub.ID
