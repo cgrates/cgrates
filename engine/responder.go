@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/rpc"
 	"reflect"
 	"runtime"
@@ -432,7 +431,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 		return err
 	}
 	dcs, _ = dcs.AppendDefaultRun()
-	log.Print("DCS: ", len(dcs))
+	utils.Logger.Info(fmt.Sprintf("DCS: %v", len(dcs.Chargers)))
 	sesRuns := make([]*SessionRun, 0)
 	for _, dc := range dcs.Chargers {
 		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.RequestTypeField)) {
@@ -474,7 +473,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 		}
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
-	log.Print("RUNS: ", len(sesRuns))
+	utils.Logger.Info(fmt.Sprintf("RUNS: %v", len(sesRuns)))
 	*sRuns = sesRuns
 	rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
 		Value: sRuns,
