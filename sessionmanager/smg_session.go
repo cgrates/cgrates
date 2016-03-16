@@ -77,7 +77,6 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
-	utils.Logger.Debug(fmt.Sprintf("### SMGSession.debit durationIndex: %v, dur: %v, lastUsed: %v, lastUsage: %v", self.cd.DurationIndex, dur, lastUsed, self.lastUsage))
 	self.lastUsage = dur                   // Reset the lastUsage for later reference
 	lastUsedCorrection := time.Duration(0) // Used if lastUsed influences the debit
 	if self.cd.DurationIndex != 0 && lastUsed != 0 {
@@ -86,11 +85,9 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 		} else { // We have debitted less than we have consumed, add the difference to duration debitted
 			lastUsedCorrection = lastUsed - self.lastUsage
 		}
-		utils.Logger.Debug(fmt.Sprintf("### Calculated lastUsedCorrection: %+v for lastUsage: %v, lastUsed: %v", lastUsedCorrection, self.lastUsage, lastUsed))
 	}
 	// apply the lastUsed correction
 	dur += lastUsedCorrection
-	utils.Logger.Debug(fmt.Sprintf("### After lastUsedCorrection dur: %+v, lastUsedCorrection: %+v", dur, lastUsedCorrection))
 	// apply correction from previous run
 	dur -= self.extraDuration
 	self.extraDuration = 0
@@ -110,17 +107,16 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
-	utils.Logger.Debug(fmt.Sprintf("### ANSWER durationIndex: %v,  dur: %v, extraDuration: %v, lastUsed: %v, lastUsedCorrection: %v",
-		self.cd.DurationIndex, dur, self.extraDuration, lastUsed, lastUsedCorrection))
-	dur -= lastUsedCorrection // Revert the correction to return the real duration reserved
-	utils.Logger.Debug(fmt.Sprintf("### ANSWER after lastUsedCorrection, durationIndex: %v,  dur: %v, lastUsedCorrection: %v",
-		self.cd.DurationIndex, dur, lastUsedCorrection))
 	self.cd.DurationIndex -= dur
 	self.cd.DurationIndex += ccDuration
 	self.cd.MaxCostSoFar += cc.Cost
 	self.cd.LoopIndex += 1
 	self.sessionCds = append(self.sessionCds, self.cd.Clone())
 	self.callCosts = append(self.callCosts, cc)
+	ccDuration -= lastUsedCorrection
+	if ccDuration < 0 { // if correction has pushed ccDuration bellow 0
+		ccDuration = 0
+	}
 	return ccDuration, nil
 }
 
