@@ -133,6 +133,10 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 		return err
 	}
 	for _, cdr := range cdrs {
+		// replace user profile fields
+		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+			return err
+		}
 		// replace aliases for cases they were loaded after CDR received
 		if err := LoadAlias(&AttrMatchingAlias{
 			Destination: cdr.Destination,
@@ -143,10 +147,6 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 			Subject:     cdr.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-			return err
-		}
-		// replace user profile fields
-		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
 			return err
 		}
 		if err := self.rateStoreStatsReplicate(cdr, sendToStats); err != nil {
@@ -208,6 +208,9 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR, sendToStats bool) error
 	if cdr.RunID == utils.MetaRaw { // Overwrite *raw with *default for rating
 		cdr.RunID = utils.META_DEFAULT
 	}
+	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+		return err
+	}
 	if err := LoadAlias(&AttrMatchingAlias{
 		Destination: cdr.Destination,
 		Direction:   cdr.Direction,
@@ -219,9 +222,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR, sendToStats bool) error
 	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
+
 	// Rate CDR
 	if self.rater != nil && !cdr.Rated {
 		if err := self.rateCDR(cdr); err != nil {
@@ -262,6 +263,9 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 	if cdr.RunID != utils.MetaRaw { // Only derive *raw CDRs
 		return cdrRuns, nil
 	}
+	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+		return nil, err
+	}
 	if err := LoadAlias(&AttrMatchingAlias{
 		Destination: cdr.Destination,
 		Direction:   cdr.Direction,
@@ -273,9 +277,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return nil, err
 	}
-	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
-		return nil, err
-	}
+
 	attrsDC := &utils.AttrDerivedChargers{Tenant: cdr.Tenant, Category: cdr.Category, Direction: cdr.Direction,
 		Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination}
 	var dcs utils.DerivedChargers
