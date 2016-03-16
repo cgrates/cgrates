@@ -227,8 +227,8 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	cdr := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
+	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
+		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(0) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
@@ -271,8 +271,8 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	cdr := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
+	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
+		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(300) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
@@ -310,8 +310,8 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	cdr := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
+	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
+		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(600) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
@@ -348,8 +348,8 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	cdr := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
+	cdr := &engine.CDR{CGRID: utils.Sha1("testccr1", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
+		OriginID: "testccr1", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1004", Supplier: "SUPPL1",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(610) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
@@ -390,7 +390,7 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 		return
 	}
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
-	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00082"))
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testccr2"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
 	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
 	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
@@ -425,13 +425,13 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 				AVP: []*diam.AVP{
 					diam.NewAVP(886, avp.Mbit, 10415, &diam.GroupedAVP{ // Originator-Address
 						AVP: []*diam.AVP{
-							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),             // Address-Type
-							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("49602200011")), // Address-Data
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1003")), // Address-Data
 						}}),
 					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // Recipient-Address
 						AVP: []*diam.AVP{
-							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),             // Address-Type
-							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("49780029555")), // Address-Data
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1002")), // Address-Data
 						}}),
 				},
 			}),
@@ -462,6 +462,20 @@ func TestDmtAgentSendCCRSMS(t *testing.T) {
 			t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 		}
 	*/
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, ToRs: []string{utils.SMS}}
+	if err := apierRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "1" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
+		}
+		if cdrs[0].Cost != 0.6 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
+		}
+	}
 }
 
 func TestDmtAgentSendCCRSMSWrongAccount(t *testing.T) {
@@ -469,7 +483,7 @@ func TestDmtAgentSendCCRSMSWrongAccount(t *testing.T) {
 		return
 	}
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
-	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00083"))
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testccr3"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
 	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
 	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
@@ -537,8 +551,8 @@ func TestDmtAgentSendCCRInitWrongAccount(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	cdr := &engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
-		OriginID: "dsafdsaf", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
+	cdr := &engine.CDR{CGRID: utils.Sha1("testccr4", time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE,
+		OriginID: "testccr4", OriginHost: "192.168.1.1", Source: utils.UNIT_TEST, RequestType: utils.META_RATED, Direction: "*out",
 		Tenant: "cgrates.org", Category: "call", Account: "non_existent", Subject: "non_existent", Destination: "1004", Supplier: "SUPPL1",
 		SetupTime: time.Date(2015, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2015, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
 		Usage: time.Duration(0) * time.Second, PDD: time.Duration(7) * time.Second, ExtraFields: map[string]string{"Service-Context-Id": "voice@huawei.com"},
@@ -571,7 +585,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 		return
 	}
 	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
-	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("cgrates;1451911932;00084"))
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testccr5"))
 	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
 	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
 	ccr.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("routing1.huawei.com"))

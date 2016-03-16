@@ -214,6 +214,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 	} else if len(sessionRuns) == 0 {
 		return nilDuration, nil
 	}
+	var maxDurInit bool // Avoid differences between default 0 and received 0
 	for _, sR := range sessionRuns {
 		cc := new(engine.CallCost)
 		if err = self.rater.MaxDebit(sR.CallDescriptor, cc); err != nil {
@@ -224,7 +225,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 		if ccDur := cc.GetDuration(); ccDur == 0 {
 			err = utils.ErrInsufficientCredit
 			break
-		} else if ccDur < maxDur {
+		} else if !maxDurInit || ccDur < maxDur {
 			maxDur = ccDur
 		}
 	}
