@@ -77,7 +77,6 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
-	self.lastUsage = dur                   // Reset the lastUsage for later reference
 	lastUsedCorrection := time.Duration(0) // Used if lastUsed influences the debit
 	if self.cd.DurationIndex != 0 && lastUsed != 0 {
 		if self.lastUsage > lastUsed { // We have debitted more than we have used, refund in the duration debitted
@@ -98,6 +97,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.cd.DurationIndex += dur
 	cc := &engine.CallCost{}
 	if err := self.rater.MaxDebit(self.cd, cc); err != nil {
+		self.lastUsage = 0
 		return 0, err
 	}
 	// cd corrections
@@ -117,6 +117,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	if ccDuration < 0 { // if correction has pushed ccDuration bellow 0
 		ccDuration = 0
 	}
+	self.lastUsage = ccDuration // Reset the lastUsage for later reference
 	return ccDuration, nil
 }
 
