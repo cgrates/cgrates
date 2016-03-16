@@ -351,8 +351,6 @@ func TestSMGLastUsed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "1m30s",
 	}
@@ -380,8 +378,6 @@ func TestSMGLastUsed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "2m30s",
 	}
@@ -409,8 +405,6 @@ func TestSMGLastUsed(t *testing.T) {
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
-		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1m",
 	}
 	var rpl string
