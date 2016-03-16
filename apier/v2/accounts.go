@@ -115,6 +115,9 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
 				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
 				if err != nil {
+					if err == utils.ErrNotFound { // if no action plans just continue
+						return 0, nil
+					}
 					return 0, err
 				}
 				if attr.ActionPlansOverwrite {
