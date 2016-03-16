@@ -262,6 +262,20 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 	if cdr.RunID != utils.MetaRaw { // Only derive *raw CDRs
 		return cdrRuns, nil
 	}
+	if err := LoadAlias(&AttrMatchingAlias{
+		Destination: cdr.Destination,
+		Direction:   cdr.Direction,
+		Tenant:      cdr.Tenant,
+		Category:    cdr.Category,
+		Account:     cdr.Account,
+		Subject:     cdr.Subject,
+		Context:     utils.ALIAS_CONTEXT_RATING,
+	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return nil, err
+	}
+	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+		return nil, err
+	}
 	attrsDC := &utils.AttrDerivedChargers{Tenant: cdr.Tenant, Category: cdr.Category, Direction: cdr.Direction,
 		Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination}
 	var dcs utils.DerivedChargers

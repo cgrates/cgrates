@@ -419,7 +419,7 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 		return err
 	}
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
-		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT), Destination: ev.GetDestination(utils.META_DEFAULT)}
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
 		rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{

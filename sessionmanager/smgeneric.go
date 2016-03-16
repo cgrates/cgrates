@@ -95,6 +95,7 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 			s := &SMGSession{eventStart: evStart, connId: connId, runId: sessionRun.DerivedCharger.RunID, timezone: self.timezone,
 				rater: self.rater, cdrsrv: self.cdrsrv, cd: sessionRun.CallDescriptor}
 			self.indexSession(sessionId, s)
+			utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
 			if self.cgrCfg.SmGenericConfig.DebitInterval != 0 {
 				s.stopDebit = stopDebitChan
 				go s.debitLoop(self.cgrCfg.SmGenericConfig.DebitInterval)
@@ -116,6 +117,7 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss {
+			utils.Logger.Info(fmt.Sprintf("<SMGeneric> Ending session: %s, runId: %s", sessionId, s.runId))
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
 			}
