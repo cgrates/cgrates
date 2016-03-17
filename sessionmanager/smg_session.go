@@ -124,11 +124,11 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 // Attempts to refund a duration, error on failure
 func (self *SMGSession) refund(refundDuration time.Duration) error {
 	initialRefundDuration := refundDuration
-	lastCC := self.callCosts[len(self.callCosts)-1]
-	lastCC.Timespans.Decompress()
+	firstCC := self.callCosts[0] // use merged cc (from close function)
+	firstCC.Timespans.Decompress()
 	var refundIncrements engine.Increments
-	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
-		ts := lastCC.Timespans[i]
+	for i := len(firstCC.Timespans) - 1; i >= 0; i-- {
+		ts := firstCC.Timespans[i]
 		tsDuration := ts.GetDuration()
 		if refundDuration <= tsDuration {
 
@@ -144,8 +144,8 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 				}
 			}
 			if lastRefundedIncrementIndex == 0 {
-				lastCC.Timespans[i] = nil
-				lastCC.Timespans = lastCC.Timespans[:i]
+				firstCC.Timespans[i] = nil
+				firstCC.Timespans = firstCC.Timespans[:i]
 			} else {
 				ts.SplitByIncrement(lastRefundedIncrementIndex)
 				ts.Cost = ts.CalculateCost()
@@ -154,8 +154,8 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 		} else {
 			refundIncrements = append(refundIncrements, ts.Increments...)
 			// remove the timespan entirely
-			lastCC.Timespans[i] = nil
-			lastCC.Timespans = lastCC.Timespans[:i]
+			firstCC.Timespans[i] = nil
+			firstCC.Timespans = firstCC.Timespans[:i]
 			// continue to the next timespan with what is left to refund
 			refundDuration -= tsDuration
 		}
@@ -163,7 +163,7 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	// show only what was actualy refunded (stopped in timespan)
 	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
-		cd := lastCC.CreateCallDescriptor()
+		cd := firstCC.CreateCallDescriptor()
 		cd.Increments = refundIncrements
 		cd.Increments.Compress()
 		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %s", initialRefundDuration, utils.ToJSON(cd)))
@@ -173,9 +173,9 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 			return err
 		}
 	}
-	lastCC.Cost -= refundIncrements.GetTotalCost()
-	lastCC.UpdateRatedUsage()
-	lastCC.Timespans.Compress()
+	firstCC.Cost -= refundIncrements.GetTotalCost()
+	firstCC.UpdateRatedUsage()
+	firstCC.Timespans.Compress()
 	return nil
 }
 
