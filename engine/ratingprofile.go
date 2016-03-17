@@ -145,9 +145,9 @@ func (ris RatingInfos) String() string {
 	return string(b)
 }
 
-func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
+func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
-	for index, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {
+	for index, rpa := range rpf.RatingPlanActivations.GetActiveForCall(cd) {
 		rpl, err := ratingStorage.GetRatingPlan(rpa.RatingPlanId, false)
 		if err != nil || rpl == nil {
 			utils.Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
@@ -202,7 +202,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		}
 		if len(prefix) > 0 {
 			ris = append(ris, &RatingInfo{
-				MatchedSubject: rp.Id,
+				MatchedSubject: rpf.Id,
 				RatingPlanId:   rpl.Id,
 				MatchedPrefix:  prefix,
 				MatchedDestId:  destinationId,
