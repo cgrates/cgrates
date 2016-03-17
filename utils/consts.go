@@ -28,6 +28,7 @@ var (
 	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
 	ErrRatingPlanNotFound      = errors.New("RATING_PLAN_NOT_FOUND")
 	ErrAccountNotFound         = errors.New("ACCOUNT_NOT_FOUND")
+	ErrAccountDisabled         = errors.New("ACCOUNT_DISABLED")
 	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
 	ErrInsufficientCredit      = errors.New("INSUFFICENT_CREDIT")
 )

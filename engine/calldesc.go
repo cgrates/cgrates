@@ -639,6 +639,9 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
 		return 0, utils.ErrAccountNotFound
 	} else {
+		if account.Disabled {
+			return 0, utils.ErrAccountDisabled
+		}
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
 			if _, err := Guardian.Guard(func() (interface{}, error) {
 				duration, err = cd.getMaxSessionDuration(account)
@@ -706,6 +709,9 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
 		return nil, utils.ErrAccountNotFound
 	} else {
+		if account.Disabled {
+			return nil, utils.ErrAccountDisabled
+		}
 		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
 				cc, err = cd.debit(account, cd.DryRun, true)
@@ -728,6 +734,9 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
 		return nil, utils.ErrAccountNotFound
 	} else {
+		if account.Disabled {
+			return nil, utils.ErrAccountDisabled
+		}
 		//log.Printf("ACC: %+v", account)
 		if memberIDs, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
