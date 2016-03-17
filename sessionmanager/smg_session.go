@@ -42,6 +42,7 @@ type SMGSession struct {
 	callCosts     []*engine.CallCost
 	extraDuration time.Duration // keeps the current duration debited on top of what heas been asked
 	lastUsage     time.Duration // Keep record of the last debit for LastUsed functionality
+	totalUsage    time.Duration
 }
 
 // Called in case of automatic debits
@@ -87,6 +88,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	}
 	// apply the lastUsed correction
 	dur += lastUsedCorrection
+	self.totalUsage += dur // Should reflect the total usage so far
 	// apply correction from previous run
 	dur -= self.extraDuration
 	self.extraDuration = 0
@@ -249,4 +251,8 @@ func (self *SMGSession) saveOperations() error {
 		}
 	}
 	return nil
+}
+
+func (self *SMGSession) TotalUsage() time.Duration {
+	return self.totalUsage
 }

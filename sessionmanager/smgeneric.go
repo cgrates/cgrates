@@ -200,7 +200,22 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 	usage, err := gev.GetUsage(utils.META_DEFAULT)
 	if err != nil {
-		return err
+		if err != utils.ErrNotFound {
+			return err
+
+		}
+		lastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
+		if err != nil {
+			return err
+		}
+		var s *SMGSession
+		for _, s = range self.getSession(gev.GetUUID()) {
+			break
+		}
+		if s == nil {
+			return nil
+		}
+		usage = s.TotalUsage() + lastUsed
 	}
 	if err := self.sessionEnd(gev.GetUUID(), usage); err != nil {
 		return err
