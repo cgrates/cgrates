@@ -24,11 +24,10 @@ mongo --eval 'db.createUser({"user":"cgrates", "pwd":"CGRateS.org", "roles":[{ro
 
 #env vars
 export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-export GO15VENDOREXPERIMENT=1
 
 # build and install cgrates
 cd /root/cgr
-#glide -y devel.yaml up
+#glide -y devel.yaml install
 ./build.sh
 
 # create cgr-engine link
