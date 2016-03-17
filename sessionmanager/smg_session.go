@@ -181,9 +181,12 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 
 // Session has ended, check debits and refund the extra charged duration
 func (self *SMGSession) close(endTime time.Time) error {
+	firstCC := self.callCosts[0]
+	for _, cc := range self.callCosts[1:] {
+		firstCC.Merge(cc)
+	}
 	if len(self.callCosts) != 0 { // We have had at least one cost calculation
-		lastCC := self.callCosts[len(self.callCosts)-1]
-		end := lastCC.GetEndTime()
+		end := firstCC.GetEndTime()
 		refundDuration := end.Sub(endTime)
 		self.refund(refundDuration)
 	}
@@ -214,10 +217,7 @@ func (self *SMGSession) saveOperations() error {
 	if len(self.callCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
-	firstCC := self.callCosts[0]
-	for _, cc := range self.callCosts[1:] {
-		firstCC.Merge(cc)
-	}
+	firstCC := self.callCosts[0] // was merged in close methos
 	firstCC.Timespans.Compress()
 	firstCC.Round()
 	roundIncrements := firstCC.GetRoundIncrements()
