@@ -310,6 +310,14 @@ func TestSMGLastUsed(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	eAcntVal := 8.790000
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
@@ -332,9 +340,7 @@ func TestSMGLastUsed(t *testing.T) {
 	if maxUsage != 120 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
-	eAcntVal := 7.39002
+	eAcntVal = 7.39002
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -360,7 +366,6 @@ func TestSMGLastUsed(t *testing.T) {
 	if maxUsage != 120 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal = 7.09005
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
@@ -387,7 +392,6 @@ func TestSMGLastUsed(t *testing.T) {
 	if maxUsage != 120 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
 	eAcntVal = 6.5901
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
@@ -411,7 +415,7 @@ func TestSMGLastUsed(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	eAcntVal = 7.09
+	eAcntVal = 7.59
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
