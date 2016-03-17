@@ -89,6 +89,45 @@ func (self *SMGenericV1) ProcessCdr(ev sessionmanager.SMGenericEvent, reply *str
 	return nil
 }
 
+func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, reply *[]*sessionmanager.ActiveSession) error {
+	aSessions := make([]*sessionmanager.ActiveSession, 0)
+	for _, sGrp := range self.sm.Sessions() { // Add sessions to return with filter
+		for _, s := range sGrp {
+			as := s.AsActiveSession(self.sm.Timezone())
+			if attrs.ToR != nil && *attrs.ToR != as.TOR {
+				continue
+			}
+			if attrs.RunID != nil && *attrs.RunID != as.RunId {
+				continue
+			}
+			if attrs.RequestType != nil && *attrs.RequestType != as.ReqType {
+				continue
+			}
+			if attrs.Tenant != nil && *attrs.Tenant != as.Tenant {
+				continue
+			}
+			if attrs.Category != nil && *attrs.Category != as.Category {
+				continue
+			}
+			if attrs.Account != nil && *attrs.Account != as.Account {
+				continue
+			}
+			if attrs.Subject != nil && *attrs.Subject != as.Subject {
+				continue
+			}
+			if attrs.Destination != nil && *attrs.Destination != as.Destination {
+				continue
+			}
+			if attrs.Supplier != nil && *attrs.Supplier != as.Supplier {
+				continue
+			}
+			aSessions = append(aSessions, as)
+		}
+	}
+	*reply = aSessions
+	return nil
+}
+
 // rpcclient.RpcClientConnection interface
 func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	switch serviceMethod {

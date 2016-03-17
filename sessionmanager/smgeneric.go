@@ -344,6 +344,15 @@ func (self *SMGeneric) Connect() error {
 	return nil
 }
 
+// Used by APIer to retrieve sessions
+func (self *SMGeneric) Sessions() map[string][]*SMGSession {
+	return self.getSessions()
+}
+
+func (self *SMGeneric) Timezone() string {
+	return self.timezone
+}
+
 // System shutdown
 func (self *SMGeneric) Shutdown() error {
 	for ssId := range self.getSessions() { // Force sessions shutdown

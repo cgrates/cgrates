@@ -256,3 +256,40 @@ func (self *SMGSession) saveOperations() error {
 func (self *SMGSession) TotalUsage() time.Duration {
 	return self.totalUsage
 }
+
+func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
+	sTime, _ := self.eventStart.GetSetupTime(utils.META_DEFAULT, timezone)
+	aTime, _ := self.eventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
+	usage, _ := self.eventStart.GetUsage(utils.META_DEFAULT)
+	pdd, _ := self.eventStart.GetPdd(utils.META_DEFAULT)
+	aSession := &ActiveSession{
+		CgrId:       self.eventStart.GetCgrId(timezone),
+		TOR:         utils.VOICE,
+		RunId:       self.runId,
+		AccId:       self.eventStart.GetUUID(),
+		CdrHost:     self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
+		CdrSource:   self.eventStart.GetCdrSource(),
+		ReqType:     self.eventStart.GetReqType(utils.META_DEFAULT),
+		Direction:   self.eventStart.GetDirection(utils.META_DEFAULT),
+		Tenant:      self.eventStart.GetTenant(utils.META_DEFAULT),
+		Category:    self.eventStart.GetCategory(utils.META_DEFAULT),
+		Account:     self.eventStart.GetAccount(utils.META_DEFAULT),
+		Subject:     self.eventStart.GetSubject(utils.META_DEFAULT),
+		Destination: self.eventStart.GetDestination(utils.META_DEFAULT),
+		SetupTime:   sTime,
+		AnswerTime:  aTime,
+		Usage:       usage,
+		Pdd:         pdd,
+		ExtraFields: self.eventStart.GetExtraFields(),
+		Supplier:    self.eventStart.GetSupplier(utils.META_DEFAULT),
+		SMId:        "CGR-DA",
+	}
+	if self.cd != nil {
+		aSession.LoopIndex = self.cd.LoopIndex
+		aSession.DurationIndex = self.cd.DurationIndex
+		aSession.MaxRate = self.cd.MaxRate
+		aSession.MaxRateUnit = self.cd.MaxRateUnit
+		aSession.MaxCostSoFar = self.cd.MaxCostSoFar
+	}
+	return aSession
+}

@@ -1156,3 +1156,16 @@ type AliasValue struct {
 	Alias         string
 	Weight        float64
 }
+
+// AttrSMGGetActiveSessions will filter returned sessions by SMGenericV1
+type AttrSMGGetActiveSessions struct {
+	ToR         *string
+	RunID       *string
+	RequestType *string
+	Tenant      *string
+	Category    *string
+	Account     *string
+	Subject     *string
+	Destination *string
+	Supplier    *string
+}
