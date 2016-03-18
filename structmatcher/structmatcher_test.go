@@ -95,6 +95,13 @@ func TestStructMatcherKeyValue(t *testing.T) {
 	if check, err := cl.Match(o); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(cl.rootElement))
 	}
+	err = cl.Parse(`{"*not":[{"Other":true, "Field":{"*gt":5}}]}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", toJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Match(o); check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(cl.rootElement))
+	}
 	err = cl.Parse(`{"Other":true, "Field":{"*gt":7}}`)
 	if err != nil {
 		t.Errorf("Error loading structure: %+v (%v)", toJSON(cl.rootElement), err)
@@ -345,11 +352,25 @@ func TestStructMatcherOperatorSlice(t *testing.T) {
 	if check, err := cl.Match(o); !check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(cl.rootElement))
 	}
+	err = cl.Parse(`{"*not":[{"*or":[{"Test":"test"},{"Field":{"*gt":7}},{"Other":false}]}]}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", toJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Match(o); check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(cl.rootElement))
+	}
 	err = cl.Parse(`{"*and":[{"Test":"test"},{"Field":{"*gt":5}},{"Other":true}]}`)
 	if err != nil {
 		t.Errorf("Error loading structure: %+v (%v)", toJSON(cl.rootElement), err)
 	}
 	if check, err := cl.Match(o); !check || err != nil {
+		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(cl.rootElement))
+	}
+	err = cl.Parse(`{"*not":[{"*and":[{"Test":"test"},{"Field":{"*gt":5}},{"Other":true}]}]}`)
+	if err != nil {
+		t.Errorf("Error loading structure: %+v (%v)", toJSON(cl.rootElement), err)
+	}
+	if check, err := cl.Match(o); check || err != nil {
 		t.Errorf("Error checking struct: %v %v  (%v)", check, err, toJSON(cl.rootElement))
 	}
 	err = cl.Parse(`{"*and":[{"Test":"test"},{"Field":{"*gt":7}},{"Other":false}]}`)

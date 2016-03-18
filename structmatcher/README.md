@@ -20,7 +20,9 @@ Available operators:
 - *exp: expired
 - *or: logical or
 - *and: logical and
+- *not: logical not
 - *has: receives a list of elements and checks that the elements are present in the specified field (StringMap type)
+- *rsr: will apply a rsr check to the field (see utils/rsrfield.go)
 
 Equal (*eq) and local and (*and) operators are implicit for shortcuts. In this way:
 
