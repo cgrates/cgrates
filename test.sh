@@ -13,6 +13,7 @@ go test -i github.com/cgrates/cgrates/utils
 go test -i github.com/cgrates/cgrates/history
 go test -i github.com/cgrates/cgrates/cdre
 go test -i github.com/cgrates/cgrates/agents
+go test -i github.com/cgrates/cgrates/structmatcher
 
 go test github.com/cgrates/cgrates/apier/v1
 v1=$?
@@ -42,6 +43,8 @@ go test github.com/cgrates/cgrates/cdre
 cdre=$?
 go test github.com/cgrates/cgrates/agents
 ag=$?
+go test github.com/cgrates/cgrates/structmatcher
+sc=$?
 
 
-exit $v1 && $v2 && $en && $gt && $sm && $cfg && $bl && $cr && $con && $cdrc && $ut && $hs && $c2g && $cdre && $ag
+exit $v1 && $v2 && $en && $gt && $sm && $cfg && $bl && $cr && $con && $cdrc && $ut && $hs && $c2g && $cdre && $ag && $sc
