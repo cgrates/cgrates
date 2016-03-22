@@ -85,12 +85,14 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 		} else { // We have debitted less than we have consumed, add the difference to duration debitted
 			lastUsedCorrection = lastUsed - self.lastUsage
 		}
+
+		// apply the lastUsed correction
+		dur += lastUsedCorrection
+		self.totalUsage += dur // Should reflect the total usage so far
+	} else {
+		// apply correction from previous run
+		dur -= self.extraDuration
 	}
-	// apply the lastUsed correction
-	dur += lastUsedCorrection
-	self.totalUsage += dur // Should reflect the total usage so far
-	// apply correction from previous run
-	dur -= self.extraDuration
 	self.extraDuration = 0
 	if self.cd.LoopIndex > 0 {
 		self.cd.TimeStart = self.cd.TimeEnd
@@ -189,7 +191,7 @@ func (self *SMGSession) close(endTime time.Time) error {
 		for _, cc := range self.callCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		//utils.Logger.Debug(fmt.Sprintf("MergedCC: %+v", firstCC))
+		//utils.Logger.Debug("MergedCC: " + utils.ToJSON(firstCC))
 		end := firstCC.GetEndTime()
 		refundDuration := end.Sub(endTime)
 		self.refund(refundDuration)
@@ -223,6 +225,7 @@ func (self *SMGSession) saveOperations() error {
 	}
 	firstCC := self.callCosts[0] // was merged in close method
 	firstCC.Round()
+	//utils.Logger.Debug("Saved CC: " + utils.ToJSON(firstCC))
 	roundIncrements := firstCC.GetRoundIncrements()
 	if len(roundIncrements) != 0 {
 		cd := firstCC.CreateCallDescriptor()
