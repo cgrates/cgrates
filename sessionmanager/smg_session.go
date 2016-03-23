@@ -88,7 +88,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 
 		// apply the lastUsed correction
 		dur += lastUsedCorrection
-		self.totalUsage += dur // Should reflect the total usage so far
+		self.totalUsage += lastUsed // Should reflect the total usage so far
 	} else {
 		// apply correction from previous run
 		dur -= self.extraDuration
