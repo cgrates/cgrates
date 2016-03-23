@@ -92,32 +92,32 @@ func TestSMGDataTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSMGDataLastUsedNotFixed(t *testing.T) {
+func TestSMGDataLastUsedData(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
 	eAcntVal := 6.59000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.TOR:         utils.DATA,
 		utils.ACCID:       "12349",
 		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1001",
-		utils.SUBJECT:     "1001",
-		utils.DESTINATION: "1006",
-		utils.CATEGORY:    "call",
+		utils.ACCOUNT:     "1010",
+		utils.SUBJECT:     "1010",
+		utils.DESTINATION: "222",
+		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
 		utils.SETUP_TIME:  "2016-01-05 18:30:49",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
-		utils.USAGE:       "2m",
+		utils.USAGE:       "1048576",
 	}
 	var maxUsage float64
 	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
@@ -129,22 +129,22 @@ func TestSMGDataLastUsedNotFixed(t *testing.T) {
 	eAcntVal = 5.190020
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.TOR:         utils.DATA,
 		utils.ACCID:       "12349",
 		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1001",
-		utils.SUBJECT:     "1001",
-		utils.DESTINATION: "1006",
-		utils.CATEGORY:    "call",
+		utils.ACCOUNT:     "1010",
+		utils.SUBJECT:     "1010",
+		utils.DESTINATION: "222",
+		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.USAGE:       "2m",
-		utils.LastUsed:    "13s",
+		utils.USAGE:       "1048576",
+		utils.LastUsed:    "20000",
 	}
 	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
 		t.Error(err)
@@ -155,21 +155,21 @@ func TestSMGDataLastUsedNotFixed(t *testing.T) {
 	eAcntVal = 5.123360
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
-		utils.TOR:         utils.VOICE,
+		utils.TOR:         utils.DATA,
 		utils.ACCID:       "12349",
 		utils.DIRECTION:   utils.OUT,
-		utils.ACCOUNT:     "1001",
-		utils.SUBJECT:     "1001",
-		utils.DESTINATION: "1006",
-		utils.CATEGORY:    "call",
+		utils.ACCOUNT:     "1010",
+		utils.SUBJECT:     "1010",
+		utils.DESTINATION: "222",
+		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.LastUsed:    "0s",
+		utils.LastUsed:    "0",
 	}
 	var rpl string
 	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
@@ -178,7 +178,7 @@ func TestSMGDataLastUsedNotFixed(t *testing.T) {
 	eAcntVal = 5.590000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 }
