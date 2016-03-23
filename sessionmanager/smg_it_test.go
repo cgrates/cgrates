@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"flag"
+	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"testing"
@@ -28,6 +30,15 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
+var waitRater = flag.Int("wait_rater", 150, "Number of miliseconds to wait for rater to start and cache")
+var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+
+var daCfgPath string
+var daCfg *config.CGRConfig
+var smgRPC *rpc.Client
+var err error
 
 func TestSMGInitCfg(t *testing.T) {
 	if !*testIntegration {

@@ -1,8 +1,6 @@
 package sessionmanager
 
 import (
-	"flag"
-	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
 	"testing"
@@ -12,15 +10,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
-
-var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
-var waitRater = flag.Int("wait_rater", 150, "Number of miliseconds to wait for rater to start and cache")
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
-
-var daCfgPath string
-var daCfg *config.CGRConfig
-var smgRPC *rpc.Client
-var err error
 
 func TestSMGDataInitCfg(t *testing.T) {
 	if !*testIntegration {
@@ -98,7 +87,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
-	eAcntVal := 6.59000
+	eAcntVal := 50000000000.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -123,10 +112,10 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 120 {
+	if maxUsage != 1.048576e+06 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 5.190020
+	eAcntVal = 49998951424.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -149,10 +138,10 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 120 {
+	if maxUsage != 1.048576e+06 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 5.123360
+	eAcntVal = 49998931424.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -175,7 +164,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	eAcntVal = 5.590000
+	eAcntVal = 49998931424.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
