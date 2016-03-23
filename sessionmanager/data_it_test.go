@@ -285,7 +285,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	if maxUsage != 1.048576e+06 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49998904320.000000
+	eAcntVal = 49998863360.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -311,7 +311,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	if maxUsage != 1.048576e+06 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49998883840.000000
+	eAcntVal = 49998842880.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -335,7 +335,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	eAcntVal = 49999948800.000000
+	eAcntVal = 49999897600.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
