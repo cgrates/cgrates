@@ -225,6 +225,7 @@ func (self *SMGSession) saveOperations() error {
 	}
 	firstCC := self.callCosts[0] // was merged in close method
 	firstCC.Round()
+	self.totalUsage = time.Duration(firstCC.RatedUsage) // save final usage
 	//utils.Logger.Debug("Saved CC: " + utils.ToJSON(firstCC))
 	roundIncrements := firstCC.GetRoundIncrements()
 	if len(roundIncrements) != 0 {

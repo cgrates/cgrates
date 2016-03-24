@@ -333,8 +333,18 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 }
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
+	cdr := gev.AsStoredCdr(self.cgrCfg, self.timezone)
+	if cdr.Usage == 0 {
+		var s *SMGSession
+		for _, s = range self.getSession(gev.GetUUID()) {
+			break
+		}
+		if s != nil {
+			cdr.Usage = s.TotalUsage()
+		}
+	}
 	var reply string
-	if err := self.cdrsrv.ProcessCdr(gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
+	if err := self.cdrsrv.ProcessCdr(cdr, &reply); err != nil {
 		return err
 	}
 	return nil
