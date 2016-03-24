@@ -127,7 +127,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	if smGev.GetOriginatorIP(utils.META_DEFAULT) != "127.0.0.1" {
 		t.Error("Unexpected: ", smGev.GetOriginatorIP(utils.META_DEFAULT))
 	}
-	if extrFlds := smGev.GetExtraFields(); !reflect.DeepEqual(extrFlds, map[string]string{"Extra1": "Value1", "Extra2": "5"}) {
+	if extrFlds := smGev.GetExtraFields(); !reflect.DeepEqual(extrFlds, map[string]string{"Extra1": "Value1", "Extra2": "5", "LastUsed": "21s"}) {
 		t.Error("Unexpected: ", extrFlds)
 	}
 }
