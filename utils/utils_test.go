@@ -50,6 +50,19 @@ func TestRoundUp(t *testing.T) {
 	}
 }
 
+func TestRoundUpTwice(t *testing.T) {
+	result := Round(0.641666666667, 4, ROUNDING_UP)
+	expected := 0.6417
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+	result = Round(result, 4, ROUNDING_UP)
+	expected = 0.6417
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
 func TestRoundUpMiddle(t *testing.T) {
 	result := Round(12.5, 0, ROUNDING_UP)
 	expected := 13.0
@@ -577,5 +590,54 @@ func TestPaddingNotAllowed(t *testing.T) {
 	_, err := FmtFieldWidth("test", 5, "", "", false)
 	if err == nil {
 		t.Error("Expected error")
+	}
+}
+
+func TestCastIfToString(t *testing.T) {
+	v := interface{}("somestr")
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "somestr" {
+		t.Errorf("Received: %+v", sOut)
+	}
+	v = interface{}(1)
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "1" {
+		t.Errorf("Received: %+v", sOut)
+	}
+	v = interface{}(1.2)
+	if sOut, casts := CastIfToString(v); !casts {
+		t.Error("Does not cast")
+	} else if sOut != "1.2" {
+		t.Errorf("Received: %+v", sOut)
+	}
+}
+
+func TestEndOfMonth(t *testing.T) {
+	eom := GetEndOfMonth(time.Date(2016, time.February, 5, 10, 1, 2, 3, time.UTC))
+	expected := time.Date(2016, time.February, 29, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2015, time.February, 5, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2015, time.February, 28, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.January, 31, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2016, time.January, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.December, 31, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2016, time.December, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC))
+	expected = time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
 	}
 }

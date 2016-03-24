@@ -56,7 +56,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {
-		t.Error("Received: ", gCfg)
+		t.Error("Received: ", utils.ToIJSON(gCfg))
 	}
 }
 
@@ -129,7 +129,7 @@ func TestDfBalancerJsonCfg(t *testing.T) {
 
 func TestDfRaterJsonCfg(t *testing.T) {
 	eCfg := &RaterJsonCfg{Enabled: utils.BoolPointer(false), Balancer: utils.StringPointer(""), Cdrstats: utils.StringPointer(""),
-		Historys: utils.StringPointer(""), Pubsubs: utils.StringPointer(""), Users: utils.StringPointer(""), Aliases: utils.StringPointer("")}
+		Historys: utils.StringPointer(""), Pubsubs: utils.StringPointer(""), Users: utils.StringPointer(""), Aliases: utils.StringPointer(""), Rp_subject_prefix_matching: utils.BoolPointer(false)}
 	if cfg, err := dfCgrJsonCfg.RaterJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -155,10 +155,10 @@ func TestDfCdrsJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
-		Pubsubs:         utils.StringPointer(""),
-		Users:           utils.StringPointer(""),
-		Aliases:         utils.StringPointer(""),
-		Cdrstats:        utils.StringPointer(""),
+		Pubsubs_conns:   &[]*HaPoolJsonCfg{},
+		Users_conns:     &[]*HaPoolJsonCfg{},
+		Aliases_conns:   &[]*HaPoolJsonCfg{},
+		Cdrstats_conns:  &[]*HaPoolJsonCfg{},
 		Cdr_replication: &[]*CdrReplicationJsonCfg{},
 	}
 	if cfg, err := dfCgrJsonCfg.CdrsJsonCfg(); err != nil {
@@ -456,6 +456,7 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 			&HaPoolJsonCfg{
 				Server: utils.StringPointer("internal"),
 			}},
+		Pubsub_conns:   nil,
 		Create_cdr:     utils.BoolPointer(true),
 		Debit_interval: utils.StringPointer("5m"),
 		Timezone:       utils.StringPointer(""),
@@ -468,8 +469,11 @@ func TestDiameterAgentJsonCfg(t *testing.T) {
 			&DARequestProcessorJsnCfg{
 				Id:                  utils.StringPointer("*default"),
 				Dry_run:             utils.BoolPointer(false),
+				Publish_event:       utils.BoolPointer(false),
 				Request_filter:      utils.StringPointer("Subscription-Id>Subscription-Id-Type(0)"),
+				Flags:               utils.StringSlicePointer([]string{}),
 				Continue_on_success: utils.BoolPointer(false),
+				Append_cca:          utils.BoolPointer(true),
 				CCR_fields: &[]*CdrFieldJsonCfg{
 					&CdrFieldJsonCfg{Tag: utils.StringPointer("TOR"), Field_id: utils.StringPointer(utils.TOR), Type: utils.StringPointer(utils.META_COMPOSED),
 						Value: utils.StringPointer("^*voice"), Mandatory: utils.BoolPointer(true)},

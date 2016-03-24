@@ -47,6 +47,12 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	if len(accountKeys) == 0 {
 		return nil
 	}
+	if attr.Offset > len(accountKeys) {
+		attr.Offset = len(accountKeys)
+	}
+	if attr.Offset < 0 {
+		attr.Offset = 0
+	}
 	var limitedAccounts []string
 	if attr.Limit != 0 {
 		max := math.Min(float64(attr.Offset+attr.Limit), float64(len(accountKeys)))
@@ -79,62 +85,88 @@ func (self *ApierV2) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 }
 
 type AttrSetAccount struct {
-	Tenant           string
-	Account          string
-	ActionPlanId     string
-	ActionTriggersId string
-	AllowNegative    *bool
-	Disabled         *bool
-	ReloadScheduler  bool
+	Tenant                 string
+	Account                string
+	ActionPlanIDs          *[]string
+	ActionPlansOverwrite   bool
+	ActionTriggerIDs       *[]string
+	ActionTriggerOverwrite bool
+	AllowNegative          *bool
+	Disabled               *bool
+	ReloadScheduler        bool
 }
 
 func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	var schedulerReloadNeeded = false
 	accID := utils.AccountKey(attr.Tenant, attr.Account)
+	dirtyActionPlans := make(map[string]*engine.ActionPlan)
 	var ub *engine.Account
 	_, err := engine.Guardian.Guard(func() (interface{}, error) {
 		if bal, _ := self.AccountDb.GetAccount(accID); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
-				Id: accID,
+				ID: accID,
 			}
 		}
-		if len(attr.ActionPlanId) != 0 {
+		if attr.ActionPlanIDs != nil {
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
-				var ap *engine.ActionPlan
-				var err error
-				ap, err = self.RatingDb.GetActionPlan(attr.ActionPlanId, false)
+				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
 				if err != nil {
+					if err == utils.ErrNotFound { // if no action plans just continue
+						return 0, nil
+					}
 					return 0, err
 				}
-				if _, exists := ap.AccountIDs[accID]; !exists {
-					if ap.AccountIDs == nil {
-						ap.AccountIDs = make(map[string]struct{})
+				if attr.ActionPlansOverwrite {
+					// clean previous action plans
+					for actionPlanID, ap := range actionPlansMap {
+						if _, exists := ap.AccountIDs[accID]; exists {
+							delete(ap.AccountIDs, accID)
+							dirtyActionPlans[actionPlanID] = ap
+						}
 					}
-					ap.AccountIDs[accID] = struct{}{}
-					schedulerReloadNeeded = true
-					// create tasks
-					for _, at := range ap.ActionTimings {
-						if at.IsASAP() {
-							t := &engine.Task{
-								Uuid:      utils.GenUUID(),
-								AccountID: accID,
-								ActionsID: at.ActionsID,
-							}
-							if err = self.RatingDb.PushTask(t); err != nil {
-								return 0, err
+				}
+
+				for _, actionPlanID := range *attr.ActionPlanIDs {
+					ap, ok := actionPlansMap[actionPlanID]
+					if !ok {
+						return 0, utils.ErrNotFound
+					}
+
+					if _, exists := ap.AccountIDs[accID]; !exists {
+						if ap.AccountIDs == nil {
+							ap.AccountIDs = make(utils.StringMap)
+						}
+						ap.AccountIDs[accID] = true
+						dirtyActionPlans[actionPlanID] = ap
+						// create tasks
+						for _, at := range ap.ActionTimings {
+							if at.IsASAP() {
+								t := &engine.Task{
+									Uuid:      utils.GenUUID(),
+									AccountID: accID,
+									ActionsID: at.ActionsID,
+								}
+								if err = self.RatingDb.PushTask(t); err != nil {
+									return 0, err
+								}
 							}
 						}
 					}
-					if err := self.RatingDb.SetActionPlan(attr.ActionPlanId, ap); err != nil {
+				}
+				var actionPlansCacheIds []string
+				for actionPlanID, ap := range dirtyActionPlans {
+					if err := self.RatingDb.SetActionPlan(actionPlanID, ap, true); err != nil {
 						return 0, err
 					}
+					actionPlansCacheIds = append(actionPlansCacheIds, utils.ACTION_PLAN_PREFIX+actionPlanID)
+				}
+				if len(actionPlansCacheIds) > 0 {
 					// update cache
-					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attr.ActionPlanId}})
+					self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: actionPlansCacheIds})
 				}
 				return 0, nil
 			}, 0, utils.ACTION_PLAN_PREFIX)
@@ -143,14 +175,30 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			}
 		}
 
-		if len(attr.ActionTriggersId) != 0 {
-			atrs, err := self.RatingDb.GetActionTriggers(attr.ActionTriggersId)
-			if err != nil {
-				return 0, err
+		if attr.ActionTriggerIDs != nil {
+			if attr.ActionTriggerOverwrite {
+				ub.ActionTriggers = make(engine.ActionTriggers, 0)
 			}
-			ub.ActionTriggers = atrs
-			ub.InitCounters()
+			for _, actionTriggerID := range *attr.ActionTriggerIDs {
+				atrs, err := self.RatingDb.GetActionTriggers(actionTriggerID)
+				if err != nil {
+					return 0, err
+				}
+				for _, at := range atrs {
+					var found bool
+					for _, existingAt := range ub.ActionTriggers {
+						if existingAt.Equals(at) {
+							found = true
+							break
+						}
+					}
+					if !found {
+						ub.ActionTriggers = append(ub.ActionTriggers, at)
+					}
+				}
+			}
 		}
+		ub.InitCounters()
 		if attr.AllowNegative != nil {
 			ub.AllowNegative = *attr.AllowNegative
 		}
@@ -166,7 +214,7 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if attr.ReloadScheduler && schedulerReloadNeeded {
+	if attr.ReloadScheduler && len(dirtyActionPlans) > 0 {
 		// reload scheduler
 		if self.Sched != nil {
 			self.Sched.Reload(true)

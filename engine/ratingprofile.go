@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -144,9 +145,9 @@ func (ris RatingInfos) String() string {
 	return string(b)
 }
 
-func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
+func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
-	for index, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {
+	for index, rpa := range rpf.RatingPlanActivations.GetActiveForCall(cd) {
 		rpl, err := ratingStorage.GetRatingPlan(rpa.RatingPlanId, false)
 		if err != nil || rpl == nil {
 			utils.Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
@@ -201,7 +202,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		}
 		if len(prefix) > 0 {
 			ris = append(ris, &RatingInfo{
-				MatchedSubject: rp.Id,
+				MatchedSubject: rpf.Id,
 				RatingPlanId:   rpl.Id,
 				MatchedPrefix:  prefix,
 				MatchedDestId:  destinationId,
@@ -243,4 +244,22 @@ func (rpf *RatingProfile) GetHistoryRecord(deleted bool) history.Record {
 
 type TenantRatingSubject struct {
 	Tenant, Subject string
+}
+
+func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
+	if !rpSubjectPrefixMatching || strings.HasSuffix(key, utils.ANY) {
+		return ratingStorage.GetRatingProfile(key, false)
+	}
+	if rp, err = ratingStorage.GetRatingProfile(key, false); err == nil {
+		return rp, err
+	}
+	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
+	baseKey := key[:lastIndex]
+	subject := key[lastIndex:]
+	for i := 1; i < len(subject)-1; i++ {
+		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:len(subject)-i], false); err == nil {
+			return rp, err
+		}
+	}
+	return
 }

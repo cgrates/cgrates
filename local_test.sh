@@ -1,5 +1,4 @@
 #! /usr/bin/env sh
-./build.sh
 ./test.sh
 gen=$?
 echo 'go test github.com/cgrates/cgrates/apier/v1 -local'

@@ -167,88 +167,89 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	TpDbType             string
-	TpDbHost             string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	TpDbPort             string // The port to bind to.
-	TpDbName             string // The name of the database to connect to.
-	TpDbUser             string // The user to sign in as.
-	TpDbPass             string // The user's password.
-	DataDbType           string
-	DataDbHost           string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDbPort           string // The port to bind to.
-	DataDbName           string // The name of the database to connect to.
-	DataDbUser           string // The user to sign in as.
-	DataDbPass           string // The user's password.
-	LoadHistorySize      int    // Maximum number of records to archive in load history
-	StorDBType           string // Should reflect the database type used to store logs
-	StorDBHost           string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort           string // Th e port to bind to.
-	StorDBName           string // The name of the database to connect to.
-	StorDBUser           string // The user to sign in as.
-	StorDBPass           string // The user's password.
-	StorDBMaxOpenConns   int    // Maximum database connections opened
-	StorDBMaxIdleConns   int    // Maximum idle connections to keep opened
-	StorDBCDRSIndexes    []string
-	DBDataEncoding       string        // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen        string        // RPC JSON listening address
-	RPCGOBListen         string        // RPC GOB listening address
-	HTTPListen           string        // HTTP listening address
-	DefaultReqType       string        // Use this request type if not defined on top
-	DefaultCategory      string        // set default type of record
-	DefaultTenant        string        // set default tenant
-	DefaultSubject       string        // set default rating subject, useful in case of fallback
-	DefaultTimezone      string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Reconnects           int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
-	ConnectAttempts      int           // number of initial connection attempts before giving up
-	ResponseCacheTTL     time.Duration // the life span of a cached response
-	InternalTtl          time.Duration // maximum duration to wait for internal connections before giving up
-	RoundingDecimals     int           // Number of decimals to round end prices at
-	HttpSkipTlsVerify    bool          // If enabled Http Client will accept any TLS certificate
-	TpExportPath         string        // Path towards export folder for offline Tariff Plans
-	HttpFailedDir        string        // Directory path where we store failed http requests
-	MaxCallDuration      time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
-	RaterEnabled         bool          // start standalone server (no balancer)
-	RaterBalancer        string        // balancer address host:port
-	RaterCdrStats        string        // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
-	RaterHistoryServer   string
-	RaterPubSubServer    string
-	RaterUserServer      string
-	RaterAliasesServer   string
-	BalancerEnabled      bool
-	SchedulerEnabled     bool
-	CDRSEnabled          bool                 // Enable CDR Server service
-	CDRSExtraFields      []*utils.RSRField    // Extra fields to store in CDRs
-	CDRSStoreCdrs        bool                 // store cdrs in storDb
-	CDRSRaterConns       []*HaPoolConfig      // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	CDRSPubSub           string               // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
-	CDRSUsers            string               // address where to reach the users service: <""|internal|x.y.z.y:1234>
-	CDRSAliases          string               // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
-	CDRSStats            string               // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
-	CDRSCdrReplication   []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
-	CDRStatsEnabled      bool                 // Enable CDR Stats service
-	CDRStatsSaveInterval time.Duration        // Save interval duration
-	CdreProfiles         map[string]*CdreConfig
-	CdrcProfiles         map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
-	SmGenericConfig      *SmGenericConfig
-	SmFsConfig           *SmFsConfig              // SM-FreeSWITCH configuration
-	SmKamConfig          *SmKamConfig             // SM-Kamailio Configuration
-	SmOsipsConfig        *SmOsipsConfig           // SM-OpenSIPS Configuration
-	diameterAgentCfg     *DiameterAgentCfg        // DiameterAgent configuration
-	HistoryServer        string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled bool                     // Starts History as server: <true|false>.
-	HistoryDir           string                   // Location on disk where to store history files.
-	HistorySaveInterval  time.Duration            // The timout duration between pubsub writes
-	PubSubServerEnabled  bool                     // Starts PubSub as server: <true|false>.
-	AliasesServerEnabled bool                     // Starts PubSub as server: <true|false>.
-	UserServerEnabled    bool                     // Starts User as server: <true|false>
-	UserServerIndexes    []string                 // List of user profile field indexes
-	MailerServer         string                   // The server to use when sending emails out
-	MailerAuthUser       string                   // Authenticate to email server using this user
-	MailerAuthPass       string                   // Authenticate to email server with this password
-	MailerFromAddr       string                   // From address used when sending emails out
-	DataFolderPath       string                   // Path towards data folder, for tests internal usage, not loading out of .json options
-	sureTaxCfg           *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
-	ConfigReloads        map[string]chan struct{} // Signals to specific entities that a config reload should occur
+	TpDbType                string
+	TpDbHost                string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	TpDbPort                string // The port to bind to.
+	TpDbName                string // The name of the database to connect to.
+	TpDbUser                string // The user to sign in as.
+	TpDbPass                string // The user's password.
+	DataDbType              string
+	DataDbHost              string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDbPort              string // The port to bind to.
+	DataDbName              string // The name of the database to connect to.
+	DataDbUser              string // The user to sign in as.
+	DataDbPass              string // The user's password.
+	LoadHistorySize         int    // Maximum number of records to archive in load history
+	StorDBType              string // Should reflect the database type used to store logs
+	StorDBHost              string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort              string // Th e port to bind to.
+	StorDBName              string // The name of the database to connect to.
+	StorDBUser              string // The user to sign in as.
+	StorDBPass              string // The user's password.
+	StorDBMaxOpenConns      int    // Maximum database connections opened
+	StorDBMaxIdleConns      int    // Maximum idle connections to keep opened
+	StorDBCDRSIndexes       []string
+	DBDataEncoding          string        // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen           string        // RPC JSON listening address
+	RPCGOBListen            string        // RPC GOB listening address
+	HTTPListen              string        // HTTP listening address
+	DefaultReqType          string        // Use this request type if not defined on top
+	DefaultCategory         string        // set default type of record
+	DefaultTenant           string        // set default tenant
+	DefaultSubject          string        // set default rating subject, useful in case of fallback
+	DefaultTimezone         string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Reconnects              int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
+	ConnectAttempts         int           // number of initial connection attempts before giving up
+	ResponseCacheTTL        time.Duration // the life span of a cached response
+	InternalTtl             time.Duration // maximum duration to wait for internal connections before giving up
+	RoundingDecimals        int           // Number of decimals to round end prices at
+	HttpSkipTlsVerify       bool          // If enabled Http Client will accept any TLS certificate
+	TpExportPath            string        // Path towards export folder for offline Tariff Plans
+	HttpFailedDir           string        // Directory path where we store failed http requests
+	MaxCallDuration         time.Duration // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
+	RaterEnabled            bool          // start standalone server (no balancer)
+	RaterBalancer           string        // balancer address host:port
+	RaterCdrStats           string        // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	RaterHistoryServer      string
+	RaterPubSubServer       string
+	RaterUserServer         string
+	RaterAliasesServer      string
+	RpSubjectPrefixMatching bool // enables prefix matching for the rating profile subject
+	BalancerEnabled         bool
+	SchedulerEnabled        bool
+	CDRSEnabled             bool                 // Enable CDR Server service
+	CDRSExtraFields         []*utils.RSRField    // Extra fields to store in CDRs
+	CDRSStoreCdrs           bool                 // store cdrs in storDb
+	CDRSRaterConns          []*HaPoolConfig      // address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
+	CDRSPubSubSConns        []*HaPoolConfig      // address where to reach the pubsub service: <""|internal|x.y.z.y:1234>
+	CDRSUserSConns          []*HaPoolConfig      // address where to reach the users service: <""|internal|x.y.z.y:1234>
+	CDRSAliaseSConns        []*HaPoolConfig      // address where to reach the aliases service: <""|internal|x.y.z.y:1234>
+	CDRSStatSConns          []*HaPoolConfig      // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	CDRSCdrReplication      []*CdrReplicationCfg // Replicate raw CDRs to a number of servers
+	CDRStatsEnabled         bool                 // Enable CDR Stats service
+	CDRStatsSaveInterval    time.Duration        // Save interval duration
+	CdreProfiles            map[string]*CdreConfig
+	CdrcProfiles            map[string]map[string]*CdrcConfig // Number of CDRC instances running imports, format map[dirPath]map[instanceName]{Configs}
+	SmGenericConfig         *SmGenericConfig
+	SmFsConfig              *SmFsConfig              // SM-FreeSWITCH configuration
+	SmKamConfig             *SmKamConfig             // SM-Kamailio Configuration
+	SmOsipsConfig           *SmOsipsConfig           // SM-OpenSIPS Configuration
+	diameterAgentCfg        *DiameterAgentCfg        // DiameterAgent configuration
+	HistoryServer           string                   // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled    bool                     // Starts History as server: <true|false>.
+	HistoryDir              string                   // Location on disk where to store history files.
+	HistorySaveInterval     time.Duration            // The timout duration between pubsub writes
+	PubSubServerEnabled     bool                     // Starts PubSub as server: <true|false>.
+	AliasesServerEnabled    bool                     // Starts PubSub as server: <true|false>.
+	UserServerEnabled       bool                     // Starts User as server: <true|false>
+	UserServerIndexes       []string                 // List of user profile field indexes
+	MailerServer            string                   // The server to use when sending emails out
+	MailerAuthUser          string                   // Authenticate to email server using this user
+	MailerAuthPass          string                   // Authenticate to email server with this password
+	MailerFromAddr          string                   // From address used when sending emails out
+	DataFolderPath          string                   // Path towards data folder, for tests internal usage, not loading out of .json options
+	sureTaxCfg              *SureTaxCfg              // Load here SureTax configuration, as pointer so we can have runtime reloads in the future
+	ConfigReloads           map[string]chan struct{} // Signals to specific entities that a config reload should occur
 	// Cache defaults loaded from json and needing clones
 	dfltCdreProfile *CdreConfig // Default cdreConfig profile
 	dfltCdrcProfile *CdrcConfig // Default cdrcConfig profile
@@ -283,17 +284,25 @@ func (self *CGRConfig) checkConfigSanity() error {
 				return errors.New("Rater not enabled but requested by CDRS component.")
 			}
 		}
-		if self.CDRSPubSub == utils.INTERNAL && !self.PubSubServerEnabled {
-			return errors.New("PubSub service not enabled but requested by CDRS component.")
+		for _, connCfg := range self.CDRSPubSubSConns {
+			if connCfg.Server == utils.INTERNAL && !self.PubSubServerEnabled {
+				return errors.New("PubSubS not enabled but requested by CDRS component.")
+			}
 		}
-		if self.CDRSUsers == utils.INTERNAL && !self.UserServerEnabled {
-			return errors.New("Users service not enabled but requested by CDRS component.")
+		for _, connCfg := range self.CDRSUserSConns {
+			if connCfg.Server == utils.INTERNAL && !self.UserServerEnabled {
+				return errors.New("UserS not enabled but requested by CDRS component.")
+			}
 		}
-		if self.CDRSAliases == utils.INTERNAL && !self.AliasesServerEnabled {
-			return errors.New("Aliases service not enabled but requested by CDRS component.")
+		for _, connCfg := range self.CDRSAliaseSConns {
+			if connCfg.Server == utils.INTERNAL && !self.AliasesServerEnabled {
+				return errors.New("AliaseS not enabled but requested by CDRS component.")
+			}
 		}
-		if self.CDRSStats == utils.INTERNAL && !self.CDRStatsEnabled {
-			return errors.New("CDRStats not enabled but requested by CDRS component.")
+		for _, connCfg := range self.CDRSStatSConns {
+			if connCfg.Server == utils.INTERNAL && !self.CDRStatsEnabled {
+				return errors.New("CDRStatS not enabled but requested by CDRS component.")
+			}
 		}
 	}
 	// CDRC sanity checks
@@ -686,6 +695,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnRaterCfg.Users != nil {
 			self.RaterUserServer = *jsnRaterCfg.Users
 		}
+		if jsnRaterCfg.Rp_subject_prefix_matching != nil {
+			self.RpSubjectPrefixMatching = *jsnRaterCfg.Rp_subject_prefix_matching
+		}
 	}
 
 	if jsnBalancerCfg != nil && jsnBalancerCfg.Enabled != nil {
@@ -708,7 +720,6 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnCdrsCfg.Store_cdrs != nil {
 			self.CDRSStoreCdrs = *jsnCdrsCfg.Store_cdrs
 		}
-
 		if jsnCdrsCfg.Rater_conns != nil {
 			self.CDRSRaterConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Rater_conns))
 			for idx, jsnHaCfg := range *jsnCdrsCfg.Rater_conns {
@@ -716,17 +727,33 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 				self.CDRSRaterConns[idx].loadFromJsonCfg(jsnHaCfg)
 			}
 		}
-		if jsnCdrsCfg.Pubsubs != nil {
-			self.CDRSPubSub = *jsnCdrsCfg.Pubsubs
+		if jsnCdrsCfg.Pubsubs_conns != nil {
+			self.CDRSPubSubSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Pubsubs_conns))
+			for idx, jsnHaCfg := range *jsnCdrsCfg.Pubsubs_conns {
+				self.CDRSPubSubSConns[idx] = NewDfltHaPoolConfig()
+				self.CDRSPubSubSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
 		}
-		if jsnCdrsCfg.Users != nil {
-			self.CDRSUsers = *jsnCdrsCfg.Users
+		if jsnCdrsCfg.Users_conns != nil {
+			self.CDRSUserSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Users_conns))
+			for idx, jsnHaCfg := range *jsnCdrsCfg.Users_conns {
+				self.CDRSUserSConns[idx] = NewDfltHaPoolConfig()
+				self.CDRSUserSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
 		}
-		if jsnCdrsCfg.Aliases != nil {
-			self.CDRSAliases = *jsnCdrsCfg.Aliases
+		if jsnCdrsCfg.Aliases_conns != nil {
+			self.CDRSAliaseSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Aliases_conns))
+			for idx, jsnHaCfg := range *jsnCdrsCfg.Aliases_conns {
+				self.CDRSAliaseSConns[idx] = NewDfltHaPoolConfig()
+				self.CDRSAliaseSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
 		}
-		if jsnCdrsCfg.Cdrstats != nil {
-			self.CDRSStats = *jsnCdrsCfg.Cdrstats
+		if jsnCdrsCfg.Cdrstats_conns != nil {
+			self.CDRSStatSConns = make([]*HaPoolConfig, len(*jsnCdrsCfg.Cdrstats_conns))
+			for idx, jsnHaCfg := range *jsnCdrsCfg.Cdrstats_conns {
+				self.CDRSStatSConns[idx] = NewDfltHaPoolConfig()
+				self.CDRSStatSConns[idx].loadFromJsonCfg(jsnHaCfg)
+			}
 		}
 		if jsnCdrsCfg.Cdr_replication != nil {
 			self.CDRSCdrReplication = make([]*CdrReplicationCfg, len(*jsnCdrsCfg.Cdr_replication))

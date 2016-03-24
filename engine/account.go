@@ -25,8 +25,8 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/structmatcher"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/structmatcher"
 
 	"strings"
 )
@@ -36,21 +36,22 @@ Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
 */
 type Account struct {
-	Id             string
-	BalanceMap     map[string]BalanceChain
-	UnitCounters   UnitCounters
-	ActionTriggers ActionTriggers
-	AllowNegative  bool
-	Disabled       bool
+	ID                string
+	BalanceMap        map[string]Balances
+	UnitCounters      UnitCounters
+	ActionTriggers    ActionTriggers
+	AllowNegative     bool
+	Disabled          bool
+	executingTriggers bool
 }
 
 // User's available minutes for the specified destination
-func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
+func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances Balances) {
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, utils.MONETARY, "")
 
 	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, cd.Direction, cd.TOR, "")
 	// gather all balances from shared groups
-	var extendedCreditBalances BalanceChain
+	var extendedCreditBalances Balances
 	for _, cb := range creditBalances {
 		if len(cb.SharedGroups) > 0 {
 			for sg := range cb.SharedGroups {
@@ -64,7 +65,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 			extendedCreditBalances = append(extendedCreditBalances, cb)
 		}
 	}
-	var extendedMinuteBalances BalanceChain
+	var extendedMinuteBalances Balances
 	for _, mb := range unitBalances {
 		if len(mb.SharedGroups) > 0 {
 			for sg := range mb.SharedGroups {
@@ -88,22 +89,96 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	return
 }
 
+// sets all the fields of the balance
+func (acc *Account) setBalanceAction(a *Action) error {
+	if a == nil {
+		return errors.New("nil action")
+	}
+	if a.Balance.Type == nil {
+		return errors.New("missing balance type")
+	}
+	balanceType := *a.Balance.Type
+	if acc.BalanceMap == nil {
+		acc.BalanceMap = make(map[string]Balances, 1)
+	}
+	var previousSharedGroups utils.StringMap // kept for comparison
+	var balance *Balance
+	var found bool
+	for _, b := range acc.BalanceMap[balanceType] {
+		if b.IsExpired() {
+			continue
+		}
+		if (a.Balance.Uuid != nil && b.Uuid == *a.Balance.Uuid) ||
+			(a.Balance.ID != nil && b.ID == *a.Balance.ID) {
+			previousSharedGroups = b.SharedGroups
+			balance = b
+			found = true
+			break // only set one balance
+		}
+	}
+
+	// if it is not found then we add it to the list
+	if balance == nil {
+		balance = &Balance{}
+		balance.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
+		acc.BalanceMap[balanceType] = append(acc.BalanceMap[balanceType], balance)
+	}
+
+	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT {
+		balance.ID = utils.META_DEFAULT
+		if a.Balance.Value != nil {
+			balance.Value = *a.Balance.Value
+		}
+	} else {
+		a.Balance.ModifyBalance(balance)
+	}
+
+	if !found || !previousSharedGroups.Equal(balance.SharedGroups) {
+		_, err := Guardian.Guard(func() (interface{}, error) {
+			for sgID := range balance.SharedGroups {
+				// add shared group member
+				sg, err := ratingStorage.GetSharedGroup(sgID, false)
+				if err != nil || sg == nil {
+					//than is problem
+					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
+				} else {
+					if _, found := sg.MemberIds[acc.ID]; !found {
+						// add member and save
+						if sg.MemberIds == nil {
+							sg.MemberIds = make(utils.StringMap)
+						}
+						sg.MemberIds[acc.ID] = true
+						ratingStorage.SetSharedGroup(sg)
+					}
+				}
+			}
+			return 0, nil
+		}, 0, balance.SharedGroups.Slice()...)
+		if err != nil {
+			return err
+		}
+	}
+	acc.InitCounters()
+	acc.ExecuteActionTriggers(nil)
+	return nil
+}
+
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
 func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
-	bClone := a.Balance.Clone()
+	bClone := a.Balance.CreateBalance()
 	if bClone == nil {
 		return errors.New("nil balance")
 	}
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain, 1)
+		ub.BalanceMap = make(map[string]Balances, 1)
 	}
 	found := false
-	id := a.BalanceType
-	for _, b := range ub.BalanceMap[id] {
+	balanceType := a.Balance.GetType()
+	for _, b := range ub.BalanceMap[balanceType] {
 		if b.IsExpired() {
 			continue // just to be safe (cleaned expired balances above)
 		}
@@ -113,6 +188,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 				b.SetValue(0)
 			}
 			b.SubstractValue(bClone.GetValue())
+			b.dirty = true
 			found = true
 		}
 	}
@@ -120,9 +196,9 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 	if !found {
 		// check if the Id is *default (user trying to create the default balance)
 		// use only it's value value
-		if bClone.Id == utils.META_DEFAULT {
+		if bClone.ID == utils.META_DEFAULT {
 			bClone = &Balance{
-				Id:    utils.META_DEFAULT,
+				ID:    utils.META_DEFAULT,
 				Value: -bClone.GetValue(),
 			}
 		} else {
@@ -131,9 +207,8 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			}
 		}
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
-		if bClone.Uuid == "" {
-			bClone.Uuid = utils.GenUUID()
-		}
+
+		bClone.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
 		// load ValueFactor if defined in extra parametrs
 		if a.ExtraParameters != "" {
 			vf := ValueFactor{}
@@ -144,36 +219,44 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 				utils.Logger.Warning(fmt.Sprintf("Could load value factor from actions: extra parametrs: %s", a.ExtraParameters))
 			}
 		}
-		ub.BalanceMap[id] = append(ub.BalanceMap[id], bClone)
-	}
-	for sgId := range a.Balance.SharedGroups {
-		// add shared group member
-		sg, err := ratingStorage.GetSharedGroup(sgId, false)
-		if err != nil || sg == nil {
-			//than is problem
-			utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
-		} else {
-			if _, found := sg.MemberIds[ub.Id]; !found {
-				// add member and save
-				if sg.MemberIds == nil {
-					sg.MemberIds = make(utils.StringMap)
+		ub.BalanceMap[balanceType] = append(ub.BalanceMap[balanceType], bClone)
+		_, err := Guardian.Guard(func() (interface{}, error) {
+			for sgId := range bClone.SharedGroups {
+				// add shared group member
+				sg, err := ratingStorage.GetSharedGroup(sgId, false)
+				if err != nil || sg == nil {
+					//than is problem
+					utils.Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgId))
+				} else {
+					if _, found := sg.MemberIds[ub.ID]; !found {
+						// add member and save
+						if sg.MemberIds == nil {
+							sg.MemberIds = make(utils.StringMap)
+						}
+						sg.MemberIds[ub.ID] = true
+						ratingStorage.SetSharedGroup(sg)
+					}
 				}
-				sg.MemberIds[ub.Id] = true
-				ratingStorage.SetSharedGroup(sg)
 			}
+			return 0, nil
+		}, 0, bClone.SharedGroups.Slice()...)
+		if err != nil {
+			return err
 		}
 	}
-	ub.executeActionTriggers(nil)
-	return nil //ub.BalanceMap[id].GetTotalValue()
+	ub.InitCounters()
+	ub.ExecuteActionTriggers(nil)
+	return nil
 }
 
+/*
 func (ub *Account) enableDisableBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil action")
 	}
 
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	found := false
 	id := a.BalanceType
@@ -186,19 +269,20 @@ func (ub *Account) enableDisableBalanceAction(a *Action) error {
 			found = true
 		}
 	}
+	a.Balance.Disabled = disabled // restore balance aaction as it is cached
 	if !found {
 		return utils.ErrNotFound
 	}
 	return nil
 }
-
-func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) BalanceChain {
-	var balances BalanceChain
+*/
+func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string, sharedGroup string) Balances {
+	var balances Balances
 	balances = append(balances, ub.BalanceMap[tor]...)
 	if tor != utils.MONETARY && tor != utils.GENERIC {
 		balances = append(balances, ub.BalanceMap[utils.GENERIC]...)
 	}
-	var usefulBalances BalanceChain
+	var usefulBalances Balances
 	for _, b := range balances {
 		if b.Disabled {
 			continue
@@ -216,12 +300,12 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 			continue
 		}
 		b.account = ub
-		if len(b.DestinationIds) > 0 && b.DestinationIds[utils.ANY] == false {
+		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
-						if b.DestinationIds[dId.(string)] == true {
+						if b.DestinationIDs[dId.(string)] == true {
 							b.precision = len(p)
 							usefulBalances = append(usefulBalances, b)
 							break
@@ -249,7 +333,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 }
 
 // like getBalancesForPrefix but expanding shared balances
-func (account *Account) getAlldBalancesForPrefix(destination, category, direction, balanceType string) (bc BalanceChain) {
+func (account *Account) getAlldBalancesForPrefix(destination, category, direction, balanceType string) (bc Balances) {
 	balances := account.getBalancesForPrefix(destination, category, direction, balanceType, "")
 	for _, b := range balances {
 		if len(b.SharedGroups) > 0 {
@@ -402,8 +486,12 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 				cost := increment.Cost
 				defaultBalance := ub.GetDefaultMoneyBalance()
 				defaultBalance.SubstractValue(cost)
-				increment.BalanceInfo.MoneyBalanceUuid = defaultBalance.Uuid
-				increment.BalanceInfo.AccountId = ub.Id
+				increment.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  defaultBalance.Uuid,
+					ID:    defaultBalance.ID,
+					Value: defaultBalance.Value,
+				}
+				increment.BalanceInfo.AccountID = ub.ID
 				increment.paid = true
 				if count {
 					ub.countUnits(
@@ -413,7 +501,7 @@ func (ub *Account) debitCreditBalance(cd *CallDescriptor, count bool, dryRun boo
 						&Balance{
 							Directions:     utils.StringMap{leftCC.Direction: true},
 							Value:          cost,
-							DestinationIds: utils.NewStringMap(leftCC.Destination),
+							DestinationIDs: utils.NewStringMap(leftCC.Destination),
 						})
 				}
 			}
@@ -439,44 +527,32 @@ func (ub *Account) GetDefaultMoneyBalance() *Balance {
 	// create default balance
 	defaultBalance := &Balance{
 		Uuid: utils.GenUUID(),
-		Id:   utils.META_DEFAULT,
+		ID:   utils.META_DEFAULT,
 	} // minimum weight
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	ub.BalanceMap[utils.MONETARY] = append(ub.BalanceMap[utils.MONETARY], defaultBalance)
 	return defaultBalance
 }
 
-func (ub *Account) refundIncrement(increment *Increment, cd *CallDescriptor, count bool) {
-	var balance *Balance
-	unitType := cd.TOR
-	cc := cd.CreateCallCost()
-	if increment.BalanceInfo.UnitBalanceUuid != "" {
-		if balance = ub.BalanceMap[unitType].GetBalance(increment.BalanceInfo.UnitBalanceUuid); balance == nil {
-			return
-		}
-		balance.AddValue(increment.Duration.Seconds())
-		if count {
-			ub.countUnits(-increment.Duration.Seconds(), unitType, cc, balance)
-		}
-	}
-	// check money too
-	if increment.BalanceInfo.MoneyBalanceUuid != "" {
-		if balance = ub.BalanceMap[utils.MONETARY].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
-			return
-		}
-		balance.AddValue(increment.Cost)
-		if count {
-			ub.countUnits(-increment.Cost, utils.MONETARY, cc, balance)
-		}
-	}
-}
-
 // Scans the action trigers and execute the actions for which trigger is met
-func (ub *Account) executeActionTriggers(a *Action) {
-	ub.ActionTriggers.Sort()
-	for _, at := range ub.ActionTriggers {
+func (acc *Account) ExecuteActionTriggers(a *Action) {
+	if acc.executingTriggers {
+		return
+	}
+	acc.executingTriggers = true
+	defer func() {
+		acc.executingTriggers = false
+	}()
+
+	acc.ActionTriggers.Sort()
+	for _, at := range acc.ActionTriggers {
+		// check is effective
+		if at.IsExpired(time.Now()) || !at.IsActive(time.Now()) {
+			continue
+		}
+
 		// sanity check
 		if !strings.Contains(at.ThresholdType, "counter") && !strings.Contains(at.ThresholdType, "balance") {
 			continue
@@ -490,45 +566,51 @@ func (ub *Account) executeActionTriggers(a *Action) {
 			continue
 		}
 		if strings.Contains(at.ThresholdType, "counter") {
-			for _, uc := range ub.UnitCounters {
-				if uc.BalanceType == at.BalanceType &&
-					strings.Contains(at.ThresholdType, uc.CounterType[1:]) {
-					for _, mb := range uc.Balances {
-						if strings.HasPrefix(at.ThresholdType, "*max") {
-							if mb.MatchActionTrigger(at) && mb.GetValue() >= at.ThresholdValue {
-								at.Execute(ub, nil)
-							}
-						} else { //MIN
-							if mb.MatchActionTrigger(at) && mb.GetValue() <= at.ThresholdValue {
-								at.Execute(ub, nil)
+			if (at.Balance.ID == nil || *at.Balance.ID != "") && at.UniqueID != "" {
+				at.Balance.ID = utils.StringPointer(at.UniqueID)
+			}
+			for _, counters := range acc.UnitCounters {
+				for _, uc := range counters {
+					if strings.Contains(at.ThresholdType, uc.CounterType[1:]) {
+						for _, c := range uc.Counters {
+							//log.Print("C: ", utils.ToJSON(c))
+							if strings.HasPrefix(at.ThresholdType, "*max") {
+								if c.Filter.Equal(at.Balance) && c.Value >= at.ThresholdValue {
+									//log.Print("HERE")
+									at.Execute(acc, nil)
+								}
+							} else { //MIN
+								if c.Filter.Equal(at.Balance) && c.Value <= at.ThresholdValue {
+									at.Execute(acc, nil)
+								}
 							}
 						}
 					}
 				}
 			}
 		} else { // BALANCE
-			for _, b := range ub.BalanceMap[at.BalanceType] {
+			for _, b := range acc.BalanceMap[at.Balance.GetType()] {
 				if !b.dirty && at.ThresholdType != utils.TRIGGER_BALANCE_EXPIRED { // do not check clean balances
 					continue
 				}
 				switch at.ThresholdType {
 				case utils.TRIGGER_MAX_BALANCE:
 					if b.MatchActionTrigger(at) && b.GetValue() >= at.ThresholdValue {
-						at.Execute(ub, nil)
+						at.Execute(acc, nil)
 					}
 				case utils.TRIGGER_MIN_BALANCE:
 					if b.MatchActionTrigger(at) && b.GetValue() <= at.ThresholdValue {
-						at.Execute(ub, nil)
+						at.Execute(acc, nil)
 					}
 				case utils.TRIGGER_BALANCE_EXPIRED:
 					if b.MatchActionTrigger(at) && b.IsExpired() {
-						at.Execute(ub, nil)
+						at.Execute(acc, nil)
 					}
 				}
 			}
 		}
 	}
-	ub.CleanExpiredBalances()
+	acc.CleanExpiredStuff()
 }
 
 // Mark all action trigers as ready for execution
@@ -540,7 +622,7 @@ func (acc *Account) ResetActionTriggers(a *Action) {
 		}
 		at.Executed = false
 	}
-	acc.executeActionTriggers(a)
+	acc.ExecuteActionTriggers(a)
 }
 
 // Sets/Unsets recurrent flag for action triggers
@@ -556,14 +638,16 @@ func (acc *Account) SetRecurrent(a *Action, recurrent bool) {
 // Increments the counter for the type
 func (acc *Account) countUnits(amount float64, kind string, cc *CallCost, b *Balance) {
 	acc.UnitCounters.addUnits(amount, kind, cc, b)
-	acc.executeActionTriggers(nil)
+	acc.ExecuteActionTriggers(nil)
 }
 
 // Create counters for all triggered actions
 func (acc *Account) InitCounters() {
-	acc.UnitCounters = nil
+	oldUcs := acc.UnitCounters
+	acc.UnitCounters = make(UnitCounters)
 	ucTempMap := make(map[string]*UnitCounter)
 	for _, at := range acc.ActionTriggers {
+		//log.Print("AT: ", utils.ToJSON(at))
 		if !strings.Contains(at.ThresholdType, "counter") {
 			continue
 		}
@@ -571,25 +655,46 @@ func (acc *Account) InitCounters() {
 		if strings.Contains(at.ThresholdType, "balance") {
 			ct = utils.COUNTER_BALANCE
 		}
-
-		uc, exists := ucTempMap[at.BalanceType+ct]
+		uc, exists := ucTempMap[at.Balance.GetType()+ct]
+		//log.Print("CT: ", at.Balance.GetType()+ct)
 		if !exists {
 			uc = &UnitCounter{
-				BalanceType: at.BalanceType,
 				CounterType: ct,
 			}
-			ucTempMap[at.BalanceType+ct] = uc
-			uc.Balances = BalanceChain{}
-			acc.UnitCounters = append(acc.UnitCounters, uc)
+			ucTempMap[at.Balance.GetType()+ct] = uc
+			uc.Counters = make(CounterFilters, 0)
+			acc.UnitCounters[at.Balance.GetType()] = append(acc.UnitCounters[at.Balance.GetType()], uc)
 		}
-		b := at.CreateBalance()
-		if !uc.Balances.HasBalance(b) {
-			uc.Balances = append(uc.Balances, b)
+
+		c := &CounterFilter{Filter: at.Balance.Clone()}
+		if (c.Filter.ID == nil || *c.Filter.ID == "") && at.UniqueID != "" {
+			c.Filter.ID = utils.StringPointer(at.UniqueID)
 		}
+		//log.Print("C: ", utils.ToJSON(c))
+		if !uc.Counters.HasCounter(c) {
+			uc.Counters = append(uc.Counters, c)
+		}
+	}
+	// copy old counter values
+	for key, counters := range acc.UnitCounters {
+		oldCounters, found := oldUcs[key]
+		if !found {
+			continue
+		}
+		for _, uc := range counters {
+			for _, oldUc := range oldCounters {
+				if uc.CopyCounterValues(oldUc) {
+					break
+				}
+			}
+		}
+	}
+	if len(acc.UnitCounters) == 0 {
+		acc.UnitCounters = nil // leave it nil if empty
 	}
 }
 
-func (acc *Account) CleanExpiredBalances() {
+func (acc *Account) CleanExpiredStuff() {
 	for key, bm := range acc.BalanceMap {
 		for i := 0; i < len(bm); i++ {
 			if bm[i].IsExpired() {
@@ -598,6 +703,12 @@ func (acc *Account) CleanExpiredBalances() {
 			}
 		}
 		acc.BalanceMap[key] = bm
+	}
+
+	for i := 0; i < len(acc.ActionTriggers); i++ {
+		if acc.ActionTriggers[i].IsExpired(time.Now()) {
+			acc.ActionTriggers = append(acc.ActionTriggers[:i], acc.ActionTriggers[i+1:]...)
+		}
 	}
 }
 
@@ -655,8 +766,8 @@ type TenantAccount struct {
 
 func (acc *Account) Clone() *Account {
 	newAcc := &Account{
-		Id:             acc.Id,
-		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
+		ID:             acc.ID,
+		BalanceMap:     make(map[string]Balances, len(acc.BalanceMap)),
 		UnitCounters:   nil, // not used when cloned (dryRun)
 		ActionTriggers: nil, // not used when cloned (dryRun)
 		AllowNegative:  acc.AllowNegative,
@@ -668,7 +779,7 @@ func (acc *Account) Clone() *Account {
 	return newAcc
 }
 
-func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances BalanceChain, count bool) {
+func (acc *Account) DebitConnectionFee(cc *CallCost, usefulMoneyBalances Balances, count bool) {
 	if cc.deductConnectFee {
 		connectFee := cc.GetConnectFee()
 		//log.Print("CONNECT FEE: %f", connectFee)
@@ -742,12 +853,12 @@ func (acc *Account) AsOldStructure() interface{} {
 		account        *Account
 		dirty          bool
 	}
-	type BalanceChain []*Balance
+	type Balances []*Balance
 	type UnitsCounter struct {
 		Direction   string
 		BalanceType string
 		//	Units     float64
-		Balances BalanceChain // first balance is the general one (no destination)
+		Balances Balances // first balance is the general one (no destination)
 	}
 	type ActionTrigger struct {
 		Id                    string
@@ -774,7 +885,7 @@ func (acc *Account) AsOldStructure() interface{} {
 	type ActionTriggers []*ActionTrigger
 	type Account struct {
 		Id             string
-		BalanceMap     map[string]BalanceChain
+		BalanceMap     map[string]Balances
 		UnitCounters   []*UnitsCounter
 		ActionTriggers ActionTriggers
 		AllowNegative  bool
@@ -782,61 +893,64 @@ func (acc *Account) AsOldStructure() interface{} {
 	}
 
 	result := &Account{
-		Id:             utils.OUT + ":" + acc.Id,
-		BalanceMap:     make(map[string]BalanceChain, len(acc.BalanceMap)),
+		Id:             utils.OUT + ":" + acc.ID,
+		BalanceMap:     make(map[string]Balances, len(acc.BalanceMap)),
 		UnitCounters:   make([]*UnitsCounter, len(acc.UnitCounters)),
 		ActionTriggers: make(ActionTriggers, len(acc.ActionTriggers)),
 		AllowNegative:  acc.AllowNegative,
 		Disabled:       acc.Disabled,
 	}
-	for i, uc := range acc.UnitCounters {
-		if uc == nil {
-			continue
-		}
-		result.UnitCounters[i] = &UnitsCounter{
-			BalanceType: uc.BalanceType,
-			Balances:    make(BalanceChain, len(uc.Balances)),
-		}
-		if len(uc.Balances) > 0 {
-			result.UnitCounters[i].Direction = uc.Balances[0].Directions.String()
-			for j, b := range uc.Balances {
-				result.UnitCounters[i].Balances[j] = &Balance{
-					Uuid:           b.Uuid,
-					Id:             b.Id,
-					Value:          b.Value,
-					ExpirationDate: b.ExpirationDate,
-					Weight:         b.Weight,
-					DestinationIds: b.DestinationIds.String(),
-					RatingSubject:  b.RatingSubject,
-					Category:       b.Categories.String(),
-					SharedGroup:    b.SharedGroups.String(),
-					Timings:        b.Timings,
-					TimingIDs:      b.TimingIDs.String(),
-					Disabled:       b.Disabled,
+	for balanceType, counters := range acc.UnitCounters {
+		for i, uc := range counters {
+			if uc == nil {
+				continue
+			}
+			result.UnitCounters[i] = &UnitsCounter{
+				BalanceType: balanceType,
+				Balances:    make(Balances, len(uc.Counters)),
+			}
+			if len(uc.Counters) > 0 {
+				result.UnitCounters[i].Direction = (*uc.Counters[0].Filter.Directions).String()
+				for j, c := range uc.Counters {
+					result.UnitCounters[i].Balances[j] = &Balance{
+						Uuid:           c.Filter.GetUuid(),
+						Id:             c.Filter.GetID(),
+						Value:          c.Filter.GetValue(),
+						ExpirationDate: c.Filter.GetExpirationDate(),
+						Weight:         c.Filter.GetWeight(),
+						DestinationIds: c.Filter.GetDestinationIDs().String(),
+						RatingSubject:  c.Filter.GetRatingSubject(),
+						Category:       c.Filter.GetCategories().String(),
+						SharedGroup:    c.Filter.GetSharedGroups().String(),
+						Timings:        c.Filter.Timings,
+						TimingIDs:      c.Filter.GetTimingIDs().String(),
+						Disabled:       c.Filter.GetDisabled(),
+					}
 				}
 			}
 		}
 	}
 	for i, at := range acc.ActionTriggers {
+		b := at.Balance.CreateBalance()
 		result.ActionTriggers[i] = &ActionTrigger{
 			Id:                    at.ID,
 			ThresholdType:         at.ThresholdType,
 			ThresholdValue:        at.ThresholdValue,
 			Recurrent:             at.Recurrent,
 			MinSleep:              at.MinSleep,
-			BalanceId:             at.BalanceId,
-			BalanceType:           at.BalanceType,
-			BalanceDirection:      at.BalanceDirections.String(),
-			BalanceDestinationIds: at.BalanceDestinationIds.String(),
-			BalanceWeight:         at.BalanceWeight,
-			BalanceExpirationDate: at.BalanceExpirationDate,
-			BalanceTimingTags:     at.BalanceTimingTags.String(),
-			BalanceRatingSubject:  at.BalanceRatingSubject,
-			BalanceCategory:       at.BalanceCategories.String(),
-			BalanceSharedGroup:    at.BalanceSharedGroups.String(),
-			BalanceDisabled:       at.BalanceDisabled,
+			BalanceType:           at.Balance.GetType(),
+			BalanceId:             b.ID,
+			BalanceDirection:      b.Directions.String(),
+			BalanceDestinationIds: b.DestinationIDs.String(),
+			BalanceWeight:         b.Weight,
+			BalanceExpirationDate: b.ExpirationDate,
+			BalanceTimingTags:     b.TimingIDs.String(),
+			BalanceRatingSubject:  b.RatingSubject,
+			BalanceCategory:       b.Categories.String(),
+			BalanceSharedGroup:    b.SharedGroups.String(),
+			BalanceDisabled:       b.Disabled,
 			Weight:                at.Weight,
-			ActionsId:             at.ActionsId,
+			ActionsId:             at.ActionsID,
 			MinQueuedItems:        at.MinQueuedItems,
 			Executed:              at.Executed,
 		}
@@ -844,15 +958,15 @@ func (acc *Account) AsOldStructure() interface{} {
 	for key, values := range acc.BalanceMap {
 		if len(values) > 0 {
 			key += utils.OUT
-			result.BalanceMap[key] = make(BalanceChain, len(values))
+			result.BalanceMap[key] = make(Balances, len(values))
 			for i, b := range values {
 				result.BalanceMap[key][i] = &Balance{
 					Uuid:           b.Uuid,
-					Id:             b.Id,
+					Id:             b.ID,
 					Value:          b.Value,
 					ExpirationDate: b.ExpirationDate,
 					Weight:         b.Weight,
-					DestinationIds: b.DestinationIds.String(),
+					DestinationIds: b.DestinationIDs.String(),
 					RatingSubject:  b.RatingSubject,
 					Category:       b.Categories.String(),
 					SharedGroup:    b.SharedGroups.String(),

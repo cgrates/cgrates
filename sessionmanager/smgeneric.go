@@ -97,6 +97,7 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 			s := &SMGSession{eventStart: evStart, connId: connId, runId: sessionRun.DerivedCharger.RunID, timezone: self.timezone,
 				rater: self.rater, cdrsrv: self.cdrsrv, cd: sessionRun.CallDescriptor}
 			self.indexSession(sessionId, s)
+			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Starting session: %s, runId: %s", sessionId, s.runId))
 			if self.cgrCfg.SmGenericConfig.DebitInterval != 0 {
 				s.stopDebit = stopDebitChan
 				go s.debitLoop(self.cgrCfg.SmGenericConfig.DebitInterval)
@@ -118,6 +119,7 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss {
+			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Ending session: %s, runId: %s", sessionId, s.runId))
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
 			}
@@ -153,7 +155,7 @@ func (self *SMGeneric) GetMaxUsage(gev SMGenericEvent, clnt *rpc2.Client) (time.
 func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([]string, error) {
 	gev[utils.EVENT_NAME] = utils.CGR_LCR_REQUEST
 	cd, err := gev.AsLcrRequest().AsCallDescriptor(self.timezone)
-	cd.CgrId = gev.GetCgrId(self.timezone)
+	cd.CgrID = gev.GetCgrId(self.timezone)
 	if err != nil {
 		return nil, err
 	}
@@ -170,18 +172,23 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
+	if err != nil && err != utils.ErrNotFound {
+		return nilDuration, err
+	}
 	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.MaxCallDuration)
 	if err != nil {
+		if err == utils.ErrNotFound {
+			err = utils.ErrMandatoryIeMissing
+		}
 		return nilDuration, err
 	}
 	evUuid := gev.GetUUID()
 	for _, s := range self.getSession(evUuid) {
-		if maxDur, err := s.debit(evMaxUsage); err != nil {
+		if maxDur, err := s.debit(evMaxUsage, evLastUsed); err != nil {
 			return nilDuration, err
-		} else {
-			if maxDur < evMaxUsage {
-				evMaxUsage = maxDur
-			}
+		} else if maxDur < evMaxUsage {
+			evMaxUsage = maxDur
 		}
 	}
 	return evMaxUsage, nil
@@ -199,7 +206,25 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 	usage, err := gev.GetUsage(utils.META_DEFAULT)
 	if err != nil {
-		return err
+		if err != utils.ErrNotFound {
+			return err
+
+		}
+		lastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
+		if err != nil {
+			if err == utils.ErrNotFound {
+				err = utils.ErrMandatoryIeMissing
+			}
+			return err
+		}
+		var s *SMGSession
+		for _, s = range self.getSession(gev.GetUUID()) {
+			break
+		}
+		if s == nil {
+			return nil
+		}
+		usage = s.TotalUsage() + lastUsed
 	}
 	if err := self.sessionEnd(gev.GetUUID(), usage); err != nil {
 		return err
@@ -215,18 +240,18 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 	} else if len(sessionRuns) == 0 {
 		return nilDuration, nil
 	}
+	var maxDurInit bool // Avoid differences between default 0 and received 0
 	for _, sR := range sessionRuns {
 		cc := new(engine.CallCost)
-		if err := self.rater.Call("Responder.MaxDebit", sR.CallDescriptor, cc); err != nil {
-			withErrors = true
+		if err = self.rater.Call("Responder.MaxDebit", sR.CallDescriptor, cc); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not Debit CD: %+v, RunID: %s, error: %s", sR.CallDescriptor, sR.DerivedCharger.RunID, err.Error()))
 			break
 		}
 		sR.CallCosts = append(sR.CallCosts, cc) // Save it so we can revert on issues
 		if ccDur := cc.GetDuration(); ccDur == 0 {
-			err = errors.New("INSUFFICIENT_FUNDS")
+			err = utils.ErrInsufficientCredit
 			break
-		} else if ccDur < maxDur {
+		} else if !maxDurInit || ccDur < maxDur {
 			maxDur = ccDur
 		}
 	}
@@ -262,7 +287,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 				cd.Increments.Compress()
 				utils.Logger.Info(fmt.Sprintf("Refunding session run callcost: %s", utils.ToJSON(cd)))
 				var response float64
-				err := self.rater.RefundIncrements(cd, &response)
+				err := self.rater.Call("Responder.RefundIncrements", cd, &response)
 				if err != nil {
 					return nilDuration, err
 				}
@@ -281,8 +306,19 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 				cc.Merge(ccSR)
 			}
 		}
+		cc.Round()
+		roundIncrements := cc.GetRoundIncrements()
+		if len(roundIncrements) != 0 {
+			cd := cc.CreateCallDescriptor()
+			cd.Increments = roundIncrements
+			var response float64
+			if err := self.rater.Call("Responder.RefundRounding", cd, &response); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
+			}
+		}
+
 		var reply string
-		if err := self.cdrsrv.Call("CdrServer.LogCallCost", &engine.CallCostLog{
+		if err := self.cdrsrv.Call("CdrsV2.LogCallCost", &engine.CallCostLog{
 			CgrId:          gev.GetCgrId(self.timezone),
 			Source:         utils.SESSION_MANAGER_SOURCE,
 			RunId:          sR.DerivedCharger.RunID,
@@ -309,6 +345,15 @@ func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
 
 func (self *SMGeneric) Connect() error {
 	return nil
+}
+
+// Used by APIer to retrieve sessions
+func (self *SMGeneric) Sessions() map[string][]*SMGSession {
+	return self.getSessions()
+}
+
+func (self *SMGeneric) Timezone() string {
+	return self.timezone
 }
 
 // System shutdown

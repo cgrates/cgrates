@@ -18,51 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdDebitBalance{
-		name:       "balance_debit",
-		rpcMethod:  "Responder.Debit",
-		rpcParams:  &engine.CallDescriptor{Direction: "*out"},
-		clientArgs: []string{"Direction", "Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+	c := &CmdSetTriggers{
+		name:      "triggers_set",
+		rpcMethod: "ApierV1.SetAccountActionTriggers",
+		rpcParams: &v1.AttrSetAccountActionTriggers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdDebitBalance struct {
-	name       string
-	rpcMethod  string
-	rpcParams  *engine.CallDescriptor
-	clientArgs []string
+type CmdSetTriggers struct {
+	name      string
+	rpcMethod string
+	rpcParams *v1.AttrSetAccountActionTriggers
 	*CommandExecuter
 }
 
-func (self *CmdDebitBalance) Name() string {
+func (self *CmdSetTriggers) Name() string {
 	return self.name
 }
 
-func (self *CmdDebitBalance) RpcMethod() string {
+func (self *CmdSetTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdDebitBalance) RpcParams(reset bool) interface{} {
+func (self *CmdSetTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
+		self.rpcParams = &v1.AttrSetAccountActionTriggers{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdDebitBalance) PostprocessRpcParams() error {
+func (self *CmdSetTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdDebitBalance) RpcResult() interface{} {
-	return &engine.CallCost{}
-}
-
-func (self *CmdDebitBalance) ClientArgs() []string {
-	return self.clientArgs
+func (self *CmdSetTriggers) RpcResult() interface{} {
+	var s string
+	return &s
 }

@@ -1,76 +1,74 @@
 ---
 
 - hosts: all
-  user: vagrant
-  sudo: yes
+  become: true
   vars:
     root_db_password: CGRateS.org
 
   tasks:
-    - name: install dependency
-      apt: pkg={{ item }} state=latest
-      with_items:
-        - git
-        - bzr
-        - redis-server
-        - mysql-server
-        - python-pycurl
-        - python-mysqldb
-        - mercurial
-
     - name: add cgrates user
       user: name=cgrates comment=CGRateS home=/var/run/cgrates shell=/bin/false system=yes
 
     - name: add freeswitch gpg key
-      command: gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF
-      
-    - name: add freeswitch apt key
-      shell: gpg -a --export D76EDC7725E010CF | sudo apt-key add -
+      apt_key: url=https://files.freeswitch.org/repo/deb/debian/freeswitch_archive_g0.pub state=present
 
     - name: add freeswitch apt repo
-      apt_repository: repo='deb http://files.freeswitch.org/repo/deb/debian/ wheezy main' state=present
-      
-    - name: install freeswitch
+      apt_repository: repo='deb http://files.freeswitch.org/repo/deb/freeswitch-1.6/ jessie main' state=present
+
+    - name: add mongo gpg key
+      apt_key: keyserver=keyserver.ubuntu.com id=EA312927 state=present
+
+    - name: add mongo apt repo
+      apt_repository: repo='deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/3.2 main' state=present
+
+    - name: install dependency
       apt: pkg={{ item }} update_cache=yes state=latest
       with_items:
+        - git
+        - bzr
+        - mercurial
+        - redis-server
+        - mysql-server        
+        - postgresql-9.4
+        - mongodb-org
         - freeswitch-meta-vanilla
         - freeswitch-mod-json-cdr
+        - libyuv-dev        
 
     - name: update mysql root password for root account
-      mysql_user: name=root host=localhost password={{ root_db_password }}
+      mysql_user: name=cgrates host=localhost password={{ root_db_password }}
 
     - name: copy .my.cnf
       template: src=my.cnf dest=/root/.my.cnf mode=0600
     
-- hosts: all
-  user: vagrant
+- hosts: all    
   vars:
     root_db_password: CGRateS.org
-    go_version: 1.3
+    go_version: 1.6
   
   tasks:
     - name: get golang
-      get_url: url=https://storage.googleapis.com/golang/go{{ go_version }}.linux-amd64.tar.gz dest=~/go{{ go_version }}.linux-amd64.tar.gz
-      
-    - name: unpack go
-      command: chdir=~/ tar xvf go{{ go_version }}.linux-amd64.tar.gz
-
-    - name: delete golang archive
-      file: path=~/go{{ go_version }}.linux-amd64.tar.gz state=absent
+      unarchive: src=https://storage.googleapis.com/golang/go{{ go_version }}.linux-amd64.tar.gz dest=~/go creates=~/go copy=no     
 
     - name: add variables to variables /etc/profile
       copy: src=golang.sh dest=/etc/profile.d/golang.sh
-      sudo: yes
+      become: yes
 
     - name: get cgrates 
-      shell: GOROOT=~/go GOPATH=~/code ~/go/bin/go get -u -v github.com/cgrates/cgrates
+      git: repo=https://github.com/cgrates/cgrates.git dest=/home/vagrant/code/src/github.com/cgrates/cgrates
+
+    - name: get glide
+      shell: GOROOT=/home/vagrant/go GOPATH=/home/vagrant/code ~/go/bin/go get -u -v github.com/Masterminds/glide
+
+    - name: install cgrates
+      shell: cd /home/vagrant/code/src/github.com/cgrates/cgrates; ~/code/bin/glide install
 
     - name: create cgr-engine link
       file: src=/home/vagrant/code/bin/cgr-engine dest=/usr/bin/cgr-engine state=link
-      sudo: yes
+      become: yes
       
     - name: create a link to data dir
-      sudo: yes
+      become: yes
       file: src=/home/vagrant/code/src/github.com/cgrates/cgrates/data dest=/usr/share/cgrates state=link
 
     - name: expand freeswitch json conf

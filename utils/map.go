@@ -74,18 +74,16 @@ func NewStringMap(s ...string) StringMap {
 }
 
 func ParseStringMap(s string) StringMap {
-	slice := strings.Split(s, INFIELD_SEP)
-	result := make(StringMap)
-	for _, v := range slice {
-		v = strings.TrimSpace(v)
-		if v != "" {
-			result[v] = true
-		}
+	if s == ZERO {
+		return make(StringMap)
 	}
-	return result
+	return StringMapFromSlice(strings.Split(s, INFIELD_SEP))
 }
 
 func (sm StringMap) Equal(om StringMap) bool {
+	if sm == nil && om != nil {
+		return false
+	}
 	if len(sm) != len(om) {
 		return false
 	}
@@ -109,14 +107,6 @@ func (sm StringMap) Includes(om StringMap) bool {
 	return true
 }
 
-func (sm StringMap) Clone() StringMap {
-	result := make(StringMap, len(sm))
-	for k := range sm {
-		result[k] = true
-	}
-	return result
-}
-
 func (sm StringMap) Slice() []string {
 	result := make([]string, len(sm))
 	i := 0
@@ -127,10 +117,33 @@ func (sm StringMap) Slice() []string {
 	return result
 }
 
+func (sm StringMap) IsEmpty() bool {
+	return sm == nil ||
+		len(sm) == 0 ||
+		sm[ANY] == true
+}
+
+func StringMapFromSlice(s []string) StringMap {
+	result := make(StringMap)
+	for _, v := range s {
+		v = strings.TrimSpace(v)
+		if v != "" {
+			result[v] = true
+		}
+	}
+	return result
+}
+
 func (sm StringMap) Copy(o StringMap) {
 	for k, v := range o {
 		sm[k] = v
 	}
+}
+
+func (sm StringMap) Clone() StringMap {
+	result := make(StringMap, len(sm))
+	result.Copy(sm)
+	return result
 }
 
 func (sm StringMap) String() string {

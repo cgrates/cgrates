@@ -64,13 +64,14 @@ type BalancerJsonCfg struct {
 
 // Rater config section
 type RaterJsonCfg struct {
-	Enabled  *bool
-	Balancer *string
-	Cdrstats *string
-	Historys *string
-	Pubsubs  *string
-	Aliases  *string
-	Users    *string
+	Enabled                    *bool
+	Balancer                   *string
+	Cdrstats                   *string
+	Historys                   *string
+	Pubsubs                    *string
+	Aliases                    *string
+	Users                      *string
+	Rp_subject_prefix_matching *bool
 }
 
 // Scheduler config section
@@ -84,10 +85,10 @@ type CdrsJsonCfg struct {
 	Extra_fields    *[]string
 	Store_cdrs      *bool
 	Rater_conns     *[]*HaPoolJsonCfg
-	Pubsubs         *string
-	Users           *string
-	Aliases         *string
-	Cdrstats        *string
+	Pubsubs_conns   *[]*HaPoolJsonCfg
+	Users_conns     *[]*HaPoolJsonCfg
+	Aliases_conns   *[]*HaPoolJsonCfg
+	Cdrstats_conns  *[]*HaPoolJsonCfg
 	Cdr_replication *[]*CdrReplicationJsonCfg
 }
 
@@ -250,6 +251,7 @@ type DiameterAgentJsonCfg struct {
 	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
 	Dictionaries_dir   *string           // path towards additional dictionaries
 	Sm_generic_conns   *[]*HaPoolJsonCfg // Connections towards generic SM
+	Pubsub_conns       *[]*HaPoolJsonCfg // connection towards pubsubs
 	Create_cdr         *bool
 	Debit_interval     *string
 	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -265,8 +267,11 @@ type DiameterAgentJsonCfg struct {
 type DARequestProcessorJsnCfg struct {
 	Id                  *string
 	Dry_run             *bool
+	Publish_event       *bool
 	Request_filter      *string
+	Flags               *[]string
 	Continue_on_success *bool
+	Append_cca          *bool
 	CCR_fields          *[]*CdrFieldJsonCfg
 	CCA_fields          *[]*CdrFieldJsonCfg
 }

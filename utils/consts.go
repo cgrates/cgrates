@@ -28,6 +28,9 @@ var (
 	ErrUnauthorizedDestination = errors.New("UNAUTHORIZED_DESTINATION")
 	ErrRatingPlanNotFound      = errors.New("RATING_PLAN_NOT_FOUND")
 	ErrAccountNotFound         = errors.New("ACCOUNT_NOT_FOUND")
+	ErrAccountDisabled         = errors.New("ACCOUNT_DISABLED")
+	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
+	ErrInsufficientCredit      = errors.New("INSUFFICENT_CREDIT")
 )
 
 const (
@@ -89,6 +92,8 @@ const (
 	ROUNDING_MIDDLE              = "*middle"
 	ROUNDING_DOWN                = "*down"
 	ANY                          = "*any"
+	UNLIMITED                    = "*unlimited"
+	ZERO                         = "*zero"
 	ASAP                         = "*asap"
 	USERS                        = "*users"
 	COMMENT_CHAR                 = '#'
@@ -120,6 +125,7 @@ const (
 	SETUP_TIME                   = "SetupTime"
 	ANSWER_TIME                  = "AnswerTime"
 	USAGE                        = "Usage"
+	LastUsed                     = "LastUsed"
 	PDD                          = "PDD"
 	SUPPLIER                     = "Supplier"
 	MEDI_RUNID                   = "RunID"
@@ -225,8 +231,14 @@ const (
 	CGR_DISCONNECT_CAUSE         = "cgr_disconnectcause"
 	CGR_COMPUTELCR               = "cgr_computelcr"
 	CGR_SUPPLIERS                = "cgr_suppliers"
+	CGRFlags                     = "cgr_flags"
 	KAM_FLATSTORE                = "kamailio_flatstore"
 	OSIPS_FLATSTORE              = "opensips_flatstore"
+	MAX_DEBIT_CACHE_PREFIX       = "MAX_DEBIT_"
+	REFUND_INCR_CACHE_PREFIX     = "REFUND_INCR_"
+	REFUND_ROUND_CACHE_PREFIX    = "REFUND_ROUND_"
+	GET_SESS_RUNS_CACHE_PREFIX   = "GET_SESS_RUNS_"
+	LOG_CALL_COST_CACHE_PREFIX   = "LOG_CALL_COSTS_"
 	ALIAS_CONTEXT_RATING         = "*rating"
 	NOT_AVAILABLE                = "N/A"
 	CALL                         = "call"
@@ -261,6 +273,8 @@ const (
 	MetaRaw                     = "*raw"
 	CreatedAt                   = "CreatedAt"
 	UpdatedAt                   = "UpdatedAt"
+	HandlerArgSep               = "|"
+	FlagForceDuration           = "fd"
 )
 
 var (

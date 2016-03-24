@@ -60,7 +60,7 @@ func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
 }
 
 func (self *CdrsV1) LogCallCost(ccl *engine.CallCostLog, reply *string) error {
-	if err := self.CdrSrv.LocalLogCallCost(ccl); err != nil {
+	if err := self.CdrSrv.LogCallCost(ccl); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK

@@ -156,6 +156,16 @@ type AttrReverseAlias struct {
 	Context string
 }
 
+type AliasService interface {
+	SetAlias(Alias, *string) error
+	UpdateAlias(Alias, *string) error
+	RemoveAlias(Alias, *string) error
+	GetAlias(Alias, *Alias) error
+	GetMatchingAlias(AttrMatchingAlias, *string) error
+	GetReverseAlias(AttrReverseAlias, *map[string][]*Alias) error
+	RemoveReverseAlias(AttrReverseAlias, *string) error
+}
+
 type AliasHandler struct {
 	accountingDb AccountingStorage
 	mu           sync.RWMutex

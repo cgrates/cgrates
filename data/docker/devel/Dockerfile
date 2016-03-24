@@ -11,10 +11,10 @@ RUN gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF && gpg -
 RUN echo 'deb http://files.freeswitch.org/repo/deb/debian/ jessie main' > /etc/apt/sources.list.d/freeswitch.list
 
 # add mongo repo keys
-RUN apt-key adv --keyserver 'keyserver.ubuntu.com' --recv '7F0CEB10'
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
 
 # add mongo repo
-RUN echo 'deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/3.0 main' | tee '/etc/apt/sources.list.d/mongodb-org-3.0.list'
+RUN echo 'deb http://repo.mongodb.org/apt/debian wheezy/mongodb-org/3.2 main' | tee '/etc/apt/sources.list.d/mongodb-org-3.2.list'
 
 # install dependencies
 RUN apt-get -y update && apt-get -y install git bzr mercurial redis-server mysql-server python-pycurl python-mysqldb postgresql postgresql-client sudo wget freeswitch-meta-vanilla vim zsh mongodb-org
@@ -26,7 +26,7 @@ COPY mongod.conf /etc/mongod.conf
 RUN useradd -c CGRateS -d /var/run/cgrates -s /bin/false -r cgrates
 
 # install golang
-RUN wget -qO- https://storage.googleapis.com/golang/go1.5.1.linux-amd64.tar.gz | tar xzf - -C /root/
+RUN wget -qO- https://storage.googleapis.com/golang/go1.6.linux-amd64.tar.gz | tar xzf - -C /root/
 
 #install glide
 RUN GOROOT=/root/go GOPATH=/root/code /root/go/bin/go get github.com/Masterminds/glide

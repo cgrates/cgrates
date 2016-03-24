@@ -18,50 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdFakeDebit{
-		name:       "debit_fake",
-		rpcMethod:  "Responder.FakeDebit",
-		clientArgs: []string{"Direction", "Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+	c := &CmdExecuteScheduledActions{
+		name:      "scheduler_execute",
+		rpcMethod: "ApierV1.ExecuteScheduledActions",
+		rpcParams: &v1.AttrsExecuteScheduledActions{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdFakeDebit struct {
-	name       string
-	rpcMethod  string
-	rpcParams  *engine.CallDescriptor
-	clientArgs []string
+type CmdExecuteScheduledActions struct {
+	name      string
+	rpcMethod string
+	rpcParams *v1.AttrsExecuteScheduledActions
 	*CommandExecuter
 }
 
-func (self *CmdFakeDebit) Name() string {
+func (self *CmdExecuteScheduledActions) Name() string {
 	return self.name
 }
 
-func (self *CmdFakeDebit) RpcMethod() string {
+func (self *CmdExecuteScheduledActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdFakeDebit) RpcParams(reset bool) interface{} {
+func (self *CmdExecuteScheduledActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
+		self.rpcParams = &v1.AttrsExecuteScheduledActions{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdFakeDebit) PostprocessRpcParams() error {
+func (self *CmdExecuteScheduledActions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdFakeDebit) RpcResult() interface{} {
-	return &engine.CallCost{}
-}
-
-func (self *CmdFakeDebit) ClientArgs() []string {
-	return self.clientArgs
+func (self *CmdExecuteScheduledActions) RpcResult() interface{} {
+	var s string
+	return &s
 }

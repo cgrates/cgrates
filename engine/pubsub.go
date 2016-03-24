@@ -3,12 +3,11 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"reflect"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type SubscribeInfo struct {
@@ -160,29 +159,73 @@ func (ps *PubSub) ShowSubscribers(in string, out *map[string]*SubscriberData) er
 }
 
 func (ps *PubSub) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	parts := strings.Split(serviceMethod, ".")
-	if len(parts) != 2 {
-		return utils.ErrNotImplemented
+	switch serviceMethod {
+	case "PubSubV1.Subscribe":
+		argsConverted, canConvert := args.(SubscribeInfo)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Subscribe(argsConverted, replyConverted)
+	case "PubSubV1.Unsubscribe":
+		argsConverted, canConvert := args.(SubscribeInfo)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Unsubscribe(argsConverted, replyConverted)
+	case "PubSubV1.Publish":
+		argsConverted, canConvert := args.(CgrEvent)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Publish(argsConverted, replyConverted)
+	case "PubSubV1.ShowSubscribers":
+		argsConverted, canConvert := args.(string)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*map[string]*SubscriberData)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.ShowSubscribers(argsConverted, replyConverted)
 	}
-	// get method
-	method := reflect.ValueOf(ps).MethodByName(parts[1])
-	if !method.IsValid() {
-		return utils.ErrNotImplemented
-	}
+	return rpcclient.ErrUnsupporteServiceMethod
+}
 
-	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+type ProxyPubSub struct {
+	Client *rpcclient.RpcClient
+}
 
-	ret := method.Call(params)
-	if len(ret) != 1 {
-		return utils.ErrServerError
+func NewProxyPubSub(addr string, attempts, reconnects int) (*ProxyPubSub, error) {
+	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB, nil)
+	if err != nil {
+		return nil, err
 	}
-	if ret[0].Interface() == nil {
-		return nil
-	}
-	err, ok := ret[0].Interface().(error)
-	if !ok {
-		return utils.ErrServerError
-	}
-	return err
+	return &ProxyPubSub{Client: client}, nil
+}
+
+func (ps *ProxyPubSub) Subscribe(si SubscribeInfo, reply *string) error {
+	return ps.Client.Call("PubSubV1.Subscribe", si, reply)
+}
+func (ps *ProxyPubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
+	return ps.Client.Call("PubSubV1.Unsubscribe", si, reply)
+}
+func (ps *ProxyPubSub) Publish(evt CgrEvent, reply *string) error {
+	return ps.Client.Call("PubSubV1.Publish", evt, reply)
+}
+
+func (ps *ProxyPubSub) ShowSubscribers(in string, reply *map[string]*SubscriberData) error {
+	return ps.Client.Call("PubSubV1.ShowSubscribers", in, reply)
 }

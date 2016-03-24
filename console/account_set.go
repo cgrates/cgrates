@@ -18,12 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import "github.com/cgrates/cgrates/apier/v2"
 
 func init() {
 	c := &CmdAddAccount{
 		name:      "account_set",
-		rpcMethod: "ApierV1.SetAccount",
+		rpcMethod: "ApierV2.SetAccount",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -33,7 +33,7 @@ func init() {
 type CmdAddAccount struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrSetAccount
+	rpcParams *v2.AttrSetAccount
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdAddAccount) RpcMethod() string {
 
 func (self *CmdAddAccount) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrSetAccount{}
+		self.rpcParams = &v2.AttrSetAccount{}
 	}
 	return self.rpcParams
 }

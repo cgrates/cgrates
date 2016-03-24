@@ -79,7 +79,7 @@ func (s *Scheduler) Loop() {
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for action on %v", a0.ActionsID))
+				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for action on %s", a0.ActionsID))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
@@ -127,7 +127,6 @@ func (s *Scheduler) loadActionPlans() {
 			if at.IsASAP() {
 				continue
 			}
-
 			now := time.Now()
 			if at.GetNextStartTime(now).Before(now) {
 				// the task is obsolete, do not add it to the queue

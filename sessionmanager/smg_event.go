@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -49,8 +50,9 @@ func (self SMGenericEvent) GetTOR(fieldName string) string {
 }
 
 func (self SMGenericEvent) GetCgrId(timezone string) string {
-	setupTime, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
-	return utils.Sha1(self.GetUUID(), setupTime.UTC().String())
+	//setupTime, _ := self.GetSetupTime(utils.META_DEFAULT, timezone)
+	//return utils.Sha1(self.GetUUID(), setupTime.UTC().String())
+	return utils.Sha1(self.GetUUID())
 }
 
 func (self SMGenericEvent) GetUUID() string {
@@ -155,7 +157,23 @@ func (self SMGenericEvent) GetUsage(fieldName string) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.USAGE
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	valIf, hasVal := self[fieldName]
+	if !hasVal {
+		return nilDuration, utils.ErrNotFound
+	}
+	result, _ := utils.ConvertIfaceToString(valIf)
+	return utils.ParseDurationWithSecs(result)
+}
+
+func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) {
+	if fieldName == utils.META_DEFAULT {
+		fieldName = utils.LastUsed
+	}
+	valStr, hasVal := self[fieldName]
+	if !hasVal {
+		return nilDuration, utils.ErrNotFound
+	}
+	result, _ := utils.ConvertIfaceToString(valStr)
 	return utils.ParseDurationWithSecs(result)
 }
 
@@ -210,7 +228,7 @@ func (self SMGenericEvent) GetCdrSource() string {
 func (self SMGenericEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for key, val := range self {
-		primaryFields := append(utils.PrimaryCdrFields, utils.EVENT_NAME)
+		primaryFields := append(utils.PrimaryCdrFields, utils.EVENT_NAME, utils.LastUsed)
 		if utils.IsSliceMember(primaryFields, key) {
 			continue
 		}
@@ -347,4 +365,17 @@ func (self SMGenericEvent) AsLcrRequest() *engine.LcrRequest {
 		SetupTime:   utils.FirstNonEmpty(setupTimeStr),
 		Duration:    usageStr,
 	}
+}
+
+// AsMapStringString Converts into map[string]string, used for example as pubsub event
+func (self SMGenericEvent) AsMapStringString() (map[string]string, error) {
+	mp := make(map[string]string)
+	for k, v := range self {
+		if strV, casts := utils.CastIfToString(v); !casts {
+			return nil, fmt.Errorf("Value %+v does not cast to string", v)
+		} else {
+			mp[k] = strV
+		}
+	}
+	return mp, nil
 }

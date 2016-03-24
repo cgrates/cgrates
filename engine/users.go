@@ -52,6 +52,16 @@ func (ud *UserProfile) SetId(id string) error {
 	return nil
 }
 
+type UserService interface {
+	SetUser(UserProfile, *string) error
+	RemoveUser(UserProfile, *string) error
+	UpdateUser(UserProfile, *string) error
+	GetUsers(UserProfile, *UserProfiles) error
+	AddIndex([]string, *string) error
+	GetIndexes(string, *map[string][]string) error
+	ReloadUsers(string, *string) error
+}
+
 type prop struct {
 	masked bool
 	weight float64
@@ -473,5 +483,5 @@ func LoadUserProfile(in interface{}, extraFields string) error {
 		utils.SetMapExtraFields(in, m, extraFields)
 		return nil
 	}
-	return utils.ErrNotFound
+	return utils.ErrUserNotFound
 }

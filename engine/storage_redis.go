@@ -621,7 +621,7 @@ func (rs *RedisStorage) GetAccount(key string) (*Account, error) {
 	if err != nil {
 		return nil, err
 	}
-	ub := &Account{Id: key}
+	ub := &Account{ID: key}
 	if err = rs.ms.Unmarshal(values, ub); err != nil {
 		return nil, err
 	}
@@ -633,7 +633,7 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(ub.BalanceMap) == 0 {
-		if ac, err := rs.GetAccount(ub.Id); err == nil && !ac.allBalancesExpired() {
+		if ac, err := rs.GetAccount(ub.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = ub.ActionTriggers
 			ac.UnitCounters = ub.UnitCounters
 			ac.AllowNegative = ub.AllowNegative
@@ -642,7 +642,7 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 		}
 	}
 	result, err := rs.ms.Marshal(ub)
-	err = rs.db.Cmd("SET", utils.ACCOUNT_PREFIX+ub.Id, result).Err
+	err = rs.db.Cmd("SET", utils.ACCOUNT_PREFIX+ub.ID, result).Err
 	return
 }
 
@@ -920,13 +920,25 @@ func (rs *RedisStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 	return
 }
 
-func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan) (err error) {
+func (rs *RedisStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) (err error) {
 	if len(ats.ActionTimings) == 0 {
 		// delete the key
 		err = rs.db.Cmd("DEL", utils.ACTION_PLAN_PREFIX+key).Err
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
 		return err
 	}
+	if !overwrite {
+		// get existing action plan to merge the account ids
+		if existingAts, _ := rs.GetActionPlan(key, true); existingAts != nil {
+			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
+				ats.AccountIDs = make(utils.StringMap)
+			}
+			for accID := range existingAts.AccountIDs {
+				ats.AccountIDs[accID] = true
+			}
+		}
+	}
+
 	result, err := rs.ms.Marshal(ats)
 	if err != nil {
 		return err

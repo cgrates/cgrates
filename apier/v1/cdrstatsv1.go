@@ -50,6 +50,14 @@ func (sts *CDRStatsV1) GetQueue(id string, sq *engine.StatsQueue) error {
 	return sts.CdrStats.Call("CDRStatsV1.GetQueue", id, sq)
 }
 
+func (sts *CDRStatsV1) AddQueue(cs *engine.CdrStats, reply *int) error {
+	return sts.CdrStats.Call("CDRStatsV1.AddQueue", cs, reply)
+}
+
+func (sts *CDRStatsV1) RemoveQueue(qID string, reply *int) error {
+	return sts.CdrStats.Call("CDRStatsV1.RemoveQueue", qID, reply)
+}
+
 func (sts *CDRStatsV1) GetQueueTriggers(id string, ats *engine.ActionTriggers) error {
 	return sts.CdrStats.Call("CDRStatsV1.GetQueueTriggers", id, ats)
 }

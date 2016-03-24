@@ -37,9 +37,9 @@ type ActionTiming struct {
 	ActionsID    string
 	Weight       float64
 	actions      Actions
-	accountIDs   map[string]struct{} // copy of action plans accounts
-	actionPlanID string              // the id of the belonging action plan (info only)
-	stCache      time.Time           // cached time of the next start
+	accountIDs   utils.StringMap // copy of action plans accounts
+	actionPlanID string          // the id of the belonging action plan (info only)
+	stCache      time.Time       // cached time of the next start
 }
 
 type Task struct {
@@ -50,7 +50,7 @@ type Task struct {
 
 type ActionPlan struct {
 	Id            string // informative purpose only
-	AccountIDs    map[string]struct{}
+	AccountIDs    utils.StringMap
 	ActionTimings []*ActionTiming
 }
 
@@ -65,7 +65,7 @@ func (t *Task) Execute() error {
 	return (&ActionTiming{
 		Uuid:       t.Uuid,
 		ActionsID:  t.ActionsID,
-		accountIDs: map[string]struct{}{t.AccountID: struct{}{}},
+		accountIDs: utils.StringMap{t.AccountID: true},
 	}).Execute()
 }
 
@@ -250,11 +250,11 @@ func (at *ActionTiming) SetActions(as Actions) {
 	at.actions = as
 }
 
-func (at *ActionTiming) SetAccountIDs(accIDs map[string]struct{}) {
+func (at *ActionTiming) SetAccountIDs(accIDs utils.StringMap) {
 	at.accountIDs = accIDs
 }
 
-func (at *ActionTiming) GetAccountIDs() map[string]struct{} {
+func (at *ActionTiming) GetAccountIDs() utils.StringMap {
 	return at.accountIDs
 }
 
@@ -283,7 +283,7 @@ func (at *ActionTiming) Execute() (err error) {
 	}
 	for accID, _ := range at.accountIDs {
 		_, err = Guardian.Guard(func() (interface{}, error) {
-			ub, err := accountingStorage.GetAccount(accID)
+			acc, err := accountingStorage.GetAccount(accID)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))
 				return 0, err
@@ -291,9 +291,11 @@ func (at *ActionTiming) Execute() (err error) {
 			transactionFailed := false
 			removeAccountActionFound := false
 			for _, a := range aac {
+				//log.Print("A: ", utils.ToJSON(a))
 				// check action filter
 				if len(a.Filter) > 0 {
-					matched, err := ub.matchActionFilter(a.Filter)
+					matched, err := acc.matchActionFilter(a.Filter)
+					//log.Print("Checkng: ", a.Filter, matched)
 					if err != nil {
 						return 0, err
 					}
@@ -301,12 +303,14 @@ func (at *ActionTiming) Execute() (err error) {
 						continue
 					}
 				}
-				if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
-					continue // disabled acocunts are not removed from action  plan
-					//return 0, fmt.Errorf("Account %s is disabled", accID)
+				if a.Balance == nil {
+					a.Balance = &BalanceFilter{}
 				}
-				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
-					a.Balance.ExpirationDate = expDate
+				if a.ExpirationString != "" { // if it's *unlimited then it has to be zero time
+					if expDate, parseErr := utils.ParseDate(a.ExpirationString); parseErr == nil {
+						a.Balance.ExpirationDate = &time.Time{}
+						*a.Balance.ExpirationDate = expDate
+					}
 				}
 
 				actionFunction, exists := getActionFunc(a.ActionType)
@@ -317,7 +321,7 @@ func (at *ActionTiming) Execute() (err error) {
 					transactionFailed = true
 					break
 				}
-				if err := actionFunction(ub, nil, a, aac); err != nil {
+				if err := actionFunction(acc, nil, a, aac); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					transactionFailed = true
 					break
@@ -327,17 +331,17 @@ func (at *ActionTiming) Execute() (err error) {
 				}
 			}
 			if !transactionFailed && !removeAccountActionFound {
-				accountingStorage.SetAccount(ub)
+				accountingStorage.SetAccount(acc)
 			}
 			return 0, nil
 		}, 0, accID)
 	}
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
 		for _, a := range aac {
-
-			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) &&
+			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.EmptyExpirationDate()) &&
 				parseErr == nil && !expDate.IsZero() {
-				a.Balance.ExpirationDate = expDate
+				a.Balance.ExpirationDate = &time.Time{}
+				*a.Balance.ExpirationDate = expDate
 			}
 
 			actionFunction, exists := getActionFunc(a.ActionType)
@@ -348,7 +352,7 @@ func (at *ActionTiming) Execute() (err error) {
 				break
 			}
 			if err := actionFunction(nil, nil, a, aac); err != nil {
-				utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
+				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
 				break
 			}
 		}
@@ -368,7 +372,7 @@ func (at *ActionTiming) IsASAP() bool {
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
 
-// Structure to store actions according to weight
+// Structure to store actions according to execution time and weight
 type ActionTimingPriorityList []*ActionTiming
 
 func (atpl ActionTimingPriorityList) Len() int {
@@ -388,5 +392,24 @@ func (atpl ActionTimingPriorityList) Less(i, j int) bool {
 }
 
 func (atpl ActionTimingPriorityList) Sort() {
+	sort.Sort(atpl)
+}
+
+// Structure to store actions according to weight
+type ActionTimingWeightOnlyPriorityList []*ActionTiming
+
+func (atpl ActionTimingWeightOnlyPriorityList) Len() int {
+	return len(atpl)
+}
+
+func (atpl ActionTimingWeightOnlyPriorityList) Swap(i, j int) {
+	atpl[i], atpl[j] = atpl[j], atpl[i]
+}
+
+func (atpl ActionTimingWeightOnlyPriorityList) Less(i, j int) bool {
+	return atpl[i].Weight > atpl[j].Weight
+}
+
+func (atpl ActionTimingWeightOnlyPriorityList) Sort() {
 	sort.Sort(atpl)
 }

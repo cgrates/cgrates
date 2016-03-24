@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <diameter>
-  <application id="1">
+  <application id="4">
     <!-- Diameter Network Access Server Application -->
     <!-- http://tools.ietf.org/html/rfc7155 -->
     <command code="265" short="AA" name="AA">

@@ -103,7 +103,7 @@ func (self *KamailioSessionManager) onCgrLcrReq(evData []byte, connId string) {
 
 func (self *KamailioSessionManager) getSuppliers(kev KamEvent) (string, error) {
 	cd, err := kev.AsCallDescriptor()
-	cd.CgrId = kev.GetCgrId(self.timezone)
+	cd.CgrID = kev.GetCgrId(self.timezone)
 	if err != nil {
 		utils.Logger.Info(fmt.Sprintf("<SM-Kamailio> LCR_PREPROCESS_ERROR error: %s", err.Error()))
 		return "", errors.New("LCR_PREPROCESS_ERROR")

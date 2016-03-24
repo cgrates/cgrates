@@ -70,7 +70,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 // the debit loop method (to be stoped by sending somenthing on stopDebit channel)
 func (s *Session) debitLoop(runIdx int) {
 	nextCd := s.sessionRuns[runIdx].CallDescriptor
-	nextCd.CgrId = s.eventStart.GetCgrId(s.sessionManager.Timezone())
+	nextCd.CgrID = s.eventStart.GetCgrId(s.sessionManager.Timezone())
 	index := 0.0
 	debitPeriod := s.sessionManager.DebitInterval()
 	for {
@@ -180,6 +180,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 				lastCC.Timespans = lastCC.Timespans[:i]
 			} else {
 				ts.SplitByIncrement(lastRefundedIncrementIndex)
+				ts.Cost = ts.CalculateCost()
 			}
 			break // do not go to other timespans
 		} else {
@@ -195,7 +196,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
 		cd := &engine.CallDescriptor{
-			CgrId:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
+			CgrID:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
 			Category:    lastCC.Category,
@@ -215,6 +216,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 	}
 	//utils.Logger.Debug(fmt.Sprintf("REFUND INCR: %s", utils.ToJSON(refundIncrements)))
 	lastCC.Cost -= refundIncrements.GetTotalCost()
+	lastCC.UpdateRatedUsage()
 	lastCC.Timespans.Compress()
 	return nil
 }
@@ -237,6 +239,16 @@ func (s *Session) SaveOperations() {
 		}
 		firstCC.Timespans.Compress()
 
+		firstCC.Round()
+		roundIncrements := firstCC.GetRoundIncrements()
+		if len(roundIncrements) != 0 {
+			cd := firstCC.CreateCallDescriptor()
+			cd.Increments = roundIncrements
+			var response float64
+			if err := s.sessionManager.Rater().Call("Responder.RefundRounding", cd, &response); err != nil {
+				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
+			}
+		}
 		var reply string
 		err := s.sessionManager.CdrSrv().Call("CdrServer.LogCallCost", &engine.CallCostLog{
 			CgrId:          s.eventStart.GetCgrId(s.sessionManager.Timezone()),

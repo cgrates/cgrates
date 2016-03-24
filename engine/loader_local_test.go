@@ -47,7 +47,7 @@ var accountDbCsv, accountDbStor, accountDbApier AccountingStorage // Each rating
 var storDb LoadStorage
 var lCfg *config.CGRConfig
 
-var tpCsvScenario = flag.String("tp_scenario", "prepaid1centpsec", "Use this scenario folder to import tp csv data from")
+var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario folder to import tp csv data from")
 
 // Create connection to ratingDb
 // Will use 3 different datadbs in order to be able to see differences in data loaded

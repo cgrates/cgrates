@@ -1,32 +1,32 @@
-hash: 855bc23b0e58452edf1d31f228430476a2602b79d225397d33b805b252cebb83
-updated: 2016-01-21T12:30:17.296295607+02:00
+hash: c4e3a1bdd7452ec3af195e09b8b3b1b9a61e36edfad557aeb01686706019c352
+updated: 2016-03-09T00:08:37.493018177+02:00
 imports:
 - name: github.com/cenkalti/hub
   version: 57d753b5f4856e77b3cf8ecce78c97215a7d324d
 - name: github.com/cenkalti/rpc2
   version: 2d1be381ce47537e9e076b2b76dc70933162e4e9
 - name: github.com/cgrates/fsock
-  version: c3b1d274ae0e42742ba1bce2bf3a138d72fb82ee
+  version: a8ffdbdfc8440016df008ba91e6f05f806d7a69f
 - name: github.com/cgrates/kamevapi
   version: a376b1f937ba959857929fa3e111c0f3243278c0
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/rpcclient
   version: 79661b1e514823a9ac93b2b9e97e037ee190ba47
-- name: github.com/cgrates/structmatcher
-  version: 98feee0bab15ce165540fe5f0fa006db2e9f898c
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
-  version: 30569fd7282321ac213d8db9f39eac9321ab6bd5
+  version: 1a8912836dee1f666f882b2e388e340a3a10ecdd
   subpackages:
-  - /diam
+  - diam
   - diam/avp
   - diam/datatype
   - diam/dict
   - diam/sm
+  - diam/sm/smparser
+  - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
-  version: bb006fd699a123d3eb514561dbefc352e978949d
+  version: 0f2db9e6c9cff80a97ca5c2c5096242cc1554e16
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/jinzhu/gorm
@@ -36,32 +36,35 @@ imports:
 - name: github.com/kr/pty
   version: f7ee69f31298ecbe5d2b349c711e2547a617d398
 - name: github.com/lib/pq
-  version: 11fc39a580a008f1f39bb3d11d984fb34ed778d9
-- name: github.com/mediocregopher/radix.v2
-  version: 91435107718b55ff544323a2b0f25fdd8475d283
+  version: 165a3529e799da61ab10faed1fabff3662d6193f
   subpackages:
-  - /pool
+  - oid
+- name: github.com/mediocregopher/radix.v2
+  version: 7bdaf7c45ec452ca691ab20535471e24460f0876
+  subpackages:
+  - pool
   - redis
 - name: github.com/peterh/liner
-  version: 3f1c20449d1836aa4cbe38731b96f95cdf89634d
+  version: ad1edfd30321d8f006ccf05f1e0524adeb943060
 - name: github.com/ugorji/go
-  version: 646ae4a518c1c3be0739df898118d9bccf993858
+  version: 187fa0f8af224437e08ecb3f208c4d1a94859a61
   subpackages:
-  - /codec
-- name: golang.org/x/crypto
-  version: 552e9d568fde9701ea1944fb01c8aadaceaa7353
+  - codec
 - name: golang.org/x/net
-  version: 961116aeebe66bfb58bb4d51818c70d256acbbb8
+  version: a4bbce9fcae005b22ae5443f6af064d80a6f5a55
   subpackages:
-  - /websocket
-- name: golang.org/x/text
-  version: cf4986612c83df6c55578ba198316d1684a9a287
+  - websocket
+  - context
 - name: gopkg.in/fsnotify.v1
-  version: 508915b7500b6e42a87132e4afeb4729cebc7cbb
+  version: 875cf421b32f8f1b31bd43776297876d01542279
 - name: gopkg.in/mgo.v2
-  version: e30de8ac9ae3b30df7065f766c71f88bba7d4e49
+  version: d90005c5262a3463800497ea5a89aed5fe22c886
   subpackages:
   - bson
 - name: gopkg.in/tomb.v2
   version: 14b3d72120e8d10ea6e6b7f87f7175734b1faab8
+devImports: []
+=======
+  - internal/sasl
+  - internal/scram
 devImports: []

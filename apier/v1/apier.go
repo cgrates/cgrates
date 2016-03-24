@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -108,7 +108,7 @@ func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string)
 	at := &engine.ActionTiming{
 		ActionsID: attr.ActionsId,
 	}
-	at.SetAccountIDs(map[string]struct{}{accID: struct{}{}})
+	at.SetAccountIDs(utils.StringMap{accID: true})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
@@ -503,23 +503,41 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	}
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
+		var units *float64
+		if apiAct.Units != "" {
+			if x, err := strconv.ParseFloat(apiAct.Units, 64); err == nil {
+				units = &x
+			} else {
+				return err
+			}
+		}
+
+		var weight *float64
+		if apiAct.BalanceWeight != "" {
+			if x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64); err == nil {
+				weight = &x
+			} else {
+				return err
+			}
+		}
+
 		a := &engine.Action{
 			Id:               utils.GenUUID(),
 			ActionType:       apiAct.Identifier,
-			BalanceType:      apiAct.BalanceType,
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
 			ExtraParameters:  apiAct.ExtraParameters,
 			Filter:           apiAct.Filter,
-			Balance: &engine.Balance{
-				Uuid:           utils.GenUUID(),
-				Id:             apiAct.BalanceId,
-				Value:          apiAct.Units,
-				Weight:         apiAct.BalanceWeight,
-				Directions:     utils.ParseStringMap(apiAct.Directions),
-				DestinationIds: utils.ParseStringMap(apiAct.DestinationIds),
-				RatingSubject:  apiAct.RatingSubject,
-				SharedGroups:   utils.ParseStringMap(apiAct.SharedGroups),
+			Balance: &engine.BalanceFilter{ // TODO: update this part
+				Uuid:           utils.StringPointer(utils.GenUUID()),
+				ID:             utils.StringPointer(apiAct.BalanceId),
+				Type:           utils.StringPointer(apiAct.BalanceType),
+				Value:          units,
+				Weight:         weight,
+				Directions:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Directions)),
+				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
+				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
+				SharedGroups:   utils.StringMapPointer(utils.ParseStringMap(apiAct.SharedGroups)),
 			},
 		}
 		storeActions[idx] = a
@@ -544,19 +562,25 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 	}
 	for _, engAct := range engActs {
 		act := &utils.TPAction{Identifier: engAct.ActionType,
-			BalanceType:     engAct.BalanceType,
 			ExpiryTime:      engAct.ExpirationString,
 			ExtraParameters: engAct.ExtraParameters,
 			Filter:          engAct.Filter,
 			Weight:          engAct.Weight,
 		}
-		if engAct.Balance != nil {
-			act.Units = engAct.Balance.GetValue()
-			act.Directions = engAct.Balance.Directions.String()
-			act.DestinationIds = engAct.Balance.DestinationIds.String()
-			act.RatingSubject = engAct.Balance.RatingSubject
-			act.SharedGroups = engAct.Balance.SharedGroups.String()
-			act.BalanceWeight = engAct.Balance.Weight
+		bf := engAct.Balance
+		if bf != nil {
+			act.BalanceType = bf.GetType()
+			act.Units = strconv.FormatFloat(bf.GetValue(), 'f', -1, 64)
+			act.Directions = bf.GetDirections().String()
+			act.DestinationIds = bf.GetDestinationIDs().String()
+			act.RatingSubject = bf.GetRatingSubject()
+			act.SharedGroups = bf.GetSharedGroups().String()
+			act.BalanceWeight = strconv.FormatFloat(bf.GetWeight(), 'f', -1, 64)
+			act.TimingTags = bf.GetTimingIDs().String()
+			act.BalanceId = bf.GetID()
+			act.Categories = bf.GetCategories().String()
+			act.BalanceBlocker = strconv.FormatBool(bf.GetBlocker())
+			act.BalanceDisabled = strconv.FormatBool(bf.GetDisabled())
 		}
 		acts = append(acts, act)
 	}
@@ -620,7 +644,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 			ActionsID: apiAtm.ActionsId,
 		})
 	}
-	if err := self.RatingDb.SetActionPlan(ap.Id, ap); err != nil {
+	if err := self.RatingDb.SetActionPlan(ap.Id, ap, true); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_PLAN_PREFIX: []string{utils.ACTION_PLAN_PREFIX + attrs.Id}})
@@ -656,139 +680,6 @@ func (self *ApierV1) GetActionPlan(attr AttrGetActionPlan, reply *[]*engine.Acti
 		result = append(result, apls)
 	}
 	*reply = result
-	return nil
-}
-
-type AttrAddActionTrigger struct {
-	ActionTriggersId       string
-	ActionTriggersUniqueId string
-	Tenant                 string
-	Account                string
-	ThresholdType          string
-	ThresholdValue         float64
-	BalanceId              string
-	BalanceType            string
-	BalanceDirection       string
-	BalanceDestinationIds  string
-	BalanceRatingSubject   string //ToDo
-	BalanceWeight          float64
-	BalanceExpiryTime      string
-	BalanceSharedGroup     string //ToDo
-	Weight                 float64
-	ActionsId              string
-}
-
-func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
-	if attr.BalanceDirection == "" {
-		attr.BalanceDirection = utils.OUT
-	}
-	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime, self.Config.DefaultTimezone)
-	if err != nil {
-		return utils.NewErrServerError(err)
-	}
-	at := &engine.ActionTrigger{
-		ID:                    attr.ActionTriggersId,
-		UniqueID:              attr.ActionTriggersUniqueId,
-		ThresholdType:         attr.ThresholdType,
-		ThresholdValue:        attr.ThresholdValue,
-		BalanceId:             attr.BalanceId,
-		BalanceType:           attr.BalanceType,
-		BalanceDirections:     utils.ParseStringMap(attr.BalanceDirection),
-		BalanceDestinationIds: utils.ParseStringMap(attr.BalanceDestinationIds),
-		BalanceWeight:         attr.BalanceWeight,
-		BalanceExpirationDate: balExpiryTime,
-		Weight:                attr.Weight,
-		ActionsId:             attr.ActionsId,
-		Executed:              false,
-	}
-
-	tag := utils.AccountKey(attr.Tenant, attr.Account)
-	_, err = engine.Guardian.Guard(func() (interface{}, error) {
-		userBalance, err := self.AccountDb.GetAccount(tag)
-		if err != nil {
-			return 0, err
-		}
-
-		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
-
-		if err = self.AccountDb.SetAccount(userBalance); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, tag)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = OK
-	return nil
-}
-
-type AttrResetTriggeredAction struct {
-	Id                   string
-	Tenant               string
-	Account              string
-	Directions           string
-	BalanceType          string
-	ThresholdType        string
-	ThresholdValue       float64
-	DestinationId        string
-	BalanceWeight        float64
-	BalanceRatingSubject string
-	BalanceSharedGroup   string
-}
-
-func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply *string) error {
-	var a *engine.Action
-	if attr.Id != "" {
-		// we can identify the trigger by the id
-		a = &engine.Action{Id: attr.Id}
-	} else {
-		extraParameters, err := json.Marshal(struct {
-			ThresholdType        string
-			ThresholdValue       float64
-			DestinationId        string
-			BalanceWeight        float64
-			BalanceRatingSubject string
-			BalanceDirections    string
-			BalanceSharedGroup   string
-		}{
-			attr.ThresholdType,
-			attr.ThresholdValue,
-			attr.DestinationId,
-			attr.BalanceWeight,
-			attr.Directions,
-			attr.BalanceRatingSubject,
-			attr.BalanceSharedGroup,
-		})
-		if err != nil {
-			*reply = err.Error()
-			return err
-		}
-		a = &engine.Action{
-			BalanceType:     attr.BalanceType,
-			ExtraParameters: string(extraParameters),
-		}
-	}
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
-	_, err := engine.Guardian.Guard(func() (interface{}, error) {
-		acc, err := self.AccountDb.GetAccount(accID)
-		if err != nil {
-			return 0, err
-		}
-
-		acc.ResetActionTriggers(a)
-
-		if err = self.AccountDb.SetAccount(acc); err != nil {
-			return 0, err
-		}
-		return 0, nil
-	}, 0, accID)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	*reply = OK
 	return nil
 }
 

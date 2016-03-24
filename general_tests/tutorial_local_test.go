@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -114,7 +115,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 8, Actions: 7, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 4, RatingProfiles: 9, Actions: 7, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
@@ -193,7 +194,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.6425 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
+	} else if cc.Cost != 0.6418 { // 0.01 first minute, 0.04 25 seconds with RT_20CNT
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -229,7 +230,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3002 {
+	} else if cc.Cost != 1.3 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart, _ = utils.ParseDate("2014-08-04T13:00:00Z")
@@ -265,7 +266,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3002 {
+	} else if cc.Cost != 1.3 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
 	}
 	tStart = time.Date(2014, 8, 4, 13, 0, 0, 0, time.UTC)
@@ -341,7 +342,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.327 { //
+	} else if cc.Cost != 0.3249 { //
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
 	cd = engine.CallDescriptor{
@@ -356,7 +357,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 1.3002 { //
+	} else if cc.Cost != 1.3 { //
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
 	cd = engine.CallDescriptor{
@@ -371,7 +372,7 @@ func TestTutLocalGetCosts(t *testing.T) {
 	}
 	if err := tutLocalRpc.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.Cost != 0.354 { //
+	} else if cc.Cost != 0.3498 { //
 		t.Errorf("Calling Responder.GetCost got callcost: %s", cc.AsJSON())
 	}
 }
@@ -755,7 +756,8 @@ func TestTutLocalLcrStatic(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
-	cd.CgrId = "1"
+	cd.CgrID = "1"
+	cd.RunID = "1"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -780,7 +782,8 @@ func TestTutLocalLcrStatic(t *testing.T) {
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl2", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
-	cd.CgrId = "2"
+	cd.CgrID = "2"
+	cd.RunID = "2"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -859,7 +862,8 @@ func TestTutLocalLcrQos(t *testing.T) {
 	}
 	var lcr engine.LCRCost
 	// Since there is no real quality difference, the suppliers will come in random order here
-	cd.CgrId = "3"
+	cd.CgrID = "3"
+	cd.RunID = "3"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -898,7 +902,8 @@ func TestTutLocalLcrQos(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 90, engine.ACC: 0.325, engine.TCC: 0.325, engine.ASR: 100, engine.ACD: 90}},
 		},
 	}
-	cd.CgrId = "4"
+	cd.CgrID = "4"
+	cd.RunID = "4"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -926,7 +931,8 @@ func TestTutLocalLcrQos(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
-	cd.CgrId = "5"
+	cd.CgrID = "5"
+	cd.RunID = "5"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -962,7 +968,8 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
-	cd.CgrId = "6"
+	cd.CgrID = "6"
+	cd.RunID = "6"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -988,7 +995,8 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
-	cd.CgrId = "7"
+	cd.CgrID = "7"
+	cd.RunID = "7"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -1025,7 +1033,8 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 		},
 	}
 	*/
-	cd.CgrId = "8"
+	cd.CgrID = "8"
+	cd.RunID = "8"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -1050,7 +1059,8 @@ func TestTutLocalLcrQosThreshold(t *testing.T) {
 				QOS: map[string]float64{engine.TCD: 240, engine.ACC: 0.35, engine.TCC: 0.7, engine.ASR: 100, engine.ACD: 120}},
 		},
 	}
-	cd.CgrId = "9"
+	cd.CgrID = "9"
+	cd.RunID = "9"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eLcr.Entry, lcr.Entry) {
@@ -1085,7 +1095,8 @@ func TestTutLocalLeastCost(t *testing.T) {
 		},
 	}
 	var lcr engine.LCRCost
-	cd.CgrId = "10"
+	cd.CgrID = "10"
+	cd.RunID = "10"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -1117,7 +1128,8 @@ func TestTutLocalLeastCost(t *testing.T) {
 			&engine.LCRSupplierCost{Supplier: "*out:cgrates.org:lcr_profile1:suppl1", Cost: 1.2, Duration: 60 * time.Second},
 		},
 	}
-	cd.CgrId = "11"
+	cd.CgrID = "11"
+	cd.RunID = "11"
 	if err := tutLocalRpc.Call("Responder.GetLCR", cd, &lcr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eStLcr.Entry, lcr.Entry) {
@@ -1133,7 +1145,7 @@ func TestTutLocalSetAccount(t *testing.T) {
 		return
 	}
 	var reply string
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanId: "PACKAGE_10", ActionTriggersId: "STANDARD_TRIGGERS", ReloadScheduler: true}
+	attrs := &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, ReloadScheduler: true}
 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1154,9 +1166,9 @@ func TestTutLocalSetAccount(t *testing.T) {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
-		dta, _ := utils.NewTAFromAccountKey(acnt.Id)
+		dta, _ := utils.NewTAFromAccountKey(acnt.ID)
 		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
-			t.Error("Unexpected account id received: ", acnt.Id)
+			t.Error("Unexpected account id received: ", acnt.ID)
 		}
 		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 1 {
 			t.Errorf("Unexpected balances found: %+v", balances)
@@ -1171,7 +1183,8 @@ func TestTutLocalSetAccount(t *testing.T) {
 			t.Error("Disabled should not be set")
 		}
 	}
-	attrs = &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
+	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_10"}, ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
+
 	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1183,9 +1196,9 @@ func TestTutLocalSetAccount(t *testing.T) {
 		t.Errorf("Accounts received: %+v", acnts)
 	} else {
 		acnt := acnts[0]
-		dta, _ := utils.NewTAFromAccountKey(acnt.Id)
+		dta, _ := utils.NewTAFromAccountKey(acnt.ID)
 		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
-			t.Error("Unexpected account id received: ", acnt.Id)
+			t.Error("Unexpected account id received: ", acnt.ID)
 		}
 		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 1 {
 			t.Errorf("Unexpected balances found: %+v", balances)
@@ -1200,7 +1213,37 @@ func TestTutLocalSetAccount(t *testing.T) {
 			t.Error("Disabled should be set")
 		}
 	}
+	attrs = &v2.AttrSetAccount{Tenant: "cgrates.org", Account: "tutacnt1", ActionPlanIDs: &[]string{"PACKAGE_1001"}, ActionTriggerIDs: &[]string{"CDRST1_WARN"}, AllowNegative: utils.BoolPointer(true), Disabled: utils.BoolPointer(true), ReloadScheduler: true}
 
+	if err := tutLocalRpc.Call("ApierV2.SetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV2.SetAccount: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV2.SetAccount received: %s", reply)
+	}
+	time.Sleep(100*time.Millisecond + time.Duration(*waitRater)*time.Millisecond) // Give time for scheduler to execute topups
+	if err := tutLocalRpc.Call("ApierV2.GetAccounts", utils.AttrGetAccounts{Tenant: attrs.Tenant, AccountIds: []string{attrs.Account}}, &acnts); err != nil {
+		t.Error(err)
+	} else if len(acnts) != 1 {
+		t.Errorf("Accounts received: %+v", acnts)
+	} else {
+		acnt := acnts[0]
+		dta, _ := utils.NewTAFromAccountKey(acnt.ID)
+		if dta.Tenant != attrs.Tenant || dta.Account != attrs.Account {
+			t.Error("Unexpected account id received: ", acnt.ID)
+		}
+		if balances := acnt.BalanceMap["*monetary"]; len(balances) != 3 {
+			t.Errorf("Unexpected balances found: %+v", balances)
+		}
+		if len(acnt.ActionTriggers) != 7 {
+			t.Errorf("Unexpected action triggers for account: %+v", acnt.ActionTriggers)
+		}
+		if !acnt.AllowNegative {
+			t.Error("AllowNegative should be set")
+		}
+		if !acnt.Disabled {
+			t.Error("Disabled should be set")
+		}
+	}
 }
 
 /*

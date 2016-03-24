@@ -71,10 +71,10 @@ func TestResponderGetDerivedMaxSessionTime(t *testing.T) {
 	if err := ratingStorage.SetDestination(deTMobile); err != nil {
 		t.Error(err)
 	}
-	b10 := &Balance{Value: 10, Weight: 10, DestinationIds: utils.NewStringMap("DE_TMOBILE")}
-	b20 := &Balance{Value: 20, Weight: 10, DestinationIds: utils.NewStringMap("DE_TMOBILE")}
-	rifsAccount := &Account{Id: utils.ConcatenatedKey(testTenant, "rif"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{b10}}}
-	dansAccount := &Account{Id: utils.ConcatenatedKey(testTenant, "dan"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{b20}}}
+	b10 := &Balance{Value: 10, Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
+	b20 := &Balance{Value: 20, Weight: 10, DestinationIDs: utils.NewStringMap("DE_TMOBILE")}
+	rifsAccount := &Account{ID: utils.ConcatenatedKey(testTenant, "rif"), BalanceMap: map[string]Balances{utils.VOICE: Balances{b10}}}
+	dansAccount := &Account{ID: utils.ConcatenatedKey(testTenant, "dan"), BalanceMap: map[string]Balances{utils.VOICE: Balances{b20}}}
 	if err := accountingStorage.SetAccount(rifsAccount); err != nil {
 		t.Error(err)
 	}
@@ -151,20 +151,20 @@ func TestResponderGetSessionRuns(t *testing.T) {
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
-			CallDescriptor: &CallDescriptor{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Direction: "*out", Category: "0",
-				Tenant: "vdf", Subject: "rif", Account: "minitsboy", Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-				TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
+			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "0",
+				Tenant: "vdf", Subject: "rif", Account: "minitsboy", Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
 		&SessionRun{DerivedCharger: extra2DC,
-			CallDescriptor: &CallDescriptor{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Direction: "*out", Category: "call",
-				Tenant: "vdf", Subject: "ivo", Account: "ivo", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-				TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
+			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "call",
+				Tenant: "vdf", Subject: "ivo", Account: "ivo", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
 		&SessionRun{DerivedCharger: dfDC,
-			CallDescriptor: &CallDescriptor{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Direction: "*out", Category: "call",
-				Tenant: "vdf", Subject: "dan2", Account: "dan2", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-				TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}}}
+			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "call",
+				Tenant: "vdf", Subject: "dan2", Account: "dan2", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}}}
 	if err := rsponder.GetSessionRuns(cdr, &sesRuns); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSRuns, sesRuns) {
+		for _, sr := range sesRuns {
+			t.Logf("sr cd: %+v", sr.CallDescriptor)
+		}
 		t.Errorf("Expecting: %+v, received: %+v", eSRuns, sesRuns)
 	}
 }
@@ -436,10 +436,10 @@ func TestResponderGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eLcLcr.SupplierCosts, lcrLc.SupplierCosts) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcLcr.SupplierCosts, lcrLc.SupplierCosts)
 	}
-	bRif12 := &Balance{Value: 40, Weight: 10, DestinationIds: utils.NewStringMap(dstDe.Id)}
-	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationIds: utils.NewStringMap(dstDe.Id)}
-	rif12sAccount := &Account{Id: utils.ConcatenatedKey("tenant12", "rif12"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{bRif12}}, AllowNegative: true}
-	ivo12sAccount := &Account{Id: utils.ConcatenatedKey("tenant12", "ivo12"), BalanceMap: map[string]BalanceChain{utils.VOICE: BalanceChain{bIvo12}}, AllowNegative: true}
+	bRif12 := &Balance{Value: 40, Weight: 10, DestinationIDs: utils.NewStringMap(dstDe.Id)}
+	bIvo12 := &Balance{Value: 60, Weight: 10, DestinationIDs: utils.NewStringMap(dstDe.Id)}
+	rif12sAccount := &Account{ID: utils.ConcatenatedKey("tenant12", "rif12"), BalanceMap: map[string]Balances{utils.VOICE: Balances{bRif12}}, AllowNegative: true}
+	ivo12sAccount := &Account{ID: utils.ConcatenatedKey("tenant12", "ivo12"), BalanceMap: map[string]Balances{utils.VOICE: Balances{bIvo12}}, AllowNegative: true}
 	for _, acnt := range []*Account{rif12sAccount, ivo12sAccount} {
 		if err := accountingStorage.SetAccount(acnt); err != nil {
 			t.Error(err)

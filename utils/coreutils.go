@@ -128,6 +128,9 @@ func Round(x float64, prec int, method string) float64 {
 
 func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	var nilTime time.Time
+	if len(tmStr) == 0 {
+		return nilTime, nil
+	}
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {
 		return nilTime, err
@@ -190,6 +193,8 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
 	case date == "*yearly":
 		expDate = time.Now().AddDate(1, 0, 0) // add one year
+	case date == "*month_end":
+		expDate = GetEndOfMonth(time.Now())
 	case strings.HasSuffix(date, "Z"):
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
@@ -231,12 +236,10 @@ func CopyHour(src, dest time.Time) time.Time {
 
 // Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
 func ParseDurationWithSecs(durStr string) (time.Duration, error) {
-	if durSecs, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
-		durNanosecs := int(durSecs * NANO_MULTIPLIER)
-		return time.Duration(durNanosecs), nil
-	} else {
-		return time.ParseDuration(durStr)
+	if _, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+		durStr += "s"
 	}
+	return time.ParseDuration(durStr)
 }
 
 func AccountKey(tenant, account string) string {
@@ -334,6 +337,10 @@ func Fib() func() time.Duration {
 
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
+	if str == ZERO {
+		str = ""
+		return &str
+	}
 	return &str
 }
 
@@ -359,6 +366,14 @@ func StringSlicePointer(slc []string) *[]string {
 
 func Float64SlicePointer(slc []float64) *[]float64 {
 	return &slc
+}
+
+func StringMapPointer(sm StringMap) *StringMap {
+	return &sm
+}
+
+func TimePointer(t time.Time) *time.Time {
+	return &t
 }
 
 func ReflectFuncLocation(handler interface{}) (file string, line int) {
@@ -473,4 +488,48 @@ func FmtFieldWidth(source string, width int, strip, padding string, mandatory bo
 		}
 	}
 	return source, nil
+}
+
+// Returns the string representation of iface or error if not convertible
+func CastIfToString(iface interface{}) (strVal string, casts bool) {
+	switch iface.(type) {
+	case string:
+		strVal = iface.(string)
+		casts = true
+	case int:
+		strVal = strconv.Itoa(iface.(int))
+		casts = true
+	case int64:
+		strVal = strconv.FormatInt(iface.(int64), 10)
+		casts = true
+	case float64:
+		strVal = strconv.FormatFloat(iface.(float64), 'f', -1, 64)
+		casts = true
+	case bool:
+		strVal = strconv.FormatBool(iface.(bool))
+		casts = true
+	case []uint8:
+		var byteVal []byte
+		if byteVal, casts = iface.([]byte); casts {
+			strVal = string(byteVal)
+		}
+	default: // Maybe we are lucky and the value converts to string
+		strVal, casts = iface.(string)
+	}
+	return strVal, casts
+}
+
+func GetEndOfMonth(ref time.Time) time.Time {
+	if ref.IsZero() {
+		return time.Now()
+	}
+	year, month, _ := ref.Date()
+	if month == time.December {
+		year++
+		month = time.January
+	} else {
+		month++
+	}
+	eom := time.Date(year, month, 1, 0, 0, 0, 0, ref.Location())
+	return eom.Add(-time.Second)
 }

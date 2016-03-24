@@ -89,6 +89,20 @@ func (mc *MockRpcClient) Call(methodName string, arg interface{}, reply interfac
 	}
 	return nil
 }
+func (mc *MockConnector) GetCost(*engine.CallDescriptor, *engine.CallCost) error  { return nil }
+func (mc *MockConnector) Debit(*engine.CallDescriptor, *engine.CallCost) error    { return nil }
+func (mc *MockConnector) MaxDebit(*engine.CallDescriptor, *engine.CallCost) error { return nil }
+func (mc *MockConnector) RefundIncrements(cd *engine.CallDescriptor, reply *float64) error {
+	mc.refundCd = cd
+	return nil
+}
+func (mc *MockConnector) RefundRounding(cd *engine.CallDescriptor, reply *float64) error {
+	return nil
+}
+func (mc *MockConnector) GetMaxSessionTime(*engine.CallDescriptor, *float64) error { return nil }
+func (mc *MockConnector) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
+	return nil
+}
 
 func TestSessionRefund(t *testing.T) {
 	mc := &MockRpcClient{}

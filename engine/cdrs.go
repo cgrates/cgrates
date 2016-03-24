@@ -70,7 +70,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater rpcclient.RpcClientConnection, pubsub rpcclient.RpcClientConnection, users rpcclient.RpcClientConnection, aliases rpcclient.RpcClientConnection, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
+func NewCdrServer(cgrCfg *config.CGRConfig, cdrDb CdrStorage, rater, pubsub, users, aliases, stats rpcclient.RpcClientConnection) (*CdrServer, error) {
 	return &CdrServer{cgrCfg: cgrCfg, cdrDb: cdrDb, client: rater, pubsub: pubsub, users: users, aliases: aliases, stats: stats, guard: &GuardianLock{locksMap: make(map[string]chan bool)}}, nil
 }
 
@@ -136,23 +136,9 @@ func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 	return self.processCdr(cdr)
 }
 
-func (self *CdrServer) LogCallCost(ccl *CallCostLog, reply *string) error {
-	cacheKey := "LogCallCost" + ccl.CgrId
-	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = item.Value.(string)
-		return item.Err
-	}
-	if err := self.LocalLogCallCost(ccl); err != nil {
-		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
-	return nil
-}
-
 // RPC method, used to log callcosts to db
-func (self *CdrServer) LocalLogCallCost(ccl *CallCostLog) error {
+func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
+	ccl.CallCost.UpdateCost()       // make sure the total cost reflect the increments
 	ccl.CallCost.UpdateRatedUsage() // make sure rated usage is updated
 	if ccl.CheckDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
@@ -177,6 +163,10 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 		return err
 	}
 	for _, cdr := range cdrs {
+		// replace user profile fields
+		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+			return err
+		}
 		// replace aliases for cases they were loaded after CDR received
 		if err := LoadAlias(&AttrMatchingAlias{
 			Destination: cdr.Destination,
@@ -187,10 +177,6 @@ func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) err
 			Subject:     cdr.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-			return err
-		}
-		// replace user profile fields
-		if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
 			return err
 		}
 		if err := self.rateStoreStatsReplicate(cdr, sendToStats); err != nil {
@@ -222,6 +208,7 @@ func (self *CdrServer) processCdr(cdr *CDR) (err error) {
 	}
 	if self.cgrCfg.CDRSStoreCdrs { // Store RawCDRs, this we do sync so we can reply with the status
 		if cdr.CostDetails != nil {
+			cdr.CostDetails.UpdateCost()
 			cdr.CostDetails.UpdateRatedUsage()
 		}
 		if err := self.cdrDb.SetCDR(cdr, false); err != nil { // Only original CDR stored in primary table, no derived
@@ -251,6 +238,9 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR, sendToStats bool) error
 	if cdr.RunID == utils.MetaRaw { // Overwrite *raw with *default for rating
 		cdr.RunID = utils.META_DEFAULT
 	}
+	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+		return err
+	}
 	if err := LoadAlias(&AttrMatchingAlias{
 		Destination: cdr.Destination,
 		Direction:   cdr.Direction,
@@ -262,9 +252,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR, sendToStats bool) error
 	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
+
 	// Rate CDR
 	if self.client != nil && !cdr.Rated {
 		if err := self.rateCDR(cdr); err != nil {
@@ -281,6 +269,7 @@ func (self *CdrServer) rateStoreStatsReplicate(cdr *CDR, sendToStats bool) error
 	if self.cgrCfg.CDRSStoreCdrs { // Store CDRs
 		// Store RatedCDR
 		if cdr.CostDetails != nil {
+			cdr.CostDetails.UpdateCost()
 			cdr.CostDetails.UpdateRatedUsage()
 		}
 		if err := self.cdrDb.SetCDR(cdr, true); err != nil {
@@ -305,6 +294,21 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 	if cdr.RunID != utils.MetaRaw { // Only derive *raw CDRs
 		return cdrRuns, nil
 	}
+	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
+		return nil, err
+	}
+	if err := LoadAlias(&AttrMatchingAlias{
+		Destination: cdr.Destination,
+		Direction:   cdr.Direction,
+		Tenant:      cdr.Tenant,
+		Category:    cdr.Category,
+		Account:     cdr.Account,
+		Subject:     cdr.Subject,
+		Context:     utils.ALIAS_CONTEXT_RATING,
+	}, cdr, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		return nil, err
+	}
+
 	attrsDC := &utils.AttrDerivedChargers{Tenant: cdr.Tenant, Category: cdr.Category, Direction: cdr.Direction,
 		Account: cdr.Account, Subject: cdr.Subject, Destination: cdr.Destination}
 	var dcs utils.DerivedChargers
@@ -395,16 +399,17 @@ func (self *CdrServer) getCostFromRater(cdr *CDR) (*CallCost, error) {
 		timeStart = cdr.SetupTime
 	}
 	cd := &CallDescriptor{
-		TOR:           cdr.ToR,
-		Direction:     cdr.Direction,
-		Tenant:        cdr.Tenant,
-		Category:      cdr.Category,
-		Subject:       cdr.Subject,
-		Account:       cdr.Account,
-		Destination:   cdr.Destination,
-		TimeStart:     timeStart,
-		TimeEnd:       timeStart.Add(cdr.Usage),
-		DurationIndex: cdr.Usage,
+		TOR:             cdr.ToR,
+		Direction:       cdr.Direction,
+		Tenant:          cdr.Tenant,
+		Category:        cdr.Category,
+		Subject:         cdr.Subject,
+		Account:         cdr.Account,
+		Destination:     cdr.Destination,
+		TimeStart:       timeStart,
+		TimeEnd:         timeStart.Add(cdr.Usage),
+		DurationIndex:   cdr.Usage,
+		PerformRounding: true,
 	}
 	if utils.IsSliceMember([]string{utils.META_PSEUDOPREPAID, utils.META_POSTPAID, utils.META_PREPAID, utils.PSEUDOPREPAID, utils.POSTPAID, utils.PREPAID}, cdr.RequestType) { // Prepaid - Cost can be recalculated in case of missing records from SM
 		err = self.client.Call("Responder.Debit", cd, cc)

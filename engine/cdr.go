@@ -767,7 +767,7 @@ func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
 	var err error
 	cd := &CallDescriptor{
-		CgrId:       self.GetId(),
+		CgrID:       self.GetId(),
 		TOR:         self.ToR,
 		Direction:   self.Direction,
 		Tenant:      self.Tenant,

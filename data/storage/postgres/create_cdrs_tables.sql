@@ -36,7 +36,7 @@ CREATE TABLE cdrs (
 );
 ;
 DROP INDEX IF EXISTS deleted_at_cp_idx;
-CREATE INDEX deleted_at_cp_idx ON cdrs_primary (deleted_at);
+CREATE INDEX deleted_at_cp_idx ON cdrs (deleted_at);
 
 
 DROP TABLE IF EXISTS sm_costs;

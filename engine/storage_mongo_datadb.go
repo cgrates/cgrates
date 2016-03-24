@@ -870,7 +870,7 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(acc.BalanceMap) == 0 {
-		if ac, err := ms.GetAccount(acc.Id); err == nil && !ac.allBalancesExpired() {
+		if ac, err := ms.GetAccount(acc.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = acc.ActionTriggers
 			ac.UnitCounters = acc.UnitCounters
 			ac.AllowNegative = acc.AllowNegative
@@ -878,7 +878,7 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 			acc = ac
 		}
 	}
-	_, err := ms.db.C(colAcc).Upsert(bson.M{"id": acc.Id}, acc)
+	_, err := ms.db.C(colAcc).Upsert(bson.M{"id": acc.ID}, acc)
 	return err
 }
 
@@ -1156,7 +1156,7 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 	return
 }
 
-func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan) error {
+func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) error {
 	// clean dots from account ids map
 	if len(ats.ActionTimings) == 0 {
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
@@ -1165,6 +1165,17 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan) error {
 			return err
 		}
 		return nil
+	}
+	if !overwrite {
+		// get existing action plan to merge the account ids
+		if existingAts, _ := ms.GetActionPlan(key, true); existingAts != nil {
+			if ats.AccountIDs == nil && len(existingAts.AccountIDs) > 0 {
+				ats.AccountIDs = make(utils.StringMap)
+			}
+			for accID := range existingAts.AccountIDs {
+				ats.AccountIDs[accID] = true
+			}
+		}
 	}
 	result, err := ms.ms.Marshal(ats)
 	if err != nil {

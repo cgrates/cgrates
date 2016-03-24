@@ -29,6 +29,7 @@ type DiameterAgentCfg struct {
 	Listen            string // address where to listen for diameter requests <x.y.z.y:1234>
 	DictionariesDir   string
 	SMGenericConns    []*HaPoolConfig // connections towards SMG component
+	PubSubConns       []*HaPoolConfig // connection towards pubsubs
 	CreateCDR         bool
 	DebitInterval     time.Duration
 	Timezone          string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -58,6 +59,13 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 		for idx, jsnHaCfg := range *jsnCfg.Sm_generic_conns {
 			self.SMGenericConns[idx] = NewDfltHaPoolConfig()
 			self.SMGenericConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
+	}
+	if jsnCfg.Pubsub_conns != nil {
+		self.PubSubConns = make([]*HaPoolConfig, len(*jsnCfg.Pubsub_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Pubsub_conns {
+			self.PubSubConns[idx] = NewDfltHaPoolConfig()
+			self.PubSubConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
 	if jsnCfg.Create_cdr != nil {
@@ -106,8 +114,11 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 type DARequestProcessor struct {
 	Id                string
 	DryRun            bool
+	PublishEvent      bool
 	RequestFilter     utils.RSRFields
+	Flags             utils.StringMap // Various flags to influence behavior
 	ContinueOnSuccess bool
+	AppendCCA         bool
 	CCRFields         []*CfgCdrField
 	CCAFields         []*CfgCdrField
 }
@@ -122,11 +133,23 @@ func (self *DARequestProcessor) loadFromJsonCfg(jsnCfg *DARequestProcessorJsnCfg
 	if jsnCfg.Dry_run != nil {
 		self.DryRun = *jsnCfg.Dry_run
 	}
+	if jsnCfg.Publish_event != nil {
+		self.PublishEvent = *jsnCfg.Publish_event
+	}
 	var err error
 	if jsnCfg.Request_filter != nil {
 		if self.RequestFilter, err = utils.ParseRSRFields(*jsnCfg.Request_filter, utils.INFIELD_SEP); err != nil {
 			return err
 		}
+	}
+	if jsnCfg.Flags != nil {
+		self.Flags = utils.StringMapFromSlice(*jsnCfg.Flags)
+	}
+	if jsnCfg.Continue_on_success != nil {
+		self.ContinueOnSuccess = *jsnCfg.Continue_on_success
+	}
+	if jsnCfg.Append_cca != nil {
+		self.AppendCCA = *jsnCfg.Append_cca
 	}
 	if jsnCfg.CCR_fields != nil {
 		if self.CCRFields, err = CfgCdrFieldsFromCdrFieldsJsonCfg(*jsnCfg.CCR_fields); err != nil {

@@ -50,9 +50,18 @@ func init() {
 
 const (
 	META_CCR_USAGE       = "*ccr_usage"
-	META_CCA_USAGE       = "*cca_usage"
+	META_VALUE_EXPONENT  = "*value_exponent"
+	META_SUM             = "*sum"
 	DIAMETER_CCR         = "DIAMETER_CCR"
 	DiameterRatingFailed = 5031
+	CGRError             = "CGRError"
+	CGRMaxUsage          = "CGRMaxUsage"
+	CGRResultCode        = "CGRResultCode"
+)
+
+var (
+	ErrFilterNotPassing     = errors.New("Filter not passing")
+	ErrDiameterRatingFailed = errors.New("Diameter rating failed")
 )
 
 func loadDictionaries(dictsDir, componentId string) error {
@@ -215,6 +224,40 @@ func metaHandler(m *diam.Message, tag, arg string, dur time.Duration) (string, e
 	return "", nil
 }
 
+// metaValueExponent will multiply the float value with the exponent provided.
+// Expects 2 arguments in template separated by |
+func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, 0, nil)
+	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
+	if len(handlerArgs) != 2 {
+		return "", errors.New("Unexpected number of arguments")
+	}
+	val, err := strconv.ParseFloat(handlerArgs[0], 64)
+	if err != nil {
+		return "", err
+	}
+	exp, err := strconv.Atoi(handlerArgs[1])
+	if err != nil {
+		return "", err
+	}
+	res := val * math.Pow10(exp)
+	return strconv.FormatFloat(utils.Round(res, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+}
+
+func metaSum(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, 0, nil)
+	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
+	var summed float64
+	for _, arg := range handlerArgs {
+		val, err := strconv.ParseFloat(arg, 64)
+		if err != nil {
+			return "", err
+		}
+		summed += val
+	}
+	return strconv.FormatFloat(utils.Round(summed, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+}
+
 // splitIntoInterface is used to split a string into []interface{} instead of []string
 func splitIntoInterface(content, sep string) []interface{} {
 	spltStr := strings.Split(content, sep)
@@ -230,16 +273,19 @@ func avpsWithPath(m *diam.Message, rsrFld *utils.RSRField) ([]*diam.AVP, error) 
 	return m.FindAVPsWithPath(splitIntoInterface(rsrFld.Id, utils.HIERARCHY_SEP), dict.UndefinedVendorID)
 }
 
-// Follows the implementation in the StorCdr
-func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField) (bool, int) {
+func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVars map[string]string) (bool, int) {
 	if fieldFilter == nil {
 		return true, 0
+	}
+	if val, hasIt := processorVars[fieldFilter.Id]; hasIt { // ProcessorVars have priority
+		if fieldFilter.FilterPasses(val) {
+			return true, 0
+		}
+		return false, 0
 	}
 	avps, err := avpsWithPath(m, fieldFilter)
 	if err != nil {
 		return false, 0
-	} else if len(avps) == 0 {
-		return false, 0 // No AVPs with field filter ID
 	}
 	for avpIdx, avpVal := range avps { // First match wins due to index
 		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
@@ -249,12 +295,16 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField) (bool, int)
 	return false, 0
 }
 
-func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int) string {
+func composedFieldvalue(m *diam.Message, outTpl utils.RSRFields, avpIdx int, processorVars map[string]string) string {
 	var outVal string
 	for _, rsrTpl := range outTpl {
 		if rsrTpl.IsStatic() {
 			outVal += rsrTpl.ParseValue("")
 		} else {
+			if val, hasIt := processorVars[rsrTpl.Id]; hasIt { // ProcessorVars have priority
+				outVal += rsrTpl.ParseValue(val)
+				continue
+			}
 			matchingAvps, err := avpsWithPath(m, rsrTpl)
 			if err != nil || len(matchingAvps) == 0 {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Cannot find AVP for field template with id: %s, ignoring.", rsrTpl.Id))
@@ -281,12 +331,18 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 		return []byte(valStr), nil
 	case datatype.AddressType:
 		return []byte(net.ParseIP(valStr)), nil
-	case datatype.EnumeratedType, datatype.Integer32Type, datatype.Integer64Type, datatype.Unsigned32Type, datatype.Unsigned64Type:
+	case datatype.EnumeratedType, datatype.Integer32Type, datatype.Unsigned32Type:
 		i, err := strconv.Atoi(valStr)
 		if err != nil {
 			return nil, err
 		}
 		return datatype.Enumerated(i).Serialize(), nil
+	case datatype.Unsigned64Type, datatype.Integer64Type:
+		i, err := strconv.ParseInt(valStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		return datatype.Unsigned64(i).Serialize(), nil
 	case datatype.Float32Type:
 		f, err := strconv.ParseFloat(valStr, 32)
 		if err != nil {
@@ -314,15 +370,13 @@ func serializeAVPValueFromString(dictAVP *dict.AVP, valStr, timezone string) ([]
 	}
 }
 
-var ErrFilterNotPassing = errors.New("Filter not passing")
-
-func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}) (fmtValOut string, err error) {
+func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interface{}, processorVars map[string]string) (fmtValOut string, err error) {
 	var outVal string
 	passAtIndex := -1
 	passedAllFilters := true
 	for _, fldFilter := range cfgFld.FieldFilter {
 		var pass bool
-		if pass, passAtIndex = passesFieldFilter(m, fldFilter); !pass {
+		if pass, passAtIndex = passesFieldFilter(m, fldFilter, processorVars); !pass {
 			passedAllFilters = false
 			break
 		}
@@ -340,18 +394,21 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 	case utils.META_CONSTANT:
 		outVal = cfgFld.Value.Id()
 	case utils.META_HANDLER:
-		if cfgFld.HandlerId == META_CCA_USAGE { // Exception, usage is passed in the dur variable by CCA
-			outVal = strconv.FormatFloat(extraParam.(float64), 'f', -1, 64)
-		} else {
+		switch cfgFld.HandlerId {
+		case META_VALUE_EXPONENT:
+			outVal, err = metaValueExponent(m, cfgFld.Value, 10) // FixMe: add here configured number of decimals
+		case META_SUM:
+			outVal, err = metaSum(m, cfgFld.Value, 10)
+		default:
 			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<Diameter> Ignoring processing of metafunction: %s, error: %s", cfgFld.HandlerId, err.Error()))
 			}
 		}
 	case utils.META_COMPOSED:
-		outVal = composedFieldvalue(m, cfgFld.Value, 0)
+		outVal = composedFieldvalue(m, cfgFld.Value, 0, processorVars)
 	case utils.MetaGrouped: // GroupedAVP
-		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex)
+		outVal = composedFieldvalue(m, cfgFld.Value, passAtIndex, processorVars)
 	}
 	if fmtValOut, err = utils.FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<Diameter> Error when processing field template with tag: %s, error: %s", cfgFld.Tag, err.Error()))
@@ -377,7 +434,7 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr strin
 		}
 	}
 	if dictAVPs[len(path)-1].Data.Type == diam.GroupedAVPType {
-		return errors.New("Last AVP in path needs not to be GroupedAVP")
+		return errors.New("Last AVP in path cannot be GroupedAVP")
 	}
 	var msgAVP *diam.AVP // Keep a reference here towards last AVP
 	lastAVPIdx := len(path) - 1
@@ -388,7 +445,7 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr strin
 			if err != nil {
 				return err
 			}
-			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte)
+			typeVal, err = datatype.Decode(dictAVPs[i].Data.Type, avpValByte) // Check here
 			if err != nil {
 				return err
 			}
@@ -400,7 +457,7 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr strin
 		if i == lastAVPIdx-1 && !appnd {                                                    // last AVP needs to be appended in group
 			avps, _ := m.FindAVPsWithPath(path[:lastAVPIdx], dict.UndefinedVendorID)
 			if len(avps) != 0 { // Group AVP already in the message
-				prevGrpData := avps[0].Data.(*diam.GroupedAVP)
+				prevGrpData := avps[len(avps)-1].Data.(*diam.GroupedAVP) // Take the last avp found to append there
 				prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
 				m.Header.MessageLength += uint32(msgAVP.Len())
 				return nil
@@ -411,8 +468,8 @@ func messageSetAVPsWithPath(m *diam.Message, path []interface{}, avpValStr strin
 	if !appnd { // Not group AVP, replace the previous set one with this one
 		avps, _ := m.FindAVPsWithPath(path, dict.UndefinedVendorID)
 		if len(avps) != 0 { // Group AVP already in the message
-			m.Header.MessageLength -= uint32(avps[0].Len()) // decrease message length since we overwrite
-			*avps[0] = *msgAVP
+			m.Header.MessageLength -= uint32(avps[len(avps)-1].Len()) // decrease message length since we overwrite
+			*avps[len(avps)-1] = *msgAVP
 			m.Header.MessageLength += uint32(msgAVP.Len())
 			return nil
 		}
@@ -556,7 +613,7 @@ func (self *CCR) AsSMGenericEvent(cfgFlds []*config.CfgCdrField) (sessionmanager
 	outMap := make(map[string]string) // work with it so we can append values to keys
 	outMap[utils.EVENT_NAME] = DIAMETER_CCR
 	for _, cfgFld := range cfgFlds {
-		fmtOut, err := fieldOutVal(self.diamMessage, cfgFld, self.debitInterval)
+		fmtOut, err := fieldOutVal(self.diamMessage, cfgFld, self.debitInterval, nil)
 		if err != nil {
 			if err == ErrFilterNotPassing {
 				continue // Do nothing in case of Filter not passing
@@ -621,11 +678,11 @@ func (self *CCA) AsDiameterMessage() *diam.Message {
 }
 
 // SetProcessorAVPs will add AVPs to self.diameterMessage based on template defined in processor.CCAFields
-func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, maxUsage float64) error {
+func (self *CCA) SetProcessorAVPs(reqProcessor *config.DARequestProcessor, processorVars map[string]string) error {
 	for _, cfgFld := range reqProcessor.CCAFields {
-		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, maxUsage)
+		fmtOut, err := fieldOutVal(self.ccrMessage, cfgFld, nil, processorVars)
 		if err == ErrFilterNotPassing { // Field not in or filter not passing, try match in answer
-			fmtOut, err = fieldOutVal(self.diamMessage, cfgFld, maxUsage)
+			fmtOut, err = fieldOutVal(self.diamMessage, cfgFld, nil, processorVars)
 		}
 		if err != nil {
 			if err == ErrFilterNotPassing {
