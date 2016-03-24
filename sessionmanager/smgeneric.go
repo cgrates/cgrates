@@ -117,6 +117,7 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss {
+			s.totalUsage = usage // save final usage as totalUsage
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Ending session: %s, runId: %s", sessionId, s.runId))
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits

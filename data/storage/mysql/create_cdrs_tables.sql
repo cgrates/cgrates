@@ -42,6 +42,7 @@ CREATE TABLE sm_costs (
   cgrid char(40) NOT NULL,
   run_id  varchar(64) NOT NULL,
   cost_source varchar(64) NOT NULL,
+  `usage` DECIMAL(30,9) NOT NULL,
   cost_details text,
   created_at TIMESTAMP,
   deleted_at TIMESTAMP,

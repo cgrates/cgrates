@@ -241,6 +241,7 @@ func (self *SMGSession) saveOperations() error {
 		CgrId:          self.eventStart.GetCgrId(self.timezone),
 		Source:         utils.SESSION_MANAGER_SOURCE,
 		RunId:          self.runId,
+		Usage:          float64(self.totalUsage),
 		CallCost:       firstCC,
 		CheckDuplicate: true,
 	}, &reply)
