@@ -452,6 +452,7 @@ type TBLSMCosts struct {
 	Cgrid       string
 	RunID       string
 	CostSource  string
+	Usage       float64
 	CostDetails string
 	CreatedAt   time.Time
 	DeletedAt   time.Time

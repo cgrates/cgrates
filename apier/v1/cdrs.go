@@ -26,19 +26,19 @@ import (
 )
 
 // Retrieves the callCost out of CGR logDb
-func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.CallCost) error {
+func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.SMCost) error {
 	if attrs.CgrId == "" {
 		return utils.NewErrMandatoryIeMissing("CgrId")
 	}
 	if attrs.RunId == "" {
 		attrs.RunId = utils.META_DEFAULT
 	}
-	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, attrs.RunId); err != nil {
+	if smc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, attrs.RunId); err != nil {
 		return utils.NewErrServerError(err)
-	} else if cc == nil {
+	} else if smc == nil {
 		return utils.ErrNotFound
 	} else {
-		*reply = *cc
+		*reply = *smc
 	}
 	return nil
 }

@@ -19,31 +19,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"log"
 	"testing"
 	"time"
 )
 
-func ATestAccountLock(t *testing.T) {
+func BenchmarkGuard(b *testing.B) {
 	for i := 0; i < 100; i++ {
 		go Guardian.Guard(func() (interface{}, error) {
-			log.Print("first 1")
 			time.Sleep(1 * time.Millisecond)
-			log.Print("end first 1")
 			return 0, nil
 		}, 0, "1")
 		go Guardian.Guard(func() (interface{}, error) {
-			log.Print("first 2")
 			time.Sleep(1 * time.Millisecond)
-			log.Print("end first 2")
 			return 0, nil
 		}, 0, "2")
 		go Guardian.Guard(func() (interface{}, error) {
-			log.Print("second 1")
 			time.Sleep(1 * time.Millisecond)
-			log.Print("end second 1")
 			return 0, nil
 		}, 0, "1")
 	}
-	time.Sleep(10 * time.Second)
+
+}
+
+func BenchmarkGuardian(b *testing.B) {
+	for i := 0; i < 100; i++ {
+		go Guardian.Guard(func() (interface{}, error) {
+			time.Sleep(1 * time.Millisecond)
+			return 0, nil
+		}, 0, "1")
+	}
 }

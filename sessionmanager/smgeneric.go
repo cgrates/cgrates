@@ -117,6 +117,7 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss {
+			s.totalUsage = usage // save final usage as totalUsage
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Ending session: %s, runId: %s", sessionId, s.runId))
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
@@ -333,18 +334,8 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 }
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
-	cdr := gev.AsStoredCdr(self.cgrCfg, self.timezone)
-	if cdr.Usage == 0 {
-		var s *SMGSession
-		for _, s = range self.getSession(gev.GetUUID()) {
-			break
-		}
-		if s != nil {
-			cdr.Usage = s.TotalUsage()
-		}
-	}
 	var reply string
-	if err := self.cdrsrv.ProcessCdr(cdr, &reply); err != nil {
+	if err := self.cdrsrv.ProcessCdr(gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
 		return err
 	}
 	return nil
