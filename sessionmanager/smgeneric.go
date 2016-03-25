@@ -142,8 +142,12 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 // Used when an update will relocate an initial session (eg multiple data streams)
 func (self *SMGeneric) sessionRelocate(sessionID, initialID string) error {
 	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on initialID level
-		if utils.IsSliceMember([]string{sessionID, initialID}, "") {
+		if utils.IsSliceMember([]string{sessionID, initialID}, "") { // Not allowed empty params here
 			return nil, utils.ErrMandatoryIeMissing
+		}
+		ssNew := self.getSession(sessionID) // Already relocated
+		if len(ss) != 0 {
+			return nil, nil
 		}
 		ss := self.getSession(initialID)
 		if len(ss) == 0 { // No need of relocation
@@ -232,6 +236,15 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
+	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
+		err := self.sessionRelocate(gev.GetUUID(), initialID)
+		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
+			err = self.sessionStart(gev, getClientConnId(clnt))
+		}
+		if err != nil {
+			return nilDuration, err
+		}
+	}
 	usage, err := gev.GetUsage(utils.META_DEFAULT)
 	if err != nil {
 		if err != utils.ErrNotFound {
