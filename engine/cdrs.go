@@ -333,7 +333,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) error {
 	if cdr.RequestType == utils.META_NONE {
 		return nil
 	}
-	_, hasLastUsed := cdr.ExtraFields["LastUsed"]
+	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) && (cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()

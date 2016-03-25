@@ -21,6 +21,7 @@ package sessionmanager
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -71,6 +72,18 @@ func (self *SMGeneric) getSessions() map[string][]*SMGSession {
 	self.sessionsMux.Lock()
 	defer self.sessionsMux.Unlock()
 	return self.sessions
+}
+
+func (self *SMGeneric) getSessionIDsForPrefix(prefix string) []string {
+	self.sessionsMux.Lock()
+	defer self.sessionsMux.Unlock()
+	sessionIDs := make([]string, 0)
+	for sessionID := range self.sessions {
+		if strings.HasPrefix(sessionID, prefix) {
+			sessionIDs = append(sessionIDs, sessionID)
+		}
+	}
+	return sessionIDs
 }
 
 // Returns sessions/derived for a specific uuid
@@ -267,10 +280,17 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 		}
 		usage = s.TotalUsage() + lastUsed
 	}
-	if err := self.sessionEnd(gev.GetUUID(), usage); err != nil {
-		return err
+	sessionIDs := []string{gev.GetUUID()}
+	if sessionIDPrefix, err := gev.GetFieldAsString(utils.OriginIDPrefix); err == nil { // OriginIDPrefix is present, OriginID will not be anymore considered
+		sessionIDs = self.getSessionIDsForPrefix(sessionIDPrefix)
 	}
-	return nil
+	var interimError error
+	for _, sessionID := range sessionIDs {
+		if err := self.sessionEnd(sessionID, usage); err != nil {
+			interimError = err // Last error will be the one returned as API result
+		}
+	}
+	return interimError
 }
 
 // Processes one time events (eg: SMS)
