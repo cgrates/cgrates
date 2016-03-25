@@ -33,7 +33,7 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(string) ([]string, error)
+	GetKeysForPrefix(string, bool) ([]string, error)
 }
 
 // Interface for storage providers.
