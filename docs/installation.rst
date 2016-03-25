@@ -27,23 +27,16 @@ After post-install actions are performed, CGRateS will be configured in */etc/cg
 3.2. Using source
 -----------------
 
-After the go environment is installed_ (at least go1.2) and configured_ issue the following commands:
-::
-
-    go get github.com/cgrates/cgrates/...
-
-This command will install the trunk version of CGRateS together with all the necessary dependencies.
-
-For developing CGRateS and switching betwen lts versions we are using the new (experimental) vendor directory feature introduced in go 1.5. In a nutshell all the dependencies are installed and used from a folder named vendor placed in the root of the project.
+For developing CGRateS and switching betwen lts versions we are using the new vendor directory feature introduced in go 1.6. In a nutshell all the dependencies are installed and used from a folder named vendor placed in the root of the project.
 
 To manage this vendor folder we use a tool named glide_ which will download specific versions of the external packages used by CGRateS. To configure the project with glide use the following commands:
 ::
-   export GO15VENDOREXPERIMENT=1 #this should be placed in the rc script of your shell
+   go get github.com/Masterminds/glide
    go get github.com/cgrates/cgrates
    cd $GOPATH/src/github.com/cgrates/cgrates
    glide install
 
-The glide install command will install the external dependencies versions specified in the glide.lock file in the vendor folder. There are different versions for each CGRateS branch, versions that are recorded in the yaml file when the GCRateS releases are made (using glide up command).
+The glide install command will install the external dependencies versions specified in the glide.lock file in the vendor folder. There are different versions for each CGRateS branch, versions that are recorded in the yaml file when the GCRateS releases are made.
 
 Note that the vendor folder should not be registered with the VCS we are using. For more information and command options for use glide_ readme page.
 

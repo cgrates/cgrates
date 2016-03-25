@@ -16,7 +16,9 @@ Available operators:
 - *exp: expired
 - *or: logical or
 - *and: logical and
+- *not: logical not
 - *has: receives a list of elements and checks that the elements are present in the specified field (StringMap type)
+- *rsr: will apply a rsr check to the field (see utils/rsrfield.go)
 
 Equal (*eq) and local and (*and) operators are implicit for shortcuts. In this way:
 
@@ -43,6 +45,7 @@ const (
 	CondEXP = "*exp"
 	CondOR  = "*or"
 	CondAND = "*and"
+	CondNOT = "*not"
 	CondHAS = "*has"
 	CondRSR = "*rsr"
 )
@@ -177,7 +180,7 @@ func (os *operatorSlice) checkStruct(o interface{}) (bool, error) {
 				return true, nil
 			}
 		}
-	case CondAND:
+	case CondAND, CondNOT:
 		accumulator := true
 		for _, cond := range os.slice {
 			check, err := cond.checkStruct(o)
@@ -186,7 +189,11 @@ func (os *operatorSlice) checkStruct(o interface{}) (bool, error) {
 			}
 			accumulator = accumulator && check
 		}
-		return accumulator, nil
+		if os.operator == CondAND {
+			return accumulator, nil
+		} else {
+			return !accumulator, nil
+		}
 	}
 	return false, nil
 }

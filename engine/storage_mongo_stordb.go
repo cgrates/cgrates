@@ -698,16 +698,16 @@ func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	}{at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogCallCost(cgrid, runid, source string, cc *CallCost) error {
-	return ms.db.C(utils.TBLSMCosts).Insert(&SMCost{CGRID: cgrid, RunID: runid, CostSource: source, CostDetails: cc})
+func (ms *MongoStorage) LogCallCost(smc *SMCost) error {
+	return ms.db.C(utils.TBLSMCosts).Insert(smc)
 }
 
-func (ms *MongoStorage) GetCallCostLog(cgrid, runid string) (cc *CallCost, err error) {
+func (ms *MongoStorage) GetCallCostLog(cgrid, runid string) (smc *SMCost, err error) {
 	var result SMCost
 	if err = ms.db.C(utils.TBLSMCosts).Find(bson.M{CGRIDLow: cgrid, RunIDLow: runid}).One(&result); err != nil {
 		return nil, err
 	}
-	return result.CostDetails, nil
+	return &result, nil
 }
 
 func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {

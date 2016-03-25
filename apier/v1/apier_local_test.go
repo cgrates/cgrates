@@ -1294,10 +1294,10 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else {
-		if rcvStats.Destinations != 4 ||
-			rcvStats.RatingPlans != 3 ||
-			rcvStats.RatingProfiles != 3 ||
-			rcvStats.Actions != 6 ||
+		if rcvStats.Destinations != 5 ||
+			rcvStats.RatingPlans != 4 ||
+			rcvStats.RatingProfiles != 4 ||
+			rcvStats.Actions != 7 ||
 			rcvStats.DerivedChargers != 2 {
 			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 		}

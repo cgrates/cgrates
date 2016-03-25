@@ -41,6 +41,7 @@ type CallCostLog struct {
 	CgrId          string
 	Source         string
 	RunId          string
+	Usage          float64 // real usage (not increment rounded)
 	CallCost       *CallCost
 	CheckDuplicate bool
 }
@@ -149,11 +150,11 @@ func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
 			if cc != nil {
 				return nil, utils.ErrExists
 			}
-			return nil, self.cdrDb.LogCallCost(ccl.CgrId, ccl.RunId, ccl.Source, ccl.CallCost)
+			return nil, self.cdrDb.LogCallCost(&SMCost{CGRID: ccl.CgrId, RunID: ccl.RunId, CostSource: ccl.Source, Usage: ccl.Usage, CostDetails: ccl.CallCost})
 		}, 0, ccl.CgrId)
 		return err
 	}
-	return self.cdrDb.LogCallCost(ccl.CgrId, ccl.RunId, ccl.Source, ccl.CallCost)
+	return self.cdrDb.LogCallCost(&SMCost{CGRID: ccl.CgrId, RunID: ccl.RunId, CostSource: ccl.Source, Usage: ccl.Usage, CostDetails: ccl.CallCost})
 }
 
 // Called by rate/re-rate API
@@ -363,12 +364,16 @@ func (self *CdrServer) rateCDR(cdr *CDR) error {
 	if cdr.RequestType == utils.META_NONE {
 		return nil
 	}
-	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) && cdr.Usage != 0 { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
+	_, hasLastUsed := cdr.ExtraFields["LastUsed"]
+	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) && (cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
+		var usage float64
 		for i := 0; i < 4; i++ {
-			qryCC, err = self.cdrDb.GetCallCostLog(cdr.CGRID, cdr.RunID)
+			qrySMC, err := self.cdrDb.GetCallCostLog(cdr.CGRID, cdr.RunID)
 			if err == nil {
+				qryCC = qrySMC.CostDetails
+				usage = qrySMC.Usage
 				break
 			}
 			time.Sleep(delay())
@@ -376,6 +381,9 @@ func (self *CdrServer) rateCDR(cdr *CDR) error {
 		if err != nil && (err == gorm.RecordNotFound || err == mgov2.ErrNotFound) { //calculate CDR as for pseudoprepaid
 			utils.Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", cdr.CGRID, utils.SESSION_MANAGER_SOURCE, cdr.RunID))
 			qryCC, err = self.getCostFromRater(cdr)
+		}
+		if cdr.Usage == 0 {
+			cdr.Usage = time.Duration(usage)
 		}
 
 	} else {

@@ -3,7 +3,11 @@ language: go
 go:
   - 1.6
 
-script: $TRAVIS_BUILD_DIR/test.sh
+install:
+  - go get github.com/Masterminds/glide
+  - glide install
+
+script: go test -v $(glide novendor)
 
 branches:
   only: master

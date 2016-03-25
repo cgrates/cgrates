@@ -228,7 +228,7 @@ func (self SMGenericEvent) GetCdrSource() string {
 func (self SMGenericEvent) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for key, val := range self {
-		primaryFields := append(utils.PrimaryCdrFields, utils.EVENT_NAME, utils.LastUsed)
+		primaryFields := append(utils.PrimaryCdrFields, utils.EVENT_NAME)
 		if utils.IsSliceMember(primaryFields, key) {
 			continue
 		}
@@ -236,6 +236,18 @@ func (self SMGenericEvent) GetExtraFields() map[string]string {
 		extraFields[key] = result
 	}
 	return extraFields
+}
+
+func (self SMGenericEvent) GetFieldAsString(fieldName string) (string, error) {
+	valIf, hasVal := self[fieldName]
+	if !hasVal {
+		return "", utils.ErrNotFound
+	}
+	result, converted := utils.ConvertIfaceToString(valIf)
+	if !converted {
+		return "", utils.ErrNotConvertible
+	}
+	return result, nil
 }
 
 func (self SMGenericEvent) MissingParameter(timezone string) bool {

@@ -119,6 +119,7 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			return nil, nil // Did not find the session so no need to close it anymore
 		}
 		for idx, s := range ss {
+			s.totalUsage = usage // save final usage as totalUsage
 			//utils.Logger.Info(fmt.Sprintf("<SMGeneric> Ending session: %s, runId: %s", sessionId, s.runId))
 			if idx == 0 && s.stopDebit != nil {
 				close(s.stopDebit) // Stop automatic debits
@@ -137,6 +138,27 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 		}
 		return nil, nil
 	}, time.Duration(2)*time.Second, sessionId)
+	return err
+}
+
+// Used when an update will relocate an initial session (eg multiple data streams)
+func (self *SMGeneric) sessionRelocate(sessionID, initialID string) error {
+	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on initialID level
+		if utils.IsSliceMember([]string{sessionID, initialID}, "") {
+			return nil, utils.ErrMandatoryIeMissing
+		}
+		ss := self.getSession(initialID)
+		if len(ss) == 0 { // No need of relocation
+			return nil, utils.ErrNotFound
+		}
+		for i, s := range ss {
+			self.indexSession(sessionID, s)
+			if i == 0 {
+				self.unindexSession(initialID)
+			}
+		}
+		return nil, nil
+	}, time.Duration(2)*time.Second, initialID)
 	return err
 }
 
@@ -172,6 +194,15 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
+		err := self.sessionRelocate(gev.GetUUID(), initialID)
+		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
+			err = self.sessionStart(gev, getClientConnId(clnt))
+		}
+		if err != nil {
+			return nilDuration, err
+		}
+	}
 	evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
 	if err != nil && err != utils.ErrNotFound {
 		return nilDuration, err

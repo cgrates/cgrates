@@ -45,6 +45,7 @@ CREATE TABLE sm_costs (
   cgrid CHAR(40) NOT NULL,
   run_id  VARCHAR(64) NOT NULL,
   cost_source VARCHAR(64) NOT NULL,
+  usage NUMERIC(30,9) NOT NULL,
   cost_details jsonb,
   created_at TIMESTAMP,
   deleted_at TIMESTAMP,

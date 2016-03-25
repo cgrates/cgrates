@@ -33,7 +33,7 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(string) ([]string, error)
+	GetKeysForPrefix(string, bool) ([]string, error)
 }
 
 // Interface for storage providers.
@@ -97,8 +97,8 @@ type AccountingStorage interface {
 type CdrStorage interface {
 	Storage
 	SetCDR(*CDR, bool) error
-	LogCallCost(cgrid, runid, source string, cc *CallCost) error
-	GetCallCostLog(cgrid, runid string) (*CallCost, error)
+	LogCallCost(smc *SMCost) error
+	GetCallCostLog(cgrid, runid string) (*SMCost, error)
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 

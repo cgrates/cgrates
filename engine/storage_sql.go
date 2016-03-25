@@ -55,7 +55,7 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	return nil
 }
 
-func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+func (self *SQLStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 
@@ -569,21 +569,22 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 	return nil
 
 }
-func (self *SQLStorage) LogCallCost(cgrid, runid, source string, cc *CallCost) error {
-	if cc == nil {
+func (self *SQLStorage) LogCallCost(smc *SMCost) error {
+	if smc.CostDetails == nil {
 		return nil
 	}
-	tss, err := json.Marshal(cc)
+	tss, err := json.Marshal(smc.CostDetails)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 		return err
 	}
 	tx := self.db.Begin()
 	cd := &TBLSMCosts{
-		Cgrid:       cgrid,
-		RunID:       runid,
-		CostSource:  source,
+		Cgrid:       smc.CGRID,
+		RunID:       smc.RunID,
+		CostSource:  smc.CostSource,
 		CostDetails: string(tss),
+		Usage:       smc.Usage,
 		CreatedAt:   time.Now(),
 	}
 	if tx.Save(cd).Error != nil { // Check further since error does not properly reflect duplicates here (sql: no rows in result set)
@@ -594,7 +595,7 @@ func (self *SQLStorage) LogCallCost(cgrid, runid, source string, cc *CallCost) e
 	return nil
 }
 
-func (self *SQLStorage) GetCallCostLog(cgrid, runid string) (*CallCost, error) {
+func (self *SQLStorage) GetCallCostLog(cgrid, runid string) (*SMCost, error) {
 	var tpCostDetail TBLSMCosts
 	if err := self.db.Where(&TBLSMCosts{Cgrid: cgrid, RunID: runid}).First(&tpCostDetail).Error; err != nil {
 		return nil, err
@@ -602,11 +603,17 @@ func (self *SQLStorage) GetCallCostLog(cgrid, runid string) (*CallCost, error) {
 	if len(tpCostDetail.CostDetails) == 0 {
 		return nil, nil // No costs returned
 	}
-	var cc CallCost
-	if err := json.Unmarshal([]byte(tpCostDetail.CostDetails), &cc); err != nil {
+	smc := &SMCost{
+		CGRID:       tpCostDetail.Cgrid,
+		RunID:       tpCostDetail.RunID,
+		CostSource:  tpCostDetail.CostSource,
+		Usage:       tpCostDetail.Usage,
+		CostDetails: &CallCost{},
+	}
+	if err := json.Unmarshal([]byte(tpCostDetail.CostDetails), smc.CostDetails); err != nil {
 		return nil, err
 	}
-	return &cc, nil
+	return smc, nil
 }
 
 func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {

@@ -157,5 +157,6 @@ type SMCost struct {
 	CGRID       string
 	RunID       string
 	CostSource  string
+	Usage       float64
 	CostDetails *CallCost
 }
