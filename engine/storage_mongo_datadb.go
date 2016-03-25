@@ -244,8 +244,60 @@ func (ms *MongoStorage) Close() {
 	ms.session.Close()
 }
 
-func (ms *MongoStorage) GetKeysForPrefix(prefix string) ([]string, error) {
-	return nil, nil
+func (ms *MongoStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
+	var category, subject string
+	length := len(utils.DESTINATION_PREFIX)
+	if len(prefix) >= length {
+		category = prefix[:length] // prefix lenght
+		subject = fmt.Sprintf("^%s", prefix[length:])
+	} else {
+		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
+	}
+	var result []string
+	if skipCache {
+		keyResult := struct{ Key string }{}
+		idResult := struct{ Id string }{}
+		switch category {
+		case utils.DESTINATION_PREFIX:
+			iter := ms.db.C(colDst).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.DESTINATION_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.RATING_PLAN_PREFIX:
+			iter := ms.db.C(colRpl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.RATING_PLAN_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.RATING_PROFILE_PREFIX:
+			iter := ms.db.C(colRpf).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+			for iter.Next(&idResult) {
+				result = append(result, utils.RATING_PROFILE_PREFIX+idResult.Id)
+			}
+			return result, nil
+		case utils.ACTION_PREFIX:
+			iter := ms.db.C(colAct).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.ACTION_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.ACTION_PLAN_PREFIX:
+			iter := ms.db.C(colApl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.ACCOUNT_PREFIX:
+			iter := ms.db.C(colAcc).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+			for iter.Next(&idResult) {
+				result = append(result, utils.ACCOUNT_PREFIX+idResult.Id)
+			}
+			return result, nil
+		}
+		return result, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
+	}
+	return cache2go.GetEntriesKeys(prefix), nil
 }
 
 func (ms *MongoStorage) Flush(ignore string) (err error) {
@@ -627,7 +679,7 @@ func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
 		count, err := ms.db.C(colAcc).Find(bson.M{"id": subject}).Count()
 		return count > 0, err
 	}
-	return false, errors.New("Unsupported category in HasData")
+	return false, errors.New("unsupported category in HasData")
 }
 
 func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {

@@ -84,12 +84,15 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.db.Cmd("FLUSHDB").Err
 }
 
-func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
-	r := rs.db.Cmd("KEYS", prefix+"*")
-	if r.Err != nil {
-		return nil, r.Err
+func (rs *RedisStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
+	if skipCache {
+		r := rs.db.Cmd("KEYS", prefix+"*")
+		if r.Err != nil {
+			return nil, r.Err
+		}
+		return r.List()
 	}
-	return r.List()
+	return cache2go.GetEntriesKeys(prefix), nil
 }
 
 func (rs *RedisStorage) CacheRatingAll() error {

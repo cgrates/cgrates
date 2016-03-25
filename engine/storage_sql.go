@@ -55,7 +55,7 @@ func (self *SQLStorage) Flush(scriptsPath string) (err error) {
 	return nil
 }
 
-func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+func (self *SQLStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
 	return nil, utils.ErrNotImplemented
 }
 
