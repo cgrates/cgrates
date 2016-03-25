@@ -626,7 +626,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 			}),
 			diam.NewAVP(29000, avp.Mbit, 2011, &diam.GroupedAVP{ // MC-Information
 				AVP: []*diam.AVP{
-					diam.NewAVP(29001, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
+					diam.NewAVP(29938, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
 					diam.NewAVP(29002, avp.Mbit, 2011, datatype.UTF8String("12928471313847173")), // MC-Service-Id
 					diam.NewAVP(29003, avp.Mbit, 2011, datatype.UTF8String("SPV123456012123")),   // TransparentData
 					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // MC-Information
