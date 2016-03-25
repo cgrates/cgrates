@@ -146,7 +146,7 @@ func (self *SMGeneric) sessionRelocate(sessionID, initialID string) error {
 			return nil, utils.ErrMandatoryIeMissing
 		}
 		ssNew := self.getSession(sessionID) // Already relocated
-		if len(ss) != 0 {
+		if len(ssNew) != 0 {
 			return nil, nil
 		}
 		ss := self.getSession(initialID)
@@ -242,7 +242,7 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 			err = self.sessionStart(gev, getClientConnId(clnt))
 		}
 		if err != nil {
-			return nilDuration, err
+			return err
 		}
 	}
 	usage, err := gev.GetUsage(utils.META_DEFAULT)
