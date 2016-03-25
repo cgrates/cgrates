@@ -191,3 +191,19 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcrReq, lcrReq)
 	}
 }
+
+func TestSMGenericEventGetFieldAsString(t *testing.T) {
+	smGev := SMGenericEvent{}
+	smGev[utils.EVENT_NAME] = "TEST_EVENT"
+	smGev[utils.TOR] = utils.VOICE
+	smGev[utils.ACCID] = "12345"
+	smGev[utils.DIRECTION] = utils.OUT
+	smGev[utils.ACCOUNT] = "account1"
+	smGev[utils.SUBJECT] = "subject1"
+	eFldVal := utils.VOICE
+	if strVal, err := smGev.GetFieldAsString(utils.TOR); err != nil {
+		t.Error(err)
+	} else if strVal != eFldVal {
+		t.Errorf("Expecting: %s, received: %s", eFldVal, strVal)
+	}
+}

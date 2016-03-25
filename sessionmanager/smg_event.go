@@ -238,6 +238,18 @@ func (self SMGenericEvent) GetExtraFields() map[string]string {
 	return extraFields
 }
 
+func (self SMGenericEvent) GetFieldAsString(fieldName string) (string, error) {
+	valIf, hasVal := self[fieldName]
+	if !hasVal {
+		return "", utils.ErrNotFound
+	}
+	result, converted := utils.ConvertIfaceToString(valIf)
+	if !converted {
+		return "", utils.ErrNotConvertible
+	}
+	return result, nil
+}
+
 func (self SMGenericEvent) MissingParameter(timezone string) bool {
 	switch self.GetName() {
 	case utils.CGR_AUTHORIZATION:

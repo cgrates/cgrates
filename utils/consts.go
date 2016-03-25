@@ -31,6 +31,7 @@ var (
 	ErrAccountDisabled         = errors.New("ACCOUNT_DISABLED")
 	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
 	ErrInsufficientCredit      = errors.New("INSUFFICENT_CREDIT")
+	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
 )
 
 const (
@@ -113,6 +114,7 @@ const (
 	TOR                          = "ToR"
 	ORDERID                      = "OrderID"
 	ACCID                        = "OriginID"
+	InitialOriginID              = "InitialOriginID"
 	CDRSOURCE                    = "Source"
 	CDRHOST                      = "OriginHost"
 	REQTYPE                      = "RequestType"
