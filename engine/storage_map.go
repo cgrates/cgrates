@@ -782,15 +782,15 @@ func (ms *MapStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 	return
 }
 
-func (ms *MapStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
-	result, err := ms.ms.Marshal(cc)
-	ms.dict[utils.LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid] = result
+func (ms *MapStorage) SetSMCost(smCost *SMCost) error {
+	result, err := ms.ms.Marshal(smCost)
+	ms.dict[utils.LOG_CALL_COST_PREFIX+smCost.CostSource+smCost.RunID+"_"+smCost.CGRID] = result
 	return err
 }
 
-func (ms *MapStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
+func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID string) (smCost *SMCost, err error) {
 	if values, ok := ms.dict[utils.LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid]; ok {
-		err = ms.ms.Unmarshal(values, &cc)
+		err = ms.ms.Unmarshal(values, &smCost)
 	} else {
 		return nil, utils.ErrNotFound
 	}

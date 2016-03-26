@@ -512,26 +512,26 @@ func (rs *Responder) ProcessCdr(cdr *CDR, reply *string) error {
 	return nil
 }
 
-func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
-	if item, err := rs.getCache().Get(utils.LOG_CALL_COST_CACHE_PREFIX + ccl.CgrId); err == nil && item != nil {
+func (rs *Responder) StoreSMCost(attrs AttrCDRSStoreSMCost, reply *string) error {
+	if item, err := rs.getCache().Get(utils.LOG_CALL_COST_CACHE_PREFIX + attrs.SMCost.CGRID); err == nil && item != nil {
 		*reply = item.Value.(string)
 		return item.Err
 	}
 	if rs.CdrSrv == nil {
 		err := errors.New("CDR_SERVER_NOT_RUNNING")
-		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
+		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.SMCost.CGRID, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
 	}
-	if err := rs.CdrSrv.LogCallCost(ccl); err != nil {
-		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
+	if err := rs.CdrSrv.StoreSMCost(attrs.SMCost, attrs.CheckDuplicate); err != nil {
+		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.SMCost.CGRID, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
 	}
 	*reply = utils.OK
-	rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.SMCost.CGRID, &cache2go.CacheItem{
 		Value: utils.OK,
 	})
 	return nil
@@ -740,7 +740,7 @@ type Connector interface {
 	GetDerivedMaxSessionTime(*CDR, *float64) error
 	GetSessionRuns(*CDR, *[]*SessionRun) error
 	ProcessCdr(*CDR, *string) error
-	LogCallCost(*CallCostLog, *string) error
+	StoreSMCost(AttrCDRSStoreSMCost, *string) error
 	GetLCR(*AttrGetLcr, *LCRCost) error
 	GetTimeout(int, *time.Duration) error
 }
@@ -790,8 +790,8 @@ func (rcc *RPCClientConnector) ProcessCdr(cdr *CDR, reply *string) error {
 	return rcc.Client.Call("CdrsV1.ProcessCdr", cdr, reply)
 }
 
-func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *string) error {
-	return rcc.Client.Call("CdrsV1.LogCallCost", ccl, reply)
+func (rcc *RPCClientConnector) StoreSMCost(attrs AttrCDRSStoreSMCost, reply *string) error {
+	return rcc.Client.Call("CdrsV1.StoreSMCost", attrs, reply)
 }
 
 func (rcc *RPCClientConnector) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
@@ -1005,15 +1005,14 @@ func (cp ConnectorPool) ProcessCdr(cdr *CDR, reply *string) error {
 	return utils.ErrTimedOut
 }
 
-func (cp ConnectorPool) LogCallCost(ccl *CallCostLog, reply *string) error {
+func (cp ConnectorPool) StoreSMCost(attrs AttrCDRSStoreSMCost, reply *string) error {
 	for _, con := range cp {
 		c := make(chan error, 1)
 		var r string
 
 		var timeout time.Duration
 		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.LogCallCost(ccl, &r) }()
+		go func() { c <- con.StoreSMCost(attrs, &r) }()
 		select {
 		case err := <-c:
 			*reply = r

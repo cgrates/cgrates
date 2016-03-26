@@ -569,7 +569,7 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 	return nil
 
 }
-func (self *SQLStorage) LogCallCost(smc *SMCost) error {
+func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
 	}
@@ -582,6 +582,8 @@ func (self *SQLStorage) LogCallCost(smc *SMCost) error {
 	cd := &TBLSMCosts{
 		Cgrid:       smc.CGRID,
 		RunID:       smc.RunID,
+		OriginHost:  smc.OriginHost,
+		OriginID:    smc.OriginID,
 		CostSource:  smc.CostSource,
 		CostDetails: string(tss),
 		Usage:       smc.Usage,
@@ -595,9 +597,13 @@ func (self *SQLStorage) LogCallCost(smc *SMCost) error {
 	return nil
 }
 
-func (self *SQLStorage) GetCallCostLog(cgrid, runid string) (*SMCost, error) {
+func (self *SQLStorage) GetSMCost(cgrid, runid, originHost, originIDPrefix string) (*SMCost, error) {
 	var tpCostDetail TBLSMCosts
-	if err := self.db.Where(&TBLSMCosts{Cgrid: cgrid, RunID: runid}).First(&tpCostDetail).Error; err != nil {
+	if originIDPrefix != "" {
+		if err := self.db.Where(&TBLSMCosts{OriginHost: originHost, OriginID: originIDPrefix, RunID: runid}).First(&tpCostDetail).Error; err != nil { // FixMe with originPrefix
+			return nil, err
+		}
+	} else if err := self.db.Where(&TBLSMCosts{Cgrid: cgrid, RunID: runid}).First(&tpCostDetail).Error; err != nil {
 		return nil, err
 	}
 	if len(tpCostDetail.CostDetails) == 0 {

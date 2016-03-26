@@ -97,8 +97,8 @@ type AccountingStorage interface {
 type CdrStorage interface {
 	Storage
 	SetCDR(*CDR, bool) error
-	LogCallCost(smc *SMCost) error
-	GetCallCostLog(cgrid, runid string) (*SMCost, error)
+	SetSMCost(smc *SMCost) error
+	GetSMCost(cgrid, runid, originHost, originIDPrfx string) (*SMCost, error)
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 

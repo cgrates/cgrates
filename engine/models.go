@@ -451,6 +451,8 @@ type TBLSMCosts struct {
 	ID          int64
 	Cgrid       string
 	RunID       string
+	OriginHost  string
+	OriginID    string
 	CostSource  string
 	Usage       float64
 	CostDetails string

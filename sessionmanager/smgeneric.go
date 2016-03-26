@@ -379,13 +379,15 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 		}
 
 		var reply string
-		if err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
-			CgrId:          gev.GetCgrId(self.timezone),
-			Source:         utils.SESSION_MANAGER_SOURCE,
-			RunId:          sR.DerivedCharger.RunID,
-			CallCost:       cc,
-			CheckDuplicate: true,
-		}, &reply); err != nil && err != utils.ErrExists {
+		smCost := &engine.SMCost{
+			CGRID:       gev.GetCgrId(self.timezone),
+			CostSource:  utils.SESSION_MANAGER_SOURCE,
+			RunID:       sR.DerivedCharger.RunID,
+			OriginHost:  gev.GetOriginatorIP(utils.META_DEFAULT),
+			OriginID:    gev.GetUUID(),
+			CostDetails: cc,
+		}
+		if err := self.cdrsrv.StoreSMCost(engine.AttrCDRSStoreSMCost{SMCost: smCost, CheckDuplicate: true}, &reply); err != nil && err != utils.ErrExists {
 			withErrors = true
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save CC: %+v, RunID: %s error: %s", cc, sR.DerivedCharger.RunID, err.Error()))
 		}

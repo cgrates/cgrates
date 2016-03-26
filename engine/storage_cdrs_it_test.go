@@ -222,10 +222,11 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		},
 		TOR: utils.VOICE,
 	}
-	if err := cdrStorage.LogCallCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", RunID: utils.META_DEFAULT, CostSource: utils.UNIT_TEST, CostDetails: cc}); err != nil {
+	if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", RunID: utils.META_DEFAULT, OriginHost: "localhost", OriginID: "12345",
+		CostSource: utils.UNIT_TEST, CostDetails: cc}); err != nil {
 		return err
 	}
-	if rcvSMC, err := cdrStorage.GetCallCostLog("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT); err != nil {
+	if rcvSMC, err := cdrStorage.GetSMCost("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT, "", ""); err != nil {
 		return err
 	} else if len(cc.Timespans) != len(rcvSMC.CostDetails.Timespans) { // cc.Timespans[0].RateInterval.Rating.Rates[0], rcvCC.Timespans[0].RateInterval.Rating.Rates[0])
 		return fmt.Errorf("Expecting: %+v, received: %+s", cc, utils.ToIJSON(rcvSMC))

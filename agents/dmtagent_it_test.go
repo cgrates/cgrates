@@ -242,7 +242,7 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -286,7 +286,7 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -325,7 +325,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -363,7 +363,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if msg == nil {
 		t.Fatal("No answer to CCR terminate received")

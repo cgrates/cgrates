@@ -59,6 +59,8 @@ var (
 	CGRIDLow           = strings.ToLower(utils.CGRID)
 	RunIDLow           = strings.ToLower(utils.MEDI_RUNID)
 	OrderIDLow         = strings.ToLower(utils.ORDERID)
+	OriginHostLow      = strings.ToLower(utils.CDRHOST)
+	OriginIDLow        = strings.ToLower(utils.ACCID)
 	ToRLow             = strings.ToLower(utils.TOR)
 	CDRHostLow         = strings.ToLower(utils.CDRHOST)
 	CDRSourceLow       = strings.ToLower(utils.CDRSOURCE)
@@ -236,6 +238,26 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*
 		if err = ndb.C(utils.TBL_CDRS).EnsureIndex(index); err != nil {
 			return nil, err
 		}
+	}
+	index = mgo.Index{
+		Key:        []string{CGRIDLow, RunIDLow},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
+		return nil, err
+	}
+	index = mgo.Index{
+		Key:        []string{OriginHostLow, OriginIDLow},
+		Unique:     false,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
+		return nil, err
 	}
 	return &MongoStorage{db: ndb, session: session, ms: NewCodecMsgpackMarshaler()}, err
 }

@@ -698,13 +698,17 @@ func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	}{at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogCallCost(smc *SMCost) error {
+func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 	return ms.db.C(utils.TBLSMCosts).Insert(smc)
 }
 
-func (ms *MongoStorage) GetCallCostLog(cgrid, runid string) (smc *SMCost, err error) {
+func (ms *MongoStorage) GetSMCost(cgrid, runid, originHost, originIDPrefix string) (smc *SMCost, err error) {
 	var result SMCost
-	if err = ms.db.C(utils.TBLSMCosts).Find(bson.M{CGRIDLow: cgrid, RunIDLow: runid}).One(&result); err != nil {
+	if originIDPrefix != "" {
+		if err = ms.db.C(utils.TBLSMCosts).Find(bson.M{OriginHostLow: originHost, OriginIDLow: originIDPrefix, RunIDLow: runid}).One(&result); err != nil { // FixMe for prefix
+			return nil, err
+		}
+	} else if err = ms.db.C(utils.TBLSMCosts).Find(bson.M{CGRIDLow: cgrid, RunIDLow: runid}).One(&result); err != nil {
 		return nil, err
 	}
 	return &result, nil
