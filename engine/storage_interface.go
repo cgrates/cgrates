@@ -98,7 +98,7 @@ type CdrStorage interface {
 	Storage
 	SetCDR(*CDR, bool) error
 	SetSMCost(smc *SMCost) error
-	GetSMCost(cgrid, runid, originHost, originIDPrfx string) (*SMCost, error)
+	GetSMCosts(cgrid, runid, originHost, originIDPrfx string) ([]*SMCost, error)
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 

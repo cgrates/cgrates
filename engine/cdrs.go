@@ -117,11 +117,11 @@ func (self *CdrServer) StoreSMCost(smCost *SMCost, checkDuplicate bool) error {
 	}
 	if checkDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
-			cc, err := self.cdrDb.GetSMCost(smCost.CGRID, smCost.RunID, "", "")
-			if err != nil && err != gorm.RecordNotFound && err != mgov2.ErrNotFound {
+			smCosts, err := self.cdrDb.GetSMCosts(smCost.CGRID, smCost.RunID, "", "")
+			if err != nil {
 				return nil, err
 			}
-			if cc != nil {
+			if len(smCosts) != 0 {
 				return nil, utils.ErrExists
 			}
 			return nil, self.cdrDb.SetSMCost(smCost)
@@ -343,10 +343,10 @@ func (self *CdrServer) rateCDR(cdr *CDR) error {
 		delay := utils.Fib()
 		var usage float64
 		for i := 0; i < 4; i++ {
-			qrySMC, err := self.cdrDb.GetSMCost(cdr.CGRID, cdr.RunID, cdr.OriginHost, cdr.ExtraFields[utils.OriginIDPrefix])
-			if err == nil {
-				qryCC = qrySMC.CostDetails
-				usage = qrySMC.Usage
+			smCosts, err := self.cdrDb.GetSMCosts(cdr.CGRID, cdr.RunID, cdr.OriginHost, cdr.ExtraFields[utils.OriginIDPrefix])
+			if err == nil && len(smCosts) != 0 {
+				qryCC = smCosts[0].CostDetails
+				usage = smCosts[0].Usage
 				break
 			}
 			time.Sleep(delay())

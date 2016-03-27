@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"path"
-	//"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -226,10 +227,24 @@ func testSMCosts(cfg *config.CGRConfig) error {
 		CostSource: utils.UNIT_TEST, CostDetails: cc}); err != nil {
 		return err
 	}
-	if rcvSMC, err := cdrStorage.GetSMCost("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT, "", ""); err != nil {
+	if rcvSMC, err := cdrStorage.GetSMCosts("164b0422fdc6a5117031b427439482c6a4f90e41", utils.META_DEFAULT, "", ""); err != nil {
 		return err
-	} else if len(cc.Timespans) != len(rcvSMC.CostDetails.Timespans) { // cc.Timespans[0].RateInterval.Rating.Rates[0], rcvCC.Timespans[0].RateInterval.Rating.Rates[0])
-		return fmt.Errorf("Expecting: %+v, received: %+s", cc, utils.ToIJSON(rcvSMC))
+	} else if len(rcvSMC) == 0 {
+		return errors.New("No SMCosts received")
+	} else if len(cc.Timespans) != len(rcvSMC[0].CostDetails.Timespans) { // cc.Timespans[0].RateInterval.Rating.Rates[0], rcvCC.Timespans[0].RateInterval.Rating.Rates[0])
+		return fmt.Errorf("Expecting: %+v, received: %+s", cc, utils.ToIJSON(rcvSMC[0]))
+	}
+	// Test query per prefix
+	for i := 0; i < 3; i++ {
+		if err := cdrStorage.SetSMCost(&SMCost{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e5" + strconv.Itoa(i), RunID: utils.META_DEFAULT, OriginHost: "localhost", OriginID: "abc" + strconv.Itoa(i),
+			CostSource: utils.UNIT_TEST, CostDetails: cc}); err != nil {
+			return err
+		}
+	}
+	if rcvSMC, err := cdrStorage.GetSMCosts("", utils.META_DEFAULT, "localhost", "abc"); err != nil {
+		return err
+	} else if len(rcvSMC) != 3 {
+		return fmt.Errorf("Expecting 3, received: %d", len(rcvSMC))
 	}
 	return nil
 }

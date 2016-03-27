@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 	"time"
@@ -702,16 +703,21 @@ func (ms *MongoStorage) SetSMCost(smc *SMCost) error {
 	return ms.db.C(utils.TBLSMCosts).Insert(smc)
 }
 
-func (ms *MongoStorage) GetSMCost(cgrid, runid, originHost, originIDPrefix string) (smc *SMCost, err error) {
-	var result SMCost
+func (ms *MongoStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) (smcs []*SMCost, err error) {
+	filter := bson.M{CGRIDLow: cgrid, RunIDLow: runid}
 	if originIDPrefix != "" {
-		if err = ms.db.C(utils.TBLSMCosts).Find(bson.M{OriginHostLow: originHost, OriginIDLow: originIDPrefix, RunIDLow: runid}).One(&result); err != nil { // FixMe for prefix
-			return nil, err
-		}
-	} else if err = ms.db.C(utils.TBLSMCosts).Find(bson.M{CGRIDLow: cgrid, RunIDLow: runid}).One(&result); err != nil {
+		filter = bson.M{OriginIDLow: bson.M{"$regex": bson.RegEx{Pattern: fmt.Sprintf("^%s", originIDPrefix)}}, OriginHostLow: originHost, RunIDLow: runid}
+	}
+	// Execute query
+	iter := ms.db.C(utils.TBLSMCosts).Find(filter).Iter()
+	var smCost SMCost
+	for iter.Next(&smCost) {
+		smcs = append(smcs, &smCost)
+	}
+	if err := iter.Err(); err != nil {
 		return nil, err
 	}
-	return &result, nil
+	return smcs, nil
 }
 
 func (ms *MongoStorage) SetCDR(cdr *CDR, allowUpdate bool) (err error) {
