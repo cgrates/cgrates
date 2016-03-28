@@ -21,6 +21,7 @@ package sessionmanager
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -71,6 +72,18 @@ func (self *SMGeneric) getSessions() map[string][]*SMGSession {
 	self.sessionsMux.Lock()
 	defer self.sessionsMux.Unlock()
 	return self.sessions
+}
+
+func (self *SMGeneric) getSessionIDsForPrefix(prefix string) []string {
+	self.sessionsMux.Lock()
+	defer self.sessionsMux.Unlock()
+	sessionIDs := make([]string, 0)
+	for sessionID := range self.sessions {
+		if strings.HasPrefix(sessionID, prefix) {
+			sessionIDs = append(sessionIDs, sessionID)
+		}
+	}
+	return sessionIDs
 }
 
 // Returns sessions/derived for a specific uuid
@@ -142,8 +155,12 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 // Used when an update will relocate an initial session (eg multiple data streams)
 func (self *SMGeneric) sessionRelocate(sessionID, initialID string) error {
 	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on initialID level
-		if utils.IsSliceMember([]string{sessionID, initialID}, "") {
+		if utils.IsSliceMember([]string{sessionID, initialID}, "") { // Not allowed empty params here
 			return nil, utils.ErrMandatoryIeMissing
+		}
+		ssNew := self.getSession(sessionID) // Already relocated
+		if len(ssNew) != 0 {
+			return nil, nil
 		}
 		ss := self.getSession(initialID)
 		if len(ss) == 0 { // No need of relocation
@@ -232,6 +249,15 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
+	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
+		err := self.sessionRelocate(gev.GetUUID(), initialID)
+		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
+			err = self.sessionStart(gev, getClientConnId(clnt))
+		}
+		if err != nil {
+			return err
+		}
+	}
 	usage, err := gev.GetUsage(utils.META_DEFAULT)
 	if err != nil {
 		if err != utils.ErrNotFound {
@@ -254,10 +280,17 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 		}
 		usage = s.TotalUsage() + lastUsed
 	}
-	if err := self.sessionEnd(gev.GetUUID(), usage); err != nil {
-		return err
+	sessionIDs := []string{gev.GetUUID()}
+	if sessionIDPrefix, err := gev.GetFieldAsString(utils.OriginIDPrefix); err == nil { // OriginIDPrefix is present, OriginID will not be anymore considered
+		sessionIDs = self.getSessionIDsForPrefix(sessionIDPrefix)
 	}
-	return nil
+	var interimError error
+	for _, sessionID := range sessionIDs {
+		if err := self.sessionEnd(sessionID, usage); err != nil {
+			interimError = err // Last error will be the one returned as API result
+		}
+	}
+	return interimError
 }
 
 // Processes one time events (eg: SMS)
@@ -346,13 +379,15 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 		}
 
 		var reply string
-		if err := self.cdrsrv.LogCallCost(&engine.CallCostLog{
-			CgrId:          gev.GetCgrId(self.timezone),
-			Source:         utils.SESSION_MANAGER_SOURCE,
-			RunId:          sR.DerivedCharger.RunID,
-			CallCost:       cc,
-			CheckDuplicate: true,
-		}, &reply); err != nil && err != utils.ErrExists {
+		smCost := &engine.SMCost{
+			CGRID:       gev.GetCgrId(self.timezone),
+			CostSource:  utils.SESSION_MANAGER_SOURCE,
+			RunID:       sR.DerivedCharger.RunID,
+			OriginHost:  gev.GetOriginatorIP(utils.META_DEFAULT),
+			OriginID:    gev.GetUUID(),
+			CostDetails: cc,
+		}
+		if err := self.cdrsrv.StoreSMCost(engine.AttrCDRSStoreSMCost{SMCost: smCost, CheckDuplicate: true}, &reply); err != nil && err != utils.ErrExists {
 			withErrors = true
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save CC: %+v, RunID: %s error: %s", cc, sR.DerivedCharger.RunID, err.Error()))
 		}

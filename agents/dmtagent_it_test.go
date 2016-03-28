@@ -242,7 +242,7 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -286,7 +286,7 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -325,7 +325,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -363,7 +363,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if msg == nil {
 		t.Fatal("No answer to CCR terminate received")
@@ -626,7 +626,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 			}),
 			diam.NewAVP(29000, avp.Mbit, 2011, &diam.GroupedAVP{ // MC-Information
 				AVP: []*diam.AVP{
-					diam.NewAVP(29001, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
+					diam.NewAVP(29938, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
 					diam.NewAVP(29002, avp.Mbit, 2011, datatype.UTF8String("12928471313847173")), // MC-Service-Id
 					diam.NewAVP(29003, avp.Mbit, 2011, datatype.UTF8String("SPV123456012123")),   // TransparentData
 					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // MC-Information

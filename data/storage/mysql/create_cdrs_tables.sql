@@ -41,6 +41,8 @@ CREATE TABLE sm_costs (
   id int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
   run_id  varchar(64) NOT NULL,
+  origin_host varchar(64) NOT NULL,
+  origin_id varchar(64) NOT NULL,
   cost_source varchar(64) NOT NULL,
   `usage` DECIMAL(30,9) NOT NULL,
   cost_details text,
@@ -48,5 +50,6 @@ CREATE TABLE sm_costs (
   deleted_at TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY costid (cgrid,run_id),
+  KEY origin_idx (origin_host, origin_id),
   KEY deleted_at_idx (deleted_at)
 );

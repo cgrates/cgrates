@@ -115,6 +115,7 @@ const (
 	ORDERID                      = "OrderID"
 	ACCID                        = "OriginID"
 	InitialOriginID              = "InitialOriginID"
+	OriginIDPrefix               = "OriginIDPrefix"
 	CDRSOURCE                    = "Source"
 	CDRHOST                      = "OriginHost"
 	REQTYPE                      = "RequestType"

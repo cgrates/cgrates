@@ -1359,7 +1359,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 	}
 	attrs.CgrId = "dummyid"
 	attrs.RunId = "default"
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != "SERVER_ERROR: record not found" {
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got:", err)
 	}
 }

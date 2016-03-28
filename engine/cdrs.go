@@ -108,23 +108,27 @@ func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 }
 
 // RPC method, used to log callcosts to db
-func (self *CdrServer) LogCallCost(ccl *CallCostLog) error {
-	ccl.CallCost.UpdateCost()       // make sure the total cost reflect the increments
-	ccl.CallCost.UpdateRatedUsage() // make sure rated usage is updated
-	if ccl.CheckDuplicate {
+func (self *CdrServer) StoreSMCost(smCost *SMCost, checkDuplicate bool) error {
+	smCost.CostDetails.UpdateCost()        // make sure the total cost reflect the increments
+	smCost.CostDetails.UpdateRatedUsage()  // make sure rated usage is updated
+	lockKey := smCost.CGRID + smCost.RunID // Will lock on this ID
+	if smCost.CGRID == "" && smCost.OriginID != "" {
+		lockKey = smCost.OriginHost + smCost.OriginID
+	}
+	if checkDuplicate {
 		_, err := self.guard.Guard(func() (interface{}, error) {
-			cc, err := self.cdrDb.GetCallCostLog(ccl.CgrId, ccl.RunId)
-			if err != nil && err != gorm.RecordNotFound && err != mgov2.ErrNotFound {
+			smCosts, err := self.cdrDb.GetSMCosts(smCost.CGRID, smCost.RunID, "", "")
+			if err != nil {
 				return nil, err
 			}
-			if cc != nil {
+			if len(smCosts) != 0 {
 				return nil, utils.ErrExists
 			}
-			return nil, self.cdrDb.LogCallCost(&SMCost{CGRID: ccl.CgrId, RunID: ccl.RunId, CostSource: ccl.Source, Usage: ccl.Usage, CostDetails: ccl.CallCost})
-		}, 0, ccl.CgrId)
+			return nil, self.cdrDb.SetSMCost(smCost)
+		}, 0, lockKey) // FixMe: Possible deadlock with Guard from SMG session close()
 		return err
 	}
-	return self.cdrDb.LogCallCost(&SMCost{CGRID: ccl.CgrId, RunID: ccl.RunId, CostSource: ccl.Source, Usage: ccl.Usage, CostDetails: ccl.CallCost})
+	return self.cdrDb.SetSMCost(smCost)
 }
 
 // Called by rate/re-rate API
@@ -333,16 +337,16 @@ func (self *CdrServer) rateCDR(cdr *CDR) error {
 	if cdr.RequestType == utils.META_NONE {
 		return nil
 	}
-	_, hasLastUsed := cdr.ExtraFields["LastUsed"]
+	_, hasLastUsed := cdr.ExtraFields[utils.LastUsed]
 	if utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, cdr.RequestType) && (cdr.Usage != 0 || hasLastUsed) { // ToDo: Get rid of PREPAID as soon as we don't want to support it backwards
 		// Should be previously calculated and stored in DB
 		delay := utils.Fib()
 		var usage float64
 		for i := 0; i < 4; i++ {
-			qrySMC, err := self.cdrDb.GetCallCostLog(cdr.CGRID, cdr.RunID)
-			if err == nil {
-				qryCC = qrySMC.CostDetails
-				usage = qrySMC.Usage
+			smCosts, err := self.cdrDb.GetSMCosts(cdr.CGRID, cdr.RunID, cdr.OriginHost, cdr.ExtraFields[utils.OriginIDPrefix])
+			if err == nil && len(smCosts) != 0 {
+				qryCC = smCosts[0].CostDetails
+				usage = smCosts[0].Usage
 				break
 			}
 			time.Sleep(delay())

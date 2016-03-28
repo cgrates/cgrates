@@ -569,7 +569,7 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 	return nil
 
 }
-func (self *SQLStorage) LogCallCost(smc *SMCost) error {
+func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
 	}
@@ -582,6 +582,8 @@ func (self *SQLStorage) LogCallCost(smc *SMCost) error {
 	cd := &TBLSMCosts{
 		Cgrid:       smc.CGRID,
 		RunID:       smc.RunID,
+		OriginHost:  smc.OriginHost,
+		OriginID:    smc.OriginID,
 		CostSource:  smc.CostSource,
 		CostDetails: string(tss),
 		Usage:       smc.Usage,
@@ -595,25 +597,35 @@ func (self *SQLStorage) LogCallCost(smc *SMCost) error {
 	return nil
 }
 
-func (self *SQLStorage) GetCallCostLog(cgrid, runid string) (*SMCost, error) {
-	var tpCostDetail TBLSMCosts
-	if err := self.db.Where(&TBLSMCosts{Cgrid: cgrid, RunID: runid}).First(&tpCostDetail).Error; err != nil {
+// GetSMCosts is used to retrieve one or multiple SMCosts based on filter
+func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) ([]*SMCost, error) {
+	var smCosts []*SMCost
+	q := self.db.Where(&TBLSMCosts{Cgrid: cgrid, RunID: runid})
+	if originIDPrefix != "" {
+		q = self.db.Where(&TBLSMCosts{OriginHost: originHost, RunID: runid}).Where(fmt.Sprintf("origin_id LIKE '%s%%'", originIDPrefix))
+	}
+	results := make([]*TBLSMCosts, 0)
+	if err := q.Find(&results).Error; err != nil {
 		return nil, err
 	}
-	if len(tpCostDetail.CostDetails) == 0 {
-		return nil, nil // No costs returned
+	for _, result := range results {
+		if len(result.CostDetails) == 0 {
+			continue
+		}
+		smc := &SMCost{
+			CGRID:       result.Cgrid,
+			RunID:       result.RunID,
+			CostSource:  result.CostSource,
+			Usage:       result.Usage,
+			CostDetails: &CallCost{},
+		}
+		if err := json.Unmarshal([]byte(result.CostDetails), smc.CostDetails); err != nil {
+			return nil, err
+		}
+		smCosts = append(smCosts, smc)
 	}
-	smc := &SMCost{
-		CGRID:       tpCostDetail.Cgrid,
-		RunID:       tpCostDetail.RunID,
-		CostSource:  tpCostDetail.CostSource,
-		Usage:       tpCostDetail.Usage,
-		CostDetails: &CallCost{},
-	}
-	if err := json.Unmarshal([]byte(tpCostDetail.CostDetails), smc.CostDetails); err != nil {
-		return nil, err
-	}
-	return smc, nil
+
+	return smCosts, nil
 }
 
 func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {

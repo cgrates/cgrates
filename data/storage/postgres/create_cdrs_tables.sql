@@ -44,6 +44,8 @@ CREATE TABLE sm_costs (
   id SERIAL PRIMARY KEY,
   cgrid CHAR(40) NOT NULL,
   run_id  VARCHAR(64) NOT NULL,
+  origin_host VARCHAR(64) NOT NULL,
+  origin_id VARCHAR(64) NOT NULL,
   cost_source VARCHAR(64) NOT NULL,
   usage NUMERIC(30,9) NOT NULL,
   cost_details jsonb,
@@ -51,5 +53,10 @@ CREATE TABLE sm_costs (
   deleted_at TIMESTAMP,
   UNIQUE (cgrid, run_id)
 );
+DROP INDEX IF EXISTS cgrid_smcost_idx;
+CREATE INDEX cgrid_smcost_idx ON sm_costs (cgrid, run_id);
+DROP INDEX IF EXISTS origin_smcost_idx;
+CREATE INDEX origin_smcost_idx ON sm_costs (origin_host, origin_id);
 DROP INDEX IF EXISTS deleted_at_smcost_idx;
 CREATE INDEX deleted_at_smcost_idx ON sm_costs (deleted_at);
+
