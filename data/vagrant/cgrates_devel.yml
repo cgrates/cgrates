@@ -24,52 +24,61 @@
     - name: install dependency
       apt: pkg={{ item }} update_cache=yes state=latest
       with_items:
-        - git        
+        - git
         - mercurial
         - redis-server
-        - mysql-server        
+        - mysql-server
         - postgresql-9.4
         - mongodb-org
         - freeswitch-meta-vanilla
         - freeswitch-mod-json-cdr
-        - libyuv-dev 
+        - libyuv-dev
         - python-mysqldb
+        - python-pymongo
 
     - name: update mysql root password for root account
       mysql_user: name=root host=localhost password={{ root_db_password }} state=present
 
     - name: copy .my.cnf
       template: src=my.cnf dest=/root/.my.cnf mode=0600
-    
-- hosts: all    
+
+- hosts: all
   vars:
     root_db_password: CGRateS.org
     go_version: 1.6
-  
+
   tasks:
     - name: create cgrates path
       file: path=/home/vagrant/code/src/github.com/cgrates state=directory
 
     - name: get golang
-      unarchive: src=https://storage.googleapis.com/golang/go{{ go_version }}.linux-amd64.tar.gz dest=~/ creates=~/go copy=no     
+      unarchive: src=https://storage.googleapis.com/golang/go{{ go_version }}.linux-amd64.tar.gz dest=~/ creates=~/go copy=no
 
     - name: add variables to variables /etc/profile
       copy: src=golang.sh dest=/etc/profile.d/golang.sh
       become: yes
-      
-    - name: create a link to data dir      
+
+    - name: create a link to data dir
       file: src=/home/vagrant/code/src/github.com/cgrates/cgrates/data dest=/usr/share/cgrates state=link
       become: yes
 
     #- name: expand freeswitch json conf
     #  unarchive: src=/usr/share/cgrates/tutorials/fs_json/freeswitch/etc/freeswitch_conf.tar.gz dest=/usr/share/cgrates/tutorials/fs_json/freeswitch/etc/ copy=no
-    
+
     #- name: expand freeswitch csv conf
     #  unarchive: src=/usr/share/cgrates/tutorials/fs_csv/freeswitch/etc/freeswitch_conf.tar.gz dest=/usr/share/cgrates/tutorials/fs_json/freeswitch/etc/ copy=no
-    
-    - name: setup database tables
+
+    - name: setup mysql tables
       shell: chdir=/usr/share/cgrates/storage/mysql ./setup_cgr_db.sh root {{ root_db_password }} localhost
-    
+    - name: setup postgress table
+      shell: chdir=/usr/share/cgrates/storage/postgres ./setup_cgr_db.sh
+
+    - name: create cgrates user for mongo
+      mongodb_user: database=admin name=cgrates password={{root_db_password}} roles='userAdminAnyDatabase' state=present
+
     - name: create link to cgrates dir
       file: src=~/code/src/github.com/cgrates/cgrates dest=~/cgr state=link
 
+    - name: create var folder
+      file: path=/var/log/cgrates state=directory owner=vagrant
+      become: yes

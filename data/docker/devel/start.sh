@@ -30,8 +30,10 @@ cd /root/cgr
 #glide -y devel.yaml install
 ./build.sh
 
-# create cgr-engine link
-ln -s /root/code/bin/cgr-engine /usr/bin/cgr-engine
+# create cgr-engine and cgr-loader link
+ln -s /root/code/bin/cgr-engine /usr/bin/
+ln -s /root/code/bin/cgr-loader /usr/bin/
+
 
 # expand freeswitch conf
 cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_conf.tar.gz
