@@ -78,10 +78,13 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
+	requestedDuration := dur
 	self.totalUsage += lastUsed // Should reflect the total usage so far
 
+	//utils.Logger.Debug(fmt.Sprintf("ExtraDuration: %d", self.extraDuration))
 	if lastUsed > 0 {
 		self.extraDuration = self.lastUsage - lastUsed
+		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %d", self.extraDuration))
 	}
 	// apply correction from previous run
 	if self.extraDuration < dur {
@@ -117,6 +120,10 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.sessionCds = append(self.sessionCds, self.cd.Clone())
 	self.callCosts = append(self.callCosts, cc)
 	self.lastUsage = ccDuration
+
+	if ccDuration >= dur { // we got what we asked to be debited
+		return requestedDuration, nil
+	}
 	return ccDuration, nil
 }
 
