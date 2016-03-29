@@ -655,6 +655,26 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 	}
 }
 
+func TestDmtAgentCdrs(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, ToRs: []string{utils.VOICE}}
+	if err := apierRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "610" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
+		}
+		if cdrs[0].Cost != 0.7565 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
+		}
+	}
+}
+
 func TestDmtAgentSendDataGrpInit(t *testing.T) {
 	if !*testIntegration {
 		return
@@ -803,7 +823,7 @@ func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
 	if err := dmtClient.SendMessage(ccr); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(500) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if msg == nil {
 		t.Fatal("No message returned")
@@ -883,7 +903,7 @@ func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
 	if err := dmtClient.SendMessage(ccr); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(3000) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if msg == nil {
 		t.Fatal("No message returned")
@@ -897,23 +917,16 @@ func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
 	}
 }
 
-func TestDmtAgentCdrs(t *testing.T) {
+func TestDmtAgentSendDataGrpCDRs(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
 	var cdrs []*engine.ExternalCDR
-	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, ToRs: []string{utils.VOICE}}
+	req := utils.RPCCDRsFilter{CGRIDs: []string{utils.Sha1("testdatagrp")}}
 	if err := apierRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if len(cdrs) != 1 {
+	} else if len(cdrs) != 3 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
-	} else {
-		if cdrs[0].Usage != "610" {
-			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
-		}
-		if cdrs[0].Cost != 0.7565 {
-			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
-		}
 	}
 }
 

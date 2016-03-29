@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -615,6 +614,8 @@ func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix stri
 		smc := &SMCost{
 			CGRID:       result.Cgrid,
 			RunID:       result.RunID,
+			OriginHost:  result.OriginHost,
+			OriginID:    result.OriginID,
 			CostSource:  result.CostSource,
 			Usage:       result.Usage,
 			CostDetails: &CallCost{},
@@ -966,8 +967,8 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
 		}
-		usageDur, _ := time.ParseDuration(strconv.FormatFloat(result.Usage, 'f', -1, 64) + "s")
-		pddDur, _ := time.ParseDuration(strconv.FormatFloat(result.Pdd, 'f', -1, 64) + "s")
+		usageDur := time.Duration(result.Usage * utils.NANO_MULTIPLIER)
+		pddDur := time.Duration(result.Pdd * utils.NANO_MULTIPLIER)
 		storCdr := &CDR{
 			CGRID:           result.Cgrid,
 			RunID:           result.RunID,

@@ -143,7 +143,7 @@ func (self *SMGeneric) sessionEnd(sessionId string, usage time.Duration) error {
 			if err := s.close(aTime.Add(usage)); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not close session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
-			if err := s.saveOperations(); err != nil {
+			if err := s.saveOperations(sessionId); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save session: %s, runId: %s, error: %s", sessionId, s.runId, err.Error()))
 			}
 		}
@@ -228,8 +228,7 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 		}
 		return nilDuration, err
 	}
-	evUuid := gev.GetUUID()
-	for _, s := range self.getSession(evUuid) {
+	for _, s := range self.getSession(gev.GetUUID()) {
 		if maxDur, err := s.debit(evMaxUsage, evLastUsed); err != nil {
 			return nilDuration, err
 		} else if maxDur < evMaxUsage {
@@ -254,15 +253,18 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
 			err = self.sessionStart(gev, getClientConnId(clnt))
 		}
-		if err != nil {
+		if err != nil && err != utils.ErrMandatoryIeMissing {
 			return err
 		}
+	}
+	sessionIDs := []string{gev.GetUUID()}
+	if sessionIDPrefix, err := gev.GetFieldAsString(utils.OriginIDPrefix); err == nil { // OriginIDPrefix is present, OriginID will not be anymore considered
+		sessionIDs = self.getSessionIDsForPrefix(sessionIDPrefix)
 	}
 	usage, err := gev.GetUsage(utils.META_DEFAULT)
 	if err != nil {
 		if err != utils.ErrNotFound {
 			return err
-
 		}
 		lastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
 		if err != nil {
@@ -272,17 +274,18 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 			return err
 		}
 		var s *SMGSession
-		for _, s = range self.getSession(gev.GetUUID()) {
-			break
+		for _, sID := range sessionIDs {
+			for _, s = range self.getSession(sID) {
+				break
+			}
+			if s != nil {
+				break
+			}
 		}
 		if s == nil {
 			return nil
 		}
 		usage = s.TotalUsage() + lastUsed
-	}
-	sessionIDs := []string{gev.GetUUID()}
-	if sessionIDPrefix, err := gev.GetFieldAsString(utils.OriginIDPrefix); err == nil { // OriginIDPrefix is present, OriginID will not be anymore considered
-		sessionIDs = self.getSessionIDsForPrefix(sessionIDPrefix)
 	}
 	var interimError error
 	for _, sessionID := range sessionIDs {
@@ -377,7 +380,6 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
 			}
 		}
-
 		var reply string
 		smCost := &engine.SMCost{
 			CGRID:       gev.GetCgrId(self.timezone),

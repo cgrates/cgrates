@@ -32,7 +32,7 @@ CREATE TABLE cdrs (
  created_at TIMESTAMP,
  updated_at TIMESTAMP,
  deleted_at TIMESTAMP,
- UNIQUE (cgrid, run_id)
+ UNIQUE (cgrid, run_id, origin_id)
 );
 ;
 DROP INDEX IF EXISTS deleted_at_cp_idx;

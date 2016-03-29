@@ -218,7 +218,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*
 		}
 	}
 	index = mgo.Index{
-		Key:        []string{CGRIDLow, RunIDLow},
+		Key:        []string{CGRIDLow, RunIDLow, OriginIDLow},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,

@@ -33,7 +33,7 @@ CREATE TABLE cdrs (
   updated_at TIMESTAMP,
   deleted_at TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY cdrrun (cgrid, run_id)
+  UNIQUE KEY cdrrun (cgrid, run_id, origin_id)
 );
 
 DROP TABLE IF EXISTS sm_costs;

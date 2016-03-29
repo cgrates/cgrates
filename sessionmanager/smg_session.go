@@ -80,7 +80,6 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
 	requestedDuration := dur
 	self.totalUsage += lastUsed // Should reflect the total usage so far
-
 	//utils.Logger.Debug(fmt.Sprintf("ExtraDuration: %d", self.extraDuration))
 	if lastUsed > 0 {
 		self.extraDuration = self.lastUsage - lastUsed
@@ -221,7 +220,8 @@ func (self *SMGSession) disconnectSession(reason string) error {
 }
 
 // Merge the sum of costs and sends it to CDRS for storage
-func (self *SMGSession) saveOperations() error {
+// originID could have been changed from original event, hence passing as argument here
+func (self *SMGSession) saveOperations(originID string) error {
 	if len(self.callCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
@@ -243,7 +243,8 @@ func (self *SMGSession) saveOperations() error {
 		CostSource:  utils.SESSION_MANAGER_SOURCE,
 		RunID:       self.runId,
 		OriginHost:  self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
-		OriginID:    self.eventStart.GetUUID(),
+		OriginID:    originID,
+		Usage:       self.TotalUsage().Seconds(),
 		CostDetails: firstCC,
 	}
 	if err := self.cdrsrv.StoreSMCost(engine.AttrCDRSStoreSMCost{SMCost: smCost, CheckDuplicate: true}, &reply); err != nil {
