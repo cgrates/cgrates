@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -424,7 +425,11 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			body = cdr.AsHttpForm()
 		case utils.META_HTTP_JSON:
 			content = utils.CONTENT_JSON
-			body = cdr
+			jsn, err := json.Marshal(cdr)
+			if err != nil {
+				return err
+			}
+			body = jsn
 		}
 		errChan := make(chan error)
 		go func(body interface{}, rplCfg *config.CdrReplicationCfg, content string, errChan chan error) {
