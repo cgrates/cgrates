@@ -365,7 +365,9 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 			for _, smCost := range smCosts {
 				cdrClone := cdr.Clone()
 				cdrClone.OriginID = smCost.OriginID
-				cdrClone.Usage = time.Duration(smCost.Usage * utils.NANO_MULTIPLIER) // Usage is float as seconds, convert back to duration
+				if cdr.Usage == 0 {
+					cdrClone.Usage = time.Duration(smCost.Usage * utils.NANO_MULTIPLIER) // Usage is float as seconds, convert back to duration
+				}
 				cdrClone.Cost = smCost.CostDetails.Cost
 				cdrClone.CostDetails = smCost.CostDetails
 				cdrsRated = append(cdrsRated, cdrClone)
