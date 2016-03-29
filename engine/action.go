@@ -370,7 +370,7 @@ func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Balance != nil && a.Balance.GetValue() >= 0 { // only apply if not allready negative
+	if a.Balance != nil && a.Balance.GetValue() > 0 { // only apply if not allready negative
 		a.Balance.SetValue(-a.Balance.GetValue())
 	}
 }
