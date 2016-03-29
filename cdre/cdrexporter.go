@@ -352,9 +352,13 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 		case utils.META_HTTP_POST:
 			var outValByte []byte
 			httpAddr := cfgFld.Value.Id()
+			jsn, err := json.Marshal(cdr)
+			if err != nil {
+				return err
+			}
 			if len(httpAddr) == 0 {
 				err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-			} else if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, cdr); err == nil {
+			} else if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, jsn); err == nil {
 				outVal = string(outValByte)
 				if len(outVal) == 0 && cfgFld.Mandatory {
 					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)

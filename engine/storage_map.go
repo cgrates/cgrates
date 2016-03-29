@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"sync"
 
 	"strings"
 	"time"
@@ -36,6 +37,7 @@ type MapStorage struct {
 	dict  map[string][]byte
 	tasks [][]byte
 	ms    Marshaler
+	mu    sync.RWMutex
 }
 
 func NewMapStorage() (*MapStorage, error) {
@@ -49,11 +51,15 @@ func NewMapStorageJson() (*MapStorage, error) {
 func (ms *MapStorage) Close() {}
 
 func (ms *MapStorage) Flush(ignore string) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	ms.dict = make(map[string][]byte)
 	return nil
 }
 
 func (ms *MapStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	if skipCache {
 		keysForPrefix := make([]string, 0)
 		for key := range ms.dict {
@@ -256,6 +262,8 @@ func (ms *MapStorage) cacheAccounting(alsKeys []string) error {
 
 // Used to check if specific subject is stored using prefix key attached to entity
 func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	switch categ {
 	case utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.ACCOUNT_PREFIX, utils.DERIVEDCHARGERS_PREFIX:
 		_, exists := ms.dict[categ+subject]
@@ -265,6 +273,8 @@ func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 }
 
 func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.RATING_PLAN_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -294,6 +304,8 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan,
 }
 
 func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rp)
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
@@ -308,6 +320,8 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 }
 
 func (ms *MapStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingProfile, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.RATING_PROFILE_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -328,6 +342,8 @@ func (ms *MapStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingP
 }
 
 func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(rpf)
 	ms.dict[utils.RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
@@ -338,6 +354,8 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 }
 
 func (ms *MapStorage) RemoveRatingProfile(key string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	for k := range ms.dict {
 		if strings.HasPrefix(k, key) {
 			delete(ms.dict, key)
@@ -353,6 +371,8 @@ func (ms *MapStorage) RemoveRatingProfile(key string) (err error) {
 }
 
 func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.LCR_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -371,12 +391,16 @@ func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 }
 
 func (ms *MapStorage) SetLCR(lcr *LCR) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(lcr)
 	ms.dict[utils.LCR_PREFIX+lcr.GetId()] = result
 	return
 }
 
 func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.DESTINATION_PREFIX + key
 	if values, ok := ms.dict[key]; ok {
 		b := bytes.NewBuffer(values)
@@ -402,6 +426,8 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 }
 
 func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(dest)
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
@@ -416,6 +442,8 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 }
 
 func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.ACTION_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -434,12 +462,16 @@ func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err er
 }
 
 func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[utils.ACTION_PREFIX+key] = result
 	return
 }
 
 func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -460,12 +492,16 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGrou
 }
 
 func (ms *MapStorage) SetSharedGroup(sg *SharedGroup) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sg)
 	ms.dict[utils.SHARED_GROUP_PREFIX+sg.Id] = result
 	return
 }
 
 func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	if values, ok := ms.dict[utils.ACCOUNT_PREFIX+key]; ok {
 		ub = &Account{ID: key}
 		err = ms.ms.Unmarshal(values, ub)
@@ -488,17 +524,23 @@ func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 			ub = ac
 		}
 	}
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(ub)
 	ms.dict[utils.ACCOUNT_PREFIX+ub.ID] = result
 	return
 }
 
 func (ms *MapStorage) RemoveAccount(key string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	delete(ms.dict, utils.ACCOUNT_PREFIX+key)
 	return
 }
 
 func (ms *MapStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	if values, ok := ms.dict[utils.CDR_STATS_QUEUE_PREFIX+key]; ok {
 		sq = &StatsQueue{}
 		err = ms.ms.Unmarshal(values, sq)
@@ -509,12 +551,16 @@ func (ms *MapStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error) {
 }
 
 func (ms *MapStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sq)
 	ms.dict[utils.CDR_STATS_QUEUE_PREFIX+sq.GetId()] = result
 	return
 }
 
 func (ms *MapStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	result = make(map[string]*SubscriberData)
 	for key, value := range ms.dict {
 		if strings.HasPrefix(key, utils.PUBSUB_SUBSCRIBERS_PREFIX) {
@@ -527,17 +573,23 @@ func (ms *MapStorage) GetSubscribers() (result map[string]*SubscriberData, err e
 	return
 }
 func (ms *MapStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(sub)
 	ms.dict[utils.PUBSUB_SUBSCRIBERS_PREFIX+key] = result
 	return
 }
 
 func (ms *MapStorage) RemoveSubscriber(key string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	delete(ms.dict, utils.PUBSUB_SUBSCRIBERS_PREFIX+key)
 	return
 }
 
 func (ms *MapStorage) SetUser(up *UserProfile) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(up)
 	if err != nil {
 		return err
@@ -546,6 +598,8 @@ func (ms *MapStorage) SetUser(up *UserProfile) error {
 	return nil
 }
 func (ms *MapStorage) GetUser(key string) (up *UserProfile, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	up = &UserProfile{}
 	if values, ok := ms.dict[utils.USERS_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &up)
@@ -556,6 +610,8 @@ func (ms *MapStorage) GetUser(key string) (up *UserProfile, err error) {
 }
 
 func (ms *MapStorage) GetUsers() (result []*UserProfile, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	for key, value := range ms.dict {
 		if strings.HasPrefix(key, utils.USERS_PREFIX) {
 			up := &UserProfile{}
@@ -568,11 +624,15 @@ func (ms *MapStorage) GetUsers() (result []*UserProfile, err error) {
 }
 
 func (ms *MapStorage) RemoveUser(key string) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	delete(ms.dict, utils.USERS_PREFIX+key)
 	return nil
 }
 
 func (ms *MapStorage) SetAlias(al *Alias) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(al.Values)
 	if err != nil {
 		return err
@@ -582,6 +642,8 @@ func (ms *MapStorage) SetAlias(al *Alias) error {
 }
 
 func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.ALIASES_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -607,6 +669,8 @@ func (ms *MapStorage) GetAlias(key string, skipCache bool) (al *Alias, err error
 }
 
 func (ms *MapStorage) RemoveAlias(key string) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	al := &Alias{}
 	al.SetId(key)
 	key = utils.ALIASES_PREFIX + key
@@ -622,14 +686,20 @@ func (ms *MapStorage) RemoveAlias(key string) error {
 }
 
 func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool) ([]*LoadInstance, error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	return nil, nil
 }
 
 func (ms *MapStorage) AddLoadHistory(*LoadInstance, int) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	return nil
 }
 
 func (ms *MapStorage) GetActionTriggers(key string) (atrs ActionTriggers, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	if values, ok := ms.dict[utils.ACTION_TRIGGER_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &atrs)
 	} else {
@@ -639,6 +709,8 @@ func (ms *MapStorage) GetActionTriggers(key string) (atrs ActionTriggers, err er
 }
 
 func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	if len(atrs) == 0 {
 		// delete the key
 		delete(ms.dict, utils.ACTION_TRIGGER_PREFIX+key)
@@ -650,6 +722,8 @@ func (ms *MapStorage) SetActionTriggers(key string, atrs ActionTriggers) (err er
 }
 
 func (ms *MapStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.ACTION_PLAN_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -669,6 +743,8 @@ func (ms *MapStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPlan
 
 func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) (err error) {
 	if len(ats.ActionTimings) == 0 {
+		ms.mu.Lock()
+		defer ms.mu.Unlock()
 		// delete the key
 		delete(ms.dict, utils.ACTION_PLAN_PREFIX+key)
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
@@ -685,12 +761,16 @@ func (ms *MapStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool)
 			}
 		}
 	}
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(&ats)
 	ms.dict[utils.ACTION_PLAN_PREFIX+key] = result
 	return
 }
 
 func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	apls, err := cache2go.GetAllEntries(utils.ACTION_PLAN_PREFIX)
 	if err != nil {
 		return nil, err
@@ -706,6 +786,8 @@ func (ms *MapStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err error
 }
 
 func (ms *MapStorage) PushTask(t *Task) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(t)
 	if err != nil {
 		return err
@@ -715,6 +797,8 @@ func (ms *MapStorage) PushTask(t *Task) error {
 }
 
 func (ms *MapStorage) PopTask() (t *Task, err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	if len(ms.tasks) > 0 {
 		var values []byte
 		values, ms.tasks = ms.tasks[0], ms.tasks[1:]
@@ -727,6 +811,8 @@ func (ms *MapStorage) PopTask() (t *Task, err error) {
 }
 
 func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils.DerivedChargers, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	key = utils.DERIVEDCHARGERS_PREFIX + key
 	if !skipCache {
 		if x, err := cache2go.Get(key); err == nil {
@@ -745,6 +831,8 @@ func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool) (dcs *utils
 }
 
 func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	if dcs == nil || len(dcs.Chargers) == 0 {
 		delete(ms.dict, utils.DERIVEDCHARGERS_PREFIX+key)
 		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
@@ -756,12 +844,16 @@ func (ms *MapStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers)
 }
 
 func (ms *MapStorage) SetCdrStats(cs *CdrStats) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(cs)
 	ms.dict[utils.CDR_STATS_PREFIX+cs.Id] = result
 	return err
 }
 
 func (ms *MapStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	if values, ok := ms.dict[utils.CDR_STATS_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &cs)
 	} else {
@@ -771,6 +863,8 @@ func (ms *MapStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 }
 
 func (ms *MapStorage) GetAllCdrStats() (css []*CdrStats, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	for key, value := range ms.dict {
 		if !strings.HasPrefix(key, utils.CDR_STATS_PREFIX) {
 			continue
@@ -783,12 +877,16 @@ func (ms *MapStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 }
 
 func (ms *MapStorage) SetSMCost(smCost *SMCost) error {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	result, err := ms.ms.Marshal(smCost)
 	ms.dict[utils.LOG_CALL_COST_PREFIX+smCost.CostSource+smCost.RunID+"_"+smCost.CGRID] = result
 	return err
 }
 
 func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID string) (smCost *SMCost, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
 	if values, ok := ms.dict[utils.LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid]; ok {
 		err = ms.ms.Unmarshal(values, &smCost)
 	} else {
@@ -798,6 +896,8 @@ func (ms *MapStorage) GetSMCost(cgrid, source, runid, originHost, originID strin
 }
 
 func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	mat, err := ms.ms.Marshal(at)
 	if err != nil {
 		return
@@ -811,6 +911,8 @@ func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, a
 }
 
 func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
 	mat, err := ms.ms.Marshal(at)
 	if err != nil {
 		return

@@ -26,10 +26,6 @@ import (
 // global package variable
 var Guardian = &GuardianLock{locksMap: make(map[string]chan bool)}
 
-func NewGuardianLock() *GuardianLock {
-	return &GuardianLock{locksMap: make(map[string]chan bool)}
-}
-
 type GuardianLock struct {
 	locksMap map[string]chan bool
 	mu       sync.RWMutex

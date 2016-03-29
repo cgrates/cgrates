@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/gob"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -49,16 +48,12 @@ func GetBytes(content interface{}) ([]byte, error) {
 }
 
 // Post without automatic failover
-func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, error) {
-	body, err := json.Marshal(content)
-	if err != nil {
-		return nil, err
-	}
+func HttpJsonPost(url string, skipTlsVerify bool, content []byte) ([]byte, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTlsVerify},
 	}
 	client := &http.Client{Transport: tr}
-	resp, err := client.Post(url, "application/json", bytes.NewBuffer(body))
+	resp, err := client.Post(url, "application/json", bytes.NewBuffer(content))
 	if err != nil {
 		return nil, err
 	}
