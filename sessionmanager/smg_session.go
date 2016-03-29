@@ -96,6 +96,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 		return ccDuration, nil
 	}
 	//utils.Logger.Debug(fmt.Sprintf("dur: %f", dur.Seconds()))
+	initialExtraDuration := self.extraDuration
 	self.extraDuration = 0
 	if self.cd.LoopIndex > 0 {
 		self.cd.TimeStart = self.cd.TimeEnd
@@ -111,7 +112,6 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.cd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	// update call duration with real debited duration
 	ccDuration := cc.GetDuration()
-	initialExtraDuration := self.extraDuration
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
