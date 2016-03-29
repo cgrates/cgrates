@@ -190,10 +190,13 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		return
 	}
 	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
-	var processed bool
+	var processed, lclProcessed bool
 	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
-		processed, err = self.processCCR(ccr, reqProcessor, cca)
-		if err != nil || (processed && !reqProcessor.ContinueOnSuccess) {
+		lclProcessed, err = self.processCCR(ccr, reqProcessor, cca)
+		if lclProcessed { // Process local so we don't overwrite globally
+			processed = lclProcessed
+		}
+		if err != nil || (lclProcessed && !reqProcessor.ContinueOnSuccess) {
 			break
 		}
 	}

@@ -804,7 +804,7 @@ func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
 		t.Error(err)
 	}
 	time.Sleep(time.Duration(500) * time.Millisecond)
-	/*msg := dmtClient.ReceivedMessage()
+	msg := dmtClient.ReceivedMessage()
 	if msg == nil {
 		t.Fatal("No message returned")
 	}
@@ -815,7 +815,6 @@ func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
 	} else if resCode := avpValAsString(avps[0]); resCode != "2001" {
 		t.Errorf("Expecting 2001, received: %s", resCode)
 	}
-	*/
 }
 
 func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
