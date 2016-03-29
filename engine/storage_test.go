@@ -274,7 +274,7 @@ func TestDifferentUuid(t *testing.T) {
 
 func TestStorageTask(t *testing.T) {
 	// clean previous unused tasks
-	for i := 0; i < 18; i++ {
+	for i := 0; i < 19; i++ {
 		ratingStorage.PopTask()
 	}
 
@@ -303,7 +303,7 @@ func TestStorageTask(t *testing.T) {
 		t.Error("Error poping task: ", task, err)
 	}
 	if task, err := ratingStorage.PopTask(); err == nil && task != nil {
-		t.Errorf("Error poping task %+v, %v: ", task, err)
+		t.Errorf("Error poping task %+v, %v ", task, err)
 	}
 }
 

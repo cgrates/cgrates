@@ -287,7 +287,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 		if b.Disabled {
 			continue
 		}
-		if b.IsExpired() || (len(b.SharedGroups) == 0 && b.GetValue() <= 0) {
+		if b.IsExpired() || (len(b.SharedGroups) == 0 && b.GetValue() <= 0 && !b.Blocker) {
 			continue
 		}
 		if sharedGroup != "" && b.SharedGroups[sharedGroup] == false {
