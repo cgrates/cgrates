@@ -81,10 +81,11 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	requestedDuration := dur
 	self.totalUsage += lastUsed // Should reflect the total usage so far
 
-	//utils.Logger.Debug(fmt.Sprintf("ExtraDuration: %d", self.extraDuration))
+	//utils.Logger.Debug(fmt.Sprintf("lastUsage: %f lastUsed: %f", self.lastUsage.Seconds(), lastUsed.Seconds()))
+	//utils.Logger.Debug(fmt.Sprintf("ExtraDuration: %f", self.extraDuration.Seconds()))
 	if lastUsed > 0 {
 		self.extraDuration = self.lastUsage - lastUsed
-		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %d", self.extraDuration))
+		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %f", self.extraDuration.Seconds()))
 	}
 	// apply correction from previous run
 	if self.extraDuration < dur {
@@ -94,7 +95,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 		self.extraDuration -= dur
 		return ccDuration, nil
 	}
-
+	//utils.Logger.Debug(fmt.Sprintf("dur: %f", dur.Seconds()))
 	self.extraDuration = 0
 	if self.cd.LoopIndex > 0 {
 		self.cd.TimeStart = self.cd.TimeEnd
@@ -110,6 +111,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.cd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	// update call duration with real debited duration
 	ccDuration := cc.GetDuration()
+	initialExtraDuration := self.extraDuration
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
@@ -119,12 +121,12 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.cd.LoopIndex += 1
 	self.sessionCds = append(self.sessionCds, self.cd.Clone())
 	self.callCosts = append(self.callCosts, cc)
-	self.lastUsage = ccDuration
+	self.lastUsage = initialExtraDuration + ccDuration
 
 	if ccDuration >= dur { // we got what we asked to be debited
 		return requestedDuration, nil
 	}
-	return ccDuration, nil
+	return initialExtraDuration + ccDuration, nil
 }
 
 // Attempts to refund a duration, error on failure
