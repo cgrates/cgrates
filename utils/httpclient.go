@@ -80,7 +80,7 @@ func HttpPoster(addr string, skipTlsVerify bool, content interface{}, contentTyp
 	var err error
 	switch contentType {
 	case CONTENT_JSON:
-		body, err = json.Marshal(content)
+		body = content.([]byte)
 	case CONTENT_FORM:
 		urlData = content.(url.Values)
 	case CONTENT_TEXT:

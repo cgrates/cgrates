@@ -392,7 +392,7 @@ func TestSMGLastUsed(t *testing.T) {
 	if maxUsage != 120 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 6.490110
+	eAcntVal = 6.590100
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
