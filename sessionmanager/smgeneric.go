@@ -244,7 +244,11 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 		self.sessionEnd(gev.GetUUID(), 0)
 		return nilDuration, err
 	}
-	return self.SessionUpdate(gev, clnt)
+	d, err := self.SessionUpdate(gev, clnt)
+	if err != nil {
+		self.sessionEnd(gev.GetUUID(), 0)
+	}
+	return d, err
 }
 
 // Called on session end, should stop debit loop
