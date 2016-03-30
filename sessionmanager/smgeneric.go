@@ -241,6 +241,7 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 // Called on session start
 func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
+		self.sessionEnd(gev.GetUUID(), 0)
 		return nilDuration, err
 	}
 	return self.SessionUpdate(gev, clnt)
