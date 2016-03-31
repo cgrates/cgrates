@@ -798,10 +798,10 @@ func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
 		AVP: []*diam.AVP{
 			diam.NewAVP(446, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
 				AVP: []*diam.AVP{
-					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),  // Tariff-Change-Usage
-					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)), // CC-Time
-					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(1)),  // CC-Input-Octets
-					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(2)),  // CC-Output-Octets
+					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),    // Tariff-Change-Usage
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)),   // CC-Time
+					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(1000)), // CC-Input-Octets
+					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(24)),   // CC-Output-Octets
 				},
 			}),
 			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(1)), // Data session for group 1
@@ -811,10 +811,10 @@ func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
 		AVP: []*diam.AVP{
 			diam.NewAVP(446, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
 				AVP: []*diam.AVP{
-					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),  // Tariff-Change-Usage
-					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)), // CC-Time
-					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(1)),  // CC-Input-Octets
-					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(1)),  // CC-Output-Octets
+					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),    // Tariff-Change-Usage
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)),   // CC-Time
+					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(1024)), // CC-Input-Octets
+					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(512)),  // CC-Output-Octets
 				},
 			}),
 			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(2)), // Data session for group 2
@@ -892,10 +892,10 @@ func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
 		AVP: []*diam.AVP{
 			diam.NewAVP(446, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
 				AVP: []*diam.AVP{
-					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),  // Tariff-Change-Usage
-					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)), // CC-Time
-					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(1)),  // CC-Input-Octets
-					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(2)),  // CC-Output-Octets
+					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),   // Tariff-Change-Usage
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)),  // CC-Time
+					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(512)), // CC-Input-Octets
+					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(0)),   // CC-Output-Octets
 				},
 			}),
 		},

@@ -115,7 +115,7 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 			}
 		}
 		return nil, nil
-	}, time.Duration(3)*time.Second, sessionId)
+	}, time.Duration(2)*time.Second, sessionId)
 	return err
 }
 
@@ -206,6 +206,14 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 	return lcr.SuppliersSlice()
 }
 
+// Called on session start
+func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
+		return nilDuration, err
+	}
+	return self.SessionUpdate(gev, clnt)
+}
+
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
@@ -238,14 +246,6 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 	return evMaxUsage, nil
 }
 
-// Called on session start
-func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
-		return nilDuration, err
-	}
-	return self.SessionUpdate(gev, clnt)
-}
-
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
@@ -261,34 +261,33 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 	if sessionIDPrefix, err := gev.GetFieldAsString(utils.OriginIDPrefix); err == nil { // OriginIDPrefix is present, OriginID will not be anymore considered
 		sessionIDs = self.getSessionIDsForPrefix(sessionIDPrefix)
 	}
-	usage, err := gev.GetUsage(utils.META_DEFAULT)
-	if err != nil {
-		if err != utils.ErrNotFound {
-			return err
+	usage, errUsage := gev.GetUsage(utils.META_DEFAULT)
+	var lastUsed time.Duration
+	if errUsage != nil {
+		if errUsage != utils.ErrNotFound {
+			return errUsage
 		}
-		lastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
+		var err error
+		lastUsed, err = gev.GetLastUsed(utils.META_DEFAULT)
 		if err != nil {
 			if err == utils.ErrNotFound {
 				err = utils.ErrMandatoryIeMissing
 			}
 			return err
 		}
-		var s *SMGSession
-		for _, sID := range sessionIDs {
-			for _, s = range self.getSession(sID) {
-				break
-			}
-			if s != nil {
-				break
-			}
-		}
-		if s == nil {
-			return nil
-		}
-		usage = s.TotalUsage() + lastUsed
 	}
 	var interimError error
 	for _, sessionID := range sessionIDs {
+		if errUsage != nil {
+			var s *SMGSession
+			for _, s = range self.getSession(sessionID) {
+				break
+			}
+			if s == nil {
+				continue // No session active, will not be able to close it anyway
+			}
+			usage = s.TotalUsage() + lastUsed
+		}
 		if err := self.sessionEnd(sessionID, usage); err != nil {
 			interimError = err // Last error will be the one returned as API result
 		}
