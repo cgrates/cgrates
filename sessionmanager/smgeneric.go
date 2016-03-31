@@ -35,7 +35,7 @@ var ErrPartiallyExecuted = errors.New("Partially executed")
 
 func NewSMGeneric(cgrCfg *config.CGRConfig, rater engine.Connector, cdrsrv engine.Connector, timezone string, extconns *SMGExternalConnections) *SMGeneric {
 	gsm := &SMGeneric{cgrCfg: cgrCfg, rater: rater, cdrsrv: cdrsrv, extconns: extconns, timezone: timezone,
-		sessions: make(map[string][]*SMGSession), sessionsMux: new(sync.Mutex), guard: engine.NewGuardianLock()}
+		sessions: make(map[string][]*SMGSession), sessionsMux: new(sync.Mutex), guard: engine.Guardian}
 	return gsm
 }
 
@@ -206,14 +206,6 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 	return lcr.SuppliersSlice()
 }
 
-// Called on session start
-func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
-		return nilDuration, err
-	}
-	return self.SessionUpdate(gev, clnt)
-}
-
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
@@ -244,6 +236,19 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 		}
 	}
 	return evMaxUsage, nil
+}
+
+// Called on session start
+func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
+		self.sessionEnd(gev.GetUUID(), 0)
+		return nilDuration, err
+	}
+	d, err := self.SessionUpdate(gev, clnt)
+	if err != nil {
+		self.sessionEnd(gev.GetUUID(), 0)
+	}
+	return d, err
 }
 
 // Called on session end, should stop debit loop

@@ -116,43 +116,9 @@ func TestUnsubscribeSave(t *testing.T) {
 	}
 }
 
-func TestPublish(t *testing.T) {
-	ps := NewPubSub(accountingStorage, true)
-	ps.pubFunc = func(url string, ttl bool, obj interface{}) ([]byte, error) {
-		obj.(CgrEvent)["called"] = url
-		return nil, nil
-	}
-	var r string
-	if err := ps.Subscribe(SubscribeInfo{
-		EventFilter: "EventName/test",
-		Transport:   utils.META_HTTP_POST,
-		Address:     "url",
-		LifeSpan:    time.Second,
-	}, &r); err != nil {
-		t.Error("Error subscribing: ", err)
-	}
-	m := make(map[string]string)
-	m["EventFilter"] = "test"
-	if err := ps.Publish(m, &r); err != nil {
-		t.Error("Error publishing: ", err)
-	}
-	for i := 0; i < 1000; i++ { // wait for the theread to populate map
-		if len(m) == 2 {
-			time.Sleep(time.Microsecond)
-		} else {
-			break
-		}
-	}
-	if r, exists := m["called"]; !exists || r != "url" {
-		t.Error("Error calling publish function: ", m)
-	}
-}
-
 func TestPublishExpired(t *testing.T) {
 	ps := NewPubSub(accountingStorage, true)
-	ps.pubFunc = func(url string, ttl bool, obj interface{}) ([]byte, error) {
-		m := obj.(map[string]string)
-		m["called"] = "yes"
+	ps.pubFunc = func(url string, ttl bool, obj []byte) ([]byte, error) {
 		return nil, nil
 	}
 	var r string
@@ -174,9 +140,7 @@ func TestPublishExpired(t *testing.T) {
 
 func TestPublishExpiredSave(t *testing.T) {
 	ps := NewPubSub(accountingStorage, true)
-	ps.pubFunc = func(url string, ttl bool, obj interface{}) ([]byte, error) {
-		m := obj.(map[string]string)
-		m["called"] = "yes"
+	ps.pubFunc = func(url string, ttl bool, obj []byte) ([]byte, error) {
 		return nil, nil
 	}
 	var r string

@@ -172,8 +172,10 @@ EE0,*topup_reset,,,,*monetary,*out,,,,SG3,*unlimited,,0,10,false,false,10
 EE0,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
 DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,,false,false,10
 NEG,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
-BLOCK,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,10,20,true,false,20
+BLOCK,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,1,20,true,false,20
 BLOCK,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
+BLOCK_EMPTY,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,0,20,true,false,20
+BLOCK_EMPTY,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300,10,false,false,10
 NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50,10,false,false,10
@@ -188,6 +190,7 @@ TOPUP_SHARED10_AT,SE10,*asap,10
 TOPUP_EMPTY_AT,EE0,*asap,10
 POST_AT,NEG,*asap,10
 BLOCK_AT,BLOCK,*asap,10
+BLOCK_EMPTY_AT,BLOCK_EMPTY,*asap,10
 EXP_AT,EXP,*asap,10
 `
 
@@ -216,6 +219,7 @@ vdf,emptyY,TOPUP_EMPTY_AT,,,
 vdf,post,POST_AT,,,
 cgrates.org,alodis,TOPUP_EMPTY_AT,,true,true
 cgrates.org,block,BLOCK_AT,,false,false
+cgrates.org,block_empty,BLOCK_EMPTY_AT,,false,false
 cgrates.org,expo,EXP_AT,,false,false
 cgrates.org,expnoexp,,,false,false
 `
@@ -820,7 +824,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 13 {
+	if len(csvr.actions) != 14 {
 		t.Error("Failed to load actions: ", len(csvr.actions))
 	}
 	as1 := csvr.actions["MINI"]
@@ -1006,7 +1010,7 @@ func TestLoadLCRs(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionPlans) != 8 {
+	if len(csvr.actionPlans) != 9 {
 		t.Error("Failed to load action timings: ", len(csvr.actionPlans))
 	}
 	atm := csvr.actionPlans["MORE_MINUTES"]
@@ -1101,7 +1105,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 14 {
+	if len(csvr.accountActions) != 15 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]
