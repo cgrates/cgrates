@@ -164,6 +164,6 @@ type SMCost struct {
 }
 
 type AttrCDRSStoreSMCost struct {
-	SMCost         *SMCost
+	Cost           *SMCost
 	CheckDuplicate bool
 }

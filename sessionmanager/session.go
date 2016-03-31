@@ -248,7 +248,7 @@ func (s *Session) SaveOperations() {
 			OriginID:    s.eventStart.GetUUID(),
 			CostDetails: firstCC,
 		}
-		err := s.sessionManager.CdrSrv().StoreSMCost(engine.AttrCDRSStoreSMCost{SMCost: smCost, CheckDuplicate: true}, &reply)
+		err := s.sessionManager.CdrSrv().StoreSMCost(engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply)
 		// this is a protection against the case when the close event is missed for some reason
 		// when the cdr arrives to cdrserver because our callcost is not there it will be rated
 		// as postpaid. When the close event finally arives we have to refund everything

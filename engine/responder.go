@@ -513,25 +513,25 @@ func (rs *Responder) ProcessCdr(cdr *CDR, reply *string) error {
 }
 
 func (rs *Responder) StoreSMCost(attrs AttrCDRSStoreSMCost, reply *string) error {
-	if item, err := rs.getCache().Get(utils.LOG_CALL_COST_CACHE_PREFIX + attrs.SMCost.CGRID); err == nil && item != nil {
+	if item, err := rs.getCache().Get(utils.LOG_CALL_COST_CACHE_PREFIX + attrs.Cost.CGRID); err == nil && item != nil {
 		*reply = item.Value.(string)
 		return item.Err
 	}
 	if rs.CdrSrv == nil {
 		err := errors.New("CDR_SERVER_NOT_RUNNING")
-		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.SMCost.CGRID, &cache2go.CacheItem{
+		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.Cost.CGRID, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
 	}
-	if err := rs.CdrSrv.StoreSMCost(attrs.SMCost, attrs.CheckDuplicate); err != nil {
-		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.SMCost.CGRID, &cache2go.CacheItem{
+	if err := rs.CdrSrv.StoreSMCost(attrs.Cost, attrs.CheckDuplicate); err != nil {
+		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.Cost.CGRID, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
 	}
 	*reply = utils.OK
-	rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.SMCost.CGRID, &cache2go.CacheItem{
+	rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+attrs.Cost.CGRID, &cache2go.CacheItem{
 		Value: utils.OK,
 	})
 	return nil

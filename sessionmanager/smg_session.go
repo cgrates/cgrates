@@ -247,7 +247,7 @@ func (self *SMGSession) saveOperations(originID string) error {
 		Usage:       self.TotalUsage().Seconds(),
 		CostDetails: firstCC,
 	}
-	if err := self.cdrsrv.StoreSMCost(engine.AttrCDRSStoreSMCost{SMCost: smCost, CheckDuplicate: true}, &reply); err != nil {
+	if err := self.cdrsrv.StoreSMCost(engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
 		// this is a protection against the case when the close event is missed for some reason
 		// when the cdr arrives to cdrserver because our callcost is not there it will be rated
 		// as postpaid. When the close event finally arives we have to refund everything
