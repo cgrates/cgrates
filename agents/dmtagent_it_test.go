@@ -208,7 +208,7 @@ func TestDmtAgentTPFromFolder(t *testing.T) {
 	if err := apierRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(1000) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func TestConnectDiameterClient(t *testing.T) {
