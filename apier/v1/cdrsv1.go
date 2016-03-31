@@ -59,8 +59,8 @@ func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
 	return nil
 }
 
-func (self *CdrsV1) StoreSMCost(smCost *engine.SMCost, reply *string) error {
-	if err := self.CdrSrv.StoreSMCost(smCost, false); err != nil {
+func (self *CdrsV1) StoreSMCost(attr *engine.AttrCDRSStoreSMCost, reply *string) error {
+	if err := self.CdrSrv.StoreSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
