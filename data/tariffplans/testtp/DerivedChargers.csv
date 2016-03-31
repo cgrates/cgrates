@@ -3,3 +3,4 @@
 *out,cgrates.org,call,dan,dan,,extra2,,,,,,^ivo,^ivo,,,,,,*default,*default,*default,*default
 *out,cgrates.org,call,dan,dan,,extra3,~filterhdr1:s/(.+)/special_run3/,,,,,^runusr3,^runusr3,,,,,,*default,*default,*default,*default
 *out,cgrates.org,call,dan,*any,,extra1,,,,,,^rif2,^rif2,,,,,,*default,*default,*default,*default
+*out,cgrates.org,call,1011,1011,GERMANY,extra1,,,+4915,,,,,,,,,,*default,*default,*default,*default
