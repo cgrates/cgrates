@@ -349,10 +349,10 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1011"}
-	eAcntVal := 50000.000000
+	eAcntVal := 50000.0
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 	smgEv := SMGenericEvent{
@@ -374,13 +374,13 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
-	if maxUsage != 100 {
+	if maxUsage != 0 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 50000.000000
+	eAcntVal = 50000.0
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
 	}
 }

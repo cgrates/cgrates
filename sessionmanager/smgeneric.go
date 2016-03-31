@@ -245,7 +245,7 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 		return nilDuration, err
 	}
 	d, err := self.SessionUpdate(gev, clnt)
-	if err != nil {
+	if err != nil || d == 0 {
 		self.sessionEnd(gev.GetUUID(), 0)
 	}
 	return d, err
