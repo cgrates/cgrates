@@ -206,8 +206,23 @@ func (self *SMGeneric) GetLcrSuppliers(gev SMGenericEvent, clnt *rpc2.Client) ([
 	return lcr.SuppliersSlice()
 }
 
+// Called on session start
+func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	utils.Logger.Debug(fmt.Sprintf("### SessionStart, gev: %+v, sessions: %+v", gev, self.getSessions()))
+	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
+		self.sessionEnd(gev.GetUUID(), 0)
+		return nilDuration, err
+	}
+	d, err := self.SessionUpdate(gev, clnt)
+	if err != nil || d == 0 {
+		self.sessionEnd(gev.GetUUID(), 0)
+	}
+	return d, err
+}
+
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	utils.Logger.Debug(fmt.Sprintf("### SessionUpdate, gev: %+v, sessions: %+v", gev, self.getSessions()))
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -238,21 +253,9 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 	return evMaxUsage, nil
 }
 
-// Called on session start
-func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	if err := self.sessionStart(gev, getClientConnId(clnt)); err != nil {
-		self.sessionEnd(gev.GetUUID(), 0)
-		return nilDuration, err
-	}
-	d, err := self.SessionUpdate(gev, clnt)
-	if err != nil || d == 0 {
-		self.sessionEnd(gev.GetUUID(), 0)
-	}
-	return d, err
-}
-
 // Called on session end, should stop debit loop
 func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
+	utils.Logger.Debug(fmt.Sprintf("### SessionEnd, gev: %+v, sessions: %+v", gev, self.getSessions()))
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -405,6 +408,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 }
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
+	utils.Logger.Debug(fmt.Sprintf("### ProcessCdr, gev: %+v, sessions: %+v", gev, self.getSessions()))
 	var reply string
 	if err := self.cdrsrv.ProcessCdr(gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
 		return err
