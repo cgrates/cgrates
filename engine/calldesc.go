@@ -70,17 +70,18 @@ func init() {
 }
 
 var (
-	ratingStorage           RatingStorage
-	accountingStorage       AccountingStorage
-	storageLogger           LogStorage
-	cdrStorage              CdrStorage
-	debitPeriod             = 10 * time.Second
-	globalRoundingDecimals  = 6
-	historyScribe           history.Scribe
-	pubSubServer            rpcclient.RpcClientConnection
-	userService             UserService
-	aliasService            AliasService
-	rpSubjectPrefixMatching bool
+	ratingStorage            RatingStorage
+	accountingStorage        AccountingStorage
+	storageLogger            LogStorage
+	cdrStorage               CdrStorage
+	debitPeriod              = 10 * time.Second
+	globalRoundingDecimals   = 6
+	historyScribe            history.Scribe
+	pubSubServer             rpcclient.RpcClientConnection
+	userService              UserService
+	aliasService             AliasService
+	rpSubjectPrefixMatching  bool
+	lcrSubjectPrefixMatching bool
 )
 
 // Exported method to set the storage getter.
@@ -99,6 +100,10 @@ func SetRoundingDecimals(rd int) {
 
 func SetRpSubjectPrefixMatching(flag bool) {
 	rpSubjectPrefixMatching = flag
+}
+
+func SetLcrSubjectPrefixMatching(flag bool) {
+	lcrSubjectPrefixMatching = flag
 }
 
 /*
@@ -923,6 +928,15 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		utils.LCRKey(cd.Direction, cd.Tenant, utils.ANY, utils.ANY, utils.ANY),
 		utils.LCRKey(cd.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
 		utils.LCRKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
+	}
+	if lcrSubjectPrefixMatching {
+		var partialSubjects []string
+		lenSubject := len(cd.Subject)
+		for i := 1; i < lenSubject; i++ {
+			partialSubjects = append(partialSubjects, utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject[:lenSubject-i]))
+		}
+		// insert partialsubjects into keyVariants
+		keyVariants = append(keyVariants[:1], append(partialSubjects, keyVariants[1:]...)...)
 	}
 	for _, key := range keyVariants {
 		if lcr, err := ratingStorage.GetLCR(key, false); err != nil && err != utils.ErrNotFound {

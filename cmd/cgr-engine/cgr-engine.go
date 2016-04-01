@@ -668,6 +668,8 @@ func main() {
 	}
 
 	engine.SetRoundingDecimals(cfg.RoundingDecimals)
+	engine.SetRpSubjectPrefixMatching(cfg.RpSubjectPrefixMatching)
+	engine.SetLcrSubjectPrefixMatching(cfg.LcrSubjectPrefixMatching)
 	stopHandled := false
 
 	// Rpc/http server

@@ -99,7 +99,8 @@ const CGRATES_CFG_JSON = `
 	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
 	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
 	"aliases": "",							// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
-    "rp_subject_prefix_matching": false	            // enables prefix matching for the rating profile subject
+    "rp_subject_prefix_matching": false,	    // enables prefix matching for the rating profile subject
+    "lcr_subject_prefix_matching": false    // enables prefix matching for the lcr subject
 },
 
 

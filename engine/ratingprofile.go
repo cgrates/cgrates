@@ -256,8 +256,9 @@ func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err erro
 	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
 	baseKey := key[:lastIndex]
 	subject := key[lastIndex:]
-	for i := 1; i < len(subject)-1; i++ {
-		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:len(subject)-i], false); err == nil {
+	lenSubject := len(subject)
+	for i := 1; i < lenSubject-1; i++ {
+		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false); err == nil {
 			return rp, err
 		}
 	}
