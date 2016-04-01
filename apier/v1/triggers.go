@@ -300,3 +300,146 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	*reply = utils.OK
 	return nil
 }
+
+type AttrSetActionTriggers struct {
+	GroupID               string
+	UniqueID              string
+	ThresholdType         *string
+	ThresholdValue        *float64
+	Recurrent             *bool
+	MinSleep              *string
+	ExpirationDate        *string
+	ActivationDate        *string
+	BalanceId             *string
+	BalanceType           *string
+	BalanceDirections     *[]string
+	BalanceDestinationIds *[]string
+	BalanceWeight         *float64
+	BalanceExpirationDate *string
+	BalanceTimingTags     *[]string
+	BalanceRatingSubject  *string
+	BalanceCategories     *[]string
+	BalanceSharedGroups   *[]string
+	BalanceBlocker        *bool
+	BalanceDisabled       *bool
+	MinQueuedItems        *int
+	ActionsId             *string
+}
+
+func (self *ApierV1) SetActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
+
+	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+
+	atrs, err := self.RatingDb.GetActionTriggers(attr.GroupID)
+	if err != nil && err != utils.ErrNotFound {
+		*reply = err.Error()
+		return err
+	}
+	var newAtr *engine.ActionTrigger
+	if attr.UniqueID != "" {
+		//search for exiting one
+		for _, atr := range atrs {
+			if atr.UniqueID == attr.UniqueID {
+				newAtr = atr
+				break
+			}
+		}
+	}
+
+	if newAtr == nil {
+		newAtr = &engine.ActionTrigger{}
+		atrs = append(atrs, newAtr)
+	}
+
+	if attr.ThresholdType != nil {
+		newAtr.ThresholdType = *attr.ThresholdType
+	}
+	if attr.ThresholdValue != nil {
+		newAtr.ThresholdValue = *attr.ThresholdValue
+	}
+	if attr.Recurrent != nil {
+		newAtr.Recurrent = *attr.Recurrent
+	}
+	if attr.MinSleep != nil {
+		minSleep, err := utils.ParseDurationWithSecs(*attr.MinSleep)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		newAtr.MinSleep = minSleep
+	}
+	if attr.ExpirationDate != nil {
+		expTime, err := utils.ParseTimeDetectLayout(*attr.ExpirationDate, self.Config.DefaultTimezone)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		newAtr.ExpirationDate = expTime
+	}
+	if attr.ActivationDate != nil {
+		actTime, err := utils.ParseTimeDetectLayout(*attr.ActivationDate, self.Config.DefaultTimezone)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		newAtr.ActivationDate = actTime
+	}
+	if attr.BalanceId != nil {
+		newAtr.Balance.ID = attr.BalanceId
+	}
+	if attr.BalanceType != nil {
+		newAtr.Balance.Type = attr.BalanceType
+	}
+	if attr.BalanceDirections != nil {
+		newAtr.Balance.Directions = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDirections...))
+	}
+	if attr.BalanceDestinationIds != nil {
+		newAtr.Balance.DestinationIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceDestinationIds...))
+	}
+	if attr.BalanceWeight != nil {
+		newAtr.Balance.Weight = attr.BalanceWeight
+	}
+	if attr.BalanceExpirationDate != nil {
+		balanceExpTime, err := utils.ParseDate(*attr.BalanceExpirationDate)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		newAtr.Balance.ExpirationDate = &balanceExpTime
+	}
+	if attr.BalanceTimingTags != nil {
+		newAtr.Balance.TimingIDs = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceTimingTags...))
+	}
+	if attr.BalanceRatingSubject != nil {
+		newAtr.Balance.RatingSubject = attr.BalanceRatingSubject
+	}
+	if attr.BalanceCategories != nil {
+		newAtr.Balance.Categories = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceCategories...))
+	}
+	if attr.BalanceSharedGroups != nil {
+		newAtr.Balance.SharedGroups = utils.StringMapPointer(utils.NewStringMap(*attr.BalanceSharedGroups...))
+	}
+	if attr.BalanceBlocker != nil {
+		newAtr.Balance.Blocker = attr.BalanceBlocker
+	}
+	if attr.BalanceDisabled != nil {
+		newAtr.Balance.Disabled = attr.BalanceDisabled
+	}
+	if attr.MinQueuedItems != nil {
+		newAtr.MinQueuedItems = *attr.MinQueuedItems
+	}
+	if attr.ActionsId != nil {
+		newAtr.ActionsID = *attr.ActionsId
+	}
+
+	if err := self.RatingDb.SetActionTriggers(attr.GroupID, atrs); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	//cache action triggers
+	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_TRIGGER_PREFIX: []string{utils.ACTION_TRIGGER_PREFIX + attr.GroupID}})
+	*reply = utils.OK
+	return nil
+}
