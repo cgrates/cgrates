@@ -307,7 +307,6 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
 						includeDest, found := b.DestinationIDs[dId.(string)]
-						utils.Logger.Debug("DID: " + dId.(string))
 						if found {
 							if includeDest {
 								b.precision = len(p)
