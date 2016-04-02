@@ -1295,8 +1295,8 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else {
 		if rcvStats.Destinations != 5 ||
-			rcvStats.RatingPlans != 4 ||
-			rcvStats.RatingProfiles != 4 ||
+			rcvStats.RatingPlans != 5 ||
+			rcvStats.RatingProfiles != 5 ||
 			rcvStats.Actions != 8 ||
 			rcvStats.DerivedChargers != 3 {
 			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
