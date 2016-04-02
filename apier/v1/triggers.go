@@ -175,7 +175,7 @@ type AttrSetAccountActionTriggers struct {
 	MinSleep              *string
 	ExpirationDate        *string
 	ActivationDate        *string
-	BalanceId             *string
+	BalanceID             *string
 	BalanceType           *string
 	BalanceDirections     *[]string
 	BalanceDestinationIds *[]string
@@ -188,7 +188,7 @@ type AttrSetAccountActionTriggers struct {
 	BalanceBlocker        *bool
 	BalanceDisabled       *bool
 	MinQueuedItems        *int
-	ActionsId             *string
+	ActionsID             *string
 }
 
 func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
@@ -238,8 +238,9 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 					}
 					at.ActivationDate = actTime
 				}
-				if attr.BalanceId != nil {
-					at.Balance.ID = attr.BalanceId
+				at.Balance = &engine.BalanceFilter{}
+				if attr.BalanceID != nil {
+					at.Balance.ID = attr.BalanceID
 				}
 				if attr.BalanceType != nil {
 					at.Balance.Type = attr.BalanceType
@@ -281,8 +282,8 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 				if attr.MinQueuedItems != nil {
 					at.MinQueuedItems = *attr.MinQueuedItems
 				}
-				if attr.ActionsId != nil {
-					at.ActionsID = *attr.ActionsId
+				if attr.ActionsID != nil {
+					at.ActionsID = *attr.ActionsID
 				}
 			}
 
@@ -301,7 +302,7 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 	return nil
 }
 
-type AttrSetActionTriggers struct {
+type AttrSetActionTrigger struct {
 	GroupID               string
 	UniqueID              string
 	ThresholdType         *string
@@ -310,7 +311,7 @@ type AttrSetActionTriggers struct {
 	MinSleep              *string
 	ExpirationDate        *string
 	ActivationDate        *string
-	BalanceId             *string
+	BalanceID             *string
 	BalanceType           *string
 	BalanceDirections     *[]string
 	BalanceDestinationIds *[]string
@@ -323,20 +324,16 @@ type AttrSetActionTriggers struct {
 	BalanceBlocker        *bool
 	BalanceDisabled       *bool
 	MinQueuedItems        *int
-	ActionsId             *string
+	ActionsID             *string
 }
 
-func (self *ApierV1) SetActionTriggers(attr AttrSetAccountActionTriggers, reply *string) error {
+func (self *ApierV1) SetActionTrigger(attr AttrSetActionTrigger, reply *string) error {
 
 	if missing := utils.MissingStructFields(&attr, []string{"GroupID"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 
-	atrs, err := self.RatingDb.GetActionTriggers(attr.GroupID)
-	if err != nil && err != utils.ErrNotFound {
-		*reply = err.Error()
-		return err
-	}
+	atrs, _ := self.RatingDb.GetActionTriggers(attr.GroupID)
 	var newAtr *engine.ActionTrigger
 	if attr.UniqueID != "" {
 		//search for exiting one
@@ -351,6 +348,12 @@ func (self *ApierV1) SetActionTriggers(attr AttrSetAccountActionTriggers, reply 
 	if newAtr == nil {
 		newAtr = &engine.ActionTrigger{}
 		atrs = append(atrs, newAtr)
+	}
+	newAtr.ID = attr.GroupID
+	if attr.UniqueID != "" {
+		newAtr.UniqueID = attr.UniqueID
+	} else {
+		newAtr.UniqueID = utils.GenUUID()
 	}
 
 	if attr.ThresholdType != nil {
@@ -386,8 +389,9 @@ func (self *ApierV1) SetActionTriggers(attr AttrSetAccountActionTriggers, reply 
 		}
 		newAtr.ActivationDate = actTime
 	}
-	if attr.BalanceId != nil {
-		newAtr.Balance.ID = attr.BalanceId
+	newAtr.Balance = &engine.BalanceFilter{}
+	if attr.BalanceID != nil {
+		newAtr.Balance.ID = attr.BalanceID
 	}
 	if attr.BalanceType != nil {
 		newAtr.Balance.Type = attr.BalanceType
@@ -430,16 +434,47 @@ func (self *ApierV1) SetActionTriggers(attr AttrSetAccountActionTriggers, reply 
 	if attr.MinQueuedItems != nil {
 		newAtr.MinQueuedItems = *attr.MinQueuedItems
 	}
-	if attr.ActionsId != nil {
-		newAtr.ActionsID = *attr.ActionsId
+	if attr.ActionsID != nil {
+		newAtr.ActionsID = *attr.ActionsID
 	}
 
 	if err := self.RatingDb.SetActionTriggers(attr.GroupID, atrs); err != nil {
 		*reply = err.Error()
 		return err
 	}
-	//cache action triggers
-	self.RatingDb.CacheRatingPrefixValues(map[string][]string{utils.ACTION_TRIGGER_PREFIX: []string{utils.ACTION_TRIGGER_PREFIX + attr.GroupID}})
+	//no cache for action triggers
 	*reply = utils.OK
+	return nil
+}
+
+type AttrGetActionTriggers struct {
+	GroupIDs []string
+}
+
+func (self *ApierV1) GetActionTriggers(attr AttrGetActionTriggers, atrs *engine.ActionTriggers) error {
+	var allAttrs engine.ActionTriggers
+	if len(attr.GroupIDs) > 0 {
+		for _, key := range attr.GroupIDs {
+			getAttrs, err := self.RatingDb.GetActionTriggers(key)
+			if err != nil {
+				return err
+			}
+			allAttrs = append(allAttrs, getAttrs...)
+		}
+
+	} else {
+		keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX, true)
+		if err != nil {
+			return err
+		}
+		for _, key := range keys {
+			getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):])
+			if err != nil {
+				return err
+			}
+			allAttrs = append(allAttrs, getAttrs...)
+		}
+	}
+	*atrs = allAttrs
 	return nil
 }

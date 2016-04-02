@@ -310,6 +310,12 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]strin
 				result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
 			}
 			return result, nil
+		case utils.ACTION_TRIGGER_PREFIX:
+			iter := ms.db.C(colAtr).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.ACTION_TRIGGER_PREFIX+keyResult.Key)
+			}
+			return result, nil
 		case utils.ACCOUNT_PREFIX:
 			iter := ms.db.C(colAcc).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 			for iter.Next(&idResult) {
