@@ -52,4 +52,6 @@ imports:
   version: d90005c5262a3463800497ea5a89aed5fe22c886
   subpackages:
   - bson
+- name: github.com/jinzhu/inflection
+  version: 3272df6c21d04180007eb3349844c89a3856bc25
 devImports: []
