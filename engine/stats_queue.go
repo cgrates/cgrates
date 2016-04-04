@@ -184,19 +184,21 @@ func (sq *StatsQueue) purgeObsoleteCdrs() {
 		}
 	}
 	if sq.conf.TimeWindow > 0 {
-		var index int
+		index := -1
 		for i, cdr := range sq.Cdrs {
 			if time.Now().Sub(cdr.SetupTime) > sq.conf.TimeWindow {
 				sq.removeFromMetrics(cdr)
+				index = i
 				continue
 			}
-			index = i
 			break
 		}
-		if index > 0 {
-			sq.Cdrs = sq.Cdrs[index:]
-		} else {
-			sq.Cdrs = make([]*QCdr, 0)
+		if index != -1 {
+			if index > 0 {
+				sq.Cdrs = sq.Cdrs[index:]
+			} else {
+				sq.Cdrs = make([]*QCdr, 0)
+			}
 		}
 	}
 }

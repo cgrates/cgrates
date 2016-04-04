@@ -227,7 +227,7 @@ func TestStatsAppendCdr(t *testing.T) {
 	if len(cdrStats.queues) != 2 ||
 		len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
 		len(cdrStats.queues["CDRST2"].Cdrs) != 1 {
-		t.Error("Error appending cdr to queue: ", len(cdrStats.queues))
+		t.Error("Error appending cdr to queue: ", utils.ToIJSON(cdrStats.queues))
 	}
 }
 
