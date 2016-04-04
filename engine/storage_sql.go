@@ -957,7 +957,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 		extraFieldsMp := make(map[string]string)
 		if result.ExtraFields != "" {
 			if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
-				utils.Logger.Debug(fmt.Sprintf("Unmarshall json for result: %+v, error: %v", result.ExtraFields, err))
 				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
 		}
