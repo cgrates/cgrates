@@ -69,7 +69,7 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	return dSM
 }
 
-func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor, cca *CCA) (bool, error) {
+func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor, processorVars map[string]string, cca *CCA) (bool, error) {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
 		if passes, _ := passesFieldFilter(ccr.diamMessage, fldFilter, nil); !passes {
@@ -122,7 +122,6 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		}
 	}
 	var maxUsage float64
-	processorVars := make(map[string]string)
 	processorVars[CGRResultCode] = strconv.Itoa(diam.Success)
 	processorVars[CGRError] = ""
 	if reqProcessor.DryRun { // DryRun does not send over network
@@ -166,6 +165,15 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				processorVars[CGRResultCode] = strconv.Itoa(DiameterRatingFailed)
 			}
 		}
+		if maxUsage < 0 {
+			maxUsage = 0
+		}
+		if prevMaxUsageStr, hasKey := processorVars[CGRMaxUsage]; hasKey {
+			prevMaxUsage, _ := strconv.ParseFloat(prevMaxUsageStr, 64)
+			if prevMaxUsage < maxUsage {
+				maxUsage = prevMaxUsage
+			}
+		}
 		processorVars[CGRMaxUsage] = strconv.FormatFloat(maxUsage, 'f', -1, 64)
 	}
 	if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, processorVars[CGRResultCode],
@@ -191,8 +199,9 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 	}
 	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
 	var processed, lclProcessed bool
+	processorVars := make(map[string]string) // Shared between processors
 	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
-		lclProcessed, err = self.processCCR(ccr, reqProcessor, cca)
+		lclProcessed, err = self.processCCR(ccr, reqProcessor, processorVars, cca)
 		if lclProcessed { // Process local so we don't overwrite globally
 			processed = lclProcessed
 		}

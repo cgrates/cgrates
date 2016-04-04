@@ -626,7 +626,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 			}),
 			diam.NewAVP(29000, avp.Mbit, 2011, &diam.GroupedAVP{ // MC-Information
 				AVP: []*diam.AVP{
-					diam.NewAVP(29938, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
+					diam.NewAVP(20938, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
 					diam.NewAVP(29002, avp.Mbit, 2011, datatype.UTF8String("12928471313847173")), // MC-Service-Id
 					diam.NewAVP(29003, avp.Mbit, 2011, datatype.UTF8String("SPV123456012123")),   // TransparentData
 					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // MC-Information
@@ -641,7 +641,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 	if err := dmtClient.SendMessage(ccr); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
 	if msg == nil {
 		t.Fatal("No message returned")
