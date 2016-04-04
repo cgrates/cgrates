@@ -30,8 +30,8 @@ CREATE TABLE cdrs (
  cost_details jsonb,
  extra_info text,
  created_at TIMESTAMP,
- updated_at TIMESTAMP,
- deleted_at TIMESTAMP,
+ updated_at TIMESTAMP NULL,
+ deleted_at TIMESTAMP NULL,
  UNIQUE (cgrid, run_id, origin_id)
 );
 ;
@@ -50,7 +50,7 @@ CREATE TABLE sm_costs (
   usage NUMERIC(30,9) NOT NULL,
   cost_details jsonb,
   created_at TIMESTAMP,
-  deleted_at TIMESTAMP,
+  deleted_at TIMESTAMP NULL,
   UNIQUE (cgrid, run_id)
 );
 DROP INDEX IF EXISTS cgrid_smcost_idx;

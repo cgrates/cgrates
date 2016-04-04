@@ -47,8 +47,8 @@
 
 "sm_generic": {
 	"enabled": true,
-	"rater": "127.0.0.1:2013",
-	"cdrs": "127.0.0.1:2013",
+	"rater": "internal",
+	"cdrs": "internal",
 },
 
 "diameter_agent": {

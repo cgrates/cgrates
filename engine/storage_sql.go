@@ -34,7 +34,7 @@ import (
 
 type SQLStorage struct {
 	Db *sql.DB
-	db gorm.DB
+	db *gorm.DB
 }
 
 func (self *SQLStorage) Close() {
@@ -675,8 +675,8 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 			return saved.Error
 		}
 		tx = self.db.Begin()
-		updated := tx.Model(TBLCDRs{}).Where(&TBLCDRs{Cgrid: cdr.CGRID, RunID: cdr.RunID}).Updates(
-			&TBLCDRs{
+		updated := tx.Model(&TBLCDRs{}).Where(&TBLCDRs{Cgrid: cdr.CGRID, RunID: cdr.RunID, OriginID: cdr.OriginID}).Updates(
+			TBLCDRs{
 				OriginHost:      cdr.OriginHost,
 				Source:          cdr.Source,
 				OriginID:        cdr.OriginID,
@@ -718,9 +718,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	q := self.db.Table(utils.TBL_CDRS).Select("*")
 	if qryFltr.Unscoped {
 		q = q.Unscoped()
-	} else {
-		// Query filter
-		q = q.Where("(deleted_at IS NULL OR deleted_at <= '0001-01-02')") // Soft deletes
 	}
 	// Add filters, use in to replace the high number of ORs
 	if len(qryFltr.CGRIDs) != 0 {
@@ -957,12 +954,15 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	q.Find(&results)
 
 	for _, result := range results {
-		var extraFieldsMp map[string]string
-		if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
-			return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
+		extraFieldsMp := make(map[string]string)
+		if result.ExtraFields != "" {
+			if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
+				utils.Logger.Debug(fmt.Sprintf("Unmarshall json for result: %+v, error: %v", result.ExtraFields, err))
+				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
+			}
 		}
 		var callCost CallCost
-		if len(result.CostDetails) != 0 {
+		if result.CostDetails != "" {
 			if err := json.Unmarshal([]byte(result.CostDetails), &callCost); err != nil {
 				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
