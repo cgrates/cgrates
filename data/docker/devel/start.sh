@@ -2,6 +2,7 @@
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/redis/redis.conf /etc/mysql/my.cnf
 echo 'host    all             all             0.0.0.0/32            md5'>>/etc/postgresql/9.4/main/pg_hba.conf
 
+/etc/init.d/rsyslog start
 /etc/init.d/mysql start
 /etc/init.d/postgresql start
 /etc/init.d/redis-server start

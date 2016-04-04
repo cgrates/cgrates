@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -106,7 +107,7 @@ func TestTpBalanceCounter(t *testing.T) {
 	var cc engine.CallCost
 	if err := tpRPC.Call("Responder.Debit", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.GetDuration() == 20 {
+	} else if cc.GetDuration() != 20*time.Second {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", cc.GetDuration())
 	}
 	var acnt *engine.Account
@@ -115,5 +116,74 @@ func TestTpBalanceCounter(t *testing.T) {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if acnt.UnitCounters[utils.MONETARY][1].Counters[0].Value != 20.0 {
 		t.Errorf("Calling ApierV2.GetBalance received: %s", utils.ToIJSON(acnt))
+	}
+}
+
+func TestTpActionTriggers(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var atrs engine.ActionTriggers
+	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
+		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
+	} else if len(atrs) != 9 {
+		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
+	}
+	var reply string
+	if err := tpRPC.Call("ApierV1.SetActionTrigger", v1.AttrSetActionTrigger{
+		GroupID:   "TestATR",
+		UniqueID:  "Unique atr id",
+		BalanceID: utils.StringPointer("BID1"),
+	}, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetActionTrigger: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling v1.SetActionTrigger got: %v", reply)
+	}
+
+	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{}}, &atrs); err != nil {
+		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
+	} else if len(atrs) != 10 {
+		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
+	}
+	if err := tpRPC.Call("ApierV1.GetActionTriggers", v1.AttrGetActionTriggers{GroupIDs: []string{"TestATR"}}, &atrs); err != nil {
+		t.Error("Got error on ApierV1.GetActionTriggers: ", err.Error())
+	} else if len(atrs) != 1 {
+		t.Errorf("Calling v1.GetActionTriggers got: %v", atrs)
+	}
+	if atrs[0].ID != "TestATR" ||
+		atrs[0].UniqueID != "Unique atr id" ||
+		*atrs[0].Balance.ID != "BID1" {
+		t.Error("Wrong action trigger set: ", utils.ToIJSON(atrs[0]))
+	}
+}
+
+func TestTpZeroCost(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
+	cd := engine.CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "free",
+		Account:       "1012",
+		Destination:   "+49",
+		DurationIndex: 0,
+		TimeStart:     tStart,
+		TimeEnd:       tStart.Add(time.Duration(20) * time.Second),
+	}
+	var cc engine.CallCost
+	if err := tpRPC.Call("Responder.Debit", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.GetDuration() != 20*time.Second {
+		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))
+	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1012"}
+	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 11.0 {
+		t.Errorf("Calling ApierV2.GetAccount received: %s", utils.ToIJSON(acnt))
 	}
 }
