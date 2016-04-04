@@ -458,3 +458,25 @@ func TestStatsSaveRestoreQeue(t *testing.T) {
 		t.Errorf("Expecting %+v got: %+v", sq.Cdrs[0], recovered.Cdrs[0])
 	}
 }
+
+func TestStatsPurge(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	cdr := &CDR{
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	sq.AppendCDR(cdr)
+	cdr.Cost = 2
+	sq.AppendCDR(cdr)
+	cdr.Cost = 3
+	sq.AppendCDR(cdr)
+	s := sq.GetStats()
+	if s[ASR] != -1 ||
+		s[ACD] != -1 ||
+		s[TCD] != -1 ||
+		s[ACC] != -1 ||
+		s[TCC] != -1 {
+		t.Errorf("Error getting stats: %+v", s)
+	}
+}
