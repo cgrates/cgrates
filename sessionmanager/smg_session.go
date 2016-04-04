@@ -79,6 +79,8 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
 	requestedDuration := dur
+	//utils.Logger.Debug(fmt.Sprintf("InitDur: %f, lastUsed: %f", requestedDuration.Seconds(), lastUsed.Seconds()))
+	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f, extraDuration: %f", self.totalUsage.Seconds(), self.extraDuration.Seconds()))
 	self.totalUsage += lastUsed // Should reflect the total usage so far
 	if lastUsed > 0 {
 		self.extraDuration = self.lastUsage - lastUsed
@@ -109,6 +111,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.cd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	// update call duration with real debited duration
 	ccDuration := cc.GetDuration()
+	utils.Logger.Debug(fmt.Sprintf("CCDur: %f", ccDuration.Seconds()))
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
@@ -121,8 +124,10 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.lastUsage = initialExtraDuration + ccDuration
 
 	if ccDuration >= dur { // we got what we asked to be debited
+		//utils.Logger.Debug(fmt.Sprintf("returning normal: %f", requestedDuration.Seconds()))
 		return requestedDuration, nil
 	}
+	//utils.Logger.Debug(fmt.Sprintf("returning initialExtra: %f + ccDuration: %f", initialExtraDuration.Seconds(), ccDuration.Seconds()))
 	return initialExtraDuration + ccDuration, nil
 }
 
