@@ -190,6 +190,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			b.SubstractValue(bClone.GetValue())
 			b.dirty = true
 			found = true
+			a.balanceValue = b.GetValue()
 		}
 	}
 	// if it is not found then we add it to the list
@@ -207,7 +208,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			}
 		}
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
-
+		a.balanceValue = bClone.GetValue()
 		bClone.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
 		// load ValueFactor if defined in extra parametrs
 		if a.ExtraParameters != "" {
