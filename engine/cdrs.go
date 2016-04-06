@@ -29,8 +29,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
-	"github.com/jinzhu/gorm"
-	mgov2 "gopkg.in/mgo.v2"
 )
 
 var cdrServer *CdrServer // Share the server so we can use it in http handlers
@@ -360,7 +358,9 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 			if err == nil && len(smCosts) != 0 {
 				break
 			}
-			time.Sleep(delay())
+			if i != 3 {
+				time.Sleep(delay())
+			}
 		}
 		if len(smCosts) != 0 { // Cost retrieved from SMCost table
 			for _, smCost := range smCosts {
@@ -375,7 +375,7 @@ func (self *CdrServer) rateCDR(cdr *CDR) ([]*CDR, error) {
 			}
 			return cdrsRated, nil
 		}
-		if err != nil && (err == gorm.ErrRecordNotFound || err == mgov2.ErrNotFound) { //calculate CDR as for pseudoprepaid
+		if len(smCosts) == 0 { //calculate CDR as for pseudoprepaid
 			utils.Logger.Warning(fmt.Sprintf("<Cdrs> WARNING: Could not find CallCostLog for cgrid: %s, source: %s, runid: %s, will recalculate", cdr.CGRID, utils.SESSION_MANAGER_SOURCE, cdr.RunID))
 			qryCC, err = self.getCostFromRater(cdr)
 		}
