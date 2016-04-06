@@ -287,6 +287,11 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVa
 	if err != nil {
 		return false, 0
 	}
+	if len(avps) == 0 { // No AVP found in request, treat it same as empty
+		if fieldFilter.FilterPasses("") {
+			return true, -1
+		}
+	}
 	for avpIdx, avpVal := range avps { // First match wins due to index
 		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
 			return true, avpIdx

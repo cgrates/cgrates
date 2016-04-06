@@ -473,3 +473,10 @@ func TestCCRAsSMGenericEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, rSMGEv)
 	}
 }
+
+func TestPassesFieldFilter(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil) // Multiple-Services-Credit-Control>Rating-Group
+	if pass, _ := passesFieldFilter(m, utils.ParseRSRFieldsMustCompile("Multiple-Services-Credit-Control>Rating-Group(^$)", utils.INFIELD_SEP)[0], nil); !pass {
+		t.Error("Does not pass")
+	}
+}
