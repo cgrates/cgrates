@@ -45,6 +45,7 @@ type Action struct {
 	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
 	Balance          *BalanceFilter
+	balanceValue     float64 // balance value after action execution, used with cdrlog
 }
 
 const (
@@ -181,6 +182,8 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 			parsedValue += rsrFld.ParseValue(action.Id)
 		case "ActionType":
 			parsedValue += rsrFld.ParseValue(action.ActionType)
+		case "ActionValue":
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
 		case "BalanceType":
 			parsedValue += rsrFld.ParseValue(action.Balance.GetType())
 		case "BalanceUUID":
@@ -188,7 +191,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "BalanceID":
 			parsedValue += rsrFld.ParseValue(b.ID)
 		case "BalanceValue":
-			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.balanceValue, 'f', -1, 64))
 		case "DestinationIDs":
 			parsedValue += rsrFld.ParseValue(b.DestinationIDs.String())
 		case "ExtraParameters":
@@ -215,7 +218,7 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 		utils.TENANT:    utils.ParseRSRFieldsMustCompile(utils.TENANT, utils.INFIELD_SEP),
 		utils.ACCOUNT:   utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP),
 		utils.SUBJECT:   utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP),
-		utils.COST:      utils.ParseRSRFieldsMustCompile("BalanceValue", utils.INFIELD_SEP),
+		utils.COST:      utils.ParseRSRFieldsMustCompile("ActionValue", utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 
@@ -329,7 +332,9 @@ func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	return genericDebit(ub, c, true)
+	err = genericDebit(ub, c, true)
+	a.balanceValue = c.balanceValue
+	return
 }
 
 func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -338,7 +343,9 @@ func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	return genericDebit(ub, c, false)
+	err = genericDebit(ub, c, false)
+	a.balanceValue = c.balanceValue
+	return
 }
 
 func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {

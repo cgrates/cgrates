@@ -67,7 +67,11 @@ func NewStringMap(s ...string) StringMap {
 	for _, v := range s {
 		v = strings.TrimSpace(v)
 		if v != "" {
-			result[v] = true
+			if strings.HasPrefix(v, "!") {
+				result[v[1:]] = false
+			} else {
+				result[v] = true
+			}
 		}
 	}
 	return result
@@ -128,7 +132,11 @@ func StringMapFromSlice(s []string) StringMap {
 	for _, v := range s {
 		v = strings.TrimSpace(v)
 		if v != "" {
-			result[v] = true
+			if strings.HasPrefix(v, "!") {
+				result[v[1:]] = false
+			} else {
+				result[v] = true
+			}
 		}
 	}
 	return result

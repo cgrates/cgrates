@@ -2097,6 +2097,53 @@ func TestActionExpNoExp(t *testing.T) {
 	}
 }
 
+func TestActionCdrlogBalanceValue(t *testing.T) {
+	err := accountingStorage.SetAccount(&Account{
+		ID: "cgrates.org:bv",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{&Balance{
+				Value: 10,
+			}},
+		},
+	})
+	if err != nil {
+		t.Error("Error setting account: ", err)
+	}
+	at := &ActionTiming{
+		accountIDs: utils.StringMap{"cgrates.org:bv": true},
+		Timing:     &RateInterval{},
+		actions: []*Action{
+			&Action{
+				ActionType: TOPUP,
+				Balance:    &BalanceFilter{Value: utils.Float64Pointer(1.1), Type: utils.StringPointer(utils.MONETARY)},
+			},
+			&Action{
+				ActionType: DEBIT,
+				Balance:    &BalanceFilter{Value: utils.Float64Pointer(2.1), Type: utils.StringPointer(utils.MONETARY)},
+			},
+			&Action{
+				ActionType:      CDRLOG,
+				ExtraParameters: `{"BalanceValue":"BalanceValue"}`,
+			},
+		},
+	}
+	err = at.Execute()
+	acc, err := accountingStorage.GetAccount("cgrates.org:bv")
+	if err != nil || acc == nil {
+		t.Error("Error getting account: ", acc, err)
+	}
+	if acc.BalanceMap[utils.MONETARY][0].Value != 9 {
+		t.Errorf("Transaction didn't work: %v", acc.BalanceMap[utils.MONETARY][0].Value)
+	}
+	cdrs := make([]*CDR, 0)
+	json.Unmarshal([]byte(at.actions[2].ExpirationString), &cdrs)
+	if len(cdrs) != 2 ||
+		cdrs[0].ExtraFields["BalanceValue"] != "11.1" ||
+		cdrs[1].ExtraFields["BalanceValue"] != "9" {
+		t.Errorf("Wrong cdrlogs: %+v", cdrs[1])
+	}
+}
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {
