@@ -567,7 +567,7 @@ func (self *ApierV1) RemoveBalances(attr *AttrSetBalance, reply *string) error {
 	at := &engine.ActionTiming{}
 	at.SetAccountIDs(utils.StringMap{accID: true})
 	a := &engine.Action{
-		ActionType: engine.SET_BALANCE,
+		ActionType: engine.REMOVE_BALANCE,
 		Balance: &engine.BalanceFilter{
 			Uuid:           attr.BalanceUUID,
 			ID:             attr.BalanceID,
