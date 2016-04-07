@@ -35,24 +35,47 @@ var ErrPartiallyExecuted = errors.New("Partially executed")
 
 func NewSMGeneric(cgrCfg *config.CGRConfig, rater engine.Connector, cdrsrv engine.Connector, timezone string, extconns *SMGExternalConnections) *SMGeneric {
 	gsm := &SMGeneric{cgrCfg: cgrCfg, rater: rater, cdrsrv: cdrsrv, extconns: extconns, timezone: timezone,
-		sessions: make(map[string][]*SMGSession), sessionsMux: new(sync.Mutex), guard: engine.Guardian}
+		sessions: make(map[string][]*SMGSession), sessionTerminators: make(map[string]*smgSessionTerminator), sessionsMux: new(sync.RWMutex), guard: engine.Guardian}
 	return gsm
 }
 
 type SMGeneric struct {
-	cgrCfg      *config.CGRConfig // Separate from smCfg since there can be multiple
-	rater       engine.Connector
-	cdrsrv      engine.Connector
-	timezone    string
-	sessions    map[string][]*SMGSession //Group sessions per sessionId, multiple runs based on derived charging
-	extconns    *SMGExternalConnections  // Reference towards external connections manager
-	sessionsMux *sync.Mutex              // Locks sessions map
-	guard       *engine.GuardianLock     // Used to lock on uuid
+	cgrCfg             *config.CGRConfig // Separate from smCfg since there can be multiple
+	rater              engine.Connector
+	cdrsrv             engine.Connector
+	timezone           string
+	sessions           map[string][]*SMGSession         //Group sessions per sessionId, multiple runs based on derived charging
+	sessionTerminators map[string]*smgSessionTerminator // terminate and cleanup the session if timer expires
+	extconns           *SMGExternalConnections          // Reference towards external connections manager
+	sessionsMux        *sync.RWMutex                    // Locks sessions map
+	guard              *engine.GuardianLock             // Used to lock on uuid
+}
+type smgSessionTerminator struct {
+	timer   *time.Timer
+	endChan chan bool
 }
 
 func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
 	self.sessionsMux.Lock()
 	self.sessions[uuid] = append(self.sessions[uuid], s)
+	if self.cgrCfg.SmGenericConfig.SessionTTL > 0 {
+		if _, found := self.sessionTerminators[uuid]; !found {
+			timer := time.NewTimer(self.cgrCfg.SmGenericConfig.SessionTTL)
+			endChan := make(chan bool, 1)
+			go func() {
+				select {
+				case <-timer.C:
+					self.sessionEnd(uuid, 0)
+				case <-endChan:
+					timer.Stop()
+				}
+			}()
+			self.sessionTerminators[uuid] = &smgSessionTerminator{
+				timer:   timer,
+				endChan: endChan,
+			}
+		}
+	}
 	self.sessionsMux.Unlock()
 }
 
@@ -60,10 +83,14 @@ func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
 func (self *SMGeneric) unindexSession(uuid string) bool {
 	self.sessionsMux.Lock()
 	defer self.sessionsMux.Unlock()
-	if _, hasIt := self.sessions[uuid]; !hasIt {
+	if _, found := self.sessions[uuid]; !found {
 		return false
 	}
 	delete(self.sessions, uuid)
+	if st, found := self.sessionTerminators[uuid]; found {
+		st.endChan <- true
+		delete(self.sessionTerminators, uuid)
+	}
 	return true
 }
 
@@ -88,9 +115,18 @@ func (self *SMGeneric) getSessionIDsForPrefix(prefix string) []string {
 
 // Returns sessions/derived for a specific uuid
 func (self *SMGeneric) getSession(uuid string) []*SMGSession {
-	self.sessionsMux.Lock()
-	defer self.sessionsMux.Unlock()
+	self.sessionsMux.RLock()
+	defer self.sessionsMux.RUnlock()
 	return self.sessions[uuid]
+}
+
+// Updates the timer for the session to a new ttl
+func (self *SMGeneric) resetTerminatorTimer(uuid string) {
+	self.sessionsMux.RLock()
+	defer self.sessionsMux.RUnlock()
+	if st, found := self.sessionTerminators[uuid]; found {
+		st.timer.Reset(self.cgrCfg.SmGenericConfig.SessionTTL)
+	}
 }
 
 // Handle a new session, pass the connectionId so we can communicate on disconnect request
@@ -221,6 +257,7 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
+	self.resetTerminatorTimer(gev.GetUUID())
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update

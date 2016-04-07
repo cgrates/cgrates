@@ -79,6 +79,7 @@ type SmGenericConfig struct {
 	DebitInterval   time.Duration
 	MinCallDuration time.Duration
 	MaxCallDuration time.Duration
+	SessionTTL      time.Duration
 }
 
 func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
@@ -110,6 +111,11 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 	}
 	if jsnCfg.Max_call_duration != nil {
 		if self.MaxCallDuration, err = utils.ParseDurationWithSecs(*jsnCfg.Max_call_duration); err != nil {
+			return err
+		}
+	}
+	if jsnCfg.Session_ttl != nil {
+		if self.SessionTTL, err = utils.ParseDurationWithSecs(*jsnCfg.Session_ttl); err != nil {
 			return err
 		}
 	}

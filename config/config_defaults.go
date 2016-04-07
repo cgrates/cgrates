@@ -210,6 +210,7 @@ const CGRATES_CFG_JSON = `
 	"debit_interval": "0s",					// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+    "session_ttl": "0s",                    // time after a session with no updates is terminated
 },
 
 
