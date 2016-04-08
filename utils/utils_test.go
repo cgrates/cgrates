@@ -156,7 +156,20 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
+	tmStr = "2016-04-01T02:00:00+02:00"
+	expectedTime = time.Date(2016, 4, 1, 0, 0, 0, 0, time.UTC)
+	tm, err = ParseTimeDetectLayout(tmStr, "")
+	if err != nil {
+		t.Error(err)
+	} else if !tm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", tm, expectedTime)
+	}
+	_, err = ParseTimeDetectLayout(tmStr[1:], "")
+	if err == nil {
+		t.Errorf("Expecting error")
+	}
 	sqlTmStr := "2013-12-30 15:00:01"
+	expectedTime = time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)
 	sqlTm, err := ParseTimeDetectLayout(sqlTmStr, "")
 	if err != nil {
 		t.Error(err)
@@ -290,6 +303,11 @@ func TestParseDateRFC3339(t *testing.T) {
 	expected := time.Date(2013, 7, 30, 19, 33, 10, 0, time.UTC)
 	if err != nil || !date.Equal(expected) {
 		t.Error("error parsing date: ", expected.Sub(date))
+	}
+	date, err = ParseDate("2016-04-01T02:00:00+02:00")
+	expected = time.Date(2016, 4, 1, 0, 0, 0, 0, time.UTC)
+	if err != nil || !date.Equal(expected) {
+		t.Errorf("Expecting: %v, received: %v", expected, date)
 	}
 }
 
