@@ -174,6 +174,7 @@ type SmGenericJsonCfg struct {
 	Debit_interval    *string
 	Min_call_duration *string
 	Max_call_duration *string
+	Session_ttl       *string
 }
 
 // SM-FreeSWITCH config section
