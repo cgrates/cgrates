@@ -74,6 +74,7 @@ const (
 	CDRLOG                    = "*cdrlog"
 	SET_DDESTINATIONS         = "*set_ddestinations"
 	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
+	CGR_RPC                   = "*cgr_rpc"
 )
 
 func (a *Action) Clone() *Action {
@@ -140,6 +141,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return setBalanceAction, true
 	case TRANSFER_MONETARY_DEFAULT:
 		return transferMonetaryDefaultAction, true
+	case CGR_RPC:
+		return cgrRPCAction, true
 	}
 	return nil, false
 }
@@ -643,6 +646,22 @@ func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Act
 				balance.Value = 0
 			}
 		}
+	}
+	return nil
+}
+
+type RPCRequest struct {
+	Server    string
+	Transport string
+	Attempts  int
+	Async     bool
+	Arg       map[string]interface{}
+}
+
+func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	rpcRequest := RPCRequest{}
+	if err := json.Unmarshal([]byte(a.ExtraParameters), &rpcRequest); err != nil {
+		return err
 	}
 	return nil
 }

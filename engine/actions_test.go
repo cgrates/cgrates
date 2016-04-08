@@ -2102,6 +2102,8 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 		ID: "cgrates.org:bv",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
+				ID:    "*default",
+				Uuid:  "25a02c82-f09f-4c6e-bacf-8ed4b076475a",
 				Value: 10,
 			}},
 		},
@@ -2114,16 +2116,29 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
+				Id:         "RECUR_FOR_V3HSILLMILLD1G",
 				ActionType: TOPUP,
-				Balance:    &BalanceFilter{Value: utils.Float64Pointer(1.1), Type: utils.StringPointer(utils.MONETARY)},
+				Balance: &BalanceFilter{
+					ID:    utils.StringPointer("*default"),
+					Uuid:  utils.StringPointer("25a02c82-f09f-4c6e-bacf-8ed4b076475a"),
+					Value: utils.Float64Pointer(1.1),
+					Type:  utils.StringPointer(utils.MONETARY),
+				},
 			},
 			&Action{
+				Id:         "RECUR_FOR_V3HSILLMILLD5G",
 				ActionType: DEBIT,
-				Balance:    &BalanceFilter{Value: utils.Float64Pointer(2.1), Type: utils.StringPointer(utils.MONETARY)},
+				Balance: &BalanceFilter{
+					ID:    utils.StringPointer("*default"),
+					Uuid:  utils.StringPointer("25a02c82-f09f-4c6e-bacf-8ed4b076475a"),
+					Value: utils.Float64Pointer(2.1),
+					Type:  utils.StringPointer(utils.MONETARY),
+				},
 			},
 			&Action{
+				Id:              "c",
 				ActionType:      CDRLOG,
-				ExtraParameters: `{"BalanceValue":"BalanceValue"}`,
+				ExtraParameters: `{"BalanceID":"BalanceID","BalanceUUID":"BalanceUUID","ActionID":"ActionID","BalanceValue":"BalanceValue"}`,
 			},
 		},
 	}
@@ -2140,7 +2155,7 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 	if len(cdrs) != 2 ||
 		cdrs[0].ExtraFields["BalanceValue"] != "11.1" ||
 		cdrs[1].ExtraFields["BalanceValue"] != "9" {
-		t.Errorf("Wrong cdrlogs: %+v", cdrs[1])
+		t.Errorf("Wrong cdrlogs: %", utils.ToIJSON(cdrs))
 	}
 }
 
