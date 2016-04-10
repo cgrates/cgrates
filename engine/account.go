@@ -190,6 +190,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			b.SubstractValue(bClone.GetValue())
 			b.dirty = true
 			found = true
+			a.balanceValue = b.GetValue()
 		}
 	}
 	// if it is not found then we add it to the list
@@ -207,7 +208,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 			}
 		}
 		bClone.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
-
+		a.balanceValue = bClone.GetValue()
 		bClone.Uuid = utils.GenUUID() // alway overwrite the uuid for consistency
 		// load ValueFactor if defined in extra parametrs
 		if a.ExtraParameters != "" {
@@ -287,7 +288,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 		if b.Disabled {
 			continue
 		}
-		if b.IsExpired() || (len(b.SharedGroups) == 0 && b.GetValue() <= 0) {
+		if b.IsExpired() || (len(b.SharedGroups) == 0 && b.GetValue() <= 0 && !b.Blocker) {
 			continue
 		}
 		if sharedGroup != "" && b.SharedGroups[sharedGroup] == false {
@@ -305,14 +306,20 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					for dId, _ := range destIds {
-						if b.DestinationIDs[dId.(string)] == true {
-							b.precision = len(p)
-							usefulBalances = append(usefulBalances, b)
-							break
+						includeDest, found := b.DestinationIDs[dId.(string)]
+						if found {
+							if includeDest {
+								b.precision = len(p)
+								usefulBalances = append(usefulBalances, b)
+								break
+							} else { // the balance had !, so now equals false => exclude balance
+								b.precision = 1 // fake to exit the outer loop
+								break
+							}
 						}
-						if b.precision > 0 {
+						/*if b.precision > 0 {
 							break
-						}
+						}*/
 					}
 				}
 				if b.precision > 0 {

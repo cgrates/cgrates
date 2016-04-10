@@ -115,7 +115,7 @@ func TestTutLocalCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 4, RatingProfiles: 9, Actions: 7, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 4, RatingProfiles: 9, Actions: 8, ActionPlans: 4, SharedGroups: 1, Aliases: 1,
 		DerivedChargers: 1, LcrProfiles: 5, CdrStats: 6, Users: 3, LastLoadId: loadInst.LoadId, LastLoadTime: loadInst.LoadTime.Format(time.RFC3339)}
 	var args utils.AttrCacheStats
 	if err := tutLocalRpc.Call("ApierV2.GetCacheStats", args, &rcvStats); err != nil {
@@ -718,7 +718,7 @@ func TestTutLocalCostErrors(t *testing.T) {
 }
 
 // Make sure queueids were created
-func TestTutFsCallsCdrStats(t *testing.T) {
+func TestTutLocalCdrStats(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1291,6 +1291,101 @@ func TestTutLocalCdrStatsAfter(t *testing.T) {
 	}
 }
 */
+
+func TestTutLocalPrepaidCDRWithSMCost(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid1", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
+		ToR: utils.VOICE, OriginID: "testprepaid1", OriginHost: "192.168.1.1", Source: "TEST_PREPAID_CDR_SMCOST1", RequestType: utils.META_PREPAID,
+		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
+		SetupTime: time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC), AnswerTime: time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
+		Usage: time.Duration(90) * time.Second, Supplier: "suppl1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
+	smCost := &engine.SMCost{CGRID: cdr.CGRID,
+		RunID:      utils.META_DEFAULT,
+		OriginHost: cdr.OriginHost,
+		OriginID:   cdr.OriginID,
+		CostSource: "TestTutLocalPrepaidCDRWithSMCost",
+		Usage:      cdr.Usage.Seconds(),
+		CostDetails: &engine.CallCost{
+			Direction:   utils.OUT,
+			Destination: "1003",
+			Timespans: []*engine.TimeSpan{
+				&engine.TimeSpan{
+					TimeStart:     time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC).Local(), // MongoDB saves timestamps in local timezone
+					TimeEnd:       time.Date(2016, 4, 6, 13, 31, 30, 0, time.UTC).Local(),
+					DurationIndex: 0,
+					RateInterval: &engine.RateInterval{
+						Rating: &engine.RIRate{Rates: engine.RateGroups{
+							&engine.Rate{GroupIntervalStart: 0, Value: 0.01, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				},
+			},
+			TOR: utils.VOICE,
+		},
+	}
+	var reply string
+	if err := tutLocalRpc.Call("CdrsV2.StoreSMCost", &engine.AttrCDRSStoreSMCost{Cost: smCost}, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	if err := tutLocalRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for CDR to be processed
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
+	if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].OriginID != cdr.OriginID {
+			t.Errorf("Unexpected OriginID for Cdr received: %+v", cdrs[0])
+		}
+		if cdrs[0].Cost != 0.9 {
+			t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
+		}
+	}
+}
+
+func TestTutLocalPrepaidCDRWithoutSMCost(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cdr := &engine.CDR{CGRID: utils.Sha1("testprepaid2", time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC).String()),
+		ToR: utils.VOICE, OriginID: "testprepaid2", OriginHost: "192.168.1.1", Source: "TEST_PREPAID_CDR_NO_SMCOST1", RequestType: utils.META_PREPAID,
+		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1003",
+		SetupTime: time.Date(2016, 4, 6, 13, 29, 24, 0, time.UTC), AnswerTime: time.Date(2016, 4, 6, 13, 30, 0, 0, time.UTC),
+		Usage: time.Duration(90) * time.Second, Supplier: "suppl1",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
+	var reply string
+	if err := tutLocalRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply received: ", reply)
+	}
+	/*
+		time.Sleep(time.Duration(7000) * time.Millisecond) // Give time for CDR to be processed
+		var cdrs []*engine.ExternalCDR
+		req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, CGRIDs: []string{cdr.CGRID}}
+		if err := tutLocalRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if len(cdrs) != 1 {
+			t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+		} else {
+			if cdrs[0].OriginID != cdr.OriginID {
+				t.Errorf("Unexpected OriginID for Cdr received: %+v", cdrs[0])
+			}
+			if cdrs[0].Cost != 0.9 {
+				t.Errorf("Unexpected Cost for Cdr received: %+v", cdrs[0])
+			}
+		}
+	*/
+}
 
 func TestTutLocalStopCgrEngine(t *testing.T) {
 	if !*testLocal {

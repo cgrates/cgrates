@@ -247,6 +247,7 @@ func TestV2CDRsMySQLRateWithoutTP(t *testing.T) {
 	if !*testLocal {
 		return
 	}
+	//"d32a571d7bcbc6700fd35c1c0c5c6f458a62e260"
 	rawCdrCGRID := utils.Sha1("bbb1", time.Date(2015, 11, 21, 10, 47, 24, 0, time.UTC).String())
 	// Rate the injected CDR, should not rate it since we have no TP loaded
 	attrs := utils.AttrRateCdrs{CgrIds: []string{rawCdrCGRID}}

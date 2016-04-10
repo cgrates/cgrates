@@ -21,43 +21,43 @@ package console
 import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdSetTriggers{
-		name:      "triggers_set",
-		rpcMethod: "ApierV1.SetActionTrigger",
-		rpcParams: &v1.AttrSetActionTrigger{},
+	c := &CmdAccountResetTriggers{
+		name:      "account_triggers_reset",
+		rpcMethod: "ApierV1.ResetAccountActionTriggers",
+		rpcParams: &v1.AttrRemoveAccountActionTriggers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSetTriggers struct {
+type CmdAccountResetTriggers struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrSetActionTrigger
+	rpcParams *v1.AttrRemoveAccountActionTriggers
 	*CommandExecuter
 }
 
-func (self *CmdSetTriggers) Name() string {
+func (self *CmdAccountResetTriggers) Name() string {
 	return self.name
 }
 
-func (self *CmdSetTriggers) RpcMethod() string {
+func (self *CmdAccountResetTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetTriggers) RpcParams(reset bool) interface{} {
+func (self *CmdAccountResetTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrSetActionTrigger{}
+		self.rpcParams = &v1.AttrRemoveAccountActionTriggers{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetTriggers) PostprocessRpcParams() error {
+func (self *CmdAccountResetTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdSetTriggers) RpcResult() interface{} {
+func (self *CmdAccountResetTriggers) RpcResult() interface{} {
 	var s string
 	return &s
 }

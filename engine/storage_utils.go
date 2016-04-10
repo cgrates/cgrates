@@ -156,7 +156,14 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 type SMCost struct {
 	CGRID       string
 	RunID       string
+	OriginHost  string
+	OriginID    string
 	CostSource  string
 	Usage       float64
 	CostDetails *CallCost
+}
+
+type AttrCDRSStoreSMCost struct {
+	Cost           *SMCost
+	CheckDuplicate bool
 }

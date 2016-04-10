@@ -103,6 +103,12 @@ func (mc *MockConnector) GetMaxSessionTime(*engine.CallDescriptor, *float64) err
 func (mc *MockConnector) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
 	return nil
 }
+func (mc *MockConnector) GetDerivedMaxSessionTime(*engine.CDR, *float64) error    { return nil }
+func (mc *MockConnector) GetSessionRuns(*engine.CDR, *[]*engine.SessionRun) error { return nil }
+func (mc *MockConnector) ProcessCdr(*engine.CDR, *string) error                   { return nil }
+func (mc *MockConnector) StoreSMCost(engine.AttrCDRSStoreSMCost, *string) error   { return nil }
+func (mc *MockConnector) GetLCR(*engine.AttrGetLcr, *engine.LCRCost) error        { return nil }
+func (mc *MockConnector) GetTimeout(int, *time.Duration) error                    { return nil }
 
 func TestSessionRefund(t *testing.T) {
 	mc := &MockRpcClient{}

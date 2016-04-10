@@ -498,10 +498,6 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 
 func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	cacheKey := "GetLCR" + attrs.CgrID
-	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = *(item.Value.(*LCRCost))
-		return item.Err
-	}
 	if attrs.CallDescriptor.Subject == "" {
 		attrs.CallDescriptor.Subject = attrs.CallDescriptor.Account
 	}
@@ -524,7 +520,6 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return err
 	}
-
 	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.Stats, attrs.Paginator)
 	if err != nil {
 		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})

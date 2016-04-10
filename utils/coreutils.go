@@ -195,7 +195,7 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().AddDate(1, 0, 0) // add one year
 	case date == "*month_end":
 		expDate = GetEndOfMonth(time.Now())
-	case strings.HasSuffix(date, "Z"):
+	case strings.HasSuffix(date, "Z") || strings.Index(date, "+") != -1: // Allow both Z and +hh:mm format
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
 		unix, err := strconv.ParseInt(date, 10, 64)

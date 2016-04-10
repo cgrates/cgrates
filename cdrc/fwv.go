@@ -20,16 +20,18 @@ package cdrc
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func fwvValue(cdrLine string, indexStart, width int, padding string) string {
@@ -214,7 +216,12 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 		for _, rsrFld := range httpFieldCfg.Value {
 			httpAddr += rsrFld.ParseValue("")
 		}
-		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, storedCdr); err != nil && httpFieldCfg.Mandatory {
+		var jsn []byte
+		jsn, err = json.Marshal(storedCdr)
+		if err != nil {
+			return nil, err
+		}
+		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, jsn); err != nil && httpFieldCfg.Mandatory {
 			return nil, err
 		} else {
 			fieldVal = string(outValByte)

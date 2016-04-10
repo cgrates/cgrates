@@ -27,6 +27,7 @@
 	"enabled": true,
 	"rater": "internal",
 	"cdrs": "internal",
+	"session_ttl": "10ms",
 },
 
 }

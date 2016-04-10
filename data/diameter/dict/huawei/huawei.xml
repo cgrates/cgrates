@@ -133,7 +133,7 @@
     <avp name="Re-Routing-Number" code="20937" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="2011">
       <data type="UTF8String" />
     </avp>
-    <avp name="HighLayerCharacteristics" code="29938" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="2011">
+    <avp name="HighLayerCharacteristics" code="20938" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="2011">
       <data type="OctetString" />
     </avp>
     <avp name="MC-Service-Id" code="29002" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="2011">

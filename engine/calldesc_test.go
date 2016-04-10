@@ -566,7 +566,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		MaxCostSoFar: 0,
 	}
 	result, err := cd.GetMaxSessionDuration()
-	expected := 30 * time.Minute
+	expected := 17 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
 	}
@@ -576,6 +576,57 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		Tenant:       "cgrates.org",
 		Subject:      "block",
 		Account:      "block",
+		Destination:  "444",
+		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err = cd.GetMaxSessionDuration()
+	expected = 30 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	}
+}
+
+func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("BLOCK_EMPTY_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	acc, err := accountingStorage.GetAccount("cgrates.org:block_empty")
+	if err != nil {
+		t.Error("error getting account: ", err)
+	}
+	if len(acc.BalanceMap[utils.MONETARY]) != 2 ||
+		acc.BalanceMap[utils.MONETARY][0].Blocker != true {
+		for _, b := range acc.BalanceMap[utils.MONETARY] {
+			t.Logf("B: %+v", b)
+		}
+		t.Error("Error executing action  plan on account: ", acc.BalanceMap[utils.MONETARY])
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "block",
+		Account:      "block_empty",
+		Destination:  "0723",
+		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err := cd.GetMaxSessionDuration()
+	expected := 0 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	}
+	cd = &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "block",
+		Account:      "block_empty",
 		Destination:  "444",
 		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),

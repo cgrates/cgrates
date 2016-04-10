@@ -69,17 +69,18 @@ func init() {
 }
 
 var (
-	ratingStorage           RatingStorage
-	accountingStorage       AccountingStorage
-	storageLogger           LogStorage
-	cdrStorage              CdrStorage
-	debitPeriod             = 10 * time.Second
-	globalRoundingDecimals  = 5
-	historyScribe           rpcclient.RpcClientConnection
-	pubSubServer            rpcclient.RpcClientConnection
-	userService             rpcclient.RpcClientConnection
-	aliasService            rpcclient.RpcClientConnection
-	rpSubjectPrefixMatching bool
+	ratingStorage            RatingStorage
+	accountingStorage        AccountingStorage
+	storageLogger            LogStorage
+	cdrStorage               CdrStorage
+	debitPeriod              = 10 * time.Second
+	globalRoundingDecimals   = 5
+	historyScribe            rpcclient.RpcClientConnection
+	pubSubServer             rpcclient.RpcClientConnection
+	userService              rpcclient.RpcClientConnection
+	aliasService             rpcclient.RpcClientConnection
+	rpSubjectPrefixMatching  bool
+	lcrSubjectPrefixMatching bool
 )
 
 // Exported method to set the storage getter.
@@ -98,6 +99,10 @@ func SetRoundingDecimals(rd int) {
 
 func SetRpSubjectPrefixMatching(flag bool) {
 	rpSubjectPrefixMatching = flag
+}
+
+func SetLcrSubjectPrefixMatching(flag bool) {
+	lcrSubjectPrefixMatching = flag
 }
 
 /*
@@ -187,7 +192,11 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 		cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey())
 	}
 	if cd.account != nil && cd.account.Disabled {
-		return nil, fmt.Errorf("User %s is disabled", cd.account.ID)
+		return nil, utils.ErrAccountDisabled
+	}
+	if err != nil || cd.account == nil {
+		utils.Logger.Warning(fmt.Sprintf("Account: %s, not found (%v)", cd.GetAccountKey(), err))
+		return nil, utils.ErrAccountNotFound
 	}
 	return cd.account, err
 }
@@ -634,13 +643,9 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	cd.account = nil // make sure it's not cached
-	if account, err := cd.getAccount(); err != nil || account == nil {
-		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
-		return 0, utils.ErrAccountNotFound
+	if account, err := cd.getAccount(); err != nil {
+		return 0, err
 	} else {
-		if account.Disabled {
-			return 0, utils.ErrAccountDisabled
-		}
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
 			if _, err := Guardian.Guard(func() (interface{}, error) {
 				duration, err = cd.getMaxSessionDuration(account)
@@ -704,13 +709,9 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	// lock all group members
-	if account, err := cd.getAccount(); err != nil || account == nil {
-		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
-		return nil, utils.ErrAccountNotFound
+	if account, err := cd.getAccount(); err != nil {
+		return nil, err
 	} else {
-		if account.Disabled {
-			return nil, utils.ErrAccountDisabled
-		}
 		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
 				cc, err = cd.debit(account, cd.DryRun, true)
@@ -729,13 +730,9 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
-	if account, err := cd.getAccount(); err != nil || account == nil {
-		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
-		return nil, utils.ErrAccountNotFound
+	if account, err := cd.getAccount(); err != nil {
+		return nil, err
 	} else {
-		if account.Disabled {
-			return nil, utils.ErrAccountDisabled
-		}
 		//log.Printf("ACC: %+v", account)
 		if memberIDs, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
@@ -930,6 +927,15 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		utils.LCRKey(cd.Direction, cd.Tenant, utils.ANY, utils.ANY, utils.ANY),
 		utils.LCRKey(cd.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
 		utils.LCRKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
+	}
+	if lcrSubjectPrefixMatching {
+		var partialSubjects []string
+		lenSubject := len(cd.Subject)
+		for i := 1; i < lenSubject; i++ {
+			partialSubjects = append(partialSubjects, utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject[:lenSubject-i]))
+		}
+		// insert partialsubjects into keyVariants
+		keyVariants = append(keyVariants[:1], append(partialSubjects, keyVariants[1:]...)...)
 	}
 	for _, key := range keyVariants {
 		if lcr, err := ratingStorage.GetLCR(key, false); err != nil && err != utils.ErrNotFound {

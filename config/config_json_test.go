@@ -129,7 +129,7 @@ func TestDfBalancerJsonCfg(t *testing.T) {
 
 func TestDfRaterJsonCfg(t *testing.T) {
 	eCfg := &RaterJsonCfg{Enabled: utils.BoolPointer(false), Balancer: utils.StringPointer(""), Cdrstats: utils.StringPointer(""),
-		Historys: utils.StringPointer(""), Pubsubs: utils.StringPointer(""), Users: utils.StringPointer(""), Aliases: utils.StringPointer(""), Rp_subject_prefix_matching: utils.BoolPointer(false)}
+		Historys: utils.StringPointer(""), Pubsubs: utils.StringPointer(""), Users: utils.StringPointer(""), Aliases: utils.StringPointer(""), Rp_subject_prefix_matching: utils.BoolPointer(false), Lcr_subject_prefix_matching: utils.BoolPointer(false)}
 	if cfg, err := dfCgrJsonCfg.RaterJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
@@ -347,6 +347,7 @@ func TestSmGenericJsonCfg(t *testing.T) {
 		Debit_interval:    utils.StringPointer("0s"),
 		Min_call_duration: utils.StringPointer("0s"),
 		Max_call_duration: utils.StringPointer("3h"),
+		Session_ttl:       utils.StringPointer("0s"),
 	}
 	if cfg, err := dfCgrJsonCfg.SmGenericJsonCfg(); err != nil {
 		t.Error(err)

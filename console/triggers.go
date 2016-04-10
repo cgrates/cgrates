@@ -18,46 +18,49 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier/v1"
+import (
+	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
+)
 
 func init() {
-	c := &CmdRemoveTriggers{
-		name:      "triggers_remove",
-		rpcMethod: "ApierV1.RemoveAccountActionTriggers",
-		rpcParams: &v1.AttrRemoveAccountActionTriggers{},
+	c := &CmdGetTriggers{
+		name:      "triggers",
+		rpcMethod: "ApierV1.GetActionTriggers",
+		rpcParams: &v1.AttrGetActionTriggers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdRemoveTriggers struct {
+type CmdGetTriggers struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrRemoveAccountActionTriggers
+	rpcParams *v1.AttrGetActionTriggers
 	*CommandExecuter
 }
 
-func (self *CmdRemoveTriggers) Name() string {
+func (self *CmdGetTriggers) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveTriggers) RpcMethod() string {
+func (self *CmdGetTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveTriggers) RpcParams(reset bool) interface{} {
+func (self *CmdGetTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrRemoveAccountActionTriggers{}
+		self.rpcParams = &v1.AttrGetActionTriggers{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveTriggers) PostprocessRpcParams() error {
+func (self *CmdGetTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveTriggers) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetTriggers) RpcResult() interface{} {
+	atr := engine.ActionTriggers{}
+	return &atr
 }

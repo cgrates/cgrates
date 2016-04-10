@@ -29,11 +29,11 @@ CREATE TABLE cdrs (
   cost DECIMAL(20,4) NOT NULL,
   cost_details text,
   extra_info text,
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP,
-  deleted_at TIMESTAMP,
+  created_at TIMESTAMP NULL,
+  updated_at TIMESTAMP NULL,
+  deleted_at TIMESTAMP NULL,
   PRIMARY KEY (id),
-  UNIQUE KEY cdrrun (cgrid, run_id)
+  UNIQUE KEY cdrrun (cgrid, run_id, origin_id)
 );
 
 DROP TABLE IF EXISTS sm_costs;
@@ -41,12 +41,15 @@ CREATE TABLE sm_costs (
   id int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
   run_id  varchar(64) NOT NULL,
+  origin_host varchar(64) NOT NULL,
+  origin_id varchar(64) NOT NULL,
   cost_source varchar(64) NOT NULL,
   `usage` DECIMAL(30,9) NOT NULL,
   cost_details text,
-  created_at TIMESTAMP,
-  deleted_at TIMESTAMP,
+  created_at TIMESTAMP NULL,
+  deleted_at TIMESTAMP NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY costid (cgrid,run_id),
+  KEY origin_idx (origin_host, origin_id),
   KEY deleted_at_idx (deleted_at)
 );

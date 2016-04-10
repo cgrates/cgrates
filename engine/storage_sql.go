@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
-	"strconv"
 	"strings"
 	"time"
 
@@ -35,7 +34,7 @@ import (
 
 type SQLStorage struct {
 	Db *sql.DB
-	db gorm.DB
+	db *gorm.DB
 }
 
 func (self *SQLStorage) Close() {
@@ -569,7 +568,7 @@ func (self *SQLStorage) SetTpAccountActions(aas []TpAccountAction) error {
 	return nil
 
 }
-func (self *SQLStorage) LogCallCost(smc *SMCost) error {
+func (self *SQLStorage) SetSMCost(smc *SMCost) error {
 	if smc.CostDetails == nil {
 		return nil
 	}
@@ -582,6 +581,8 @@ func (self *SQLStorage) LogCallCost(smc *SMCost) error {
 	cd := &TBLSMCosts{
 		Cgrid:       smc.CGRID,
 		RunID:       smc.RunID,
+		OriginHost:  smc.OriginHost,
+		OriginID:    smc.OriginID,
 		CostSource:  smc.CostSource,
 		CostDetails: string(tss),
 		Usage:       smc.Usage,
@@ -595,25 +596,37 @@ func (self *SQLStorage) LogCallCost(smc *SMCost) error {
 	return nil
 }
 
-func (self *SQLStorage) GetCallCostLog(cgrid, runid string) (*SMCost, error) {
-	var tpCostDetail TBLSMCosts
-	if err := self.db.Where(&TBLSMCosts{Cgrid: cgrid, RunID: runid}).First(&tpCostDetail).Error; err != nil {
+// GetSMCosts is used to retrieve one or multiple SMCosts based on filter
+func (self *SQLStorage) GetSMCosts(cgrid, runid, originHost, originIDPrefix string) ([]*SMCost, error) {
+	var smCosts []*SMCost
+	q := self.db.Where(&TBLSMCosts{Cgrid: cgrid, RunID: runid})
+	if originIDPrefix != "" {
+		q = self.db.Where(&TBLSMCosts{OriginHost: originHost, RunID: runid}).Where(fmt.Sprintf("origin_id LIKE '%s%%'", originIDPrefix))
+	}
+	results := make([]*TBLSMCosts, 0)
+	if err := q.Find(&results).Error; err != nil {
 		return nil, err
 	}
-	if len(tpCostDetail.CostDetails) == 0 {
-		return nil, nil // No costs returned
+	for _, result := range results {
+		if len(result.CostDetails) == 0 {
+			continue
+		}
+		smc := &SMCost{
+			CGRID:       result.Cgrid,
+			RunID:       result.RunID,
+			OriginHost:  result.OriginHost,
+			OriginID:    result.OriginID,
+			CostSource:  result.CostSource,
+			Usage:       result.Usage,
+			CostDetails: &CallCost{},
+		}
+		if err := json.Unmarshal([]byte(result.CostDetails), smc.CostDetails); err != nil {
+			return nil, err
+		}
+		smCosts = append(smCosts, smc)
 	}
-	smc := &SMCost{
-		CGRID:       tpCostDetail.Cgrid,
-		RunID:       tpCostDetail.RunID,
-		CostSource:  tpCostDetail.CostSource,
-		Usage:       tpCostDetail.Usage,
-		CostDetails: &CallCost{},
-	}
-	if err := json.Unmarshal([]byte(tpCostDetail.CostDetails), smc.CostDetails); err != nil {
-		return nil, err
-	}
-	return smc, nil
+
+	return smCosts, nil
 }
 
 func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
@@ -662,8 +675,8 @@ func (self *SQLStorage) SetCDR(cdr *CDR, allowUpdate bool) error {
 			return saved.Error
 		}
 		tx = self.db.Begin()
-		updated := tx.Model(TBLCDRs{}).Where(&TBLCDRs{Cgrid: cdr.CGRID, RunID: cdr.RunID}).Updates(
-			&TBLCDRs{
+		updated := tx.Model(&TBLCDRs{}).Where(&TBLCDRs{Cgrid: cdr.CGRID, RunID: cdr.RunID, OriginID: cdr.OriginID}).Updates(
+			TBLCDRs{
 				OriginHost:      cdr.OriginHost,
 				Source:          cdr.Source,
 				OriginID:        cdr.OriginID,
@@ -705,9 +718,6 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	q := self.db.Table(utils.TBL_CDRS).Select("*")
 	if qryFltr.Unscoped {
 		q = q.Unscoped()
-	} else {
-		// Query filter
-		q = q.Where("(deleted_at IS NULL OR deleted_at <= '0001-01-02')") // Soft deletes
 	}
 	// Add filters, use in to replace the high number of ORs
 	if len(qryFltr.CGRIDs) != 0 {
@@ -944,18 +954,20 @@ func (self *SQLStorage) GetCDRs(qryFltr *utils.CDRsFilter, remove bool) ([]*CDR,
 	q.Find(&results)
 
 	for _, result := range results {
-		var extraFieldsMp map[string]string
-		if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
-			return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
+		extraFieldsMp := make(map[string]string)
+		if result.ExtraFields != "" {
+			if err := json.Unmarshal([]byte(result.ExtraFields), &extraFieldsMp); err != nil {
+				return nil, 0, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
+			}
 		}
 		var callCost CallCost
-		if len(result.CostDetails) != 0 {
+		if result.CostDetails != "" {
 			if err := json.Unmarshal([]byte(result.CostDetails), &callCost); err != nil {
 				return nil, 0, fmt.Errorf("JSON unmarshal callcost error for cgrid: %s, runid: %v, error: %s", result.Cgrid, result.RunID, err.Error())
 			}
 		}
-		usageDur, _ := time.ParseDuration(strconv.FormatFloat(result.Usage, 'f', -1, 64) + "s")
-		pddDur, _ := time.ParseDuration(strconv.FormatFloat(result.Pdd, 'f', -1, 64) + "s")
+		usageDur := time.Duration(result.Usage * utils.NANO_MULTIPLIER)
+		pddDur := time.Duration(result.Pdd * utils.NANO_MULTIPLIER)
 		storCdr := &CDR{
 			CGRID:           result.Cgrid,
 			RunID:           result.RunID,

@@ -20,6 +20,7 @@ package cdrc
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -93,7 +94,7 @@ func pairToRecord(part1, part2 *PartialFlatstoreRecord) ([]string, error) {
 
 func NewPartialRecordsCache(ttl time.Duration, cdrOutDir string, csvSep rune) (*PartialRecordsCache, error) {
 	return &PartialRecordsCache{ttl: ttl, cdrOutDir: cdrOutDir, csvSep: csvSep,
-		partialRecords: make(map[string]map[string]*PartialFlatstoreRecord), guard: engine.NewGuardianLock()}, nil
+		partialRecords: make(map[string]map[string]*PartialFlatstoreRecord), guard: engine.Guardian}, nil
 }
 
 type PartialRecordsCache struct {
@@ -323,7 +324,12 @@ func (self *CsvRecordsProcessor) recordToStoredCdr(record []string, cdrcId strin
 		for _, rsrFld := range httpFieldCfg.Value {
 			httpAddr += rsrFld.ParseValue("")
 		}
-		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, storedCdr); err != nil && httpFieldCfg.Mandatory {
+		var jsn []byte
+		jsn, err = json.Marshal(storedCdr)
+		if err != nil {
+			return nil, err
+		}
+		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, jsn); err != nil && httpFieldCfg.Mandatory {
 			return nil, err
 		} else {
 			fieldVal = string(outValByte)

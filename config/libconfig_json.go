@@ -64,14 +64,15 @@ type BalancerJsonCfg struct {
 
 // Rater config section
 type RaterJsonCfg struct {
-	Enabled                    *bool
-	Balancer                   *string
-	Cdrstats                   *string
-	Historys                   *string
-	Pubsubs                    *string
-	Aliases                    *string
-	Users                      *string
-	Rp_subject_prefix_matching *bool
+	Enabled                     *bool
+	Balancer                    *string
+	Cdrstats                    *string
+	Historys                    *string
+	Pubsubs                     *string
+	Aliases                     *string
+	Users                       *string
+	Rp_subject_prefix_matching  *bool
+	Lcr_subject_prefix_matching *bool
 }
 
 // Scheduler config section
@@ -173,6 +174,7 @@ type SmGenericJsonCfg struct {
 	Debit_interval    *string
 	Min_call_duration *string
 	Max_call_duration *string
+	Session_ttl       *string
 }
 
 // SM-FreeSWITCH config section

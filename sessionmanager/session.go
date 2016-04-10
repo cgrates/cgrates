@@ -249,18 +249,19 @@ func (s *Session) SaveOperations() {
 				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
 			}
 		}
+		smCost := &engine.SMCost{
+			CGRID:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
+			CostSource:  utils.SESSION_MANAGER_SOURCE,
+			RunID:       sr.DerivedCharger.RunID,
+			OriginHost:  s.eventStart.GetOriginatorIP(utils.META_DEFAULT),
+			OriginID:    s.eventStart.GetUUID(),
+			CostDetails: firstCC,
+		}
 		var reply string
-		err := s.sessionManager.CdrSrv().Call("CdrServer.LogCallCost", &engine.CallCostLog{
-			CgrId:          s.eventStart.GetCgrId(s.sessionManager.Timezone()),
-			Source:         utils.SESSION_MANAGER_SOURCE,
-			RunId:          sr.DerivedCharger.RunID,
-			CallCost:       firstCC,
-			CheckDuplicate: true,
-		}, &reply)
-		// this is a protection against the case when the close event is missed for some reason
-		// when the cdr arrives to cdrserver because our callcost is not there it will be rated
-		// as postpaid. When the close event finally arives we have to refund everything
-		if err != nil {
+		if err := s.sessionManager.CdrSrv().Call("CdrServer.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
+			// this is a protection against the case when the close event is missed for some reason
+			// when the cdr arrives to cdrserver because our callcost is not there it will be rated
+			// as postpaid. When the close event finally arives we have to refund everything
 			if err == utils.ErrExists {
 				s.Refund(firstCC, firstCC.Timespans[0].TimeStart)
 			} else {

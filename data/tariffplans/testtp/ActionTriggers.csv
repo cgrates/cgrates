@@ -2,6 +2,7 @@
 STANDARD_TRIGGERS,,*min_balance,2,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_BALANCE,10
 STANDARD_TRIGGERS,,*max_balance,20,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_BALANCE,10
 STANDARD_TRIGGERS,,*max_event_counter,15,false,0,,,,*monetary,*out,,FS_USERS,,,,,,,,,LOG_BALANCE,10
+STANDARD_TRIGGERS,,*max_balance_counter,1,false,0,,,,*monetary,*out,,,,,,,,,,,LOG_BALANCE,10
 CDRST1_WARN_ASR,,*min_asr,45,true,1h,,,,,,,,,,,,,,,3,CDRST_WARN_HTTP,10
 CDRST1_WARN_ACD,,*min_acd,10,true,1h,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10
 CDRST1_WARN_ACC,,*max_acc,10,true,10m,,,,,,,,,,,,,,,5,CDRST_WARN_HTTP,10

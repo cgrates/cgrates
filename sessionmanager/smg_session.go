@@ -42,7 +42,7 @@ type SMGSession struct {
 	sessionCds    []*engine.CallDescriptor
 	callCosts     []*engine.CallCost
 	extraDuration time.Duration // keeps the current duration debited on top of what heas been asked
-	lastUsage     time.Duration // Keep record of the last debit for LastUsed functionality
+	lastUsage     time.Duration
 	totalUsage    time.Duration
 }
 
@@ -79,21 +79,24 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
 func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
-	lastUsedCorrection := time.Duration(0) // Used if lastUsed influences the debit
-	if self.cd.DurationIndex != 0 && lastUsed != 0 {
-		if self.lastUsage > lastUsed { // We have debitted more than we have used, refund in the duration debitted
-			lastUsedCorrection = -(self.lastUsage - lastUsed)
-		} else { // We have debitted less than we have consumed, add the difference to duration debitted
-			lastUsedCorrection = lastUsed - self.lastUsage
-		}
-
-		// apply the lastUsed correction
-		dur += lastUsedCorrection
-		self.totalUsage += lastUsed // Should reflect the total usage so far
-	} else {
-		// apply correction from previous run
-		dur -= self.extraDuration
+	requestedDuration := dur
+	//utils.Logger.Debug(fmt.Sprintf("InitDur: %f, lastUsed: %f", requestedDuration.Seconds(), lastUsed.Seconds()))
+	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f, extraDuration: %f", self.totalUsage.Seconds(), self.extraDuration.Seconds()))
+	self.totalUsage += lastUsed // Should reflect the total usage so far
+	if lastUsed > 0 {
+		self.extraDuration = self.lastUsage - lastUsed
+		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %f", self.extraDuration.Seconds()))
 	}
+	// apply correction from previous run
+	if self.extraDuration < dur {
+		dur -= self.extraDuration
+	} else {
+		ccDuration := self.extraDuration // fake ccDuration
+		self.extraDuration -= dur
+		return ccDuration, nil
+	}
+	//utils.Logger.Debug(fmt.Sprintf("dur: %f", dur.Seconds()))
+	initialExtraDuration := self.extraDuration
 	self.extraDuration = 0
 	if self.cd.LoopIndex > 0 {
 		self.cd.TimeStart = self.cd.TimeEnd
@@ -109,6 +112,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.cd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 	// update call duration with real debited duration
 	ccDuration := cc.GetDuration()
+	//utils.Logger.Debug(fmt.Sprintf("CCDur: %f", ccDuration.Seconds()))
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
@@ -118,12 +122,14 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.cd.LoopIndex += 1
 	self.sessionCds = append(self.sessionCds, self.cd.Clone())
 	self.callCosts = append(self.callCosts, cc)
-	ccDuration -= lastUsedCorrection
-	if ccDuration < 0 { // if correction has pushed ccDuration bellow 0
-		ccDuration = 0
+	self.lastUsage = initialExtraDuration + ccDuration
+
+	if ccDuration >= dur { // we got what we asked to be debited
+		//utils.Logger.Debug(fmt.Sprintf("returning normal: %f", requestedDuration.Seconds()))
+		return requestedDuration, nil
 	}
-	self.lastUsage = ccDuration // Reset the lastUsage for later reference
-	return ccDuration, nil
+	//utils.Logger.Debug(fmt.Sprintf("returning initialExtra: %f + ccDuration: %f", initialExtraDuration.Seconds(), ccDuration.Seconds()))
+	return initialExtraDuration + ccDuration, nil
 }
 
 // Attempts to refund a duration, error on failure
@@ -220,7 +226,8 @@ func (self *SMGSession) disconnectSession(reason string) error {
 }
 
 // Merge the sum of costs and sends it to CDRS for storage
-func (self *SMGSession) saveOperations() error {
+// originID could have been changed from original event, hence passing as argument here
+func (self *SMGSession) saveOperations(originID string) error {
 	if len(self.callCosts) == 0 {
 		return nil // There are no costs to save, ignore the operation
 	}
@@ -236,20 +243,17 @@ func (self *SMGSession) saveOperations() error {
 			return err
 		}
 	}
-
+	smCost := &engine.SMCost{
+		CGRID:       self.eventStart.GetCgrId(self.timezone),
+		CostSource:  utils.SESSION_MANAGER_SOURCE,
+		RunID:       self.runId,
+		OriginHost:  self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
+		OriginID:    originID,
+		Usage:       self.TotalUsage().Seconds(),
+		CostDetails: firstCC,
+	}
 	var reply string
-	err := self.cdrsrv.Call("CdrServer.LogCallCost", &engine.CallCostLog{
-		CgrId:          self.eventStart.GetCgrId(self.timezone),
-		Source:         utils.SESSION_MANAGER_SOURCE,
-		RunId:          self.runId,
-		Usage:          float64(self.totalUsage),
-		CallCost:       firstCC,
-		CheckDuplicate: true,
-	}, &reply)
-	// this is a protection against the case when the close event is missed for some reason
-	// when the cdr arrives to cdrserver because our callcost is not there it will be rated
-	// as postpaid. When the close event finally arives we have to refund everything
-	if err != nil {
+	if err := self.cdrsrv.Call("CdrServer.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
 		if err == utils.ErrExists {
 			self.refund(self.cd.GetDuration()) // Refund entire duration
 		} else {

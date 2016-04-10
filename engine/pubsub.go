@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -36,7 +37,7 @@ type SubscriberData struct {
 type PubSub struct {
 	subscribers map[string]*SubscriberData
 	ttlVerify   bool
-	pubFunc     func(string, bool, interface{}) ([]byte, error)
+	pubFunc     func(string, bool, []byte) ([]byte, error)
 	mux         *sync.Mutex
 	accountDb   AccountingStorage
 }
@@ -133,12 +134,16 @@ func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 		transport := split[0]
 		address := split[1]
 		ttlVerify := ps.ttlVerify
+		jsn, err := json.Marshal(evt)
+		if err != nil {
+			return err
+		}
 		switch transport {
 		case utils.META_HTTP_POST:
 			go func() {
 				delay := utils.Fib()
 				for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-					if _, err := ps.pubFunc(address, ttlVerify, evt); err == nil {
+					if _, err := ps.pubFunc(address, ttlVerify, jsn); err == nil {
 						break // Success, no need to reinterate
 					} else if i == 4 { // Last iteration, syslog the warning
 						utils.Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), evt["EventName"]))
