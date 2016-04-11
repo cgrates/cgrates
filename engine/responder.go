@@ -592,8 +592,8 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	if rs.Bal != nil {
 		response["Raters"] = rs.Bal.GetClientAddresses()
 	}
-	response["memstat"] = memstats.HeapAlloc / 1024
-	response["footprint"] = memstats.Sys / 1024
+	response["memstat"] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
+	response["footprint"] = utils.SizeFmt(float64(memstats.Sys), "")
 	*reply = response
 	return
 }

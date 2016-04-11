@@ -533,3 +533,17 @@ func GetEndOfMonth(ref time.Time) time.Time {
 	eom := time.Date(year, month, 1, 0, 0, 0, 0, ref.Location())
 	return eom.Add(-time.Second)
 }
+
+// formats number in K,M,G, etc.
+func SizeFmt(num float64, suffix string) string {
+	if suffix == "" {
+		suffix = "B"
+	}
+	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
+		if math.Abs(num) < 1024.0 {
+			return fmt.Sprintf("%3.1f%s%s", num, unit, suffix)
+		}
+		num /= 1024.0
+	}
+	return fmt.Sprintf("%.1f%s%s", num, "Yi", suffix)
+}
