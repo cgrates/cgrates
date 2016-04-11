@@ -426,7 +426,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	time.Sleep(50 * time.Millisecond)
-	eAcntVal = 49999897600.000000
+	eAcntVal = 49999887360.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {

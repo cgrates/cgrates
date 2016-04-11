@@ -65,7 +65,12 @@ func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
 			go func() {
 				select {
 				case <-timer.C:
-					self.sessionEnd(uuid, 0)
+					totalUsage := s.TotalUsage() + self.cgrCfg.SmGenericConfig.SessionTTL
+					self.sessionEnd(uuid, totalUsage)
+					cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
+					cdr.Usage = totalUsage
+					var reply string
+					self.cdrsrv.ProcessCdr(cdr, &reply)
 				case <-endChan:
 					timer.Stop()
 				}
