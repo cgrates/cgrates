@@ -1,0 +1,17 @@
+{
+// CGRateS Configuration file
+//
+// Used for multiple RAL configuration tests
+// Starts RAL
+
+"listen": {
+	"rpc_json": ":12012",				// RPC JSON listening address
+	"rpc_gob": ":12013",				// RPC GOB listening address
+	"http": ":12080",					// HTTP listening address
+},
+
+"rater": {
+	"enabled": true,					// enable Rater service: <true|false>
+},
+
+}

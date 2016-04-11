@@ -427,7 +427,7 @@ func TestTutLocalMaxDebit(t *testing.T) {
 		TimeStart:     tStart,
 		TimeEnd:       tStart.Add(time.Duration(120) * time.Second),
 	}
-	cd.CgrId = "1"
+	cd.CgrID = "1"
 	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.GetDuration() == 120 {
@@ -444,7 +444,7 @@ func TestTutLocalMaxDebit(t *testing.T) {
 		TimeStart:     tStart,
 		TimeEnd:       tStart.Add(time.Duration(120) * time.Second),
 	}
-	cd.CgrId = "2"
+	cd.CgrID = "2"
 	if err := tutLocalRpc.Call("Responder.MaxDebit", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
 	} else if cc.GetDuration() != time.Duration(62)*time.Second { // We have as strategy *dsconnect

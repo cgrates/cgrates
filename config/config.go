@@ -60,6 +60,7 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := new(CGRConfig)
+	cfg.InstanceID = utils.GenUUID()
 	cfg.DataFolderPath = "/usr/share/cgrates/"
 	cfg.SmGenericConfig = new(SmGenericConfig)
 	cfg.SmFsConfig = new(SmFsConfig)
@@ -167,6 +168,7 @@ func NewCGRConfigFromFolder(cfgDir string) (*CGRConfig, error) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
+	InstanceID               string // Identifier for this engine instance
 	TpDbType                 string
 	TpDbHost                 string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	TpDbPort                 string // The port to bind to.

@@ -278,6 +278,7 @@ const (
 	UpdatedAt                   = "UpdatedAt"
 	HandlerArgSep               = "|"
 	FlagForceDuration           = "fd"
+	InstanceID                  = "InstanceID"
 )
 
 var (

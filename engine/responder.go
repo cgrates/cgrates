@@ -551,6 +551,7 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
+	response[utils.InstanceID] = config.CgrConfig().InstanceID
 	if rs.Bal != nil {
 		response["Raters"] = rs.Bal.GetClientAddresses()
 	}
