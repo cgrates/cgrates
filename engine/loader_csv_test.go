@@ -42,6 +42,7 @@ NAT,0723
 NAT,+49
 RET,0723
 RET,0724
+SPEC,0723045
 PSTN_71,+4971
 PSTN_72,+4972
 PSTN_70,+4970
@@ -319,7 +320,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 12 {
+	if len(csvr.destinations) != 13 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
