@@ -360,23 +360,6 @@ func (ri *RateInterval) GetMaxCost() (float64, string) {
 // Structure to store intervals according to weight
 type RateIntervalList []*RateInterval
 
-func (il RateIntervalList) Len() int {
-	return len(il)
-}
-
-func (il RateIntervalList) Swap(i, j int) {
-	il[i], il[j] = il[j], il[i]
-}
-
-// we need higher weights earlyer in the list
-func (il RateIntervalList) Less(j, i int) bool {
-	return il[i].Weight < il[j].Weight //|| il[i].Timing.StartTime > il[j].Timing.StartTime
-}
-
-func (il RateIntervalList) Sort() {
-	sort.Sort(il)
-}
-
 // Structure to store intervals according to weight
 type RateIntervalTimeSorter struct {
 	referenceTime time.Time
@@ -393,6 +376,9 @@ func (il *RateIntervalTimeSorter) Swap(i, j int) {
 
 // we need higher weights earlyer in the list
 func (il *RateIntervalTimeSorter) Less(j, i int) bool {
+	if il.ris[i].Weight < il.ris[j].Weight {
+		return il.ris[i].Weight < il.ris[j].Weight
+	}
 	t1 := il.ris[i].Timing.getLeftMargin(il.referenceTime)
 	t2 := il.ris[j].Timing.getLeftMargin(il.referenceTime)
 	return t1.After(t2)
