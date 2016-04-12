@@ -250,6 +250,41 @@ func TestRatingProfileRIforTSMidnight(t *testing.T) {
 	}
 }
 
+func TestRatingProfileYearMonthDay(t *testing.T) {
+	ri := &RatingInfo{
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "09:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					StartTime: "00:00:00",
+				},
+			},
+			&RateInterval{
+				Timing: &RITiming{
+					Years:     utils.Years{2016},
+					Months:    utils.Months{1},
+					MonthDays: utils.MonthDays{6, 7},
+					WeekDays:  utils.WeekDays{},
+					StartTime: "19:00:00",
+				},
+			},
+		},
+	}
+	ts := &TimeSpan{
+		TimeStart: time.Date(2016, 1, 6, 23, 40, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2016, 1, 7, 1, 1, 30, 0, time.UTC),
+	}
+	rIntervals := ri.SelectRatingIntevalsForTimespan(ts)
+	if len(rIntervals) != 1 ||
+		rIntervals[0].Timing.StartTime != "19:00:00" {
+		t.Error("Wrong interval list: ", utils.ToIJSON(rIntervals))
+	}
+}
+
 func TestRatingProfileSubjectPrefixMatching(t *testing.T) {
 	rpSubjectPrefixMatching = true
 	rp, err := RatingProfileSubjectPrefixMatching("*out:cgrates.org:data:rif")
