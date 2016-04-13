@@ -614,14 +614,12 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 
 // Splits the given timespan on activation period's activation time.
 func (ts *TimeSpan) SplitByDay() (newTs *TimeSpan) {
-	if ts.TimeStart.Day() == ts.TimeEnd.Day() {
+	if ts.TimeStart.Day() == ts.TimeEnd.Day() || utils.TimeIs0h(ts.TimeEnd) {
 		return
 	}
+
 	splitDate := ts.TimeStart.AddDate(0, 0, 1)
 	splitDate = time.Date(splitDate.Year(), splitDate.Month(), splitDate.Day(), 0, 0, 0, 0, splitDate.Location())
-	if splitDate == ts.TimeEnd { // the end date time was actually 00:00:00
-		return
-	}
 	newTs = &TimeSpan{
 		TimeStart: splitDate,
 		TimeEnd:   ts.TimeEnd,

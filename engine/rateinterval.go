@@ -289,7 +289,7 @@ Returns true if the received time result inside the interval
 */
 func (i *RateInterval) Contains(t time.Time, endTime bool) bool {
 	if endTime {
-		if t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0 { // back one second to 23:59:59
+		if utils.TimeIs0h(t) { // back one second to 23:59:59
 			t = t.Add(-1 * time.Second)
 		}
 	}
