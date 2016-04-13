@@ -378,20 +378,20 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				}
 			}
 		}
-	}
-	//log.Printf("After SplitByRatingPlan: %+v", utils.ToJSON(timespans))
-	// split on days
-	for i := 0; i < len(timespans); i++ {
-		rp := timespans[i].ratingInfo
-		newTs := timespans[i].SplitByDay()
-		if newTs != nil {
-			//log.Print("NEW TS: ", newTs.TimeStart, newTs.TimeEnd)
-			newTs.setRatingInfo(rp)
-			// insert the new timespan
-			index := i + 1
-			timespans = append(timespans, nil)
-			copy(timespans[index+1:], timespans[index:])
-			timespans[index] = newTs
+		//log.Printf("After SplitByRatingPlan: %+v", utils.ToJSON(timespans))
+		// split on days
+		for i := 0; i < len(timespans); i++ {
+			rp := timespans[i].ratingInfo
+			newTs := timespans[i].SplitByDay()
+			if newTs != nil {
+				//log.Print("NEW TS: ", newTs.TimeStart, newTs.TimeEnd)
+				newTs.setRatingInfo(rp)
+				// insert the new timespan
+				index := i + 1
+				timespans = append(timespans, nil)
+				copy(timespans[index+1:], timespans[index:])
+				timespans[index] = newTs
+			}
 		}
 	}
 	//log.Printf("After SplitByDay: %+v", utils.ToJSON(timespans))
