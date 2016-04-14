@@ -83,7 +83,7 @@ func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	totalSessionUsage := s.TotalUsage() + tmtr.ttl
 	if tmtr.ttlUsage != nil {
 		totalSessionUsage = s.TotalUsage() + *tmtr.ttlUsage
-		evUpdate[utils.USAGE] = diffSessionUsage.Seconds()
+		evUpdate[utils.USAGE] = tmtr.ttlUsage.Seconds()
 	}
 	if tmtr.ttlLastUsed != nil {
 		evUpdate[utils.LastUsed] = tmtr.ttlLastUsed.Seconds()
