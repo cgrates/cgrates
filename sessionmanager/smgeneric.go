@@ -82,15 +82,16 @@ func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	if tmtr.ttlUsage != nil {
 		totalSessionUsage = *tmtr.ttlUsage
 	}
-	if totalSessionUsage > s.TotalUsage() {
-		evUpdate := s.eventStart
-		diffSessionUsage := totalSessionUsage - s.TotalUsage()
-		evUpdate[utils.USAGE] = diffSessionUsage.Seconds() // Debit additionally
-		if tmtr.ttlLastUsed != nil {
-			evUpdate[utils.LastUsed] = tmtr.ttlLastUsed.Seconds()
-		}
-		self.SessionUpdate(evUpdate, nil)
+	diffSessionUsage := totalSessionUsage - s.TotalUsage()
+	evUpdate := s.eventStart
+	evUpdate[utils.USAGE] = 0.0
+	if diffSessionUsage > 0 {
+		evUpdate[utils.USAGE] = diffSessionUsage.Seconds()
 	}
+	if tmtr.ttlLastUsed != nil {
+		evUpdate[utils.LastUsed] = tmtr.ttlLastUsed.Seconds()
+	}
+	self.SessionUpdate(evUpdate, nil)
 	self.sessionEnd(s.eventStart.GetUUID(), totalSessionUsage)
 	cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
 	cdr.Usage = totalSessionUsage
