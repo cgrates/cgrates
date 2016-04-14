@@ -278,6 +278,9 @@ const (
 	UpdatedAt                   = "UpdatedAt"
 	HandlerArgSep               = "|"
 	FlagForceDuration           = "fd"
+	SessionTTL                  = "SessionTTL"
+	SessionTTLLastUsed          = "SessionTTLLastUsed"
+	SessionTTLUsage             = "SessionTTLUsage"
 )
 
 var (

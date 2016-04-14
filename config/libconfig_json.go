@@ -167,14 +167,16 @@ type CdrcJsonCfg struct {
 
 // SM-Generic config section
 type SmGenericJsonCfg struct {
-	Enabled           *bool
-	Listen_bijson     *string
-	Rater             *string
-	Cdrs              *string
-	Debit_interval    *string
-	Min_call_duration *string
-	Max_call_duration *string
-	Session_ttl       *string
+	Enabled               *bool
+	Listen_bijson         *string
+	Rater                 *string
+	Cdrs                  *string
+	Debit_interval        *string
+	Min_call_duration     *string
+	Max_call_duration     *string
+	Session_ttl           *string
+	Session_ttl_last_used *string
+	Session_ttl_usage     *string
 }
 
 // SM-FreeSWITCH config section

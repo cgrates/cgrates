@@ -72,14 +72,16 @@ func (self *FsConnConfig) loadFromJsonCfg(jsnCfg *FsConnJsonCfg) error {
 }
 
 type SmGenericConfig struct {
-	Enabled         bool
-	ListenBijson    string
-	HaRater         []*HaPoolConfig
-	HaCdrs          []*HaPoolConfig
-	DebitInterval   time.Duration
-	MinCallDuration time.Duration
-	MaxCallDuration time.Duration
-	SessionTTL      time.Duration
+	Enabled            bool
+	ListenBijson       string
+	HaRater            []*HaPoolConfig
+	HaCdrs             []*HaPoolConfig
+	DebitInterval      time.Duration
+	MinCallDuration    time.Duration
+	MaxCallDuration    time.Duration
+	SessionTTL         time.Duration
+	SessionTTLLastUsed *time.Duration
+	SessionTTLUsage    *time.Duration
 }
 
 func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
@@ -117,6 +119,20 @@ func (self *SmGenericConfig) loadFromJsonCfg(jsnCfg *SmGenericJsonCfg) error {
 	if jsnCfg.Session_ttl != nil {
 		if self.SessionTTL, err = utils.ParseDurationWithSecs(*jsnCfg.Session_ttl); err != nil {
 			return err
+		}
+	}
+	if jsnCfg.Session_ttl_last_used != nil {
+		if sessionTTLLastUsed, err := utils.ParseDurationWithSecs(*jsnCfg.Session_ttl_last_used); err != nil {
+			return err
+		} else {
+			self.SessionTTLLastUsed = &sessionTTLLastUsed
+		}
+	}
+	if jsnCfg.Session_ttl_usage != nil {
+		if sessionTTLUsage, err := utils.ParseDurationWithSecs(*jsnCfg.Session_ttl_usage); err != nil {
+			return err
+		} else {
+			self.SessionTTLUsage = &sessionTTLUsage
 		}
 	}
 	return nil

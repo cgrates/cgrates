@@ -51,34 +51,75 @@ type SMGeneric struct {
 	guard              *engine.GuardianLock             // Used to lock on uuid
 }
 type smgSessionTerminator struct {
-	timer   *time.Timer
-	endChan chan bool
+	timer       *time.Timer
+	endChan     chan bool
+	ttl         time.Duration
+	ttlLastUsed *time.Duration
+	ttlUsage    *time.Duration
+}
+
+// Updates the timer for the session to a new ttl and terminate info
+func (self *SMGeneric) resetTerminatorTimer(uuid string, ttl time.Duration, ttlLastUsed, ttlUsage *time.Duration) {
+	self.sessionsMux.RLock()
+	defer self.sessionsMux.RUnlock()
+	if st, found := self.sessionTerminators[uuid]; found {
+		if ttl != 0 {
+			st.ttl = ttl
+		}
+		if ttlLastUsed != nil {
+			st.ttlLastUsed = ttlLastUsed
+		}
+		if ttlUsage != nil {
+			st.ttlUsage = ttlUsage
+		}
+		st.timer.Reset(st.ttl)
+	}
+}
+
+// Called when a session timeouts
+func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
+	totalSessionUsage := s.TotalUsage() + tmtr.ttl
+	if tmtr.ttlUsage != nil {
+		totalSessionUsage = *tmtr.ttlUsage
+	}
+	if totalSessionUsage > s.TotalUsage() {
+		evUpdate := s.eventStart
+		diffSessionUsage := totalSessionUsage - s.TotalUsage()
+		evUpdate[utils.USAGE] = diffSessionUsage.Seconds() // Debit additionally
+		if tmtr.ttlLastUsed != nil {
+			evUpdate[utils.LastUsed] = tmtr.ttlLastUsed.Seconds()
+		}
+		self.SessionUpdate(evUpdate, nil)
+	}
+	self.sessionEnd(s.eventStart.GetUUID(), totalSessionUsage)
+	cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
+	cdr.Usage = totalSessionUsage
+	var reply string
+	self.cdrsrv.ProcessCdr(cdr, &reply)
 }
 
 func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
 	self.sessionsMux.Lock()
 	self.sessions[uuid] = append(self.sessions[uuid], s)
-	if self.cgrCfg.SmGenericConfig.SessionTTL > 0 {
+	if self.cgrCfg.SmGenericConfig.SessionTTL != 0 {
 		if _, found := self.sessionTerminators[uuid]; !found {
 			timer := time.NewTimer(self.cgrCfg.SmGenericConfig.SessionTTL)
 			endChan := make(chan bool, 1)
+			terminator := &smgSessionTerminator{
+				timer:   timer,
+				endChan: endChan,
+				ttl:     self.cgrCfg.SmGenericConfig.SessionTTL,
+			}
+			self.sessionTerminators[uuid] = terminator
 			go func() {
 				select {
 				case <-timer.C:
-					totalUsage := s.TotalUsage() + self.cgrCfg.SmGenericConfig.SessionTTL
-					self.sessionEnd(uuid, totalUsage)
-					cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
-					cdr.Usage = totalUsage
-					var reply string
-					self.cdrsrv.ProcessCdr(cdr, &reply)
+					self.ttlTerminate(s, terminator)
 				case <-endChan:
 					timer.Stop()
 				}
 			}()
-			self.sessionTerminators[uuid] = &smgSessionTerminator{
-				timer:   timer,
-				endChan: endChan,
-			}
+
 		}
 	}
 	self.sessionsMux.Unlock()
@@ -123,15 +164,6 @@ func (self *SMGeneric) getSession(uuid string) []*SMGSession {
 	self.sessionsMux.RLock()
 	defer self.sessionsMux.RUnlock()
 	return self.sessions[uuid]
-}
-
-// Updates the timer for the session to a new ttl
-func (self *SMGeneric) resetTerminatorTimer(uuid string) {
-	self.sessionsMux.RLock()
-	defer self.sessionsMux.RUnlock()
-	if st, found := self.sessionTerminators[uuid]; found {
-		st.timer.Reset(self.cgrCfg.SmGenericConfig.SessionTTL)
-	}
 }
 
 // Handle a new session, pass the connectionId so we can communicate on disconnect request
@@ -262,7 +294,21 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	self.resetTerminatorTimer(gev.GetUUID())
+	ttl := time.Duration(0)
+	if ttlStr, err := gev.GetFieldAsString(utils.SessionTTL); err == nil {
+		ttl, _ = utils.ParseDurationWithSecs(ttlStr)
+	}
+	var ttlLastUsed *time.Duration
+	if ttlLastUsedStr, err := gev.GetFieldAsString(utils.SessionTTLLastUsed); err == nil {
+		ttlLastUsedParsed, _ := utils.ParseDurationWithSecs(ttlLastUsedStr)
+		ttlLastUsed = &ttlLastUsedParsed
+	}
+	var ttlUsage *time.Duration
+	if ttlUsageStr, err := gev.GetFieldAsString(utils.SessionTTLUsage); err == nil {
+		ttlUsageParsed, _ := utils.ParseDurationWithSecs(ttlUsageStr)
+		ttlUsage = &ttlUsageParsed
+	}
+	self.resetTerminatorTimer(gev.GetUUID(), ttl, ttlLastUsed, ttlUsage)
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
