@@ -547,3 +547,7 @@ func SizeFmt(num float64, suffix string) string {
 	}
 	return fmt.Sprintf("%.1f%s%s", num, "Yi", suffix)
 }
+
+func TimeIs0h(t time.Time) bool {
+	return t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
+}

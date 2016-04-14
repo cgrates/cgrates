@@ -326,6 +326,43 @@ func TestGetCostRatingPlansAndRatingIntervalsMore(t *testing.T) {
 	}
 }
 
+func TestGetCostRatingPlansAndRatingIntervalsMoreDays(t *testing.T) {
+	t1 := time.Date(2012, time.February, 20, 9, 50, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 23, 18, 10, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: t2.Sub(t1)}
+	result, _ := cd.GetCost()
+	if len(result.Timespans) != 8 ||
+		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
+		!result.Timespans[1].TimeEnd.Equal(result.Timespans[2].TimeStart) ||
+		!result.Timespans[2].TimeEnd.Equal(result.Timespans[3].TimeStart) ||
+		!result.Timespans[3].TimeEnd.Equal(result.Timespans[4].TimeStart) ||
+		!result.Timespans[4].TimeEnd.Equal(result.Timespans[5].TimeStart) ||
+		!result.Timespans[5].TimeEnd.Equal(result.Timespans[6].TimeStart) ||
+		!result.Timespans[6].TimeEnd.Equal(result.Timespans[7].TimeStart) {
+		for _, ts := range result.Timespans {
+			t.Logf("TS %+v", ts)
+		}
+		t.Errorf("Expected %+v was %+v", 4, len(result.Timespans))
+	}
+}
+
+func TestGetCostRatingPlansAndRatingIntervalsMoreDaysWeekend(t *testing.T) {
+	t1 := time.Date(2012, time.February, 24, 9, 50, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 27, 18, 10, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: t2.Sub(t1)}
+	result, _ := cd.GetCost()
+	if len(result.Timespans) != 5 ||
+		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
+		!result.Timespans[1].TimeEnd.Equal(result.Timespans[2].TimeStart) ||
+		!result.Timespans[2].TimeEnd.Equal(result.Timespans[3].TimeStart) ||
+		!result.Timespans[3].TimeEnd.Equal(result.Timespans[4].TimeStart) {
+		for _, ts := range result.Timespans {
+			t.Logf("TS %+v", ts)
+		}
+		t.Errorf("Expected %+v was %+v", 4, len(result.Timespans))
+	}
+}
+
 func TestGetCostRateGroups(t *testing.T) {
 	t1 := time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC)
