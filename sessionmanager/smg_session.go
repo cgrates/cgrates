@@ -54,7 +54,7 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 			return
 		default:
 		}
-		if maxDebit, err := self.debit(debitInterval, nilDuration); err != nil {
+		if maxDebit, err := self.debit(debitInterval, nil); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit opperation on session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
 			disconnectReason := SYSTEM_ERROR
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
@@ -77,14 +77,19 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 }
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
-func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
+func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
 	requestedDuration := dur
 	//utils.Logger.Debug(fmt.Sprintf("InitDur: %f, lastUsed: %f", requestedDuration.Seconds(), lastUsed.Seconds()))
 	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f, extraDuration: %f", self.totalUsage.Seconds(), self.extraDuration.Seconds()))
-	self.totalUsage += lastUsed // Should reflect the total usage so far
-	if lastUsed > 0 {
-		self.extraDuration = self.lastUsage - lastUsed
+	if lastUsed != nil {
+		self.extraDuration = self.lastUsage - *lastUsed
 		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %f", self.extraDuration.Seconds()))
+		if *lastUsed != self.lastUsage {
+			// total usage correction
+			self.totalUsage -= self.lastUsage
+			self.totalUsage += *lastUsed
+			//utils.Logger.Debug(fmt.Sprintf("Correction: %f", self.totalUsage.Seconds()))
+		}
 	}
 	// apply correction from previous run
 	if self.extraDuration < dur {
@@ -122,6 +127,8 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.sessionCds = append(self.sessionCds, self.cd.Clone())
 	self.callCosts = append(self.callCosts, cc)
 	self.lastUsage = initialExtraDuration + ccDuration
+	self.totalUsage += self.lastUsage
+	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f", self.totalUsage.Seconds()))
 
 	if ccDuration >= dur { // we got what we asked to be debited
 		//utils.Logger.Debug(fmt.Sprintf("returning normal: %f", requestedDuration.Seconds()))

@@ -674,7 +674,7 @@ func TestSMGSessionTTL(t *testing.T) {
 
 	time.Sleep(50 * time.Millisecond)
 
-	eAcntVal = 4.390000
+	eAcntVal = 4.089900
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
@@ -687,11 +687,11 @@ func TestSMGSessionTTL(t *testing.T) {
 	} else if len(cdrs) != 1 {
 		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	} else {
-		if cdrs[0].Usage != "30.01" {
-			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
+		if cdrs[0].Usage != "150" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		}
-		if cdrs[0].Cost != 1.2 {
-			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
+		if cdrs[0].Cost != 1.5 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
 		}
 	}
 }

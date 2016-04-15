@@ -115,7 +115,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	if maxUsage != 1.048576e+06 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49998945280.000000
+	eAcntVal = 49998945280.000000 //1054720
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -141,7 +141,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	if maxUsage != 1.048576e+06 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49998924800.000000
+	eAcntVal = 49998924800.000000 //20480
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -164,7 +164,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	eAcntVal = 49999979520.000000
+	eAcntVal = 49999979520.000000 //20480
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -426,7 +426,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.DATA].GetTotalValue())
 	}
 	time.Sleep(50 * time.Millisecond)
-	eAcntVal = 49999887360.000000
+	eAcntVal = 49998842880.000000 //1054720
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -440,7 +440,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1010"}
-	eAcntVal := 49999887360.000000
+	eAcntVal := 49998842880.000000
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -468,7 +468,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 	if maxUsage != 1.048576e+06 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49998832640.000000 //1054720
+	eAcntVal = 49997788160.000000 //1054720
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -495,7 +495,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 	if maxUsage != 1.048576e+06 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
-	eAcntVal = 49998812160.000000 // 20480
+	eAcntVal = 49997767680.000000 // 20480
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
@@ -503,7 +503,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 	}
 
 	time.Sleep(50 * time.Millisecond)
-	eAcntVal = 49999866880.000000 //-1054720
+	eAcntVal = 49997767680.000000 //0
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {

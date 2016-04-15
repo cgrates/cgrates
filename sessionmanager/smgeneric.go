@@ -314,9 +314,13 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 			return nilDuration, err
 		}
 	}
+	var lastUsed *time.Duration
 	evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
 	if err != nil && err != utils.ErrNotFound {
 		return nilDuration, err
+	}
+	if err == nil {
+		lastUsed = &evLastUsed
 	}
 	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.MaxCallDuration)
 	if err != nil {
@@ -326,7 +330,7 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 		return nilDuration, err
 	}
 	for _, s := range self.getSession(gev.GetUUID()) {
-		if maxDur, err := s.debit(evMaxUsage, evLastUsed); err != nil {
+		if maxDur, err := s.debit(evMaxUsage, lastUsed); err != nil {
 			return nilDuration, err
 		} else if maxDur < evMaxUsage {
 			evMaxUsage = maxDur
@@ -375,7 +379,7 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 			if s == nil {
 				continue // No session active, will not be able to close it anyway
 			}
-			usage = s.TotalUsage() + lastUsed
+			usage = s.TotalUsage() - s.lastUsage + lastUsed
 		}
 		if err := self.sessionEnd(sessionID, usage); err != nil {
 			interimError = err // Last error will be the one returned as API result
