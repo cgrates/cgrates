@@ -618,13 +618,13 @@ func TestSMGSessionTTL(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	smgEv := SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "12350",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
-		utils.DESTINATION: "1006",
+		utils.DESTINATION: "1008",
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
@@ -646,13 +646,13 @@ func TestSMGSessionTTL(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	smgEv = SMGenericEvent{
-		utils.EVENT_NAME:  "TEST_EVENT",
+		utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "12350",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
-		utils.DESTINATION: "1006",
+		utils.DESTINATION: "1008",
 		utils.CATEGORY:    "call",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
@@ -679,5 +679,19 @@ func TestSMGSessionTTL(t *testing.T) {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1008"}}
+	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "30.01" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %+v ", cdrs[0])
+		}
+		if cdrs[0].Cost != 1.2 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
+		}
 	}
 }
