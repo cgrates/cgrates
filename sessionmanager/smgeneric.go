@@ -78,20 +78,18 @@ func (self *SMGeneric) resetTerminatorTimer(uuid string, ttl time.Duration, ttlL
 
 // Called when a session timeouts
 func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
-	totalSessionUsage := s.TotalUsage() + tmtr.ttl
 	evUpdate := s.eventStart
 	evUpdate[utils.USAGE] = tmtr.ttl.Seconds()
 	if tmtr.ttlUsage != nil {
-		totalSessionUsage = s.TotalUsage() + *tmtr.ttlUsage
 		evUpdate[utils.USAGE] = tmtr.ttlUsage.Seconds()
 	}
 	if tmtr.ttlLastUsed != nil {
 		evUpdate[utils.LastUsed] = tmtr.ttlLastUsed.Seconds()
 	}
 	self.SessionUpdate(evUpdate, nil)
-	self.sessionEnd(s.eventStart.GetUUID(), totalSessionUsage)
+	self.sessionEnd(s.eventStart.GetUUID(), s.TotalUsage())
 	cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
-	cdr.Usage = totalSessionUsage
+	cdr.Usage = s.TotalUsage()
 	var reply string
 	self.cdrsrv.ProcessCdr(cdr, &reply)
 }
