@@ -279,6 +279,9 @@ const (
 	HandlerArgSep               = "|"
 	FlagForceDuration           = "fd"
 	InstanceID                  = "InstanceID"
+	SessionTTL                  = "SessionTTL"
+	SessionTTLLastUsed          = "SessionTTLLastUsed"
+	SessionTTLUsage             = "SessionTTLUsage"
 )
 
 var (

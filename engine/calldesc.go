@@ -361,6 +361,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		// split on rating plans
 		afterStart, afterEnd := false, false //optimization for multiple activation periods
 		for _, rp := range cd.RatingInfos {
+			//log.Print("RP: ", utils.ToJSON(rp))
 			if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
 				firstSpan.setRatingInfo(rp)
 			} else {
@@ -368,7 +369,6 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				for i := 0; i < len(timespans); i++ {
 					newTs := timespans[i].SplitByRatingPlan(rp)
 					if newTs != nil {
-						//log.Print("NEW TS", newTs.TimeStart)
 						timespans = append(timespans, newTs)
 					} else {
 						afterEnd = true
@@ -377,8 +377,23 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				}
 			}
 		}
+		//log.Printf("After SplitByRatingPlan: %+v", utils.ToJSON(timespans))
+		// split on days
+		for i := 0; i < len(timespans); i++ {
+			rp := timespans[i].ratingInfo
+			newTs := timespans[i].SplitByDay()
+			if newTs != nil {
+				//log.Print("NEW TS: ", newTs.TimeStart, newTs.TimeEnd)
+				newTs.setRatingInfo(rp)
+				// insert the new timespan
+				index := i + 1
+				timespans = append(timespans, nil)
+				copy(timespans[index+1:], timespans[index:])
+				timespans[index] = newTs
+			}
+		}
 	}
-	// utils.Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
+	//log.Printf("After SplitByDay: %+v", utils.ToJSON(timespans))
 	// split on rate intervals
 	for i := 0; i < len(timespans); i++ {
 		//log.Printf("==============%v==================", i)
@@ -387,6 +402,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		// utils.Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rateIntervals := rp.SelectRatingIntevalsForTimespan(timespans[i])
+		//log.Print("RIs: ", utils.ToJSON(rateIntervals))
 		/*for _, interval := range rp.RateIntervals {
 			if !timespans[i].hasBetterRateIntervalThan(interval) {
 				timespans[i].SetRateInterval(interval)
@@ -519,6 +535,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 		cd.TOR = utils.VOICE
 	}
 	err := cd.LoadRatingPlans()
+	//log.Print("RI: ", utils.ToJSON(cd.RatingInfos))
 	if err != nil {
 		//utils.Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
 		return &CallCost{Cost: -1}, err

@@ -53,29 +53,75 @@ type SMGeneric struct {
 	guard              *engine.GuardianLock             // Used to lock on uuid
 }
 type smgSessionTerminator struct {
-	timer   *time.Timer
-	endChan chan bool
+	timer       *time.Timer
+	endChan     chan bool
+	ttl         time.Duration
+	ttlLastUsed *time.Duration
+	ttlUsage    *time.Duration
+}
+
+// Updates the timer for the session to a new ttl and terminate info
+func (self *SMGeneric) resetTerminatorTimer(uuid string, ttl time.Duration, ttlLastUsed, ttlUsage *time.Duration) {
+	self.sessionsMux.RLock()
+	defer self.sessionsMux.RUnlock()
+	if st, found := self.sessionTerminators[uuid]; found {
+		if ttl != 0 {
+			st.ttl = ttl
+		}
+		if ttlLastUsed != nil {
+			st.ttlLastUsed = ttlLastUsed
+		}
+		if ttlUsage != nil {
+			st.ttlUsage = ttlUsage
+		}
+		st.timer.Reset(st.ttl)
+	}
+}
+
+// Called when a session timeouts
+func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
+	debitUsage := tmtr.ttl
+	if tmtr.ttlUsage != nil {
+		debitUsage = *tmtr.ttlUsage
+	}
+	for _, s := range self.getSession(s.eventStart.GetUUID()) {
+		s.debit(debitUsage, tmtr.ttlLastUsed)
+	}
+	self.sessionEnd(s.eventStart.GetUUID(), s.TotalUsage())
+	cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
+	cdr.Usage = s.TotalUsage()
+	var reply string
+	self.cdrsrv.Call("CdrServer.ProcessCdr", cdr, &reply)
 }
 
 func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
 	self.sessionsMux.Lock()
 	self.sessions[uuid] = append(self.sessions[uuid], s)
-	if self.cgrCfg.SmGenericConfig.SessionTTL > 0 {
+	if self.cgrCfg.SmGenericConfig.SessionTTL != 0 {
 		if _, found := self.sessionTerminators[uuid]; !found {
-			timer := time.NewTimer(self.cgrCfg.SmGenericConfig.SessionTTL)
+			ttl := self.cgrCfg.SmGenericConfig.SessionTTL
+			if ttlEv := s.eventStart.GetSessionTTL(); ttlEv != 0 {
+				ttl = ttlEv
+			}
+			timer := time.NewTimer(ttl)
 			endChan := make(chan bool, 1)
+			terminator := &smgSessionTerminator{
+				timer:       timer,
+				endChan:     endChan,
+				ttl:         ttl,
+				ttlLastUsed: s.eventStart.GetSessionTTLLastUsed(),
+				ttlUsage:    s.eventStart.GetSessionTTLUsage(),
+			}
+			self.sessionTerminators[uuid] = terminator
 			go func() {
 				select {
 				case <-timer.C:
-					self.sessionEnd(uuid, 0)
+					self.ttlTerminate(s, terminator)
 				case <-endChan:
 					timer.Stop()
 				}
 			}()
-			self.sessionTerminators[uuid] = &smgSessionTerminator{
-				timer:   timer,
-				endChan: endChan,
-			}
+
 		}
 	}
 	self.sessionsMux.Unlock()
@@ -120,15 +166,6 @@ func (self *SMGeneric) getSession(uuid string) []*SMGSession {
 	self.sessionsMux.RLock()
 	defer self.sessionsMux.RUnlock()
 	return self.sessions[uuid]
-}
-
-// Updates the timer for the session to a new ttl
-func (self *SMGeneric) resetTerminatorTimer(uuid string) {
-	self.sessionsMux.RLock()
-	defer self.sessionsMux.RUnlock()
-	if st, found := self.sessionTerminators[uuid]; found {
-		st.timer.Reset(self.cgrCfg.SmGenericConfig.SessionTTL)
-	}
 }
 
 // Handle a new session, pass the connectionId so we can communicate on disconnect request
@@ -260,7 +297,7 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	self.resetTerminatorTimer(gev.GetUUID())
+	self.resetTerminatorTimer(gev.GetUUID(), gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -270,9 +307,13 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 			return nilDuration, err
 		}
 	}
+	var lastUsed *time.Duration
 	evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
 	if err != nil && err != utils.ErrNotFound {
 		return nilDuration, err
+	}
+	if err == nil {
+		lastUsed = &evLastUsed
 	}
 	evMaxUsage, err := gev.GetMaxUsage(utils.META_DEFAULT, self.cgrCfg.MaxCallDuration)
 	if err != nil {
@@ -282,7 +323,7 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 		return nilDuration, err
 	}
 	for _, s := range self.getSession(gev.GetUUID()) {
-		if maxDur, err := s.debit(evMaxUsage, evLastUsed); err != nil {
+		if maxDur, err := s.debit(evMaxUsage, lastUsed); err != nil {
 			return nilDuration, err
 		} else if maxDur < evMaxUsage {
 			evMaxUsage = maxDur
@@ -331,7 +372,7 @@ func (self *SMGeneric) SessionEnd(gev SMGenericEvent, clnt *rpc2.Client) error {
 			if s == nil {
 				continue // No session active, will not be able to close it anyway
 			}
-			usage = s.TotalUsage() + lastUsed
+			usage = s.TotalUsage() - s.lastUsage + lastUsed
 		}
 		if err := self.sessionEnd(sessionID, usage); err != nil {
 			interimError = err // Last error will be the one returned as API result

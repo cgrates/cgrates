@@ -97,6 +97,9 @@ func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, re
 			if attrs.ToR != nil && *attrs.ToR != as.TOR {
 				continue
 			}
+			if attrs.OriginID != nil && *attrs.OriginID != as.OriginID {
+				continue
+			}
 			if attrs.RunID != nil && *attrs.RunID != as.RunId {
 				continue
 			}

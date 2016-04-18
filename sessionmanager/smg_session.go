@@ -42,8 +42,9 @@ type SMGSession struct {
 	sessionCds    []*engine.CallDescriptor
 	callCosts     []*engine.CallCost
 	extraDuration time.Duration // keeps the current duration debited on top of what heas been asked
-	lastUsage     time.Duration
-	totalUsage    time.Duration
+	lastUsage     time.Duration // last requested Duration
+	lastDebit     time.Duration // last real debited duration
+	totalUsage    time.Duration // sum of lastUsage
 }
 
 // Called in case of automatic debits
@@ -55,7 +56,7 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 			return
 		default:
 		}
-		if maxDebit, err := self.debit(debitInterval, nilDuration); err != nil {
+		if maxDebit, err := self.debit(debitInterval, nil); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not complete debit opperation on session: %s, error: %s", self.eventStart.GetUUID(), err.Error()))
 			disconnectReason := SYSTEM_ERROR
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
@@ -78,14 +79,19 @@ func (self *SMGSession) debitLoop(debitInterval time.Duration) {
 }
 
 // Attempts to debit a duration, returns maximum duration which can be debitted or error
-func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.Duration, error) {
+func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.Duration, error) {
 	requestedDuration := dur
 	//utils.Logger.Debug(fmt.Sprintf("InitDur: %f, lastUsed: %f", requestedDuration.Seconds(), lastUsed.Seconds()))
 	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f, extraDuration: %f", self.totalUsage.Seconds(), self.extraDuration.Seconds()))
-	self.totalUsage += lastUsed // Should reflect the total usage so far
-	if lastUsed > 0 {
-		self.extraDuration = self.lastUsage - lastUsed
+	if lastUsed != nil {
+		self.extraDuration = self.lastDebit - *lastUsed
 		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %f", self.extraDuration.Seconds()))
+		if *lastUsed != self.lastUsage {
+			// total usage correction
+			self.totalUsage -= self.lastUsage
+			self.totalUsage += *lastUsed
+			//utils.Logger.Debug(fmt.Sprintf("Correction: %f", self.totalUsage.Seconds()))
+		}
 	}
 	// apply correction from previous run
 	if self.extraDuration < dur {
@@ -105,7 +111,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	self.cd.DurationIndex += dur
 	cc := &engine.CallCost{}
 	if err := self.rater.Call("Responder.MaxDebit", self.cd, cc); err != nil {
-		self.lastUsage = 0
+		self.lastDebit = 0
 		return 0, err
 	}
 	// cd corrections
@@ -116,13 +122,20 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed time.Duration) (time.D
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
+	if ccDuration >= dur {
+		self.lastUsage = requestedDuration
+	} else {
+		self.lastUsage = ccDuration
+	}
 	self.cd.DurationIndex -= dur
 	self.cd.DurationIndex += ccDuration
 	self.cd.MaxCostSoFar += cc.Cost
 	self.cd.LoopIndex += 1
 	self.sessionCds = append(self.sessionCds, self.cd.Clone())
 	self.callCosts = append(self.callCosts, cc)
-	self.lastUsage = initialExtraDuration + ccDuration
+	self.lastDebit = initialExtraDuration + ccDuration
+	self.totalUsage += self.lastUsage
+	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f", self.totalUsage.Seconds()))
 
 	if ccDuration >= dur { // we got what we asked to be debited
 		//utils.Logger.Debug(fmt.Sprintf("returning normal: %f", requestedDuration.Seconds()))
@@ -270,13 +283,12 @@ func (self *SMGSession) TotalUsage() time.Duration {
 func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 	sTime, _ := self.eventStart.GetSetupTime(utils.META_DEFAULT, timezone)
 	aTime, _ := self.eventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
-	usage, _ := self.eventStart.GetUsage(utils.META_DEFAULT)
 	pdd, _ := self.eventStart.GetPdd(utils.META_DEFAULT)
 	aSession := &ActiveSession{
 		CgrId:       self.eventStart.GetCgrId(timezone),
 		TOR:         utils.VOICE,
 		RunId:       self.runId,
-		AccId:       self.eventStart.GetUUID(),
+		OriginID:    self.eventStart.GetUUID(),
 		CdrHost:     self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
 		CdrSource:   self.eventStart.GetCdrSource(),
 		ReqType:     self.eventStart.GetReqType(utils.META_DEFAULT),
@@ -288,7 +300,7 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 		Destination: self.eventStart.GetDestination(utils.META_DEFAULT),
 		SetupTime:   sTime,
 		AnswerTime:  aTime,
-		Usage:       usage,
+		Usage:       self.TotalUsage(),
 		Pdd:         pdd,
 		ExtraFields: self.eventStart.GetExtraFields(),
 		Supplier:    self.eventStart.GetSupplier(utils.META_DEFAULT),

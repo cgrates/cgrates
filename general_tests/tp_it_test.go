@@ -161,6 +161,12 @@ func TestTpZeroCost(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1012"}
+	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	}
+	balanceValueBefore := acnt.BalanceMap[utils.MONETARY][0].Value
 	tStart := time.Date(2016, 3, 31, 0, 0, 0, 0, time.UTC)
 	cd := engine.CallDescriptor{
 		Direction:     "*out",
@@ -175,15 +181,13 @@ func TestTpZeroCost(t *testing.T) {
 	}
 	var cc engine.CallCost
 	if err := tpRPC.Call("Responder.Debit", cd, &cc); err != nil {
-		t.Error("Got error on Responder.GetCost: ", err.Error())
+		t.Error("Got error on Responder.Debit: ", err.Error())
 	} else if cc.GetDuration() != 20*time.Second {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))
 	}
-	var acnt *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1012"}
 	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
-	} else if acnt.BalanceMap[utils.MONETARY][0].Value != 11.0 {
+	} else if acnt.BalanceMap[utils.MONETARY][0].Value != balanceValueBefore {
 		t.Errorf("Calling ApierV2.GetAccount received: %s", utils.ToIJSON(acnt))
 	}
 }

@@ -1160,6 +1160,7 @@ type AliasValue struct {
 // AttrSMGGetActiveSessions will filter returned sessions by SMGenericV1
 type AttrSMGGetActiveSessions struct {
 	ToR         *string
+	OriginID    *string
 	RunID       *string
 	RequestType *string
 	Tenant      *string

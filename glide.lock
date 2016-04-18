@@ -1,5 +1,5 @@
 hash: 5c488630d1d32687b7a3c3b22c47ceaf7eb3cffb764799706728a6accbcd3ff5
-updated: 2016-04-07T20:19:19.216414077+03:00
+updated: 2016-04-11T11:24:07.55158903+03:00
 imports:
 - name: github.com/cenkalti/hub
   version: b864404b5f990410d56858a1b0a6fac23a85443f
@@ -12,7 +12,7 @@ imports:
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/rpcclient
-  version: 9302178591f1b3b5460c36a4ddae395f0f5397c5
+  version: 64c9ff2b700d5a97a969a59d648bd75d09274143
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
@@ -26,7 +26,7 @@ imports:
   - diam/sm/smparser
   - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
-  version: 1421caf44f6464fd2ee8de694c7508ee13f92964
+  version: 7ebe0a500653eeb1859664bed5e48dec1e164e73
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
 - name: github.com/jinzhu/gorm

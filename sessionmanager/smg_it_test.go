@@ -40,7 +40,7 @@ var daCfg *config.CGRConfig
 var smgRPC *rpc.Client
 var err error
 
-func TestSMGInitCfg(t *testing.T) {
+func TestSMGVoiceInitCfg(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -56,7 +56,7 @@ func TestSMGInitCfg(t *testing.T) {
 }
 
 // Remove data in both rating and accounting db
-func TestSMGResetDataDb(t *testing.T) {
+func TestSMGVoiceResetDataDb(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -66,7 +66,7 @@ func TestSMGResetDataDb(t *testing.T) {
 }
 
 // Wipe out the cdr database
-func TestSMGResetStorDb(t *testing.T) {
+func TestSMGVoiceResetStorDb(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -76,7 +76,7 @@ func TestSMGResetStorDb(t *testing.T) {
 }
 
 // Start CGR Engine
-func TestSMGStartEngine(t *testing.T) {
+func TestSMGVoiceStartEngine(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -86,7 +86,7 @@ func TestSMGStartEngine(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestSMGApierRpcConn(t *testing.T) {
+func TestSMGVoiceApierRpcConn(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -98,7 +98,7 @@ func TestSMGApierRpcConn(t *testing.T) {
 }
 
 // Load the tariff plan, creating accounts and their balances
-func TestSMGTPFromFolder(t *testing.T) {
+func TestSMGVoiceTPFromFolder(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -110,7 +110,7 @@ func TestSMGTPFromFolder(t *testing.T) {
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
-func TestSMGMonetaryRefund(t *testing.T) {
+func TestSMGVoiceMonetaryRefund(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -171,7 +171,7 @@ func TestSMGMonetaryRefund(t *testing.T) {
 	}
 }
 
-func TestSMGVoiceRefund(t *testing.T) {
+func TestSMGVoiceVoiceRefund(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -232,7 +232,7 @@ func TestSMGVoiceRefund(t *testing.T) {
 	}
 }
 
-func TestSMGMixedRefund(t *testing.T) {
+func TestSMGVoiceMixedRefund(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -306,7 +306,7 @@ func TestSMGMixedRefund(t *testing.T) {
 	t.Logf("After voice: %f", acnt.BalanceMap[utils.VOICE].GetTotalValue())
 }
 
-func TestSMGLastUsed(t *testing.T) {
+func TestSMGVoiceLastUsed(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -321,7 +321,7 @@ func TestSMGLastUsed(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "12350",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -349,7 +349,7 @@ func TestSMGLastUsed(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "12350",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -375,7 +375,7 @@ func TestSMGLastUsed(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "12350",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -401,7 +401,7 @@ func TestSMGLastUsed(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "12350",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -423,7 +423,7 @@ func TestSMGLastUsed(t *testing.T) {
 	}
 }
 
-func TestSMGLastUsedEnd(t *testing.T) {
+func TestSMGVoiceLastUsedEnd(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -514,7 +514,7 @@ func TestSMGLastUsedEnd(t *testing.T) {
 	}
 }
 
-func TestSMGLastUsedNotFixed(t *testing.T) {
+func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -602,5 +602,109 @@ func TestSMGLastUsedNotFixed(t *testing.T) {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+}
+
+func TestSMGVoiceSessionTTL(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	eAcntVal := 5.590000
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	smgEv := SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
+		utils.TOR:         utils.VOICE,
+		utils.ACCID:       "12360",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     "1001",
+		utils.SUBJECT:     "1001",
+		utils.DESTINATION: "1008",
+		utils.CATEGORY:    "call",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.USAGE:       "2m",
+	}
+	var maxUsage float64
+	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+		t.Error(err)
+	}
+	if maxUsage != 120 {
+		t.Error("Bad max usage: ", maxUsage)
+	}
+	var aSessions []*ActiveSession
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer("12360")}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	} else if aSessions[0].Usage != time.Duration(120)*time.Second {
+		t.Errorf("Expecting 2m, received usage: %v", aSessions[0].Usage)
+	}
+	eAcntVal = 4.190020
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	smgEv = SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL",
+		utils.TOR:         utils.VOICE,
+		utils.ACCID:       "12360",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     "1001",
+		utils.SUBJECT:     "1001",
+		utils.DESTINATION: "1008",
+		utils.CATEGORY:    "call",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.USAGE:       "2m",
+		utils.LastUsed:    "30s",
+	}
+	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+		t.Error(err)
+	}
+	if maxUsage != 120 {
+		t.Error("Bad max usage: ", maxUsage)
+	}
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer("12360")}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
+		t.Errorf("Expecting 2m30s, received usage: %v", aSessions[0].Usage)
+	}
+	eAcntVal = 4.090030
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	time.Sleep(100 * time.Millisecond)
+	eAcntVal = 4.0565
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+	}
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1008"}}
+	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "150.05" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
+		if cdrs[0].Cost != 1.5333 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
+		}
 	}
 }
