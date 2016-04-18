@@ -279,13 +279,12 @@ func (self *SMGSession) TotalUsage() time.Duration {
 func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 	sTime, _ := self.eventStart.GetSetupTime(utils.META_DEFAULT, timezone)
 	aTime, _ := self.eventStart.GetAnswerTime(utils.META_DEFAULT, timezone)
-	usage, _ := self.eventStart.GetUsage(utils.META_DEFAULT)
 	pdd, _ := self.eventStart.GetPdd(utils.META_DEFAULT)
 	aSession := &ActiveSession{
 		CgrId:       self.eventStart.GetCgrId(timezone),
 		TOR:         utils.VOICE,
 		RunId:       self.runId,
-		AccId:       self.eventStart.GetUUID(),
+		OriginID:    self.eventStart.GetUUID(),
 		CdrHost:     self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
 		CdrSource:   self.eventStart.GetCdrSource(),
 		ReqType:     self.eventStart.GetReqType(utils.META_DEFAULT),
@@ -297,7 +296,7 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 		Destination: self.eventStart.GetDestination(utils.META_DEFAULT),
 		SetupTime:   sTime,
 		AnswerTime:  aTime,
-		Usage:       usage,
+		Usage:       self.TotalUsage(),
 		Pdd:         pdd,
 		ExtraFields: self.eventStart.GetExtraFields(),
 		Supplier:    self.eventStart.GetSupplier(utils.META_DEFAULT),

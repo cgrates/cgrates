@@ -87,11 +87,12 @@ func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 		evUpdate[utils.LastUsed] = tmtr.ttlLastUsed.Seconds()
 	}
 	self.SessionUpdate(evUpdate, nil)
-	self.sessionEnd(s.eventStart.GetUUID(), s.TotalUsage())
+	/*self.sessionEnd(s.eventStart.GetUUID(), s.TotalUsage())
 	cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
 	cdr.Usage = s.TotalUsage()
 	var reply string
 	self.cdrsrv.ProcessCdr(cdr, &reply)
+	*/
 }
 
 func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {

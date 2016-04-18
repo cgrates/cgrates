@@ -272,7 +272,7 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 		aSession := &ActiveSession{
 			CgrId:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			TOR:         utils.VOICE,
-			AccId:       s.eventStart.GetUUID(),
+			OriginID:    s.eventStart.GetUUID(),
 			CdrHost:     s.eventStart.GetOriginatorIP(utils.META_DEFAULT),
 			CdrSource:   "FS_" + s.eventStart.GetName(),
 			ReqType:     s.eventStart.GetReqType(utils.META_DEFAULT),
@@ -309,7 +309,7 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 type ActiveSession struct {
 	CgrId         string
 	TOR           string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
-	AccId         string            // represents the unique accounting id given by the telecom switch generating the CDR
+	OriginID      string            // represents the unique accounting id given by the telecom switch generating the CDR
 	CdrHost       string            // represents the IP address of the host generating the CDR (automatically populated by the server)
 	CdrSource     string            // formally identifies the source of the CDR (free form field)
 	ReqType       string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
