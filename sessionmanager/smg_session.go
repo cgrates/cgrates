@@ -41,8 +41,9 @@ type SMGSession struct {
 	sessionCds    []*engine.CallDescriptor
 	callCosts     []*engine.CallCost
 	extraDuration time.Duration // keeps the current duration debited on top of what heas been asked
-	lastUsage     time.Duration
-	totalUsage    time.Duration
+	lastUsage     time.Duration // last requested Duration
+	lastDebit     time.Duration // last real debited duration
+	totalUsage    time.Duration // sum of lastUsage
 }
 
 // Called in case of automatic debits
@@ -82,7 +83,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	//utils.Logger.Debug(fmt.Sprintf("InitDur: %f, lastUsed: %f", requestedDuration.Seconds(), lastUsed.Seconds()))
 	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f, extraDuration: %f", self.totalUsage.Seconds(), self.extraDuration.Seconds()))
 	if lastUsed != nil {
-		self.extraDuration = self.lastUsage - *lastUsed
+		self.extraDuration = self.lastDebit - *lastUsed
 		//utils.Logger.Debug(fmt.Sprintf("ExtraDuration LastUsed: %f", self.extraDuration.Seconds()))
 		if *lastUsed != self.lastUsage {
 			// total usage correction
@@ -109,7 +110,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.cd.DurationIndex += dur
 	cc := &engine.CallCost{}
 	if err := self.rater.MaxDebit(self.cd, cc); err != nil {
-		self.lastUsage = 0
+		self.lastDebit = 0
 		return 0, err
 	}
 	// cd corrections
@@ -120,13 +121,18 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	if ccDuration != dur {
 		self.extraDuration = ccDuration - dur
 	}
+	if ccDuration >= dur {
+		self.lastUsage = requestedDuration
+	} else {
+		self.lastUsage = ccDuration
+	}
 	self.cd.DurationIndex -= dur
 	self.cd.DurationIndex += ccDuration
 	self.cd.MaxCostSoFar += cc.Cost
 	self.cd.LoopIndex += 1
 	self.sessionCds = append(self.sessionCds, self.cd.Clone())
 	self.callCosts = append(self.callCosts, cc)
-	self.lastUsage = initialExtraDuration + ccDuration
+	self.lastDebit = initialExtraDuration + ccDuration
 	self.totalUsage += self.lastUsage
 	//utils.Logger.Debug(fmt.Sprintf("TotalUsage: %f", self.totalUsage.Seconds()))
 
