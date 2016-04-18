@@ -29,8 +29,8 @@ func RegisterRpcObject(name string, rpcObject interface{}) {
 		if methodType.NumIn() == 3 { // if it has three parameters (one is self and two are rpc params)
 			RpcObjects[name+"."+method.Name] = &RpcObject{
 				Object:   objType,
-				InParam:  reflect.New(methodType.In(1)).Elem().Interface(),
-				OutParam: reflect.New(methodType.In(2)).Elem().Interface(),
+				InParam:  reflect.New(methodType.In(1)).Interface(),
+				OutParam: reflect.New(methodType.In(2).Elem()).Interface(),
 			}
 		}
 

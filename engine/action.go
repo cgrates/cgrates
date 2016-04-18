@@ -32,6 +32,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 /*
@@ -651,19 +652,24 @@ func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Act
 }
 
 type RPCRequest struct {
-	Server    string
+	Address   string
 	Transport string
 	Method    string
 	Attempts  int
 	Async     bool
-	Arg       map[string]interface{}
+	Param     string
 }
 
 func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	rpcRequest := RPCRequest{}
-	if err := json.Unmarshal([]byte(a.ExtraParameters), &rpcRequest); err != nil {
+	req := RPCRequest{}
+	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
 		return err
 	}
+	client, err := rpcclient.NewRpcClient(req.Method, req.Address, req.Attempts, 0, req.Transport, nil)
+	if err != nil {
+		return nil, err
+	}
+	client.Call()
 	return nil
 }
 
