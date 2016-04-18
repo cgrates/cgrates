@@ -99,12 +99,18 @@ func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
 	self.sessions[uuid] = append(self.sessions[uuid], s)
 	if self.cgrCfg.SmGenericConfig.SessionTTL != 0 {
 		if _, found := self.sessionTerminators[uuid]; !found {
-			timer := time.NewTimer(self.cgrCfg.SmGenericConfig.SessionTTL)
+			ttl := self.cgrCfg.SmGenericConfig.SessionTTL
+			if ttlEv := s.eventStart.GetSessionTTL(); ttlEv != 0 {
+				ttl = ttlEv
+			}
+			timer := time.NewTimer(ttl)
 			endChan := make(chan bool, 1)
 			terminator := &smgSessionTerminator{
-				timer:   timer,
-				endChan: endChan,
-				ttl:     self.cgrCfg.SmGenericConfig.SessionTTL,
+				timer:       timer,
+				endChan:     endChan,
+				ttl:         ttl,
+				ttlLastUsed: s.eventStart.GetSessionTTLLastUsed(),
+				ttlUsage:    s.eventStart.GetSessionTTLUsage(),
 			}
 			self.sessionTerminators[uuid] = terminator
 			go func() {
@@ -290,21 +296,7 @@ func (self *SMGeneric) SessionStart(gev SMGenericEvent, clnt *rpc2.Client) (time
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	ttl := time.Duration(0)
-	if ttlStr, err := gev.GetFieldAsString(utils.SessionTTL); err == nil {
-		ttl, _ = utils.ParseDurationWithSecs(ttlStr)
-	}
-	var ttlLastUsed *time.Duration
-	if ttlLastUsedStr, err := gev.GetFieldAsString(utils.SessionTTLLastUsed); err == nil {
-		ttlLastUsedParsed, _ := utils.ParseDurationWithSecs(ttlLastUsedStr)
-		ttlLastUsed = &ttlLastUsedParsed
-	}
-	var ttlUsage *time.Duration
-	if ttlUsageStr, err := gev.GetFieldAsString(utils.SessionTTLUsage); err == nil {
-		ttlUsageParsed, _ := utils.ParseDurationWithSecs(ttlUsageStr)
-		ttlUsage = &ttlUsageParsed
-	}
-	self.resetTerminatorTimer(gev.GetUUID(), ttl, ttlLastUsed, ttlUsage)
+	self.resetTerminatorTimer(gev.GetUUID(), gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
