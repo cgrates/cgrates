@@ -2159,6 +2159,44 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 	}
 }
 
+type TestRPCParameters struct {
+	status string
+}
+
+type Attr struct {
+	Name    string
+	Surname string
+	Age     float64
+}
+
+func (trpcp *TestRPCParameters) Hopa(in Attr, out *float64) error {
+	trpcp.status = utils.OK
+	return nil
+}
+
+func (trpcp *TestRPCParameters) Call(string, interface{}, interface{}) error {
+	return nil
+}
+
+func TestCgrRpcAction(t *testing.T) {
+	trpcp := &TestRPCParameters{}
+	utils.RegisterRpcParams("", trpcp)
+	a := &Action{
+		ExtraParameters: `{"Address": "internal",
+	"Transport": "*gob",
+	"Method": "TestRPCParameters.Hopa",
+	"Attempts":1,
+	"Async" :false,
+	"Param": "{\"Name\":\"n\", \"Surname\":\"s\", \"Age\":10.2}"}`,
+	}
+	if err := cgrRPCAction(nil, nil, a, nil); err != nil {
+		t.Error("error executing cgr action: ", err)
+	}
+	if trpcp.status != utils.OK {
+		t.Error("RPC not called!")
+	}
+}
+
 /**************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {

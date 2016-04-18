@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/smtp"
 	"path"
 	"reflect"
@@ -665,12 +666,25 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
 		return err
 	}
-	client, err := rpcclient.NewRpcClient(req.Method, req.Address, req.Attempts, 0, req.Transport, nil)
+	log.Printf("REQ: %+v", req)
+	params, err := utils.GetRpcParams(req.Method)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	client.Call()
-	return nil
+	var client rpcclient.RpcClientConnection
+	if req.Address != utils.INTERNAL {
+		if client, err = rpcclient.NewRpcClient(req.Method, req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
+			return err
+		}
+	} else {
+		client = params.Object
+	}
+
+	in, out := params.InParam, params.OutParam
+	if err := json.Unmarshal([]byte(req.Param), &in); err != nil {
+		return err
+	}
+	return client.Call(req.Method, in, out)
 }
 
 // Structure to store actions according to weight
