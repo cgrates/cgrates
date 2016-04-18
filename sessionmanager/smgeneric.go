@@ -85,12 +85,11 @@ func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	for _, s := range self.getSession(s.eventStart.GetUUID()) {
 		s.debit(debitUsage, tmtr.ttlLastUsed)
 	}
-	/*self.sessionEnd(s.eventStart.GetUUID(), s.TotalUsage())
+	self.sessionEnd(s.eventStart.GetUUID(), s.TotalUsage())
 	cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
 	cdr.Usage = s.TotalUsage()
 	var reply string
 	self.cdrsrv.ProcessCdr(cdr, &reply)
-	*/
 }
 
 func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {

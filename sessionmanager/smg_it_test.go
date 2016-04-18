@@ -686,41 +686,25 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-
 	time.Sleep(100 * time.Millisecond)
-	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer("12360")}, &aSessions); err != nil {
+	eAcntVal = 4.0565
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
-	} else if len(aSessions) != 1 {
-		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(150)*time.Second+time.Duration(50)*time.Millisecond {
-		t.Errorf("Expecting 2m30s50ms, received usage: %v", aSessions[0].Usage)
+	} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
+		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-
-	/*
-		if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer("12360")}, &aSessions); err != nil {
-			t.Error(err)
-		} else if len(aSessions) != 0 {
-			t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1008"}}
+	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "150.05" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
 		}
-		eAcntVal = 4.089900
-		if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
-			t.Error(err)
-		} else if acnt.BalanceMap[utils.MONETARY].GetTotalValue() != eAcntVal {
-			t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
+		if cdrs[0].Cost != 1.5333 {
+			t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
 		}
-		var cdrs []*engine.ExternalCDR
-		req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{"1008"}}
-		if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
-			t.Error("Unexpected error: ", err.Error())
-		} else if len(cdrs) != 1 {
-			t.Error("Unexpected number of CDRs returned: ", len(cdrs))
-		} else {
-			if cdrs[0].Usage != "150" {
-				t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
-			}
-			if cdrs[0].Cost != 1.5 {
-				t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
-			}
-		}
-	*/
+	}
 }
