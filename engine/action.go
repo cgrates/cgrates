@@ -653,6 +653,7 @@ func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Act
 type RPCRequest struct {
 	Server    string
 	Transport string
+	Method    string
 	Attempts  int
 	Async     bool
 	Arg       map[string]interface{}
