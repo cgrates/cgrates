@@ -687,13 +687,13 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		t.Errorf("Expected: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer("12360")}, &aSessions); err != nil {
 		t.Error(err)
 	} else if len(aSessions) != 1 {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
-	} else if aSessions[0].Usage != time.Duration(150)*time.Second+time.Duration(10)*time.Millisecond {
-		t.Errorf("Expecting 2m30s10ms, received usage: %v", aSessions[0].Usage)
+	} else if aSessions[0].Usage != time.Duration(150)*time.Second+time.Duration(50)*time.Millisecond {
+		t.Errorf("Expecting 2m30s50ms, received usage: %v", aSessions[0].Usage)
 	}
 
 	/*
