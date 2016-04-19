@@ -33,7 +33,7 @@ func RegisterRpcParams(name string, obj rpcclient.RpcClientConnection) {
 		if methodType.NumIn() == 3 { // if it has three parameters (one is self and two are rpc params)
 			rpcParamsMap[name+"."+method.Name] = &RpcParams{
 				Object:   obj,
-				InParam:  reflect.New(methodType.In(1)).Interface(),
+				InParam:  reflect.Zero(methodType.In(1)).Interface(),
 				OutParam: reflect.New(methodType.In(2).Elem()).Interface(),
 			}
 		}

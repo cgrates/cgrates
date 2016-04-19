@@ -666,7 +666,6 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
 		return err
 	}
-	log.Printf("REQ: %+v", req)
 	params, err := utils.GetRpcParams(req.Method)
 	if err != nil {
 		return err
@@ -681,9 +680,12 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	}
 
 	in, out := params.InParam, params.OutParam
+	log.Print("IN: ", reflect.TypeOf(in))
+	log.Print(req.Param)
 	if err := json.Unmarshal([]byte(req.Param), &in); err != nil {
 		return err
 	}
+	log.Print("IN: ", reflect.TypeOf(in))
 	return client.Call(req.Method, in, out)
 }
 

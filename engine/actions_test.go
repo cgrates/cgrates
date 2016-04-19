@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -2174,8 +2175,32 @@ func (trpcp *TestRPCParameters) Hopa(in Attr, out *float64) error {
 	return nil
 }
 
-func (trpcp *TestRPCParameters) Call(string, interface{}, interface{}) error {
-	return nil
+func (trpcp *TestRPCParameters) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
+	}
+	// get method
+	method := reflect.ValueOf(trpcp).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
+
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }
 
 func TestCgrRpcAction(t *testing.T) {
