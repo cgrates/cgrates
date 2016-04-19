@@ -657,7 +657,7 @@ type RPCRequest struct {
 	Method    string
 	Attempts  int
 	Async     bool
-	Param     string
+	Param     map[string]interface{}
 }
 
 func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
@@ -677,13 +677,25 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	} else {
 		client = params.Object
 	}
+	if client == nil {
+		return utils.ErrServerError
+	}
 
 	in, out := params.InParam, params.OutParam
-	x := in
-	if err := json.Unmarshal([]byte(req.Param), &x); err != nil {
+	p, err := utils.FromMapStringInterfaceValue(req.Param, in)
+	if err != nil {
 		return err
 	}
-	return client.Call(req.Method, in, out)
+	if !req.Async {
+		err = client.Call(req.Method, p, out)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %+v err: %v", out, err))
+		return err
+	}
+	go func() {
+		err := client.Call(req.Method, p, out)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %+v err: %v", out, err))
+	}()
+	return nil
 }
 
 // Structure to store actions according to weight

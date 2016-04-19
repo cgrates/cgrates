@@ -10,7 +10,7 @@ var rpcParamsMap map[string]*RpcParams
 
 type RpcParams struct {
 	Object   rpcclient.RpcClientConnection
-	InParam  interface{}
+	InParam  reflect.Value
 	OutParam interface{}
 }
 
@@ -33,7 +33,7 @@ func RegisterRpcParams(name string, obj rpcclient.RpcClientConnection) {
 		if methodType.NumIn() == 3 { // if it has three parameters (one is self and two are rpc params)
 			rpcParamsMap[name+"."+method.Name] = &RpcParams{
 				Object:   obj,
-				InParam:  (reflect.New(methodType.In(1)).Elem()).Interface(),
+				InParam:  reflect.New(methodType.In(1)),
 				OutParam: reflect.New(methodType.In(2).Elem()).Interface(),
 			}
 		}

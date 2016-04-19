@@ -103,11 +103,12 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 }
 
 func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	at := &engine.ActionTiming{
 		ActionsID: attr.ActionsId,
 	}
-	at.SetAccountIDs(utils.StringMap{accID: true})
+	if attr.Tenant != "" && attr.Account != "" {
+		at.SetAccountIDs(utils.StringMap{utils.AccountKey(attr.Tenant, attr.Account): true})
+	}
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
