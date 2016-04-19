@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/smtp"
 	"path"
 	"reflect"
@@ -680,12 +679,10 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	}
 
 	in, out := params.InParam, params.OutParam
-	log.Print("IN: ", reflect.TypeOf(in))
-	log.Print(req.Param)
-	if err := json.Unmarshal([]byte(req.Param), &in); err != nil {
+	x := in
+	if err := json.Unmarshal([]byte(req.Param), &x); err != nil {
 		return err
 	}
-	log.Print("IN: ", reflect.TypeOf(in))
 	return client.Call(req.Method, in, out)
 }
 
