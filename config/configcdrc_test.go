@@ -37,7 +37,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 	eCgrCfg.CdrcProfiles["/var/log/cgrates/cdrc/in"] = map[string]*CdrcConfig{
 		"*default": &CdrcConfig{
 			Enabled:                 false,
-			Cdrs:                    "internal",
+			CdrsConns:               []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 			CdrFormat:               "csv",
 			FieldSeparator:          ',',
 			DataUsageMultiplyFactor: 1024,
@@ -82,7 +82,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc1/in"] = map[string]*CdrcConfig{
 		"CDRC-CSV1": &CdrcConfig{
 			Enabled:                 true,
-			Cdrs:                    "internal",
+			CdrsConns:               []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 			CdrFormat:               "csv",
 			FieldSeparator:          ',',
 			DataUsageMultiplyFactor: 1024,
@@ -125,7 +125,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc2/in"] = map[string]*CdrcConfig{
 		"CDRC-CSV2": &CdrcConfig{
 			Enabled:                 true,
-			Cdrs:                    "internal",
+			CdrsConns:               []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 			CdrFormat:               "csv",
 			FieldSeparator:          ',',
 			DataUsageMultiplyFactor: 0.000976563,
@@ -148,7 +148,7 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc3/in"] = map[string]*CdrcConfig{
 		"CDRC-CSV3": &CdrcConfig{
 			Enabled:                 true,
-			Cdrs:                    "internal",
+			CdrsConns:               []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 			CdrFormat:               "csv",
 			FieldSeparator:          ',',
 			DataUsageMultiplyFactor: 1024,

@@ -22,8 +22,8 @@
 
 "sm_freeswitch": {
 	"enabled": true,				// starts SessionManager service: <true|false>
-	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "2.3.4.5:8021", "password": "ClueCon", "reconnects": 5},
+	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+		{"address": "2.3.4.5:8021", "password": "ClueCon", "reconnects": 5},
 	],
 },
 

@@ -33,7 +33,7 @@ const (
 	DATADB_JSN      = "data_db"
 	STORDB_JSN      = "stor_db"
 	BALANCER_JSN    = "balancer"
-	RATER_JSN       = "rater"
+	RALS_JSN        = "rals"
 	SCHEDULER_JSN   = "scheduler"
 	CDRS_JSN        = "cdrs"
 	MEDIATOR_JSN    = "mediator"
@@ -128,12 +128,12 @@ func (self CgrJsonCfg) BalancerJsonCfg() (*BalancerJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) RaterJsonCfg() (*RaterJsonCfg, error) {
-	rawCfg, hasKey := self[RATER_JSN]
+func (self CgrJsonCfg) RalsJsonCfg() (*RalsJsonCfg, error) {
+	rawCfg, hasKey := self[RALS_JSN]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := new(RaterJsonCfg)
+	cfg := new(RalsJsonCfg)
 	if err := json.Unmarshal(*rawCfg, cfg); err != nil {
 		return nil, err
 	}

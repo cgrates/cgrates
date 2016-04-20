@@ -7,14 +7,14 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 "general": {
-	"default_reqtype": "*pseudoprepaid",				// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
+	"default_request_type": "*pseudoprepaid",				// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 },
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
 },
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
 
@@ -42,9 +42,9 @@
 
 "sm_freeswitch": {
 	"enabled": true,				// starts SessionManager service: <true|false>
-	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 5},
-		{"server": "2.3.4.5:8021", "password": "ClueCon", "reconnects": 5},
+	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+		{"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 5},
+		{"address": "2.3.4.5:8021", "password": "ClueCon", "reconnects": 5},
 	],
 },
 
