@@ -247,5 +247,15 @@ func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan str
 	server.RpcRegister(responder)
 	server.RpcRegister(apierRpcV1)
 	server.RpcRegister(apierRpcV2)
+
+	utils.RegisterRpcParams("", &engine.Stats{})
+	utils.RegisterRpcParams("", &history.FileScribe{})
+	utils.RegisterRpcParams("", &engine.PubSub{})
+	utils.RegisterRpcParams("", &engine.AliasHandler{})
+	utils.RegisterRpcParams("", &engine.UserMap{})
+	utils.RegisterRpcParams("", responder)
+	utils.RegisterRpcParams("", apierRpcV1)
+	utils.RegisterRpcParams("", apierRpcV2)
+
 	internalRaterChan <- responder // Rater done
 }

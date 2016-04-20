@@ -2,14 +2,12 @@ package utils
 
 import (
 	"reflect"
-
-	"github.com/cgrates/rpcclient"
 )
 
 var rpcParamsMap map[string]*RpcParams
 
 type RpcParams struct {
-	Object   rpcclient.RpcClientConnection
+	Object   interface{}
 	InParam  reflect.Value
 	OutParam interface{}
 }
@@ -18,7 +16,7 @@ func init() {
 	rpcParamsMap = make(map[string]*RpcParams)
 }
 
-func RegisterRpcParams(name string, obj rpcclient.RpcClientConnection) {
+func RegisterRpcParams(name string, obj interface{}) {
 	objType := reflect.TypeOf(obj)
 	if name == "" {
 		val := reflect.ValueOf(obj)
@@ -31,10 +29,14 @@ func RegisterRpcParams(name string, obj rpcclient.RpcClientConnection) {
 		method := objType.Method(i)
 		methodType := method.Type
 		if methodType.NumIn() == 3 { // if it has three parameters (one is self and two are rpc params)
+			out := methodType.In(2)
+			if out.Kind() == reflect.Ptr {
+				out = out.Elem()
+			}
 			rpcParamsMap[name+"."+method.Name] = &RpcParams{
 				Object:   obj,
 				InParam:  reflect.New(methodType.In(1)),
-				OutParam: reflect.New(methodType.In(2).Elem()).Interface(),
+				OutParam: reflect.New(out).Interface(),
 			}
 		}
 
@@ -42,6 +44,7 @@ func RegisterRpcParams(name string, obj rpcclient.RpcClientConnection) {
 }
 
 func GetRpcParams(method string) (*RpcParams, error) {
+	Logger.Info("REGISTERED: " + ToJSON(rpcParamsMap))
 	x, found := rpcParamsMap[method]
 	if !found {
 		return nil, ErrNotFound
