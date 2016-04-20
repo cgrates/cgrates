@@ -214,11 +214,28 @@ func TestTpZeroNegativeCost(t *testing.T) {
 	} else if cc.GetDuration() != 20*time.Second {
 		t.Errorf("Calling Responder.MaxDebit got callcost: %v", utils.ToIJSON(cc))
 	}
-	var acnt *engine.Account
+	var acnt engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1013"}
 	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	} else if acnt.BalanceMap[utils.VOICE][0].Value != 100.0 {
 		t.Errorf("Calling ApierV2.GetAccount received: %s", utils.ToIJSON(acnt))
+	}
+}
+
+func TestTpExecuteActionCgrRpc(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var reply string
+	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{ActionsId: "RPC"}, &reply); err != nil {
+		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ExecuteAction got reply: %s", reply)
+	}
+	var acnt engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "rpc"}
+	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	}
 }

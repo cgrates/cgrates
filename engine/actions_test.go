@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -2102,6 +2103,8 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 		ID: "cgrates.org:bv",
 		BalanceMap: map[string]Balances{
 			utils.MONETARY: Balances{&Balance{
+				ID:    "*default",
+				Uuid:  "25a02c82-f09f-4c6e-bacf-8ed4b076475a",
 				Value: 10,
 			}},
 		},
@@ -2114,16 +2117,29 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 		Timing:     &RateInterval{},
 		actions: []*Action{
 			&Action{
+				Id:         "RECUR_FOR_V3HSILLMILLD1G",
 				ActionType: TOPUP,
-				Balance:    &BalanceFilter{Value: utils.Float64Pointer(1.1), Type: utils.StringPointer(utils.MONETARY)},
+				Balance: &BalanceFilter{
+					ID:    utils.StringPointer("*default"),
+					Uuid:  utils.StringPointer("25a02c82-f09f-4c6e-bacf-8ed4b076475a"),
+					Value: utils.Float64Pointer(1.1),
+					Type:  utils.StringPointer(utils.MONETARY),
+				},
 			},
 			&Action{
+				Id:         "RECUR_FOR_V3HSILLMILLD5G",
 				ActionType: DEBIT,
-				Balance:    &BalanceFilter{Value: utils.Float64Pointer(2.1), Type: utils.StringPointer(utils.MONETARY)},
+				Balance: &BalanceFilter{
+					ID:    utils.StringPointer("*default"),
+					Uuid:  utils.StringPointer("25a02c82-f09f-4c6e-bacf-8ed4b076475a"),
+					Value: utils.Float64Pointer(2.1),
+					Type:  utils.StringPointer(utils.MONETARY),
+				},
 			},
 			&Action{
+				Id:              "c",
 				ActionType:      CDRLOG,
-				ExtraParameters: `{"BalanceValue":"BalanceValue"}`,
+				ExtraParameters: `{"BalanceID":"BalanceID","BalanceUUID":"BalanceUUID","ActionID":"ActionID","BalanceValue":"BalanceValue"}`,
 			},
 		},
 	}
@@ -2140,7 +2156,69 @@ func TestActionCdrlogBalanceValue(t *testing.T) {
 	if len(cdrs) != 2 ||
 		cdrs[0].ExtraFields["BalanceValue"] != "11.1" ||
 		cdrs[1].ExtraFields["BalanceValue"] != "9" {
-		t.Errorf("Wrong cdrlogs: %+v", cdrs[1])
+		t.Errorf("Wrong cdrlogs: %", utils.ToIJSON(cdrs))
+	}
+}
+
+type TestRPCParameters struct {
+	status string
+}
+
+type Attr struct {
+	Name    string
+	Surname string
+	Age     float64
+}
+
+func (trpcp *TestRPCParameters) Hopa(in Attr, out *float64) error {
+	trpcp.status = utils.OK
+	return nil
+}
+
+func (trpcp *TestRPCParameters) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
+	}
+	// get method
+	method := reflect.ValueOf(trpcp).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
+
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
+}
+
+func TestCgrRpcAction(t *testing.T) {
+	trpcp := &TestRPCParameters{}
+	utils.RegisterRpcParams("", trpcp)
+	a := &Action{
+		ExtraParameters: `{"Address": "internal",
+	"Transport": "*gob",
+	"Method": "TestRPCParameters.Hopa",
+	"Attempts":1,
+	"Async" :false,
+	"Param": {"Name":"n", "Surname":"s", "Age":10.2}}`,
+	}
+	if err := cgrRPCAction(nil, nil, a, nil); err != nil {
+		t.Error("error executing cgr action: ", err)
+	}
+	if trpcp.status != utils.OK {
+		t.Error("RPC not called!")
 	}
 }
 

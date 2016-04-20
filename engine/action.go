@@ -32,6 +32,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 /*
@@ -74,6 +75,7 @@ const (
 	CDRLOG                    = "*cdrlog"
 	SET_DDESTINATIONS         = "*set_ddestinations"
 	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
+	CGR_RPC                   = "*cgr_rpc"
 )
 
 func (a *Action) Clone() *Action {
@@ -140,6 +142,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return setBalanceAction, true
 	case TRANSFER_MONETARY_DEFAULT:
 		return transferMonetaryDefaultAction, true
+	case CGR_RPC:
+		return cgrRPCAction, true
 	}
 	return nil, false
 }
@@ -644,6 +648,53 @@ func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Act
 			}
 		}
 	}
+	return nil
+}
+
+type RPCRequest struct {
+	Address   string
+	Transport string
+	Method    string
+	Attempts  int
+	Async     bool
+	Param     map[string]interface{}
+}
+
+func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	req := RPCRequest{}
+	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
+		return err
+	}
+	params, err := utils.GetRpcParams(req.Method)
+	if err != nil {
+		return err
+	}
+	var client rpcclient.RpcClientConnection
+	if req.Address != utils.INTERNAL {
+		if client, err = rpcclient.NewRpcClient(req.Method, req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
+			return err
+		}
+	} else {
+		client = params.Object
+	}
+	if client == nil {
+		return utils.ErrServerError
+	}
+
+	in, out := params.InParam, params.OutParam
+	p, err := utils.FromMapStringInterfaceValue(req.Param, in)
+	if err != nil {
+		return err
+	}
+	if !req.Async {
+		err = client.Call(req.Method, p, out)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %+v err: %v", out, err))
+		return err
+	}
+	go func() {
+		err := client.Call(req.Method, p, out)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %+v err: %v", out, err))
+	}()
 	return nil
 }
 
