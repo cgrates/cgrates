@@ -1297,7 +1297,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		if rcvStats.Destinations != 5 ||
 			rcvStats.RatingPlans != 5 ||
 			rcvStats.RatingProfiles != 5 ||
-			rcvStats.Actions != 9 ||
+			rcvStats.Actions != 10 ||
 			rcvStats.DerivedChargers != 3 {
 			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 		}
