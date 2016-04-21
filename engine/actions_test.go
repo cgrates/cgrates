@@ -2212,7 +2212,7 @@ func TestCgrRpcAction(t *testing.T) {
 	"Method": "TestRPCParameters.Hopa",
 	"Attempts":1,
 	"Async" :false,
-	"Param": {"Name":"n", "Surname":"s", "Age":10.2}}`,
+	"Params": {"Name":"n", "Surname":"s", "Age":10.2}}`,
 	}
 	if err := cgrRPCAction(nil, nil, a, nil); err != nil {
 		t.Error("error executing cgr action: ", err)

@@ -657,7 +657,7 @@ type RPCRequest struct {
 	Method    string
 	Attempts  int
 	Async     bool
-	Param     map[string]interface{}
+	Params    map[string]interface{}
 }
 
 func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
@@ -678,7 +678,7 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 		client = params.Object.(rpcclient.RpcClientConnection)
 	}
 	in, out := params.InParam, params.OutParam
-	p, err := utils.FromMapStringInterfaceValue(req.Param, in)
+	p, err := utils.FromMapStringInterfaceValue(req.Params, in)
 	if err != nil {
 		return err
 	}
