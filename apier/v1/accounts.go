@@ -426,7 +426,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 			Uuid:           attr.BalanceUuid,
 			ID:             attr.BalanceId,
 			Type:           utils.StringPointer(attr.BalanceType),
-			Value:          utils.Float64Pointer(attr.Value),
+			Value:          &engine.ValueFormula{Static: attr.Value},
 			ExpirationDate: expTime,
 			RatingSubject:  attr.RatingSubject,
 			Weight:         attr.Weight,
@@ -514,13 +514,15 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 			Uuid:           attr.BalanceUUID,
 			ID:             attr.BalanceID,
 			Type:           utils.StringPointer(attr.BalanceType),
-			Value:          attr.Value,
 			ExpirationDate: expTime,
 			RatingSubject:  attr.RatingSubject,
 			Weight:         attr.Weight,
 			Blocker:        attr.Blocker,
 			Disabled:       attr.Disabled,
 		},
+	}
+	if attr.Value != nil {
+		a.Balance.Value = &engine.ValueFormula{Static: *attr.Value}
 	}
 	if attr.Directions != nil {
 		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))
@@ -572,13 +574,15 @@ func (self *ApierV1) RemoveBalances(attr *AttrSetBalance, reply *string) error {
 			Uuid:           attr.BalanceUUID,
 			ID:             attr.BalanceID,
 			Type:           utils.StringPointer(attr.BalanceType),
-			Value:          attr.Value,
 			ExpirationDate: expTime,
 			RatingSubject:  attr.RatingSubject,
 			Weight:         attr.Weight,
 			Blocker:        attr.Blocker,
 			Disabled:       attr.Disabled,
 		},
+	}
+	if attr.Value != nil {
+		a.Balance.Value = &engine.ValueFormula{Static: *attr.Value}
 	}
 	if attr.Directions != nil {
 		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))

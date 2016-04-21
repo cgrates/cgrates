@@ -1,7 +1,10 @@
 package engine
 
 import (
+	"encoding/json"
+	"errors"
 	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -11,7 +14,7 @@ type BalanceFilter struct {
 	Uuid           *string
 	ID             *string
 	Type           *string
-	Value          *float64
+	Value          *ValueFormula
 	Directions     *utils.StringMap
 	ExpirationDate *time.Time
 	Weight         *float64
@@ -58,7 +61,7 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		*result.ID = *bf.ID
 	}
 	if bf.Value != nil {
-		result.Value = new(float64)
+		result.Value = new(ValueFormula)
 		*result.Value = *bf.Value
 	}
 	if bf.RatingSubject != nil {
@@ -116,7 +119,7 @@ func (bf *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 		bf.ID = &b.ID
 	}
 	if b.Value != 0 {
-		bf.Value = &b.Value
+		bf.Value.Static = b.Value
 	}
 	if !b.Directions.IsEmpty() {
 		bf.Directions = &b.Directions
@@ -173,14 +176,22 @@ func (bp *BalanceFilter) GetValue() float64 {
 	if bp == nil || bp.Value == nil {
 		return 0.0
 	}
-	return *bp.Value
+	if bp.Value.Method == "" {
+		return bp.Value.Static
+	}
+	// calculate using formula
+	formula, exists := valueFormulas[bp.Value.Method]
+	if !exists {
+		return 0.0
+	}
+	return formula(bp.Value.Params)
 }
 
 func (bp *BalanceFilter) SetValue(v float64) {
 	if bp.Value == nil {
-		bp.Value = new(float64)
+		bp.Value = new(ValueFormula)
 	}
-	*bp.Value = v
+	bp.Value.Static = v
 }
 
 func (bp *BalanceFilter) GetUuid() string {
@@ -292,7 +303,7 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 		b.Directions = *bf.Directions
 	}
 	if bf.Value != nil {
-		b.Value = *bf.Value
+		b.Value = bf.GetValue()
 	}
 	if bf.ExpirationDate != nil {
 		b.ExpirationDate = *bf.ExpirationDate
@@ -322,4 +333,38 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 		b.Disabled = *bf.Disabled
 	}
 	b.SetDirty() // Mark the balance as dirty since we have modified and it should be checked by action triggers
+}
+
+//for computing a dynamic value for Value field
+type ValueFormula struct {
+	Method string
+	Params map[string]interface{}
+	Static float64
+}
+
+func ParseBalanceFilterValue(val string) (*ValueFormula, error) {
+	u, err := strconv.ParseFloat(val, 64)
+	if err == nil {
+		return &ValueFormula{Static: u}, err
+	}
+	var vf ValueFormula
+	err = json.Unmarshal([]byte(val), &vf)
+	if err == nil {
+		return &vf, err
+	}
+	return nil, errors.New("Invalid value: " + val)
+}
+
+type valueFormula func(map[string]interface{}) float64
+
+const (
+	PERIODIC = "*periodic"
+)
+
+var valueFormulas = map[string]valueFormula{
+	PERIODIC: periodicFormula,
+}
+
+func periodicFormula(params map[string]interface{}) float64 {
+	return 0.0
 }

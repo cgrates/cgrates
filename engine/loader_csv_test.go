@@ -840,7 +840,7 @@ func TestLoadActions(t *testing.T) {
 				Type:           utils.StringPointer(utils.MONETARY),
 				Uuid:           as1[0].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				Value:          utils.Float64Pointer(10),
+				Value:          &ValueFormula{Static: 10},
 				Weight:         utils.Float64Pointer(10),
 				DestinationIDs: nil,
 				TimingIDs:      nil,
@@ -860,7 +860,7 @@ func TestLoadActions(t *testing.T) {
 				Type:           utils.StringPointer(utils.VOICE),
 				Uuid:           as1[1].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				Value:          utils.Float64Pointer(100),
+				Value:          &ValueFormula{Static: 100},
 				Weight:         utils.Float64Pointer(10),
 				RatingSubject:  utils.StringPointer("test"),
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
@@ -873,7 +873,7 @@ func TestLoadActions(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(as1, expected) {
-		t.Errorf("Error loading action1: %+v", as1[0].Balance)
+		t.Errorf("Error loading action1: %s", utils.ToIJSON(as1))
 	}
 	as2 := csvr.actions["SHARED"]
 	expected = []*Action{
@@ -887,7 +887,7 @@ func TestLoadActions(t *testing.T) {
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				DestinationIDs: nil,
 				Uuid:           as2[0].Balance.Uuid,
-				Value:          utils.Float64Pointer(100),
+				Value:          &ValueFormula{Static: 100},
 				Weight:         utils.Float64Pointer(10),
 				SharedGroups:   utils.StringMapPointer(utils.NewStringMap("SG1")),
 				TimingIDs:      nil,
@@ -898,7 +898,7 @@ func TestLoadActions(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(as2, expected) {
-		t.Errorf("Error loading action: %+v", as2[0].Balance)
+		t.Errorf("Error loading action: %s", utils.ToIJSON(as2))
 	}
 	as3 := csvr.actions["DEFEE"]
 	expected = []*Action{

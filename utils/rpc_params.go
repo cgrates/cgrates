@@ -1,8 +1,6 @@
 package utils
 
-import (
-	"reflect"
-)
+import "reflect"
 
 var rpcParamsMap map[string]*RpcParams
 
@@ -39,12 +37,10 @@ func RegisterRpcParams(name string, obj interface{}) {
 				OutParam: reflect.New(out).Interface(),
 			}
 		}
-
 	}
 }
 
 func GetRpcParams(method string) (*RpcParams, error) {
-	Logger.Info("REGISTERED: " + ToJSON(rpcParamsMap))
 	x, found := rpcParamsMap[method]
 	if !found {
 		return nil, ErrNotFound

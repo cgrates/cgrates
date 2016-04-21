@@ -531,11 +531,11 @@ func (tpr *TpReader) LoadActions() (err error) {
 			}
 
 			if tpact.Units != "" && tpact.Units != utils.ANY {
-				u, err := strconv.ParseFloat(tpact.Units, 64)
+				vf, err := ParseBalanceFilterValue(tpact.Units)
 				if err != nil {
 					return err
 				}
-				acts[idx].Balance.Value = utils.Float64Pointer(u)
+				acts[idx].Balance.Value = vf
 			}
 
 			if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {
@@ -1007,11 +1007,11 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					}
 
 					if tpact.Units != "" && tpact.Units != utils.ANY {
-						u, err := strconv.ParseFloat(tpact.Units, 64)
+						vf, err := ParseBalanceFilterValue(tpact.Units)
 						if err != nil {
 							return err
 						}
-						acts[idx].Balance.Value = utils.Float64Pointer(u)
+						acts[idx].Balance.Value = vf
 					}
 
 					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {
@@ -1355,11 +1355,11 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 					}
 
 					if tpact.Units != "" && tpact.Units != utils.ANY {
-						u, err := strconv.ParseFloat(tpact.Units, 64)
+						vf, err := ParseBalanceFilterValue(tpact.Units)
 						if err != nil {
 							return err
 						}
-						acts[idx].Balance.Value = utils.Float64Pointer(u)
+						acts[idx].Balance.Value = vf
 					}
 
 					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {

@@ -504,10 +504,10 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	}
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
-		var units *float64
+		var vf *engine.ValueFormula
 		if apiAct.Units != "" {
-			if x, err := strconv.ParseFloat(apiAct.Units, 64); err == nil {
-				units = &x
+			if x, err := engine.ParseBalanceFilterValue(apiAct.Units); err == nil {
+				vf = x
 			} else {
 				return err
 			}
@@ -533,7 +533,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 				Uuid:           utils.StringPointer(utils.GenUUID()),
 				ID:             utils.StringPointer(apiAct.BalanceId),
 				Type:           utils.StringPointer(apiAct.BalanceType),
-				Value:          units,
+				Value:          vf,
 				Weight:         weight,
 				Directions:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Directions)),
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
