@@ -83,14 +83,14 @@ func stopRaterSignalHandler(internalCdrStatSChan chan rpcclient.RpcClientConnect
 Connects to the balancer and calls unregister RPC method.
 */
 func unregisterFromBalancer(exitChan chan bool) {
-	client, err := rpc.Dial("tcp", cfg.RaterBalancer)
+	client, err := rpc.Dial("tcp", cfg.RALsBalancer)
 	if err != nil {
 		utils.Logger.Crit("Cannot contact the balancer!")
 		exitChan <- true
 		return
 	}
 	var reply int
-	utils.Logger.Info(fmt.Sprintf("Unregistering from balancer %s", cfg.RaterBalancer))
+	utils.Logger.Info(fmt.Sprintf("Unregistering from balancer %s", cfg.RALsBalancer))
 	client.Call("Responder.UnRegisterRater", cfg.RPCGOBListen, &reply)
 	if err := client.Close(); err != nil {
 		utils.Logger.Crit("Could not close balancer unregistration!")
@@ -102,14 +102,14 @@ func unregisterFromBalancer(exitChan chan bool) {
 Connects to the balancer and rehisters the engine to the server.
 */
 func registerToBalancer(exitChan chan bool) {
-	client, err := rpc.Dial("tcp", cfg.RaterBalancer)
+	client, err := rpc.Dial("tcp", cfg.RALsBalancer)
 	if err != nil {
 		utils.Logger.Crit(fmt.Sprintf("Cannot contact the balancer: %v", err))
 		exitChan <- true
 		return
 	}
 	var reply int
-	utils.Logger.Info(fmt.Sprintf("Registering to balancer %s", cfg.RaterBalancer))
+	utils.Logger.Info(fmt.Sprintf("Registering to balancer %s", cfg.RALsBalancer))
 	client.Call("Responder.RegisterRater", cfg.RPCGOBListen, &reply)
 	if err := client.Close(); err != nil {
 		utils.Logger.Crit("Could not close balancer registration!")

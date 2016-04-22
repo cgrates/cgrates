@@ -170,9 +170,9 @@ func (self *KamailioSessionManager) Connect() error {
 		regexp.MustCompile("CGR_CALL_END"):     []func([]byte, string){self.onCallEnd},
 	}
 	errChan := make(chan error)
-	for _, connCfg := range self.cfg.Connections {
+	for _, connCfg := range self.cfg.EvapiConns {
 		connId := utils.GenUUID()
-		if self.conns[connId], err = kamevapi.NewKamEvapi(connCfg.EvapiAddr, connId, connCfg.Reconnects, eventHandlers, utils.Logger.(*syslog.Writer)); err != nil {
+		if self.conns[connId], err = kamevapi.NewKamEvapi(connCfg.Address, connId, connCfg.Reconnects, eventHandlers, utils.Logger.(*syslog.Writer)); err != nil {
 			return err
 		}
 		go func() { // Start reading in own goroutine, return on error

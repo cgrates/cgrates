@@ -486,7 +486,7 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 				self.cgrCfg.HttpFailedDir,
 				rplCfg.FallbackFileName())
 			_, err := utils.HttpPoster(
-				rplCfg.Server, self.cgrCfg.HttpSkipTlsVerify, body,
+				rplCfg.Address, self.cgrCfg.HttpSkipTlsVerify, body,
 				content, rplCfg.Attempts, fallbackPath)
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf(

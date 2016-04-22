@@ -817,7 +817,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 		}
 		cs.CdrStats = len(queueIds)
 	}
-	if self.Config.RaterUserServer == utils.INTERNAL {
+	if self.Users != nil {
 		var ups engine.UserProfiles
 		if err := self.Users.Call("UsersV1.GetUsers", &engine.UserProfile{}, &ups); err != nil {
 			return utils.NewErrServerError(err)

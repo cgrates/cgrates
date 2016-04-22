@@ -231,9 +231,9 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 func (sm *FSSessionManager) Connect() error {
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
 	errChan := make(chan error)
-	for _, connCfg := range sm.cfg.Connections {
+	for _, connCfg := range sm.cfg.EventSocketConns {
 		connId := utils.GenUUID()
-		fSock, err := fsock.NewFSock(connCfg.Server, connCfg.Password, connCfg.Reconnects, sm.createHandlers(), eventFilters, utils.Logger.(*syslog.Writer), connId)
+		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, sm.createHandlers(), eventFilters, utils.Logger.(*syslog.Writer), connId)
 		if err != nil {
 			return err
 		} else if !fSock.Connected() {
@@ -246,7 +246,7 @@ func (sm *FSSessionManager) Connect() error {
 				errChan <- err
 			}
 		}()
-		if fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Server, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
+		if fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
 			make(map[string][]func(string, string)), make(map[string]string), utils.Logger.(*syslog.Writer), connId); err != nil {
 			return fmt.Errorf("Cannot connect FreeSWITCH senders pool, error: %s", err.Error())
 		} else if fsSenderPool == nil {

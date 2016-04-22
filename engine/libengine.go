@@ -19,23 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
 
 func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, codec string,
-	rpcConnCfgs []*config.HaPoolConfig, internalConnChan chan rpcclient.RpcClientConnection) (*rpcclient.RpcClientPool, error) {
+	rpcConnCfgs []*config.HaPoolConfig, internalConnChan chan rpcclient.RpcClientConnection, ttl time.Duration) (*rpcclient.RpcClientPool, error) {
 	var rpcClient *rpcclient.RpcClient
 	var err error
 	rpcPool := rpcclient.NewRpcClientPool(dispatchStrategy)
 	for _, rpcConnCfg := range rpcConnCfgs {
-		if rpcConnCfg.Server == utils.INTERNAL {
-			internalConn := <-internalConnChan
-			internalConnChan <- internalConn
+		if rpcConnCfg.Address == utils.MetaInternal {
+			var internalConn rpcclient.RpcClientConnection
+			select {
+			case internalConn := <-internalConnChan:
+				internalConnChan <- internalConn
+			case <-time.After(ttl):
+				return nil, errors.New("TTL triggered")
+			}
 			rpcClient, err = rpcclient.NewRpcClient("", "", 0, 0, rpcclient.INTERNAL_RPC, internalConn)
 		} else {
-			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Server, connAttempts, reconnects, codec, nil)
+			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, connAttempts, reconnects, codec, nil)
 		}
 		if err != nil {
 			break
