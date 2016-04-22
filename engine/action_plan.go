@@ -291,7 +291,6 @@ func (at *ActionTiming) Execute() (err error) {
 			transactionFailed := false
 			removeAccountActionFound := false
 			for _, a := range aac {
-				//log.Print("A: ", utils.ToJSON(a))
 				// check action filter
 				if len(a.Filter) > 0 {
 					matched, err := acc.matchActionFilter(a.Filter)

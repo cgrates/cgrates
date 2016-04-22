@@ -364,7 +364,7 @@ func (mig MigratorRC8) migrateActionsInt() error {
 				bf.Type = utils.StringPointer(oldAc.BalanceType)
 			}
 			if oldAc.Balance.Value != 0 {
-				bf.Value = &engine.ValueFormula{Static: oldAc.Balance.Value}
+				bf.Value = &utils.ValueFormula{Static: oldAc.Balance.Value}
 			}
 			if oldAc.Balance.RatingSubject != "" {
 				bf.RatingSubject = utils.StringPointer(oldAc.Balance.RatingSubject)

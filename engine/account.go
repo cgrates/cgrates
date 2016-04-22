@@ -170,6 +170,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		return errors.New("nil action")
 	}
 	bClone := a.Balance.CreateBalance()
+	//log.Print("Bclone: ", utils.ToJSON(a.Balance))
 	if bClone == nil {
 		return errors.New("nil balance")
 	}

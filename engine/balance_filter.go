@@ -1,10 +1,7 @@
 package engine
 
 import (
-	"encoding/json"
-	"errors"
 	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -14,7 +11,7 @@ type BalanceFilter struct {
 	Uuid           *string
 	ID             *string
 	Type           *string
-	Value          *ValueFormula
+	Value          *utils.ValueFormula
 	Directions     *utils.StringMap
 	ExpirationDate *time.Time
 	Weight         *float64
@@ -61,7 +58,7 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		*result.ID = *bf.ID
 	}
 	if bf.Value != nil {
-		result.Value = new(ValueFormula)
+		result.Value = new(utils.ValueFormula)
 		*result.Value = *bf.Value
 	}
 	if bf.RatingSubject != nil {
@@ -180,7 +177,7 @@ func (bp *BalanceFilter) GetValue() float64 {
 		return bp.Value.Static
 	}
 	// calculate using formula
-	formula, exists := valueFormulas[bp.Value.Method]
+	formula, exists := utils.ValueFormulas[bp.Value.Method]
 	if !exists {
 		return 0.0
 	}
@@ -189,7 +186,7 @@ func (bp *BalanceFilter) GetValue() float64 {
 
 func (bp *BalanceFilter) SetValue(v float64) {
 	if bp.Value == nil {
-		bp.Value = new(ValueFormula)
+		bp.Value = new(utils.ValueFormula)
 	}
 	bp.Value.Static = v
 }
@@ -333,38 +330,4 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 		b.Disabled = *bf.Disabled
 	}
 	b.SetDirty() // Mark the balance as dirty since we have modified and it should be checked by action triggers
-}
-
-//for computing a dynamic value for Value field
-type ValueFormula struct {
-	Method string
-	Params map[string]interface{}
-	Static float64
-}
-
-func ParseBalanceFilterValue(val string) (*ValueFormula, error) {
-	u, err := strconv.ParseFloat(val, 64)
-	if err == nil {
-		return &ValueFormula{Static: u}, err
-	}
-	var vf ValueFormula
-	err = json.Unmarshal([]byte(val), &vf)
-	if err == nil {
-		return &vf, err
-	}
-	return nil, errors.New("Invalid value: " + val)
-}
-
-type valueFormula func(map[string]interface{}) float64
-
-const (
-	PERIODIC = "*periodic"
-)
-
-var valueFormulas = map[string]valueFormula{
-	PERIODIC: periodicFormula,
-}
-
-func periodicFormula(params map[string]interface{}) float64 {
-	return 0.0
 }

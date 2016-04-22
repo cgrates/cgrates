@@ -504,9 +504,9 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	}
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
-		var vf *engine.ValueFormula
+		var vf *utils.ValueFormula
 		if apiAct.Units != "" {
-			if x, err := engine.ParseBalanceFilterValue(apiAct.Units); err == nil {
+			if x, err := utils.ParseBalanceFilterValue(apiAct.Units); err == nil {
 				vf = x
 			} else {
 				return err

@@ -41,12 +41,12 @@ func init() {
 
 func populateDB() {
 	ats := []*Action{
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &ValueFormula{Static: 10}}},
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Weight: utils.Float64Pointer(20), Value: &ValueFormula{Static: 10}, DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 10}}},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Weight: utils.Float64Pointer(20), Value: &utils.ValueFormula{Static: 10}, DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
 	}
 
 	ats1 := []*Action{
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &ValueFormula{Static: 10}}, Weight: 10},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 10}}, Weight: 10},
 		&Action{ActionType: "*reset_account", Weight: 20},
 	}
 

@@ -180,6 +180,7 @@ BLOCK_EMPTY,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300,10,false,false,10
 NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50,10,false,false,10
+VF,*debit,,,,*monetary,*out,,,,,*unlimited,*any,"{""Method"":""*periodic"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
 `
 	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -223,6 +224,7 @@ cgrates.org,block,BLOCK_AT,,false,false
 cgrates.org,block_empty,BLOCK_EMPTY_AT,,false,false
 cgrates.org,expo,EXP_AT,,false,false
 cgrates.org,expnoexp,,,false,false
+cgrates.org,vf,,,false,false
 `
 
 	derivedCharges = `
@@ -825,7 +827,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 14 {
+	if len(csvr.actions) != 15 {
 		t.Error("Failed to load actions: ", len(csvr.actions))
 	}
 	as1 := csvr.actions["MINI"]
@@ -840,7 +842,7 @@ func TestLoadActions(t *testing.T) {
 				Type:           utils.StringPointer(utils.MONETARY),
 				Uuid:           as1[0].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				Value:          &ValueFormula{Static: 10},
+				Value:          &utils.ValueFormula{Static: 10},
 				Weight:         utils.Float64Pointer(10),
 				DestinationIDs: nil,
 				TimingIDs:      nil,
@@ -860,7 +862,7 @@ func TestLoadActions(t *testing.T) {
 				Type:           utils.StringPointer(utils.VOICE),
 				Uuid:           as1[1].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				Value:          &ValueFormula{Static: 100},
+				Value:          &utils.ValueFormula{Static: 100},
 				Weight:         utils.Float64Pointer(10),
 				RatingSubject:  utils.StringPointer("test"),
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
@@ -887,7 +889,7 @@ func TestLoadActions(t *testing.T) {
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				DestinationIDs: nil,
 				Uuid:           as2[0].Balance.Uuid,
-				Value:          &ValueFormula{Static: 100},
+				Value:          &utils.ValueFormula{Static: 100},
 				Weight:         utils.Float64Pointer(10),
 				SharedGroups:   utils.StringMapPointer(utils.NewStringMap("SG1")),
 				TimingIDs:      nil,
@@ -1106,7 +1108,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 15 {
+	if len(csvr.accountActions) != 16 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]

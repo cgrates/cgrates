@@ -531,7 +531,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 			}
 
 			if tpact.Units != "" && tpact.Units != utils.ANY {
-				vf, err := ParseBalanceFilterValue(tpact.Units)
+				vf, err := utils.ParseBalanceFilterValue(tpact.Units)
 				if err != nil {
 					return err
 				}
@@ -1007,7 +1007,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					}
 
 					if tpact.Units != "" && tpact.Units != utils.ANY {
-						vf, err := ParseBalanceFilterValue(tpact.Units)
+						vf, err := utils.ParseBalanceFilterValue(tpact.Units)
 						if err != nil {
 							return err
 						}
@@ -1355,7 +1355,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 					}
 
 					if tpact.Units != "" && tpact.Units != utils.ANY {
-						vf, err := ParseBalanceFilterValue(tpact.Units)
+						vf, err := utils.ParseBalanceFilterValue(tpact.Units)
 						if err != nil {
 							return err
 						}
