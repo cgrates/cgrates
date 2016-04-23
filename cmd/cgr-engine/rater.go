@@ -189,12 +189,10 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 			engine.SetUserService(usersConns)
 		}()
 	}
-
 	// Wait for all connections to complete before going further
 	for _, chn := range waitTasks {
 		<-chn
 	}
-
 	responder := &engine.Responder{Bal: bal, ExitChan: exitChan, Stats: cdrStats}
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Sched: sched,

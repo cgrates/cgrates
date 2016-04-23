@@ -166,8 +166,10 @@ func TestCsvLclProcessCdrDir(t *testing.T) {
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
 	}
-	if cdrcCfg.Cdrs == utils.INTERNAL { // For now we only test over network
-		cdrcCfg.Cdrs = "127.0.0.1:2013"
+	for _, cdrsConn := range cdrcCfg.CdrsConns {
+		if cdrsConn.Address == utils.INTERNAL {
+			cdrsConn.Address = "127.0.0.1:2013"
+		}
 	}
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
@@ -202,8 +204,10 @@ func TestCsvLclProcessCdr3Dir(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if cdrcCfg.Cdrs == utils.INTERNAL { // For now we only test over network
-		cdrcCfg.Cdrs = "127.0.0.1:2013"
+	for _, cdrsConn := range cdrcCfg.CdrsConns {
+		if cdrsConn.Address == utils.INTERNAL {
+			cdrsConn.Address = "127.0.0.1:2013"
+		}
 	}
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())

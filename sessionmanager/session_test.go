@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 //"github.com/cgrates/cgrates/config"
@@ -89,26 +90,26 @@ func (mc *MockRpcClient) Call(methodName string, arg interface{}, reply interfac
 	}
 	return nil
 }
-func (mc *MockConnector) GetCost(*engine.CallDescriptor, *engine.CallCost) error  { return nil }
-func (mc *MockConnector) Debit(*engine.CallDescriptor, *engine.CallCost) error    { return nil }
-func (mc *MockConnector) MaxDebit(*engine.CallDescriptor, *engine.CallCost) error { return nil }
-func (mc *MockConnector) RefundIncrements(cd *engine.CallDescriptor, reply *float64) error {
+func (mc *MockRpcClient) GetCost(*engine.CallDescriptor, *engine.CallCost) error  { return nil }
+func (mc *MockRpcClient) Debit(*engine.CallDescriptor, *engine.CallCost) error    { return nil }
+func (mc *MockRpcClient) MaxDebit(*engine.CallDescriptor, *engine.CallCost) error { return nil }
+func (mc *MockRpcClient) RefundIncrements(cd *engine.CallDescriptor, reply *float64) error {
 	mc.refundCd = cd
 	return nil
 }
-func (mc *MockConnector) RefundRounding(cd *engine.CallDescriptor, reply *float64) error {
+func (mc *MockRpcClient) RefundRounding(cd *engine.CallDescriptor, reply *float64) error {
 	return nil
 }
-func (mc *MockConnector) GetMaxSessionTime(*engine.CallDescriptor, *float64) error { return nil }
-func (mc *MockConnector) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
+func (mc *MockRpcClient) GetMaxSessionTime(*engine.CallDescriptor, *float64) error { return nil }
+func (mc *MockRpcClient) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
 	return nil
 }
-func (mc *MockConnector) GetDerivedMaxSessionTime(*engine.CDR, *float64) error    { return nil }
-func (mc *MockConnector) GetSessionRuns(*engine.CDR, *[]*engine.SessionRun) error { return nil }
-func (mc *MockConnector) ProcessCdr(*engine.CDR, *string) error                   { return nil }
-func (mc *MockConnector) StoreSMCost(engine.AttrCDRSStoreSMCost, *string) error   { return nil }
-func (mc *MockConnector) GetLCR(*engine.AttrGetLcr, *engine.LCRCost) error        { return nil }
-func (mc *MockConnector) GetTimeout(int, *time.Duration) error                    { return nil }
+func (mc *MockRpcClient) GetDerivedMaxSessionTime(*engine.CDR, *float64) error    { return nil }
+func (mc *MockRpcClient) GetSessionRuns(*engine.CDR, *[]*engine.SessionRun) error { return nil }
+func (mc *MockRpcClient) ProcessCdr(*engine.CDR, *string) error                   { return nil }
+func (mc *MockRpcClient) StoreSMCost(engine.AttrCDRSStoreSMCost, *string) error   { return nil }
+func (mc *MockRpcClient) GetLCR(*engine.AttrGetLcr, *engine.LCRCost) error        { return nil }
+func (mc *MockRpcClient) GetTimeout(int, *time.Duration) error                    { return nil }
 
 func TestSessionRefund(t *testing.T) {
 	mc := &MockRpcClient{}
