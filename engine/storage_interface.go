@@ -68,6 +68,8 @@ type RatingStorage interface {
 	GetAllActionPlans() (map[string]*ActionPlan, error)
 	PushTask(*Task) error
 	PopTask() (*Task, error)
+	GetRatingStructuresVersion() (*RatingStructuresVersion, error)
+	SetRatingStructuresVersion(*RatingStructuresVersion) error
 }
 
 type AccountingStorage interface {
@@ -92,6 +94,8 @@ type AccountingStorage interface {
 	RemoveAlias(string) error
 	GetLoadHistory(int, bool) ([]*LoadInstance, error)
 	AddLoadHistory(*LoadInstance, int) error
+	GetAccountingStructuresVersion() (*AccountingStructuresVersion, error)
+	SetAccountingStructuresVersion(*AccountingStructuresVersion) error
 }
 
 type CdrStorage interface {
@@ -100,6 +104,8 @@ type CdrStorage interface {
 	SetSMCost(smc *SMCost) error
 	GetSMCosts(cgrid, runid, originHost, originIDPrfx string) ([]*SMCost, error)
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
+	GetCdrStructuresVersion() (*CdrStructuresVersion, error)
+	SetCdrStructuresVersion(*CdrStructuresVersion) error
 }
 
 type LogStorage interface {

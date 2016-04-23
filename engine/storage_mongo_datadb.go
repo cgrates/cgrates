@@ -53,6 +53,7 @@ const (
 	colLogAtr = "action_trigger_logs"
 	colLogApl = "action_plan_logs"
 	colLogErr = "error_logs"
+	colVer    = "versions"
 )
 
 var (
@@ -1361,5 +1362,56 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 		css = append(css, &clone)
 	}
 	err = iter.Close()
+	return
+}
+
+func (ms *MongoStorage) SetRatingStructuresVersion(v *RatingStructuresVersion) (err error) {
+	_, err = ms.db.C(colVer).Upsert(bson.M{"key": utils.RATING_VERSION_PREFIX + "version"}, &struct {
+		Key   string
+		Value *RatingStructuresVersion
+	}{utils.RATING_VERSION_PREFIX + "version", v})
+	return
+}
+
+func (ms *MongoStorage) GetRatingStructuresVersion() (rsv *RatingStructuresVersion, err error) {
+	rsv = new(RatingStructuresVersion)
+	err = ms.db.C(colVer).Find(bson.M{"key": utils.RATING_VERSION_PREFIX + "version"}).One(rsv)
+	if err == mgo.ErrNotFound {
+		rsv = nil
+	}
+	return
+}
+
+func (ms *MongoStorage) SetAccountingStructuresVersion(v *AccountingStructuresVersion) (err error) {
+	_, err = ms.db.C(colVer).Upsert(bson.M{"key": utils.ACCOUNTING_VERSION_PREFIX + "version"}, &struct {
+		Key   string
+		Value *AccountingStructuresVersion
+	}{utils.ACCOUNTING_VERSION_PREFIX + "version", v})
+	return
+}
+
+func (ms *MongoStorage) GetAccountingStructuresVersion() (asv *AccountingStructuresVersion, err error) {
+	asv = new(AccountingStructuresVersion)
+	err = ms.db.C(colVer).Find(bson.M{"key": utils.ACCOUNTING_VERSION_PREFIX + "version"}).One(asv)
+	if err == mgo.ErrNotFound {
+		asv = nil
+	}
+	return
+}
+
+func (ms *MongoStorage) SetCdrStructuresVersion(v *CdrStructuresVersion) (err error) {
+	_, err = ms.db.C(colVer).Upsert(bson.M{"key": utils.CDR_VERSION_PREFIX + "version"}, &struct {
+		Key   string
+		Value *CdrStructuresVersion
+	}{utils.CDR_VERSION_PREFIX + "version", v})
+	return
+}
+
+func (ms *MongoStorage) GetCdrStructuresVersion() (csv *CdrStructuresVersion, err error) {
+	csv = new(CdrStructuresVersion)
+	err = ms.db.C(colVer).Find(bson.M{"key": utils.CDR_VERSION_PREFIX + "version"}).One(csv)
+	if err == mgo.ErrNotFound {
+		csv = nil
+	}
 	return
 }
