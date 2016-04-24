@@ -1,33 +1,41 @@
 {
 
 "listen": {
-	"rpc_json": ":2016",			// RPC JSON listening address
-	"rpc_gob": ":2017",			// RPC GOB listening address
-	"http": ":2082",				// HTTP listening address
+	"rpc_json": ":2016",
+	"rpc_gob": ":2017",
+	"http": ":2082",
 },
 
-"rater": {
-	"enabled": true,					// enable Rater service: <true|false>
-	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-	"pubsubs": "internal",				// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-	"users": "internal",				// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
-	"aliases": "internal",
+"rals": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
 },
 
 "scheduler": {
-	"enabled": true,					// start Scheduler service: <true|false>
+	"enabled": true,
 },
 
 "cdrstats": {
-	"enabled": true,					// starts the cdrstats service: <true|false>
+	"enabled": true,
 },
 
 "pubsubs": {
-	"enabled": true,				// starts PubSub service: <true|false>.
+	"enabled": true,
 },
 
 "aliases": {
-	"enabled": true,				// starts Aliases service: <true|false>.
+	"enabled": true,
 },
 
 "users": {

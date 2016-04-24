@@ -38,4 +38,9 @@
 	}
 },
 
+"cdrstats": {
+	"enabled": true,						// starts the cdrstats service: <true|false>
+	"save_interval": "0s",					// interval to save changed stats into dataDb storage
+},
+
 }

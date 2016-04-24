@@ -167,7 +167,7 @@ func TestCsvLclProcessCdrDir(t *testing.T) {
 		break
 	}
 	for _, cdrsConn := range cdrcCfg.CdrsConns {
-		if cdrsConn.Address == utils.INTERNAL {
+		if cdrsConn.Address == utils.MetaInternal {
 			cdrsConn.Address = "127.0.0.1:2013"
 		}
 	}
@@ -205,7 +205,7 @@ func TestCsvLclProcessCdr3Dir(t *testing.T) {
 		return
 	}
 	for _, cdrsConn := range cdrcCfg.CdrsConns {
-		if cdrsConn.Address == utils.INTERNAL {
+		if cdrsConn.Address == utils.MetaInternal {
 			cdrsConn.Address = "127.0.0.1:2013"
 		}
 	}

@@ -810,7 +810,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.DerivedChargers = cache2go.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
 	cs.LcrProfiles = cache2go.CountEntries(utils.LCR_PREFIX)
 	cs.Aliases = cache2go.CountEntries(utils.ALIASES_PREFIX)
-	if self.CdrStatsSrv != nil && self.Config.CDRStatsEnabled {
+	if self.CdrStatsSrv != nil {
 		var queueIds []string
 		if err := self.CdrStatsSrv.Call("CDRStatsV1.GetQueueIds", 0, &queueIds); err != nil {
 			return utils.NewErrServerError(err)

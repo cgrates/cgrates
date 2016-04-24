@@ -36,7 +36,7 @@ func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, codec str
 		if rpcConnCfg.Address == utils.MetaInternal {
 			var internalConn rpcclient.RpcClientConnection
 			select {
-			case internalConn := <-internalConnChan:
+			case internalConn = <-internalConnChan:
 				internalConnChan <- internalConn
 			case <-time.After(ttl):
 				return nil, errors.New("TTL triggered")

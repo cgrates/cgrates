@@ -2207,7 +2207,7 @@ func TestCgrRpcAction(t *testing.T) {
 	trpcp := &TestRPCParameters{}
 	utils.RegisterRpcParams("", trpcp)
 	a := &Action{
-		ExtraParameters: `{"Address": "internal",
+		ExtraParameters: `{"Address": "*internal",
 	"Transport": "*gob",
 	"Method": "TestRPCParameters.Hopa",
 	"Attempts":1,

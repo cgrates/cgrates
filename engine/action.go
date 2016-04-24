@@ -670,7 +670,7 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 		return err
 	}
 	var client rpcclient.RpcClientConnection
-	if req.Address != utils.INTERNAL {
+	if req.Address != utils.MetaInternal {
 		if client, err = rpcclient.NewRpcClient(req.Method, req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
 			return err
 		}

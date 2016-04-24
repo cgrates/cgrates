@@ -292,64 +292,67 @@ func startCDRS(internalCdrSChan chan rpcclient.RpcClientConnection, logDb engine
 	internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	internalCdrStatSChan chan rpcclient.RpcClientConnection, server *utils.Server, exitChan chan bool) {
 	utils.Logger.Info("Starting CGRateS CDRS service.")
-	// Conn pool towards RAL
-	ralConn, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
-		cfg.CDRSRaterConns, internalRaterChan, cfg.InternalTtl)
-	if err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to RAL: %s", err.Error()))
-		exitChan <- true
-		return
-	}
-	// Pubsub connection init
-	var pubSubConn *rpcclient.RpcClientPool
-	if reflect.DeepEqual(cfg.CDRSRaterConns, cfg.CDRSPubSubSConns) {
-		pubSubConn = ralConn
-	} else {
-		pubSubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
-			cfg.CDRSPubSubSConns, internalPubSubSChan, cfg.InternalTtl)
+	var ralConn, pubSubConn, usersConn, aliasesConn, statsConn *rpcclient.RpcClientPool
+	if len(cfg.CDRSRaterConns) != 0 { // Conn pool towards RAL
+		ralConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+			cfg.CDRSRaterConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to PubSubSystem: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to RAL: %s", err.Error()))
 			exitChan <- true
 			return
 		}
 	}
-	// Users connection init
-	var usersConn *rpcclient.RpcClientPool
-	if reflect.DeepEqual(cfg.CDRSRaterConns, cfg.CDRSUserSConns) {
-		pubSubConn = ralConn
-	} else {
-		usersConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
-			cfg.CDRSUserSConns, internalUserSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to UserS: %s", err.Error()))
-			exitChan <- true
-			return
+	if len(cfg.CDRSPubSubSConns) != 0 { // Pubsub connection init
+		if reflect.DeepEqual(cfg.CDRSRaterConns, cfg.CDRSPubSubSConns) {
+			pubSubConn = ralConn
+		} else {
+			pubSubConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.CDRSPubSubSConns, internalPubSubSChan, cfg.InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to PubSubSystem: %s", err.Error()))
+				exitChan <- true
+				return
+			}
 		}
 	}
-	// Aliases connection init
-	var aliasesConn *rpcclient.RpcClientPool
-	if reflect.DeepEqual(cfg.CDRSRaterConns, cfg.CDRSAliaseSConns) {
-		pubSubConn = ralConn
-	} else {
-		aliasesConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
-			cfg.CDRSAliaseSConns, internalAliaseSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to AliaseS: %s", err.Error()))
-			exitChan <- true
-			return
+	if len(cfg.CDRSUserSConns) != 0 { // Users connection init
+		if reflect.DeepEqual(cfg.CDRSRaterConns, cfg.CDRSUserSConns) {
+			usersConn = ralConn
+		} else {
+			usersConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.CDRSUserSConns, internalUserSChan, cfg.InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to UserS: %s", err.Error()))
+				exitChan <- true
+				return
+			}
 		}
 	}
-	// Stats connection init
-	var statsConn *rpcclient.RpcClientPool
-	if reflect.DeepEqual(cfg.CDRSRaterConns, cfg.CDRSStatSConns) {
-		pubSubConn = ralConn
-	} else {
-		statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
-			cfg.CDRSStatSConns, internalCdrStatSChan, cfg.InternalTtl)
-		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to StatS: %s", err.Error()))
-			exitChan <- true
-			return
+	if len(cfg.CDRSAliaseSConns) != 0 { // Aliases connection init
+		if reflect.DeepEqual(cfg.CDRSRaterConns, cfg.CDRSAliaseSConns) {
+			aliasesConn = ralConn
+		} else {
+			aliasesConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.CDRSAliaseSConns, internalAliaseSChan, cfg.InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to AliaseS: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+		}
+	}
+
+	if len(cfg.CDRSStatSConns) != 0 { // Stats connection init
+		if reflect.DeepEqual(cfg.CDRSRaterConns, cfg.CDRSStatSConns) {
+			statsConn = ralConn
+		} else {
+			statsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.CDRSStatSConns, internalCdrStatSChan, cfg.InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<CDRS> Could not connect to StatS: %s", err.Error()))
+				exitChan <- true
+				return
+			}
 		}
 	}
 	cdrServer, _ := engine.NewCdrServer(cfg, cdrDb, ralConn, pubSubConn, usersConn, aliasesConn, statsConn)

@@ -93,7 +93,6 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.GetCost")
 		*reply, err = *r, e
@@ -497,7 +496,7 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 }
 
 func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
-	cacheKey := "GetLCR" + attrs.CgrID
+	cacheKey := utils.LCRCachePrefix + attrs.CgrID + attrs.RunID
 	if attrs.CallDescriptor.Subject == "" {
 		attrs.CallDescriptor.Subject = attrs.CallDescriptor.Account
 	}

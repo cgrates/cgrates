@@ -92,7 +92,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		waitTasks = append(waitTasks, balTaskChan)
 		go func() {
 			defer close(balTaskChan)
-			if cfg.RALsBalancer == utils.INTERNAL {
+			if cfg.RALsBalancer == utils.MetaInternal {
 				select {
 				case bal = <-internalBalancerChan:
 					internalBalancerChan <- bal // Put it back if someone else is interested about
@@ -193,12 +193,16 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	for _, chn := range waitTasks {
 		<-chn
 	}
-	responder := &engine.Responder{Bal: bal, ExitChan: exitChan, Stats: cdrStats}
+	responder := &engine.Responder{Bal: bal, ExitChan: exitChan}
 	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Sched: sched,
-		Config: cfg, Responder: responder, CdrStatsSrv: cdrStats, Users: usersConns}
+		Config: cfg, Responder: responder, Users: usersConns}
 	apierRpcV2 := &v2.ApierV2{
 		ApierV1: *apierRpcV1}
+	if cdrStats != nil { // ToDo: Fix here properly the init of stats
+		responder.Stats = cdrStats
+		apierRpcV1.CdrStatsSrv = cdrStats
+	}
 	// internalSchedulerChan shared here
 	server.RpcRegister(responder)
 	server.RpcRegister(apierRpcV1)
