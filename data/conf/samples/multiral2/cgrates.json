@@ -10,7 +10,7 @@
 	"http": ":12080",					// HTTP listening address
 },
 
-"rater": {
+"rals": {
 	"enabled": true,					// enable Rater service: <true|false>
 },
 

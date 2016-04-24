@@ -8,13 +8,17 @@
 
 
 "sm_freeswitch": {
-	"enabled": true,				// starts SessionManager service: <true|false>
-	"rater": "127.0.0.1:2013",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "127.0.0.1:2013",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"debit_interval": "5s",			// interval to perform debits on.
+	"enabled": true,
+	"rals_conns": [
+		{"address": "127.0.0.1:2013"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2013"}
+	],
+	"debit_interval": "5s",
 	"channel_sync_interval": "10s",
-	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 15}
+	"event_socket_conns":[
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
 	],
 },
 

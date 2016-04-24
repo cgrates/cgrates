@@ -7,7 +7,7 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
 
@@ -26,7 +26,9 @@
 	"FWV1": {
 		"enabled": true,							// enable CDR client functionality
 		"dry_run": true,
-		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
+		"cdrs_conns": [
+			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
+		],
 		"cdr_format": "fwv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"cdr_in_dir": "/tmp/cgr_fwv/cdrc/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgr_fwv/cdrc/out",		// absolute path towards the directory where processed CDRs will be moved

@@ -135,7 +135,7 @@ const CGRATES_CFG_JSON = `
 		"field_separator": ",",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-        "mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
+		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
@@ -225,12 +225,12 @@ const CGRATES_CFG_JSON = `
 
 "sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-    "rals_conns": [
-        {"address": "*internal"}		// address where to reach the Rater <""|*internal|127.0.0.1:2013>
-    ],
+	"rals_conns": [
+		{"address": "*internal"}		// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	],
 	"cdrs_conns": [
-        {"address": "*internal"}		// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-    ],
+		{"address": "*internal"}		// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+	],
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
 	"debit_interval": "10s",				// interval to perform debits on.
@@ -251,12 +251,12 @@ const CGRATES_CFG_JSON = `
 
 "sm_kamailio": {
 	"enabled": false,						// starts SessionManager service: <true|false>
-    "rals_conns": [
-        {"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
-    ],
+	"rals_conns": [
+		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	],
 	"cdrs_conns": [
-        {"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-    ],
+		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+	],
 	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
 	"debit_interval": "10s",				// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
@@ -270,12 +270,12 @@ const CGRATES_CFG_JSON = `
 "sm_opensips": {
 	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
-    "rals_conns": [
-        {"address": "*internal"}     // address where to reach the Rater <""|*internal|127.0.0.1:2013>
-    ],
+	"rals_conns": [
+		{"address": "*internal"}     // address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	],
 	"cdrs_conns": [
-        {"address": "*internal"}     // address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
-    ],
+		{"address": "*internal"}     // address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+	],
 	"reconnects": 5,					// number of reconnects if connection is lost
 	"create_cdr": false,				// create CDR out of events and sends it to CDRS component
 	"debit_interval": "10s",			// interval to perform debits on.

@@ -4,7 +4,7 @@
 // Used in mediator_local_test
 // Starts rater, cdrs and mediator connecting over internal channel
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
 
@@ -14,7 +14,6 @@
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
-	"mediator": "internal",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 },
 
 "cdrc": {
@@ -65,10 +64,6 @@
 			{"cdr_field_id": "usage", "value": "~6:s/^(\\d+)$/${1}s/"},
 		],
 	}
-},
-
-"mediator": {
-	"enabled": true,						// starts Mediator service: <true|false>.
 },
 
 "cdre": {

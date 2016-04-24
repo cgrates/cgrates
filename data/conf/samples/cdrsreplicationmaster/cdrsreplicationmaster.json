@@ -4,7 +4,7 @@
 // Used in apier_local_tests
 // Starts rater, cdrs and mediator connecting over internal channel
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
 
