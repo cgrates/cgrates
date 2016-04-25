@@ -180,7 +180,7 @@ BLOCK_EMPTY,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300,10,false,false,10
 NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50,10,false,false,10
-VF,*debit,,,,*monetary,*out,,,,,*unlimited,*any,"{""Method"":""*periodic"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
+VF,*debit,,,,*monetary,*out,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
 `
 	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
