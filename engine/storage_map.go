@@ -925,7 +925,7 @@ func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Action
 	return
 }
 
-func (ms *MapStorage) SetRatingStructuresVersion(v *RatingStructuresVersion) (err error) {
+func (ms *MapStorage) SetStructVersion(v *StructVersion) (err error) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	var result []byte
@@ -933,63 +933,16 @@ func (ms *MapStorage) SetRatingStructuresVersion(v *RatingStructuresVersion) (er
 	if err != nil {
 		return
 	}
-	ms.dict[utils.RATING_VERSION_PREFIX+"version"] = result
+	ms.dict[utils.VERSION_PREFIX+"struct"] = result
 	return
 }
 
-func (ms *MapStorage) GetRatingStructuresVersion() (rsv *RatingStructuresVersion, err error) {
+func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
-	rsv = &RatingStructuresVersion{}
-	if values, ok := ms.dict[utils.RATING_VERSION_PREFIX+"version"]; ok {
+	rsv = &StructVersion{}
+	if values, ok := ms.dict[utils.VERSION_PREFIX+"struct"]; ok {
 		err = ms.ms.Unmarshal(values, &rsv)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-
-func (ms *MapStorage) SetAccountingStructuresVersion(v *AccountingStructuresVersion) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	var result []byte
-	result, err = ms.ms.Marshal(v)
-	if err != nil {
-		return
-	}
-	ms.dict[utils.ACCOUNTING_VERSION_PREFIX+"version"] = result
-	return
-}
-
-func (ms *MapStorage) GetAccountingStructuresVersion() (asv *AccountingStructuresVersion, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	asv = &AccountingStructuresVersion{}
-	if values, ok := ms.dict[utils.ACCOUNTING_VERSION_PREFIX+"version"]; ok {
-		err = ms.ms.Unmarshal(values, &asv)
-	} else {
-		return nil, utils.ErrNotFound
-	}
-	return
-}
-func (ms *MapStorage) SetCdrStructuresVersion(v *CdrStructuresVersion) (err error) {
-	ms.mu.Lock()
-	defer ms.mu.Unlock()
-	var result []byte
-	result, err = ms.ms.Marshal(v)
-	if err != nil {
-		return
-	}
-	ms.dict[utils.CDR_VERSION_PREFIX+"version"] = result
-	return
-}
-
-func (ms *MapStorage) GetCdrStructuresVersion() (csv *CdrStructuresVersion, err error) {
-	ms.mu.RLock()
-	defer ms.mu.RUnlock()
-	csv = &CdrStructuresVersion{}
-	if values, ok := ms.dict[utils.CDR_VERSION_PREFIX+"version"]; ok {
-		err = ms.ms.Unmarshal(values, &csv)
 	} else {
 		return nil, utils.ErrNotFound
 	}

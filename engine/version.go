@@ -8,46 +8,22 @@ import (
 
 func init() {
 	// get current db version
-	dbRsv, err := ratingStorage.GetRatingStructuresVersion()
+	dbVersion, err := accountingStorage.GetStructVersion()
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf("Could not retrive current version from db: %v", err))
 		return
 	}
 	// comparing versions
-	if currentRsv.CompareAndMigrate(dbRsv) {
+	if currentVersion.CompareAndMigrate(dbVersion) {
 		// write the new values
-		if err := ratingStorage.SetRatingStructuresVersion(currentRsv); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
-		}
-	}
-	dbAsv, err := accountingStorage.GetAccountingStructuresVersion()
-	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf("Could not retrive current version from db: %v", err))
-		return
-	}
-	// comparing versions
-	if currentAsv.CompareAndMigrate(dbAsv) {
-		// write the new values
-		if err := accountingStorage.SetAccountingStructuresVersion(currentAsv); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
-		}
-	}
-	dbCsv, err := cdrStorage.GetCdrStructuresVersion()
-	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf("Could not retrive current version from db: %v", err))
-		return
-	}
-	// comparing versions
-	if currentCsv.CompareAndMigrate(dbCsv) {
-		// write the new values
-		if err := cdrStorage.SetCdrStructuresVersion(currentCsv); err != nil {
+		if err := accountingStorage.SetStructVersion(currentVersion); err != nil {
 			utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
 		}
 	}
 }
 
 var (
-	currentRsv = &RatingStructuresVersion{
+	currentVersion = &StructVersion{
 		Destinations:    "1",
 		RatingPlans:     "1",
 		RatingProfiles:  "1",
@@ -57,24 +33,19 @@ var (
 		ActionPlans:     "1",
 		ActionTriggers:  "1",
 		SharedGroups:    "1",
-	}
-
-	currentAsv = &AccountingStructuresVersion{
-		Accounts:    "1",
-		CdrStats:    "1",
-		Users:       "1",
-		Alias:       "1",
-		PubSubs:     "1",
-		LoadHistory: "1",
-	}
-
-	currentCsv = &CdrStructuresVersion{
-		Cdrs:    "1",
-		SMCosts: "1",
+		Accounts:        "1",
+		CdrStats:        "1",
+		Users:           "1",
+		Alias:           "1",
+		PubSubs:         "1",
+		LoadHistory:     "1",
+		Cdrs:            "1",
+		SMCosts:         "1",
 	}
 )
 
-type RatingStructuresVersion struct {
+type StructVersion struct {
+	//  rating
 	Destinations    string
 	RatingPlans     string
 	RatingProfiles  string
@@ -84,92 +55,78 @@ type RatingStructuresVersion struct {
 	ActionPlans     string
 	ActionTriggers  string
 	SharedGroups    string
-}
-
-func (rsv *RatingStructuresVersion) CompareAndMigrate(dbRsv *RatingStructuresVersion) bool {
-	migrationPerformed := false
-	if rsv.Destinations != dbRsv.Destinations {
-		migrationPerformed = true
-
-	}
-	if rsv.RatingPlans != dbRsv.RatingPlans {
-		migrationPerformed = true
-
-	}
-	if rsv.RatingProfiles != dbRsv.RatingPlans {
-		migrationPerformed = true
-
-	}
-	if rsv.Lcrs != dbRsv.Lcrs {
-		migrationPerformed = true
-
-	}
-	if rsv.DerivedChargers != dbRsv.DerivedChargers {
-		migrationPerformed = true
-
-	}
-	if rsv.Actions != dbRsv.Actions {
-		migrationPerformed = true
-
-	}
-	if rsv.ActionPlans != dbRsv.ActionPlans {
-		migrationPerformed = true
-
-	}
-	if rsv.ActionTriggers != dbRsv.ActionTriggers {
-		migrationPerformed = true
-
-	}
-	if rsv.SharedGroups != dbRsv.SharedGroups {
-		migrationPerformed = true
-
-	}
-	return migrationPerformed
-}
-
-type AccountingStructuresVersion struct {
+	// accounting
 	Accounts    string
 	CdrStats    string
 	Users       string
 	Alias       string
 	PubSubs     string
 	LoadHistory string
-}
-
-func (asv *AccountingStructuresVersion) CompareAndMigrate(dbAsv *AccountingStructuresVersion) bool {
-	migrationPerformed := false
-	if asv.Accounts != dbAsv.Accounts {
-		migrationPerformed = true
-	}
-	if asv.CdrStats != dbAsv.CdrStats {
-		migrationPerformed = true
-	}
-	if asv.Users != dbAsv.Users {
-		migrationPerformed = true
-	}
-	if asv.Alias != dbAsv.Alias {
-		migrationPerformed = true
-	}
-	if asv.PubSubs != dbAsv.PubSubs {
-		migrationPerformed = true
-	}
-	if asv.LoadHistory != dbAsv.LoadHistory {
-		migrationPerformed = true
-	}
-	return migrationPerformed
-}
-
-type CdrStructuresVersion struct {
+	// cdr
 	Cdrs    string
 	SMCosts string
 }
 
-func (csv *CdrStructuresVersion) CompareAndMigrate(dbCsv *CdrStructuresVersion) bool {
+func (sv *StructVersion) CompareAndMigrate(dbVer *StructVersion) bool {
 	migrationPerformed := false
-	if csv.Cdrs != dbCsv.Cdrs {
+	if sv.Destinations != dbVer.Destinations {
+		migrationPerformed = true
+
+	}
+	if sv.RatingPlans != dbVer.RatingPlans {
+		migrationPerformed = true
+
+	}
+	if sv.RatingProfiles != dbVer.RatingPlans {
+		migrationPerformed = true
+
+	}
+	if sv.Lcrs != dbVer.Lcrs {
+		migrationPerformed = true
+
+	}
+	if sv.DerivedChargers != dbVer.DerivedChargers {
+		migrationPerformed = true
+
+	}
+	if sv.Actions != dbVer.Actions {
+		migrationPerformed = true
+
+	}
+	if sv.ActionPlans != dbVer.ActionPlans {
+		migrationPerformed = true
+
+	}
+	if sv.ActionTriggers != dbVer.ActionTriggers {
+		migrationPerformed = true
+
+	}
+	if sv.SharedGroups != dbVer.SharedGroups {
+		migrationPerformed = true
+
+	}
+	if sv.Accounts != dbVer.Accounts {
 		migrationPerformed = true
 	}
-	if csv.SMCosts != dbCsv.SMCosts {
+	if sv.CdrStats != dbVer.CdrStats {
+		migrationPerformed = true
+	}
+	if sv.Users != dbVer.Users {
+		migrationPerformed = true
+	}
+	if sv.Alias != dbVer.Alias {
+		migrationPerformed = true
+	}
+	if sv.PubSubs != dbVer.PubSubs {
+		migrationPerformed = true
+	}
+	if sv.LoadHistory != dbVer.LoadHistory {
+		migrationPerformed = true
+	}
+	if sv.Cdrs != dbVer.Cdrs {
+		migrationPerformed = true
+	}
+	if sv.SMCosts != dbVer.SMCosts {
 		migrationPerformed = true
 	}
 	return migrationPerformed

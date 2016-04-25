@@ -1094,55 +1094,20 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	return rs.db.Cmd("SET", utils.LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v", string(mat), string(mas)))).Err
 }
 
-func (rs *RedisStorage) SetRatingStructuresVersion(v *RatingStructuresVersion) (err error) {
+func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(v)
 	if err != nil {
 		return
 	}
-	return rs.db.Cmd("SET", utils.RATING_VERSION_PREFIX+"version", result).Err
+	return rs.db.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
 }
 
-func (rs *RedisStorage) GetRatingStructuresVersion() (rsv *RatingStructuresVersion, err error) {
+func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
 	var values []byte
-	rsv = &RatingStructuresVersion{}
-	if values, err = rs.db.Cmd("GET", utils.RATING_VERSION_PREFIX+"version").Bytes(); err == nil {
+	rsv = &StructVersion{}
+	if values, err = rs.db.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &rsv)
-	}
-	return
-}
-
-func (rs *RedisStorage) SetAccountingStructuresVersion(v *AccountingStructuresVersion) (err error) {
-	var result []byte
-	result, err = rs.ms.Marshal(v)
-	if err != nil {
-		return
-	}
-	return rs.db.Cmd("SET", utils.ACCOUNTING_VERSION_PREFIX+"version", result).Err
-}
-
-func (rs *RedisStorage) GetAccountingStructuresVersion() (asv *AccountingStructuresVersion, err error) {
-	var values []byte
-	asv = &AccountingStructuresVersion{}
-	if values, err = rs.db.Cmd("GET", utils.ACCOUNTING_VERSION_PREFIX+"version").Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &asv)
-	}
-	return
-}
-func (rs *RedisStorage) SetCdrStructuresVersion(v *CdrStructuresVersion) (err error) {
-	var result []byte
-	result, err = rs.ms.Marshal(v)
-	if err != nil {
-		return
-	}
-	return rs.db.Cmd("SET", utils.CDR_VERSION_PREFIX+"version", result).Err
-}
-
-func (rs *RedisStorage) GetCdrStructuresVersion() (csv *CdrStructuresVersion, err error) {
-	var values []byte
-	csv = &CdrStructuresVersion{}
-	if values, err = rs.db.Cmd("GET", utils.CDR_VERSION_PREFIX+"version").Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &csv)
 	}
 	return
 }

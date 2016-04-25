@@ -1343,11 +1343,3 @@ func (self *SQLStorage) GetTpAliases(filter *TpAlias) ([]TpAlias, error) {
 
 	return tpAliases, nil
 }
-
-func (self *SQLStorage) SetCdrStructuresVersion(v *CdrStructuresVersion) (err error) {
-	return utils.ErrNotImplemented
-}
-
-func (self *SQLStorage) GetCdrStructuresVersion() (csv *CdrStructuresVersion, err error) {
-	return nil, utils.ErrNotImplemented
-}
