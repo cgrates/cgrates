@@ -163,7 +163,7 @@ func main() {
 				log.Print(err.Error())
 			}
 		}
-		if strings.Contains(*migrateRC8, "int2") {
+		if strings.Contains(*migrateRC8, "vf") {
 			if err := migratorRC8rat.migrateActionsInt2(); err != nil {
 				log.Print(err.Error())
 			}
