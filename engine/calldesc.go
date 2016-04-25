@@ -74,7 +74,7 @@ var (
 	storageLogger            LogStorage
 	cdrStorage               CdrStorage
 	debitPeriod              = 10 * time.Second
-	globalRoundingDecimals   = 5
+	globalRoundingDecimals   = 6
 	historyScribe            rpcclient.RpcClientConnection
 	pubSubServer             rpcclient.RpcClientConnection
 	userService              rpcclient.RpcClientConnection
