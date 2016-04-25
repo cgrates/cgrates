@@ -147,7 +147,6 @@ func TestCDRStatsLclPostCdrs(t *testing.T) {
 		}
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-
 }
 
 func TestCDRStatsLclGetMetrics1(t *testing.T) {

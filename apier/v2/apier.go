@@ -220,14 +220,12 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		dcsKeys[idx] = utils.DERIVEDCHARGERS_PREFIX + dc
 	}
 	aps, _ := loader.GetLoadedIds(utils.ACTION_PLAN_PREFIX)
-	utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading cache.")
+	utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading cache.")
 
 	cstKeys, _ := loader.GetLoadedIds(utils.CDR_STATS_PREFIX)
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	li := loader.GetLoadInstance()
-
-	// release the tp data
-	loader.Init()
+	loader.Init() // release the tp data
 
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
@@ -247,7 +245,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return err
 	}
 	if len(aps) != 0 && self.Sched != nil {
-		utils.Logger.Info("ApierV1.LoadTariffPlanFromFolder, reloading scheduler.")
+		utils.Logger.Info("ApierV2.LoadTariffPlanFromFolder, reloading scheduler.")
 		self.Sched.Reload(true)
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
@@ -256,7 +254,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 			return err
 		}
 	}
-
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
 		if err := self.Users.Call("UsersV1.ReloadUsers", "", &r); err != nil {
