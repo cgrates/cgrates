@@ -30,14 +30,14 @@ func ParseBalanceFilterValue(val string) (*ValueFormula, error) {
 type valueFormula func(map[string]interface{}) float64
 
 const (
-	PERIODIC = "*periodic"
+	INCREMENTAL = "*incremental"
 )
 
 var ValueFormulas = map[string]valueFormula{
-	PERIODIC: periodicFormula,
+	INCREMENTAL: incrementalFormula,
 }
 
-func periodicFormula(params map[string]interface{}) float64 {
+func incrementalFormula(params map[string]interface{}) float64 {
 	// check parameters
 	unitsInterface, unitsFound := params["Units"]
 	intervalInterface, intervalFound := params["Interval"]
