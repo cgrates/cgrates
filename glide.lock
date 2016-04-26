@@ -1,5 +1,5 @@
 hash: 5c488630d1d32687b7a3c3b22c47ceaf7eb3cffb764799706728a6accbcd3ff5
-updated: 2016-04-11T11:24:07.55158903+03:00
+updated: 2016-04-26T18:00:43.651987521+03:00
 imports:
 - name: github.com/cenkalti/hub
   version: b864404b5f990410d56858a1b0a6fac23a85443f
@@ -12,7 +12,7 @@ imports:
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/rpcclient
-  version: 64c9ff2b700d5a97a969a59d648bd75d09274143
+  version: 9a6185f8a2093ce10f1a08242b0d757f24795800
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
@@ -40,7 +40,7 @@ imports:
   subpackages:
   - oid
 - name: github.com/mediocregopher/radix.v2
-  version: 7bdaf7c45ec452ca691ab20535471e24460f0876
+  version: 74e50e64194d2d2f4836212451c28b127f9d7fa1
   subpackages:
   - pool
   - redis
@@ -51,20 +51,20 @@ imports:
   subpackages:
   - codec
 - name: golang.org/x/net
-  version: e45385e9b226f570b1f086bf287b25d3d4117776
+  version: b797637b7aeeed133049c7281bfa31dcc9ca42d6
   subpackages:
   - websocket
   - context
+- name: golang.org/x/sys
+  version: f64b50fbea64174967a8882830d621a18ee1548e
+  subpackages:
+  - unix
 - name: gopkg.in/fsnotify.v1
-  version: 875cf421b32f8f1b31bd43776297876d01542279
+  version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
 - name: gopkg.in/mgo.v2
   version: b6e2fa371e64216a45e61072a96d4e3859f169da
   subpackages:
   - bson
-- name: gopkg.in/tomb.v2
-  version: 14b3d72120e8d10ea6e6b7f87f7175734b1faab8
-devImports: []
-=======
   - internal/sasl
   - internal/scram
 devImports: []
