@@ -194,6 +194,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 }
 
 func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
+	utils.Logger.Debug(fmt.Sprintf("Responder.RefundIncrements, arg: %+v", arg))
 	if item, err := rs.getCache().Get(utils.REFUND_INCR_CACHE_PREFIX + arg.CgrID + arg.RunID); err == nil && item != nil {
 		*reply = *(item.Value.(*float64))
 		return item.Err

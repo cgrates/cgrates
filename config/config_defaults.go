@@ -39,7 +39,7 @@ const CGRATES_CFG_JSON = `
 	"default_timezone": "Local",						// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	"connect_attempts": 3,								// initial server connect attempts
 	"reconnects": -1,									// number of retries in case of connection lost
-	"response_cache_ttl": "3s",							// the life span of a cached response
+	"response_cache_ttl": "0s",							// the life span of a cached response
 	"internal_ttl": "2m",								// maximum duration to wait for internal connections before giving up
 },
 

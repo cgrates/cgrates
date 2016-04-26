@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"

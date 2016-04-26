@@ -195,7 +195,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		t.Error(err)
 	}
 	if maxUsage != 90 {
-		t.Error("Bad max usage: ", maxUsage)
+		t.Error("Received: ", maxUsage)
 	}
 	var acnt *engine.Account
 	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
