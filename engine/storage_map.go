@@ -924,3 +924,27 @@ func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Action
 	ms.dict[utils.LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s", string(mat), string(mas)))
 	return
 }
+
+func (ms *MapStorage) SetStructVersion(v *StructVersion) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	var result []byte
+	result, err = ms.ms.Marshal(v)
+	if err != nil {
+		return
+	}
+	ms.dict[utils.VERSION_PREFIX+"struct"] = result
+	return
+}
+
+func (ms *MapStorage) GetStructVersion() (rsv *StructVersion, err error) {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+	rsv = &StructVersion{}
+	if values, ok := ms.dict[utils.VERSION_PREFIX+"struct"]; ok {
+		err = ms.ms.Unmarshal(values, &rsv)
+	} else {
+		return nil, utils.ErrNotFound
+	}
+	return
+}

@@ -1093,3 +1093,21 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	}
 	return rs.db.Cmd("SET", utils.LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v", string(mat), string(mas)))).Err
 }
+
+func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
+	var result []byte
+	result, err = rs.ms.Marshal(v)
+	if err != nil {
+		return
+	}
+	return rs.db.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
+}
+
+func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
+	var values []byte
+	rsv = &StructVersion{}
+	if values, err = rs.db.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err == nil {
+		err = rs.ms.Unmarshal(values, &rsv)
+	}
+	return
+}

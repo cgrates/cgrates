@@ -203,5 +203,21 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	server.RpcRegister(responder)
 	server.RpcRegister(apierRpcV1)
 	server.RpcRegister(apierRpcV2)
+
+	utils.RegisterRpcParams("", &engine.Stats{})
+	utils.RegisterRpcParams("", &v1.CDRStatsV1{})
+	utils.RegisterRpcParams("ScribeV1", &history.FileScribe{})
+	utils.RegisterRpcParams("PubSubV1", &engine.PubSub{})
+	utils.RegisterRpcParams("AliasesV1", &engine.AliasHandler{})
+	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
+	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
+	utils.RegisterRpcParams("", &v1.CdrsV1{})
+	utils.RegisterRpcParams("", &v2.CdrsV2{})
+	utils.RegisterRpcParams("", &v1.SessionManagerV1{})
+	utils.RegisterRpcParams("", &v1.SMGenericV1{})
+	utils.RegisterRpcParams("", responder)
+	utils.RegisterRpcParams("", apierRpcV1)
+	utils.RegisterRpcParams("", apierRpcV2)
+
 	internalRaterChan <- responder // Rater done
 }

@@ -197,6 +197,7 @@ const (
 	LOG_CALL_COST_PREFIX         = "cco_"
 	LOG_ACTION_TIMMING_PREFIX    = "ltm_"
 	LOG_ACTION_TRIGGER_PREFIX    = "ltr_"
+	VERSION_PREFIX               = "ver_"
 	LOG_ERR                      = "ler_"
 	LOG_CDR                      = "cdr_"
 	LOG_MEDIATED_CDR             = "mcd_"

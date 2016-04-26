@@ -657,7 +657,7 @@ type RPCRequest struct {
 	Method    string
 	Attempts  int
 	Async     bool
-	Param     map[string]interface{}
+	Params    map[string]interface{}
 }
 
 func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
@@ -671,29 +671,25 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	}
 	var client rpcclient.RpcClientConnection
 	if req.Address != utils.MetaInternal {
-		if client, err = rpcclient.NewRpcClient(req.Method, req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
+		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
 			return err
 		}
 	} else {
-		client = params.Object
+		client = params.Object.(rpcclient.RpcClientConnection)
 	}
-	if client == nil {
-		return utils.ErrServerError
-	}
-
 	in, out := params.InParam, params.OutParam
-	p, err := utils.FromMapStringInterfaceValue(req.Param, in)
+	p, err := utils.FromMapStringInterfaceValue(req.Params, in)
 	if err != nil {
 		return err
 	}
 	if !req.Async {
 		err = client.Call(req.Method, p, out)
-		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %+v err: %v", out, err))
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 		return err
 	}
 	go func() {
 		err := client.Call(req.Method, p, out)
-		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %+v err: %v", out, err))
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 	}()
 	return nil
 }
