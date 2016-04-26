@@ -151,8 +151,7 @@ func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 	return self.processCdr(cdr)
 }
 
-// RPC method, used to log callcosts to db
-func (self *CdrServer) StoreSMCost(smCost *SMCost, checkDuplicate bool) error {
+func (self *CdrServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 	smCost.CostDetails.UpdateCost()                                              // make sure the total cost reflect the increments
 	smCost.CostDetails.UpdateRatedUsage()                                        // make sure rated usage is updated
 	lockKey := utils.CDRS_SOURCE + smCost.CGRID + smCost.RunID + smCost.OriginID // Will lock on this ID
@@ -170,6 +169,11 @@ func (self *CdrServer) StoreSMCost(smCost *SMCost, checkDuplicate bool) error {
 		return err
 	}
 	return self.cdrDb.SetSMCost(smCost)
+}
+
+// RPC method, differs from storeSMCost through it's signature
+func (self *CdrServer) StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) error {
+	return self.storeSMCost(attr.Cost, attr.CheckDuplicate)
 }
 
 // Called by rate/re-rate API
@@ -532,7 +536,6 @@ func (cdrsrv *CdrServer) Call(serviceMethod string, args interface{}, reply inte
 
 	// construct the params
 	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
-
 	ret := method.Call(params)
 	if len(ret) != 1 {
 		return utils.ErrServerError

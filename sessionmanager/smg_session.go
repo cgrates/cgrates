@@ -266,7 +266,7 @@ func (self *SMGSession) saveOperations(originID string) error {
 		CostDetails: firstCC,
 	}
 	var reply string
-	if err := self.cdrsrv.Call("CdrServer.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
 		if err == utils.ErrExists {
 			self.refund(self.cd.GetDuration()) // Refund entire duration
 		} else {
