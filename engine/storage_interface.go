@@ -92,6 +92,8 @@ type AccountingStorage interface {
 	RemoveAlias(string) error
 	GetLoadHistory(int, bool) ([]*LoadInstance, error)
 	AddLoadHistory(*LoadInstance, int) error
+	GetStructVersion() (*StructVersion, error)
+	SetStructVersion(*StructVersion) error
 }
 
 type CdrStorage interface {

@@ -53,6 +53,7 @@ const (
 	colLogAtr = "action_trigger_logs"
 	colLogApl = "action_plan_logs"
 	colLogErr = "error_logs"
+	colVer    = "version"
 )
 
 var (
@@ -1361,5 +1362,22 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 		css = append(css, &clone)
 	}
 	err = iter.Close()
+	return
+}
+
+func (ms *MongoStorage) SetStructVersion(v *StructVersion) (err error) {
+	_, err = ms.db.C(colVer).Upsert(bson.M{"key": utils.VERSION_PREFIX + "struct"}, &struct {
+		Key   string
+		Value *StructVersion
+	}{utils.VERSION_PREFIX + "struct", v})
+	return
+}
+
+func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
+	rsv = new(StructVersion)
+	err = ms.db.C(colVer).Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(rsv)
+	if err == mgo.ErrNotFound {
+		rsv = nil
+	}
 	return
 }
