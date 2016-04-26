@@ -507,6 +507,10 @@ func main() {
 		}
 		defer accountDb.Close()
 		engine.SetAccountingStorage(accountDb)
+		if err := engine.CheckVersion(); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
 	}
 	if cfg.RALsEnabled || cfg.CDRSEnabled || cfg.SchedulerEnabled { // Only connect to storDb if necessary
 		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,

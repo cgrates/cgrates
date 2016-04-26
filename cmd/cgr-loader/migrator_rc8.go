@@ -669,3 +669,11 @@ func (mig MigratorRC8) migrateSharedGroups() error {
 	}
 	return nil
 }
+
+func (mig MigratorRC8) writeVersion() error {
+	result, err := mig.ms.Marshal(engine.CurrentVersion)
+	if err != nil {
+		return err
+	}
+	return mig.db.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
+}

@@ -167,6 +167,9 @@ func main() {
 			if err := migratorRC8rat.migrateActionsInt2(); err != nil {
 				log.Print(err.Error())
 			}
+			if err := migratorRC8acc.writeVersion(); err != nil {
+				log.Print(err.Error())
+			}
 		}
 		log.Print("Done!")
 		return

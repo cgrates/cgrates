@@ -53,7 +53,7 @@ const (
 	colLogAtr = "action_trigger_logs"
 	colLogApl = "action_plan_logs"
 	colLogErr = "error_logs"
-	colVer    = "version"
+	colVer    = "versions"
 )
 
 var (
