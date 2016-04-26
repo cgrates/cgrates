@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package agents
 
+/*
 import (
 	"os/exec"
 	"path"
@@ -120,3 +121,4 @@ func TestHaPoolCdrs(t *testing.T) {
 func TestHaPoolStopEngine(t *testing.T) {
 	TestDmtAgentStopEngine(t)
 }
+*/

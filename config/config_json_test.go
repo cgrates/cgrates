@@ -50,7 +50,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_timezone:     utils.StringPointer("Local"),
 		Connect_attempts:     utils.IntPointer(3),
 		Reconnects:           utils.IntPointer(-1),
-		Response_cache_ttl:   utils.StringPointer("3s"),
+		Response_cache_ttl:   utils.StringPointer("0s"),
 		Internal_ttl:         utils.StringPointer("2m")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
