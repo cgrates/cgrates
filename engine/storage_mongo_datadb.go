@@ -1379,7 +1379,7 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 		Value StructVersion
 	}
 
-	err = ms.db.C(colVer).Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(result)
+	err = ms.db.C(colVer).Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result)
 	if err == mgo.ErrNotFound {
 		rsv = nil
 	}
