@@ -173,16 +173,21 @@ func main() {
 				}
 			}
 		} else if *datadb_type == "mongo" && *tpdb_type == "mongo" {
-			mongoMigrator, err := NewMongoMigrator(*datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass)
+			mongoMigratorAcc, err := NewMongoMigrator(*datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass)
+			if err != nil {
+				log.Print(err.Error())
+				return
+			}
+			mongoMigratorRat, err := NewMongoMigrator(*tpdb_host, *tpdb_port, *tpdb_name, *tpdb_user, *tpdb_pass)
 			if err != nil {
 				log.Print(err.Error())
 				return
 			}
 			if strings.Contains(*migrateRC8, "vf") {
-				if err := mongoMigrator.migrateActions(); err != nil {
+				if err := mongoMigratorRat.migrateActions(); err != nil {
 					log.Print(err.Error())
 				}
-				if err := mongoMigrator.writeVersion(); err != nil {
+				if err := mongoMigratorAcc.writeVersion(); err != nil {
 					log.Print(err.Error())
 				}
 			}
