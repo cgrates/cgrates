@@ -93,59 +93,36 @@ func (a *Action) Clone() *Action {
 type actionTypeFunc func(*Account, *StatsQueueTriggered, *Action, Actions) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
-	switch typ {
-	case LOG:
-		return logAction, true
-	case CDRLOG:
-		return cdrLogAction, true
-	case RESET_TRIGGERS:
-		return resetTriggersAction, true
-	case SET_RECURRENT:
-		return setRecurrentAction, true
-	case UNSET_RECURRENT:
-		return unsetRecurrentAction, true
-	case ALLOW_NEGATIVE:
-		return allowNegativeAction, true
-	case DENY_NEGATIVE:
-		return denyNegativeAction, true
-	case RESET_ACCOUNT:
-		return resetAccountAction, true
-	case TOPUP_RESET:
-		return topupResetAction, true
-	case TOPUP:
-		return topupAction, true
-	case DEBIT_RESET:
-		return debitResetAction, true
-	case DEBIT:
-		return debitAction, true
-	case RESET_COUNTERS:
-		return resetCountersAction, true
-	case ENABLE_ACCOUNT:
-		return enableUserAction, true
-	case DISABLE_ACCOUNT:
-		return disableUserAction, true
-	//case ENABLE_DISABLE_BALANCE:
-	//	return enableDisableBalanceAction, true
-	case CALL_URL:
-		return callUrl, true
-	case CALL_URL_ASYNC:
-		return callUrlAsync, true
-	case MAIL_ASYNC:
-		return mailAsync, true
-	case SET_DDESTINATIONS:
-		return setddestinations, true
-	case REMOVE_ACCOUNT:
-		return removeAccountAction, true
-	case REMOVE_BALANCE:
-		return removeBalanceAction, true
-	case SET_BALANCE:
-		return setBalanceAction, true
-	case TRANSFER_MONETARY_DEFAULT:
-		return transferMonetaryDefaultAction, true
-	case CGR_RPC:
-		return cgrRPCAction, true
+	actionFuncMap := map[string]actionTypeFunc{
+		LOG:             logAction,
+		CDRLOG:          cdrLogAction,
+		RESET_TRIGGERS:  resetTriggersAction,
+		SET_RECURRENT:   setRecurrentAction,
+		UNSET_RECURRENT: unsetRecurrentAction,
+		ALLOW_NEGATIVE:  allowNegativeAction,
+		DENY_NEGATIVE:   denyNegativeAction,
+		RESET_ACCOUNT:   resetAccountAction,
+		TOPUP_RESET:     topupResetAction,
+		TOPUP:           topupAction,
+		DEBIT_RESET:     debitResetAction,
+		DEBIT:           debitAction,
+		RESET_COUNTERS:  resetCountersAction,
+		ENABLE_ACCOUNT:  enableUserAction,
+		DISABLE_ACCOUNT: disableUserAction,
+		//case ENABLE_DISABLE_BALANCE:
+		//	return enableDisableBalanceAction, true
+		CALL_URL:                  callUrl,
+		CALL_URL_ASYNC:            callUrlAsync,
+		MAIL_ASYNC:                mailAsync,
+		SET_DDESTINATIONS:         setddestinations,
+		REMOVE_ACCOUNT:            removeAccountAction,
+		REMOVE_BALANCE:            removeBalanceAction,
+		SET_BALANCE:               setBalanceAction,
+		TRANSFER_MONETARY_DEFAULT: transferMonetaryDefaultAction,
+		CGR_RPC:                   cgrRPCAction,
 	}
-	return nil, false
+	f, exists := actionFuncMap[typ]
+	return f, exists
 }
 
 func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {

@@ -127,7 +127,7 @@ func (acc *Account) setBalanceAction(a *Action) error {
 	if a.Balance.ID != nil && *a.Balance.ID == utils.META_DEFAULT {
 		balance.ID = utils.META_DEFAULT
 		if a.Balance.Value != nil {
-			balance.Value = *a.Balance.Value
+			balance.Value = a.Balance.GetValue()
 		}
 	} else {
 		a.Balance.ModifyBalance(balance)
@@ -170,6 +170,7 @@ func (ub *Account) debitBalanceAction(a *Action, reset bool) error {
 		return errors.New("nil action")
 	}
 	bClone := a.Balance.CreateBalance()
+	//log.Print("Bclone: ", utils.ToJSON(a.Balance))
 	if bClone == nil {
 		return errors.New("nil balance")
 	}

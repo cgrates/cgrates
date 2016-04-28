@@ -1,29 +1,41 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
-func init() {
+func CheckVersion() error {
 	// get current db version
 	dbVersion, err := accountingStorage.GetStructVersion()
 	if err != nil {
-		utils.Logger.Warning(fmt.Sprintf("Could not retrive current version from db: %v", err))
-		return
-	}
-	// comparing versions
-	if currentVersion.CompareAndMigrate(dbVersion) {
-		// write the new values
-		if err := accountingStorage.SetStructVersion(currentVersion); err != nil {
-			utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
+		if lhList, err := accountingStorage.GetLoadHistory(1, true); err != nil || len(lhList) == 0 {
+			// no data, write version
+			if err := accountingStorage.SetStructVersion(CurrentVersion); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
+			}
+		} else {
+			// has data but no version => run migration
+			msg := "Could not detect data structures version: run appropriate migration"
+			utils.Logger.Crit(msg)
+			return errors.New(msg)
+		}
+	} else {
+		// comparing versions
+		if len(CurrentVersion.CompareAndMigrate(dbVersion)) > 0 {
+			// write the new values
+			msg := "Migration needed: please backup cgr data and run cgr-cloader -migrate"
+			utils.Logger.Crit(msg)
+			return errors.New(msg)
 		}
 	}
+	return nil
 }
 
 var (
-	currentVersion = &StructVersion{
+	CurrentVersion = &StructVersion{
 		Destinations:    "1",
 		RatingPlans:     "1",
 		RatingProfiles:  "1",
@@ -67,67 +79,133 @@ type StructVersion struct {
 	SMCosts string
 }
 
-func (sv *StructVersion) CompareAndMigrate(dbVer *StructVersion) bool {
-	migrationPerformed := false
+type MigrationInfo struct {
+	Prefix         string
+	DbVersion      string
+	CurrentVersion string
+}
+
+func (sv *StructVersion) CompareAndMigrate(dbVer *StructVersion) []*MigrationInfo {
+	var migrationInfoList []*MigrationInfo
 	if sv.Destinations != dbVer.Destinations {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.DESTINATION_PREFIX,
+			DbVersion:      dbVer.Destinations,
+			CurrentVersion: CurrentVersion.Destinations,
+		})
 
 	}
 	if sv.RatingPlans != dbVer.RatingPlans {
-		migrationPerformed = true
-
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.RATING_PLAN_PREFIX,
+			DbVersion:      dbVer.RatingPlans,
+			CurrentVersion: CurrentVersion.RatingPlans,
+		})
 	}
-	if sv.RatingProfiles != dbVer.RatingPlans {
-		migrationPerformed = true
-
+	if sv.RatingProfiles != dbVer.RatingProfiles {
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.RATING_PROFILE_PREFIX,
+			DbVersion:      dbVer.RatingProfiles,
+			CurrentVersion: CurrentVersion.RatingProfiles,
+		})
 	}
 	if sv.Lcrs != dbVer.Lcrs {
-		migrationPerformed = true
-
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.LCR_PREFIX,
+			DbVersion:      dbVer.Lcrs,
+			CurrentVersion: CurrentVersion.Lcrs,
+		})
 	}
 	if sv.DerivedChargers != dbVer.DerivedChargers {
-		migrationPerformed = true
-
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.DERIVEDCHARGERS_PREFIX,
+			DbVersion:      dbVer.DerivedChargers,
+			CurrentVersion: CurrentVersion.DerivedChargers,
+		})
 	}
 	if sv.Actions != dbVer.Actions {
-		migrationPerformed = true
-
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.ACTION_PREFIX,
+			DbVersion:      dbVer.Actions,
+			CurrentVersion: CurrentVersion.Actions,
+		})
 	}
 	if sv.ActionPlans != dbVer.ActionPlans {
-		migrationPerformed = true
-
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.ACTION_PLAN_PREFIX,
+			DbVersion:      dbVer.ActionPlans,
+			CurrentVersion: CurrentVersion.ActionPlans,
+		})
 	}
 	if sv.ActionTriggers != dbVer.ActionTriggers {
-		migrationPerformed = true
-
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.ACTION_TRIGGER_PREFIX,
+			DbVersion:      dbVer.ActionTriggers,
+			CurrentVersion: CurrentVersion.ActionTriggers,
+		})
 	}
 	if sv.SharedGroups != dbVer.SharedGroups {
-		migrationPerformed = true
-
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.SHARED_GROUP_PREFIX,
+			DbVersion:      dbVer.SharedGroups,
+			CurrentVersion: CurrentVersion.SharedGroups,
+		})
 	}
 	if sv.Accounts != dbVer.Accounts {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.ACCOUNT_PREFIX,
+			DbVersion:      dbVer.Accounts,
+			CurrentVersion: CurrentVersion.Accounts,
+		})
 	}
 	if sv.CdrStats != dbVer.CdrStats {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.CDR_STATS_PREFIX,
+			DbVersion:      dbVer.CdrStats,
+			CurrentVersion: CurrentVersion.CdrStats,
+		})
 	}
 	if sv.Users != dbVer.Users {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.USERS_PREFIX,
+			DbVersion:      dbVer.Users,
+			CurrentVersion: CurrentVersion.Users,
+		})
 	}
 	if sv.Alias != dbVer.Alias {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.ALIASES_PREFIX,
+			DbVersion:      dbVer.Alias,
+			CurrentVersion: CurrentVersion.Alias,
+		})
 	}
 	if sv.PubSubs != dbVer.PubSubs {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.PUBSUB_SUBSCRIBERS_PREFIX,
+			DbVersion:      dbVer.PubSubs,
+			CurrentVersion: CurrentVersion.PubSubs,
+		})
 	}
 	if sv.LoadHistory != dbVer.LoadHistory {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.LOADINST_KEY,
+			DbVersion:      dbVer.LoadHistory,
+			CurrentVersion: CurrentVersion.LoadHistory,
+		})
 	}
 	if sv.Cdrs != dbVer.Cdrs {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.CDRS_SOURCE,
+			DbVersion:      dbVer.RatingPlans,
+			CurrentVersion: CurrentVersion.RatingPlans,
+		})
 	}
 	if sv.SMCosts != dbVer.SMCosts {
-		migrationPerformed = true
+		migrationInfoList = append(migrationInfoList, &MigrationInfo{
+			Prefix:         utils.SMG,
+			DbVersion:      dbVer.SMCosts,
+			CurrentVersion: CurrentVersion.SMCosts,
+		})
 	}
-	return migrationPerformed
+	return migrationInfoList
 }

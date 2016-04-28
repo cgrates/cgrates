@@ -482,7 +482,7 @@ func (mig MigratorRC8) migrateActions() error {
 				bf.Type = utils.StringPointer(oldAc.BalanceType)
 			}
 			if oldAc.Balance.Value != 0 {
-				bf.Value = utils.Float64Pointer(oldAc.Balance.Value)
+				bf.Value = &utils.ValueFormula{Static: oldAc.Balance.Value}
 			}
 			if oldAc.Balance.RatingSubject != "" {
 				bf.RatingSubject = utils.StringPointer(oldAc.Balance.RatingSubject)
@@ -668,4 +668,12 @@ func (mig MigratorRC8) migrateSharedGroups() error {
 		}
 	}
 	return nil
+}
+
+func (mig MigratorRC8) writeVersion() error {
+	result, err := mig.ms.Marshal(engine.CurrentVersion)
+	if err != nil {
+		return err
+	}
+	return mig.db.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
 }

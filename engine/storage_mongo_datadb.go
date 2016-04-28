@@ -53,7 +53,7 @@ const (
 	colLogAtr = "action_trigger_logs"
 	colLogApl = "action_plan_logs"
 	colLogErr = "error_logs"
-	colVer    = "version"
+	colVer    = "versions"
 )
 
 var (
@@ -1374,10 +1374,15 @@ func (ms *MongoStorage) SetStructVersion(v *StructVersion) (err error) {
 }
 
 func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
-	rsv = new(StructVersion)
-	err = ms.db.C(colVer).Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(rsv)
+	var result struct {
+		Key   string
+		Value StructVersion
+	}
+
+	err = ms.db.C(colVer).Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result)
 	if err == mgo.ErrNotFound {
 		rsv = nil
 	}
+	rsv = &result.Value
 	return
 }

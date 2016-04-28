@@ -277,3 +277,13 @@ func (wd WeekDays) Serialize(sep string) string {
 	}
 	return wdStr
 }
+
+func DaysInMonth(year int, month time.Month) float64 {
+	return float64(time.Date(year, month, 1, 0, 0, 0, 0, time.UTC).AddDate(0, 1, -1).Day())
+}
+
+func DaysInYear(year int) float64 {
+	first := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+	last := first.AddDate(1, 0, 0)
+	return float64(last.Sub(first).Hours() / 24)
+}

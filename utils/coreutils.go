@@ -127,8 +127,9 @@ func Round(x float64, prec int, method string) float64 {
 }
 
 func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
+	tmStr = strings.TrimSpace(tmStr)
 	var nilTime time.Time
-	if len(tmStr) == 0 {
+	if len(tmStr) == 0 || tmStr == UNLIMITED {
 		return nilTime, nil
 	}
 	loc, err := time.LoadLocation(timezone)
@@ -179,7 +180,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 func ParseDate(date string) (expDate time.Time, err error) {
 	date = strings.TrimSpace(date)
 	switch {
-	case date == "*unlimited" || date == "":
+	case date == UNLIMITED || date == "":
 		// leave it at zero
 	case strings.HasPrefix(date, "+"):
 		d, err := time.ParseDuration(date[1:])

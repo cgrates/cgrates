@@ -152,7 +152,7 @@ CREATE TABLE `tp_actions` (
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
   `directions` varchar(8) NOT NULL,
-  `units` varchar(24) NOT NULL,
+  `units` varchar(256) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
   `timing_tags` varchar(128) NOT NULL,
   `destination_tags` varchar(64) NOT NULL,
