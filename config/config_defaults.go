@@ -166,8 +166,9 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"cdrc": {
-	"*default": {
+"cdrc": [
+	{
+		"id": "*default",								// identifier of the CDRC runner
 		"enabled": false,							// enable CDR client functionality
 		"dry_run": false,							// do not send the CDRs to CDRS, just parse them
 		"cdrs_conns": [
@@ -202,8 +203,8 @@ const CGRATES_CFG_JSON = `
 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
 		],
 		"trailer_fields": [],							// template of the import trailer fields
-	}
-},
+	},
+],
 
 "sm_generic": {
 	"enabled": false,						// starts SessionManager service: <true|false>

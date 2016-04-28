@@ -18,14 +18,16 @@
 	"enabled": true,						// enable Rater service: <true|false>
 },
 
-"cdrc": {
-	"CDRC-CSV1": {
+"cdrc": [
+	{
+		"id": "CDRC-CSV1",
 		"enabled": true,							// enable CDR client functionality
 		"cdr_in_dir": "/tmp/cgrates/cdrc1/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgrates/cdrc1/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "csv1",					// free form field, tag identifying the source of the CDRs within CDRS database
 	},
-	"CDRC-CSV2": {
+	{
+		"id": "CDRC-CSV2",
 		"enabled": true,							// enable CDR client functionality
 		"cdr_in_dir": "/tmp/cgrates/cdrc2/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgrates/cdrc2/out",	// absolute path towards the directory where processed CDRs will be moved
@@ -38,7 +40,7 @@
 			{"field_id": "Usage", "value": "~9:s/^(\\d+)$/${1}s/"},
 		],
 	},
-},
+],
 
 "sm_freeswitch": {
 	"enabled": true,				// starts SessionManager service: <true|false>

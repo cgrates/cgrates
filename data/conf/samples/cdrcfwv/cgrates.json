@@ -22,8 +22,9 @@
 },
 
 
-"cdrc": {
-	"FWV1": {
+"cdrc": [
+	{
+		"id": "FWV1",
 		"enabled": true,							// enable CDR client functionality
 		"dry_run": true,
 		"cdrs_conns": [
@@ -62,6 +63,6 @@
 			{"tag": "TotalDuration", "type": "metatag", "metatag_id":"total_duration", "value": "150", "width": 12},	
 		],
 	},
-},
+],
 
 }

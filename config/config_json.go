@@ -188,12 +188,12 @@ func (self CgrJsonCfg) CdreJsonCfgs() (map[string]*CdreJsonCfg, error) {
 	return cfg, nil
 }
 
-func (self CgrJsonCfg) CdrcJsonCfg() (map[string]*CdrcJsonCfg, error) {
+func (self CgrJsonCfg) CdrcJsonCfg() ([]*CdrcJsonCfg, error) {
 	rawCfg, hasKey := self[CDRC_JSN]
 	if !hasKey {
 		return nil, nil
 	}
-	cfg := make(map[string]*CdrcJsonCfg)
+	cfg := make([]*CdrcJsonCfg, 0)
 	if err := json.Unmarshal(*rawCfg, &cfg); err != nil {
 		return nil, err
 	}

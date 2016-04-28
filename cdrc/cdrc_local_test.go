@@ -49,7 +49,7 @@ README:
 
 var cfgPath string
 var cfg *config.CGRConfig
-var cdrcCfgs map[string]*config.CdrcConfig
+var cdrcCfgs []*config.CdrcConfig
 var cdrcCfg *config.CdrcConfig
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args

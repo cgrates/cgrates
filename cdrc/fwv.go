@@ -49,14 +49,14 @@ func fwvValue(cdrLine string, indexStart, width int, padding string) string {
 	return rawVal
 }
 
-func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig, cdrcCfgs map[string]*config.CdrcConfig, httpClient *http.Client, httpSkipTlsCheck bool, timezone string) *FwvRecordsProcessor {
+func NewFwvRecordsProcessor(file *os.File, dfltCfg *config.CdrcConfig, cdrcCfgs []*config.CdrcConfig, httpClient *http.Client, httpSkipTlsCheck bool, timezone string) *FwvRecordsProcessor {
 	return &FwvRecordsProcessor{file: file, cdrcCfgs: cdrcCfgs, dfltCfg: dfltCfg, httpSkipTlsCheck: httpSkipTlsCheck, timezone: timezone}
 }
 
 type FwvRecordsProcessor struct {
 	file               *os.File
 	dfltCfg            *config.CdrcConfig // General parameters
-	cdrcCfgs           map[string]*config.CdrcConfig
+	cdrcCfgs           []*config.CdrcConfig
 	httpClient         *http.Client
 	httpSkipTlsCheck   bool
 	timezone           string
@@ -125,11 +125,11 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	}
 	self.processedRecordsNr += 1
 	record := string(buf)
-	for cfgKey, cdrcCfg := range self.cdrcCfgs {
-		if passes := self.recordPassesCfgFilter(record, cfgKey); !passes {
+	for _, cdrcCfg := range self.cdrcCfgs {
+		if passes := self.recordPassesCfgFilter(record, cdrcCfg); !passes {
 			continue
 		}
-		if storedCdr, err := self.recordToStoredCdr(record, cfgKey); err != nil {
+		if storedCdr, err := self.recordToStoredCdr(record, cdrcCfg, cdrcCfg.ID); err != nil {
 			return nil, fmt.Errorf("Failed converting to StoredCdr, error: %s", err.Error())
 		} else {
 			recordCdrs = append(recordCdrs, storedCdr)
@@ -141,9 +141,9 @@ func (self *FwvRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
 	return recordCdrs, nil
 }
 
-func (self *FwvRecordsProcessor) recordPassesCfgFilter(record, configKey string) bool {
+func (self *FwvRecordsProcessor) recordPassesCfgFilter(record string, cdrcCfg *config.CdrcConfig) bool {
 	filterPasses := true
-	for _, rsrFilter := range self.cdrcCfgs[configKey].CdrFilter {
+	for _, rsrFilter := range cdrcCfg.CdrFilter {
 		if rsrFilter == nil { // Nil filter does not need to match anything
 			continue
 		}
@@ -158,8 +158,8 @@ func (self *FwvRecordsProcessor) recordPassesCfgFilter(record, configKey string)
 	return filterPasses
 }
 
-// Converts a record (header or normal) to StoredCdr
-func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string) (*engine.CDR, error) {
+// Converts a record (header or normal) to CDR
+func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cdrcCfg *config.CdrcConfig, cfgKey string) (*engine.CDR, error) {
 	var err error
 	var lazyHttpFields []*config.CfgCdrField
 	var cfgFields []*config.CfgCdrField
@@ -171,13 +171,13 @@ func (self *FwvRecordsProcessor) recordToStoredCdr(record string, cfgKey string)
 		storedCdr = &engine.CDR{OriginHost: "0.0.0.0", ExtraFields: make(map[string]string), Cost: -1}
 	}
 	if cfgKey == "*header" {
-		cfgFields = self.dfltCfg.HeaderFields
-		storedCdr.Source = self.dfltCfg.CdrSourceId
-		duMultiplyFactor = self.dfltCfg.DataUsageMultiplyFactor
+		cfgFields = cdrcCfg.HeaderFields
+		storedCdr.Source = cdrcCfg.CdrSourceId
+		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	} else {
-		cfgFields = self.cdrcCfgs[cfgKey].ContentFields
-		storedCdr.Source = self.cdrcCfgs[cfgKey].CdrSourceId
-		duMultiplyFactor = self.cdrcCfgs[cfgKey].DataUsageMultiplyFactor
+		cfgFields = cdrcCfg.ContentFields
+		storedCdr.Source = cdrcCfg.CdrSourceId
+		duMultiplyFactor = cdrcCfg.DataUsageMultiplyFactor
 	}
 	for _, cdrFldCfg := range cfgFields {
 		var fieldVal string
@@ -244,7 +244,7 @@ func (self *FwvRecordsProcessor) processHeader() error {
 		return fmt.Errorf("In header, line len: %d, have read: %d", self.lineLen, nRead)
 	}
 	var err error
-	if self.headerCdr, err = self.recordToStoredCdr(string(buf), "*header"); err != nil {
+	if self.headerCdr, err = self.recordToStoredCdr(string(buf), self.dfltCfg, "*header"); err != nil {
 		return err
 	}
 	return nil

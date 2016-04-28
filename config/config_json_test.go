@@ -302,8 +302,9 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 		&CdrFieldJsonCfg{Tag: utils.StringPointer("Usage"), Field_id: utils.StringPointer(utils.USAGE), Type: utils.StringPointer(utils.META_COMPOSED),
 			Value: utils.StringPointer("13"), Mandatory: utils.BoolPointer(true)},
 	}
-	eCfg := map[string]*CdrcJsonCfg{
-		"*default": &CdrcJsonCfg{
+	eCfg := []*CdrcJsonCfg{
+		&CdrcJsonCfg{
+			Id:      utils.StringPointer(utils.META_DEFAULT),
 			Enabled: utils.BoolPointer(false),
 			Dry_run: utils.BoolPointer(false),
 			Cdrs_conns: &[]*HaPoolJsonCfg{&HaPoolJsonCfg{
@@ -330,7 +331,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 	if cfg, err := dfCgrJsonCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg["*default"])
+		t.Errorf("Expecting: \n%s\n, received: \n%s\n: ", utils.ToIJSON(eCfg), utils.ToIJSON(cfg))
 	}
 }
 
@@ -633,14 +634,16 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.ANSWER_TIME), Value: utils.StringPointer("1")},
 		&CdrFieldJsonCfg{Field_id: utils.StringPointer(utils.USAGE), Value: utils.StringPointer(`~9:s/^(\d+)$/${1}s/`)},
 	}
-	eCfgCdrc := map[string]*CdrcJsonCfg{
-		"CDRC-CSV1": &CdrcJsonCfg{
+	eCfgCdrc := []*CdrcJsonCfg{
+		&CdrcJsonCfg{
+			Id:            utils.StringPointer("CDRC-CSV1"),
 			Enabled:       utils.BoolPointer(true),
 			Cdr_in_dir:    utils.StringPointer("/tmp/cgrates/cdrc1/in"),
 			Cdr_out_dir:   utils.StringPointer("/tmp/cgrates/cdrc1/out"),
 			Cdr_source_id: utils.StringPointer("csv1"),
 		},
-		"CDRC-CSV2": &CdrcJsonCfg{
+		&CdrcJsonCfg{
+			Id:                         utils.StringPointer("CDRC-CSV2"),
 			Enabled:                    utils.BoolPointer(true),
 			Data_usage_multiply_factor: utils.Float64Pointer(0.000976563),
 			Run_delay:                  utils.IntPointer(1),
@@ -653,8 +656,7 @@ func TestNewCgrJsonCfgFromFile(t *testing.T) {
 	if cfg, err := cgrJsonCfg.CdrcJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfgCdrc, cfg) {
-		key := "CDRC-CSV2"
-		t.Errorf("Expecting:\n %+v\n received:\n %+v\n", utils.ToIJSON(eCfgCdrc[key]), utils.ToIJSON(cfg[key]))
+		t.Errorf("Expecting:\n %+v\n received:\n %+v\n", utils.ToIJSON(eCfgCdrc), utils.ToIJSON(cfg))
 	}
 	eCfgSmFs := &SmFsJsonCfg{
 		Enabled: utils.BoolPointer(true),

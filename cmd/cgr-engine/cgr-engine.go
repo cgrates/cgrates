@@ -86,22 +86,23 @@ func startCdrcs(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConn
 		}
 		// Start CDRCs
 		for _, cdrcCfgs := range cfg.CdrcProfiles {
-			var cdrcCfg *config.CdrcConfig
-			for _, cdrcCfg = range cdrcCfgs { // Take a random config out since they should be the same
-				break
+			var enabledCfgs []*config.CdrcConfig
+			for _, cdrcCfg := range cdrcCfgs { // Take a random config out since they should be the same
+				if cdrcCfg.Enabled {
+					enabledCfgs = append(enabledCfgs, cdrcCfg)
+				}
 			}
-			if cdrcCfg.Enabled == false {
-				continue // Ignore not enabled
+
+			if len(enabledCfgs) != 0 {
+				go startCdrc(internalCdrSChan, internalRaterChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cdrcChildrenChan, exitChan)
 			}
-			go startCdrc(internalCdrSChan, internalRaterChan, cdrcCfgs, cfg.HttpSkipTlsVerify, cdrcChildrenChan, exitChan)
 		}
 		cdrcInitialized = true // Initialized
-
 	}
 }
 
 // Fires up a cdrc instance
-func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool,
+func startCdrc(internalCdrSChan, internalRaterChan chan rpcclient.RpcClientConnection, cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool,
 	closeChan chan struct{}, exitChan chan bool) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one

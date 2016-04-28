@@ -55,7 +55,7 @@ Common parameters within configs processed:
 Parameters specific per config instance:
  * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
 */
-func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection, closeChan chan struct{}, dfltTimezone string) (*Cdrc, error) {
+func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection, closeChan chan struct{}, dfltTimezone string) (*Cdrc, error) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
@@ -83,7 +83,7 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs
 
 type Cdrc struct {
 	httpSkipTlsCheck    bool
-	cdrcCfgs            map[string]*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
+	cdrcCfgs            []*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
 	dfltCdrcCfg         *config.CdrcConfig
 	timezone            string
 	cdrs                rpcclient.RpcClientConnection

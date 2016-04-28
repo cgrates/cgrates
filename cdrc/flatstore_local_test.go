@@ -85,7 +85,11 @@ func TestFlatstoreLclCreateCdrFiles(t *testing.T) {
 	if flatstoreCfg == nil {
 		t.Fatal("Empty default cdrc configuration")
 	}
-	flatstoreCdrcCfg = flatstoreCfg.CdrcProfiles["/tmp/cgr_flatstore/cdrc/in"]["FLATSTORE"]
+	for _, cdrcCfg := range flatstoreCfg.CdrcProfiles["/tmp/cgr_flatstore/cdrc/in"] {
+		if cdrcCfg.ID == "FLATSTORE" {
+			flatstoreCdrcCfg = cdrcCfg
+		}
+	}
 	if err := os.RemoveAll(flatstoreCdrcCfg.CdrInDir); err != nil {
 		t.Fatal("Error removing folder: ", flatstoreCdrcCfg.CdrInDir, err)
 	}

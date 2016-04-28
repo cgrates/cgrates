@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"io/ioutil"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -28,6 +26,9 @@ import (
 	"path"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 )
 
 var fwvCfgPath string
@@ -91,7 +92,11 @@ func TestFwvLclCreateCdrFiles(t *testing.T) {
 	if fwvCfg == nil {
 		t.Fatal("Empty default cdrc configuration")
 	}
-	fwvCdrcCfg = fwvCfg.CdrcProfiles["/tmp/cgr_fwv/cdrc/in"]["FWV1"]
+	for _, cdrcCfg := range fwvCfg.CdrcProfiles["/tmp/cgr_fwv/cdrc/in"] {
+		if cdrcCfg.ID == "FWV1" {
+			fwvCdrcCfg = cdrcCfg
+		}
+	}
 	if err := os.RemoveAll(fwvCdrcCfg.CdrInDir); err != nil {
 		t.Fatal("Error removing folder: ", fwvCdrcCfg.CdrInDir, err)
 	}

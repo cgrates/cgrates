@@ -143,6 +143,7 @@ type CdreJsonCfg struct {
 
 // Cdrc config section
 type CdrcJsonCfg struct {
+	Id                         *string
 	Enabled                    *bool
 	Dry_run                    *bool
 	Cdrs_conns                 *[]*HaPoolJsonCfg

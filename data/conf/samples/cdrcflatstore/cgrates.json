@@ -22,8 +22,9 @@
 },
 
 
-"cdrc": {
-	"FLATSTORE": {
+"cdrc": [
+	{
+		"id": "FLATSTORE",
 		"enabled": true,								// enable CDR client functionality
 		"cdrs_conns": [
 			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
@@ -56,6 +57,6 @@
 			{"tag": "DialogId", "cdr_field_id": "DialogId", "type": "cdrfield", "value": "11"},
 		],
 	},
-},
+],
 
 }

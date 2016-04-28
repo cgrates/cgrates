@@ -25,6 +25,7 @@ import (
 )
 
 type CdrcConfig struct {
+	ID                      string          // free-form text identifying this CDRC instance
 	Enabled                 bool            // Enable/Disable the profile
 	DryRun                  bool            // Do not post CDRs to the server
 	CdrsConns               []*HaPoolConfig // The address where CDRs can be reached
@@ -51,6 +52,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		return nil
 	}
 	var err error
+	if jsnCfg.Id != nil {
+		self.ID = *jsnCfg.Id
+	}
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
@@ -129,6 +133,7 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 // Clone itself into a new CdrcConfig
 func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc := new(CdrcConfig)
+	clnCdrc.ID = self.ID
 	clnCdrc.Enabled = self.Enabled
 	clnCdrc.CdrsConns = make([]*HaPoolConfig, len(self.CdrsConns))
 	for idx, cdrConn := range self.CdrsConns {
