@@ -562,7 +562,8 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 		return utils.NewErrServerError(err)
 	}
 	for _, engAct := range engActs {
-		act := &utils.TPAction{Identifier: engAct.ActionType,
+		act := &utils.TPAction{
+			Identifier:      engAct.ActionType,
 			ExpiryTime:      engAct.ExpirationString,
 			ExtraParameters: engAct.ExtraParameters,
 			Filter:          engAct.Filter,
@@ -571,7 +572,7 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 		bf := engAct.Balance
 		if bf != nil {
 			act.BalanceType = bf.GetType()
-			act.Units = strconv.FormatFloat(bf.GetValue(), 'f', -1, 64)
+			act.Units = bf.Value.String()
 			act.Directions = bf.GetDirections().String()
 			act.DestinationIds = bf.GetDestinationIDs().String()
 			act.RatingSubject = bf.GetRatingSubject()
