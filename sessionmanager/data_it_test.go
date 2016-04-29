@@ -845,7 +845,7 @@ func TestSMGDataLastUsedMultipleDataConstantUsage(t *testing.T) {
 	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
-	eAcntVal = 49997767680.000000 // refunded
+	eAcntVal = 49997757440.000000 // 10240 (from the start)
 	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
 		t.Error(err)
 	} else if acnt.BalanceMap[utils.DATA].GetTotalValue() != eAcntVal {
