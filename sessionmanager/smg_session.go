@@ -113,6 +113,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.cd.DurationIndex += dur
 	cc := &engine.CallCost{}
 	if err := self.rater.Call("Responder.MaxDebit", self.cd, cc); err != nil {
+		self.lastUsage = 0
 		self.lastDebit = 0
 		return 0, err
 	}
