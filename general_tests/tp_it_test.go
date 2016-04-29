@@ -239,3 +239,55 @@ func TestTpExecuteActionCgrRpc(t *testing.T) {
 		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
 	}
 }
+
+func TestTpCreateExecuteActionMatch(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var reply string
+	if err := tpRPC.Call("ApierV2.SetActions", utils.AttrSetActions{
+		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
+		Actions: []*utils.TPAction{
+			&utils.TPAction{
+				BalanceType:   "*monetary",
+				Directions:    "*out",
+				Identifier:    "*topup",
+				RatingSubject: "",
+				Units:         "10.500000",
+				Weight:        10,
+			},
+		},
+	}, &reply); err != nil {
+		t.Error("Got error on ApierV2.SetActions: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.SetActions got reply: %s", reply)
+	}
+	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
+		Tenant:    "cgrates.org",
+		Account:   "1015",
+		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
+	}, &reply); err != nil {
+		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ExecuteAction got reply: %s", reply)
+	}
+	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
+		Tenant:    "cgrates.org",
+		Account:   "1015",
+		ActionsId: "PAYMENT_2056bd2fe137082970f97102b64e42fd",
+	}, &reply); err != nil {
+		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ExecuteAction got reply: %s", reply)
+	}
+	var acnt engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1015"}
+	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error("Got error on ApierV2.GetAccount: ", err.Error())
+	}
+	if len(acnt.BalanceMap) != 1 ||
+		len(acnt.BalanceMap[utils.MONETARY]) != 1 ||
+		acnt.BalanceMap[utils.MONETARY].GetTotalValue() != 21 {
+		t.Error("error matching previous created balance: ", utils.ToIJSON(acnt.BalanceMap))
+	}
+}

@@ -530,7 +530,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 			ExtraParameters:  apiAct.ExtraParameters,
 			Filter:           apiAct.Filter,
 			Balance: &engine.BalanceFilter{ // TODO: update this part
-				Uuid:           utils.StringPointer(utils.GenUUID()),
+				Uuid:           utils.StringPointer(apiAct.BalanceUuid),
 				ID:             utils.StringPointer(apiAct.BalanceId),
 				Type:           utils.StringPointer(apiAct.BalanceType),
 				Value:          vf,
