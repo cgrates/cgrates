@@ -916,6 +916,10 @@ func (ms *MongoStorage) SetActions(key string, as Actions) error {
 	return err
 }
 
+func (ms *MongoStorage) RemoveActions(key string) error {
+	return ms.db.C(colAct).Remove(bson.M{"key": key})
+}
+
 func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
 	if !skipCache {
 		if x, err := cache2go.Get(utils.SHARED_GROUP_PREFIX + key); err == nil {

@@ -1064,3 +1064,48 @@ func (self *ApierV1) GetLoadHistory(attrs utils.Paginator, reply *[]*engine.Load
 	*reply = loadHist[offset:nrItems]
 	return nil
 }
+
+type AttrRemActions struct {
+	ActionIDs []string
+}
+
+func (self *ApierV1) RemActions(attr AttrRemActions, reply *string) error {
+	if attr.ActionIDs == nil {
+		return nil
+	}
+	stringMap := utils.NewStringMap(attr.ActionIDs...)
+	keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX, true)
+	if err != nil {
+		return err
+	}
+	for _, key := range keys {
+		getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):])
+		if err != nil {
+			return err
+		}
+		for _, atr := range getAttrs {
+			if _, found := stringMap[atr.ActionsID]; found {
+				// found action trigger referencing action; abort
+				return fmt.Errorf("action %s refenced by action trigger %s", atr.ActionsID, atr.ID)
+			}
+		}
+	}
+	allAplsMap, err := self.RatingDb.GetAllActionPlans()
+	if err != nil {
+		return err
+	}
+	for _, apl := range allAplsMap {
+		for _, aID := range attr.ActionIDs {
+			if _, found := apl.AccountIDs[aID]; found {
+				return fmt.Errorf("action %s refenced by action plan %s", aID, apl.Id)
+			}
+		}
+
+	}
+	for _, aID := range attr.ActionIDs {
+		if err := self.RatingDb.RemoveActions(aID); err != nil {
+			return err
+		}
+	}
+	return nil
+}

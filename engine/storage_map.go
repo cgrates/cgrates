@@ -469,6 +469,13 @@ func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 	return
 }
 
+func (ms *MapStorage) RemoveActions(key string) (err error) {
+	ms.mu.Lock()
+	defer ms.mu.Unlock()
+	delete(ms.dict, utils.ACTION_PREFIX+key)
+	return
+}
+
 func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
