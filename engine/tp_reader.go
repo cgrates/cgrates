@@ -514,7 +514,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				}
 			}
 			acts[idx] = &Action{
-				Id:         tag + strconv.Itoa(idx),
+				Id:         tag,
 				ActionType: tpact.Identifier,
 				//BalanceType:      tpact.BalanceType,
 				Weight:           tpact.Weight,
@@ -990,7 +990,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						}
 					}
 					acts[idx] = &Action{
-						Id:         tag + strconv.Itoa(idx),
+						Id:         tag,
 						ActionType: tpact.Identifier,
 						//BalanceType:      tpact.BalanceType,
 						Weight:           tpact.Weight,
@@ -1338,7 +1338,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						}
 					}
 					acts[idx] = &Action{
-						Id:         tag + strconv.Itoa(idx),
+						Id:         tag,
 						ActionType: tpact.Identifier,
 						//BalanceType:      tpact.BalanceType,
 						Weight:           tpact.Weight,

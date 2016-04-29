@@ -572,7 +572,7 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 		bf := engAct.Balance
 		if bf != nil {
 			act.BalanceType = bf.GetType()
-			act.Units = bf.Value.String()
+			act.Units = strconv.FormatFloat(bf.GetValue(), 'f', -1, 64)
 			act.Directions = bf.GetDirections().String()
 			act.DestinationIds = bf.GetDestinationIDs().String()
 			act.RatingSubject = bf.GetRatingSubject()
