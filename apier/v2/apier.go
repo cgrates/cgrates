@@ -315,6 +315,7 @@ func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Ac
 
 		}
 	}
+
 	*reply = retActions
 	return nil
 }

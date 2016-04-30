@@ -523,7 +523,7 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 		}
 
 		a := &engine.Action{
-			Id:               utils.GenUUID(),
+			Id:               attrs.ActionsId,
 			ActionType:       apiAct.Identifier,
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
@@ -1071,41 +1071,56 @@ type AttrRemActions struct {
 
 func (self *ApierV1) RemActions(attr AttrRemActions, reply *string) error {
 	if attr.ActionIDs == nil {
-		return nil
+		err := utils.ErrNotFound
+		*reply = err.Error()
+		return err
 	}
 	stringMap := utils.NewStringMap(attr.ActionIDs...)
 	keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX, true)
 	if err != nil {
+		*reply = err.Error()
 		return err
 	}
 	for _, key := range keys {
 		getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):])
 		if err != nil {
+			*reply = err.Error()
 			return err
 		}
 		for _, atr := range getAttrs {
 			if _, found := stringMap[atr.ActionsID]; found {
 				// found action trigger referencing action; abort
-				return fmt.Errorf("action %s refenced by action trigger %s", atr.ActionsID, atr.ID)
+				err := fmt.Errorf("action %s refenced by action trigger %s", atr.ActionsID, atr.ID)
+				*reply = err.Error()
+				return err
 			}
 		}
 	}
 	allAplsMap, err := self.RatingDb.GetAllActionPlans()
-	if err != nil {
+	if err != nil && err != utils.ErrNotFound {
+		*reply = err.Error()
 		return err
 	}
 	for _, apl := range allAplsMap {
-		for _, aID := range attr.ActionIDs {
-			if _, found := apl.AccountIDs[aID]; found {
-				return fmt.Errorf("action %s refenced by action plan %s", aID, apl.Id)
+		for _, atm := range apl.ActionTimings {
+			if _, found := stringMap[atm.ActionsID]; found {
+				err := fmt.Errorf("action %s refenced by action plan %s", atm.ActionsID, apl.Id)
+				*reply = err.Error()
+				return err
 			}
 		}
 
 	}
 	for _, aID := range attr.ActionIDs {
 		if err := self.RatingDb.RemoveActions(aID); err != nil {
+			*reply = err.Error()
 			return err
 		}
 	}
+	if err := self.RatingDb.CacheRatingPrefixes(utils.ACTION_PREFIX); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = utils.OK
 	return nil
 }
