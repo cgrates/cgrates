@@ -338,6 +338,9 @@ func TestTpSetRemActions(t *testing.T) {
 }
 
 func TestTpRemActionsRefenced(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
 	actionsMap := make(map[string]engine.Actions)
 	if err := tpRPC.Call("ApierV2.GetActions", v2.AttrGetActions{
 		ActionIDs: []string{"TOPUP_VOICE"},
