@@ -7,6 +7,10 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 
+ "rals": {
+ 	"enabled": true						// so we can query CDRs
+ },
+
  "cdrs": {
  	"enabled": true,
 	"rals_conns": [], // no rating support, just *raw CDR testing

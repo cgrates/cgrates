@@ -30,6 +30,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -86,7 +87,6 @@ func TestCsvITInitCdrDb(t *testing.T) {
 	}
 }
 
-/*
 func TestCsvITCreateCdrDirs(t *testing.T) {
 	if !*testIT {
 		return
@@ -105,7 +105,6 @@ func TestCsvITCreateCdrDirs(t *testing.T) {
 	}
 }
 
-
 func TestCsvITStartEngine(t *testing.T) {
 	if !*testIT {
 		return
@@ -114,7 +113,6 @@ func TestCsvITStartEngine(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-*/
 
 // Connect rpc client to rater
 func TestCsvITRpcConn(t *testing.T) {
@@ -172,6 +170,19 @@ func TestCsvITProcessedFiles(t *testing.T) {
 		t.Error(err)
 	} else if fileContent2 != string(outContent2) {
 		t.Errorf("Expecting: %q, received: %q", fileContent1, string(outContent2))
+	}
+}
+
+func TestCsvITAnalyseCDRs(t *testing.T) {
+	if !*testIT {
+		return
+	}
+	var reply []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{}
+	if err := cdrcRpc.Call("ApierV2.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 6 { // 1 injected, 1 rated, 1 *raw and it's pair in *default run
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 }
 
