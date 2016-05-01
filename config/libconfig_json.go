@@ -255,7 +255,7 @@ type DiameterAgentJsonCfg struct {
 	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
 	Dictionaries_dir   *string           // path towards additional dictionaries
 	Sm_generic_conns   *[]*HaPoolJsonCfg // Connections towards generic SM
-	Pubsub_conns       *[]*HaPoolJsonCfg // connection towards pubsubs
+	Pubsubs_conns      *[]*HaPoolJsonCfg // connection towards pubsubs
 	Create_cdr         *bool
 	Debit_interval     *string
 	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>

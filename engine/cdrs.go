@@ -243,7 +243,6 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, rep
 	}
 	var ratedCDRs []*CDR // Gather all CDRs received from rating subsystem
 	for _, cdrRun := range cdrRuns {
-		utils.Logger.Debug(fmt.Sprintf("Processing CDR run: %+v", cdrRun))
 		if err := LoadUserProfile(cdrRun, utils.EXTRA_FIELDS); err != nil {
 			utils.Logger.Err(fmt.Sprintf("<CDRS> UserS handling for CDR %+v, got error: %s", cdrRun, err.Error()))
 			continue

@@ -61,9 +61,9 @@ func (self *DiameterAgentCfg) loadFromJsonCfg(jsnCfg *DiameterAgentJsonCfg) erro
 			self.SMGenericConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
 	}
-	if jsnCfg.Pubsub_conns != nil {
-		self.PubSubConns = make([]*HaPoolConfig, len(*jsnCfg.Pubsub_conns))
-		for idx, jsnHaCfg := range *jsnCfg.Pubsub_conns {
+	if jsnCfg.Pubsubs_conns != nil {
+		self.PubSubConns = make([]*HaPoolConfig, len(*jsnCfg.Pubsubs_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Pubsubs_conns {
 			self.PubSubConns[idx] = NewDfltHaPoolConfig()
 			self.PubSubConns[idx].loadFromJsonCfg(jsnHaCfg)
 		}
