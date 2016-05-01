@@ -853,7 +853,7 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 				self.CdrcProfiles[*jsnCrc1Cfg.Cdr_in_dir] = make([]*CdrcConfig, 0)
 			}
 			var cdrcInstCfg *CdrcConfig
-			if *jsnCrc1Cfg.Id == utils.META_DEFAULT {
+			if *jsnCrc1Cfg.Id == utils.META_DEFAULT && self.dfltCdrcProfile == nil {
 				cdrcInstCfg = new(CdrcConfig)
 			} else {
 				cdrcInstCfg = self.dfltCdrcProfile.Clone() // Clone default so we do not inherit pointers

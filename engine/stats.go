@@ -289,6 +289,7 @@ func (s *Stats) setupQueueSaver(sq *StatsQueue) {
 func (s *Stats) AppendCDR(cdr *CDR, out *int) error {
 	s.mux.RLock()
 	defer s.mux.RUnlock()
+	utils.Logger.Debug(fmt.Sprintf("Stats.AppendCDR: %+v", cdr))
 	for _, sq := range s.queues {
 		sq.AppendCDR(cdr)
 	}
