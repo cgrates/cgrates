@@ -13,7 +13,7 @@
 
  "cdrs": {
  	"enabled": true,
-	"rals_conns": [], // no rating support, just *raw CDR testing
+	"rals_conns": [], 					// no rating support, just *raw CDR testing
 },
 
 
@@ -25,20 +25,6 @@
  		"cdr_in_dir": "/tmp/cdrctests/csvit1/in",
  		"cdr_out_dir": "/tmp/cdrctests/csvit1/out",
  		"cdr_source_id": "csvit1",
-// 		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-// 			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "2", "mandatory": true},
-// 			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "3", "mandatory": true},
-// 			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "4", "mandatory": true},
-// 			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "5", "mandatory": true},
-// 			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "6", "mandatory": true},
-// 			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "7", "mandatory": true},
-// 			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "8", "mandatory": true},
-// 			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "9", "mandatory": true},
-// 			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "10", "mandatory": true},
-// 			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "11", "mandatory": true},
-// 			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "12", "mandatory": true},
-// 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
-// 		],
  	},
  	{
  		"id": "*CSVit2",								// identifier of the CDRC runner
