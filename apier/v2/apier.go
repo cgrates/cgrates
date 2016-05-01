@@ -21,6 +21,7 @@ package v2
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path"
 	"strings"
@@ -261,5 +262,60 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		}
 	}
 	*reply = *li
+	return nil
+}
+
+type AttrGetActions struct {
+	ActionIDs []string
+	Offset    int // Set the item offset
+	Limit     int // Limit number of items retrieved
+}
+
+// Retrieves actions attached to specific ActionsId within cache
+func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Actions) error {
+	var actionKeys []string
+	var err error
+	if len(attr.ActionIDs) == 0 {
+		if actionKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACTION_PREFIX, false); err != nil {
+			return err
+		}
+	} else {
+		for _, accID := range attr.ActionIDs {
+			if len(accID) == 0 { // Source of error returned from redis (key not found)
+				continue
+			}
+			actionKeys = append(actionKeys, utils.ACCOUNT_PREFIX+accID)
+		}
+	}
+	if len(actionKeys) == 0 {
+		return nil
+	}
+	if attr.Offset > len(actionKeys) {
+		attr.Offset = len(actionKeys)
+	}
+	if attr.Offset < 0 {
+		attr.Offset = 0
+	}
+	var limitedActions []string
+	if attr.Limit != 0 {
+		max := math.Min(float64(attr.Offset+attr.Limit), float64(len(actionKeys)))
+		limitedActions = actionKeys[attr.Offset:int(max)]
+	} else {
+		limitedActions = actionKeys[attr.Offset:]
+	}
+	retActions := make(map[string]engine.Actions)
+	for _, accKey := range limitedActions {
+		key := accKey[len(utils.ACTION_PREFIX):]
+		acts, err := self.RatingDb.GetActions(key, false)
+		if err != nil {
+			return utils.NewErrServerError(err)
+		}
+		if len(acts) > 0 {
+			retActions[key] = acts
+
+		}
+	}
+
+	*reply = retActions
 	return nil
 }

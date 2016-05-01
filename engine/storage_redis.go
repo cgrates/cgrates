@@ -590,6 +590,11 @@ func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	return
 }
 
+func (rs *RedisStorage) RemoveActions(key string) (err error) {
+	err = rs.db.Cmd("DEL", utils.ACTION_PREFIX+key).Err
+	return
+}
+
 func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
 	key = utils.SHARED_GROUP_PREFIX + key
 	if !skipCache {

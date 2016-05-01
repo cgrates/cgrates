@@ -833,7 +833,7 @@ func TestLoadActions(t *testing.T) {
 	as1 := csvr.actions["MINI"]
 	expected := []*Action{
 		&Action{
-			Id:               "MINI0",
+			Id:               "MINI",
 			ActionType:       TOPUP_RESET,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
@@ -853,7 +853,7 @@ func TestLoadActions(t *testing.T) {
 			},
 		},
 		&Action{
-			Id:               "MINI1",
+			Id:               "MINI",
 			ActionType:       TOPUP,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
@@ -880,7 +880,7 @@ func TestLoadActions(t *testing.T) {
 	as2 := csvr.actions["SHARED"]
 	expected = []*Action{
 		&Action{
-			Id:               "SHARED0",
+			Id:               "SHARED",
 			ActionType:       TOPUP,
 			ExpirationString: UNLIMITED,
 			Weight:           10,
@@ -905,7 +905,7 @@ func TestLoadActions(t *testing.T) {
 	as3 := csvr.actions["DEFEE"]
 	expected = []*Action{
 		&Action{
-			Id:              "DEFEE0",
+			Id:              "DEFEE",
 			ActionType:      CDRLOG,
 			ExtraParameters: `{"Category":"^ddi","MediationRunId":"^did_run"}`,
 			Weight:          10,

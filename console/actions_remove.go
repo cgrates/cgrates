@@ -18,48 +18,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/apier/v2"
-	"github.com/cgrates/cgrates/engine"
-)
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdGetActions{
-		name:      "actions",
-		rpcMethod: "ApierV2.GetActions",
+	c := &CmdRemoveActions{
+		name:      "actions_remove",
+		rpcMethod: "ApierV1.RemActions",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetActions struct {
+type CmdRemoveActions struct {
 	name      string
 	rpcMethod string
-	rpcParams *v2.AttrGetActions
+	rpcParams *v1.AttrRemActions
 	*CommandExecuter
 }
 
-func (self *CmdGetActions) Name() string {
+func (self *CmdRemoveActions) Name() string {
 	return self.name
 }
 
-func (self *CmdGetActions) RpcMethod() string {
+func (self *CmdRemoveActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetActions) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v2.AttrGetActions{}
+		self.rpcParams = &v1.AttrRemActions{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetActions) PostprocessRpcParams() error {
+func (self *CmdRemoveActions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetActions) RpcResult() interface{} {
-	a := make(map[string]engine.Actions, 0)
-	return &a
+func (self *CmdRemoveActions) RpcResult() interface{} {
+	var s string
+	return &s
 }

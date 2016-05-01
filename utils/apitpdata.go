@@ -275,6 +275,7 @@ type TPActions struct {
 type TPAction struct {
 	Identifier      string // Identifier mapped in the code
 	BalanceId       string // Balance identification string (account scope)
+	BalanceUuid     string // Balance identification string (global scope)
 	BalanceType     string // Type of balance the action will operate on
 	Directions      string // Balance direction
 	Units           string // Number of units to add/deduct

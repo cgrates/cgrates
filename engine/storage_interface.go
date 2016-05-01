@@ -59,6 +59,7 @@ type RatingStorage interface {
 	SetDerivedChargers(string, *utils.DerivedChargers) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
+	RemoveActions(string) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
 	SetSharedGroup(*SharedGroup) error
 	GetActionTriggers(string) (ActionTriggers, error)
@@ -204,6 +205,7 @@ func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
 	mh.MapType = reflect.TypeOf(map[string]interface{}(nil))
+	mh.RawToString = true
 	return cmm
 }
 

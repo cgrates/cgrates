@@ -37,6 +37,10 @@ var ValueFormulas = map[string]valueFormula{
 	INCREMENTAL: incrementalFormula,
 }
 
+func (vf *ValueFormula) String() string {
+	return ToJSON(vf)
+}
+
 func incrementalFormula(params map[string]interface{}) float64 {
 	// check parameters
 	unitsInterface, unitsFound := params["Units"]

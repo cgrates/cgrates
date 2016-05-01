@@ -90,13 +90,15 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 			// total usage correction
 			self.totalUsage -= self.lastUsage
 			self.totalUsage += *lastUsed
-			//utils.Logger.Debug(fmt.Sprintf("Correction: %f", self.totalUsage.Seconds()))
+			//utils.Logger.Debug(fmt.Sprintf("TotalUsage Correction: %f", self.totalUsage.Seconds()))
 		}
 	}
 	// apply correction from previous run
 	if self.extraDuration < dur {
 		dur -= self.extraDuration
 	} else {
+		self.lastUsage = requestedDuration
+		self.totalUsage += self.lastUsage
 		ccDuration := self.extraDuration // fake ccDuration
 		self.extraDuration -= dur
 		return ccDuration, nil
@@ -111,6 +113,7 @@ func (self *SMGSession) debit(dur time.Duration, lastUsed *time.Duration) (time.
 	self.cd.DurationIndex += dur
 	cc := &engine.CallCost{}
 	if err := self.rater.Call("Responder.MaxDebit", self.cd, cc); err != nil {
+		self.lastUsage = 0
 		self.lastDebit = 0
 		return 0, err
 	}
