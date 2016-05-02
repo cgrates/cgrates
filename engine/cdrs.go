@@ -272,11 +272,12 @@ func (self *CdrServer) deriveRateStoreStatsReplicate(cdr *CDR, store, stats, rep
 }
 
 func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
-	cdrRuns := []*CDR{cdr}
+	dfltCDRRun := cdr.Clone()
+	cdrRuns := []*CDR{dfltCDRRun}
 	if cdr.RunID != utils.MetaRaw { // Only derive *raw CDRs
 		return cdrRuns, nil
 	}
-	cdr.RunID = utils.META_DEFAULT // Rewrite *raw with *default since we have it as first run
+	dfltCDRRun.RunID = utils.META_DEFAULT // Rewrite *raw with *default since we have it as first run
 	if err := LoadUserProfile(cdr, utils.EXTRA_FIELDS); err != nil {
 		return nil, err
 	}

@@ -153,7 +153,7 @@ func TestCDRStatsLclPostCdrs(t *testing.T) {
 			t.Error(err.Error())
 		}
 	}
-	time.Sleep(time.Duration(1000) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
 
 func TestCDRStatsLclGetMetrics1(t *testing.T) {
