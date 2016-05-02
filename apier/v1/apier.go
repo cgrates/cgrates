@@ -51,6 +51,7 @@ type ApierV1 struct {
 	Responder   *engine.Responder
 	CdrStatsSrv rpcclient.RpcClientConnection
 	Users       rpcclient.RpcClientConnection
+	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {

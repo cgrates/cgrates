@@ -1171,3 +1171,10 @@ type AttrSMGGetActiveSessions struct {
 	Destination *string
 	Supplier    *string
 }
+
+type AttrRateCDRs struct {
+	RPCCDRsFilter
+	StoreCDRs     *bool
+	SendToStatS   *bool // Set to true if the CDRs should be sent to stats server
+	ReplicateCDRs *bool // Replicate results
+}

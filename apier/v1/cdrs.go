@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
@@ -84,4 +85,12 @@ func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error
 	}
 	*reply = "OK"
 	return nil
+}
+
+// New way of (re-)rating CDRs
+func (apier *ApierV1) RateCDRs(attrs utils.AttrRateCDRs, reply *string) error {
+	if apier.CDRs == nil {
+		return errors.New("CDRS_NOT_ENABLED")
+	}
+	return apier.CDRs.Call("CDRsV1.RateCDRs", attrs, reply)
 }

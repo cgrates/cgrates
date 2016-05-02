@@ -122,27 +122,12 @@ func (self *CdrServer) RegisterHandlersToServer(server *utils.Server) {
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
 }
 
-func (self *CdrServer) ProcessCdr(cdr *CDR, reply *string) error {
-	cacheKey := "ProcessCdr" + cdr.CGRID
-	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
-		*reply = item.Value.(string)
-		return item.Err
-	}
-	if err := self.LocalProcessCdr(cdr); err != nil {
-		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
-		return utils.NewErrServerError(err)
-	}
-	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
-	*reply = utils.OK
-	return nil
-}
-
-// RPC method, used to internally process CDR
+// Used to internally process CDR
 func (self *CdrServer) LocalProcessCdr(cdr *CDR) error {
 	return self.processCdr(cdr)
 }
 
-// RPC method, used to process external CDRs
+// Used to process external CDRs
 func (self *CdrServer) ProcessExternalCdr(eCDR *ExternalCDR) error {
 	cdr, err := NewCDRFromExternalCDR(eCDR, self.cgrCfg.DefaultTimezone)
 	if err != nil {
@@ -169,25 +154,6 @@ func (self *CdrServer) storeSMCost(smCost *SMCost, checkDuplicate bool) error {
 		return err
 	}
 	return self.cdrDb.SetSMCost(smCost)
-}
-
-// RPC method, differs from storeSMCost through it's signature
-func (self *CdrServer) StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) error {
-	return self.storeSMCost(attr.Cost, attr.CheckDuplicate)
-}
-
-// Called by rate/re-rate API
-func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) error {
-	cdrs, _, err := self.cdrDb.GetCDRs(cdrFltr, false)
-	if err != nil {
-		return err
-	}
-	for _, cdr := range cdrs {
-		if err := self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs, sendToStats, len(self.cgrCfg.CDRSCdrReplication) != 0); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
-		}
-	}
-	return nil
 }
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
@@ -508,13 +474,86 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 	return nil
 }
 
+// Called by rate/re-rate API, FixMe: deprecate it once new APIer structure is operational
+func (self *CdrServer) RateCDRs(cdrFltr *utils.CDRsFilter, sendToStats bool) error {
+	cdrs, _, err := self.cdrDb.GetCDRs(cdrFltr, false)
+	if err != nil {
+		return err
+	}
+	for _, cdr := range cdrs {
+		if err := self.deriveRateStoreStatsReplicate(cdr, self.cgrCfg.CDRSStoreCdrs, sendToStats, len(self.cgrCfg.CDRSCdrReplication) != 0); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
+		}
+	}
+	return nil
+}
+
+func (self *CdrServer) V1ProcessCDR(cdr *CDR, reply *string) error {
+	cacheKey := "ProcessCdr" + cdr.CGRID
+	if item, err := self.getCache().Get(cacheKey); err == nil && item != nil {
+		*reply = item.Value.(string)
+		return item.Err
+	}
+	if err := self.LocalProcessCdr(cdr); err != nil {
+		self.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+		return utils.NewErrServerError(err)
+	}
+	self.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: utils.OK})
+	*reply = utils.OK
+	return nil
+}
+
+// Alias, deprecated after removing CdrServerV1.ProcessCdr
+func (self *CdrServer) V1ProcessCdr(cdr *CDR, reply *string) error {
+	return self.V1ProcessCDR(cdr, reply)
+}
+
+// RPC method, differs from storeSMCost through it's signature
+func (self *CdrServer) V1StoreSMCost(attr AttrCDRSStoreSMCost, reply *string) error {
+	if err := self.storeSMCost(attr.Cost, attr.CheckDuplicate); err != nil {
+		return utils.NewErrServerError(err)
+	}
+	*reply = utils.OK
+	return nil
+}
+
+// Called by rate/re-rate API, RPC method
+func (self *CdrServer) V1RateCDRs(attrs utils.AttrRateCDRs, reply *string) error {
+	cdrFltr, err := attrs.RPCCDRsFilter.AsCDRsFilter(self.cgrCfg.DefaultTimezone)
+	if err != nil {
+		return utils.NewErrServerError(err)
+	}
+	cdrs, _, err := self.cdrDb.GetCDRs(cdrFltr, false)
+	if err != nil {
+		return err
+	}
+	storeCDRs := self.cgrCfg.CDRSStoreCdrs
+	if attrs.StoreCDRs != nil {
+		storeCDRs = *attrs.StoreCDRs
+	}
+	sendToStats := self.stats != nil
+	if attrs.SendToStatS != nil {
+		sendToStats = *attrs.SendToStatS
+	}
+	replicate := len(self.cgrCfg.CDRSCdrReplication) != 0
+	if attrs.ReplicateCDRs != nil {
+		replicate = *attrs.ReplicateCDRs
+	}
+	for _, cdr := range cdrs {
+		if err := self.deriveRateStoreStatsReplicate(cdr, storeCDRs, sendToStats, replicate); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<CDRS> Processing CDR %+v, got error: %s", cdr, err.Error()))
+		}
+	}
+	return nil
+}
+
 func (cdrsrv *CdrServer) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	parts := strings.Split(serviceMethod, ".")
 	if len(parts) != 2 {
 		return utils.ErrNotImplemented
 	}
 	// get method
-	method := reflect.ValueOf(cdrsrv).MethodByName(parts[1])
+	method := reflect.ValueOf(cdrsrv).MethodByName(parts[0][len(parts[0])-2:] + parts[1]) // Inherit the version in the method
 	if !method.IsValid() {
 		return utils.ErrNotImplemented
 	}

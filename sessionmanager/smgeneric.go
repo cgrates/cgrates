@@ -91,7 +91,7 @@ func (self *SMGeneric) ttlTerminate(s *SMGSession, tmtr *smgSessionTerminator) {
 	cdr := s.eventStart.AsStoredCdr(self.cgrCfg, self.timezone)
 	cdr.Usage = s.TotalUsage()
 	var reply string
-	self.cdrsrv.Call("CdrServer.ProcessCdr", cdr, &reply)
+	self.cdrsrv.Call("CdrsV1.ProcessCdr", cdr, &reply)
 }
 
 func (self *SMGeneric) indexSession(uuid string, s *SMGSession) {
@@ -474,7 +474,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 			OriginID:    gev.GetUUID(),
 			CostDetails: cc,
 		}
-		if err := self.cdrsrv.Call("CdrServer.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil && err != utils.ErrExists {
+		if err := self.cdrsrv.Call("CdrsV1.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil && err != utils.ErrExists {
 			withErrors = true
 			utils.Logger.Err(fmt.Sprintf("<SMGeneric> Could not save CC: %+v, RunID: %s error: %s", cc, sR.DerivedCharger.RunID, err.Error()))
 		}
@@ -487,7 +487,7 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 
 func (self *SMGeneric) ProcessCdr(gev SMGenericEvent) error {
 	var reply string
-	if err := self.cdrsrv.Call("CdrServer.ProcessCdr", gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrsV1.ProcessCdr", gev.AsStoredCdr(self.cgrCfg, self.timezone), &reply); err != nil {
 		return err
 	}
 	return nil
