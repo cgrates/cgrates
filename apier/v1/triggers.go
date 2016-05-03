@@ -182,6 +182,7 @@ type AttrSetAccountActionTriggers struct {
 	ThresholdType         *string
 	ThresholdValue        *float64
 	Recurrent             *bool
+	Executed              *bool
 	MinSleep              *string
 	ExpirationDate        *string
 	ActivationDate        *string
@@ -226,6 +227,9 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 				}
 				if attr.Recurrent != nil {
 					at.Recurrent = *attr.Recurrent
+				}
+				if attr.Executed != nil {
+					at.Executed = *attr.Executed
 				}
 				if attr.MinSleep != nil {
 					minSleep, err := utils.ParseDurationWithSecs(*attr.MinSleep)
