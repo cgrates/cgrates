@@ -192,8 +192,10 @@ func (self *SMGSession) refund(refundDuration time.Duration) error {
 	if len(refundIncrements) > 0 {
 		cd := firstCC.CreateCallDescriptor()
 		cd.Increments = refundIncrements
+		cd.CgrID = self.cd.CgrID
+		cd.RunID = self.cd.RunID
 		cd.Increments.Compress()
-		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %s", initialRefundDuration, utils.ToJSON(cd)))
+		utils.Logger.Info(fmt.Sprintf("Refunding %s duration %v with incerements: %s", cd.CgrID, initialRefundDuration, utils.ToJSON(cd.Increments)))
 		var response float64
 		err := self.rater.Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {
@@ -253,6 +255,8 @@ func (self *SMGSession) saveOperations(originID string) error {
 	roundIncrements := firstCC.GetRoundIncrements()
 	if len(roundIncrements) != 0 {
 		cd := firstCC.CreateCallDescriptor()
+		cd.CgrID = self.cd.CgrID
+		cd.RunID = self.cd.RunID
 		cd.Increments = roundIncrements
 		var response float64
 		if err := self.rater.Call("Responder.RefundRounding", cd, &response); err != nil {

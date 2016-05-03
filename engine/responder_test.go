@@ -153,10 +153,10 @@ func TestResponderGetSessionRuns(t *testing.T) {
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
-			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "0",
+			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "extra1", Direction: "*out", Category: "0",
 				Tenant: "vdf", Subject: "rif", Account: "minitsboy", Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
 		&SessionRun{DerivedCharger: extra2DC,
-			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "call",
+			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "extra2", Direction: "*out", Category: "call",
 				Tenant: "vdf", Subject: "ivo", Account: "ivo", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
 		&SessionRun{DerivedCharger: dfDC,
 			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "call",
@@ -165,7 +165,7 @@ func TestResponderGetSessionRuns(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSRuns, sesRuns) {
 		for _, sr := range sesRuns {
-			t.Logf("sr cd: %+v", sr.CallDescriptor)
+			t.Logf("sr cd: %s", utils.ToIJSON(sr.CallDescriptor))
 		}
 		t.Errorf("Expecting: %+v, received: %+v", eSRuns, sesRuns)
 	}

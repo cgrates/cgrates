@@ -423,16 +423,10 @@ func (self *SMGeneric) ChargeEvent(gev SMGenericEvent, clnt *rpc2.Client) (maxDu
 			}
 			// refund cc
 			if len(refundIncrements) > 0 {
-				cd := &engine.CallDescriptor{
-					Direction:   cc.Direction,
-					Tenant:      cc.Tenant,
-					Category:    cc.Category,
-					Subject:     cc.Subject,
-					Account:     cc.Account,
-					Destination: cc.Destination,
-					TOR:         cc.TOR,
-					Increments:  refundIncrements,
-				}
+				cd := cc.CreateCallDescriptor()
+				cd.Increments = refundIncrements
+				cd.CgrID = sR.CallDescriptor.CgrID
+				cd.RunID = sR.CallDescriptor.RunID
 				cd.Increments.Compress()
 				utils.Logger.Info(fmt.Sprintf("Refunding session run callcost: %s", utils.ToJSON(cd)))
 				var response float64

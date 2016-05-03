@@ -117,7 +117,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12345",
+		utils.ACCID:       "123451",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -147,7 +147,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12345",
+		utils.ACCID:       "123451",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -178,7 +178,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12345",
+		utils.ACCID:       "123452",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -208,7 +208,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12345",
+		utils.ACCID:       "123452",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -246,7 +246,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12345",
+		utils.ACCID:       "123453",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -278,7 +278,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12345",
+		utils.ACCID:       "123453",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -438,7 +438,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "1234911",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -466,7 +466,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "1234911",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -492,7 +492,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "1234911",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -529,7 +529,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "1234922",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -557,7 +557,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "1234922",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
@@ -583,7 +583,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "1234922",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1001",
 		utils.SUBJECT:     "1001",
