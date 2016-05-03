@@ -293,7 +293,7 @@ func (self *SMGSession) AsActiveSession(timezone string) *ActiveSession {
 	pdd, _ := self.eventStart.GetPdd(utils.META_DEFAULT)
 	aSession := &ActiveSession{
 		CgrId:       self.eventStart.GetCgrId(timezone),
-		TOR:         utils.VOICE,
+		TOR:         self.eventStart.GetTOR(utils.META_DEFAULT),
 		RunId:       self.runId,
 		OriginID:    self.eventStart.GetUUID(),
 		CdrHost:     self.eventStart.GetOriginatorIP(utils.META_DEFAULT),
