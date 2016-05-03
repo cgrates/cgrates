@@ -366,3 +366,32 @@ func TestTpRemActionsRefenced(t *testing.T) {
 		t.Error("no error on ApierV2.GetActions: ", err)
 	}
 }
+
+func TestApierResetAccountActionTriggers(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var acnt engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1005"}
+	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.ActionTriggers[0].Executed == true {
+		t.Errorf("wrong action trigger executed flag: %s", utils.ToIJSON(acnt.ActionTriggers))
+	}
+	var reply string
+	if err := tpRPC.Call("ApierV2.ResetAccountActionTriggers", v1.AttrResetAccountActionTriggers{
+		Tenant:   "cgrates.org",
+		Account:  "1005",
+		GroupID:  "STANDARD_TRIGGERS",
+		Executed: true,
+	}, &reply); err != nil {
+		t.Error("Error on ApierV2.ResetAccountActionTriggers: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV2.ResetAccountActionTriggers got reply: %s", reply)
+	}
+	if err := tpRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.ActionTriggers[0].Executed == false {
+		t.Errorf("wrong action trigger executed flag: %s", utils.ToIJSON(acnt.ActionTriggers))
+	}
+}
