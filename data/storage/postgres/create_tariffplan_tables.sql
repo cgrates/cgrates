@@ -147,7 +147,7 @@ CREATE TABLE tp_actions (
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
   directions VARCHAR(8) NOT NULL,
-  units VARCHAR(10) NOT NULL,
+  units VARCHAR(256) NOT NULL,
   expiry_time VARCHAR(24) NOT NULL,
   timing_tags VARCHAR(128) NOT NULL,
   destination_tags VARCHAR(64) NOT NULL,

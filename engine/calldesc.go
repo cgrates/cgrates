@@ -28,7 +28,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -70,17 +69,18 @@ func init() {
 }
 
 var (
-	ratingStorage           RatingStorage
-	accountingStorage       AccountingStorage
-	storageLogger           LogStorage
-	cdrStorage              CdrStorage
-	debitPeriod             = 10 * time.Second
-	globalRoundingDecimals  = 6
-	historyScribe           history.Scribe
-	pubSubServer            rpcclient.RpcClientConnection
-	userService             UserService
-	aliasService            AliasService
-	rpSubjectPrefixMatching bool
+	ratingStorage            RatingStorage
+	accountingStorage        AccountingStorage
+	storageLogger            LogStorage
+	cdrStorage               CdrStorage
+	debitPeriod              = 10 * time.Second
+	globalRoundingDecimals   = 6
+	historyScribe            rpcclient.RpcClientConnection
+	pubSubServer             rpcclient.RpcClientConnection
+	userService              rpcclient.RpcClientConnection
+	aliasService             rpcclient.RpcClientConnection
+	rpSubjectPrefixMatching  bool
+	lcrSubjectPrefixMatching bool
 )
 
 // Exported method to set the storage getter.
@@ -101,6 +101,10 @@ func SetRpSubjectPrefixMatching(flag bool) {
 	rpSubjectPrefixMatching = flag
 }
 
+func SetLcrSubjectPrefixMatching(flag bool) {
+	lcrSubjectPrefixMatching = flag
+}
+
 /*
 Sets the database for logging (can be de same  as storage getter or different db)
 */
@@ -116,7 +120,7 @@ func SetCdrStorage(cStorage CdrStorage) {
 }
 
 // Exported method to set the history scribe.
-func SetHistoryScribe(scribe history.Scribe) {
+func SetHistoryScribe(scribe rpcclient.RpcClientConnection) {
 	historyScribe = scribe
 }
 
@@ -124,11 +128,11 @@ func SetPubSub(ps rpcclient.RpcClientConnection) {
 	pubSubServer = ps
 }
 
-func SetUserService(us UserService) {
+func SetUserService(us rpcclient.RpcClientConnection) {
 	userService = us
 }
 
-func SetAliasService(as AliasService) {
+func SetAliasService(as rpcclient.RpcClientConnection) {
 	aliasService = as
 }
 
@@ -188,7 +192,11 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 		cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey())
 	}
 	if cd.account != nil && cd.account.Disabled {
-		return nil, fmt.Errorf("User %s is disabled", cd.account.ID)
+		return nil, utils.ErrAccountDisabled
+	}
+	if err != nil || cd.account == nil {
+		utils.Logger.Warning(fmt.Sprintf("Account: %s, not found (%v)", cd.GetAccountKey(), err))
+		return nil, utils.ErrAccountNotFound
 	}
 	return cd.account, err
 }
@@ -353,6 +361,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		// split on rating plans
 		afterStart, afterEnd := false, false //optimization for multiple activation periods
 		for _, rp := range cd.RatingInfos {
+			//log.Print("RP: ", utils.ToJSON(rp))
 			if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
 				firstSpan.setRatingInfo(rp)
 			} else {
@@ -360,7 +369,6 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				for i := 0; i < len(timespans); i++ {
 					newTs := timespans[i].SplitByRatingPlan(rp)
 					if newTs != nil {
-						//log.Print("NEW TS", newTs.TimeStart)
 						timespans = append(timespans, newTs)
 					} else {
 						afterEnd = true
@@ -369,8 +377,23 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				}
 			}
 		}
+		//log.Printf("After SplitByRatingPlan: %+v", utils.ToJSON(timespans))
+		// split on days
+		for i := 0; i < len(timespans); i++ {
+			rp := timespans[i].ratingInfo
+			newTs := timespans[i].SplitByDay()
+			if newTs != nil {
+				//log.Print("NEW TS: ", newTs.TimeStart, newTs.TimeEnd)
+				newTs.setRatingInfo(rp)
+				// insert the new timespan
+				index := i + 1
+				timespans = append(timespans, nil)
+				copy(timespans[index+1:], timespans[index:])
+				timespans[index] = newTs
+			}
+		}
 	}
-	// utils.Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
+	//log.Printf("After SplitByDay: %+v", utils.ToJSON(timespans))
 	// split on rate intervals
 	for i := 0; i < len(timespans); i++ {
 		//log.Printf("==============%v==================", i)
@@ -379,6 +402,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 		// utils.Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rateIntervals := rp.SelectRatingIntevalsForTimespan(timespans[i])
+		//log.Print("RIs: ", utils.ToJSON(rateIntervals))
 		/*for _, interval := range rp.RateIntervals {
 			if !timespans[i].hasBetterRateIntervalThan(interval) {
 				timespans[i].SetRateInterval(interval)
@@ -511,6 +535,7 @@ func (cd *CallDescriptor) getCost() (*CallCost, error) {
 		cd.TOR = utils.VOICE
 	}
 	err := cd.LoadRatingPlans()
+	//log.Print("RI: ", utils.ToJSON(cd.RatingInfos))
 	if err != nil {
 		//utils.Logger.Err(fmt.Sprintf("error getting cost for key <%s>: %s", cd.GetKey(cd.Subject), err.Error()))
 		return &CallCost{Cost: -1}, err
@@ -635,13 +660,9 @@ func (origCD *CallDescriptor) getMaxSessionDuration(origAcc *Account) (time.Dura
 
 func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	cd.account = nil // make sure it's not cached
-	if account, err := cd.getAccount(); err != nil || account == nil {
-		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
-		return 0, utils.ErrAccountNotFound
+	if account, err := cd.getAccount(); err != nil {
+		return 0, err
 	} else {
-		if account.Disabled {
-			return 0, utils.ErrAccountDisabled
-		}
 		if memberIds, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
 			if _, err := Guardian.Guard(func() (interface{}, error) {
 				duration, err = cd.getMaxSessionDuration(account)
@@ -705,13 +726,9 @@ func (cd *CallDescriptor) debit(account *Account, dryRun bool, goNegative bool) 
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
 	// lock all group members
-	if account, err := cd.getAccount(); err != nil || account == nil {
-		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
-		return nil, utils.ErrAccountNotFound
+	if account, err := cd.getAccount(); err != nil {
+		return nil, err
 	} else {
-		if account.Disabled {
-			return nil, utils.ErrAccountDisabled
-		}
 		if memberIds, sgerr := account.GetUniqueSharedGroupMembers(cd); sgerr == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
 				cc, err = cd.debit(account, cd.DryRun, true)
@@ -730,13 +747,9 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // by the GetMaxSessionDuration method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	cd.account = nil // make sure it's not cached
-	if account, err := cd.getAccount(); err != nil || account == nil {
-		utils.Logger.Err(fmt.Sprintf("Account: %s, not found", cd.GetAccountKey()))
-		return nil, utils.ErrAccountNotFound
+	if account, err := cd.getAccount(); err != nil {
+		return nil, err
 	} else {
-		if account.Disabled {
-			return nil, utils.ErrAccountDisabled
-		}
 		//log.Printf("ACC: %+v", account)
 		if memberIDs, err := account.GetUniqueSharedGroupMembers(cd); err == nil {
 			_, err = Guardian.Guard(func() (interface{}, error) {
@@ -920,6 +933,8 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		ForceDuration:   cd.ForceDuration,
 		PerformRounding: cd.PerformRounding,
 		DryRun:          cd.DryRun,
+		CgrID:           cd.CgrID,
+		RunID:           cd.RunID,
 	}
 }
 
@@ -932,6 +947,15 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 		utils.LCRKey(cd.Direction, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
 		utils.LCRKey(utils.ANY, utils.ANY, utils.ANY, utils.ANY, utils.ANY),
 	}
+	if lcrSubjectPrefixMatching {
+		var partialSubjects []string
+		lenSubject := len(cd.Subject)
+		for i := 1; i < lenSubject; i++ {
+			partialSubjects = append(partialSubjects, utils.LCRKey(cd.Direction, cd.Tenant, cd.Category, cd.Account, cd.Subject[:lenSubject-i]))
+		}
+		// insert partialsubjects into keyVariants
+		keyVariants = append(keyVariants[:1], append(partialSubjects, keyVariants[1:]...)...)
+	}
 	for _, key := range keyVariants {
 		if lcr, err := ratingStorage.GetLCR(key, false); err != nil && err != utils.ErrNotFound {
 			return nil, err
@@ -942,7 +966,7 @@ func (cd *CallDescriptor) GetLCRFromStorage() (*LCR, error) {
 	return nil, utils.ErrNotFound
 }
 
-func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCRCost, error) {
+func (cd *CallDescriptor) GetLCR(stats rpcclient.RpcClientConnection, p *utils.Paginator) (*LCRCost, error) {
 	cd.account = nil // make sure it's not cached
 	lcr, err := cd.GetLCRFromStorage()
 	if err != nil {
@@ -1073,7 +1097,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCR
 						if lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
 							for _, qId := range cdrStatsQueueIds {
 								sq := &StatsQueue{}
-								if err := stats.GetQueue(qId, sq); err == nil {
+								if err := stats.Call("CDRStatsV1.GetQueue", qId, sq); err == nil {
 									if sq.conf.QueueLength == 0 { //only add qeues that don't have fixed length
 										supplierQueues = append(supplierQueues, sq)
 									}
@@ -1081,7 +1105,7 @@ func (cd *CallDescriptor) GetLCR(stats StatsInterface, p *utils.Paginator) (*LCR
 							}
 						} else {
 							statValues := make(map[string]float64)
-							if err := stats.GetValues(qId, &statValues); err != nil {
+							if err := stats.Call("CDRStatsV1.GetValues", qId, &statValues); err != nil {
 								lcrCost.SupplierCosts = append(lcrCost.SupplierCosts, &LCRSupplierCost{
 									Supplier: fullSupplier,
 									Error:    fmt.Sprintf("Get stats values for queue id %s, error %s", qId, err.Error()),

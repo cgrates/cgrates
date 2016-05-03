@@ -1,8 +1,9 @@
 {
 // Contains CDRC  template for FreeSWITCH CDR
 
-"cdrc": {
-	"CDRC-CSV2": { 
+"cdrc": [
+	{ 
+		"id": "CDRC-CSV2",
 		"enabled": true,				// enable CDR client functionality
 		"cdr_in_dir": "/tmp/cgrates/cdrc_fs/in",	// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgrates/cdrc_fs/out",	// absolute path towards the directory where processed CDRs will be moved
@@ -22,6 +23,6 @@
 			{"tag": "usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "~8:s/^(\\d+)$/${1}s/", "mandatory": true},
 		],
 	},
-},
+],
 
 }

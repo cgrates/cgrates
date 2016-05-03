@@ -50,12 +50,10 @@ func DerivedChargersMatchesDest(dcs *utils.DerivedChargers, dest string) bool {
 	for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
 		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 			destIds := x.(map[interface{}]struct{})
-			for value := range dcs.DestinationIDs {
-				for idId := range destIds {
-					dId := idId.(string)
-					if value == dId {
-						return true
-					}
+			for dId := range destIds {
+				includeDest, found := dcs.DestinationIDs[dId.(string)]
+				if found {
+					return includeDest
 				}
 			}
 		}

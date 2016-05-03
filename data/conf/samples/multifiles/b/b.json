@@ -4,7 +4,7 @@
 // Should be the second file loaded
 
 "general": {
-	"default_reqtype": "*pseudoprepaid",			// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
+	"default_request_type": "*pseudoprepaid",			// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 },
 
 "cdre": {

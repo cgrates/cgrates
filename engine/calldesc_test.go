@@ -41,12 +41,12 @@ func init() {
 
 func populateDB() {
 	ats := []*Action{
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(10)}},
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Weight: utils.Float64Pointer(20), Value: utils.Float64Pointer(10), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 10}}},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Weight: utils.Float64Pointer(20), Value: &utils.ValueFormula{Static: 10}, DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
 	}
 
 	ats1 := []*Action{
-		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: utils.Float64Pointer(10)}, Weight: 10},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 10}}, Weight: 10},
 		&Action{ActionType: "*reset_account", Weight: 20},
 	}
 
@@ -326,6 +326,43 @@ func TestGetCostRatingPlansAndRatingIntervalsMore(t *testing.T) {
 	}
 }
 
+func TestGetCostRatingPlansAndRatingIntervalsMoreDays(t *testing.T) {
+	t1 := time.Date(2012, time.February, 20, 9, 50, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 23, 18, 10, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: t2.Sub(t1)}
+	result, _ := cd.GetCost()
+	if len(result.Timespans) != 8 ||
+		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
+		!result.Timespans[1].TimeEnd.Equal(result.Timespans[2].TimeStart) ||
+		!result.Timespans[2].TimeEnd.Equal(result.Timespans[3].TimeStart) ||
+		!result.Timespans[3].TimeEnd.Equal(result.Timespans[4].TimeStart) ||
+		!result.Timespans[4].TimeEnd.Equal(result.Timespans[5].TimeStart) ||
+		!result.Timespans[5].TimeEnd.Equal(result.Timespans[6].TimeStart) ||
+		!result.Timespans[6].TimeEnd.Equal(result.Timespans[7].TimeStart) {
+		for _, ts := range result.Timespans {
+			t.Logf("TS %+v", ts)
+		}
+		t.Errorf("Expected %+v was %+v", 4, len(result.Timespans))
+	}
+}
+
+func TestGetCostRatingPlansAndRatingIntervalsMoreDaysWeekend(t *testing.T) {
+	t1 := time.Date(2012, time.February, 24, 9, 50, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 27, 18, 10, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: t2.Sub(t1)}
+	result, _ := cd.GetCost()
+	if len(result.Timespans) != 5 ||
+		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
+		!result.Timespans[1].TimeEnd.Equal(result.Timespans[2].TimeStart) ||
+		!result.Timespans[2].TimeEnd.Equal(result.Timespans[3].TimeStart) ||
+		!result.Timespans[3].TimeEnd.Equal(result.Timespans[4].TimeStart) {
+		for _, ts := range result.Timespans {
+			t.Logf("TS %+v", ts)
+		}
+		t.Errorf("Expected %+v was %+v", 4, len(result.Timespans))
+	}
+}
+
 func TestGetCostRateGroups(t *testing.T) {
 	t1 := time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC)
@@ -566,7 +603,7 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		MaxCostSoFar: 0,
 	}
 	result, err := cd.GetMaxSessionDuration()
-	expected := 30 * time.Minute
+	expected := 17 * time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v (%v)", expected, result, err)
 	}
@@ -576,6 +613,57 @@ func TestGetMaxSessiontWithBlocker(t *testing.T) {
 		Tenant:       "cgrates.org",
 		Subject:      "block",
 		Account:      "block",
+		Destination:  "444",
+		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err = cd.GetMaxSessionDuration()
+	expected = 30 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	}
+}
+
+func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("BLOCK_EMPTY_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	acc, err := accountingStorage.GetAccount("cgrates.org:block_empty")
+	if err != nil {
+		t.Error("error getting account: ", err)
+	}
+	if len(acc.BalanceMap[utils.MONETARY]) != 2 ||
+		acc.BalanceMap[utils.MONETARY][0].Blocker != true {
+		for _, b := range acc.BalanceMap[utils.MONETARY] {
+			t.Logf("B: %+v", b)
+		}
+		t.Error("Error executing action  plan on account: ", acc.BalanceMap[utils.MONETARY])
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "block",
+		Account:      "block_empty",
+		Destination:  "0723",
+		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err := cd.GetMaxSessionDuration()
+	expected := 0 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	}
+	cd = &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "block",
+		Account:      "block_empty",
 		Destination:  "444",
 		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),

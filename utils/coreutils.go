@@ -127,8 +127,9 @@ func Round(x float64, prec int, method string) float64 {
 }
 
 func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
+	tmStr = strings.TrimSpace(tmStr)
 	var nilTime time.Time
-	if len(tmStr) == 0 {
+	if len(tmStr) == 0 || tmStr == UNLIMITED {
 		return nilTime, nil
 	}
 	loc, err := time.LoadLocation(timezone)
@@ -179,7 +180,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 func ParseDate(date string) (expDate time.Time, err error) {
 	date = strings.TrimSpace(date)
 	switch {
-	case date == "*unlimited" || date == "":
+	case date == UNLIMITED || date == "":
 		// leave it at zero
 	case strings.HasPrefix(date, "+"):
 		d, err := time.ParseDuration(date[1:])
@@ -195,7 +196,7 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().AddDate(1, 0, 0) // add one year
 	case date == "*month_end":
 		expDate = GetEndOfMonth(time.Now())
-	case strings.HasSuffix(date, "Z"):
+	case strings.HasSuffix(date, "Z") || strings.Index(date, "+") != -1: // Allow both Z and +hh:mm format
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
 		unix, err := strconv.ParseInt(date, 10, 64)
@@ -532,4 +533,22 @@ func GetEndOfMonth(ref time.Time) time.Time {
 	}
 	eom := time.Date(year, month, 1, 0, 0, 0, 0, ref.Location())
 	return eom.Add(-time.Second)
+}
+
+// formats number in K,M,G, etc.
+func SizeFmt(num float64, suffix string) string {
+	if suffix == "" {
+		suffix = "B"
+	}
+	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
+		if math.Abs(num) < 1024.0 {
+			return fmt.Sprintf("%3.1f%s%s", num, unit, suffix)
+		}
+		num /= 1024.0
+	}
+	return fmt.Sprintf("%.1f%s%s", num, "Yi", suffix)
+}
+
+func TimeIs0h(t time.Time) bool {
+	return t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
 }

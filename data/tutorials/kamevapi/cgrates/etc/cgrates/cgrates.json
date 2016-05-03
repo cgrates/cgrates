@@ -7,48 +7,59 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 
-"rater": {
-	"enabled": true,						// enable Rater service: <true|false>
-	"cdrstats": "internal",					// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-	"historys": "internal",					// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
-	"pubsubs": "internal",					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-	"users": "internal",					// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
-	"aliases": "internal"
+"rals": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"historys_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
 },
 
 
 "scheduler": {
-	"enabled": true,						// start Scheduler service: <true|false>
+	"enabled": true,
 },
 
 
 "cdrs": {
-	"enabled": true,						// start the CDR Server service:  <true|false>
-	"rater": "internal",					// address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	"cdrstats": "internal",					// address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
 },
 
 
 "cdrstats": {
-	"enabled": true,						// starts the cdrstats service: <true|false>
+	"enabled": true,
 },
 
 
 "cdre": {
 	"*default": {
-		"cdr_format": "csv",							// exported CDRs format <csv>
+		"cdr_format": "csv",
 		"field_separator": ",",
-		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
-		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-        "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENRIC unit to call duration in some billing systems)
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
-		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
-		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
-		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_dir": "/tmp/cgr_kamevapi/cgrates/cdre",			// path where the exported CDRs will be placed
-		"header_fields": [],							// template of the exported header fields
-		"content_fields": [								// template of the exported content fields
+		"data_usage_multiply_factor": 1,
+		"sms_usage_multiply_factor": 1,
+        "generic_usage_multiply_factor": 1,
+		"cost_multiply_factor": 1,
+		"cost_rounding_decimals": -1,
+		"cost_shift_digits": 0,
+		"mask_destination_id": "MASKED_DESTINATIONS",
+		"mask_length": 0,
+		"export_dir": "/tmp/cgr_kamevapi/cgrates/cdre",
+		"header_fields": [],
+		"content_fields": [
 			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
 			{"tag":"RunId", "cdr_field_id": "mediation_runid", "type": "cdrfield", "value": "mediation_runid"},
 			{"tag":"Tor", "cdr_field_id": "tor", "type": "cdrfield", "value": "tor"},
@@ -65,22 +76,22 @@
 			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
 			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},
 		],
-		"trailer_fields": [],							// template of the exported trailer fields
+		"trailer_fields": [],
 	},
 	"customer_tpl": {
-		"cdr_format": "csv",							// exported CDRs format <csv>
+		"cdr_format": "csv",
 		"field_separator": ";",
-		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
-		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-        "generic_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
-		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
-		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
-		"cost_shift_digits": 0,							// shift digits in the cost on export (eg: convert from EUR to cents)
-		"mask_destination_id": "MASKED_DESTINATIONS",	// destination id containing called addresses to be masked on export
-		"mask_length": 0,								// length of the destination suffix to be masked
-		"export_dir": "/tmp/cgr_kamevapi/cgrates/cdre",			// path where the exported CDRs will be placed
-		"header_fields": [],							// template of the exported header fields
-		"content_fields": [								// template of the exported content fields
+		"data_usage_multiply_factor": 1,
+		"sms_usage_multiply_factor": 1,
+        "generic_usage_multiply_factor": 1,
+		"cost_multiply_factor": 1,
+		"cost_rounding_decimals": -1,
+		"cost_shift_digits": 0,
+		"mask_destination_id": "MASKED_DESTINATIONS",
+		"mask_length": 0,
+		"export_dir": "/tmp/cgr_kamevapi/cgrates/cdre",
+		"header_fields": [],
+		"content_fields": [	
 			{"tag": "CgrId", "cdr_field_id": "cgrid", "type": "cdrfield", "value": "cgrid"},
 			{"tag":"AccId", "cdr_field_id": "accid", "type": "cdrfield", "value": "accid"},
 			{"tag":"ReqType", "cdr_field_id": "reqtype", "type": "cdrfield", "value": "reqtype"},
@@ -92,37 +103,36 @@
 			{"tag":"Usage", "cdr_field_id": "usage", "type": "cdrfield", "value": "usage"},
 			{"tag":"Cost", "cdr_field_id": "cost", "type": "cdrfield", "value": "cost"},
 		],
-		"trailer_fields": [],							// template of the exported trailer fields
+		"trailer_fields": [],
 	}
 },
 
 
 "sm_kamailio": {
-	"enabled": true,				// starts SessionManager service: <true|false>
-	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"create_cdr": true,				// create CDR out of events and sends them to CDRS component
+	"enabled": true,
+	"create_cdr": true,
 },
 
 
 "historys": {
-	"enabled": true,							// starts History service: <true|false>.
-	"history_dir": "/tmp/cgr_kamevapi/cgrates/history",	// location on disk where to store history files.
+	"enabled": true,
+	"history_dir": "/tmp/cgr_kamevapi/cgrates/history",
 },
 
 
 "pubsubs": {
-	"enabled": true,				// starts PubSub service: <true|false>.
+	"enabled": true,
 },
 
 
 "aliases": {
-	"enabled": true,				// starts PubSub service: <true|false>.
+	"enabled": true,
 },
 
 
 "users": {
-	"enabled": true,				// starts User service: <true|false>.
-	"indexes": ["Uuid"],			// user profile field indexes
+	"enabled": true,
+	"indexes": ["Uuid"],
 },
 
 

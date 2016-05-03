@@ -27,7 +27,7 @@ func init() {
 	c := &CmdSetAliases{
 		name:      "aliases_set",
 		rpcMethod: "AliasesV1.SetAlias",
-		rpcParams: &engine.Alias{Direction: utils.OUT},
+		rpcParams: &engine.AttrAddAlias{Alias: &engine.Alias{Direction: utils.OUT}},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -37,7 +37,7 @@ func init() {
 type CmdSetAliases struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.Alias
+	rpcParams *engine.AttrAddAlias
 	*CommandExecuter
 }
 
@@ -51,7 +51,7 @@ func (self *CmdSetAliases) RpcMethod() string {
 
 func (self *CmdSetAliases) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.Alias{Direction: utils.OUT}
+		self.rpcParams = &engine.AttrAddAlias{Alias: &engine.Alias{Direction: utils.OUT}}
 	}
 	return self.rpcParams
 }

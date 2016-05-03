@@ -32,6 +32,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 /*
@@ -45,6 +46,7 @@ type Action struct {
 	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
 	Balance          *BalanceFilter
+	balanceValue     float64 // balance value after action execution, used with cdrlog
 }
 
 const (
@@ -73,6 +75,7 @@ const (
 	CDRLOG                    = "*cdrlog"
 	SET_DDESTINATIONS         = "*set_ddestinations"
 	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
+	CGR_RPC                   = "*cgr_rpc"
 )
 
 func (a *Action) Clone() *Action {
@@ -90,57 +93,36 @@ func (a *Action) Clone() *Action {
 type actionTypeFunc func(*Account, *StatsQueueTriggered, *Action, Actions) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
-	switch typ {
-	case LOG:
-		return logAction, true
-	case CDRLOG:
-		return cdrLogAction, true
-	case RESET_TRIGGERS:
-		return resetTriggersAction, true
-	case SET_RECURRENT:
-		return setRecurrentAction, true
-	case UNSET_RECURRENT:
-		return unsetRecurrentAction, true
-	case ALLOW_NEGATIVE:
-		return allowNegativeAction, true
-	case DENY_NEGATIVE:
-		return denyNegativeAction, true
-	case RESET_ACCOUNT:
-		return resetAccountAction, true
-	case TOPUP_RESET:
-		return topupResetAction, true
-	case TOPUP:
-		return topupAction, true
-	case DEBIT_RESET:
-		return debitResetAction, true
-	case DEBIT:
-		return debitAction, true
-	case RESET_COUNTERS:
-		return resetCountersAction, true
-	case ENABLE_ACCOUNT:
-		return enableUserAction, true
-	case DISABLE_ACCOUNT:
-		return disableUserAction, true
-	//case ENABLE_DISABLE_BALANCE:
-	//	return enableDisableBalanceAction, true
-	case CALL_URL:
-		return callUrl, true
-	case CALL_URL_ASYNC:
-		return callUrlAsync, true
-	case MAIL_ASYNC:
-		return mailAsync, true
-	case SET_DDESTINATIONS:
-		return setddestinations, true
-	case REMOVE_ACCOUNT:
-		return removeAccountAction, true
-	case REMOVE_BALANCE:
-		return removeBalanceAction, true
-	case SET_BALANCE:
-		return setBalanceAction, true
-	case TRANSFER_MONETARY_DEFAULT:
-		return transferMonetaryDefaultAction, true
+	actionFuncMap := map[string]actionTypeFunc{
+		LOG:             logAction,
+		CDRLOG:          cdrLogAction,
+		RESET_TRIGGERS:  resetTriggersAction,
+		SET_RECURRENT:   setRecurrentAction,
+		UNSET_RECURRENT: unsetRecurrentAction,
+		ALLOW_NEGATIVE:  allowNegativeAction,
+		DENY_NEGATIVE:   denyNegativeAction,
+		RESET_ACCOUNT:   resetAccountAction,
+		TOPUP_RESET:     topupResetAction,
+		TOPUP:           topupAction,
+		DEBIT_RESET:     debitResetAction,
+		DEBIT:           debitAction,
+		RESET_COUNTERS:  resetCountersAction,
+		ENABLE_ACCOUNT:  enableUserAction,
+		DISABLE_ACCOUNT: disableUserAction,
+		//case ENABLE_DISABLE_BALANCE:
+		//	return enableDisableBalanceAction, true
+		CALL_URL:                  callUrl,
+		CALL_URL_ASYNC:            callUrlAsync,
+		MAIL_ASYNC:                mailAsync,
+		SET_DDESTINATIONS:         setddestinations,
+		REMOVE_ACCOUNT:            removeAccountAction,
+		REMOVE_BALANCE:            removeBalanceAction,
+		SET_BALANCE:               setBalanceAction,
+		TRANSFER_MONETARY_DEFAULT: transferMonetaryDefaultAction,
+		CGR_RPC:                   cgrRPCAction,
 	}
-	return nil, false
+	f, exists := actionFuncMap[typ]
+	return f, exists
 }
 
 func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -181,6 +163,8 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 			parsedValue += rsrFld.ParseValue(action.Id)
 		case "ActionType":
 			parsedValue += rsrFld.ParseValue(action.ActionType)
+		case "ActionValue":
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
 		case "BalanceType":
 			parsedValue += rsrFld.ParseValue(action.Balance.GetType())
 		case "BalanceUUID":
@@ -188,7 +172,7 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 		case "BalanceID":
 			parsedValue += rsrFld.ParseValue(b.ID)
 		case "BalanceValue":
-			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.balanceValue, 'f', -1, 64))
 		case "DestinationIDs":
 			parsedValue += rsrFld.ParseValue(b.DestinationIDs.String())
 		case "ExtraParameters":
@@ -215,7 +199,7 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 		utils.TENANT:    utils.ParseRSRFieldsMustCompile(utils.TENANT, utils.INFIELD_SEP),
 		utils.ACCOUNT:   utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP),
 		utils.SUBJECT:   utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP),
-		utils.COST:      utils.ParseRSRFieldsMustCompile("BalanceValue", utils.INFIELD_SEP),
+		utils.COST:      utils.ParseRSRFieldsMustCompile("ActionValue", utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 
@@ -329,7 +313,9 @@ func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	return genericDebit(ub, c, true)
+	err = genericDebit(ub, c, true)
+	a.balanceValue = c.balanceValue
+	return
 }
 
 func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -338,7 +324,9 @@ func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	return genericDebit(ub, c, false)
+	err = genericDebit(ub, c, false)
+	a.balanceValue = c.balanceValue
+	return
 }
 
 func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -370,7 +358,7 @@ func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Balance != nil && a.Balance.GetValue() >= 0 { // only apply if not allready negative
+	if a.Balance != nil && a.Balance.GetValue() > 0 { // only apply if not allready negative
 		a.Balance.SetValue(-a.Balance.GetValue())
 	}
 }
@@ -426,9 +414,13 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error
 	if sq != nil {
 		o = sq
 	}
+	jsn, err := json.Marshal(o)
+	if err != nil {
+		return err
+	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	_, err := utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, o, utils.CONTENT_JSON, 1, fallbackPath)
+	_, err = utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 1, fallbackPath)
 	return err
 }
 
@@ -441,9 +433,13 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 	if sq != nil {
 		o = sq
 	}
+	jsn, err := json.Marshal(o)
+	if err != nil {
+		return err
+	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, o, utils.CONTENT_JSON, 3, fallbackPath)
+	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 3, fallbackPath)
 	return nil
 }
 
@@ -629,6 +625,49 @@ func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Act
 			}
 		}
 	}
+	return nil
+}
+
+type RPCRequest struct {
+	Address   string
+	Transport string
+	Method    string
+	Attempts  int
+	Async     bool
+	Params    map[string]interface{}
+}
+
+func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	req := RPCRequest{}
+	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
+		return err
+	}
+	params, err := utils.GetRpcParams(req.Method)
+	if err != nil {
+		return err
+	}
+	var client rpcclient.RpcClientConnection
+	if req.Address != utils.MetaInternal {
+		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
+			return err
+		}
+	} else {
+		client = params.Object.(rpcclient.RpcClientConnection)
+	}
+	in, out := params.InParam, params.OutParam
+	p, err := utils.FromMapStringInterfaceValue(req.Params, in)
+	if err != nil {
+		return err
+	}
+	if !req.Async {
+		err = client.Call(req.Method, p, out)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
+		return err
+	}
+	go func() {
+		err := client.Call(req.Method, p, out)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
+	}()
 	return nil
 }
 

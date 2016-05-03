@@ -119,3 +119,21 @@ func TestHandleDeivedChargersMatchDestNatRet(t *testing.T) {
 		t.Error("Derived charger failed to match dest")
 	}
 }
+
+func TestHandleDeivedChargersMatchDestSpec(t *testing.T) {
+	dcs := &utils.DerivedChargers{
+		DestinationIDs: utils.NewStringMap("NAT", "SPEC"),
+	}
+	if !DerivedChargersMatchesDest(dcs, "0723045326") {
+		t.Error("Derived charger failed to match dest")
+	}
+}
+
+func TestHandleDeivedChargersMatchDestNegativeSpec(t *testing.T) {
+	dcs := &utils.DerivedChargers{
+		DestinationIDs: utils.NewStringMap("NAT", "!SPEC"),
+	}
+	if DerivedChargersMatchesDest(dcs, "0723045326") {
+		t.Error("Derived charger failed to match dest")
+	}
+}

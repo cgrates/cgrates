@@ -7,7 +7,7 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
 
@@ -22,10 +22,13 @@
 },
 
 
-"cdrc": {
-	"FLATSTORE": {
+"cdrc": [
+	{
+		"id": "FLATSTORE",
 		"enabled": true,								// enable CDR client functionality
-		"cdrs": "internal",								// address where to reach CDR server. <internal|x.y.z.y:1234>
+		"cdrs_conns": [
+			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
+		],
 		"cdr_format": "opensips_flatstore",				// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": "|",							// separator used in case of csv files
 		"run_delay": 0,									// sleep interval in seconds between consecutive runs, 0 to use automation via inotify
@@ -54,6 +57,6 @@
 			{"tag": "DialogId", "cdr_field_id": "DialogId", "type": "cdrfield", "value": "11"},
 		],
 	},
-},
+],
 
 }

@@ -22,11 +22,12 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/rpcclient"
 )
 
 type SessionManager interface {
-	Rater() engine.Connector
-	CdrSrv() engine.Connector
+	Rater() rpcclient.RpcClientConnection
+	CdrSrv() rpcclient.RpcClientConnection
 	DebitInterval() time.Duration
 	DisconnectSession(engine.Event, string, string) error
 	WarnSessionMinDuration(string, string)

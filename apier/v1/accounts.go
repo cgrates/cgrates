@@ -318,7 +318,7 @@ func (self *ApierV1) GetAccounts(attr utils.AttrGetAccounts, reply *[]interface{
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + attr.Tenant); err != nil {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX+attr.Tenant, true); err != nil {
 			return err
 		}
 	} else {
@@ -426,7 +426,7 @@ func (self *ApierV1) modifyBalance(aType string, attr *AttrAddBalance, reply *st
 			Uuid:           attr.BalanceUuid,
 			ID:             attr.BalanceId,
 			Type:           utils.StringPointer(attr.BalanceType),
-			Value:          utils.Float64Pointer(attr.Value),
+			Value:          &utils.ValueFormula{Static: attr.Value},
 			ExpirationDate: expTime,
 			RatingSubject:  attr.RatingSubject,
 			Weight:         attr.Weight,
@@ -514,13 +514,15 @@ func (self *ApierV1) SetBalance(attr *AttrSetBalance, reply *string) error {
 			Uuid:           attr.BalanceUUID,
 			ID:             attr.BalanceID,
 			Type:           utils.StringPointer(attr.BalanceType),
-			Value:          attr.Value,
 			ExpirationDate: expTime,
 			RatingSubject:  attr.RatingSubject,
 			Weight:         attr.Weight,
 			Blocker:        attr.Blocker,
 			Disabled:       attr.Disabled,
 		},
+	}
+	if attr.Value != nil {
+		a.Balance.Value = &utils.ValueFormula{Static: *attr.Value}
 	}
 	if attr.Directions != nil {
 		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))
@@ -567,18 +569,20 @@ func (self *ApierV1) RemoveBalances(attr *AttrSetBalance, reply *string) error {
 	at := &engine.ActionTiming{}
 	at.SetAccountIDs(utils.StringMap{accID: true})
 	a := &engine.Action{
-		ActionType: engine.SET_BALANCE,
+		ActionType: engine.REMOVE_BALANCE,
 		Balance: &engine.BalanceFilter{
 			Uuid:           attr.BalanceUUID,
 			ID:             attr.BalanceID,
 			Type:           utils.StringPointer(attr.BalanceType),
-			Value:          attr.Value,
 			ExpirationDate: expTime,
 			RatingSubject:  attr.RatingSubject,
 			Weight:         attr.Weight,
 			Blocker:        attr.Blocker,
 			Disabled:       attr.Disabled,
 		},
+	}
+	if attr.Value != nil {
+		a.Balance.Value = &utils.ValueFormula{Static: *attr.Value}
 	}
 	if attr.Directions != nil {
 		a.Balance.Directions = utils.StringMapPointer(utils.ParseStringMap(*attr.Directions))

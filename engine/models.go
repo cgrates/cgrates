@@ -440,7 +440,7 @@ type TBLCDRs struct {
 	ExtraInfo       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
-	DeletedAt       time.Time
+	DeletedAt       *time.Time
 }
 
 func (t TBLCDRs) TableName() string {
@@ -451,10 +451,13 @@ type TBLSMCosts struct {
 	ID          int64
 	Cgrid       string
 	RunID       string
+	OriginHost  string
+	OriginID    string
 	CostSource  string
+	Usage       float64
 	CostDetails string
 	CreatedAt   time.Time
-	DeletedAt   time.Time
+	DeletedAt   *time.Time
 }
 
 func (t TBLSMCosts) TableName() string {

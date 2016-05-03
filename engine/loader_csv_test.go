@@ -42,6 +42,7 @@ NAT,0723
 NAT,+49
 RET,0723
 RET,0724
+SPEC,0723045
 PSTN_71,+4971
 PSTN_72,+4972
 PSTN_70,+4970
@@ -172,11 +173,14 @@ EE0,*topup_reset,,,,*monetary,*out,,,,SG3,*unlimited,,0,10,false,false,10
 EE0,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
 DEFEE,*cdrlog,"{""Category"":""^ddi"",""MediationRunId"":""^did_run""}",,,,,,,,,,,,,false,false,10
 NEG,*allow_negative,,,,*monetary,*out,,,,,*unlimited,,0,10,false,false,10
-BLOCK,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,10,20,true,false,20
+BLOCK,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,1,20,true,false,20
 BLOCK,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
+BLOCK_EMPTY,*topup,,,bblocker,*monetary,*out,,NAT,,,*unlimited,,0,20,true,false,20
+BLOCK_EMPTY,*topup,,,bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 FILTER,*topup,,"{""*and"":[{""Value"":{""*lt"":0}},{""Id"":{""*eq"":""*default""}}]}",bfree,*monetary,*out,,,,,*unlimited,,20,10,false,false,10
 EXP,*topup,,,,*voice,*out,,,,,*monthly,*any,300,10,false,false,10
 NOEXP,*topup,,,,*voice,*out,,,,,*unlimited,*any,50,10,false,false,10
+VF,*debit,,,,*monetary,*out,,,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":10, ""Interval"":""month"", ""Increment"":""day""}}",10,false,false,10
 `
 	actionPlans = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -188,6 +192,7 @@ TOPUP_SHARED10_AT,SE10,*asap,10
 TOPUP_EMPTY_AT,EE0,*asap,10
 POST_AT,NEG,*asap,10
 BLOCK_AT,BLOCK,*asap,10
+BLOCK_EMPTY_AT,BLOCK_EMPTY,*asap,10
 EXP_AT,EXP,*asap,10
 `
 
@@ -216,8 +221,10 @@ vdf,emptyY,TOPUP_EMPTY_AT,,,
 vdf,post,POST_AT,,,
 cgrates.org,alodis,TOPUP_EMPTY_AT,,true,true
 cgrates.org,block,BLOCK_AT,,false,false
+cgrates.org,block_empty,BLOCK_EMPTY_AT,,false,false
 cgrates.org,expo,EXP_AT,,false,false
 cgrates.org,expnoexp,,,false,false
+cgrates.org,vf,,,false,false
 `
 
 	derivedCharges = `
@@ -315,7 +322,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 12 {
+	if len(csvr.destinations) != 13 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
@@ -820,13 +827,13 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 13 {
+	if len(csvr.actions) != 15 {
 		t.Error("Failed to load actions: ", len(csvr.actions))
 	}
 	as1 := csvr.actions["MINI"]
 	expected := []*Action{
 		&Action{
-			Id:               "MINI0",
+			Id:               "MINI",
 			ActionType:       TOPUP_RESET,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
@@ -835,7 +842,7 @@ func TestLoadActions(t *testing.T) {
 				Type:           utils.StringPointer(utils.MONETARY),
 				Uuid:           as1[0].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				Value:          utils.Float64Pointer(10),
+				Value:          &utils.ValueFormula{Static: 10},
 				Weight:         utils.Float64Pointer(10),
 				DestinationIDs: nil,
 				TimingIDs:      nil,
@@ -846,7 +853,7 @@ func TestLoadActions(t *testing.T) {
 			},
 		},
 		&Action{
-			Id:               "MINI1",
+			Id:               "MINI",
 			ActionType:       TOPUP,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
@@ -855,7 +862,7 @@ func TestLoadActions(t *testing.T) {
 				Type:           utils.StringPointer(utils.VOICE),
 				Uuid:           as1[1].Balance.Uuid,
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
-				Value:          utils.Float64Pointer(100),
+				Value:          &utils.ValueFormula{Static: 100},
 				Weight:         utils.Float64Pointer(10),
 				RatingSubject:  utils.StringPointer("test"),
 				DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
@@ -868,12 +875,12 @@ func TestLoadActions(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(as1, expected) {
-		t.Errorf("Error loading action1: %+v", as1[0].Balance)
+		t.Errorf("Error loading action1: %s", utils.ToIJSON(as1))
 	}
 	as2 := csvr.actions["SHARED"]
 	expected = []*Action{
 		&Action{
-			Id:               "SHARED0",
+			Id:               "SHARED",
 			ActionType:       TOPUP,
 			ExpirationString: UNLIMITED,
 			Weight:           10,
@@ -882,7 +889,7 @@ func TestLoadActions(t *testing.T) {
 				Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 				DestinationIDs: nil,
 				Uuid:           as2[0].Balance.Uuid,
-				Value:          utils.Float64Pointer(100),
+				Value:          &utils.ValueFormula{Static: 100},
 				Weight:         utils.Float64Pointer(10),
 				SharedGroups:   utils.StringMapPointer(utils.NewStringMap("SG1")),
 				TimingIDs:      nil,
@@ -893,12 +900,12 @@ func TestLoadActions(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(as2, expected) {
-		t.Errorf("Error loading action: %+v", as2[0].Balance)
+		t.Errorf("Error loading action: %s", utils.ToIJSON(as2))
 	}
 	as3 := csvr.actions["DEFEE"]
 	expected = []*Action{
 		&Action{
-			Id:              "DEFEE0",
+			Id:              "DEFEE",
 			ActionType:      CDRLOG,
 			ExtraParameters: `{"Category":"^ddi","MediationRunId":"^did_run"}`,
 			Weight:          10,
@@ -1006,7 +1013,7 @@ func TestLoadLCRs(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionPlans) != 8 {
+	if len(csvr.actionPlans) != 9 {
 		t.Error("Failed to load action timings: ", len(csvr.actionPlans))
 	}
 	atm := csvr.actionPlans["MORE_MINUTES"]
@@ -1101,7 +1108,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 14 {
+	if len(csvr.accountActions) != 16 {
 		t.Error("Failed to load account actions: ", len(csvr.accountActions))
 	}
 	aa := csvr.accountActions["vdf:minitsboy"]

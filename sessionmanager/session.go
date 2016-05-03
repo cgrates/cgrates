@@ -58,7 +58,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 		sessionManager: sm,
 		connId:         connId,
 	}
-	if err := sm.Rater().GetSessionRuns(ev.AsStoredCdr(s.sessionManager.Timezone()), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
+	if err := sm.Rater().Call("Responder.GetSessionRuns", ev.AsStoredCdr(s.sessionManager.Timezone()), &s.sessionRuns); err != nil || len(s.sessionRuns) == 0 {
 		return nil
 	}
 	for runIdx := range s.sessionRuns {
@@ -70,7 +70,7 @@ func NewSession(ev engine.Event, connId string, sm SessionManager) *Session {
 // the debit loop method (to be stoped by sending somenthing on stopDebit channel)
 func (s *Session) debitLoop(runIdx int) {
 	nextCd := s.sessionRuns[runIdx].CallDescriptor
-	nextCd.CgrID = s.eventStart.GetCgrId("")
+	nextCd.CgrID = s.eventStart.GetCgrId(s.sessionManager.Timezone())
 	index := 0.0
 	debitPeriod := s.sessionManager.DebitInterval()
 	for {
@@ -86,7 +86,7 @@ func (s *Session) debitLoop(runIdx int) {
 		nextCd.LoopIndex = index
 		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := new(engine.CallCost)
-		if err := s.sessionManager.Rater().MaxDebit(nextCd, cc); err != nil {
+		if err := s.sessionManager.Rater().Call("Responder.MaxDebit", nextCd, cc); err != nil {
 			utils.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 			if err.Error() == utils.ErrUnauthorizedDestination.Error() {
 				s.sessionManager.DisconnectSession(s.eventStart, s.connId, UNAUTHORIZED_DESTINATION)
@@ -195,12 +195,22 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 	// show only what was actualy refunded (stopped in timespan)
 	// utils.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
-		cd := lastCC.CreateCallDescriptor()
-		cd.Increments = refundIncrements
+		cd := &engine.CallDescriptor{
+			CgrID:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
+			Direction:   lastCC.Direction,
+			Tenant:      lastCC.Tenant,
+			Category:    lastCC.Category,
+			Subject:     lastCC.Subject,
+			Account:     lastCC.Account,
+			Destination: lastCC.Destination,
+			TOR:         lastCC.TOR,
+			Increments:  refundIncrements,
+		}
 		cd.Increments.Compress()
 		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
 		var response float64
-		if err := s.sessionManager.Rater().RefundIncrements(cd, &response); err != nil {
+		err := s.sessionManager.Rater().Call("Responder.RefundIncrements", cd, &response)
+		if err != nil {
 			return err
 		}
 	}
@@ -235,22 +245,23 @@ func (s *Session) SaveOperations() {
 			cd := firstCC.CreateCallDescriptor()
 			cd.Increments = roundIncrements
 			var response float64
-			if err := s.sessionManager.Rater().RefundRounding(cd, &response); err != nil {
+			if err := s.sessionManager.Rater().Call("Responder.RefundRounding", cd, &response); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<SM> ERROR failed to refund rounding: %v", err))
 			}
 		}
+		smCost := &engine.SMCost{
+			CGRID:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
+			CostSource:  utils.SESSION_MANAGER_SOURCE,
+			RunID:       sr.DerivedCharger.RunID,
+			OriginHost:  s.eventStart.GetOriginatorIP(utils.META_DEFAULT),
+			OriginID:    s.eventStart.GetUUID(),
+			CostDetails: firstCC,
+		}
 		var reply string
-		err := s.sessionManager.CdrSrv().LogCallCost(&engine.CallCostLog{
-			CgrId:          s.eventStart.GetCgrId(s.sessionManager.Timezone()),
-			Source:         utils.SESSION_MANAGER_SOURCE,
-			RunId:          sr.DerivedCharger.RunID,
-			CallCost:       firstCC,
-			CheckDuplicate: true,
-		}, &reply)
-		// this is a protection against the case when the close event is missed for some reason
-		// when the cdr arrives to cdrserver because our callcost is not there it will be rated
-		// as postpaid. When the close event finally arives we have to refund everything
-		if err != nil {
+		if err := s.sessionManager.CdrSrv().Call("CdrServer.StoreSMCost", engine.AttrCDRSStoreSMCost{Cost: smCost, CheckDuplicate: true}, &reply); err != nil {
+			// this is a protection against the case when the close event is missed for some reason
+			// when the cdr arrives to cdrserver because our callcost is not there it will be rated
+			// as postpaid. When the close event finally arives we have to refund everything
 			if err == utils.ErrExists {
 				s.Refund(firstCC, firstCC.Timespans[0].TimeStart)
 			} else {
@@ -270,7 +281,7 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 		aSession := &ActiveSession{
 			CgrId:       s.eventStart.GetCgrId(s.sessionManager.Timezone()),
 			TOR:         utils.VOICE,
-			AccId:       s.eventStart.GetUUID(),
+			OriginID:    s.eventStart.GetUUID(),
 			CdrHost:     s.eventStart.GetOriginatorIP(utils.META_DEFAULT),
 			CdrSource:   "FS_" + s.eventStart.GetName(),
 			ReqType:     s.eventStart.GetReqType(utils.META_DEFAULT),
@@ -307,7 +318,7 @@ func (s *Session) AsActiveSessions() []*ActiveSession {
 type ActiveSession struct {
 	CgrId         string
 	TOR           string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms|*generic>
-	AccId         string            // represents the unique accounting id given by the telecom switch generating the CDR
+	OriginID      string            // represents the unique accounting id given by the telecom switch generating the CDR
 	CdrHost       string            // represents the IP address of the host generating the CDR (automatically populated by the server)
 	CdrSource     string            // formally identifies the source of the CDR (free form field)
 	ReqType       string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.

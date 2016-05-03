@@ -208,7 +208,7 @@ func TestDmtAgentTPFromFolder(t *testing.T) {
 	if err := apierRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(1000) * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 func TestConnectDiameterClient(t *testing.T) {
@@ -242,7 +242,7 @@ func TestDmtAgentSendCCRInit(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -286,7 +286,7 @@ func TestDmtAgentSendCCRUpdate(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -325,7 +325,7 @@ func TestDmtAgentSendCCRUpdate2(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if avps, err := msg.FindAVPsWithPath([]interface{}{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
@@ -363,7 +363,7 @@ func TestDmtAgentSendCCRTerminate(t *testing.T) {
 	if err := dmtClient.SendMessage(m); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(150) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage()
 	if msg == nil {
 		t.Fatal("No answer to CCR terminate received")
@@ -626,7 +626,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 			}),
 			diam.NewAVP(29000, avp.Mbit, 2011, &diam.GroupedAVP{ // MC-Information
 				AVP: []*diam.AVP{
-					diam.NewAVP(29001, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
+					diam.NewAVP(20938, avp.Mbit, 2011, datatype.OctetString("0x38924012914528")), // HighLayerCharacteristics
 					diam.NewAVP(29002, avp.Mbit, 2011, datatype.UTF8String("12928471313847173")), // MC-Service-Id
 					diam.NewAVP(29003, avp.Mbit, 2011, datatype.UTF8String("SPV123456012123")),   // TransparentData
 					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // MC-Information
@@ -641,7 +641,7 @@ func TestDmtAgentSendCCRSimpaEvent(t *testing.T) {
 	if err := dmtClient.SendMessage(ccr); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(time.Duration(100) * time.Millisecond)
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	msg := dmtClient.ReceivedMessage() // Discard the received message so we can test next one
 	if msg == nil {
 		t.Fatal("No message returned")
@@ -672,6 +672,261 @@ func TestDmtAgentCdrs(t *testing.T) {
 		if cdrs[0].Cost != 0.7565 {
 			t.Errorf("Unexpected CDR Cost received, cdr: %+v ", cdrs[0])
 		}
+	}
+}
+
+func TestDmtAgentSendDataGrpInit(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testdatagrp"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("gprs@huawei.com"))
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
+	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(1)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("104502200011")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.RequestedAction, avp.Mbit, 0, datatype.Enumerated(0))
+	ccr.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.CCTime, avp.Mbit, 0, datatype.Unsigned32(1))}})
+	ccr.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{ //
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("22509")), // Calling-Vlr-Number
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("4002")),  // Called-Party-NP
+				},
+			}),
+			diam.NewAVP(2000, avp.Mbit, 10415, &diam.GroupedAVP{ // SMS-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(886, avp.Mbit, 10415, &diam.GroupedAVP{ // Originator-Address
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1003")), // Address-Data
+						}}),
+					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // Recipient-Address
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1002")), // Address-Data
+						}}),
+				},
+			}),
+		}})
+	if err := dmtClient.SendMessage(ccr); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Result-Code not found")
+	} else if resCode := avpValAsString(avps[0]); resCode != "2001" {
+		t.Errorf("Expecting 2001, received: %s", resCode)
+	}
+}
+
+func TestDmtAgentSendDataGrpUpdate(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testdatagrp"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("gprs@huawei.com"))
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(2))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
+	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(1)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("104502200011")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.RequestedAction, avp.Mbit, 0, datatype.Enumerated(0))
+	ccr.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.CCTime, avp.Mbit, 0, datatype.Unsigned32(1))}})
+	ccr.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{ //
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("22509")), // Calling-Vlr-Number
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("4002")),  // Called-Party-NP
+				},
+			}),
+			diam.NewAVP(2000, avp.Mbit, 10415, &diam.GroupedAVP{ // SMS-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(886, avp.Mbit, 10415, &diam.GroupedAVP{ // Originator-Address
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1003")), // Address-Data
+						}}),
+					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // Recipient-Address
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1002")), // Address-Data
+						}}),
+				},
+			}),
+		}})
+	ccr.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(446, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),    // Tariff-Change-Usage
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)),   // CC-Time
+					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(1000)), // CC-Input-Octets
+					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(24)),   // CC-Output-Octets
+				},
+			}),
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(1)), // Data session for group 1
+		},
+	})
+	ccr.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(446, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),    // Tariff-Change-Usage
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)),   // CC-Time
+					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(1024)), // CC-Input-Octets
+					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(512)),  // CC-Output-Octets
+				},
+			}),
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(2)), // Data session for group 2
+		},
+	})
+	if err := dmtClient.SendMessage(ccr); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Result-Code not found")
+	} else if resCode := avpValAsString(avps[0]); resCode != "2001" {
+		t.Errorf("Expecting 2001, received: %s", resCode)
+	}
+}
+
+func TestDmtAgentSendDataGrpTerminate(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("testdatagrp"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("gprs@huawei.com"))
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(3))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
+	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2016, 1, 5, 11, 30, 10, 0, time.UTC)))
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(1)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("104502200011")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.RequestedAction, avp.Mbit, 0, datatype.Enumerated(0))
+	ccr.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.CCTime, avp.Mbit, 0, datatype.Unsigned32(1))}})
+	ccr.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{ //
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("22509")), // Calling-Vlr-Number
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("4002")),  // Called-Party-NP
+				},
+			}),
+			diam.NewAVP(2000, avp.Mbit, 10415, &diam.GroupedAVP{ // SMS-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(886, avp.Mbit, 10415, &diam.GroupedAVP{ // Originator-Address
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1003")), // Address-Data
+						}}),
+					diam.NewAVP(1201, avp.Mbit, 10415, &diam.GroupedAVP{ // Recipient-Address
+						AVP: []*diam.AVP{
+							diam.NewAVP(899, avp.Mbit, 10415, datatype.Enumerated(1)),      // Address-Type
+							diam.NewAVP(897, avp.Mbit, 10415, datatype.UTF8String("1002")), // Address-Data
+						}}),
+				},
+			}),
+		}})
+	ccr.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(446, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),   // Tariff-Change-Usage
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)),  // CC-Time
+					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(512)), // CC-Input-Octets
+					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(0)),   // CC-Output-Octets
+				},
+			}),
+		},
+	})
+	if err := dmtClient.SendMessage(ccr); err != nil {
+		t.Error(err)
+	}
+	time.Sleep(time.Duration(3000) * time.Millisecond)
+	msg := dmtClient.ReceivedMessage()
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	if avps, err := msg.FindAVPsWithPath([]interface{}{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Result-Code not found")
+	} else if resCode := avpValAsString(avps[0]); resCode != "2001" {
+		t.Errorf("Expecting 2001, received: %s", resCode)
+	}
+}
+
+func TestDmtAgentSendDataGrpCDRs(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{CGRIDs: []string{utils.Sha1("testdatagrp")}}
+	if err := apierRpc.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 3 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
 	}
 }
 

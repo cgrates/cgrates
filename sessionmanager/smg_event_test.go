@@ -127,7 +127,7 @@ func TestSMGenericEventParseFields(t *testing.T) {
 	if smGev.GetOriginatorIP(utils.META_DEFAULT) != "127.0.0.1" {
 		t.Error("Unexpected: ", smGev.GetOriginatorIP(utils.META_DEFAULT))
 	}
-	if extrFlds := smGev.GetExtraFields(); !reflect.DeepEqual(extrFlds, map[string]string{"Extra1": "Value1", "Extra2": "5"}) {
+	if extrFlds := smGev.GetExtraFields(); !reflect.DeepEqual(extrFlds, map[string]string{"Extra1": "Value1", "Extra2": "5", "LastUsed": "21s"}) {
 		t.Error("Unexpected: ", extrFlds)
 	}
 }
@@ -189,5 +189,21 @@ func TestSMGenericEventAsLcrRequest(t *testing.T) {
 		Account: "account1", Subject: "subject1", Destination: "+4986517174963", SetupTime: "2015-11-09 14:21:24", Duration: "1m23s"}
 	if lcrReq := smGev.AsLcrRequest(); !reflect.DeepEqual(eLcrReq, lcrReq) {
 		t.Errorf("Expecting: %+v, received: %+v", eLcrReq, lcrReq)
+	}
+}
+
+func TestSMGenericEventGetFieldAsString(t *testing.T) {
+	smGev := SMGenericEvent{}
+	smGev[utils.EVENT_NAME] = "TEST_EVENT"
+	smGev[utils.TOR] = utils.VOICE
+	smGev[utils.ACCID] = "12345"
+	smGev[utils.DIRECTION] = utils.OUT
+	smGev[utils.ACCOUNT] = "account1"
+	smGev[utils.SUBJECT] = "subject1"
+	eFldVal := utils.VOICE
+	if strVal, err := smGev.GetFieldAsString(utils.TOR); err != nil {
+		t.Error(err)
+	} else if strVal != eFldVal {
+		t.Errorf("Expecting: %s, received: %s", eFldVal, strVal)
 	}
 }

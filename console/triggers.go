@@ -19,48 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdUpdateAliases{
-		name:      "aliases_update",
-		rpcMethod: "AliasesV1.UpdateAlias",
-		rpcParams: &engine.Alias{Direction: utils.OUT},
+	c := &CmdGetTriggers{
+		name:      "triggers",
+		rpcMethod: "ApierV1.GetActionTriggers",
+		rpcParams: &v1.AttrGetActionTriggers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdUpdateAliases struct {
+type CmdGetTriggers struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.Alias
+	rpcParams *v1.AttrGetActionTriggers
 	*CommandExecuter
 }
 
-func (self *CmdUpdateAliases) Name() string {
+func (self *CmdGetTriggers) Name() string {
 	return self.name
 }
 
-func (self *CmdUpdateAliases) RpcMethod() string {
+func (self *CmdGetTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUpdateAliases) RpcParams(reset bool) interface{} {
+func (self *CmdGetTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.Alias{Direction: utils.OUT}
+		self.rpcParams = &v1.AttrGetActionTriggers{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdUpdateAliases) PostprocessRpcParams() error {
+func (self *CmdGetTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdUpdateAliases) RpcResult() interface{} {
-	var s string
-	return &s
+func (self *CmdGetTriggers) RpcResult() interface{} {
+	atr := engine.ActionTriggers{}
+	return &atr
 }

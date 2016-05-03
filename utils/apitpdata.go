@@ -275,6 +275,7 @@ type TPActions struct {
 type TPAction struct {
 	Identifier      string // Identifier mapped in the code
 	BalanceId       string // Balance identification string (account scope)
+	BalanceUuid     string // Balance identification string (global scope)
 	BalanceType     string // Type of balance the action will operate on
 	Directions      string // Balance direction
 	Units           string // Number of units to add/deduct
@@ -1160,6 +1161,7 @@ type AliasValue struct {
 // AttrSMGGetActiveSessions will filter returned sessions by SMGenericV1
 type AttrSMGGetActiveSessions struct {
 	ToR         *string
+	OriginID    *string
 	RunID       *string
 	RequestType *string
 	Tenant      *string
@@ -1168,4 +1170,11 @@ type AttrSMGGetActiveSessions struct {
 	Subject     *string
 	Destination *string
 	Supplier    *string
+}
+
+type AttrRateCDRs struct {
+	RPCCDRsFilter
+	StoreCDRs     *bool
+	SendToStatS   *bool // Set to true if the CDRs should be sent to stats server
+	ReplicateCDRs *bool // Replicate results
 }

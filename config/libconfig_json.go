@@ -25,10 +25,9 @@ type GeneralJsonCfg struct {
 	Dbdata_encoding      *string
 	Tpexport_dir         *string
 	Http_failed_dir      *string
-	Default_reqtype      *string
+	Default_request_type *string
 	Default_category     *string
 	Default_tenant       *string
-	Default_subject      *string
 	Default_timezone     *string
 	Connect_attempts     *int
 	Reconnects           *int
@@ -50,7 +49,7 @@ type DbJsonCfg struct {
 	Db_port           *int
 	Db_name           *string
 	Db_user           *string
-	Db_passwd         *string
+	Db_password       *string
 	Max_open_conns    *int // Used only in case of storDb
 	Max_idle_conns    *int
 	Load_history_size *int // Used in case of dataDb to limit the length of the loads history
@@ -63,15 +62,16 @@ type BalancerJsonCfg struct {
 }
 
 // Rater config section
-type RaterJsonCfg struct {
-	Enabled                    *bool
-	Balancer                   *string
-	Cdrstats                   *string
-	Historys                   *string
-	Pubsubs                    *string
-	Aliases                    *string
-	Users                      *string
-	Rp_subject_prefix_matching *bool
+type RalsJsonCfg struct {
+	Enabled                     *bool
+	Balancer                    *string
+	Cdrstats_conns              *[]*HaPoolJsonCfg
+	Historys_conns              *[]*HaPoolJsonCfg
+	Pubsubs_conns               *[]*HaPoolJsonCfg
+	Aliases_conns               *[]*HaPoolJsonCfg
+	Users_conns                 *[]*HaPoolJsonCfg
+	Rp_subject_prefix_matching  *bool
+	Lcr_subject_prefix_matching *bool
 }
 
 // Scheduler config section
@@ -84,17 +84,17 @@ type CdrsJsonCfg struct {
 	Enabled         *bool
 	Extra_fields    *[]string
 	Store_cdrs      *bool
-	Rater           *string
-	Pubsubs         *string
-	Users           *string
-	Aliases         *string
-	Cdrstats        *string
+	Rals_conns      *[]*HaPoolJsonCfg
+	Pubsubs_conns   *[]*HaPoolJsonCfg
+	Users_conns     *[]*HaPoolJsonCfg
+	Aliases_conns   *[]*HaPoolJsonCfg
+	Cdrstats_conns  *[]*HaPoolJsonCfg
 	Cdr_replication *[]*CdrReplicationJsonCfg
 }
 
 type CdrReplicationJsonCfg struct {
 	Transport   *string
-	Server      *string
+	Address     *string
 	Synchronous *bool
 	Attempts    *int
 	Cdr_filter  *string
@@ -143,9 +143,10 @@ type CdreJsonCfg struct {
 
 // Cdrc config section
 type CdrcJsonCfg struct {
+	Id                         *string
 	Enabled                    *bool
 	Dry_run                    *bool
-	Cdrs                       *string
+	Cdrs_conns                 *[]*HaPoolJsonCfg
 	Cdr_format                 *string
 	Field_separator            *string
 	Timezone                   *string
@@ -166,20 +167,23 @@ type CdrcJsonCfg struct {
 
 // SM-Generic config section
 type SmGenericJsonCfg struct {
-	Enabled           *bool
-	Listen_bijson     *string
-	Rater             *string
-	Cdrs              *string
-	Debit_interval    *string
-	Min_call_duration *string
-	Max_call_duration *string
+	Enabled               *bool
+	Listen_bijson         *string
+	Rals_conns            *[]*HaPoolJsonCfg
+	Cdrs_conns            *[]*HaPoolJsonCfg
+	Debit_interval        *string
+	Min_call_duration     *string
+	Max_call_duration     *string
+	Session_ttl           *string
+	Session_ttl_last_used *string
+	Session_ttl_usage     *string
 }
 
 // SM-FreeSWITCH config section
 type SmFsJsonCfg struct {
 	Enabled                *bool
-	Rater                  *string
-	Cdrs                   *string
+	Rals_conns             *[]*HaPoolJsonCfg
+	Cdrs_conns             *[]*HaPoolJsonCfg
 	Create_cdr             *bool
 	Extra_fields           *[]string
 	Debit_interval         *string
@@ -192,12 +196,17 @@ type SmFsJsonCfg struct {
 	Subscribe_park         *bool
 	Channel_sync_interval  *string
 	Max_wait_connection    *string
-	Connections            *[]*FsConnJsonCfg
+	Event_socket_conns     *[]*FsConnJsonCfg
+}
+
+// Represents one connection instance towards a rater/cdrs server
+type HaPoolJsonCfg struct {
+	Address *string
 }
 
 // Represents one connection instance towards FreeSWITCH
 type FsConnJsonCfg struct {
-	Server     *string
+	Address    *string
 	Password   *string
 	Reconnects *int
 }
@@ -205,18 +214,18 @@ type FsConnJsonCfg struct {
 // SM-Kamailio config section
 type SmKamJsonCfg struct {
 	Enabled           *bool
-	Rater             *string
-	Cdrs              *string
+	Rals_conns        *[]*HaPoolJsonCfg
+	Cdrs_conns        *[]*HaPoolJsonCfg
 	Create_cdr        *bool
 	Debit_interval    *string
 	Min_call_duration *string
 	Max_call_duration *string
-	Connections       *[]*KamConnJsonCfg
+	Evapi_conns       *[]*KamConnJsonCfg
 }
 
 // Represents one connection instance towards Kamailio
 type KamConnJsonCfg struct {
-	Evapi_addr *string
+	Address    *string
 	Reconnects *int
 }
 
@@ -224,8 +233,8 @@ type KamConnJsonCfg struct {
 type SmOsipsJsonCfg struct {
 	Enabled                   *bool
 	Listen_udp                *string
-	Rater                     *string
-	Cdrs                      *string
+	Rals_conns                *[]*HaPoolJsonCfg
+	Cdrs_conns                *[]*HaPoolJsonCfg
 	Create_cdr                *bool
 	Debit_interval            *string
 	Min_call_duration         *string
@@ -242,11 +251,11 @@ type OsipsConnJsonCfg struct {
 
 // DiameterAgent configuration
 type DiameterAgentJsonCfg struct {
-	Enabled            *bool   // enables the diameter agent: <true|false>
-	Listen             *string // address where to listen for diameter requests <x.y.z.y:1234>
-	Dictionaries_dir   *string // path towards additional dictionaries
-	Sm_generic         *string // connection towards generic SM
-	Pubsubs            *string // connection towards pubsubs
+	Enabled            *bool             // enables the diameter agent: <true|false>
+	Listen             *string           // address where to listen for diameter requests <x.y.z.y:1234>
+	Dictionaries_dir   *string           // path towards additional dictionaries
+	Sm_generic_conns   *[]*HaPoolJsonCfg // Connections towards generic SM
+	Pubsubs_conns      *[]*HaPoolJsonCfg // connection towards pubsubs
 	Create_cdr         *bool
 	Debit_interval     *string
 	Timezone           *string // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -296,10 +305,10 @@ type UserServJsonCfg struct {
 
 // Mailer config section
 type MailerJsonCfg struct {
-	Server       *string
-	Auth_user    *string
-	Auth_passwd  *string
-	From_address *string
+	Server        *string
+	Auth_user     *string
+	Auth_password *string
+	From_address  *string
 }
 
 // SureTax config section

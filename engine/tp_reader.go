@@ -433,7 +433,7 @@ func (tpr *TpReader) LoadLCRs() (err error) {
 			}
 		}
 		if !found && tpr.ratingStorage != nil {
-			if keys, err := tpr.ratingStorage.GetKeysForPrefix(utils.RATING_PROFILE_PREFIX + ratingProfileSearchKey); err != nil {
+			if keys, err := tpr.ratingStorage.GetKeysForPrefix(utils.RATING_PROFILE_PREFIX+ratingProfileSearchKey, true); err != nil {
 				return fmt.Errorf("[LCR] error querying ratingDb %s", err.Error())
 			} else if len(keys) != 0 {
 				found = true
@@ -514,7 +514,7 @@ func (tpr *TpReader) LoadActions() (err error) {
 				}
 			}
 			acts[idx] = &Action{
-				Id:         tag + strconv.Itoa(idx),
+				Id:         tag,
 				ActionType: tpact.Identifier,
 				//BalanceType:      tpact.BalanceType,
 				Weight:           tpact.Weight,
@@ -531,11 +531,11 @@ func (tpr *TpReader) LoadActions() (err error) {
 			}
 
 			if tpact.Units != "" && tpact.Units != utils.ANY {
-				u, err := strconv.ParseFloat(tpact.Units, 64)
+				vf, err := utils.ParseBalanceFilterValue(tpact.Units)
 				if err != nil {
 					return err
 				}
-				acts[idx].Balance.Value = utils.Float64Pointer(u)
+				acts[idx].Balance.Value = vf
 			}
 
 			if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {
@@ -990,7 +990,7 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 						}
 					}
 					acts[idx] = &Action{
-						Id:         tag + strconv.Itoa(idx),
+						Id:         tag,
 						ActionType: tpact.Identifier,
 						//BalanceType:      tpact.BalanceType,
 						Weight:           tpact.Weight,
@@ -1007,11 +1007,11 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *TpAccountAction) error 
 					}
 
 					if tpact.Units != "" && tpact.Units != utils.ANY {
-						u, err := strconv.ParseFloat(tpact.Units, 64)
+						vf, err := utils.ParseBalanceFilterValue(tpact.Units)
 						if err != nil {
 							return err
 						}
-						acts[idx].Balance.Value = utils.Float64Pointer(u)
+						acts[idx].Balance.Value = vf
 					}
 
 					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {
@@ -1338,7 +1338,7 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 						}
 					}
 					acts[idx] = &Action{
-						Id:         tag + strconv.Itoa(idx),
+						Id:         tag,
 						ActionType: tpact.Identifier,
 						//BalanceType:      tpact.BalanceType,
 						Weight:           tpact.Weight,
@@ -1355,11 +1355,11 @@ func (tpr *TpReader) LoadCdrStatsFiltered(tag string, save bool) (err error) {
 					}
 
 					if tpact.Units != "" && tpact.Units != utils.ANY {
-						u, err := strconv.ParseFloat(tpact.Units, 64)
+						vf, err := utils.ParseBalanceFilterValue(tpact.Units)
 						if err != nil {
 							return err
 						}
-						acts[idx].Balance.Value = utils.Float64Pointer(u)
+						acts[idx].Balance.Value = vf
 					}
 
 					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.ANY {

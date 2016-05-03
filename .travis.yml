@@ -7,7 +7,7 @@ install:
   - go get github.com/Masterminds/glide
   - glide install
 
-script: $TRAVIS_BUILD_DIR/test.sh
+script: go test -v $(glide novendor)
 
 branches:
   only: master

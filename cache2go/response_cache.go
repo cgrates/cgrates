@@ -18,7 +18,7 @@ type CacheItem struct {
 type ResponseCache struct {
 	ttl       time.Duration
 	cache     map[string]*CacheItem
-	semaphore map[string]chan bool
+	semaphore map[string]chan bool // used for waiting till the first goroutine processes the response
 	mu        sync.RWMutex
 }
 
@@ -32,6 +32,7 @@ func NewResponseCache(ttl time.Duration) *ResponseCache {
 }
 
 func (rc *ResponseCache) Cache(key string, item *CacheItem) {
+	//utils.Logger.Info("key: " + key)
 	if rc.ttl == 0 {
 		return
 	}
@@ -54,13 +55,21 @@ func (rc *ResponseCache) Get(key string) (*CacheItem, error) {
 	if rc.ttl == 0 {
 		return nil, utils.ErrNotImplemented
 	}
+	rc.mu.RLock()
+	item, ok := rc.cache[key]
+	rc.mu.RUnlock()
+	if ok {
+		//utils.Logger.Info(",,,,,,,,,,,,,,,,,,,,,Found key: " + key)
+		return item, nil
+	}
 	rc.wait(key) // wait for other goroutine processsing this key
 	rc.mu.RLock()
 	defer rc.mu.RUnlock()
-	item, ok := rc.cache[key]
+	item, ok = rc.cache[key]
 	if !ok {
 		return nil, ErrNotFound
 	}
+	//utils.Logger.Info("............................Found key: " + key)
 	return item, nil
 }
 

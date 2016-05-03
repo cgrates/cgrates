@@ -11,7 +11,7 @@ type BalanceFilter struct {
 	Uuid           *string
 	ID             *string
 	Type           *string
-	Value          *float64
+	Value          *utils.ValueFormula
 	Directions     *utils.StringMap
 	ExpirationDate *time.Time
 	Weight         *float64
@@ -58,7 +58,7 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		*result.ID = *bf.ID
 	}
 	if bf.Value != nil {
-		result.Value = new(float64)
+		result.Value = new(utils.ValueFormula)
 		*result.Value = *bf.Value
 	}
 	if bf.RatingSubject != nil {
@@ -116,7 +116,7 @@ func (bf *BalanceFilter) LoadFromBalance(b *Balance) *BalanceFilter {
 		bf.ID = &b.ID
 	}
 	if b.Value != 0 {
-		bf.Value = &b.Value
+		bf.Value.Static = b.Value
 	}
 	if !b.Directions.IsEmpty() {
 		bf.Directions = &b.Directions
@@ -173,14 +173,22 @@ func (bp *BalanceFilter) GetValue() float64 {
 	if bp == nil || bp.Value == nil {
 		return 0.0
 	}
-	return *bp.Value
+	if bp.Value.Method == "" {
+		return bp.Value.Static
+	}
+	// calculate using formula
+	formula, exists := utils.ValueFormulas[bp.Value.Method]
+	if !exists {
+		return 0.0
+	}
+	return formula(bp.Value.Params)
 }
 
 func (bp *BalanceFilter) SetValue(v float64) {
 	if bp.Value == nil {
-		bp.Value = new(float64)
+		bp.Value = new(utils.ValueFormula)
 	}
-	*bp.Value = v
+	bp.Value.Static = v
 }
 
 func (bp *BalanceFilter) GetUuid() string {
@@ -292,7 +300,7 @@ func (bf *BalanceFilter) ModifyBalance(b *Balance) {
 		b.Directions = *bf.Directions
 	}
 	if bf.Value != nil {
-		b.Value = *bf.Value
+		b.Value = bf.GetValue()
 	}
 	if bf.ExpirationDate != nil {
 		b.ExpirationDate = *bf.ExpirationDate

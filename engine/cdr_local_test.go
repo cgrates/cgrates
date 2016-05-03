@@ -19,10 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"flag"
-	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Arguments received via test command
@@ -42,7 +44,8 @@ func TestHttpJsonPost(t *testing.T) {
 		RunID: utils.DEFAULT_RUNID,
 		Usage: "0.00000001", ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if _, err := utils.HttpJsonPost("http://localhost:8000", false, cdrOut); err == nil {
+	jsn, _ := json.Marshal(cdrOut)
+	if _, err := utils.HttpJsonPost("http://localhost:8000", false, jsn); err == nil {
 		t.Error(err)
 	}
 }

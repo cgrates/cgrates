@@ -25,9 +25,10 @@ import (
 )
 
 type CdrcConfig struct {
+	ID                      string          // free-form text identifying this CDRC instance
 	Enabled                 bool            // Enable/Disable the profile
 	DryRun                  bool            // Do not post CDRs to the server
-	Cdrs                    string          // The address where CDRs can be reached
+	CdrsConns               []*HaPoolConfig // The address where CDRs can be reached
 	CdrFormat               string          // The type of CDR file to process <csv|opensips_flatstore>
 	FieldSeparator          rune            // The separator to use when reading csvs
 	DataUsageMultiplyFactor float64         // Conversion factor for data usage
@@ -51,14 +52,21 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 		return nil
 	}
 	var err error
+	if jsnCfg.Id != nil {
+		self.ID = *jsnCfg.Id
+	}
 	if jsnCfg.Enabled != nil {
 		self.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Dry_run != nil {
 		self.DryRun = *jsnCfg.Dry_run
 	}
-	if jsnCfg.Cdrs != nil {
-		self.Cdrs = *jsnCfg.Cdrs
+	if jsnCfg.Cdrs_conns != nil {
+		self.CdrsConns = make([]*HaPoolConfig, len(*jsnCfg.Cdrs_conns))
+		for idx, jsnHaCfg := range *jsnCfg.Cdrs_conns {
+			self.CdrsConns[idx] = NewDfltHaPoolConfig()
+			self.CdrsConns[idx].loadFromJsonCfg(jsnHaCfg)
+		}
 	}
 	if jsnCfg.Cdr_format != nil {
 		self.CdrFormat = *jsnCfg.Cdr_format
@@ -125,8 +133,13 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 // Clone itself into a new CdrcConfig
 func (self *CdrcConfig) Clone() *CdrcConfig {
 	clnCdrc := new(CdrcConfig)
+	clnCdrc.ID = self.ID
 	clnCdrc.Enabled = self.Enabled
-	clnCdrc.Cdrs = self.Cdrs
+	clnCdrc.CdrsConns = make([]*HaPoolConfig, len(self.CdrsConns))
+	for idx, cdrConn := range self.CdrsConns {
+		clonedVal := *cdrConn
+		clnCdrc.CdrsConns[idx] = &clonedVal
+	}
 	clnCdrc.CdrFormat = self.CdrFormat
 	clnCdrc.FieldSeparator = self.FieldSeparator
 	clnCdrc.DataUsageMultiplyFactor = self.DataUsageMultiplyFactor

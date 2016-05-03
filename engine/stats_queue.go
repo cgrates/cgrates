@@ -56,6 +56,7 @@ var METRIC_TRIGGER_MAP = map[string]string{
 type QCdr struct {
 	SetupTime  time.Time
 	AnswerTime time.Time
+	EventTime  time.Time
 	Pdd        time.Duration
 	Usage      time.Duration
 	Cost       float64
@@ -111,15 +112,19 @@ func (sq *StatsQueue) Load(saved *StatsQueue) {
 	}
 }
 
-func (sq *StatsQueue) AppendCDR(cdr *CDR) {
+func (sq *StatsQueue) AppendCDR(cdr *CDR) *QCdr {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
+	var qcdr *QCdr
 	if sq.conf.AcceptCdr(cdr) {
-		sq.appendQcdr(sq.simplifyCdr(cdr), true)
+		qcdr = sq.simplifyCdr(cdr)
+		sq.appendQcdr(qcdr, true)
 	}
+	return qcdr
 }
 
 func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
+	qcdr.EventTime = time.Now() //used for TimeWindow
 	sq.Cdrs = append(sq.Cdrs, qcdr)
 	sq.addToMetrics(qcdr)
 	sq.purgeObsoleteCdrs()
@@ -151,6 +156,7 @@ func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 }
 
 func (sq *StatsQueue) addToMetrics(cdr *QCdr) {
+	//log.Print("AddToMetrics: " + utils.ToIJSON(cdr))
 	for _, metric := range sq.metrics {
 		metric.AddCdr(cdr)
 	}
@@ -184,15 +190,20 @@ func (sq *StatsQueue) purgeObsoleteCdrs() {
 		}
 	}
 	if sq.conf.TimeWindow > 0 {
+		index := -1
 		for i, cdr := range sq.Cdrs {
-			if time.Now().Sub(cdr.SetupTime) > sq.conf.TimeWindow {
+			if time.Now().Sub(cdr.EventTime) > sq.conf.TimeWindow {
 				sq.removeFromMetrics(cdr)
+				index = i
 				continue
+			}
+			break
+		}
+		if index > -1 {
+			if index < len(sq.Cdrs)-1 {
+				sq.Cdrs = sq.Cdrs[index+1:]
 			} else {
-				if i > 0 {
-					sq.Cdrs = sq.Cdrs[i:]
-				}
-				break
+				sq.Cdrs = make([]*QCdr, 0)
 			}
 		}
 	}

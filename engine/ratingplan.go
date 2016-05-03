@@ -59,12 +59,7 @@ func (rp *RatingPlan) RateIntervalList(dId string) RateIntervalList {
 	return ril
 }
 
-/*
-type xCachedRatingPlan struct {
-	rp *RatingPlan
-	*cache2go.XEntry
-}
-*/
+// no sorter because it's sorted with RateIntervalTimeSorter
 
 /*
 Adds one ore more intervals to the internal interval list only if it is not allready in the list.

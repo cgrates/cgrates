@@ -1,0 +1,10 @@
+{
+"diameter_agent": {
+	"enabled": true,
+	"listen": "127.0.0.1:3868",
+	"sm_generic_conns": [
+        {"address": "127.0.0.1:2018"},
+        {"address": "127.0.0.1:2020"}
+    ],
+},
+}

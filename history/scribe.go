@@ -30,10 +30,6 @@ const (
 	RATING_PROFILES_FN = "rating_profiles.json"
 )
 
-type Scribe interface {
-	Record(Record, *int) error
-}
-
 type Record struct {
 	Id       string
 	Filename string

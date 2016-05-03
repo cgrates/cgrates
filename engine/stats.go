@@ -20,11 +20,12 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type StatsInterface interface {
@@ -303,54 +304,30 @@ func (s *Stats) Stop(int, *int) error {
 	return nil
 }
 
-type ProxyStats struct {
-	Client *rpcclient.RpcClient
-}
-
-func NewProxyStats(addr string, attempts, reconnects int) (*ProxyStats, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB, nil)
-	if err != nil {
-		return nil, err
+func (s *Stats) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
 	}
-	return &ProxyStats{Client: client}, nil
-}
+	// get method
+	method := reflect.ValueOf(s).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
 
-func (ps *ProxyStats) GetValues(sqID string, values *map[string]float64) error {
-	return ps.Client.Call("Stats.GetValues", sqID, values)
-}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 
-func (ps *ProxyStats) AppendCDR(cdr *CDR, out *int) error {
-	return ps.Client.Call("Stats.AppendCDR", cdr, out)
-}
-
-func (ps *ProxyStats) GetQueueIds(in int, ids *[]string) error {
-	return ps.Client.Call("Stats.GetQueueIds", in, ids)
-}
-
-func (ps *ProxyStats) GetQueue(id string, sq *StatsQueue) error {
-	return ps.Client.Call("Stats.GetQueue", id, sq)
-}
-
-func (ps *ProxyStats) GetQueueTriggers(id string, ats *ActionTriggers) error {
-	return ps.Client.Call("Stats.GetQueueTriggers", id, ats)
-}
-
-func (ps *ProxyStats) AddQueue(cs *CdrStats, out *int) error {
-	return ps.Client.Call("Stats.AddQueue", cs, out)
-}
-
-func (ps *ProxyStats) RemoveQueue(qID string, out *int) error {
-	return ps.Client.Call("Stats.RemoveQueue", qID, out)
-}
-
-func (ps *ProxyStats) ReloadQueues(ids []string, out *int) error {
-	return ps.Client.Call("Stats.ReloadQueues", ids, out)
-}
-
-func (ps *ProxyStats) ResetQueues(ids []string, out *int) error {
-	return ps.Client.Call("Stats.ResetQueues", ids, out)
-}
-
-func (ps *ProxyStats) Stop(i int, r *int) error {
-	return ps.Client.Call("Stats.Stop", 0, i)
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }

@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 	"gopkg.in/fsnotify.v1"
 )
 
@@ -54,7 +55,7 @@ Common parameters within configs processed:
 Parameters specific per config instance:
  * duMultiplyFactor, cdrSourceId, cdrFilter, cdrFields
 */
-func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs engine.Connector, closeChan chan struct{}, dfltTimezone string) (*Cdrc, error) {
+func NewCdrc(cdrcCfgs []*config.CdrcConfig, httpSkipTlsCheck bool, cdrs rpcclient.RpcClientConnection, closeChan chan struct{}, dfltTimezone string) (*Cdrc, error) {
 	var cdrcCfg *config.CdrcConfig
 	for _, cdrcCfg = range cdrcCfgs { // Take the first config out, does not matter which one
 		break
@@ -82,10 +83,10 @@ func NewCdrc(cdrcCfgs map[string]*config.CdrcConfig, httpSkipTlsCheck bool, cdrs
 
 type Cdrc struct {
 	httpSkipTlsCheck    bool
-	cdrcCfgs            map[string]*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
+	cdrcCfgs            []*config.CdrcConfig // All cdrc config profiles attached to this CDRC (key will be profile instance name)
 	dfltCdrcCfg         *config.CdrcConfig
 	timezone            string
-	cdrs                engine.Connector
+	cdrs                rpcclient.RpcClientConnection
 	httpClient          *http.Client
 	closeChan           chan struct{}        // Used to signal config reloads when we need to span different CDRC-Client
 	maxOpenFiles        chan struct{}        // Maximum number of simultaneous files processed
@@ -201,7 +202,7 @@ func (self *Cdrc) processFile(filePath string) error {
 				utils.Logger.Info(fmt.Sprintf("<Cdrc> DryRun CDR: %+v", storedCdr))
 				continue
 			}
-			if err := self.cdrs.ProcessCdr(storedCdr, &reply); err != nil {
+			if err := self.cdrs.Call("Responder.ProcessCdr", storedCdr, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", storedCdr, reply))

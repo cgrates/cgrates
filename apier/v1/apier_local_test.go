@@ -1274,7 +1274,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
@@ -1294,11 +1294,11 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else {
-		if rcvStats.Destinations != 4 ||
-			rcvStats.RatingPlans != 3 ||
-			rcvStats.RatingProfiles != 3 ||
-			rcvStats.Actions != 6 ||
-			rcvStats.DerivedChargers != 2 {
+		if rcvStats.Destinations != 5 ||
+			rcvStats.RatingPlans != 5 ||
+			rcvStats.RatingProfiles != 5 ||
+			rcvStats.Actions != 11 ||
+			rcvStats.DerivedChargers != 3 {
 			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 		}
 	}
@@ -1359,7 +1359,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 	}
 	attrs.CgrId = "dummyid"
 	attrs.RunId = "default"
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != "SERVER_ERROR: record not found" {
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got:", err)
 	}
 }

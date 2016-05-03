@@ -116,13 +116,13 @@ type CdrExporter struct {
 // Return Json marshaled callCost attached to
 // Keep it separately so we test only this part in local tests
 func (cdre *CdrExporter) getCdrCostDetails(CGRID, runId string) (string, error) {
-	cc, err := cdre.cdrDb.GetCallCostLog(CGRID, runId)
+	smcs, err := cdre.cdrDb.GetSMCosts(CGRID, runId, "", "")
 	if err != nil {
 		return "", err
-	} else if cc == nil {
+	} else if len(smcs) == 0 {
 		return "", nil
 	}
-	ccJson, _ := json.Marshal(cc)
+	ccJson, _ := json.Marshal(smcs[0].CostDetails)
 	return string(ccJson), nil
 }
 
@@ -352,9 +352,13 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 		case utils.META_HTTP_POST:
 			var outValByte []byte
 			httpAddr := cfgFld.Value.Id()
+			jsn, err := json.Marshal(cdr)
+			if err != nil {
+				return err
+			}
 			if len(httpAddr) == 0 {
 				err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-			} else if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, cdr); err == nil {
+			} else if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, jsn); err == nil {
 				outVal = string(outValByte)
 				if len(outVal) == 0 && cfgFld.Mandatory {
 					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)

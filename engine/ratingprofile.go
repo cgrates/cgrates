@@ -92,15 +92,18 @@ type RatingInfo struct {
 
 // SelectRatingIntevalsForTimespan orders rate intervals in time preserving only those which aply to the specified timestamp
 func (ri RatingInfo) SelectRatingIntevalsForTimespan(ts *TimeSpan) (result RateIntervalList) {
-	ri.RateIntervals.Sort()
 	sorter := &RateIntervalTimeSorter{referenceTime: ts.TimeStart, ris: ri.RateIntervals}
 	rateIntervals := sorter.Sort()
 	// get the rating interval closest to begining of timespan
 	var delta time.Duration = -1
 	var bestRateIntervalIndex int
+	var bestIntervalWeight float64
 	for index, rateInterval := range rateIntervals {
 		if !rateInterval.Contains(ts.TimeStart, false) {
 			continue
+		}
+		if rateInterval.Weight < bestIntervalWeight {
+			break // don't consider lower weights'
 		}
 		startTime := rateInterval.Timing.getLeftMargin(ts.TimeStart)
 		tmpDelta := ts.TimeStart.Sub(startTime)
@@ -108,12 +111,17 @@ func (ri RatingInfo) SelectRatingIntevalsForTimespan(ts *TimeSpan) (result RateI
 			startTime.Equal(ts.TimeStart)) &&
 			(delta == -1 || tmpDelta < delta) {
 			bestRateIntervalIndex = index
+			bestIntervalWeight = rateInterval.Weight
 			delta = tmpDelta
 		}
 	}
 	result = append(result, rateIntervals[bestRateIntervalIndex])
 	// check if later rating intervals influence this timespan
+	//log.Print("RIS: ", utils.ToIJSON(rateIntervals))
 	for i := bestRateIntervalIndex + 1; i < len(rateIntervals); i++ {
+		if rateIntervals[i].Weight < bestIntervalWeight {
+			break // don't consider lower weights'
+		}
 		startTime := rateIntervals[i].Timing.getLeftMargin(ts.TimeStart)
 		if startTime.Before(ts.TimeEnd) {
 			result = append(result, rateIntervals[i])
@@ -256,8 +264,9 @@ func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err erro
 	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
 	baseKey := key[:lastIndex]
 	subject := key[lastIndex:]
-	for i := 1; i < len(subject)-1; i++ {
-		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:len(subject)-i], false); err == nil {
+	lenSubject := len(subject)
+	for i := 1; i < lenSubject-1; i++ {
+		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false); err == nil {
 			return rp, err
 		}
 	}

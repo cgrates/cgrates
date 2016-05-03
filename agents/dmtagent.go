@@ -32,7 +32,7 @@ import (
 	"github.com/fiorix/go-diameter/diam/sm"
 )
 
-func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient, pubsubs *rpcclient.RpcClient) (*DiameterAgent, error) {
+func NewDiameterAgent(cgrCfg *config.CGRConfig, smg rpcclient.RpcClientConnection, pubsubs rpcclient.RpcClientConnection) (*DiameterAgent, error) {
 	da := &DiameterAgent{cgrCfg: cgrCfg, smg: smg, pubsubs: pubsubs}
 	dictsDir := cgrCfg.DiameterAgentCfg().DictionariesDir
 	if len(dictsDir) != 0 {
@@ -45,8 +45,8 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, smg *rpcclient.RpcClient, pubsub
 
 type DiameterAgent struct {
 	cgrCfg  *config.CGRConfig
-	smg     *rpcclient.RpcClient // Connection towards CGR-SMG component
-	pubsubs *rpcclient.RpcClient // Connection towards CGR-PubSub component
+	smg     rpcclient.RpcClientConnection // Connection towards CGR-SMG component
+	pubsubs rpcclient.RpcClientConnection // Connection towards CGR-PubSub component
 }
 
 // Creates the message handlers
@@ -69,7 +69,7 @@ func (self *DiameterAgent) handlers() diam.Handler {
 	return dSM
 }
 
-func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor, cca *CCA) (bool, error) {
+func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestProcessor, processorVars map[string]string, cca *CCA) (bool, error) {
 	passesAllFilters := true
 	for _, fldFilter := range reqProcessor.RequestFilter {
 		if passes, _ := passesFieldFilter(ccr.diamMessage, fldFilter, nil); !passes {
@@ -122,7 +122,6 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 		}
 	}
 	var maxUsage float64
-	processorVars := make(map[string]string)
 	processorVars[CGRResultCode] = strconv.Itoa(diam.Success)
 	processorVars[CGRError] = ""
 	if reqProcessor.DryRun { // DryRun does not send over network
@@ -166,6 +165,15 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				processorVars[CGRResultCode] = strconv.Itoa(DiameterRatingFailed)
 			}
 		}
+		if maxUsage < 0 {
+			maxUsage = 0
+		}
+		if prevMaxUsageStr, hasKey := processorVars[CGRMaxUsage]; hasKey {
+			prevMaxUsage, _ := strconv.ParseFloat(prevMaxUsageStr, 64)
+			if prevMaxUsage < maxUsage {
+				maxUsage = prevMaxUsage
+			}
+		}
 		processorVars[CGRMaxUsage] = strconv.FormatFloat(maxUsage, 'f', -1, 64)
 	}
 	if err := messageSetAVPsWithPath(cca.diamMessage, []interface{}{"Result-Code"}, processorVars[CGRResultCode],
@@ -190,10 +198,14 @@ func (self *DiameterAgent) handleCCR(c diam.Conn, m *diam.Message) {
 		return
 	}
 	cca := NewBareCCAFromCCR(ccr, self.cgrCfg.DiameterAgentCfg().OriginHost, self.cgrCfg.DiameterAgentCfg().OriginRealm)
-	var processed bool
+	var processed, lclProcessed bool
+	processorVars := make(map[string]string) // Shared between processors
 	for _, reqProcessor := range self.cgrCfg.DiameterAgentCfg().RequestProcessors {
-		processed, err = self.processCCR(ccr, reqProcessor, cca)
-		if err != nil || (processed && !reqProcessor.ContinueOnSuccess) {
+		lclProcessed, err = self.processCCR(ccr, reqProcessor, processorVars, cca)
+		if lclProcessed { // Process local so we don't overwrite globally
+			processed = lclProcessed
+		}
+		if err != nil || (lclProcessed && !reqProcessor.ContinueOnSuccess) {
 			break
 		}
 	}

@@ -33,6 +33,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -48,8 +49,9 @@ type ApierV1 struct {
 	Sched       *scheduler.Scheduler
 	Config      *config.CGRConfig
 	Responder   *engine.Responder
-	CdrStatsSrv engine.StatsInterface
-	Users       engine.UserService
+	CdrStatsSrv rpcclient.RpcClientConnection
+	Users       rpcclient.RpcClientConnection
+	CDRs        rpcclient.RpcClientConnection // FixMe: populate it from cgr-engine
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -103,11 +105,12 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 }
 
 func (self *ApierV1) ExecuteAction(attr *utils.AttrExecuteAction, reply *string) error {
-	accID := utils.AccountKey(attr.Tenant, attr.Account)
 	at := &engine.ActionTiming{
 		ActionsID: attr.ActionsId,
 	}
-	at.SetAccountIDs(utils.StringMap{accID: true})
+	if attr.Tenant != "" && attr.Account != "" {
+		at.SetAccountIDs(utils.StringMap{utils.AccountKey(attr.Tenant, attr.Account): true})
+	}
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
@@ -375,13 +378,13 @@ func (self *ApierV1) LoadTariffPlanFromStorDb(attrs AttrLoadTpFromStorDb, reply 
 	}
 
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
+		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, nil); err != nil {
 			return err
 		}
 	}
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
-		if err := self.Users.ReloadUsers("", &r); err != nil {
+		if err := self.Users.Call("AliasV1.ReloadUsers", "", &r); err != nil {
 			return err
 		}
 	}
@@ -502,10 +505,10 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 	}
 	storeActions := make(engine.Actions, len(attrs.Actions))
 	for idx, apiAct := range attrs.Actions {
-		var units *float64
+		var vf *utils.ValueFormula
 		if apiAct.Units != "" {
-			if x, err := strconv.ParseFloat(apiAct.Units, 64); err == nil {
-				units = &x
+			if x, err := utils.ParseBalanceFilterValue(apiAct.Units); err == nil {
+				vf = x
 			} else {
 				return err
 			}
@@ -521,17 +524,17 @@ func (self *ApierV1) SetActions(attrs utils.AttrSetActions, reply *string) error
 		}
 
 		a := &engine.Action{
-			Id:               utils.GenUUID(),
+			Id:               attrs.ActionsId,
 			ActionType:       apiAct.Identifier,
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
 			ExtraParameters:  apiAct.ExtraParameters,
 			Filter:           apiAct.Filter,
 			Balance: &engine.BalanceFilter{ // TODO: update this part
-				Uuid:           utils.StringPointer(utils.GenUUID()),
+				Uuid:           utils.StringPointer(apiAct.BalanceUuid),
 				ID:             utils.StringPointer(apiAct.BalanceId),
 				Type:           utils.StringPointer(apiAct.BalanceType),
-				Value:          units,
+				Value:          vf,
 				Weight:         weight,
 				Directions:     utils.StringMapPointer(utils.ParseStringMap(apiAct.Directions)),
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
@@ -560,7 +563,8 @@ func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
 		return utils.NewErrServerError(err)
 	}
 	for _, engAct := range engActs {
-		act := &utils.TPAction{Identifier: engAct.ActionType,
+		act := &utils.TPAction{
+			Identifier:      engAct.ActionType,
 			ExpiryTime:      engAct.ExpirationString,
 			ExtraParameters: engAct.ExtraParameters,
 			Filter:          engAct.Filter,
@@ -808,23 +812,23 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.DerivedChargers = cache2go.CountEntries(utils.DERIVEDCHARGERS_PREFIX)
 	cs.LcrProfiles = cache2go.CountEntries(utils.LCR_PREFIX)
 	cs.Aliases = cache2go.CountEntries(utils.ALIASES_PREFIX)
-	if self.CdrStatsSrv != nil && self.Config.CDRStatsEnabled {
+	if self.CdrStatsSrv != nil {
 		var queueIds []string
-		if err := self.CdrStatsSrv.GetQueueIds(0, &queueIds); err != nil {
+		if err := self.CdrStatsSrv.Call("CDRStatsV1.GetQueueIds", 0, &queueIds); err != nil {
 			return utils.NewErrServerError(err)
 		}
 		cs.CdrStats = len(queueIds)
 	}
-	if self.Config.RaterUserServer == utils.INTERNAL {
+	if self.Users != nil {
 		var ups engine.UserProfiles
-		if err := self.Users.GetUsers(engine.UserProfile{}, &ups); err != nil {
+		if err := self.Users.Call("UsersV1.GetUsers", &engine.UserProfile{}, &ups); err != nil {
 			return utils.NewErrServerError(err)
 		}
 		cs.Users = len(ups)
 	}
 	if loadHistInsts, err := self.AccountDb.GetLoadHistory(1, false); err != nil || len(loadHistInsts) == 0 {
 		if err != nil { // Not really an error here since we only count in cache
-			utils.Logger.Err(fmt.Sprintf("ApierV1.GetCacheStats, error on GetLoadHistory: %s", err.Error()))
+			utils.Logger.Warning(fmt.Sprintf("ApierV1.GetCacheStats, error on GetLoadHistory: %s", err.Error()))
 		}
 		cs.LastLoadId = utils.NOT_AVAILABLE
 		cs.LastLoadTime = utils.NOT_AVAILABLE
@@ -960,13 +964,14 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		self.Sched.Reload(true)
 	}
 	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
-		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
+		var out int
+		if err := self.CdrStatsSrv.Call("CDRStatsV1.ReloadQueues", cstKeys, &out); err != nil {
 			return err
 		}
 	}
 	if len(userKeys) != 0 && self.Users != nil {
 		var r string
-		if err := self.Users.ReloadUsers("", &r); err != nil {
+		if err := self.Users.Call("UsersV1.ReloadUsers", "", &r); err != nil {
 			return err
 		}
 	}
@@ -1058,5 +1063,68 @@ func (self *ApierV1) GetLoadHistory(attrs utils.Paginator, reply *[]*engine.Load
 		nrItems = len(loadHist)
 	}
 	*reply = loadHist[offset:nrItems]
+	return nil
+}
+
+type AttrRemActions struct {
+	ActionIDs []string
+}
+
+func (self *ApierV1) RemActions(attr AttrRemActions, reply *string) error {
+	if attr.ActionIDs == nil {
+		err := utils.ErrNotFound
+		*reply = err.Error()
+		return err
+	}
+	// The check could lead to very long execution time. So we decided to leave it at the user's risck.'
+	/*
+		stringMap := utils.NewStringMap(attr.ActionIDs...)
+		keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX, true)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		for _, key := range keys {
+			getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):])
+			if err != nil {
+				*reply = err.Error()
+				return err
+			}
+			for _, atr := range getAttrs {
+				if _, found := stringMap[atr.ActionsID]; found {
+					// found action trigger referencing action; abort
+					err := fmt.Errorf("action %s refenced by action trigger %s", atr.ActionsID, atr.ID)
+					*reply = err.Error()
+					return err
+				}
+			}
+		}
+		allAplsMap, err := self.RatingDb.GetAllActionPlans()
+		if err != nil && err != utils.ErrNotFound {
+			*reply = err.Error()
+			return err
+		}
+		for _, apl := range allAplsMap {
+			for _, atm := range apl.ActionTimings {
+				if _, found := stringMap[atm.ActionsID]; found {
+					err := fmt.Errorf("action %s refenced by action plan %s", atm.ActionsID, apl.Id)
+					*reply = err.Error()
+					return err
+				}
+			}
+
+		}
+	*/
+	for _, aID := range attr.ActionIDs {
+		if err := self.RatingDb.RemoveActions(aID); err != nil {
+			*reply = err.Error()
+			return err
+		}
+	}
+	if err := self.RatingDb.CacheRatingPrefixes(utils.ACTION_PREFIX); err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = utils.OK
 	return nil
 }

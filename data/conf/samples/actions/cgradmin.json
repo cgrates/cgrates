@@ -10,11 +10,17 @@
 	"http": ":2080",				// HTTP listening address
 },
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-        "pubsubs": "internal",
-        "users": "internal",
-        "aliases": "internal",
+		"pubsubs_conns": [
+			{"address": "*internal"}
+		],
+		"users_conns": [
+			{"address": "*internal"}
+		],
+		"aliases_conns": [
+			{"address": "*internal"}
+		],
 },
 
 "scheduler": {

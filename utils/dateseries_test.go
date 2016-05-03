@@ -161,3 +161,30 @@ func TestDateseriesMonthsIsCompleteYes(t *testing.T) {
 		t.Error("Error months IsComplete: ", months)
 	}
 }
+
+func TestDateseriesDaysInMonth(t *testing.T) {
+	if n := DaysInMonth(2016, 4); n != 30 {
+		t.Error("error calculating days: ", n)
+	}
+	if n := DaysInMonth(2016, 2); n != 29 {
+		t.Error("error calculating days: ", n)
+	}
+	if n := DaysInMonth(2016, 1); n != 31 {
+		t.Error("error calculating days: ", n)
+	}
+	if n := DaysInMonth(2016, 12); n != 31 {
+		t.Error("error calculating days: ", n)
+	}
+	if n := DaysInMonth(2015, 2); n != 28 {
+		t.Error("error calculating days: ", n)
+	}
+}
+
+func TestDateseriesDaysInYear(t *testing.T) {
+	if n := DaysInYear(2016); n != 366 {
+		t.Error("error calculating days: ", n)
+	}
+	if n := DaysInYear(2015); n != 365 {
+		t.Error("error calculating days: ", n)
+	}
+}

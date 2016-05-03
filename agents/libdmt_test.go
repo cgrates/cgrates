@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fiorix/go-diameter/diam"
 	"github.com/fiorix/go-diameter/diam/avp"
@@ -133,12 +134,12 @@ func TestMetaSum(t *testing.T) {
 			}),
 		},
 	})
-	if val, err := metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err != nil {
+	if val, err := metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;^|;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 0, 10); err != nil {
 		t.Error(err)
 	} else if val != "9995" {
 		t.Error("Received: ", val)
 	}
-	if _, err = metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 10); err == nil {
+	if _, err = metaSum(m, utils.ParseRSRFieldsMustCompile("Requested-Service-Unit>CC-Money>Unit-Value>Value-Digits;Requested-Service-Unit>CC-Money>Unit-Value>Exponent", utils.INFIELD_SEP), 0, 10); err == nil {
 		t.Error("Should have received error") // Insufficient number arguments
 	}
 }
@@ -394,5 +395,88 @@ func TestCCASetProcessorAVPs(t *testing.T) {
 		t.Error(err)
 	} else if ccaMsg := cca.AsDiameterMessage(); !reflect.DeepEqual(eMessage, ccaMsg) {
 		t.Errorf("Expecting: %+v, received: %+v", eMessage, ccaMsg)
+	}
+}
+
+func TestCCRAsSMGenericEvent(t *testing.T) {
+	ccr := &CCR{ // Bare information, just the one needed for answer
+		SessionId:         "ccrasgen1",
+		AuthApplicationId: 4,
+		CCRequestType:     3,
+	}
+	ccr.diamMessage = ccr.AsBareDiameterMessage()
+	ccr.diamMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(446, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(17)),   // CC-Time
+					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(1341)), // CC-Input-Octets
+					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(3079)), // CC-Output-Octets
+				},
+			}),
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(99)),
+		},
+	})
+	ccr.diamMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(446, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(452, avp.Mbit, 0, datatype.Enumerated(0)),     // Tariff-Change-Usage
+					diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(20)),    // CC-Time
+					diam.NewAVP(412, avp.Mbit, 0, datatype.Unsigned64(8046)),  // CC-Input-Octets
+					diam.NewAVP(414, avp.Mbit, 0, datatype.Unsigned64(46193)), // CC-Output-Octets
+				},
+			}),
+			diam.NewAVP(432, avp.Mbit, 0, datatype.Unsigned32(1)),
+		},
+	})
+	ccr.diamMessage.NewAVP("FramedIPAddress", avp.Mbit, 0, datatype.OctetString("0AE40041"))
+	cfgFlds := make([]*config.CfgCdrField, 0)
+	eSMGEv := sessionmanager.SMGenericEvent{"EventName": "DIAMETER_CCR"}
+	if rSMGEv, err := ccr.AsSMGenericEvent(cfgFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSMGEv, rSMGEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, rSMGEv)
+	}
+	cfgFlds = []*config.CfgCdrField{
+		&config.CfgCdrField{
+			Tag:         "LastUsed",
+			FieldFilter: utils.ParseRSRFieldsMustCompile("~Multiple-Services-Credit-Control>Used-Service-Unit>CC-Input-Octets:s/^(.*)$/test/(test);Multiple-Services-Credit-Control>Rating-Group(1)", utils.INFIELD_SEP),
+			FieldId:     "LastUsed",
+			Type:        "*handler",
+			HandlerId:   "*sum",
+			Value:       utils.ParseRSRFieldsMustCompile("Multiple-Services-Credit-Control>Used-Service-Unit>CC-Input-Octets;^|;Multiple-Services-Credit-Control>Used-Service-Unit>CC-Output-Octets", utils.INFIELD_SEP),
+			Mandatory:   true,
+		},
+	}
+	eSMGEv = sessionmanager.SMGenericEvent{"EventName": "DIAMETER_CCR", "LastUsed": "54239"}
+	if rSMGEv, err := ccr.AsSMGenericEvent(cfgFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSMGEv, rSMGEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, rSMGEv)
+	}
+	cfgFlds = []*config.CfgCdrField{
+		&config.CfgCdrField{
+			Tag:         "LastUsed",
+			FieldFilter: utils.ParseRSRFieldsMustCompile("~Multiple-Services-Credit-Control>Used-Service-Unit>CC-Input-Octets:s/^(.*)$/test/(test);Multiple-Services-Credit-Control>Rating-Group(99)", utils.INFIELD_SEP),
+			FieldId:     "LastUsed",
+			Type:        "*handler",
+			HandlerId:   "*sum",
+			Value:       utils.ParseRSRFieldsMustCompile("Multiple-Services-Credit-Control>Used-Service-Unit>CC-Input-Octets;^|;Multiple-Services-Credit-Control>Used-Service-Unit>CC-Output-Octets", utils.INFIELD_SEP),
+			Mandatory:   true,
+		},
+	}
+	eSMGEv = sessionmanager.SMGenericEvent{"EventName": "DIAMETER_CCR", "LastUsed": "4420"}
+	if rSMGEv, err := ccr.AsSMGenericEvent(cfgFlds); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eSMGEv, rSMGEv) {
+		t.Errorf("Expecting: %+v, received: %+v", eSMGEv, rSMGEv)
+	}
+}
+
+func TestPassesFieldFilter(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil) // Multiple-Services-Credit-Control>Rating-Group
+	if pass, _ := passesFieldFilter(m, utils.ParseRSRFieldsMustCompile("Multiple-Services-Credit-Control>Rating-Group(^$)", utils.INFIELD_SEP)[0], nil); !pass {
+		t.Error("Does not pass")
 	}
 }

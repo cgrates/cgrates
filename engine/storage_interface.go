@@ -33,7 +33,7 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(string) ([]string, error)
+	GetKeysForPrefix(string, bool) ([]string, error)
 }
 
 // Interface for storage providers.
@@ -59,6 +59,7 @@ type RatingStorage interface {
 	SetDerivedChargers(string, *utils.DerivedChargers) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
+	RemoveActions(string) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
 	SetSharedGroup(*SharedGroup) error
 	GetActionTriggers(string) (ActionTriggers, error)
@@ -92,13 +93,15 @@ type AccountingStorage interface {
 	RemoveAlias(string) error
 	GetLoadHistory(int, bool) ([]*LoadInstance, error)
 	AddLoadHistory(*LoadInstance, int) error
+	GetStructVersion() (*StructVersion, error)
+	SetStructVersion(*StructVersion) error
 }
 
 type CdrStorage interface {
 	Storage
 	SetCDR(*CDR, bool) error
-	LogCallCost(cgrid, runid, source string, cc *CallCost) error
-	GetCallCostLog(cgrid, runid string) (*CallCost, error)
+	SetSMCost(smc *SMCost) error
+	GetSMCosts(cgrid, runid, originHost, originIDPrfx string) ([]*SMCost, error)
 	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 
@@ -202,6 +205,7 @@ func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
 	mh.MapType = reflect.TypeOf(map[string]interface{}(nil))
+	mh.RawToString = true
 	return cmm
 }
 

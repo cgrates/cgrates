@@ -10,26 +10,35 @@
 	"http": ":2080",					// HTTP listening address
 },
 
-"rater": {
-	"enabled": true,					// enable Rater service: <true|false>
-	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-	"pubsubs": "internal",				// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-	"users": "internal",				// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
-	"aliases": "internal",
+"rals": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
 },
 
 "scheduler": {
-	"enabled": true,					// start Scheduler service: <true|false>
+	"enabled": true,
 },
 
 "cdrs": {
-	"enabled": true,					// start the CDR Server service:  <true|false>
-	"rater": "internal",				// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
-	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
 },
 
 "cdrstats": {
-	"enabled": true,					// starts the cdrstats service: <true|false>
+	"enabled": true,
 },
 
 "pubsubs": {
@@ -47,13 +56,13 @@
 
 "sm_generic": {
 	"enabled": true,
-	"rater": "internal",
-	"cdrs": "internal",
 },
 
 "diameter_agent": {
 	"enabled": true,
-	"pubsubs": "internal",
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
 },
 
 }

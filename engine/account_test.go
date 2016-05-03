@@ -856,7 +856,7 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 		BalanceMap:    map[string]Balances{utils.SMS: Balances{&Balance{Value: 14}}, utils.DATA: Balances{&Balance{Value: 1024}}, utils.VOICE: Balances{&Balance{Value: 15, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}, Directions: utils.NewStringMap(utils.OUT)}, &Balance{Weight: 10, DestinationIDs: utils.StringMap{"RET": true}}}},
 	}
 	newMb := &BalanceFilter{
-		Value:          utils.Float64Pointer(-10),
+		Value:          &utils.ValueFormula{Static: -10},
 		Type:           utils.StringPointer(utils.VOICE),
 		Weight:         utils.Float64Pointer(20),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
@@ -883,19 +883,19 @@ func TestAccountAddMinuteNil(t *testing.T) {
 
 func TestAccountAddMinutBucketEmpty(t *testing.T) {
 	mb1 := &BalanceFilter{
-		Value:          utils.Float64Pointer(-10),
+		Value:          &utils.ValueFormula{Static: -10},
 		Type:           utils.StringPointer(utils.VOICE),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	mb2 := &BalanceFilter{
-		Value:          utils.Float64Pointer(-10),
+		Value:          &utils.ValueFormula{Static: -10},
 		Type:           utils.StringPointer(utils.VOICE),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"NAT": true}),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
 	}
 	mb3 := &BalanceFilter{
-		Value:          utils.Float64Pointer(-10),
+		Value:          &utils.ValueFormula{Static: -10},
 		Type:           utils.StringPointer(utils.VOICE),
 		DestinationIDs: utils.StringMapPointer(utils.StringMap{"OTHER": true}),
 		Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),

@@ -29,18 +29,17 @@ const CGRATES_CFG_JSON = `
 
 "general": {
 	"http_skip_tls_verify": false,						// if enabled Http Client will accept any TLS certificate
-	"rounding_decimals": 5,							// system level precision for floats
+	"rounding_decimals": 5,								// system level precision for floats
 	"dbdata_encoding": "msgpack",						// encoding used to store object data in strings: <msgpack|json>
 	"tpexport_dir": "/var/log/cgrates/tpe",				// path towards export folder for offline Tariff Plans
 	"http_failed_dir": "/var/log/cgrates/http_failed",	// directory path where we store failed http requests
-	"default_reqtype": "*rated",						// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
-	"default_category": "call",							// default Type of Record to consider when missing from requests
-	"default_tenant": "cgrates.org",					// default Tenant to consider when missing from requests
-	"default_subject": "cgrates",						// default rating Subject to consider when missing from requests
+	"default_request_type": "*rated",					// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
+	"default_category": "call",							// default category to consider when missing from requests
+	"default_tenant": "cgrates.org",					// default tenant to consider when missing from requests
 	"default_timezone": "Local",						// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	"connect_attempts": 3,								// initial server connect attempts
 	"reconnects": -1,									// number of retries in case of connection lost
-	"response_cache_ttl": "3s",							// the life span of a cached response
+	"response_cache_ttl": "0s",							// the life span of a cached response
 	"internal_ttl": "2m",								// maximum duration to wait for internal connections before giving up
 },
 
@@ -58,7 +57,7 @@ const CGRATES_CFG_JSON = `
 	"db_port": 6379, 						// port to reach the tariffplan_db
 	"db_name": "10", 						// tariffplan_db name to connect to
 	"db_user": "", 							// sername to use when connecting to tariffplan_db
-	"db_passwd": "", 						// password to use when connecting to tariffplan_db
+	"db_password": "", 						// password to use when connecting to tariffplan_db
 },
 
 
@@ -68,7 +67,7 @@ const CGRATES_CFG_JSON = `
 	"db_port": 6379, 						// data_db port to reach the database
 	"db_name": "11", 						// data_db database name to connect to
 	"db_user": "", 							// username to use when connecting to data_db
-	"db_passwd": "", 						// password to use when connecting to data_db
+	"db_password": "", 						// password to use when connecting to data_db
 	"load_history_size": 10,				// Number of records in the load history
 },
 
@@ -79,7 +78,7 @@ const CGRATES_CFG_JSON = `
 	"db_port": 3306,						// the port to reach the stordb
 	"db_name": "cgrates",					// stor database name
 	"db_user": "cgrates",					// username to use when connecting to stordb
-	"db_passwd": "CGRateS.org",				// password to use when connecting to stordb
+	"db_password": "CGRateS.org",			// password to use when connecting to stordb
 	"max_open_conns": 100,					// maximum database connections opened
 	"max_idle_conns": 10,					// maximum database connections idle
 	"cdrs_indexes": [],						// indexes on cdrs table to speed up queries, used only in case of mongo
@@ -91,15 +90,16 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"rater": {
+"rals": {
 	"enabled": false,						// enable Rater service: <true|false>
-	"balancer": "",							// register to balancer as worker: <""|internal|x.y.z.y:1234>
-	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality: <""|internal|x.y.z.y:1234>
-	"historys": "",							// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
-	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
-	"aliases": "",							// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
-    "rp_subject_prefix_matching": false	            // enables prefix matching for the rating profile subject
+	"balancer": "",							// register to balancer as worker: <""|*internal|x.y.z.y:1234>
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality: <""|*internal|x.y.z.y:1234>
+	"historys_conns": [],					// address where to reach the history service, empty to disable history functionality: <""|*internal|x.y.z.y:1234>
+	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
+	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
+	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
+	"rp_subject_prefix_matching": false,	// enables prefix matching for the rating profile subject
+	"lcr_subject_prefix_matching": false	// enables prefix matching for the lcr subject
 },
 
 
@@ -112,12 +112,14 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,						// start the CDR Server service:  <true|false>
 	"extra_fields": [],						// extra fields to store in CDRs for non-generic CDRs
 	"store_cdrs": true,						// store cdrs in storDb
-	"rater": "internal",					// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
-	"pubsubs": "",							// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-	"users": "",							// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
-	"aliases": "",							// address where to reach the aliases service, empty to disable aliases functionality: <""|internal|x.y.z.y:1234>
-	"cdrstats": "",							// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-	"cdr_replication":[],					// replicate the raw CDR to a number of servers
+	"rals_conns": [
+		{"address": "*internal"}			// address where to reach the Rater for cost calculation, empty to disable functionality: <""|*internal|x.y.z.y:1234>
+	],
+	"pubsubs_conns": [],					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
+	"users_conns": [],						// address where to reach the user service, empty to disable user profile functionality: <""|*internal|x.y.z.y:1234>
+	"aliases_conns": [],					// address where to reach the aliases service, empty to disable aliases functionality: <""|*internal|x.y.z.y:1234>
+	"cdrstats_conns": [],					// address where to reach the cdrstats service, empty to disable stats functionality<""|*internal|x.y.z.y:1234>
+	"cdr_replication":[]					// replicate the raw CDR to a number of servers
 },
 
 
@@ -133,7 +135,7 @@ const CGRATES_CFG_JSON = `
 		"field_separator": ",",
 		"data_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from KBytes to Bytes)
 		"sms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from SMS unit to call duration in some billing systems)
-        "mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
+		"mms_usage_multiply_factor": 1,					// multiply data usage before export (eg: convert from MMS unit to call duration in some billing systems)
 		"generic_usage_multiply_factor": 1,				// multiply data usage before export (eg: convert from GENERIC unit to call duration in some billing systems)
 		"cost_multiply_factor": 1,						// multiply cost before export, eg: add VAT
 		"cost_rounding_decimals": -1,					// rounding decimals for Cost values. -1 to disable rounding
@@ -164,11 +166,14 @@ const CGRATES_CFG_JSON = `
 },
 
 
-"cdrc": {
-	"*default": {
+"cdrc": [
+	{
+		"id": "*default",								// identifier of the CDRC runner
 		"enabled": false,							// enable CDR client functionality
 		"dry_run": false,							// do not send the CDRs to CDRS, just parse them
-		"cdrs": "internal",							// address where to reach CDR server. <internal|x.y.z.y:1234>
+		"cdrs_conns": [
+			{"address": "*internal"}				// address where to reach CDR server. <*internal|x.y.z.y:1234>
+		],							
 		"cdr_format": "csv",						// CDR file format <csv|freeswitch_csv|fwv|opensips_flatstore>
 		"field_separator": ",",						// separator used in case of csv files
 		"timezone": "",								// timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
@@ -198,52 +203,67 @@ const CGRATES_CFG_JSON = `
 			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "13", "mandatory": true},
 		],
 		"trailer_fields": [],							// template of the import trailer fields
-	}
-},
+	},
+],
 
 "sm_generic": {
 	"enabled": false,						// starts SessionManager service: <true|false>
 	"listen_bijson": "127.0.0.1:2014",		// address where to listen for bidirectional JSON-RPC requests
-	"rater": "internal",					// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",						// address where to reach CDR Server <""|internal|x.y.z.y:1234>
+	"rals_conns": [
+		{"address": "*internal"}				// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}				// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+	],
 	"debit_interval": "0s",					// interval to perform debits on.
 	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
 	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+	"session_ttl": "0s",					// time after a session with no updates is terminated, not defined by default
+	//"session_ttl_last_used": "",			// tweak LastUsed for sessions timing-out, not defined by default
+	//"session_ttl_usage": "",				// tweak Usage for sessions timing-out, not defined by default
 },
 
 
 "sm_freeswitch": {
 	"enabled": false,				// starts SessionManager service: <true|false>
-	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
-	"extra_fields": [],				// extra fields to store in auth/CDRs when creating them
-	"debit_interval": "10s",		// interval to perform debits on.
-	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
-	"min_dur_low_balance": "5s",	// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
-	"low_balance_ann_file": "",		// file to be played when low balance is reached for prepaid calls
-	"empty_balance_context": "",	// if defined, prepaid calls will be transfered to this context on empty balance
-	"empty_balance_ann_file": "",	// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
-	"subscribe_park": true,			// subscribe via fsock to receive park events
-	"channel_sync_interval": "5m",	// sync channels with freeswitch regularly
-	"max_wait_connection": "2s",	// maximum duration to wait for a connection to be retrieved from the pool
-	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
+	"rals_conns": [
+		{"address": "*internal"}		// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}		// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+	],
+	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
+	"extra_fields": [],						// extra fields to store in auth/CDRs when creating them
+	"debit_interval": "10s",				// interval to perform debits on.
+	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+	"min_dur_low_balance": "5s",			// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debit_interval)
+	"low_balance_ann_file": "",				// file to be played when low balance is reached for prepaid calls
+	"empty_balance_context": "",			// if defined, prepaid calls will be transfered to this context on empty balance
+	"empty_balance_ann_file": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
+	"subscribe_park": true,					// subscribe via fsock to receive park events
+	"channel_sync_interval": "5m",			// sync channels with freeswitch regularly
+	"max_wait_connection": "2s",			// maximum duration to wait for a connection to be retrieved from the pool
+	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
 	],
 },
 
 
 "sm_kamailio": {
-	"enabled": false,				// starts SessionManager service: <true|false>
-	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
-	"create_cdr": false,			// create CDR out of events and sends it to CDRS component
-	"debit_interval": "10s",		// interval to perform debits on.
-	"min_call_duration": "0s",		// only authorize calls with allowed duration higher than this
-	"max_call_duration": "3h",		// maximum call duration a prepaid call can last
-	"connections":[					// instantiate connections to multiple Kamailio servers
-		{"evapi_addr": "127.0.0.1:8448", "reconnects": 5}
+	"enabled": false,						// starts SessionManager service: <true|false>
+	"rals_conns": [
+		{"address": "*internal"}			// address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}			// address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+	],
+	"create_cdr": false,					// create CDR out of events and sends them to CDRS component
+	"debit_interval": "10s",				// interval to perform debits on.
+	"min_call_duration": "0s",				// only authorize calls with allowed duration higher than this
+	"max_call_duration": "3h",				// maximum call duration a prepaid call can last
+	"evapi_conns":[							// instantiate connections to multiple Kamailio servers
+		{"address": "127.0.0.1:8448", "reconnects": 5}
 	],
 },
 
@@ -251,8 +271,12 @@ const CGRATES_CFG_JSON = `
 "sm_opensips": {
 	"enabled": false,					// starts SessionManager service: <true|false>
 	"listen_udp": "127.0.0.1:2020",		// address where to listen for datagram events coming from OpenSIPS
-	"rater": "internal",				// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",					// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
+	"rals_conns": [
+		{"address": "*internal"}     // address where to reach the Rater <""|*internal|127.0.0.1:2013>
+	],
+	"cdrs_conns": [
+		{"address": "*internal"}     // address where to reach CDR Server, empty to disable CDR capturing <*internal|x.y.z.y:1234>
+	],
 	"reconnects": 5,					// number of reconnects if connection is lost
 	"create_cdr": false,				// create CDR out of events and sends it to CDRS component
 	"debit_interval": "10s",			// interval to perform debits on.
@@ -267,8 +291,10 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,											// enables the diameter agent: <true|false>
 	"listen": "127.0.0.1:3868",									// address where to listen for diameter requests <x.y.z.y:1234>
 	"dictionaries_dir": "/usr/share/cgrates/diameter/dict/",	// path towards directory holding additional dictionaries to load
-	"sm_generic": "internal",									// connection towards SMG component for session management
-	"pubsubs": "",												// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
+	"sm_generic_conns": [
+		{"address": "*internal"}									// connection towards SMG component for session management
+	],															
+	"pubsubs_conns": [],										// address where to reach the pubusb service, empty to disable pubsub functionality: <""|*internal|x.y.z.y:1234>
 	"create_cdr": true,											// create CDR out of CCR terminate and send it to SMG component
 	"debit_interval": "5m",										// interval for CCR updates
 	"timezone": "",												// timezone for timestamps where not specified, empty for general defaults <""|UTC|Local|$IANA_TZ_DB>
@@ -335,7 +361,7 @@ const CGRATES_CFG_JSON = `
 "mailer": {
 	"server": "localhost",								// the server to use when sending emails out
 	"auth_user": "cgrates",								// authenticate to email server using this user
-	"auth_passwd": "CGRateS.org",						// authenticate to email server with this password
+	"auth_password": "CGRateS.org",						// authenticate to email server with this password
 	"from_address": "cgr-mailer@localhost.localdomain"	// from address used when sending emails out
 },
 

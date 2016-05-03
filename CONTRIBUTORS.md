@@ -42,6 +42,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @bhepp    | Brice Heppner |
 | @noahmehl | Noah Mehl |
 | @elfranne | Tom Braarup Cuykens |
+| @rbarrabe | Régis Barrabé |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->

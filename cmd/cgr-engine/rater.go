@@ -40,9 +40,10 @@ func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled 
 }
 
 // Starts rater and reports on chan
-func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan struct{}, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
-	internalCdrStatSChan chan engine.StatsInterface, internalHistorySChan chan history.Scribe,
-	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan engine.UserService, internalAliaseSChan chan engine.AliasService,
+
+func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneChan chan struct{}, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
+	internalCdrStatSChan chan rpcclient.RpcClientConnection, internalHistorySChan chan rpcclient.RpcClientConnection,
+	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
 	server *utils.Server,
 	ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, loadDb engine.LoadStorage, cdrDb engine.CdrStorage, logDb engine.LogStorage,
 	stopHandled *bool, exitChan chan bool) {
@@ -84,15 +85,13 @@ func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan str
 
 		}()
 	}
-
-	// Connection to balancer
 	var bal *balancer2go.Balancer
-	if cfg.RaterBalancer != "" {
+	if cfg.RALsBalancer != "" { // Connection to balancer
 		balTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, balTaskChan)
 		go func() {
 			defer close(balTaskChan)
-			if cfg.RaterBalancer == utils.INTERNAL {
+			if cfg.RALsBalancer == utils.MetaInternal {
 				select {
 				case bal = <-internalBalancerChan:
 					internalBalancerChan <- bal // Put it back if someone else is interested about
@@ -108,144 +107,117 @@ func startRater(internalRaterChan chan *engine.Responder, cacheDoneChan chan str
 			}
 		}()
 	}
-
-	// Connection to CDRStats
-	var cdrStats engine.StatsInterface
-	if cfg.RaterCdrStats != "" {
+	var cdrStats *rpcclient.RpcClientPool
+	if len(cfg.RALsCDRStatSConns) != 0 { // Connections to CDRStats
 		cdrstatTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, cdrstatTaskChan)
 		go func() {
 			defer close(cdrstatTaskChan)
-			if cfg.RaterCdrStats == utils.INTERNAL {
-				select {
-				case cdrStats = <-internalCdrStatSChan:
-					internalCdrStatSChan <- cdrStats
-				case <-time.After(cfg.InternalTtl):
-					utils.Logger.Crit("<Rater>: Internal cdrstats connection timeout.")
-					exitChan <- true
-					return
-				}
-			} else if cdrStats, err = engine.NewProxyStats(cfg.RaterCdrStats, cfg.ConnectAttempts, -1); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to cdrstats, error: %s", err.Error()))
+			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.RALsCDRStatSConns, internalCdrStatSChan, cfg.InternalTtl)
+			if err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to CDRStatS, error: %s", err.Error()))
 				exitChan <- true
 				return
 			}
 		}()
 	}
-
-	// Connection to HistoryS
-	if cfg.RaterHistoryServer != "" {
+	if len(cfg.RALsHistorySConns) != 0 { // Connection to HistoryS,
 		histTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, histTaskChan)
 		go func() {
 			defer close(histTaskChan)
-			var scribeServer history.Scribe
-			if cfg.RaterHistoryServer == utils.INTERNAL {
-				select {
-				case scribeServer = <-internalHistorySChan:
-					internalHistorySChan <- scribeServer
-				case <-time.After(cfg.InternalTtl):
-					utils.Logger.Crit("<Rater>: Internal historys connection timeout.")
-					exitChan <- true
-					return
-				}
-			} else if scribeServer, err = history.NewProxyScribe(cfg.RaterHistoryServer, cfg.ConnectAttempts, -1); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect historys, error: %s", err.Error()))
+			if historySConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.RALsHistorySConns, internalHistorySChan, cfg.InternalTtl); err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect HistoryS, error: %s", err.Error()))
 				exitChan <- true
 				return
+			} else {
+				engine.SetHistoryScribe(historySConns)
 			}
-			engine.SetHistoryScribe(scribeServer) // ToDo: replace package sharing with connection based one
 		}()
 	}
-
-	// Connection to pubsubs
-	if cfg.RaterPubSubServer != "" {
+	if len(cfg.RALsPubSubSConns) != 0 { // Connection to pubsubs
 		pubsubTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
 			defer close(pubsubTaskChan)
-			var pubSubServer rpcclient.RpcClientConnection
-			if cfg.RaterPubSubServer == utils.INTERNAL {
-				select {
-				case pubSubServer = <-internalPubSubSChan:
-					internalPubSubSChan <- pubSubServer
-				case <-time.After(cfg.InternalTtl):
-					utils.Logger.Crit("<Rater>: Internal pubsub connection timeout.")
-					exitChan <- true
-					return
-				}
-			} else if pubSubServer, err = rpcclient.NewRpcClient("tcp", cfg.RaterPubSubServer, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB, nil); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to pubsubs: %s", err.Error()))
+			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.RALsPubSubSConns, internalPubSubSChan, cfg.InternalTtl); err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to PubSubS: %s", err.Error()))
 				exitChan <- true
 				return
+			} else {
+				engine.SetPubSub(pubSubSConns)
 			}
-			engine.SetPubSub(pubSubServer) // ToDo: replace package sharing with connection based one
 		}()
 	}
-
-	// Connection to AliasService
-	if cfg.RaterAliasesServer != "" {
+	if len(cfg.RALsAliasSConns) != 0 { // Connection to AliasService
 		aliasesTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, aliasesTaskChan)
 		go func() {
 			defer close(aliasesTaskChan)
-			var aliasesServer engine.AliasService
-			if cfg.RaterAliasesServer == utils.INTERNAL {
-				select {
-				case aliasesServer = <-internalAliaseSChan:
-					internalAliaseSChan <- aliasesServer
-				case <-time.After(cfg.InternalTtl):
-					utils.Logger.Crit("<Rater>: Internal aliases connection timeout.")
-					exitChan <- true
-					return
-				}
-			} else if aliasesServer, err = engine.NewProxyAliasService(cfg.RaterAliasesServer, cfg.ConnectAttempts, -1); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect to aliases, error: %s", err.Error()))
+			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.RALsAliasSConns, internalAliaseSChan, cfg.InternalTtl); err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to AliaseS, error: %s", err.Error()))
 				exitChan <- true
 				return
+			} else {
+				engine.SetAliasService(aliaseSCons)
 			}
-			engine.SetAliasService(aliasesServer) // ToDo: replace package sharing with connection based one
 		}()
 	}
-
-	// Connection to UserService
-	var userServer engine.UserService
-	if cfg.RaterUserServer != "" {
+	var usersConns rpcclient.RpcClientConnection
+	if len(cfg.RALsUserSConns) != 0 { // Connection to UserService
 		usersTaskChan := make(chan struct{})
 		waitTasks = append(waitTasks, usersTaskChan)
 		go func() {
 			defer close(usersTaskChan)
-			if cfg.RaterUserServer == utils.INTERNAL {
-				select {
-				case userServer = <-internalUserSChan:
-					internalUserSChan <- userServer
-				case <-time.After(cfg.InternalTtl):
-					utils.Logger.Crit("<Rater>: Internal users connection timeout.")
-					exitChan <- true
-					return
-				}
-			} else if userServer, err = engine.NewProxyUserService(cfg.RaterUserServer, cfg.ConnectAttempts, -1); err != nil {
-				utils.Logger.Crit(fmt.Sprintf("<Rater> Could not connect users, error: %s", err.Error()))
+			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+				cfg.RALsUserSConns, internalUserSChan, cfg.InternalTtl); err != nil {
+				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect UserS, error: %s", err.Error()))
 				exitChan <- true
 				return
 			}
-			engine.SetUserService(userServer)
+			engine.SetUserService(usersConns)
 		}()
 	}
-
 	// Wait for all connections to complete before going further
 	for _, chn := range waitTasks {
 		<-chn
 	}
-
-	responder := &engine.Responder{Bal: bal, ExitChan: exitChan, Stats: cdrStats}
+	responder := &engine.Responder{Bal: bal, ExitChan: exitChan}
+	responder.SetTimeToLive(cfg.ResponseCacheTTL, nil)
 	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Sched: sched,
-		Config: cfg, Responder: responder, CdrStatsSrv: cdrStats, Users: userServer}
+		Config: cfg, Responder: responder}
+	if cdrStats != nil { // ToDo: Fix here properly the init of stats
+		responder.Stats = cdrStats
+		apierRpcV1.CdrStatsSrv = cdrStats
+	}
+	if usersConns != nil {
+		apierRpcV1.Users = usersConns
+	}
 	apierRpcV2 := &v2.ApierV2{
 		ApierV1: *apierRpcV1}
+
 	// internalSchedulerChan shared here
 	server.RpcRegister(responder)
 	server.RpcRegister(apierRpcV1)
 	server.RpcRegister(apierRpcV2)
+
+	utils.RegisterRpcParams("", &engine.Stats{})
+	utils.RegisterRpcParams("", &v1.CDRStatsV1{})
+	utils.RegisterRpcParams("ScribeV1", &history.FileScribe{})
+	utils.RegisterRpcParams("PubSubV1", &engine.PubSub{})
+	utils.RegisterRpcParams("AliasesV1", &engine.AliasHandler{})
+	utils.RegisterRpcParams("UsersV1", &engine.UserMap{})
+	utils.RegisterRpcParams("", &v1.CdrsV1{})
+	utils.RegisterRpcParams("", &v2.CdrsV2{})
+	utils.RegisterRpcParams("", &v1.SessionManagerV1{})
+	utils.RegisterRpcParams("", &v1.SMGenericV1{})
+	utils.RegisterRpcParams("", responder)
+	utils.RegisterRpcParams("", apierRpcV1)
+	utils.RegisterRpcParams("", apierRpcV2)
+	utils.GetRpcParams("")
 	internalRaterChan <- responder // Rater done
 }

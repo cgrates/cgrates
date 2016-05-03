@@ -30,9 +30,10 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
+	"github.com/cgrates/rpcclient"
 )
 
-func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs engine.Connector, timezone string) *FSSessionManager {
+func NewFSSessionManager(smFsConfig *config.SmFsConfig, rater, cdrs rpcclient.RpcClientConnection, timezone string) *FSSessionManager {
 	return &FSSessionManager{
 		cfg:         smFsConfig,
 		conns:       make(map[string]*fsock.FSock),
@@ -50,10 +51,11 @@ type FSSessionManager struct {
 	cfg         *config.SmFsConfig
 	conns       map[string]*fsock.FSock     // Keep the list here for connection management purposes
 	senderPools map[string]*fsock.FSockPool // Keep sender pools here
-	rater       engine.Connector
-	cdrsrv      engine.Connector
-	sessions    *Sessions
-	timezone    string
+	rater       rpcclient.RpcClientConnection
+	cdrsrv      rpcclient.RpcClientConnection
+
+	sessions *Sessions
+	timezone string
 }
 
 func (sm *FSSessionManager) createHandlers() map[string][]func(string, string) {
@@ -98,6 +100,7 @@ func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 		return err
 	}
 	cd := &engine.CallDescriptor{
+		CgrID:       ev.GetCgrId(sm.Timezone()),
 		Direction:   ev.GetDirection(utils.META_DEFAULT),
 		Tenant:      ev.GetTenant(utils.META_DEFAULT),
 		Category:    ev.GetCategory(utils.META_DEFAULT),
@@ -107,7 +110,7 @@ func (sm *FSSessionManager) setCgrLcr(ev engine.Event, connId string) error {
 		TimeStart:   startTime,
 		TimeEnd:     startTime.Add(config.CgrConfig().MaxCallDuration),
 	}
-	if err := sm.rater.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd}, &lcrCost); err != nil {
+	if err := sm.rater.Call("Responder.GetLCR", &engine.AttrGetLcr{CallDescriptor: cd}, &lcrCost); err != nil {
 		return err
 	}
 	supps := []string{}
@@ -131,7 +134,7 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 		return
 	}
 	var maxCallDuration float64 // This will be the maximum duration this channel will be allowed to last
-	if err := sm.rater.GetDerivedMaxSessionTime(ev.AsStoredCdr(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
+	if err := sm.rater.Call("Responder.GetDerivedMaxSessionTime", ev.AsStoredCdr(config.CgrConfig().DefaultTimezone), &maxCallDuration); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Could not get max session time for %s, error: %s", ev.GetUUID(), err.Error()))
 	}
 	if maxCallDuration != -1 { // For calls different than unlimited, set limits
@@ -146,13 +149,14 @@ func (sm *FSSessionManager) onChannelPark(ev engine.Event, connId string) {
 	// ComputeLcr
 	if ev.ComputeLcr() {
 		cd, err := fsev.AsCallDescriptor()
+		cd.CgrID = fsev.GetCgrId(sm.Timezone())
 		if err != nil {
 			utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_PREPROCESS_ERROR: %s", err.Error()))
 			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
 			return
 		}
 		var lcr engine.LCRCost
-		if err = sm.Rater().GetLCR(&engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
+		if err = sm.Rater().Call("Responder.GetLCR", &engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
 			utils.Logger.Info(fmt.Sprintf("<SM-FreeSWITCH> LCR_API_ERROR: %s", err.Error()))
 			sm.unparkCall(ev.GetUUID(), connId, ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR)
 		}
@@ -227,9 +231,9 @@ func (sm *FSSessionManager) onChannelHangupComplete(ev engine.Event) {
 func (sm *FSSessionManager) Connect() error {
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
 	errChan := make(chan error)
-	for _, connCfg := range sm.cfg.Connections {
+	for _, connCfg := range sm.cfg.EventSocketConns {
 		connId := utils.GenUUID()
-		fSock, err := fsock.NewFSock(connCfg.Server, connCfg.Password, connCfg.Reconnects, sm.createHandlers(), eventFilters, utils.Logger.(*syslog.Writer), connId)
+		fSock, err := fsock.NewFSock(connCfg.Address, connCfg.Password, connCfg.Reconnects, sm.createHandlers(), eventFilters, utils.Logger.(*syslog.Writer), connId)
 		if err != nil {
 			return err
 		} else if !fSock.Connected() {
@@ -242,7 +246,7 @@ func (sm *FSSessionManager) Connect() error {
 				errChan <- err
 			}
 		}()
-		if fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Server, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
+		if fsSenderPool, err := fsock.NewFSockPool(5, connCfg.Address, connCfg.Password, 1, sm.cfg.MaxWaitConnection,
 			make(map[string][]func(string, string)), make(map[string]string), utils.Logger.(*syslog.Writer), connId); err != nil {
 			return fmt.Errorf("Cannot connect FreeSWITCH senders pool, error: %s", err.Error())
 		} else if fsSenderPool == nil {
@@ -294,7 +298,7 @@ func (sm *FSSessionManager) DisconnectSession(ev engine.Event, connId, notify st
 
 func (sm *FSSessionManager) ProcessCdr(storedCdr *engine.CDR) error {
 	var reply string
-	if err := sm.cdrsrv.ProcessCdr(storedCdr, &reply); err != nil {
+	if err := sm.cdrsrv.Call("CdrServer.ProcessCdr", storedCdr, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CGRID, storedCdr.OriginID, err.Error()))
 	}
 	return nil
@@ -304,11 +308,11 @@ func (sm *FSSessionManager) DebitInterval() time.Duration {
 	return sm.cfg.DebitInterval
 }
 
-func (sm *FSSessionManager) CdrSrv() engine.Connector {
+func (sm *FSSessionManager) CdrSrv() rpcclient.RpcClientConnection {
 	return sm.cdrsrv
 }
 
-func (sm *FSSessionManager) Rater() engine.Connector {
+func (sm *FSSessionManager) Rater() rpcclient.RpcClientConnection {
 	return sm.rater
 }
 

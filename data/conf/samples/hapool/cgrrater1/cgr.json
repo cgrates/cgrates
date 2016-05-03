@@ -1,0 +1,45 @@
+{
+"listen": {
+	"rpc_json": ":2014",
+	"rpc_gob": ":2015",
+	"http": ":2081",
+},
+
+"rals": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"scheduler": {
+	"enabled": true,
+},
+
+"cdrstats": {
+	"enabled": true,
+},
+
+"pubsubs": {
+	"enabled": true,
+},
+
+"aliases": {
+	"enabled": true,
+},
+
+"users": {
+	"enabled": true,
+	"indexes": ["SubscriberId"],
+},
+
+}

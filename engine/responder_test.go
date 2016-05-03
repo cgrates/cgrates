@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/gob"
 	"reflect"
 	"testing"
 	"time"
@@ -151,10 +153,10 @@ func TestResponderGetSessionRuns(t *testing.T) {
 	sesRuns := make([]*SessionRun, 0)
 	eSRuns := []*SessionRun{
 		&SessionRun{DerivedCharger: extra1DC,
-			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "0",
+			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "extra1", Direction: "*out", Category: "0",
 				Tenant: "vdf", Subject: "rif", Account: "minitsboy", Destination: "0256", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
 		&SessionRun{DerivedCharger: extra2DC,
-			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "call",
+			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "extra2", Direction: "*out", Category: "call",
 				Tenant: "vdf", Subject: "ivo", Account: "ivo", Destination: "1002", TimeStart: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), TimeEnd: time.Date(2013, 11, 7, 8, 42, 36, 0, time.UTC), TOR: utils.VOICE, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}},
 		&SessionRun{DerivedCharger: dfDC,
 			CallDescriptor: &CallDescriptor{CgrID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), RunID: "*default", Direction: "*out", Category: "call",
@@ -163,7 +165,7 @@ func TestResponderGetSessionRuns(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eSRuns, sesRuns) {
 		for _, sr := range sesRuns {
-			t.Logf("sr cd: %+v", sr.CallDescriptor)
+			t.Logf("sr cd: %s", utils.ToIJSON(sr.CallDescriptor))
 		}
 		t.Errorf("Expecting: %+v, received: %+v", eSRuns, sesRuns)
 	}
@@ -289,7 +291,8 @@ func TestResponderGetLCR(t *testing.T) {
 		}
 	}
 	danStatsId := "dan12_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: danStatsId, Supplier: []string{"dan12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, nil)
+	var r int
+	rsponder.Stats.Call("CDRStatsV1.AddQueue", &CdrStats{Id: danStatsId, Supplier: []string{"dan12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, &r)
 	danRpfl := &RatingProfile{Id: "*out:tenant12:call:dan12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -299,7 +302,7 @@ func TestResponderGetLCR(t *testing.T) {
 		}},
 	}
 	rifStatsId := "rif12_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: rifStatsId, Supplier: []string{"rif12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, nil)
+	rsponder.Stats.Call("CDRStatsV1.AddQueue", &CdrStats{Id: rifStatsId, Supplier: []string{"rif12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, &r)
 	rifRpfl := &RatingProfile{Id: "*out:tenant12:call:rif12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -309,7 +312,7 @@ func TestResponderGetLCR(t *testing.T) {
 		}},
 	}
 	ivoStatsId := "ivo12_stats"
-	rsponder.Stats.AddQueue(&CdrStats{Id: ivoStatsId, Supplier: []string{"ivo12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, nil)
+	rsponder.Stats.Call("CDRStatsV1.AddQueue", &CdrStats{Id: ivoStatsId, Supplier: []string{"ivo12"}, Metrics: []string{ASR, PDD, ACD, TCD, ACC, TCC, DDC}}, &r)
 	ivoRpfl := &RatingProfile{Id: "*out:tenant12:call:ivo12",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime:  time.Date(2015, 01, 01, 8, 0, 0, 0, time.UTC),
@@ -489,10 +492,12 @@ func TestResponderGetLCR(t *testing.T) {
 	} else if !reflect.DeepEqual(eQTLcr.SupplierCosts, lcrQT.SupplierCosts) {
 		t.Errorf("Expecting: %+v, received: %+v", eQTLcr.SupplierCosts, lcrQT.SupplierCosts)
 	}
+
 	cdr := &CDR{Supplier: "rif12", AnswerTime: time.Now(), Usage: 3 * time.Minute, Cost: 1}
-	rsponder.Stats.AppendCDR(cdr, nil)
+	rsponder.Stats.Call("CDRStatsV1.AppendCDR", cdr, &r)
 	cdr = &CDR{Supplier: "dan12", AnswerTime: time.Now(), Usage: 5 * time.Minute, Cost: 2}
-	rsponder.Stats.AppendCDR(cdr, nil)
+	rsponder.Stats.Call("CDRStatsV1.AppendCDR", cdr, &r)
+
 	eQTLcr = &LCRCost{
 		Entry: &LCREntry{DestinationId: utils.ANY, RPCategory: "call", Strategy: LCR_STRATEGY_QOS_THRESHOLD, StrategyParams: "35;;;;4m;;;;;;;;;", Weight: 10.0},
 		SupplierCosts: []*LCRSupplierCost{
@@ -536,5 +541,98 @@ func TestResponderGetLCR(t *testing.T) {
 
 	} else if !reflect.DeepEqual(eQosLcr.SupplierCosts, lcrQ.SupplierCosts) {
 		t.Errorf("Expecting: %+v, received: %+v", eQosLcr.SupplierCosts, lcrQ.SupplierCosts)
+	}
+}
+
+func TestResponderGobSMCost(t *testing.T) {
+	attr := AttrCDRSStoreSMCost{
+		Cost: &SMCost{
+			CGRID:      "b783a8bcaa356570436983cd8a0e6de4993f9ba6",
+			RunID:      "*default",
+			OriginHost: "",
+			OriginID:   "testdatagrp_grp1",
+			CostSource: "SMR",
+			Usage:      1536,
+			CostDetails: &CallCost{
+				Direction:   "*out",
+				Category:    "generic",
+				Tenant:      "cgrates.org",
+				Subject:     "1001",
+				Account:     "1001",
+				Destination: "data",
+				TOR:         "*data",
+				Cost:        0,
+				Timespans: TimeSpans{&TimeSpan{
+					TimeStart: time.Date(2016, 1, 5, 12, 30, 10, 0, time.UTC),
+					TimeEnd:   time.Date(2016, 1, 5, 12, 55, 46, 0, time.UTC),
+					Cost:      0,
+					RateInterval: &RateInterval{
+						Timing: nil,
+						Rating: &RIRate{
+							ConnectFee:       0,
+							RoundingMethod:   "",
+							RoundingDecimals: 0,
+							MaxCost:          0,
+							MaxCostStrategy:  "",
+							Rates: RateGroups{&Rate{
+								GroupIntervalStart: 0,
+								Value:              0,
+								RateIncrement:      1 * time.Second,
+								RateUnit:           1 * time.Second,
+							},
+							},
+						},
+						Weight: 0,
+					},
+					DurationIndex: 0,
+					Increments: Increments{&Increment{
+						Duration: 1 * time.Second,
+						Cost:     0,
+						BalanceInfo: &DebitInfo{
+							Unit: &UnitInfo{
+								UUID:          "fa0aa280-2b76-4b5b-bb06-174f84b8c321",
+								ID:            "",
+								Value:         100864,
+								DestinationID: "data",
+								Consumed:      1,
+								TOR:           "*data",
+								RateInterval:  nil,
+							},
+							Monetary:  nil,
+							AccountID: "cgrates.org:1001",
+						},
+						CompressFactor: 1536,
+					},
+					},
+					RoundIncrement: nil,
+					MatchedSubject: "fa0aa280-2b76-4b5b-bb06-174f84b8c321",
+					MatchedPrefix:  "data",
+					MatchedDestId:  "*any",
+					RatingPlanId:   "*none",
+					CompressFactor: 1,
+				},
+				},
+				RatedUsage: 1536,
+			},
+		},
+		CheckDuplicate: false,
+	}
+
+	var network bytes.Buffer        // Stand-in for a network connection
+	enc := gob.NewEncoder(&network) // Will write to network.
+	dec := gob.NewDecoder(&network) // Will read from network.
+	err := enc.Encode(attr)
+	if err != nil {
+		t.Error("encode error: ", err)
+	}
+
+	// Decode (receive) and print the values.
+	var q AttrCDRSStoreSMCost
+	err = dec.Decode(&q)
+	if err != nil {
+		t.Error("decode error: ", err)
+	}
+	if !reflect.DeepEqual(attr, q) {
+		t.Error("wrong transmission")
 	}
 }

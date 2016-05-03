@@ -4,7 +4,7 @@
 // Used in apier_local_tests
 // Starts rater, cdrs and mediator connecting over internal channel
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
 
@@ -12,8 +12,8 @@
 	"enabled": true,			// start the CDR Server service:  <true|false>
 	"store_cdrs": false,		// store cdrs in storDb
 	"cdr_replication":[			// replicate the rated CDR to a number of servers
-			{"transport": "*http_post", "server": "http://127.0.0.1:12080/cdr_http", "attempts": 1},
-			//{"transport": "*http_post", "server": "http://127.0.0.1:8000/mycdr"},
+			{"transport": "*http_post", "address": "http://127.0.0.1:12080/cdr_http", "attempts": 1},
+			//{"transport": "*http_post", "address": "http://127.0.0.1:8000/mycdr"},
 			
 	],
 },

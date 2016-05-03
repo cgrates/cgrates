@@ -244,8 +244,8 @@ func metaValueExponent(m *diam.Message, argsTpl utils.RSRFields, roundingDecimal
 	return strconv.FormatFloat(utils.Round(res, roundingDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 }
 
-func metaSum(m *diam.Message, argsTpl utils.RSRFields, roundingDecimals int) (string, error) {
-	valStr := composedFieldvalue(m, argsTpl, 0, nil)
+func metaSum(m *diam.Message, argsTpl utils.RSRFields, passAtIndex, roundingDecimals int) (string, error) {
+	valStr := composedFieldvalue(m, argsTpl, passAtIndex, nil)
 	handlerArgs := strings.Split(valStr, utils.HandlerArgSep)
 	var summed float64
 	for _, arg := range handlerArgs {
@@ -286,6 +286,11 @@ func passesFieldFilter(m *diam.Message, fieldFilter *utils.RSRField, processorVa
 	avps, err := avpsWithPath(m, fieldFilter)
 	if err != nil {
 		return false, 0
+	}
+	if len(avps) == 0 { // No AVP found in request, treat it same as empty
+		if fieldFilter.FilterPasses("") {
+			return true, -1
+		}
 	}
 	for avpIdx, avpVal := range avps { // First match wins due to index
 		if fieldFilter.FilterPasses(avpValAsString(avpVal)) {
@@ -398,7 +403,7 @@ func fieldOutVal(m *diam.Message, cfgFld *config.CfgCdrField, extraParam interfa
 		case META_VALUE_EXPONENT:
 			outVal, err = metaValueExponent(m, cfgFld.Value, 10) // FixMe: add here configured number of decimals
 		case META_SUM:
-			outVal, err = metaSum(m, cfgFld.Value, 10)
+			outVal, err = metaSum(m, cfgFld.Value, passAtIndex, 10)
 		default:
 			outVal, err = metaHandler(m, cfgFld.HandlerId, cfgFld.Layout, extraParam.(time.Duration))
 			if err != nil {

@@ -30,7 +30,7 @@ type CdrsV1 struct {
 
 // Designed for CGR internal usage
 func (self *CdrsV1) ProcessCdr(cdr *engine.CDR, reply *string) error {
-	if err := self.CdrSrv.ProcessCdr(cdr); err != nil {
+	if err := self.CdrSrv.LocalProcessCdr(cdr); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.OK
@@ -46,7 +46,7 @@ func (self *CdrsV1) ProcessExternalCdr(cdr *engine.ExternalCDR, reply *string) e
 	return nil
 }
 
-// Remotely start mediation with specific runid, runs asynchronously, it's status will be displayed in syslog
+// Remotely (re)rating, deprecated
 func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
 	cdrsFltr, err := attrs.AsCDRsFilter(self.CdrSrv.Timezone())
 	if err != nil {
@@ -59,10 +59,6 @@ func (self *CdrsV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
 	return nil
 }
 
-func (self *CdrsV1) LogCallCost(ccl *engine.CallCostLog, reply *string) error {
-	if err := self.CdrSrv.LogCallCost(ccl); err != nil {
-		return utils.NewErrServerError(err)
-	}
-	*reply = utils.OK
-	return nil
+func (self *CdrsV1) StoreSMCost(attr engine.AttrCDRSStoreSMCost, reply *string) error {
+	return self.CdrSrv.V1StoreSMCost(attr, reply)
 }

@@ -31,6 +31,7 @@ var (
 	ErrAccountDisabled         = errors.New("ACCOUNT_DISABLED")
 	ErrUserNotFound            = errors.New("USER_NOT_FOUND")
 	ErrInsufficientCredit      = errors.New("INSUFFICENT_CREDIT")
+	ErrNotConvertible          = errors.New("NOT_CONVERTIBLE")
 )
 
 const (
@@ -113,6 +114,8 @@ const (
 	TOR                          = "ToR"
 	ORDERID                      = "OrderID"
 	ACCID                        = "OriginID"
+	InitialOriginID              = "InitialOriginID"
+	OriginIDPrefix               = "OriginIDPrefix"
 	CDRSOURCE                    = "Source"
 	CDRHOST                      = "OriginHost"
 	REQTYPE                      = "RequestType"
@@ -140,7 +143,7 @@ const (
 	FWV                          = "fwv"
 	DRYRUN                       = "dry_run"
 	META_COMBIMED                = "*combimed"
-	INTERNAL                     = "internal"
+	MetaInternal                 = "*internal"
 	ZERO_RATING_SUBJECT_PREFIX   = "*zero"
 	OK                           = "OK"
 	CDRE_FIXED_WIDTH             = "fwv"
@@ -194,6 +197,7 @@ const (
 	LOG_CALL_COST_PREFIX         = "cco_"
 	LOG_ACTION_TIMMING_PREFIX    = "ltm_"
 	LOG_ACTION_TRIGGER_PREFIX    = "ltr_"
+	VERSION_PREFIX               = "ver_"
 	LOG_ERR                      = "ler_"
 	LOG_CDR                      = "cdr_"
 	LOG_MEDIATED_CDR             = "mcd_"
@@ -238,7 +242,9 @@ const (
 	REFUND_INCR_CACHE_PREFIX     = "REFUND_INCR_"
 	REFUND_ROUND_CACHE_PREFIX    = "REFUND_ROUND_"
 	GET_SESS_RUNS_CACHE_PREFIX   = "GET_SESS_RUNS_"
+	GET_DERIV_MAX_SESS_TIME      = "GET_DERIV_MAX_SESS_TIME_"
 	LOG_CALL_COST_CACHE_PREFIX   = "LOG_CALL_COSTS_"
+	LCRCachePrefix               = "LCR_"
 	ALIAS_CONTEXT_RATING         = "*rating"
 	NOT_AVAILABLE                = "N/A"
 	CALL                         = "call"
@@ -275,6 +281,10 @@ const (
 	UpdatedAt                   = "UpdatedAt"
 	HandlerArgSep               = "|"
 	FlagForceDuration           = "fd"
+	InstanceID                  = "InstanceID"
+	SessionTTL                  = "SessionTTL"
+	SessionTTLLastUsed          = "SessionTTLLastUsed"
+	SessionTTLUsage             = "SessionTTLUsage"
 )
 
 var (

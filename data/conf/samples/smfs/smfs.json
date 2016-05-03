@@ -1,0 +1,25 @@
+{
+
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+
+"sm_freeswitch": {
+	"enabled": true,
+	"rals_conns": [
+		{"address": "127.0.0.1:2013"}
+	],
+	"cdrs_conns": [
+		{"address": "127.0.0.1:2013"}
+	],
+	"debit_interval": "5s",
+	"channel_sync_interval": "10s",
+	"event_socket_conns":[
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
+	],
+},
+
+}

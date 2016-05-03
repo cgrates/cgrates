@@ -32,12 +32,13 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		t.Error(err)
 	}
 	eCgrCfg, _ := NewDefaultCGRConfig()
-	eCgrCfg.CdrcProfiles = make(map[string]map[string]*CdrcConfig)
+	eCgrCfg.CdrcProfiles = make(map[string][]*CdrcConfig)
 	// Default instance first
-	eCgrCfg.CdrcProfiles["/var/log/cgrates/cdrc/in"] = map[string]*CdrcConfig{
-		"*default": &CdrcConfig{
+	eCgrCfg.CdrcProfiles["/var/log/cgrates/cdrc/in"] = []*CdrcConfig{
+		&CdrcConfig{
+			ID:                      utils.META_DEFAULT,
 			Enabled:                 false,
-			Cdrs:                    "internal",
+			CdrsConns:               []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 			CdrFormat:               "csv",
 			FieldSeparator:          ',',
 			DataUsageMultiplyFactor: 1024,
@@ -79,10 +80,11 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 			TrailerFields: make([]*CfgCdrField, 0),
 		},
 	}
-	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc1/in"] = map[string]*CdrcConfig{
-		"CDRC-CSV1": &CdrcConfig{
+	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc1/in"] = []*CdrcConfig{
+		&CdrcConfig{
+			ID:                      "CDRC-CSV1",
 			Enabled:                 true,
-			Cdrs:                    "internal",
+			CdrsConns:               []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 			CdrFormat:               "csv",
 			FieldSeparator:          ',',
 			DataUsageMultiplyFactor: 1024,
@@ -122,14 +124,15 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 			TrailerFields: make([]*CfgCdrField, 0),
 		},
 	}
-	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc2/in"] = map[string]*CdrcConfig{
-		"CDRC-CSV2": &CdrcConfig{
+	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc2/in"] = []*CdrcConfig{
+		&CdrcConfig{
+			ID:                      "CDRC-CSV2",
 			Enabled:                 true,
-			Cdrs:                    "internal",
+			CdrsConns:               []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 			CdrFormat:               "csv",
 			FieldSeparator:          ',',
 			DataUsageMultiplyFactor: 0.000976563,
-			RunDelay:                0,
+			RunDelay:                1000000000,
 			MaxOpenFiles:            1024,
 			CdrInDir:                "/tmp/cgrates/cdrc2/in",
 			CdrOutDir:               "/tmp/cgrates/cdrc2/out",
@@ -137,18 +140,21 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 			CdrFilter:               utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
 			HeaderFields:            make([]*CfgCdrField, 0),
 			ContentFields: []*CfgCdrField{
-				&CfgCdrField{Tag: "", Type: "", FieldId: utils.TOR, Value: utils.ParseRSRFieldsMustCompile("~7:s/^(voice|data|sms|generic)$/*$1/", utils.INFIELD_SEP),
+				&CfgCdrField{FieldId: utils.TOR, Value: utils.ParseRSRFieldsMustCompile("~7:s/^(voice|data|sms|mms|generic)$/*$1/", utils.INFIELD_SEP),
 					FieldFilter: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP), Width: 0, Strip: "", Padding: "", Layout: "", Mandatory: false},
-				&CfgCdrField{Tag: "", Type: "", FieldId: utils.ANSWER_TIME, Value: utils.ParseRSRFieldsMustCompile("2", utils.INFIELD_SEP),
+				&CfgCdrField{Tag: "", Type: "", FieldId: utils.ANSWER_TIME, Value: utils.ParseRSRFieldsMustCompile("1", utils.INFIELD_SEP),
+					FieldFilter: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP), Width: 0, Strip: "", Padding: "", Layout: "", Mandatory: false},
+				&CfgCdrField{FieldId: utils.USAGE, Value: utils.ParseRSRFieldsMustCompile("~9:s/^(\\d+)$/${1}s/", utils.INFIELD_SEP),
 					FieldFilter: utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP), Width: 0, Strip: "", Padding: "", Layout: "", Mandatory: false},
 			},
 			TrailerFields: make([]*CfgCdrField, 0),
 		},
 	}
-	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc3/in"] = map[string]*CdrcConfig{
-		"CDRC-CSV3": &CdrcConfig{
+	eCgrCfg.CdrcProfiles["/tmp/cgrates/cdrc3/in"] = []*CdrcConfig{
+		&CdrcConfig{
+			ID:                      "CDRC-CSV3",
 			Enabled:                 true,
-			Cdrs:                    "internal",
+			CdrsConns:               []*HaPoolConfig{&HaPoolConfig{Address: utils.MetaInternal}},
 			CdrFormat:               "csv",
 			FieldSeparator:          ',',
 			DataUsageMultiplyFactor: 1024,
@@ -189,6 +195,6 @@ func TestLoadCdrcConfigMultipleFiles(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(eCgrCfg.CdrcProfiles, cgrCfg.CdrcProfiles) {
-		t.Errorf("Expected: %+v, received: %+v", eCgrCfg.CdrcProfiles, cgrCfg.CdrcProfiles)
+		t.Errorf("Expected: \n%s\n, received: \n%s\n", utils.ToJSON(eCgrCfg.CdrcProfiles), utils.ToJSON(cgrCfg.CdrcProfiles))
 	}
 }

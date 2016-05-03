@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
+	"github.com/cgrates/rpcclient"
 )
 
 /*
@@ -80,7 +81,7 @@ duration::
 
 */
 
-func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, reconnects int, rater, cdrsrv engine.Connector, timezone string) (*OsipsSessionManager, error) {
+func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, reconnects int, rater, cdrsrv rpcclient.RpcClientConnection, timezone string) (*OsipsSessionManager, error) {
 	osm := &OsipsSessionManager{cfg: smOsipsCfg, reconnects: reconnects, rater: rater, cdrsrv: cdrsrv, timezone: timezone, cdrStartEvents: make(map[string]*OsipsEvent), sessions: NewSessions()}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
 		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart}, // Raised when OpenSIPS starts so we can register our event handlers
@@ -94,8 +95,8 @@ func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, reconnects int, ra
 type OsipsSessionManager struct {
 	cfg             *config.SmOsipsConfig
 	reconnects      int
-	rater           engine.Connector
-	cdrsrv          engine.Connector
+	rater           rpcclient.RpcClientConnection
+	cdrsrv          rpcclient.RpcClientConnection
 	timezone        string
 	eventHandlers   map[string][]func(*osipsdagram.OsipsEvent)
 	evSubscribeStop chan struct{}                         // Reference towards the channel controlling subscriptions, keep it as reference so we do not need to copy it
@@ -130,12 +131,12 @@ func (osm *OsipsSessionManager) DebitInterval() time.Duration {
 }
 
 // Returns the connection to local cdr database, used by session to log it's final costs
-func (osm *OsipsSessionManager) CdrSrv() engine.Connector {
+func (osm *OsipsSessionManager) CdrSrv() rpcclient.RpcClientConnection {
 	return osm.cdrsrv
 }
 
 // Returns connection to rater/controller
-func (osm *OsipsSessionManager) Rater() engine.Connector {
+func (osm *OsipsSessionManager) Rater() rpcclient.RpcClientConnection {
 	return osm.rater
 }
 
@@ -152,7 +153,7 @@ func (osm *OsipsSessionManager) Shutdown() error {
 // Process the CDR with CDRS component
 func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.CDR) error {
 	var reply string
-	return osm.cdrsrv.ProcessCdr(storedCdr, &reply)
+	return osm.cdrsrv.Call("CdrServer.ProcessCdr", storedCdr, &reply)
 }
 
 // Disconnects the session
