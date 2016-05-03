@@ -1076,42 +1076,45 @@ func (self *ApierV1) RemActions(attr AttrRemActions, reply *string) error {
 		*reply = err.Error()
 		return err
 	}
-	stringMap := utils.NewStringMap(attr.ActionIDs...)
-	keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX, true)
-	if err != nil {
-		*reply = err.Error()
-		return err
-	}
-	for _, key := range keys {
-		getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):])
+	// The check could lead to very long execution time. So we decided to leave it at the user's risck.'
+	/*
+		stringMap := utils.NewStringMap(attr.ActionIDs...)
+		keys, err := self.RatingDb.GetKeysForPrefix(utils.ACTION_TRIGGER_PREFIX, true)
 		if err != nil {
 			*reply = err.Error()
 			return err
 		}
-		for _, atr := range getAttrs {
-			if _, found := stringMap[atr.ActionsID]; found {
-				// found action trigger referencing action; abort
-				err := fmt.Errorf("action %s refenced by action trigger %s", atr.ActionsID, atr.ID)
+		for _, key := range keys {
+			getAttrs, err := self.RatingDb.GetActionTriggers(key[len(utils.ACTION_TRIGGER_PREFIX):])
+			if err != nil {
 				*reply = err.Error()
 				return err
 			}
-		}
-	}
-	allAplsMap, err := self.RatingDb.GetAllActionPlans()
-	if err != nil && err != utils.ErrNotFound {
-		*reply = err.Error()
-		return err
-	}
-	for _, apl := range allAplsMap {
-		for _, atm := range apl.ActionTimings {
-			if _, found := stringMap[atm.ActionsID]; found {
-				err := fmt.Errorf("action %s refenced by action plan %s", atm.ActionsID, apl.Id)
-				*reply = err.Error()
-				return err
+			for _, atr := range getAttrs {
+				if _, found := stringMap[atr.ActionsID]; found {
+					// found action trigger referencing action; abort
+					err := fmt.Errorf("action %s refenced by action trigger %s", atr.ActionsID, atr.ID)
+					*reply = err.Error()
+					return err
+				}
 			}
 		}
+		allAplsMap, err := self.RatingDb.GetAllActionPlans()
+		if err != nil && err != utils.ErrNotFound {
+			*reply = err.Error()
+			return err
+		}
+		for _, apl := range allAplsMap {
+			for _, atm := range apl.ActionTimings {
+				if _, found := stringMap[atm.ActionsID]; found {
+					err := fmt.Errorf("action %s refenced by action plan %s", atm.ActionsID, apl.Id)
+					*reply = err.Error()
+					return err
+				}
+			}
 
-	}
+		}
+	*/
 	for _, aID := range attr.ActionIDs {
 		if err := self.RatingDb.RemoveActions(aID); err != nil {
 			*reply = err.Error()
