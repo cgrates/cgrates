@@ -167,7 +167,7 @@ func TestCdrsFileFailover(t *testing.T) {
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(failoverContent[11], readBytes[11]) { // Checking just the prefix should do since some content is dynamic
-		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
+		t.Errorf("Expecting: %q, received: %q", string(failoverContent[11]), string(readBytes[11]))
 	}
 	if err := os.Remove(filePath); err != nil {
 		t.Error("Failed removing file: ", filePath)

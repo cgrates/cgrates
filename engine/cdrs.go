@@ -456,9 +456,9 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 			fallbackPath := path.Join(
 				self.cgrCfg.HttpFailedDir,
 				rplCfg.FallbackFileName())
-			_, err := utils.HttpPoster(
+			_, _, err := utils.HttpPoster(
 				rplCfg.Address, self.cgrCfg.HttpSkipTlsVerify, body,
-				content, rplCfg.Attempts, fallbackPath)
+				content, rplCfg.Attempts, fallbackPath, false) // ToDo: Review caching here after we are sure that the connection leak is gone
 			if err != nil {
 				utils.Logger.Err(fmt.Sprintf(
 					"<CDRReplicator> Replicating CDR: %+v, got error: %s", cdr, err.Error()))
@@ -470,7 +470,6 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 		if rplCfg.Synchronous { // Synchronize here
 			<-errChan
 		}
-
 	}
 	return nil
 }
