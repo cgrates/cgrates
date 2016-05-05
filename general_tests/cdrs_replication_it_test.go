@@ -20,7 +20,11 @@ package general_tests
 
 import (
 	"flag"
+	"io/ioutil"
+	"os"
 	"path"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -136,5 +140,35 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 			//!reflect.DeepEqual(rcvedCdrs[0].ExtraFields, testCdr1.ExtraFields) {
 			t.Errorf("Expected: %+v, received: %+v", testCdr1, rcvedCdrs[0])
 		}
+	}
+}
+
+// Connect rpc client to rater
+func TestCdrsFileFailover(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	failoverContent := []byte(`Account=1001&AnswerTime=2013-12-07T08%3A42%3A26Z&Category=call&Destination=1002&Direction=%2Aout&DisconnectCause=&OriginHost=192.168.1.1&OriginID=httpjsonrpc1&PDD=0&RequestType=%2Apseudoprepaid&SetupTime=2013-12-07T08%3A42%3A24Z&Source=UNKNOWN&Subject=1001&Supplier=&Tenant=cgrates.org&ToR=%2Avoice&Usage=10&field_extr1=val_extr1&fieldextr2=valextr2`)
+	var rplCfg *config.CdrReplicationCfg
+	for _, rplCfg = range cdrsMasterCfg.CDRSCdrReplication {
+		if strings.HasSuffix(rplCfg.Address, "invalid") { // Find the config which shold generate the failoback
+			break
+		}
+	}
+	filesInDir, _ := ioutil.ReadDir(cdrsMasterCfg.HttpFailedDir)
+	var fileName string
+	for _, file := range filesInDir { // First file in directory is the one we need, harder to find it's name out of config
+		fileName = file.Name()
+		break
+	}
+	filePath := path.Join(cdrsMasterCfg.HttpFailedDir, fileName)
+	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(failoverContent, readBytes) {
+		t.Errorf("Expecting: %q, received: %q", string(failoverContent), string(readBytes))
+	}
+	if err := os.Remove(filePath); err != nil {
+		t.Error("Failed removing file: ", filePath)
 	}
 }
