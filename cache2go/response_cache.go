@@ -32,6 +32,7 @@ func NewResponseCache(ttl time.Duration) *ResponseCache {
 }
 
 func (rc *ResponseCache) Cache(key string, item *CacheItem) {
+	//utils.Logger.Info("key: " + key)
 	if rc.ttl == 0 {
 		return
 	}
@@ -58,6 +59,7 @@ func (rc *ResponseCache) Get(key string) (*CacheItem, error) {
 	item, ok := rc.cache[key]
 	rc.mu.RUnlock()
 	if ok {
+		//utils.Logger.Info(",,,,,,,,,,,,,,,,,,,,,Found key: " + key)
 		return item, nil
 	}
 	rc.wait(key) // wait for other goroutine processsing this key
@@ -67,6 +69,7 @@ func (rc *ResponseCache) Get(key string) (*CacheItem, error) {
 	if !ok {
 		return nil, ErrNotFound
 	}
+	//utils.Logger.Info("............................Found key: " + key)
 	return item, nil
 }
 

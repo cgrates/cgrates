@@ -933,6 +933,8 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		ForceDuration:   cd.ForceDuration,
 		PerformRounding: cd.PerformRounding,
 		DryRun:          cd.DryRun,
+		CgrID:           cd.CgrID,
+		RunID:           cd.RunID,
 	}
 }
 

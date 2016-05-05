@@ -96,7 +96,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123491",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -104,7 +104,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SETUP_TIME:  "2016-01-05 18:30:59",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1048576",
 	}
@@ -124,7 +124,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123491",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -132,6 +132,8 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:59",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "20000",
 	}
@@ -150,7 +152,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123491",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -158,6 +160,8 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:59",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.LastUsed:    "0",
 	}
 	var rpl string
@@ -187,7 +191,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123492",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -195,7 +199,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SETUP_TIME:  "2016-01-05 18:30:50",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1048576",
 	}
@@ -221,7 +225,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123492",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -252,7 +256,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123492",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -283,7 +287,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123492",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -314,7 +318,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123492",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -345,7 +349,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123492",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -387,7 +391,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.VOICE,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "1234967",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1011",
 		utils.SUBJECT:     "1011",
@@ -403,6 +407,8 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
+	// the second derived charging run has no credit
+
 	if maxUsage != 0 {
 		t.Error("Bad max usage: ", maxUsage)
 	}
@@ -429,7 +435,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123494",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -437,7 +443,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SETUP_TIME:  "2016-01-05 18:30:52",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1048576",
 	}
@@ -478,7 +484,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123495",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -486,7 +492,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SETUP_TIME:  "2016-01-05 18:30:53",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1048576",
 	}
@@ -513,7 +519,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123495",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -566,7 +572,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123496",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -574,7 +580,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SETUP_TIME:  "2016-01-05 18:30:54",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1048576",
 	}
@@ -600,7 +606,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123496",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -631,7 +637,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123496",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -662,7 +668,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123496",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -693,7 +699,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123496",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -724,7 +730,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123496",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -766,7 +772,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	smgEv := SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123497",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -774,7 +780,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 		utils.CATEGORY:    "data",
 		utils.TENANT:      "cgrates.org",
 		utils.REQTYPE:     utils.META_PREPAID,
-		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.SETUP_TIME:  "2016-01-05 18:30:55",
 		utils.ANSWER_TIME: "2016-01-05 18:31:05",
 		utils.USAGE:       "1048576",
 	}
@@ -801,7 +807,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123497",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -832,7 +838,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123497",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -863,7 +869,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123497",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -894,7 +900,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123497",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",
@@ -925,7 +931,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 	smgEv = SMGenericEvent{
 		utils.EVENT_NAME:  "TEST_EVENT",
 		utils.TOR:         utils.DATA,
-		utils.ACCID:       "12349",
+		utils.ACCID:       "123497",
 		utils.DIRECTION:   utils.OUT,
 		utils.ACCOUNT:     "1010",
 		utils.SUBJECT:     "1010",

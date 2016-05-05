@@ -129,7 +129,15 @@ func (self *ApierV1) RemoveAccountActionTriggers(attr AttrRemoveAccountActionTri
 	return nil
 }
 
-func (self *ApierV1) ResetAccountActionTriggers(attr AttrRemoveAccountActionTriggers, reply *string) error {
+type AttrResetAccountActionTriggers struct {
+	Tenant   string
+	Account  string
+	GroupID  string
+	UniqueID string
+	Executed bool
+}
+
+func (self *ApierV1) ResetAccountActionTriggers(attr AttrResetAccountActionTriggers, reply *string) error {
 
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -146,11 +154,13 @@ func (self *ApierV1) ResetAccountActionTriggers(attr AttrRemoveAccountActionTrig
 			if (attr.UniqueID == "" || at.UniqueID == attr.UniqueID) &&
 				(attr.GroupID == "" || at.ID == attr.GroupID) {
 				// reset action trigger
-				at.Executed = false
+				at.Executed = attr.Executed
 			}
 
 		}
-		account.ExecuteActionTriggers(nil)
+		if attr.Executed == false {
+			account.ExecuteActionTriggers(nil)
+		}
 		if err := self.AccountDb.SetAccount(account); err != nil {
 			return 0, err
 		}
@@ -172,6 +182,7 @@ type AttrSetAccountActionTriggers struct {
 	ThresholdType         *string
 	ThresholdValue        *float64
 	Recurrent             *bool
+	Executed              *bool
 	MinSleep              *string
 	ExpirationDate        *string
 	ActivationDate        *string
@@ -216,6 +227,9 @@ func (self *ApierV1) SetAccountActionTriggers(attr AttrSetAccountActionTriggers,
 				}
 				if attr.Recurrent != nil {
 					at.Recurrent = *attr.Recurrent
+				}
+				if attr.Executed != nil {
+					at.Executed = *attr.Executed
 				}
 				if attr.MinSleep != nil {
 					minSleep, err := utils.ParseDurationWithSecs(*attr.MinSleep)

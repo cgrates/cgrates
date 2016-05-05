@@ -2233,7 +2233,9 @@ func TestValueFormulaDebit(t *testing.T) {
 	}
 	at.Execute()
 	afterUb, err := accountingStorage.GetAccount("cgrates.org:vf")
-	if err != nil || afterUb.BalanceMap[utils.MONETARY].GetTotalValue() != -0.333334 {
+	// not an exact value, depends of month
+	v := afterUb.BalanceMap[utils.MONETARY].GetTotalValue()
+	if err != nil || v > -0.30 || v < -0.35 {
 		t.Error("error debiting account: ", err, utils.ToIJSON(afterUb))
 	}
 }
