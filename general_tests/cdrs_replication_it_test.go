@@ -20,6 +20,7 @@ package general_tests
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
@@ -36,6 +37,7 @@ import (
 
 var cdrsMasterCfgPath, cdrsSlaveCfgPath string
 var cdrsMasterCfg, cdrsSlaveCfg *config.CGRConfig
+var cdrsMasterRpc *rpcclient.RpcClient
 
 var testIntegration = flag.Bool("integration", false, "Perform the tests in integration mode, not by default.") // This flag will be passed here via "go test -local" args
 
@@ -90,7 +92,7 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	cdrsMasterRpc, err := rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1, "json", nil)
+	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1, "json", nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -172,3 +174,30 @@ func TestCdrsFileFailover(t *testing.T) {
 		t.Error("Failed removing file: ", filePath)
 	}
 }
+
+/*
+// Performance test, check `lsof -a -p 8427 | wc -l`
+
+func TestCdrsHttpCdrReplication2(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	cdrs := make([]*engine.CDR, 0)
+	for i := 0; i < 10000; i++ {
+		cdr := &engine.CDR{OriginID: fmt.Sprintf("httpjsonrpc_%d", i),
+			ToR: utils.VOICE, OriginHost: "192.168.1.1", Source: "UNKNOWN", RequestType: utils.META_PSEUDOPREPAID,
+			Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+			SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}}
+		cdrs = append(cdrs, cdr)
+	}
+	var reply string
+	for _, cdr := range cdrs {
+		if err := cdrsMasterRpc.Call("CdrsV2.ProcessCdr", cdr, &reply); err != nil {
+			t.Error("Unexpected error: ", err.Error())
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply received: ", reply)
+		}
+	}
+}
+*/
