@@ -319,3 +319,34 @@ func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Ac
 	*reply = retActions
 	return nil
 }
+
+type AttrGetDestinations struct {
+	DestIDs []string
+}
+
+func (self *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.Destination) error {
+	dests := make([]*engine.Destination, 0)
+	if attr.DestIDs == nil {
+		return utils.NewErrMandatoryIeMissing("DestIDs")
+	}
+	if len(attr.DestIDs) == 0 {
+		// get all destination ids
+		destIDs, err := self.RatingDb.GetKeysForPrefix(utils.DESTINATION_PREFIX, true)
+		if err != nil {
+			return err
+		}
+		for _, destID := range destIDs {
+			attr.DestIDs = append(attr.DestIDs, destID[len(utils.DESTINATION_PREFIX):])
+		}
+	}
+	for _, destID := range attr.DestIDs {
+		dst, err := self.RatingDb.GetDestination(destID)
+		if err != nil {
+			return err
+		}
+		dests = append(dests, dst)
+	}
+
+	*reply = dests
+	return nil
+}

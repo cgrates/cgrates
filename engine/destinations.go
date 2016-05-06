@@ -82,6 +82,7 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 }
 
 func CleanStalePrefixes(destIds []string) {
+	utils.Logger.Info("Cleaning stale dest prefixes: " + utils.ToJSON(destIds))
 	prefixMap, err := cache2go.GetAllEntries(utils.DESTINATION_PREFIX)
 	if err != nil {
 		return
