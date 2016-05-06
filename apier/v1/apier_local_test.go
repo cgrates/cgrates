@@ -812,7 +812,7 @@ func TestApierReloadCache(t *testing.T) {
 		return
 	}
 	reply := ""
-	arc := new(utils.ApiReloadCache)
+	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
@@ -1236,7 +1236,7 @@ func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 	}
 	TestApierInitDataDb(t)
 	reply := ""
-	arc := new(utils.ApiReloadCache)
+	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
@@ -1282,7 +1282,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		return
 	}
 	reply := ""
-	arc := new(utils.ApiReloadCache)
+	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
@@ -1708,7 +1708,7 @@ func TestApierReloadCache2(t *testing.T) {
 		return
 	}
 	reply := ""
-	arc := new(utils.ApiReloadCache)
+	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
