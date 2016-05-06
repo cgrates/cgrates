@@ -28,7 +28,33 @@ import (
 	"github.com/ChrisTrenkamp/goxpath/tree"
 	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
+
+// getElementText will process the node to extract the elementName's text out of it (only first one found)
+// returns utils.ErrNotFound if the element is not found in the node
+func elementText(xmlRes tree.Res, elmntPath string) (string, error) {
+	xp, err := goxpath.Parse(elmntPath)
+	if err != nil {
+		return "", err
+	}
+	elmntBuf := bytes.NewBufferString(xml.Header)
+	if err := goxpath.Marshal(xmlRes.(tree.Node), elmntBuf); err != nil {
+		return "", err
+	}
+	elmntNode, err := xmltree.ParseXML(elmntBuf)
+	if err != nil {
+		return "", err
+	}
+	elmnts, err := goxpath.Exec(xp, elmntNode, nil)
+	if err != nil {
+		return "", err
+	}
+	if len(elmnts) == 0 {
+		return "", utils.ErrNotFound
+	}
+	return elmnts[0].String(), nil
+}
 
 func NewXMLRecordsProcessor(recordsReader io.Reader) (*XMLRecordsProcessor, error) {
 	xp, err := goxpath.Parse(path.Join("/broadWorksCDR/cdrData/"))
@@ -44,7 +70,7 @@ func NewXMLRecordsProcessor(recordsReader io.Reader) (*XMLRecordsProcessor, erro
 	}
 	xmlProc := new(XMLRecordsProcessor)
 	xmlProc.cdrXmlElmts = goxpath.MustExec(xp, xmlNode, nil)
-	return nil, nil
+	return xmlProc, nil
 }
 
 type XMLRecordsProcessor struct {
@@ -60,11 +86,8 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 	if len(xmlProc.cdrXmlElmts) <= xmlProc.procItems {
 		return nil, io.EOF // have processed all items
 	}
-	cdrXml := xmlProc.cdrXmlElmts[xmlProc.procItems]
+	cdrs = make([]*engine.CDR, 0)
+	//cdrXml := xmlProc.cdrXmlElmts[xmlProc.procItems]
 	xmlProc.procItems += 1
-	cdrBuf := bytes.NewBufferString(xml.Header)
-	if err := goxpath.Marshal(cdrXml.(tree.Node), cdrBuf); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return cdrs, nil
 }

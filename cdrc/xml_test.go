@@ -20,14 +20,14 @@ package cdrc
 
 import (
 	"bytes"
-	"encoding/xml"
-	"fmt"
 	"path"
+	"reflect"
 	"testing"
 
 	"github.com/ChrisTrenkamp/goxpath"
-	"github.com/ChrisTrenkamp/goxpath/tree"
 	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
@@ -169,20 +169,42 @@ func optsNotStrict(s *xmltree.ParseOptions) {
 	s.Strict = false
 }
 
-func TestXmlPathCDRs(t *testing.T) {
+func TestElementText(t *testing.T) {
 	xp := goxpath.MustParse(path.Join("/broadWorksCDR/cdrData/"))
 	xmlTree := xmltree.MustParseXML(bytes.NewBufferString(cdrXmlBroadsoft), optsNotStrict)
 	cdrs := goxpath.MustExec(xp, xmlTree, nil)
-	for _, cdr := range cdrs {
-		cdrBuf := bytes.NewBufferString(xml.Header)
-		if err := goxpath.Marshal(cdr.(tree.Node), cdrBuf); err != nil {
-			t.Error(err)
-		}
-		xp := goxpath.MustParse(path.Join("/cdrData/basicModule/userNumber"))
-		userNumberNode := xmltree.MustParseXML(cdrBuf, optsNotStrict)
-		userNumber := goxpath.MustExec(xp, userNumberNode, nil)
-		if len(userNumber) != 0 {
-			fmt.Printf("UserNumber: %s\n", userNumber[0].String())
-		}
+	cdrWithoutUserNr := cdrs[0]
+	if _, err := elementText(cdrWithoutUserNr, "cdrData/basicModule/userNumber"); err != utils.ErrNotFound {
+		t.Error(err)
+	}
+	cdrWithUser := cdrs[1]
+	if val, err := elementText(cdrWithUser, "cdrData/basicModule/userNumber"); err != nil {
+		t.Error(err)
+	} else if val != "1001" {
+		t.Errorf("Expecting: 1001, received: %s", val)
+	}
+	if val, err := elementText(cdrWithUser, "/cdrData/centrexModule/locationList/locationInformation/locationType"); err != nil {
+		t.Error(err)
+	} else if val != "Primary Device" {
+		t.Errorf("Expecting: <Primary Device>, received: <%s>", val)
+	}
+}
+
+func TestXMLRPProcessNextRecord(t *testing.T) {
+	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft))
+	if err != nil {
+		t.Error(err)
+	}
+	var cdrs []*engine.CDR
+	for {
+		cdrs, err = xmlRP.ProcessNextRecord()
+		break
+	}
+	if err != nil {
+		t.Error(err)
+	}
+	expectedCDRs := []*engine.CDR{}
+	if !reflect.DeepEqual(expectedCDRs, cdrs) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedCDRs, cdrs)
 	}
 }
