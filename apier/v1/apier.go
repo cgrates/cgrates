@@ -722,7 +722,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	return nil
 }
 
-func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
+func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) error {
 	var dstKeys, rpKeys, rpfKeys, actKeys, aplKeys, shgKeys, lcrKeys, dcsKeys, alsKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))

@@ -374,7 +374,7 @@ func main() {
 		if *flush {
 			dstIds, rplIds, rpfIds, lcrIds = nil, nil, nil, nil // Should reload all these on flush
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{
+		if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{
 			DestinationIds:   dstIds,
 			RatingPlanIds:    rplIds,
 			RatingProfileIds: rpfIds,

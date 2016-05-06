@@ -140,6 +140,38 @@ func TestDestManagRemoveSomeDestinationLoaded(t *testing.T) {
 	}
 }
 
+func TestDestManagLoadTariffPlanFromFolderRemoveSomeFlush(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "removesome"), FlushDb: true}
+	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+		t.Error(err)
+	} else if destLoadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+}
+
+func TestDestManagRemoveSomeFlushDestinationLoaded(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	dests := make([]*engine.Destination, 0)
+	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	} else if len(dests) != 4 {
+		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+	}
+
+	var rcvStats utils.CacheStats
+	if err := destRPC.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if rcvStats.Destinations != 5 {
+		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+	}
+}
+
 func TestDestManagLoadTariffPlanFromFolderAddBack(t *testing.T) {
 	if !*testIntegration {
 		return
@@ -201,5 +233,126 @@ func TestDestManagAddOneDestinationLoaded(t *testing.T) {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if rcvStats.Destinations != 10 {
 		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+	}
+}
+
+func TestDestManagCacheWithGetCache(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	if err := engine.InitDataDb(destCfg); err != nil {
+		t.Fatal(err)
+	}
+	var reply string
+	if err := destRPC.Call("ApierV1.ReloadCache", utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.ReloadCache received: %+v", reply)
+	}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheall"), FlushDb: true}
+	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+		t.Error(err)
+	} else if destLoadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+
+	dests := make([]*engine.Destination, 0)
+	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	} else if len(dests) != 1 {
+		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+	}
+
+	var rcvStats utils.CacheStats
+	if err := destRPC.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if rcvStats.Destinations != 2 {
+		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+	}
+
+	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheone"), FlushDb: true}
+	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+		t.Error(err)
+	} else if destLoadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+
+	dests = make([]*engine.Destination, 0)
+	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	} else if len(dests) != 1 {
+		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+	}
+
+	if err := destRPC.Call("ApierV1.GetCacheStats", utils.AttrCacheStats{}, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if rcvStats.Destinations != 1 {
+		t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+	}
+}
+
+func TestDestManagCacheWithGetCost(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	if err := engine.InitDataDb(destCfg); err != nil {
+		t.Fatal(err)
+	}
+	var reply string
+	if err := destRPC.Call("ApierV1.ReloadCache", utils.AttrReloadCache{}, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ApierV1.ReloadCache received: %+v", reply)
+	}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheall"), FlushDb: true}
+	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+		t.Error(err)
+	} else if destLoadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+
+	dests := make([]*engine.Destination, 0)
+	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	} else if len(dests) != 1 {
+		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+	}
+
+	var cc engine.CallCost
+	cd := &engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Account:     "test",
+		Destination: "1002",
+		TimeStart:   time.Date(2016, 2, 24, 0, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2016, 2, 24, 0, 0, 10, 0, time.UTC),
+	}
+	if err := destRPC.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error(err)
+	} else if cc.Cost != 1.6667 {
+		t.Error("Empty loadId received, loadInstance: ", utils.ToIJSON(cc))
+	}
+
+	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "test", "destinations", "cacheone"), FlushDb: true}
+	if err := destRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &destLoadInst); err != nil {
+		t.Error(err)
+	} else if destLoadInst.LoadId == "" {
+		t.Error("Empty loadId received, loadInstance: ", destLoadInst)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+
+	dests = make([]*engine.Destination, 0)
+	if err := destRPC.Call("ApierV2.GetDestinations", v2.AttrGetDestinations{DestinationIDs: []string{}}, &dests); err != nil {
+		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	} else if len(dests) != 1 {
+		t.Errorf("Calling ApierV2.GetDestinations got reply: %v", utils.ToIJSON(dests))
+	}
+
+	if err := destRPC.Call("Responder.GetCost", cd, &cc); err.Error() != utils.ErrUnauthorizedDestination.Error() {
+		t.Error(err)
 	}
 }
