@@ -1066,11 +1066,11 @@ func (self *ApierV1) GetLoadHistory(attrs utils.Paginator, reply *[]*engine.Load
 	return nil
 }
 
-type AttrRemActions struct {
+type AttrRemoveActions struct {
 	ActionIDs []string
 }
 
-func (self *ApierV1) RemActions(attr AttrRemActions, reply *string) error {
+func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error {
 	if attr.ActionIDs == nil {
 		err := utils.ErrNotFound
 		*reply = err.Error()
