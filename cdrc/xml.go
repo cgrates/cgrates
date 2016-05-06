@@ -18,18 +18,53 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package cdrc
 
-//import
 import (
+	"bytes"
+	"encoding/xml"
+	"io"
+	"path"
+
+	"github.com/ChrisTrenkamp/goxpath"
+	"github.com/ChrisTrenkamp/goxpath/tree"
+	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
 	"github.com/cgrates/cgrates/engine"
 )
 
-type XMLRecordsProcessor struct {
-}
-
-func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() ([]*engine.CDR, error) {
+func NewXMLRecordsProcessor(recordsReader io.Reader) (*XMLRecordsProcessor, error) {
+	xp, err := goxpath.Parse(path.Join("/broadWorksCDR/cdrData/"))
+	if err != nil {
+		return nil, err
+	}
+	optsNotStrict := func(s *xmltree.ParseOptions) {
+		s.Strict = false
+	}
+	xmlNode, err := xmltree.ParseXML(recordsReader, optsNotStrict)
+	if err != nil {
+		return nil, err
+	}
+	xmlProc := new(XMLRecordsProcessor)
+	xmlProc.cdrXmlElmts = goxpath.MustExec(xp, xmlNode, nil)
 	return nil, nil
 }
 
+type XMLRecordsProcessor struct {
+	cdrXmlElmts []tree.Res // result of splitting the XML doc into CDR elements
+	procItems   int        // current number of processed records from file
+}
+
 func (xmlProc *XMLRecordsProcessor) ProcessedRecordsNr() int64 {
-	return 0
+	return int64(xmlProc.procItems)
+}
+
+func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err error) {
+	if len(xmlProc.cdrXmlElmts) <= xmlProc.procItems {
+		return nil, io.EOF // have processed all items
+	}
+	cdrXml := xmlProc.cdrXmlElmts[xmlProc.procItems]
+	xmlProc.procItems += 1
+	cdrBuf := bytes.NewBufferString(xml.Header)
+	if err := goxpath.Marshal(cdrXml.(tree.Node), cdrBuf); err != nil {
+		return nil, err
+	}
+	return nil, nil
 }
