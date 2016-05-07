@@ -33,7 +33,7 @@ func init() {
 type CmdReloadCache struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ApiReloadCache
+	rpcParams *utils.AttrReloadCache
 	rpcResult string
 	*CommandExecuter
 }
@@ -48,7 +48,7 @@ func (self *CmdReloadCache) RpcMethod() string {
 
 func (self *CmdReloadCache) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.ApiReloadCache{}
+		self.rpcParams = &utils.AttrReloadCache{}
 	}
 	return self.rpcParams
 }

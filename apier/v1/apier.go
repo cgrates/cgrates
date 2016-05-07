@@ -722,7 +722,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	return nil
 }
 
-func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
+func (self *ApierV1) ReloadCache(attrs utils.AttrReloadCache, reply *string) error {
 	var dstKeys, rpKeys, rpfKeys, actKeys, aplKeys, shgKeys, lcrKeys, dcsKeys, alsKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
@@ -1066,11 +1066,11 @@ func (self *ApierV1) GetLoadHistory(attrs utils.Paginator, reply *[]*engine.Load
 	return nil
 }
 
-type AttrRemActions struct {
+type AttrRemoveActions struct {
 	ActionIDs []string
 }
 
-func (self *ApierV1) RemActions(attr AttrRemActions, reply *string) error {
+func (self *ApierV1) RemoveActions(attr AttrRemoveActions, reply *string) error {
 	if attr.ActionIDs == nil {
 		err := utils.ErrNotFound
 		*reply = err.Error()
