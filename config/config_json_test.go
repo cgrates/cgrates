@@ -319,6 +319,7 @@ func TestDfCdrcJsonCfg(t *testing.T) {
 			Cdr_in_dir:                 utils.StringPointer("/var/log/cgrates/cdrc/in"),
 			Cdr_out_dir:                utils.StringPointer("/var/log/cgrates/cdrc/out"),
 			Failed_calls_prefix:        utils.StringPointer("missed_calls"),
+			Cdr_path:                   utils.StringPointer(""),
 			Cdr_source_id:              utils.StringPointer("freeswitch_csv"),
 			Cdr_filter:                 utils.StringPointer(""),
 			Continue_on_success:        utils.BoolPointer(false),

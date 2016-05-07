@@ -20,6 +20,7 @@ package utils
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -657,5 +658,23 @@ func TestEndOfMonth(t *testing.T) {
 	expected = time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC)
 	if !eom.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, eom)
+	}
+}
+
+func TestParseHierarchyPath(t *testing.T) {
+	eHP := HierarchyPath([]string{"Root", "CGRateS"})
+	if hp := ParseHierarchyPath("Root>CGRateS", ""); !reflect.DeepEqual(hp, eHP) {
+		t.Errorf("Expecting: %+v, received: %+v", eHP, hp)
+	}
+	if hp := ParseHierarchyPath("/Root/CGRateS/", ""); !reflect.DeepEqual(hp, eHP) {
+		t.Errorf("Expecting: %+v, received: %+v", eHP, hp)
+	}
+}
+
+func TestHierarchyPathAsString(t *testing.T) {
+	eStr := "/Root/CGRateS"
+	hp := HierarchyPath([]string{"Root", "CGRateS"})
+	if hpStr := hp.AsString("/", true); hpStr != eStr {
+		t.Errorf("Expecting: %q, received: %q", eStr, hpStr)
 	}
 }

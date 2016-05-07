@@ -155,6 +155,7 @@ type CdrcJsonCfg struct {
 	Cdr_in_dir                 *string
 	Cdr_out_dir                *string
 	Failed_calls_prefix        *string
+	Cdr_path                   *string
 	Cdr_source_id              *string
 	Cdr_filter                 *string
 	Continue_on_success        *bool

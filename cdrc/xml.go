@@ -22,11 +22,11 @@ import (
 	"bytes"
 	"encoding/xml"
 	"io"
-	"path"
 
 	"github.com/ChrisTrenkamp/goxpath"
 	"github.com/ChrisTrenkamp/goxpath/tree"
 	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -56,8 +56,8 @@ func elementText(xmlRes tree.Res, elmntPath string) (string, error) {
 	return elmnts[0].String(), nil
 }
 
-func NewXMLRecordsProcessor(recordsReader io.Reader) (*XMLRecordsProcessor, error) {
-	xp, err := goxpath.Parse(path.Join("/broadWorksCDR/cdrData/"))
+func NewXMLRecordsProcessor(recordsReader io.Reader, cdrPath utils.HierarchyPath, cdrcCfgs []*config.CdrcConfig) (*XMLRecordsProcessor, error) {
+	xp, err := goxpath.Parse(cdrPath.AsString("/", true))
 	if err != nil {
 		return nil, err
 	}
@@ -68,14 +68,16 @@ func NewXMLRecordsProcessor(recordsReader io.Reader) (*XMLRecordsProcessor, erro
 	if err != nil {
 		return nil, err
 	}
-	xmlProc := new(XMLRecordsProcessor)
+	xmlProc := &XMLRecordsProcessor{cdrPath: cdrPath, cdrcCfgs: cdrcCfgs}
 	xmlProc.cdrXmlElmts = goxpath.MustExec(xp, xmlNode, nil)
 	return xmlProc, nil
 }
 
 type XMLRecordsProcessor struct {
-	cdrXmlElmts []tree.Res // result of splitting the XML doc into CDR elements
-	procItems   int        // current number of processed records from file
+	cdrXmlElmts []tree.Res           // result of splitting the XML doc into CDR elements
+	procItems   int                  // current number of processed records from file
+	cdrPath     utils.HierarchyPath  // path towards one CDR element
+	cdrcCfgs    []*config.CdrcConfig // individual configs for the folder CDRC is monitoring
 }
 
 func (xmlProc *XMLRecordsProcessor) ProcessedRecordsNr() int64 {
@@ -87,7 +89,27 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 		return nil, io.EOF // have processed all items
 	}
 	cdrs = make([]*engine.CDR, 0)
-	//cdrXml := xmlProc.cdrXmlElmts[xmlProc.procItems]
+	cdrXML := xmlProc.cdrXmlElmts[xmlProc.procItems]
 	xmlProc.procItems += 1
+	for _, cdrcCfg := range xmlProc.cdrcCfgs {
+		filtersPassing := true
+		for _, rsrFltr := range cdrcCfg.CdrFilter {
+			if rsrFltr == nil {
+				continue // Pass
+			}
+			fieldVal, _ := elementText(cdrXML, rsrFltr.Id)
+			if !rsrFltr.FilterPasses(fieldVal) {
+				filtersPassing = false
+				break
+			}
+		}
+		if !filtersPassing {
+			continue
+		}
+	}
 	return cdrs, nil
+}
+
+func (xmlProc *XMLRecordsProcessor) recordToStoredCdr(xmlEntity tree.Res, cdrcCfg *config.CdrcConfig) (*engine.CDR, error) {
+	return nil, nil
 }

@@ -25,23 +25,24 @@ import (
 )
 
 type CdrcConfig struct {
-	ID                      string          // free-form text identifying this CDRC instance
-	Enabled                 bool            // Enable/Disable the profile
-	DryRun                  bool            // Do not post CDRs to the server
-	CdrsConns               []*HaPoolConfig // The address where CDRs can be reached
-	CdrFormat               string          // The type of CDR file to process <csv|opensips_flatstore>
-	FieldSeparator          rune            // The separator to use when reading csvs
-	DataUsageMultiplyFactor float64         // Conversion factor for data usage
-	Timezone                string          // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	RunDelay                time.Duration   // Delay between runs, 0 for inotify driven requests
-	MaxOpenFiles            int             // Maximum number of files opened simultaneously
-	CdrInDir                string          // Folder to process CDRs from
-	CdrOutDir               string          // Folder to move processed CDRs to
-	FailedCallsPrefix       string          // Used in case of flatstore CDRs to avoid searching for BYE records
-	CdrSourceId             string          // Source identifier for the processed CDRs
-	CdrFilter               utils.RSRFields // Filter CDR records to import
-	ContinueOnSuccess       bool            // Continue after execution
-	PartialRecordCache      time.Duration   // Duration to cache partial records when not pairing
+	ID                      string              // free-form text identifying this CDRC instance
+	Enabled                 bool                // Enable/Disable the profile
+	DryRun                  bool                // Do not post CDRs to the server
+	CdrsConns               []*HaPoolConfig     // The address where CDRs can be reached
+	CdrFormat               string              // The type of CDR file to process <csv|opensips_flatstore>
+	FieldSeparator          rune                // The separator to use when reading csvs
+	DataUsageMultiplyFactor float64             // Conversion factor for data usage
+	Timezone                string              // timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	RunDelay                time.Duration       // Delay between runs, 0 for inotify driven requests
+	MaxOpenFiles            int                 // Maximum number of files opened simultaneously
+	CdrInDir                string              // Folder to process CDRs from
+	CdrOutDir               string              // Folder to move processed CDRs to
+	FailedCallsPrefix       string              // Used in case of flatstore CDRs to avoid searching for BYE records
+	CDRPath                 utils.HierarchyPath // used for XML CDRs to specify the path towards CDR elements
+	CdrSourceId             string              // Source identifier for the processed CDRs
+	CdrFilter               utils.RSRFields     // Filter CDR records to import
+	ContinueOnSuccess       bool                // Continue after execution
+	PartialRecordCache      time.Duration       // Duration to cache partial records when not pairing
 	HeaderFields            []*CfgCdrField
 	ContentFields           []*CfgCdrField
 	TrailerFields           []*CfgCdrField
@@ -95,6 +96,9 @@ func (self *CdrcConfig) loadFromJsonCfg(jsnCfg *CdrcJsonCfg) error {
 	}
 	if jsnCfg.Failed_calls_prefix != nil {
 		self.FailedCallsPrefix = *jsnCfg.Failed_calls_prefix
+	}
+	if jsnCfg.Cdr_path != nil {
+		self.CDRPath = utils.ParseHierarchyPath(*jsnCfg.Cdr_path, "")
 	}
 	if jsnCfg.Cdr_source_id != nil {
 		self.CdrSourceId = *jsnCfg.Cdr_source_id

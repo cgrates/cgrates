@@ -552,3 +552,36 @@ func SizeFmt(num float64, suffix string) string {
 func TimeIs0h(t time.Time) bool {
 	return t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
 }
+
+func ParseHierarchyPath(path string, sep string) HierarchyPath {
+	if sep == "" {
+		for _, sep = range []string{HIERARCHY_SEP, "/"} {
+			if idx := strings.Index(path, sep); idx != -1 {
+				break
+			}
+		}
+	}
+	path = strings.Trim(path, sep) // Need to strip if prefix of suffiy (eg: paths with /) so we can properly split
+	return HierarchyPath(strings.Split(path, sep))
+}
+
+// HierarchyPath is used in various places to represent various path hierarchies (eg: in Diameter groups, XML trees)
+type HierarchyPath []string
+
+func (h HierarchyPath) AsString(sep string, prefix bool) string {
+	if len(h) == 0 {
+		return ""
+	}
+	retStr := ""
+	for idx, itm := range h {
+		if idx == 0 {
+			if prefix {
+				retStr += sep
+			}
+		} else {
+			retStr += sep
+		}
+		retStr += itm
+	}
+	return retStr
+}

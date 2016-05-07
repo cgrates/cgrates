@@ -183,6 +183,7 @@ const CGRATES_CFG_JSON = `
 		"cdr_in_dir": "/var/log/cgrates/cdrc/in",	// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/var/log/cgrates/cdrc/out",	// absolute path towards the directory where processed CDRs will be moved
 		"failed_calls_prefix": "missed_calls",		// used in case of flatstore CDRs to avoid searching for BYE records
+		"cdr_path": "",							// path towards one CDR element in case of XML CDRs
 		"cdr_source_id": "freeswitch_csv",			// free form field, tag identifying the source of the CDRs within CDRS database
 		"cdr_filter": "",							// filter CDR records to import
 		"continue_on_success": false,				// continue to the next template if executed

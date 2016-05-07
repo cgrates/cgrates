@@ -191,7 +191,7 @@ func TestElementText(t *testing.T) {
 }
 
 func TestXMLRPProcessNextRecord(t *testing.T) {
-	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft))
+	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft), utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), nil)
 	if err != nil {
 		t.Error(err)
 	}
