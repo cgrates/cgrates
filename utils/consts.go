@@ -285,6 +285,7 @@ const (
 	SessionTTL                  = "SessionTTL"
 	SessionTTLLastUsed          = "SessionTTLLastUsed"
 	SessionTTLUsage             = "SessionTTLUsage"
+	HandlerSubstractUsage       = "*substract_usage"
 )
 
 var (

@@ -21,12 +21,14 @@ package cdrc
 import (
 	"bytes"
 	"path"
-	"reflect"
+	//"reflect"
 	"testing"
+	"time"
 
 	"github.com/ChrisTrenkamp/goxpath"
 	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
-	"github.com/cgrates/cgrates/engine"
+	//"github.com/cgrates/cgrates/config"
+	//"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -169,7 +171,7 @@ func optsNotStrict(s *xmltree.ParseOptions) {
 	s.Strict = false
 }
 
-func TestElementText(t *testing.T) {
+func TestXMLElementText(t *testing.T) {
 	xp := goxpath.MustParse(path.Join("/broadWorksCDR/cdrData/"))
 	xmlTree := xmltree.MustParseXML(bytes.NewBufferString(cdrXmlBroadsoft), optsNotStrict)
 	cdrs := goxpath.MustExec(xp, xmlTree, nil)
@@ -190,15 +192,66 @@ func TestElementText(t *testing.T) {
 	}
 }
 
-func TestXMLRPProcessNextRecord(t *testing.T) {
-	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft), utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), nil)
+func TestXMLHandlerSubstractUsage(t *testing.T) {
+	xp := goxpath.MustParse(path.Join("/broadWorksCDR/cdrData/"))
+	xmlTree := xmltree.MustParseXML(bytes.NewBufferString(cdrXmlBroadsoft), optsNotStrict)
+	cdrs := goxpath.MustExec(xp, xmlTree, nil)
+	cdrWithUsage := cdrs[1]
+	if usage, err := handlerSubstractUsage(cdrWithUsage, utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>releaseTime;^|;broadWorksCDR>cdrData>basicModule>answerTime", utils.INFIELD_SEP),
+		utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC"); err != nil {
+		t.Error(err)
+	} else if usage != time.Duration(13483000000) {
+		t.Errorf("Expected: 13.483s, received: %v", usage)
+	}
+}
+
+/*
+func TestXMLRPProcess(t *testing.T) {
+	cdrcCfgs := []*config.CdrcConfig{
+		&config.CdrcConfig{
+			ID:                      "TestXML",
+			Enabled:                 true,
+			CdrFormat:               "xml",
+			DataUsageMultiplyFactor: 1024,
+			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
+			CdrSourceId:             "TestXML",
+			CdrFilter:               utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
+			ContentFields: []*config.CfgCdrField{
+				&config.CfgCdrField{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.TOR,
+					Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "OriginID", Type: utils.META_COMPOSED, FieldId: utils.ACCID,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>localCallId", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "RequestType", Type: utils.META_COMPOSED, FieldId: utils.REQTYPE,
+					Value: utils.ParseRSRFieldsMustCompile("^*rated", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Direction", Type: utils.META_COMPOSED, FieldId: utils.DIRECTION,
+					Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.TENANT,
+					Value: utils.ParseRSRFieldsMustCompile("~broadWorksCDR>cdrData>basicModule>userId:s/*.@(.*)/${1}/", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.CATEGORY,
+					Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.ACCOUNT,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>userNumber", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Destination", Type: utils.META_COMPOSED, FieldId: utils.DESTINATION,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>calledNumber", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "SetupTime", Type: utils.META_COMPOSED, FieldId: utils.SETUP_TIME,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>startTime", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "AnswerTime", Type: utils.META_COMPOSED, FieldId: utils.ANSWER_TIME,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>answerTime", utils.INFIELD_SEP), Mandatory: true},
+				&config.CfgCdrField{Tag: "Usage", Type: utils.META_HANDLER, FieldId: utils.USAGE, HandlerId: utils.HandlerSubstractUsage,
+					Value: utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>basicModule>releaseTime;^|;broadWorksCDR>cdrData>basicModule>answerTime", utils.INFIELD_SEP), Mandatory: true},
+			},
+		},
+	}
+	xmlRP, err := NewXMLRecordsProcessor(bytes.NewBufferString(cdrXmlBroadsoft), utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}), "UTC", true, cdrcCfgs)
 	if err != nil {
 		t.Error(err)
 	}
 	var cdrs []*engine.CDR
-	for {
+	for i := 0; i < len(cdrs); i++ {
 		cdrs, err = xmlRP.ProcessNextRecord()
-		break
+		if i == 1 { // Take second CDR since the first one cannot be processed
+			break
+		}
 	}
 	if err != nil {
 		t.Error(err)
@@ -208,3 +261,4 @@ func TestXMLRPProcessNextRecord(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedCDRs, cdrs)
 	}
 }
+*/
