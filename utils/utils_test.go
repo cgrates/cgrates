@@ -259,6 +259,14 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if !eamonTmS.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", eamonTmS, expectedTime)
 	}
+	broadSoftTmStr := "20160419210007.037"
+	broadTmS, err := ParseTimeDetectLayout(broadSoftTmStr, "")
+	expectedTime = time.Date(2016, 4, 19, 21, 0, 7, 37000000, time.UTC)
+	if err != nil {
+		t.Error(err)
+	} else if !broadTmS.Equal(expectedTime) {
+		t.Errorf("Expecting: %v, received: %v", expectedTime, broadTmS)
+	}
 }
 
 func TestParseDateUnix(t *testing.T) {
