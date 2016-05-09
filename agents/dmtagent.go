@@ -160,6 +160,10 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				processorVars[CGRError] = utils.ErrInsufficientCredit.Error()
 			case strings.HasSuffix(err.Error(), utils.ErrAccountDisabled.Error()):
 				processorVars[CGRError] = utils.ErrAccountDisabled.Error()
+			case strings.HasSuffix(err.Error(), utils.ErrRatingPlanNotFound.Error()):
+				processorVars[CGRError] = utils.ErrRatingPlanNotFound.Error()
+			case strings.HasSuffix(err.Error(), utils.ErrUnauthorizedDestination.Error()):
+				processorVars[CGRError] = utils.ErrUnauthorizedDestination.Error()
 			default: // Unknown error
 				processorVars[CGRError] = err.Error()
 				processorVars[CGRResultCode] = strconv.Itoa(DiameterRatingFailed)
