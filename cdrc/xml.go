@@ -135,7 +135,9 @@ func (xmlProc *XMLRecordsProcessor) ProcessNextRecord() (cdrs []*engine.CDR, err
 			if rsrFltr == nil {
 				continue // Pass
 			}
-			fieldVal, _ := elementText(cdrXML, rsrFltr.Id)
+			absolutePath := utils.ParseHierarchyPath(rsrFltr.Id, "")
+			relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
+			fieldVal, _ := elementText(cdrXML, relPath.AsString("/", true))
 			if !rsrFltr.FilterPasses(fieldVal) {
 				filtersPassing = false
 				break
@@ -169,10 +171,10 @@ func (xmlProc *XMLRecordsProcessor) recordToCDR(xmlEntity tree.Res, cdrcCfg *con
 				} else { // Dynamic value extracted using path
 					absolutePath := utils.ParseHierarchyPath(cfgFieldRSR.Id, "")
 					relPath := utils.HierarchyPath(absolutePath[len(xmlProc.cdrPath)-1:]) // Need relative path to the xmlElmnt
-					if fieldVal, err := elementText(xmlEntity, relPath.AsString("/", true)); err != nil {
+					if elmntText, err := elementText(xmlEntity, relPath.AsString("/", true)); err != nil {
 						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s, err: %s", xmlEntity, cdrFldCfg.Tag, err.Error())
 					} else {
-						fieldVal += cfgFieldRSR.ParseValue(fieldVal)
+						fieldVal += cfgFieldRSR.ParseValue(elmntText)
 					}
 				}
 			}

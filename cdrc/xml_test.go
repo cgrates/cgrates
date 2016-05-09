@@ -21,14 +21,14 @@ package cdrc
 import (
 	"bytes"
 	"path"
-	//"reflect"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/ChrisTrenkamp/goxpath"
 	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
-	//"github.com/cgrates/cgrates/config"
-	//"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -62,9 +62,9 @@ var cdrXmlBroadsoft = `<?xml version="1.0" encoding="ISO-8859-1"?>
       <groupNumber>2001</groupNumber>
       <direction>Terminating</direction>
       <asCallType>Network</asCallType>
-      <callingNumber>+4986517174963</callingNumber>
+      <callingNumber>1001</callingNumber>
       <callingPresentationIndicator>Public</callingPresentationIndicator>
-      <calledNumber>1001</calledNumber>
+      <calledNumber>+4986517174963</calledNumber>
       <startTime>20160419210005.247</startTime>
       <userTimeZone>1+020000</userTimeZone>
       <localCallId>25160047719:0</localCallId>
@@ -205,7 +205,6 @@ func TestXMLHandlerSubstractUsage(t *testing.T) {
 	}
 }
 
-/*
 func TestXMLRPProcess(t *testing.T) {
 	cdrcCfgs := []*config.CdrcConfig{
 		&config.CdrcConfig{
@@ -215,7 +214,7 @@ func TestXMLRPProcess(t *testing.T) {
 			DataUsageMultiplyFactor: 1024,
 			CDRPath:                 utils.HierarchyPath([]string{"broadWorksCDR", "cdrData"}),
 			CdrSourceId:             "TestXML",
-			CdrFilter:               utils.ParseRSRFieldsMustCompile("", utils.INFIELD_SEP),
+			CdrFilter:               utils.ParseRSRFieldsMustCompile("broadWorksCDR>cdrData>headerModule>type(Normal)", utils.INFIELD_SEP),
 			ContentFields: []*config.CfgCdrField{
 				&config.CfgCdrField{Tag: "TOR", Type: utils.META_COMPOSED, FieldId: utils.TOR,
 					Value: utils.ParseRSRFieldsMustCompile("^*voice", utils.INFIELD_SEP), Mandatory: true},
@@ -226,7 +225,7 @@ func TestXMLRPProcess(t *testing.T) {
 				&config.CfgCdrField{Tag: "Direction", Type: utils.META_COMPOSED, FieldId: utils.DIRECTION,
 					Value: utils.ParseRSRFieldsMustCompile("^*out", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "Tenant", Type: utils.META_COMPOSED, FieldId: utils.TENANT,
-					Value: utils.ParseRSRFieldsMustCompile("~broadWorksCDR>cdrData>basicModule>userId:s/*.@(.*)/${1}/", utils.INFIELD_SEP), Mandatory: true},
+					Value: utils.ParseRSRFieldsMustCompile("~broadWorksCDR>cdrData>basicModule>userId:s/.*@(.*)/${1}/", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "Category", Type: utils.META_COMPOSED, FieldId: utils.CATEGORY,
 					Value: utils.ParseRSRFieldsMustCompile("^call", utils.INFIELD_SEP), Mandatory: true},
 				&config.CfgCdrField{Tag: "Account", Type: utils.META_COMPOSED, FieldId: utils.ACCOUNT,
@@ -247,7 +246,7 @@ func TestXMLRPProcess(t *testing.T) {
 		t.Error(err)
 	}
 	var cdrs []*engine.CDR
-	for i := 0; i < len(cdrs); i++ {
+	for i := 0; i < 4; i++ {
 		cdrs, err = xmlRP.ProcessNextRecord()
 		if i == 1 { // Take second CDR since the first one cannot be processed
 			break
@@ -256,9 +255,13 @@ func TestXMLRPProcess(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	expectedCDRs := []*engine.CDR{}
+	expectedCDRs := []*engine.CDR{
+		&engine.CDR{CGRID: "1f045359a0784d15e051d7e41ae30132b139d714", OriginHost: "0.0.0.0", Source: "TestXML", OriginID: "25160047719:0",
+			ToR: "*voice", RequestType: "*rated", Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Destination: "+4986517174963",
+			SetupTime: time.Date(2016, 4, 19, 21, 0, 5, 247000000, time.UTC), AnswerTime: time.Date(2016, 4, 19, 21, 0, 6, 813000000, time.UTC), Usage: time.Duration(13483000000),
+			ExtraFields: map[string]string{}, Cost: -1},
+	}
 	if !reflect.DeepEqual(expectedCDRs, cdrs) {
-		t.Errorf("Expecting: %+v, received: %+v", expectedCDRs, cdrs)
+		t.Errorf("Expecting: %+v\n, received: %+v\n", expectedCDRs, cdrs)
 	}
 }
-*/
