@@ -273,7 +273,7 @@ func startSmOpenSIPS(internalRaterChan, internalCDRSChan chan rpcclient.RpcClien
 	}
 	if len(cfg.SmOsipsConfig.CDRsConns) != 0 {
 		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
-			cfg.SmOsipsConfig.CDRsConns, internalRaterChan, cfg.InternalTtl)
+			cfg.SmOsipsConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<SMOpenSIPS> Could not connect to CDRs: %s", err.Error()))
 			exitChan <- true
