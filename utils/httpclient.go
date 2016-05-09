@@ -50,7 +50,8 @@ func GetBytes(content interface{}) ([]byte, error) {
 // Post without automatic failover
 func HttpJsonPost(url string, skipTlsVerify bool, content []byte) ([]byte, error) {
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTlsVerify},
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: skipTlsVerify},
+		DisableKeepAlives: true,
 	}
 	client := &http.Client{Transport: tr}
 	resp, err := client.Post(url, "application/json", bytes.NewBuffer(content))
@@ -69,25 +70,24 @@ func HttpJsonPost(url string, skipTlsVerify bool, content []byte) ([]byte, error
 }
 
 // Post with built-in failover
-func HttpPoster(addr string, skipTlsVerify bool, content interface{}, contentType string, attempts int, fallbackFilePath string) ([]byte, error) {
-	var body []byte
-	var urlData url.Values
-	var err error
-	switch contentType {
-	case CONTENT_JSON:
-		body = content.([]byte)
-	case CONTENT_FORM:
-		urlData = content.(url.Values)
-	case CONTENT_TEXT:
-		body = content.([]byte)
-	default:
-		err = fmt.Errorf("Unsupported ContentType: %s", contentType)
+// Returns also reference towards client so we can close it's connections when done
+func HttpPoster(addr string, skipTlsVerify bool, content interface{}, contentType string, attempts int, fallbackFilePath string, cacheIdleConns bool) ([]byte, *http.Client, error) {
+	if !IsSliceMember([]string{CONTENT_JSON, CONTENT_FORM, CONTENT_TEXT}, contentType) {
+		return nil, nil, fmt.Errorf("Unsupported ContentType: %s", contentType)
 	}
-	if err != nil {
-		return nil, err
+	var body []byte        // Used to write in file and send over http
+	var urlVals url.Values // Used when posting form
+	if IsSliceMember([]string{CONTENT_JSON, CONTENT_TEXT}, contentType) {
+		body = content.([]byte)
+	} else if contentType == CONTENT_FORM {
+		urlVals = content.(url.Values)
+		body = []byte(urlVals.Encode())
 	}
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTlsVerify},
+	}
+	if !cacheIdleConns {
+		tr.DisableKeepAlives = true
 	}
 	client := &http.Client{Transport: tr}
 	delay := Fib()
@@ -95,12 +95,13 @@ func HttpPoster(addr string, skipTlsVerify bool, content interface{}, contentTyp
 	if contentType == CONTENT_JSON {
 		bodyType = "application/json"
 	}
+	var err error
 	for i := 0; i < attempts; i++ {
 		var resp *http.Response
 		if IsSliceMember([]string{CONTENT_JSON, CONTENT_TEXT}, contentType) {
 			resp, err = client.Post(addr, bodyType, bytes.NewBuffer(body))
 		} else if contentType == CONTENT_FORM {
-			resp, err = client.PostForm(addr, urlData)
+			resp, err = client.PostForm(addr, urlVals)
 		}
 		if err != nil {
 			Logger.Warning(fmt.Sprintf("<HttpPoster> Posting to : <%s>, error: <%s>", addr, err.Error()))
@@ -119,16 +120,16 @@ func HttpPoster(addr string, skipTlsVerify bool, content interface{}, contentTyp
 			time.Sleep(delay())
 			continue
 		}
-		return respBody, nil
+		return respBody, client, nil
 	}
 	// If we got that far, post was not possible, write it on disk
 	fileOut, err := os.Create(fallbackFilePath)
 	if err != nil {
-		return nil, err
+		return nil, client, err
 	}
 	defer fileOut.Close()
 	if _, err := fileOut.Write(body); err != nil {
-		return nil, err
+		return nil, client, err
 	}
-	return nil, nil
+	return nil, client, nil
 }

@@ -181,6 +181,10 @@ func (self *Cdrc) processFile(filePath string) error {
 			self.httpSkipTlsCheck, self.partialRecordsCache)
 	case utils.FWV:
 		recordsProcessor = NewFwvRecordsProcessor(file, self.dfltCdrcCfg, self.cdrcCfgs, self.httpClient, self.httpSkipTlsCheck, self.timezone)
+	case utils.XML:
+		if recordsProcessor, err = NewXMLRecordsProcessor(file, self.dfltCdrcCfg.CDRPath, self.timezone, self.httpSkipTlsCheck, self.cdrcCfgs); err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("Unsupported CDR format: %s", self.dfltCdrcCfg.CdrFormat)
 	}
@@ -202,7 +206,7 @@ func (self *Cdrc) processFile(filePath string) error {
 				utils.Logger.Info(fmt.Sprintf("<Cdrc> DryRun CDR: %+v", storedCdr))
 				continue
 			}
-			if err := self.cdrs.Call("Responder.ProcessCdr", storedCdr, &reply); err != nil {
+			if err := self.cdrs.Call("CdrsV1.ProcessCdr", storedCdr, &reply); err != nil {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Failed sending CDR, %+v, error: %s", storedCdr, err.Error()))
 			} else if reply != "OK" {
 				utils.Logger.Err(fmt.Sprintf("<Cdrc> Received unexpected reply for CDR, %+v, reply: %s", storedCdr, reply))

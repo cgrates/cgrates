@@ -83,6 +83,7 @@ func TestSearchExtraField(t *testing.T) {
 		extraFields["injected_hdr"] != "injected_value" {
 		t.Error("Error parsing extra fields: ", extraFields)
 	}
+
 }
 
 func TestSearchExtraFieldInSlice(t *testing.T) {
@@ -90,6 +91,9 @@ func TestSearchExtraFieldInSlice(t *testing.T) {
 	value := fsCdr.searchExtraField("app_data", fsCdr.body)
 	if value != "ringback=%(2000,4000,440,480)" {
 		t.Error("Error finding extra field: ", value)
+	}
+	if value := fsCdr.searchExtraField("floatfld1", map[string]interface{}{"floatfld1": 6.4}); value != "6.4" {
+		t.Errorf("Expecting: 6.4, received: %s", value)
 	}
 }
 

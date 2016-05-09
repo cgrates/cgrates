@@ -227,7 +227,6 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	userKeys, _ := loader.GetLoadedIds(utils.USERS_PREFIX)
 	li := loader.GetLoadInstance()
 	loader.Init() // release the tp data
-
 	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DESTINATION_PREFIX:     dstKeys,
 		utils.RATING_PLAN_PREFIX:     rpKeys,
@@ -317,5 +316,36 @@ func (self *ApierV2) GetActions(attr AttrGetActions, reply *map[string]engine.Ac
 	}
 
 	*reply = retActions
+	return nil
+}
+
+type AttrGetDestinations struct {
+	DestinationIDs []string
+}
+
+func (self *ApierV2) GetDestinations(attr AttrGetDestinations, reply *[]*engine.Destination) error {
+	dests := make([]*engine.Destination, 0)
+	if attr.DestinationIDs == nil {
+		return utils.NewErrMandatoryIeMissing("DestIDs")
+	}
+	if len(attr.DestinationIDs) == 0 {
+		// get all destination ids
+		destIDs, err := self.RatingDb.GetKeysForPrefix(utils.DESTINATION_PREFIX, true)
+		if err != nil {
+			return err
+		}
+		for _, destID := range destIDs {
+			attr.DestinationIDs = append(attr.DestinationIDs, destID[len(utils.DESTINATION_PREFIX):])
+		}
+	}
+	for _, destID := range attr.DestinationIDs {
+		dst, err := self.RatingDb.GetDestination(destID)
+		if err != nil {
+			return err
+		}
+		dests = append(dests, dst)
+	}
+
+	*reply = dests
 	return nil
 }

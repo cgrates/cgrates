@@ -293,7 +293,7 @@ func TestTpCreateExecuteActionMatch(t *testing.T) {
 	}
 }
 
-func TestTpSetRemActions(t *testing.T) {
+func TestTpSetRemoveActions(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -323,12 +323,12 @@ func TestTpSetRemActions(t *testing.T) {
 	} else if len(actionsMap) != 1 {
 		t.Errorf("Calling ApierV2.GetActions got reply: %s", utils.ToIJSON(actionsMap))
 	}
-	if err := tpRPC.Call("ApierV2.RemActions", v1.AttrRemActions{
+	if err := tpRPC.Call("ApierV2.RemoveActions", v1.AttrRemoveActions{
 		ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},
 	}, &reply); err != nil {
-		t.Error("Got error on ApierV2.RemActions: ", err.Error())
+		t.Error("Got error on ApierV2.RemoveActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.RemActions got reply: %s", reply)
+		t.Errorf("Calling ApierV2.RemoveActions got reply: %s", reply)
 	}
 	if err := tpRPC.Call("ApierV2.GetActions", v2.AttrGetActions{
 		ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},
@@ -337,7 +337,7 @@ func TestTpSetRemActions(t *testing.T) {
 	}
 }
 
-func TestTpRemActionsRefenced(t *testing.T) {
+func TestTpRemoveActionsRefenced(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
@@ -353,12 +353,12 @@ func TestTpRemActionsRefenced(t *testing.T) {
 		t.Errorf("Calling ApierV2.GetActions got reply: %s", utils.ToIJSON(actionsMap))
 	}
 	var reply string
-	if err := tpRPC.Call("ApierV2.RemActions", v1.AttrRemActions{
+	if err := tpRPC.Call("ApierV2.RemoveActions", v1.AttrRemoveActions{
 		ActionIDs: []string{"TOPUP_VOICE"},
 	}, &reply); err != nil {
-		t.Error("Error on ApierV2.RemActions: ", err.Error())
+		t.Error("Error on ApierV2.RemoveActions: ", err.Error())
 	} else if reply != utils.OK {
-		t.Errorf("Calling ApierV2.RemActions got reply: %s", reply)
+		t.Errorf("Calling ApierV2.RemoveActions got reply: %s", reply)
 	}
 	if err := tpRPC.Call("ApierV2.GetActions", v2.AttrGetActions{
 		ActionIDs: []string{"PAYMENT_2056bd2fe137082970f97102b64e42fd"},

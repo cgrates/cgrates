@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import (
+	"github.com/cgrates/cgrates/apier/v2"
+	"github.com/cgrates/cgrates/engine"
+)
 
 func init() {
 	c := &CmdGetDestination{
-		name:      "destination",
-		rpcMethod: "ApierV1.GetDestination",
+		name:      "destinations",
+		rpcMethod: "ApierV2.GetDestinations",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -33,7 +36,7 @@ func init() {
 type CmdGetDestination struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringWrapper
+	rpcParams *v2.AttrGetDestinations
 	*CommandExecuter
 }
 
@@ -47,7 +50,7 @@ func (self *CmdGetDestination) RpcMethod() string {
 
 func (self *CmdGetDestination) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &StringWrapper{}
+		self.rpcParams = &v2.AttrGetDestinations{}
 	}
 	return self.rpcParams
 }
@@ -57,5 +60,6 @@ func (self *CmdGetDestination) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetDestination) RpcResult() interface{} {
-	return &engine.Destination{}
+	a := make([]*engine.Destination, 0)
+	return &a
 }

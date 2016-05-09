@@ -560,7 +560,7 @@ type AttrGetAccounts struct {
 }
 
 // Data used to do remote cache reloads via api
-type ApiReloadCache struct {
+type AttrReloadCache struct {
 	DestinationIds   []string
 	RatingPlanIds    []string
 	RatingProfileIds []string

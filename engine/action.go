@@ -420,7 +420,7 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error
 	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	_, err = utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 1, fallbackPath)
+	_, _, err = utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 1, fallbackPath, false)
 	return err
 }
 
@@ -439,7 +439,7 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 3, fallbackPath)
+	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 3, fallbackPath, false)
 	return nil
 }
 
