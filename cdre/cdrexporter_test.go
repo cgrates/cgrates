@@ -90,7 +90,7 @@ func TestGetDateTimeFieldVal(t *testing.T) {
 		t.Error("Expecting: 2014-06-11 19:19:00, got: ", cdrVal)
 	}
 	// Test filter
-	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
+	fltr, _ := utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
 	cfgCdrFld = &config.CfgCdrField{Tag: "stop_time", Type: "cdrfield", FieldId: "stop_time", Value: val, FieldFilter: fltr, Layout: layout}
 	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, cfgCdrFld); err == nil {
 		t.Error(err)
@@ -116,7 +116,7 @@ func TestCdreCdrFieldValue(t *testing.T) {
 	} else if val != cdr.Destination {
 		t.Errorf("Expecting: %s, received: %s", cdr.Destination, val)
 	}
-	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
+	fltr, _ := utils.ParseRSRFields("Tenant(itsyscom.com)", utils.INFIELD_SEP)
 	cfgCdrFld = &config.CfgCdrField{Tag: "destination", Type: "cdrfield", FieldId: utils.DESTINATION, Value: val, FieldFilter: fltr}
 	if _, err := cdre.cdrFieldValue(cdr, cfgCdrFld); err == nil {
 		t.Error("Failed to use filter")

@@ -358,7 +358,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
 		matchingAllFilters := true
 		for _, dcRunFilter := range runFilters {
-			if fltrPass, _ := ev.PassesFieldFilter(dcRunFilter); !fltrPass {
+			if !dcRunFilter.FilterPasses(ev.FieldAsString(dcRunFilter)) {
 				matchingAllFilters = false
 				break
 			}

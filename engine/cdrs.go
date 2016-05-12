@@ -303,7 +303,7 @@ func (self *CdrServer) deriveCdrs(cdr *CDR) ([]*CDR, error) {
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
 		matchingAllFilters := true
 		for _, dcRunFilter := range runFilters {
-			if fltrPass, _ := cdr.PassesFieldFilter(dcRunFilter); !fltrPass {
+			if !dcRunFilter.FilterPasses(cdr.FieldAsString(dcRunFilter)) {
 				matchingAllFilters = false
 				break
 			}
@@ -429,7 +429,7 @@ func (self *CdrServer) replicateCdr(cdr *CDR) error {
 	for _, rplCfg := range self.cgrCfg.CDRSCdrReplication {
 		passesFilters := true
 		for _, cdfFltr := range rplCfg.CdrFilter {
-			if fltrPass, _ := cdr.PassesFieldFilter(cdfFltr); !fltrPass {
+			if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
 				passesFilters = false
 				break
 			}
