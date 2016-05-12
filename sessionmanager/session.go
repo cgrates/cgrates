@@ -207,7 +207,7 @@ func (s *Session) Refund(lastCC *engine.CallCost, hangupTime time.Time) error {
 			Increments:  refundIncrements,
 		}
 		cd.Increments.Compress()
-		utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
+		//utils.Logger.Info(fmt.Sprintf("Refunding duration %v with cd: %+v", refundDuration, cd))
 		var response float64
 		err := s.sessionManager.Rater().Call("Responder.RefundIncrements", cd, &response)
 		if err != nil {
