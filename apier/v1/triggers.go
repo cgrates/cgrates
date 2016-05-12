@@ -28,6 +28,7 @@ type AttrAddAccountActionTriggers struct {
 	ActionTriggerIDs       *[]string
 	ActionTriggerOverwrite bool
 	ActivationDate         string
+	Executed               bool
 }
 
 func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers, reply *string) error {
@@ -66,6 +67,7 @@ func (self *ApierV1) AddAccountActionTriggers(attr AttrAddAccountActionTriggers,
 						}
 					}
 					at.ActivationDate = actTime
+					at.Executed = attr.Executed
 					if !found {
 						account.ActionTriggers = append(account.ActionTriggers, at)
 					}
