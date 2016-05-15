@@ -55,14 +55,11 @@ func TestRPCITInitCfg(t *testing.T) {
 	}
 }
 
-func TestRPCITStartEngine(t *testing.T) {
+func TestRPCITStartSecondEngine(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	if ral1, err = engine.StopStartEngine(rpcITCfgPath1, *waitRater); err != nil {
-		t.Fatal(err)
-	}
-	if ral2, err = engine.StartEngine(rpcITCfgPath2, *waitRater); err != nil {
+	if ral2, err = engine.StopStartEngine(rpcITCfgPath2, *waitRater); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -74,8 +71,8 @@ func TestRPCITRpcConnPool(t *testing.T) {
 	}
 	rpcPoolFirst = rpcclient.NewRpcClientPool(rpcclient.POOL_FIRST)
 	rpcRAL1, err = rpcclient.NewRpcClient("tcp", rpcITCfg1.RPCJSONListen, 3, 1, rpcclient.JSON_RPC, nil)
-	if err != nil {
-		t.Fatal(err)
+	if err == nil {
+		t.Fatal("Should receive cannot connect error here")
 	}
 	rpcPoolFirst.AddClient(rpcRAL1)
 	rpcRAL2, err = rpcclient.NewRpcClient("tcp", rpcITCfg2.RPCJSONListen, 3, 1, rpcclient.JSON_RPC, nil)
@@ -83,6 +80,36 @@ func TestRPCITRpcConnPool(t *testing.T) {
 		t.Fatal(err)
 	}
 	rpcPoolFirst.AddClient(rpcRAL2)
+}
+
+// Connect rpc client to rater
+func TestRPCITStatusSecondEngine(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var status map[string]interface{}
+	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil {
+		t.Error(err)
+	} else if status[utils.InstanceID].(string) == "" {
+		t.Error("Empty InstanceID received")
+	} else {
+		ral2ID = status[utils.InstanceID].(string)
+	}
+	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
+		t.Error(err)
+	} else if status[utils.InstanceID].(string) != ral2ID {
+		t.Errorf("Expecting: %s, received: %s", ral2ID, status[utils.InstanceID].(string))
+	}
+}
+
+// Start first engine
+func TestRPCITStartFirstEngine(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	if ral1, err = engine.StartEngine(rpcITCfgPath1, *waitRater); err != nil {
+		t.Fatal(err)
+	}
 }
 
 // Connect rpc client to rater
@@ -95,6 +122,8 @@ func TestRPCITStatusFirstInitial(t *testing.T) {
 		t.Error(err)
 	} else if status[utils.InstanceID].(string) == "" {
 		t.Error("Empty InstanceID received")
+	} else if status[utils.InstanceID].(string) == ral2ID {
+		t.Fatalf("Should receive ralID different than second one, got: %s", status[utils.InstanceID].(string))
 	} else {
 		ral1ID = status[utils.InstanceID].(string)
 	}
@@ -119,15 +148,15 @@ func TestRPCITStatusFirstFailover(t *testing.T) {
 		t.Error(err)
 	} else if status[utils.InstanceID].(string) == "" {
 		t.Error("Empty InstanceID received")
+	} else if status[utils.InstanceID].(string) == ral1ID {
+		t.Fatalf("Should receive ralID different than first one, got: %s", status[utils.InstanceID].(string))
 	} else {
-		ral1ID = status[utils.InstanceID].(string)
+		ral2ID = status[utils.InstanceID].(string)
 	}
 	if err := rpcPoolFirst.Call("Responder.Status", "", &status); err != nil { // Make sure second time we land on the same instance
 		t.Error(err)
-	} else if status[utils.InstanceID].(string) != ral1ID {
-		t.Errorf("Expecting: %s, received: %s", ral1ID, status[utils.InstanceID].(string))
-	} else {
-		ral2ID = status[utils.InstanceID].(string)
+	} else if status[utils.InstanceID].(string) != ral2ID {
+		t.Errorf("Expecting: %s, received: %s", ral2ID, status[utils.InstanceID].(string))
 	}
 }
 

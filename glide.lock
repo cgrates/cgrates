@@ -1,8 +1,8 @@
 hash: 3140edeb6e77689465bafe5508a04afb78246b5f126488aa6db99f4984c4bbed
-updated: 2016-05-06T13:17:47.39427346+02:00
+updated: 2016-05-15T20:52:24.065638286+02:00
 imports:
 - name: camlistore.org
-  version: 99a3dac0a862e43cbd8aa6c34a4969432815ce3d
+  version: 86f480aa69fd4ae3e904b61f4ad33b1bc9c92a19
   subpackages:
   - pkg/googlestorage
   - pkg/blob
@@ -27,22 +27,20 @@ imports:
   - internal/execxp
   - internal/parser
   - tree
+  - xtypes
   - tree/xmltree
   - internal/lexer
   - internal/parser/findutil
   - internal/parser/intfns
   - internal/parser/pathexpr
-  - literals/numlit
-  - literals/strlit
   - xconst
   - xfn
   - xsort
-  - literals/boollit
   - tree/xmltree/xmlbuilder
   - tree/xmltree/xmlele
   - tree/xmltree/xmlnode
 - name: github.com/denisenkom/go-mssqldb
-  version: 8d4984e8baccbf5bfadd7f7e366fd61b7ccac38b
+  version: 2a223b1644106bc7ca456c12cde55a80185813ef
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
@@ -73,18 +71,18 @@ imports:
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
 - name: github.com/jinzhu/gorm
-  version: bf413d67d3a25d4eeddb28541283fa6434d1cdb5
+  version: 57c72125b3087e1ed02c16f23a1f381cde3aaf2c
 - name: github.com/jinzhu/inflection
   version: 3272df6c21d04180007eb3349844c89a3856bc25
 - name: github.com/kr/pty
   version: f7ee69f31298ecbe5d2b349c711e2547a617d398
 - name: github.com/lib/pq
-  version: dd3290b2f71a8b30bee8e4e75a337a825263d26f
+  version: ee1442bda7bd1b6a84e913bdb421cb1874ec629d
   subpackages:
   - hstore
   - oid
 - name: github.com/mattn/go-sqlite3
-  version: 7204887cf3a42df1cfaa5505dc3a3427f6dded8b
+  version: 38ee283dabf11c9cbdb968eebd79b1fa7acbabe6
 - name: github.com/mediocregopher/radix.v2
   version: 74e50e64194d2d2f4836212451c28b127f9d7fa1
   subpackages:
@@ -102,12 +100,12 @@ imports:
   - syncutil/singleflight
   - readerutil
 - name: golang.org/x/crypto
-  version: 019870fc9d457ee8abd13a2e93e3f2a3b55b7119
+  version: b6789ab629056511030d652d851e7dc10c9e9c9e
   subpackages:
   - ssh/terminal
   - md4
 - name: golang.org/x/net
-  version: 7e42c0e1329bb108f7376a7618a2871ab90f1c4d
+  version: ef00b378c73f107bf44d5c9b69875255ce89b79a
   subpackages:
   - websocket
   - context
@@ -125,11 +123,11 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/sys
-  version: b776ec39b3e54652e09028aaaaac9757f4f8211a
+  version: 33267e036fd93fcd26ea95b7bdaf2d8306cb743c
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: bd1c9905f55d983c0cd0b15cf0c3e2fe860c8902
+  version: f773ec03ce334298742df7f3108fc0d402646d22
   subpackages:
   - encoding
   - encoding/charmap
@@ -147,7 +145,7 @@ imports:
   - runes
   - internal/tag
 - name: google.golang.org/api
-  version: f9a4669e07732c84854dce1f5c451c22427228fb
+  version: 4300f6b0c8a7f09e521dd0af2cee27e28846e037
   subpackages:
   - compute/v1
   - storage/v1
@@ -179,7 +177,7 @@ imports:
   - internal/log
   - internal/remote_api
 - name: google.golang.org/cloud
-  version: 200292f09e3aaa34878d801ab71fe823b1f7d36a
+  version: ed0cb07e5fc4f6936e6e9d523568808f93228351
   subpackages:
   - compute/metadata
   - internal
@@ -195,7 +193,7 @@ imports:
   - pubsub
   - storage
 - name: google.golang.org/grpc
-  version: 8eb8dd0298f7a44728405d92c7ed710f65f7ad17
+  version: 4c4ed377c72e199edd16a87011f13a56fd519119
   subpackages:
   - credentials
   - credentials/oauth

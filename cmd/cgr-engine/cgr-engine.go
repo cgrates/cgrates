@@ -135,7 +135,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 		ralsConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
 			cfg.SmGenericConfig.RALsConns, internalRaterChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RAL: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RALs: %s", err.Error()))
 			exitChan <- true
 			return
 		}
@@ -144,7 +144,7 @@ func startSmGeneric(internalSMGChan chan rpcclient.RpcClientConnection, internal
 		cdrsConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
 			cfg.SmGenericConfig.CDRsConns, internalCDRSChan, cfg.InternalTtl)
 		if err != nil {
-			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RAL: %s", err.Error()))
+			utils.Logger.Crit(fmt.Sprintf("<SMGeneric> Could not connect to RALs: %s", err.Error()))
 			exitChan <- true
 			return
 		}

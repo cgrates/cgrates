@@ -32,6 +32,7 @@ func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, codec str
 	var rpcClient *rpcclient.RpcClient
 	var err error
 	rpcPool := rpcclient.NewRpcClientPool(dispatchStrategy)
+	atLestOneConnected := false // If one connected we don't longer return errors
 	for _, rpcConnCfg := range rpcConnCfgs {
 		if rpcConnCfg.Address == utils.MetaInternal {
 			var internalConn rpcclient.RpcClientConnection
@@ -45,13 +46,16 @@ func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, codec str
 		} else {
 			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, connAttempts, reconnects, codec, nil)
 		}
-		if err != nil {
-			break
+		//if err != nil { // Commented so we pass the last error instead of first
+		//	break
+		//}
+		if err == nil {
+			atLestOneConnected = true
 		}
 		rpcPool.AddClient(rpcClient)
 	}
-	if err != nil {
-		return nil, err
+	if atLestOneConnected {
+		err = nil
 	}
-	return rpcPool, nil
+	return rpcPool, err
 }
