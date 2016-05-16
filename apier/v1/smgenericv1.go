@@ -204,6 +204,16 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 			return rpcclient.ErrWrongReplyType
 		}
 		return self.ProcessCdr(argsConverted, replyConverted)
+	case "SMGenericV1.ActiveSessions":
+		argsConverted, canConvert := args.(utils.AttrSMGGetActiveSessions)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*[]*sessionmanager.ActiveSession)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return self.ActiveSessions(argsConverted, replyConverted)
 	}
 	return rpcclient.ErrUnsupporteServiceMethod
 }

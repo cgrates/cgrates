@@ -20,7 +20,7 @@ imports:
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/rpcclient
-  version: 9a6185f8a2093ce10f1a08242b0d757f24795800
+  version: e307424118247fe71aee908429555bec60c48573
 - name: github.com/ChrisTrenkamp/goxpath
   version: 4aad8d0161aae7d17df4755d2c1e86cd1fcaaab6
   subpackages:

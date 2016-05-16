@@ -5,13 +5,21 @@
 // Starts RAL
 
 "listen": {
-	"rpc_json": ":12012",				// RPC JSON listening address
-	"rpc_gob": ":12013",				// RPC GOB listening address
-	"http": ":12080",					// HTTP listening address
+	"rpc_json": ":12012",
+	"rpc_gob": ":12013",
+	"http": ":12080",
 },
 
 "rals": {
-	"enabled": true,					// enable Rater service: <true|false>
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"sm_generic": {
+	"enabled": true,
 },
 
 }

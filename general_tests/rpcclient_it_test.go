@@ -26,6 +26,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -179,5 +180,18 @@ func TestRPCITStatusFirstFailback(t *testing.T) {
 		t.Error(err)
 	} else if status[utils.InstanceID].(string) != ral1ID {
 		t.Errorf("Expecting: %s, received: %s", ral1ID, status[utils.InstanceID].(string))
+	}
+}
+
+// Make sure it executes on the first node supporting the command
+func TestRPCITDirectedRPC(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var sessions []*sessionmanager.ActiveSession
+	if err := rpcPoolFirst.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{}, &sessions); err != nil {
+		t.Error(err) // {"id":2,"result":null,"error":"rpc: can't find service SMGenericV1.ActiveSessions"}
+	} else if len(sessions) != 0 {
+		t.Errorf("Received sessions: %+v", sessions)
 	}
 }
