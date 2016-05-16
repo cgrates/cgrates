@@ -545,7 +545,7 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 			cache2go.Push(utils.DESTINATION_PREFIX+p, dest.Id)
 		}
 	} else {
-		return nil, errors.New("not found")
+		return nil, utils.ErrNotFound
 	}
 	return
 }
@@ -562,8 +562,63 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	err = rs.db.Cmd("SET", utils.DESTINATION_PREFIX+dest.Id, b.Bytes()).Err
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(), &response)
+		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
+	return
+}
+
+func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
+	conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	var dest *Destination
+	defer rs.db.Put(conn)
+	if values, err = conn.Cmd("GET", key).Bytes(); len(values) > 0 && err == nil {
+		b := bytes.NewBuffer(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return err
+		}
+		r.Close()
+		dest = new(Destination)
+		err = rs.ms.Unmarshal(out, dest)
+	} else {
+		return utils.ErrNotFound
+	}
+	key := utils.DESTINATION_PREFIX + destID
+	if err = conn.Cmd("DEL", key).Err; err != nil {
+		return err
+	}
+	if dest != nil {
+		for _, prefix := range dest.Prefixes {
+			changed := false
+			if idIDs, err := cache2go.Get(utils.DESTINATION_PREFIX + prefix); err == nil {
+				dIDs := idIDs.(map[interface{}]struct{})
+				if len(dIDs) == 1 {
+					// remove de prefix from cache
+					cache2go.RemKey(utils.DESTINATION_PREFIX + prefix)
+				} else {
+					// delete the destination from list and put the new list in chache
+					delete(dIDs, searchedDID)
+					changed = true
+				}
+			}
+			if changed {
+				cache2go.Cache(utils.DESTINATION_PREFIX+prefix, dIDs)
+			}
+		}
+	}
+	dest := &Destination{Id: key}
+	if historyScribe != nil {
+		response := 0
+		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(true), &response)
+	}
+
 	return
 }
 

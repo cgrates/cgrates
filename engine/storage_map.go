@@ -436,7 +436,7 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	ms.dict[utils.DESTINATION_PREFIX+dest.Id] = b.Bytes()
 	response := 0
 	if historyScribe != nil {
-		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(), &response)
+		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
 	return
 }

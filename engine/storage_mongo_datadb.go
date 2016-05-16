@@ -883,7 +883,7 @@ func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
 	}{Key: dest.Id, Value: b.Bytes()})
 	if err == nil && historyScribe != nil {
 		var response int
-		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(), &response)
+		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
 	return
 }
