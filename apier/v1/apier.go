@@ -63,6 +63,15 @@ func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) err
 	return nil
 }
 
+type AttrRemoveDestination struct {
+	DestinationIDs []string
+	Prefixes       []string
+}
+
+func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) error {
+	return nil
+}
+
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {
 	if sg, err := apier.RatingDb.GetSharedGroup(sgId, false); err != nil && err != utils.ErrNotFound { // Not found is not an error here
 		return err
