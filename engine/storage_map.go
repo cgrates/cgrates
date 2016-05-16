@@ -441,6 +441,10 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+func (ms *MapStorage) RemoveDestination(destID string) (err error) {
+	return
+}
+
 func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()

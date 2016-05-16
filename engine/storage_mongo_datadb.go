@@ -888,6 +888,10 @@ func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
+	return
+}
+
 func (ms *MongoStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
 	if !skipCache {
 		if x, err := cache2go.Get(utils.ACTION_PREFIX + key); err == nil {

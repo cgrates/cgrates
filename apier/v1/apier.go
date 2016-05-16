@@ -69,7 +69,7 @@ type AttrRemoveDestination struct {
 }
 
 func (self *ApierV1) RemoveDestination(attr AttrRemoveDestination, reply *string) error {
-
+	return nil
 }
 
 func (apier *ApierV1) GetSharedGroup(sgId string, reply *engine.SharedGroup) error {

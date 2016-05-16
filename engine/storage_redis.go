@@ -568,7 +568,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 }
 
 func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
-	conn, err := rs.db.Get()
+	/*conn, err := rs.db.Get()
 	if err != nil {
 		return err
 	}
@@ -617,7 +617,7 @@ func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
 	if historyScribe != nil {
 		response := 0
 		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(true), &response)
-	}
+	}*/
 
 	return
 }
