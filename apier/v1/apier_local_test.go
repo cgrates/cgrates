@@ -988,8 +988,8 @@ func TestApierSetActionPlan(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	atm1 := &ApiActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
-	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*ApiActionPlan{atm1}}
+	atm1 := &AttrActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
+	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*AttrActionPlan{atm1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActionPlan", atms1, &reply1); err != nil {
 		t.Error("Got error on ApierV1.SetActionPlan: ", err.Error())

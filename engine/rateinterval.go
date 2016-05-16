@@ -360,6 +360,18 @@ func (ri *RateInterval) GetMaxCost() (float64, string) {
 // Structure to store intervals according to weight
 type RateIntervalList []*RateInterval
 
+func (rl RateIntervalList) GetWeight() float64 {
+	// all reates should have the same weight
+	// just in case get the max
+	var maxWeight float64
+	for _, r := range rl {
+		if r.Weight > maxWeight {
+			maxWeight = r.Weight
+		}
+	}
+	return maxWeight
+}
+
 // Structure to store intervals according to weight
 type RateIntervalTimeSorter struct {
 	referenceTime time.Time

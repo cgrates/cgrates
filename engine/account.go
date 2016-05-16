@@ -306,21 +306,22 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
+					foundResult := false
+					includeDest := true // wheter it is excluded or included
 					for dId, _ := range destIds {
-						includeDest, found := b.DestinationIDs[dId.(string)]
+						inclDest, found := b.DestinationIDs[dId.(string)]
 						if found {
-							if includeDest {
-								b.precision = len(p)
-								usefulBalances = append(usefulBalances, b)
-								break
-							} else { // the balance had !, so now equals false => exclude balance
-								b.precision = 1 // fake to exit the outer loop
-								break
-							}
+							foundResult = true
+							includeDest = includeDest && inclDest
 						}
-						/*if b.precision > 0 {
-							break
-						}*/
+					}
+					if foundResult {
+						if includeDest {
+							b.precision = len(p)
+							usefulBalances = append(usefulBalances, b)
+						} else {
+							b.precision = 1 // fake to exit the outer loop
+						}
 					}
 				}
 				if b.precision > 0 {
