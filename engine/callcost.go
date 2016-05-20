@@ -241,7 +241,7 @@ func (cc *CallCost) MatchCCFilter(bf *BalanceFilter) bool {
 				for filterDestID := range *bf.DestinationIDs {
 					if _, ok := destIds[filterDestID]; ok {
 						foundMatchingDestID = true
-						break
+						break // only one found?
 					}
 				}
 			}

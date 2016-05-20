@@ -467,12 +467,12 @@ func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 					}
 					inc.BalanceInfo.AccountID = ub.ID
 					if cost != 0 {
+						moneyBal.SubstractValue(cost)
 						inc.BalanceInfo.Monetary = &MonetaryInfo{
 							UUID:  moneyBal.Uuid,
 							ID:    moneyBal.ID,
 							Value: moneyBal.Value,
 						}
-						moneyBal.SubstractValue(cost)
 						cd.MaxCostSoFar += cost
 					}
 					inc.paid = true
