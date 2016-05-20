@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"net/smtp"
 	"path"
 	"reflect"
@@ -638,6 +640,24 @@ type RPCRequest struct {
 }
 
 func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	// parse template
+	tmpl := template.New("extra_params")
+	t, err := tmpl.Parse(a.ExtraParameters)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("error parsing *cgr_rpc template: %s", err.Error()))
+		return err
+	}
+	var buf bytes.Buffer
+	if err = t.Execute(&buf, map[string]interface{}{
+		"account": account,
+		"action":  a,
+		"actions": acs,
+		"sq":      sq,
+	}); err != nil {
+		utils.Logger.Err(fmt.Sprintf("error executing *cgr_rpc template %s:", err.Error()))
+		return err
+	}
+	a.ExtraParameters = buf.String()
 	req := RPCRequest{}
 	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
 		return err
