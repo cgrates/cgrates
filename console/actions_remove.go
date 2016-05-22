@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2015 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,43 +21,42 @@ package console
 import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdRemoveTriggers{
-		name:      "triggers_remove",
-		rpcMethod: "ApierV1.RemoveAccountActionTriggers",
-		rpcParams: &v1.AttrRemoveAccountActionTriggers{},
+	c := &CmdRemoveActions{
+		name:      "actions_remove",
+		rpcMethod: "ApierV1.RemoveActions",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdRemoveTriggers struct {
+type CmdRemoveActions struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrRemoveAccountActionTriggers
+	rpcParams *v1.AttrRemoveActions
 	*CommandExecuter
 }
 
-func (self *CmdRemoveTriggers) Name() string {
+func (self *CmdRemoveActions) Name() string {
 	return self.name
 }
 
-func (self *CmdRemoveTriggers) RpcMethod() string {
+func (self *CmdRemoveActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemoveTriggers) RpcParams(reset bool) interface{} {
+func (self *CmdRemoveActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrRemoveAccountActionTriggers{}
+		self.rpcParams = &v1.AttrRemoveActions{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemoveTriggers) PostprocessRpcParams() error {
+func (self *CmdRemoveActions) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdRemoveTriggers) RpcResult() interface{} {
+func (self *CmdRemoveActions) RpcResult() interface{} {
 	var s string
 	return &s
 }

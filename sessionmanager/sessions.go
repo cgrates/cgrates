@@ -28,7 +28,7 @@ import (
 func NewSessions() *Sessions {
 	return &Sessions{
 		sessionsMux: new(sync.Mutex),
-		guard:       engine.NewGuardianLock(),
+		guard:       engine.Guardian,
 	}
 }
 

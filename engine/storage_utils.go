@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/cgrates/cgrates/utils"
@@ -45,7 +46,8 @@ func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler str
 		d, err = NewMongoStorage(host, port, name, user, pass, nil)
 		db = d.(RatingStorage)
 	default:
-		err = errors.New("unknown db")
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
+			db_type, utils.REDIS, utils.MONGO))
 	}
 	if err != nil {
 		return nil, err
@@ -71,7 +73,8 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 		d, err = NewMongoStorage(host, port, name, user, pass, nil)
 		db = d.(AccountingStorage)
 	default:
-		err = errors.New("unknown db")
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are '%s' or '%s'",
+			db_type, utils.REDIS, utils.MONGO))
 	}
 	if err != nil {
 		return nil, err
@@ -102,7 +105,8 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	default:
-		err = errors.New("unknown db")
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
 	}
 	if err != nil {
 		return nil, err
@@ -120,7 +124,8 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes)
 	default:
-		err = errors.New("unknown db")
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
 	}
 	if err != nil {
 		return nil, err
@@ -138,7 +143,8 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass, cdrsIndexes)
 	default:
-		err = errors.New("unknown db")
+		err = errors.New(fmt.Sprintf("Unknown db '%s' valid options are [%s, %s, %s]",
+			db_type, utils.MYSQL, utils.MONGO, utils.POSTGRES))
 	}
 	if err != nil {
 		return nil, err
@@ -150,6 +156,14 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, 
 type SMCost struct {
 	CGRID       string
 	RunID       string
+	OriginHost  string
+	OriginID    string
 	CostSource  string
+	Usage       float64
 	CostDetails *CallCost
+}
+
+type AttrCDRSStoreSMCost struct {
+	Cost           *SMCost
+	CheckDuplicate bool
 }

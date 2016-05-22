@@ -210,6 +210,24 @@ func TestLcrGet(t *testing.T) {
 	}
 }
 
+func TestLcrGetPrefix(t *testing.T) {
+	lcrSubjectPrefixMatching = true
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 04, 06, 17, 41, 0, 0, time.UTC),
+		Tenant:      "cgrates.org",
+		Direction:   "*in",
+		Category:    "call",
+		Destination: "0723098765",
+		Account:     "rif",
+		Subject:     "rifus",
+	}
+	lcr, err := cd.GetLCR(nil, nil)
+	if err != nil || lcr == nil {
+		t.Errorf("Bad lcr: %+v, %v", lcr, err)
+	}
+}
+
 func TestLcrRequestAsCallDescriptor(t *testing.T) {
 	sTime := time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC)
 	callDur := time.Duration(1) * time.Minute

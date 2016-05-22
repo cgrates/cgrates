@@ -29,8 +29,8 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 var (
@@ -92,66 +92,107 @@ func main() {
 	var rater, cdrstats, users *rpc.Client
 	var loader engine.LoadReader
 	if *migrateRC8 != "" {
-		var db_nb int
-		db_nb, err = strconv.Atoi(*datadb_name)
-		if err != nil {
-			log.Print("Redis db name must be an integer!")
-			return
-		}
-		host := *datadb_host
-		if *datadb_port != "" {
-			host += ":" + *datadb_port
-		}
-		migratorRC8acc, err := NewMigratorRC8(host, db_nb, *datadb_pass, *dbdata_encoding)
-		if err != nil {
-			log.Print(err.Error())
-			return
-		}
-		if strings.Contains(*migrateRC8, "acc") || strings.Contains(*migrateRC8, "*all") {
-			if err := migratorRC8acc.migrateAccounts(); err != nil {
+		if *datadb_type == "redis" && *tpdb_type == "redis" {
+			var db_nb int
+			db_nb, err = strconv.Atoi(*datadb_name)
+			if err != nil {
+				log.Print("Redis db name must be an integer!")
+				return
+			}
+			host := *datadb_host
+			if *datadb_port != "" {
+				host += ":" + *datadb_port
+			}
+			migratorRC8acc, err := NewMigratorRC8(host, db_nb, *datadb_pass, *dbdata_encoding)
+			if err != nil {
 				log.Print(err.Error())
+				return
+			}
+			if strings.Contains(*migrateRC8, "acc") || strings.Contains(*migrateRC8, "*all") {
+				if err := migratorRC8acc.migrateAccounts(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+
+			db_nb, err = strconv.Atoi(*tpdb_name)
+			if err != nil {
+				log.Print("Redis db name must be an integer!")
+				return
+			}
+			host = *tpdb_host
+			if *tpdb_port != "" {
+				host += ":" + *tpdb_port
+			}
+			migratorRC8rat, err := NewMigratorRC8(host, db_nb, *tpdb_pass, *dbdata_encoding)
+			if err != nil {
+				log.Print(err.Error())
+				return
+			}
+			if strings.Contains(*migrateRC8, "atr") || strings.Contains(*migrateRC8, "*all") {
+				if err := migratorRC8rat.migrateActionTriggers(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+			if strings.Contains(*migrateRC8, "act") || strings.Contains(*migrateRC8, "*all") {
+				if err := migratorRC8rat.migrateActions(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+			if strings.Contains(*migrateRC8, "dcs") || strings.Contains(*migrateRC8, "*all") {
+				if err := migratorRC8rat.migrateDerivedChargers(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+			if strings.Contains(*migrateRC8, "apl") || strings.Contains(*migrateRC8, "*all") {
+				if err := migratorRC8rat.migrateActionPlans(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+			if strings.Contains(*migrateRC8, "shg") || strings.Contains(*migrateRC8, "*all") {
+				if err := migratorRC8rat.migrateSharedGroups(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+			if strings.Contains(*migrateRC8, "int") {
+				if err := migratorRC8acc.migrateAccountsInt(); err != nil {
+					log.Print(err.Error())
+				}
+				if err := migratorRC8rat.migrateActionTriggersInt(); err != nil {
+					log.Print(err.Error())
+				}
+				if err := migratorRC8rat.migrateActionsInt(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+			if strings.Contains(*migrateRC8, "vf") {
+				if err := migratorRC8rat.migrateActionsInt2(); err != nil {
+					log.Print(err.Error())
+				}
+				if err := migratorRC8acc.writeVersion(); err != nil {
+					log.Print(err.Error())
+				}
+			}
+		} else if *datadb_type == "mongo" && *tpdb_type == "mongo" {
+			mongoMigratorAcc, err := NewMongoMigrator(*datadb_host, *datadb_port, *datadb_name, *datadb_user, *datadb_pass)
+			if err != nil {
+				log.Print(err.Error())
+				return
+			}
+			mongoMigratorRat, err := NewMongoMigrator(*tpdb_host, *tpdb_port, *tpdb_name, *tpdb_user, *tpdb_pass)
+			if err != nil {
+				log.Print(err.Error())
+				return
+			}
+			if strings.Contains(*migrateRC8, "vf") {
+				if err := mongoMigratorRat.migrateActions(); err != nil {
+					log.Print(err.Error())
+				}
+				if err := mongoMigratorAcc.writeVersion(); err != nil {
+					log.Print(err.Error())
+				}
 			}
 		}
 
-		db_nb, err = strconv.Atoi(*tpdb_name)
-		if err != nil {
-			log.Print("Redis db name must be an integer!")
-			return
-		}
-		host = *tpdb_host
-		if *tpdb_port != "" {
-			host += ":" + *tpdb_port
-		}
-		migratorRC8rat, err := NewMigratorRC8(host, db_nb, *tpdb_pass, *dbdata_encoding)
-		if err != nil {
-			log.Print(err.Error())
-			return
-		}
-		if strings.Contains(*migrateRC8, "atr") || strings.Contains(*migrateRC8, "*all") {
-			if err := migratorRC8rat.migrateActionTriggers(); err != nil {
-				log.Print(err.Error())
-			}
-		}
-		if strings.Contains(*migrateRC8, "act") || strings.Contains(*migrateRC8, "*all") {
-			if err := migratorRC8rat.migrateActions(); err != nil {
-				log.Print(err.Error())
-			}
-		}
-		if strings.Contains(*migrateRC8, "dcs") || strings.Contains(*migrateRC8, "*all") {
-			if err := migratorRC8rat.migrateDerivedChargers(); err != nil {
-				log.Print(err.Error())
-			}
-		}
-		if strings.Contains(*migrateRC8, "apl") || strings.Contains(*migrateRC8, "*all") {
-			if err := migratorRC8rat.migrateActionPlans(); err != nil {
-				log.Print(err.Error())
-			}
-		}
-		if strings.Contains(*migrateRC8, "shg") || strings.Contains(*migrateRC8, "*all") {
-			if err := migratorRC8rat.migrateSharedGroups(); err != nil {
-				log.Print(err.Error())
-			}
-		}
 		log.Print("Done!")
 		return
 	}
@@ -246,7 +287,7 @@ func main() {
 		return
 	}
 	if *historyServer != "" { // Init scribeAgent so we can store the differences
-		if scribeAgent, err := history.NewProxyScribe(*historyServer, 3, 3); err != nil {
+		if scribeAgent, err := rpcclient.NewRpcClient("tcp", *historyServer, 3, 3, utils.GOB, nil); err != nil {
 			log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
 			return
 		} else {
@@ -333,7 +374,7 @@ func main() {
 		if *flush {
 			dstIds, rplIds, rpfIds, lcrIds = nil, nil, nil, nil // Should reload all these on flush
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{
+		if err = rater.Call("ApierV1.ReloadCache", utils.AttrReloadCache{
 			DestinationIds:   dstIds,
 			RatingPlanIds:    rplIds,
 			RatingProfileIds: rpfIds,

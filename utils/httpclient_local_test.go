@@ -39,15 +39,15 @@ func TestHttpJsonPoster(t *testing.T) {
 		return
 	}
 	content := &TestContent{Var1: "Val1", Var2: "Val2"}
+	jsn, _ := json.Marshal(content)
 	filePath := "/tmp/cgr_test_http_poster.json"
-	if _, err := HttpPoster("http://localhost:8080/invalid", true, content, CONTENT_JSON, 3, filePath); err != nil {
+	if _, _, err := HttpPoster("http://localhost:8080/invalid", true, jsn, CONTENT_JSON, 3, filePath, false); err != nil {
 		t.Error(err)
 	}
-	jsnContent, _ := json.Marshal(content)
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(jsnContent, readBytes) {
-		t.Errorf("Expecting: %q, received: %q", string(jsnContent), string(readBytes))
+	} else if !reflect.DeepEqual(jsn, readBytes) {
+		t.Errorf("Expecting: %q, received: %q", string(jsn), string(readBytes))
 	}
 	if err := os.Remove(filePath); err != nil {
 		t.Error("Failed removing file: ", filePath)
@@ -62,7 +62,7 @@ func TestHttpBytesPoster(t *testing.T) {
 		Test2
 		`)
 	filePath := "/tmp/test_http_poster.http"
-	if _, err := HttpPoster("http://localhost:8080/invalid", true, content, CONTENT_TEXT, 3, filePath); err != nil {
+	if _, _, err := HttpPoster("http://localhost:8080/invalid", true, content, CONTENT_TEXT, 3, filePath, false); err != nil {
 		t.Error(err)
 	}
 	if readBytes, err := ioutil.ReadFile(filePath); err != nil {

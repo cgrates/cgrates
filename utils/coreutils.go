@@ -127,7 +127,11 @@ func Round(x float64, prec int, method string) float64 {
 }
 
 func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
+	tmStr = strings.TrimSpace(tmStr)
 	var nilTime time.Time
+	if len(tmStr) == 0 || tmStr == UNLIMITED {
+		return nilTime, nil
+	}
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {
 		return nilTime, err
@@ -140,6 +144,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 	oneLineTimestampRule := regexp.MustCompile(`^\d{14}$`)
 	oneSpaceTimestampRule := regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
 	eamonTimestampRule := regexp.MustCompile(`^\d{2}/\d{2}/\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
+	broadsoftTimestampRule := regexp.MustCompile(`^\d{14}\.\d{3}`)
 	switch {
 	case rfc3339Rule.MatchString(tmStr):
 		return time.Parse(time.RFC3339, tmStr)
@@ -167,6 +172,8 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 		return time.ParseInLocation("02.01.2006  15:04:05", tmStr, loc)
 	case eamonTimestampRule.MatchString(tmStr):
 		return time.ParseInLocation("02/01/2006 15:04:05", tmStr, loc)
+	case broadsoftTimestampRule.MatchString(tmStr):
+		return time.ParseInLocation("20060102150405.999", tmStr, loc)
 	case tmStr == "*now":
 		return time.Now(), nil
 	}
@@ -176,7 +183,7 @@ func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
 func ParseDate(date string) (expDate time.Time, err error) {
 	date = strings.TrimSpace(date)
 	switch {
-	case date == "*unlimited" || date == "":
+	case date == UNLIMITED || date == "":
 		// leave it at zero
 	case strings.HasPrefix(date, "+"):
 		d, err := time.ParseDuration(date[1:])
@@ -190,7 +197,9 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
 	case date == "*yearly":
 		expDate = time.Now().AddDate(1, 0, 0) // add one year
-	case strings.HasSuffix(date, "Z"):
+	case date == "*month_end":
+		expDate = GetEndOfMonth(time.Now())
+	case strings.HasSuffix(date, "Z") || strings.Index(date, "+") != -1: // Allow both Z and +hh:mm format
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
 		unix, err := strconv.ParseInt(date, 10, 64)
@@ -231,12 +240,10 @@ func CopyHour(src, dest time.Time) time.Time {
 
 // Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
 func ParseDurationWithSecs(durStr string) (time.Duration, error) {
-	if durSecs, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
-		durNanosecs := int(durSecs * NANO_MULTIPLIER)
-		return time.Duration(durNanosecs), nil
-	} else {
-		return time.ParseDuration(durStr)
+	if _, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+		durStr += "s"
 	}
+	return time.ParseDuration(durStr)
 }
 
 func AccountKey(tenant, account string) string {
@@ -334,6 +341,10 @@ func Fib() func() time.Duration {
 
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
+	if str == ZERO {
+		str = ""
+		return &str
+	}
 	return &str
 }
 
@@ -359,6 +370,14 @@ func StringSlicePointer(slc []string) *[]string {
 
 func Float64SlicePointer(slc []float64) *[]float64 {
 	return &slc
+}
+
+func StringMapPointer(sm StringMap) *StringMap {
+	return &sm
+}
+
+func TimePointer(t time.Time) *time.Time {
+	return &t
 }
 
 func ReflectFuncLocation(handler interface{}) (file string, line int) {
@@ -502,4 +521,70 @@ func CastIfToString(iface interface{}) (strVal string, casts bool) {
 		strVal, casts = iface.(string)
 	}
 	return strVal, casts
+}
+
+func GetEndOfMonth(ref time.Time) time.Time {
+	if ref.IsZero() {
+		return time.Now()
+	}
+	year, month, _ := ref.Date()
+	if month == time.December {
+		year++
+		month = time.January
+	} else {
+		month++
+	}
+	eom := time.Date(year, month, 1, 0, 0, 0, 0, ref.Location())
+	return eom.Add(-time.Second)
+}
+
+// formats number in K,M,G, etc.
+func SizeFmt(num float64, suffix string) string {
+	if suffix == "" {
+		suffix = "B"
+	}
+	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
+		if math.Abs(num) < 1024.0 {
+			return fmt.Sprintf("%3.1f%s%s", num, unit, suffix)
+		}
+		num /= 1024.0
+	}
+	return fmt.Sprintf("%.1f%s%s", num, "Yi", suffix)
+}
+
+func TimeIs0h(t time.Time) bool {
+	return t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
+}
+
+func ParseHierarchyPath(path string, sep string) HierarchyPath {
+	if sep == "" {
+		for _, sep = range []string{HIERARCHY_SEP, "/"} {
+			if idx := strings.Index(path, sep); idx != -1 {
+				break
+			}
+		}
+	}
+	path = strings.Trim(path, sep) // Need to strip if prefix of suffiy (eg: paths with /) so we can properly split
+	return HierarchyPath(strings.Split(path, sep))
+}
+
+// HierarchyPath is used in various places to represent various path hierarchies (eg: in Diameter groups, XML trees)
+type HierarchyPath []string
+
+func (h HierarchyPath) AsString(sep string, prefix bool) string {
+	if len(h) == 0 {
+		return ""
+	}
+	retStr := ""
+	for idx, itm := range h {
+		if idx == 0 {
+			if prefix {
+				retStr += sep
+			}
+		} else {
+			retStr += sep
+		}
+		retStr += itm
+	}
+	return retStr
 }

@@ -430,6 +430,8 @@ func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTri
 			ThresholdValue:        tpAt.ThresholdValue,
 			Recurrent:             tpAt.Recurrent,
 			MinSleep:              tpAt.MinSleep,
+			ExpirationDate:        tpAt.ExpiryTime,
+			ActivationDate:        tpAt.ActivationTime,
 			BalanceId:             tpAt.BalanceTag,
 			BalanceType:           tpAt.BalanceType,
 			BalanceDirections:     tpAt.BalanceDirections,

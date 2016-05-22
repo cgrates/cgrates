@@ -2,12 +2,12 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type UserProfile struct {
@@ -139,21 +139,21 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	return nil
 }
 
-func (um *UserMap) SetUser(up UserProfile, reply *string) error {
+func (um *UserMap) SetUser(up *UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
-	if err := um.accountingDb.SetUser(&up); err != nil {
+	if err := um.accountingDb.SetUser(up); err != nil {
 		*reply = err.Error()
 		return err
 	}
 	um.table[up.GetId()] = up.Profile
 	um.properties[up.GetId()] = &prop{weight: up.Weight, masked: up.Masked}
-	um.addIndex(&up, um.indexKeys)
+	um.addIndex(up, um.indexKeys)
 	*reply = utils.OK
 	return nil
 }
 
-func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
+func (um *UserMap) RemoveUser(up *UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
 	if err := um.accountingDb.RemoveUser(up.GetId()); err != nil {
@@ -162,12 +162,12 @@ func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
 	}
 	delete(um.table, up.GetId())
 	delete(um.properties, up.GetId())
-	um.deleteIndex(&up)
+	um.deleteIndex(up)
 	*reply = utils.OK
 	return nil
 }
 
-func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
+func (um *UserMap) UpdateUser(up *UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
 	m, found := um.table[up.GetId()]
@@ -212,7 +212,7 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 	return nil
 }
 
-func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
+func (um *UserMap) GetUsers(up *UserProfile, results *UserProfiles) error {
 	um.mu.RLock()
 	defer um.mu.RUnlock()
 	table := um.table // no index
@@ -402,44 +402,32 @@ func (um *UserMap) GetIndexes(in string, reply *map[string][]string) error {
 	return nil
 }
 
-type ProxyUserService struct {
-	Client *rpcclient.RpcClient
-}
-
-func NewProxyUserService(addr string, attempts, reconnects int) (*ProxyUserService, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB, nil)
-	if err != nil {
-		return nil, err
+func (um *UserMap) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
 	}
-	return &ProxyUserService{Client: client}, nil
-}
+	// get method
+	method := reflect.ValueOf(um).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
 
-func (ps *ProxyUserService) SetUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UsersV1.SetUser", ud, reply)
-}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 
-func (ps *ProxyUserService) RemoveUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UsersV1.RemoveUser", ud, reply)
-}
-
-func (ps *ProxyUserService) UpdateUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UsersV1.UpdateUser", ud, reply)
-}
-
-func (ps *ProxyUserService) GetUsers(ud UserProfile, users *UserProfiles) error {
-	return ps.Client.Call("UsersV1.GetUsers", ud, users)
-}
-
-func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
-	return ps.Client.Call("UsersV1.AddIndex", indexes, reply)
-}
-
-func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) error {
-	return ps.Client.Call("UsersV1.AddIndex", in, reply)
-}
-
-func (ps *ProxyUserService) ReloadUsers(in string, reply *string) error {
-	return ps.Client.Call("UsersV1.ReloadUsers", in, reply)
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }
 
 // extraFields - Field name in the interface containing extraFields information
@@ -484,7 +472,7 @@ func LoadUserProfile(in interface{}, extraFields string) error {
 		}
 	}
 	ups := UserProfiles{}
-	if err := userService.GetUsers(*up, &ups); err != nil {
+	if err := userService.Call("UsersV1.GetUsers", up, &ups); err != nil {
 		return err
 	}
 	if len(ups) > 0 {
@@ -495,5 +483,5 @@ func LoadUserProfile(in interface{}, extraFields string) error {
 		utils.SetMapExtraFields(in, m, extraFields)
 		return nil
 	}
-	return utils.ErrNotFound
+	return utils.ErrUserNotFound
 }

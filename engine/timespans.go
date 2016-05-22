@@ -33,49 +33,99 @@ A unit in which a call will be split that has a specific price related interval 
 type TimeSpan struct {
 	TimeStart, TimeEnd                                         time.Time
 	Cost                                                       float64
-	ratingInfo                                                 *RatingInfo
 	RateInterval                                               *RateInterval
 	DurationIndex                                              time.Duration // the call duration so far till TimeEnd
 	Increments                                                 Increments
+	RoundIncrement                                             *Increment
 	MatchedSubject, MatchedPrefix, MatchedDestId, RatingPlanId string
 	CompressFactor                                             int
+	ratingInfo                                                 *RatingInfo
 }
 
 type Increment struct {
-	Duration            time.Duration
-	Cost                float64
-	BalanceInfo         *BalanceInfo // need more than one for units with cost
-	BalanceRateInterval *RateInterval
-	UnitInfo            *UnitInfo
-	CompressFactor      int
-	paid                bool
-}
-
-// Holds the minute information related to a specified timespan
-type UnitInfo struct {
-	DestinationId string
-	Quantity      float64
-	TOR           string
-	//Price         float64
-}
-
-func (mi *UnitInfo) Equal(other *UnitInfo) bool {
-	return mi.DestinationId == other.DestinationId &&
-		mi.Quantity == other.Quantity &&
-		mi.TOR == other.TOR
+	Duration       time.Duration
+	Cost           float64
+	BalanceInfo    *DebitInfo // need more than one for units with cost
+	CompressFactor int
+	paid           bool
 }
 
 // Holds information about the balance that made a specific payment
-type BalanceInfo struct {
-	UnitBalanceUuid  string
-	MoneyBalanceUuid string
-	AccountId        string // used when debited from shared balance
+type DebitInfo struct {
+	Unit      *UnitInfo
+	Monetary  *MonetaryInfo
+	AccountID string // used when debited from shared balance
 }
 
-func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
-	return bi.UnitBalanceUuid == other.UnitBalanceUuid &&
-		bi.MoneyBalanceUuid == other.MoneyBalanceUuid &&
-		bi.AccountId == other.AccountId
+func (di *DebitInfo) Equal(other *DebitInfo) bool {
+	return di.Unit.Equal(other.Unit) &&
+		di.Monetary.Equal(other.Monetary) &&
+		di.AccountID == other.AccountID
+}
+
+func (di *DebitInfo) Clone() *DebitInfo {
+	nDi := &DebitInfo{
+		AccountID: di.AccountID,
+	}
+	if di.Unit != nil {
+		nDi.Unit = di.Unit.Clone()
+	}
+	if di.Monetary != nil {
+		nDi.Monetary = di.Monetary.Clone()
+	}
+	return nDi
+}
+
+type MonetaryInfo struct {
+	UUID         string
+	ID           string
+	Value        float64
+	RateInterval *RateInterval
+}
+
+func (mi *MonetaryInfo) Clone() *MonetaryInfo {
+	newMi := *mi
+	return &newMi
+}
+
+func (mi *MonetaryInfo) Equal(other *MonetaryInfo) bool {
+	if mi == nil && other == nil {
+		return true
+	}
+	if mi == nil || other == nil {
+		return false
+	}
+	return mi.UUID == other.UUID &&
+		reflect.DeepEqual(mi.RateInterval, other.RateInterval)
+}
+
+type UnitInfo struct {
+	UUID          string
+	ID            string
+	Value         float64
+	DestinationID string
+	Consumed      float64
+	TOR           string
+	RateInterval  *RateInterval
+}
+
+func (ui *UnitInfo) Clone() *UnitInfo {
+	newUi := *ui
+	return &newUi
+}
+
+func (ui *UnitInfo) Equal(other *UnitInfo) bool {
+	if ui == nil && other == nil {
+		return true
+	}
+	if ui == nil || other == nil {
+		return false
+	}
+	return ui.UUID == other.UUID &&
+		ui.DestinationID == other.DestinationID &&
+		ui.Consumed == other.Consumed &&
+		ui.TOR == other.TOR &&
+		reflect.DeepEqual(ui.RateInterval, other.RateInterval)
 }
 
 type TimeSpans []*TimeSpan
@@ -212,22 +262,20 @@ func (tss *TimeSpans) Decompress() { // must be pointer receiver
 }
 
 func (incr *Increment) Clone() *Increment {
-	nIncr := &Increment{
-		Duration:            incr.Duration,
-		Cost:                incr.Cost,
-		BalanceRateInterval: incr.BalanceRateInterval,
-		UnitInfo:            incr.UnitInfo,
-		BalanceInfo:         incr.BalanceInfo,
+	nInc := &Increment{
+		Duration: incr.Duration,
+		Cost:     incr.Cost,
 	}
-	return nIncr
+	if incr.BalanceInfo != nil {
+		nInc.BalanceInfo = incr.BalanceInfo.Clone()
+	}
+	return nInc
 }
 
 func (incr *Increment) Equal(other *Increment) bool {
 	return incr.Duration == other.Duration &&
 		incr.Cost == other.Cost &&
-		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo)) &&
-		((incr.BalanceRateInterval == nil && other.BalanceRateInterval == nil) || reflect.DeepEqual(incr.BalanceRateInterval, other.BalanceRateInterval)) &&
-		((incr.UnitInfo == nil && other.UnitInfo == nil) || incr.UnitInfo.Equal(other.UnitInfo))
+		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo))
 }
 
 func (incr *Increment) GetCompressFactor() int {
@@ -260,6 +308,14 @@ func (incs *Increments) Compress() { // must be pointer receiver
 			cIncrs = append(cIncrs, incr)
 		} else {
 			cIncrs[len(cIncrs)-1].CompressFactor++
+			if cIncrs[len(cIncrs)-1].BalanceInfo != nil && incr.BalanceInfo != nil {
+				if cIncrs[len(cIncrs)-1].BalanceInfo.Monetary != nil && incr.BalanceInfo.Monetary != nil {
+					cIncrs[len(cIncrs)-1].BalanceInfo.Monetary.Value = incr.BalanceInfo.Monetary.Value
+				}
+				if cIncrs[len(cIncrs)-1].BalanceInfo.Unit != nil && incr.BalanceInfo.Unit != nil {
+					cIncrs[len(cIncrs)-1].BalanceInfo.Unit.Value = incr.BalanceInfo.Unit.Value
+				}
+			}
 		}
 	}
 	*incs = cIncrs
@@ -268,8 +324,19 @@ func (incs *Increments) Compress() { // must be pointer receiver
 func (incs *Increments) Decompress() { // must be pointer receiver
 	var cIncrs Increments
 	for _, cIncr := range *incs {
-		for i := 0; i < cIncr.GetCompressFactor(); i++ {
-			cIncrs = append(cIncrs, cIncr.Clone())
+		cf := cIncr.GetCompressFactor()
+		for i := 0; i < cf; i++ {
+			incr := cIncr.Clone()
+			// set right Values
+			if incr.BalanceInfo != nil {
+				if incr.BalanceInfo.Monetary != nil {
+					incr.BalanceInfo.Monetary.Value += (float64(cf-(i+1)) * incr.Cost)
+				}
+				if incr.BalanceInfo.Unit != nil {
+					incr.BalanceInfo.Unit.Value += (float64(cf-(i+1)) * incr.BalanceInfo.Unit.Consumed)
+				}
+			}
+			cIncrs = append(cIncrs, incr)
 		}
 	}
 	*incs = cIncrs
@@ -328,7 +395,7 @@ func (ts *TimeSpan) CalculateCost() float64 {
 		}
 		return ts.RateInterval.GetCost(ts.GetDuration(), ts.GetGroupStart())
 	} else {
-		return ts.Increments.GetTotalCost()
+		return ts.Increments.GetTotalCost() * float64(ts.GetCompressFactor())
 	}
 }
 
@@ -347,17 +414,17 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	ts.Increments = make([]*Increment, 0)
 	// create rated units series
 	_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	// we will use the cost calculated cost and devide by nb of increments
+	// we will use the calculated cost and devide by nb of increments
 	// because ts cost is rounded
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
 	incrementCost := ts.CalculateCost() / float64(nbIncrements)
-	incrementCost = utils.Round(incrementCost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
+	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:    rateIncrement,
 			Cost:        incrementCost,
-			BalanceInfo: &BalanceInfo{},
+			BalanceInfo: &DebitInfo{},
 		}
 		ts.Increments = append(ts.Increments, inc)
 	}
@@ -540,6 +607,26 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 	newTs.copyRatingInfo(ts)
 	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = activationTime
+	ts.SetNewDurationIndex(newTs)
+	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
+	return
+}
+
+// Splits the given timespan on activation period's activation time.
+func (ts *TimeSpan) SplitByDay() (newTs *TimeSpan) {
+	if ts.TimeStart.Day() == ts.TimeEnd.Day() || utils.TimeIs0h(ts.TimeEnd) {
+		return
+	}
+
+	splitDate := ts.TimeStart.AddDate(0, 0, 1)
+	splitDate = time.Date(splitDate.Year(), splitDate.Month(), splitDate.Day(), 0, 0, 0, 0, splitDate.Location())
+	newTs = &TimeSpan{
+		TimeStart: splitDate,
+		TimeEnd:   ts.TimeEnd,
+	}
+	newTs.copyRatingInfo(ts)
+	newTs.DurationIndex = ts.DurationIndex
+	ts.TimeEnd = splitDate
 	ts.SetNewDurationIndex(newTs)
 	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	return

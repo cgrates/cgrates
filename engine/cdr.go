@@ -255,26 +255,6 @@ func (cdr *CDR) FieldsAsString(rsrFlds utils.RSRFields) string {
 	return fldVal
 }
 
-func (cdr *CDR) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string) {
-	if fieldFilter == nil {
-		return true, ""
-	}
-	if fieldFilter.IsStatic() && cdr.FieldAsString(&utils.RSRField{Id: fieldFilter.Id}) == cdr.FieldAsString(fieldFilter) {
-		return true, cdr.FieldAsString(&utils.RSRField{Id: fieldFilter.Id})
-	}
-	preparedFilter := &utils.RSRField{Id: fieldFilter.Id, RSRules: make([]*utils.ReSearchReplace, len(fieldFilter.RSRules))} // Reset rules so they do not point towards same structures as original fieldFilter
-	for idx := range fieldFilter.RSRules {
-		// Hardcode the template with maximum of 5 groups ordered
-		preparedFilter.RSRules[idx] = &utils.ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: utils.FILTER_REGEXP_TPL}
-	}
-	preparedVal := cdr.FieldAsString(preparedFilter)
-	filteredValue := cdr.FieldAsString(fieldFilter)
-	if preparedFilter.RegexpMatched() && (len(preparedVal) == 0 || preparedVal == filteredValue) {
-		return true, filteredValue
-	}
-	return false, ""
-}
-
 func (cdr *CDR) AsStoredCdr(timezone string) *CDR {
 	return cdr
 }
@@ -745,8 +725,7 @@ type UsageRecord struct {
 
 func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 	var err error
-	cdr := &CDR{ToR: self.ToR, RequestType: self.RequestType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category,
-		Account: self.Account, Subject: self.Subject, Destination: self.Destination}
+	cdr := &CDR{CGRID: self.GetId(), ToR: self.ToR, RequestType: self.RequestType, Direction: self.Direction, Tenant: self.Tenant, Category: self.Category, Account: self.Account, Subject: self.Subject, Destination: self.Destination}
 	if cdr.SetupTime, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
 		return nil, err
 	}
@@ -768,6 +747,7 @@ func (self *UsageRecord) AsStoredCdr(timezone string) (*CDR, error) {
 func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
 	var err error
 	cd := &CallDescriptor{
+		CgrID:       self.GetId(),
 		TOR:         self.ToR,
 		Direction:   self.Direction,
 		Tenant:      self.Tenant,
@@ -795,4 +775,8 @@ func (self *UsageRecord) AsCallDescriptor(timezone string) (*CallDescriptor, err
 		cd.ExtraFields[k] = v
 	}
 	return cd, nil
+}
+
+func (self *UsageRecord) GetId() string {
+	return utils.Sha1(self.ToR, self.RequestType, self.Direction, self.Tenant, self.Category, self.Account, self.Subject, self.Destination, self.SetupTime, self.AnswerTime, self.Usage)
 }

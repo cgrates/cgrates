@@ -157,8 +157,72 @@ func (self SMGenericEvent) GetUsage(fieldName string) (time.Duration, error) {
 	if fieldName == utils.META_DEFAULT {
 		fieldName = utils.USAGE
 	}
-	result, _ := utils.ConvertIfaceToString(self[fieldName])
+	valIf, hasVal := self[fieldName]
+	if !hasVal {
+		return nilDuration, utils.ErrNotFound
+	}
+	result, _ := utils.ConvertIfaceToString(valIf)
 	return utils.ParseDurationWithSecs(result)
+}
+
+func (self SMGenericEvent) GetLastUsed(fieldName string) (time.Duration, error) {
+	if fieldName == utils.META_DEFAULT {
+		fieldName = utils.LastUsed
+	}
+	valStr, hasVal := self[fieldName]
+	if !hasVal {
+		return nilDuration, utils.ErrNotFound
+	}
+	result, _ := utils.ConvertIfaceToString(valStr)
+	return utils.ParseDurationWithSecs(result)
+}
+
+// GetSessionTTL retrieves SessionTTL setting out of SMGenericEvent
+func (self SMGenericEvent) GetSessionTTL() time.Duration {
+	valIf, hasVal := self[utils.SessionTTL]
+	if !hasVal {
+		return time.Duration(0)
+	}
+	ttlStr, converted := utils.ConvertIfaceToString(valIf)
+	if !converted {
+		return time.Duration(0)
+	}
+	ttl, _ := utils.ParseDurationWithSecs(ttlStr)
+	return ttl
+}
+
+// GetSessionTTLLastUsed retrieves SessionTTLLastUsed setting out of SMGenericEvent
+func (self SMGenericEvent) GetSessionTTLLastUsed() *time.Duration {
+	valIf, hasVal := self[utils.SessionTTLLastUsed]
+	if !hasVal {
+		return nil
+	}
+	ttlStr, converted := utils.ConvertIfaceToString(valIf)
+	if !converted {
+		return nil
+	}
+	if ttl, err := utils.ParseDurationWithSecs(ttlStr); err != nil {
+		return nil
+	} else {
+		return &ttl
+	}
+}
+
+// GetSessionTTLUsage retrieves SessionTTLUsage setting out of SMGenericEvent
+func (self SMGenericEvent) GetSessionTTLUsage() *time.Duration {
+	valIf, hasVal := self[utils.SessionTTLUsage]
+	if !hasVal {
+		return nil
+	}
+	ttlStr, converted := utils.ConvertIfaceToString(valIf)
+	if !converted {
+		return nil
+	}
+	if ttl, err := utils.ParseDurationWithSecs(ttlStr); err != nil {
+		return nil
+	} else {
+		return &ttl
+	}
 }
 
 func (self SMGenericEvent) GetMaxUsage(fieldName string, cfgMaxUsage time.Duration) (time.Duration, error) {
@@ -220,6 +284,18 @@ func (self SMGenericEvent) GetExtraFields() map[string]string {
 		extraFields[key] = result
 	}
 	return extraFields
+}
+
+func (self SMGenericEvent) GetFieldAsString(fieldName string) (string, error) {
+	valIf, hasVal := self[fieldName]
+	if !hasVal {
+		return "", utils.ErrNotFound
+	}
+	result, converted := utils.ConvertIfaceToString(valIf)
+	if !converted {
+		return "", utils.ErrNotConvertible
+	}
+	return result, nil
 }
 
 func (self SMGenericEvent) MissingParameter(timezone string) bool {

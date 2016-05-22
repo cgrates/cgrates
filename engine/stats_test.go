@@ -35,6 +35,7 @@ func TestStatsQueueInit(t *testing.T) {
 func TestStatsValue(t *testing.T) {
 	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}})
 	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		Usage:      10 * time.Second,
 		Cost:       1,
@@ -227,7 +228,7 @@ func TestStatsAppendCdr(t *testing.T) {
 	if len(cdrStats.queues) != 2 ||
 		len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
 		len(cdrStats.queues["CDRST2"].Cdrs) != 1 {
-		t.Error("Error appending cdr to queue: ", len(cdrStats.queues))
+		t.Error("Error appending cdr to queue: ", utils.ToIJSON(cdrStats.queues))
 	}
 }
 
@@ -456,5 +457,100 @@ func TestStatsSaveRestoreQeue(t *testing.T) {
 	}
 	if len(recovered.Cdrs) != 1 || recovered.Cdrs[0].Cost != sq.Cdrs[0].Cost {
 		t.Errorf("Expecting %+v got: %+v", sq.Cdrs[0], recovered.Cdrs[0])
+	}
+}
+
+func TestStatsPurgeTimeOne(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	qcdr := sq.AppendCDR(cdr)
+	qcdr.EventTime = qcdr.SetupTime
+	s := sq.GetStats()
+	if s[ASR] != -1 ||
+		s[ACD] != -1 ||
+		s[TCD] != -1 ||
+		s[ACC] != -1 ||
+		s[TCC] != -1 {
+		t.Errorf("Error getting stats: %+v", s)
+	}
+}
+
+func TestStatsPurgeTime(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	qcdr := sq.AppendCDR(cdr)
+	qcdr.EventTime = qcdr.SetupTime
+	cdr.Cost = 2
+	qcdr = sq.AppendCDR(cdr)
+	qcdr.EventTime = qcdr.SetupTime
+	cdr.Cost = 3
+	qcdr = sq.AppendCDR(cdr)
+	qcdr.EventTime = qcdr.SetupTime
+	s := sq.GetStats()
+	if s[ASR] != -1 ||
+		s[ACD] != -1 ||
+		s[TCD] != -1 ||
+		s[ACC] != -1 ||
+		s[TCC] != -1 {
+		t.Errorf("Error getting stats: %+v", s)
+	}
+}
+
+func TestStatsPurgeTimeFirst(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	qcdr := sq.AppendCDR(cdr)
+	cdr.Cost = 2
+	cdr.SetupTime = time.Date(2024, 7, 14, 14, 25, 0, 0, time.UTC)
+	cdr.AnswerTime = time.Date(2024, 7, 14, 14, 25, 0, 0, time.UTC)
+	qcdr.EventTime = qcdr.SetupTime
+	sq.AppendCDR(cdr)
+	cdr.Cost = 3
+	sq.AppendCDR(cdr)
+	s := sq.GetStats()
+	if s[ASR] != 100 ||
+		s[ACD] != 10 ||
+		s[TCD] != 20 ||
+		s[ACC] != 2.5 ||
+		s[TCC] != 5 {
+		t.Errorf("Error getting stats: %+v", s)
+	}
+}
+
+func TestStatsPurgeLength(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, QueueLength: 1})
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	sq.AppendCDR(cdr)
+	cdr.Cost = 2
+	sq.AppendCDR(cdr)
+	cdr.Cost = 3
+	sq.AppendCDR(cdr)
+	s := sq.GetStats()
+	if s[ASR] != 100 ||
+		s[ACD] != 10 ||
+		s[TCD] != 10 ||
+		s[ACC] != 3 ||
+		s[TCC] != 3 {
+		t.Errorf("Error getting stats: %+v", s)
 	}
 }

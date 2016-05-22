@@ -43,7 +43,7 @@
     <avp name="Time-Of-First-Usage" code="263" must="M,V" may="-" must-not="-" may-encrypt="Y" vendor-id="12645">
       <data type="Time" />
     </avp>
-    <avp name="Time-Of-Last-Usage" code="266" must="M,V" may="-" must-not="-" may-encrypt="Y" vendor-id="12645">
+    <avp name="Time-Of-Last-Usage" code="264" must="M,V" may="-" must-not="-" may-encrypt="Y" vendor-id="12645">
       <data type="Time" />
     </avp>
   </application>

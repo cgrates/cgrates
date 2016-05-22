@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v1
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
@@ -26,19 +27,19 @@ import (
 )
 
 // Retrieves the callCost out of CGR logDb
-func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.CallCost) error {
+func (apier *ApierV1) GetCallCostLog(attrs utils.AttrGetCallCost, reply *engine.SMCost) error {
 	if attrs.CgrId == "" {
 		return utils.NewErrMandatoryIeMissing("CgrId")
 	}
 	if attrs.RunId == "" {
 		attrs.RunId = utils.META_DEFAULT
 	}
-	if cc, err := apier.CdrDb.GetCallCostLog(attrs.CgrId, attrs.RunId); err != nil {
+	if smcs, err := apier.CdrDb.GetSMCosts(attrs.CgrId, attrs.RunId, "", ""); err != nil {
 		return utils.NewErrServerError(err)
-	} else if cc == nil {
+	} else if len(smcs) == 0 {
 		return utils.ErrNotFound
 	} else {
-		*reply = *cc
+		*reply = *smcs[0]
 	}
 	return nil
 }
@@ -84,4 +85,12 @@ func (apier *ApierV1) RemoveCDRs(attrs utils.RPCCDRsFilter, reply *string) error
 	}
 	*reply = "OK"
 	return nil
+}
+
+// New way of (re-)rating CDRs
+func (apier *ApierV1) RateCDRs(attrs utils.AttrRateCDRs, reply *string) error {
+	if apier.CDRs == nil {
+		return errors.New("CDRS_NOT_ENABLED")
+	}
+	return apier.CDRs.Call("CDRsV1.RateCDRs", attrs, reply)
 }

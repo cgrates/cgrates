@@ -1,0 +1,28 @@
+{
+"listen": {
+	"rpc_json": "127.0.0.1:2020",			// RPC JSON listening address
+	"rpc_gob": "127.0.0.1:2021",			// RPC GOB listening address
+	"http": "127.0.0.1:2084",				// HTTP listening address
+},
+
+"cdrs": {
+	"enabled": true,					// start the CDR Server service:  <true|false>
+	"rals_conns": [
+	     {"address": "127.0.0.1:2014"},
+	     {"address": "127.0.0.1:2016"}
+	],
+	"cdrstats": "",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+},
+
+"sm_generic": {
+	"enabled": true,
+	"rals_conns": [
+	      {"address": "127.0.0.1:2014"},
+	      {"address": "127.0.0.1:2016"}
+	],
+	"cdrs_conns": [
+	      {"address": "*internal"}     // address where to reach CDR Server, empty to disable CDR capturing <internal|x.y.z.y:1234>
+	],
+},
+
+}

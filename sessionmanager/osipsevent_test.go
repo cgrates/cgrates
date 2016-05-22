@@ -33,7 +33,7 @@ import (
 var addr, _ = net.ResolveUDPAddr("udp", "172.16.254.77:42574")
 var osipsEv = &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_CDR",
 	AttrValues: map[string]string{"to_tag": "4ea9687f", "cgr_account": "dan", "setuptime": "7", "created": "1406370492", "method": "INVITE", "callid": "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ",
-		"sip_reason": "OK", "time": "1406370499", "cgr_reqtype": utils.META_PREPAID, "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com", "sip_code": "200",
+		"sip_reason": "OK", "cgr_answertime": "1406370499" ,"time": "1406370499", "cgr_reqtype": utils.META_PREPAID, "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com", "sip_code": "200",
 		"duration": "20", CGR_PDD: "3s", "from_tag": "eb082607", "extra1": "val1", "extra2": "val2", "cgr_supplier": "supplier3"}, OriginatorAddress: addr}}
 
 func TestOsipsEventInterface(t *testing.T) {
@@ -158,7 +158,7 @@ func TestOsipsAccMissedToStoredCdr(t *testing.T) {
 	setupTime, _ := utils.ParseTimeDetectLayout("1431182699", "")
 	osipsEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_MISSED_EVENT",
 		AttrValues: map[string]string{"method": "INVITE", "from_tag": "5cb81eaa", "to_tag": "", "callid": "27b1e6679ad0109b5d756e42bb4c9c28@0:0:0:0:0:0:0:0",
-			"sip_code": "404", "sip_reason": "Not Found", "time": "1431182699", "cgr_reqtype": utils.META_PSEUDOPREPAID,
+			"sip_code": "404", "sip_reason": "Not Found", "time": "1431182699", "cgr_answertime": "1431182699", "cgr_reqtype": utils.META_PSEUDOPREPAID,
 			"cgr_account": "1001", "cgr_destination": "1002", utils.CGR_SUPPLIER: "supplier1",
 			"duration": "", "dialog_id": "3547:277000822", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr,
 	}}
@@ -176,7 +176,7 @@ func TestOsipsAccMissedToStoredCdr(t *testing.T) {
 func TestOsipsUpdateDurationFromEvent(t *testing.T) {
 	osipsEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_EVENT",
 		AttrValues: map[string]string{"method": "INVITE", "from_tag": "87d02470", "to_tag": "a671a98", "callid": "05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0",
-			"sip_code": "200", "sip_reason": "OK", "time": "1430579770", "cgr_reqtype": utils.META_PREPAID,
+			"sip_code": "200", "sip_reason": "OK", "time": "1430579770", "cgr_answertime": "1430579770", "cgr_reqtype": utils.META_PREPAID,
 			"cgr_account": "1001", "cgr_destination": "1002", utils.CGR_SUPPLIER: "supplier1",
 			"duration": "", "dialog_id": "3547:277000822", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr,
 	}}
@@ -188,7 +188,7 @@ func TestOsipsUpdateDurationFromEvent(t *testing.T) {
 	}}
 	eOsipsEv := &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_EVENT",
 		AttrValues: map[string]string{"method": "UPDATE", "from_tag": "87d02470", "to_tag": "a671a98", "callid": "05dac0aaa716c9814f855f0e8fee6936@0:0:0:0:0:0:0:0",
-			"sip_code": "200", "sip_reason": "OK", "time": "1430579770", "cgr_reqtype": utils.META_PREPAID,
+			"sip_code": "200", "sip_reason": "OK", "time": "1430579770", "cgr_answertime": "1430579770", "cgr_reqtype": utils.META_PREPAID,
 			"cgr_account": "1001", "cgr_destination": "1002", utils.CGR_SUPPLIER: "supplier1",
 			"duration": "27s", "dialog_id": "3547:277000822", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr,
 	}}

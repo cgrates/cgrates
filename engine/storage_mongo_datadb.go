@@ -53,12 +53,15 @@ const (
 	colLogAtr = "action_trigger_logs"
 	colLogApl = "action_plan_logs"
 	colLogErr = "error_logs"
+	colVer    = "versions"
 )
 
 var (
 	CGRIDLow           = strings.ToLower(utils.CGRID)
 	RunIDLow           = strings.ToLower(utils.MEDI_RUNID)
 	OrderIDLow         = strings.ToLower(utils.ORDERID)
+	OriginHostLow      = strings.ToLower(utils.CDRHOST)
+	OriginIDLow        = strings.ToLower(utils.ACCID)
 	ToRLow             = strings.ToLower(utils.TOR)
 	CDRHostLow         = strings.ToLower(utils.CDRHOST)
 	CDRSourceLow       = strings.ToLower(utils.CDRSOURCE)
@@ -216,7 +219,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*
 		}
 	}
 	index = mgo.Index{
-		Key:        []string{CGRIDLow, RunIDLow},
+		Key:        []string{CGRIDLow, RunIDLow, OriginIDLow},
 		Unique:     true,
 		DropDups:   false,
 		Background: false,
@@ -237,6 +240,26 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*
 			return nil, err
 		}
 	}
+	index = mgo.Index{
+		Key:        []string{CGRIDLow, RunIDLow},
+		Unique:     true,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
+		return nil, err
+	}
+	index = mgo.Index{
+		Key:        []string{OriginHostLow, OriginIDLow},
+		Unique:     false,
+		DropDups:   false,
+		Background: false,
+		Sparse:     false,
+	}
+	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
+		return nil, err
+	}
 	return &MongoStorage{db: ndb, session: session, ms: NewCodecMsgpackMarshaler()}, err
 }
 
@@ -244,8 +267,66 @@ func (ms *MongoStorage) Close() {
 	ms.session.Close()
 }
 
-func (ms *MongoStorage) GetKeysForPrefix(prefix string) ([]string, error) {
-	return nil, nil
+func (ms *MongoStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
+	var category, subject string
+	length := len(utils.DESTINATION_PREFIX)
+	if len(prefix) >= length {
+		category = prefix[:length] // prefix lenght
+		subject = fmt.Sprintf("^%s", prefix[length:])
+	} else {
+		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
+	}
+	var result []string
+	if skipCache {
+		keyResult := struct{ Key string }{}
+		idResult := struct{ Id string }{}
+		switch category {
+		case utils.DESTINATION_PREFIX:
+			iter := ms.db.C(colDst).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.DESTINATION_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.RATING_PLAN_PREFIX:
+			iter := ms.db.C(colRpl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.RATING_PLAN_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.RATING_PROFILE_PREFIX:
+			iter := ms.db.C(colRpf).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+			for iter.Next(&idResult) {
+				result = append(result, utils.RATING_PROFILE_PREFIX+idResult.Id)
+			}
+			return result, nil
+		case utils.ACTION_PREFIX:
+			iter := ms.db.C(colAct).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.ACTION_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.ACTION_PLAN_PREFIX:
+			iter := ms.db.C(colApl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.ACTION_TRIGGER_PREFIX:
+			iter := ms.db.C(colAtr).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			for iter.Next(&keyResult) {
+				result = append(result, utils.ACTION_TRIGGER_PREFIX+keyResult.Key)
+			}
+			return result, nil
+		case utils.ACCOUNT_PREFIX:
+			iter := ms.db.C(colAcc).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+			for iter.Next(&idResult) {
+				result = append(result, utils.ACCOUNT_PREFIX+idResult.Id)
+			}
+			return result, nil
+		}
+		return result, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
+	}
+	return cache2go.GetEntriesKeys(prefix), nil
 }
 
 func (ms *MongoStorage) Flush(ignore string) (err error) {
@@ -627,7 +708,7 @@ func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
 		count, err := ms.db.C(colAcc).Find(bson.M{"id": subject}).Count()
 		return count > 0, err
 	}
-	return false, errors.New("Unsupported category in HasData")
+	return false, errors.New("unsupported category in HasData")
 }
 
 func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
@@ -679,7 +760,7 @@ func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan) error {
 	}{Key: rp.Id, Value: b.Bytes()})
 	if err == nil && historyScribe != nil {
 		var response int
-		historyScribe.Record(rp.GetHistoryRecord(), &response)
+		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
 	return err
 }
@@ -704,7 +785,7 @@ func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
 	_, err := ms.db.C(colRpf).Upsert(bson.M{"id": rp.Id}, rp)
 	if err == nil && historyScribe != nil {
 		var response int
-		historyScribe.Record(rp.GetHistoryRecord(false), &response)
+		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(false), &response)
 	}
 	return err
 }
@@ -720,7 +801,7 @@ func (ms *MongoStorage) RemoveRatingProfile(key string) error {
 		rpf := &RatingProfile{Id: result.Id}
 		if historyScribe != nil {
 			var response int
-			go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
+			go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
 		}
 	}
 	return iter.Close()
@@ -802,8 +883,12 @@ func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
 	}{Key: dest.Id, Value: b.Bytes()})
 	if err == nil && historyScribe != nil {
 		var response int
-		historyScribe.Record(dest.GetHistoryRecord(), &response)
+		historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
+	return
+}
+
+func (ms *MongoStorage) RemoveDestination(destID string) (err error) {
 	return
 }
 
@@ -833,6 +918,10 @@ func (ms *MongoStorage) SetActions(key string, as Actions) error {
 		Value Actions
 	}{Key: key, Value: as})
 	return err
+}
+
+func (ms *MongoStorage) RemoveActions(key string) error {
+	return ms.db.C(colAct).Remove(bson.M{"key": key})
 }
 
 func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
@@ -870,7 +959,7 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(acc.BalanceMap) == 0 {
-		if ac, err := ms.GetAccount(acc.Id); err == nil && !ac.allBalancesExpired() {
+		if ac, err := ms.GetAccount(acc.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = acc.ActionTriggers
 			ac.UnitCounters = acc.UnitCounters
 			ac.AllowNegative = acc.AllowNegative
@@ -878,7 +967,7 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 			acc = ac
 		}
 	}
-	_, err := ms.db.C(colAcc).Upsert(bson.M{"id": acc.Id}, acc)
+	_, err := ms.db.C(colAcc).Upsert(bson.M{"id": acc.ID}, acc)
 	return err
 }
 
@@ -1281,5 +1370,27 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 		css = append(css, &clone)
 	}
 	err = iter.Close()
+	return
+}
+
+func (ms *MongoStorage) SetStructVersion(v *StructVersion) (err error) {
+	_, err = ms.db.C(colVer).Upsert(bson.M{"key": utils.VERSION_PREFIX + "struct"}, &struct {
+		Key   string
+		Value *StructVersion
+	}{utils.VERSION_PREFIX + "struct", v})
+	return
+}
+
+func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
+	var result struct {
+		Key   string
+		Value StructVersion
+	}
+
+	err = ms.db.C(colVer).Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result)
+	if err == mgo.ErrNotFound {
+		rsv = nil
+	}
+	rsv = &result.Value
 	return
 }

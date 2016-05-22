@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -96,6 +97,10 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 		case string:
 			if key == field {
 				return v
+			}
+		case float64:
+			if key == field {
+				return strconv.FormatFloat(v, 'f', -1, 64)
 			}
 		case map[string]interface{}:
 			if result = fsCdr.searchExtraField(field, v); result != "" {

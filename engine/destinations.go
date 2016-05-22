@@ -63,12 +63,13 @@ func (d *Destination) AddPrefix(pfx string) {
 }
 
 // history record method
-func (d *Destination) GetHistoryRecord() history.Record {
+func (d *Destination) GetHistoryRecord(deleted bool) history.Record {
 	js, _ := json.Marshal(d)
 	return history.Record{
 		Id:       d.Id,
 		Filename: history.DESTINATIONS_FN,
 		Payload:  js,
+		Deleted:  deleted,
 	}
 }
 
@@ -82,6 +83,7 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 }
 
 func CleanStalePrefixes(destIds []string) {
+	utils.Logger.Info("Cleaning stale dest prefixes: " + utils.ToJSON(destIds))
 	prefixMap, err := cache2go.GetAllEntries(utils.DESTINATION_PREFIX)
 	if err != nil {
 		return

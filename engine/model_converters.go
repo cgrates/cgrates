@@ -224,6 +224,8 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result []TpActionTrig
 			ThresholdValue:         at.ThresholdValue,
 			Recurrent:              at.Recurrent,
 			MinSleep:               at.MinSleep,
+			ExpiryTime:             at.ExpirationDate,
+			ActivationTime:         at.ActivationDate,
 			BalanceTag:             at.BalanceId,
 			BalanceType:            at.BalanceType,
 			BalanceDirections:      at.BalanceDirections,

@@ -63,7 +63,7 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,,,,false,false,10`
 	csvr.WriteToDatabase(false, false)
 	ratingDbAcntActs.CacheRatingAll()
 	acntDbAcntActs.CacheAccountingAll()
-	expectAcnt := &engine.Account{Id: "cgrates.org:1"}
+	expectAcnt := &engine.Account{ID: "cgrates.org:1"}
 	if acnt, err := acntDbAcntActs.GetAccount("cgrates.org:1"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
@@ -82,11 +82,11 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 	if err := at.Execute(); err != nil {
 		t.Error(err)
 	}
-	expectAcnt := &engine.Account{Id: "cgrates.org:1", Disabled: true}
+	expectAcnt := &engine.Account{ID: "cgrates.org:1", Disabled: true}
 	if acnt, err := acntDbAcntActs.GetAccount(acnt1Tag); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectAcnt, acnt) {
-		t.Errorf("Expecting: %+v, received: %+v", expectAcnt, acnt)
+		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(expectAcnt), utils.ToJSON(acnt))
 	}
 }
 
@@ -99,7 +99,7 @@ func TestAcntActsEnableAcnt(t *testing.T) {
 	if err := at.Execute(); err != nil {
 		t.Error(err)
 	}
-	expectAcnt := &engine.Account{Id: "cgrates.org:1", Disabled: false}
+	expectAcnt := &engine.Account{ID: "cgrates.org:1", Disabled: false}
 	if acnt, err := acntDbAcntActs.GetAccount(acnt1Tag); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectAcnt, acnt) {

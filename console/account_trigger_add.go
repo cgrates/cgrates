@@ -18,44 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdGetDestination{
-		name:      "destination",
-		rpcMethod: "ApierV1.GetDestination",
+	c := &CmdAccountAddTriggers{
+		name:      "account_triggers_add",
+		rpcMethod: "ApierV1.AddAccountActionTriggers",
+		rpcParams: &v1.AttrAddAccountActionTriggers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetDestination struct {
+type CmdAccountAddTriggers struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringWrapper
+	rpcParams *v1.AttrAddAccountActionTriggers
 	*CommandExecuter
 }
 
-func (self *CmdGetDestination) Name() string {
+func (self *CmdAccountAddTriggers) Name() string {
 	return self.name
 }
 
-func (self *CmdGetDestination) RpcMethod() string {
+func (self *CmdAccountAddTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDestination) RpcParams(reset bool) interface{} {
+func (self *CmdAccountAddTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &StringWrapper{}
+		self.rpcParams = &v1.AttrAddAccountActionTriggers{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetDestination) PostprocessRpcParams() error {
+func (self *CmdAccountAddTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdGetDestination) RpcResult() interface{} {
-	return &engine.Destination{}
+func (self *CmdAccountAddTriggers) RpcResult() interface{} {
+	var s string
+	return &s
 }

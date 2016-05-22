@@ -18,49 +18,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
-	c := &CmdUpdateAliases{
-		name:      "aliases_update",
-		rpcMethod: "AliasesV1.UpdateAlias",
-		rpcParams: &engine.Alias{Direction: utils.OUT},
+	c := &CmdAccountRemoveTriggers{
+		name:      "account_triggers_remove",
+		rpcMethod: "ApierV1.RemoveAccountActionTriggers",
+		rpcParams: &v1.AttrRemoveAccountActionTriggers{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdUpdateAliases struct {
+type CmdAccountRemoveTriggers struct {
 	name      string
 	rpcMethod string
-	rpcParams *engine.Alias
+	rpcParams *v1.AttrRemoveAccountActionTriggers
 	*CommandExecuter
 }
 
-func (self *CmdUpdateAliases) Name() string {
+func (self *CmdAccountRemoveTriggers) Name() string {
 	return self.name
 }
 
-func (self *CmdUpdateAliases) RpcMethod() string {
+func (self *CmdAccountRemoveTriggers) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdUpdateAliases) RpcParams(reset bool) interface{} {
+func (self *CmdAccountRemoveTriggers) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &engine.Alias{Direction: utils.OUT}
+		self.rpcParams = &v1.AttrRemoveAccountActionTriggers{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdUpdateAliases) PostprocessRpcParams() error {
+func (self *CmdAccountRemoveTriggers) PostprocessRpcParams() error {
 	return nil
 }
 
-func (self *CmdUpdateAliases) RpcResult() interface{} {
+func (self *CmdAccountRemoveTriggers) RpcResult() interface{} {
 	var s string
 	return &s
 }

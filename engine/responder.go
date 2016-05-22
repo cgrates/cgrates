@@ -49,21 +49,16 @@ type AttrGetLcr struct {
 type Responder struct {
 	Bal           *balancer2go.Balancer
 	ExitChan      chan bool
-	CdrSrv        *CdrServer
-	Stats         StatsInterface
+	Stats         rpcclient.RpcClientConnection
 	Timeout       time.Duration
 	Timezone      string
 	cnt           int64
 	responseCache *cache2go.ResponseCache
 }
 
-func NewResponder(exitChan chan bool, cdrSrv *CdrServer, stats StatsInterface, timeout, timeToLive time.Duration) *Responder {
-	return &Responder{
-		ExitChan:      exitChan,
-		Stats:         stats,
-		Timeout:       timeToLive,
-		responseCache: cache2go.NewResponseCache(timeToLive),
-	}
+func (rs *Responder) SetTimeToLive(timeToLive time.Duration, out *int) error {
+	rs.responseCache = cache2go.NewResponseCache(timeToLive)
+	return nil
 }
 
 func (rs *Responder) getCache() *cache2go.ResponseCache {
@@ -81,6 +76,10 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
+		return err
+	}
 	// replace aliases
 	if err := LoadAlias(
 		&AttrMatchingAlias{
@@ -92,10 +91,6 @@ func (rs *Responder) GetCost(arg *CallDescriptor, reply *CallCost) (err error) {
 			Subject:     arg.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		return err
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
 	}
 	if rs.Bal != nil {
@@ -119,6 +114,10 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
+		return err
+	}
 	// replace aliases
 	if err := LoadAlias(
 		&AttrMatchingAlias{
@@ -132,10 +131,7 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
+
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.Debit")
 		*reply, err = *r, e
@@ -150,49 +146,19 @@ func (rs *Responder) Debit(arg *CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
-func (rs *Responder) FakeDebit(arg *CallDescriptor, reply *CallCost) (err error) {
-	if arg.Subject == "" {
-		arg.Subject = arg.Account
-	}
-	// replace aliases
-	if err := LoadAlias(
-		&AttrMatchingAlias{
-			Destination: arg.Destination,
-			Direction:   arg.Direction,
-			Tenant:      arg.Tenant,
-			Category:    arg.Category,
-			Account:     arg.Account,
-			Subject:     arg.Subject,
-			Context:     utils.ALIAS_CONTEXT_RATING,
-		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		return err
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
-	if rs.Bal != nil {
-		r, e := rs.getCallCost(arg, "Responder.FakeDebit")
-		*reply, err = *r, e
-	} else {
-		r, e := arg.FakeDebit()
-		if e != nil {
-			return e
-		} else if r != nil {
-			*reply = *r
-		}
-	}
-	return
-}
-
 func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) {
-	if item, err := rs.getCache().Get(utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrID + arg.RunID); err == nil && item != nil {
+	cacheKey := utils.MAX_DEBIT_CACHE_PREFIX + arg.CgrID + arg.RunID + arg.DurationIndex.String()
+	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		*reply = *(item.Value.(*CallCost))
 		return item.Err
 	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
+		return err
+	}
 	// replace aliases
 	if err := LoadAlias(
 		&AttrMatchingAlias{
@@ -206,17 +172,14 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
+
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(arg, "Responder.MaxDebit")
 		*reply, err = *r, e
 	} else {
 		r, e := arg.MaxDebit()
 		if e != nil {
-			rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrID+arg.RunID, &cache2go.CacheItem{
+			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{
 				Err: e,
 			})
 			return e
@@ -224,7 +187,7 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 			*reply = *r
 		}
 	}
-	rs.getCache().Cache(utils.MAX_DEBIT_CACHE_PREFIX+arg.CgrID+arg.RunID, &cache2go.CacheItem{
+	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -232,12 +195,17 @@ func (rs *Responder) MaxDebit(arg *CallDescriptor, reply *CallCost) (err error) 
 }
 
 func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err error) {
-	if item, err := rs.getCache().Get(utils.REFUND_INCR_CACHE_PREFIX + arg.CgrID + arg.RunID); err == nil && item != nil {
+	cacheKey := utils.REFUND_INCR_CACHE_PREFIX + arg.CgrID + arg.RunID
+	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
 		*reply = *(item.Value.(*float64))
 		return item.Err
 	}
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
+	}
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
+		return err
 	}
 	// replace aliases
 	if err := LoadAlias(
@@ -250,18 +218,60 @@ func (rs *Responder) RefundIncrements(arg *CallDescriptor, reply *float64) (err 
 			Subject:     arg.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{
+			Err: err,
+		})
 		return err
+	}
+
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
+	} else {
+		err = arg.RefundIncrements()
+	}
+	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{
+		Value: reply,
+		Err:   err,
+	})
+	return
+}
+
+func (rs *Responder) RefundRounding(arg *CallDescriptor, reply *float64) (err error) {
+	cacheKey := utils.REFUND_ROUND_CACHE_PREFIX + arg.CgrID + arg.RunID + arg.DurationIndex.String()
+	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
+		*reply = *(item.Value.(*float64))
+		return item.Err
+	}
+	if arg.Subject == "" {
+		arg.Subject = arg.Account
 	}
 	// replace user profile fields
 	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
 		return err
 	}
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(arg, "Responder.RefundIncrements")
-	} else {
-		*reply, err = arg.RefundIncrements()
+	// replace aliases
+	if err := LoadAlias(
+		&AttrMatchingAlias{
+			Destination: arg.Destination,
+			Direction:   arg.Direction,
+			Tenant:      arg.Tenant,
+			Category:    arg.Category,
+			Account:     arg.Account,
+			Subject:     arg.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{
+			Err: err,
+		})
+		return err
 	}
-	rs.getCache().Cache(utils.REFUND_INCR_CACHE_PREFIX+arg.CgrID+arg.RunID, &cache2go.CacheItem{
+
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(arg, "Responder.RefundRounding")
+	} else {
+		err = arg.RefundRounding()
+	}
+	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{
 		Value: reply,
 		Err:   err,
 	})
@@ -272,6 +282,10 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 	if arg.Subject == "" {
 		arg.Subject = arg.Account
 	}
+	// replace user profile fields
+	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
+		return err
+	}
 	// replace aliases
 	if err := LoadAlias(
 		&AttrMatchingAlias{
@@ -285,10 +299,7 @@ func (rs *Responder) GetMaxSessionTime(arg *CallDescriptor, reply *float64) (err
 		}, arg, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	// replace user profile fields
-	if err := LoadUserProfile(arg, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
+
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(arg, "Responder.GetMaxSessionTime")
 	} else {
@@ -303,8 +314,18 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 	if rs.Bal != nil {
 		return errors.New("unsupported method on the balancer")
 	}
+	cacheKey := utils.GET_DERIV_MAX_SESS_TIME + ev.CGRID + ev.RunID
+	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
+		*reply = *(item.Value.(*float64))
+		return item.Err
+	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
+	}
+	// replace user profile fields
+	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
+		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
+		return err
 	}
 	// replace aliases
 	if err := LoadAlias(
@@ -317,17 +338,16 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 			Subject:     ev.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
+		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return err
 	}
-	// replace user profile fields
-	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
+
 	maxCallDuration := -1.0
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
+		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return err
 	}
 	dcs, _ = dcs.AppendDefaultRun()
@@ -338,7 +358,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
 		matchingAllFilters := true
 		for _, dcRunFilter := range runFilters {
-			if fltrPass, _ := ev.PassesFieldFilter(dcRunFilter); !fltrPass {
+			if !dcRunFilter.FilterPasses(ev.FieldAsString(dcRunFilter)) {
 				matchingAllFilters = false
 				break
 			}
@@ -348,10 +368,12 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 		}
 		startTime, err := ev.GetSetupTime(utils.META_DEFAULT, rs.Timezone)
 		if err != nil {
+			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 			return err
 		}
 		usage, err := ev.GetDuration(utils.META_DEFAULT)
 		if err != nil {
+			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 			return err
 		}
 		if usage == 0 {
@@ -359,7 +381,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 		}
 		cd := &CallDescriptor{
 			CgrID:       ev.GetCgrId(rs.Timezone),
-			RunID:       ev.RunID,
+			RunID:       dc.RunID,
 			TOR:         ev.ToR,
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
@@ -374,6 +396,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 		err = rs.GetMaxSessionTime(cd, &remainingDuration)
 		if err != nil {
 			*reply = 0
+			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 			return err
 		}
 		if utils.IsSliceMember([]string{utils.META_POSTPAID, utils.POSTPAID}, ev.GetReqType(dc.RequestTypeField)) {
@@ -387,6 +410,7 @@ func (rs *Responder) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
 			maxCallDuration = remainingDuration
 		}
 	}
+	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: maxCallDuration})
 	*reply = maxCallDuration
 	return nil
 }
@@ -396,8 +420,18 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 	if rs.Bal != nil {
 		return errors.New("Unsupported method on the balancer")
 	}
+	cacheKey := utils.GET_SESS_RUNS_CACHE_PREFIX + ev.CGRID
+	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
+		*sRuns = *(item.Value.(*[]*SessionRun))
+		return item.Err
+	}
 	if ev.Subject == "" {
 		ev.Subject = ev.Account
+	}
+	//utils.Logger.Info(fmt.Sprintf("DC before: %+v", ev))
+	// replace user profile fields
+	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
+		return err
 	}
 	// replace aliases
 	if err := LoadAlias(
@@ -412,20 +446,20 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 		}, ev, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
 		return err
 	}
-	// replace user profile fields
-	if err := LoadUserProfile(ev, utils.EXTRA_FIELDS); err != nil {
-		return err
-	}
+
+	//utils.Logger.Info(fmt.Sprintf("DC after: %+v", ev))
 	attrsDC := &utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
-		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT), Destination: ev.GetDestination(utils.META_DEFAULT)}
+	//utils.Logger.Info(fmt.Sprintf("Derived chargers for: %+v", attrsDC))
 	dcs := &utils.DerivedChargers{}
 	if err := rs.GetDerivedChargers(attrsDC, dcs); err != nil {
-		rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
+		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{
 			Err: err,
 		})
 		return err
 	}
 	dcs, _ = dcs.AppendDefaultRun()
+	//utils.Logger.Info(fmt.Sprintf("DCS: %v", len(dcs.Chargers)))
 	sesRuns := make([]*SessionRun, 0)
 	for _, dc := range dcs.Chargers {
 		if !utils.IsSliceMember([]string{utils.META_PREPAID, utils.PREPAID}, ev.GetReqType(dc.RequestTypeField)) {
@@ -433,21 +467,18 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField, rs.Timezone)
 		if err != nil {
-			rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
-				Err: err,
-			})
+			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 			return errors.New("Error parsing answer event start time")
 		}
 		endTime, err := ev.GetEndTime("", rs.Timezone)
 		if err != nil {
-			rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
-				Err: err,
-			})
+			rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 			return errors.New("Error parsing answer event end time")
 		}
+		extraFields := ev.GetExtraFields()
 		cd := &CallDescriptor{
 			CgrID:       ev.GetCgrId(rs.Timezone),
-			RunID:       ev.RunID,
+			RunID:       dc.RunID,
 			TOR:         ev.ToR,
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
@@ -457,13 +488,18 @@ func (rs *Responder) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
 			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime,
 			TimeEnd:     endTime,
-			ExtraFields: ev.GetExtraFields()}
+			ExtraFields: extraFields}
+		if flagsStr, hasFlags := extraFields[utils.CGRFlags]; hasFlags { // Force duration from extra fields
+			flags := utils.StringMapFromSlice(strings.Split(flagsStr, utils.INFIELD_SEP))
+			if _, hasFD := flags[utils.FlagForceDuration]; hasFD {
+				cd.ForceDuration = true
+			}
+		}
 		sesRuns = append(sesRuns, &SessionRun{DerivedCharger: dc, CallDescriptor: cd})
 	}
+	//utils.Logger.Info(fmt.Sprintf("RUNS: %v", len(sesRuns)))
 	*sRuns = sesRuns
-	rs.getCache().Cache(utils.GET_SESS_RUNS_CACHE_PREFIX+ev.CGRID, &cache2go.CacheItem{
-		Value: sRuns,
-	})
+	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: sRuns})
 	return nil
 }
 
@@ -479,45 +515,18 @@ func (rs *Responder) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *u
 	return nil
 }
 
-func (rs *Responder) ProcessCdr(cdr *CDR, reply *string) error {
-	if rs.CdrSrv == nil {
-		return errors.New("CDR_SERVER_NOT_RUNNING")
-	}
-	if err := rs.CdrSrv.ProcessCdr(cdr); err != nil {
-		return err
-	}
-	*reply = utils.OK
-	return nil
-}
-
-func (rs *Responder) LogCallCost(ccl *CallCostLog, reply *string) error {
-	if item, err := rs.getCache().Get(utils.LOG_CALL_COST_CACHE_PREFIX + ccl.CgrId); err == nil && item != nil {
-		*reply = item.Value.(string)
+func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
+	cacheKey := utils.LCRCachePrefix + attrs.CgrID + attrs.RunID
+	if item, err := rs.getCache().Get(cacheKey); err == nil && item != nil {
+		*reply = *(item.Value.(*LCRCost))
 		return item.Err
 	}
-	if rs.CdrSrv == nil {
-		err := errors.New("CDR_SERVER_NOT_RUNNING")
-		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
-			Err: err,
-		})
-		return err
-	}
-	if err := rs.CdrSrv.LogCallCost(ccl); err != nil {
-		rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
-			Err: err,
-		})
-		return err
-	}
-	*reply = utils.OK
-	rs.getCache().Cache(utils.LOG_CALL_COST_CACHE_PREFIX+ccl.CgrId, &cache2go.CacheItem{
-		Value: utils.OK,
-	})
-	return nil
-}
-
-func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 	if attrs.CallDescriptor.Subject == "" {
 		attrs.CallDescriptor.Subject = attrs.CallDescriptor.Account
+	}
+	// replace user profile fields
+	if err := LoadUserProfile(attrs.CallDescriptor, utils.EXTRA_FIELDS); err != nil {
+		return err
 	}
 	// replace aliases
 	cd := attrs.CallDescriptor
@@ -531,14 +540,12 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 			Subject:     cd.Subject,
 			Context:     utils.ALIAS_CONTEXT_RATING,
 		}, cd, utils.EXTRA_FIELDS); err != nil && err != utils.ErrNotFound {
-		return err
-	}
-	// replace user profile fields
-	if err := LoadUserProfile(attrs.CallDescriptor, utils.EXTRA_FIELDS); err != nil {
+		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return err
 	}
 	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.Stats, attrs.Paginator)
 	if err != nil {
+		rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Err: err})
 		return err
 	}
 	if lcrCost.Entry != nil && lcrCost.Entry.Strategy == LCR_STRATEGY_LOAD {
@@ -546,6 +553,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 			suppl.Cost = -1 // In case of load distribution we don't calculate costs
 		}
 	}
+	rs.getCache().Cache(cacheKey, &cache2go.CacheItem{Value: lcrCost})
 	*reply = *lcrCost
 	return nil
 }
@@ -566,11 +574,12 @@ func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err erro
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	response := make(map[string]interface{})
+	response[utils.InstanceID] = config.CgrConfig().InstanceID
 	if rs.Bal != nil {
 		response["Raters"] = rs.Bal.GetClientAddresses()
 	}
-	response["memstat"] = memstats.HeapAlloc / 1024
-	response["footprint"] = memstats.Sys / 1024
+	response["memstat"] = utils.SizeFmt(float64(memstats.HeapAlloc), "")
+	response["footprint"] = utils.SizeFmt(float64(memstats.Sys), "")
 	*reply = response
 	return
 }
@@ -670,334 +679,29 @@ func (rs *Responder) GetTimeout(i int, d *time.Duration) error {
 	return nil
 }
 
-// Reflection worker type for not standalone balancer
-type ResponderWorker struct{}
-
-func (rw *ResponderWorker) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	methodName := strings.TrimLeft(serviceMethod, "Responder.")
-	switch args.(type) {
-	case CallDescriptor:
-		cd := args.(CallDescriptor)
-		switch reply.(type) {
-		case *CallCost:
-			rep := reply.(*CallCost)
-			method := reflect.ValueOf(&cd).MethodByName(methodName)
-			ret := method.Call([]reflect.Value{})
-			*rep = *(ret[0].Interface().(*CallCost))
-		case *float64:
-			rep := reply.(*float64)
-			method := reflect.ValueOf(&cd).MethodByName(methodName)
-			ret := method.Call([]reflect.Value{})
-			*rep = *(ret[0].Interface().(*float64))
-		}
-	case string:
-		switch methodName {
-		case "Status":
-			*(reply.(*string)) = "Local!"
-		case "Shutdown":
-			*(reply.(*string)) = "Done!"
-		}
-
+func (rs *Responder) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
 	}
-	return nil
-}
-
-func (rw *ResponderWorker) Close() error {
-	return nil
-}
-
-type Connector interface {
-	GetCost(*CallDescriptor, *CallCost) error
-	Debit(*CallDescriptor, *CallCost) error
-	MaxDebit(*CallDescriptor, *CallCost) error
-	RefundIncrements(*CallDescriptor, *float64) error
-	GetMaxSessionTime(*CallDescriptor, *float64) error
-	GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error
-	GetDerivedMaxSessionTime(*CDR, *float64) error
-	GetSessionRuns(*CDR, *[]*SessionRun) error
-	ProcessCdr(*CDR, *string) error
-	LogCallCost(*CallCostLog, *string) error
-	GetLCR(*AttrGetLcr, *LCRCost) error
-	GetTimeout(int, *time.Duration) error
-}
-
-type RPCClientConnector struct {
-	Client  *rpcclient.RpcClient
-	Timeout time.Duration
-}
-
-func (rcc *RPCClientConnector) GetCost(cd *CallDescriptor, cc *CallCost) error {
-	return rcc.Client.Call("Responder.GetCost", cd, cc)
-}
-
-func (rcc *RPCClientConnector) Debit(cd *CallDescriptor, cc *CallCost) error {
-	return rcc.Client.Call("Responder.Debit", cd, cc)
-}
-
-func (rcc *RPCClientConnector) MaxDebit(cd *CallDescriptor, cc *CallCost) error {
-	return rcc.Client.Call("Responder.MaxDebit", cd, cc)
-}
-
-func (rcc *RPCClientConnector) RefundIncrements(cd *CallDescriptor, resp *float64) error {
-	return rcc.Client.Call("Responder.RefundIncrements", cd, resp)
-}
-
-func (rcc *RPCClientConnector) GetMaxSessionTime(cd *CallDescriptor, resp *float64) error {
-	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
-}
-
-func (rcc *RPCClientConnector) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
-	return rcc.Client.Call("Responder.GetDerivedMaxSessionTime", ev, reply)
-}
-
-func (rcc *RPCClientConnector) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
-	return rcc.Client.Call("Responder.GetSessionRuns", ev, sRuns)
-}
-
-func (rcc *RPCClientConnector) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
-	return rcc.Client.Call("ApierV1.GetDerivedChargers", attrs, dcs)
-}
-
-func (rcc *RPCClientConnector) ProcessCdr(cdr *CDR, reply *string) error {
-	return rcc.Client.Call("CdrsV1.ProcessCdr", cdr, reply)
-}
-
-func (rcc *RPCClientConnector) LogCallCost(ccl *CallCostLog, reply *string) error {
-	return rcc.Client.Call("CdrsV1.LogCallCost", ccl, reply)
-}
-
-func (rcc *RPCClientConnector) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
-	return rcc.Client.Call("Responder.GetLCR", attrs, reply)
-}
-
-func (rcc *RPCClientConnector) GetTimeout(i int, d *time.Duration) error {
-	*d = rcc.Timeout
-	return nil
-}
-
-type ConnectorPool []Connector
-
-func (cp ConnectorPool) GetCost(cd *CallDescriptor, cc *CallCost) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		callCost := &CallCost{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetCost(cd, callCost) }()
-		select {
-		case err := <-c:
-			*cc = *callCost
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
+	// get method
+	method := reflect.ValueOf(rs).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
 	}
-	return utils.ErrTimedOut
-}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 
-func (cp ConnectorPool) Debit(cd *CallDescriptor, cc *CallCost) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		callCost := &CallCost{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.Debit(cd, callCost) }()
-		select {
-		case err := <-c:
-			*cc = *callCost
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
 	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) MaxDebit(cd *CallDescriptor, cc *CallCost) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		callCost := &CallCost{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.MaxDebit(cd, callCost) }()
-		select {
-		case err := <-c:
-			*cc = *callCost
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
+	if ret[0].Interface() == nil {
+		return nil
 	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) RefundIncrements(cd *CallDescriptor, resp *float64) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r float64
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.RefundIncrements(cd, &r) }()
-		select {
-		case err := <-c:
-			*resp = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
 	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetMaxSessionTime(cd *CallDescriptor, resp *float64) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r float64
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetMaxSessionTime(cd, &r) }()
-		select {
-		case err := <-c:
-			*resp = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetDerivedMaxSessionTime(ev *CDR, reply *float64) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r float64
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetDerivedMaxSessionTime(ev, &r) }()
-		select {
-		case err := <-c:
-			*reply = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetSessionRuns(ev *CDR, sRuns *[]*SessionRun) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		sr := make([]*SessionRun, 0)
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetSessionRuns(ev, &sr) }()
-		select {
-		case err := <-c:
-			*sRuns = sr
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetDerivedChargers(attrs *utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		derivedChargers := utils.DerivedChargers{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetDerivedChargers(attrs, &derivedChargers) }()
-		select {
-		case err := <-c:
-			*dcs = derivedChargers
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) ProcessCdr(cdr *CDR, reply *string) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r string
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.ProcessCdr(cdr, &r) }()
-		select {
-		case err := <-c:
-			*reply = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) LogCallCost(ccl *CallCostLog, reply *string) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		var r string
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.LogCallCost(ccl, &r) }()
-		select {
-		case err := <-c:
-			*reply = r
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetLCR(attr *AttrGetLcr, reply *LCRCost) error {
-	for _, con := range cp {
-		c := make(chan error, 1)
-		lcrCost := &LCRCost{}
-
-		var timeout time.Duration
-		con.GetTimeout(0, &timeout)
-
-		go func() { c <- con.GetLCR(attr, lcrCost) }()
-		select {
-		case err := <-c:
-			*reply = *lcrCost
-			return err
-		case <-time.After(timeout):
-			// call timed out, continue
-		}
-	}
-	return utils.ErrTimedOut
-}
-
-func (cp ConnectorPool) GetTimeout(i int, d *time.Duration) error {
-	*d = 0
-	return nil
+	return err
 }

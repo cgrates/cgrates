@@ -283,7 +283,7 @@ func (at *ActionTiming) Execute() (err error) {
 	}
 	for accID, _ := range at.accountIDs {
 		_, err = Guardian.Guard(func() (interface{}, error) {
-			ub, err := accountingStorage.GetAccount(accID)
+			acc, err := accountingStorage.GetAccount(accID)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))
 				return 0, err
@@ -291,10 +291,9 @@ func (at *ActionTiming) Execute() (err error) {
 			transactionFailed := false
 			removeAccountActionFound := false
 			for _, a := range aac {
-				//log.Print("A: ", utils.ToJSON(a))
 				// check action filter
 				if len(a.Filter) > 0 {
-					matched, err := ub.matchActionFilter(a.Filter)
+					matched, err := acc.matchActionFilter(a.Filter)
 					//log.Print("Checkng: ", a.Filter, matched)
 					if err != nil {
 						return 0, err
@@ -303,12 +302,14 @@ func (at *ActionTiming) Execute() (err error) {
 						continue
 					}
 				}
-				if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
-					continue // disabled acocunts are not removed from action  plan
-					//return 0, fmt.Errorf("Account %s is disabled", accID)
+				if a.Balance == nil {
+					a.Balance = &BalanceFilter{}
 				}
-				if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
-					a.Balance.ExpirationDate = expDate
+				if a.ExpirationString != "" { // if it's *unlimited then it has to be zero time
+					if expDate, parseErr := utils.ParseDate(a.ExpirationString); parseErr == nil {
+						a.Balance.ExpirationDate = &time.Time{}
+						*a.Balance.ExpirationDate = expDate
+					}
 				}
 
 				actionFunction, exists := getActionFunc(a.ActionType)
@@ -319,7 +320,7 @@ func (at *ActionTiming) Execute() (err error) {
 					transactionFailed = true
 					break
 				}
-				if err := actionFunction(ub, nil, a, aac); err != nil {
+				if err := actionFunction(acc, nil, a, aac); err != nil {
 					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
 					transactionFailed = true
 					break
@@ -329,17 +330,17 @@ func (at *ActionTiming) Execute() (err error) {
 				}
 			}
 			if !transactionFailed && !removeAccountActionFound {
-				accountingStorage.SetAccount(ub)
+				accountingStorage.SetAccount(acc)
 			}
 			return 0, nil
 		}, 0, accID)
 	}
 	if len(at.accountIDs) == 0 { // action timing executing without accounts
 		for _, a := range aac {
-
-			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) &&
+			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.EmptyExpirationDate()) &&
 				parseErr == nil && !expDate.IsZero() {
-				a.Balance.ExpirationDate = expDate
+				a.Balance.ExpirationDate = &time.Time{}
+				*a.Balance.ExpirationDate = expDate
 			}
 
 			actionFunction, exists := getActionFunc(a.ActionType)

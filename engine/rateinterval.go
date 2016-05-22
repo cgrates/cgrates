@@ -289,7 +289,7 @@ Returns true if the received time result inside the interval
 */
 func (i *RateInterval) Contains(t time.Time, endTime bool) bool {
 	if endTime {
-		if t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0 { // back one second to 23:59:59
+		if utils.TimeIs0h(t) { // back one second to 23:59:59
 			t = t.Add(-1 * time.Second)
 		}
 	}
@@ -303,6 +303,9 @@ func (i *RateInterval) String_DISABLED() string {
 func (i *RateInterval) Equal(o *RateInterval) bool {
 	if i == nil && o == nil {
 		return true
+	}
+	if i == nil || o == nil {
+		return false // considering the earlier test
 	}
 	if i.Weight != o.Weight {
 		return false
@@ -357,21 +360,16 @@ func (ri *RateInterval) GetMaxCost() (float64, string) {
 // Structure to store intervals according to weight
 type RateIntervalList []*RateInterval
 
-func (il RateIntervalList) Len() int {
-	return len(il)
-}
-
-func (il RateIntervalList) Swap(i, j int) {
-	il[i], il[j] = il[j], il[i]
-}
-
-// we need higher weights earlyer in the list
-func (il RateIntervalList) Less(j, i int) bool {
-	return il[i].Weight < il[j].Weight //|| il[i].Timing.StartTime > il[j].Timing.StartTime
-}
-
-func (il RateIntervalList) Sort() {
-	sort.Sort(il)
+func (rl RateIntervalList) GetWeight() float64 {
+	// all reates should have the same weight
+	// just in case get the max
+	var maxWeight float64
+	for _, r := range rl {
+		if r.Weight > maxWeight {
+			maxWeight = r.Weight
+		}
+	}
+	return maxWeight
 }
 
 // Structure to store intervals according to weight
@@ -390,6 +388,9 @@ func (il *RateIntervalTimeSorter) Swap(i, j int) {
 
 // we need higher weights earlyer in the list
 func (il *RateIntervalTimeSorter) Less(j, i int) bool {
+	if il.ris[i].Weight < il.ris[j].Weight {
+		return il.ris[i].Weight < il.ris[j].Weight
+	}
 	t1 := il.ris[i].Timing.getLeftMargin(il.referenceTime)
 	t2 := il.ris[j].Timing.getLeftMargin(il.referenceTime)
 	return t1.After(t2)

@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"net/smtp"
 	"path"
 	"reflect"
@@ -32,6 +34,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 /*
@@ -40,33 +43,33 @@ Structure to be filled for each tariff plan with the bonus value for received ca
 type Action struct {
 	Id               string
 	ActionType       string
-	BalanceType      string
 	ExtraParameters  string
 	Filter           string
 	ExpirationString string // must stay as string because it can have relative values like 1month
 	Weight           float64
-	Balance          *Balance
+	Balance          *BalanceFilter
+	balanceValue     float64 // balance value after action execution, used with cdrlog
 }
 
 const (
-	LOG                       = "*log"
-	RESET_TRIGGERS            = "*reset_triggers"
-	SET_RECURRENT             = "*set_recurrent"
-	UNSET_RECURRENT           = "*unset_recurrent"
-	ALLOW_NEGATIVE            = "*allow_negative"
-	DENY_NEGATIVE             = "*deny_negative"
-	RESET_ACCOUNT             = "*reset_account"
-	REMOVE_ACCOUNT            = "*remove_account"
-	SET_BALANCE               = "*set_balance" // not ready for production until switching to pointers
-	REMOVE_BALANCE            = "*remove_balance"
-	TOPUP_RESET               = "*topup_reset"
-	TOPUP                     = "*topup"
-	DEBIT_RESET               = "*debit_reset"
-	DEBIT                     = "*debit"
-	RESET_COUNTERS            = "*reset_counters"
-	ENABLE_ACCOUNT            = "*enable_account"
-	DISABLE_ACCOUNT           = "*disable_account"
-	ENABLE_DISABLE_BALANCE    = "*enable_disable_balance"
+	LOG             = "*log"
+	RESET_TRIGGERS  = "*reset_triggers"
+	SET_RECURRENT   = "*set_recurrent"
+	UNSET_RECURRENT = "*unset_recurrent"
+	ALLOW_NEGATIVE  = "*allow_negative"
+	DENY_NEGATIVE   = "*deny_negative"
+	RESET_ACCOUNT   = "*reset_account"
+	REMOVE_ACCOUNT  = "*remove_account"
+	SET_BALANCE     = "*set_balance"
+	REMOVE_BALANCE  = "*remove_balance"
+	TOPUP_RESET     = "*topup_reset"
+	TOPUP           = "*topup"
+	DEBIT_RESET     = "*debit_reset"
+	DEBIT           = "*debit"
+	RESET_COUNTERS  = "*reset_counters"
+	ENABLE_ACCOUNT  = "*enable_account"
+	DISABLE_ACCOUNT = "*disable_account"
+	//ENABLE_DISABLE_BALANCE    = "*enable_disable_balance"
 	CALL_URL                  = "*call_url"
 	CALL_URL_ASYNC            = "*call_url_async"
 	MAIL_ASYNC                = "*mail_async"
@@ -74,74 +77,54 @@ const (
 	CDRLOG                    = "*cdrlog"
 	SET_DDESTINATIONS         = "*set_ddestinations"
 	TRANSFER_MONETARY_DEFAULT = "*transfer_monetary_default"
+	CGR_RPC                   = "*cgr_rpc"
 )
 
 func (a *Action) Clone() *Action {
 	return &Action{
-		Id:               a.Id,
-		ActionType:       a.ActionType,
-		BalanceType:      a.BalanceType,
+		Id:         a.Id,
+		ActionType: a.ActionType,
+		//BalanceType:      a.BalanceType,
 		ExtraParameters:  a.ExtraParameters,
 		ExpirationString: a.ExpirationString,
 		Weight:           a.Weight,
-		Balance:          a.Balance.Clone(),
+		Balance:          a.Balance,
 	}
 }
 
 type actionTypeFunc func(*Account, *StatsQueueTriggered, *Action, Actions) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
-	switch typ {
-	case LOG:
-		return logAction, true
-	case CDRLOG:
-		return cdrLogAction, true
-	case RESET_TRIGGERS:
-		return resetTriggersAction, true
-	case SET_RECURRENT:
-		return setRecurrentAction, true
-	case UNSET_RECURRENT:
-		return unsetRecurrentAction, true
-	case ALLOW_NEGATIVE:
-		return allowNegativeAction, true
-	case DENY_NEGATIVE:
-		return denyNegativeAction, true
-	case RESET_ACCOUNT:
-		return resetAccountAction, true
-	case TOPUP_RESET:
-		return topupResetAction, true
-	case TOPUP:
-		return topupAction, true
-	case DEBIT_RESET:
-		return debitResetAction, true
-	case DEBIT:
-		return debitAction, true
-	case RESET_COUNTERS:
-		return resetCountersAction, true
-	case ENABLE_ACCOUNT:
-		return enableUserAction, true
-	case DISABLE_ACCOUNT:
-		return disableUserAction, true
-	case ENABLE_DISABLE_BALANCE:
-		return enableDisableBalanceAction, true
-	case CALL_URL:
-		return callUrl, true
-	case CALL_URL_ASYNC:
-		return callUrlAsync, true
-	case MAIL_ASYNC:
-		return mailAsync, true
-	case SET_DDESTINATIONS:
-		return setddestinations, true
-	case REMOVE_ACCOUNT:
-		return removeAccountAction, true
-	case REMOVE_BALANCE:
-		return removeBalanceAction, true
-	case SET_BALANCE:
-		return setBalanceAction, true
-	case TRANSFER_MONETARY_DEFAULT:
-		return transferMonetaryDefaultAction, true
+	actionFuncMap := map[string]actionTypeFunc{
+		LOG:             logAction,
+		CDRLOG:          cdrLogAction,
+		RESET_TRIGGERS:  resetTriggersAction,
+		SET_RECURRENT:   setRecurrentAction,
+		UNSET_RECURRENT: unsetRecurrentAction,
+		ALLOW_NEGATIVE:  allowNegativeAction,
+		DENY_NEGATIVE:   denyNegativeAction,
+		RESET_ACCOUNT:   resetAccountAction,
+		TOPUP_RESET:     topupResetAction,
+		TOPUP:           topupAction,
+		DEBIT_RESET:     debitResetAction,
+		DEBIT:           debitAction,
+		RESET_COUNTERS:  resetCountersAction,
+		ENABLE_ACCOUNT:  enableUserAction,
+		DISABLE_ACCOUNT: disableUserAction,
+		//case ENABLE_DISABLE_BALANCE:
+		//	return enableDisableBalanceAction, true
+		CALL_URL:                  callUrl,
+		CALL_URL_ASYNC:            callUrlAsync,
+		MAIL_ASYNC:                mailAsync,
+		SET_DDESTINATIONS:         setddestinations,
+		REMOVE_ACCOUNT:            removeAccountAction,
+		REMOVE_BALANCE:            removeBalanceAction,
+		SET_BALANCE:               setBalanceAction,
+		TRANSFER_MONETARY_DEFAULT: transferMonetaryDefaultAction,
+		CGR_RPC:                   cgrRPCAction,
 	}
-	return nil, false
+	f, exists := actionFuncMap[typ]
+	return f, exists
 }
 
 func logAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -161,18 +144,19 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 	var err error
 	var dta *utils.TenantAccount
 	if acnt != nil {
-		dta, err = utils.NewTAFromAccountKey(acnt.Id) // Account information should be valid
+		dta, err = utils.NewTAFromAccountKey(acnt.ID) // Account information should be valid
 	}
 	if err != nil || acnt == nil {
 		dta = new(utils.TenantAccount) // Init with empty values
 	}
 	var parsedValue string // Template values
+	b := action.Balance.CreateBalance()
 	for _, rsrFld := range rsrFlds {
 		switch rsrFld.Id {
 		case "AccountID":
-			parsedValue += rsrFld.ParseValue(acnt.Id)
+			parsedValue += rsrFld.ParseValue(acnt.ID)
 		case "Directions":
-			parsedValue += rsrFld.ParseValue(action.Balance.Directions.String())
+			parsedValue += rsrFld.ParseValue(b.Directions.String())
 		case utils.TENANT:
 			parsedValue += rsrFld.ParseValue(dta.Tenant)
 		case utils.ACCOUNT:
@@ -181,20 +165,22 @@ func parseTemplateValue(rsrFlds utils.RSRFields, acnt *Account, action *Action) 
 			parsedValue += rsrFld.ParseValue(action.Id)
 		case "ActionType":
 			parsedValue += rsrFld.ParseValue(action.ActionType)
+		case "ActionValue":
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(b.GetValue(), 'f', -1, 64))
 		case "BalanceType":
-			parsedValue += rsrFld.ParseValue(action.BalanceType)
+			parsedValue += rsrFld.ParseValue(action.Balance.GetType())
 		case "BalanceUUID":
-			parsedValue += rsrFld.ParseValue(action.Balance.Uuid)
+			parsedValue += rsrFld.ParseValue(b.Uuid)
 		case "BalanceID":
-			parsedValue += rsrFld.ParseValue(action.Balance.Id)
+			parsedValue += rsrFld.ParseValue(b.ID)
 		case "BalanceValue":
-			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.Balance.GetValue(), 'f', -1, 64))
+			parsedValue += rsrFld.ParseValue(strconv.FormatFloat(action.balanceValue, 'f', -1, 64))
 		case "DestinationIDs":
-			parsedValue += rsrFld.ParseValue(action.Balance.DestinationIds.String())
+			parsedValue += rsrFld.ParseValue(b.DestinationIDs.String())
 		case "ExtraParameters":
 			parsedValue += rsrFld.ParseValue(action.ExtraParameters)
 		case "RatingSubject":
-			parsedValue += rsrFld.ParseValue(action.Balance.RatingSubject)
+			parsedValue += rsrFld.ParseValue(b.RatingSubject)
 		case utils.CATEGORY:
 			parsedValue += rsrFld.ParseValue(action.Balance.Categories.String())
 		case "SharedGroups":
@@ -215,7 +201,7 @@ func cdrLogAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions)
 		utils.TENANT:    utils.ParseRSRFieldsMustCompile(utils.TENANT, utils.INFIELD_SEP),
 		utils.ACCOUNT:   utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP),
 		utils.SUBJECT:   utils.ParseRSRFieldsMustCompile(utils.ACCOUNT, utils.INFIELD_SEP),
-		utils.COST:      utils.ParseRSRFieldsMustCompile("BalanceValue", utils.INFIELD_SEP),
+		utils.COST:      utils.ParseRSRFieldsMustCompile("ActionValue", utils.INFIELD_SEP),
 	}
 	template := make(map[string]string)
 
@@ -325,11 +311,13 @@ func topupResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
-		ub.BalanceMap = make(map[string]BalanceChain, 0)
+		ub.BalanceMap = make(map[string]Balances, 0)
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	return genericDebit(ub, c, true)
+	err = genericDebit(ub, c, true)
+	a.balanceValue = c.balanceValue
+	return
 }
 
 func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -338,7 +326,9 @@ func topupAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (
 	}
 	c := a.Clone()
 	genericMakeNegative(c)
-	return genericDebit(ub, c, false)
+	err = genericDebit(ub, c, false)
+	a.balanceValue = c.balanceValue
+	return
 }
 
 func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
@@ -346,7 +336,7 @@ func debitResetAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
-		ub.BalanceMap = make(map[string]BalanceChain, 0)
+		ub.BalanceMap = make(map[string]Balances, 0)
 	}
 	return genericDebit(ub, a, true)
 }
@@ -370,7 +360,7 @@ func resetCountersAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Balance != nil && a.Balance.GetValue() >= 0 { // only apply if not allready negative
+	if a.Balance != nil && a.Balance.GetValue() > 0 { // only apply if not allready negative
 		a.Balance.SetValue(-a.Balance.GetValue())
 	}
 }
@@ -380,7 +370,7 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 		return errors.New("nil account")
 	}
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]BalanceChain)
+		ub.BalanceMap = make(map[string]Balances)
 	}
 	return ub.debitBalanceAction(a, reset)
 }
@@ -401,17 +391,17 @@ func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	return
 }
 
-func enableDisableBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+/*func enableDisableBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
 	if ub == nil {
 		return errors.New("nil account")
 	}
 	ub.enableDisableBalanceAction(a)
 	return
-}
+}*/
 
 func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {
-		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
+		ub.BalanceMap[k] = Balances{&Balance{Value: 0}}
 	}
 	ub.InitCounters()
 	ub.ResetActionTriggers(nil)
@@ -426,9 +416,13 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error
 	if sq != nil {
 		o = sq
 	}
+	jsn, err := json.Marshal(o)
+	if err != nil {
+		return err
+	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	_, err := utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, o, utils.CONTENT_JSON, 1, fallbackPath)
+	_, _, err = utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 1, fallbackPath, false)
 	return err
 }
 
@@ -441,9 +435,13 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 	if sq != nil {
 		o = sq
 	}
+	jsn, err := json.Marshal(o)
+	if err != nil {
+		return err
+	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, o, utils.CONTENT_JSON, 3, fallbackPath)
+	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 3, fallbackPath, false)
 	return nil
 }
 
@@ -468,7 +466,7 @@ func mailAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) err
 		if err != nil {
 			return err
 		}
-		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on Balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.Id, time.Now(), balJsn))
+		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on Balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.ID, time.Now(), balJsn))
 	} else if sq != nil {
 		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on StatsQueueId: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nStatsQueueId:\r\n\t%s\r\n\r\nMetrics:\r\n\t%+v\r\n\r\nTrigger:\r\n\t%+v\r\n\r\nYours faithfully,\r\nCGR CDR Stats Monitor\r\n",
 			toAddrStr, sq.Id, time.Now(), sq.Id, sq.Metrics, sq.Trigger))
@@ -480,7 +478,7 @@ func mailAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) err
 				break
 			} else if i == 4 {
 				if ub != nil {
-					utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], BalanceId: %s", a.ExtraParameters, err.Error(), ub.Id))
+					utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], BalanceId: %s", a.ExtraParameters, err.Error(), ub.ID))
 				} else if sq != nil {
 					utils.Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], StatsQueueTriggeredId: %s", a.ExtraParameters, err.Error(), sq.Id))
 				}
@@ -496,7 +494,7 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 	var ddcDestId string
 	for _, bchain := range ub.BalanceMap {
 		for _, b := range bchain {
-			for destId := range b.DestinationIds {
+			for destId := range b.DestinationIDs {
 				if strings.HasPrefix(destId, "*ddc") {
 					ddcDestId = destId
 					break
@@ -533,7 +531,7 @@ func setddestinations(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actio
 func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	var accID string
 	if ub != nil {
-		accID = ub.Id
+		accID = ub.ID
 	} else {
 		accountInfo := struct {
 			Tenant  string
@@ -584,10 +582,10 @@ func removeAccountAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 }
 
 func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
-	if _, exists := ub.BalanceMap[a.BalanceType]; !exists {
+	if _, exists := ub.BalanceMap[a.Balance.GetType()]; !exists {
 		return utils.ErrNotFound
 	}
-	bChain := ub.BalanceMap[a.BalanceType]
+	bChain := ub.BalanceMap[a.Balance.GetType()]
 	found := false
 	for i := 0; i < len(bChain); i++ {
 		if bChain[i].MatchFilter(a.Balance, false) {
@@ -598,7 +596,7 @@ func removeBalanceAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Ac
 			found = true
 		}
 	}
-	ub.BalanceMap[a.BalanceType] = bChain
+	ub.BalanceMap[a.Balance.GetType()] = bChain
 	if !found {
 		return utils.ErrNotFound
 	}
@@ -621,7 +619,7 @@ func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Act
 	bChain := acc.BalanceMap[utils.MONETARY]
 	for _, balance := range bChain {
 		if balance.Uuid != defaultBalance.Uuid &&
-			balance.Id != defaultBalance.Id && // extra caution
+			balance.ID != defaultBalance.ID && // extra caution
 			balance.MatchFilter(a.Balance, false) {
 			if balance.Value > 0 {
 				defaultBalance.Value += balance.Value
@@ -629,6 +627,67 @@ func transferMonetaryDefaultAction(acc *Account, sq *StatsQueueTriggered, a *Act
 			}
 		}
 	}
+	return nil
+}
+
+type RPCRequest struct {
+	Address   string
+	Transport string
+	Method    string
+	Attempts  int
+	Async     bool
+	Params    map[string]interface{}
+}
+
+func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
+	// parse template
+	tmpl := template.New("extra_params")
+	t, err := tmpl.Parse(a.ExtraParameters)
+	if err != nil {
+		utils.Logger.Err(fmt.Sprintf("error parsing *cgr_rpc template: %s", err.Error()))
+		return err
+	}
+	var buf bytes.Buffer
+	if err = t.Execute(&buf, map[string]interface{}{
+		"account": account,
+		"action":  a,
+		"actions": acs,
+		"sq":      sq,
+	}); err != nil {
+		utils.Logger.Err(fmt.Sprintf("error executing *cgr_rpc template %s:", err.Error()))
+		return err
+	}
+	a.ExtraParameters = buf.String()
+	req := RPCRequest{}
+	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
+		return err
+	}
+	params, err := utils.GetRpcParams(req.Method)
+	if err != nil {
+		return err
+	}
+	var client rpcclient.RpcClientConnection
+	if req.Address != utils.MetaInternal {
+		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
+			return err
+		}
+	} else {
+		client = params.Object.(rpcclient.RpcClientConnection)
+	}
+	in, out := params.InParam, params.OutParam
+	p, err := utils.FromMapStringInterfaceValue(req.Params, in)
+	if err != nil {
+		return err
+	}
+	if !req.Async {
+		err = client.Call(req.Method, p, out)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
+		return err
+	}
+	go func() {
+		err := client.Call(req.Method, p, out)
+		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
+	}()
 	return nil
 }
 

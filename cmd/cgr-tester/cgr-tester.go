@@ -153,7 +153,6 @@ func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
 
 func main() {
 	flag.Parse()
-	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)

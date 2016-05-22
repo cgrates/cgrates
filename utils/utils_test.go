@@ -20,6 +20,7 @@ package utils
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -45,6 +46,19 @@ func TestUUID(t *testing.T) {
 func TestRoundUp(t *testing.T) {
 	result := Round(12.52, 0, ROUNDING_UP)
 	expected := 13.0
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundUpTwice(t *testing.T) {
+	result := Round(0.641666666667, 4, ROUNDING_UP)
+	expected := 0.6417
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+	result = Round(result, 4, ROUNDING_UP)
+	expected = 0.6417
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
 	}
@@ -143,7 +157,20 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
+	tmStr = "2016-04-01T02:00:00+02:00"
+	expectedTime = time.Date(2016, 4, 1, 0, 0, 0, 0, time.UTC)
+	tm, err = ParseTimeDetectLayout(tmStr, "")
+	if err != nil {
+		t.Error(err)
+	} else if !tm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", tm, expectedTime)
+	}
+	_, err = ParseTimeDetectLayout(tmStr[1:], "")
+	if err == nil {
+		t.Errorf("Expecting error")
+	}
 	sqlTmStr := "2013-12-30 15:00:01"
+	expectedTime = time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)
 	sqlTm, err := ParseTimeDetectLayout(sqlTmStr, "")
 	if err != nil {
 		t.Error(err)
@@ -232,6 +259,14 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if !eamonTmS.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", eamonTmS, expectedTime)
 	}
+	broadSoftTmStr := "20160419210007.037"
+	broadTmS, err := ParseTimeDetectLayout(broadSoftTmStr, "")
+	expectedTime = time.Date(2016, 4, 19, 21, 0, 7, 37000000, time.UTC)
+	if err != nil {
+		t.Error(err)
+	} else if !broadTmS.Equal(expectedTime) {
+		t.Errorf("Expecting: %v, received: %v", expectedTime, broadTmS)
+	}
 }
 
 func TestParseDateUnix(t *testing.T) {
@@ -277,6 +312,11 @@ func TestParseDateRFC3339(t *testing.T) {
 	expected := time.Date(2013, 7, 30, 19, 33, 10, 0, time.UTC)
 	if err != nil || !date.Equal(expected) {
 		t.Error("error parsing date: ", expected.Sub(date))
+	}
+	date, err = ParseDate("2016-04-01T02:00:00+02:00")
+	expected = time.Date(2016, 4, 1, 0, 0, 0, 0, time.UTC)
+	if err != nil || !date.Equal(expected) {
+		t.Errorf("Expecting: %v, received: %v", expected, date)
 	}
 }
 
@@ -598,5 +638,51 @@ func TestCastIfToString(t *testing.T) {
 		t.Error("Does not cast")
 	} else if sOut != "1.2" {
 		t.Errorf("Received: %+v", sOut)
+	}
+}
+
+func TestEndOfMonth(t *testing.T) {
+	eom := GetEndOfMonth(time.Date(2016, time.February, 5, 10, 1, 2, 3, time.UTC))
+	expected := time.Date(2016, time.February, 29, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2015, time.February, 5, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2015, time.February, 28, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.January, 31, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2016, time.January, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.December, 31, 10, 1, 2, 3, time.UTC))
+	expected = time.Date(2016, time.December, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+	eom = GetEndOfMonth(time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC))
+	expected = time.Date(2016, time.July, 31, 23, 59, 59, 0, time.UTC)
+	if !eom.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, eom)
+	}
+}
+
+func TestParseHierarchyPath(t *testing.T) {
+	eHP := HierarchyPath([]string{"Root", "CGRateS"})
+	if hp := ParseHierarchyPath("Root>CGRateS", ""); !reflect.DeepEqual(hp, eHP) {
+		t.Errorf("Expecting: %+v, received: %+v", eHP, hp)
+	}
+	if hp := ParseHierarchyPath("/Root/CGRateS/", ""); !reflect.DeepEqual(hp, eHP) {
+		t.Errorf("Expecting: %+v, received: %+v", eHP, hp)
+	}
+}
+
+func TestHierarchyPathAsString(t *testing.T) {
+	eStr := "/Root/CGRateS"
+	hp := HierarchyPath([]string{"Root", "CGRateS"})
+	if hpStr := hp.AsString("/", true); hpStr != eStr {
+		t.Errorf("Expecting: %q, received: %q", eStr, hpStr)
 	}
 }

@@ -21,6 +21,7 @@ package cdre
 import (
 	"encoding/csv"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -116,28 +117,28 @@ type CdrExporter struct {
 // Return Json marshaled callCost attached to
 // Keep it separately so we test only this part in local tests
 func (cdre *CdrExporter) getCdrCostDetails(CGRID, runId string) (string, error) {
-	cc, err := cdre.cdrDb.GetCallCostLog(CGRID, runId)
+	smcs, err := cdre.cdrDb.GetSMCosts(CGRID, runId, "", "")
 	if err != nil {
 		return "", err
-	} else if cc == nil {
+	} else if len(smcs) == 0 {
 		return "", nil
 	}
-	ccJson, _ := json.Marshal(cc)
+	ccJson, _ := json.Marshal(smcs[0].CostDetails)
 	return string(ccJson), nil
 }
 
 func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
 	var combinedVal string // Will result as combination of the field values, filters must match
 	for _, filterRule := range cfgCdrFld.FieldFilter {
-		fltrPass, ftrPassValue := processedCdr.PassesFieldFilter(filterRule)
-		if !fltrPass {
-			return "", nil
+		if !filterRule.FilterPasses(processedCdr.FieldAsString(&utils.RSRField{Id: filterRule.Id})) { // Filter will activate the rule to extract the content
+			continue
 		}
+		pairingVal := processedCdr.FieldAsString(filterRule)
 		for _, cdr := range cdre.cdrs {
 			if cdr.CGRID != processedCdr.CGRID {
 				continue // We only care about cdrs with same primary cdr behind
 			}
-			if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == ftrPassValue { // First CDR with filte
+			if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == pairingVal { // First CDR with filte
 				for _, rsrRule := range cfgCdrFld.Value {
 					combinedVal += cdr.FieldAsString(rsrRule)
 				}
@@ -159,10 +160,15 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.CDR, cfgCdrFld *config.
 	if len(cfgCdrFld.Value) == 0 {
 		return "", nil
 	}
-	for _, fltrRl := range cfgCdrFld.FieldFilter {
-		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
-			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+	passesFilters := true
+	for _, cdfFltr := range cfgCdrFld.FieldFilter {
+		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
+			passesFilters = false
+			break
 		}
+	}
+	if !passesFilters { // Not passes filters, ignore this replication
+		return "", errors.New("Not passing filters")
 	}
 	layout := cfgCdrFld.Layout
 	if len(layout) == 0 {
@@ -177,10 +183,15 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *engine.CDR, cfgCdrFld *config.
 
 // Extracts the value specified by cfgHdr out of cdr
 func (cdre *CdrExporter) cdrFieldValue(cdr *engine.CDR, cfgCdrFld *config.CfgCdrField) (string, error) {
-	for _, fltrRl := range cfgCdrFld.FieldFilter {
-		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
-			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+	passesFilters := true
+	for _, cdfFltr := range cfgCdrFld.FieldFilter {
+		if !cdfFltr.FilterPasses(cdr.FieldAsString(cdfFltr)) {
+			passesFilters = false
+			break
 		}
+	}
+	if !passesFilters { // Not passes filters, ignore this replication
+		return "", fmt.Errorf("Filters not passing")
 	}
 	layout := cfgCdrFld.Layout
 	if len(layout) == 0 {
@@ -352,9 +363,13 @@ func (cdre *CdrExporter) processCdr(cdr *engine.CDR) error {
 		case utils.META_HTTP_POST:
 			var outValByte []byte
 			httpAddr := cfgFld.Value.Id()
+			jsn, err := json.Marshal(cdr)
+			if err != nil {
+				return err
+			}
 			if len(httpAddr) == 0 {
 				err = fmt.Errorf("Empty http address for field %s type %s", cfgFld.Tag, cfgFld.Type)
-			} else if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, cdr); err == nil {
+			} else if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, jsn); err == nil {
 				outVal = string(outValByte)
 				if len(outVal) == 0 && cfgFld.Mandatory {
 					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)

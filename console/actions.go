@@ -18,7 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import (
+	"github.com/cgrates/cgrates/apier/v2"
+	"github.com/cgrates/cgrates/engine"
+)
 
 func init() {
 	c := &CmdGetActions{
@@ -33,7 +36,7 @@ func init() {
 type CmdGetActions struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringWrapper
+	rpcParams *v2.AttrGetActions
 	*CommandExecuter
 }
 
@@ -47,7 +50,7 @@ func (self *CmdGetActions) RpcMethod() string {
 
 func (self *CmdGetActions) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &StringWrapper{}
+		self.rpcParams = &v2.AttrGetActions{}
 	}
 	return self.rpcParams
 }
@@ -57,6 +60,6 @@ func (self *CmdGetActions) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetActions) RpcResult() interface{} {
-	a := make([]*utils.TPAction, 0)
+	a := make(map[string]engine.Actions, 0)
 	return &a
 }

@@ -2,6 +2,7 @@
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/redis/redis.conf /etc/mysql/my.cnf
 echo 'host    all             all             0.0.0.0/32            md5'>>/etc/postgresql/9.4/main/pg_hba.conf
 
+/etc/init.d/rsyslog start
 /etc/init.d/mysql start
 /etc/init.d/postgresql start
 /etc/init.d/redis-server start
@@ -24,15 +25,16 @@ mongo --eval 'db.createUser({"user":"cgrates", "pwd":"CGRateS.org", "roles":[{ro
 
 #env vars
 export GOROOT=/root/go; export GOPATH=/root/code; export PATH=$GOROOT/bin:$GOPATH/bin:$PATH
-export GO15VENDOREXPERIMENT=1
 
 # build and install cgrates
 cd /root/cgr
-#glide -y devel.yaml up
+#glide -y devel.yaml install
 ./build.sh
 
-# create cgr-engine link
-ln -s /root/code/bin/cgr-engine /usr/bin/cgr-engine
+# create cgr-engine and cgr-loader link
+ln -s /root/code/bin/cgr-engine /usr/bin/
+ln -s /root/code/bin/cgr-loader /usr/bin/
+
 
 # expand freeswitch conf
 cd /usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/ && tar xzf freeswitch_conf.tar.gz

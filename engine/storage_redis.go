@@ -84,12 +84,15 @@ func (rs *RedisStorage) Flush(ignore string) error {
 	return rs.db.Cmd("FLUSHDB").Err
 }
 
-func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
-	r := rs.db.Cmd("KEYS", prefix+"*")
-	if r.Err != nil {
-		return nil, r.Err
+func (rs *RedisStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]string, error) {
+	if skipCache {
+		r := rs.db.Cmd("KEYS", prefix+"*")
+		if r.Err != nil {
+			return nil, r.Err
+		}
+		return r.List()
 	}
-	return r.List()
+	return cache2go.GetEntriesKeys(prefix), nil
 }
 
 func (rs *RedisStorage) CacheRatingAll() error {
@@ -439,7 +442,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	err = rs.db.Cmd("SET", utils.RATING_PLAN_PREFIX+rp.Id, b.Bytes()).Err
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(rp.GetHistoryRecord(), &response)
+		go historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(), &response)
 	}
 	return
 }
@@ -468,7 +471,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	err = rs.db.Cmd("SET", utils.RATING_PROFILE_PREFIX+rpf.Id, result).Err
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(rpf.GetHistoryRecord(false), &response)
+		go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(false), &response)
 	}
 	return
 }
@@ -491,7 +494,7 @@ func (rs *RedisStorage) RemoveRatingProfile(key string) error {
 		rpf := &RatingProfile{Id: key}
 		if historyScribe != nil {
 			response := 0
-			go historyScribe.Record(rpf.GetHistoryRecord(true), &response)
+			go historyScribe.Call("HistoryV1.Record", rpf.GetHistoryRecord(true), &response)
 		}
 	}
 	return nil
@@ -542,7 +545,7 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 			cache2go.Push(utils.DESTINATION_PREFIX+p, dest.Id)
 		}
 	} else {
-		return nil, errors.New("not found")
+		return nil, utils.ErrNotFound
 	}
 	return
 }
@@ -559,8 +562,63 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	err = rs.db.Cmd("SET", utils.DESTINATION_PREFIX+dest.Id, b.Bytes()).Err
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(dest.GetHistoryRecord(), &response)
+		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(false), &response)
 	}
+	return
+}
+
+func (rs *RedisStorage) RemoveDestination(destID string) (err error) {
+	/*conn, err := rs.db.Get()
+	if err != nil {
+		return err
+	}
+	var dest *Destination
+	defer rs.db.Put(conn)
+	if values, err = conn.Cmd("GET", key).Bytes(); len(values) > 0 && err == nil {
+		b := bytes.NewBuffer(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return err
+		}
+		r.Close()
+		dest = new(Destination)
+		err = rs.ms.Unmarshal(out, dest)
+	} else {
+		return utils.ErrNotFound
+	}
+	key := utils.DESTINATION_PREFIX + destID
+	if err = conn.Cmd("DEL", key).Err; err != nil {
+		return err
+	}
+	if dest != nil {
+		for _, prefix := range dest.Prefixes {
+			changed := false
+			if idIDs, err := cache2go.Get(utils.DESTINATION_PREFIX + prefix); err == nil {
+				dIDs := idIDs.(map[interface{}]struct{})
+				if len(dIDs) == 1 {
+					// remove de prefix from cache
+					cache2go.RemKey(utils.DESTINATION_PREFIX + prefix)
+				} else {
+					// delete the destination from list and put the new list in chache
+					delete(dIDs, searchedDID)
+					changed = true
+				}
+			}
+			if changed {
+				cache2go.Cache(utils.DESTINATION_PREFIX+prefix, dIDs)
+			}
+		}
+	}
+	dest := &Destination{Id: key}
+	if historyScribe != nil {
+		response := 0
+		go historyScribe.Call("HistoryV1.Record", dest.GetHistoryRecord(true), &response)
+	}*/
+
 	return
 }
 
@@ -584,6 +642,11 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err 
 func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.db.Cmd("SET", utils.ACTION_PREFIX+key, result).Err
+	return
+}
+
+func (rs *RedisStorage) RemoveActions(key string) (err error) {
+	err = rs.db.Cmd("DEL", utils.ACTION_PREFIX+key).Err
 	return
 }
 
@@ -621,7 +684,7 @@ func (rs *RedisStorage) GetAccount(key string) (*Account, error) {
 	if err != nil {
 		return nil, err
 	}
-	ub := &Account{Id: key}
+	ub := &Account{ID: key}
 	if err = rs.ms.Unmarshal(values, ub); err != nil {
 		return nil, err
 	}
@@ -633,7 +696,7 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	// UPDATE: if all balances expired and were cleaned it makes
 	// sense to write empty balance map
 	if len(ub.BalanceMap) == 0 {
-		if ac, err := rs.GetAccount(ub.Id); err == nil && !ac.allBalancesExpired() {
+		if ac, err := rs.GetAccount(ub.ID); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = ub.ActionTriggers
 			ac.UnitCounters = ub.UnitCounters
 			ac.AllowNegative = ub.AllowNegative
@@ -642,7 +705,7 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 		}
 	}
 	result, err := rs.ms.Marshal(ub)
-	err = rs.db.Cmd("SET", utils.ACCOUNT_PREFIX+ub.Id, result).Err
+	err = rs.db.Cmd("SET", utils.ACCOUNT_PREFIX+ub.ID, result).Err
 	return
 }
 
@@ -1089,4 +1152,22 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 		return
 	}
 	return rs.db.Cmd("SET", utils.LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v", string(mat), string(mas)))).Err
+}
+
+func (rs *RedisStorage) SetStructVersion(v *StructVersion) (err error) {
+	var result []byte
+	result, err = rs.ms.Marshal(v)
+	if err != nil {
+		return
+	}
+	return rs.db.Cmd("SET", utils.VERSION_PREFIX+"struct", result).Err
+}
+
+func (rs *RedisStorage) GetStructVersion() (rsv *StructVersion, err error) {
+	var values []byte
+	rsv = &StructVersion{}
+	if values, err = rs.db.Cmd("GET", utils.VERSION_PREFIX+"struct").Bytes(); err == nil {
+		err = rs.ms.Unmarshal(values, &rsv)
+	}
+	return
 }

@@ -29,17 +29,18 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/kamevapi"
+	"github.com/cgrates/rpcclient"
 )
 
-func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv engine.Connector, timezone string) (*KamailioSessionManager, error) {
+func NewKamailioSessionManager(smKamCfg *config.SmKamConfig, rater, cdrsrv rpcclient.RpcClientConnection, timezone string) (*KamailioSessionManager, error) {
 	ksm := &KamailioSessionManager{cfg: smKamCfg, rater: rater, cdrsrv: cdrsrv, timezone: timezone, conns: make(map[string]*kamevapi.KamEvapi), sessions: NewSessions()}
 	return ksm, nil
 }
 
 type KamailioSessionManager struct {
 	cfg      *config.SmKamConfig
-	rater    engine.Connector
-	cdrsrv   engine.Connector
+	rater    rpcclient.RpcClientConnection
+	cdrsrv   rpcclient.RpcClientConnection
 	timezone string
 	conns    map[string]*kamevapi.KamEvapi
 	sessions *Sessions
@@ -64,7 +65,7 @@ func (self *KamailioSessionManager) onCgrAuth(evData []byte, connId string) {
 	}
 	var remainingDuration float64
 	var errMaxSession error
-	if errMaxSession = self.rater.GetDerivedMaxSessionTime(kev.AsStoredCdr(self.Timezone()), &remainingDuration); errMaxSession != nil {
+	if errMaxSession = self.rater.Call("Responder.GetDerivedMaxSessionTime", kev.AsStoredCdr(self.Timezone()), &remainingDuration); errMaxSession != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Could not get max session time, error: %s", errMaxSession.Error()))
 	}
 	var supplStr string
@@ -102,12 +103,13 @@ func (self *KamailioSessionManager) onCgrLcrReq(evData []byte, connId string) {
 
 func (self *KamailioSessionManager) getSuppliers(kev KamEvent) (string, error) {
 	cd, err := kev.AsCallDescriptor()
+	cd.CgrID = kev.GetCgrId(self.timezone)
 	if err != nil {
 		utils.Logger.Info(fmt.Sprintf("<SM-Kamailio> LCR_PREPROCESS_ERROR error: %s", err.Error()))
 		return "", errors.New("LCR_PREPROCESS_ERROR")
 	}
 	var lcr engine.LCRCost
-	if err = self.Rater().GetLCR(&engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
+	if err = self.Rater().Call("Responder.GetLCR", &engine.AttrGetLcr{CallDescriptor: cd}, &lcr); err != nil {
 		utils.Logger.Info(fmt.Sprintf("<SM-Kamailio> LCR_API_ERROR error: %s", err.Error()))
 		return "", errors.New("LCR_API_ERROR")
 	}
@@ -168,9 +170,9 @@ func (self *KamailioSessionManager) Connect() error {
 		regexp.MustCompile("CGR_CALL_END"):     []func([]byte, string){self.onCallEnd},
 	}
 	errChan := make(chan error)
-	for _, connCfg := range self.cfg.Connections {
+	for _, connCfg := range self.cfg.EvapiConns {
 		connId := utils.GenUUID()
-		if self.conns[connId], err = kamevapi.NewKamEvapi(connCfg.EvapiAddr, connId, connCfg.Reconnects, eventHandlers, utils.Logger.(*syslog.Writer)); err != nil {
+		if self.conns[connId], err = kamevapi.NewKamEvapi(connCfg.Address, connId, connCfg.Reconnects, eventHandlers, utils.Logger.(*syslog.Writer)); err != nil {
 			return err
 		}
 		go func() { // Start reading in own goroutine, return on error
@@ -196,10 +198,10 @@ func (self *KamailioSessionManager) DisconnectSession(ev engine.Event, connId, n
 func (self *KamailioSessionManager) DebitInterval() time.Duration {
 	return self.cfg.DebitInterval
 }
-func (self *KamailioSessionManager) CdrSrv() engine.Connector {
+func (self *KamailioSessionManager) CdrSrv() rpcclient.RpcClientConnection {
 	return self.cdrsrv
 }
-func (self *KamailioSessionManager) Rater() engine.Connector {
+func (self *KamailioSessionManager) Rater() rpcclient.RpcClientConnection {
 	return self.rater
 }
 
@@ -208,7 +210,7 @@ func (self *KamailioSessionManager) ProcessCdr(cdr *engine.CDR) error {
 		return nil
 	}
 	var reply string
-	if err := self.cdrsrv.ProcessCdr(cdr, &reply); err != nil {
+	if err := self.cdrsrv.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<SM-Kamailio> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", cdr.CGRID, cdr.OriginID, err.Error()))
 	}
 	return nil

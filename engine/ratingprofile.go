@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -91,15 +92,18 @@ type RatingInfo struct {
 
 // SelectRatingIntevalsForTimespan orders rate intervals in time preserving only those which aply to the specified timestamp
 func (ri RatingInfo) SelectRatingIntevalsForTimespan(ts *TimeSpan) (result RateIntervalList) {
-	ri.RateIntervals.Sort()
 	sorter := &RateIntervalTimeSorter{referenceTime: ts.TimeStart, ris: ri.RateIntervals}
 	rateIntervals := sorter.Sort()
 	// get the rating interval closest to begining of timespan
 	var delta time.Duration = -1
 	var bestRateIntervalIndex int
+	var bestIntervalWeight float64
 	for index, rateInterval := range rateIntervals {
 		if !rateInterval.Contains(ts.TimeStart, false) {
 			continue
+		}
+		if rateInterval.Weight < bestIntervalWeight {
+			break // don't consider lower weights'
 		}
 		startTime := rateInterval.Timing.getLeftMargin(ts.TimeStart)
 		tmpDelta := ts.TimeStart.Sub(startTime)
@@ -107,12 +111,17 @@ func (ri RatingInfo) SelectRatingIntevalsForTimespan(ts *TimeSpan) (result RateI
 			startTime.Equal(ts.TimeStart)) &&
 			(delta == -1 || tmpDelta < delta) {
 			bestRateIntervalIndex = index
+			bestIntervalWeight = rateInterval.Weight
 			delta = tmpDelta
 		}
 	}
 	result = append(result, rateIntervals[bestRateIntervalIndex])
 	// check if later rating intervals influence this timespan
+	//log.Print("RIS: ", utils.ToIJSON(rateIntervals))
 	for i := bestRateIntervalIndex + 1; i < len(rateIntervals); i++ {
+		if rateIntervals[i].Weight < bestIntervalWeight {
+			break // don't consider lower weights'
+		}
 		startTime := rateIntervals[i].Timing.getLeftMargin(ts.TimeStart)
 		if startTime.Before(ts.TimeEnd) {
 			result = append(result, rateIntervals[i])
@@ -144,9 +153,9 @@ func (ris RatingInfos) String() string {
 	return string(b)
 }
 
-func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
+func (rpf *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
-	for index, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {
+	for index, rpa := range rpf.RatingPlanActivations.GetActiveForCall(cd) {
 		rpl, err := ratingStorage.GetRatingPlan(rpa.RatingPlanId, false)
 		if err != nil || rpl == nil {
 			utils.Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
@@ -167,13 +176,18 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
-					for idId := range destIds {
-						dId := idId.(string)
-						if _, ok := rpl.DestinationRates[dId]; ok {
-							rps = rpl.RateIntervalList(dId)
-							prefix = p
-							destinationId = dId
-							break
+					var bestWeight float64
+					for idID := range destIds {
+						dID := idID.(string)
+						if _, ok := rpl.DestinationRates[dID]; ok {
+							ril := rpl.RateIntervalList(dID)
+							currentWeight := ril.GetWeight()
+							if currentWeight > bestWeight {
+								bestWeight = currentWeight
+								rps = ril
+								prefix = p
+								destinationId = dID
+							}
 						}
 					}
 				}
@@ -201,7 +215,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		}
 		if len(prefix) > 0 {
 			ris = append(ris, &RatingInfo{
-				MatchedSubject: rp.Id,
+				MatchedSubject: rpf.Id,
 				RatingPlanId:   rpl.Id,
 				MatchedPrefix:  prefix,
 				MatchedDestId:  destinationId,
@@ -243,4 +257,23 @@ func (rpf *RatingProfile) GetHistoryRecord(deleted bool) history.Record {
 
 type TenantRatingSubject struct {
 	Tenant, Subject string
+}
+
+func RatingProfileSubjectPrefixMatching(key string) (rp *RatingProfile, err error) {
+	if !rpSubjectPrefixMatching || strings.HasSuffix(key, utils.ANY) {
+		return ratingStorage.GetRatingProfile(key, false)
+	}
+	if rp, err = ratingStorage.GetRatingProfile(key, false); err == nil {
+		return rp, err
+	}
+	lastIndex := strings.LastIndex(key, utils.CONCATENATED_KEY_SEP)
+	baseKey := key[:lastIndex]
+	subject := key[lastIndex:]
+	lenSubject := len(subject)
+	for i := 1; i < lenSubject-1; i++ {
+		if rp, err = ratingStorage.GetRatingProfile(baseKey+subject[:lenSubject-i], false); err == nil {
+			return rp, err
+		}
+	}
+	return
 }

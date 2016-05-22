@@ -33,7 +33,7 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	var accountKeys []string
 	var err error
 	if len(attr.AccountIds) == 0 {
-		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX + utils.ConcatenatedKey(attr.Tenant)); err != nil {
+		if accountKeys, err = self.AccountDb.GetKeysForPrefix(utils.ACCOUNT_PREFIX+attr.Tenant, true); err != nil {
 			return err
 		}
 	} else {
@@ -46,6 +46,12 @@ func (self *ApierV2) GetAccounts(attr utils.AttrGetAccounts, reply *[]*engine.Ac
 	}
 	if len(accountKeys) == 0 {
 		return nil
+	}
+	if attr.Offset > len(accountKeys) {
+		attr.Offset = len(accountKeys)
+	}
+	if attr.Offset < 0 {
+		attr.Offset = 0
 	}
 	var limitedAccounts []string
 	if attr.Limit != 0 {
@@ -102,13 +108,16 @@ func (self *ApierV2) SetAccount(attr AttrSetAccount, reply *string) error {
 			ub = bal
 		} else { // Not found in db, create it here
 			ub = &engine.Account{
-				Id: accID,
+				ID: accID,
 			}
 		}
 		if attr.ActionPlanIDs != nil {
 			_, err := engine.Guardian.Guard(func() (interface{}, error) {
 				actionPlansMap, err := self.RatingDb.GetAllActionPlans()
 				if err != nil {
+					if err == utils.ErrNotFound { // if no action plans just continue
+						return 0, nil
+					}
 					return 0, err
 				}
 				if attr.ActionPlansOverwrite {
