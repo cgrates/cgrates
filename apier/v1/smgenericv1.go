@@ -131,6 +131,15 @@ func (self *SMGenericV1) ActiveSessions(attrs utils.AttrSMGGetActiveSessions, re
 	return nil
 }
 
+func (self *SMGenericV1) ActiveSessionsCount(attrs utils.AttrSMGGetActiveSessions, reply *int) error {
+	var aSessions []*sessionmanager.ActiveSession
+	if err := self.ActiveSessions(attrs, &aSessions); err != nil {
+		return err
+	}
+	*reply = len(aSessions)
+	return nil
+}
+
 // rpcclient.RpcClientConnection interface
 func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	switch serviceMethod {
@@ -214,6 +223,17 @@ func (self *SMGenericV1) Call(serviceMethod string, args interface{}, reply inte
 			return rpcclient.ErrWrongReplyType
 		}
 		return self.ActiveSessions(argsConverted, replyConverted)
+
+	case "SMGenericV1.ActiveSessionsCount":
+		argsConverted, canConvert := args.(utils.AttrSMGGetActiveSessions)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*int)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return self.ActiveSessionsCount(argsConverted, replyConverted)
 	}
 	return rpcclient.ErrUnsupporteServiceMethod
 }
