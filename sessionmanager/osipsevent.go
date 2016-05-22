@@ -151,11 +151,11 @@ func (osipsev *OsipsEvent) GetSetupTime(fieldName, timezone string) (time.Time, 
 	return utils.ParseTimeDetectLayout(sTimeStr, timezone)
 }
 func (osipsev *OsipsEvent) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
-	aTimeStr := utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[TIME])
+	aTimeStr := utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_ANSWERTIME])
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		aTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else if fieldName == utils.META_DEFAULT {
-		aTimeStr = osipsev.osipsEvent.AttrValues[TIME]
+		aTimeStr = osipsev.osipsEvent.AttrValues[CGR_ANSWERTIME]
 	}
 	return utils.ParseTimeDetectLayout(aTimeStr, timezone)
 }
@@ -250,7 +250,7 @@ func (osipsev *OsipsEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 }
 func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
 	primaryFields := []string{TO_TAG, SETUP_DURATION, OSIPS_SETUP_TIME, "method", "callid", "sip_reason", OSIPS_EVENT_TIME, "sip_code", "duration", "from_tag", "dialog_id",
-		CGR_TENANT, CGR_CATEGORY, CGR_REQTYPE, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION, utils.CGR_SUPPLIER, CGR_PDD}
+		CGR_TENANT, CGR_CATEGORY, CGR_REQTYPE, CGR_ACCOUNT, CGR_SUBJECT, CGR_DESTINATION, utils.CGR_SUPPLIER, CGR_PDD,CGR_ANSWERTIME}
 	extraFields := make(map[string]string)
 	for field, val := range osipsev.osipsEvent.AttrValues {
 		if !utils.IsSliceMember(primaryFields, field) {
