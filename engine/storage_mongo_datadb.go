@@ -25,7 +25,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -99,21 +98,32 @@ func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
 func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*MongoStorage, error) {
 
 	// We need this object to establish a session to our MongoDB.
-	address := fmt.Sprintf("%s:%s", host, port)
-	mongoDBDialInfo := &mgo.DialInfo{
-		Addrs:    []string{address},
-		Timeout:  60 * time.Second,
-		Database: db,
-		Username: user,
-		Password: pass,
-	}
+	/*address := fmt.Sprintf("%s:%s", host, port)
+			mongoDBDialInfo := &mgo.DialInfo{
+				Addrs:    []string{address},
+				Timeout:  60 * time.Second,
+				Database: db,
+	Username: user,
+	Password: pass,
+			}
 
-	// Create a session which maintains a pool of socket connections
-	// to our MongoDB.
-	session, err := mgo.DialWithInfo(mongoDBDialInfo)
+			// Create a session which maintains a pool of socket connections
+			// to our MongoDB.
+			session, err := mgo.DialWithInfo(mongoDBDialInfo)
+			if err != nil {
+				log.Printf("ERR: %v", err)
+				return nil, err
+			}*/
+
+	address := fmt.Sprintf("%s:%s", host, port)
+	if user != "" && pass != "" {
+		address = fmt.Sprintf("%s:%s@%s", user, pass, address)
+	}
+	session, err := mgo.Dial(address)
 	if err != nil {
 		return nil, err
 	}
+
 	ndb := session.DB(db)
 	session.SetMode(mgo.Monotonic, true)
 	index := mgo.Index{
