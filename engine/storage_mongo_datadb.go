@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -86,21 +87,35 @@ var (
 
 type MongoStorage struct {
 	session *mgo.Session
-	db      *mgo.Database
+	db      string
 	ms      Marshaler
 }
 
+func (ms *MongoStorage) conn(col string) (*mgo.Session, *mgo.Collection) {
+	sessionCopy := ms.session.Copy()
+	return sessionCopy, sessionCopy.DB(ms.db).C(col)
+}
+
 func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*MongoStorage, error) {
+
+	// We need this object to establish a session to our MongoDB.
 	address := fmt.Sprintf("%s:%s", host, port)
-	if user != "" && pass != "" {
-		address = fmt.Sprintf("%s:%s@%s", user, pass, address)
+	mongoDBDialInfo := &mgo.DialInfo{
+		Addrs:    []string{address},
+		Timeout:  60 * time.Second,
+		Database: db,
+		Username: user,
+		Password: pass,
 	}
-	session, err := mgo.Dial(address)
+
+	// Create a session which maintains a pool of socket connections
+	// to our MongoDB.
+	session, err := mgo.DialWithInfo(mongoDBDialInfo)
 	if err != nil {
 		return nil, err
 	}
 	ndb := session.DB(db)
-	//session.SetMode(mgo.Monotonic, true)
+	session.SetMode(mgo.Monotonic, true)
 	index := mgo.Index{
 		Key:        []string{"key"},
 		Unique:     true,  // Prevent two documents from having the same index key
@@ -260,7 +275,7 @@ func NewMongoStorage(host, port, db, user, pass string, cdrsIndexes []string) (*
 	if err = ndb.C(utils.TBLSMCosts).EnsureIndex(index); err != nil {
 		return nil, err
 	}
-	return &MongoStorage{db: ndb, session: session, ms: NewCodecMsgpackMarshaler()}, err
+	return &MongoStorage{db: db, session: session, ms: NewCodecMsgpackMarshaler()}, err
 }
 
 func (ms *MongoStorage) Close() {
@@ -278,47 +293,50 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]strin
 	}
 	var result []string
 	if skipCache {
+		session := ms.session.Copy()
+		defer session.Close()
+		db := session.DB(ms.db)
 		keyResult := struct{ Key string }{}
 		idResult := struct{ Id string }{}
 		switch category {
 		case utils.DESTINATION_PREFIX:
-			iter := ms.db.C(colDst).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			iter := db.C(colDst).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 			for iter.Next(&keyResult) {
 				result = append(result, utils.DESTINATION_PREFIX+keyResult.Key)
 			}
 			return result, nil
 		case utils.RATING_PLAN_PREFIX:
-			iter := ms.db.C(colRpl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			iter := db.C(colRpl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 			for iter.Next(&keyResult) {
 				result = append(result, utils.RATING_PLAN_PREFIX+keyResult.Key)
 			}
 			return result, nil
 		case utils.RATING_PROFILE_PREFIX:
-			iter := ms.db.C(colRpf).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+			iter := db.C(colRpf).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 			for iter.Next(&idResult) {
 				result = append(result, utils.RATING_PROFILE_PREFIX+idResult.Id)
 			}
 			return result, nil
 		case utils.ACTION_PREFIX:
-			iter := ms.db.C(colAct).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			iter := db.C(colAct).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 			for iter.Next(&keyResult) {
 				result = append(result, utils.ACTION_PREFIX+keyResult.Key)
 			}
 			return result, nil
 		case utils.ACTION_PLAN_PREFIX:
-			iter := ms.db.C(colApl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			iter := db.C(colApl).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 			for iter.Next(&keyResult) {
 				result = append(result, utils.ACTION_PLAN_PREFIX+keyResult.Key)
 			}
 			return result, nil
 		case utils.ACTION_TRIGGER_PREFIX:
-			iter := ms.db.C(colAtr).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
+			iter := db.C(colAtr).Find(bson.M{"key": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"key": 1}).Iter()
 			for iter.Next(&keyResult) {
 				result = append(result, utils.ACTION_TRIGGER_PREFIX+keyResult.Key)
 			}
 			return result, nil
 		case utils.ACCOUNT_PREFIX:
-			iter := ms.db.C(colAcc).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
+			iter := db.C(colAcc).Find(bson.M{"id": bson.M{"$regex": bson.RegEx{Pattern: subject}}}).Select(bson.M{"id": 1}).Iter()
 			for iter.Next(&idResult) {
 				result = append(result, utils.ACCOUNT_PREFIX+idResult.Id)
 			}
@@ -330,12 +348,15 @@ func (ms *MongoStorage) GetKeysForPrefix(prefix string, skipCache bool) ([]strin
 }
 
 func (ms *MongoStorage) Flush(ignore string) (err error) {
-	collections, err := ms.db.CollectionNames()
+	session := ms.session.Copy()
+	defer session.Close()
+	db := session.DB(ms.db)
+	collections, err := db.CollectionNames()
 	if err != nil {
 		return err
 	}
 	for _, c := range collections {
-		if err = ms.db.C(c).DropCollection(); err != nil {
+		if err = db.C(c).DropCollection(); err != nil {
 			return err
 		}
 	}
@@ -390,17 +411,20 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	cache2go.BeginTransaction()
 	keyResult := struct{ Key string }{}
 	idResult := struct{ Id string }{}
+	session := ms.session.Copy()
+	defer session.Close()
+	db := session.DB(ms.db)
 	if dKeys == nil || (float64(cache2go.CountEntries(utils.DESTINATION_PREFIX))*utils.DESTINATIONS_LOAD_THRESHOLD < float64(len(dKeys))) {
 		// if need to load more than a half of exiting keys load them all
 		utils.Logger.Info("Caching all destinations")
-		iter := ms.db.C(colDst).Find(nil).Select(bson.M{"key": 1}).Iter()
+		iter := db.C(colDst).Find(nil).Select(bson.M{"key": 1}).Iter()
 		dKeys = make([]string, 0)
 		for iter.Next(&keyResult) {
 			dKeys = append(dKeys, utils.DESTINATION_PREFIX+keyResult.Key)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("destinations: %s", err.Error())
 		}
 		cache2go.RemPrefixKey(utils.DESTINATION_PREFIX)
 	} else if len(dKeys) != 0 {
@@ -414,7 +438,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		}
 		if _, err = ms.GetDestination(key[len(utils.DESTINATION_PREFIX):]); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("destinations: %s", err.Error())
 		}
 	}
 	if len(dKeys) != 0 {
@@ -422,14 +446,14 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if rpKeys == nil {
 		utils.Logger.Info("Caching all rating plans")
-		iter := ms.db.C(colRpl).Find(nil).Select(bson.M{"key": 1}).Iter()
+		iter := db.C(colRpl).Find(nil).Select(bson.M{"key": 1}).Iter()
 		rpKeys = make([]string, 0)
 		for iter.Next(&keyResult) {
 			rpKeys = append(rpKeys, utils.RATING_PLAN_PREFIX+keyResult.Key)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("rating plans: %s", err.Error())
 		}
 		cache2go.RemPrefixKey(utils.RATING_PLAN_PREFIX)
 	} else if len(rpKeys) != 0 {
@@ -439,7 +463,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		cache2go.RemKey(key)
 		if _, err = ms.GetRatingPlan(key[len(utils.RATING_PLAN_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("rating plans: %s", err.Error())
 		}
 	}
 	if len(rpKeys) != 0 {
@@ -447,14 +471,14 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if rpfKeys == nil {
 		utils.Logger.Info("Caching all rating profiles")
-		iter := ms.db.C(colRpf).Find(nil).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colRpf).Find(nil).Select(bson.M{"id": 1}).Iter()
 		rpfKeys = make([]string, 0)
 		for iter.Next(&idResult) {
 			rpfKeys = append(rpfKeys, utils.RATING_PROFILE_PREFIX+idResult.Id)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("rating profiles: %s", err.Error())
 		}
 		cache2go.RemPrefixKey(utils.RATING_PROFILE_PREFIX)
 	} else if len(rpfKeys) != 0 {
@@ -464,7 +488,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		cache2go.RemKey(key)
 		if _, err = ms.GetRatingProfile(key[len(utils.RATING_PROFILE_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("rating profiles: %s", err.Error())
 		}
 	}
 	if len(rpfKeys) != 0 {
@@ -472,14 +496,14 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if lcrKeys == nil {
 		utils.Logger.Info("Caching LCR rules.")
-		iter := ms.db.C(colLcr).Find(nil).Select(bson.M{"key": 1}).Iter()
+		iter := db.C(colLcr).Find(nil).Select(bson.M{"key": 1}).Iter()
 		lcrKeys = make([]string, 0)
 		for iter.Next(&keyResult) {
 			lcrKeys = append(lcrKeys, utils.LCR_PREFIX+keyResult.Key)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("lcr rules: %s", err.Error())
 		}
 		cache2go.RemPrefixKey(utils.LCR_PREFIX)
 	} else if len(lcrKeys) != 0 {
@@ -489,7 +513,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		cache2go.RemKey(key)
 		if _, err = ms.GetLCR(key[len(utils.LCR_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("lcr rules: %s", err.Error())
 		}
 	}
 	if len(lcrKeys) != 0 {
@@ -498,14 +522,14 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	// DerivedChargers caching
 	if dcsKeys == nil {
 		utils.Logger.Info("Caching all derived chargers")
-		iter := ms.db.C(colDcs).Find(nil).Select(bson.M{"key": 1}).Iter()
+		iter := db.C(colDcs).Find(nil).Select(bson.M{"key": 1}).Iter()
 		dcsKeys = make([]string, 0)
 		for iter.Next(&keyResult) {
 			dcsKeys = append(dcsKeys, utils.DERIVEDCHARGERS_PREFIX+keyResult.Key)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("derived chargers: %s", err.Error())
 		}
 		cache2go.RemPrefixKey(utils.DERIVEDCHARGERS_PREFIX)
 	} else if len(dcsKeys) != 0 {
@@ -515,7 +539,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		cache2go.RemKey(key)
 		if _, err = ms.GetDerivedChargers(key[len(utils.DERIVEDCHARGERS_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("derived chargers: %s", err.Error())
 		}
 	}
 	if len(dcsKeys) != 0 {
@@ -526,14 +550,14 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if actKeys == nil {
 		utils.Logger.Info("Caching all actions")
-		iter := ms.db.C(colAct).Find(nil).Select(bson.M{"key": 1}).Iter()
+		iter := db.C(colAct).Find(nil).Select(bson.M{"key": 1}).Iter()
 		actKeys = make([]string, 0)
 		for iter.Next(&keyResult) {
 			actKeys = append(actKeys, utils.ACTION_PREFIX+keyResult.Key)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("actions: %s", err.Error())
 		}
 		cache2go.RemPrefixKey(utils.ACTION_PREFIX)
 	} else if len(actKeys) != 0 {
@@ -543,7 +567,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		cache2go.RemKey(key)
 		if _, err = ms.GetActions(key[len(utils.ACTION_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("actions: %s", err.Error())
 		}
 	}
 	if len(actKeys) != 0 {
@@ -555,14 +579,14 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if aplKeys == nil {
 		utils.Logger.Info("Caching all action plans")
-		iter := ms.db.C(colApl).Find(nil).Select(bson.M{"key": 1}).Iter()
+		iter := db.C(colApl).Find(nil).Select(bson.M{"key": 1}).Iter()
 		aplKeys = make([]string, 0)
 		for iter.Next(&keyResult) {
 			aplKeys = append(aplKeys, utils.ACTION_PLAN_PREFIX+keyResult.Key)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("action plans: %s", err.Error())
 		}
 		cache2go.RemPrefixKey(utils.ACTION_PLAN_PREFIX)
 	} else if len(aplKeys) != 0 {
@@ -572,7 +596,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		cache2go.RemKey(key)
 		if _, err = ms.GetActionPlan(key[len(utils.ACTION_PLAN_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("action plans: %s", err.Error())
 		}
 	}
 	if len(aplKeys) != 0 {
@@ -584,14 +608,14 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 	}
 	if shgKeys == nil {
 		utils.Logger.Info("Caching all shared groups")
-		iter := ms.db.C(colShg).Find(nil).Select(bson.M{"id": 1}).Iter()
+		iter := db.C(colShg).Find(nil).Select(bson.M{"id": 1}).Iter()
 		shgKeys = make([]string, 0)
 		for iter.Next(&idResult) {
 			shgKeys = append(shgKeys, utils.SHARED_GROUP_PREFIX+idResult.Id)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("shared groups: %s", err.Error())
 		}
 	} else if len(shgKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching shared groups: %v", shgKeys))
@@ -600,7 +624,7 @@ func (ms *MongoStorage) cacheRating(dKeys, rpKeys, rpfKeys, lcrKeys, dcsKeys, ac
 		cache2go.RemKey(key)
 		if _, err = ms.GetSharedGroup(key[len(utils.SHARED_GROUP_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("shared groups: %s", err.Error())
 		}
 	}
 	if len(shgKeys) != 0 {
@@ -646,16 +670,19 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 	if alsKeys == nil {
 		cache2go.RemPrefixKey(utils.ALIASES_PREFIX)
 	}
+	session := ms.session.Copy()
+	defer session.Close()
+	db := session.DB(ms.db)
 	if alsKeys == nil {
 		utils.Logger.Info("Caching all aliases")
-		iter := ms.db.C(colAls).Find(nil).Select(bson.M{"key": 1}).Iter()
+		iter := db.C(colAls).Find(nil).Select(bson.M{"key": 1}).Iter()
 		alsKeys = make([]string, 0)
 		for iter.Next(&keyResult) {
 			alsKeys = append(alsKeys, utils.ALIASES_PREFIX+keyResult.Key)
 		}
 		if err := iter.Close(); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("aliases: %s", err.Error())
 		}
 	} else if len(alsKeys) != 0 {
 		utils.Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
@@ -671,7 +698,7 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 		cache2go.RemKey(key)
 		if _, err = ms.GetAlias(key[len(utils.ALIASES_PREFIX):], true); err != nil {
 			cache2go.RollbackTransaction()
-			return err
+			return fmt.Errorf("aliases: %s", err.Error())
 		}
 	}
 	if len(alsKeys) != 0 {
@@ -688,24 +715,27 @@ func (ms *MongoStorage) cacheAccounting(alsKeys []string) (err error) {
 }
 
 func (ms *MongoStorage) HasData(category, subject string) (bool, error) {
+	session := ms.session.Copy()
+	defer session.Close()
+	db := session.DB(ms.db)
 	switch category {
 	case utils.DESTINATION_PREFIX:
-		count, err := ms.db.C(colDst).Find(bson.M{"key": subject}).Count()
+		count, err := db.C(colDst).Find(bson.M{"key": subject}).Count()
 		return count > 0, err
 	case utils.RATING_PLAN_PREFIX:
-		count, err := ms.db.C(colRpl).Find(bson.M{"key": subject}).Count()
+		count, err := db.C(colRpl).Find(bson.M{"key": subject}).Count()
 		return count > 0, err
 	case utils.RATING_PROFILE_PREFIX:
-		count, err := ms.db.C(colRpf).Find(bson.M{"id": subject}).Count()
+		count, err := db.C(colRpf).Find(bson.M{"id": subject}).Count()
 		return count > 0, err
 	case utils.ACTION_PREFIX:
-		count, err := ms.db.C(colAct).Find(bson.M{"key": subject}).Count()
+		count, err := db.C(colAct).Find(bson.M{"key": subject}).Count()
 		return count > 0, err
 	case utils.ACTION_PLAN_PREFIX:
-		count, err := ms.db.C(colApl).Find(bson.M{"key": subject}).Count()
+		count, err := db.C(colApl).Find(bson.M{"key": subject}).Count()
 		return count > 0, err
 	case utils.ACCOUNT_PREFIX:
-		count, err := ms.db.C(colAcc).Find(bson.M{"id": subject}).Count()
+		count, err := db.C(colAcc).Find(bson.M{"id": subject}).Count()
 		return count > 0, err
 	}
 	return false, errors.New("unsupported category in HasData")
@@ -724,7 +754,9 @@ func (ms *MongoStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPla
 		Key   string
 		Value []byte
 	}
-	err = ms.db.C(colRpl).Find(bson.M{"key": key}).One(&kv)
+	session, col := ms.conn(colRpl)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
 		b := bytes.NewBuffer(kv.Value)
 		r, err := zlib.NewReader(b)
@@ -754,7 +786,9 @@ func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan) error {
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	_, err = ms.db.C(colRpl).Upsert(bson.M{"key": rp.Id}, &struct {
+	session, col := ms.conn(colRpl)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": rp.Id}, &struct {
 		Key   string
 		Value []byte
 	}{Key: rp.Id, Value: b.Bytes()})
@@ -774,7 +808,9 @@ func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool) (rp *Rating
 		}
 	}
 	rp = new(RatingProfile)
-	err = ms.db.C(colRpf).Find(bson.M{"id": key}).One(rp)
+	session, col := ms.conn(colRpf)
+	defer session.Close()
+	err = col.Find(bson.M{"id": key}).One(rp)
 	if err == nil {
 		cache2go.Cache(utils.RATING_PROFILE_PREFIX+key, rp)
 	}
@@ -782,7 +818,9 @@ func (ms *MongoStorage) GetRatingProfile(key string, skipCache bool) (rp *Rating
 }
 
 func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
-	_, err := ms.db.C(colRpf).Upsert(bson.M{"id": rp.Id}, rp)
+	session, col := ms.conn(colRpf)
+	defer session.Close()
+	_, err := col.Upsert(bson.M{"id": rp.Id}, rp)
 	if err == nil && historyScribe != nil {
 		var response int
 		historyScribe.Call("HistoryV1.Record", rp.GetHistoryRecord(false), &response)
@@ -791,10 +829,12 @@ func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
 }
 
 func (ms *MongoStorage) RemoveRatingProfile(key string) error {
-	iter := ms.db.C(colRpf).Find(bson.M{"id": bson.RegEx{Pattern: key + ".*", Options: ""}}).Select(bson.M{"id": 1}).Iter()
+	session, col := ms.conn(colRpf)
+	defer session.Close()
+	iter := col.Find(bson.M{"id": bson.RegEx{Pattern: key + ".*", Options: ""}}).Select(bson.M{"id": 1}).Iter()
 	var result struct{ Id string }
 	for iter.Next(&result) {
-		if err := ms.db.C(colRpf).Remove(bson.M{"id": result.Id}); err != nil {
+		if err := col.Remove(bson.M{"id": result.Id}); err != nil {
 			return err
 		}
 		cache2go.RemKey(utils.RATING_PROFILE_PREFIX + key)
@@ -819,7 +859,9 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 		Key   string
 		Value *LCR
 	}
-	err = ms.db.C(colLcr).Find(bson.M{"key": key}).One(&result)
+	session, col := ms.conn(colLcr)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&result)
 	if err == nil {
 		lcr = result.Value
 		cache2go.Cache(utils.LCR_PREFIX+key, lcr)
@@ -828,7 +870,9 @@ func (ms *MongoStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 }
 
 func (ms *MongoStorage) SetLCR(lcr *LCR) error {
-	_, err := ms.db.C(colLcr).Upsert(bson.M{"key": lcr.GetId()}, &struct {
+	session, col := ms.conn(colLcr)
+	defer session.Close()
+	_, err := col.Upsert(bson.M{"key": lcr.GetId()}, &struct {
 		Key   string
 		Value *LCR
 	}{lcr.GetId(), lcr})
@@ -841,7 +885,9 @@ func (ms *MongoStorage) GetDestination(key string) (result *Destination, err err
 		Key   string
 		Value []byte
 	}
-	err = ms.db.C(colDst).Find(bson.M{"key": key}).One(&kv)
+	session, col := ms.conn(colDst)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
 		b := bytes.NewBuffer(kv.Value)
 		r, err := zlib.NewReader(b)
@@ -877,7 +923,9 @@ func (ms *MongoStorage) SetDestination(dest *Destination) (err error) {
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	_, err = ms.db.C(colDst).Upsert(bson.M{"key": dest.Id}, &struct {
+	session, col := ms.conn(colDst)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": dest.Id}, &struct {
 		Key   string
 		Value []byte
 	}{Key: dest.Id, Value: b.Bytes()})
@@ -904,7 +952,9 @@ func (ms *MongoStorage) GetActions(key string, skipCache bool) (as Actions, err 
 		Key   string
 		Value Actions
 	}
-	err = ms.db.C(colAct).Find(bson.M{"key": key}).One(&result)
+	session, col := ms.conn(colAct)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&result)
 	if err == nil {
 		as = result.Value
 		cache2go.Cache(utils.ACTION_PREFIX+key, as)
@@ -913,7 +963,9 @@ func (ms *MongoStorage) GetActions(key string, skipCache bool) (as Actions, err 
 }
 
 func (ms *MongoStorage) SetActions(key string, as Actions) error {
-	_, err := ms.db.C(colAct).Upsert(bson.M{"key": key}, &struct {
+	session, col := ms.conn(colAct)
+	defer session.Close()
+	_, err := col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value Actions
 	}{Key: key, Value: as})
@@ -921,7 +973,9 @@ func (ms *MongoStorage) SetActions(key string, as Actions) error {
 }
 
 func (ms *MongoStorage) RemoveActions(key string) error {
-	return ms.db.C(colAct).Remove(bson.M{"key": key})
+	session, col := ms.conn(colAct)
+	defer session.Close()
+	return col.Remove(bson.M{"key": key})
 }
 
 func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
@@ -932,8 +986,10 @@ func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGr
 			return nil, err
 		}
 	}
+	session, col := ms.conn(colShg)
+	defer session.Close()
 	sg = &SharedGroup{}
-	err = ms.db.C(colShg).Find(bson.M{"id": key}).One(sg)
+	err = col.Find(bson.M{"id": key}).One(sg)
 	if err == nil {
 		cache2go.Cache(utils.SHARED_GROUP_PREFIX+key, sg)
 	}
@@ -941,13 +997,17 @@ func (ms *MongoStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGr
 }
 
 func (ms *MongoStorage) SetSharedGroup(sg *SharedGroup) (err error) {
-	_, err = ms.db.C(colShg).Upsert(bson.M{"id": sg.Id}, sg)
+	session, col := ms.conn(colShg)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"id": sg.Id}, sg)
 	return err
 }
 
 func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
 	result = new(Account)
-	err = ms.db.C(colAcc).Find(bson.M{"id": key}).One(result)
+	session, col := ms.conn(colAcc)
+	defer session.Close()
+	err = col.Find(bson.M{"id": key}).One(result)
 	if err == mgo.ErrNotFound {
 		result = nil
 	}
@@ -967,12 +1027,16 @@ func (ms *MongoStorage) SetAccount(acc *Account) error {
 			acc = ac
 		}
 	}
-	_, err := ms.db.C(colAcc).Upsert(bson.M{"id": acc.ID}, acc)
+	session, col := ms.conn(colAcc)
+	defer session.Close()
+	_, err := col.Upsert(bson.M{"id": acc.ID}, acc)
 	return err
 }
 
 func (ms *MongoStorage) RemoveAccount(key string) error {
-	return ms.db.C(colAcc).Remove(bson.M{"id": key})
+	session, col := ms.conn(colAcc)
+	defer session.Close()
+	return col.Remove(bson.M{"id": key})
 
 }
 
@@ -981,7 +1045,9 @@ func (ms *MongoStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error)
 		Key   string
 		Value *StatsQueue
 	}
-	err = ms.db.C(colStq).Find(bson.M{"key": key}).One(&result)
+	session, col := ms.conn(colStq)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&result)
 	if err == nil {
 		sq = result.Value
 	}
@@ -989,7 +1055,9 @@ func (ms *MongoStorage) GetCdrStatsQueue(key string) (sq *StatsQueue, err error)
 }
 
 func (ms *MongoStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
-	_, err = ms.db.C(colStq).Upsert(bson.M{"key": sq.GetId()}, &struct {
+	session, col := ms.conn(colStq)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": sq.GetId()}, &struct {
 		Key   string
 		Value *StatsQueue
 	}{Key: sq.GetId(), Value: sq})
@@ -997,7 +1065,9 @@ func (ms *MongoStorage) SetCdrStatsQueue(sq *StatsQueue) (err error) {
 }
 
 func (ms *MongoStorage) GetSubscribers() (result map[string]*SubscriberData, err error) {
-	iter := ms.db.C(colPbs).Find(nil).Iter()
+	session, col := ms.conn(colPbs)
+	defer session.Close()
+	iter := col.Find(nil).Iter()
 	result = make(map[string]*SubscriberData)
 	var kv struct {
 		Key   string
@@ -1011,7 +1081,9 @@ func (ms *MongoStorage) GetSubscribers() (result map[string]*SubscriberData, err
 }
 
 func (ms *MongoStorage) SetSubscriber(key string, sub *SubscriberData) (err error) {
-	_, err = ms.db.C(colPbs).Upsert(bson.M{"key": key}, &struct {
+	session, col := ms.conn(colPbs)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value *SubscriberData
 	}{Key: key, Value: sub})
@@ -1019,11 +1091,15 @@ func (ms *MongoStorage) SetSubscriber(key string, sub *SubscriberData) (err erro
 }
 
 func (ms *MongoStorage) RemoveSubscriber(key string) (err error) {
-	return ms.db.C(colPbs).Remove(bson.M{"key": key})
+	session, col := ms.conn(colPbs)
+	defer session.Close()
+	return col.Remove(bson.M{"key": key})
 }
 
 func (ms *MongoStorage) SetUser(up *UserProfile) (err error) {
-	_, err = ms.db.C(colUsr).Upsert(bson.M{"key": up.GetId()}, &struct {
+	session, col := ms.conn(colUsr)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": up.GetId()}, &struct {
 		Key   string
 		Value *UserProfile
 	}{Key: up.GetId(), Value: up})
@@ -1035,7 +1111,9 @@ func (ms *MongoStorage) GetUser(key string) (up *UserProfile, err error) {
 		Key   string
 		Value *UserProfile
 	}
-	err = ms.db.C(colUsr).Find(bson.M{"key": key}).One(&kv)
+	session, col := ms.conn(colUsr)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
 		up = kv.Value
 	}
@@ -1043,7 +1121,9 @@ func (ms *MongoStorage) GetUser(key string) (up *UserProfile, err error) {
 }
 
 func (ms *MongoStorage) GetUsers() (result []*UserProfile, err error) {
-	iter := ms.db.C(colUsr).Find(nil).Iter()
+	session, col := ms.conn(colUsr)
+	defer session.Close()
+	iter := col.Find(nil).Iter()
 	var kv struct {
 		Key   string
 		Value *UserProfile
@@ -1056,11 +1136,15 @@ func (ms *MongoStorage) GetUsers() (result []*UserProfile, err error) {
 }
 
 func (ms *MongoStorage) RemoveUser(key string) (err error) {
-	return ms.db.C(colUsr).Remove(bson.M{"key": key})
+	session, col := ms.conn(colUsr)
+	defer session.Close()
+	return col.Remove(bson.M{"key": key})
 }
 
 func (ms *MongoStorage) SetAlias(al *Alias) (err error) {
-	_, err = ms.db.C(colAls).Upsert(bson.M{"key": al.GetId()}, &struct {
+	session, col := ms.conn(colAls)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": al.GetId()}, &struct {
 		Key   string
 		Value AliasValues
 	}{Key: al.GetId(), Value: al.Values})
@@ -1083,7 +1167,9 @@ func (ms *MongoStorage) GetAlias(key string, skipCache bool) (al *Alias, err err
 		Key   string
 		Value AliasValues
 	}
-	if err = ms.db.C(colAls).Find(bson.M{"key": origKey}).One(&kv); err == nil {
+	session, col := ms.conn(colAls)
+	defer session.Close()
+	if err = col.Find(bson.M{"key": origKey}).One(&kv); err == nil {
 		al = &Alias{Values: kv.Value}
 		al.SetId(origKey)
 		if err == nil {
@@ -1104,10 +1190,12 @@ func (ms *MongoStorage) RemoveAlias(key string) (err error) {
 		Key   string
 		Value AliasValues
 	}
-	if err := ms.db.C(colAls).Find(bson.M{"key": origKey}).One(&kv); err == nil {
+	session, col := ms.conn(colAls)
+	defer session.Close()
+	if err := col.Find(bson.M{"key": origKey}).One(&kv); err == nil {
 		al.Values = kv.Value
 	}
-	err = ms.db.C(colAls).Remove(bson.M{"key": origKey})
+	err = col.Remove(bson.M{"key": origKey})
 	if err == nil {
 		al.RemoveReverseCache()
 		cache2go.RemKey(key)
@@ -1135,7 +1223,9 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*
 		Key   string
 		Value []*LoadInstance
 	}
-	err = ms.db.C(colLht).Find(bson.M{"key": utils.LOADINST_KEY}).One(&kv)
+	session, col := ms.conn(colLht)
+	defer session.Close()
+	err = col.Find(bson.M{"key": utils.LOADINST_KEY}).One(&kv)
 	if err == nil {
 		loadInsts = kv.Value
 		cache2go.RemKey(utils.LOADINST_KEY)
@@ -1155,7 +1245,9 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) e
 		Key   string
 		Value []*LoadInstance
 	}
-	err := ms.db.C(colLht).Find(bson.M{"key": utils.LOADINST_KEY}).One(&kv)
+	session, col := ms.conn(colLht)
+	defer session.Close()
+	err := col.Find(bson.M{"key": utils.LOADINST_KEY}).One(&kv)
 
 	if err != nil && err != mgo.ErrNotFound {
 		return err
@@ -1176,7 +1268,9 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) e
 		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
 			existingLoadHistory = existingLoadHistory[:loadHistSize]
 		}
-		_, err = ms.db.C(colLht).Upsert(bson.M{"key": utils.LOADINST_KEY}, &struct {
+		session, col := ms.conn(colLht)
+		defer session.Close()
+		_, err = col.Upsert(bson.M{"key": utils.LOADINST_KEY}, &struct {
 			Key   string
 			Value []*LoadInstance
 		}{Key: utils.LOADINST_KEY, Value: existingLoadHistory})
@@ -1190,7 +1284,9 @@ func (ms *MongoStorage) GetActionTriggers(key string) (atrs ActionTriggers, err 
 		Key   string
 		Value ActionTriggers
 	}
-	err = ms.db.C(colAtr).Find(bson.M{"key": key}).One(&kv)
+	session, col := ms.conn(colAtr)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
 		atrs = kv.Value
 	}
@@ -1198,14 +1294,16 @@ func (ms *MongoStorage) GetActionTriggers(key string) (atrs ActionTriggers, err 
 }
 
 func (ms *MongoStorage) SetActionTriggers(key string, atrs ActionTriggers) (err error) {
+	session, col := ms.conn(colAtr)
+	defer session.Close()
 	if len(atrs) == 0 {
-		err = ms.db.C(colAtr).Remove(bson.M{"key": key}) // delete the key
+		err = col.Remove(bson.M{"key": key}) // delete the key
 		if err != mgo.ErrNotFound {
 			return err
 		}
 		return nil
 	}
-	_, err = ms.db.C(colAtr).Upsert(bson.M{"key": key}, &struct {
+	_, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value ActionTriggers
 	}{Key: key, Value: atrs})
@@ -1224,7 +1322,9 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 		Key   string
 		Value []byte
 	}
-	err = ms.db.C(colApl).Find(bson.M{"key": key}).One(&kv)
+	session, col := ms.conn(colApl)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
 		b := bytes.NewBuffer(kv.Value)
 		r, err := zlib.NewReader(b)
@@ -1246,10 +1346,12 @@ func (ms *MongoStorage) GetActionPlan(key string, skipCache bool) (ats *ActionPl
 }
 
 func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite bool) error {
+	session, col := ms.conn(colApl)
+	defer session.Close()
 	// clean dots from account ids map
 	if len(ats.ActionTimings) == 0 {
 		cache2go.RemKey(utils.ACTION_PLAN_PREFIX + key)
-		err := ms.db.C(colApl).Remove(bson.M{"key": key})
+		err := col.Remove(bson.M{"key": key})
 		if err != mgo.ErrNotFound {
 			return err
 		}
@@ -1274,7 +1376,7 @@ func (ms *MongoStorage) SetActionPlan(key string, ats *ActionPlan, overwrite boo
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	_, err = ms.db.C(colApl).Upsert(bson.M{"key": key}, &struct {
+	_, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value []byte
 	}{Key: key, Value: b.Bytes()})
@@ -1297,7 +1399,9 @@ func (ms *MongoStorage) GetAllActionPlans() (ats map[string]*ActionPlan, err err
 }
 
 func (ms *MongoStorage) PushTask(t *Task) error {
-	return ms.db.C(colTsk).Insert(bson.M{"_id": bson.NewObjectId(), "task": t})
+	session, col := ms.conn(colTsk)
+	defer session.Close()
+	return col.Insert(bson.M{"_id": bson.NewObjectId(), "task": t})
 }
 
 func (ms *MongoStorage) PopTask() (t *Task, err error) {
@@ -1305,8 +1409,10 @@ func (ms *MongoStorage) PopTask() (t *Task, err error) {
 		ID   bson.ObjectId `bson:"_id"`
 		Task *Task
 	}{}
-	if err = ms.db.C(colTsk).Find(nil).One(&v); err == nil {
-		if remErr := ms.db.C(colTsk).Remove(bson.M{"_id": v.ID}); remErr != nil {
+	session, col := ms.conn(colTsk)
+	defer session.Close()
+	if err = col.Find(nil).One(&v); err == nil {
+		if remErr := col.Remove(bson.M{"_id": v.ID}); remErr != nil {
 			return nil, remErr
 		}
 		t = v.Task
@@ -1327,7 +1433,9 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs *uti
 		Key   string
 		Value *utils.DerivedChargers
 	}
-	err = ms.db.C(colDcs).Find(bson.M{"key": key}).One(&kv)
+	session, col := ms.conn(colDcs)
+	defer session.Close()
+	err = col.Find(bson.M{"key": key}).One(&kv)
 	if err == nil {
 		dcs = kv.Value
 		cache2go.Cache(utils.DERIVEDCHARGERS_PREFIX+key, dcs)
@@ -1338,13 +1446,17 @@ func (ms *MongoStorage) GetDerivedChargers(key string, skipCache bool) (dcs *uti
 func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedChargers) (err error) {
 	if dcs == nil || len(dcs.Chargers) == 0 {
 		cache2go.RemKey(utils.DERIVEDCHARGERS_PREFIX + key)
-		err = ms.db.C(colDcs).Remove(bson.M{"key": key})
+		session, col := ms.conn(colDcs)
+		defer session.Close()
+		err = col.Remove(bson.M{"key": key})
 		if err != mgo.ErrNotFound {
 			return err
 		}
 		return nil
 	}
-	_, err = ms.db.C(colDcs).Upsert(bson.M{"key": key}, &struct {
+	session, col := ms.conn(colDcs)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": key}, &struct {
 		Key   string
 		Value *utils.DerivedChargers
 	}{Key: key, Value: dcs})
@@ -1352,18 +1464,24 @@ func (ms *MongoStorage) SetDerivedChargers(key string, dcs *utils.DerivedCharger
 }
 
 func (ms *MongoStorage) SetCdrStats(cs *CdrStats) error {
-	_, err := ms.db.C(colCrs).Upsert(bson.M{"id": cs.Id}, cs)
+	session, col := ms.conn(colCrs)
+	defer session.Close()
+	_, err := col.Upsert(bson.M{"id": cs.Id}, cs)
 	return err
 }
 
 func (ms *MongoStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 	cs = &CdrStats{}
-	err = ms.db.C(colCrs).Find(bson.M{"id": key}).One(cs)
+	session, col := ms.conn(colCrs)
+	defer session.Close()
+	err = col.Find(bson.M{"id": key}).One(cs)
 	return
 }
 
 func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
-	iter := ms.db.C(colCrs).Find(nil).Iter()
+	session, col := ms.conn(colCrs)
+	defer session.Close()
+	iter := col.Find(nil).Iter()
 	var cs CdrStats
 	for iter.Next(&cs) {
 		clone := cs // avoid using the same pointer in append
@@ -1374,7 +1492,9 @@ func (ms *MongoStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 }
 
 func (ms *MongoStorage) SetStructVersion(v *StructVersion) (err error) {
-	_, err = ms.db.C(colVer).Upsert(bson.M{"key": utils.VERSION_PREFIX + "struct"}, &struct {
+	session, col := ms.conn(colVer)
+	defer session.Close()
+	_, err = col.Upsert(bson.M{"key": utils.VERSION_PREFIX + "struct"}, &struct {
 		Key   string
 		Value *StructVersion
 	}{utils.VERSION_PREFIX + "struct", v})
@@ -1386,8 +1506,9 @@ func (ms *MongoStorage) GetStructVersion() (rsv *StructVersion, err error) {
 		Key   string
 		Value StructVersion
 	}
-
-	err = ms.db.C(colVer).Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result)
+	session, col := ms.conn(colVer)
+	defer session.Close()
+	err = col.Find(bson.M{"key": utils.VERSION_PREFIX + "struct"}).One(&result)
 	if err == mgo.ErrNotFound {
 		rsv = nil
 	}
