@@ -171,12 +171,12 @@ func (self *SMGeneric) getSession(uuid string) []*SMGSession {
 // Handle a new session, pass the connectionId so we can communicate on disconnect request
 func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error {
 	sessionId := evStart.GetUUID()
-	_, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
+	processed, err := self.guard.Guard(func() (interface{}, error) { // Lock it on UUID level
 		var sessionRuns []*engine.SessionRun
 		if err := self.rater.Call("Responder.GetSessionRuns", evStart.AsStoredCdr(self.cgrCfg, self.timezone), &sessionRuns); err != nil {
-			return nil, err
+			return true, err
 		} else if len(sessionRuns) == 0 {
-			return nil, nil
+			return true, nil
 		}
 		stopDebitChan := make(chan struct{})
 		for _, sessionRun := range sessionRuns {
@@ -189,8 +189,12 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 				go s.debitLoop(self.cgrCfg.SmGenericConfig.DebitInterval)
 			}
 		}
-		return nil, nil
+		return true, nil
 	}, time.Duration(2)*time.Second, sessionId)
+	if processed == nil || processed == false {
+		utils.Logger.Err("<SMGeneric> Cannot start session, empty reply")
+		return utils.ErrServerError
+	}
 	return err
 }
 
@@ -322,7 +326,12 @@ func (self *SMGeneric) SessionUpdate(gev SMGenericEvent, clnt *rpc2.Client) (tim
 		}
 		return nilDuration, err
 	}
-	for _, s := range self.getSession(gev.GetUUID()) {
+	aSessions := self.getSession(gev.GetUUID())
+	if len(aSessions) == 0 {
+		utils.Logger.Err(fmt.Sprintf("<SMGeneric> SessionUpdate with no active sessions for event: <%s>", gev.GetUUID()))
+		return nilDuration, utils.ErrServerError
+	}
+	for _, s := range aSessions {
 		if maxDur, err := s.debit(evMaxUsage, lastUsed); err != nil {
 			return nilDuration, err
 		} else if maxDur < evMaxUsage {
