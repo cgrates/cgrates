@@ -35,6 +35,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
+	"github.com/mitchellh/mapstructure"
 )
 
 /*
@@ -642,22 +643,24 @@ type RPCRequest struct {
 func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	// parse template
 	tmpl := template.New("extra_params")
+	tmpl.Delims("<<", ">>")
 	t, err := tmpl.Parse(a.ExtraParameters)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("error parsing *cgr_rpc template: %s", err.Error()))
 		return err
 	}
 	var buf bytes.Buffer
-	if err = t.Execute(&buf, map[string]interface{}{
-		"account": account,
-		"action":  a,
-		"actions": acs,
-		"sq":      sq,
-	}); err != nil {
+	if err = t.Execute(&buf, struct {
+		Account *Account
+		Sq      *StatsQueueTriggered
+		Action  *Action
+		Actions Actions
+	}{account, sq, a, acs}); err != nil {
 		utils.Logger.Err(fmt.Sprintf("error executing *cgr_rpc template %s:", err.Error()))
 		return err
 	}
 	a.ExtraParameters = buf.String()
+	//utils.Logger.Info("ExtraParameters: " + a.ExtraParameters)
 	req := RPCRequest{}
 	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
 		return err
@@ -675,17 +678,21 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 		client = params.Object.(rpcclient.RpcClientConnection)
 	}
 	in, out := params.InParam, params.OutParam
-	p, err := utils.FromMapStringInterfaceValue(req.Params, in)
+	//utils.Logger.Info("Params: " + utils.ToJSON(req.Params))
+	//p, err := utils.FromMapStringInterfaceValue(req.Params, in)
+	mapstructure.Decode(req.Params, in)
 	if err != nil {
+		utils.Logger.Info("err3: " + err.Error())
 		return err
 	}
+	utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> calling: %s with: %s", req.Method, utils.ToJSON(in)))
 	if !req.Async {
-		err = client.Call(req.Method, p, out)
+		err = client.Call(req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 		return err
 	}
 	go func() {
-		err := client.Call(req.Method, p, out)
+		err := client.Call(req.Method, in, out)
 		utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> result: %s err: %v", utils.ToJSON(out), err))
 	}()
 	return nil

@@ -843,6 +843,14 @@ func (acc *Account) matchActionFilter(condition string) (bool, error) {
 	return false, nil
 }
 
+func (acc *Account) GetID() string {
+	split := strings.Split(acc.ID, utils.CONCATENATED_KEY_SEP)
+	if len(split) != 2 {
+		return ""
+	}
+	return split[1]
+}
+
 // used in some api for transition
 func (acc *Account) AsOldStructure() interface{} {
 	type Balance struct {
