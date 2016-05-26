@@ -1721,6 +1721,75 @@ func TestAccountDoubleInitCounters(t *testing.T) {
 	}
 }
 
+func TestAccountGetBalancesForPrefixMixed(t *testing.T) {
+	acc := &Account{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					Value:          10,
+					DestinationIDs: utils.StringMap{"NAT": true, "RET": false},
+				},
+			},
+		},
+	}
+	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
+	if len(bcs) != 0 {
+		t.Error("error excluding on mixed balances")
+	}
+}
+
+func TestAccountGetBalancesForPrefixAllExcl(t *testing.T) {
+	acc := &Account{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					Value:          10,
+					DestinationIDs: utils.StringMap{"NAT": false, "RET": false},
+				},
+			},
+		},
+	}
+	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
+	if len(bcs) == 0 {
+		t.Error("error finding balance on all excluded")
+	}
+}
+
+func TestAccountGetBalancesForPrefixMixedGood(t *testing.T) {
+	acc := &Account{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					Value:          10,
+					DestinationIDs: utils.StringMap{"NAT": true, "RET": false, "EXOTIC": true},
+				},
+			},
+		},
+	}
+
+	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
+	if len(bcs) == 0 {
+		t.Error("error finding on mixed balances good")
+	}
+}
+
+func TestAccountGetBalancesForPrefixMixedBad(t *testing.T) {
+	acc := &Account{
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{
+					Value:          10,
+					DestinationIDs: utils.StringMap{"NAT": true, "RET": false, "EXOTIC": false},
+				},
+			},
+		},
+	}
+	bcs := acc.getBalancesForPrefix("999123", "", utils.OUT, utils.MONETARY, "")
+	if len(bcs) != 0 {
+		t.Error("error excluding on mixed balances bad")
+	}
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
