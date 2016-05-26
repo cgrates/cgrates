@@ -640,6 +640,21 @@ type RPCRequest struct {
 	Params    map[string]interface{}
 }
 
+/*
+<< .Object.Property >>
+
+Property can be a attribute or a method both used without ()
+Please also note the initial dot .
+
+Currently there are following objects that can be used:
+
+Account -  the account that this action is called on
+Action - the action with all it's attributs
+Actions - the list of actions in the current action set
+Sq - StatsQueueTriggered object
+
+We can actually use everythiong that go templates offer. You can read more here: https://golang.org/pkg/text/template/
+*/
 func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error {
 	// parse template
 	tmpl := template.New("extra_params")
@@ -682,7 +697,7 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	//p, err := utils.FromMapStringInterfaceValue(req.Params, in)
 	mapstructure.Decode(req.Params, in)
 	if err != nil {
-		utils.Logger.Info("err3: " + err.Error())
+		utils.Logger.Info("<*cgr_rpc> err: " + err.Error())
 		return err
 	}
 	utils.Logger.Info(fmt.Sprintf("<*cgr_rpc> calling: %s with: %s", req.Method, utils.ToJSON(in)))

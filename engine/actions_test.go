@@ -2187,7 +2187,7 @@ func (trpcp *TestRPCParameters) Call(serviceMethod string, args interface{}, rep
 	}
 
 	// construct the params
-	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
+	params := []reflect.Value{reflect.ValueOf(args).Elem(), reflect.ValueOf(reply)}
 
 	ret := method.Call(params)
 	if len(ret) != 1 {
