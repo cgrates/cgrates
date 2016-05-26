@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"cmd/cgrates/utils"
 	"reflect"
 	"testing"
 )
@@ -135,6 +134,6 @@ func TestStructFromMapStringInterfaceValue(t *testing.T) {
 	if rt.Name != "test" ||
 		*rt.Disabled != true ||
 		!reflect.DeepEqual(rt.Members, []string{"1", "2", "3"}) {
-		t.Errorf("error converting structure value: %s", utils.ToIJSON(rt))
+		t.Errorf("error converting structure value: %s", ToIJSON(rt))
 	}
 }
