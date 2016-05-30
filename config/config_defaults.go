@@ -32,6 +32,7 @@ const CGRATES_CFG_JSON = `
 	"rounding_decimals": 5,								// system level precision for floats
 	"dbdata_encoding": "msgpack",						// encoding used to store object data in strings: <msgpack|json>
 	"tpexport_dir": "/var/log/cgrates/tpe",				// path towards export folder for offline Tariff Plans
+	"httpposter_attempts": 3,							// number of http attempts before considering request failed (eg: *call_url)
 	"http_failed_dir": "/var/log/cgrates/http_failed",	// directory path where we store failed http requests
 	"default_request_type": "*rated",					// default request type to consider when missing from requests: <""|*prepaid|*postpaid|*pseudoprepaid|*rated>
 	"default_category": "call",							// default category to consider when missing from requests
@@ -39,8 +40,11 @@ const CGRATES_CFG_JSON = `
 	"default_timezone": "Local",						// default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
 	"connect_attempts": 3,								// initial server connect attempts
 	"reconnects": -1,									// number of retries in case of connection lost
+	"connect_timeout": "1s",							// consider connection unsuccessful on timeout, 0 to disable the feature
+	"reply_timeout": "2s",								// consider connection down for replies taking longer than this value
 	"response_cache_ttl": "0s",							// the life span of a cached response
 	"internal_ttl": "2m",								// maximum duration to wait for internal connections before giving up
+	"locking_timeout": "5s",							// timeout internal locks to avoid deadlocks
 },
 
 

@@ -26,6 +26,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -287,7 +288,7 @@ func main() {
 		return
 	}
 	if *historyServer != "" { // Init scribeAgent so we can store the differences
-		if scribeAgent, err := rpcclient.NewRpcClient("tcp", *historyServer, 3, 3, utils.GOB, nil); err != nil {
+		if scribeAgent, err := rpcclient.NewRpcClient("tcp", *historyServer, 3, 3, time.Duration(1*time.Second), time.Duration(5*time.Minute), utils.GOB, nil); err != nil {
 			log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
 			return
 		} else {

@@ -191,23 +191,27 @@ type CGRConfig struct {
 	StorDBMaxOpenConns       int    // Maximum database connections opened
 	StorDBMaxIdleConns       int    // Maximum idle connections to keep opened
 	StorDBCDRSIndexes        []string
-	DBDataEncoding           string          // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen            string          // RPC JSON listening address
-	RPCGOBListen             string          // RPC GOB listening address
-	HTTPListen               string          // HTTP listening address
-	DefaultReqType           string          // Use this request type if not defined on top
-	DefaultCategory          string          // set default type of record
-	DefaultTenant            string          // set default tenant
-	DefaultTimezone          string          // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
-	Reconnects               int             // number of recconect attempts in case of connection lost <-1 for infinite | nb>
-	ConnectAttempts          int             // number of initial connection attempts before giving up
-	ResponseCacheTTL         time.Duration   // the life span of a cached response
-	InternalTtl              time.Duration   // maximum duration to wait for internal connections before giving up
-	RoundingDecimals         int             // Number of decimals to round end prices at
-	HttpSkipTlsVerify        bool            // If enabled Http Client will accept any TLS certificate
-	TpExportPath             string          // Path towards export folder for offline Tariff Plans
+	DBDataEncoding           string        // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen            string        // RPC JSON listening address
+	RPCGOBListen             string        // RPC GOB listening address
+	HTTPListen               string        // HTTP listening address
+	DefaultReqType           string        // Use this request type if not defined on top
+	DefaultCategory          string        // set default type of record
+	DefaultTenant            string        // set default tenant
+	DefaultTimezone          string        // default timezone for timestamps where not specified <""|UTC|Local|$IANA_TZ_DB>
+	Reconnects               int           // number of recconect attempts in case of connection lost <-1 for infinite | nb>
+	ConnectTimeout           time.Duration // timeout for RPC connection attempts
+	ReplyTimeout             time.Duration // timeout replies if not reaching back
+	ConnectAttempts          int           // number of initial connection attempts before giving up
+	ResponseCacheTTL         time.Duration // the life span of a cached response
+	InternalTtl              time.Duration // maximum duration to wait for internal connections before giving up
+	RoundingDecimals         int           // Number of decimals to round end prices at
+	HttpSkipTlsVerify        bool          // If enabled Http Client will accept any TLS certificate
+	TpExportPath             string        // Path towards export folder for offline Tariff Plans
+	HttpPosterAttempts       int
 	HttpFailedDir            string          // Directory path where we store failed http requests
 	MaxCallDuration          time.Duration   // The maximum call duration (used by responder when querying DerivedCharging) // ToDo: export it in configuration file
+	LockingTimeout           time.Duration   // locking mechanism timeout to avoid deadlocks
 	RALsEnabled              bool            // start standalone server (no balancer)
 	RALsBalancer             string          // balancer address host:port
 	RALsCDRStatSConns        []*HaPoolConfig // address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
@@ -657,6 +661,16 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnGeneralCfg.Reconnects != nil {
 			self.Reconnects = *jsnGeneralCfg.Reconnects
 		}
+		if jsnGeneralCfg.Connect_timeout != nil {
+			if self.ConnectTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Connect_timeout); err != nil {
+				return err
+			}
+		}
+		if jsnGeneralCfg.Reply_timeout != nil {
+			if self.ReplyTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Reply_timeout); err != nil {
+				return err
+			}
+		}
 		if jsnGeneralCfg.Rounding_decimals != nil {
 			self.RoundingDecimals = *jsnGeneralCfg.Rounding_decimals
 		}
@@ -666,6 +680,9 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		if jsnGeneralCfg.Tpexport_dir != nil {
 			self.TpExportPath = *jsnGeneralCfg.Tpexport_dir
 		}
+		if jsnGeneralCfg.Httpposter_attempts != nil {
+			self.HttpPosterAttempts = *jsnGeneralCfg.Httpposter_attempts
+		}
 		if jsnGeneralCfg.Http_failed_dir != nil {
 			self.HttpFailedDir = *jsnGeneralCfg.Http_failed_dir
 		}
@@ -674,6 +691,11 @@ func (self *CGRConfig) loadFromJsonCfg(jsnCfg *CgrJsonCfg) error {
 		}
 		if jsnGeneralCfg.Internal_ttl != nil {
 			if self.InternalTtl, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Internal_ttl); err != nil {
+				return err
+			}
+		}
+		if jsnGeneralCfg.Locking_timeout != nil {
+			if self.LockingTimeout, err = utils.ParseDurationWithSecs(*jsnGeneralCfg.Locking_timeout); err != nil {
 				return err
 			}
 		}

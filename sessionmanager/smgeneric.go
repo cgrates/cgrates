@@ -190,7 +190,7 @@ func (self *SMGeneric) sessionStart(evStart SMGenericEvent, connId string) error
 			}
 		}
 		return true, nil
-	}, time.Duration(2)*time.Second, sessionId)
+	}, self.cgrCfg.LockingTimeout, sessionId)
 	if processed == nil || processed == false {
 		utils.Logger.Err("<SMGeneric> Cannot start session, empty reply")
 		return utils.ErrServerError

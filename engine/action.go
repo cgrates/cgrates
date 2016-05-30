@@ -423,7 +423,7 @@ func callUrl(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) error
 	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	_, _, err = utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 1, fallbackPath, false)
+	_, _, err = utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, config.CgrConfig().HttpPosterAttempts, fallbackPath, false)
 	return err
 }
 
@@ -442,7 +442,7 @@ func callUrlAsync(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) 
 	}
 	cfg := config.CgrConfig()
 	fallbackPath := path.Join(cfg.HttpFailedDir, fmt.Sprintf("act_%s_%s_%s.json", a.ActionType, a.ExtraParameters, utils.GenUUID()))
-	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, 3, fallbackPath, false)
+	go utils.HttpPoster(a.ExtraParameters, cfg.HttpSkipTlsVerify, jsn, utils.CONTENT_JSON, config.CgrConfig().HttpPosterAttempts, fallbackPath, false)
 	return nil
 }
 
@@ -686,7 +686,7 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 	}
 	var client rpcclient.RpcClientConnection
 	if req.Address != utils.MetaInternal {
-		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0, req.Transport, nil); err != nil {
+		if client, err = rpcclient.NewRpcClient("tcp", req.Address, req.Attempts, 0, config.CgrConfig().ConnectTimeout, config.CgrConfig().ReplyTimeout, req.Transport, nil); err != nil {
 			return err
 		}
 	} else {

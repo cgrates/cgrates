@@ -91,7 +91,7 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 	if !*testIntegration {
 		return
 	}
-	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1, "json", nil)
+	cdrsMasterRpc, err = rpcclient.NewRpcClient("tcp", cdrsMasterCfg.RPCJSONListen, 1, 1, time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -108,7 +108,7 @@ func TestCdrsHttpCdrReplication(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-	cdrsSlaveRpc, err := rpcclient.NewRpcClient("tcp", "127.0.0.1:12012", 1, 1, "json", nil)
+	cdrsSlaveRpc, err := rpcclient.NewRpcClient("tcp", "127.0.0.1:12012", 1, 1, time.Duration(1*time.Second), time.Duration(2*time.Second), "json", nil)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
