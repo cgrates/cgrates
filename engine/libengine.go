@@ -31,7 +31,7 @@ func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, connectTi
 	rpcConnCfgs []*config.HaPoolConfig, internalConnChan chan rpcclient.RpcClientConnection, ttl time.Duration) (*rpcclient.RpcClientPool, error) {
 	var rpcClient *rpcclient.RpcClient
 	var err error
-	rpcPool := rpcclient.NewRpcClientPool(dispatchStrategy)
+	rpcPool := rpcclient.NewRpcClientPool(dispatchStrategy, replyTimeout)
 	atLestOneConnected := false // If one connected we don't longer return errors
 	for _, rpcConnCfg := range rpcConnCfgs {
 		if rpcConnCfg.Address == utils.MetaInternal {
