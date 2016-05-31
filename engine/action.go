@@ -674,10 +674,10 @@ func cgrRPCAction(account *Account, sq *StatsQueueTriggered, a *Action, acs Acti
 		utils.Logger.Err(fmt.Sprintf("error executing *cgr_rpc template %s:", err.Error()))
 		return err
 	}
-	a.ExtraParameters = buf.String()
-	//utils.Logger.Info("ExtraParameters: " + a.ExtraParameters)
+	processedExtraParam := buf.String()
+	//utils.Logger.Info("ExtraParameters: " + parsedExtraParameters)
 	req := RPCRequest{}
-	if err := json.Unmarshal([]byte(a.ExtraParameters), &req); err != nil {
+	if err := json.Unmarshal([]byte(processedExtraParam), &req); err != nil {
 		return err
 	}
 	params, err := utils.GetRpcParams(req.Method)
