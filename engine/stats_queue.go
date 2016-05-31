@@ -134,6 +134,17 @@ func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 		stats := sq.getStats()
 		sq.conf.Triggers.Sort()
 		for _, at := range sq.conf.Triggers {
+			// check is effective
+			if at.IsExpired(time.Now()) || !at.IsActive(time.Now()) {
+				continue
+			}
+
+			if at.Executed {
+				// trigger is marked as executed, so skipp it until
+				// the next reset (see RESET_TRIGGERS action type)
+				continue
+			}
+
 			if at.MinQueuedItems > 0 && len(sq.Cdrs) < at.MinQueuedItems {
 				continue
 			}

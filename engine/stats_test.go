@@ -202,9 +202,9 @@ func TestStatsQueueIds(t *testing.T) {
 		t.Error("Errorf getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 5
 	if result != expected {
-		t.Errorf("Errorf loading stats queues. Expected %v was %v", expected, result)
+		t.Errorf("Errorf loading stats queues. Expected %v was %v (%v)", expected, result, ids)
 	}
 }
 
@@ -225,7 +225,7 @@ func TestStatsAppendCdr(t *testing.T) {
 		t.Error("Error appending cdr to stats: ", err)
 	}
 	t.Log(cdrStats.queues)
-	if len(cdrStats.queues) != 2 ||
+	if len(cdrStats.queues) != 5 ||
 		len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
 		len(cdrStats.queues["CDRST2"].Cdrs) != 1 {
 		t.Error("Error appending cdr to queue: ", utils.ToIJSON(cdrStats.queues))
@@ -280,7 +280,7 @@ func TestStatsReloadQueues(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 5
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v: %v", expected, result, ids)
 	}
@@ -316,7 +316,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 6
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
@@ -348,7 +348,7 @@ func TestStatsReloadQueuesWithIds(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 6
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
@@ -398,7 +398,7 @@ func TestStatsResetQueues(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 6
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
@@ -430,7 +430,7 @@ func TestStatsResetQueuesWithIds(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 6
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
