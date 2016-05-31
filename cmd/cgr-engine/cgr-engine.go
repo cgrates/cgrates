@@ -172,7 +172,7 @@ func startDiameterAgent(internalSMGChan, internalPubSubSChan chan rpcclient.RpcC
 	utils.Logger.Info("Starting CGRateS DiameterAgent service.")
 	var smgConn, pubsubConn *rpcclient.RpcClientPool
 	if len(cfg.DiameterAgentCfg().SMGenericConns) != 0 {
-		smgConn, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
+		smgConn, err = engine.NewRPCPool(rpcclient.POOL_BROADCAST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
 			cfg.DiameterAgentCfg().SMGenericConns, internalSMGChan, cfg.InternalTtl)
 		if err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<DiameterAgent> Could not connect to SMG: %s", err.Error()))
