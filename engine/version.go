@@ -7,13 +7,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func CheckVersion() error {
+func CheckVersion(acntDB AccountingStorage) error {
 	// get current db version
-	dbVersion, err := accountingStorage.GetStructVersion()
+	if acntDB == nil {
+		acntDB = accountingStorage
+	}
+	dbVersion, err := acntDB.GetStructVersion()
 	if err != nil {
-		if lhList, err := accountingStorage.GetLoadHistory(1, true); err != nil || len(lhList) == 0 {
+		if lhList, err := acntDB.GetLoadHistory(1, true); err != nil || len(lhList) == 0 {
 			// no data, write version
-			if err := accountingStorage.SetStructVersion(CurrentVersion); err != nil {
+			if err := acntDB.SetStructVersion(CurrentVersion); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not write current version to db: %v", err))
 			}
 		} else {
