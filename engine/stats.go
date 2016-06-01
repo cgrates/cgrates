@@ -20,20 +20,22 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type StatsInterface interface {
 	GetValues(string, *map[string]float64) error
 	GetQueueIds(int, *[]string) error
 	GetQueue(string, *StatsQueue) error
-	GetQueueTriggers(string, *ActionTriggerPriotityList) error
-	AppendCDR(*StoredCdr, *int) error
+	GetQueueTriggers(string, *ActionTriggers) error
+	AppendCDR(*CDR, *int) error
 	AddQueue(*CdrStats, *int) error
+	RemoveQueue(string, *int) error
 	ReloadQueues([]string, *int) error
 	ResetQueues([]string, *int) error
 	Stop(int, *int) error
@@ -87,7 +89,7 @@ func NewStats(ratingDb RatingStorage, accountingDb AccountingStorage, saveInterv
 	if css, err := ratingDb.GetAllCdrStats(); err == nil {
 		cdrStats.UpdateQueues(css, nil)
 	} else {
-		Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
+		utils.Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
 	}
 	return cdrStats
 }
@@ -114,7 +116,7 @@ func (s *Stats) GetQueue(id string, sq *StatsQueue) error {
 	return nil
 }
 
-func (s *Stats) GetQueueTriggers(id string, ats *ActionTriggerPriotityList) error {
+func (s *Stats) GetQueueTriggers(id string, ats *ActionTriggers) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	q, found := s.queues[id]
@@ -124,7 +126,7 @@ func (s *Stats) GetQueueTriggers(id string, ats *ActionTriggerPriotityList) erro
 	if q.conf.Triggers != nil {
 		*ats = q.conf.Triggers
 	} else {
-		*ats = ActionTriggerPriotityList{}
+		*ats = ActionTriggers{}
 	}
 	return nil
 }
@@ -156,9 +158,29 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 		sq = NewStatsQueue(cs)
 		s.queues[cs.Id] = sq
 	}
+	// save the conf
+	if err := s.ratingDb.SetCdrStats(cs); err != nil {
+		return err
+	}
 	if _, exists = s.queueSavers[sq.GetId()]; !exists {
 		s.setupQueueSaver(sq)
 	}
+	return nil
+}
+
+func (s *Stats) RemoveQueue(qID string, out *int) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	if s.queues == nil {
+		s.queues = make(map[string]*StatsQueue)
+	}
+	if s.queueSavers == nil {
+		s.queueSavers = make(map[string]*queueSaver)
+	}
+
+	delete(s.queues, qID)
+	delete(s.queueSavers, qID)
+
 	return nil
 }
 
@@ -195,7 +217,7 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 		for _, id := range ids {
 			sq, exists := s.queues[id]
 			if !exists {
-				Logger.Warning(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
+				utils.Logger.Warning(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
 				continue
 			}
 			sq.Cdrs = make([]*QCdr, 0)
@@ -233,7 +255,6 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		if sq == nil {
 			sq = NewStatsQueue(cs)
 			// load queue from storage if exists
-
 			if saved, err := s.accountingDb.GetCdrStatsQueue(sq.GetId()); err == nil {
 				sq.Load(saved)
 			}
@@ -268,7 +289,7 @@ func (s *Stats) setupQueueSaver(sq *StatsQueue) {
 	}
 }
 
-func (s *Stats) AppendCDR(cdr *StoredCdr, out *int) error {
+func (s *Stats) AppendCDR(cdr *CDR, out *int) error {
 	s.mux.RLock()
 	defer s.mux.RUnlock()
 	for _, sq := range s.queues {
@@ -286,50 +307,30 @@ func (s *Stats) Stop(int, *int) error {
 	return nil
 }
 
-type ProxyStats struct {
-	Client *rpcclient.RpcClient
-}
-
-func NewProxyStats(addr string, attempts, reconnects int) (*ProxyStats, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
-	if err != nil {
-		return nil, err
+func (s *Stats) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
 	}
-	return &ProxyStats{Client: client}, nil
-}
+	// get method
+	method := reflect.ValueOf(s).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
 
-func (ps *ProxyStats) GetValues(sqID string, values *map[string]float64) error {
-	return ps.Client.Call("Stats.GetValues", sqID, values)
-}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 
-func (ps *ProxyStats) AppendCDR(cdr *StoredCdr, out *int) error {
-	return ps.Client.Call("Stats.AppendCDR", cdr, out)
-}
-
-func (ps *ProxyStats) GetQueueIds(in int, ids *[]string) error {
-	return ps.Client.Call("Stats.GetQueueIds", in, ids)
-}
-
-func (ps *ProxyStats) GetQueue(id string, sq *StatsQueue) error {
-	return ps.Client.Call("Stats.GetQueue", id, sq)
-}
-
-func (ps *ProxyStats) GetQueueTriggers(id string, ats *ActionTriggerPriotityList) error {
-	return ps.Client.Call("Stats.GetQueueTriggers", id, ats)
-}
-
-func (ps *ProxyStats) AddQueue(cs *CdrStats, out *int) error {
-	return ps.Client.Call("Stats.AddQueue", cs, out)
-}
-
-func (ps *ProxyStats) ReloadQueues(ids []string, out *int) error {
-	return ps.Client.Call("Stats.ReloadQueues", ids, out)
-}
-
-func (ps *ProxyStats) ResetQueues(ids []string, out *int) error {
-	return ps.Client.Call("Stats.ResetQueues", ids, out)
-}
-
-func (ps *ProxyStats) Stop(i int, r *int) error {
-	return ps.Client.Call("Stats.Stop", 0, i)
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }

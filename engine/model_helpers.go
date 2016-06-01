@@ -387,15 +387,18 @@ func (tps TpActions) GetActions() (map[string][]*utils.TPAction, error) {
 			Identifier:      tpAc.Action,
 			BalanceId:       tpAc.BalanceTag,
 			BalanceType:     tpAc.BalanceType,
-			Direction:       tpAc.Direction,
+			Directions:      tpAc.Directions,
 			Units:           tpAc.Units,
 			ExpiryTime:      tpAc.ExpiryTime,
+			Filter:          tpAc.Filter,
 			TimingTags:      tpAc.TimingTags,
 			DestinationIds:  tpAc.DestinationTags,
 			RatingSubject:   tpAc.RatingSubject,
-			Category:        tpAc.Category,
-			SharedGroup:     tpAc.SharedGroup,
+			Categories:      tpAc.Categories,
+			SharedGroups:    tpAc.SharedGroups,
 			BalanceWeight:   tpAc.BalanceWeight,
+			BalanceBlocker:  tpAc.BalanceBlocker,
+			BalanceDisabled: tpAc.BalanceDisabled,
 			ExtraParameters: tpAc.ExtraParameters,
 			Weight:          tpAc.Weight,
 		}
@@ -421,21 +424,26 @@ func (tps TpActionTriggers) GetActionTriggers() (map[string][]*utils.TPActionTri
 	ats := make(map[string][]*utils.TPActionTrigger)
 	for _, tpAt := range tps {
 		at := &utils.TPActionTrigger{
-			Id:                    tpAt.UniqueId,
+			Id:                    tpAt.Tag,
+			UniqueID:              tpAt.UniqueId,
 			ThresholdType:         tpAt.ThresholdType,
 			ThresholdValue:        tpAt.ThresholdValue,
 			Recurrent:             tpAt.Recurrent,
 			MinSleep:              tpAt.MinSleep,
+			ExpirationDate:        tpAt.ExpiryTime,
+			ActivationDate:        tpAt.ActivationTime,
 			BalanceId:             tpAt.BalanceTag,
 			BalanceType:           tpAt.BalanceType,
-			BalanceDirection:      tpAt.BalanceDirection,
+			BalanceDirections:     tpAt.BalanceDirections,
 			BalanceDestinationIds: tpAt.BalanceDestinationTags,
 			BalanceWeight:         tpAt.BalanceWeight,
 			BalanceExpirationDate: tpAt.BalanceExpiryTime,
 			BalanceTimingTags:     tpAt.BalanceTimingTags,
 			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
-			BalanceCategory:       tpAt.BalanceCategory,
-			BalanceSharedGroup:    tpAt.BalanceSharedGroup,
+			BalanceCategories:     tpAt.BalanceCategories,
+			BalanceSharedGroups:   tpAt.BalanceSharedGroups,
+			BalanceBlocker:        tpAt.BalanceBlocker,
+			BalanceDisabled:       tpAt.BalanceDisabled,
 			Weight:                tpAt.Weight,
 			ActionsId:             tpAt.ActionsTag,
 			MinQueuedItems:        tpAt.MinQueuedItems,
@@ -455,9 +463,10 @@ func (tps TpAccountActions) GetAccountActions() (map[string]*utils.TPAccountActi
 			LoadId:           tpAa.Loadid,
 			Tenant:           tpAa.Tenant,
 			Account:          tpAa.Account,
-			Direction:        tpAa.Direction,
 			ActionPlanId:     tpAa.ActionPlanTag,
 			ActionTriggersId: tpAa.ActionTriggersTag,
+			AllowNegative:    tpAa.AllowNegative,
+			Disabled:         tpAa.Disabled,
 		}
 		aas[aacts.KeyId()] = aacts
 	}
@@ -470,7 +479,7 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 	dcs := make(map[string]*utils.TPDerivedChargers)
 	for _, tpDcMdl := range tps {
 		tpDc := &utils.TPDerivedChargers{TPid: tpDcMdl.Tpid, Loadid: tpDcMdl.Loadid, Direction: tpDcMdl.Direction, Tenant: tpDcMdl.Tenant, Category: tpDcMdl.Category,
-			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject}
+			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject, DestinationIds: tpDcMdl.DestinationIds}
 		tag := tpDc.GetDerivedChargesId()
 		if _, hasIt := dcs[tag]; !hasIt {
 			dcs[tag] = tpDc
@@ -491,6 +500,8 @@ func (tps TpDerivedChargers) GetDerivedChargers() (map[string]*utils.TPDerivedCh
 			UsageField:           ValueOrDefault(tpDcMdl.UsageField, utils.META_DEFAULT),
 			SupplierField:        ValueOrDefault(tpDcMdl.SupplierField, utils.META_DEFAULT),
 			DisconnectCauseField: ValueOrDefault(tpDcMdl.DisconnectCauseField, utils.META_DEFAULT),
+			CostField:            ValueOrDefault(tpDcMdl.CostField, utils.META_DEFAULT),
+			RatedField:           ValueOrDefault(tpDcMdl.RatedField, utils.META_DEFAULT),
 		}
 		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, nDc)
 	}
@@ -503,36 +514,36 @@ func (tps TpCdrStats) GetCdrStats() (map[string][]*utils.TPCdrStat, error) {
 	css := make(map[string][]*utils.TPCdrStat)
 	for _, tpCs := range tps {
 		css[tpCs.Tag] = append(css[tpCs.Tag], &utils.TPCdrStat{
-			QueueLength:         strconv.Itoa(tpCs.QueueLength),
-			TimeWindow:          tpCs.TimeWindow,
-			Metrics:             tpCs.Metrics,
-			SaveInterval:        tpCs.SaveInterval,
-			SetupInterval:       tpCs.SetupInterval,
-			TORs:                tpCs.Tors,
-			CdrHosts:            tpCs.CdrHosts,
-			CdrSources:          tpCs.CdrSources,
-			ReqTypes:            tpCs.ReqTypes,
-			Directions:          tpCs.Directions,
-			Tenants:             tpCs.Tenants,
-			Categories:          tpCs.Categories,
-			Accounts:            tpCs.Accounts,
-			Subjects:            tpCs.Subjects,
-			DestinationPrefixes: tpCs.DestinationPrefixes,
-			PddInterval:         tpCs.PddInterval,
-			UsageInterval:       tpCs.UsageInterval,
-			Suppliers:           tpCs.Suppliers,
-			DisconnectCauses:    tpCs.DisconnectCauses,
-			MediationRunIds:     tpCs.MediationRunids,
-			RatedAccounts:       tpCs.RatedAccounts,
-			RatedSubjects:       tpCs.RatedSubjects,
-			CostInterval:        tpCs.CostInterval,
-			ActionTriggers:      tpCs.ActionTriggers,
+			QueueLength:      strconv.Itoa(tpCs.QueueLength),
+			TimeWindow:       tpCs.TimeWindow,
+			Metrics:          tpCs.Metrics,
+			SaveInterval:     tpCs.SaveInterval,
+			SetupInterval:    tpCs.SetupInterval,
+			TORs:             tpCs.Tors,
+			CdrHosts:         tpCs.CdrHosts,
+			CdrSources:       tpCs.CdrSources,
+			ReqTypes:         tpCs.ReqTypes,
+			Directions:       tpCs.Directions,
+			Tenants:          tpCs.Tenants,
+			Categories:       tpCs.Categories,
+			Accounts:         tpCs.Accounts,
+			Subjects:         tpCs.Subjects,
+			DestinationIds:   tpCs.DestinationIds,
+			PddInterval:      tpCs.PddInterval,
+			UsageInterval:    tpCs.UsageInterval,
+			Suppliers:        tpCs.Suppliers,
+			DisconnectCauses: tpCs.DisconnectCauses,
+			MediationRunIds:  tpCs.MediationRunids,
+			RatedAccounts:    tpCs.RatedAccounts,
+			RatedSubjects:    tpCs.RatedSubjects,
+			CostInterval:     tpCs.CostInterval,
+			ActionTriggers:   tpCs.ActionTriggers,
 		})
 	}
 	return css, nil
 }
 
-func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *utils.TPCdrStat) {
+func UpdateCdrStats(cs *CdrStats, triggers ActionTriggers, tpCs *utils.TPCdrStat, timezone string) {
 	if tpCs.QueueLength != "" && tpCs.QueueLength != "0" {
 		if qi, err := strconv.Atoi(tpCs.QueueLength); err == nil {
 			cs.QueueLength = qi
@@ -560,7 +571,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 	if tpCs.SetupInterval != "" {
 		times := strings.Split(tpCs.SetupInterval, utils.INFIELD_SEP)
 		if len(times) > 0 {
-			if sTime, err := utils.ParseTimeDetectLayout(times[0]); err == nil {
+			if sTime, err := utils.ParseTimeDetectLayout(times[0], timezone); err == nil {
 				if len(cs.SetupInterval) < 1 {
 					cs.SetupInterval = append(cs.SetupInterval, sTime)
 				} else {
@@ -571,7 +582,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 			}
 		}
 		if len(times) > 1 {
-			if eTime, err := utils.ParseTimeDetectLayout(times[1]); err == nil {
+			if eTime, err := utils.ParseTimeDetectLayout(times[1], timezone); err == nil {
 				if len(cs.SetupInterval) < 2 {
 					cs.SetupInterval = append(cs.SetupInterval, eTime)
 				} else {
@@ -609,8 +620,8 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *util
 	if tpCs.Subjects != "" {
 		cs.Subject = append(cs.Subject, tpCs.Subjects)
 	}
-	if tpCs.DestinationPrefixes != "" {
-		cs.DestinationPrefix = append(cs.DestinationPrefix, tpCs.DestinationPrefixes)
+	if tpCs.DestinationIds != "" {
+		cs.DestinationIds = append(cs.DestinationIds, tpCs.DestinationIds)
 	}
 	if tpCs.PddInterval != "" {
 		pdds := strings.Split(tpCs.PddInterval, utils.INFIELD_SEP)
@@ -717,20 +728,85 @@ func ValueOrDefault(val string, deflt string) string {
 
 type TpUsers []TpUser
 
-func (tps TpUsers) GetUsers() (map[string]*UserProfile, error) {
-	users := make(map[string]*UserProfile)
+func (tps TpUsers) GetUsers() (map[string]*utils.TPUsers, error) {
+	users := make(map[string]*utils.TPUsers)
 	for _, tp := range tps {
-		var user *UserProfile
+		var user *utils.TPUsers
 		var found bool
 		if user, found = users[tp.GetId()]; !found {
-			user = &UserProfile{
+			user = &utils.TPUsers{
 				Tenant:   tp.Tenant,
 				UserName: tp.UserName,
-				Profile:  make(map[string]string),
+				Weight:   tp.Weight,
 			}
 			users[tp.GetId()] = user
 		}
-		user.Profile[tp.AttributeName] = tp.AttributeValue
+		if tp.Masked == true {
+			user.Masked = true
+		}
+		user.Profile = append(user.Profile,
+			&utils.TPUserProfile{
+				AttrName:  tp.AttributeName,
+				AttrValue: tp.AttributeValue,
+			})
 	}
 	return users, nil
+}
+
+type TpAliases []TpAlias
+
+func (tps TpAliases) GetAliases() (map[string]*utils.TPAliases, error) {
+	als := make(map[string]*utils.TPAliases)
+	for _, tp := range tps {
+		var al *utils.TPAliases
+		var found bool
+		if al, found = als[tp.GetId()]; !found {
+			al = &utils.TPAliases{
+				Direction: tp.Direction,
+				Tenant:    tp.Tenant,
+				Category:  tp.Category,
+				Account:   tp.Account,
+				Subject:   tp.Subject,
+				Context:   tp.Context,
+			}
+			als[tp.GetId()] = al
+		}
+		al.Values = append(al.Values, &utils.TPAliasValue{
+			DestinationId: tp.DestinationId,
+			Target:        tp.Target,
+			Original:      tp.Original,
+			Alias:         tp.Alias,
+			Weight:        tp.Weight,
+		})
+	}
+	return als, nil
+}
+
+type TpLcrRules []TpLcrRule
+
+func (tps TpLcrRules) GetLcrRules() (map[string]*utils.TPLcrRules, error) {
+	lcrs := make(map[string]*utils.TPLcrRules)
+	for _, tp := range tps {
+		var lcr *utils.TPLcrRules
+		var found bool
+		if lcr, found = lcrs[tp.GetLcrRuleId()]; !found {
+			lcr = &utils.TPLcrRules{
+				Direction: tp.Direction,
+				Tenant:    tp.Tenant,
+				Category:  tp.Category,
+				Account:   tp.Account,
+				Subject:   tp.Subject,
+			}
+			lcrs[tp.GetLcrRuleId()] = lcr
+		}
+		lcr.Rules = append(lcr.Rules, &utils.TPLcrRule{
+			DestinationId:  tp.DestinationTag,
+			RpCategory:     tp.RpCategory,
+			Strategy:       tp.Strategy,
+			StrategyParams: tp.StrategyParams,
+			ActivationTime: tp.ActivationTime,
+			Weight:         tp.Weight,
+		})
+	}
+	return lcrs, nil
 }

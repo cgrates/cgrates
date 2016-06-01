@@ -61,7 +61,7 @@ func TestCDRStatsLclStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if _, err := engine.StopStartEngine(cdrstCfgPath, *waitRater); err != nil {
+	if _, err := engine.StopStartEngine(cdrstCfgPath, 1000); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -104,6 +104,13 @@ func TestCDRStatsLclGetQueueIds2(t *testing.T) {
 	} else if len(eQueueIds) != len(queueIds) {
 		t.Errorf("Expecting: %v, received: %v", eQueueIds, queueIds)
 	}
+	var rcvMetrics map[string]float64
+	expectedMetrics := map[string]float64{"ASR": -1, "ACD": -1}
+	if err := cdrstRpc.Call("CDRStatsV1.GetMetrics", AttrGetMetrics{StatsQueueId: "CDRST4"}, &rcvMetrics); err != nil {
+		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedMetrics, rcvMetrics) {
+		t.Errorf("Expecting: %v, received: %v", expectedMetrics, rcvMetrics)
+	}
 }
 
 func TestCDRStatsLclPostCdrs(t *testing.T) {
@@ -111,31 +118,34 @@ func TestCDRStatsLclPostCdrs(t *testing.T) {
 		return
 	}
 	httpClient := new(http.Client)
-	storedCdrs := []*engine.StoredCdr{
-		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsafa", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+	storedCdrs := []*engine.CDR{
+		&engine.CDR{CGRID: utils.Sha1("dsafdsafa", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsafa",
+			OriginHost: "192.168.1.1", Source: "test",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(),
-			AnswerTime: time.Now(), MediationRunId: utils.DEFAULT_RUNID,
-			Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-			Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan",
+			AnswerTime: time.Now(), RunID: utils.DEFAULT_RUNID, Usage: time.Duration(10) * time.Second,
+			ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
-		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsafb", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		&engine.CDR{CGRID: utils.Sha1("dsafdsafb", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsafb",
+			OriginHost: "192.168.1.1", Source: "test",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(),
-			AnswerTime: time.Now(), MediationRunId: utils.DEFAULT_RUNID,
-			Usage: time.Duration(5) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan",
+			AnswerTime: time.Now(), RunID: utils.DEFAULT_RUNID,
+			Usage: time.Duration(5) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
-		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsafc", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		&engine.CDR{CGRID: utils.Sha1("dsafdsafc", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsafc",
+			OriginHost: "192.168.1.1", Source: "test",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(), AnswerTime: time.Now(),
-			MediationRunId: utils.DEFAULT_RUNID,
-			Usage:          time.Duration(30) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan",
+			RunID: utils.DEFAULT_RUNID,
+			Usage: time.Duration(30) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
-		&engine.StoredCdr{CgrId: utils.Sha1("dsafdsafd", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test",
-			ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
+		&engine.CDR{CGRID: utils.Sha1("dsafdsafd", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsafd",
+			OriginHost: "192.168.1.1", Source: "test",
+			RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org",
 			Category: "call", Account: "1001", Subject: "1001", Destination: "+4986517174963", SetupTime: time.Now(), AnswerTime: time.Time{},
-			MediationRunId: utils.DEFAULT_RUNID,
-			Usage:          time.Duration(0) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dan",
+			RunID: utils.DEFAULT_RUNID,
+			Usage: time.Duration(0) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 		},
 	}
 	for _, storedCdr := range storedCdrs {
@@ -144,7 +154,6 @@ func TestCDRStatsLclPostCdrs(t *testing.T) {
 		}
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
-
 }
 
 func TestCDRStatsLclGetMetrics1(t *testing.T) {
@@ -200,5 +209,14 @@ func TestCDRStatsLclResetMetrics(t *testing.T) {
 		t.Error("Calling CDRStatsV1.GetMetrics, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedMetrics2, rcvMetrics2) {
 		t.Errorf("Expecting: %v, received: %v", expectedMetrics2, rcvMetrics2)
+	}
+}
+
+func TestCDRStatsLclKillEngine(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if err := engine.KillEngine(*waitRater); err != nil {
+		t.Error(err)
 	}
 }

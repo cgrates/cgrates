@@ -39,18 +39,18 @@ func TestLoadCgrCfgWithDefaults(t *testing.T) {
 {
 "sm_freeswitch": {
 	"enabled": true,				// starts SessionManager service: <true|false>
-	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 3},
-		{"server": "1.2.3.5:8021", "password": "ClueCon", "reconnects": 5}
+	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+		{"address": "1.2.3.4:8021", "password": "ClueCon", "reconnects": 3},
+		{"address": "1.2.3.5:8021", "password": "ClueCon", "reconnects": 5}
 	],
 },
 
 }`
 	eCgrCfg, _ := NewDefaultCGRConfig()
 	eCgrCfg.SmFsConfig.Enabled = true
-	eCgrCfg.SmFsConfig.Connections = []*FsConnConfig{
-		&FsConnConfig{Server: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3},
-		&FsConnConfig{Server: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5},
+	eCgrCfg.SmFsConfig.EventSocketConns = []*FsConnConfig{
+		&FsConnConfig{Address: "1.2.3.4:8021", Password: "ClueCon", Reconnects: 3},
+		&FsConnConfig{Address: "1.2.3.5:8021", Password: "ClueCon", Reconnects: 5},
 	}
 	if cgrCfg, err := NewCGRConfigFromJsonStringWithDefaults(JSN_CFG); err != nil {
 		t.Error(err)

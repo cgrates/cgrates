@@ -1,0 +1,57 @@
+{
+
+// Real-time Charging System for Telecom & ISP environments
+// Copyright (C) ITsysCOM GmbH
+//
+// This file contains the default configuration hardcoded into CGRateS.
+// This is what you get when you load CGRateS with an empty configuration file.
+
+
+ "rals": {
+ 	"enabled": true						// so we can query CDRs
+ },
+
+ "cdrs": {
+ 	"enabled": true,
+	"rals_conns": [], 					// no rating support, just *raw CDR testing
+},
+
+
+
+ "cdrc": [
+ 	{
+ 		"id": "*default",
+ 		"enabled": true,					
+ 		"cdr_in_dir": "/tmp/cdrctests/csvit1/in",
+ 		"cdr_out_dir": "/tmp/cdrctests/csvit1/out",
+ 		"cdr_source_id": "csvit1",
+ 	},
+ 	{
+ 		"id": "*CSVit2",								// identifier of the CDRC runner
+ 		"enabled": true,							// enable CDR client functionality		
+ 		"field_separator": ";",					
+ 		"cdr_in_dir": "/tmp/cdrctests/csvit2/in",	// absolute path towards the directory where the CDRs are stored
+ 		"cdr_out_dir": "/tmp/cdrctests/csvit2/out",	// absolute path towards the directory where processed CDRs will be moved
+ 		"cdr_source_id": "csvit2",			// free form field, tag identifying the source of the CDRs within CDRS database
+		"content_fields":[							// import content_fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			{"tag": "TOR", "field_id": "ToR", "type": "*composed", "value": "^*voice", "mandatory": true},
+			{"tag": "OriginID", "field_id": "OriginID", "type": "*composed", "value": "0", "mandatory": true},
+			{"tag": "RequestType", "field_id": "RequestType", "type": "*composed", "value": "1", "mandatory": true},
+			{"tag": "Direction", "field_id": "Direction", "type": "*composed", "value": "^*out", "mandatory": true},
+			{"tag": "Tenant", "field_id": "Tenant", "type": "*composed", "value": "2", "mandatory": true},
+			{"tag": "Category", "field_id": "Category", "type": "*composed", "value": "^call", "mandatory": true},
+			{"tag": "Account", "field_id": "Account", "type": "*composed", "value": "3", "mandatory": true},
+			{"tag": "Subject", "field_id": "Subject", "type": "*composed", "value": "3", "mandatory": true},
+			{"tag": "Destination", "field_id": "Destination", "type": "*composed", "value": "~4:s/0([1-9]\\d+)/+49${1}/", "mandatory": true},
+			{"tag": "SetupTime", "field_id": "SetupTime", "type": "*composed", "value": "5", "mandatory": true},
+			{"tag": "AnswerTime", "field_id": "AnswerTime", "type": "*composed", "value": "5", "mandatory": true},
+			{"tag": "Usage", "field_id": "Usage", "type": "*composed", "value": "6", "mandatory": true},
+			{"tag": "HDRExtra3", "field_id": "HDRExtra3", "type": "*composed", "value": "6", "mandatory": true},
+			{"tag": "HDRExtra2", "field_id": "HDRExtra2", "type": "*composed", "value": "6", "mandatory": true},
+			{"tag": "HDRExtra1", "field_id": "HDRExtra1", "type": "*composed", "value": "6", "mandatory": true},
+		],
+	},
+],
+
+
+}

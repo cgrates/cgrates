@@ -53,14 +53,14 @@ func TestCDRFields(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err)
 	}
-	setupTime, _ := utils.ParseTimeDetectLayout("1436280728")
-	answerTime, _ := utils.ParseTimeDetectLayout("1436280728")
-	expctStoredCdr := &StoredCdr{CgrId: "164b0422fdc6a5117031b427439482c6a4f90e41", TOR: utils.VOICE, AccId: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad",
-		CdrHost: "127.0.0.1", CdrSource: "freeswitch_json", Direction: utils.OUT, Category: "call", ReqType: utils.META_PREPAID, Tenant: "cgrates.org", Account: "1001", Subject: "1001",
-		Destination: "1003", SetupTime: setupTime, Pdd: time.Duration(28) * time.Millisecond, AnswerTime: answerTime, Usage: time.Duration(66) * time.Second, Supplier: "supplier1",
+	setupTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
+	answerTime, _ := utils.ParseTimeDetectLayout("1436280728", "")
+	expctCDR := &CDR{CGRID: "164b0422fdc6a5117031b427439482c6a4f90e41", ToR: utils.VOICE, OriginID: "e3133bf7-dcde-4daf-9663-9a79ffcef5ad",
+		OriginHost: "127.0.0.1", Source: "freeswitch_json", Direction: utils.OUT, Category: "call", RequestType: utils.META_PREPAID, Tenant: "cgrates.org", Account: "1001", Subject: "1001",
+		Destination: "1003", SetupTime: setupTime, PDD: time.Duration(28) * time.Millisecond, AnswerTime: answerTime, Usage: time.Duration(66) * time.Second, Supplier: "supplier1",
 		DisconnectCause: "NORMAL_CLEARING", ExtraFields: map[string]string{"sip_user_agent": "PJSUA v2.3 Linux-3.2.0.4/x86_64/glibc-2.13"}, Cost: -1}
-	if storedCdr := fsCdr.AsStoredCdr(); !reflect.DeepEqual(expctStoredCdr, storedCdr) {
-		t.Errorf("Expecting: %v, received: %v", expctStoredCdr, storedCdr)
+	if CDR := fsCdr.AsStoredCdr(""); !reflect.DeepEqual(expctCDR, CDR) {
+		t.Errorf("Expecting: %v, received: %v", expctCDR, CDR)
 	}
 }
 
@@ -83,6 +83,7 @@ func TestSearchExtraField(t *testing.T) {
 		extraFields["injected_hdr"] != "injected_value" {
 		t.Error("Error parsing extra fields: ", extraFields)
 	}
+
 }
 
 func TestSearchExtraFieldInSlice(t *testing.T) {
@@ -90,6 +91,9 @@ func TestSearchExtraFieldInSlice(t *testing.T) {
 	value := fsCdr.searchExtraField("app_data", fsCdr.body)
 	if value != "ringback=%(2000,4000,440,480)" {
 		t.Error("Error finding extra field: ", value)
+	}
+	if value := fsCdr.searchExtraField("floatfld1", map[string]interface{}{"floatfld1": 6.4}); value != "6.4" {
+		t.Errorf("Expecting: 6.4, received: %s", value)
 	}
 }
 

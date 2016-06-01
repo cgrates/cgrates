@@ -21,7 +21,6 @@ package engine
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -32,20 +31,45 @@ const (
 	FORMAT = "2006-1-2 15:04:05 MST"
 )
 
-type ActionPlan struct {
-	Uuid       string // uniquely identify the timing
-	Id         string // informative purpose only
-	AccountIds []string
-	Timing     *RateInterval
-	Weight     float64
-	ActionsId  string
-	actions    Actions
-	stCache    time.Time // cached time of the next start
+type ActionTiming struct {
+	Uuid         string
+	Timing       *RateInterval
+	ActionsID    string
+	Weight       float64
+	actions      Actions
+	accountIDs   utils.StringMap // copy of action plans accounts
+	actionPlanID string          // the id of the belonging action plan (info only)
+	stCache      time.Time       // cached time of the next start
 }
 
-type ActionPlans []*ActionPlan
+type Task struct {
+	Uuid      string
+	AccountID string
+	ActionsID string
+}
 
-func (at *ActionPlan) GetNextStartTime(now time.Time) (t time.Time) {
+type ActionPlan struct {
+	Id            string // informative purpose only
+	AccountIDs    utils.StringMap
+	ActionTimings []*ActionTiming
+}
+
+func (apl *ActionPlan) RemoveAccountID(accID string) (found bool) {
+	if _, found = apl.AccountIDs[accID]; found {
+		delete(apl.AccountIDs, accID)
+	}
+	return
+}
+
+func (t *Task) Execute() error {
+	return (&ActionTiming{
+		Uuid:       t.Uuid,
+		ActionsID:  t.ActionsID,
+		accountIDs: utils.StringMap{t.AccountID: true},
+	}).Execute()
+}
+
+func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
@@ -68,7 +92,7 @@ func (at *ActionPlan) GetNextStartTime(now time.Time) (t time.Time) {
 }
 
 // To be deleted after the above solution proves reliable
-func (at *ActionPlan) GetNextStartTimeOld(now time.Time) (t time.Time) {
+func (at *ActionTiming) GetNextStartTimeOld(now time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
@@ -93,7 +117,7 @@ func (at *ActionPlan) GetNextStartTimeOld(now time.Time) (t time.Time) {
 		var err error
 		t, err = time.Parse(FORMAT, l)
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Cannot parse action timing's StartTime %v", l))
+			utils.Logger.Err(fmt.Sprintf("Cannot parse action plan's StartTime %v", l))
 			at.stCache = t
 			return
 		}
@@ -218,99 +242,147 @@ YEARS:
 	return
 }
 
-func (at *ActionPlan) resetStartTimeCache() {
+func (at *ActionTiming) ResetStartTimeCache() {
 	at.stCache = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
-func (at *ActionPlan) SetActions(as Actions) {
+func (at *ActionTiming) SetActions(as Actions) {
 	at.actions = as
 }
 
-func (at *ActionPlan) getActions() (as []*Action, err error) {
+func (at *ActionTiming) SetAccountIDs(accIDs utils.StringMap) {
+	at.accountIDs = accIDs
+}
+
+func (at *ActionTiming) GetAccountIDs() utils.StringMap {
+	return at.accountIDs
+}
+
+func (at *ActionTiming) SetActionPlanID(id string) {
+	at.actionPlanID = id
+}
+
+func (at *ActionTiming) GetActionPlanID() string {
+	return at.actionPlanID
+}
+
+func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		at.actions, err = ratingStorage.GetActions(at.ActionsId, false)
+		at.actions, err = ratingStorage.GetActions(at.ActionsID, false)
 	}
 	at.actions.Sort()
 	return at.actions, err
 }
 
-func (at *ActionPlan) Execute() (err error) {
-	if len(at.AccountIds) == 0 { // nothing to do if no accounts set
-		return
-	}
-	at.resetStartTimeCache()
+func (at *ActionTiming) Execute() (err error) {
+	at.ResetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsId, err))
+		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsID, err))
 		return
 	}
-	for _, a := range aac {
-		if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.ExpirationDate.IsZero()) && parseErr == nil && !expDate.IsZero() {
-			a.Balance.ExpirationDate = expDate
-		}
-		// handle remove action
-		if a.ActionType == REMOVE_ACCOUNT {
-			for _, accId := range at.AccountIds {
-				_, err := Guardian.Guard(func() (interface{}, error) {
-					if err := accountingStorage.RemoveAccount(accId); err != nil {
-						Logger.Warning(fmt.Sprintf("Could not remove account Id: %s: %d", accId, err))
+	for accID, _ := range at.accountIDs {
+		_, err = Guardian.Guard(func() (interface{}, error) {
+			acc, err := accountingStorage.GetAccount(accID)
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf("Could not get account id: %s. Skipping!", accID))
+				return 0, err
+			}
+			transactionFailed := false
+			removeAccountActionFound := false
+			for _, a := range aac {
+				// check action filter
+				if len(a.Filter) > 0 {
+					matched, err := acc.matchActionFilter(a.Filter)
+					//log.Print("Checkng: ", a.Filter, matched)
+					if err != nil {
+						return 0, err
 					}
-					return 0, nil
-				}, accId)
-				if err != nil {
-					Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
+					if !matched {
+						continue
+					}
+				}
+				if a.Balance == nil {
+					a.Balance = &BalanceFilter{}
+				}
+				if a.ExpirationString != "" { // if it's *unlimited then it has to be zero time
+					if expDate, parseErr := utils.ParseDate(a.ExpirationString); parseErr == nil {
+						a.Balance.ExpirationDate = &time.Time{}
+						*a.Balance.ExpirationDate = expDate
+					}
+				}
+
+				actionFunction, exists := getActionFunc(a.ActionType)
+				if !exists {
+					// do not allow the action plan to be rescheduled
+					at.Timing = nil
+					utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+					transactionFailed = true
+					break
+				}
+				if err := actionFunction(acc, nil, a, aac); err != nil {
+					utils.Logger.Err(fmt.Sprintf("Error executing action %s: %v!", a.ActionType, err))
+					transactionFailed = true
+					break
+				}
+				if a.ActionType == REMOVE_ACCOUNT {
+					removeAccountActionFound = true
 				}
 			}
-			continue // do not go to getActionFunc
-		}
+			if !transactionFailed && !removeAccountActionFound {
+				accountingStorage.SetAccount(acc)
+			}
+			return 0, nil
+		}, 0, accID)
+	}
+	if len(at.accountIDs) == 0 { // action timing executing without accounts
+		for _, a := range aac {
+			if expDate, parseErr := utils.ParseDate(a.ExpirationString); (a.Balance == nil || a.Balance.EmptyExpirationDate()) &&
+				parseErr == nil && !expDate.IsZero() {
+				a.Balance.ExpirationDate = &time.Time{}
+				*a.Balance.ExpirationDate = expDate
+			}
 
-		actionFunction, exists := getActionFunc(a.ActionType)
-		if !exists {
-			// do not allow the action timing to be rescheduled
-			at.Timing = nil
-			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
-			return
-		}
-		for _, accId := range at.AccountIds {
-			_, err := Guardian.Guard(func() (interface{}, error) {
-				ub, err := accountingStorage.GetAccount(accId)
-				if err != nil {
-					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", accId))
-					return 0, err
-				} else if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
-					return 0, fmt.Errorf("Account %s is disabled", accId)
-				}
-				//Logger.Info(fmt.Sprintf("Executing %v on %+v", a.ActionType, ub))
-				err = actionFunction(ub, nil, a, aac)
-				//Logger.Info(fmt.Sprintf("After execute, account: %+v", ub))
-				accountingStorage.SetAccount(ub)
-				return 0, nil
-			}, accId)
-			if err != nil {
-				Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
+			actionFunction, exists := getActionFunc(a.ActionType)
+			if !exists {
+				// do not allow the action plan to be rescheduled
+				at.Timing = nil
+				utils.Logger.Err(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
+				break
+			}
+			if err := actionFunction(nil, nil, a, aac); err != nil {
+				utils.Logger.Err(fmt.Sprintf("Error executing accountless action %s: %v!", a.ActionType, err))
+				break
 			}
 		}
 	}
-	storageLogger.LogActionPlan(utils.SCHED_SOURCE, at, aac)
+	if err != nil {
+		utils.Logger.Warning(fmt.Sprintf("Error executing action plan: %v", err))
+		return err
+	}
+	storageLogger.LogActionTiming(utils.SCHED_SOURCE, at, aac)
 	return
 }
 
-func (at *ActionPlan) IsASAP() bool {
+func (at *ActionTiming) IsASAP() bool {
+	if at.Timing == nil {
+		return false
+	}
 	return at.Timing.Timing.StartTime == utils.ASAP
 }
 
-// Structure to store actions according to weight
-type ActionPlanPriotityList []*ActionPlan
+// Structure to store actions according to execution time and weight
+type ActionTimingPriorityList []*ActionTiming
 
-func (atpl ActionPlanPriotityList) Len() int {
+func (atpl ActionTimingPriorityList) Len() int {
 	return len(atpl)
 }
 
-func (atpl ActionPlanPriotityList) Swap(i, j int) {
+func (atpl ActionTimingPriorityList) Swap(i, j int) {
 	atpl[i], atpl[j] = atpl[j], atpl[i]
 }
 
-func (atpl ActionPlanPriotityList) Less(i, j int) bool {
+func (atpl ActionTimingPriorityList) Less(i, j int) bool {
 	if atpl[i].GetNextStartTime(time.Now()).Equal(atpl[j].GetNextStartTime(time.Now())) {
 		// higher weights earlyer in the list
 		return atpl[i].Weight > atpl[j].Weight
@@ -318,41 +390,25 @@ func (atpl ActionPlanPriotityList) Less(i, j int) bool {
 	return atpl[i].GetNextStartTime(time.Now()).Before(atpl[j].GetNextStartTime(time.Now()))
 }
 
-func (atpl ActionPlanPriotityList) Sort() {
+func (atpl ActionTimingPriorityList) Sort() {
 	sort.Sort(atpl)
 }
 
-func (at *ActionPlan) String_DISABLED() string {
-	return at.Id + " " + at.GetNextStartTime(time.Now()).String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
+// Structure to store actions according to weight
+type ActionTimingWeightOnlyPriorityList []*ActionTiming
+
+func (atpl ActionTimingWeightOnlyPriorityList) Len() int {
+	return len(atpl)
 }
 
-// Helper to remove ActionPlan members based on specific filters, empty data means no always match
-func RemActionPlan(ats ActionPlans, actionTimingId, balanceId string) ActionPlans {
-	for idx, at := range ats {
-		if len(actionTimingId) != 0 && at.Uuid != actionTimingId { // No Match for ActionPlanId, no need to move further
-			continue
-		}
-		if len(balanceId) == 0 { // No account defined, considered match for complete removal
-			if len(ats) == 1 { // Removing last item, by init empty
-				return make([]*ActionPlan, 0)
-			}
-			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
-			continue
-		}
-		for iBlnc, blncId := range at.AccountIds {
-			if blncId == balanceId {
-				if len(at.AccountIds) == 1 { // Only one balance, remove complete at
-					if len(ats) == 1 { // Removing last item, by init empty
-						return make([]*ActionPlan, 0)
-					}
-					ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
-				} else {
-					at.AccountIds[iBlnc], at.AccountIds = at.AccountIds[len(at.AccountIds)-1], at.AccountIds[:len(at.AccountIds)-1]
-				}
-				// only remove the first one matching
-				break
-			}
-		}
-	}
-	return ats
+func (atpl ActionTimingWeightOnlyPriorityList) Swap(i, j int) {
+	atpl[i], atpl[j] = atpl[j], atpl[i]
+}
+
+func (atpl ActionTimingWeightOnlyPriorityList) Less(i, j int) bool {
+	return atpl[i].Weight > atpl[j].Weight
+}
+
+func (atpl ActionTimingWeightOnlyPriorityList) Sort() {
+	sort.Sort(atpl)
 }

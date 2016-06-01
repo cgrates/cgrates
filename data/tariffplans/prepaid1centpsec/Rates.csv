@@ -1,4 +1,0 @@
-#Tag,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
-RT_1CENT,0,1,1s,1s,0s
-RT_DATA_2c,0,0.002,10,10,0
-RT_SMS_5c,0,0.005,1,1,0

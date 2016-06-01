@@ -23,6 +23,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"reflect"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
@@ -32,49 +33,50 @@ import (
 type Storage interface {
 	Close()
 	Flush(string) error
-	GetKeysForPrefix(string) ([]string, error)
+	GetKeysForPrefix(string, bool) ([]string, error)
 }
 
 // Interface for storage providers.
 type RatingStorage interface {
 	Storage
-	CacheAll() error
-	CachePrefixes(...string) error
-	CachePrefixValues(map[string][]string) error
-	Cache([]string, []string, []string, []string, []string, []string, []string, []string, []string) error
+	CacheRatingAll() error
+	CacheRatingPrefixes(...string) error
+	CacheRatingPrefixValues(map[string][]string) error
 	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string, bool) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
-	GetRpAlias(string, bool) (string, error)
-	SetRpAlias(string, string) error
-	RemoveRpAliases([]*TenantRatingSubject, bool) error
-	GetRPAliases(string, string, bool) ([]string, error)
+	RemoveRatingProfile(string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
+	RemoveDestination(string) error
 	GetLCR(string, bool) (*LCR, error)
 	SetLCR(*LCR) error
 	SetCdrStats(*CdrStats) error
 	GetCdrStats(string) (*CdrStats, error)
 	GetAllCdrStats() ([]*CdrStats, error)
-	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
-	SetDerivedChargers(string, utils.DerivedChargers) error
+	GetDerivedChargers(string, bool) (*utils.DerivedChargers, error)
+	SetDerivedChargers(string, *utils.DerivedChargers) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
+	RemoveActions(string) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
 	SetSharedGroup(*SharedGroup) error
-	GetActionPlans(string) (ActionPlans, error)
-	SetActionPlans(string, ActionPlans) error
-	GetAllActionPlans() (map[string]ActionPlans, error)
-	GetAccAlias(string, bool) (string, error)
-	SetAccAlias(string, string) error
-	RemoveAccAliases([]*TenantAccount, bool) error
-	GetAccountAliases(string, string, bool) ([]string, error)
+	GetActionTriggers(string) (ActionTriggers, error)
+	SetActionTriggers(string, ActionTriggers) error
+	GetActionPlan(string, bool) (*ActionPlan, error)
+	SetActionPlan(string, *ActionPlan, bool) error
+	GetAllActionPlans() (map[string]*ActionPlan, error)
+	PushTask(*Task) error
+	PopTask() (*Task, error)
 }
 
 type AccountingStorage interface {
 	Storage
+	CacheAccountingAll() error
+	CacheAccountingPrefixes(...string) error
+	CacheAccountingPrefixValues(map[string][]string) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	RemoveAccount(string) error
@@ -87,24 +89,28 @@ type AccountingStorage interface {
 	GetUser(string) (*UserProfile, error)
 	GetUsers() ([]*UserProfile, error)
 	RemoveUser(string) error
+	SetAlias(*Alias) error
+	GetAlias(string, bool) (*Alias, error)
+	RemoveAlias(string) error
+	GetLoadHistory(int, bool) ([]*LoadInstance, error)
+	AddLoadHistory(*LoadInstance, int) error
+	GetStructVersion() (*StructVersion, error)
+	SetStructVersion(*StructVersion) error
 }
 
 type CdrStorage interface {
 	Storage
-	SetCdr(*StoredCdr) error
-	SetRatedCdr(*StoredCdr) error
-	LogCallCost(cgrid, source, runid string, cc *CallCost) error
-	GetCallCostLog(cgrid, source, runid string) (*CallCost, error)
-	GetStoredCdrs(*utils.CdrsFilter) ([]*StoredCdr, int64, error)
-	RemStoredCdrs([]string) error
+	SetCDR(*CDR, bool) error
+	SetSMCost(smc *SMCost) error
+	GetSMCosts(cgrid, runid, originHost, originIDPrfx string) ([]*SMCost, error)
+	GetCDRs(*utils.CDRsFilter, bool) ([]*CDR, int64, error)
 }
 
 type LogStorage interface {
 	Storage
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogError(uuid, source, runid, errstr string) error
 	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
-	LogActionPlan(source string, at *ActionPlan, as Actions) error
+	LogActionTiming(source string, at *ActionTiming, as Actions) error
 }
 
 type LoadStorage interface {
@@ -124,9 +130,10 @@ type LoadReader interface {
 	GetTpRatingProfiles(*TpRatingProfile) ([]TpRatingProfile, error)
 	GetTpSharedGroups(string, string) ([]TpSharedGroup, error)
 	GetTpCdrStats(string, string) ([]TpCdrstat, error)
+	GetTpLCRs(*TpLcrRule) ([]TpLcrRule, error)
 	GetTpUsers(*TpUser) ([]TpUser, error)
+	GetTpAliases(*TpAlias) ([]TpAlias, error)
 	GetTpDerivedChargers(*TpDerivedCharger) ([]TpDerivedCharger, error)
-	GetTpLCRs(string, string) ([]TpLcrRule, error)
 	GetTpActions(string, string) ([]TpAction, error)
 	GetTpActionPlans(string, string) ([]TpActionPlan, error)
 	GetTpActionTriggers(string, string) ([]TpActionTrigger, error)
@@ -134,7 +141,7 @@ type LoadReader interface {
 }
 
 type LoadWriter interface {
-	RemTpData(string, string, ...string) error
+	RemTpData(string, string, map[string]string) error
 	SetTpTimings([]TpTiming) error
 	SetTpDestinations([]TpDestination) error
 	SetTpRates([]TpRate) error
@@ -144,6 +151,7 @@ type LoadWriter interface {
 	SetTpSharedGroups([]TpSharedGroup) error
 	SetTpCdrStats([]TpCdrstat) error
 	SetTpUsers([]TpUser) error
+	SetTpAliases([]TpAlias) error
 	SetTpDerivedChargers([]TpDerivedCharger) error
 	SetTpLCRs([]TpLcrRule) error
 	SetTpActions([]TpAction) error
@@ -198,6 +206,7 @@ func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
 	mh.MapType = reflect.TypeOf(map[string]interface{}(nil))
+	mh.RawToString = true
 	return cmm
 }
 
@@ -242,4 +251,10 @@ func (gm *GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
 
 func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
+}
+
+type LoadInstance struct {
+	LoadId       string    // Unique identifier for the load
+	TariffPlanId string    // Tariff plan identificator for the data loaded
+	LoadTime     time.Time // Time of load
 }

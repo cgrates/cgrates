@@ -36,7 +36,14 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | --------------- | --------- |
 | @danbogos | Dan Christian Bogos |
 | @eloycoto | Eloy Coto Pereiro |
-
+| @nikbyte  | Nick Altmann |
+| @kjcsb1   | Cameron Beattie |
+| @rinor    | Rinor Hoxha |
+| @bhepp    | Brice Heppner |
+| @noahmehl | Noah Mehl |
+| @elfranne | Tom Braarup Cuykens |
+| @rbarrabe | Régis Barrabé |
+| @J0hnSteel | John Koce Steel |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->

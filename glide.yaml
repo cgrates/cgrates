@@ -1,0 +1,38 @@
+package: github.com/cgrates/cgrates
+import:
+- package: github.com/DisposaBoy/JsonConfigReader
+- package: github.com/cenk/hub
+- package: github.com/cenkalti/rpc2
+- package: github.com/cgrates/fsock
+- package: github.com/cgrates/kamevapi
+- package: github.com/cgrates/osipsdagram
+- package: github.com/cgrates/rpcclient
+- package: github.com/fiorix/go-diameter
+  subpackages:
+  - diam
+  - diam/avp
+  - diam/datatype
+  - diam/dict
+  - diam/sm
+- package: github.com/go-sql-driver/mysql
+- package: github.com/gorhill/cronexpr
+- package: github.com/jinzhu/gorm
+- package: github.com/kr/pty
+- package: github.com/lib/pq
+- package: github.com/mediocregopher/radix.v2
+  subpackages:
+  - pool
+  - redis
+- package: github.com/peterh/liner
+- package: github.com/ugorji/go
+  subpackages:
+  - codec
+- package: golang.org/x/net
+  subpackages:
+  - websocket
+- package: gopkg.in/fsnotify.v1
+- package: gopkg.in/mgo.v2
+  subpackages:
+  - bson
+- package: github.com/ChrisTrenkamp/goxpath
+- package: github.com/mitchellh/mapstructure

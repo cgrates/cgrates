@@ -21,6 +21,7 @@ package engine
 import (
 	"flag"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/config"
@@ -46,7 +47,7 @@ var accountDbCsv, accountDbStor, accountDbApier AccountingStorage // Each rating
 var storDb LoadStorage
 var lCfg *config.CGRConfig
 
-var tpCsvScenario = flag.String("tp_scenario", "prepaid1centpsec", "Use this scenario folder to import tp csv data from")
+var tpCsvScenario = flag.String("tp_scenario", "testtp", "Use this scenario folder to import tp csv data from")
 
 // Create connection to ratingDb
 // Will use 3 different datadbs in order to be able to see differences in data loaded
@@ -90,13 +91,12 @@ func TestCreateStorTpTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var db *MySQLStorage
-	if d, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns); err != nil {
+	db, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns)
+	if err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
 	} else {
-		db = d.(*MySQLStorage)
-		storDb = d.(LoadStorage)
+		storDb = db
 	}
 	// Creating the table serves also as reset since there is a drop prior to create
 	if err := db.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", utils.CREATE_TARIFFPLAN_TABLES_SQL)); err != nil {
@@ -131,7 +131,9 @@ func TestLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.CDR_STATS_CSV),
-		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV)), "")
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.USERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ALIASES_CSV),
+	), "", "", lCfg.LoadHistorySize)
 
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
@@ -166,8 +168,14 @@ func TestLoadFromCSV(t *testing.T) {
 	if err = loader.LoadDerivedChargers(); err != nil {
 		t.Error("Failed loading derived chargers: ", err.Error())
 	}
+	if err = loader.LoadLCRs(); err != nil {
+		t.Error("Failed loading lcr rules: ", err.Error())
+	}
 	if err = loader.LoadUsers(); err != nil {
 		t.Error("Failed loading users: ", err.Error())
+	}
+	if err = loader.LoadAliases(); err != nil {
+		t.Error("Failed loading aliases: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
 		t.Error("Could not write data into ratingDb: ", err.Error())
@@ -201,7 +209,7 @@ func TestLoadFromStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, utils.TEST_SQL)
+	loader := NewTpReader(ratingDbStor, accountDbStor, storDb, utils.TEST_SQL, "", lCfg.LoadHistorySize)
 	if err := loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -235,6 +243,15 @@ func TestLoadFromStorDb(t *testing.T) {
 	if err := loader.LoadDerivedChargers(); err != nil {
 		t.Error("Failed loading derived chargers: ", err.Error())
 	}
+	if err := loader.LoadLCRs(); err != nil {
+		t.Error("Failed loading lcr rules: ", err.Error())
+	}
+	if err := loader.LoadUsers(); err != nil {
+		t.Error("Failed loading users: ", err.Error())
+	}
+	if err := loader.LoadAliases(); err != nil {
+		t.Error("Failed loading aliases: ", err.Error())
+	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
 		t.Error("Could not write data into ratingDb: ", err.Error())
 	}
@@ -244,7 +261,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, utils.TEST_SQL)
+	loader := NewTpReader(ratingDbApier, accountDbApier, storDb, utils.TEST_SQL, "", lCfg.LoadHistorySize)
 	// Load ratingPlans. This will also set destination keys
 	if ratingPlans, err := storDb.GetTpRatingPlans(utils.TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")
@@ -316,6 +333,30 @@ func TestLoadIndividualProfiles(t *testing.T) {
 			}
 		}
 	}
+	// Load users
+	if users, err := storDb.GetTpUsers(&TpUser{Tpid: utils.TEST_SQL}); err != nil {
+		t.Fatal("Could not retrieve users, error: ", err.Error())
+	} else if len(users) == 0 {
+		t.Fatal("Could not retrieve users")
+	} else {
+		for _, usr := range users {
+			if found, err := loader.LoadUsersFiltered(&usr); found && err != nil {
+				t.Fatalf("Could not user with id: %s, error: %s", usr.GetId(), err.Error())
+			}
+		}
+	}
+	// Load aliases
+	if aliases, err := storDb.GetTpAliases(&TpAlias{Tpid: utils.TEST_SQL}); err != nil {
+		t.Fatal("Could not retrieve aliases, error: ", err.Error())
+	} else if len(aliases) == 0 {
+		t.Fatal("Could not retrieve aliases")
+	} else {
+		for _, al := range aliases {
+			if found, err := loader.LoadAliasesFiltered(&al); found && err != nil {
+				t.Fatalf("Could not load aliase with id: %s, error: %s", al.GetId(), err.Error())
+			}
+		}
+	}
 	// Load account actions
 	if accountActions, err := storDb.GetTpAccountActions(&TpAccountAction{Tpid: utils.TEST_SQL, Loadid: loadId}); err != nil {
 		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())
@@ -338,7 +379,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 }
 
 // Compares previously loaded data from csv and stor to be identical, redis specific tests
-func TestMatchLoadCsvWithStor(t *testing.T) {
+func TestMatchLoadCsvWithStorRating(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -348,14 +389,52 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 	}
 	rsStor := ratingDbStor.(*RedisStorage)
 	rsApier := ratingDbApier.(*RedisStorage)
-	keysCsv, err := rsCsv.db.Keys("*")
+	keysCsv, err := rsCsv.db.Cmd("KEYS", "*").List()
 	if err != nil {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
 	for _, key := range keysCsv {
 		var refVal []byte
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
-			qVal, err := rs.db.Get(key)
+			if key == utils.TASKS_KEY || strings.HasPrefix(key, utils.ACTION_PLAN_PREFIX) { // action plans are not consistent
+				continue
+			}
+			qVal, err := rs.db.Cmd("GET", key).Bytes()
+			if err != nil {
+				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
+			}
+			if idx == 0 { // Only compare at second iteration, first one is to set reference value
+				refVal = qVal
+				continue
+			}
+			if len(refVal) != len(qVal) {
+				t.Errorf("Missmatched data for key: %s\n\t reference val: %s \n\t retrieved val: %s\n on iteration: %d", key, refVal, qVal, idx)
+			}
+		}
+	}
+}
+
+func TestMatchLoadCsvWithStorAccounting(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	rsCsv, redisDb := accountDbCsv.(*RedisStorage)
+	if !redisDb {
+		return // We only support these tests for redis
+	}
+	rsStor := accountDbStor.(*RedisStorage)
+	rsApier := accountDbApier.(*RedisStorage)
+	keysCsv, err := rsCsv.db.Cmd("KEYS", "*").List()
+	if err != nil {
+		t.Fatal("Failed querying redis keys for csv data")
+	}
+	for _, key := range keysCsv {
+		var refVal []byte
+		if key == "load_history" {
+			continue
+		}
+		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
+			qVal, err := rs.db.Cmd("GET", key).Bytes()
 			if err != nil {
 				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
 			}

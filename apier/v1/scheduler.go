@@ -20,9 +20,12 @@ package v1
 
 import (
 	"errors"
+	"fmt"
+	"sort"
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -98,36 +101,25 @@ import (
 */
 
 type AttrsGetScheduledActions struct {
-	Direction, Tenant, Account string
-	TimeStart, TimeEnd         time.Time // Filter based on next runTime
+	Tenant, Account    string
+	TimeStart, TimeEnd time.Time // Filter based on next runTime
 	utils.Paginator
 }
 
 type ScheduledActions struct {
-	NextRunTime                             time.Time
-	Accounts                                []*utils.DirectionTenantAccount
-	ActionsId, ActionPlanId, ActionPlanUuid string
+	NextRunTime                               time.Time
+	Accounts                                  int
+	ActionsId, ActionPlanId, ActionTimingUuid string
 }
 
 func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *[]*ScheduledActions) error {
-	schedActions := make([]*ScheduledActions, 0)
 	if self.Sched == nil {
 		return errors.New("SCHEDULER_NOT_ENABLED")
 	}
+	schedActions := make([]*ScheduledActions, 0) // needs to be initialized if remains empty
 	scheduledActions := self.Sched.GetQueue()
-	var min, max int
-	if attrs.Paginator.Offset != nil {
-		min = *attrs.Paginator.Offset
-	}
-	if attrs.Paginator.Limit != nil {
-		max = *attrs.Paginator.Limit
-	}
-	if max > len(scheduledActions) {
-		max = len(scheduledActions)
-	}
-	scheduledActions = scheduledActions[min : min+max]
 	for _, qActions := range scheduledActions {
-		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid}
+		sas := &ScheduledActions{ActionsId: qActions.ActionsID, ActionPlanId: qActions.GetActionPlanID(), ActionTimingUuid: qActions.Uuid, Accounts: len(qActions.GetAccountIDs())}
 		if attrs.SearchTerm != "" &&
 			!(strings.Contains(sas.ActionPlanId, attrs.SearchTerm) ||
 				strings.Contains(sas.ActionsId, attrs.SearchTerm)) {
@@ -140,32 +132,133 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 		if !attrs.TimeEnd.IsZero() && (sas.NextRunTime.After(attrs.TimeEnd) || sas.NextRunTime.Equal(attrs.TimeEnd)) {
 			continue
 		}
-		acntFiltersMatch := false
-		for _, acntKey := range qActions.AccountIds {
-			directionMatched := len(attrs.Direction) == 0
-			tenantMatched := len(attrs.Tenant) == 0
-			accountMatched := len(attrs.Account) == 0
-			dta, _ := utils.NewDTAFromAccountKey(acntKey)
-			sas.Accounts = append(sas.Accounts, dta)
-			// One member matching
-			if !directionMatched && attrs.Direction == dta.Direction {
-				directionMatched = true
+		// filter on account
+		if attrs.Tenant != "" || attrs.Account != "" {
+			found := false
+			for accID := range qActions.GetAccountIDs() {
+				split := strings.Split(accID, utils.CONCATENATED_KEY_SEP)
+				if len(split) != 2 {
+					continue // malformed account id
+				}
+				if attrs.Tenant != "" && attrs.Tenant != split[0] {
+					continue
+				}
+				if attrs.Account != "" && attrs.Account != split[1] {
+					continue
+				}
+				found = true
+				break
 			}
-			if !tenantMatched && attrs.Tenant == dta.Tenant {
-				tenantMatched = true
-			}
-			if !accountMatched && attrs.Account == dta.Account {
-				accountMatched = true
-			}
-			if directionMatched && tenantMatched && accountMatched {
-				acntFiltersMatch = true
+			if !found {
+				continue
 			}
 		}
-		if !acntFiltersMatch {
-			continue
-		}
+
+		// we have a winner
+
 		schedActions = append(schedActions, sas)
 	}
+	if attrs.Paginator.Offset != nil {
+		if *attrs.Paginator.Offset <= len(schedActions) {
+			schedActions = schedActions[*attrs.Paginator.Offset:]
+		}
+	}
+	if attrs.Paginator.Limit != nil {
+		if *attrs.Paginator.Limit <= len(schedActions) {
+			schedActions = schedActions[:*attrs.Paginator.Limit]
+		}
+	}
 	*reply = schedActions
+	return nil
+}
+
+type AttrsExecuteScheduledActions struct {
+	ActionPlanID       string
+	TimeStart, TimeEnd time.Time // replay the action timings between the two dates
+}
+
+func (self *ApierV1) ExecuteScheduledActions(attr AttrsExecuteScheduledActions, reply *string) error {
+	if attr.ActionPlanID != "" { // execute by ActionPlanID
+		apl, err := self.RatingDb.GetActionPlan(attr.ActionPlanID, false)
+		if err != nil {
+			*reply = err.Error()
+			return err
+		}
+		if apl != nil {
+			// order by weight
+			engine.ActionTimingWeightOnlyPriorityList(apl.ActionTimings).Sort()
+			for _, at := range apl.ActionTimings {
+				if at.IsASAP() {
+					continue
+				}
+
+				at.SetAccountIDs(apl.AccountIDs) // copy the accounts
+				at.SetActionPlanID(apl.Id)
+				err := at.Execute()
+				if err != nil {
+					*reply = err.Error()
+					return err
+				}
+				utils.Logger.Info(fmt.Sprintf("<Force Scheduler> Executing action %s ", at.ActionsID))
+			}
+		}
+	}
+	if !attr.TimeStart.IsZero() && !attr.TimeEnd.IsZero() { // execute between two dates
+		actionPlans, err := self.RatingDb.GetAllActionPlans()
+		if err != nil && err != utils.ErrNotFound {
+			err := fmt.Errorf("cannot get action plans: %v", err)
+			*reply = err.Error()
+			return err
+		}
+
+		// recreate the queue
+		queue := engine.ActionTimingPriorityList{}
+		for _, actionPlan := range actionPlans {
+			for _, at := range actionPlan.ActionTimings {
+				if at.Timing == nil {
+					continue
+				}
+				if at.IsASAP() {
+					continue
+				}
+				if at.GetNextStartTime(attr.TimeStart).Before(attr.TimeStart) {
+					// the task is obsolete, do not add it to the queue
+					continue
+				}
+				at.SetAccountIDs(actionPlan.AccountIDs) // copy the accounts
+				at.SetActionPlanID(actionPlan.Id)
+				at.ResetStartTimeCache()
+				queue = append(queue, at)
+			}
+		}
+		sort.Sort(queue)
+		// start playback execution loop
+		current := attr.TimeStart
+		for len(queue) > 0 && current.Before(attr.TimeEnd) {
+			a0 := queue[0]
+			current = a0.GetNextStartTime(current)
+			if current.Before(attr.TimeEnd) || current.Equal(attr.TimeEnd) {
+				utils.Logger.Info(fmt.Sprintf("<Replay Scheduler> Executing action %s for time %v", a0.ActionsID, current))
+				err := a0.Execute()
+				if err != nil {
+					*reply = err.Error()
+					return err
+				}
+				// if after execute the next start time is in the past then
+				// do not add it to the queue
+				a0.ResetStartTimeCache()
+				current = current.Add(time.Second)
+				start := a0.GetNextStartTime(current)
+				if start.Before(current) || start.After(attr.TimeEnd) {
+					queue = queue[1:]
+				} else {
+					queue = append(queue, a0)
+					queue = queue[1:]
+					sort.Sort(queue)
+				}
+			}
+		}
+	}
+	*reply = utils.OK
 	return nil
 }

@@ -30,29 +30,31 @@ import (
 
 func TestCsvRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cdrcConfig := cgrConfig.CdrcProfiles["/var/log/cgrates/cdrc/in"][utils.META_DEFAULT]
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.CDRFIELD, CdrFieldId: "supplier", Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
-	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "DisconnectCauseTest", Type: utils.CDRFIELD, CdrFieldId: utils.DISCONNECT_CAUSE,
+	cdrcConfig := cgrConfig.CdrcProfiles["/var/log/cgrates/cdrc/in"][0]
+	cdrcConfig.CdrSourceId = "TEST_CDRC"
+	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.META_COMPOSED, FieldId: utils.SUPPLIER, Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
+	cdrcConfig.ContentFields = append(cdrcConfig.ContentFields, &config.CfgCdrField{Tag: "DisconnectCauseTest", Type: utils.META_COMPOSED, FieldId: utils.DISCONNECT_CAUSE,
 		Value: []*utils.RSRField{&utils.RSRField{Id: "16"}}})
-	csvProcessor := &CsvRecordsProcessor{cdrFormat: CSV, cdrSourceIds: []string{"TEST_CDRC"}, cdrFields: [][]*config.CfgCdrField{cdrcConfig.ContentFields}}
+	//
+	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
 	cdrRow := []string{"firstField", "secondField"}
-	_, err := csvProcessor.recordToStoredCdr(cdrRow, 0)
+	_, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", utils.META_PREPAID, "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
 		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1", "NORMAL_DISCONNECT"}
-	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, 0)
+	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
-	expectedCdr := &engine.StoredCdr{
-		CgrId:           utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
-		TOR:             cdrRow[2],
-		AccId:           cdrRow[3],
-		CdrHost:         "0.0.0.0", // Got it over internal interface
-		CdrSource:       "TEST_CDRC",
-		ReqType:         cdrRow[4],
+	expectedCdr := &engine.CDR{
+		CGRID:           utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
+		ToR:             cdrRow[2],
+		OriginID:        cdrRow[3],
+		OriginHost:      "0.0.0.0", // Got it over internal interface
+		Source:          "TEST_CDRC",
+		RequestType:     cdrRow[4],
 		Direction:       cdrRow[5],
 		Tenant:          cdrRow[6],
 		Category:        cdrRow[7],
@@ -73,20 +75,24 @@ func TestCsvRecordForkCdr(t *testing.T) {
 }
 
 func TestCsvDataMultiplyFactor(t *testing.T) {
-	cdrFields := []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.CDRFIELD, CdrFieldId: "tor", Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
-		&config.CfgCdrField{Tag: "UsageField", Type: utils.CDRFIELD, CdrFieldId: "usage", Value: []*utils.RSRField{&utils.RSRField{Id: "1"}}}}
-	csvProcessor := &CsvRecordsProcessor{cdrFormat: CSV, cdrSourceIds: []string{"TEST_CDRC"}, duMultiplyFactors: []float64{0}, cdrFields: [][]*config.CfgCdrField{cdrFields}}
+	cgrConfig, _ := config.NewDefaultCGRConfig()
+	cdrcConfig := cgrConfig.CdrcProfiles["/var/log/cgrates/cdrc/in"][0]
+	cdrcConfig.CdrSourceId = "TEST_CDRC"
+	cdrcConfig.ContentFields = []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.META_COMPOSED, FieldId: utils.TOR, Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
+		&config.CfgCdrField{Tag: "UsageField", Type: utils.META_COMPOSED, FieldId: utils.USAGE, Value: []*utils.RSRField{&utils.RSRField{Id: "1"}}}}
+	csvProcessor := &CsvRecordsProcessor{dfltCdrcCfg: cdrcConfig, cdrcCfgs: []*config.CdrcConfig{cdrcConfig}}
+	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 0
 	cdrRow := []string{"*data", "1"}
-	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, 0)
+	rtCdr, err := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	var sTime time.Time
-	expectedCdr := &engine.StoredCdr{
-		CgrId:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
-		CdrHost:     "0.0.0.0",
-		CdrSource:   "TEST_CDRC",
+	expectedCdr := &engine.CDR{
+		CGRID:       utils.Sha1("", sTime.String()),
+		ToR:         cdrRow[0],
+		OriginHost:  "0.0.0.0",
+		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1) * time.Second,
 		ExtraFields: map[string]string{},
 		Cost:        -1,
@@ -94,30 +100,30 @@ func TestCsvDataMultiplyFactor(t *testing.T) {
 	if !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
-	csvProcessor.duMultiplyFactors = []float64{1024}
-	expectedCdr = &engine.StoredCdr{
-		CgrId:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
-		CdrHost:     "0.0.0.0",
-		CdrSource:   "TEST_CDRC",
+	csvProcessor.cdrcCfgs[0].DataUsageMultiplyFactor = 1024
+	expectedCdr = &engine.CDR{
+		CGRID:       utils.Sha1("", sTime.String()),
+		ToR:         cdrRow[0],
+		OriginHost:  "0.0.0.0",
+		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1024) * time.Second,
 		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
-	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow, 0); !reflect.DeepEqual(expectedCdr, rtCdr) {
+	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 	cdrRow = []string{"*voice", "1"}
-	expectedCdr = &engine.StoredCdr{
-		CgrId:       utils.Sha1("", sTime.String()),
-		TOR:         cdrRow[0],
-		CdrHost:     "0.0.0.0",
-		CdrSource:   "TEST_CDRC",
+	expectedCdr = &engine.CDR{
+		CGRID:       utils.Sha1("", sTime.String()),
+		ToR:         cdrRow[0],
+		OriginHost:  "0.0.0.0",
+		Source:      "TEST_CDRC",
 		Usage:       time.Duration(1) * time.Second,
 		ExtraFields: map[string]string{},
 		Cost:        -1,
 	}
-	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow, 0); !reflect.DeepEqual(expectedCdr, rtCdr) {
+	if rtCdr, _ := csvProcessor.recordToStoredCdr(cdrRow, cdrcConfig); !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
 }

@@ -77,8 +77,11 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	}
 	defer accountDb.Close()
 	engine.SetAccountingStorage(accountDb)
-	if err := ratingDb.CacheAll(); err != nil {
+	if err := ratingDb.CacheRatingAll(); err != nil {
 		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
+	}
+	if err := accountDb.CacheAccountingAll(); err != nil {
+		return nilDuration, fmt.Errorf("Cache accounting error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)
 	var result *engine.CallCost
@@ -150,7 +153,6 @@ func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
 
 func main() {
 	flag.Parse()
-	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)

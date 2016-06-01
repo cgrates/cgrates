@@ -1,0 +1,25 @@
+{
+// CGRateS Configuration file
+//
+// Used for multiple RAL configuration tests
+// Starts RAL
+
+"listen": {
+	"rpc_json": ":12012",
+	"rpc_gob": ":12013",
+	"http": ":12080",
+},
+
+"rals": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+},
+
+"sm_generic": {
+	"enabled": true,
+},
+
+}

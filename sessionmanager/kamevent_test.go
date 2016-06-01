@@ -72,35 +72,35 @@ func TestKevAsKamAuthReply(t *testing.T) {
 func TestKevMissingParameter(t *testing.T) {
 	kamEv := KamEvent{"event": "CGR_AUTH_REQUEST", "tr_index": "36045", "tr_label": "612369399", "cgr_reqtype": utils.META_POSTPAID,
 		"cgr_account": "1001", "cgr_destination": "1002"}
-	if !kamEv.MissingParameter() {
+	if !kamEv.MissingParameter("") {
 		t.Error("Failed detecting missing parameters")
 	}
 	kamEv["cgr_setuptime"] = "1419962256"
-	if kamEv.MissingParameter() {
+	if kamEv.MissingParameter("") {
 		t.Error("False detecting missing parameters")
 	}
 	kamEv = KamEvent{"event": "UNKNOWN"}
-	if !kamEv.MissingParameter() {
+	if !kamEv.MissingParameter("") {
 		t.Error("Failed detecting missing parameters")
 	}
 	kamEv = KamEvent{"event": CGR_LCR_REQUEST, "tr_index": "36045", "tr_label": "612369399", "cgr_reqtype": utils.META_POSTPAID,
 		"cgr_account": "1001"}
-	if !kamEv.MissingParameter() {
+	if !kamEv.MissingParameter("") {
 		t.Error("Failed detecting missing parameters")
 	}
 	kamEv = KamEvent{"event": CGR_LCR_REQUEST, CGR_ACCOUNT: "1001", CGR_DESTINATION: "1002", "tr_index": "36045", "tr_label": "612369399"}
-	if kamEv.MissingParameter() {
+	if kamEv.MissingParameter("") {
 		t.Error("False detecting missing parameters")
 	}
 	kamEv = KamEvent{"event": "CGR_CALL_START", "callid": "9d28ec3ee068babdfe036623f42c0969@0:0:0:0:0:0:0:0", "from_tag": "3131b566",
 		"cgr_reqtype": utils.META_POSTPAID, "cgr_account": "1001", "cgr_destination": "1002"}
-	if !kamEv.MissingParameter() {
+	if !kamEv.MissingParameter("") {
 		t.Error("Failed detecting missing parameters")
 	}
 	kamEv["h_entry"] = "463"
 	kamEv["h_id"] = "2605"
 	kamEv["cgr_answertime"] = "1419964961"
-	if kamEv.MissingParameter() {
+	if kamEv.MissingParameter("") {
 		t.Error("False detecting missing parameters")
 	}
 }

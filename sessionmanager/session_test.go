@@ -80,30 +80,40 @@ func TestSessionNilSession(t *testing.T) {
 }
 */
 
-type MockConnector struct {
+type MockRpcClient struct {
 	refundCd *engine.CallDescriptor
 }
 
-func (mc *MockConnector) GetCost(*engine.CallDescriptor, *engine.CallCost) error  { return nil }
-func (mc *MockConnector) Debit(*engine.CallDescriptor, *engine.CallCost) error    { return nil }
-func (mc *MockConnector) MaxDebit(*engine.CallDescriptor, *engine.CallCost) error { return nil }
-func (mc *MockConnector) RefundIncrements(cd *engine.CallDescriptor, reply *float64) error {
+func (mc *MockRpcClient) Call(methodName string, arg interface{}, reply interface{}) error {
+	if cd, ok := arg.(*engine.CallDescriptor); ok {
+		mc.refundCd = cd
+	}
+	return nil
+}
+func (mc *MockRpcClient) GetCost(*engine.CallDescriptor, *engine.CallCost) error  { return nil }
+func (mc *MockRpcClient) Debit(*engine.CallDescriptor, *engine.CallCost) error    { return nil }
+func (mc *MockRpcClient) MaxDebit(*engine.CallDescriptor, *engine.CallCost) error { return nil }
+func (mc *MockRpcClient) RefundIncrements(cd *engine.CallDescriptor, reply *float64) error {
 	mc.refundCd = cd
 	return nil
 }
-func (mc *MockConnector) GetMaxSessionTime(*engine.CallDescriptor, *float64) error { return nil }
-func (mc *MockConnector) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
+func (mc *MockRpcClient) RefundRounding(cd *engine.CallDescriptor, reply *float64) error {
 	return nil
 }
-func (mc *MockConnector) GetDerivedMaxSessionTime(*engine.StoredCdr, *float64) error    { return nil }
-func (mc *MockConnector) GetSessionRuns(*engine.StoredCdr, *[]*engine.SessionRun) error { return nil }
-func (mc *MockConnector) ProcessCdr(*engine.StoredCdr, *string) error                   { return nil }
-func (mc *MockConnector) LogCallCost(*engine.CallCostLog, *string) error                { return nil }
-func (mc *MockConnector) GetLCR(*engine.AttrGetLcr, *engine.LCRCost) error              { return nil }
+func (mc *MockRpcClient) GetMaxSessionTime(*engine.CallDescriptor, *float64) error { return nil }
+func (mc *MockRpcClient) GetDerivedChargers(*utils.AttrDerivedChargers, *utils.DerivedChargers) error {
+	return nil
+}
+func (mc *MockRpcClient) GetDerivedMaxSessionTime(*engine.CDR, *float64) error    { return nil }
+func (mc *MockRpcClient) GetSessionRuns(*engine.CDR, *[]*engine.SessionRun) error { return nil }
+func (mc *MockRpcClient) ProcessCdr(*engine.CDR, *string) error                   { return nil }
+func (mc *MockRpcClient) StoreSMCost(engine.AttrCDRSStoreSMCost, *string) error   { return nil }
+func (mc *MockRpcClient) GetLCR(*engine.AttrGetLcr, *engine.LCRCost) error        { return nil }
+func (mc *MockRpcClient) GetTimeout(int, *time.Duration) error                    { return nil }
 
 func TestSessionRefund(t *testing.T) {
-	mc := &MockConnector{}
-	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	mc := &MockRpcClient{}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc, timezone: time.UTC.String()}, eventStart: FSEvent{SETUP_TIME: time.Now().Format(time.RFC3339)}}
 	ts := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
@@ -116,14 +126,14 @@ func TestSessionRefund(t *testing.T) {
 	cc := &engine.CallCost{Timespans: engine.TimeSpans{ts}}
 	hangupTime := time.Date(2015, 6, 10, 14, 7, 20, 0, time.UTC)
 	s.Refund(cc, hangupTime)
-	if len(mc.refundCd.Increments) != 10 || len(cc.Timespans) != 1 || cc.Timespans[0].TimeEnd != hangupTime {
+	if len(mc.refundCd.Increments) != 1 || mc.refundCd.Increments[0].GetCompressFactor() != 10 || len(cc.Timespans) != 1 || cc.Timespans[0].TimeEnd != hangupTime {
 		t.Errorf("Error refunding: %+v, %+v", mc.refundCd.Increments, cc.Timespans[0])
 	}
 }
 
 func TestSessionRefundAll(t *testing.T) {
-	mc := &MockConnector{}
-	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	mc := &MockRpcClient{}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc, timezone: time.UTC.String()}, eventStart: FSEvent{SETUP_TIME: time.Now().Format(time.RFC3339)}}
 	ts := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
@@ -136,14 +146,14 @@ func TestSessionRefundAll(t *testing.T) {
 	cc := &engine.CallCost{Timespans: engine.TimeSpans{ts}}
 	hangupTime := time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC)
 	s.Refund(cc, hangupTime)
-	if len(mc.refundCd.Increments) != 30 || len(cc.Timespans) != 0 {
+	if len(mc.refundCd.Increments) != 1 || mc.refundCd.Increments[0].GetCompressFactor() != 30 || len(cc.Timespans) != 0 {
 		t.Errorf("Error refunding: %+v, %+v", len(mc.refundCd.Increments), cc.Timespans)
 	}
 }
 
 func TestSessionRefundManyAll(t *testing.T) {
-	mc := &MockConnector{}
-	s := &Session{sessionManager: &FSSessionManager{rater: mc}}
+	mc := &MockRpcClient{}
+	s := &Session{sessionManager: &FSSessionManager{rater: mc, timezone: time.UTC.String()}, eventStart: FSEvent{SETUP_TIME: time.Now().Format(time.RFC3339)}}
 	ts1 := &engine.TimeSpan{
 		TimeStart: time.Date(2015, 6, 10, 14, 7, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2015, 6, 10, 14, 7, 30, 0, time.UTC),
@@ -165,7 +175,7 @@ func TestSessionRefundManyAll(t *testing.T) {
 	cc := &engine.CallCost{Timespans: engine.TimeSpans{ts1, ts2}}
 	hangupTime := time.Date(2015, 6, 10, 14, 07, 0, 0, time.UTC)
 	s.Refund(cc, hangupTime)
-	if len(mc.refundCd.Increments) != 60 || len(cc.Timespans) != 0 {
+	if len(mc.refundCd.Increments) != 1 || mc.refundCd.Increments[0].GetCompressFactor() != 60 || len(cc.Timespans) != 0 {
 		t.Errorf("Error refunding: %+v, %+v", len(mc.refundCd.Increments), cc.Timespans)
 	}
 }

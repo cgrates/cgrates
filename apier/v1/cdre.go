@@ -34,6 +34,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/cgrates/cgrates/cdre"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -92,6 +93,9 @@ func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 // Export Cdrs to file
 func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
 	var err error
+
+	cdreReloadStruct := <-self.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
+	defer func() { self.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
 	exportTemplate := self.Config.CdreProfiles[utils.META_DEFAULT]
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
@@ -116,7 +120,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError.Error(), "Invalid")
 		}
 	}
-	exportDir := exportTemplate.ExportDir
+	exportDir := exportTemplate.ExportFolder
 	if attr.ExportDir != nil && len(*attr.ExportDir) != 0 {
 		exportDir = *attr.ExportDir
 	}
@@ -136,9 +140,13 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
 		dataUsageMultiplyFactor = *attr.DataUsageMultiplyFactor
 	}
-	smsUsageMultiplyFactor := exportTemplate.SmsUsageMultiplyFactor
+	smsUsageMultiplyFactor := exportTemplate.SMSUsageMultiplyFactor
 	if attr.SmsUsageMultiplyFactor != nil && *attr.SmsUsageMultiplyFactor != 0.0 {
 		smsUsageMultiplyFactor = *attr.SmsUsageMultiplyFactor
+	}
+	mmsUsageMultiplyFactor := exportTemplate.MMSUsageMultiplyFactor
+	if attr.MmsUsageMultiplyFactor != nil && *attr.MmsUsageMultiplyFactor != 0.0 {
+		mmsUsageMultiplyFactor = *attr.MmsUsageMultiplyFactor
 	}
 	genericUsageMultiplyFactor := exportTemplate.GenericUsageMultiplyFactor
 	if attr.GenericUsageMultiplyFactor != nil && *attr.GenericUsageMultiplyFactor != 0.0 {
@@ -156,7 +164,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.RoundDecimals != nil {
 		roundingDecimals = *attr.RoundDecimals
 	}
-	maskDestId := exportTemplate.MaskDestId
+	maskDestId := exportTemplate.MaskDestinationID
 	if attr.MaskDestinationId != nil && len(*attr.MaskDestinationId) != 0 {
 		maskDestId = *attr.MaskDestinationId
 	}
@@ -164,19 +172,18 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.MaskLength != nil {
 		maskLen = *attr.MaskLength
 	}
-	cdrsFltr, err := attr.AsCdrsFilter()
+	cdrsFltr, err := attr.AsCDRsFilter(self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	cdrs, _, err := self.CdrDb.GetStoredCdrs(cdrsFltr)
+	cdrs, _, err := self.CdrDb.GetCDRs(cdrsFltr, false)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, exportId, dataUsageMultiplyFactor, smsUsageMultiplyFactor, genericUsageMultiplyFactor,
-		costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify)
+	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, exportId, dataUsageMultiplyFactor, smsUsageMultiplyFactor, mmsUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify, self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -195,14 +202,19 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	return nil
 }
 
-// Remove Cdrs out of CDR storage
-func (self *ApierV1) RemCdrs(attrs utils.AttrRemCdrs, reply *string) error {
-	if len(attrs.CgrIds) == 0 {
-		return fmt.Errorf("%s:CgrIds", utils.ErrMandatoryIeMissing.Error())
+// Reloads CDRE configuration out of folder specified
+func (apier *ApierV1) ReloadCdreConfig(attrs AttrReloadConfig, reply *string) error {
+	if attrs.ConfigDir == "" {
+		attrs.ConfigDir = utils.CONFIG_DIR
 	}
-	if err := self.CdrDb.RemStoredCdrs(attrs.CgrIds); err != nil {
+	newCfg, err := config.NewCGRConfigFromFolder(attrs.ConfigDir)
+	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*reply = "OK"
+	cdreReloadStruct := <-apier.Config.ConfigReloads[utils.CDRE] // Get the CDRE reload channel                     // Read the content of the channel, locking it
+	apier.Config.CdreProfiles = newCfg.CdreProfiles
+	apier.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct // Unlock reloads
+	utils.Logger.Info("<CDRE> Configuration reloaded")
+	*reply = OK
 	return nil
 }

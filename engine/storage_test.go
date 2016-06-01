@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"reflect"
-	"sort"
 	"testing"
 	"time"
 
@@ -100,12 +98,15 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 	}
 }
 
-func TestCacheRefresh(t *testing.T) {
+func TestStorageCacheRefresh(t *testing.T) {
 	ratingStorage.SetDestination(&Destination{"T11", []string{"0"}})
 	ratingStorage.GetDestination("T11")
 	ratingStorage.SetDestination(&Destination{"T11", []string{"1"}})
 	t.Log("Test cache refresh")
-	ratingStorage.CacheAll()
+	err := ratingStorage.CacheRatingAll()
+	if err != nil {
+		t.Error("Error cache rating: ", err)
+	}
 	d, err := ratingStorage.GetDestination("T11")
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
@@ -113,9 +114,136 @@ func TestCacheRefresh(t *testing.T) {
 	}
 }
 
-func TestCacheAliases(t *testing.T) {
-	if subj, err := cache2go.GetCached(utils.RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey("vdf", "a3")); err == nil && subj != "minu" {
-		t.Error("Error caching alias: ", subj, err)
+func TestStorageGetAliases(t *testing.T) {
+	ala := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Context:   utils.ALIAS_CONTEXT_RATING,
+		Values: AliasValues{
+			&AliasValue{
+				Pairs:         AliasPairs{"Subject": map[string]string{"b1": "aaa"}},
+				Weight:        10,
+				DestinationId: utils.ANY,
+			},
+		},
+	}
+	alb := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Context:   "*other",
+		Values: AliasValues{
+			&AliasValue{
+				Pairs:         AliasPairs{"Account": map[string]string{"b1": "aaa"}},
+				Weight:        10,
+				DestinationId: utils.ANY,
+			},
+		},
+	}
+	accountingStorage.SetAlias(ala)
+	accountingStorage.SetAlias(alb)
+	foundAlias, err := accountingStorage.GetAlias(ala.GetId(), true)
+	if err != nil || len(foundAlias.Values) != 1 {
+		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
+	}
+	foundAlias, err = accountingStorage.GetAlias(alb.GetId(), true)
+	if err != nil || len(foundAlias.Values) != 1 {
+		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
+	}
+	foundAlias, err = accountingStorage.GetAlias(ala.GetId(), false)
+	if err != nil || len(foundAlias.Values) != 1 {
+		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
+	}
+	foundAlias, err = accountingStorage.GetAlias(alb.GetId(), false)
+	if err != nil || len(foundAlias.Values) != 1 {
+		t.Errorf("Alias get error %+v, %v: ", foundAlias, err)
+	}
+}
+
+func TestStorageCacheGetReverseAliases(t *testing.T) {
+	ala := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Context:   utils.ALIAS_CONTEXT_RATING,
+	}
+	alb := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Context:   "*other",
+	}
+	if x, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Subject" + utils.ALIAS_CONTEXT_RATING); err == nil {
+		aliasKeys := x.(map[interface{}]struct{})
+		_, found := aliasKeys[utils.ConcatenatedKey(ala.GetId(), utils.ANY)]
+		if !found {
+			t.Error("Error getting reverse alias: ", aliasKeys, ala.GetId()+utils.ANY)
+		}
+	} else {
+		t.Error("Error getting reverse alias: ", err)
+	}
+	if x, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + "Account" + "*other"); err == nil {
+		aliasKeys := x.(map[interface{}]struct{})
+		_, found := aliasKeys[utils.ConcatenatedKey(alb.GetId(), utils.ANY)]
+		if !found {
+			t.Error("Error getting reverse alias: ", aliasKeys)
+		}
+	} else {
+		t.Error("Error getting reverse alias: ", err)
+	}
+}
+
+func TestStorageCacheRemoveCachedAliases(t *testing.T) {
+	ala := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Context:   utils.ALIAS_CONTEXT_RATING,
+	}
+	alb := &Alias{
+		Direction: "*out",
+		Tenant:    "vdf",
+		Category:  "0",
+		Account:   "b1",
+		Subject:   "b1",
+		Context:   utils.ALIAS_CONTEXT_RATING,
+	}
+	accountingStorage.RemoveAlias(ala.GetId())
+	accountingStorage.RemoveAlias(alb.GetId())
+
+	if _, err := cache2go.Get(utils.ALIASES_PREFIX + ala.GetId()); err == nil {
+		t.Error("Error removing cached alias: ", err)
+	}
+	if _, err := cache2go.Get(utils.ALIASES_PREFIX + alb.GetId()); err == nil {
+		t.Error("Error removing cached alias: ", err)
+	}
+
+	if _, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); err == nil {
+		t.Error("Error removing cached reverse alias: ", err)
+	}
+	if _, err := cache2go.Get(utils.REVERSE_ALIASES_PREFIX + "aaa" + utils.ALIAS_CONTEXT_RATING); err == nil {
+		t.Error("Error removing cached reverse alias: ", err)
+	}
+}
+
+func TestStorageDisabledAccount(t *testing.T) {
+	acc, err := accountingStorage.GetAccount("cgrates.org:alodis")
+	if err != nil || acc == nil {
+		t.Error("Error loading disabled user account: ", err, acc)
+	}
+	if acc.Disabled != true || acc.AllowNegative != true {
+		t.Errorf("Error loading user account properties: %+v", acc)
 	}
 }
 
@@ -129,135 +257,81 @@ func TestStoreInterfaces(t *testing.T) {
 	var _ LogStorage = sql
 }
 
-func TestGetRPAliases(t *testing.T) {
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
-		t.Error(err)
+func TestDifferentUuid(t *testing.T) {
+	a1, err := accountingStorage.GetAccount("cgrates.org:12345")
+	if err != nil {
+		t.Error("Error getting account: ", err)
 	}
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
-		t.Error(err)
+	a2, err := accountingStorage.GetAccount("cgrates.org:123456")
+	if err != nil {
+		t.Error("Error getting account: ", err)
 	}
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
-		t.Error(err)
-	}
-	expectAliases := sort.StringSlice([]string{"2001", "2002"})
-	expectAliases.Sort()
-	if aliases, err := ratingStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
-		t.Error(err)
-	} else {
-		aliases := sort.StringSlice(aliases)
-		aliases.Sort()
-		if !reflect.DeepEqual(aliases, expectAliases) {
-			t.Errorf("Expecting: %v, received: %v", expectAliases, aliases)
-		}
+	if a1.BalanceMap[utils.VOICE][0].Uuid == a2.BalanceMap[utils.VOICE][0].Uuid ||
+		a1.BalanceMap[utils.MONETARY][0].Uuid == a2.BalanceMap[utils.MONETARY][0].Uuid {
+		t.Errorf("Identical uuids in different accounts: %+v <-> %+v", a1.BalanceMap[utils.VOICE][0], a1.BalanceMap[utils.MONETARY][0])
 	}
 }
 
-func TestRemRSubjAliases(t *testing.T) {
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
-		t.Error(err)
+func TestStorageTask(t *testing.T) {
+	// clean previous unused tasks
+	for i := 0; i < 20; i++ {
+		ratingStorage.PopTask()
 	}
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
-		t.Error(err)
-	}
-	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}, true); err != nil {
-		t.Error(err)
-	}
-	if cgrAliases, err := ratingStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
-		t.Error(err)
-	} else if len(cgrAliases) != 0 {
-		t.Error("Subject aliases not removed: ", cgrAliases)
-	}
-	if iscAliases, err := ratingStorage.GetRPAliases("itsyscom.com", "1001", true); err != nil { // Make sure the aliases were removed at tenant level
-		t.Error(err)
-	} else if !reflect.DeepEqual(iscAliases, []string{"2003"}) {
-		t.Errorf("Unexpected aliases: %v", iscAliases)
-	}
-}
 
-func TestStorageRpAliases(t *testing.T) {
-	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err == nil {
-		t.Error("Found alias before setting")
+	if err := ratingStorage.PushTask(&Task{Uuid: "1"}); err != nil {
+		t.Error("Error pushing task: ", err)
 	}
-	if err := ratingStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "1991"), "1991"); err != nil {
-		t.Error(err)
+	if err := ratingStorage.PushTask(&Task{Uuid: "2"}); err != nil {
+		t.Error("Error pushing task: ", err)
 	}
-	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err != nil {
-		t.Error("Alias not found after setting")
+	if err := ratingStorage.PushTask(&Task{Uuid: "3"}); err != nil {
+		t.Error("Error pushing task: ", err)
 	}
-	if err := ratingStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1991"}}, true); err != nil {
-		t.Error(err)
+	if err := ratingStorage.PushTask(&Task{Uuid: "4"}); err != nil {
+		t.Error("Error pushing task: ", err)
 	}
-	if _, err := ratingStorage.GetRpAlias("cgrates.org:1991", true); err == nil {
-		t.Error("Found alias after removing")
+	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "1" {
+		t.Error("Error poping task: ", task, err)
 	}
-}
-
-func TestGetAccountAliases(t *testing.T) {
-	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2001"), "1001"); err != nil {
-		t.Error(err)
+	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "2" {
+		t.Error("Error poping task: ", task, err)
 	}
-	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2002"), "1001"); err != nil {
-		t.Error(err)
+	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "3" {
+		t.Error("Error poping task: ", task, err)
 	}
-	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
-		t.Error(err)
+	if task, err := ratingStorage.PopTask(); err != nil && task.Uuid != "4" {
+		t.Error("Error poping task: ", task, err)
 	}
-	expectAliases := sort.StringSlice([]string{"2001", "2002"})
-	expectAliases.Sort()
-	if aliases, err := ratingStorage.GetAccountAliases("cgrates.org", "1001", true); err != nil {
-		t.Error(err)
-	} else {
-		aliases := sort.StringSlice(aliases)
-		aliases.Sort()
-		if !reflect.DeepEqual(aliases, expectAliases) {
-			t.Errorf("Expecting: %v, received: %v", expectAliases, aliases)
-		}
-	}
-}
-
-func TestStorageAccAliases(t *testing.T) {
-	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err == nil {
-		t.Error("Found alias before setting")
-	}
-	if err := ratingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "1991"), "1991"); err != nil {
-		t.Error(err)
-	}
-	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err != nil {
-		t.Error("Alias not found after setting")
-	}
-	if err := ratingStorage.RemoveAccAliases([]*TenantAccount{&TenantAccount{Tenant: "cgrates.org", Account: "1991"}}, true); err != nil {
-		t.Error(err)
-	}
-	if _, err := ratingStorage.GetAccAlias("cgrates.org:1991", true); err == nil {
-		t.Error("Found alias after removing")
+	if task, err := ratingStorage.PopTask(); err == nil && task != nil {
+		t.Errorf("Error poping task %+v, %v ", task, err)
 	}
 }
 
 /************************** Benchmarks *****************************/
 
 func GetUB() *Account {
-	uc := &UnitsCounter{
-		Direction:   OUTBOUND,
-		BalanceType: utils.SMS,
-		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}},
+	uc := &UnitCounter{
+		Counters: CounterFilters{&CounterFilter{Value: 1}, &CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(20), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}}, &CounterFilter{Filter: &BalanceFilter{Weight: utils.Float64Pointer(10), DestinationIDs: utils.StringMapPointer(utils.NewStringMap("RET"))}}},
 	}
 	at := &ActionTrigger{
-		Id:                    "some_uuid",
-		BalanceType:           utils.MONETARY,
-		BalanceDirection:      OUTBOUND,
-		ThresholdValue:        100.0,
-		BalanceDestinationIds: "NAT",
-		Weight:                10.0,
-		ActionsId:             "Commando",
+		ID:             "some_uuid",
+		ThresholdValue: 100.0,
+		Balance: &BalanceFilter{
+			Type:           utils.StringPointer(utils.MONETARY),
+			Directions:     utils.StringMapPointer(utils.NewStringMap(utils.OUT)),
+			DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT")),
+		},
+		Weight:    10.0,
+		ActionsID: "Commando",
 	}
 	var zeroTime time.Time
 	zeroTime = zeroTime.UTC() // for deep equal to find location
 	ub := &Account{
-		Id:             "rif",
+		ID:             "rif",
 		AllowNegative:  true,
-		BalanceMap:     map[string]BalanceChain{utils.SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: BalanceChain{&Balance{Weight: 20, DestinationIds: "NAT"}, &Balance{Weight: 10, DestinationIds: "RET"}}},
-		UnitCounters:   []*UnitsCounter{uc, uc},
-		ActionTriggers: ActionTriggerPriotityList{at, at, at},
+		BalanceMap:     map[string]Balances{utils.SMS: Balances{&Balance{Value: 14, ExpirationDate: zeroTime}}, utils.DATA: Balances{&Balance{Value: 1024, ExpirationDate: zeroTime}}, utils.VOICE: Balances{&Balance{Weight: 20, DestinationIDs: utils.NewStringMap("NAT")}, &Balance{Weight: 10, DestinationIDs: utils.NewStringMap("RET")}}},
+		UnitCounters:   UnitCounters{utils.SMS: []*UnitCounter{uc, uc}},
+		ActionTriggers: ActionTriggers{at, at, at},
 	}
 	return ub
 }

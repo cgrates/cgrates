@@ -4,7 +4,7 @@
 // Used in mediator_local_test
 // Starts rater, cdrs and mediator connecting over internal channel
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
 },
 
@@ -14,17 +14,18 @@
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
-	"mediator": "internal",							// address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 },
 
-"cdrc": {
-	"CDRC-CSV1": {
+"cdrc": [
+	{
+		"id": "CDRC-CSV1",
 		"enabled": true,							// enable CDR client functionality
 		"cdr_in_dir": "/tmp/cgrates/cdrc1/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgrates/cdrc1/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "csv1",					// free form field, tag identifying the source of the CDRs within CDRS database
 	},
-	"CDRC-CSV2": {
+	{
+		"id": "CDRC-CSV2",
 		"enabled": true,							// enable CDR client functionality
 		"cdr_in_dir": "/tmp/cgrates/cdrc2/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgrates/cdrc2/out",	// absolute path towards the directory where processed CDRs will be moved
@@ -44,7 +45,8 @@
 			{"cdr_field_id": "usage", "value": "~9:s/^(\\d+)$/${1}s/"},
 		],
 	},
-	"CDRC-CSV3": {
+	{
+		"id": "CDRC-CSV3",
 		"enabled": true,							// enable CDR client functionality
 		"field_separator": ";",						// separator used in case of csv files
 		"cdr_in_dir": "/tmp/cgrates/cdrc3/in",		// absolute path towards the directory where the CDRs are stored
@@ -65,11 +67,7 @@
 			{"cdr_field_id": "usage", "value": "~6:s/^(\\d+)$/${1}s/"},
 		],
 	}
-},
-
-"mediator": {
-	"enabled": true,						// starts Mediator service: <true|false>.
-},
+],
 
 "cdre": {
 	"CDRE-FW1": {

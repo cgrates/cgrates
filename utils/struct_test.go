@@ -84,3 +84,56 @@ func TestStructExtraFields(t *testing.T) {
 		t.Errorf("expected: %v got: %v", ts.ExtraFields, efMap)
 	}
 }
+
+func TestStructFromMapStringInterface(t *testing.T) {
+	ts := &struct {
+		Name     string
+		Class    *string
+		List     []string
+		Elements struct {
+			Type  string
+			Value float64
+		}
+	}{}
+	s := "test2"
+	m := map[string]interface{}{
+		"Name":  "test1",
+		"Class": &s,
+		"List":  []string{"test3", "test4"},
+		"Elements": struct {
+			Type  string
+			Value float64
+		}{
+			Type:  "test5",
+			Value: 9.8,
+		},
+	}
+	if err := FromMapStringInterface(m, ts); err != nil {
+		t.Logf("ts: %+v", ToJSON(ts))
+		t.Error("Error converting map to struct: ", err)
+	}
+}
+
+func TestStructFromMapStringInterfaceValue(t *testing.T) {
+	type T struct {
+		Name     string
+		Disabled *bool
+		Members  []string
+	}
+	ts := &T{}
+	vts := reflect.ValueOf(ts)
+	x, err := FromMapStringInterfaceValue(map[string]interface{}{
+		"Name":     "test",
+		"Disabled": true,
+		"Members":  []string{"1", "2", "3"},
+	}, vts)
+	rt := x.(T)
+	if err != nil {
+		t.Fatalf("error converting structure value: %v", err)
+	}
+	if rt.Name != "test" ||
+		*rt.Disabled != true ||
+		!reflect.DeepEqual(rt.Members, []string{"1", "2", "3"}) {
+		t.Errorf("error converting structure value: %s", ToIJSON(rt))
+	}
+}

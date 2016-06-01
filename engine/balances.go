@@ -33,71 +33,97 @@ import (
 // Can hold different units as seconds or monetary
 type Balance struct {
 	Uuid           string //system wide unique
-	Id             string // account wide unique
+	ID             string // account wide unique
 	Value          float64
+	Directions     utils.StringMap
 	ExpirationDate time.Time
 	Weight         float64
-	DestinationIds string
+	DestinationIDs utils.StringMap
 	RatingSubject  string
-	Category       string
-	SharedGroup    string
+	Categories     utils.StringMap
+	SharedGroups   utils.StringMap
 	Timings        []*RITiming
-	TimingIDs      string
+	TimingIDs      utils.StringMap
+	Disabled       bool
+	Factor         ValueFactor
+	Blocker        bool
 	precision      int
 	account        *Account // used to store ub reference for shared balances
 	dirty          bool
 }
 
 func (b *Balance) Equal(o *Balance) bool {
-	if b.DestinationIds == "" {
-		b.DestinationIds = utils.ANY
+	if len(b.DestinationIDs) == 0 {
+		b.DestinationIDs = utils.StringMap{utils.ANY: true}
 	}
-	if o.DestinationIds == "" {
-		o.DestinationIds = utils.ANY
+	if len(o.DestinationIDs) == 0 {
+		o.DestinationIDs = utils.StringMap{utils.ANY: true}
 	}
-	bDestIds := b.sortDestinationIds()
-	oDestIds := o.sortDestinationIds()
-	return b.Id == o.Id &&
+	return b.Uuid == o.Uuid &&
+		b.ID == o.ID &&
 		b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
-		bDestIds == oDestIds &&
+		b.DestinationIDs.Equal(o.DestinationIDs) &&
+		b.Directions.Equal(o.Directions) &&
 		b.RatingSubject == o.RatingSubject &&
-		b.Category == o.Category &&
-		b.SharedGroup == o.SharedGroup
+		b.Categories.Equal(o.Categories) &&
+		b.SharedGroups.Equal(o.SharedGroups) &&
+		b.Disabled == o.Disabled &&
+		b.Blocker == o.Blocker
 }
 
-func (b *Balance) MatchFilter(o *Balance) bool {
-	if o.Id != "" {
-		return b.Id == o.Id
+func (b *Balance) MatchFilter(o *BalanceFilter, skipIds bool) bool {
+	if o == nil {
+		return true
 	}
-	if b.DestinationIds == "" {
-		b.DestinationIds = utils.ANY
+	if !skipIds && o.Uuid != nil && *o.Uuid != "" {
+		return b.Uuid == *o.Uuid
 	}
-	if o.DestinationIds == "" {
-		o.DestinationIds = utils.ANY
+	if !skipIds && o.ID != nil && *o.ID != "" {
+		return b.ID == *o.ID
 	}
-	bDestIds := b.sortDestinationIds()
-	oDestIds := o.sortDestinationIds()
-	return (o.ExpirationDate.IsZero() || b.ExpirationDate.Equal(o.ExpirationDate)) &&
-		(o.Weight == 0 || b.Weight == o.Weight) &&
-		(oDestIds == "" || bDestIds == oDestIds) &&
-		(o.RatingSubject == "" || b.RatingSubject == o.RatingSubject) &&
-		(o.Category == "" || b.Category == o.Category) &&
-		(o.SharedGroup == "" || b.SharedGroup == o.SharedGroup)
+	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
+		(o.Weight == nil || b.Weight == *o.Weight) &&
+		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
+		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
+		(o.DestinationIDs == nil || b.DestinationIDs.Includes(*o.DestinationIDs)) &&
+		(o.Directions == nil || b.Directions.Includes(*o.Directions)) &&
+		(o.Categories == nil || b.Categories.Includes(*o.Categories)) &&
+		(o.TimingIDs == nil || b.TimingIDs.Includes(*o.TimingIDs)) &&
+		(o.SharedGroups == nil || b.SharedGroups.Includes(*o.SharedGroups)) &&
+		(o.RatingSubject == nil || b.RatingSubject == *o.RatingSubject)
 }
 
-// the default balance has no destinationid, Expirationdate or ratesubject
+func (b *Balance) HardMatchFilter(o *BalanceFilter, skipIds bool) bool {
+	if o == nil {
+		return true
+	}
+	if !skipIds && o.Uuid != nil && *o.Uuid != "" {
+		return b.Uuid == *o.Uuid
+	}
+	if !skipIds && o.ID != nil && *o.ID != "" {
+		return b.ID == *o.ID
+	}
+	return (o.ExpirationDate == nil || b.ExpirationDate.Equal(*o.ExpirationDate)) &&
+		(o.Weight == nil || b.Weight == *o.Weight) &&
+		(o.Blocker == nil || b.Blocker == *o.Blocker) &&
+		(o.Disabled == nil || b.Disabled == *o.Disabled) &&
+		(o.DestinationIDs == nil || b.DestinationIDs.Equal(*o.DestinationIDs)) &&
+		(o.Directions == nil || b.Directions.Equal(*o.Directions)) &&
+		(o.Categories == nil || b.Categories.Equal(*o.Categories)) &&
+		(o.TimingIDs == nil || b.TimingIDs.Equal(*o.TimingIDs)) &&
+		(o.SharedGroups == nil || b.SharedGroups.Equal(*o.SharedGroups)) &&
+		(o.RatingSubject == nil || b.RatingSubject == *o.RatingSubject)
+}
+
+// the default balance has standard Id
 func (b *Balance) IsDefault() bool {
-	return (b.DestinationIds == "" || b.DestinationIds == utils.ANY) &&
-		b.RatingSubject == "" &&
-		b.Category == "" &&
-		b.ExpirationDate.IsZero() &&
-		b.SharedGroup == "" &&
-		b.Weight == 0
+	return b.ID == utils.META_DEFAULT
 }
 
 func (b *Balance) IsExpired() bool {
-	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
+	// check if it expires in the next second
+	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now().Add(1*time.Second))
 }
 
 func (b *Balance) IsActive() bool {
@@ -105,6 +131,9 @@ func (b *Balance) IsActive() bool {
 }
 
 func (b *Balance) IsActiveAt(t time.Time) bool {
+	if b.Disabled {
+		return false
+	}
 	if len(b.Timings) == 0 {
 		return true
 	}
@@ -116,89 +145,63 @@ func (b *Balance) IsActiveAt(t time.Time) bool {
 	return false
 }
 
-func (b *Balance) sortDestinationIds() string {
-	destIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
-	sort.StringSlice(destIds).Sort()
-	return strings.Join(destIds, utils.INFIELD_SEP)
-}
-
 func (b *Balance) MatchCategory(category string) bool {
-	return b.Category == "" || b.Category == category
+	return len(b.Categories) == 0 || b.Categories[category] == true
 }
 
 func (b *Balance) HasDestination() bool {
-	return b.DestinationIds != "" && b.DestinationIds != utils.ANY
+	return len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false
 }
 
-func (b *Balance) MatchDestination(destinationId string) bool {
-	return !b.HasDestination() || strings.Contains(b.DestinationIds, destinationId)
+func (b *Balance) HasDirection() bool {
+	return len(b.Directions) > 0
+}
+
+func (b *Balance) MatchDestination(destinationID string) bool {
+	return !b.HasDestination() || b.DestinationIDs[destinationID] == true
 }
 
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
-	if at.BalanceId != "" {
-		return b.Id == at.BalanceId
-	}
-	matchesDestination := true
-	if at.BalanceDestinationIds != "" {
-		bDestIds := b.sortDestinationIds()
-		atDestinationIds := at.sortDestinationIds()
-		matchesDestination = (bDestIds == atDestinationIds)
-	}
-	matchesExpirationDate := true
-	if !at.BalanceExpirationDate.IsZero() {
-		matchesExpirationDate = (at.BalanceExpirationDate.Equal(b.ExpirationDate))
-	}
-	matchesWeight := true
-	if at.BalanceWeight > 0 {
-		matchesWeight = (at.BalanceWeight == b.Weight)
-	}
-	matchesRatingSubject := true
-	if at.BalanceRatingSubject != "" {
-		matchesRatingSubject = (at.BalanceRatingSubject == b.RatingSubject)
-	}
-
-	matchesSharedGroup := true
-	if at.BalanceSharedGroup != "" {
-		matchesSharedGroup = (at.BalanceSharedGroup == b.SharedGroup)
-	}
-
-	return matchesDestination &&
-		matchesExpirationDate &&
-		matchesWeight &&
-		matchesRatingSubject &&
-		matchesSharedGroup
+	return b.HardMatchFilter(at.Balance, false)
 }
 
 func (b *Balance) Clone() *Balance {
-	return &Balance{
+	if b == nil {
+		return nil
+	}
+	n := &Balance{
 		Uuid:           b.Uuid,
-		Id:             b.Id,
+		ID:             b.ID,
 		Value:          b.Value, // this value is in seconds
-		DestinationIds: b.DestinationIds,
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
-		Category:       b.Category,
-		SharedGroup:    b.SharedGroup,
+		Categories:     b.Categories,
+		SharedGroups:   b.SharedGroups,
 		TimingIDs:      b.TimingIDs,
 		Timings:        b.Timings, // should not be a problem with aliasing
+		Blocker:        b.Blocker,
+		Disabled:       b.Disabled,
 		dirty:          b.dirty,
 	}
+	if b.DestinationIDs != nil {
+		n.DestinationIDs = b.DestinationIDs.Clone()
+	}
+	if b.Directions != nil {
+		n.Directions = b.Directions.Clone()
+	}
+	return n
 }
 
-func (b *Balance) getMatchingPrefixAndDestId(dest string) (prefix, destId string) {
-	if b.DestinationIds != "" && b.DestinationIds != utils.ANY {
+func (b *Balance) getMatchingPrefixAndDestID(dest string) (prefix, destId string) {
+	if len(b.DestinationIDs) != 0 && b.DestinationIDs[utils.ANY] == false {
 		for _, p := range utils.SplitPrefix(dest, MIN_PREFIX_MATCH) {
-			if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
-				destIds := x.(map[interface{}]struct{})
-				for dId, _ := range destIds {
-					balDestIds := strings.Split(b.DestinationIds, utils.INFIELD_SEP)
-					for _, balDestID := range balDestIds {
-						if dId == balDestID {
-							return p, balDestID
-						}
+			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
+				destIDs := x.(map[interface{}]struct{})
+				for dID := range destIDs {
+					if b.DestinationIDs[dID.(string)] == true {
+						return p, dID.(string)
 					}
-
 				}
 			}
 		}
@@ -214,7 +217,7 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 	credit = initialCredit
 	cc, err := b.GetCost(cd, false)
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+		utils.Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 		return 0, credit
 	}
 	if cc.deductConnectFee {
@@ -296,35 +299,13 @@ func (b *Balance) SetValue(amount float64) {
 	b.Value = amount
 	b.Value = utils.Round(b.GetValue(), globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	b.dirty = true
-
-	// publish event
-	accountId := ""
-	allowNegative := ""
-	disabled := ""
-	if b.account != nil {
-		accountId = b.account.Id
-		allowNegative = strconv.FormatBool(b.account.AllowNegative)
-		disabled = strconv.FormatBool(b.account.Disabled)
-	}
-	Publish(CgrEvent{
-		"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
-		"Uuid":                 b.Uuid,
-		"Id":                   b.Id,
-		"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
-		"ExpirationDate":       b.ExpirationDate.String(),
-		"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
-		"DestinationIds":       b.DestinationIds,
-		"RatingSubject":        b.RatingSubject,
-		"Category":             b.Category,
-		"SharedGroup":          b.SharedGroup,
-		"TimingIDs":            b.TimingIDs,
-		"Account":              accountId,
-		"AccountAllowNegative": allowNegative,
-		"AccountDisabled":      disabled,
-	})
 }
 
-func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances BalanceChain, count bool, dryRun bool) (cc *CallCost, err error) {
+func (b *Balance) SetDirty() {
+	b.dirty = true
+}
+
+func (b *Balance) debitUnits(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
@@ -336,8 +317,6 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 			TimeEnd:   cd.TimeEnd,
 		})
 
-		seconds := duration.Seconds()
-		amount := seconds
 		ts := cc.Timespans[0]
 		ts.RoundToDuration(duration)
 		ts.RateInterval = &RateInterval{
@@ -352,7 +331,7 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				},
 			},
 		}
-		prefix, destid := b.getMatchingPrefixAndDestId(cd.Destination)
+		prefix, destid := b.getMatchingPrefixAndDestID(cd.Destination)
 		if prefix == "" {
 			prefix = cd.Destination
 		}
@@ -369,18 +348,27 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		//log.Printf("CC: %+v", ts)
 		for incIndex, inc := range ts.Increments {
 			//log.Printf("INCREMENET: %+v", inc)
-			if seconds == 1 {
-				amount = inc.Duration.Seconds()
+
+			amount := inc.Duration.Seconds()
+			if b.Factor != nil {
+				amount = utils.Round(amount/b.Factor.GetValue(cd.TOR), globalRoundingDecimals, utils.ROUNDING_UP)
 			}
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
-				inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.Id
-				inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
+				inc.BalanceInfo.Unit = &UnitInfo{
+					UUID:          b.Uuid,
+					ID:            b.ID,
+					Value:         b.Value,
+					DestinationID: cc.Destination,
+					Consumed:      amount,
+					TOR:           cc.TOR,
+					RateInterval:  nil,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
 				inc.Cost = 0
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationIds: cc.Destination}})
+					ub.countUnits(amount, cc.TOR, cc, b)
 				}
 			} else {
 				inc.paid = false
@@ -401,26 +389,33 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 		// get the cost from balance
 		//log.Printf("::::::: %+v", cd)
 		cc, err = b.GetCost(cd, true)
+		if err != nil {
+			return nil, err
+		}
+		if debitConnectFee {
+			// this is the first add, debit the connect fee
+			ub.DebitConnectionFee(cc, moneyBalances, count)
+		}
 		cc.Timespans.Decompress()
 		//log.Printf("CC: %+v", cc)
-		if err != nil {
-			return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
-		}
+
 		for tsIndex, ts := range cc.Timespans {
 			if ts.Increments == nil {
 				ts.createIncrementsSlice()
 			}
 
 			if ts.RateInterval == nil {
-				Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
+				utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 				return nil, errors.New("timespan with no rate interval assigned")
 			}
 			maxCost, strategy := ts.RateInterval.GetMaxCost()
 			for incIndex, inc := range ts.Increments {
 				// debit minutes and money
-				seconds := inc.Duration.Seconds()
+				amount := inc.Duration.Seconds()
+				if b.Factor != nil {
+					amount = utils.Round(amount/b.Factor.GetValue(cd.TOR), globalRoundingDecimals, utils.ROUNDING_UP)
+				}
 				cost := inc.Cost
-				//log.Printf("INC: %+v", inc)
 				inc.paid = false
 				if strategy == utils.MAX_COST_DISCONNECT && cd.MaxCostSoFar >= maxCost {
 					// cat the entire current timespan
@@ -438,11 +433,16 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 				}
 				if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 					cost, inc.Cost = 0.0, 0.0
-					inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.Id
+					inc.BalanceInfo.Monetary = &MonetaryInfo{
+						UUID:         b.Uuid,
+						ID:           b.ID,
+						Value:        b.Value,
+						RateInterval: ts.RateInterval,
+					}
+					inc.BalanceInfo.AccountID = ub.ID
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationIds: cc.Destination}})
+						ub.countUnits(cost, utils.MONETARY, cc, b)
 					}
 					// go to nextincrement
 					continue
@@ -454,21 +454,32 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 						break
 					}
 				}
-				if (cost == 0 || moneyBal != nil) && b.GetValue() >= seconds {
-					b.SubstractValue(seconds)
-					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
-					inc.BalanceInfo.AccountId = ub.Id
-					inc.UnitInfo = &UnitInfo{cc.Destination, seconds, cc.TOR}
+				if (cost == 0 || moneyBal != nil) && b.GetValue() >= amount {
+					b.SubstractValue(amount)
+					inc.BalanceInfo.Unit = &UnitInfo{
+						UUID:          b.Uuid,
+						ID:            b.ID,
+						Value:         b.Value,
+						DestinationID: cc.Destination,
+						Consumed:      amount,
+						TOR:           cc.TOR,
+						RateInterval:  ts.RateInterval,
+					}
+					inc.BalanceInfo.AccountID = ub.ID
 					if cost != 0 {
-						inc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
 						moneyBal.SubstractValue(cost)
+						inc.BalanceInfo.Monetary = &MonetaryInfo{
+							UUID:  moneyBal.Uuid,
+							ID:    moneyBal.ID,
+							Value: moneyBal.Value,
+						}
 						cd.MaxCostSoFar += cost
 					}
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: seconds, DestinationIds: cc.Destination}})
+						ub.countUnits(amount, cc.TOR, cc, b)
 						if cost != 0 {
-							ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationIds: cc.Destination}})
+							ub.countUnits(cost, utils.MONETARY, cc, moneyBal)
 						}
 					}
 				} else {
@@ -492,27 +503,33 @@ func (b *Balance) DebitUnits(cd *CallDescriptor, ub *Account, moneyBalances Bala
 	return
 }
 
-func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun bool) (cc *CallCost, err error) {
+func (b *Balance) debitMoney(cd *CallDescriptor, ub *Account, moneyBalances Balances, count bool, dryRun, debitConnectFee bool) (cc *CallCost, err error) {
 	if !b.IsActiveAt(cd.TimeStart) || b.GetValue() <= 0 {
 		return
 	}
 	//log.Printf("}}}}}}} %+v", cd.testCallcost)
 	cc, err = b.GetCost(cd, true)
+	if err != nil {
+		return nil, err
+	}
+
+	if debitConnectFee {
+		// this is the first add, debit the connect fee
+		ub.DebitConnectionFee(cc, moneyBalances, count)
+	}
+
 	cc.Timespans.Decompress()
 	//log.Printf("CallCost In Debit: %+v", cc)
 	//for _, ts := range cc.Timespans {
 	//	log.Printf("CC_TS: %+v", ts.RateInterval.Rating.Rates[0])
 	//}
-	if err != nil {
-		return nil, fmt.Errorf("Error getting new cost for balance subject: %v", err)
-	}
 	for tsIndex, ts := range cc.Timespans {
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
 		}
 		//log.Printf("TS: %+v", ts)
 		if ts.RateInterval == nil {
-			Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
+			utils.Logger.Err(fmt.Sprintf("Nil RateInterval ERROR on TS: %+v, CC: %+v, from CD: %+v", ts, cc, cd))
 			return nil, errors.New("timespan with no rate interval assigned")
 		}
 		maxCost, strategy := ts.RateInterval.GetMaxCost()
@@ -539,11 +556,18 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 			}
 			if strategy == utils.MAX_COST_FREE && cd.MaxCostSoFar >= maxCost {
 				amount, inc.Cost = 0.0, 0.0
-				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.Id
+				inc.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  b.Uuid,
+					ID:    b.ID,
+					Value: b.Value,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
+				if b.RatingSubject != "" {
+					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
+				}
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationIds: cc.Destination}})
+					ub.countUnits(amount, utils.MONETARY, cc, b)
 				}
 
 				//log.Printf("TS: %+v", cc.Cost)
@@ -554,11 +578,18 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 			if b.GetValue() >= amount {
 				b.SubstractValue(amount)
 				cd.MaxCostSoFar += amount
-				inc.BalanceInfo.MoneyBalanceUuid = b.Uuid
-				inc.BalanceInfo.AccountId = ub.Id
+				inc.BalanceInfo.Monetary = &MonetaryInfo{
+					UUID:  b.Uuid,
+					ID:    b.ID,
+					Value: b.Value,
+				}
+				inc.BalanceInfo.AccountID = ub.ID
+				if b.RatingSubject != "" {
+					inc.BalanceInfo.Monetary.RateInterval = ts.RateInterval
+				}
 				inc.paid = true
 				if count {
-					ub.countUnits(&Action{BalanceType: utils.MONETARY, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationIds: cc.Destination}})
+					ub.countUnits(amount, utils.MONETARY, cc, b)
 				}
 			} else {
 				inc.paid = false
@@ -587,53 +618,38 @@ func (b *Balance) DebitMoney(cd *CallDescriptor, ub *Account, count bool, dryRun
 /*
 Structure to store minute buckets according to weight, precision or price.
 */
-type BalanceChain []*Balance
+type Balances []*Balance
 
-func (bc BalanceChain) Len() int {
+func (bc Balances) Len() int {
 	return len(bc)
 }
 
-func (bc BalanceChain) Swap(i, j int) {
+func (bc Balances) Swap(i, j int) {
 	bc[i], bc[j] = bc[j], bc[i]
 }
 
 // we need the better ones at the beginning
-func (bc BalanceChain) Less(j, i int) bool {
+func (bc Balances) Less(j, i int) bool {
 	return bc[i].precision < bc[j].precision ||
 		(bc[i].precision == bc[j].precision && bc[i].Weight < bc[j].Weight)
 
 }
 
-func (bc BalanceChain) Sort() {
+func (bc Balances) Sort() {
 	sort.Sort(bc)
 }
 
-func (bc BalanceChain) GetTotalValue() (total float64) {
+func (bc Balances) GetTotalValue() (total float64) {
 	for _, b := range bc {
 		if !b.IsExpired() && b.IsActive() {
 			total += b.GetValue()
 		}
 	}
+	total = utils.Round(total, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	return
 }
 
-func (bc BalanceChain) Debit(amount float64) float64 {
-	bc.Sort()
-	for i, b := range bc {
-		if b.IsExpired() {
-			continue
-		}
-		if b.GetValue() >= amount || i == len(bc)-1 { // if last one go negative
-			b.SubstractValue(amount)
-			break
-		}
-		b.SetValue(0)
-		amount -= b.GetValue()
-	}
-	return bc.GetTotalValue()
-}
-
-func (bc BalanceChain) Equal(o BalanceChain) bool {
+func (bc Balances) Equal(o Balances) bool {
 	if len(bc) != len(o) {
 		return false
 	}
@@ -647,15 +663,15 @@ func (bc BalanceChain) Equal(o BalanceChain) bool {
 	return true
 }
 
-func (bc BalanceChain) Clone() BalanceChain {
-	var newChain BalanceChain
+func (bc Balances) Clone() Balances {
+	var newChain Balances
 	for _, b := range bc {
 		newChain = append(newChain, b.Clone())
 	}
 	return newChain
 }
 
-func (bc BalanceChain) GetBalance(uuid string) *Balance {
+func (bc Balances) GetBalance(uuid string) *Balance {
 	for _, balance := range bc {
 		if balance.Uuid == uuid {
 			return balance
@@ -664,7 +680,7 @@ func (bc BalanceChain) GetBalance(uuid string) *Balance {
 	return nil
 }
 
-func (bc BalanceChain) HasBalance(balance *Balance) bool {
+func (bc Balances) HasBalance(balance *Balance) bool {
 	for _, b := range bc {
 		if b.Equal(balance) {
 			return true
@@ -673,11 +689,50 @@ func (bc BalanceChain) HasBalance(balance *Balance) bool {
 	return false
 }
 
-func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
+func (bc Balances) SaveDirtyBalances(acc *Account) {
+	savedAccounts := make(map[string]bool)
 	for _, b := range bc {
-		// TODO: check if the account was not already saved ?
-		if b.account != nil && b.account != acc && b.dirty {
+		if b.dirty {
+			// publish event
+			accountId := ""
+			allowNegative := ""
+			disabled := ""
+			if b.account != nil { // only publish modifications for balances with account set
+				//utils.LogStack()
+				accountId = b.account.ID
+				allowNegative = strconv.FormatBool(b.account.AllowNegative)
+				disabled = strconv.FormatBool(b.account.Disabled)
+				Publish(CgrEvent{
+					"EventName":            utils.EVT_ACCOUNT_BALANCE_MODIFIED,
+					"Uuid":                 b.Uuid,
+					"Id":                   b.ID,
+					"Value":                strconv.FormatFloat(b.Value, 'f', -1, 64),
+					"ExpirationDate":       b.ExpirationDate.String(),
+					"Weight":               strconv.FormatFloat(b.Weight, 'f', -1, 64),
+					"DestinationIDs":       b.DestinationIDs.String(),
+					"Directions":           b.Directions.String(),
+					"RatingSubject":        b.RatingSubject,
+					"Categories":           b.Categories.String(),
+					"SharedGroups":         b.SharedGroups.String(),
+					"TimingIDs":            b.TimingIDs.String(),
+					"Account":              accountId,
+					"AccountAllowNegative": allowNegative,
+					"AccountDisabled":      disabled,
+				})
+			}
+		}
+		if b.account != nil && b.account != acc && b.dirty && savedAccounts[b.account.ID] == false {
 			accountingStorage.SetAccount(b.account)
+			savedAccounts[b.account.ID] = true
 		}
 	}
+}
+
+type ValueFactor map[string]float64
+
+func (f ValueFactor) GetValue(tor string) float64 {
+	if value, ok := f[tor]; ok {
+		return value
+	}
+	return 1.0
 }

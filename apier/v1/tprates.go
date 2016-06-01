@@ -87,7 +87,7 @@ func (self *ApierV1) RemTPRate(attrs AttrGetTPRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_RATES, attrs.TPid, attrs.RateId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_RATES, attrs.TPid, map[string]string{"tag": attrs.RateId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

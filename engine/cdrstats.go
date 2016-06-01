@@ -20,69 +20,69 @@ package engine
 
 import (
 	"reflect"
-	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func NewCdrStatsFromCdrStatsCfg(csCfg *config.CdrStatsConfig) *CdrStats {
 	return &CdrStats{
-		Id:                csCfg.Id,
-		QueueLength:       csCfg.QueueLength,
-		TimeWindow:        csCfg.TimeWindow,
-		Metrics:           csCfg.Metrics,
-		SetupInterval:     csCfg.SetupInterval,
-		TOR:               csCfg.TORs,
-		CdrHost:           csCfg.CdrHosts,
-		CdrSource:         csCfg.CdrSources,
-		ReqType:           csCfg.ReqTypes,
-		Direction:         csCfg.Directions,
-		Tenant:            csCfg.Tenants,
-		Category:          csCfg.Categories,
-		Account:           csCfg.Accounts,
-		Subject:           csCfg.Subjects,
-		DestinationPrefix: csCfg.DestinationPrefixes,
-		UsageInterval:     csCfg.UsageInterval,
-		Supplier:          csCfg.Suppliers,
-		DisconnectCause:   csCfg.DisconnectCauses,
-		MediationRunIds:   csCfg.MediationRunIds,
-		RatedAccount:      csCfg.RatedAccounts,
-		RatedSubject:      csCfg.RatedSubjects,
-		CostInterval:      csCfg.CostInterval,
+		Id:              csCfg.Id,
+		QueueLength:     csCfg.QueueLength,
+		TimeWindow:      csCfg.TimeWindow,
+		Metrics:         csCfg.Metrics,
+		SetupInterval:   csCfg.SetupInterval,
+		TOR:             csCfg.TORs,
+		CdrHost:         csCfg.CdrHosts,
+		CdrSource:       csCfg.CdrSources,
+		ReqType:         csCfg.ReqTypes,
+		Direction:       csCfg.Directions,
+		Tenant:          csCfg.Tenants,
+		Category:        csCfg.Categories,
+		Account:         csCfg.Accounts,
+		Subject:         csCfg.Subjects,
+		DestinationIds:  csCfg.DestinationIds,
+		UsageInterval:   csCfg.UsageInterval,
+		Supplier:        csCfg.Suppliers,
+		DisconnectCause: csCfg.DisconnectCauses,
+		MediationRunIds: csCfg.MediationRunIds,
+		RatedAccount:    csCfg.RatedAccounts,
+		RatedSubject:    csCfg.RatedSubjects,
+		CostInterval:    csCfg.CostInterval,
 	}
 }
 
 type CdrStats struct {
-	Id                string        // Config id, unique per config instance
-	QueueLength       int           // Number of items in the stats buffer
-	TimeWindow        time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-	SaveInterval      time.Duration
-	Metrics           []string        // ASR, ACD, ACC
-	SetupInterval     []time.Time     // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
-	TOR               []string        // CDRFieldFilter on TORs
-	CdrHost           []string        // CDRFieldFilter on CdrHosts
-	CdrSource         []string        // CDRFieldFilter on CdrSources
-	ReqType           []string        // CDRFieldFilter on ReqTypes
-	Direction         []string        // CDRFieldFilter on Directions
-	Tenant            []string        // CDRFieldFilter on Tenants
-	Category          []string        // CDRFieldFilter on Categories
-	Account           []string        // CDRFieldFilter on Accounts
-	Subject           []string        // CDRFieldFilter on Subjects
-	DestinationPrefix []string        // CDRFieldFilter on DestinationPrefixes
-	UsageInterval     []time.Duration // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
-	PddInterval       []time.Duration // CDRFieldFilter on PddInterval, 2 or less items (>= Pdd, <Pdd)
-	Supplier          []string        // CDRFieldFilter on Suppliers
-	DisconnectCause   []string        // Filter on DisconnectCause
-	MediationRunIds   []string        // CDRFieldFilter on MediationRunIds
-	RatedAccount      []string        // CDRFieldFilter on RatedAccounts
-	RatedSubject      []string        // CDRFieldFilter on RatedSubjects
-	CostInterval      []float64       // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
-	Triggers          ActionTriggerPriotityList
+	Id              string        // Config id, unique per config instance
+	QueueLength     int           // Number of items in the stats buffer
+	TimeWindow      time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+	SaveInterval    time.Duration
+	Metrics         []string        // ASR, ACD, ACC
+	SetupInterval   []time.Time     // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
+	TOR             []string        // CDRFieldFilter on TORs
+	CdrHost         []string        // CDRFieldFilter on CdrHosts
+	CdrSource       []string        // CDRFieldFilter on CdrSources
+	ReqType         []string        // CDRFieldFilter on RequestTypes
+	Direction       []string        // CDRFieldFilter on Directions
+	Tenant          []string        // CDRFieldFilter on Tenants
+	Category        []string        // CDRFieldFilter on Categories
+	Account         []string        // CDRFieldFilter on Accounts
+	Subject         []string        // CDRFieldFilter on Subjects
+	DestinationIds  []string        // CDRFieldFilter on DestinationPrefixes
+	UsageInterval   []time.Duration // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
+	PddInterval     []time.Duration // CDRFieldFilter on PddInterval, 2 or less items (>= Pdd, <Pdd)
+	Supplier        []string        // CDRFieldFilter on Suppliers
+	DisconnectCause []string        // Filter on DisconnectCause
+	MediationRunIds []string        // CDRFieldFilter on MediationRunIds
+	RatedAccount    []string        // CDRFieldFilter on RatedAccounts
+	RatedSubject    []string        // CDRFieldFilter on RatedSubjects
+	CostInterval    []float64       // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
+	Triggers        ActionTriggers
 }
 
-func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
+func (cs *CdrStats) AcceptCdr(cdr *CDR) bool {
 	if cdr == nil {
 		return false
 	}
@@ -94,16 +94,16 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 			return false
 		}
 	}
-	if len(cs.TOR) > 0 && !utils.IsSliceMember(cs.TOR, cdr.TOR) {
+	if len(cs.TOR) > 0 && !utils.IsSliceMember(cs.TOR, cdr.ToR) {
 		return false
 	}
-	if len(cs.CdrHost) > 0 && !utils.IsSliceMember(cs.CdrHost, cdr.CdrHost) {
+	if len(cs.CdrHost) > 0 && !utils.IsSliceMember(cs.CdrHost, cdr.OriginHost) {
 		return false
 	}
-	if len(cs.CdrSource) > 0 && !utils.IsSliceMember(cs.CdrSource, cdr.CdrSource) {
+	if len(cs.CdrSource) > 0 && !utils.IsSliceMember(cs.CdrSource, cdr.Source) {
 		return false
 	}
-	if len(cs.ReqType) > 0 && !utils.IsSliceMember(cs.ReqType, cdr.ReqType) {
+	if len(cs.ReqType) > 0 && !utils.IsSliceMember(cs.ReqType, cdr.RequestType) {
 		return false
 	}
 	if len(cs.Direction) > 0 && !utils.IsSliceMember(cs.Direction, cdr.Direction) {
@@ -121,11 +121,22 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 	if len(cs.Subject) > 0 && !utils.IsSliceMember(cs.Subject, cdr.Subject) {
 		return false
 	}
-	if len(cs.DestinationPrefix) > 0 {
+	if len(cs.DestinationIds) > 0 {
 		found := false
-		for _, prefix := range cs.DestinationPrefix {
-			if strings.HasPrefix(cdr.Destination, prefix) {
-				found = true
+		for _, p := range utils.SplitPrefix(cdr.Destination, MIN_PREFIX_MATCH) {
+			if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
+				destIds := x.(map[interface{}]struct{})
+				for idID := range destIds {
+					if utils.IsSliceMember(cs.DestinationIds, idID.(string)) {
+						found = true
+						break
+					}
+				}
+				if found {
+					break
+				}
+			}
+			if found {
 				break
 			}
 		}
@@ -142,10 +153,10 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 		}
 	}
 	if len(cs.PddInterval) > 0 {
-		if cdr.Pdd < cs.PddInterval[0] {
+		if cdr.PDD < cs.PddInterval[0] {
 			return false
 		}
-		if len(cs.PddInterval) > 1 && cdr.Pdd >= cs.PddInterval[1] {
+		if len(cs.PddInterval) > 1 && cdr.PDD >= cs.PddInterval[1] {
 			return false
 		}
 	}
@@ -155,7 +166,7 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 	if len(cs.DisconnectCause) > 0 && !utils.IsSliceMember(cs.DisconnectCause, cdr.DisconnectCause) {
 		return false
 	}
-	if len(cs.MediationRunIds) > 0 && !utils.IsSliceMember(cs.MediationRunIds, cdr.MediationRunId) {
+	if len(cs.MediationRunIds) > 0 && !utils.IsSliceMember(cs.MediationRunIds, cdr.RunID) {
 		return false
 	}
 	if len(cs.CostInterval) > 0 {
@@ -165,12 +176,6 @@ func (cs *CdrStats) AcceptCdr(cdr *StoredCdr) bool {
 		if len(cs.CostInterval) > 1 && cdr.Cost >= cs.CostInterval[1] {
 			return false
 		}
-	}
-	if len(cs.RatedAccount) > 0 && !utils.IsSliceMember(cs.RatedAccount, cdr.RatedAccount) {
-		return false
-	}
-	if len(cs.RatedSubject) > 0 && !utils.IsSliceMember(cs.RatedSubject, cdr.RatedSubject) {
-		return false
 	}
 	return true
 }
@@ -197,7 +202,7 @@ func (cs *CdrStats) equalExceptTriggers(other *CdrStats) bool {
 		reflect.DeepEqual(cs.Category, other.Category) &&
 		reflect.DeepEqual(cs.Account, other.Account) &&
 		reflect.DeepEqual(cs.Subject, other.Subject) &&
-		reflect.DeepEqual(cs.DestinationPrefix, other.DestinationPrefix) &&
+		reflect.DeepEqual(cs.DestinationIds, other.DestinationIds) &&
 		reflect.DeepEqual(cs.UsageInterval, other.UsageInterval) &&
 		reflect.DeepEqual(cs.PddInterval, other.PddInterval) &&
 		reflect.DeepEqual(cs.Supplier, other.Supplier) &&

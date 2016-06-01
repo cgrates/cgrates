@@ -41,63 +41,63 @@ func init() {
 
 func populateDB() {
 	ats := []*Action{
-		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}},
-		&Action{ActionType: "*topup", BalanceType: utils.VOICE, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationIds: "NAT"}},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 10}}},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.VOICE), Weight: utils.Float64Pointer(20), Value: &utils.ValueFormula{Static: 10}, DestinationIDs: utils.StringMapPointer(utils.NewStringMap("NAT"))}},
 	}
 
 	ats1 := []*Action{
-		&Action{ActionType: "*topup", BalanceType: utils.MONETARY, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 10},
+		&Action{ActionType: "*topup", Balance: &BalanceFilter{Type: utils.StringPointer(utils.MONETARY), Value: &utils.ValueFormula{Static: 10}}, Weight: 10},
 		&Action{ActionType: "*reset_account", Weight: 20},
 	}
 
 	minu := &Account{
-		Id: "*out:vdf:minu",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY + OUTBOUND: BalanceChain{&Balance{Value: 50}},
-			utils.VOICE + OUTBOUND: BalanceChain{
-				&Balance{Value: 200, DestinationIds: "NAT", Weight: 10},
-				&Balance{Value: 100, DestinationIds: "RET", Weight: 20},
+		ID: "vdf:minu",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{&Balance{Value: 50}},
+			utils.VOICE: Balances{
+				&Balance{Value: 200, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	broker := &Account{
-		Id: "*out:vdf:broker",
-		BalanceMap: map[string]BalanceChain{
-			utils.VOICE + OUTBOUND: BalanceChain{
-				&Balance{Value: 20, DestinationIds: "NAT", Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationIds: "RET", Weight: 20},
+		ID: "vdf:broker",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{
+				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			}},
 	}
 	luna := &Account{
-		Id: "*out:vdf:luna",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY + OUTBOUND: BalanceChain{
+		ID: "vdf:luna",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 0, Weight: 20},
 			}},
 	}
 	// this is added to test if csv load tests account will not overwrite balances
 	minitsboy := &Account{
-		Id: "*out:vdf:minitsboy",
-		BalanceMap: map[string]BalanceChain{
-			utils.VOICE + OUTBOUND: BalanceChain{
-				&Balance{Value: 20, DestinationIds: "NAT", Weight: 10, RatingSubject: "rif"},
-				&Balance{Value: 100, DestinationIds: "RET", Weight: 20},
+		ID: "vdf:minitsboy",
+		BalanceMap: map[string]Balances{
+			utils.VOICE: Balances{
+				&Balance{Value: 20, DestinationIDs: utils.NewStringMap("NAT"), Weight: 10, RatingSubject: "rif"},
+				&Balance{Value: 100, DestinationIDs: utils.NewStringMap("RET"), Weight: 20},
 			},
-			utils.MONETARY + OUTBOUND: BalanceChain{
+			utils.MONETARY: Balances{
 				&Balance{Value: 100, Weight: 10},
 			},
 		},
 	}
 	max := &Account{
-		Id: "*out:cgrates.org:max",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY + OUTBOUND: BalanceChain{
+		ID: "cgrates.org:max",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 11, Weight: 20},
 			}},
 	}
 	money := &Account{
-		Id: "*out:cgrates.org:money",
-		BalanceMap: map[string]BalanceChain{
-			utils.MONETARY + OUTBOUND: BalanceChain{
+		ID: "cgrates.org:money",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
 				&Balance{Value: 10000, Weight: 10},
 			}},
 	}
@@ -129,7 +129,7 @@ func TestSplitSpans(t *testing.T) {
 }
 
 func TestSplitSpansWeekend(t *testing.T) {
-	cd := &CallDescriptor{Direction: OUTBOUND,
+	cd := &CallDescriptor{Direction: utils.OUT,
 		Category:        "postpaid",
 		TOR:             utils.VOICE,
 		Tenant:          "foehn",
@@ -326,6 +326,43 @@ func TestGetCostRatingPlansAndRatingIntervalsMore(t *testing.T) {
 	}
 }
 
+func TestGetCostRatingPlansAndRatingIntervalsMoreDays(t *testing.T) {
+	t1 := time.Date(2012, time.February, 20, 9, 50, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 23, 18, 10, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: t2.Sub(t1)}
+	result, _ := cd.GetCost()
+	if len(result.Timespans) != 8 ||
+		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
+		!result.Timespans[1].TimeEnd.Equal(result.Timespans[2].TimeStart) ||
+		!result.Timespans[2].TimeEnd.Equal(result.Timespans[3].TimeStart) ||
+		!result.Timespans[3].TimeEnd.Equal(result.Timespans[4].TimeStart) ||
+		!result.Timespans[4].TimeEnd.Equal(result.Timespans[5].TimeStart) ||
+		!result.Timespans[5].TimeEnd.Equal(result.Timespans[6].TimeStart) ||
+		!result.Timespans[6].TimeEnd.Equal(result.Timespans[7].TimeStart) {
+		for _, ts := range result.Timespans {
+			t.Logf("TS %+v", ts)
+		}
+		t.Errorf("Expected %+v was %+v", 4, len(result.Timespans))
+	}
+}
+
+func TestGetCostRatingPlansAndRatingIntervalsMoreDaysWeekend(t *testing.T) {
+	t1 := time.Date(2012, time.February, 24, 9, 50, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 27, 18, 10, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: t2.Sub(t1)}
+	result, _ := cd.GetCost()
+	if len(result.Timespans) != 5 ||
+		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
+		!result.Timespans[1].TimeEnd.Equal(result.Timespans[2].TimeStart) ||
+		!result.Timespans[2].TimeEnd.Equal(result.Timespans[3].TimeStart) ||
+		!result.Timespans[3].TimeEnd.Equal(result.Timespans[4].TimeStart) {
+		for _, ts := range result.Timespans {
+			t.Logf("TS %+v", ts)
+		}
+		t.Errorf("Expected %+v was %+v", 4, len(result.Timespans))
+	}
+}
+
 func TestGetCostRateGroups(t *testing.T) {
 	t1 := time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC)
@@ -384,6 +421,17 @@ func TestSubjectNotFound(t *testing.T) {
 	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
 		//t.Logf("%+v", result.Timespans[0].RateInterval)
 		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
+func TestSubjectNotFoundCostNegativeOne(t *testing.T) {
+	t1 := time.Date(2013, time.February, 1, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.February, 1, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "cgrates.org", Subject: "not_exiting", Destination: "025740532", TimeStart: t1, TimeEnd: t2}
+	result, _ := cd.GetCost()
+	if result.Cost != -1 || result.GetConnectFee() != 0 {
+		//t.Logf("%+v", result.Timespans[0].RateInterval)
+		t.Errorf("Expected -1 was %v", result)
 	}
 }
 
@@ -476,10 +524,13 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxRate(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
+	//acc, _ := accountingStorage.GetAccount("cgrates.org:12345")
+	//log.Print("ACC: ", utils.ToIJSON(acc))
 	cd := &CallDescriptor{
 		Direction:   "*out",
 		Category:    "call",
@@ -500,8 +551,9 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithMaxCost(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd := &CallDescriptor{
@@ -522,9 +574,112 @@ func TestMaxSessionTimeWithMaxCost(t *testing.T) {
 	}
 }
 
+func TestGetMaxSessiontWithBlocker(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("BLOCK_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	acc, err := accountingStorage.GetAccount("cgrates.org:block")
+	if err != nil {
+		t.Error("error getting account: ", err)
+	}
+	if len(acc.BalanceMap[utils.MONETARY]) != 2 ||
+		acc.BalanceMap[utils.MONETARY][0].Blocker != true {
+		for _, b := range acc.BalanceMap[utils.MONETARY] {
+			t.Logf("B: %+v", b)
+		}
+		t.Error("Error executing action  plan on account: ", acc.BalanceMap[utils.MONETARY])
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "block",
+		Account:      "block",
+		Destination:  "0723",
+		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err := cd.GetMaxSessionDuration()
+	expected := 17 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	}
+	cd = &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "block",
+		Account:      "block",
+		Destination:  "444",
+		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err = cd.GetMaxSessionDuration()
+	expected = 30 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	}
+}
+
+func TestGetMaxSessiontWithBlockerEmpty(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("BLOCK_EMPTY_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	acc, err := accountingStorage.GetAccount("cgrates.org:block_empty")
+	if err != nil {
+		t.Error("error getting account: ", err)
+	}
+	if len(acc.BalanceMap[utils.MONETARY]) != 2 ||
+		acc.BalanceMap[utils.MONETARY][0].Blocker != true {
+		for _, b := range acc.BalanceMap[utils.MONETARY] {
+			t.Logf("B: %+v", b)
+		}
+		t.Error("Error executing action  plan on account: ", acc.BalanceMap[utils.MONETARY])
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "block",
+		Account:      "block_empty",
+		Destination:  "0723",
+		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err := cd.GetMaxSessionDuration()
+	expected := 0 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	}
+	cd = &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "block",
+		Account:      "block_empty",
+		Destination:  "444",
+		TimeStart:    time.Date(2016, 1, 13, 14, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2016, 1, 13, 14, 30, 0, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	result, err = cd.GetMaxSessionDuration()
+	expected = 30 * time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v (%v)", expected, result, err)
+	}
+}
+
 func TestGetCostWithMaxCost(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd := &CallDescriptor{
@@ -545,9 +700,213 @@ func TestGetCostWithMaxCost(t *testing.T) {
 	}
 }
 
+func TestGetCostRoundingIssue(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 51, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.GetCost()
+	expected := 0.17
+	if cc.Cost != expected || err != nil {
+		t.Log(utils.ToIJSON(cc))
+		t.Errorf("Expected %v was %+v", expected, cc)
+	}
+}
+
+func TestGetCostRatingInfoOnZeroTime(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.GetCost()
+	if err != nil ||
+		len(cc.Timespans) != 1 ||
+		cc.Timespans[0].MatchedDestId != "RET" ||
+		cc.Timespans[0].MatchedSubject != "*out:cgrates.org:call:dy" ||
+		cc.Timespans[0].MatchedPrefix != "0723" ||
+		cc.Timespans[0].RatingPlanId != "DY_PLAN" {
+		t.Error("MatchedInfo not added:", utils.ToIJSON(cc))
+	}
+}
+
+func TestDebitRatingInfoOnZeroTime(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.Debit()
+	if err != nil ||
+		cc == nil ||
+		len(cc.Timespans) != 1 ||
+		cc.Timespans[0].MatchedDestId != "RET" ||
+		cc.Timespans[0].MatchedSubject != "*out:cgrates.org:call:dy" ||
+		cc.Timespans[0].MatchedPrefix != "0723" ||
+		cc.Timespans[0].RatingPlanId != "DY_PLAN" {
+		t.Error("MatchedInfo not added:", utils.ToIJSON(cc))
+	}
+}
+
+func TestMaxDebitRatingInfoOnZeroTime(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "0723123113",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.MaxDebit()
+	if err != nil ||
+		len(cc.Timespans) != 1 ||
+		cc.Timespans[0].MatchedDestId != "RET" ||
+		cc.Timespans[0].MatchedSubject != "*out:cgrates.org:call:dy" ||
+		cc.Timespans[0].MatchedPrefix != "0723" ||
+		cc.Timespans[0].RatingPlanId != "DY_PLAN" {
+		t.Error("MatchedInfo not added:", utils.ToIJSON(cc))
+	}
+}
+
+func TestMaxDebitUnknowDest(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dy",
+		Account:      "dy",
+		Destination:  "9999999999",
+		TimeStart:    time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:      time.Date(2015, 10, 26, 13, 29, 29, 0, time.UTC),
+		MaxCostSoFar: 0,
+	}
+	cc, err := cd.MaxDebit()
+	if err == nil || err != utils.ErrUnauthorizedDestination {
+		t.Errorf("Bad error reported %+v: %v", cc, err)
+	}
+}
+
+func TestMaxDebitRoundingIssue(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:       "*out",
+		Category:        "call",
+		Tenant:          "cgrates.org",
+		Subject:         "dy",
+		Account:         "dy",
+		Destination:     "0723123113",
+		TimeStart:       time.Date(2015, 10, 26, 13, 29, 27, 0, time.UTC),
+		TimeEnd:         time.Date(2015, 10, 26, 13, 29, 51, 0, time.UTC),
+		MaxCostSoFar:    0,
+		PerformRounding: true,
+	}
+	acc, err := accountingStorage.GetAccount("cgrates.org:dy")
+	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
+		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
+	}
+
+	cc, err := cd.MaxDebit()
+	expected := 0.17
+	if cc.Cost != expected || err != nil {
+		t.Log(utils.ToIJSON(cc))
+		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
+	}
+	acc, err = accountingStorage.GetAccount("cgrates.org:dy")
+	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
+		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
+	}
+}
+
+func TestDebitRoundingRefund(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:       "*out",
+		Category:        "call",
+		Tenant:          "cgrates.org",
+		Subject:         "dy",
+		Account:         "dy",
+		Destination:     "0723123113",
+		TimeStart:       time.Date(2016, 3, 4, 13, 50, 00, 0, time.UTC),
+		TimeEnd:         time.Date(2016, 3, 4, 13, 53, 00, 0, time.UTC),
+		MaxCostSoFar:    0,
+		PerformRounding: true,
+	}
+	acc, err := accountingStorage.GetAccount("cgrates.org:dy")
+	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1 {
+		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
+	}
+
+	cc, err := cd.Debit()
+	expected := 0.3
+	if cc.Cost != expected || err != nil {
+		t.Log(utils.ToIJSON(cc))
+		t.Errorf("Expected %v was %+v (%v)", expected, cc, err)
+	}
+	acc, err = accountingStorage.GetAccount("cgrates.org:dy")
+	if err != nil || acc.BalanceMap[utils.MONETARY][0].Value != 1-expected {
+		t.Errorf("Error getting account: %+v (%v)", utils.ToIJSON(acc), err)
+	}
+}
+
 func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd := &CallDescriptor{
@@ -569,8 +928,9 @@ func TestMaxSessionTimeWithMaxCostFree(t *testing.T) {
 }
 
 func TestMaxDebitWithMaxCostFree(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd := &CallDescriptor{
@@ -592,8 +952,9 @@ func TestMaxDebitWithMaxCostFree(t *testing.T) {
 }
 
 func TestGetCostWithMaxCostFree(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd := &CallDescriptor{
@@ -616,6 +977,7 @@ func TestGetCostWithMaxCostFree(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
+	aliasService = NewAliasHandler(accountingStorage)
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
@@ -626,6 +988,17 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 		Account:     "a1",
 		Destination: "0723",
 	}
+	LoadAlias(
+		&AttrMatchingAlias{
+			Destination: cd.Destination,
+			Direction:   cd.Direction,
+			Tenant:      cd.Tenant,
+			Category:    cd.Category,
+			Account:     cd.Account,
+			Subject:     cd.Subject,
+			Context:     utils.ALIAS_CONTEXT_RATING,
+		}, cd, utils.EXTRA_FIELDS)
+
 	result, err := cd.GetMaxSessionDuration()
 	expected := time.Minute
 	if result != expected || err != nil {
@@ -634,12 +1007,14 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithAccountShared(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP_SHARED0_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP_SHARED0_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
-	ap, _ = ratingStorage.GetActionPlans("TOPUP_SHARED10_AT")
-	for _, at := range ap {
+	ap, _ = ratingStorage.GetActionPlan("TOPUP_SHARED10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 
@@ -673,12 +1048,14 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 }
 
 func TestMaxDebitWithAccountShared(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP_SHARED0_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP_SHARED0_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
-	ap, _ = ratingStorage.GetActionPlans("TOPUP_SHARED10_AT")
-	for _, at := range ap {
+	ap, _ = ratingStorage.GetActionPlan("TOPUP_SHARED10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 
@@ -698,13 +1075,13 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 		t.Errorf("Wrong callcost in shared debit: %+v, %v", cc, err)
 	}
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
+	balanceMap := acc.BalanceMap[utils.MONETARY]
 	if len(balanceMap) != 1 || balanceMap[0].GetValue() != 0 {
 		t.Errorf("Wrong shared balance debited: %+v", balanceMap[0])
 	}
-	other, err := accountingStorage.GetAccount("*out:vdf:empty10")
-	if err != nil || other.BalanceMap[utils.MONETARY+OUTBOUND][0].GetValue() != 7.5 {
-		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MONETARY+OUTBOUND][0])
+	other, err := accountingStorage.GetAccount("vdf:empty10")
+	if err != nil || other.BalanceMap[utils.MONETARY][0].GetValue() != 7.5 {
+		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[utils.MONETARY][0])
 	}
 }
 
@@ -807,17 +1184,16 @@ func TestDebitAndMaxDebit(t *testing.T) {
 	if err1 != nil || err2 != nil {
 		t.Error("Error debiting and/or maxdebiting: ", err1, err2)
 	}
+	if cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value != 90 ||
+		cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value != 80 {
+		t.Error("Error setting the Unit.Value: ", cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value, cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value)
+	}
+	// make Unit.Values have the same value
+	cc1.Timespans[0].Increments[0].BalanceInfo.Unit.Value = 0
+	cc2.Timespans[0].Increments[0].BalanceInfo.Unit.Value = 0
 	if !reflect.DeepEqual(cc1, cc2) {
-		t.Log("===============================")
-		t.Logf("CC1: %+v", cc1)
-		for _, ts := range cc1.Timespans {
-			t.Logf("TS: %+v", ts)
-		}
-		t.Logf("CC2: %+v", cc2)
-		for _, ts := range cc2.Timespans {
-			t.Logf("TS: %+v", ts)
-		}
-		t.Log("===============================")
+		t.Log("CC1: ", utils.ToIJSON(cc1))
+		t.Log("CC2: ", utils.ToIJSON(cc2))
 		t.Error("Debit and MaxDebit differ")
 	}
 }
@@ -833,7 +1209,7 @@ func TestMaxSesionTimeEmptyBalance(t *testing.T) {
 		Account:     "luna",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
+	acc, _ := accountingStorage.GetAccount("vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != 0 {
 		t.Error("Error get max session for 0 acount", err)
@@ -851,7 +1227,7 @@ func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
 		Account:     "luna",
 		Destination: "112",
 	}
-	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
+	acc, _ := accountingStorage.GetAccount("vdf:luna")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime == 0 {
 		t.Error("Error get max session for 0 acount", err)
@@ -868,7 +1244,7 @@ func TestMaxSesionTimeLong(t *testing.T) {
 		Subject:     "money",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("*out:cgrates.org:money")
+	acc, _ := accountingStorage.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
 	if err != nil || allowedTime != cd.TimeEnd.Sub(cd.TimeStart) {
 		t.Error("Error get max session for acount:", allowedTime, err)
@@ -885,17 +1261,19 @@ func TestMaxSesionTimeLongerThanMoney(t *testing.T) {
 		Subject:     "money",
 		Destination: "0723",
 	}
-	acc, _ := accountingStorage.GetAccount("*out:cgrates.org:money")
+	acc, _ := accountingStorage.GetAccount("cgrates.org:money")
 	allowedTime, err := cd.getMaxSessionDuration(acc)
-	expected, err := time.ParseDuration("2h46m40s")
+	expected, err := time.ParseDuration("9999s") // 1 is the connect fee
 	if err != nil || allowedTime != expected {
+		t.Log(utils.ToIJSON(acc))
 		t.Errorf("Expected: %v got %v", expected, allowedTime)
 	}
 }
 
 func TestDebitFromShareAndNormal(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP_SHARED10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP_SHARED10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 
@@ -911,7 +1289,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 	}
 	cc, err := cd.MaxDebit()
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
+	balanceMap := acc.BalanceMap[utils.MONETARY]
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from share and normal error: %+v, %v", cc, err)
 	}
@@ -922,8 +1300,9 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 }
 
 func TestDebitFromEmptyShare(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP_EMPTY_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP_EMPTY_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 
@@ -943,15 +1322,16 @@ func TestDebitFromEmptyShare(t *testing.T) {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
 	}
 	acc, _ := cd.getAccount()
-	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
+	balanceMap := acc.BalanceMap[utils.MONETARY]
 	if len(balanceMap) != 2 || balanceMap[0].GetValue() != 0 || balanceMap[1].GetValue() != -2.5 {
 		t.Errorf("Error debiting from empty share: %+v", balanceMap[1].GetValue())
 	}
 }
 
 func TestDebitNegatve(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("POST_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("POST_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 
@@ -972,13 +1352,13 @@ func TestDebitNegatve(t *testing.T) {
 	}
 	acc, _ := cd.getAccount()
 	//utils.PrintFull(acc)
-	balanceMap := acc.BalanceMap[utils.MONETARY+OUTBOUND]
+	balanceMap := acc.BalanceMap[utils.MONETARY]
 	if len(balanceMap) != 1 || balanceMap[0].GetValue() != -2.5 {
 		t.Errorf("Error debiting from empty share: %+v", balanceMap[0].GetValue())
 	}
 	cc, err = cd.MaxDebit()
 	acc, _ = cd.getAccount()
-	balanceMap = acc.BalanceMap[utils.MONETARY+OUTBOUND]
+	balanceMap = acc.BalanceMap[utils.MONETARY]
 	//utils.LogFull(balanceMap)
 	if err != nil || cc.Cost != 2.5 {
 		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
@@ -989,8 +1369,9 @@ func TestDebitNegatve(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRate(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd1 := &CallDescriptor{
@@ -1016,9 +1397,35 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 	}
 }
 
+func TestMaxDebitForceDuration(t *testing.T) {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
+		at.Execute()
+	}
+	cd1 := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "12345",
+		Account:       "12345",
+		Destination:   "447956",
+		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 40, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 0,
+		ForceDuration: true,
+	}
+	_, err := cd1.MaxDebit()
+	if err != utils.ErrInsufficientCredit {
+		t.Fatal("Error forcing duration: ", err)
+	}
+}
+
 func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd1 := &CallDescriptor{
@@ -1045,8 +1452,9 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 }
 
 func TestMaxDebitConsumesMinutes(t *testing.T) {
-	ap, _ := ratingStorage.GetActionPlans("TOPUP10_AT")
-	for _, at := range ap {
+	ap, _ := ratingStorage.GetActionPlan("TOPUP10_AT", false)
+	for _, at := range ap.ActionTimings {
+		at.accountIDs = ap.AccountIDs
 		at.Execute()
 	}
 	cd1 := &CallDescriptor{
@@ -1061,8 +1469,8 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 		LoopIndex:     0,
 		DurationIndex: 0}
 	cd1.MaxDebit()
-	if cd1.account.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue() != 20 {
-		t.Error("Error using minutes: ", cd1.account.BalanceMap[utils.VOICE+OUTBOUND][0].GetValue())
+	if cd1.account.BalanceMap[utils.VOICE][0].GetValue() != 20 {
+		t.Error("Error using minutes: ", cd1.account.BalanceMap[utils.VOICE][0].GetValue())
 	}
 }
 
@@ -1117,6 +1525,35 @@ func TestCDDataGetCost(t *testing.T) {
 	cc, err := cd.GetCost()
 	if err != nil || cc.Cost != 65 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
+	}
+}
+
+func TestCDRefundIncrements(t *testing.T) {
+	ub := &Account{
+		ID: "test:ref",
+		BalanceMap: map[string]Balances{
+			utils.MONETARY: Balances{
+				&Balance{Uuid: "moneya", Value: 100},
+			},
+			utils.VOICE: Balances{
+				&Balance{Uuid: "minutea", Value: 10, Weight: 20, DestinationIDs: utils.StringMap{"NAT": true}},
+				&Balance{Uuid: "minuteb", Value: 10, DestinationIDs: utils.StringMap{"RET": true}},
+			},
+		},
+	}
+	accountingStorage.SetAccount(ub)
+	increments := Increments{
+		&Increment{Cost: 2, BalanceInfo: &DebitInfo{Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
+		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &DebitInfo{Unit: &UnitInfo{UUID: "minutea"}, Monetary: &MonetaryInfo{UUID: "moneya"}, AccountID: ub.ID}},
+		&Increment{Duration: 4 * time.Second, BalanceInfo: &DebitInfo{Unit: &UnitInfo{UUID: "minuteb"}, AccountID: ub.ID}},
+	}
+	cd := &CallDescriptor{TOR: utils.VOICE, Increments: increments}
+	cd.RefundIncrements()
+	ub, _ = accountingStorage.GetAccount(ub.ID)
+	if ub.BalanceMap[utils.MONETARY][0].GetValue() != 104 ||
+		ub.BalanceMap[utils.VOICE][0].GetValue() != 13 ||
+		ub.BalanceMap[utils.VOICE][1].GetValue() != 14 {
+		t.Error("Error refunding money: ", utils.ToIJSON(ub.BalanceMap))
 	}
 }
 

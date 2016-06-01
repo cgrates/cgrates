@@ -41,22 +41,22 @@ func TestSetAccounts(t *testing.T) {
 	cgrTenant := "cgrates.org"
 	iscTenant := "itsyscom.com"
 	b10 := &engine.Balance{Value: 10, Weight: 10}
-	cgrAcnt1 := &engine.Account{Id: utils.ConcatenatedKey(utils.OUT, cgrTenant, "account1"),
-		BalanceMap: map[string]engine.BalanceChain{utils.MONETARY + engine.OUTBOUND: engine.BalanceChain{b10}}}
-	cgrAcnt2 := &engine.Account{Id: utils.ConcatenatedKey(utils.OUT, cgrTenant, "account2"),
-		BalanceMap: map[string]engine.BalanceChain{utils.MONETARY + engine.OUTBOUND: engine.BalanceChain{b10}}}
-	cgrAcnt3 := &engine.Account{Id: utils.ConcatenatedKey(utils.OUT, cgrTenant, "account3"),
-		BalanceMap: map[string]engine.BalanceChain{utils.MONETARY + engine.OUTBOUND: engine.BalanceChain{b10}}}
-	iscAcnt1 := &engine.Account{Id: utils.ConcatenatedKey(utils.OUT, iscTenant, "account1"),
-		BalanceMap: map[string]engine.BalanceChain{utils.MONETARY + engine.OUTBOUND: engine.BalanceChain{b10}}}
-	iscAcnt2 := &engine.Account{Id: utils.ConcatenatedKey(utils.OUT, iscTenant, "account2"),
-		BalanceMap: map[string]engine.BalanceChain{utils.MONETARY + engine.OUTBOUND: engine.BalanceChain{b10}}}
+	cgrAcnt1 := &engine.Account{ID: utils.ConcatenatedKey(cgrTenant, "account1"),
+		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.OUT: engine.Balances{b10}}}
+	cgrAcnt2 := &engine.Account{ID: utils.ConcatenatedKey(cgrTenant, "account2"),
+		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.OUT: engine.Balances{b10}}}
+	cgrAcnt3 := &engine.Account{ID: utils.ConcatenatedKey(cgrTenant, "account3"),
+		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.OUT: engine.Balances{b10}}}
+	iscAcnt1 := &engine.Account{ID: utils.ConcatenatedKey(iscTenant, "account1"),
+		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.OUT: engine.Balances{b10}}}
+	iscAcnt2 := &engine.Account{ID: utils.ConcatenatedKey(iscTenant, "account2"),
+		BalanceMap: map[string]engine.Balances{utils.MONETARY + utils.OUT: engine.Balances{b10}}}
 	for _, account := range []*engine.Account{cgrAcnt1, cgrAcnt2, cgrAcnt3, iscAcnt1, iscAcnt2} {
 		if err := apierAcntsAcntStorage.SetAccount(account); err != nil {
 			t.Error(err)
 		}
 	}
-	apierAcntsAcntStorage.CachePrefixes(utils.ACTION_PREFIX)
+	apierAcntsAcntStorage.CacheRatingPrefixes(utils.ACTION_PREFIX)
 }
 
 /*
@@ -72,7 +72,7 @@ func TestGetAccountIds(t *testing.T) {
 */
 
 func TestGetAccounts(t *testing.T) {
-	var accounts []*engine.Account
+	var accounts []interface{}
 	var attrs utils.AttrGetAccounts
 	if err := apierAcnts.GetAccounts(utils.AttrGetAccounts{Tenant: "cgrates.org"}, &accounts); err != nil {
 		t.Error("Unexpected error", err.Error())

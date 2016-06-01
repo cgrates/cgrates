@@ -151,21 +151,24 @@ CREATE TABLE `tp_actions` (
   `action` varchar(24) NOT NULL,
   `balance_tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
-  `direction` varchar(8) NOT NULL,
-  `units` DECIMAL(20,4) NOT NULL,
+  `directions` varchar(8) NOT NULL,
+  `units` varchar(256) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
   `timing_tags` varchar(128) NOT NULL,
   `destination_tags` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
-  `category` varchar(32) NOT NULL,
-  `shared_group` varchar(64) NOT NULL,
-  `balance_weight` DECIMAL(8,2) NOT NULL,
+  `categories` varchar(32) NOT NULL,
+  `shared_groups` varchar(64) NOT NULL,
+  `balance_weight` varchar(10) NOT NULL,
+  `balance_blocker` varchar(5) NOT NULL,
+  `balance_disabled` varchar(24) NOT NULL,
   `extra_parameters` varchar(256) NOT NULL,
+  `filter` varchar(256) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`direction`,`expiry_time`,`timing_tags`,`destination_tags`,`shared_group`,`balance_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`balance_type`,`directions`,`expiry_time`,`timing_tags`,`destination_tags`,`shared_groups`,`balance_weight`,`weight`)
 );
 
 --
@@ -196,27 +199,31 @@ CREATE TABLE `tp_action_triggers` (
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
   `unique_id` varchar(64) NOT NULL,
-  `balance_tag` varchar(64) NOT NULL,
-  `balance_type` varchar(24) NOT NULL,
-  `balance_direction` varchar(8) NOT NULL,
-  `threshold_type` char(12) NOT NULL,
+  `threshold_type` char(64) NOT NULL,
   `threshold_value` DECIMAL(20,4) NOT NULL,
   `recurrent` BOOLEAN NOT NULL,
   `min_sleep` varchar(16) NOT NULL,
+  `expiry_time` varchar(24) NOT NULL,
+  `activation_time` varchar(24) NOT NULL,
+  `balance_tag` varchar(64) NOT NULL,
+  `balance_type` varchar(24) NOT NULL,
+  `balance_directions` varchar(8) NOT NULL,
+  `balance_categories` varchar(32) NOT NULL,
   `balance_destination_tags` varchar(64) NOT NULL,
-  `balance_weight` DECIMAL(8,2) NOT NULL,
+  `balance_rating_subject` varchar(64) NOT NULL,
+  `balance_shared_groups` varchar(64) NOT NULL,
   `balance_expiry_time` varchar(24) NOT NULL,
   `balance_timing_tags` varchar(128) NOT NULL,
-  `balance_rating_subject` varchar(64) NOT NULL,
-  `balance_category` varchar(32) NOT NULL,
-  `balance_shared_group` varchar(64) NOT NULL,
+  `balance_weight` varchar(10) NOT NULL,
+  `balance_blocker` varchar(5) NOT NULL,
+  `balance_disabled` varchar(5) NOT NULL,
   `min_queued_items` int(11) NOT NULL,
   `actions_tag` varchar(64) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`balance_type`,`balance_direction`,`threshold_type`,`threshold_value`,`balance_destination_tags`,`actions_tag`)
+  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`balance_type`,`balance_directions`,`threshold_type`,`threshold_value`,`balance_destination_tags`,`actions_tag`)
 );
 
 --
@@ -230,13 +237,14 @@ CREATE TABLE `tp_account_actions` (
   `loadid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `account` varchar(64) NOT NULL,
-  `direction` varchar(8) NOT NULL,
   `action_plan_tag` varchar(64),
   `action_triggers_tag` varchar(64),
+  `allow_negative` BOOLEAN NOT NULL,
+  `disabled` BOOLEAN NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_account` (`tpid`,`loadid`,`tenant`,`account`,`direction`)
+  UNIQUE KEY `unique_tp_account` (`tpid`,`loadid`,`tenant`,`account`)
 );
 
 --
@@ -254,7 +262,7 @@ CREATE TABLE tp_lcr_rules (
   `subject` varchar(64) NOT NULL,
   `destination_tag` varchar(64) NOT NULL,
   `rp_category` varchar(32) NOT NULL,
-  `strategy` varchar(16) NOT NULL,
+  `strategy` varchar(18) NOT NULL,
   `strategy_params`	varchar(256) NOT NULL,
   `activation_time` varchar(24) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
@@ -277,6 +285,7 @@ CREATE TABLE tp_derived_chargers (
   `category` varchar(32) NOT NULL,
   `account` varchar(24) NOT NULL,
   `subject` varchar(64) NOT NULL,
+  `destination_ids` varchar(64) NOT NULL,
   `runid`  varchar(24) NOT NULL,
   `run_filters`  varchar(256) NOT NULL,
   `req_type_field`  varchar(24) NOT NULL,
@@ -292,6 +301,8 @@ CREATE TABLE tp_derived_chargers (
   `usage_field`  varchar(24) NOT NULL,
   `supplier_field`  varchar(24) NOT NULL,
   `disconnect_cause_field`  varchar(24) NOT NULL,
+  `rated_field`  varchar(24) NOT NULL,
+  `cost_field`  varchar(24) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
@@ -321,7 +332,7 @@ CREATE TABLE tp_cdr_stats (
   `categories` varchar(32) NOT NULL,
   `accounts` varchar(24) NOT NULL,
   `subjects` varchar(64) NOT NULL,
-  `destination_prefixes` varchar(64) NOT NULL,
+  `destination_ids` varchar(64) NOT NULL,
   `pdd_interval` varchar(64) NOT NULL,
   `usage_interval` varchar(64) NOT NULL,
   `suppliers` varchar(64) NOT NULL,
@@ -336,7 +347,7 @@ CREATE TABLE tp_cdr_stats (
   KEY `tpid` (`tpid`)
 );
 
-    --
+--
 -- Table structure for table `tp_users`
 --
 
@@ -346,9 +357,36 @@ CREATE TABLE tp_users (
   `tpid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `user_name` varchar(64) NOT NULL,
+  `masked` BOOLEAN NOT NULL,
   `attribute_name` varchar(64) NOT NULL,
   `attribute_value` varchar(64) NOT NULL,
+  `weight` DECIMAL(8,2) NOT NULL,
   `created_at` TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
+);
+
+--
+-- Table structure for table `tp_aliases`
+--
+
+DROP TABLE IF EXISTS tp_aliases;
+CREATE TABLE tp_aliases (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `direction` varchar(8) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `category` varchar(64) NOT NULL,
+  `account` varchar(64) NOT NULL,
+  `subject` varchar(64) NOT NULL,
+  `destination_id` varchar(64) NOT NULL,
+  `context` varchar(64) NOT NULL,
+  `target` varchar(64) NOT NULL,
+  `original` varchar(64) NOT NULL,
+  `alias` varchar(64) NOT NULL,
+  `weight` decimal(8,2) NOT NULL,
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_aliases` (`tpid`,`direction`,`tenant`,`category`,`account`,`subject`,`context`, `target`)
 );

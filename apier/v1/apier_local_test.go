@@ -30,7 +30,6 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -53,7 +52,7 @@ README:
   * Flush tables in storDb to start clean.
   * Start engine with default configuration and give it some time to listen (here caching can slow down, hence the command argument parameter).
   * Connect rpc client depending on encoding defined in configuration.
-  * Execute remote Apis and test their replies(follow prepaid1cent scenario so we can test load in dataDb also).
+  * Execute remote Apis and test their replies(follow testtp scenario so we can test load in dataDb also).
 */
 
 var cfgPath string
@@ -80,7 +79,7 @@ func TestApierCreateDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportDir, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out", cfg.HistoryDir} {
+	for _, pathDir := range []string{cfg.CdreProfiles[utils.META_DEFAULT].ExportFolder, "/var/log/cgrates/cdrc/in", "/var/log/cgrates/cdrc/out", cfg.HistoryDir} {
 
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
@@ -122,6 +121,7 @@ func TestApierStartEngine(t *testing.T) {
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	engine := exec.Command(enginePath, "-config_dir", cfgPath)
+	//engine.Stderr = os.Stderr
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
@@ -312,7 +312,7 @@ func TestApierTPRate(t *testing.T) {
 	if err := rater.Call("ApierV1.GetTPRateIds", AttrGetTPRateIds{rt.TPid, utils.Paginator{}}, &rplyRtIds); err != nil {
 		t.Error("Calling ApierV1.GetTPRateIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRtIds, rplyRtIds) {
-		t.Errorf("Calling ApierV1.GetTPDestinationIds expected: %v, received: %v", expectedRtIds, rplyRtIds)
+		t.Errorf("Calling ApierV1.GetTPDestinationIDs expected: %v, received: %v", expectedRtIds, rplyRtIds)
 	}
 }
 
@@ -488,8 +488,8 @@ func TestApierTPActions(t *testing.T) {
 	}
 	reply := ""
 	act := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
-			DestinationIds: "*any", BalanceWeight: 10, Weight: 10},
+		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Directions: "*out", Units: "10", ExpiryTime: "*unlimited",
+			DestinationIds: "*any", BalanceWeight: "10", Weight: 10},
 	}}
 	actWarn := &utils.TPActions{TPid: utils.TEST_SQL, ActionsId: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
@@ -601,7 +601,7 @@ func TestApierTPActionTriggers(t *testing.T) {
 	}
 	reply := ""
 	at := &utils.TPActionTriggers{TPid: utils.TEST_SQL, ActionTriggersId: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
-		&utils.TPActionTrigger{Id: "MYFIRSTTRIGGER", BalanceType: "*monetary", BalanceDirection: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
+		&utils.TPActionTrigger{Id: "STANDARD_TRIGGERS", UniqueID: "MYFIRSTTRIGGER", BalanceType: "*monetary", BalanceDirections: "*out", ThresholdType: "*min_balance", ThresholdValue: 2, ActionsId: "LOG_BALANCE", Weight: 10},
 	}}
 	atTst := new(utils.TPActionTriggers)
 	*atTst = *at
@@ -625,12 +625,13 @@ func TestApierTPActionTriggers(t *testing.T) {
 	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionTriggersId]" {
 		t.Error("Calling ApierV1.SetTPActionTriggers got unexpected error: ", err.Error())
 	}
+	atTst.ActionTriggers[0].Id = utils.TEST_SQL
 	// Test get
 	var rplyActs *utils.TPActionTriggers
 	if err := rater.Call("ApierV1.GetTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ActionTriggersId: atTst.ActionTriggersId}, &rplyActs); err != nil {
-		t.Error("Calling ApierV1.GetTPActionTriggers, got error: ", err.Error())
+		t.Errorf("Calling ApierV1.GetTPActionTriggers %s, got error: %s", atTst.ActionTriggersId, err.Error())
 	} else if !reflect.DeepEqual(atTst, rplyActs) {
-		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %v, received: %v", atTst.ActionTriggers[0], rplyActs.ActionTriggers[0])
+		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %+v, received: %+v", atTst.ActionTriggers[0], rplyActs.ActionTriggers[0])
 	}
 	// Test remove
 	if err := rater.Call("ApierV1.RemTPActionTriggers", AttrGetTPActionTriggers{TPid: atTst.TPid, ActionTriggersId: atTst.ActionTriggersId}, &reply); err != nil {
@@ -655,15 +656,15 @@ func TestApierTPAccountActions(t *testing.T) {
 	}
 	reply := ""
 	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1001", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1001", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa2 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1002", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1002", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa3 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1003", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1003", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa4 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1004", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1004", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aa5 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org",
-		Account: "1005", Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Account: "1005", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	aaTst := new(utils.TPAccountActions)
 	*aaTst = *aa1
 	aaTst.Account = utils.TEST_SQL
@@ -683,7 +684,7 @@ func TestApierTPAccountActions(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPAccountActions", new(utils.TPAccountActions), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPAccountActions, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid LoadId Tenant Account Direction ActionPlanId ActionTriggersId]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid LoadId Tenant Account ActionPlanId ActionTriggersId]" {
 		t.Error("Calling ApierV1.SetTPAccountActions got unexpected error: ", err.Error())
 	}
 	// Test get
@@ -735,11 +736,10 @@ func TestApierSetRatingProfile(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
-	// Calling the second time should raise EXISTS
-	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err == nil || err.Error() != "EXISTS" {
+	// Calling the second time should not raise EXISTS
+	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
-	time.Sleep(10 * time.Millisecond) // Give time for cache reload
 	// Make sure rates were loaded for account dan
 	// Test here ResponderGetCost
 	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
@@ -784,7 +784,7 @@ func TestApierLoadAccountActions(t *testing.T) {
 		return
 	}
 	reply := ""
-	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	aa1 := &utils.TPAccountActions{TPid: utils.TEST_SQL, LoadId: utils.TEST_SQL, Tenant: "cgrates.org", Account: "1001"}
 	if err := rater.Call("ApierV1.LoadAccountActions", aa1, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadAccountActions: ", err.Error())
 	} else if reply != "OK" {
@@ -812,7 +812,7 @@ func TestApierReloadCache(t *testing.T) {
 		return
 	}
 	reply := ""
-	arc := new(utils.ApiReloadCache)
+	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
@@ -826,32 +826,12 @@ func TestApierGetCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2, ActionPlans: 1, LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
-	}
-}
-
-func TestApierGetCachedItemAge(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var rcvAge *utils.CachedItemAge
-	if err := rater.Call("ApierV1.GetCachedItemAge", "+4917", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.Destination > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := rater.Call("ApierV1.GetCachedItemAge", "RETAIL1", &rcvAge); err != nil {
-		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if rcvAge.RatingPlan > time.Duration(2)*time.Second {
-		t.Errorf("Cache too old: %d", rcvAge)
-	}
-	if err := rater.Call("ApierV1.GetCachedItemAge", "DUMMY_DATA", &rcvAge); err == nil || err.Error() != "NOT_FOUND" {
-		t.Error("Did not get NOT_FOUND: ", err.Error())
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %+v, received: %+v", expectedStats, rcvStats)
 	}
 }
 
@@ -905,43 +885,43 @@ func TestApierAddBalance(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out", Value: 1.5}
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Value: 1.5}
 	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan", BalanceType: "*monetary", Direction: "*out", Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan", BalanceType: "*monetary", Value: 1.5}
 	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan2", BalanceType: "*monetary", Direction: "*out", Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan2", BalanceType: "*monetary", Value: 1.5}
 	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Direction: "*out", Value: 1.5}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Value: 1.5}
 	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Direction: "*out", Value: 2.1}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Value: 2.1}
 	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Direction: "*out", Value: 2.1}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Value: 2.1}
 	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
-	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Direction: "*out", Value: 1, Overwrite: true}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Value: 1, Overwrite: true}
 	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
@@ -957,7 +937,7 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 	reply := ""
 	// Add balance to a previously known account
-	attrs := utils.AttrExecuteAction{Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "PREPAID_10"}
+	attrs := utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "dan2", ActionsId: "PREPAID_10"}
 	if err := rater.Call("ApierV1.ExecuteAction", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != "OK" {
@@ -965,7 +945,7 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 	reply2 := ""
 	// Add balance to an account which does n exist
-	attrs = utils.AttrExecuteAction{Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
+	attrs = utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
 	if err := rater.Call("ApierV1.ExecuteAction", attrs, &reply2); err == nil || reply2 == "OK" {
 		t.Error("Expecting error on ApierV1.ExecuteAction.", err, reply2)
 	}
@@ -975,7 +955,7 @@ func TestApierSetActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	act1 := &utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}
+	act1 := &utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "75", ExpiryTime: engine.UNLIMITED, Weight: 20.0}
 	attrs1 := &utils.AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{act1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err != nil {
@@ -994,13 +974,13 @@ func TestApierGetActions(t *testing.T) {
 		return
 	}
 	expectActs := []*utils.TPAction{
-		&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
+		&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: utils.MONETARY, Directions: utils.OUT, Units: "75", BalanceWeight: "0", BalanceBlocker: "false", BalanceDisabled: "false", ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
 
 	var reply []*utils.TPAction
 	if err := rater.Call("ApierV1.GetActions", "ACTS_1", &reply); err != nil {
 		t.Error("Got error on ApierV1.GetActions: ", err.Error())
 	} else if !reflect.DeepEqual(expectActs, reply) {
-		t.Errorf("Expected: %v, received: %v", expectActs, reply)
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(expectActs), utils.ToJSON(reply))
 	}
 }
 
@@ -1008,8 +988,8 @@ func TestApierSetActionPlan(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	atm1 := &ApiActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
-	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*ApiActionPlan{atm1}}
+	atm1 := &AttrActionPlan{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
+	atms1 := &AttrSetActionPlan{Id: "ATMS_1", ActionPlan: []*AttrActionPlan{atm1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActionPlan", atms1, &reply1); err != nil {
 		t.Error("Got error on ApierV1.SetActionPlan: ", err.Error())
@@ -1029,20 +1009,19 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	}
 	reply := ""
 	// Add balance to a previously known account
-	attrs := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan2", BalanceDirection: "*out", BalanceType: "*monetary",
-		ThresholdType: "*min_balance", ThresholdValue: 2, BalanceDestinationIds: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
-	if err := rater.Call("ApierV1.AddTriggeredAction", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
+	attrs := &AttrAddAccountActionTriggers{ActionTriggerIDs: &[]string{"STANDARD_TRIGGERS"}, Tenant: "cgrates.org", Account: "dan2"}
+	if err := rater.Call("ApierV1.AddAccountActionTriggers", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddAccountActionTriggers: ", err.Error())
 	} else if reply != "OK" {
-		t.Errorf("Calling ApierV1.AddTriggeredAction received: %s", reply)
+		t.Errorf("Calling ApierV1.AddAccountActionTriggers received: %s", reply)
 	}
 	reply2 := ""
-	attrs2 := new(AttrAddActionTrigger)
+	attrs2 := new(AttrAddAccountActionTriggers)
 	*attrs2 = *attrs
 	attrs2.Account = "dan10" // Does not exist so it should error when adding triggers on it
 	// Add trigger to an account which does n exist
-	if err := rater.Call("ApierV1.AddTriggeredAction", attrs2, &reply2); err == nil || reply2 == "OK" {
-		t.Error("Expecting error on ApierV1.AddTriggeredAction.", err, reply2)
+	if err := rater.Call("ApierV1.AddAccountActionTriggers", attrs2, &reply2); err == nil || reply2 == "OK" {
+		t.Error("Expecting error on ApierV1.AddAccountActionTriggers.", err, reply2)
 	}
 }
 
@@ -1051,12 +1030,47 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply engine.ActionTriggerPriotityList
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
+	var reply engine.ActionTriggers
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
-	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
+	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
 		t.Errorf("Unexpected action triggers received %v", reply)
+	}
+}
+
+// Test here SetAccountActionTriggers
+func TestApierSetAccountActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	// Test first get so we can steal the id which we need to remove
+	var reply engine.ActionTriggers
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
+	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
+	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
+		for _, atr := range reply {
+			t.Logf("ATR: %+v", atr)
+		}
+		t.Errorf("Unexpected action triggers received %v", reply)
+	}
+	var setReply string
+	setReq := AttrSetAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID, ActivationDate: utils.StringPointer("2016-02-05T18:00:00Z")}
+	if err := rater.Call("ApierV1.ResetAccountActionTriggers", setReq, &setReply); err != nil {
+		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
+	} else if setReply != OK {
+		t.Error("Unexpected answer received", setReply)
+	}
+	if err := rater.Call("ApierV1.SetAccountActionTriggers", setReq, &setReply); err != nil {
+		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
+	} else if setReply != OK {
+		t.Error("Unexpected answer received", setReply)
+	}
+	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTriggers: ", err.Error())
+	} else if len(reply) != 1 || reply[0].ActivationDate != time.Date(2016, 2, 5, 18, 0, 0, 0, time.UTC) {
+		t.Errorf("Unexpected action triggers received %+v", reply[0])
 	}
 }
 
@@ -1066,24 +1080,32 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 		return
 	}
 	// Test first get so we can steal the id which we need to remove
-	var reply engine.ActionTriggerPriotityList
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
+	var reply engine.ActionTriggers
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
-	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
+	} else if len(reply) != 1 || reply[0].ActionsID != "LOG_BALANCE" {
+		for _, atr := range reply {
+			t.Logf("ATR: %+v", atr)
+		}
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var rmReply string
-	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", Direction: "*out", ActionTriggersId: reply[0].Id}
-	if err := rater.Call("ApierV1.RemAccountActionTriggers", rmReq, &rmReply); err != nil {
-		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
+	rmReq := AttrRemoveAccountActionTriggers{Tenant: "cgrates.org", Account: "dan2", UniqueID: reply[0].UniqueID}
+	if err := rater.Call("ApierV1.ResetAccountActionTriggers", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.ResetActionTiming: ", err.Error())
+	} else if rmReply != OK {
+		t.Error("Unexpected answer received", rmReply)
+	}
+	if err := rater.Call("ApierV1.RemoveAccountActionTriggers", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.RemoveActionTiming: ", err.Error())
 	} else if rmReply != OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTriggers: ", err.Error())
 	} else if len(reply) != 0 {
-		t.Errorf("Unexpected action triggers received %v", reply)
+		t.Errorf("Unexpected action triggers received %+v", reply[0])
 	}
 }
 
@@ -1093,7 +1115,7 @@ func TestApierSetAccount(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", ActionPlanId: "ATMS_1"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan7", ActionPlanId: "ATMS_1", ReloadScheduler: true}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1115,32 +1137,32 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 		return
 	}
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan7", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan7"}
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {
 		t.Error("Unexpected action plan received")
 	} else {
 		if reply[0].ActionPlanId != "ATMS_1" {
-			t.Errorf("Unexpected ActionPlanId received")
+			t.Errorf("Unexpected ActionoveAccountPlanId received")
 		}
 	}
 }
 
-// Test here RemActionTiming
-func TestApierRemActionTiming(t *testing.T) {
+// Test here RemoveActionTiming
+func TestApierRemUniqueIDActionTiming(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var rmReply string
-	rmReq := AttrRemActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4", Direction: "*out"}
+	rmReq := AttrRemActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4"}
 	if err := rater.Call("ApierV1.RemActionTiming", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
 	} else if rmReply != OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan4", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan4"}
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 0 {
@@ -1154,36 +1176,36 @@ func TestApierGetAccount(t *testing.T) {
 		return
 	}
 	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
-		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan"}
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 1.5 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 1.5, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 1.5 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 1.5, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 	// The one we have topped up though executeAction
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan2"}
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 11.5 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 10, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11.5 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 10, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan3", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan3"}
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 3.6 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 3.6, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 3.6 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 3.6, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
-	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan6", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "dan6"}
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 1 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 1, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 1 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 1, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 
@@ -1193,13 +1215,13 @@ func TestApierTriggersExecute(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8"}
+	attrs := &utils.AttrSetAccount{Tenant: "cgrates.org", Account: "dan8", ReloadScheduler: true}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
 	}
-	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceType: "*monetary", Direction: "*out", Value: 2}
+	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceType: "*monetary", Value: 2}
 	if err := rater.Call("ApierV1.AddBalance", attrAddBlnc, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
 	} else if reply != "OK" {
@@ -1214,7 +1236,7 @@ func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 	}
 	TestApierInitDataDb(t)
 	reply := ""
-	arc := new(utils.ApiReloadCache)
+	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
@@ -1222,7 +1244,7 @@ func TestApierResetDataBeforeLoadFromFolder(t *testing.T) {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{}
+	expectedStats := &utils.CacheStats{LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -1246,13 +1268,13 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 		t.Error(err)
 	}
 	// Simple test that command is executed without errors
-	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
+	attrs = &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
 	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
@@ -1260,7 +1282,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		return
 	}
 	reply := ""
-	arc := new(utils.ApiReloadCache)
+	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
@@ -1268,12 +1290,17 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 3, Actions: 5, DerivedChargers: 2}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
-	} else if !reflect.DeepEqual(rcvStats, expectedStats) {
-		t.Errorf("Calling ApierV1.GetCacheStats received: %v, expected: %v", rcvStats, expectedStats)
+	} else {
+		if rcvStats.Destinations != 5 ||
+			rcvStats.RatingPlans != 5 ||
+			rcvStats.RatingProfiles != 5 ||
+			rcvStats.Actions != 13 ||
+			rcvStats.DerivedChargers != 3 {
+			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
+		}
 	}
 }
 
@@ -1284,11 +1311,11 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 		return
 	}
 	var reply *engine.Account
-	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}
+	if err := rater.Call("ApierV2.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue() != 11 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[utils.MONETARY+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[utils.MONETARY].GetTotalValue() != 11 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[utils.MONETARY].GetTotalValue())
 	}
 }
 
@@ -1332,7 +1359,7 @@ func TestApierGetCallCostLog(t *testing.T) {
 	}
 	attrs.CgrId = "dummyid"
 	attrs.RunId = "default"
-	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != "SERVER_ERROR: record not found" {
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND, got:", err)
 	}
 }
@@ -1366,14 +1393,14 @@ func TestApierCdrServer(t *testing.T) {
 		return
 	}
 	httpClient := new(http.Client)
-	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{utils.META_RATED}, "direction": []string{"*out"},
-		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
-		"setup_time":  []string{"2013-11-07T08:42:22Z"},
-		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{utils.META_RATED}, "direction": []string{"*out"},
-		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
-		"setup_time":  []string{"2013-11-07T08:42:23Z"},
-		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+	cdrForm1 := url.Values{utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED}, utils.DIRECTION: []string{"*out"},
+		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1001"}, utils.SUBJECT: []string{"1001"}, utils.DESTINATION: []string{"1002"},
+		utils.SETUP_TIME:  []string{"2013-11-07T08:42:22Z"},
+		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+	cdrForm2 := url.Values{utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{utils.META_RATED}, utils.DIRECTION: []string{"*out"},
+		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1001"}, utils.SUBJECT: []string{"1001"}, utils.DESTINATION: []string{"1002"},
+		utils.SETUP_TIME:  []string{"2013-11-07T08:42:23Z"},
+		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
 		cdrForm.Set(utils.CDRSOURCE, utils.TEST_SQL)
 		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cdr_http", "127.0.0.1:2080"), cdrForm); err != nil {
@@ -1397,7 +1424,7 @@ func TestApierExportCdrsToFile(t *testing.T) {
     req.CdrFormat = &dryRun
     tm1, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:22Z")
     tm2, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:23Z")
-    expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCgrIds: []string{utils.Sha1("dsafdsaf", tm1.String()),
+    expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCGRIDs: []string{utils.Sha1("dsafdsaf", tm1.String()),
         utils.Sha1("adsafdsaf", tm2.String())}}
     if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
         t.Error(err.Error())
@@ -1425,8 +1452,8 @@ func TestApierLocalGetCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply []*engine.ExternalCdr
-	req := utils.AttrGetCdrs{}
+	var reply []*engine.ExternalCDR
+	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
 	if err := rater.Call("ApierV1.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(reply) != 2 {
@@ -1439,18 +1466,19 @@ func TestApierLocalProcessCdr(t *testing.T) {
 		return
 	}
 	var reply string
-	cdr := engine.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: utils.VOICE, AccId: "dsafdsaf",
-		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: utils.DEFAULT_RUNID,
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01, RatedAccount: "dan", RatedSubject: "dans",
+	cdr := engine.CDR{CGRID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderID: 123, ToR: utils.VOICE, OriginID: "dsafdsaf",
+		OriginHost: "192.168.1.1", Source: "test", RequestType: utils.META_RATED, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001",
+		Destination: "1002",
+		SetupTime:   time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), RunID: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if err := rater.Call("CdrsV1.ProcessCdr", cdr, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)
 	}
-	var cdrs []*engine.ExternalCdr
-	req := utils.AttrGetCdrs{}
+	var cdrs []*engine.ExternalCDR
+	req := utils.AttrGetCdrs{MediationRunIds: []string{utils.MetaRaw}}
 	if err := rater.Call("ApierV1.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if len(cdrs) != 3 {
@@ -1462,13 +1490,13 @@ func TestApierLocalSetDC(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	dcs1 := utils.DerivedChargers{
-		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+	dcs1 := []*utils.DerivedCharger{
+		&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}
-	attrs := AttrSetDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: dcs1}
+	attrs := AttrSetDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: dcs1, Overwrite: true}
 	var reply string
 	if err := rater.Call("ApierV1.SetDerivedChargers", attrs, &reply); err != nil {
 		t.Error("Unexpected error", err.Error())
@@ -1482,12 +1510,13 @@ func TestApierLocalGetDC(t *testing.T) {
 		return
 	}
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
-	eDcs := utils.DerivedChargers{
-		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-	}
+	eDcs := utils.DerivedChargers{DestinationIDs: utils.NewStringMap(),
+		Chargers: []*utils.DerivedCharger{
+			&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+				AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+				AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+		}}
 	var dcs utils.DerivedChargers
 	if err := rater.Call("ApierV1.GetDerivedChargers", attrs, &dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
@@ -1538,12 +1567,18 @@ func TestApierLocalSetDestination(t *testing.T) {
 	}
 }
 
-func TestApierLocalGetRatingSubjectAliases(t *testing.T) {
+func TestApierLocalGetAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var subjAliases []string
-	if err := rater.Call("ApierV1.GetRatingSubjectAliases", engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}, &subjAliases); err == nil {
+	var alias engine.Alias
+	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil {
+		t.Error("Unexpected nil error received")
+	} else if err.Error() != utils.ErrNotFound.Error() {
+		t.Error("Unexpected error", err.Error())
+	}
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil {
 		t.Error("Unexpected nil error received")
 	} else if err.Error() != utils.ErrNotFound.Error() {
 		t.Error("Unexpected error", err.Error())
@@ -1554,23 +1589,18 @@ func TestApierLocalAddRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	addRtSubjAliases := &AttrAddRatingSubjectAliases{Tenant: "cgrates.org", Subject: "1001", Aliases: []string{"2001", "2002", "2003"}}
+	addRtSubjAliases := &AttrAddRatingSubjectAliases{Tenant: "cgrates.org", Category: "call", Subject: "1001", Aliases: []string{"2001", "2002", "2003"}}
 	var rply string
 	if err := rater.Call("ApierV1.AddRatingSubjectAliases", addRtSubjAliases, &rply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if rply != utils.OK {
 		t.Error("Unexpected reply: ", rply)
 	}
-	var subjAliases []string
-	expectSubjAliases := sort.StringSlice(addRtSubjAliases.Aliases)
-	expectSubjAliases.Sort()
-	if err := rater.Call("ApierV1.GetRatingSubjectAliases", engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}, &subjAliases); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else {
-		subjAliases := sort.StringSlice(subjAliases)
-		subjAliases.Sort()
-		if !reflect.DeepEqual(expectSubjAliases, subjAliases) {
-			t.Errorf("Expecting: %v, received: %v", expectSubjAliases, subjAliases)
+	var alias engine.Alias
+	for _, als := range addRtSubjAliases.Aliases {
+		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: addRtSubjAliases.Tenant, Category: addRtSubjAliases.Category,
+			Account: als, Subject: als}, &alias); err != nil {
+			t.Error("Unexpected error", err.Error())
 		}
 	}
 }
@@ -1586,24 +1616,10 @@ func TestApierLocalRemRatingSubjectAliases(t *testing.T) {
 	} else if rply != utils.OK {
 		t.Error("Unexpected reply: ", rply)
 	}
-	var subjAliases []string
-	if err := rater.Call("ApierV1.GetRatingSubjectAliases", engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}, &subjAliases); err == nil {
-		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Unexpected error", err.Error())
-	}
-}
-
-func TestApierLocalGetAccountAliases(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	tenantAcnt := engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}
-	var acntAliases []string
-	if err := rater.Call("ApierV1.GetAccountAliases", tenantAcnt, &acntAliases); err == nil {
-		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Unexpected error", err.Error())
+	var alias engine.Alias
+	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error %v, alias: %+v", err, alias)
 	}
 }
 
@@ -1611,23 +1627,18 @@ func TestApierLocalAddAccountAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	addAcntAliases := &AttrAddAccountAliases{Tenant: "cgrates.org", Account: "1001", Aliases: []string{"2001", "2002", "2003"}}
+	addAcntAliases := &AttrAddAccountAliases{Tenant: "cgrates.org", Category: "call", Account: "1001", Aliases: []string{"2001", "2002", "2003"}}
 	var rply string
 	if err := rater.Call("ApierV1.AddAccountAliases", addAcntAliases, &rply); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if rply != utils.OK {
 		t.Error("Unexpected reply: ", rply)
 	}
-	var acntAliases []string
-	expectAcntAliases := sort.StringSlice(addAcntAliases.Aliases)
-	expectAcntAliases.Sort()
-	if err := rater.Call("ApierV1.GetAccountAliases", engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAliases); err != nil {
-		t.Error("Unexpected error", err.Error())
-	} else {
-		acntAliases := sort.StringSlice(acntAliases)
-		acntAliases.Sort()
-		if !reflect.DeepEqual(expectAcntAliases, acntAliases) {
-			t.Errorf("Expecting: %v, received: %v", expectAcntAliases, acntAliases)
+	var alias engine.Alias
+	for _, als := range addAcntAliases.Aliases {
+		if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: addAcntAliases.Tenant, Category: addAcntAliases.Category,
+			Account: als, Subject: als}, &alias); err != nil {
+			t.Error("Unexpected error", err.Error())
 		}
 	}
 }
@@ -1643,11 +1654,10 @@ func TestApierLocalRemAccountAliases(t *testing.T) {
 	} else if rply != utils.OK {
 		t.Error("Unexpected reply: ", rply)
 	}
-	var acntAliases []string
-	if err := rater.Call("ApierV1.GetAccountAliases", engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAliases); err == nil {
-		t.Error("Unexpected nil error received")
-	} else if err.Error() != utils.ErrNotFound.Error() {
-		t.Error("Unexpected error", err.Error())
+	var alias engine.Alias
+	//al.Direction, al.Tenant, al.Category, al.Account, al.Subject, al.Group
+	if err := rater.Call("AliasesV1.GetAlias", engine.Alias{Context: utils.ALIAS_CONTEXT_RATING, Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "2001", Subject: "2001"}, &alias); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("Unexpected error %v, alias: %+v", err, alias)
 	}
 }
 
@@ -1657,7 +1667,7 @@ func TestApierLocalGetScheduledActions(t *testing.T) {
 	}
 	var rply []*ScheduledActions
 	if err := rater.Call("ApierV1.GetScheduledActions", AttrsGetScheduledActions{}, &rply); err != nil {
-		t.Error("Unexpected error: ", err.Error)
+		t.Error("Unexpected error: ", err)
 	}
 }
 
@@ -1698,7 +1708,7 @@ func TestApierReloadCache2(t *testing.T) {
 		return
 	}
 	reply := ""
-	arc := new(utils.ApiReloadCache)
+	arc := new(utils.AttrReloadCache)
 	// Simple test that command is executed without errors
 	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
@@ -1749,7 +1759,7 @@ func TestApierGetCacheStats2(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := new(utils.CacheStats)
+	expectedStats := &utils.CacheStats{LastLoadId: utils.NOT_AVAILABLE, LastLoadTime: utils.NOT_AVAILABLE}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -1770,6 +1780,7 @@ func TestApierLoadTariffPlanFromStorDb(t *testing.T) {
 	}
 }
 
+/*
 func TestApierGetCacheStats3(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1782,7 +1793,7 @@ func TestApierGetCacheStats3(t *testing.T) {
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
 		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
 	}
-}
+}*/
 
 // Simply kill the engine after we are done with tests within this file
 func TestApierStopEngine(t *testing.T) {

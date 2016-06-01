@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -28,13 +29,6 @@ func (ce CgrEvent) PassFilters(rsrFields utils.RSRFields) bool {
 	return true
 }
 
-type PublisherSubscriber interface {
-	Subscribe(SubscribeInfo, *string) error
-	Unsubscribe(SubscribeInfo, *string) error
-	Publish(CgrEvent, *string) error
-	ShowSubscribers(string, *map[string]*SubscriberData) error
-}
-
 type SubscriberData struct {
 	ExpTime time.Time
 	Filters utils.RSRFields
@@ -43,7 +37,7 @@ type SubscriberData struct {
 type PubSub struct {
 	subscribers map[string]*SubscriberData
 	ttlVerify   bool
-	pubFunc     func(string, bool, interface{}) ([]byte, error)
+	pubFunc     func(string, bool, []byte) ([]byte, error)
 	mux         *sync.Mutex
 	accountDb   AccountingStorage
 }
@@ -69,13 +63,13 @@ func (ps *PubSub) saveSubscriber(key string) {
 		return
 	}
 	if err := accountingStorage.SetSubscriber(key, subData); err != nil {
-		Logger.Err("<PubSub> Error saving subscriber: " + err.Error())
+		utils.Logger.Err("<PubSub> Error saving subscriber: " + err.Error())
 	}
 }
 
 func (ps *PubSub) removeSubscriber(key string) {
 	if err := accountingStorage.RemoveSubscriber(key); err != nil {
-		Logger.Err("<PubSub> Error removing subscriber: " + err.Error())
+		utils.Logger.Err("<PubSub> Error removing subscriber: " + err.Error())
 	}
 }
 
@@ -122,6 +116,7 @@ func (ps *PubSub) Unsubscribe(si SubscribeInfo, reply *string) error {
 func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 	ps.mux.Lock()
 	defer ps.mux.Unlock()
+	evt["Timestamp"] = time.Now().Format(time.RFC3339Nano)
 	for key, subData := range ps.subscribers {
 		if !subData.ExpTime.IsZero() && subData.ExpTime.Before(time.Now()) {
 			delete(ps.subscribers, key)
@@ -133,21 +128,25 @@ func (ps *PubSub) Publish(evt CgrEvent, reply *string) error {
 		}
 		split := utils.InfieldSplit(key)
 		if len(split) != 2 {
-			Logger.Warning("<PubSub> Wrong transport;address pair: " + key)
+			utils.Logger.Warning("<PubSub> Wrong transport;address pair: " + key)
 			continue
 		}
 		transport := split[0]
 		address := split[1]
-
+		ttlVerify := ps.ttlVerify
+		jsn, err := json.Marshal(evt)
+		if err != nil {
+			return err
+		}
 		switch transport {
 		case utils.META_HTTP_POST:
 			go func() {
 				delay := utils.Fib()
 				for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-					if _, err := ps.pubFunc(address, ps.ttlVerify, evt); err == nil {
+					if _, err := ps.pubFunc(address, ttlVerify, jsn); err == nil {
 						break // Success, no need to reinterate
 					} else if i == 4 { // Last iteration, syslog the warning
-						Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), evt["EventName"]))
+						utils.Logger.Warning(fmt.Sprintf("<PubSub> Failed calling url: [%s], error: [%s], event type: %s", address, err.Error(), evt["EventName"]))
 						break
 					}
 					time.Sleep(delay())
@@ -164,12 +163,58 @@ func (ps *PubSub) ShowSubscribers(in string, out *map[string]*SubscriberData) er
 	return nil
 }
 
+func (ps *PubSub) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	switch serviceMethod {
+	case "PubSubV1.Subscribe":
+		argsConverted, canConvert := args.(SubscribeInfo)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Subscribe(argsConverted, replyConverted)
+	case "PubSubV1.Unsubscribe":
+		argsConverted, canConvert := args.(SubscribeInfo)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Unsubscribe(argsConverted, replyConverted)
+	case "PubSubV1.Publish":
+		argsConverted, canConvert := args.(CgrEvent)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*string)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.Publish(argsConverted, replyConverted)
+	case "PubSubV1.ShowSubscribers":
+		argsConverted, canConvert := args.(string)
+		if !canConvert {
+			return rpcclient.ErrWrongArgsType
+		}
+		replyConverted, canConvert := reply.(*map[string]*SubscriberData)
+		if !canConvert {
+			return rpcclient.ErrWrongReplyType
+		}
+		return ps.ShowSubscribers(argsConverted, replyConverted)
+	}
+	return rpcclient.ErrUnsupporteServiceMethod
+}
+
 type ProxyPubSub struct {
 	Client *rpcclient.RpcClient
 }
 
-func NewProxyPubSub(addr string, attempts, reconnects int) (*ProxyPubSub, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
+func NewProxyPubSub(addr string, attempts, reconnects int, connectTimeout, replyTimeout time.Duration) (*ProxyPubSub, error) {
+	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, connectTimeout, replyTimeout, utils.GOB, nil)
 	if err != nil {
 		return nil, err
 	}

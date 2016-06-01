@@ -27,15 +27,22 @@ After post-install actions are performed, CGRateS will be configured in */etc/cg
 3.2. Using source
 -----------------
 
-After the go environment is installed_ (at least go1.2) and configured_ issue the following commands:
+For developing CGRateS and switching betwen lts versions we are using the new vendor directory feature introduced in go 1.6. In a nutshell all the dependencies are installed and used from a folder named vendor placed in the root of the project.
+
+To manage this vendor folder we use a tool named glide_ which will download specific versions of the external packages used by CGRateS. To configure the project with glide use the following commands:
 ::
+   go get github.com/Masterminds/glide
+   go get github.com/cgrates/cgrates
+   cd $GOPATH/src/github.com/cgrates/cgrates
+   glide install
 
-    go get github.com/cgrates/cgrates
+The glide install command will install the external dependencies versions specified in the glide.lock file in the vendor folder. There are different versions for each CGRateS branch, versions that are recorded in the yaml file when the GCRateS releases are made.
 
-This command will install the trunk version of CGRateS together with all the necessary dependencies.
+Note that the vendor folder should not be registered with the VCS we are using. For more information and command options for use glide_ readme page.
 
 .. _installed: http://golang.org/doc/install
 .. _configured: http://golang.org/doc/code.html
+.. _glide: https://github.com/Masterminds/glide
 
 
 3.3. Post-install
@@ -44,34 +51,37 @@ This command will install the trunk version of CGRateS together with all the nec
 Database setup
 ~~~~~~~~~~~~~~
 
-For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary. 
+For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary.
+
 At present we support the following databases:
 
-As DataDB types (rating and accounting subsystems):
+
 
 - Redis_
 
-As StorDB (persistent storage for CDRs and tariff plan versions).
-
+Used as DataDb, optimized for real-time information access.
 Once installed there should be no special requirements in terms of setup since no schema is necessary.
+
 
 - MySQL_
 
+Used as StorDb, optimized for CDR archiving and offline Tariff Plan versioning.
 Once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
 
  ::
-   
+
   cd /usr/share/cgrates/storage/mysql/
   ./setup_cgr_db.sh root CGRateS.org localhost
 
 - PostgreSQL_
 
+Used as StorDb, optimized for CDR archiving and offline Tariff Plan versioning.
 Once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
 
  ::
-   
+
   cd /usr/share/cgrates/storage/postgres/
-  ./setup_cgr_db.sh root CGRateS.org localhost
+  ./setup_cgr_db.sh
 
 .. _Redis: http://redis.io/
 .. _MySQL: http://www.mysql.org/
@@ -84,4 +94,3 @@ Git
 The CGR-History component will use Git_ to archive tariff plan changes, hence it's installation is necessary before using CGR-History.
 
 .. _Git: http://git-scm.com/
-

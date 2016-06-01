@@ -138,14 +138,14 @@ func APItoModelRatingProfile(rpf *utils.TPRatingProfile) (result []TpRatingProfi
 }
 
 func APItoModelLcrRule(lcrs *utils.TPLcrRules) (result []TpLcrRule) {
-	for _, lcr := range lcrs.LcrRules {
+	for _, lcr := range lcrs.Rules {
 		result = append(result, TpLcrRule{
 			Tpid:           lcrs.TPid,
-			Direction:      lcr.Direction,
-			Tenant:         lcr.Tenant,
-			Category:       lcr.Category,
-			Account:        lcr.Account,
-			Subject:        lcr.Subject,
+			Direction:      lcrs.Direction,
+			Tenant:         lcrs.Tenant,
+			Category:       lcrs.Category,
+			Account:        lcrs.Account,
+			Subject:        lcrs.Subject,
 			DestinationTag: lcr.DestinationId,
 			RpCategory:     lcr.RpCategory,
 			Strategy:       lcr.Strategy,
@@ -154,7 +154,7 @@ func APItoModelLcrRule(lcrs *utils.TPLcrRules) (result []TpLcrRule) {
 			Weight:         lcr.Weight,
 		})
 	}
-	if len(lcrs.LcrRules) == 0 {
+	if len(lcrs.Rules) == 0 {
 		result = append(result, TpLcrRule{
 			Tpid: lcrs.TPid,
 		})
@@ -170,15 +170,18 @@ func APItoModelAction(as *utils.TPActions) (result []TpAction) {
 			Action:          a.Identifier,
 			BalanceTag:      a.BalanceId,
 			BalanceType:     a.BalanceType,
-			Direction:       a.Direction,
+			Directions:      a.Directions,
 			Units:           a.Units,
 			ExpiryTime:      a.ExpiryTime,
+			Filter:          a.Filter,
 			TimingTags:      a.TimingTags,
 			DestinationTags: a.DestinationIds,
 			RatingSubject:   a.RatingSubject,
-			Category:        a.Category,
-			SharedGroup:     a.SharedGroup,
+			Categories:      a.Categories,
+			SharedGroups:    a.SharedGroups,
 			BalanceWeight:   a.BalanceWeight,
+			BalanceBlocker:  a.BalanceBlocker,
+			BalanceDisabled: a.BalanceDisabled,
 			ExtraParameters: a.ExtraParameters,
 			Weight:          a.Weight,
 		})
@@ -215,22 +218,26 @@ func APItoModelActionTrigger(ats *utils.TPActionTriggers) (result []TpActionTrig
 	for _, at := range ats.ActionTriggers {
 		result = append(result, TpActionTrigger{
 			Tpid:                   ats.TPid,
-			Tag:                    ats.ActionTriggersId,
-			UniqueId:               at.Id,
+			Tag:                    at.Id,
+			UniqueId:               at.UniqueID,
 			ThresholdType:          at.ThresholdType,
 			ThresholdValue:         at.ThresholdValue,
 			Recurrent:              at.Recurrent,
 			MinSleep:               at.MinSleep,
+			ExpiryTime:             at.ExpirationDate,
+			ActivationTime:         at.ActivationDate,
 			BalanceTag:             at.BalanceId,
 			BalanceType:            at.BalanceType,
-			BalanceDirection:       at.BalanceDirection,
+			BalanceDirections:      at.BalanceDirections,
 			BalanceDestinationTags: at.BalanceDestinationIds,
 			BalanceWeight:          at.BalanceWeight,
 			BalanceExpiryTime:      at.BalanceExpirationDate,
 			BalanceTimingTags:      at.BalanceTimingTags,
 			BalanceRatingSubject:   at.BalanceRatingSubject,
-			BalanceCategory:        at.BalanceCategory,
-			BalanceSharedGroup:     at.BalanceSharedGroup,
+			BalanceCategories:      at.BalanceCategories,
+			BalanceSharedGroups:    at.BalanceSharedGroups,
+			BalanceBlocker:         at.BalanceBlocker,
+			BalanceDisabled:        at.BalanceDisabled,
 			MinQueuedItems:         at.MinQueuedItems,
 			ActionsTag:             at.ActionsId,
 			Weight:                 at.Weight,
@@ -249,7 +256,6 @@ func APItoModelAccountAction(aa *utils.TPAccountActions) *TpAccountAction {
 	return &TpAccountAction{
 		Tpid:              aa.TPid,
 		Loadid:            aa.LoadId,
-		Direction:         aa.Direction,
 		Tenant:            aa.Tenant,
 		Account:           aa.Account,
 		ActionPlanTag:     aa.ActionPlanId,
@@ -301,6 +307,8 @@ func APItoModelDerivedCharger(dcs *utils.TPDerivedChargers) (result []TpDerivedC
 			UsageField:           dc.UsageField,
 			SupplierField:        dc.SupplierField,
 			DisconnectCauseField: dc.DisconnectCauseField,
+			CostField:            dc.CostField,
+			RatedField:           dc.RatedField,
 		})
 	}
 	if len(dcs.DerivedChargers) == 0 {
@@ -321,38 +329,82 @@ func APItoModelCdrStat(stats *utils.TPCdrStats) (result []TpCdrstat) {
 	for _, st := range stats.CdrStats {
 		ql, _ := strconv.Atoi(st.QueueLength)
 		result = append(result, TpCdrstat{
-			Tpid:                stats.TPid,
-			Tag:                 stats.CdrStatsId,
-			QueueLength:         ql,
-			TimeWindow:          st.TimeWindow,
-			SaveInterval:        st.SaveInterval,
-			Metrics:             st.Metrics,
-			SetupInterval:       st.SetupInterval,
-			Tors:                st.TORs,
-			CdrHosts:            st.CdrHosts,
-			CdrSources:          st.CdrSources,
-			ReqTypes:            st.ReqTypes,
-			Directions:          st.Directions,
-			Tenants:             st.Tenants,
-			Categories:          st.Categories,
-			Accounts:            st.Accounts,
-			Subjects:            st.Subjects,
-			DestinationPrefixes: st.DestinationPrefixes,
-			PddInterval:         st.PddInterval,
-			UsageInterval:       st.UsageInterval,
-			Suppliers:           st.Suppliers,
-			DisconnectCauses:    st.DisconnectCauses,
-			MediationRunids:     st.MediationRunIds,
-			RatedAccounts:       st.RatedAccounts,
-			RatedSubjects:       st.RatedSubjects,
-			CostInterval:        st.CostInterval,
-			ActionTriggers:      st.ActionTriggers,
+			Tpid:             stats.TPid,
+			Tag:              stats.CdrStatsId,
+			QueueLength:      ql,
+			TimeWindow:       st.TimeWindow,
+			SaveInterval:     st.SaveInterval,
+			Metrics:          st.Metrics,
+			SetupInterval:    st.SetupInterval,
+			Tors:             st.TORs,
+			CdrHosts:         st.CdrHosts,
+			CdrSources:       st.CdrSources,
+			ReqTypes:         st.ReqTypes,
+			Directions:       st.Directions,
+			Tenants:          st.Tenants,
+			Categories:       st.Categories,
+			Accounts:         st.Accounts,
+			Subjects:         st.Subjects,
+			DestinationIds:   st.DestinationIds,
+			PddInterval:      st.PddInterval,
+			UsageInterval:    st.UsageInterval,
+			Suppliers:        st.Suppliers,
+			DisconnectCauses: st.DisconnectCauses,
+			MediationRunids:  st.MediationRunIds,
+			RatedAccounts:    st.RatedAccounts,
+			RatedSubjects:    st.RatedSubjects,
+			CostInterval:     st.CostInterval,
+			ActionTriggers:   st.ActionTriggers,
 		})
 	}
 	if len(stats.CdrStats) == 0 {
 		result = append(result, TpCdrstat{
 			Tpid: stats.TPid,
 			Tag:  stats.CdrStatsId,
+		})
+	}
+	return
+}
+
+func APItoModelAliases(attr *utils.TPAliases) (result []TpAlias) {
+	for _, v := range attr.Values {
+		result = append(result, TpAlias{
+			Tpid:          attr.TPid,
+			Direction:     attr.Direction,
+			Tenant:        attr.Tenant,
+			Category:      attr.Category,
+			Account:       attr.Account,
+			Subject:       attr.Subject,
+			Context:       attr.Context,
+			DestinationId: v.DestinationId,
+			Target:        v.Target,
+			Original:      v.Original,
+			Alias:         v.Alias,
+			Weight:        v.Weight,
+		})
+	}
+	if len(attr.Values) == 0 {
+		result = append(result, TpAlias{
+			Tpid: attr.TPid,
+		})
+	}
+	return
+}
+
+func APItoModelUsers(attr *utils.TPUsers) (result []TpUser) {
+	for _, p := range attr.Profile {
+		result = append(result, TpUser{
+			Tpid:           attr.TPid,
+			Tenant:         attr.Tenant,
+			UserName:       attr.UserName,
+			AttributeName:  p.AttrName,
+			AttributeValue: p.AttrValue,
+			Weight:         attr.Weight,
+		})
+	}
+	if len(attr.Profile) == 0 {
+		result = append(result, TpUser{
+			Tpid: attr.TPid,
 		})
 	}
 	return

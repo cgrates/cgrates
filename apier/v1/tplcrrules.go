@@ -18,20 +18,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package v1
 
-/*
+import (
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
 // Creates a new LcrRules profile within a tariff plan
-func (self *ApierV1) SetTPLcrRules(attrs utils.TPLcrRules, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrRulesId", "LcrRules"}); len(missing) != 0 {
+func (self *ApierV1) SetTPLcrRule(attrs utils.TPLcrRules, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Direction", "Tenant", "Category", "Account", "Subject"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	for _, action := range attrs.LcrRules {
-		requiredFields := []string{"Identifier", "Weight"}
-
-		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:LcrAction:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
-		}
-	}
-	if err := self.StorDb.SetTPLcrRules(attrs.TPid, map[string][]*utils.TPLcrRule{attrs.LcrRulesId: attrs.LcrRules}); err != nil {
+	tm := engine.APItoModelLcrRule(&attrs)
+	if err := self.StorDb.SetTpLCRs(tm); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	*reply = "OK"
@@ -39,35 +37,44 @@ func (self *ApierV1) SetTPLcrRules(attrs utils.TPLcrRules, reply *string) error 
 }
 
 type AttrGetTPLcrRules struct {
-	TPid  string // Tariff plan id
-	LcrId string // Lcr id
+	TPid      string // Tariff plan id
+	LcrRuleId string // Lcr id
 }
 
 // Queries specific LcrRules profile on tariff plan
-func (self *ApierV1) GetTPLcrRules(attrs AttrGetTPLcrRules, reply *utils.TPLcrRules) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrId"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPLcrRule(attr AttrGetTPLcrRules, reply *utils.TPLcrRules) error {
+	if missing := utils.MissingStructFields(&attr, []string{"TPid", "LcrRuleId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if lcrs, err := self.StorDb.GetTpLCRs(attrs.TPid, attrs.LcrId); err != nil {
+	lcr := &engine.TpLcrRule{
+		Tpid: attr.TPid,
+	}
+	lcr.SetLcrRuleId(attr.LcrRuleId)
+	if lcrs, err := self.StorDb.GetTpLCRs(lcr); err != nil {
 		return utils.NewErrServerError(err)
-	} else if len(acts) == 0 {
+	} else if len(lcrs) == 0 {
 		return utils.ErrNotFound
 	} else {
-		*reply = utils.TPLcrRules{TPid: attrs.TPid, LcrRulesId: attrs.LcrRulesId, LcrRules: lcrs[attrs.LcrRulesId]}
+		tmMap, err := engine.TpLcrRules(lcrs).GetLcrRules()
+		if err != nil {
+			return err
+		}
+		*reply = *tmMap[attr.LcrRuleId]
 	}
 	return nil
 }
 
-type AttrGetTPLcrActionIds struct {
+type AttrGetTPLcrIds struct {
 	TPid string // Tariff plan id
+	utils.Paginator
 }
 
 // Queries LcrRules identities on specific tariff plan.
-func (self *ApierV1) GetTPLcrActionIds(attrs AttrGetTPLcrActionIds, reply *[]string) error {
+func (self *ApierV1) GetTPLcrRuleIds(attrs AttrGetTPLcrIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_LCRS, "id", nil); err != nil {
+	if ids, err := self.StorDb.GetTpTableIds(attrs.TPid, utils.TBL_TP_LCRS, utils.TPDistinctIds{"direction", "tenant", "category", "account", "subject"}, nil, &attrs.Paginator); err != nil {
 		return utils.NewErrServerError(err)
 	} else if ids == nil {
 		return utils.ErrNotFound
@@ -78,15 +85,14 @@ func (self *ApierV1) GetTPLcrActionIds(attrs AttrGetTPLcrActionIds, reply *[]str
 }
 
 // Removes specific LcrRules on Tariff plan
-func (self *ApierV1) RemTPLcrRules(attrs AttrGetTPLcrRules, reply *string) error {
+func (self *ApierV1) RemTPLcrRule(attrs AttrGetTPLcrRules, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LcrRulesId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_LCRS, attrs.TPid, attrs.LcrRulesId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_LCRS, attrs.TPid, map[string]string{"tag": attrs.LcrRuleId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"
 	}
 	return nil
 }
-*/

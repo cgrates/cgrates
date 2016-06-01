@@ -110,8 +110,8 @@ func (kev KamEvent) AsEvent(ignored string) engine.Event {
 func (kev KamEvent) GetName() string {
 	return kev[EVENT]
 }
-func (kev KamEvent) GetCgrId() string {
-	setupTime, _ := kev.GetSetupTime(utils.META_DEFAULT)
+func (kev KamEvent) GetCgrId(timezone string) string {
+	setupTime, _ := kev.GetSetupTime(utils.META_DEFAULT, timezone)
 	return utils.Sha1(kev.GetUUID(), setupTime.UTC().String())
 }
 func (kev KamEvent) GetUUID() string {
@@ -129,11 +129,12 @@ func (kev KamEvent) GetAccount(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_ACCOUNT])
 }
+
 func (kev KamEvent) GetSubject(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_SUBJECT], kev[CGR_ACCOUNT])
+	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_SUBJECT], kev.GetAccount(fieldName))
 }
 func (kev KamEvent) GetDestination(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
@@ -162,22 +163,22 @@ func (kev KamEvent) GetReqType(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(kev[fieldName], kev[CGR_REQTYPE], config.CgrConfig().DefaultReqType)
 }
-func (kev KamEvent) GetAnswerTime(fieldName string) (time.Time, error) {
+func (kev KamEvent) GetAnswerTime(fieldName, timezone string) (time.Time, error) {
 	aTimeStr := utils.FirstNonEmpty(kev[fieldName], kev[CGR_ANSWERTIME])
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		aTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.ParseTimeDetectLayout(aTimeStr)
+	return utils.ParseTimeDetectLayout(aTimeStr, timezone)
 }
-func (kev KamEvent) GetSetupTime(fieldName string) (time.Time, error) {
+func (kev KamEvent) GetSetupTime(fieldName, timezone string) (time.Time, error) {
 	sTimeStr := utils.FirstNonEmpty(kev[fieldName], kev[CGR_SETUPTIME], kev[CGR_ANSWERTIME])
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.ParseTimeDetectLayout(sTimeStr)
+	return utils.ParseTimeDetectLayout(sTimeStr, timezone)
 }
-func (kev KamEvent) GetEndTime() (time.Time, error) {
-	return utils.ParseTimeDetectLayout(kev[CGR_STOPTIME])
+func (kev KamEvent) GetEndTime(fieldName, timezone string) (time.Time, error) {
+	return utils.ParseTimeDetectLayout(kev[CGR_STOPTIME], timezone)
 }
 func (kev KamEvent) GetDuration(fieldName string) (time.Duration, error) {
 	durStr := utils.FirstNonEmpty(kev[fieldName], kev[CGR_DURATION])
@@ -228,11 +229,11 @@ func (kev KamEvent) GetCdrSource() string {
 	return "KAMAILIO_" + kev.GetName()
 }
 
-func (kev KamEvent) MissingParameter() bool {
+func (kev KamEvent) MissingParameter(timezone string) bool {
 	var nullTime time.Time
 	switch kev.GetName() {
 	case CGR_AUTH_REQUEST:
-		if setupTime, err := kev.GetSetupTime(utils.META_DEFAULT); err != nil || setupTime == nullTime {
+		if setupTime, err := kev.GetSetupTime(utils.META_DEFAULT, timezone); err != nil || setupTime == nullTime {
 			return true
 		}
 		return len(kev.GetAccount(utils.META_DEFAULT)) == 0 ||
@@ -243,7 +244,7 @@ func (kev KamEvent) MissingParameter() bool {
 			len(kev.GetDestination(utils.META_DEFAULT)) == 0 ||
 			len(kev[KAM_TR_INDEX]) == 0 || len(kev[KAM_TR_LABEL]) == 0
 	case CGR_CALL_START:
-		if aTime, err := kev.GetAnswerTime(utils.META_DEFAULT); err != nil || aTime == nullTime {
+		if aTime, err := kev.GetAnswerTime(utils.META_DEFAULT, timezone); err != nil || aTime == nullTime {
 			return true
 		}
 		return len(kev.GetUUID()) == 0 ||
@@ -262,13 +263,13 @@ func (kev KamEvent) MissingParameter() bool {
 }
 
 // Useful for CDR generation
-func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField) string {
-	sTime, _ := kev.GetSetupTime(utils.META_DEFAULT)
-	aTime, _ := kev.GetAnswerTime(utils.META_DEFAULT)
+func (kev KamEvent) ParseEventValue(rsrFld *utils.RSRField, timezone string) string {
+	sTime, _ := kev.GetSetupTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
+	aTime, _ := kev.GetAnswerTime(utils.META_DEFAULT, config.CgrConfig().DefaultTimezone)
 	duration, _ := kev.GetDuration(utils.META_DEFAULT)
 	switch rsrFld.Id {
 	case utils.CGRID:
-		return rsrFld.ParseValue(kev.GetCgrId())
+		return rsrFld.ParseValue(kev.GetCgrId(timezone))
 	case utils.TOR:
 		return rsrFld.ParseValue(utils.VOICE)
 	case utils.ACCID:
@@ -315,24 +316,24 @@ func (kev KamEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return false, ""
 }
 
-func (kev KamEvent) AsStoredCdr() *engine.StoredCdr {
-	storCdr := new(engine.StoredCdr)
-	storCdr.CgrId = kev.GetCgrId()
-	storCdr.TOR = utils.VOICE
-	storCdr.AccId = kev.GetUUID()
-	storCdr.CdrHost = kev.GetOriginatorIP(utils.META_DEFAULT)
-	storCdr.CdrSource = kev.GetCdrSource()
-	storCdr.ReqType = kev.GetReqType(utils.META_DEFAULT)
+func (kev KamEvent) AsStoredCdr(timezone string) *engine.CDR {
+	storCdr := new(engine.CDR)
+	storCdr.CGRID = kev.GetCgrId(timezone)
+	storCdr.ToR = utils.VOICE
+	storCdr.OriginID = kev.GetUUID()
+	storCdr.OriginHost = kev.GetOriginatorIP(utils.META_DEFAULT)
+	storCdr.Source = kev.GetCdrSource()
+	storCdr.RequestType = kev.GetReqType(utils.META_DEFAULT)
 	storCdr.Direction = kev.GetDirection(utils.META_DEFAULT)
 	storCdr.Tenant = kev.GetTenant(utils.META_DEFAULT)
 	storCdr.Category = kev.GetCategory(utils.META_DEFAULT)
 	storCdr.Account = kev.GetAccount(utils.META_DEFAULT)
 	storCdr.Subject = kev.GetSubject(utils.META_DEFAULT)
 	storCdr.Destination = kev.GetDestination(utils.META_DEFAULT)
-	storCdr.SetupTime, _ = kev.GetSetupTime(utils.META_DEFAULT)
-	storCdr.AnswerTime, _ = kev.GetAnswerTime(utils.META_DEFAULT)
+	storCdr.SetupTime, _ = kev.GetSetupTime(utils.META_DEFAULT, timezone)
+	storCdr.AnswerTime, _ = kev.GetAnswerTime(utils.META_DEFAULT, timezone)
 	storCdr.Usage, _ = kev.GetDuration(utils.META_DEFAULT)
-	storCdr.Pdd, _ = kev.GetPdd(utils.META_DEFAULT)
+	storCdr.PDD, _ = kev.GetPdd(utils.META_DEFAULT)
 	storCdr.Supplier = kev.GetSupplier(utils.META_DEFAULT)
 	storCdr.DisconnectCause = kev.GetDisconnectCause(utils.META_DEFAULT)
 	storCdr.ExtraFields = kev.GetExtraFields()
@@ -381,10 +382,10 @@ func (kev KamEvent) AsCallDescriptor() (*engine.CallDescriptor, error) {
 		Account:     kev.GetAccount(utils.META_DEFAULT),
 		Subject:     kev.GetSubject(utils.META_DEFAULT),
 		Destination: kev.GetDestination(utils.META_DEFAULT),
-		StartTime:   utils.FirstNonEmpty(kev[CGR_SETUPTIME], kev[CGR_ANSWERTIME]),
+		SetupTime:   utils.FirstNonEmpty(kev[CGR_SETUPTIME], kev[CGR_ANSWERTIME]),
 		Duration:    kev[CGR_DURATION],
 	}
-	return lcrReq.AsCallDescriptor()
+	return lcrReq.AsCallDescriptor(config.CgrConfig().DefaultTimezone)
 }
 
 func (kev KamEvent) ComputeLcr() bool {

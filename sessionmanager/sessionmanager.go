@@ -22,18 +22,19 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/rpcclient"
 )
 
 type SessionManager interface {
-	Rater() engine.Connector
-	CdrSrv() engine.Connector
+	Rater() rpcclient.RpcClientConnection
+	CdrSrv() rpcclient.RpcClientConnection
 	DebitInterval() time.Duration
-	Connect() error
 	DisconnectSession(engine.Event, string, string) error
 	WarnSessionMinDuration(string, string)
-	RemoveSession(string)
-	ProcessCdr(*engine.StoredCdr) error
-	Shutdown() error
 	Sessions() []*Session
-	SyncSessions() error
+	Timezone() string
+	Connect() error
+	Shutdown() error
+	//RemoveSession(string)
+	//SyncSessions() error
 }

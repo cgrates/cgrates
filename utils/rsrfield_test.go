@@ -34,7 +34,8 @@ func TestNewRSRField1(t *testing.T) {
 		t.Errorf("Expecting: %v, received: %v", expRSRField1, rsrField)
 	}
 	// With filter
-	expRSRField2 := &RSRField{Id: "sip_redirected_to", filterValue: "086517174963",
+	filter, _ := NewRSRFilter("086517174963")
+	expRSRField2 := &RSRField{Id: "sip_redirected_to", filters: []*RSRFilter{filter},
 		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}
 	if rsrField, err := NewRSRField(`~sip_redirected_to:s/sip:\+49(\d+)@/0$1/(086517174963)`); err != nil {
 		t.Error("Unexpected error: ", err.Error())
@@ -219,5 +220,135 @@ func TestRSRFieldsId(t *testing.T) {
 		t.Error("Unexpected error: ", err)
 	} else if idRcv := rsrFlds.Id(); idRcv != "" {
 		t.Errorf("Received id: %s", idRcv)
+	}
+}
+
+func TestRSRCostDetails(t *testing.T) {
+	fieldsStr1 := `{"Direction":"*out","Category":"default_route","Tenant":"demo.cgrates.org","Subject":"voxbeam_premium","Account":"6335820713","Destination":"15143606781","TOR":"*voice","Cost":0.0007,"Timespans":[{"TimeStart":"2015-08-30T21:46:54Z","TimeEnd":"2015-08-30T21:47:06Z","Cost":0.00072,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"*middle","RoundingDecimals":5,"MaxCost":0,"MaxCostStrategy":"0","Rates":[{"GroupIntervalStart":0,"Value":0.0036,"RateIncrement":6000000000,"RateUnit":60000000000}]},"Weight":10},"DurationIndex":12000000000,"Increments":[{"Duration":6000000000,"Cost":0.00036,"BalanceInfo":{"UnitBalanceUuid":"","MoneyBalanceUuid":"40adda88-25d3-4009-b928-f39d61590439","AccountId":"*out:demo.cgrates.org:6335820713"},"BalanceRateInterval":null,"UnitInfo":null,"CompressFactor":2}],"MatchedSubject":"*out:demo.cgrates.org:default_route:voxbeam_premium","MatchedPrefix":"1514","MatchedDestId":"Canada","RatingPlanId":"RP_VOXBEAM_PREMIUM"}]}`
+	rsrField, err := NewRSRField(`~cost_details:s/"MatchedDestId":"(\w+)"/${1}/`)
+	if err != nil {
+		t.Error(err)
+	}
+	if parsedVal := rsrField.ParseValue(fieldsStr1); parsedVal != "Canada" {
+		t.Errorf("Expecting: Canada, received: %s", parsedVal)
+	}
+}
+
+func TestRSRFilterPass(t *testing.T) {
+	fltr, err := NewRSRFilter("") // Pass any
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("") {
+		t.Error("Not passing!")
+	}
+	if !fltr.Pass("any") {
+		t.Error("Not passing!")
+	}
+	fltr, err = NewRSRFilter("!") // Pass nothing
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("") {
+		t.Error("Passing!")
+	}
+	if fltr.Pass("any") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("full_match") // Full string pass
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("full_match") {
+		t.Error("Not passing!")
+	}
+	if fltr.Pass("full_match1") {
+		t.Error("Passing!")
+	}
+	if fltr.Pass("") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("^prefixMatch") // Prefix pass
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("prefixMatch") {
+		t.Error("Not passing!")
+	}
+	if !fltr.Pass("prefixMatch12345") {
+		t.Error("Not passing!")
+	}
+	if fltr.Pass("1prefixMatch") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("suffixMatch$") // Suffix pass
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("suffixMatch") {
+		t.Error("Not passing!")
+	}
+	if !fltr.Pass("12345suffixMatch") {
+		t.Error("Not passing!")
+	}
+	if fltr.Pass("suffixMatch1") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("!fullMatch") // Negative full pass
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("ShouldMatch") {
+		t.Error("Not passing!")
+	}
+	if fltr.Pass("fullMatch") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("!^prefixMatch") // Negative prefix pass
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("prefixMatch123") {
+		t.Error("Passing!")
+	}
+	if !fltr.Pass("123prefixMatch") {
+		t.Error("Not passing!")
+	}
+	fltr, err = NewRSRFilter("!suffixMatch$") // Negative suffix pass
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("123suffixMatch") {
+		t.Error("Passing!")
+	}
+	if !fltr.Pass("suffixMatch123") {
+		t.Error("Not passing!")
+	}
+	fltr, err = NewRSRFilter("~^C.+S$") // Regexp pass
+	if err != nil {
+		t.Error(err)
+	}
+	if !fltr.Pass("CGRateS") {
+		t.Error("Not passing!")
+	}
+	if fltr.Pass("1CGRateS") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("!~^C.*S$") // Negative regexp pass
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("CGRateS") {
+		t.Error("Passing!")
+	}
+	fltr, err = NewRSRFilter("^$") // Empty value
+	if err != nil {
+		t.Error(err)
+	}
+	if fltr.Pass("CGRateS") {
+		t.Error("Passing!")
+	}
+	if !fltr.Pass("") {
+		t.Error("Not passing!")
 	}
 }

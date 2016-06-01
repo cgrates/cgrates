@@ -10,11 +10,17 @@
 	"http": ":2080",					// HTTP listening address
 },
 
-"rater": {
+"rals": {
 	"enabled": true,					// enable Rater service: <true|false>
-	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-	"pubsubs": "internal",					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-	"users": "internal",					// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
 },
 
 "scheduler": {
@@ -23,8 +29,9 @@
 
 "cdrs": {
 	"enabled": true,					// start the CDR Server service:  <true|false>
-	"rater": "internal",				// address where to reach the Rater for cost calculation, empty to disable functionality: <""|internal|x.y.z.y:1234>
-	"cdrstats": "internal",				// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
 },
 
 "cdrstats": {
@@ -40,6 +47,5 @@
 	"enabled": true,				// starts User service: <true|false>.
 	"indexes": ["Uuid"],			// user profile field indexes
 },
-
 
 }

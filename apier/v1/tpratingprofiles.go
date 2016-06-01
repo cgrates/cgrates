@@ -161,7 +161,7 @@ func (self *ApierV1) RemTPRatingProfile(attrs AttrGetTPRatingProfile, reply *str
 	if err := tmpRpf.SetRatingProfileId(attrs.RatingProfileId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, tmpRpf.Loadid, tmpRpf.Direction, tmpRpf.Tenant, tmpRpf.Category, tmpRpf.Subject); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, map[string]string{"loadid": tmpRpf.Loadid, "direction": tmpRpf.Direction, "tenant": tmpRpf.Tenant, "category": tmpRpf.Category, "subject": tmpRpf.Subject}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

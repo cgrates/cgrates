@@ -23,15 +23,13 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha1"
-	"crypto/tls"
+	"encoding/gob"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
-	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -128,8 +126,16 @@ func Round(x float64, prec int, method string) float64 {
 	return rounder / pow
 }
 
-func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
+func ParseTimeDetectLayout(tmStr string, timezone string) (time.Time, error) {
+	tmStr = strings.TrimSpace(tmStr)
 	var nilTime time.Time
+	if len(tmStr) == 0 || tmStr == UNLIMITED {
+		return nilTime, nil
+	}
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return nilTime, err
+	}
 	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
 	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
 	gotimeRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
@@ -138,33 +144,36 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 	oneLineTimestampRule := regexp.MustCompile(`^\d{14}$`)
 	oneSpaceTimestampRule := regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
 	eamonTimestampRule := regexp.MustCompile(`^\d{2}/\d{2}/\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
+	broadsoftTimestampRule := regexp.MustCompile(`^\d{14}\.\d{3}`)
 	switch {
 	case rfc3339Rule.MatchString(tmStr):
 		return time.Parse(time.RFC3339, tmStr)
 	case gotimeRule.MatchString(tmStr):
 		return time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", tmStr)
 	case sqlRule.MatchString(tmStr):
-		return time.Parse("2006-01-02 15:04:05", tmStr)
+		return time.ParseInLocation("2006-01-02 15:04:05", tmStr, loc)
 	case fsTimestamp.MatchString(tmStr):
 		if tmstmp, err := strconv.ParseInt(tmStr+"000", 10, 64); err != nil {
 			return nilTime, err
 		} else {
-			return time.Unix(0, tmstmp), nil
+			return time.Unix(0, tmstmp).In(loc), nil
 		}
 	case unixTimestampRule.MatchString(tmStr):
 		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
 			return nilTime, err
 		} else {
-			return time.Unix(tmstmp, 0), nil
+			return time.Unix(tmstmp, 0).In(loc), nil
 		}
 	case tmStr == "0" || len(tmStr) == 0: // Time probably missing from request
 		return nilTime, nil
 	case oneLineTimestampRule.MatchString(tmStr):
-		return time.Parse("20060102150405", tmStr)
+		return time.ParseInLocation("20060102150405", tmStr, loc)
 	case oneSpaceTimestampRule.MatchString(tmStr):
-		return time.Parse("02.01.2006  15:04:05", tmStr)
+		return time.ParseInLocation("02.01.2006  15:04:05", tmStr, loc)
 	case eamonTimestampRule.MatchString(tmStr):
-		return time.Parse("02/01/2006 15:04:05", tmStr)
+		return time.ParseInLocation("02/01/2006 15:04:05", tmStr, loc)
+	case broadsoftTimestampRule.MatchString(tmStr):
+		return time.ParseInLocation("20060102150405.999", tmStr, loc)
 	case tmStr == "*now":
 		return time.Now(), nil
 	}
@@ -174,7 +183,7 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 func ParseDate(date string) (expDate time.Time, err error) {
 	date = strings.TrimSpace(date)
 	switch {
-	case date == "*unlimited" || date == "":
+	case date == UNLIMITED || date == "":
 		// leave it at zero
 	case strings.HasPrefix(date, "+"):
 		d, err := time.ParseDuration(date[1:])
@@ -188,7 +197,9 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
 	case date == "*yearly":
 		expDate = time.Now().AddDate(1, 0, 0) // add one year
-	case strings.HasSuffix(date, "Z"):
+	case date == "*month_end":
+		expDate = GetEndOfMonth(time.Now())
+	case strings.HasSuffix(date, "Z") || strings.Index(date, "+") != -1: // Allow both Z and +hh:mm format
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
 		unix, err := strconv.ParseInt(date, 10, 64)
@@ -229,16 +240,14 @@ func CopyHour(src, dest time.Time) time.Time {
 
 // Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
 func ParseDurationWithSecs(durStr string) (time.Duration, error) {
-	if durSecs, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
-		durNanosecs := int(durSecs * NANO_MULTIPLIER)
-		return time.Duration(durNanosecs), nil
-	} else {
-		return time.ParseDuration(durStr)
+	if _, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+		durStr += "s"
 	}
+	return time.ParseDuration(durStr)
 }
 
-func AccountKey(tenant, account, direction string) string {
-	return fmt.Sprintf("%s:%s:%s", direction, tenant, account)
+func AccountKey(tenant, account string) string {
+	return fmt.Sprintf("%s:%s", tenant, account)
 }
 
 // returns the minimum duration between the two
@@ -250,7 +259,8 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 }
 
 func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
-	if rateSubj == "" {
+	rateSubj = strings.TrimSpace(rateSubj)
+	if rateSubj == "" || rateSubj == ANY {
 		rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1s"
 	}
 	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {
@@ -283,30 +293,6 @@ func InfieldJoin(vals ...string) string {
 
 func InfieldSplit(val string) []string {
 	return strings.Split(val, INFIELD_SEP)
-}
-
-func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, error) {
-	body, err := json.Marshal(content)
-	if err != nil {
-		return nil, err
-	}
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTlsVerify},
-	}
-	client := &http.Client{Transport: tr}
-	resp, err := client.Post(url, "application/json", bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode > 299 {
-		return respBody, fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
-	}
-	return respBody, nil
 }
 
 func Unzip(src, dest string) error {
@@ -355,6 +341,10 @@ func Fib() func() time.Duration {
 
 // Utilities to provide pointers where we need to define ad-hoc
 func StringPointer(str string) *string {
+	if str == ZERO {
+		str = ""
+		return &str
+	}
 	return &str
 }
 
@@ -382,6 +372,14 @@ func Float64SlicePointer(slc []float64) *[]float64 {
 	return &slc
 }
 
+func StringMapPointer(sm StringMap) *StringMap {
+	return &sm
+}
+
+func TimePointer(t time.Time) *time.Time {
+	return &t
+}
+
 func ReflectFuncLocation(handler interface{}) (file string, line int) {
 	f := runtime.FuncForPC(reflect.ValueOf(handler).Pointer())
 	entry := f.Entry()
@@ -400,4 +398,193 @@ func ToJSON(v interface{}) string {
 
 func LogFull(v interface{}) {
 	log.Print(ToIJSON(v))
+}
+
+// Used to convert from generic interface type towards string value
+func ConvertIfaceToString(fld interface{}) (string, bool) {
+	var strVal string
+	var converted bool
+	switch fld.(type) {
+	case string:
+		strVal = fld.(string)
+		converted = true
+	case int:
+		strVal = strconv.Itoa(fld.(int))
+		converted = true
+	case int64:
+		strVal = strconv.FormatInt(fld.(int64), 10)
+		converted = true
+	case bool:
+		strVal = strconv.FormatBool(fld.(bool))
+		converted = true
+	case []uint8:
+		var byteVal []byte
+		if byteVal, converted = fld.([]byte); converted {
+			strVal = string(byteVal)
+		}
+	default: // Maybe we are lucky and the value converts to string
+		strVal, converted = fld.(string)
+	}
+	return strVal, converted
+}
+
+// Simple object cloner, b should be a pointer towards a value into which we want to decode
+func Clone(a, b interface{}) error {
+	buff := new(bytes.Buffer)
+	enc := gob.NewEncoder(buff)
+	dec := gob.NewDecoder(buff)
+	if err := enc.Encode(a); err != nil {
+		return err
+	}
+	if err := dec.Decode(b); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Used as generic function logic for various fields
+
+// Attributes
+//  source - the base source
+//  width - the field width
+//  strip - if present it will specify the strip strategy, when missing strip will not be allowed
+//  padding - if present it will specify the padding strategy to use, left, right, zeroleft, zeroright
+func FmtFieldWidth(source string, width int, strip, padding string, mandatory bool) (string, error) {
+	if mandatory && len(source) == 0 {
+		return "", errors.New("Empty source value")
+	}
+	if width == 0 { // Disable width processing if not defined
+		return source, nil
+	}
+	if len(source) == width { // the source is exactly the maximum length
+		return source, nil
+	}
+	if len(source) > width { //the source is bigger than allowed
+		if len(strip) == 0 {
+			return "", fmt.Errorf("Source %s is bigger than the width %d, no strip defied", source, width)
+		}
+		if strip == "right" {
+			return source[:width], nil
+		} else if strip == "xright" {
+			return source[:width-1] + "x", nil // Suffix with x to mark prefix
+		} else if strip == "left" {
+			diffIndx := len(source) - width
+			return source[diffIndx:], nil
+		} else if strip == "xleft" { // Prefix one x to mark stripping
+			diffIndx := len(source) - width
+			return "x" + source[diffIndx+1:], nil
+		}
+	} else { //the source is smaller as the maximum allowed
+		if len(padding) == 0 {
+			return "", fmt.Errorf("Source %s is smaller than the width %d, no padding defined", source, width)
+		}
+		var paddingFmt string
+		switch padding {
+		case "right":
+			paddingFmt = fmt.Sprintf("%%-%ds", width)
+		case "left":
+			paddingFmt = fmt.Sprintf("%%%ds", width)
+		case "zeroleft":
+			paddingFmt = fmt.Sprintf("%%0%ds", width)
+		}
+		if len(paddingFmt) != 0 {
+			return fmt.Sprintf(paddingFmt, source), nil
+		}
+	}
+	return source, nil
+}
+
+// Returns the string representation of iface or error if not convertible
+func CastIfToString(iface interface{}) (strVal string, casts bool) {
+	switch iface.(type) {
+	case string:
+		strVal = iface.(string)
+		casts = true
+	case int:
+		strVal = strconv.Itoa(iface.(int))
+		casts = true
+	case int64:
+		strVal = strconv.FormatInt(iface.(int64), 10)
+		casts = true
+	case float64:
+		strVal = strconv.FormatFloat(iface.(float64), 'f', -1, 64)
+		casts = true
+	case bool:
+		strVal = strconv.FormatBool(iface.(bool))
+		casts = true
+	case []uint8:
+		var byteVal []byte
+		if byteVal, casts = iface.([]byte); casts {
+			strVal = string(byteVal)
+		}
+	default: // Maybe we are lucky and the value converts to string
+		strVal, casts = iface.(string)
+	}
+	return strVal, casts
+}
+
+func GetEndOfMonth(ref time.Time) time.Time {
+	if ref.IsZero() {
+		return time.Now()
+	}
+	year, month, _ := ref.Date()
+	if month == time.December {
+		year++
+		month = time.January
+	} else {
+		month++
+	}
+	eom := time.Date(year, month, 1, 0, 0, 0, 0, ref.Location())
+	return eom.Add(-time.Second)
+}
+
+// formats number in K,M,G, etc.
+func SizeFmt(num float64, suffix string) string {
+	if suffix == "" {
+		suffix = "B"
+	}
+	for _, unit := range []string{"", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"} {
+		if math.Abs(num) < 1024.0 {
+			return fmt.Sprintf("%3.1f%s%s", num, unit, suffix)
+		}
+		num /= 1024.0
+	}
+	return fmt.Sprintf("%.1f%s%s", num, "Yi", suffix)
+}
+
+func TimeIs0h(t time.Time) bool {
+	return t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0
+}
+
+func ParseHierarchyPath(path string, sep string) HierarchyPath {
+	if sep == "" {
+		for _, sep = range []string{HIERARCHY_SEP, "/"} {
+			if idx := strings.Index(path, sep); idx != -1 {
+				break
+			}
+		}
+	}
+	path = strings.Trim(path, sep) // Need to strip if prefix of suffiy (eg: paths with /) so we can properly split
+	return HierarchyPath(strings.Split(path, sep))
+}
+
+// HierarchyPath is used in various places to represent various path hierarchies (eg: in Diameter groups, XML trees)
+type HierarchyPath []string
+
+func (h HierarchyPath) AsString(sep string, prefix bool) string {
+	if len(h) == 0 {
+		return ""
+	}
+	retStr := ""
+	for idx, itm := range h {
+		if idx == 0 {
+			if prefix {
+				retStr += sep
+			}
+		} else {
+			retStr += sep
+		}
+		retStr += itm
+	}
+	return retStr
 }

@@ -18,86 +18,90 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import (
-	"strings"
-
-	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 // Amount of a trafic of a certain type
-type UnitsCounter struct {
-	Direction   string
-	BalanceType string
-	//	Units     float64
-	Balances BalanceChain // first balance is the general one (no destination)
+type UnitCounter struct {
+	CounterType string         // *event or *balance
+	Counters    CounterFilters // first balance is the general one (no destination)
 }
 
-// clears balances for this counter
-// makes sure there are balances for all action triggers
-func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
-	uc.Balances = BalanceChain{&Balance{}} // general balance
-	for _, at := range ats {
-		if !strings.Contains(at.ThresholdType, "counter") {
-			// only get actions fo counter type action triggers
-			continue
+type CounterFilter struct {
+	Value  float64
+	Filter *BalanceFilter
+}
+
+type CounterFilters []*CounterFilter
+
+func (cfs CounterFilters) HasCounter(cf *CounterFilter) bool {
+	for _, c := range cfs {
+		if c.Filter.Equal(cf.Filter) {
+			return true
 		}
-		acs, err := ratingStorage.GetActions(at.ActionsId, false)
-		if err != nil {
-			continue
-		}
-		for _, a := range acs {
-			if a.Balance != nil {
-				b := a.Balance.Clone()
-				b.SetValue(0)
-				if !uc.Balances.HasBalance(b) {
-					uc.Balances = append(uc.Balances, b)
-				}
+	}
+	return false
+}
+
+// Returns true if the counters were of the same type
+// Copies the value from old balances
+func (uc *UnitCounter) CopyCounterValues(oldUc *UnitCounter) bool {
+	if uc.CounterType != oldUc.CounterType { // type check
+		return false
+	}
+	for _, c := range uc.Counters {
+		for _, oldC := range oldUc.Counters {
+			if c.Filter.Equal(oldC.Filter) {
+				c.Value = oldC.Value
+				break
 			}
 		}
 	}
-	uc.Balances.Sort()
+	return true
 }
 
-// returns the first balance that has no destination attached
-func (uc *UnitsCounter) GetGeneralBalance() *Balance {
-	if len(uc.Balances) == 0 { // general balance not present for some reson
-		uc.Balances = append(uc.Balances, &Balance{})
+type UnitCounters map[string][]*UnitCounter
+
+func (ucs UnitCounters) addUnits(amount float64, kind string, cc *CallCost, b *Balance) {
+	counters, found := ucs[kind]
+	if !found {
+		return
 	}
-	return uc.Balances[0]
-}
-
-// Adds the units from the received balance to an existing balance if the destination
-// is the same or ads the balance to the list if none matches.
-func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
-	counted := false
-	if prefix != "" {
-		for _, mb := range uc.Balances {
-			if !mb.HasDestination() {
+	for _, uc := range counters {
+		if uc == nil { // safeguard
+			continue
+		}
+		if uc.CounterType == "" {
+			uc.CounterType = utils.COUNTER_EVENT
+		}
+		for _, c := range uc.Counters {
+			if uc.CounterType == utils.COUNTER_EVENT && cc != nil && cc.MatchCCFilter(c.Filter) {
+				c.Value += amount
 				continue
 			}
-			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
-				if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
-					destIds := x.(map[interface{}]struct{})
-					if _, found := destIds[mb.DestinationIds]; found {
-						mb.AddValue(amount)
-						counted = true
-						break
-					}
-				}
-				if counted {
-					break
+
+			if uc.CounterType == utils.COUNTER_BALANCE && b != nil && b.MatchFilter(c.Filter, true) {
+				c.Value += amount
+				continue
+			}
+		}
+
+	}
+}
+
+func (ucs UnitCounters) resetCounters(a *Action) {
+	for key, counters := range ucs {
+		if a != nil && a.Balance.Type != nil && a.Balance.GetType() != key {
+			continue
+		}
+		for _, c := range counters {
+			if c == nil { // safeguard
+				continue
+			}
+			for _, cf := range c.Counters {
+				if a == nil || a.Balance == nil || cf.Filter.Equal(a.Balance) {
+					cf.Value = 0
 				}
 			}
 		}
 	}
-	if !counted {
-		// use general balance
-		b := uc.GetGeneralBalance()
-		b.AddValue(amount)
-	}
 }
-
-/*func (uc *UnitsCounter) String() string {
-	return fmt.Sprintf("%s %s %v", uc.BalanceId, uc.Direction, uc.Units)
-}*/

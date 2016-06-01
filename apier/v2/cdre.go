@@ -33,6 +33,8 @@ import (
 // Export Cdrs to file
 func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *utils.ExportedFileCdrs) error {
 	var err error
+	cdreReloadStruct := <-self.Config.ConfigReloads[utils.CDRE]                  // Read the content of the channel, locking it
+	defer func() { self.Config.ConfigReloads[utils.CDRE] <- cdreReloadStruct }() // Unlock reloads at exit
 	exportTemplate := self.Config.CdreProfiles[utils.META_DEFAULT]
 	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // Export template prefered, use it
 		var hasIt bool
@@ -54,19 +56,19 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 			return fmt.Errorf("%s:FieldSeparator:%s", utils.ErrServerError, "Invalid")
 		}
 	}
-	exportDir := exportTemplate.ExportDir
-	if attr.ExportDir != nil && len(*attr.ExportDir) != 0 {
-		exportDir = *attr.ExportDir
+	ExportFolder := exportTemplate.ExportFolder
+	if attr.ExportFolder != nil && len(*attr.ExportFolder) != 0 {
+		ExportFolder = *attr.ExportFolder
 	}
-	exportId := strconv.FormatInt(time.Now().Unix(), 10)
-	if attr.ExportId != nil && len(*attr.ExportId) != 0 {
-		exportId = *attr.ExportId
+	ExportID := strconv.FormatInt(time.Now().Unix(), 10)
+	if attr.ExportID != nil && len(*attr.ExportID) != 0 {
+		ExportID = *attr.ExportID
 	}
-	fileName := fmt.Sprintf("cdre_%s.%s", exportId, cdrFormat)
+	fileName := fmt.Sprintf("cdre_%s.%s", ExportID, cdrFormat)
 	if attr.ExportFileName != nil && len(*attr.ExportFileName) != 0 {
 		fileName = *attr.ExportFileName
 	}
-	filePath := path.Join(exportDir, fileName)
+	filePath := path.Join(ExportFolder, fileName)
 	if cdrFormat == utils.DRYRUN {
 		filePath = utils.DRYRUN
 	}
@@ -74,9 +76,13 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
 		dataUsageMultiplyFactor = *attr.DataUsageMultiplyFactor
 	}
-	smsUsageMultiplyFactor := exportTemplate.SmsUsageMultiplyFactor
-	if attr.SmsUsageMultiplyFactor != nil && *attr.SmsUsageMultiplyFactor != 0.0 {
-		smsUsageMultiplyFactor = *attr.SmsUsageMultiplyFactor
+	SMSUsageMultiplyFactor := exportTemplate.SMSUsageMultiplyFactor
+	if attr.SMSUsageMultiplyFactor != nil && *attr.SMSUsageMultiplyFactor != 0.0 {
+		SMSUsageMultiplyFactor = *attr.SMSUsageMultiplyFactor
+	}
+	MMSUsageMultiplyFactor := exportTemplate.MMSUsageMultiplyFactor
+	if attr.MMSUsageMultiplyFactor != nil && *attr.MMSUsageMultiplyFactor != 0.0 {
+		MMSUsageMultiplyFactor = *attr.MMSUsageMultiplyFactor
 	}
 	genericUsageMultiplyFactor := exportTemplate.GenericUsageMultiplyFactor
 	if attr.GenericUsageMultiplyFactor != nil && *attr.GenericUsageMultiplyFactor != 0.0 {
@@ -94,27 +100,26 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 	if attr.RoundDecimals != nil {
 		roundingDecimals = *attr.RoundDecimals
 	}
-	maskDestId := exportTemplate.MaskDestId
-	if attr.MaskDestinationId != nil && len(*attr.MaskDestinationId) != 0 {
-		maskDestId = *attr.MaskDestinationId
+	maskDestId := exportTemplate.MaskDestinationID
+	if attr.MaskDestinationID != nil && len(*attr.MaskDestinationID) != 0 {
+		maskDestId = *attr.MaskDestinationID
 	}
 	maskLen := exportTemplate.MaskLength
 	if attr.MaskLength != nil {
 		maskLen = *attr.MaskLength
 	}
-	cdrsFltr, err := attr.RpcCdrsFilter.AsCdrsFilter()
+	cdrsFltr, err := attr.RPCCDRsFilter.AsCDRsFilter(self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	cdrs, _, err := self.CdrDb.GetStoredCdrs(cdrsFltr)
+	cdrs, _, err := self.CdrDb.GetCDRs(cdrsFltr, false)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, exportId, dataUsageMultiplyFactor, smsUsageMultiplyFactor, genericUsageMultiplyFactor,
-		costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify)
+	cdrexp, err := cdre.NewCdrExporter(cdrs, self.CdrDb, exportTemplate, cdrFormat, fieldSep, ExportID, dataUsageMultiplyFactor, SMSUsageMultiplyFactor, MMSUsageMultiplyFactor, genericUsageMultiplyFactor, costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify, self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
@@ -126,7 +131,7 @@ func (self *ApierV2) ExportCdrsToFile(attr utils.AttrExportCdrsToFile, reply *ut
 		return utils.NewErrServerError(err)
 	}
 	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
-	if !attr.SuppressCgrIds {
+	if !attr.Verbose {
 		reply.ExportedCgrIds = cdrexp.PositiveExports()
 		reply.UnexportedCgrIds = cdrexp.NegativeExports()
 	}

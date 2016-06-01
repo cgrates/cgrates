@@ -1,0 +1,34 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"general": {
+    "response_cache_ttl": "1s",
+},
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",					// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+"rals": {
+	"enabled": true,					// enable Rater service: <true|false>
+},
+
+"scheduler": {
+	"enabled": true,					// start Scheduler service: <true|false>
+},
+
+"cdrs": {
+	"enabled": true,					// start the CDR Server service:  <true|false>
+},
+
+"sm_generic": {
+	"enabled": true,
+	"session_ttl": "50ms",
+},
+
+}

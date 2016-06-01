@@ -156,7 +156,7 @@ BYE|3111f3c9|49ca4c42|a58ebaae40d08d6757d8424fb09c4c54@0:0:0:0:0:0:0:0|200|OK|14
 	}}
 	cdrc := &Cdrc{CdrFormat: utils.OSIPS_FLATSTORE, cdrSourceIds: []string{"TEST_CDRC"}, failedCallsPrefix: "missed_calls",
 		cdrFields: cdrFields, partialRecords: make(map[string]map[string]*PartialFlatstoreRecord),
-		guard: engine.NewGuardianLock()}
+		guard: engine.Guardian}
 	cdrsContent := bytes.NewReader([]byte(flatstoreCdrs))
 	csvReader := csv.NewReader(cdrsContent)
 	csvReader.Comma = '|'
@@ -283,7 +283,7 @@ INVITE|324cb497|d4af7023|8deaadf2ae9a17809a391f05af31afb0@0:0:0:0:0:0:0:0|486|Bu
 	}}
 	cdrc := &Cdrc{CdrFormat: utils.OSIPS_FLATSTORE, cdrSourceIds: []string{"TEST_CDRC"}, failedCallsPrefix: "missed_calls",
 		cdrFields: cdrFields, partialRecords: make(map[string]map[string]*PartialFlatstoreRecord),
-		guard: engine.NewGuardianLock()}
+		guard: engine.Guardian}
 	cdrsContent := bytes.NewReader([]byte(flatstoreCdrs))
 	csvReader := csv.NewReader(cdrsContent)
 	csvReader.Comma = '|'

@@ -66,7 +66,7 @@ func stopEngine() error {
 	return nil
 }
 
-func TestLoadConfig(t *testing.T) {
+func TestMCDRCLoadConfig(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -77,31 +77,27 @@ func TestLoadConfig(t *testing.T) {
 	}
 }
 
-func TestEmptyTables(t *testing.T) {
+func TestMCDRCEmptyTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	if *storDbType != utils.MYSQL {
 		t.Fatal("Unsupported storDbType")
 	}
-	var mysql *engine.MySQLStorage
-	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns); err != nil {
+	mysql, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+	if err != nil {
 		t.Fatal("Error on opening database connection: ", err)
-	} else {
-		mysql = d.(*engine.MySQLStorage)
 	}
 	if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, utils.CREATE_CDRS_TABLES_SQL)); err != nil {
 		t.Fatal("Error on mysql creation: ", err.Error())
 		return // No point in going further
 	}
-	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
-		if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
-			t.Fatal(err.Error())
-		}
+	if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", utils.TBL_CDRS)); err != nil {
+		t.Fatal(err.Error())
 	}
 }
 
-func TestCreateCdrDirs(t *testing.T) {
+func TestMCDRCCreateCdrDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -120,7 +116,7 @@ func TestCreateCdrDirs(t *testing.T) {
 }
 
 // Connect rpc client to rater
-func TestRpcConn(t *testing.T) {
+func TestMCDRCRpcConn(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -133,13 +129,13 @@ func TestRpcConn(t *testing.T) {
 }
 
 // Test here LoadTariffPlanFromFolder
-func TestApierLoadTariffPlanFromFolder(t *testing.T) {
+func TestMCDRCApierLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
 	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {
@@ -149,7 +145,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 // The default scenario, out of cdrc defined in .cfg file
-func TestHandleCdr1File(t *testing.T) {
+func TestMCDRCHandleCdr1File(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -167,7 +163,7 @@ dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,rated,*out,cgra
 }
 
 // Scenario out of first .xml config
-func TestHandleCdr2File(t *testing.T) {
+func TestMCDRCHandleCdr2File(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -185,7 +181,7 @@ func TestHandleCdr2File(t *testing.T) {
 }
 
 // Scenario out of second .xml config
-func TestHandleCdr3File(t *testing.T) {
+func TestMCDRCHandleCdr3File(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -199,4 +195,11 @@ func TestHandleCdr3File(t *testing.T) {
 	if err := os.Rename(tmpFilePath, path.Join("/tmp/cgrates/cdrc3/in", fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
+}
+
+func TestMCDRCStopEngine(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	stopEngine()
 }

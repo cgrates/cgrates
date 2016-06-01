@@ -54,13 +54,14 @@ type LcrRequest struct {
 	Account      string
 	Subject      string
 	Destination  string
-	StartTime    string
+	SetupTime    string
 	Duration     string
 	IgnoreErrors bool
+	ExtraFields  map[string]string
 	*utils.Paginator
 }
 
-func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
+func (self *LcrRequest) AsCallDescriptor(timezone string) (*CallDescriptor, error) {
 	if len(self.Account) == 0 || len(self.Destination) == 0 {
 		return nil, utils.ErrMandatoryIeMissing
 	}
@@ -79,9 +80,9 @@ func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
 	}
 	var timeStart time.Time
 	var err error
-	if len(self.StartTime) == 0 {
+	if len(self.SetupTime) == 0 {
 		timeStart = time.Now()
-	} else if timeStart, err = utils.ParseTimeDetectLayout(self.StartTime); err != nil {
+	} else if timeStart, err = utils.ParseTimeDetectLayout(self.SetupTime, timezone); err != nil {
 		return nil, err
 	}
 	var callDur time.Duration
@@ -90,7 +91,7 @@ func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
 	} else if callDur, err = utils.ParseDurationWithSecs(self.Duration); err != nil {
 		return nil, err
 	}
-	return &CallDescriptor{
+	cd := &CallDescriptor{
 		Direction:   self.Direction,
 		Tenant:      self.Tenant,
 		Category:    self.Category,
@@ -99,7 +100,14 @@ func (self *LcrRequest) AsCallDescriptor() (*CallDescriptor, error) {
 		Destination: self.Destination,
 		TimeStart:   timeStart,
 		TimeEnd:     timeStart.Add(callDur),
-	}, nil
+	}
+	if self.ExtraFields != nil {
+		cd.ExtraFields = make(map[string]string)
+	}
+	for key, val := range self.ExtraFields {
+		cd.ExtraFields[key] = val
+	}
+	return cd, nil
 }
 
 // A LCR reply, used in APIer and SM where we need to expose it
@@ -266,7 +274,7 @@ func (es LCREntriesSorter) Sort() {
 func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
 	var potentials LCREntriesSorter
 	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
-		if x, err := cache2go.GetCached(utils.DESTINATION_PREFIX + p); err == nil {
+		if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 
 			destIds := x.(map[interface{}]struct{})
 			for idId := range destIds {
@@ -385,12 +393,12 @@ func (lc *LCRCost) GetSupplierRatio(supplier string) int {
 	for _, param := range params {
 		ratioSlice := strings.Split(param, utils.CONCATENATED_KEY_SEP)
 		if len(ratioSlice) != 2 {
-			Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
+			utils.Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
 			continue
 		}
 		p, err := strconv.Atoi(ratioSlice[1])
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
+			utils.Logger.Warning(fmt.Sprintf("bad format in load distribution strategy param: %s", lc.Entry.StrategyParams))
 			continue
 		}
 		ratios[ratioSlice[0]] = p
@@ -424,7 +432,7 @@ func (lc *LCRCost) HasErrors() bool {
 func (lc *LCRCost) LogErrors() {
 	for _, supplCost := range lc.SupplierCosts {
 		if len(supplCost.Error) != 0 {
-			Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", supplCost.Supplier, supplCost.Error))
+			utils.Logger.Err(fmt.Sprintf("LCR_ERROR: supplier <%s>, error <%s>", supplCost.Supplier, supplCost.Error))
 		}
 	}
 }

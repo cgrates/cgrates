@@ -24,20 +24,21 @@ import (
 )
 
 // Wraps regexp compiling in case of rsr fields
-func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, pddFld, aTimeFld, durFld, supplFld, dCauseFld string) (dc *DerivedCharger, err error) {
+func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, pddFld, aTimeFld, durFld,
+	supplFld, dCauseFld, ratedFld, costFld string) (dc *DerivedCharger, err error) {
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
-	dc = &DerivedCharger{RunId: runId}
+	dc = &DerivedCharger{RunID: runId}
 	dc.RunFilters = runFilters
 	if strings.HasPrefix(dc.RunFilters, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilters, STATIC_VALUE_PREFIX) {
 		if dc.rsrRunFilters, err = ParseRSRFields(dc.RunFilters, INFIELD_SEP); err != nil {
 			return nil, err
 		}
 	}
-	dc.ReqTypeField = reqTypeFld
-	if strings.HasPrefix(dc.ReqTypeField, REGEXP_PREFIX) || strings.HasPrefix(dc.ReqTypeField, STATIC_VALUE_PREFIX) {
-		if dc.rsrReqTypeField, err = NewRSRField(dc.ReqTypeField); err != nil {
+	dc.RequestTypeField = reqTypeFld
+	if strings.HasPrefix(dc.RequestTypeField, REGEXP_PREFIX) || strings.HasPrefix(dc.RequestTypeField, STATIC_VALUE_PREFIX) {
+		if dc.rsrRequestTypeField, err = NewRSRField(dc.RequestTypeField); err != nil {
 			return nil, err
 		}
 	}
@@ -83,9 +84,9 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 			return nil, err
 		}
 	}
-	dc.PddField = pddFld
-	if strings.HasPrefix(dc.PddField, REGEXP_PREFIX) || strings.HasPrefix(dc.PddField, STATIC_VALUE_PREFIX) {
-		if dc.rsrPddField, err = NewRSRField(dc.PddField); err != nil {
+	dc.PDDField = pddFld
+	if strings.HasPrefix(dc.PDDField, REGEXP_PREFIX) || strings.HasPrefix(dc.PDDField, STATIC_VALUE_PREFIX) {
+		if dc.rsrPddField, err = NewRSRField(dc.PDDField); err != nil {
 			return nil, err
 		}
 	}
@@ -113,13 +114,25 @@ func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld,
 			return nil, err
 		}
 	}
+	dc.RatedField = ratedFld
+	if strings.HasPrefix(dc.RatedField, REGEXP_PREFIX) || strings.HasPrefix(dc.RatedField, STATIC_VALUE_PREFIX) {
+		if dc.rsrRatedField, err = NewRSRField(dc.RatedField); err != nil {
+			return nil, err
+		}
+	}
+	dc.CostField = costFld
+	if strings.HasPrefix(dc.CostField, REGEXP_PREFIX) || strings.HasPrefix(dc.CostField, STATIC_VALUE_PREFIX) {
+		if dc.rsrCostField, err = NewRSRField(dc.CostField); err != nil {
+			return nil, err
+		}
+	}
 	return dc, nil
 }
 
 type DerivedCharger struct {
-	RunId                   string      // Unique runId in the chain
+	RunID                   string      // Unique runId in the chain
 	RunFilters              string      // Only run the charger if all the filters match
-	ReqTypeField            string      // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
+	RequestTypeField        string      // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
 	DirectionField          string      // Field containing direction info
 	TenantField             string      // Field containing tenant info
 	CategoryField           string      // Field containing tor info
@@ -127,13 +140,15 @@ type DerivedCharger struct {
 	SubjectField            string      // Field containing subject information
 	DestinationField        string      // Field containing destination information
 	SetupTimeField          string      // Field containing setup time information
-	PddField                string      // Field containing setup time information
+	PDDField                string      // Field containing setup time information
 	AnswerTimeField         string      // Field containing answer time information
 	UsageField              string      // Field containing usage information
 	SupplierField           string      // Field containing supplier information
 	DisconnectCauseField    string      // Field containing disconnect cause information
+	CostField               string      // Field containing cost information
+	RatedField              string      // Field marking rated request in CDR
 	rsrRunFilters           []*RSRField // Storage for compiled Regexp in case of RSRFields
-	rsrReqTypeField         *RSRField
+	rsrRequestTypeField     *RSRField
 	rsrDirectionField       *RSRField
 	rsrTenantField          *RSRField
 	rsrCategoryField        *RSRField
@@ -146,46 +161,14 @@ type DerivedCharger struct {
 	rsrUsageField           *RSRField
 	rsrSupplierField        *RSRField
 	rsrDisconnectCauseField *RSRField
-}
-
-func DerivedChargersKey(direction, tenant, category, account, subject string) string {
-	return ConcatenatedKey(direction, tenant, category, account, subject)
-}
-
-type DerivedChargers []*DerivedCharger
-
-// Precheck that RunId is unique
-func (dcs DerivedChargers) Append(dc *DerivedCharger) (DerivedChargers, error) {
-	if dc.RunId == DEFAULT_RUNID {
-		return nil, errors.New("Reserved RunId")
-	}
-	for _, dcLocal := range dcs {
-		if dcLocal.RunId == dc.RunId {
-			return nil, errors.New("Duplicated RunId")
-		}
-	}
-	return append(dcs, dc), nil
-}
-
-func (dcs DerivedChargers) AppendDefaultRun() (DerivedChargers, error) {
-	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
-		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
-	return append(dcs, dcDf), nil
-}
-
-func (dcs DerivedChargers) Equal(other DerivedChargers) bool {
-	for i, dc := range dcs {
-		if !dc.Equal(other[i]) {
-			return false
-		}
-	}
-	return true
+	rsrCostField            *RSRField
+	rsrRatedField           *RSRField
 }
 
 func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
-	return dc.RunId == other.RunId &&
+	return dc.RunID == other.RunID &&
 		dc.RunFilters == other.RunFilters &&
-		dc.ReqTypeField == other.ReqTypeField &&
+		dc.RequestTypeField == other.RequestTypeField &&
 		dc.DirectionField == other.DirectionField &&
 		dc.TenantField == other.TenantField &&
 		dc.CategoryField == other.CategoryField &&
@@ -193,9 +176,51 @@ func (dc *DerivedCharger) Equal(other *DerivedCharger) bool {
 		dc.SubjectField == other.SubjectField &&
 		dc.DestinationField == other.DestinationField &&
 		dc.SetupTimeField == other.SetupTimeField &&
-		dc.PddField == other.PddField &&
+		dc.PDDField == other.PDDField &&
 		dc.AnswerTimeField == other.AnswerTimeField &&
 		dc.UsageField == other.UsageField &&
 		dc.SupplierField == other.SupplierField &&
-		dc.DisconnectCauseField == other.DisconnectCauseField
+		dc.DisconnectCauseField == other.DisconnectCauseField &&
+		dc.CostField == other.CostField &&
+		dc.RatedField == other.RatedField
+}
+
+func DerivedChargersKey(direction, tenant, category, account, subject string) string {
+	return ConcatenatedKey(direction, tenant, category, account, subject)
+}
+
+type DerivedChargers struct {
+	DestinationIDs StringMap
+	Chargers       []*DerivedCharger
+}
+
+// Precheck that RunId is unique
+func (dcs *DerivedChargers) Append(dc *DerivedCharger) (*DerivedChargers, error) {
+	if dc.RunID == DEFAULT_RUNID {
+		return nil, errors.New("Reserved RunId")
+	}
+	for _, dcLocal := range dcs.Chargers {
+		if dcLocal.RunID == dc.RunID {
+			return nil, errors.New("Duplicated RunId")
+		}
+	}
+	dcs.Chargers = append(dcs.Chargers, dc)
+	return dcs, nil
+}
+
+func (dcs *DerivedChargers) AppendDefaultRun() (*DerivedChargers, error) {
+	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, "", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
+	dcs.Chargers = append(dcs.Chargers, dcDf)
+	return dcs, nil
+}
+
+func (dcs *DerivedChargers) Equal(other *DerivedChargers) bool {
+	dcs.DestinationIDs.Equal(other.DestinationIDs)
+	for i, dc := range dcs.Chargers {
+		if !dc.Equal(other.Chargers[i]) {
+			return false
+		}
+	}
+	return true
 }

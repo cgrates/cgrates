@@ -1,29 +1,19 @@
 {
 
-"cdrc": {
-	"CDRC-CSV2": {
-		"enabled": true,							// enable CDR client functionality
-		"cdr_in_dir": "/tmp/cgrates/cdrc2/in",		// absolute path towards the directory where the CDRs are stored
-		"cdr_out_dir": "/tmp/cgrates/cdrc2/out",	// absolute path towards the directory where processed CDRs will be moved
-		"data_usage_multiply_factor": 0.000976563,
-		"cdr_source_id": "csv2",					// free form field, tag identifying the source of the CDRs within CDRS database
-		"content_fields":[								// import template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
-			{"cdr_field_id": "tor", "value": "~7:s/^(voice|data|sms|generic)$/*$1/"},
-			{"cdr_field_id": "answer_time", "value": "2"},
-		],
-	},
-	"CDRC-CSV3": {
+"cdrc": [
+	{
+		"id": "CDRC-CSV3",
 		"enabled": true,							// enable CDR client functionality
 		"cdr_in_dir": "/tmp/cgrates/cdrc3/in",		// absolute path towards the directory where the CDRs are stored
 		"cdr_out_dir": "/tmp/cgrates/cdrc3/out",	// absolute path towards the directory where processed CDRs will be moved
 		"cdr_source_id": "csv3",					// free form field, tag identifying the source of the CDRs within CDRS database
 	},
-},
+],
 
 "sm_freeswitch": {
 	"enabled": true,				// starts SessionManager service: <true|false>
-	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "2.3.4.5:8021", "password": "ClueCon", "reconnects": 5},
+	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+		{"address": "2.3.4.5:8021", "password": "ClueCon", "reconnects": 5},
 	],
 },
 

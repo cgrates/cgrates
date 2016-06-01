@@ -2,18 +2,20 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"sync"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/rpcclient"
 )
 
 type UserProfile struct {
 	Tenant   string
 	UserName string
+	Masked   bool
 	Profile  map[string]string
+	Weight   float64
 	ponder   int
 }
 
@@ -27,8 +29,9 @@ func (ups UserProfiles) Swap(i, j int) {
 	ups[i], ups[j] = ups[j], ups[i]
 }
 
-func (ups UserProfiles) Less(j, i int) bool { // get higher ponder in front
-	return ups[i].ponder < ups[j].ponder
+func (ups UserProfiles) Less(j, i int) bool { // get higher Weight and ponder in front
+	return ups[i].Weight < ups[j].Weight ||
+		(ups[i].Weight == ups[j].Weight && ups[i].ponder < ups[j].ponder)
 }
 
 func (ups UserProfiles) Sort() {
@@ -59,8 +62,14 @@ type UserService interface {
 	ReloadUsers(string, *string) error
 }
 
+type prop struct {
+	masked bool
+	weight float64
+}
+
 type UserMap struct {
 	table        map[string]map[string]string
+	properties   map[string]*prop
 	index        map[string]map[string]bool
 	indexKeys    []string
 	accountingDb AccountingStorage
@@ -79,6 +88,7 @@ func NewUserMap(accountingDb AccountingStorage, indexes []string) (*UserMap, err
 func newUserMap(accountingDb AccountingStorage, indexes []string) *UserMap {
 	return &UserMap{
 		table:        make(map[string]map[string]string),
+		properties:   make(map[string]*prop),
 		index:        make(map[string]map[string]bool),
 		indexKeys:    indexes,
 		accountingDb: accountingDb,
@@ -91,18 +101,22 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	// backup old data
 	oldTable := um.table
 	oldIndex := um.index
+	oldProperties := um.properties
 	um.table = make(map[string]map[string]string)
 	um.index = make(map[string]map[string]bool)
+	um.properties = make(map[string]*prop)
 
-	// load from rating db
+	// load from db
 	if ups, err := um.accountingDb.GetUsers(); err == nil {
 		for _, up := range ups {
 			um.table[up.GetId()] = up.Profile
+			um.properties[up.GetId()] = &prop{weight: up.Weight, masked: up.Masked}
 		}
 	} else {
 		// restore old data before return
 		um.table = oldTable
 		um.index = oldIndex
+		um.properties = oldProperties
 
 		*reply = err.Error()
 		return err
@@ -112,9 +126,10 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	if len(um.indexKeys) != 0 {
 		var s string
 		if err := um.AddIndex(um.indexKeys, &s); err != nil {
-			Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", um.indexKeys, err))
+			utils.Logger.Err(fmt.Sprintf("Error adding %v indexes to user profile service: %v", um.indexKeys, err))
 			um.table = oldTable
 			um.index = oldIndex
+			um.properties = oldProperties
 
 			*reply = err.Error()
 			return err
@@ -124,20 +139,21 @@ func (um *UserMap) ReloadUsers(in string, reply *string) error {
 	return nil
 }
 
-func (um *UserMap) SetUser(up UserProfile, reply *string) error {
+func (um *UserMap) SetUser(up *UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
-	if err := um.accountingDb.SetUser(&up); err != nil {
+	if err := um.accountingDb.SetUser(up); err != nil {
 		*reply = err.Error()
 		return err
 	}
 	um.table[up.GetId()] = up.Profile
-	um.addIndex(&up, um.indexKeys)
+	um.properties[up.GetId()] = &prop{weight: up.Weight, masked: up.Masked}
+	um.addIndex(up, um.indexKeys)
 	*reply = utils.OK
 	return nil
 }
 
-func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
+func (um *UserMap) RemoveUser(up *UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
 	if err := um.accountingDb.RemoveUser(up.GetId()); err != nil {
@@ -145,12 +161,13 @@ func (um *UserMap) RemoveUser(up UserProfile, reply *string) error {
 		return err
 	}
 	delete(um.table, up.GetId())
-	um.deleteIndex(&up)
+	delete(um.properties, up.GetId())
+	um.deleteIndex(up)
 	*reply = utils.OK
 	return nil
 }
 
-func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
+func (um *UserMap) UpdateUser(up *UserProfile, reply *string) error {
 	um.mu.Lock()
 	defer um.mu.Unlock()
 	m, found := um.table[up.GetId()]
@@ -158,6 +175,7 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 		*reply = utils.ErrNotFound.Error()
 		return utils.ErrNotFound
 	}
+	properties := um.properties[up.GetId()]
 	if m == nil {
 		m = make(map[string]string)
 	}
@@ -168,6 +186,8 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 	oldUp := &UserProfile{
 		Tenant:   up.Tenant,
 		UserName: up.UserName,
+		Masked:   properties.masked,
+		Weight:   properties.weight,
 		Profile:  oldM,
 	}
 	for key, value := range up.Profile {
@@ -176,6 +196,8 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 	finalUp := &UserProfile{
 		Tenant:   up.Tenant,
 		UserName: up.UserName,
+		Masked:   up.Masked,
+		Weight:   up.Weight,
 		Profile:  m,
 	}
 	if err := um.accountingDb.SetUser(finalUp); err != nil {
@@ -183,13 +205,14 @@ func (um *UserMap) UpdateUser(up UserProfile, reply *string) error {
 		return err
 	}
 	um.table[up.GetId()] = m
+	um.properties[up.GetId()] = &prop{weight: up.Weight, masked: up.Masked}
 	um.deleteIndex(oldUp)
 	um.addIndex(finalUp, um.indexKeys)
 	*reply = utils.OK
 	return nil
 }
 
-func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
+func (um *UserMap) GetUsers(up *UserProfile, results *UserProfiles) error {
 	um.mu.RLock()
 	defer um.mu.RUnlock()
 	table := um.table // no index
@@ -226,6 +249,10 @@ func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
 
 	candidates := make(UserProfiles, 0) // It should not return nil in case of no users but []
 	for key, values := range table {
+		// skip masked if not asked for
+		if up.Masked == false && um.properties[key] != nil && um.properties[key].masked == true {
+			continue
+		}
 		ponder := 0
 		tableUP := &UserProfile{
 			Profile: values,
@@ -257,7 +284,13 @@ func (um *UserMap) GetUsers(up UserProfile, results *UserProfiles) error {
 			continue
 		}
 		// all filters passed, add to candidates
-		nup := &UserProfile{Profile: make(map[string]string)}
+		nup := &UserProfile{
+			Profile: make(map[string]string),
+		}
+		if um.properties[key] != nil {
+			nup.Masked = um.properties[key].masked
+			nup.Weight = um.properties[key].weight
+		}
 		nup.SetId(key)
 		nup.ponder = ponder
 		for k, v := range tableUP.Profile {
@@ -369,52 +402,38 @@ func (um *UserMap) GetIndexes(in string, reply *map[string][]string) error {
 	return nil
 }
 
-type UserProxy struct{}
-
-type ProxyUserService struct {
-	Client *rpcclient.RpcClient
-}
-
-func NewProxyUserService(addr string, attempts, reconnects int) (*ProxyUserService, error) {
-	client, err := rpcclient.NewRpcClient("tcp", addr, attempts, reconnects, utils.GOB)
-	if err != nil {
-		return nil, err
+func (um *UserMap) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	parts := strings.Split(serviceMethod, ".")
+	if len(parts) != 2 {
+		return utils.ErrNotImplemented
 	}
-	return &ProxyUserService{Client: client}, nil
-}
+	// get method
+	method := reflect.ValueOf(um).MethodByName(parts[1])
+	if !method.IsValid() {
+		return utils.ErrNotImplemented
+	}
 
-func (ps *ProxyUserService) SetUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UsersV1.SetUser", ud, reply)
-}
+	// construct the params
+	params := []reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)}
 
-func (ps *ProxyUserService) RemoveUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UsersV1.RemoveUser", ud, reply)
-}
-
-func (ps *ProxyUserService) UpdateUser(ud UserProfile, reply *string) error {
-	return ps.Client.Call("UsersV1.UpdateUser", ud, reply)
-}
-
-func (ps *ProxyUserService) GetUsers(ud UserProfile, users *UserProfiles) error {
-	return ps.Client.Call("UsersV1.GetUsers", ud, users)
-}
-
-func (ps *ProxyUserService) AddIndex(indexes []string, reply *string) error {
-	return ps.Client.Call("UsersV1.AddIndex", indexes, reply)
-}
-
-func (ps *ProxyUserService) GetIndexes(in string, reply *map[string][]string) error {
-	return ps.Client.Call("UsersV1.AddIndex", in, reply)
-}
-
-func (ps *ProxyUserService) ReloadUsers(in string, reply *string) error {
-	return ps.Client.Call("UsersV1.ReloadUsers", in, reply)
+	ret := method.Call(params)
+	if len(ret) != 1 {
+		return utils.ErrServerError
+	}
+	if ret[0].Interface() == nil {
+		return nil
+	}
+	err, ok := ret[0].Interface().(error)
+	if !ok {
+		return utils.ErrServerError
+	}
+	return err
 }
 
 // extraFields - Field name in the interface containing extraFields information
-func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
+func LoadUserProfile(in interface{}, extraFields string) error {
 	if userService == nil { // no user service => no fun
-		return in, nil
+		return nil
 	}
 	m := utils.ToMapStringString(in)
 	var needsUsers bool
@@ -425,9 +444,10 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 		}
 	}
 	if !needsUsers { // Do not process further if user profile is not needed
-		return in, nil
+		return nil
 	}
 	up := &UserProfile{
+		Masked:  false, // do not get masked users
 		Profile: make(map[string]string),
 	}
 	tenant := m["Tenant"]
@@ -452,8 +472,8 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 		}
 	}
 	ups := UserProfiles{}
-	if err := userService.GetUsers(*up, &ups); err != nil {
-		return nil, err
+	if err := userService.Call("UsersV1.GetUsers", up, &ups); err != nil {
+		return err
 	}
 	if len(ups) > 0 {
 		up = ups[0]
@@ -461,7 +481,7 @@ func LoadUserProfile(in interface{}, extraFields string) (interface{}, error) {
 		m["Tenant"] = up.Tenant
 		utils.FromMapStringString(m, in)
 		utils.SetMapExtraFields(in, m, extraFields)
-		return in, nil
+		return nil
 	}
-	return nil, utils.ErrNotFound
+	return utils.ErrUserNotFound
 }

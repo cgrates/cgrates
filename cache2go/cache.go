@@ -1,28 +1,17 @@
 //Simple caching library with expiration capabilities
 package cache2go
 
-import (
-	"sync"
-	"time"
-)
+import "sync"
 
 const (
 	PREFIX_LEN   = 4
 	KIND_ADD     = "ADD"
 	KIND_ADP     = "ADP"
 	KIND_REM     = "REM"
+	KIND_POP     = "POP"
 	KIND_PRF     = "PRF"
 	DOUBLE_CACHE = true
 )
-
-type timestampedValue struct {
-	timestamp time.Time
-	value     interface{}
-}
-
-func (tsv timestampedValue) Value() interface{} {
-	return tsv.value
-}
 
 type transactionItem struct {
 	key   string
@@ -42,7 +31,7 @@ var (
 	mux   sync.RWMutex
 	cache cacheStore
 	// transaction stuff
-	transactionBuffer []transactionItem
+	transactionBuffer []*transactionItem
 	transactionMux    sync.Mutex
 	transactionON     = false
 	transactionLock   = false
@@ -74,7 +63,9 @@ func CommitTransaction() {
 		case KIND_ADD:
 			Cache(item.key, item.value)
 		case KIND_ADP:
-			CachePush(item.key, item.value)
+			Push(item.key, item.value)
+		case KIND_POP:
+			Pop(item.key, item.value)
 		}
 	}
 	mux.Unlock()
@@ -91,14 +82,14 @@ func Cache(key string, value interface{}) {
 	}
 	if !transactionON {
 		cache.Put(key, value)
-		//fmt.Println("ADD: ", key)
+		//log.Println("ADD: ", key)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: value, kind: KIND_ADD})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_ADD})
 	}
 }
 
 // Appends to an existing slice in the cache key
-func CachePush(key string, value interface{}) {
+func Push(key string, value interface{}) {
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
@@ -106,21 +97,27 @@ func CachePush(key string, value interface{}) {
 	if !transactionON {
 		cache.Append(key, value)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: value, kind: KIND_ADP})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_ADP})
 	}
 }
 
 // The function to extract a value for a key that never expire
-func GetCached(key string) (v interface{}, err error) {
+func Get(key string) (v interface{}, err error) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.Get(key)
 }
 
-func GetKeyAge(key string) (time.Duration, error) {
-	mux.RLock()
-	defer mux.RUnlock()
-	return cache.GetAge(key)
+func Pop(key string, value interface{}) {
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
+	}
+	if !transactionON {
+		cache.Pop(key, value)
+	} else {
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, value: value, kind: KIND_POP})
+	}
 }
 
 func RemKey(key string) {
@@ -131,7 +128,7 @@ func RemKey(key string) {
 	if !transactionON {
 		cache.Delete(key)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: key, kind: KIND_REM})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: key, kind: KIND_REM})
 	}
 }
 
@@ -143,7 +140,7 @@ func RemPrefixKey(prefix string) {
 	if !transactionON {
 		cache.DeletePrefix(prefix)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: prefix, kind: KIND_PRF})
+		transactionBuffer = append(transactionBuffer, &transactionItem{key: prefix, kind: KIND_PRF})
 	}
 }
 
@@ -164,7 +161,7 @@ func CountEntries(prefix string) (result int) {
 	return cache.CountEntriesForPrefix(prefix)
 }
 
-func GetAllEntries(prefix string) (map[string]timestampedValue, error) {
+func GetAllEntries(prefix string) (map[string]interface{}, error) {
 	mux.RLock()
 	defer mux.RUnlock()
 	return cache.GetAllForPrefix(prefix)

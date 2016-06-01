@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diameter>
+  <application id="4">
+    <vendor id="12645" name="Vodafone" />
+    <avp name="Reporting-Reason" code="261" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="12645">
+      <data type="Enumerated">
+        <item code="0" name="THRESHOLD" />
+        <item code="1" name="QHT" />
+        <item code="2" name="FINAL" />
+        <item code="3" name="QUOTA_EXHAUSTED" />
+        <item code="4" name="VALIDITY_TIME" />
+        <item code="5" name="OTHER_QUOTA_TYPE" />
+        <item code="6" name="RATING_CONDITION_CHANGE" />
+        <item code="7" name="FORCED_REAUTHORISATION" />
+        <item code="8" name="POOL_EXHAUSTED" />
+      </data>
+    </avp>
+    <avp name="Quota-Holding-Time" code="258" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="12645">
+      <data type="Unsigned32" />
+    </avp>
+    <avp name="Quota-Consumption-Time" code="257" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="12645">
+      <data type="Unsigned32" />
+    </avp>
+    <avp name="Rulebase-Id" code="262" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="12645">
+      <data type="UTF8String" />
+    </avp>
+    <avp name="Context-Type" code="256" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="12645">
+      <data type="Enumerated">
+        <item code="0" name="PRIMARY" />
+        <item code="1" name="SECONDARY" />
+      </data>
+    </avp>
+    <avp name="Radio-Access-Technology" code="260" must="V" may="P,M" must-not="-" may-encrypt="N" vendor-id="12645">
+      <data type="Enumerated">
+        <item code="1" name="UTRAN" />
+        <item code="2" name="GERAN" />
+        <item code="3" name="WLAN" />
+      </data>
+    </avp>
+    <avp name="User-Location-Information" code="267" must="M,V" may="-" must-not="-" may-encrypt="Y" vendor-id="12645">
+      <data type="OctetString" />
+    </avp>
+    <avp name="Time-Of-First-Usage" code="263" must="M,V" may="-" must-not="-" may-encrypt="Y" vendor-id="12645">
+      <data type="Time" />
+    </avp>
+    <avp name="Time-Of-Last-Usage" code="264" must="M,V" may="-" must-not="-" may-encrypt="Y" vendor-id="12645">
+      <data type="Time" />
+    </avp>
+  </application>
+</diameter>

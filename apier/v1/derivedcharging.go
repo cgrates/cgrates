@@ -20,6 +20,7 @@ package v1
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -33,18 +34,21 @@ func (self *ApierV1) GetDerivedChargers(attrs utils.AttrDerivedChargers, reply *
 	if hDc, err := engine.HandleGetDerivedChargers(self.RatingDb, &attrs); err != nil {
 		return utils.NewErrServerError(err)
 	} else if hDc != nil {
-		*reply = hDc
+		*reply = *hDc
 	}
 	return nil
 }
 
 type AttrSetDerivedChargers struct {
-	Direction, Tenant, Category, Account, Subject string
-	DerivedChargers                               utils.DerivedChargers
-	Overwrite                                     bool // Do not overwrite if present in redis
+	Direction, Tenant, Category, Account, Subject, DestinationIds string
+	DerivedChargers                                               []*utils.DerivedCharger
+	Overwrite                                                     bool // Do not overwrite if present in redis
 }
 
 func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *string) (err error) {
+	if len(attrs.DerivedChargers) == 0 {
+		return utils.NewErrMandatoryIeMissing("DerivedChargers")
+	}
 	if len(attrs.Direction) == 0 {
 		attrs.Direction = utils.OUT
 	}
@@ -67,16 +71,18 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	}
 	dcKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.HasData(utils.DESTINATION_PREFIX, dcKey); err != nil {
+		if exists, err := self.RatingDb.HasData(utils.DERIVEDCHARGERS_PREFIX, dcKey); err != nil {
 			return utils.NewErrServerError(err)
 		} else if exists {
 			return utils.ErrExists
 		}
 	}
-	if err := self.RatingDb.SetDerivedChargers(dcKey, attrs.DerivedChargers); err != nil {
+	dstIds := strings.Split(attrs.DestinationIds, utils.INFIELD_SEP)
+	dcs := &utils.DerivedChargers{DestinationIDs: utils.NewStringMap(dstIds...), Chargers: attrs.DerivedChargers}
+	if err := self.RatingDb.SetDerivedChargers(dcKey, dcs); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if err := self.RatingDb.CachePrefixValues(map[string][]string{
+	if err := self.RatingDb.CacheRatingPrefixValues(map[string][]string{
 		utils.DERIVEDCHARGERS_PREFIX: []string{utils.DERIVEDCHARGERS_PREFIX + dcKey},
 	}); err != nil {
 		return utils.NewErrServerError(err)
@@ -110,7 +116,7 @@ func (self *ApierV1) RemDerivedChargers(attrs AttrRemDerivedChargers, reply *str
 	} else {
 		*reply = "OK"
 	}
-	if err := self.RatingDb.CachePrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
+	if err := self.RatingDb.CacheRatingPrefixes(utils.DERIVEDCHARGERS_PREFIX); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return nil

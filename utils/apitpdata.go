@@ -273,19 +273,23 @@ type TPActions struct {
 }
 
 type TPAction struct {
-	Identifier      string  // Identifier mapped in the code
-	BalanceId       string  // Balance identification string (account scope)
-	BalanceType     string  // Type of balance the action will operate on
-	Direction       string  // Balance direction
-	Units           float64 // Number of units to add/deduct
-	ExpiryTime      string  // Time when the units will expire
-	TimingTags      string  // Timing when balance is active
-	DestinationIds  string  // Destination profile id
-	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
-	Category        string  // category filter for balances
-	SharedGroup     string  // Reference to a shared group
-	BalanceWeight   float64 // Balance weight
+	Identifier      string // Identifier mapped in the code
+	BalanceId       string // Balance identification string (account scope)
+	BalanceUuid     string // Balance identification string (global scope)
+	BalanceType     string // Type of balance the action will operate on
+	Directions      string // Balance direction
+	Units           string // Number of units to add/deduct
+	ExpiryTime      string // Time when the units will expire
+	Filter          string // The condition on balances that is checked before the action
+	TimingTags      string // Timing when balance is active
+	DestinationIds  string // Destination profile id
+	RatingSubject   string // Reference a rate subject defined in RatingProfiles
+	Categories      string // category filter for balances
+	SharedGroups    string // Reference to a shared group
+	BalanceWeight   string // Balance weight
 	ExtraParameters string
+	BalanceBlocker  string
+	BalanceDisabled string
 	Weight          float64 // Action's weight
 }
 
@@ -302,23 +306,55 @@ type TPSharedGroup struct {
 }
 
 type TPLcrRules struct {
-	TPid       string
-	LcrRulesId string
-	LcrRules   []*TPLcrRule
+	TPid      string
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Rules     []*TPLcrRule
 }
 
 type TPLcrRule struct {
-	Direction      string
-	Tenant         string
-	Category       string
-	Account        string
-	Subject        string
 	DestinationId  string
 	RpCategory     string
 	Strategy       string
 	StrategyParams string
 	ActivationTime string
 	Weight         float64
+}
+
+type TPAliases struct {
+	TPid      string
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Context   string
+	Values    []*TPAliasValue
+}
+
+type TPAliasValue struct {
+	DestinationId string
+	Target        string
+	Original      string
+	Alias         string
+	Weight        float64
+}
+
+type TPUsers struct {
+	TPid     string
+	Tenant   string
+	Masked   bool
+	UserName string
+	Profile  []*TPUserProfile
+	Weight   float64
+}
+
+type TPUserProfile struct {
+	AttrName  string
+	AttrValue string
 }
 
 type TPCdrStats struct {
@@ -328,30 +364,30 @@ type TPCdrStats struct {
 }
 
 type TPCdrStat struct {
-	QueueLength         string
-	TimeWindow          string
-	SaveInterval        string
-	Metrics             string
-	SetupInterval       string
-	TORs                string
-	CdrHosts            string
-	CdrSources          string
-	ReqTypes            string
-	Directions          string
-	Tenants             string
-	Categories          string
-	Accounts            string
-	Subjects            string
-	DestinationPrefixes string
-	PddInterval         string
-	UsageInterval       string
-	Suppliers           string
-	DisconnectCauses    string
-	MediationRunIds     string
-	RatedAccounts       string
-	RatedSubjects       string
-	CostInterval        string
-	ActionTriggers      string
+	QueueLength      string
+	TimeWindow       string
+	SaveInterval     string
+	Metrics          string
+	SetupInterval    string
+	TORs             string
+	CdrHosts         string
+	CdrSources       string
+	ReqTypes         string
+	Directions       string
+	Tenants          string
+	Categories       string
+	Accounts         string
+	Subjects         string
+	DestinationIds   string
+	PddInterval      string
+	UsageInterval    string
+	Suppliers        string
+	DisconnectCauses string
+	MediationRunIds  string
+	RatedAccounts    string
+	RatedSubjects    string
+	CostInterval     string
+	ActionTriggers   string
 }
 
 type TPDerivedChargers struct {
@@ -362,6 +398,7 @@ type TPDerivedChargers struct {
 	Category        string
 	Account         string
 	Subject         string
+	DestinationIds  string
 	DerivedChargers []*TPDerivedCharger
 }
 
@@ -415,6 +452,8 @@ type TPDerivedCharger struct {
 	UsageField           string
 	SupplierField        string
 	DisconnectCauseField string
+	CostField            string
+	RatedField           string
 }
 
 type TPActionPlan struct {
@@ -436,21 +475,26 @@ type TPActionTriggers struct {
 }
 
 type TPActionTrigger struct {
-	Id                    string
+	Id                    string  // group id
+	UniqueID              string  // individual id
 	ThresholdType         string  // This threshold type
 	ThresholdValue        float64 // Threshold
 	Recurrent             bool    // reset executed flag each run
 	MinSleep              string  // Minimum duration between two executions in case of recurrent triggers
+	ExpirationDate        string  // Trigger expiration
+	ActivationDate        string  // Trigger activation
 	BalanceId             string  // The id of the balance in the account
 	BalanceType           string  // Type of balance this trigger monitors
-	BalanceDirection      string  // Traffic direction
+	BalanceDirections     string  // Traffic direction
 	BalanceDestinationIds string  // filter for balance
-	BalanceWeight         float64 // filter for balance
+	BalanceWeight         string  // filter for balance
 	BalanceExpirationDate string  // filter for balance
 	BalanceTimingTags     string  // filter for balance
 	BalanceRatingSubject  string  // filter for balance
-	BalanceCategory       string  // filter for balance
-	BalanceSharedGroup    string  // filter for balance
+	BalanceCategories     string  // filter for balance
+	BalanceSharedGroups   string  // filter for balance
+	BalanceBlocker        string  // filter for balance
+	BalanceDisabled       string  // filter for balance
 	MinQueuedItems        int     // Trigger actions only if this number is hit (stats only)
 	ActionsId             string  // Actions which will execute on threshold reached
 	Weight                float64 // weight
@@ -462,10 +506,10 @@ func NewTPAccountActionsFromKeyId(tpid, loadId, keyId string) (*TPAccountActions
 	// *out:cgrates.org:1001
 	s := strings.Split(keyId, ":")
 	// [*out cgrates.org 1001]
-	if len(s) != 3 {
+	if len(s) != 2 {
 		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
 	}
-	return &TPAccountActions{TPid: tpid, LoadId: loadId, Direction: s[0], Tenant: s[1], Account: s[2]}, nil
+	return &TPAccountActions{TPid: tpid, LoadId: loadId, Tenant: s[0], Account: s[1]}, nil
 }
 
 type TPAccountActions struct {
@@ -473,20 +517,19 @@ type TPAccountActions struct {
 	LoadId           string // LoadId, used to group actions on a load
 	Tenant           string // Tenant's Id
 	Account          string // Account name
-	Direction        string // Traffic direction
 	ActionPlanId     string // Id of ActionPlan profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
+	AllowNegative    bool
+	Disabled         bool
 }
 
 // Returns the id used in some nosql dbs (eg: redis)
 func (self *TPAccountActions) KeyId() string {
-	return fmt.Sprintf("%s:%s:%s", self.Direction, self.Tenant, self.Account)
+	return fmt.Sprintf("%s:%s", self.Tenant, self.Account)
 }
 
 func (aa *TPAccountActions) GetAccountActionsId() string {
 	return aa.LoadId +
-		CONCATENATED_KEY_SEP +
-		aa.Direction +
 		CONCATENATED_KEY_SEP +
 		aa.Tenant +
 		CONCATENATED_KEY_SEP +
@@ -495,42 +538,39 @@ func (aa *TPAccountActions) GetAccountActionsId() string {
 
 func (aa *TPAccountActions) SetAccountActionsId(id string) error {
 	ids := strings.Split(id, CONCATENATED_KEY_SEP)
-	if len(ids) != 4 {
+	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
 	aa.LoadId = ids[0]
-	aa.Direction = ids[1]
-	aa.Tenant = ids[2]
-	aa.Account = ids[3]
+	aa.Tenant = ids[1]
+	aa.Account = ids[2]
 	return nil
 }
 
 type AttrGetAccount struct {
-	Tenant    string
-	Account   string
-	Direction string
+	Tenant  string
+	Account string
 }
 
 type AttrGetAccounts struct {
 	Tenant     string
-	Direction  string
 	AccountIds []string
 	Offset     int // Set the item offset
 	Limit      int // Limit number of items retrieved
 }
 
 // Data used to do remote cache reloads via api
-type ApiReloadCache struct {
+type AttrReloadCache struct {
 	DestinationIds   []string
 	RatingPlanIds    []string
 	RatingProfileIds []string
 	ActionIds        []string
+	ActionPlanIds    []string
 	SharedGroupIds   []string
-	RpAliases        []string
-	AccAliases       []string
 	LCRIds           []string
 	DerivedChargers  []string
 	LcrProfiles      []string
+	Aliases          []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
@@ -541,30 +581,15 @@ type CacheStats struct {
 	RatingPlans     int
 	RatingProfiles  int
 	Actions         int
+	ActionPlans     int
 	SharedGroups    int
-	RatingAliases   int
-	AccountAliases  int
 	DerivedChargers int
 	LcrProfiles     int
 	CdrStats        int
 	Users           int
-}
-
-type AttrCachedItemAge struct {
-	Category string // Item's category, same name as .csv files without extension
-	ItemId   string // Item's identity tag
-}
-
-type CachedItemAge struct {
-	Destination     time.Duration
-	RatingPlan      time.Duration
-	RatingProfile   time.Duration
-	Action          time.Duration
-	SharedGroup     time.Duration
-	RatingAlias     time.Duration
-	AccountAlias    time.Duration
-	DerivedChargers time.Duration
-	LcrProfiles     time.Duration
+	Aliases         int
+	LastLoadId      string
+	LastLoadTime    string
 }
 
 type AttrExpFileCdrs struct {
@@ -576,6 +601,7 @@ type AttrExpFileCdrs struct {
 	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
 	SmsUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	MmsUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
 	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
@@ -594,10 +620,8 @@ type AttrExpFileCdrs struct {
 	Accounts                   []string // If provided, it will filter account
 	Subjects                   []string // If provided, it will filter the rating subject
 	DestinationPrefixes        []string // If provided, it will filter on destination prefix
-	RatedAccounts              []string // If provided, it will filter ratedaccount
-	RatedSubjects              []string // If provided, it will filter the ratedsubject
-	OrderIdStart               int64    // Export from this order identifier
-	OrderIdEnd                 int64    // Export smaller than this order identifier
+	OrderIdStart               *int64   // Export from this order identifier
+	OrderIdEnd                 *int64   // Export smaller than this order identifier
 	TimeStart                  string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd                    string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors                 bool     // Do not export errored CDRs
@@ -606,35 +630,33 @@ type AttrExpFileCdrs struct {
 	Paginator
 }
 
-func (self *AttrExpFileCdrs) AsCdrsFilter() (*CdrsFilter, error) {
-	cdrFltr := &CdrsFilter{
-		CgrIds:        self.CgrIds,
-		RunIds:        self.MediationRunIds,
-		Tors:          self.TORs,
-		CdrHosts:      self.CdrHosts,
-		CdrSources:    self.CdrSources,
-		ReqTypes:      self.ReqTypes,
-		Directions:    self.Directions,
-		Tenants:       self.Tenants,
-		Categories:    self.Categories,
-		Accounts:      self.Accounts,
-		Subjects:      self.Subjects,
-		DestPrefixes:  self.DestinationPrefixes,
-		RatedAccounts: self.RatedAccounts,
-		RatedSubjects: self.RatedSubjects,
-		OrderIdStart:  self.OrderIdStart,
-		OrderIdEnd:    self.OrderIdEnd,
-		Paginator:     self.Paginator,
+func (self *AttrExpFileCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
+	cdrFltr := &CDRsFilter{
+		CGRIDs:              self.CgrIds,
+		RunIDs:              self.MediationRunIds,
+		ToRs:                self.TORs,
+		OriginHosts:         self.CdrHosts,
+		Sources:             self.CdrSources,
+		RequestTypes:        self.ReqTypes,
+		Directions:          self.Directions,
+		Tenants:             self.Tenants,
+		Categories:          self.Categories,
+		Accounts:            self.Accounts,
+		Subjects:            self.Subjects,
+		DestinationPrefixes: self.DestinationPrefixes,
+		OrderIDStart:        self.OrderIdStart,
+		OrderIDEnd:          self.OrderIdEnd,
+		Paginator:           self.Paginator,
 	}
 	if len(self.TimeStart) != 0 {
-		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart); err != nil {
+		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &answerTimeStart
 		}
 	}
 	if len(self.TimeEnd) != 0 {
-		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd); err != nil {
+		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &answerTimeEnd
@@ -673,8 +695,8 @@ type AttrGetCdrs struct {
 	DestinationPrefixes []string // If provided, it will filter on destination prefix
 	RatedAccounts       []string // If provided, it will filter ratedaccount
 	RatedSubjects       []string // If provided, it will filter the ratedsubject
-	OrderIdStart        int64    // Export from this order identifier
-	OrderIdEnd          int64    // Export smaller than this order identifier
+	OrderIdStart        *int64   // Export from this order identifier
+	OrderIdEnd          *int64   // Export smaller than this order identifier
 	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors          bool     // Do not export errored CDRs
@@ -682,35 +704,33 @@ type AttrGetCdrs struct {
 	Paginator
 }
 
-func (self *AttrGetCdrs) AsCdrsFilter() (*CdrsFilter, error) {
-	cdrFltr := &CdrsFilter{
-		CgrIds:        self.CgrIds,
-		RunIds:        self.MediationRunIds,
-		Tors:          self.TORs,
-		CdrHosts:      self.CdrHosts,
-		CdrSources:    self.CdrSources,
-		ReqTypes:      self.ReqTypes,
-		Directions:    self.Directions,
-		Tenants:       self.Tenants,
-		Categories:    self.Categories,
-		Accounts:      self.Accounts,
-		Subjects:      self.Subjects,
-		DestPrefixes:  self.DestinationPrefixes,
-		RatedAccounts: self.RatedAccounts,
-		RatedSubjects: self.RatedSubjects,
-		OrderIdStart:  self.OrderIdStart,
-		OrderIdEnd:    self.OrderIdEnd,
-		Paginator:     self.Paginator,
+func (self *AttrGetCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
+	cdrFltr := &CDRsFilter{
+		CGRIDs:              self.CgrIds,
+		RunIDs:              self.MediationRunIds,
+		ToRs:                self.TORs,
+		OriginHosts:         self.CdrHosts,
+		Sources:             self.CdrSources,
+		RequestTypes:        self.ReqTypes,
+		Directions:          self.Directions,
+		Tenants:             self.Tenants,
+		Categories:          self.Categories,
+		Accounts:            self.Accounts,
+		Subjects:            self.Subjects,
+		DestinationPrefixes: self.DestinationPrefixes,
+		OrderIDStart:        self.OrderIdStart,
+		OrderIDEnd:          self.OrderIdEnd,
+		Paginator:           self.Paginator,
 	}
 	if len(self.TimeStart) != 0 {
-		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart); err != nil {
+		if answerTimeStart, err := ParseTimeDetectLayout(self.TimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &answerTimeStart
 		}
 	}
 	if len(self.TimeEnd) != 0 {
-		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd); err != nil {
+		if answerTimeEnd, err := ParseTimeDetectLayout(self.TimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &answerTimeEnd
@@ -742,15 +762,51 @@ type AttrRateCdrs struct {
 	Accounts            []string // If provided, it will filter account
 	Subjects            []string // If provided, it will filter the rating subject
 	DestinationPrefixes []string // If provided, it will filter on destination prefix
-	RatedAccounts       []string // If provided, it will filter ratedaccount
-	RatedSubjects       []string // If provided, it will filter the ratedsubject
-	OrderIdStart        int64    // Export from this order identifier
-	OrderIdEnd          int64    // Export smaller than this order identifier
+	OrderIdStart        *int64   // Export from this order identifier
+	OrderIdEnd          *int64   // Export smaller than this order identifier
 	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
 	RerateErrors        bool     // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
 	RerateRated         bool     // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
 	SendToStats         bool     // Set to true if the CDRs should be sent to stats server
+}
+
+func (attrRateCDRs *AttrRateCdrs) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
+	cdrFltr := &CDRsFilter{
+		CGRIDs:              attrRateCDRs.CgrIds,
+		RunIDs:              attrRateCDRs.MediationRunIds,
+		OriginHosts:         attrRateCDRs.CdrHosts,
+		Sources:             attrRateCDRs.CdrSources,
+		ToRs:                attrRateCDRs.TORs,
+		RequestTypes:        attrRateCDRs.ReqTypes,
+		Directions:          attrRateCDRs.Directions,
+		Tenants:             attrRateCDRs.Tenants,
+		Categories:          attrRateCDRs.Categories,
+		Accounts:            attrRateCDRs.Accounts,
+		Subjects:            attrRateCDRs.Subjects,
+		DestinationPrefixes: attrRateCDRs.DestinationPrefixes,
+		OrderIDStart:        attrRateCDRs.OrderIdStart,
+		OrderIDEnd:          attrRateCDRs.OrderIdEnd,
+	}
+	if aTime, err := ParseTimeDetectLayout(attrRateCDRs.TimeStart, timezone); err != nil {
+		return nil, err
+	} else if !aTime.IsZero() {
+		cdrFltr.AnswerTimeStart = &aTime
+	}
+	if aTimeEnd, err := ParseTimeDetectLayout(attrRateCDRs.TimeEnd, timezone); err != nil {
+		return nil, err
+	} else if !aTimeEnd.IsZero() {
+		cdrFltr.AnswerTimeEnd = &aTimeEnd
+	}
+	if attrRateCDRs.RerateErrors {
+		cdrFltr.MinCost = Float64Pointer(-1.0)
+		if !attrRateCDRs.RerateRated {
+			cdrFltr.MaxCost = Float64Pointer(0.0)
+		}
+	} else if attrRateCDRs.RerateRated {
+		cdrFltr.MinCost = Float64Pointer(0.0)
+	}
+	return cdrFltr, nil
 }
 
 type AttrLoadTpFromFolder struct {
@@ -772,19 +828,19 @@ type AttrGetDestination struct {
 }
 
 type AttrDerivedChargers struct {
-	Direction, Tenant, Category, Account, Subject string
+	Direction, Tenant, Category, Account, Subject, Destination string
 }
 
-func NewDTAFromAccountKey(accountKey string) (*DirectionTenantAccount, error) {
+func NewTAFromAccountKey(accountKey string) (*TenantAccount, error) {
 	accountSplt := strings.Split(accountKey, CONCATENATED_KEY_SEP)
-	if len(accountSplt) != 3 {
-		return nil, fmt.Errorf("Unsupported format for DirectionTenantAccount: %s", accountKey)
+	if len(accountSplt) != 2 {
+		return nil, fmt.Errorf("Unsupported format for TenantAccount: %s", accountKey)
 	}
-	return &DirectionTenantAccount{accountSplt[0], accountSplt[1], accountSplt[2]}, nil
+	return &TenantAccount{accountSplt[0], accountSplt[1]}, nil
 }
 
-type DirectionTenantAccount struct {
-	Direction, Tenant, Account string
+type TenantAccount struct {
+	Tenant, Account string
 }
 
 func NewDTCSFromRPKey(rpKey string) (*DirectionTenantCategorySubject, error) {
@@ -817,224 +873,210 @@ type ExportedTPStats struct {
 	Compressed    bool
 }
 
-// Filter used in engine.GetStoredCdrs
-type CdrsFilter struct {
-	CgrIds              []string          // If provided, it will filter based on the cgrids present in list
-	NotCgrIds           []string          // Filter specific CgrIds out
-	RunIds              []string          // If provided, it will filter on mediation runid
-	NotRunIds           []string          // Filter specific runIds out
-	Tors                []string          // If provided, filter on TypeOfRecord
-	NotTors             []string          // Filter specific TORs out
-	CdrHosts            []string          // If provided, it will filter cdrhost
-	NotCdrHosts         []string          // Filter out specific cdr hosts
-	CdrSources          []string          // If provided, it will filter cdrsource
-	NotCdrSources       []string          // Filter out specific CDR sources
-	ReqTypes            []string          // If provided, it will fiter reqtype
-	NotReqTypes         []string          // Filter out specific request types
-	Directions          []string          // If provided, it will fiter direction
-	NotDirections       []string          // Filter out specific directions
-	Tenants             []string          // If provided, it will filter tenant
-	NotTenants          []string          // If provided, it will filter tenant
-	Categories          []string          // If provided, it will filter çategory
-	NotCategories       []string          // Filter out specific categories
-	Accounts            []string          // If provided, it will filter account
-	NotAccounts         []string          // Filter out specific Accounts
-	Subjects            []string          // If provided, it will filter the rating subject
-	NotSubjects         []string          // Filter out specific subjects
-	DestPrefixes        []string          // If provided, it will filter on destination prefix
-	NotDestPrefixes     []string          // Filter out specific destination prefixes
-	Suppliers           []string          // If provided, it will filter the supplier
-	NotSuppliers        []string          // Filter out specific suppliers
-	DisconnectCauses    []string          // Filter for disconnect Cause
-	NotDisconnectCauses []string          // Filter out specific disconnect causes
-	RatedAccounts       []string          // If provided, it will filter ratedaccount
-	NotRatedAccounts    []string          // Filter out specific RatedAccounts
-	RatedSubjects       []string          // If provided, it will filter the ratedsubject
-	NotRatedSubjects    []string          // Filter out specific RatedSubjects
-	Costs               []float64         // Query based on costs specified
-	NotCosts            []float64         // Filter out specific costs out from result
-	ExtraFields         map[string]string // Query based on extra fields content
-	NotExtraFields      map[string]string // Filter out based on extra fields content
-	OrderIdStart        int64             // Export from this order identifier
-	OrderIdEnd          int64             // Export smaller than this order identifier
-	SetupTimeStart      *time.Time        // Start of interval, bigger or equal than configured
-	SetupTimeEnd        *time.Time        // End interval, smaller than setupTime
-	AnswerTimeStart     *time.Time        // Start of interval, bigger or equal than configured
-	AnswerTimeEnd       *time.Time        // End interval, smaller than answerTime
-	CreatedAtStart      *time.Time        // Start of interval, bigger or equal than configured
-	CreatedAtEnd        *time.Time        // End interval, smaller than
-	UpdatedAtStart      *time.Time        // Start of interval, bigger or equal than configured
-	UpdatedAtEnd        *time.Time        // End interval, smaller than
-	MinUsage            *float64          // Start of the usage interval (>=)
-	MaxUsage            *float64          // End of the usage interval (<)
-	MinPdd              *float64          // Start of the pdd interval (>=)
-	MaxPdd              *float64          // End of the pdd interval (<)
-	MinCost             *float64          // Start of the cost interval (>=)
-	MaxCost             *float64          // End of the usage interval (<)
-	FilterOnRated       bool              // Do not consider rated CDRs but raw one
-	Unscoped            bool              // Include soft-deleted records in results
-	Count               bool              // If true count the items instead of returning data
+// CDRsFilter is a filter used to get records out of storDB
+type CDRsFilter struct {
+	CGRIDs                 []string          // If provided, it will filter based on the cgrids present in list
+	NotCGRIDs              []string          // Filter specific CgrIds out
+	RunIDs                 []string          // If provided, it will filter on mediation runid
+	NotRunIDs              []string          // Filter specific runIds out
+	OriginHosts            []string          // If provided, it will filter cdrhost
+	NotOriginHosts         []string          // Filter out specific cdr hosts
+	Sources                []string          // If provided, it will filter cdrsource
+	NotSources             []string          // Filter out specific CDR sources
+	ToRs                   []string          // If provided, filter on TypeOfRecord
+	NotToRs                []string          // Filter specific TORs out
+	RequestTypes           []string          // If provided, it will fiter reqtype
+	NotRequestTypes        []string          // Filter out specific request types
+	Directions             []string          // If provided, it will fiter direction
+	NotDirections          []string          // Filter out specific directions
+	Tenants                []string          // If provided, it will filter tenant
+	NotTenants             []string          // If provided, it will filter tenant
+	Categories             []string          // If provided, it will filter çategory
+	NotCategories          []string          // Filter out specific categories
+	Accounts               []string          // If provided, it will filter account
+	NotAccounts            []string          // Filter out specific Accounts
+	Subjects               []string          // If provided, it will filter the rating subject
+	NotSubjects            []string          // Filter out specific subjects
+	DestinationPrefixes    []string          // If provided, it will filter on destination prefix
+	NotDestinationPrefixes []string          // Filter out specific destination prefixes
+	Suppliers              []string          // If provided, it will filter the supplier
+	NotSuppliers           []string          // Filter out specific suppliers
+	DisconnectCauses       []string          // Filter for disconnect Cause
+	NotDisconnectCauses    []string          // Filter out specific disconnect causes
+	Costs                  []float64         // Query based on costs specified
+	NotCosts               []float64         // Filter out specific costs out from result
+	ExtraFields            map[string]string // Query based on extra fields content
+	NotExtraFields         map[string]string // Filter out based on extra fields content
+	OrderIDStart           *int64            // Export from this order identifier
+	OrderIDEnd             *int64            // Export smaller than this order identifier
+	SetupTimeStart         *time.Time        // Start of interval, bigger or equal than configured
+	SetupTimeEnd           *time.Time        // End interval, smaller than setupTime
+	AnswerTimeStart        *time.Time        // Start of interval, bigger or equal than configured
+	AnswerTimeEnd          *time.Time        // End interval, smaller than answerTime
+	CreatedAtStart         *time.Time        // Start of interval, bigger or equal than configured
+	CreatedAtEnd           *time.Time        // End interval, smaller than
+	UpdatedAtStart         *time.Time        // Start of interval, bigger or equal than configured
+	UpdatedAtEnd           *time.Time        // End interval, smaller than
+	MinUsage               string            // Start of the usage interval (>=)
+	MaxUsage               string            // End of the usage interval (<)
+	MinPDD                 string            // Start of the pdd interval (>=)
+	MaxPDD                 string            // End of the pdd interval (<)
+	MinCost                *float64          // Start of the cost interval (>=)
+	MaxCost                *float64          // End of the usage interval (<)
+	Unscoped               bool              // Include soft-deleted records in results
+	Count                  bool              // If true count the items instead of returning data
 	Paginator
 }
 
-// Used in Rpc calls, slightly different than CdrsFilter by using string instead of Time filters
-type RpcCdrsFilter struct {
-	CgrIds              []string          // If provided, it will filter based on the cgrids present in list
-	NotCgrIds           []string          // Filter specific CgrIds out
-	RunIds              []string          // If provided, it will filter on mediation runid
-	NotRunIds           []string          // Filter specific runIds out
-	Tors                []string          // If provided, filter on TypeOfRecord
-	NotTors             []string          // Filter specific TORs out
-	CdrHosts            []string          // If provided, it will filter cdrhost
-	NotCdrHosts         []string          // Filter out specific cdr hosts
-	CdrSources          []string          // If provided, it will filter cdrsource
-	NotCdrSources       []string          // Filter out specific CDR sources
-	ReqTypes            []string          // If provided, it will fiter reqtype
-	NotReqTypes         []string          // Filter out specific request types
-	Directions          []string          // If provided, it will fiter direction
-	NotDirections       []string          // Filter out specific directions
-	Tenants             []string          // If provided, it will filter tenant
-	NotTenants          []string          // If provided, it will filter tenant
-	Categories          []string          // If provided, it will filter çategory
-	NotCategories       []string          // Filter out specific categories
-	Accounts            []string          // If provided, it will filter account
-	NotAccounts         []string          // Filter out specific Accounts
-	Subjects            []string          // If provided, it will filter the rating subject
-	NotSubjects         []string          // Filter out specific subjects
-	DestPrefixes        []string          // If provided, it will filter on destination prefix
-	NotDestPrefixes     []string          // Filter out specific destination prefixes
-	Suppliers           []string          // If provided, it will filter the supplier
-	NotSuppliers        []string          // Filter out specific suppliers
-	DisconnectCauses    []string          // Filter for disconnect Cause
-	NotDisconnectCauses []string          // Filter out specific disconnect causes
-	RatedAccounts       []string          // If provided, it will filter ratedaccount
-	NotRatedAccounts    []string          // Filter out specific RatedAccounts
-	RatedSubjects       []string          // If provided, it will filter the ratedsubject
-	NotRatedSubjects    []string          // Filter out specific RatedSubjects
-	Costs               []float64         // Query based on costs specified
-	NotCosts            []float64         // Filter out specific costs out from result
-	ExtraFields         map[string]string // Query based on extra fields content
-	NotExtraFields      map[string]string // Filter out based on extra fields content
-	OrderIdStart        int64             // Export from this order identifier
-	OrderIdEnd          int64             // Export smaller than this order identifier
-	SetupTimeStart      string            // Start of interval, bigger or equal than configured
-	SetupTimeEnd        string            // End interval, smaller than setupTime
-	AnswerTimeStart     string            // Start of interval, bigger or equal than configured
-	AnswerTimeEnd       string            // End interval, smaller than answerTime
-	CreatedAtStart      string            // Start of interval, bigger or equal than configured
-	CreatedAtEnd        string            // End interval, smaller than
-	UpdatedAtStart      string            // Start of interval, bigger or equal than configured
-	UpdatedAtEnd        string            // End interval, smaller than
-	MinUsage            *float64          // Start of the usage interval (>=)
-	MaxUsage            *float64          // End of the usage interval (<)
-	MinPdd              *float64          // Start of the pdd interval (>=)
-	MaxPdd              *float64          // End of the pdd interval (<)
-	MinCost             *float64          // Start of the cost interval (>=)
-	MaxCost             *float64          // End of the usage interval (<)
-	FilterOnRated       bool              // Do not consider derived CDRs but original one
-	Paginator                             // Add pagination
+// RPCCDRsFilter is a filter used in Rpc calls
+// RPCCDRsFilter is slightly different than CDRsFilter by using string instead of Time filters
+type RPCCDRsFilter struct {
+	CGRIDs                 []string          // If provided, it will filter based on the cgrids present in list
+	NotCGRIDs              []string          // Filter specific CgrIds out
+	RunIDs                 []string          // If provided, it will filter on mediation runid
+	NotRunIDs              []string          // Filter specific runIds out
+	OriginHosts            []string          // If provided, it will filter cdrhost
+	NotOriginHosts         []string          // Filter out specific cdr hosts
+	Sources                []string          // If provided, it will filter cdrsource
+	NotSources             []string          // Filter out specific CDR sources
+	ToRs                   []string          // If provided, filter on TypeOfRecord
+	NotToRs                []string          // Filter specific TORs out
+	RequestTypes           []string          // If provided, it will fiter reqtype
+	NotRequestTypes        []string          // Filter out specific request types
+	Directions             []string          // If provided, it will fiter direction
+	NotDirections          []string          // Filter out specific directions
+	Tenants                []string          // If provided, it will filter tenant
+	NotTenants             []string          // If provided, it will filter tenant
+	Categories             []string          // If provided, it will filter çategory
+	NotCategories          []string          // Filter out specific categories
+	Accounts               []string          // If provided, it will filter account
+	NotAccounts            []string          // Filter out specific Accounts
+	Subjects               []string          // If provided, it will filter the rating subject
+	NotSubjects            []string          // Filter out specific subjects
+	DestinationPrefixes    []string          // If provided, it will filter on destination prefix
+	NotDestinationPrefixes []string          // Filter out specific destination prefixes
+	Suppliers              []string          // If provided, it will filter the supplier
+	NotSuppliers           []string          // Filter out specific suppliers
+	DisconnectCauses       []string          // Filter for disconnect Cause
+	NotDisconnectCauses    []string          // Filter out specific disconnect causes
+	Costs                  []float64         // Query based on costs specified
+	NotCosts               []float64         // Filter out specific costs out from result
+	ExtraFields            map[string]string // Query based on extra fields content
+	NotExtraFields         map[string]string // Filter out based on extra fields content
+	OrderIDStart           *int64            // Export from this order identifier
+	OrderIDEnd             *int64            // Export smaller than this order identifier
+	SetupTimeStart         string            // Start of interval, bigger or equal than configured
+	SetupTimeEnd           string            // End interval, smaller than setupTime
+	AnswerTimeStart        string            // Start of interval, bigger or equal than configured
+	AnswerTimeEnd          string            // End interval, smaller than answerTime
+	CreatedAtStart         string            // Start of interval, bigger or equal than configured
+	CreatedAtEnd           string            // End interval, smaller than
+	UpdatedAtStart         string            // Start of interval, bigger or equal than configured
+	UpdatedAtEnd           string            // End interval, smaller than
+	MinUsage               string            // Start of the usage interval (>=)
+	MaxUsage               string            // End of the usage interval (<)
+	MinPDD                 string            // Start of the pdd interval (>=)
+	MaxPDD                 string            // End of the pdd interval (<)
+	MinCost                *float64          // Start of the cost interval (>=)
+	MaxCost                *float64          // End of the usage interval (<)
+	Paginator                                // Add pagination
 }
 
-func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
-	cdrFltr := &CdrsFilter{
-		CgrIds:              self.CgrIds,
-		NotCgrIds:           self.NotCgrIds,
-		RunIds:              self.RunIds,
-		NotRunIds:           self.NotRunIds,
-		Tors:                self.Tors,
-		NotTors:             self.NotTors,
-		CdrHosts:            self.CdrHosts,
-		NotCdrHosts:         self.NotCdrHosts,
-		CdrSources:          self.CdrSources,
-		NotCdrSources:       self.NotCdrSources,
-		ReqTypes:            self.ReqTypes,
-		NotReqTypes:         self.NotReqTypes,
-		Directions:          self.Directions,
-		NotDirections:       self.NotDirections,
-		Tenants:             self.Tenants,
-		NotTenants:          self.NotTenants,
-		Categories:          self.Categories,
-		NotCategories:       self.NotCategories,
-		Accounts:            self.Accounts,
-		NotAccounts:         self.NotAccounts,
-		Subjects:            self.Subjects,
-		NotSubjects:         self.NotSubjects,
-		DestPrefixes:        self.DestPrefixes,
-		NotDestPrefixes:     self.NotDestPrefixes,
-		Suppliers:           self.Suppliers,
-		NotSuppliers:        self.NotSuppliers,
-		DisconnectCauses:    self.DisconnectCauses,
-		NotDisconnectCauses: self.NotDisconnectCauses,
-		RatedAccounts:       self.RatedAccounts,
-		NotRatedAccounts:    self.NotRatedAccounts,
-		RatedSubjects:       self.RatedSubjects,
-		NotRatedSubjects:    self.NotRatedSubjects,
-		Costs:               self.Costs,
-		NotCosts:            self.NotCosts,
-		ExtraFields:         self.ExtraFields,
-		NotExtraFields:      self.NotExtraFields,
-		OrderIdStart:        self.OrderIdStart,
-		OrderIdEnd:          self.OrderIdEnd,
-		MinUsage:            self.MinUsage,
-		MaxUsage:            self.MaxUsage,
-		MinPdd:              self.MinPdd,
-		MaxPdd:              self.MaxPdd,
-		MinCost:             self.MinCost,
-		MaxCost:             self.MaxCost,
-		FilterOnRated:       self.FilterOnRated,
-		Paginator:           self.Paginator,
+func (self *RPCCDRsFilter) AsCDRsFilter(timezone string) (*CDRsFilter, error) {
+	cdrFltr := &CDRsFilter{
+		CGRIDs:                 self.CGRIDs,
+		NotCGRIDs:              self.NotCGRIDs,
+		RunIDs:                 self.RunIDs,
+		NotRunIDs:              self.NotRunIDs,
+		ToRs:                   self.ToRs,
+		NotToRs:                self.NotToRs,
+		OriginHosts:            self.OriginHosts,
+		NotOriginHosts:         self.NotOriginHosts,
+		Sources:                self.Sources,
+		NotSources:             self.NotSources,
+		RequestTypes:           self.RequestTypes,
+		NotRequestTypes:        self.NotRequestTypes,
+		Directions:             self.Directions,
+		NotDirections:          self.NotDirections,
+		Tenants:                self.Tenants,
+		NotTenants:             self.NotTenants,
+		Categories:             self.Categories,
+		NotCategories:          self.NotCategories,
+		Accounts:               self.Accounts,
+		NotAccounts:            self.NotAccounts,
+		Subjects:               self.Subjects,
+		NotSubjects:            self.NotSubjects,
+		DestinationPrefixes:    self.DestinationPrefixes,
+		NotDestinationPrefixes: self.NotDestinationPrefixes,
+		Suppliers:              self.Suppliers,
+		NotSuppliers:           self.NotSuppliers,
+		DisconnectCauses:       self.DisconnectCauses,
+		NotDisconnectCauses:    self.NotDisconnectCauses,
+		Costs:                  self.Costs,
+		NotCosts:               self.NotCosts,
+		ExtraFields:            self.ExtraFields,
+		NotExtraFields:         self.NotExtraFields,
+		OrderIDStart:           self.OrderIDStart,
+		OrderIDEnd:             self.OrderIDEnd,
+		MinUsage:               self.MinUsage,
+		MaxUsage:               self.MaxUsage,
+		MinPDD:                 self.MinPDD,
+		MaxPDD:                 self.MaxPDD,
+		MinCost:                self.MinCost,
+		MaxCost:                self.MaxCost,
+		Paginator:              self.Paginator,
 	}
 	if len(self.SetupTimeStart) != 0 {
-		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart); err != nil {
+		if sTimeStart, err := ParseTimeDetectLayout(self.SetupTimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.SetupTimeStart = &sTimeStart
 		}
 	}
 	if len(self.SetupTimeEnd) != 0 {
-		if sTimeEnd, err := ParseTimeDetectLayout(self.SetupTimeEnd); err != nil {
+		if sTimeEnd, err := ParseTimeDetectLayout(self.SetupTimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.SetupTimeEnd = &sTimeEnd
 		}
 	}
 	if len(self.AnswerTimeStart) != 0 {
-		if aTimeStart, err := ParseTimeDetectLayout(self.AnswerTimeStart); err != nil {
+		if aTimeStart, err := ParseTimeDetectLayout(self.AnswerTimeStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeStart = &aTimeStart
 		}
 	}
 	if len(self.AnswerTimeEnd) != 0 {
-		if aTimeEnd, err := ParseTimeDetectLayout(self.AnswerTimeEnd); err != nil {
+		if aTimeEnd, err := ParseTimeDetectLayout(self.AnswerTimeEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.AnswerTimeEnd = &aTimeEnd
 		}
 	}
 	if len(self.CreatedAtStart) != 0 {
-		if tStart, err := ParseTimeDetectLayout(self.CreatedAtStart); err != nil {
+		if tStart, err := ParseTimeDetectLayout(self.CreatedAtStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.CreatedAtStart = &tStart
 		}
 	}
 	if len(self.CreatedAtEnd) != 0 {
-		if tEnd, err := ParseTimeDetectLayout(self.CreatedAtEnd); err != nil {
+		if tEnd, err := ParseTimeDetectLayout(self.CreatedAtEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.CreatedAtEnd = &tEnd
 		}
 	}
 	if len(self.UpdatedAtStart) != 0 {
-		if tStart, err := ParseTimeDetectLayout(self.UpdatedAtStart); err != nil {
+		if tStart, err := ParseTimeDetectLayout(self.UpdatedAtStart, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.UpdatedAtStart = &tStart
 		}
 	}
 	if len(self.UpdatedAtEnd) != 0 {
-		if tEnd, err := ParseTimeDetectLayout(self.UpdatedAtEnd); err != nil {
+		if tEnd, err := ParseTimeDetectLayout(self.UpdatedAtEnd, timezone); err != nil {
 			return nil, err
 		} else {
 			cdrFltr.UpdatedAtEnd = &tEnd
@@ -1046,20 +1088,21 @@ func (self *RpcCdrsFilter) AsCdrsFilter() (*CdrsFilter, error) {
 type AttrExportCdrsToFile struct {
 	CdrFormat                  *string  // Cdr output file format <utils.CdreCdrFormats>
 	FieldSeparator             *string  // Separator used between fields
-	ExportId                   *string  // Optional exportid
-	ExportDir                  *string  // If provided it overwrites the configured export directory
+	ExportID                   *string  // Optional exportid
+	ExportFolder               *string  // If provided it overwrites the configured export directory
 	ExportFileName             *string  // If provided the output filename will be set to this
 	ExportTemplate             *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	DataUsageMultiplyFactor    *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
-	SmsUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	SMSUsageMultiplyFactor     *float64 // Multiply sms usage before export (eg: convert from SMS unit to call duration for some billing systems)
+	MMSUsageMultiplyFactor     *float64 // Multiply mms usage before export (eg: convert from MMS unit to call duration for some billing systems)
 	GenericUsageMultiplyFactor *float64 // Multiply generic usage before export (eg: convert from GENERIC unit to call duration for some billing systems)
 	CostMultiplyFactor         *float64 // Multiply the cost before export, eg: apply VAT
 	CostShiftDigits            *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
 	RoundDecimals              *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
-	MaskDestinationId          *string  // Overwrite configured MaskDestId
+	MaskDestinationID          *string  // Overwrite configured MaskDestId
 	MaskLength                 *int     // Overwrite configured MaskLength, -1 to use general config ones
-	SuppressCgrIds             bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
-	RpcCdrsFilter                       // Inherit the CDR filter attributes
+	Verbose                    bool     // Disable CgrIds reporting in reply/ExportedCgrIds and reply/UnexportedCgrIds
+	RPCCDRsFilter                       // Inherit the CDR filter attributes
 }
 
 type AttrSetActions struct {
@@ -1069,24 +1112,25 @@ type AttrSetActions struct {
 }
 
 type AttrExecuteAction struct {
-	Direction string
 	Tenant    string
 	Account   string
 	ActionsId string
 }
 
 type AttrSetAccount struct {
-	Tenant        string
-	Direction     string
-	Account       string
-	ActionPlanId  string
-	AllowNegative bool
+	Tenant           string
+	Account          string
+	ActionPlanId     string
+	ActionTriggersId string
+	AllowNegative    *bool
+	Disabled         *bool
+	ReloadScheduler  bool
 }
 
 type AttrRemoveAccount struct {
-	Tenant    string
-	Direction string
-	Account   string
+	Tenant          string
+	Account         string
+	ReloadScheduler bool
 }
 
 type AttrGetSMASessions struct {
@@ -1096,4 +1140,41 @@ type AttrGetSMASessions struct {
 type AttrGetCallCost struct {
 	CgrId string // Unique id of the CDR
 	RunId string // Run Id
+}
+
+type TpAlias struct {
+	Direction string
+	Tenant    string
+	Category  string
+	Account   string
+	Subject   string
+	Group     string
+	Values    []*AliasValue
+}
+
+type AliasValue struct {
+	DestinationId string
+	Alias         string
+	Weight        float64
+}
+
+// AttrSMGGetActiveSessions will filter returned sessions by SMGenericV1
+type AttrSMGGetActiveSessions struct {
+	ToR         *string
+	OriginID    *string
+	RunID       *string
+	RequestType *string
+	Tenant      *string
+	Category    *string
+	Account     *string
+	Subject     *string
+	Destination *string
+	Supplier    *string
+}
+
+type AttrRateCDRs struct {
+	RPCCDRsFilter
+	StoreCDRs     *bool
+	SendToStatS   *bool // Set to true if the CDRs should be sent to stats server
+	ReplicateCDRs *bool // Replicate results
 }

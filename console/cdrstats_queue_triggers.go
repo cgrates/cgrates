@@ -56,5 +56,5 @@ func (self *CmdCdrStatsQueueTriggers) PostprocessRpcParams() error {
 }
 
 func (self *CmdCdrStatsQueueTriggers) RpcResult() interface{} {
-	return &engine.ActionTriggerPriotityList{}
+	return new(engine.ActionTriggers)
 }

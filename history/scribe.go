@@ -30,14 +30,11 @@ const (
 	RATING_PROFILES_FN = "rating_profiles.json"
 )
 
-type Scribe interface {
-	Record(Record, *int) error
-}
-
 type Record struct {
 	Id       string
 	Filename string
 	Payload  []byte
+	Deleted  bool
 }
 
 type records []*Record
@@ -63,12 +60,17 @@ func (rs records) Sort() {
 	sort.Sort(rs)
 }
 
-func (rs records) SetOrAdd(rec *Record) records {
+func (rs records) Modify(rec *Record) records {
 	//rs.Sort()
 	n := len(rs)
 	i := sort.Search(n, func(i int) bool { return rs[i].Id >= rec.Id })
 	if i < n && rs[i].Id == rec.Id {
-		rs[i] = rec
+		if rec.Deleted {
+			// delete
+			rs = append(rs[:i], rs[i+1:]...)
+		} else {
+			rs[i] = rec
+		}
 	} else {
 		// i is the index where it would be inserted.
 		rs = append(rs, nil)

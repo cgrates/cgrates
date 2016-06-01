@@ -63,18 +63,19 @@ func (d *Destination) AddPrefix(pfx string) {
 }
 
 // history record method
-func (d *Destination) GetHistoryRecord() history.Record {
+func (d *Destination) GetHistoryRecord(deleted bool) history.Record {
 	js, _ := json.Marshal(d)
 	return history.Record{
 		Id:       d.Id,
 		Filename: history.DESTINATIONS_FN,
 		Payload:  js,
+		Deleted:  deleted,
 	}
 }
 
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
-	if cached, err := cache2go.GetCached(utils.DESTINATION_PREFIX + prefix); err == nil {
+	if cached, err := cache2go.Get(utils.DESTINATION_PREFIX + prefix); err == nil {
 		_, found := cached.(map[interface{}]struct{})[destId]
 		return found
 	}
@@ -82,12 +83,13 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 }
 
 func CleanStalePrefixes(destIds []string) {
+	utils.Logger.Info("Cleaning stale dest prefixes: " + utils.ToJSON(destIds))
 	prefixMap, err := cache2go.GetAllEntries(utils.DESTINATION_PREFIX)
 	if err != nil {
 		return
 	}
 	for prefix, idIDs := range prefixMap {
-		dIDs := idIDs.Value().(map[interface{}]struct{})
+		dIDs := idIDs.(map[interface{}]struct{})
 		changed := false
 		for _, searchedDID := range destIds {
 			if _, found := dIDs[searchedDID]; found {

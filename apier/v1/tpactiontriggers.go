@@ -29,7 +29,9 @@ func (self *ApierV1) SetTPActionTriggers(attrs utils.TPActionTriggers, reply *st
 		[]string{"TPid", "ActionTriggersId"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-
+	for _, at := range attrs.ActionTriggers {
+		at.Id = attrs.ActionTriggersId
+	}
 	ats := engine.APItoModelActionTrigger(&attrs)
 	if err := self.StorDb.SetTpActionTriggers(ats); err != nil {
 		return utils.NewErrServerError(err)
@@ -92,7 +94,7 @@ func (self *ApierV1) RemTPActionTriggers(attrs AttrGetTPActionTriggers, reply *s
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTriggersId"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_ACTION_TRIGGERS, attrs.TPid, attrs.ActionTriggersId); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_ACTION_TRIGGERS, attrs.TPid, map[string]string{"tag": attrs.ActionTriggersId}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

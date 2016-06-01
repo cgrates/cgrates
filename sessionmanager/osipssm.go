@@ -29,6 +29,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
+	"github.com/cgrates/rpcclient"
 )
 
 /*
@@ -80,8 +81,8 @@ duration::
 
 */
 
-func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
-	osm := &OsipsSessionManager{cfg: smOsipsCfg, rater: rater, cdrsrv: cdrsrv, cdrStartEvents: make(map[string]*OsipsEvent)}
+func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, reconnects int, rater, cdrsrv rpcclient.RpcClientConnection, timezone string) (*OsipsSessionManager, error) {
+	osm := &OsipsSessionManager{cfg: smOsipsCfg, reconnects: reconnects, rater: rater, cdrsrv: cdrsrv, timezone: timezone, cdrStartEvents: make(map[string]*OsipsEvent), sessions: NewSessions()}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
 		"E_OPENSIPS_START":   []func(*osipsdagram.OsipsEvent){osm.onOpensipsStart}, // Raised when OpenSIPS starts so we can register our event handlers
 		"E_ACC_CDR":          []func(*osipsdagram.OsipsEvent){osm.onCdr},           // Raised if cdr_flag is configured
@@ -93,20 +94,22 @@ func NewOSipsSessionManager(smOsipsCfg *config.SmOsipsConfig, rater, cdrsrv engi
 
 type OsipsSessionManager struct {
 	cfg             *config.SmOsipsConfig
-	rater           engine.Connector
-	cdrsrv          engine.Connector
+	reconnects      int
+	rater           rpcclient.RpcClientConnection
+	cdrsrv          rpcclient.RpcClientConnection
+	timezone        string
 	eventHandlers   map[string][]func(*osipsdagram.OsipsEvent)
 	evSubscribeStop chan struct{}                         // Reference towards the channel controlling subscriptions, keep it as reference so we do not need to copy it
 	stopServing     chan struct{}                         // Stop serving datagrams
 	miConn          *osipsdagram.OsipsMiDatagramConnector // Pool of connections used to various OpenSIPS servers, keep reference towards events received so we can issue commands always to the same remote
-	sessions        []*Session
+	sessions        *Sessions
 	cdrStartEvents  map[string]*OsipsEvent // Used when building CDRs, ToDo: secure access to map
 }
 
 // Called when firing up the session manager, will stay connected for the duration of the daemon running
 func (osm *OsipsSessionManager) Connect() (err error) {
 	osm.stopServing = make(chan struct{})
-	if osm.miConn, err = osipsdagram.NewOsipsMiDatagramConnector(osm.cfg.MiAddr, osm.cfg.Reconnects); err != nil {
+	if osm.miConn, err = osipsdagram.NewOsipsMiDatagramConnector(osm.cfg.MiAddr, osm.reconnects); err != nil {
 		return fmt.Errorf("Cannot connect to OpenSIPS at %s, error: %s", osm.cfg.MiAddr, err.Error())
 	}
 	osm.evSubscribeStop = make(chan struct{})
@@ -114,22 +117,12 @@ func (osm *OsipsSessionManager) Connect() (err error) {
 	go osm.SubscribeEvents(osm.evSubscribeStop)
 	evsrv, err := osipsdagram.NewEventServer(osm.cfg.ListenUdp, osm.eventHandlers)
 	if err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Cannot initialize datagram server, error: <%s>", err.Error()))
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Cannot initialize datagram server, error: <%s>", err.Error()))
 		return
 	}
-	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPS> Listening for datagram events at <%s>", osm.cfg.ListenUdp))
+	utils.Logger.Info(fmt.Sprintf("<SM-OpenSIPS> Listening for datagram events at <%s>", osm.cfg.ListenUdp))
 	evsrv.ServeEvents(osm.stopServing) // Will break through stopServing on error in other places
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
-}
-
-// Removes a session on call end
-func (osm *OsipsSessionManager) RemoveSession(uuid string) {
-	for i, ss := range osm.sessions {
-		if ss.eventStart.GetUUID() == uuid {
-			osm.sessions = append(osm.sessions[:i], osm.sessions[i+1:]...)
-			return
-		}
-	}
 }
 
 // DebitInterval will give out the frequence of the debits sent to engine
@@ -138,12 +131,12 @@ func (osm *OsipsSessionManager) DebitInterval() time.Duration {
 }
 
 // Returns the connection to local cdr database, used by session to log it's final costs
-func (osm *OsipsSessionManager) CdrSrv() engine.Connector {
+func (osm *OsipsSessionManager) CdrSrv() rpcclient.RpcClientConnection {
 	return osm.cdrsrv
 }
 
 // Returns connection to rater/controller
-func (osm *OsipsSessionManager) Rater() engine.Connector {
+func (osm *OsipsSessionManager) Rater() rpcclient.RpcClientConnection {
 	return osm.rater
 }
 
@@ -158,9 +151,9 @@ func (osm *OsipsSessionManager) Shutdown() error {
 }
 
 // Process the CDR with CDRS component
-func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.StoredCdr) error {
+func (osm *OsipsSessionManager) ProcessCdr(storedCdr *engine.CDR) error {
 	var reply string
-	return osm.cdrsrv.ProcessCdr(storedCdr, &reply)
+	return osm.cdrsrv.Call("CdrsV1.ProcessCdr", storedCdr, &reply)
 }
 
 // Disconnects the session
@@ -168,16 +161,16 @@ func (osm *OsipsSessionManager) DisconnectSession(ev engine.Event, connId, notif
 	sessionIds := ev.GetSessionIds()
 	if len(sessionIds) != 2 {
 		errMsg := fmt.Sprintf("Failed disconnecting session for event: %+v, notify: %s, dialogId: %v", ev, notify, sessionIds)
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> " + errMsg))
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> " + errMsg))
 		return errors.New(errMsg)
 	}
 	cmd := fmt.Sprintf(":dlg_end_dlg:\n%s\n%s\n\n", sessionIds[0], sessionIds[1])
 	if reply, err := osm.miConn.SendCommand([]byte(cmd)); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed disconnecting session for event: %+v, notify: %s, dialogId: %v, error: <%s>", ev, notify, sessionIds, err))
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed disconnecting session for event: %+v, notify: %s, dialogId: %v, error: <%s>", ev, notify, sessionIds, err))
 		return err
 	} else if !bytes.HasPrefix(reply, []byte("200 OK")) {
 		errStr := fmt.Sprintf("Failed disconnecting session for event: %+v, notify: %s, dialogId: %v", ev, notify, sessionIds)
-		engine.Logger.Err("<SM-OpenSIPS> " + errStr)
+		utils.Logger.Err("<SM-OpenSIPS> " + errStr)
 		return errors.New(errStr)
 	}
 	return nil
@@ -217,10 +210,10 @@ func (osm *OsipsSessionManager) subscribeEvents() error {
 		}
 		cmd := fmt.Sprintf(":event_subscribe:\n%s\nudp:%s:%s\n%d\n", eventName, addrListen, portListen, int(subscribeInterval.Seconds()))
 		if reply, err := osm.miConn.SendCommand([]byte(cmd)); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>, error: <%s>", osm.cfg.MiAddr, err))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>, error: <%s>", osm.cfg.MiAddr, err))
 			return err
 		} else if !bytes.HasPrefix(reply, []byte("200 OK")) {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>", osm.cfg.MiAddr))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed subscribing to OpenSIPS at address: <%s>", osm.cfg.MiAddr))
 			return errors.New("Failed subscribing to OpenSIPS events")
 		}
 	}
@@ -237,8 +230,8 @@ func (osm *OsipsSessionManager) onOpensipsStart(cdrDagram *osipsdagram.OsipsEven
 // Triggered by CDR event
 func (osm *OsipsSessionManager) onCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	osipsEv, _ := NewOsipsEvent(cdrDagram)
-	if err := osm.ProcessCdr(osipsEv.AsStoredCdr()); err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(), osipsEv.GetUUID(), err.Error()))
+	if err := osm.ProcessCdr(osipsEv.AsStoredCdr(osm.timezone)); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", osipsEv.GetCgrId(osm.timezone), osipsEv.GetUUID(), err.Error()))
 	}
 }
 
@@ -250,24 +243,24 @@ func (osm *OsipsSessionManager) onAccEvent(osipsDgram *osipsdagram.OsipsEvent) {
 	}
 	if osipsDgram.AttrValues["method"] == "INVITE" { // Call start
 		if err := osm.callStart(osipsEv); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_START out of %+v, error: <%s>", osipsDgram, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_START out of %+v, error: <%s>", osipsDgram, err.Error()))
 		}
 		if err := osm.processCdrStart(osipsEv); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing cdr start out of %+v, error: <%s>", osipsDgram, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing cdr start out of %+v, error: <%s>", osipsDgram, err.Error()))
 		}
 	} else if osipsDgram.AttrValues["method"] == "BYE" {
 		if err := osm.callEnd(osipsEv); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_END out of %+v, error: <%s>", osipsDgram, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CALL_END out of %+v, error: <%s>", osipsDgram, err.Error()))
 		}
 		if err := osm.processCdrStop(osipsEv); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing cdr stop out of %+v, error: <%s>", osipsDgram, err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing cdr stop out of %+v, error: <%s>", osipsDgram, err.Error()))
 		}
 	}
 }
 
 // Handler of call start event. Mostly starts a session if needed
 func (osm *OsipsSessionManager) callStart(osipsEv *OsipsEvent) error {
-	if osipsEv.MissingParameter() {
+	if osipsEv.MissingParameter(osm.timezone) {
 		if err := osm.DisconnectSession(osipsEv, "", utils.ErrMandatoryIeMissing.Error()); err != nil {
 			return err
 		}
@@ -275,26 +268,25 @@ func (osm *OsipsSessionManager) callStart(osipsEv *OsipsEvent) error {
 	}
 	s := NewSession(osipsEv, "", osm)
 	if s != nil {
-		osm.sessions = append(osm.sessions, s)
+		osm.sessions.indexSession(s)
 	}
 	return nil
 }
 
 // Handler for callEnd. Mostly removes a session if needed
 func (osm *OsipsSessionManager) callEnd(osipsEv *OsipsEvent) error {
-	s := osm.getSession(osipsEv.GetUUID())
+	s := osm.sessions.getSession(osipsEv.GetUUID())
 	if s == nil { // Not handled by us
 		return nil
 	}
-	osm.RemoveSession(s.eventStart.GetUUID()) // Unreference it early so we avoid concurrency
-	origEvent := s.eventStart.(*OsipsEvent)   // Need a complete event for methods in close
+	origEvent := s.eventStart.(*OsipsEvent) // Need a complete event for methods in close
 	if err := origEvent.updateDurationFromEvent(osipsEv); err != nil {
 		return err
 	}
-	if origEvent.MissingParameter() {
+	if origEvent.MissingParameter(osm.timezone) {
 		return utils.ErrMandatoryIeMissing
 	}
-	if err := s.Close(origEvent); err != nil { // Stop loop, refund advanced charges and save the costs deducted so far to database
+	if err := osm.sessions.removeSession(s, origEvent); err != nil { // Unreference it early so we avoid concurrency
 		return err
 	}
 	return nil
@@ -330,24 +322,18 @@ func (osm *OsipsSessionManager) processCdrStop(osipsEv *OsipsEvent) error {
 	if err := osipsEvStart.updateDurationFromEvent(osipsEv); err != nil {
 		return err
 	}
-	return osm.ProcessCdr(osipsEvStart.AsStoredCdr())
-}
-
-// Searches and return the session with the specifed uuid
-func (osm *OsipsSessionManager) getSession(uuid string) *Session {
-	for _, s := range osm.sessions {
-		if s.eventStart.GetUUID() == uuid {
-			return s
-		}
-	}
-	return nil
+	return osm.ProcessCdr(osipsEvStart.AsStoredCdr(osm.timezone))
 }
 
 func (osm *OsipsSessionManager) Sessions() []*Session {
-	return osm.sessions
+	return osm.sessions.getSessions()
 }
 
 // Sync sessions with FS
 func (osm *OsipsSessionManager) SyncSessions() error {
 	return nil
+}
+
+func (osm *OsipsSessionManager) Timezone() string {
+	return osm.timezone
 }

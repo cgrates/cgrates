@@ -205,8 +205,24 @@ func TestLcrGet(t *testing.T) {
 		Subject:     "rif",
 	}
 	lcr, err := cd.GetLCR(nil, nil)
-	//jsn, _ := json.Marshal(lcr)
-	//log.Print("LCR: ", string(jsn))
+	if err != nil || lcr == nil {
+		t.Errorf("Bad lcr: %+v, %v", lcr, err)
+	}
+}
+
+func TestLcrGetPrefix(t *testing.T) {
+	lcrSubjectPrefixMatching = true
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2015, 04, 06, 17, 41, 0, 0, time.UTC),
+		Tenant:      "cgrates.org",
+		Direction:   "*in",
+		Category:    "call",
+		Destination: "0723098765",
+		Account:     "rif",
+		Subject:     "rifus",
+	}
+	lcr, err := cd.GetLCR(nil, nil)
 	if err != nil || lcr == nil {
 		t.Errorf("Bad lcr: %+v, %v", lcr, err)
 	}
@@ -215,11 +231,11 @@ func TestLcrGet(t *testing.T) {
 func TestLcrRequestAsCallDescriptor(t *testing.T) {
 	sTime := time.Date(2015, 04, 06, 17, 40, 0, 0, time.UTC)
 	callDur := time.Duration(1) * time.Minute
-	lcrReq := &LcrRequest{Account: "2001", StartTime: sTime.String()}
-	if _, err := lcrReq.AsCallDescriptor(); err == nil || err != utils.ErrMandatoryIeMissing {
+	lcrReq := &LcrRequest{Account: "2001", SetupTime: sTime.String()}
+	if _, err := lcrReq.AsCallDescriptor(""); err == nil || err != utils.ErrMandatoryIeMissing {
 		t.Error("Unexpected error received: %v", err)
 	}
-	lcrReq = &LcrRequest{Account: "2001", Destination: "2002", StartTime: sTime.String()}
+	lcrReq = &LcrRequest{Account: "2001", Destination: "2002", SetupTime: sTime.String()}
 	eCd := &CallDescriptor{
 		Direction:   utils.OUT,
 		Tenant:      config.CgrConfig().DefaultTenant,
@@ -230,7 +246,7 @@ func TestLcrRequestAsCallDescriptor(t *testing.T) {
 		TimeStart:   sTime,
 		TimeEnd:     sTime.Add(callDur),
 	}
-	if cd, err := lcrReq.AsCallDescriptor(); err != nil {
+	if cd, err := lcrReq.AsCallDescriptor(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCd, cd) {
 		t.Errorf("Expected: %+v, received: %+v", eCd, cd)

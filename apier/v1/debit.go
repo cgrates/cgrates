@@ -27,17 +27,16 @@ func (self *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) e
 	if missing := utils.MissingStructFields(&usageRecord, []string{"Account", "Destination", "Usage"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	out, err := engine.LoadUserProfile(usageRecord, "")
+	err := engine.LoadUserProfile(usageRecord, "")
 	if err != nil {
 		*reply = err.Error()
 		return err
 	}
-	usageRecord = out.(engine.UsageRecord)
-	if usageRecord.TOR == "" {
-		usageRecord.TOR = utils.VOICE
+	if usageRecord.ToR == "" {
+		usageRecord.ToR = utils.VOICE
 	}
-	if usageRecord.ReqType == "" {
-		usageRecord.ReqType = self.Config.DefaultReqType
+	if usageRecord.RequestType == "" {
+		usageRecord.RequestType = self.Config.DefaultReqType
 	}
 	if usageRecord.Direction == "" {
 		usageRecord.Direction = utils.OUT
@@ -54,7 +53,7 @@ func (self *ApierV1) DebitUsage(usageRecord engine.UsageRecord, reply *string) e
 	if usageRecord.AnswerTime == "" {
 		usageRecord.AnswerTime = utils.META_NOW
 	}
-	cd, err := usageRecord.AsCallDescriptor()
+	cd, err := usageRecord.AsCallDescriptor(self.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}

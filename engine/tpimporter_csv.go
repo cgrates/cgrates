@@ -54,7 +54,9 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ACCOUNT_ACTIONS_CSV:   (*TPCSVImporter).importAccountActions,
 	utils.DERIVED_CHARGERS_CSV:  (*TPCSVImporter).importDerivedChargers,
 	utils.CDR_STATS_CSV:         (*TPCSVImporter).importCdrStats,
+	utils.LCRS_CSV:              (*TPCSVImporter).importLcrs,
 	utils.USERS_CSV:             (*TPCSVImporter).importUsers,
+	utils.ALIASES_CSV:           (*TPCSVImporter).importAliases,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -73,7 +75,9 @@ func (self *TPCSVImporter) Run() error {
 		path.Join(self.DirPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(self.DirPath, utils.DERIVED_CHARGERS_CSV),
 		path.Join(self.DirPath, utils.CDR_STATS_CSV),
-		path.Join(self.DirPath, utils.USERS_CSV))
+		path.Join(self.DirPath, utils.USERS_CSV),
+		path.Join(self.DirPath, utils.ALIASES_CSV),
+	)
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
 		fHandler, hasName := fileHandlers[f.Name()]
@@ -81,7 +85,7 @@ func (self *TPCSVImporter) Run() error {
 			continue
 		}
 		if err := fHandler(self, f.Name()); err != nil {
-			Logger.Err(fmt.Sprintf("<TPCSVImporter> Importing file: %s, got error: %s", f.Name(), err.Error()))
+			utils.Logger.Err(fmt.Sprintf("<TPCSVImporter> Importing file: %s, got error: %s", f.Name(), err.Error()))
 		}
 	}
 	return nil
@@ -298,6 +302,21 @@ func (self *TPCSVImporter) importCdrStats(fn string) error {
 	return self.StorDb.SetTpCdrStats(tps)
 }
 
+func (self *TPCSVImporter) importLcrs(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	tps, err := self.csvr.GetTpLCRs(nil)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+	}
+
+	return self.StorDb.SetTpLCRs(tps)
+}
+
 func (self *TPCSVImporter) importUsers(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
@@ -311,4 +330,18 @@ func (self *TPCSVImporter) importUsers(fn string) error {
 	}
 
 	return self.StorDb.SetTpUsers(tps)
+}
+
+func (self *TPCSVImporter) importAliases(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	tps, err := self.csvr.GetTpAliases(nil)
+	if err != nil {
+		return err
+	}
+	for i := 0; i < len(tps); i++ {
+		tps[i].Tpid = self.TPid
+	}
+	return self.StorDb.SetTpAliases(tps)
 }

@@ -26,7 +26,7 @@ func init() {
 	c := &CmdExecuteAction{
 		name:      "action_execute",
 		rpcMethod: "ApierV1.ExecuteAction",
-		rpcParams: &utils.AttrExecuteAction{Direction: utils.OUT},
+		rpcParams: &utils.AttrExecuteAction{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -50,7 +50,7 @@ func (self *CmdExecuteAction) RpcMethod() string {
 
 func (self *CmdExecuteAction) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrExecuteAction{Direction: utils.OUT}
+		self.rpcParams = &utils.AttrExecuteAction{}
 	}
 	return self.rpcParams
 }

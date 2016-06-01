@@ -14,14 +14,29 @@ var testMap = UserMap{
 		":user":       map[string]string{"t": "v"},
 		"test:":       map[string]string{"t": "v"},
 		"test1:user1": map[string]string{"t": "v", "x": "y"},
+		"test:masked": map[string]string{"t": "v"},
 	},
 	index: make(map[string]map[string]bool),
+	properties: map[string]*prop{
+		"test:masked": &prop{masked: true},
+	},
+}
+
+var testMap2 = UserMap{
+	table: map[string]map[string]string{
+		"an:u1": map[string]string{"a": "b", "c": "d"},
+		"an:u2": map[string]string{"a": "b"},
+	},
+	index: make(map[string]map[string]bool),
+	properties: map[string]*prop{
+		"an:u2": &prop{weight: 10},
+	},
 }
 
 func TestUsersAdd(t *testing.T) {
 	tm := newUserMap(accountingStorage, nil)
 	var r string
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -42,7 +57,7 @@ func TestUsersAdd(t *testing.T) {
 func TestUsersUpdate(t *testing.T) {
 	tm := newUserMap(accountingStorage, nil)
 	var r string
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -73,7 +88,7 @@ func TestUsersUpdate(t *testing.T) {
 func TestUsersUpdateNotFound(t *testing.T) {
 	tm := newUserMap(accountingStorage, nil)
 	var r string
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -91,12 +106,12 @@ func TestUsersUpdateNotFound(t *testing.T) {
 func TestUsersUpdateInit(t *testing.T) {
 	tm := newUserMap(accountingStorage, nil)
 	var r string
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 	}
 	tm.SetUser(up, &r)
-	up = UserProfile{
+	up = &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -117,7 +132,7 @@ func TestUsersUpdateInit(t *testing.T) {
 func TestUsersRemove(t *testing.T) {
 	tm := newUserMap(accountingStorage, nil)
 	var r string
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -143,7 +158,7 @@ func TestUsersRemove(t *testing.T) {
 }
 
 func TestUsersGetFull(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -157,8 +172,34 @@ func TestUsersGetFull(t *testing.T) {
 	}
 }
 
+func TestUsersGetFullMasked(t *testing.T) {
+	up := &UserProfile{
+		Tenant: "test",
+	}
+	results := UserProfiles{}
+	testMap.GetUsers(up, &results)
+	if len(results) != 3 {
+		t.Error("error getting users: ", results)
+	}
+}
+
+func TestUsersGetFullUnMasked(t *testing.T) {
+	up := &UserProfile{
+		Tenant: "test",
+		Masked: true,
+	}
+	results := UserProfiles{}
+	testMap.GetUsers(up, &results)
+	if len(results) != 4 {
+		for _, r := range results {
+			t.Logf("U: %+v", r)
+		}
+		t.Error("error getting users: ", results)
+	}
+}
+
 func TestUsersGetTenant(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "testX",
 		UserName: "user",
 		Profile: map[string]string{
@@ -173,7 +214,7 @@ func TestUsersGetTenant(t *testing.T) {
 }
 
 func TestUsersGetUserName(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "userX",
 		Profile: map[string]string{
@@ -188,7 +229,7 @@ func TestUsersGetUserName(t *testing.T) {
 }
 
 func TestUsersGetNotFoundProfile(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -203,7 +244,7 @@ func TestUsersGetNotFoundProfile(t *testing.T) {
 }
 
 func TestUsersGetMissingTenant(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		UserName: "user",
 		Profile: map[string]string{
 			"t": "v",
@@ -217,7 +258,7 @@ func TestUsersGetMissingTenant(t *testing.T) {
 }
 
 func TestUsersGetMissingUserName(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant: "test",
 		Profile: map[string]string{
 			"t": "v",
@@ -231,7 +272,7 @@ func TestUsersGetMissingUserName(t *testing.T) {
 }
 
 func TestUsersGetMissingId(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		Profile: map[string]string{
 			"t": "v",
 		},
@@ -244,7 +285,7 @@ func TestUsersGetMissingId(t *testing.T) {
 }
 
 func TestUsersGetMissingIdTwo(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		Profile: map[string]string{
 			"t": "v",
 			"x": "y",
@@ -258,7 +299,7 @@ func TestUsersGetMissingIdTwo(t *testing.T) {
 }
 
 func TestUsersGetMissingIdTwoSort(t *testing.T) {
-	up := UserProfile{
+	up := &UserProfile{
 		Profile: map[string]string{
 			"t": "v",
 			"x": "y",
@@ -274,12 +315,29 @@ func TestUsersGetMissingIdTwoSort(t *testing.T) {
 	}
 }
 
+func TestUsersGetMissingIdTwoSortWeight(t *testing.T) {
+	up := &UserProfile{
+		Profile: map[string]string{
+			"a": "b",
+			"c": "d",
+		},
+	}
+	results := UserProfiles{}
+	testMap2.GetUsers(up, &results)
+	if len(results) != 2 {
+		t.Error("error getting users: ", results)
+	}
+	if results[0].GetId() != "an:u2" {
+		t.Errorf("Error sorting profiles: %+v", results[0])
+	}
+}
+
 func TestUsersAddIndex(t *testing.T) {
 	var r string
 	testMap.AddIndex([]string{"t"}, &r)
 	if r != utils.OK ||
 		len(testMap.index) != 1 ||
-		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 4 {
+		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 5 {
 		t.Error("error adding index: ", testMap.index)
 	}
 }
@@ -289,8 +347,8 @@ func TestUsersAddIndexFull(t *testing.T) {
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
 	if r != utils.OK ||
-		len(testMap.index) != 6 ||
-		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 4 {
+		len(testMap.index) != 7 ||
+		len(testMap.index[utils.ConcatenatedKey("t", "v")]) != 5 {
 		t.Error("error adding index: ", testMap.index)
 	}
 }
@@ -309,7 +367,7 @@ func TestUsersGetFullindex(t *testing.T) {
 	var r string
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -327,7 +385,7 @@ func TestUsersGetTenantindex(t *testing.T) {
 	var r string
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "testX",
 		UserName: "user",
 		Profile: map[string]string{
@@ -345,7 +403,7 @@ func TestUsersGetUserNameindex(t *testing.T) {
 	var r string
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "userX",
 		Profile: map[string]string{
@@ -363,7 +421,7 @@ func TestUsersGetNotFoundProfileindex(t *testing.T) {
 	var r string
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -381,7 +439,7 @@ func TestUsersGetMissingTenantindex(t *testing.T) {
 	var r string
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
-	up := UserProfile{
+	up := &UserProfile{
 		UserName: "user",
 		Profile: map[string]string{
 			"t": "v",
@@ -398,7 +456,7 @@ func TestUsersGetMissingUserNameindex(t *testing.T) {
 	var r string
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
-	up := UserProfile{
+	up := &UserProfile{
 		Tenant: "test",
 		Profile: map[string]string{
 			"t": "v",
@@ -415,7 +473,7 @@ func TestUsersGetMissingIdindex(t *testing.T) {
 	var r string
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
-	up := UserProfile{
+	up := &UserProfile{
 		Profile: map[string]string{
 			"t": "v",
 		},
@@ -431,7 +489,7 @@ func TestUsersGetMissingIdTwoINdex(t *testing.T) {
 	var r string
 	testMap.index = make(map[string]map[string]bool) // reset index
 	testMap.AddIndex([]string{"t", "x", "UserName", "Tenant"}, &r)
-	up := UserProfile{
+	up := &UserProfile{
 		Profile: map[string]string{
 			"t": "v",
 			"x": "y",
@@ -451,7 +509,7 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 	if len(tm.index) != 0 {
 		t.Error("error adding indexes: ", tm.index)
 	}
-	tm.SetUser(UserProfile{
+	tm.SetUser(&UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -461,7 +519,7 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 	if len(tm.index) != 1 || !tm.index["t:v"]["test:user"] {
 		t.Error("error adding indexes: ", tm.index)
 	}
-	tm.SetUser(UserProfile{
+	tm.SetUser(&UserProfile{
 		Tenant:   "test",
 		UserName: "best",
 		Profile: map[string]string{
@@ -473,7 +531,7 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 		!tm.index["t:v"]["test:best"] {
 		t.Error("error adding indexes: ", tm.index)
 	}
-	tm.UpdateUser(UserProfile{
+	tm.UpdateUser(&UserProfile{
 		Tenant:   "test",
 		UserName: "best",
 		Profile: map[string]string{
@@ -485,7 +543,7 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 		!tm.index["t:v1"]["test:best"] {
 		t.Error("error adding indexes: ", tm.index)
 	}
-	tm.UpdateUser(UserProfile{
+	tm.UpdateUser(&UserProfile{
 		Tenant:   "test",
 		UserName: "best",
 		Profile: map[string]string{
@@ -497,7 +555,7 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 		!tm.index["t:v"]["test:best"] {
 		t.Error("error adding indexes: ", tm.index)
 	}
-	tm.RemoveUser(UserProfile{
+	tm.RemoveUser(&UserProfile{
 		Tenant:   "test",
 		UserName: "best",
 		Profile: map[string]string{
@@ -509,7 +567,7 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 		tm.index["t:v"]["test:best"] {
 		t.Error("error adding indexes: ", tm.index)
 	}
-	tm.RemoveUser(UserProfile{
+	tm.RemoveUser(&UserProfile{
 		Tenant:   "test",
 		UserName: "user",
 		Profile: map[string]string{
@@ -524,17 +582,17 @@ func TestUsersAddUpdateRemoveIndexes(t *testing.T) {
 func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
-			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
-			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
-			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13"},
+			"test:user":   map[string]string{utils.TOR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{utils.TOR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{utils.TOR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{utils.TOR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13"},
 		},
 		index: make(map[string]map[string]bool),
 	}
 
 	ur := &UsageRecord{
-		TOR:         utils.USERS,
-		ReqType:     utils.USERS,
+		ToR:         utils.USERS,
+		RequestType: utils.USERS,
 		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
@@ -546,13 +604,13 @@ func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 		Usage:       "13",
 	}
 
-	out, err := LoadUserProfile(ur, "")
+	err := LoadUserProfile(ur, "")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
 	expected := &UsageRecord{
-		TOR:         "04",
-		ReqType:     "4",
+		ToR:         "04",
+		RequestType: "4",
 		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
@@ -563,26 +621,25 @@ func TestUsersUsageRecordGetLoadUserProfile(t *testing.T) {
 		AnswerTime:  "t4",
 		Usage:       "13",
 	}
-	ur = out.(*UsageRecord)
 	if !reflect.DeepEqual(ur, expected) {
 		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
 }
 
-func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
+func TestUsersExternalCDRGetLoadUserProfileExtraFields(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
-			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
-			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
-			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1"},
+			"test:user":   map[string]string{utils.TOR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{utils.TOR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{utils.TOR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{utils.TOR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1"},
 		},
 		index: make(map[string]map[string]bool),
 	}
 
-	ur := &ExternalCdr{
-		TOR:         utils.USERS,
-		ReqType:     utils.USERS,
+	ur := &ExternalCDR{
+		ToR:         utils.USERS,
+		RequestType: utils.USERS,
 		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
@@ -597,13 +654,13 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
 		},
 	}
 
-	out, err := LoadUserProfile(ur, "ExtraFields")
+	err := LoadUserProfile(ur, "ExtraFields")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
-	expected := &ExternalCdr{
-		TOR:         "04",
-		ReqType:     "4",
+	expected := &ExternalCDR{
+		ToR:         "04",
+		RequestType: "4",
 		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
@@ -617,26 +674,25 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFields(t *testing.T) {
 			"Test": "1",
 		},
 	}
-	ur = out.(*ExternalCdr)
 	if !reflect.DeepEqual(ur, expected) {
 		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
 }
 
-func TestUsersExternalCdrGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
+func TestUsersExternalCDRGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
-			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
-			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
-			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "2"},
+			"test:user":   map[string]string{utils.TOR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{utils.TOR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{utils.TOR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{utils.TOR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "2"},
 		},
 		index: make(map[string]map[string]bool),
 	}
 
-	ur := &ExternalCdr{
-		TOR:         utils.USERS,
-		ReqType:     utils.USERS,
+	ur := &ExternalCDR{
+		ToR:         utils.USERS,
+		RequestType: utils.USERS,
 		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
@@ -651,26 +707,26 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsNotFound(t *testing.T) {
 		},
 	}
 
-	_, err := LoadUserProfile(ur, "ExtraFields")
-	if err != utils.ErrNotFound {
+	err := LoadUserProfile(ur, "ExtraFields")
+	if err != utils.ErrUserNotFound {
 		t.Error("Error detecting err in loading user profile: ", err)
 	}
 }
 
-func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
+func TestUsersExternalCDRGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"test:user":   map[string]string{"TOR": "01", "ReqType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
-			":user":       map[string]string{"TOR": "02", "ReqType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
-			"test:":       map[string]string{"TOR": "03", "ReqType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
-			"test1:user1": map[string]string{"TOR": "04", "ReqType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1", "Best": "BestValue"},
+			"test:user":   map[string]string{utils.TOR: "01", "RequestType": "1", "Direction": "*out", "Category": "c1", "Account": "dan", "Subject": "0723", "Destination": "+401", "SetupTime": "s1", "AnswerTime": "t1", "Usage": "10"},
+			":user":       map[string]string{utils.TOR: "02", "RequestType": "2", "Direction": "*out", "Category": "c2", "Account": "ivo", "Subject": "0724", "Destination": "+402", "SetupTime": "s2", "AnswerTime": "t2", "Usage": "11"},
+			"test:":       map[string]string{utils.TOR: "03", "RequestType": "3", "Direction": "*out", "Category": "c3", "Account": "elloy", "Subject": "0725", "Destination": "+403", "SetupTime": "s3", "AnswerTime": "t3", "Usage": "12"},
+			"test1:user1": map[string]string{utils.TOR: "04", "RequestType": "4", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726", "Destination": "+404", "SetupTime": "s4", "AnswerTime": "t4", "Usage": "13", "Test": "1", "Best": "BestValue"},
 		},
 		index: make(map[string]map[string]bool),
 	}
 
-	ur := &ExternalCdr{
-		TOR:         utils.USERS,
-		ReqType:     utils.USERS,
+	ur := &ExternalCDR{
+		ToR:         utils.USERS,
+		RequestType: utils.USERS,
 		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
@@ -686,13 +742,13 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 		},
 	}
 
-	out, err := LoadUserProfile(ur, "ExtraFields")
+	err := LoadUserProfile(ur, "ExtraFields")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
-	expected := &ExternalCdr{
-		TOR:         "04",
-		ReqType:     "4",
+	expected := &ExternalCDR{
+		ToR:         "04",
+		RequestType: "4",
 		Direction:   "*out",
 		Tenant:      "",
 		Category:    "call",
@@ -707,7 +763,6 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 			"Best": "BestValue",
 		},
 	}
-	ur = out.(*ExternalCdr)
 	if !reflect.DeepEqual(ur, expected) {
 		t.Errorf("Expected: %+v got: %+v", expected, ur)
 	}
@@ -716,9 +771,9 @@ func TestUsersExternalCdrGetLoadUserProfileExtraFieldsSet(t *testing.T) {
 func TestUsersCallDescLoadUserProfile(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"cgrates.org:dan":      map[string]string{"ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
-			"cgrates.org:danvoice": map[string]string{"TOR": "*voice", "ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
-			"cgrates:rif":          map[string]string{"ReqType": "*postpaid", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726"},
+			"cgrates.org:dan":      map[string]string{"RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
+			"cgrates.org:danvoice": map[string]string{utils.TOR: "*voice", "RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
+			"cgrates:rif":          map[string]string{"RequestType": "*postpaid", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726"},
 		},
 		index: make(map[string]map[string]bool),
 	}
@@ -745,29 +800,28 @@ func TestUsersCallDescLoadUserProfile(t *testing.T) {
 		TimeEnd:     startTime.Add(time.Duration(1) * time.Minute),
 		ExtraFields: map[string]string{"Cli": "+4986517174963"},
 	}
-	out, err := LoadUserProfile(cd, "ExtraFields")
+	err := LoadUserProfile(cd, "ExtraFields")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
-	cdRcv := out.(*CallDescriptor)
-	if !reflect.DeepEqual(expected, cdRcv) {
-		t.Errorf("Expected: %+v got: %+v", expected, cdRcv)
+	if !reflect.DeepEqual(expected, cd) {
+		t.Errorf("Expected: %+v got: %+v", expected, cd)
 	}
 }
 
-func TestUsersStoredCdrLoadUserProfile(t *testing.T) {
+func TestUsersCDRLoadUserProfile(t *testing.T) {
 	userService = &UserMap{
 		table: map[string]map[string]string{
-			"cgrates.org:dan":      map[string]string{"ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
-			"cgrates.org:danvoice": map[string]string{"TOR": "*voice", "ReqType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
-			"cgrates:rif":          map[string]string{"ReqType": "*postpaid", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726"},
+			"cgrates.org:dan":      map[string]string{"RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "dan", "Cli": "+4986517174963"},
+			"cgrates.org:danvoice": map[string]string{utils.TOR: "*voice", "RequestType": "*prepaid", "Category": "call1", "Account": "dan", "Subject": "0723"},
+			"cgrates:rif":          map[string]string{"RequestType": "*postpaid", "Direction": "*out", "Category": "call", "Account": "rif", "Subject": "0726"},
 		},
 		index: make(map[string]map[string]bool),
 	}
 	startTime := time.Now()
-	cdr := &StoredCdr{
-		TOR:         "*sms",
-		ReqType:     utils.USERS,
+	cdr := &CDR{
+		ToR:         "*sms",
+		RequestType: utils.USERS,
 		Tenant:      utils.USERS,
 		Category:    utils.USERS,
 		Account:     utils.USERS,
@@ -778,9 +832,9 @@ func TestUsersStoredCdrLoadUserProfile(t *testing.T) {
 		Usage:       time.Duration(1) * time.Minute,
 		ExtraFields: map[string]string{"Cli": "+4986517174963"},
 	}
-	expected := &StoredCdr{
-		TOR:         "*sms",
-		ReqType:     "*prepaid",
+	expected := &CDR{
+		ToR:         "*sms",
+		RequestType: "*prepaid",
 		Tenant:      "cgrates.org",
 		Category:    "call1",
 		Account:     "dan",
@@ -791,12 +845,11 @@ func TestUsersStoredCdrLoadUserProfile(t *testing.T) {
 		Usage:       time.Duration(1) * time.Minute,
 		ExtraFields: map[string]string{"Cli": "+4986517174963"},
 	}
-	out, err := LoadUserProfile(cdr, "ExtraFields")
+	err := LoadUserProfile(cdr, "ExtraFields")
 	if err != nil {
 		t.Error("Error loading user profile: ", err)
 	}
-	cdRcv := out.(*StoredCdr)
-	if !reflect.DeepEqual(expected, cdRcv) {
-		t.Errorf("Expected: %+v got: %+v", expected, cdRcv)
+	if !reflect.DeepEqual(expected, cdr) {
+		t.Errorf("Expected: %+v got: %+v", expected, cdr)
 	}
 }

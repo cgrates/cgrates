@@ -48,10 +48,10 @@ func TestGetEmptyDC(t *testing.T) {
 */
 
 func TestSetDC(t *testing.T) {
-	dcs1 := utils.DerivedChargers{
-		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+	dcs1 := []*utils.DerivedCharger{
+		&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}
 	attrs := AttrSetDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: dcs1}
@@ -65,17 +65,18 @@ func TestSetDC(t *testing.T) {
 
 func TestGetDC(t *testing.T) {
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
-	eDcs := utils.DerivedChargers{
-		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
-	}
+	eDcs := utils.DerivedChargers{DestinationIDs: utils.NewStringMap(),
+		Chargers: []*utils.DerivedCharger{
+			&utils.DerivedCharger{RunID: "extra1", RequestTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+				AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+			&utils.DerivedCharger{RunID: "extra2", RequestTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+				AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+		}}
 	var dcs utils.DerivedChargers
 	if err := apierDcT.GetDerivedChargers(attrs, &dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, eDcs) {
-		t.Errorf("Expecting: %v, received: %v", eDcs, dcs)
+		t.Errorf("Expecting: %v, received: %v", eDcs.DestinationIDs, dcs.DestinationIDs)
 	}
 }
 
@@ -96,9 +97,6 @@ func TestGetEmptyDC2(t *testing.T) {
 	if err := apierDcT.GetDerivedChargers(attrs, &dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, apierDcT.Config.DerivedChargers) {
-		for _, dc := range dcs {
-			fmt.Printf("Got dc: %v\n", dc)
-		}
 		t.Error("Returned DerivedChargers not matching the configured ones")
 	}
 }

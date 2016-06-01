@@ -29,30 +29,43 @@ import (
 )
 
 type Scheduler struct {
-	queue       engine.ActionPlanPriotityList
+	queue       engine.ActionTimingPriorityList
 	timer       *time.Timer
 	restartLoop chan bool
 	sync.Mutex
+	storage          engine.RatingStorage
+	schedulerStarted bool
 }
 
-func NewScheduler() *Scheduler {
-	return &Scheduler{restartLoop: make(chan bool)}
+func NewScheduler(storage engine.RatingStorage) *Scheduler {
+	return &Scheduler{
+		restartLoop: make(chan bool),
+		storage:     storage,
+	}
 }
 
 func (s *Scheduler) Loop() {
+	s.schedulerStarted = true
 	for {
 		for len(s.queue) == 0 { //hang here if empty
 			<-s.restartLoop
 		}
+		utils.Logger.Info(fmt.Sprintf("<Scheduler> Scheduler queue length: %v", len(s.queue)))
 		s.Lock()
 		a0 := s.queue[0]
+		utils.Logger.Info(fmt.Sprintf("<Scheduler> Action: %s", a0.ActionsID))
 		now := time.Now()
-		if a0.GetNextStartTime(now).Equal(now) || a0.GetNextStartTime(now).Before(now) {
+		start := a0.GetNextStartTime(now)
+		if start.Equal(now) || start.Before(now) {
 			go a0.Execute()
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
-			now = time.Now()
-			if !a0.GetNextStartTime(now).Before(now) {
+			a0.ResetStartTimeCache()
+			now = time.Now().Add(time.Second)
+			start = a0.GetNextStartTime(now)
+			if start.Before(now) {
+				s.queue = s.queue[1:]
+			} else {
 				s.queue = append(s.queue, a0)
 				s.queue = s.queue[1:]
 				sort.Sort(s.queue)
@@ -61,12 +74,12 @@ func (s *Scheduler) Loop() {
 		} else {
 			s.Unlock()
 			d := a0.GetNextStartTime(now).Sub(now)
-			// engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
+			utils.Logger.Info(fmt.Sprintf("<Scheduler> Time to next action (%s): %v", a0.ActionsID, d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				engine.Logger.Info(fmt.Sprintf("Time for action on %v", a0))
+				utils.Logger.Info(fmt.Sprintf("<Scheduler> Time for action on %s", a0.ActionsID))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
@@ -74,57 +87,70 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) LoadActionPlans(storage engine.RatingStorage) {
-	actionTimings, err := storage.GetAllActionPlans()
-	if err != nil {
-		engine.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
-	}
-	// recreate the queue
+func (s *Scheduler) Reload(protect bool) {
+	s.loadActionPlans()
+	s.restart()
+}
+
+func (s *Scheduler) loadActionPlans() {
 	s.Lock()
-	s.queue = engine.ActionPlanPriotityList{}
-	for key, ats := range actionTimings {
-		toBeSaved := false
-		isAsap := false
-		newAts := make([]*engine.ActionPlan, 0) // will remove the one time runs from the database
-		for _, at := range ats {
-			isAsap = at.IsASAP()
-			toBeSaved = toBeSaved || isAsap
-			if isAsap {
-				if len(at.AccountIds) > 0 {
-					engine.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
-				}
-				at.Execute()
-				at.AccountIds = make([]string, 0)
-				// do not append it to the newAts list to be saved
-			} else {
-				now := time.Now()
-				if at.GetNextStartTime(now).Before(now) {
-					// the task is obsolete, do not add it to the queue
-					continue
-				}
-				s.queue = append(s.queue, at)
-			}
-			// save even asap action timings with empty account id list
-			newAts = append(newAts, at)
+	defer s.Unlock()
+	// limit the number of concurrent tasks
+	limit := make(chan bool, 10)
+	// execute existing tasks
+	for {
+		task, err := s.storage.PopTask()
+		if err != nil || task == nil {
+			break
 		}
-		if toBeSaved {
-			engine.Guardian.Guard(func() (interface{}, error) {
-				storage.SetActionPlans(key, newAts)
-				return 0, nil
-			}, utils.ACTION_TIMING_PREFIX)
+		limit <- true
+		go func() {
+			utils.Logger.Info(fmt.Sprintf("<Scheduler> executing task %s on account %s", task.ActionsID, task.AccountID))
+			task.Execute()
+			<-limit
+		}()
+	}
+
+	actionPlans, err := s.storage.GetAllActionPlans()
+	if err != nil && err != utils.ErrNotFound {
+		utils.Logger.Warning(fmt.Sprintf("<Scheduler> Cannot get action plans: %v", err))
+	}
+	utils.Logger.Info(fmt.Sprintf("<Scheduler> processing %d action plans", len(actionPlans)))
+	// recreate the queue
+	s.queue = engine.ActionTimingPriorityList{}
+	for _, actionPlan := range actionPlans {
+		for _, at := range actionPlan.ActionTimings {
+			if at.Timing == nil {
+				utils.Logger.Warning(fmt.Sprintf("<Scheduler> Nil timing on action plan: %+v, discarding!", at))
+				continue
+			}
+			if at.IsASAP() {
+				continue
+			}
+			now := time.Now()
+			if at.GetNextStartTime(now).Before(now) {
+				// the task is obsolete, do not add it to the queue
+				continue
+			}
+			at.SetAccountIDs(actionPlan.AccountIDs) // copy the accounts
+			at.SetActionPlanID(actionPlan.Id)
+			s.queue = append(s.queue, at)
+
 		}
 	}
 	sort.Sort(s.queue)
-	s.Unlock()
+	utils.Logger.Info(fmt.Sprintf("<Scheduler> queued %d action plans", len(s.queue)))
 }
 
-func (s *Scheduler) Restart() {
-	s.restartLoop <- true
+func (s *Scheduler) restart() {
+	if s.schedulerStarted {
+		s.restartLoop <- true
+	}
 	if s.timer != nil {
 		s.timer.Stop()
 	}
 }
 
-func (s *Scheduler) GetQueue() engine.ActionPlanPriotityList {
+func (s *Scheduler) GetQueue() engine.ActionTimingPriorityList {
 	return s.queue
 }

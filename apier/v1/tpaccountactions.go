@@ -26,7 +26,7 @@ import (
 // Creates a new AccountActions profile within a tariff plan
 func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs,
-		[]string{"TPid", "LoadId", "Tenant", "Account", "Direction", "ActionPlanId", "ActionTriggersId"}); len(missing) != 0 {
+		[]string{"TPid", "LoadId", "Tenant", "Account", "ActionPlanId", "ActionTriggersId"}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	aas := engine.APItoModelAccountAction(&attrs)
@@ -46,7 +46,7 @@ type AttrGetTPAccountActionsByLoadId struct {
 func (self *ApierV1) GetTPAccountActionsByLoadId(attrs utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
 	mndtryFlds := []string{"TPid", "LoadId"}
 	if len(attrs.Account) != 0 { // If account provided as filter, make all related fields mandatory
-		mndtryFlds = append(mndtryFlds, "Tenant", "Account", "Direction")
+		mndtryFlds = append(mndtryFlds, "Tenant", "Account")
 	}
 	if missing := utils.MissingStructFields(&attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -150,14 +150,14 @@ func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, repl
 
 // Removes specific AccountActions on Tariff plan
 func (self *ApierV1) RemTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	aa := engine.TpAccountAction{Tpid: attrs.TPid}
 	if err := aa.SetAccountActionId(attrs.AccountActionsId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.Tpid, aa.Loadid, aa.Direction, aa.Tenant, aa.Account); err != nil {
+	if err := self.StorDb.RemTpData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.Tpid, map[string]string{"loadid": aa.Loadid, "tenant": aa.Tenant, "account": aa.Account}); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = "OK"

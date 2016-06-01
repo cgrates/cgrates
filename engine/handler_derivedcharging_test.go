@@ -18,15 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-/*
 import (
-	"reflect"
 	"testing"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
+/*
 var cfgDcT *config.CGRConfig
 var acntDb AccountingStorage
 
@@ -94,3 +92,48 @@ func TestHandleGetStoredDC(t *testing.T) {
 	}
 }
 */
+
+func TestHandleDeivedChargersMatchDestRet(t *testing.T) {
+	dcs := &utils.DerivedChargers{
+		DestinationIDs: utils.NewStringMap("RET"),
+	}
+	if !DerivedChargersMatchesDest(dcs, "0723045326") {
+		t.Error("Derived charger failed to match dest")
+	}
+}
+
+func TestHandleDeivedChargersMatchDestNat(t *testing.T) {
+	dcs := &utils.DerivedChargers{
+		DestinationIDs: utils.NewStringMap("NAT"),
+	}
+	if !DerivedChargersMatchesDest(dcs, "0723045326") {
+		t.Error("Derived charger failed to match dest")
+	}
+}
+
+func TestHandleDeivedChargersMatchDestNatRet(t *testing.T) {
+	dcs := &utils.DerivedChargers{
+		DestinationIDs: utils.NewStringMap("NAT", "RET"),
+	}
+	if !DerivedChargersMatchesDest(dcs, "0723045326") {
+		t.Error("Derived charger failed to match dest")
+	}
+}
+
+func TestHandleDeivedChargersMatchDestSpec(t *testing.T) {
+	dcs := &utils.DerivedChargers{
+		DestinationIDs: utils.NewStringMap("NAT", "SPEC"),
+	}
+	if !DerivedChargersMatchesDest(dcs, "0723045326") {
+		t.Error("Derived charger failed to match dest")
+	}
+}
+
+func TestHandleDeivedChargersMatchDestNegativeSpec(t *testing.T) {
+	dcs := &utils.DerivedChargers{
+		DestinationIDs: utils.NewStringMap("NAT", "!SPEC"),
+	}
+	if DerivedChargersMatchesDest(dcs, "0723045326") {
+		t.Error("Derived charger failed to match dest")
+	}
+}

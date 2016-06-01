@@ -1,0 +1,3 @@
+#Direction,Tenant,Category,Account,Subject,DestinationId,Context,Target,Original,Alias,Weight
+*out,cgrates.org,call,1006,1006,*any,*rating,Subject,1006,1001,10
+*out,cgrates.org,call,1006,1006,*any,*rating,Account,1006,1002,10

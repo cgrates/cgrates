@@ -47,13 +47,13 @@ func InitDataDb(cfg *config.CGRConfig) error {
 			return err
 		}
 	}
-	ratingDb.CacheAll()
+	ratingDb.CacheRatingAll()
 	return nil
 }
 
 func InitStorDb(cfg *config.CGRConfig) error {
 	storDb, err := ConfigureLoadStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding,
-		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
+		cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns, cfg.StorDBCDRSIndexes)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func StopStartEngine(cfgPath string, waitEngine int) (*exec.Cmd, error) {
 	return StartEngine(cfgPath, waitEngine)
 }
 
-func LoadTariffPlanFromFolder(tpPath string, ratingDb RatingStorage, accountingDb AccountingStorage) error {
+func LoadTariffPlanFromFolder(tpPath, timezone string, loadHistSize int, ratingDb RatingStorage, accountingDb AccountingStorage) error {
 	loader := NewTpReader(ratingDb, accountingDb, NewFileCSVStorage(utils.CSV_SEP,
 		path.Join(tpPath, utils.DESTINATIONS_CSV),
 		path.Join(tpPath, utils.TIMINGS_CSV),
@@ -106,7 +106,10 @@ func LoadTariffPlanFromFolder(tpPath string, ratingDb RatingStorage, accountingD
 		path.Join(tpPath, utils.ACCOUNT_ACTIONS_CSV),
 		path.Join(tpPath, utils.DERIVED_CHARGERS_CSV),
 		path.Join(tpPath, utils.CDR_STATS_CSV),
-		path.Join(tpPath, utils.USERS_CSV)), "")
+
+		path.Join(tpPath, utils.USERS_CSV),
+		path.Join(tpPath, utils.ALIASES_CSV),
+	), "", timezone, loadHistSize)
 	if err := loader.LoadAll(); err != nil {
 		return utils.NewErrServerError(err)
 	}

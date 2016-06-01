@@ -26,11 +26,12 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/console"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/liner"
 	"github.com/cgrates/rpcclient"
+	"github.com/peterh/liner"
 )
 
 var (
@@ -109,7 +110,7 @@ func main() {
 		return
 	}
 	var err error
-	client, err = rpcclient.NewRpcClient("tcp", *server, 3, 3, *rpc_encoding)
+	client, err = rpcclient.NewRpcClient("tcp", *server, 3, 3, time.Duration(1*time.Second), time.Duration(5*time.Minute), *rpc_encoding, nil)
 	if err != nil {
 		flag.PrintDefaults()
 		log.Fatal("Could not connect to server " + *server)

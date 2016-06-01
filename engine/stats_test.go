@@ -34,7 +34,8 @@ func TestStatsQueueInit(t *testing.T) {
 
 func TestStatsValue(t *testing.T) {
 	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}})
-	cdr := &StoredCdr{
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		Usage:      10 * time.Second,
 		Cost:       1,
@@ -55,22 +56,22 @@ func TestStatsValue(t *testing.T) {
 }
 
 func TestStatsSimplifyCDR(t *testing.T) {
-	cdr := &StoredCdr{
-		TOR:            "tor",
-		AccId:          "accid",
-		CdrHost:        "cdrhost",
-		CdrSource:      "cdrsource",
-		ReqType:        "reqtype",
-		Direction:      "direction",
-		Tenant:         "tenant",
-		Category:       "category",
-		Account:        "account",
-		Subject:        "subject",
-		Destination:    "12345678",
-		SetupTime:      time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
-		Usage:          10 * time.Second,
-		MediationRunId: "mri",
-		Cost:           10,
+	cdr := &CDR{
+		ToR:         "tor",
+		OriginID:    "accid",
+		OriginHost:  "cdrhost",
+		Source:      "cdrsource",
+		RequestType: "reqtype",
+		Direction:   "direction",
+		Tenant:      "tenant",
+		Category:    "category",
+		Account:     "account",
+		Subject:     "subject",
+		Destination: "12345678",
+		SetupTime:   time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
+		Usage:       10 * time.Second,
+		RunID:       "mri",
+		Cost:        10,
 	}
 	sq := &StatsQueue{}
 	qcdr := sq.simplifyCdr(cdr)
@@ -84,24 +85,24 @@ func TestStatsSimplifyCDR(t *testing.T) {
 
 func TestAcceptCdr(t *testing.T) {
 	sq := NewStatsQueue(nil)
-	cdr := &StoredCdr{
-		TOR:             "tor",
-		AccId:           "accid",
-		CdrHost:         "cdrhost",
-		CdrSource:       "cdrsource",
-		ReqType:         "reqtype",
+	cdr := &CDR{
+		ToR:             "tor",
+		OriginID:        "accid",
+		OriginHost:      "cdrhost",
+		Source:          "cdrsource",
+		RequestType:     "reqtype",
 		Direction:       "direction",
 		Tenant:          "tenant",
 		Category:        "category",
 		Account:         "account",
 		Subject:         "subject",
-		Destination:     "12345678",
+		Destination:     "0723045326",
 		SetupTime:       time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC),
 		Usage:           10 * time.Second,
-		Pdd:             7 * time.Second,
+		PDD:             7 * time.Second,
 		Supplier:        "supplier1",
 		DisconnectCause: "normal",
-		MediationRunId:  "mri",
+		RunID:           "mri",
 		Cost:            10,
 	}
 	sq.conf = &CdrStats{}
@@ -148,19 +149,11 @@ func TestAcceptCdr(t *testing.T) {
 	if sq.conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{RatedAccount: []string{"test"}}
+	sq.conf = &CdrStats{DestinationIds: []string{"test"}}
 	if sq.conf.AcceptCdr(cdr) == true {
 		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
 	}
-	sq.conf = &CdrStats{RatedSubject: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
-		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
-	}
-	sq.conf = &CdrStats{DestinationPrefix: []string{"test"}}
-	if sq.conf.AcceptCdr(cdr) == true {
-		t.Errorf("Should have NOT accepted this CDR: %+v", cdr)
-	}
-	sq.conf = &CdrStats{DestinationPrefix: []string{"test", "123"}}
+	sq.conf = &CdrStats{DestinationIds: []string{"NAT", "RET"}}
 	if sq.conf.AcceptCdr(cdr) != true {
 		t.Errorf("Should have accepted this CDR: %+v", cdr)
 	}
@@ -209,15 +202,15 @@ func TestStatsQueueIds(t *testing.T) {
 		t.Error("Errorf getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 5
 	if result != expected {
-		t.Errorf("Errorf loading stats queues. Expected %v was %v", expected, result)
+		t.Errorf("Errorf loading stats queues. Expected %v was %v (%v)", expected, result, ids)
 	}
 }
 
 func TestStatsAppendCdr(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:          "cgrates.org",
 		Category:        "call",
 		AnswerTime:      time.Now(),
@@ -231,15 +224,17 @@ func TestStatsAppendCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Error appending cdr to stats: ", err)
 	}
-	if len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
+	t.Log(cdrStats.queues)
+	if len(cdrStats.queues) != 5 ||
+		len(cdrStats.queues["CDRST1"].Cdrs) != 0 ||
 		len(cdrStats.queues["CDRST2"].Cdrs) != 1 {
-		t.Error("Error appending cdr to queue: ", len(cdrStats.queues["CDRST2"].Cdrs))
+		t.Error("Error appending cdr to queue: ", utils.ToIJSON(cdrStats.queues))
 	}
 }
 
 func TestStatsGetValues(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -248,7 +243,7 @@ func TestStatsGetValues(t *testing.T) {
 		Cost:       10,
 	}
 	cdrStats.AppendCDR(cdr, nil)
-	cdr = &StoredCdr{
+	cdr = &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -268,7 +263,7 @@ func TestStatsGetValues(t *testing.T) {
 
 func TestStatsReloadQueues(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -285,7 +280,7 @@ func TestStatsReloadQueues(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 5
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v: %v", expected, result, ids)
 	}
@@ -303,7 +298,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 	cdrStats.AddQueue(&CdrStats{
 		Id: utils.META_DEFAULT,
 	}, nil)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -321,7 +316,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 6
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
@@ -336,7 +331,7 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 
 func TestStatsReloadQueuesWithIds(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -353,7 +348,7 @@ func TestStatsReloadQueuesWithIds(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 6
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
@@ -368,7 +363,7 @@ func TestStatsReloadQueuesWithIds(t *testing.T) {
 
 func TestStatsSaveQueues(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -386,7 +381,7 @@ func TestStatsSaveQueues(t *testing.T) {
 
 func TestStatsResetQueues(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -403,7 +398,7 @@ func TestStatsResetQueues(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 6
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
@@ -418,7 +413,7 @@ func TestStatsResetQueues(t *testing.T) {
 
 func TestStatsResetQueuesWithIds(t *testing.T) {
 	cdrStats := NewStats(ratingStorage, accountingStorage, 0)
-	cdr := &StoredCdr{
+	cdr := &CDR{
 		Tenant:     "cgrates.org",
 		Category:   "call",
 		AnswerTime: time.Now(),
@@ -435,7 +430,7 @@ func TestStatsResetQueuesWithIds(t *testing.T) {
 		t.Error("Error getting queue ids: ", err)
 	}
 	result := len(ids)
-	expected := 2
+	expected := 6
 	if result != expected {
 		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
 	}
@@ -462,5 +457,100 @@ func TestStatsSaveRestoreQeue(t *testing.T) {
 	}
 	if len(recovered.Cdrs) != 1 || recovered.Cdrs[0].Cost != sq.Cdrs[0].Cost {
 		t.Errorf("Expecting %+v got: %+v", sq.Cdrs[0], recovered.Cdrs[0])
+	}
+}
+
+func TestStatsPurgeTimeOne(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	qcdr := sq.AppendCDR(cdr)
+	qcdr.EventTime = qcdr.SetupTime
+	s := sq.GetStats()
+	if s[ASR] != -1 ||
+		s[ACD] != -1 ||
+		s[TCD] != -1 ||
+		s[ACC] != -1 ||
+		s[TCC] != -1 {
+		t.Errorf("Error getting stats: %+v", s)
+	}
+}
+
+func TestStatsPurgeTime(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	qcdr := sq.AppendCDR(cdr)
+	qcdr.EventTime = qcdr.SetupTime
+	cdr.Cost = 2
+	qcdr = sq.AppendCDR(cdr)
+	qcdr.EventTime = qcdr.SetupTime
+	cdr.Cost = 3
+	qcdr = sq.AppendCDR(cdr)
+	qcdr.EventTime = qcdr.SetupTime
+	s := sq.GetStats()
+	if s[ASR] != -1 ||
+		s[ACD] != -1 ||
+		s[TCD] != -1 ||
+		s[ACC] != -1 ||
+		s[TCC] != -1 {
+		t.Errorf("Error getting stats: %+v", s)
+	}
+}
+
+func TestStatsPurgeTimeFirst(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, TimeWindow: 30 * time.Minute})
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	qcdr := sq.AppendCDR(cdr)
+	cdr.Cost = 2
+	cdr.SetupTime = time.Date(2024, 7, 14, 14, 25, 0, 0, time.UTC)
+	cdr.AnswerTime = time.Date(2024, 7, 14, 14, 25, 0, 0, time.UTC)
+	qcdr.EventTime = qcdr.SetupTime
+	sq.AppendCDR(cdr)
+	cdr.Cost = 3
+	sq.AppendCDR(cdr)
+	s := sq.GetStats()
+	if s[ASR] != 100 ||
+		s[ACD] != 10 ||
+		s[TCD] != 20 ||
+		s[ACC] != 2.5 ||
+		s[TCC] != 5 {
+		t.Errorf("Error getting stats: %+v", s)
+	}
+}
+
+func TestStatsPurgeLength(t *testing.T) {
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, TCD, ACC, TCC}, QueueLength: 1})
+	cdr := &CDR{
+		SetupTime:  time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
+		Usage:      10 * time.Second,
+		Cost:       1,
+	}
+	sq.AppendCDR(cdr)
+	cdr.Cost = 2
+	sq.AppendCDR(cdr)
+	cdr.Cost = 3
+	sq.AppendCDR(cdr)
+	s := sq.GetStats()
+	if s[ASR] != 100 ||
+		s[ACD] != 10 ||
+		s[TCD] != 10 ||
+		s[ACC] != 3 ||
+		s[TCC] != 3 {
+		t.Errorf("Error getting stats: %+v", s)
 	}
 }

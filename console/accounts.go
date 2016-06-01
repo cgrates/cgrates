@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2015 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ import (
 func init() {
 	c := &CmdGetAccounts{
 		name:      "accounts",
-		rpcMethod: "ApierV1.GetAccounts",
-		rpcParams: &utils.AttrGetAccounts{Direction: "*out"},
+		rpcMethod: "ApierV2.GetAccounts",
+		rpcParams: &utils.AttrGetAccounts{},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -51,7 +51,7 @@ func (self *CmdGetAccounts) RpcMethod() string {
 
 func (self *CmdGetAccounts) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &utils.AttrGetAccounts{Direction: "*out"}
+		self.rpcParams = &utils.AttrGetAccounts{}
 	}
 	return self.rpcParams
 }

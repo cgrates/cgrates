@@ -109,7 +109,7 @@ CREATE TABLE tp_rating_profiles (
   activation_time VARCHAR(24) NOT NULL,
   rating_plan_tag VARCHAR(64) NOT NULL,
   fallback_subjects VARCHAR(64),
-  cdr_stat_queue_ids varchar(64),
+  cdr_stat_queue_ids VARCHAR(64),
   created_at TIMESTAMP,
   UNIQUE (tpid, loadid, tenant, category, direction, subject, activation_time)
 );
@@ -146,19 +146,22 @@ CREATE TABLE tp_actions (
   action VARCHAR(24) NOT NULL,
   balance_tag VARCHAR(64) NOT NULL,
   balance_type VARCHAR(24) NOT NULL,
-  direction VARCHAR(8) NOT NULL,
-  units NUMERIC(20,4) NOT NULL,
+  directions VARCHAR(8) NOT NULL,
+  units VARCHAR(256) NOT NULL,
   expiry_time VARCHAR(24) NOT NULL,
   timing_tags VARCHAR(128) NOT NULL,
   destination_tags VARCHAR(64) NOT NULL,
   rating_subject VARCHAR(64) NOT NULL,
-  category VARCHAR(32) NOT NULL,
-  shared_group VARCHAR(64) NOT NULL,
-  balance_weight NUMERIC(8,2) NOT NULL,
+  categories VARCHAR(32) NOT NULL,
+  shared_groups VARCHAR(64) NOT NULL,
+  balance_weight VARCHAR(10) NOT NULL,
+  balance_blocker VARCHAR(5) NOT NULL,
+  balance_disabled VARCHAR(5) NOT NULL,
   extra_parameters VARCHAR(256) NOT NULL,
+  filter VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, tag, action, balance_tag, balance_type, direction, expiry_time, timing_tags, destination_tags, shared_group, balance_weight, weight)
+  UNIQUE (tpid, tag, action, balance_tag, balance_type, directions, expiry_time, timing_tags, destination_tags, shared_groups, balance_weight, weight)
 );
 CREATE INDEX tpactions_tpid_idx ON tp_actions (tpid);
 CREATE INDEX tpactions_idx ON tp_actions (tpid,tag);
@@ -191,25 +194,29 @@ CREATE TABLE tp_action_triggers (
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
   unique_id VARCHAR(64) NOT NULL,
-  balance_tag VARCHAR(64) NOT NULL,
-  balance_type VARCHAR(24) NOT NULL,
-  balance_direction VARCHAR(8) NOT NULL,
-  threshold_type char(12) NOT NULL,
+  threshold_type VARCHAR(64) NOT NULL,
   threshold_value NUMERIC(20,4) NOT NULL,
   recurrent BOOLEAN NOT NULL,
   min_sleep VARCHAR(16) NOT NULL,
+  expiry_time VARCHAR(24) NOT NULL,
+  activation_time VARCHAR(24) NOT NULL,
+  balance_tag VARCHAR(64) NOT NULL,
+  balance_type VARCHAR(24) NOT NULL,
+  balance_directions VARCHAR(8) NOT NULL,
+  balance_categories VARCHAR(32) NOT NULL,
   balance_destination_tags VARCHAR(64) NOT NULL,
-  balance_weight NUMERIC(8,2) NOT NULL,
+  balance_rating_subject VARCHAR(64) NOT NULL,
+  balance_shared_groups VARCHAR(64) NOT NULL,
   balance_expiry_time VARCHAR(24) NOT NULL,
   balance_timing_tags VARCHAR(128) NOT NULL,
-  balance_rating_subject VARCHAR(64) NOT NULL,
-  balance_category VARCHAR(32) NOT NULL,
-  balance_shared_group VARCHAR(64) NOT NULL,
+  balance_weight VARCHAR(10) NOT NULL,
+  balance_blocker VARCHAR(5) NOT NULL,
+  balance_disabled VARCHAR(5) NOT NULL,
   min_queued_items INTEGER NOT NULL,
   actions_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, tag, balance_tag, balance_type, balance_direction, threshold_type, threshold_value, balance_destination_tags, actions_tag)
+  UNIQUE (tpid, tag, balance_tag, balance_type, balance_directions, threshold_type, threshold_value, balance_destination_tags, actions_tag)
 );
 CREATE INDEX tpactiontrigers_tpid_idx ON tp_action_triggers (tpid);
 CREATE INDEX tpactiontrigers_idx ON tp_action_triggers (tpid,tag);
@@ -225,14 +232,15 @@ CREATE TABLE tp_account_actions (
   loadid VARCHAR(64) NOT NULL,
   tenant VARCHAR(64) NOT NULL,
   account VARCHAR(64) NOT NULL,
-  direction VARCHAR(8) NOT NULL,
   action_plan_tag VARCHAR(64),
   action_triggers_tag VARCHAR(64),
+  allow_negative BOOLEAN NOT NULL,
+  disabled BOOLEAN NOT NULL,
   created_at TIMESTAMP,
-  UNIQUE (tpid, loadid, tenant, account, direction)
+  UNIQUE (tpid, loadid, tenant, account)
 );
 CREATE INDEX tpaccountactions_tpid_idx ON tp_account_actions (tpid);
-CREATE INDEX tpaccountactions_idx ON tp_account_actions (tpid,loadid,tenant,account,direction);
+CREATE INDEX tpaccountactions_idx ON tp_account_actions (tpid,loadid,tenant,account);
 
 --
 -- Table structure for table `tp_lcr_rules`
@@ -249,7 +257,7 @@ CREATE TABLE tp_lcr_rules (
   subject VARCHAR(64) NOT NULL,
   destination_tag VARCHAR(64) NOT NULL,
   rp_category VARCHAR(32) NOT NULL,
-  strategy VARCHAR(16) NOT NULL,
+  strategy VARCHAR(18) NOT NULL,
   strategy_params VARCHAR(256) NOT NULL,
   activation_time VARCHAR(24) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
@@ -272,6 +280,7 @@ CREATE TABLE tp_derived_chargers (
   category VARCHAR(32) NOT NULL,
   account VARCHAR(24) NOT NULL,
   subject VARCHAR(64) NOT NULL,
+  destination_ids VARCHAR(64) NOT NULL,
   runid  VARCHAR(24) NOT NULL,
   run_filters  VARCHAR(256) NOT NULL,
   req_type_field  VARCHAR(24) NOT NULL,
@@ -287,6 +296,8 @@ CREATE TABLE tp_derived_chargers (
   usage_field  VARCHAR(24) NOT NULL,
   supplier_field  VARCHAR(24) NOT NULL,
   disconnect_cause_field  VARCHAR(24) NOT NULL,
+  rated_field  VARCHAR(24) NOT NULL,
+  cost_field  VARCHAR(24) NOT NULL,
   created_at TIMESTAMP
 );
 CREATE INDEX tpderivedchargers_tpid_idx ON tp_derived_chargers (tpid);
@@ -316,7 +327,7 @@ CREATE TABLE tp_cdr_stats (
   categories VARCHAR(32) NOT NULL,
   accounts VARCHAR(24) NOT NULL,
   subjects VARCHAR(64) NOT NULL,
-  destination_prefixes VARCHAR(64) NOT NULL,
+  destination_ids VARCHAR(64) NOT NULL,
   pdd_interval VARCHAR(64) NOT NULL,
   usage_interval VARCHAR(64) NOT NULL,
   suppliers VARCHAR(64) NOT NULL,
@@ -341,9 +352,36 @@ CREATE TABLE tp_users (
   tpid VARCHAR(64) NOT NULL,
   tenant VARCHAR(64) NOT NULL,
   user_name VARCHAR(64) NOT NULL,
+  masked BOOLEAN NOT NULL,
   attribute_name VARCHAR(64) NOT NULL,
   attribute_value VARCHAR(64) NOT NULL,
+  weight NUMERIC(8,2) NOT NULL,
   created_at TIMESTAMP
 );
 CREATE INDEX tpusers_tpid_idx ON tp_users (tpid);
 CREATE INDEX tpusers_idx ON tp_users (tpid,tenant,user_name);
+
+
+--
+-- Table structure for table `tp_aliases`
+--
+
+DROP TABLE IF EXISTS tp_aliases;
+CREATE TABLE tp_aliases (
+  "id" SERIAL PRIMARY KEY,
+  "tpid" varchar(64) NOT NULL,
+  "direction" varchar(8) NOT NULL,
+  "tenant" varchar(64) NOT NULL,
+  "category" varchar(64) NOT NULL,
+  "account" varchar(64) NOT NULL,
+  "subject" varchar(64) NOT NULL,
+  "destination_id" varchar(64) NOT NULL,
+  "context" varchar(64) NOT NULL,
+  "target" varchar(64) NOT NULL,
+  "original" varchar(64) NOT NULL,
+  "alias" varchar(64) NOT NULL,
+  "weight" NUMERIC(8,2) NOT NULL,
+  "created_at" TIMESTAMP
+);
+CREATE INDEX tpaliases_tpid_idx ON tp_aliases (tpid);
+CREATE INDEX tpaliases_idx ON tp_aliases ("tpid","direction","tenant","category","account","subject","context","target");

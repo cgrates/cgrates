@@ -58,10 +58,11 @@ func (rit *RITiming) CronString() string {
 		hour, min, sec = "*", "*", "*"
 	} else {
 		hms := strings.Split(rit.StartTime, ":")
-		if len(hms) != 3 {
+		if len(hms) == 3 {
+			hour, min, sec = hms[0], hms[1], hms[2]
+		} else {
 			hour, min, sec = "*", "*", "*"
 		}
-		hour, min, sec = hms[0], hms[1], hms[2]
 		if strings.HasPrefix(hour, "0") {
 			hour = hour[1:]
 		}
@@ -135,9 +136,7 @@ func (rit *RITiming) getRightMargin(t time.Time) (rigthtTime time.Time) {
 	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
 }
 
-/*
-Returns a time object that represents the start of the interval realtive to the received time
-*/
+//Returns a time object that represents the start of the interval realtive to the received time
 func (rit *RITiming) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 0, 0, 0, 0
@@ -290,7 +289,7 @@ Returns true if the received time result inside the interval
 */
 func (i *RateInterval) Contains(t time.Time, endTime bool) bool {
 	if endTime {
-		if t.Hour() == 0 && t.Minute() == 0 && t.Second() == 0 { // back one second to 23:59:59
+		if utils.TimeIs0h(t) { // back one second to 23:59:59
 			t = t.Add(-1 * time.Second)
 		}
 	}
@@ -302,6 +301,15 @@ func (i *RateInterval) String_DISABLED() string {
 }
 
 func (i *RateInterval) Equal(o *RateInterval) bool {
+	if i == nil && o == nil {
+		return true
+	}
+	if i == nil || o == nil {
+		return false // considering the earlier test
+	}
+	if i.Weight != o.Weight {
+		return false
+	}
 	if i.Timing == nil && o.Timing == nil {
 		return true
 	}
@@ -318,7 +326,6 @@ func (i *RateInterval) GetCost(duration, startSecond time.Duration) float64 {
 		GetRateParameters(startSecond)
 	price /= rateUnit.Seconds()
 	d := duration.Seconds()
-
 	return d * price
 }
 
@@ -353,19 +360,43 @@ func (ri *RateInterval) GetMaxCost() (float64, string) {
 // Structure to store intervals according to weight
 type RateIntervalList []*RateInterval
 
-func (il RateIntervalList) Len() int {
-	return len(il)
+func (rl RateIntervalList) GetWeight() float64 {
+	// all reates should have the same weight
+	// just in case get the max
+	var maxWeight float64
+	for _, r := range rl {
+		if r.Weight > maxWeight {
+			maxWeight = r.Weight
+		}
+	}
+	return maxWeight
 }
 
-func (il RateIntervalList) Swap(i, j int) {
-	il[i], il[j] = il[j], il[i]
+// Structure to store intervals according to weight
+type RateIntervalTimeSorter struct {
+	referenceTime time.Time
+	ris           []*RateInterval
+}
+
+func (il *RateIntervalTimeSorter) Len() int {
+	return len(il.ris)
+}
+
+func (il *RateIntervalTimeSorter) Swap(i, j int) {
+	il.ris[i], il.ris[j] = il.ris[j], il.ris[i]
 }
 
 // we need higher weights earlyer in the list
-func (il RateIntervalList) Less(j, i int) bool {
-	return il[i].Weight < il[j].Weight //|| il[i].Timing.StartTime > il[j].Timing.StartTime
+func (il *RateIntervalTimeSorter) Less(j, i int) bool {
+	if il.ris[i].Weight < il.ris[j].Weight {
+		return il.ris[i].Weight < il.ris[j].Weight
+	}
+	t1 := il.ris[i].Timing.getLeftMargin(il.referenceTime)
+	t2 := il.ris[j].Timing.getLeftMargin(il.referenceTime)
+	return t1.After(t2)
 }
 
-func (il RateIntervalList) Sort() {
+func (il *RateIntervalTimeSorter) Sort() []*RateInterval {
 	sort.Sort(il)
+	return il.ris
 }

@@ -1,14 +1,14 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012-2015 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) ITsysCOM GmbH
 
-This program is free software: you can redistribute it and/or modify
+This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITH*out ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -139,10 +139,10 @@ func (lcr *TpLcrRule) SetLcrRuleId(id string) error {
 		return fmt.Errorf("wrong LcrRule Id: %s", id)
 	}
 	lcr.Direction = ids[0]
-	lcr.Tenant = ids[2]
-	lcr.Category = ids[3]
+	lcr.Tenant = ids[1]
+	lcr.Category = ids[2]
 	lcr.Account = ids[3]
-	lcr.Subject = ids[5]
+	lcr.Subject = ids[4]
 	return nil
 }
 
@@ -156,18 +156,21 @@ type TpAction struct {
 	Tag             string  `index:"0" re:"\w+\s*"`
 	Action          string  `index:"1" re:"\*\w+\s*"`
 	ExtraParameters string  `index:"2" re:"\S+\s*"`
-	BalanceTag      string  `index:"3" re:"\w+\s*"`
-	BalanceType     string  `index:"4" re:"\*\w+\s*"`
-	Direction       string  `index:"5" re:"\*out\s*"`
-	Category        string  `index:"6" re:"\*?\w+\s*"`
-	DestinationTags string  `index:"7" re:"\*any|\w+\s*"`
-	RatingSubject   string  `index:"8" re:"\w+\s*"`
-	SharedGroup     string  `index:"9" re:"[0-9A-Za-z_;]*"`
-	ExpiryTime      string  `index:"10" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
-	TimingTags      string  `index:"11" re:"[0-9A-Za-z_;]*|\*any"`
-	Units           float64 `index:"12" re:"\d+\s*"`
-	BalanceWeight   float64 `index:"13" re:"\d+\.?\d*\s*"`
-	Weight          float64 `index:"14" re:"\d+\.?\d*\s*"`
+	Filter          string  `index:"3" re:"\S+\s*"`
+	BalanceTag      string  `index:"4" re:"\w+\s*"`
+	BalanceType     string  `index:"5" re:"\*\w+\s*"`
+	Directions      string  `index:"6" re:""`
+	Categories      string  `index:"7" re:""`
+	DestinationTags string  `index:"8" re:"\*any|\w+\s*"`
+	RatingSubject   string  `index:"9" re:"\w+\s*"`
+	SharedGroups    string  `index:"10" re:"[0-9A-Za-z_;]*"`
+	ExpiryTime      string  `index:"11" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
+	TimingTags      string  `index:"12" re:"[0-9A-Za-z_;]*|\*any"`
+	Units           string  `index:"13" re:"\d+\s*"`
+	BalanceWeight   string  `index:"14" re:"\d+\.?\d*\s*"`
+	BalanceBlocker  string  `index:"15" re:""`
+	BalanceDisabled string  `index:"16" re:""`
+	Weight          float64 `index:"17" re:"\d+\.?\d*\s*"`
 	CreatedAt       time.Time
 }
 
@@ -190,19 +193,23 @@ type TpActionTrigger struct {
 	ThresholdValue         float64 `index:"3" re:"\d+\.?\d*"`
 	Recurrent              bool    `index:"4" re:"true|false"`
 	MinSleep               string  `index:"5" re:"\d+[smh]?"`
-	BalanceTag             string  `index:"6" re:"\w+\s*"`
-	BalanceType            string  `index:"7" re:"\*\w+"`
-	BalanceDirection       string  `index:"8" re:"\*out"`
-	BalanceCategory        string  `index:"9" re:"\w+|\*any"`
-	BalanceDestinationTags string  `index:"10" re:"\w+|\*any"`
-	BalanceRatingSubject   string  `index:"11" re:"\w+|\*any"`
-	BalanceSharedGroup     string  `index:"12" re:"\w+|\*any"`
-	BalanceExpiryTime      string  `index:"13" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
-	BalanceTimingTags      string  `index:"14" re:"[0-9A-Za-z_;]*|\*any"`
-	BalanceWeight          float64 `index:"15" re:"\d+\.?\d*"`
-	MinQueuedItems         int     `index:"16" re:"\d+"`
-	ActionsTag             string  `index:"17" re:"\w+"`
-	Weight                 float64 `index:"18" re:"\d+\.?\d*"`
+	ExpiryTime             string  `index:"6" re:""`
+	ActivationTime         string  `index:"7" re:""`
+	BalanceTag             string  `index:"8" re:"\w+\s*"`
+	BalanceType            string  `index:"9" re:"\*\w+"`
+	BalanceDirections      string  `index:"10" re:"\*out"`
+	BalanceCategories      string  `index:"11" re:""`
+	BalanceDestinationTags string  `index:"12" re:"\w+|\*any"`
+	BalanceRatingSubject   string  `index:"13" re:"\w+|\*any"`
+	BalanceSharedGroups    string  `index:"14" re:"\w+|\*any"`
+	BalanceExpiryTime      string  `index:"15" re:"\*\w+\s*|\+\d+[smh]\s*|\d+\s*"`
+	BalanceTimingTags      string  `index:"16" re:"[0-9A-Za-z_;]*|\*any"`
+	BalanceWeight          string  `index:"17" re:"\d+\.?\d*"`
+	BalanceBlocker         string  `index:"18" re:""`
+	BalanceDisabled        string  `index:"19" re:""`
+	MinQueuedItems         int     `index:"20" re:"\d+"`
+	ActionsTag             string  `index:"21" re:"\w+"`
+	Weight                 float64 `index:"22" re:"\d+\.?\d*"`
 	CreatedAt              time.Time
 }
 
@@ -212,26 +219,26 @@ type TpAccountAction struct {
 	Loadid            string
 	Tenant            string `index:"0" re:"\w+\s*"`
 	Account           string `index:"1" re:"(\w+;?)+\s*"`
-	Direction         string `index:"2" re:"\*out\s*"`
-	ActionPlanTag     string `index:"3" re:"\w+\s*"`
-	ActionTriggersTag string `index:"4" re:"\w+\s*"`
+	ActionPlanTag     string `index:"2" re:"\w+\s*"`
+	ActionTriggersTag string `index:"3" re:"\w+\s*"`
+	AllowNegative     bool   `index:"4" re:""`
+	Disabled          bool   `index:"5" re:""`
 	CreatedAt         time.Time
 }
 
 func (aa *TpAccountAction) SetAccountActionId(id string) error {
 	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
-	if len(ids) != 4 {
+	if len(ids) != 3 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
 	aa.Loadid = ids[0]
-	aa.Direction = ids[1]
-	aa.Tenant = ids[2]
-	aa.Account = ids[3]
+	aa.Tenant = ids[1]
+	aa.Account = ids[2]
 	return nil
 }
 
 func (aa *TpAccountAction) GetAccountActionId() string {
-	return utils.AccountKey(aa.Tenant, aa.Account, aa.Direction)
+	return utils.AccountKey(aa.Tenant, aa.Account)
 }
 
 type TpSharedGroup struct {
@@ -253,21 +260,24 @@ type TpDerivedCharger struct {
 	Category             string `index:"2" re:"\w+\s*"`
 	Account              string `index:"3" re:"\w+\s*"`
 	Subject              string `index:"4" re:"\*any\s*|\w+\s*"`
-	Runid                string `index:"5" re:"\w+\s*"`
-	RunFilters           string `index:"6" re:"[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	ReqTypeField         string `index:"7" re:"\*default\s*|[~^*]*[0-9A-Za-z_/:().+]+\s*"`
-	DirectionField       string `index:"8" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	TenantField          string `index:"9" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	CategoryField        string `index:"10" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	AccountField         string `index:"11" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	SubjectField         string `index:"12" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	DestinationField     string `index:"13" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	SetupTimeField       string `index:"14" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	PddField             string `index:"15" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	AnswerTimeField      string `index:"16" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	UsageField           string `index:"17" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	SupplierField        string `index:"18" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
-	DisconnectCauseField string `index:"19" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DestinationIds       string `index:"5" re:""`
+	Runid                string `index:"6" re:"\w+\s*"`
+	RunFilters           string `index:"7" re:"[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	ReqTypeField         string `index:"8" re:"\*default\s*|[~^*]*[0-9A-Za-z_/:().+]+\s*"`
+	DirectionField       string `index:"9" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	TenantField          string `index:"10" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	CategoryField        string `index:"11" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	AccountField         string `index:"12" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SubjectField         string `index:"13" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DestinationField     string `index:"14" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SetupTimeField       string `index:"15" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	PddField             string `index:"16" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	AnswerTimeField      string `index:"17" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	UsageField           string `index:"18" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	SupplierField        string `index:"19" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	DisconnectCauseField string `index:"20" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	RatedField           string `index:"21" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
+	CostField            string `index:"22" re:"\*default\s*|[~^]*[0-9A-Za-z_/:().+]+\s*"`
 	CreatedAt            time.Time
 }
 
@@ -290,34 +300,34 @@ func (tpdc *TpDerivedCharger) GetDerivedChargersId() string {
 }
 
 type TpCdrstat struct {
-	Id                  int64
-	Tpid                string
-	Tag                 string `index:"0" re:""`
-	QueueLength         int    `index:"1" re:""`
-	TimeWindow          string `index:"2" re:""`
-	SaveInterval        string `index:"3" re:""`
-	Metrics             string `index:"4" re:""`
-	SetupInterval       string `index:"5" re:""`
-	Tors                string `index:"6" re:""`
-	CdrHosts            string `index:"7" re:""`
-	CdrSources          string `index:"8" re:""`
-	ReqTypes            string `index:"9" re:""`
-	Directions          string `index:"10" re:""`
-	Tenants             string `index:"11" re:""`
-	Categories          string `index:"12" re:""`
-	Accounts            string `index:"13" re:""`
-	Subjects            string `index:"14" re:""`
-	DestinationPrefixes string `index:"15" re:""`
-	PddInterval         string `index:"16" re:""`
-	UsageInterval       string `index:"17" re:""`
-	Suppliers           string `index:"18" re:""`
-	DisconnectCauses    string `index:"19" re:""`
-	MediationRunids     string `index:"20" re:""`
-	RatedAccounts       string `index:"21" re:""`
-	RatedSubjects       string `index:"22" re:""`
-	CostInterval        string `index:"23" re:""`
-	ActionTriggers      string `index:"24" re:""`
-	CreatedAt           time.Time
+	Id               int64
+	Tpid             string
+	Tag              string `index:"0" re:""`
+	QueueLength      int    `index:"1" re:""`
+	TimeWindow       string `index:"2" re:""`
+	SaveInterval     string `index:"3" re:""`
+	Metrics          string `index:"4" re:""`
+	SetupInterval    string `index:"5" re:""`
+	Tors             string `index:"6" re:""`
+	CdrHosts         string `index:"7" re:""`
+	CdrSources       string `index:"8" re:""`
+	ReqTypes         string `index:"9" re:""`
+	Directions       string `index:"10" re:""`
+	Tenants          string `index:"11" re:""`
+	Categories       string `index:"12" re:""`
+	Accounts         string `index:"13" re:""`
+	Subjects         string `index:"14" re:""`
+	DestinationIds   string `index:"15" re:""`
+	PddInterval      string `index:"16" re:""`
+	UsageInterval    string `index:"17" re:""`
+	Suppliers        string `index:"18" re:""`
+	DisconnectCauses string `index:"19" re:""`
+	MediationRunids  string `index:"20" re:""`
+	RatedAccounts    string `index:"21" re:""`
+	RatedSubjects    string `index:"22" re:""`
+	CostInterval     string `index:"23" re:""`
+	ActionTriggers   string `index:"24" re:""`
+	CreatedAt        time.Time
 }
 
 func (t TpCdrstat) TableName() string {
@@ -327,24 +337,90 @@ func (t TpCdrstat) TableName() string {
 type TpUser struct {
 	Id             int64
 	Tpid           string
-	Tenant         string `index:"0" re:""`
-	UserName       string `index:"1" re:""`
-	AttributeName  string `index:"2" re:""`
-	AttributeValue string `index:"3" re:""`
+	Tenant         string  `index:"0" re:""`
+	UserName       string  `index:"1" re:""`
+	Masked         bool    `index:"2" re:""`
+	AttributeName  string  `index:"3" re:""`
+	AttributeValue string  `index:"4" re:""`
+	Weight         float64 `index:"5" re:""`
+	CreatedAt      time.Time
 }
 
 func (tu *TpUser) GetId() string {
 	return utils.ConcatenatedKey(tu.Tenant, tu.UserName)
 }
 
-type TblCdrsPrimary struct {
-	Id              int64
+func (tu *TpUser) SetId(id string) error {
+	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(vals) != 2 {
+		return utils.ErrInvalidKey
+	}
+	tu.Tenant = vals[0]
+	tu.UserName = vals[1]
+	return nil
+}
+
+type TpAlias struct {
+	Id            int64
+	Tpid          string
+	Direction     string  `index:"0" re:""`
+	Tenant        string  `index:"1" re:""`
+	Category      string  `index:"2" re:""`
+	Account       string  `index:"3" re:""`
+	Subject       string  `index:"4" re:""`
+	DestinationId string  `index:"5" re:""`
+	Context       string  `index:"6" re:""`
+	Target        string  `index:"7" re:""`
+	Original      string  `index:"8" re:""`
+	Alias         string  `index:"9" re:""`
+	Weight        float64 `index:"10" re:""`
+}
+
+func (ta *TpAlias) TableName() string {
+	return "tp_aliases"
+}
+
+func (ta *TpAlias) SetId(id string) error {
+	vals := strings.Split(id, utils.CONCATENATED_KEY_SEP)
+	if len(vals) != 6 {
+		return utils.ErrInvalidKey
+	}
+	ta.Direction = vals[0]
+	ta.Tenant = vals[1]
+	ta.Category = vals[2]
+	ta.Account = vals[3]
+	ta.Subject = vals[4]
+	ta.Context = vals[5]
+	return nil
+}
+
+func (ta *TpAlias) GetId() string {
+	return utils.ConcatenatedKey(ta.Direction, ta.Tenant, ta.Category, ta.Account, ta.Subject, ta.Context)
+}
+
+type TpLimiter struct {
+	Id             int64
+	Tpid           string
+	LimiterID      string    `index:"0" re:""`
+	ResourceID     string    `index:"1" re:""`
+	Filter         string    `index:"2" re:""`
+	TTL            string    `index:"3" re:""`
+	TimingIDs      string    `index:"4" re:""`
+	ActivationTime string    `index:"5" re:""`
+	Limit          float64   `index:"6" re:""`
+	ActionTriggers string    `index:"7" re:""`
+	CreatedAt      time.Time `index:"8" re:""`
+}
+
+type TBLCDRs struct {
+	ID              int64
 	Cgrid           string
+	RunID           string
+	OriginHost      string
+	Source          string
+	OriginID        string
 	Tor             string
-	Accid           string
-	Cdrhost         string
-	Cdrsource       string
-	Reqtype         string
+	RequestType     string
 	Direction       string
 	Tenant          string
 	Category        string
@@ -357,73 +433,33 @@ type TblCdrsPrimary struct {
 	Usage           float64
 	Supplier        string
 	DisconnectCause string
-	CreatedAt       time.Time
-	DeletedAt       time.Time
-}
-
-func (t TblCdrsPrimary) TableName() string {
-	return utils.TBL_CDRS_PRIMARY
-}
-
-type TblCdrsExtra struct {
-	Id          int64
-	Cgrid       string
-	ExtraFields string
-	CreatedAt   time.Time
-	DeletedAt   time.Time
-}
-
-func (t TblCdrsExtra) TableName() string {
-	return utils.TBL_CDRS_EXTRA
-}
-
-type TblCostDetail struct {
-	Id          int64
-	Cgrid       string
-	Runid       string
-	Tor         string
-	Direction   string
-	Tenant      string
-	Category    string
-	Account     string
-	Subject     string
-	Destination string
-	Cost        float64
-	Timespans   string
-	CostSource  string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   time.Time
-}
-
-func (t TblCostDetail) TableName() string {
-	return utils.TBL_COST_DETAILS
-}
-
-type TblRatedCdr struct {
-	Id              int64
-	Cgrid           string
-	Runid           string
-	Reqtype         string
-	Direction       string
-	Tenant          string
-	Category        string
-	Account         string
-	Subject         string
-	Destination     string
-	SetupTime       time.Time
-	Pdd             float64
-	AnswerTime      time.Time
-	Usage           float64
-	Supplier        string
-	DisconnectCause string
+	ExtraFields     string
 	Cost            float64
+	CostDetails     string
+	CostSource      string
 	ExtraInfo       string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
-	DeletedAt       time.Time
+	DeletedAt       *time.Time
 }
 
-func (t TblRatedCdr) TableName() string {
-	return utils.TBL_RATED_CDRS
+func (t TBLCDRs) TableName() string {
+	return utils.TBL_CDRS
+}
+
+type TBLSMCosts struct {
+	ID          int64
+	Cgrid       string
+	RunID       string
+	OriginHost  string
+	OriginID    string
+	CostSource  string
+	Usage       float64
+	CostDetails string
+	CreatedAt   time.Time
+	DeletedAt   *time.Time
+}
+
+func (t TBLSMCosts) TableName() string {
+	return utils.TBLSMCosts
 }

@@ -23,6 +23,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type StatsQueue struct {
@@ -46,12 +48,15 @@ var METRIC_TRIGGER_MAP = map[string]string{
 	"*max_acc": ACC,
 	"*min_tcc": TCC,
 	"*max_tcc": TCC,
+	"*min_ddc": DDC,
+	"*max_ddc": DDC,
 }
 
 // Simplified cdr structure containing only the necessary info
 type QCdr struct {
 	SetupTime  time.Time
 	AnswerTime time.Time
+	EventTime  time.Time
 	Pdd        time.Duration
 	Usage      time.Duration
 	Cost       float64
@@ -91,7 +96,7 @@ func (sq *StatsQueue) Save(adb AccountingStorage) {
 	defer sq.mux.Unlock()
 	if sq.dirty {
 		if err := adb.SetCdrStatsQueue(sq); err != nil {
-			Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
+			utils.Logger.Err(fmt.Sprintf("Error saving cdr stats queue id %s: %v", sq.GetId(), err))
 			return
 		}
 		sq.dirty = false
@@ -107,15 +112,19 @@ func (sq *StatsQueue) Load(saved *StatsQueue) {
 	}
 }
 
-func (sq *StatsQueue) AppendCDR(cdr *StoredCdr) {
+func (sq *StatsQueue) AppendCDR(cdr *CDR) *QCdr {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
+	var qcdr *QCdr
 	if sq.conf.AcceptCdr(cdr) {
-		sq.appendQcdr(sq.simplifyCdr(cdr), true)
+		qcdr = sq.simplifyCdr(cdr)
+		sq.appendQcdr(qcdr, true)
 	}
+	return qcdr
 }
 
 func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
+	qcdr.EventTime = time.Now() //used for TimeWindow
 	sq.Cdrs = append(sq.Cdrs, qcdr)
 	sq.addToMetrics(qcdr)
 	sq.purgeObsoleteCdrs()
@@ -125,6 +134,17 @@ func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 		stats := sq.getStats()
 		sq.conf.Triggers.Sort()
 		for _, at := range sq.conf.Triggers {
+			// check is effective
+			if at.IsExpired(time.Now()) || !at.IsActive(time.Now()) {
+				continue
+			}
+
+			if at.Executed {
+				// trigger is marked as executed, so skipp it until
+				// the next reset (see RESET_TRIGGERS action type)
+				continue
+			}
+
 			if at.MinQueuedItems > 0 && len(sq.Cdrs) < at.MinQueuedItems {
 				continue
 			}
@@ -147,6 +167,7 @@ func (sq *StatsQueue) appendQcdr(qcdr *QCdr, runTrigger bool) {
 }
 
 func (sq *StatsQueue) addToMetrics(cdr *QCdr) {
+	//log.Print("AddToMetrics: " + utils.ToIJSON(cdr))
 	for _, metric := range sq.metrics {
 		metric.AddCdr(cdr)
 	}
@@ -158,11 +179,11 @@ func (sq *StatsQueue) removeFromMetrics(cdr *QCdr) {
 	}
 }
 
-func (sq *StatsQueue) simplifyCdr(cdr *StoredCdr) *QCdr {
+func (sq *StatsQueue) simplifyCdr(cdr *CDR) *QCdr {
 	return &QCdr{
 		SetupTime:  cdr.SetupTime,
 		AnswerTime: cdr.AnswerTime,
-		Pdd:        cdr.Pdd,
+		Pdd:        cdr.PDD,
 		Usage:      cdr.Usage,
 		Cost:       cdr.Cost,
 		Dest:       cdr.Destination,
@@ -180,15 +201,20 @@ func (sq *StatsQueue) purgeObsoleteCdrs() {
 		}
 	}
 	if sq.conf.TimeWindow > 0 {
+		index := -1
 		for i, cdr := range sq.Cdrs {
-			if time.Now().Sub(cdr.SetupTime) > sq.conf.TimeWindow {
+			if time.Now().Sub(cdr.EventTime) > sq.conf.TimeWindow {
 				sq.removeFromMetrics(cdr)
+				index = i
 				continue
+			}
+			break
+		}
+		if index > -1 {
+			if index < len(sq.Cdrs)-1 {
+				sq.Cdrs = sq.Cdrs[index+1:]
 			} else {
-				if i > 0 {
-					sq.Cdrs = sq.Cdrs[i:]
-				}
-				break
+				sq.Cdrs = make([]*QCdr, 0)
 			}
 		}
 	}

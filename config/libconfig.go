@@ -19,12 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"net/url"
 )
 
 type CdrReplicationCfg struct {
 	Transport   string
-	Server      string
+	Address     string
 	Synchronous bool
+	Attempts    int             // Number of attempts if not success
 	CdrFilter   utils.RSRFields // Only replicate if the filters here are matching
+}
+
+func (rplCfg CdrReplicationCfg) FallbackFileName() string {
+	return fmt.Sprintf("cdr_%s_%s_%s.form", rplCfg.Transport, url.QueryEscape(rplCfg.Address), utils.GenUUID())
 }

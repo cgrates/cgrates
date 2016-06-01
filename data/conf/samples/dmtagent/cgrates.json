@@ -1,0 +1,68 @@
+{
+// CGRateS Configuration file
+//
+// Used for cgradmin
+// Starts rater, scheduler
+
+"listen": {
+	"rpc_json": ":2012",				// RPC JSON listening address
+	"rpc_gob": ":2013",					// RPC GOB listening address
+	"http": ":2080",					// HTTP listening address
+},
+
+"rals": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"scheduler": {
+	"enabled": true,
+},
+
+"cdrs": {
+	"enabled": true,
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+},
+
+"cdrstats": {
+	"enabled": true,
+},
+
+"pubsubs": {
+	"enabled": true,				// starts PubSub service: <true|false>.
+},
+
+"aliases": {
+	"enabled": true,				// starts Aliases service: <true|false>.
+},
+
+"users": {
+	"enabled": true,
+	"indexes": ["SubscriberId"],
+},
+
+"sm_generic": {
+	"enabled": true,
+},
+
+"diameter_agent": {
+	"enabled": true,
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+},
+
+}

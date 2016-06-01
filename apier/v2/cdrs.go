@@ -26,30 +26,30 @@ import (
 )
 
 // Retrieves CDRs based on the filters
-func (apier *ApierV2) GetCdrs(attrs utils.RpcCdrsFilter, reply *[]*engine.ExternalCdr) error {
-	cdrsFltr, err := attrs.AsCdrsFilter()
+func (apier *ApierV2) GetCdrs(attrs utils.RPCCDRsFilter, reply *[]*engine.ExternalCDR) error {
+	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
-	if cdrs, _, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
+	if cdrs, _, err := apier.CdrDb.GetCDRs(cdrsFltr, false); err != nil {
 		return utils.NewErrServerError(err)
 	} else if len(cdrs) == 0 {
-		*reply = make([]*engine.ExternalCdr, 0)
+		*reply = make([]*engine.ExternalCDR, 0)
 	} else {
 		for _, cdr := range cdrs {
-			*reply = append(*reply, cdr.AsExternalCdr())
+			*reply = append(*reply, cdr.AsExternalCDR())
 		}
 	}
 	return nil
 }
 
-func (apier *ApierV2) CountCdrs(attrs utils.RpcCdrsFilter, reply *int64) error {
-	cdrsFltr, err := attrs.AsCdrsFilter()
+func (apier *ApierV2) CountCdrs(attrs utils.RPCCDRsFilter, reply *int64) error {
+	cdrsFltr, err := attrs.AsCDRsFilter(apier.Config.DefaultTimezone)
 	if err != nil {
 		return utils.NewErrServerError(err)
 	}
 	cdrsFltr.Count = true
-	if _, count, err := apier.CdrDb.GetStoredCdrs(cdrsFltr); err != nil {
+	if _, count, err := apier.CdrDb.GetCDRs(cdrsFltr, false); err != nil {
 		return utils.NewErrServerError(err)
 	} else {
 		*reply = count

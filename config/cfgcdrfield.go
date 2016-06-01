@@ -31,16 +31,19 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 	if jsnCfgFld.Type != nil {
 		cfgFld.Type = *jsnCfgFld.Type
 	}
-	if jsnCfgFld.Cdr_field_id != nil {
-		cfgFld.CdrFieldId = *jsnCfgFld.Cdr_field_id
+	if jsnCfgFld.Field_id != nil {
+		cfgFld.FieldId = *jsnCfgFld.Field_id
 	}
-	if jsnCfgFld.Metatag_id != nil {
-		cfgFld.MetatagId = *jsnCfgFld.Metatag_id
+	if jsnCfgFld.Handler_id != nil {
+		cfgFld.HandlerId = *jsnCfgFld.Handler_id
 	}
 	if jsnCfgFld.Value != nil {
 		if cfgFld.Value, err = utils.ParseRSRFields(*jsnCfgFld.Value, utils.INFIELD_SEP); err != nil {
 			return nil, err
 		}
+	}
+	if jsnCfgFld.Append != nil {
+		cfgFld.Append = *jsnCfgFld.Append
 	}
 	if jsnCfgFld.Field_filter != nil {
 		if cfgFld.FieldFilter, err = utils.ParseRSRFields(*jsnCfgFld.Field_filter, utils.INFIELD_SEP); err != nil {
@@ -68,9 +71,10 @@ func NewCfgCdrFieldFromCdrFieldJsonCfg(jsnCfgFld *CdrFieldJsonCfg) (*CfgCdrField
 type CfgCdrField struct {
 	Tag         string // Identifier for the administrator
 	Type        string // Type of field
-	CdrFieldId  string // StoredCdr field name
-	MetatagId   string
+	FieldId     string // Field identifier
+	HandlerId   string
 	Value       utils.RSRFields
+	Append      bool
 	FieldFilter utils.RSRFields
 	Width       int
 	Strip       string

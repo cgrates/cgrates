@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,13 +34,7 @@ const (
 	// Freswitch event property names
 	FS_CDR_MAP            = "variables"
 	FS_DIRECTION          = "direction"
-	FS_SUBJECT            = "cgr_subject"
-	FS_ACCOUNT            = "cgr_account"
-	FS_DESTINATION        = "cgr_destination"
-	FS_REQTYPE            = "cgr_reqtype" //prepaid or postpaid
-	FS_CATEGORY           = "cgr_category"
 	FS_UUID               = "uuid" // -Unique ID for this call leg
-	FS_CSTMID             = "cgr_tenant"
 	FS_CALL_DEST_NR       = "dialed_extension"
 	FS_PARK_TIME          = "start_epoch"
 	FS_SETUP_TIME         = "start_epoch"
@@ -76,8 +71,8 @@ type FSCdr struct {
 	body   map[string]interface{} // keeps the loaded body for extra field search
 }
 
-func (fsCdr FSCdr) getCgrId() string {
-	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME])
+func (fsCdr FSCdr) getCGRID(timezone string) string {
+	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone)
 	return utils.Sha1(fsCdr.vars[FS_UUID], setupTime.UTC().String())
 }
 
@@ -103,6 +98,10 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 			if key == field {
 				return v
 			}
+		case float64:
+			if key == field {
+				return strconv.FormatFloat(v, 'f', -1, 64)
+			}
 		case map[string]interface{}:
 			if result = fsCdr.searchExtraField(field, v); result != "" {
 				return
@@ -114,36 +113,35 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 						return
 					}
 				} else {
-					Logger.Warning(fmt.Sprintf("Slice with no maps: %v", reflect.TypeOf(item)))
+					utils.Logger.Warning(fmt.Sprintf("Slice with no maps: %v", reflect.TypeOf(item)))
 				}
 			}
 		default:
-			Logger.Warning(fmt.Sprintf("Unexpected type: %v", reflect.TypeOf(v)))
+			utils.Logger.Warning(fmt.Sprintf("Unexpected type: %v", reflect.TypeOf(v)))
 		}
 	}
 	return
 }
 
-func (fsCdr FSCdr) AsStoredCdr() *StoredCdr {
-
-	storCdr := new(StoredCdr)
-	storCdr.CgrId = fsCdr.getCgrId()
-	storCdr.TOR = utils.VOICE
-	storCdr.AccId = fsCdr.vars[FS_UUID]
-	storCdr.CdrHost = fsCdr.vars[FS_IP]
-	storCdr.CdrSource = FS_CDR_SOURCE
-	storCdr.ReqType = utils.FirstNonEmpty(fsCdr.vars[FS_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
-	storCdr.Direction = "*out"
-	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[FS_CSTMID], fsCdr.cgrCfg.DefaultTenant)
-	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[FS_CATEGORY], fsCdr.cgrCfg.DefaultCategory)
-	storCdr.Account = utils.FirstNonEmpty(fsCdr.vars[FS_ACCOUNT], fsCdr.vars[FS_USERNAME])
-	storCdr.Subject = utils.FirstNonEmpty(fsCdr.vars[FS_SUBJECT], fsCdr.vars[FS_USERNAME])
-	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[FS_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
-	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
+func (fsCdr FSCdr) AsStoredCdr(timezone string) *CDR {
+	storCdr := new(CDR)
+	storCdr.CGRID = fsCdr.getCGRID(timezone)
+	storCdr.ToR = utils.VOICE
+	storCdr.OriginID = fsCdr.vars[FS_UUID]
+	storCdr.OriginHost = fsCdr.vars[FS_IP]
+	storCdr.Source = FS_CDR_SOURCE
+	storCdr.RequestType = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_REQTYPE], fsCdr.cgrCfg.DefaultReqType)
+	storCdr.Direction = utils.OUT
+	storCdr.Tenant = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_TENANT], fsCdr.cgrCfg.DefaultTenant)
+	storCdr.Category = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_CATEGORY], fsCdr.cgrCfg.DefaultCategory)
+	storCdr.Account = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_ACCOUNT], fsCdr.vars[FS_USERNAME])
+	storCdr.Subject = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_SUBJECT], fsCdr.vars[utils.CGR_ACCOUNT], fsCdr.vars[FS_USERNAME])
+	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
+	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME], timezone) // Not interested to process errors, should do them if necessary in a previous step
 	pddStr := utils.FirstNonEmpty(fsCdr.vars[FS_PROGRESS_MEDIAMSEC], fsCdr.vars[FS_PROGRESSMS])
-	pddStr = pddStr + "ms"
-	storCdr.Pdd, _ = time.ParseDuration(pddStr)
-	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME])
+	pddStr += "ms"
+	storCdr.PDD, _ = time.ParseDuration(pddStr)
+	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME], timezone)
 	storCdr.Usage, _ = utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
 	storCdr.Supplier = fsCdr.vars[utils.CGR_SUPPLIER]
 	storCdr.DisconnectCause = utils.FirstNonEmpty(fsCdr.vars[utils.CGR_DISCONNECT_CAUSE], fsCdr.vars["hangup_cause"])

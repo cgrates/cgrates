@@ -7,12 +7,23 @@
 // This is what you get when you load CGRateS with an empty configuration file.
 
 
-"rater": {
+"rals": {
 	"enabled": true,						// enable Rater service: <true|false>
-	"cdrstats": "internal",					// address where to reach the cdrstats service, empty to disable stats functionality<""|internal|x.y.z.y:1234>
-	"historys": "internal",					// address where to reach the history service, empty to disable history functionality: <""|internal|x.y.z.y:1234>
-	"pubsubs": "internal",					// address where to reach the pubusb service, empty to disable pubsub functionality: <""|internal|x.y.z.y:1234>
-	"users": "internal",					// address where to reach the user service, empty to disable user profile functionality: <""|internal|x.y.z.y:1234>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
+	"historys_conns": [
+		{"address": "*internal"}
+	],
+	"pubsubs_conns": [
+		{"address": "*internal"}
+	],
+	"users_conns": [
+		{"address": "*internal"}
+	],
+	"aliases_conns": [
+		{"address": "*internal"}
+	],
 },
 
 
@@ -23,8 +34,9 @@
 
 "cdrs": {
 	"enabled": true,						// start the CDR Server service:  <true|false>
-	"rater": "internal",					// address where to reach the Rater for cost calculation: <""|internal|x.y.z.y:1234>
-	"cdrstats": "internal",					// address where to reach the cdrstats service. Empty to disable stats gathering  <""|internal|x.y.z.y:1234>
+	"cdrstats_conns": [
+		{"address": "*internal"}
+	],
 },
 
 
@@ -98,12 +110,10 @@
 
 "sm_freeswitch": {
 	"enabled": true,				// starts SessionManager service: <true|false>
-	"rater": "internal",			// address where to reach the Rater <""|internal|127.0.0.1:2013>
-	"cdrs": "internal",				// address where to reach CDR Server, empty to disable CDR capturing <""|internal|x.y.z.y:1234>
 	"debit_interval": "5s",			// interval to perform debits on.
 	"channel_sync_interval": "10s",
-	"connections":[					// instantiate connections to multiple FreeSWITCH servers
-		{"server": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 15}
+	"event_socket_conns":[					// instantiate connections to multiple FreeSWITCH servers
+		{"address": "127.0.0.1:8021", "password": "ClueCon", "reconnects": 5}
 	],
 },
 
@@ -123,6 +133,10 @@
 	"enabled": true,				// starts User service: <true|false>.
 	"indexes": ["Uuid"],			// user profile field indexes
 },
+
+"aliases": {
+	"enabled": true,
+}
 
 
 }
