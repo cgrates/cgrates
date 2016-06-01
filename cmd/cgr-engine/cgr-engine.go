@@ -508,7 +508,7 @@ func main() {
 		}
 		defer accountDb.Close()
 		engine.SetAccountingStorage(accountDb)
-		if err := engine.CheckVersion(); err != nil {
+		if err := engine.CheckVersion(nil); err != nil {
 			fmt.Println(err.Error())
 			return
 		}

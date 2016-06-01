@@ -77,23 +77,22 @@ func TestMCDRCLoadConfig(t *testing.T) {
 	}
 }
 
+// Remove data in both rating and accounting db
+func TestMCDRCResetDataDb(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if err := engine.InitDataDb(cfg); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestMCDRCEmptyTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if *storDbType != utils.MYSQL {
-		t.Fatal("Unsupported storDbType")
-	}
-	mysql, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
-	if err != nil {
-		t.Fatal("Error on opening database connection: ", err)
-	}
-	if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, utils.CREATE_CDRS_TABLES_SQL)); err != nil {
-		t.Fatal("Error on mysql creation: ", err.Error())
-		return // No point in going further
-	}
-	if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", utils.TBL_CDRS)); err != nil {
-		t.Fatal(err.Error())
+	if err := engine.InitStorDb(cfg); err != nil {
+		t.Fatal(err)
 	}
 }
 
