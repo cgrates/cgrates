@@ -696,13 +696,13 @@ func (ms *MapStorage) RemoveAlias(key string) error {
 	return nil
 }
 
-func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool) ([]*LoadInstance, error) {
+func (ms *MapStorage) GetLoadHistory(limitItems int, skipCache bool) ([]*utils.LoadInstance, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 	return nil, nil
 }
 
-func (ms *MapStorage) AddLoadHistory(*LoadInstance, int) error {
+func (ms *MapStorage) AddLoadHistory(*utils.LoadInstance, int) error {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
 	return nil

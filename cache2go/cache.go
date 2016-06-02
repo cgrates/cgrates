@@ -13,6 +13,16 @@ const (
 	DOUBLE_CACHE = true
 )
 
+var (
+	mux   sync.RWMutex
+	cache cacheStore
+	// transaction stuff
+	transactionBuffer []*transactionItem
+	transactionMux    sync.Mutex
+	transactionON     = false
+	transactionLock   = false
+)
+
 type transactionItem struct {
 	key   string
 	value interface{}
@@ -26,16 +36,6 @@ func init() {
 		cache = newSimpleStore()
 	}
 }
-
-var (
-	mux   sync.RWMutex
-	cache cacheStore
-	// transaction stuff
-	transactionBuffer []*transactionItem
-	transactionMux    sync.Mutex
-	transactionON     = false
-	transactionLock   = false
-)
 
 func BeginTransaction() {
 	transactionMux.Lock()
@@ -72,6 +72,22 @@ func CommitTransaction() {
 	transactionBuffer = nil
 	transactionLock = false
 	transactionMux.Unlock()
+}
+
+func Save(path string, keys []string) error {
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
+	}
+	return cache.Save(path, keys)
+}
+
+func Load(path string, keys []string) error {
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
+	}
+	return cache.Load(path, keys)
 }
 
 // The function to be used to cache a key/value pair when expiration is not needed

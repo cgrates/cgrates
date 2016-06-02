@@ -19,18 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
+
+func init() {
+	gob.Register(map[interface{}]struct{}{})
+	gob.Register(engine.Actions{})
+	gob.RegisterName("github.com/cgrates/cgrates/engine.ActionPlan", &engine.ActionPlan{})
+	gob.Register([]*utils.LoadInstance{})
+	gob.RegisterName("github.com/cgrates/cgrates/engine.RatingPlan", engine.RatingPlan{})
+	gob.RegisterName("github.com/cgrates/cgrates/engine.RatingProfile", engine.RatingProfile{})
+	gob.RegisterName("github.com/cgrates/cgrates/utils.DerivedChargers", utils.DerivedChargers{})
+	gob.Register(engine.AliasValues{})
+}
 
 func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled *bool, exitChan chan bool) {
 	bal := balancer2go.NewBalancer()
@@ -40,7 +53,6 @@ func startBalancer(internalBalancerChan chan *balancer2go.Balancer, stopHandled 
 }
 
 // Starts rater and reports on chan
-
 func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneChan chan struct{}, internalBalancerChan chan *balancer2go.Balancer, internalSchedulerChan chan *scheduler.Scheduler,
 	internalCdrStatSChan chan rpcclient.RpcClientConnection, internalHistorySChan chan rpcclient.RpcClientConnection,
 	internalPubSubSChan chan rpcclient.RpcClientConnection, internalUserSChan chan rpcclient.RpcClientConnection, internalAliaseSChan chan rpcclient.RpcClientConnection,
@@ -54,15 +66,47 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 	waitTasks = append(waitTasks, cacheTaskChan)
 	go func() {
 		defer close(cacheTaskChan)
-		if err := ratingDb.CacheRatingAll(); err != nil {
-			utils.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
-			exitChan <- true
+
+		loadHist, err := accountDb.GetLoadHistory(1, true)
+		if err != nil || len(loadHist) == 0 {
+			utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
+			cacheDoneChan <- struct{}{}
 			return
 		}
-		if err := accountDb.CacheAccountingPrefixes(); err != nil { // Used to cache load history
-			utils.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
-			exitChan <- true
-			return
+
+		start := time.Now()
+		cfi, err := utils.LoadCacheFileInfo("/tmp/cgr_cache")
+		if err != nil || cfi.LoadInfo.LoadId != loadHist[0].LoadId {
+			if err := ratingDb.CacheRatingAll(); err != nil {
+				utils.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
+				exitChan <- true
+				return
+			}
+			/*if err := accountDb.CacheAccountingPrefixes(); err != nil { // Used to cache load history
+				utils.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
+				exitChan <- true
+				return
+			}*/
+
+			utils.Logger.Info(fmt.Sprintf("Cache rating creation time: %v", time.Since(start)))
+
+			start = time.Now()
+			if err := utils.SaveCacheFileInfo("/tmp/cgr_cache", &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]}); err != nil {
+				utils.Logger.Crit("could not write cache info file: " + err.Error())
+				return
+			}
+
+			if err := cache2go.Save("/tmp/cgr_cache", []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
+				utils.Logger.Emerg(fmt.Sprintf("could not save cache file: " + err.Error()))
+			}
+			utils.Logger.Info(fmt.Sprintf("Cache rating save time: %v", time.Since(start)))
+		} else {
+			if err := cache2go.Load("/tmp/cgr_cache", []string{utils.DESTINATION_PREFIX, utils.RATING_PLAN_PREFIX, utils.RATING_PROFILE_PREFIX, utils.LCR_PREFIX, utils.DERIVEDCHARGERS_PREFIX, utils.ACTION_PREFIX, utils.ACTION_PLAN_PREFIX, utils.SHARED_GROUP_PREFIX}); err != nil {
+				utils.Logger.Crit("could not load cache file: " + err.Error())
+				exitChan <- true
+				return
+			}
+			utils.Logger.Info(fmt.Sprintf("Cache rating load time: %v", time.Since(start)))
 		}
 		cacheDoneChan <- struct{}{}
 	}()

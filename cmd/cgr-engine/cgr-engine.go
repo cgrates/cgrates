@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"path/filepath"
 	//	_ "net/http/pprof"
 	"os"
 	"runtime"
@@ -33,6 +34,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -394,10 +396,40 @@ func startPubSubServer(internalPubSubSChan chan rpcclient.RpcClientConnection, a
 func startAliasesServer(internalAliaseSChan chan rpcclient.RpcClientConnection, accountDb engine.AccountingStorage, server *utils.Server, exitChan chan bool) {
 	aliasesServer := engine.NewAliasHandler(accountDb)
 	server.RpcRegisterName("AliasesV1", aliasesServer)
-	if err := accountDb.CacheAccountingPrefixes(utils.ALIASES_PREFIX); err != nil {
-		utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
-		exitChan <- true
+	loadHist, err := accountDb.GetLoadHistory(1, true)
+	if err != nil || len(loadHist) == 0 {
+		utils.Logger.Info(fmt.Sprintf("could not get load history: %v (%v)", loadHist, err))
+		internalAliaseSChan <- aliasesServer
 		return
+	}
+
+	start := time.Now()
+	cfi, err := utils.LoadCacheFileInfo("/tmp/cgr_cache")
+	if err != nil || cfi.LoadInfo.LoadId != loadHist[0].LoadId || !utils.CacheFileExists(filepath.Join("/tmp/cgr_cache", utils.ALIASES_PREFIX+".cache")) {
+		if err := accountDb.CacheAccountingPrefixes(utils.ALIASES_PREFIX); err != nil {
+			utils.Logger.Crit(fmt.Sprintf("<Aliases> Could not start, error: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+		utils.Logger.Info(fmt.Sprintf("Cache accounting creation time: %v", time.Since(start)))
+
+		start = time.Now()
+		if err := utils.SaveCacheFileInfo("/tmp/cgr_cache", &utils.CacheFileInfo{Encoding: utils.GOB, LoadInfo: loadHist[0]}); err != nil {
+			utils.Logger.Crit("could not write cache info file: " + err.Error())
+			return
+		}
+
+		if err := cache2go.Save("/tmp/cgr_cache", []string{utils.ALIASES_PREFIX}); err != nil {
+			utils.Logger.Emerg(fmt.Sprintf("could not save cache file: " + err.Error()))
+		}
+		utils.Logger.Info(fmt.Sprintf("Cache accounting save time: %v", time.Since(start)))
+	} else {
+		if err := cache2go.Load("/tmp/cgr_cache", []string{utils.ALIASES_PREFIX}); err != nil {
+			utils.Logger.Crit("could not load cache file: " + err.Error())
+			exitChan <- true
+			return
+		}
+		utils.Logger.Info(fmt.Sprintf("Cache accounting load time: %v", time.Since(start)))
 	}
 	internalAliaseSChan <- aliasesServer
 }

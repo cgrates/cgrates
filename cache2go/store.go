@@ -2,7 +2,11 @@
 package cache2go
 
 import (
+	"encoding/gob"
+	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -17,6 +21,8 @@ type cacheStore interface {
 	CountEntriesForPrefix(string) int
 	GetAllForPrefix(string) (map[string]interface{}, error)
 	GetKeysForPrefix(string) []string
+	Save(string, []string) error
+	Load(string, []string) error
 }
 
 // easy to be counted exported by prefix
@@ -106,6 +112,69 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 		}
 	}
 	return
+}
+
+func (cs cacheDoubleStore) Save(path string, keys []string) error {
+	// create a the path
+	if err := os.MkdirAll(path, 0766); err != nil {
+		utils.Logger.Err("<cache encoder>:" + err.Error())
+		return err
+	}
+
+	var wg sync.WaitGroup
+	for _, key := range keys {
+		key = key[:PREFIX_LEN]
+		value, found := cs[key]
+		if !found {
+			continue
+		}
+		wg.Add(1)
+		go func(fileName string, data map[string]interface{}) {
+			defer wg.Done()
+			dataFile, err := os.Create(filepath.Join(path, fileName) + ".cache")
+			defer dataFile.Close()
+			if err != nil {
+				utils.Logger.Err("<cache encoder>:" + err.Error())
+			}
+
+			// serialize the data
+			dataEncoder := gob.NewEncoder(dataFile)
+			if err := dataEncoder.Encode(data); err != nil {
+				utils.Logger.Err("<cache encoder>:" + err.Error())
+			}
+		}(key, value)
+	}
+	wg.Wait()
+	return nil
+}
+
+func (cs cacheDoubleStore) Load(path string, keys []string) error {
+	var wg sync.WaitGroup
+	for _, key := range keys {
+		key = key[:PREFIX_LEN] // make sure it's only limited to prefix length'
+		file := filepath.Join(path, key+".cache")
+		wg.Add(1)
+		go func(fileName, key string) {
+			defer wg.Done()
+
+			// open data file
+			dataFile, err := os.Open(fileName)
+			defer dataFile.Close()
+			if err != nil {
+				utils.Logger.Err("<cache decoder>: " + err.Error())
+			}
+
+			val := make(map[string]interface{})
+			dataDecoder := gob.NewDecoder(dataFile)
+			err = dataDecoder.Decode(&val)
+			if err != nil {
+				utils.Logger.Err("<cache decoder>: " + err.Error())
+			}
+			cs[key] = val
+		}(file, key)
+	}
+	wg.Wait()
+	return nil
 }
 
 // faster to access
@@ -231,4 +300,14 @@ func (cs cacheSimpleStore) GetKeysForPrefix(prefix string) (keys []string) {
 		}
 	}
 	return
+}
+
+func (cs cacheSimpleStore) Save(path string, keys []string) error {
+	utils.Logger.Info("simplestore save")
+	return nil
+}
+
+func (cs cacheSimpleStore) Load(path string, keys []string) error {
+	utils.Logger.Info("simplestore load")
+	return nil
 }

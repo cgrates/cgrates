@@ -23,7 +23,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"reflect"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
@@ -92,8 +91,8 @@ type AccountingStorage interface {
 	SetAlias(*Alias) error
 	GetAlias(string, bool) (*Alias, error)
 	RemoveAlias(string) error
-	GetLoadHistory(int, bool) ([]*LoadInstance, error)
-	AddLoadHistory(*LoadInstance, int) error
+	GetLoadHistory(int, bool) ([]*utils.LoadInstance, error)
+	AddLoadHistory(*utils.LoadInstance, int) error
 	GetStructVersion() (*StructVersion, error)
 	SetStructVersion(*StructVersion) error
 }
@@ -251,10 +250,4 @@ func (gm *GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
 
 func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
-}
-
-type LoadInstance struct {
-	LoadId       string    // Unique identifier for the load
-	TariffPlanId string    // Tariff plan identificator for the data loaded
-	LoadTime     time.Time // Time of load
 }

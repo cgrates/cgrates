@@ -110,8 +110,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		DEBIT_RESET:     debitResetAction,
 		DEBIT:           debitAction,
 		RESET_COUNTERS:  resetCountersAction,
-		ENABLE_ACCOUNT:  enableUserAction,
-		DISABLE_ACCOUNT: disableUserAction,
+		ENABLE_ACCOUNT:  enableAccountAction,
+		DISABLE_ACCOUNT: disableAccountAction,
 		//case ENABLE_DISABLE_BALANCE:
 		//	return enableDisableBalanceAction, true
 		CALL_URL:                  callUrl,
@@ -376,19 +376,19 @@ func genericDebit(ub *Account, a *Action, reset bool) (err error) {
 	return ub.debitBalanceAction(a, reset)
 }
 
-func enableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-	if ub == nil {
+func enableAccountAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+	if acc == nil {
 		return errors.New("nil account")
 	}
-	ub.Disabled = false
+	acc.Disabled = false
 	return
 }
 
-func disableUserAction(ub *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
-	if ub == nil {
+func disableAccountAction(acc *Account, sq *StatsQueueTriggered, a *Action, acs Actions) (err error) {
+	if acc == nil {
 		return errors.New("nil account")
 	}
-	ub.Disabled = true
+	acc.Disabled = true
 	return
 }
 

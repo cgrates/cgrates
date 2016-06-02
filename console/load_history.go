@@ -18,10 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
 	c := &CmdGetLoadHistory{
@@ -61,6 +58,6 @@ func (self *CmdGetLoadHistory) PostprocessRpcParams() error {
 }
 
 func (self *CmdGetLoadHistory) RpcResult() interface{} {
-	a := make([]*engine.LoadInstance, 0)
+	a := make([]*utils.LoadInstance, 0)
 	return &a
 }

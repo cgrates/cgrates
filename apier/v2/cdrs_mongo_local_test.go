@@ -272,7 +272,7 @@ func TestV2CdrsMongoLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var loadInst engine.LoadInstance
+	var loadInst utils.LoadInstance
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := cdrsMongoRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)

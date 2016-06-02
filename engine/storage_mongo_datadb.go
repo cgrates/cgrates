@@ -1214,7 +1214,7 @@ func (ms *MongoStorage) RemoveAlias(key string) (err error) {
 }
 
 // Limit will only retrieve the last n items out of history, newest first
-func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*LoadInstance, err error) {
+func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*utils.LoadInstance, err error) {
 	if limit == 0 {
 		return nil, nil
 	}
@@ -1222,7 +1222,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*
 		if x, err := cache2go.Get(utils.LOADINST_KEY); err != nil {
 			return nil, err
 		} else {
-			items := x.([]*LoadInstance)
+			items := x.([]*utils.LoadInstance)
 			if len(items) < limit || limit == -1 {
 				return items, nil
 			}
@@ -1231,7 +1231,7 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*
 	}
 	var kv struct {
 		Key   string
-		Value []*LoadInstance
+		Value []*utils.LoadInstance
 	}
 	session, col := ms.conn(colLht)
 	defer session.Close()
@@ -1245,15 +1245,15 @@ func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool) (loadInsts []*
 }
 
 // Adds a single load instance to load history
-func (ms *MongoStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) error {
+func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int) error {
 	if loadHistSize == 0 { // Load history disabled
 		return nil
 	}
 	// get existing load history
-	var existingLoadHistory []*LoadInstance
+	var existingLoadHistory []*utils.LoadInstance
 	var kv struct {
 		Key   string
-		Value []*LoadInstance
+		Value []*utils.LoadInstance
 	}
 	session, col := ms.conn(colLht)
 	defer session.Close()
@@ -1282,7 +1282,7 @@ func (ms *MongoStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) e
 		defer session.Close()
 		_, err = col.Upsert(bson.M{"key": utils.LOADINST_KEY}, &struct {
 			Key   string
-			Value []*LoadInstance
+			Value []*utils.LoadInstance
 		}{Key: utils.LOADINST_KEY, Value: existingLoadHistory})
 		return nil, err
 	}, 0, utils.LOADINST_KEY)

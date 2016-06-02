@@ -37,7 +37,7 @@ type TpReader struct {
 	cdrStats          map[string]*CdrStats
 	users             map[string]*UserProfile
 	aliases           map[string]*Alias
-	loadInstance      *LoadInstance
+	loadInstance      *utils.LoadInstance
 }
 
 func NewTpReader(rs RatingStorage, as AccountingStorage, lr LoadReader, tpid, timezone string, loadHistSize int) *TpReader {
@@ -1617,9 +1617,9 @@ func (tpr *TpReader) IsValid() bool {
 	return valid
 }
 
-func (tpr *TpReader) GetLoadInstance() *LoadInstance {
+func (tpr *TpReader) GetLoadInstance() *utils.LoadInstance {
 	if tpr.loadInstance == nil {
-		tpr.loadInstance = &LoadInstance{LoadId: utils.GenUUID(), TariffPlanId: tpr.tpid, LoadTime: time.Now()}
+		tpr.loadInstance = &utils.LoadInstance{LoadId: utils.GenUUID(), TariffPlanId: tpr.tpid, LoadTime: time.Now()}
 	}
 	return tpr.loadInstance
 }

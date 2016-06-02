@@ -865,7 +865,7 @@ func (rs *RedisStorage) RemoveAlias(key string) (err error) {
 }
 
 // Limit will only retrieve the last n items out of history, newest first
-func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*LoadInstance, error) {
+func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*utils.LoadInstance, error) {
 	if limit == 0 {
 		return nil, nil
 	}
@@ -873,7 +873,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*LoadInstan
 		if x, err := cache2go.Get(utils.LOADINST_KEY); err != nil {
 			return nil, err
 		} else {
-			items := x.([]*LoadInstance)
+			items := x.([]*utils.LoadInstance)
 			if len(items) < limit || limit == -1 {
 				return items, nil
 			}
@@ -887,9 +887,9 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*LoadInstan
 	if err != nil {
 		return nil, err
 	}
-	loadInsts := make([]*LoadInstance, len(marshaleds))
+	loadInsts := make([]*utils.LoadInstance, len(marshaleds))
 	for idx, marshaled := range marshaleds {
-		var lInst LoadInstance
+		var lInst utils.LoadInstance
 		err = rs.ms.Unmarshal(marshaled, &lInst)
 		if err != nil {
 			return nil, err
@@ -902,7 +902,7 @@ func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool) ([]*LoadInstan
 }
 
 // Adds a single load instance to load history
-func (rs *RedisStorage) AddLoadHistory(ldInst *LoadInstance, loadHistSize int) error {
+func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int) error {
 	conn, err := rs.db.Get()
 	if err != nil {
 		return err

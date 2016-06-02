@@ -127,7 +127,7 @@ func (self *ApierV2) LoadDerivedChargers(attrs AttrLoadDerivedChargers, reply *s
 	return nil
 }
 
-func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *engine.LoadInstance) error {
+func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *utils.LoadInstance) error {
 	if len(attrs.FolderPath) == 0 {
 		return fmt.Errorf("%s:%s", utils.ErrMandatoryIeMissing.Error(), "FolderPath")
 	}
@@ -161,7 +161,7 @@ func (self *ApierV2) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		return utils.NewErrServerError(err)
 	}
 	if attrs.DryRun {
-		*reply = engine.LoadInstance{LoadId: utils.DRYRUN}
+		*reply = utils.LoadInstance{LoadId: utils.DRYRUN}
 		return nil // Mission complete, no errors
 	}
 

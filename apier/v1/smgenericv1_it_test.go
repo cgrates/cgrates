@@ -36,7 +36,7 @@ import (
 var smgV1CfgPath string
 var smgV1Cfg *config.CGRConfig
 var smgV1Rpc *rpc.Client
-var smgV1LoadInst engine.LoadInstance // Share load information between tests
+var smgV1LoadInst utils.LoadInstance // Share load information between tests
 
 func TestSMGV1InitCfg(t *testing.T) {
 	if !*testLocal {

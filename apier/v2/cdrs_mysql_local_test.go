@@ -274,7 +274,7 @@ func TestV2CDRsMySQLLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var loadInst engine.LoadInstance
+	var loadInst utils.LoadInstance
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := cdrsRpc.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
