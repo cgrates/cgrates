@@ -130,7 +130,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 90 {
@@ -160,7 +160,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.USAGE:       "1m",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 8.8
@@ -191,7 +191,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 90 {
@@ -221,7 +221,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.USAGE:       "1m",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 150.0
@@ -259,7 +259,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 90 {
@@ -291,7 +291,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.USAGE:       "1m",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eVoiceVal = 90.0
@@ -334,7 +334,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.USAGE:       "2m",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -360,7 +360,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "1m30s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -386,7 +386,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "2m30s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -412,7 +412,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.USAGE:       "1m",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 7.59
@@ -451,7 +451,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.USAGE:       "2m",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -477,7 +477,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "30s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -503,7 +503,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.LastUsed:    "0s",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 6.590000
@@ -542,7 +542,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.USAGE:       "2m",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -568,7 +568,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "13s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -594,7 +594,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.LastUsed:    "0s",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 5.590000
@@ -633,7 +633,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		utils.USAGE:       "2m",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -667,7 +667,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "30s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {

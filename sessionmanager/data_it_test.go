@@ -109,7 +109,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.USAGE:       "1048576",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -137,7 +137,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "20000",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -165,7 +165,7 @@ func TestSMGDataLastUsedData(t *testing.T) {
 		utils.LastUsed:    "0",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 49999979520.000000 //20480
@@ -204,7 +204,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 		utils.USAGE:       "1048576",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -236,7 +236,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "20000",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -267,7 +267,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "20000",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -298,7 +298,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "20000",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -329,7 +329,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "20000",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -360,7 +360,7 @@ func TestSMGDataLastUsedMultipleData(t *testing.T) {
 		utils.LastUsed:    "0",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 49999897600.000000
@@ -404,7 +404,7 @@ func TestSMGDataDerivedChargingNoCredit(t *testing.T) {
 		utils.USAGE:       "100",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	// the second derived charging run has no credit
@@ -448,7 +448,7 @@ func TestSMGDataTTLExpired(t *testing.T) {
 		utils.USAGE:       "1048576",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -497,7 +497,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 		utils.USAGE:       "1048576",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -530,7 +530,7 @@ func TestSMGDataTTLExpiredMultiUpdates(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "20000",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -585,7 +585,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -617,7 +617,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "0",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -648,7 +648,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "0",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -679,7 +679,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "0",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -710,7 +710,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "0",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -741,7 +741,7 @@ func TestSMGDataMultipleDataNoUsage(t *testing.T) {
 		utils.LastUsed:    "0",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 49997767680.000000 // refunded
@@ -785,7 +785,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -818,7 +818,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "600",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -849,7 +849,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "600",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -880,7 +880,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "600",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -911,7 +911,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 		utils.USAGE:       "1048576",
 		utils.LastUsed:    "600",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 1.048576e+06 {
@@ -942,7 +942,7 @@ func TestSMGDataMultipleDataConstantUsage(t *testing.T) {
 		utils.LastUsed:    "0",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 49997757440.000000 // 10240 (from the start)
