@@ -246,6 +246,7 @@ func (self *SMGeneric) sessionRelocate(sessionID, initialID string) error {
 			return nil, utils.ErrNotFound
 		}
 		for i, s := range ss {
+			s.eventStart[utils.ACCID] = sessionID // Overwrite initialSessionID with new one
 			self.indexSession(sessionID, s)
 			if i == 0 {
 				self.unindexSession(initialID)
@@ -301,7 +302,6 @@ func (self *SMGeneric) InitiateSession(gev SMGenericEvent, clnt *rpc2.Client) (t
 
 // Execute debits for usage/maxUsage
 func (self *SMGeneric) UpdateSession(gev SMGenericEvent, clnt *rpc2.Client) (time.Duration, error) {
-	self.resetTerminatorTimer(gev.GetUUID(), gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	if initialID, err := gev.GetFieldAsString(utils.InitialOriginID); err == nil {
 		err := self.sessionRelocate(gev.GetUUID(), initialID)
 		if err == utils.ErrNotFound { // Session was already relocated, create a new  session with this update
@@ -311,6 +311,7 @@ func (self *SMGeneric) UpdateSession(gev SMGenericEvent, clnt *rpc2.Client) (tim
 			return nilDuration, err
 		}
 	}
+	self.resetTerminatorTimer(gev.GetUUID(), gev.GetSessionTTL(), gev.GetSessionTTLLastUsed(), gev.GetSessionTTLUsage())
 	var lastUsed *time.Duration
 	evLastUsed, err := gev.GetLastUsed(utils.META_DEFAULT)
 	if err != nil && err != utils.ErrNotFound {
