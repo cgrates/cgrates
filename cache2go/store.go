@@ -3,6 +3,7 @@ package cache2go
 
 import (
 	"encoding/gob"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,6 +28,11 @@ type cacheStore interface {
 
 // easy to be counted exported by prefix
 type cacheDoubleStore map[string]map[string]interface{}
+
+type KeyValue struct {
+	Key   string
+	Value interface{}
+}
 
 func newDoubleStore() cacheDoubleStore {
 	return make(cacheDoubleStore)
@@ -117,7 +123,7 @@ func (cs cacheDoubleStore) GetKeysForPrefix(prefix string) (keys []string) {
 func (cs cacheDoubleStore) Save(path string, keys []string) error {
 	// create a the path
 	if err := os.MkdirAll(path, 0766); err != nil {
-		utils.Logger.Err("<cache encoder>:" + err.Error())
+		utils.Logger.Info("<cache encoder>:" + err.Error())
 		return err
 	}
 
@@ -134,13 +140,17 @@ func (cs cacheDoubleStore) Save(path string, keys []string) error {
 			dataFile, err := os.Create(filepath.Join(path, fileName) + ".cache")
 			defer dataFile.Close()
 			if err != nil {
-				utils.Logger.Err("<cache encoder>:" + err.Error())
+				utils.Logger.Info("<cache encoder>:" + err.Error())
 			}
 
 			// serialize the data
 			dataEncoder := gob.NewEncoder(dataFile)
+			log.Print("start: ", fileName)
 			if err := dataEncoder.Encode(data); err != nil {
-				utils.Logger.Err("<cache encoder>:" + err.Error())
+				log.Print("err: ", fileName, err)
+				utils.Logger.Info("<cache encoder>:" + err.Error())
+			} else {
+				log.Print("end: ", fileName, err)
 			}
 		}(key, value)
 	}
@@ -161,14 +171,14 @@ func (cs cacheDoubleStore) Load(path string, keys []string) error {
 			dataFile, err := os.Open(fileName)
 			defer dataFile.Close()
 			if err != nil {
-				utils.Logger.Err("<cache decoder>: " + err.Error())
+				utils.Logger.Info("<cache decoder>: " + err.Error())
 			}
 
 			val := make(map[string]interface{})
 			dataDecoder := gob.NewDecoder(dataFile)
 			err = dataDecoder.Decode(&val)
 			if err != nil {
-				utils.Logger.Err("<cache decoder>: " + err.Error())
+				utils.Logger.Info("<cache decoder>: " + err.Error())
 			}
 			cs[key] = val
 		}(file, key)

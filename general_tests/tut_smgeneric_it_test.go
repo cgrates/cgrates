@@ -34,7 +34,7 @@ import (
 var tutSMGCfgPath string
 var tutSMGCfg *config.CGRConfig
 var tutSMGRpc *rpc.Client
-var smgLoadInst engine.LoadInstance // Share load information between tests
+var smgLoadInst utils.LoadInstance // Share load information between tests
 
 func TestTutSMGInitCfg(t *testing.T) {
 	if !*testLocal {

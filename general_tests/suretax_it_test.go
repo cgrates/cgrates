@@ -42,7 +42,7 @@ var tpDir = flag.String("tp_dir", "", "CGR config dir path here")
 
 var stiCfg *config.CGRConfig
 var stiRpc *rpc.Client
-var stiLoadInst engine.LoadInstance
+var stiLoadInst utils.LoadInstance
 
 func TestSTIInitCfg(t *testing.T) {
 	if !*testSureTax {

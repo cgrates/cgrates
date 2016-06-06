@@ -35,7 +35,7 @@ import (
 var tutLocalCfgPath string
 var tutFsLocalCfg *config.CGRConfig
 var tutLocalRpc *rpc.Client
-var loadInst engine.LoadInstance // Share load information between tests
+var loadInst utils.LoadInstance // Share load information between tests
 
 func TestTutLocalInitCfg(t *testing.T) {
 	if !*testLocal {

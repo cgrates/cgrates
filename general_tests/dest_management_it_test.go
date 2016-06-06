@@ -16,7 +16,7 @@ import (
 var destCfgPath string
 var destCfg *config.CGRConfig
 var destRPC *rpc.Client
-var destLoadInst engine.LoadInstance // Share load information between tests
+var destLoadInst utils.LoadInstance // Share load information between tests
 
 func TestDestManagInitCfg(t *testing.T) {
 	if !*testIntegration {

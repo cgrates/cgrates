@@ -410,7 +410,7 @@ func TestRPCITStatusBcastCmd(t *testing.T) {
 	} else if stats.LastLoadId != utils.NOT_AVAILABLE {
 		t.Errorf("Received unexpected stats: %+v", stats)
 	}
-	var loadInst engine.LoadInstance
+	var loadInst utils.LoadInstance
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "tutorial")}
 	if err := rpcRAL1.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)

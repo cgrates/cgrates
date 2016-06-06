@@ -17,7 +17,7 @@ import (
 var tpCfgPath string
 var tpCfg *config.CGRConfig
 var tpRPC *rpc.Client
-var tpLoadInst engine.LoadInstance // Share load information between tests
+var tpLoadInst utils.LoadInstance // Share load information between tests
 
 func TestTpInitCfg(t *testing.T) {
 	if !*testIntegration {

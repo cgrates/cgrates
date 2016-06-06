@@ -74,7 +74,7 @@ func TestSMGDataTPFromFolder(t *testing.T) {
 		return
 	}
 	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "testtp")}
-	var loadInst engine.LoadInstance
+	var loadInst utils.LoadInstance
 	if err := smgRPC.Call("ApierV2.LoadTariffPlanFromFolder", attrs, &loadInst); err != nil {
 		t.Error(err)
 	}
