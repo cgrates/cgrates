@@ -24,6 +24,7 @@ type GeneralJsonCfg struct {
 	Rounding_decimals    *int
 	Dbdata_encoding      *string
 	Tpexport_dir         *string
+	Httpposter_attempts  *int
 	Http_failed_dir      *string
 	Default_request_type *string
 	Default_category     *string
@@ -31,8 +32,11 @@ type GeneralJsonCfg struct {
 	Default_timezone     *string
 	Connect_attempts     *int
 	Reconnects           *int
+	Connect_timeout      *string
+	Reply_timeout        *string
 	Response_cache_ttl   *string
 	Internal_ttl         *string
+	Locking_timeout      *string
 }
 
 // Listen config section

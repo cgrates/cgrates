@@ -302,21 +302,30 @@ func (ub *Account) getBalancesForPrefix(prefix, category, direction, tor string,
 			continue
 		}
 		b.account = ub
+
 		if len(b.DestinationIDs) > 0 && b.DestinationIDs[utils.ANY] == false {
 			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.Get(utils.DESTINATION_PREFIX + p); err == nil {
 					destIds := x.(map[interface{}]struct{})
 					foundResult := false
-					includeDest := true // wheter it is excluded or included
+					allInclude := true // wheter it is excluded or included
 					for dId, _ := range destIds {
 						inclDest, found := b.DestinationIDs[dId.(string)]
 						if found {
 							foundResult = true
-							includeDest = includeDest && inclDest
+							allInclude = allInclude && inclDest
 						}
 					}
-					if foundResult {
-						if includeDest {
+					// check wheter all destination ids in the balance were exclusions
+					allExclude := true
+					for _, inclDest := range b.DestinationIDs {
+						if inclDest {
+							allExclude = false
+							break
+						}
+					}
+					if foundResult || allExclude {
+						if allInclude {
 							b.precision = len(p)
 							usefulBalances = append(usefulBalances, b)
 						} else {
@@ -841,6 +850,14 @@ func (acc *Account) matchActionFilter(condition string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (acc *Account) GetID() string {
+	split := strings.Split(acc.ID, utils.CONCATENATED_KEY_SEP)
+	if len(split) != 2 {
+		return ""
+	}
+	return split[1]
 }
 
 // used in some api for transition

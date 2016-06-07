@@ -113,7 +113,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		waitTasks = append(waitTasks, cdrstatTaskChan)
 		go func() {
 			defer close(cdrstatTaskChan)
-			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+			cdrStats, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
 				cfg.RALsCDRStatSConns, internalCdrStatSChan, cfg.InternalTtl)
 			if err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to CDRStatS, error: %s", err.Error()))
@@ -127,7 +127,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		waitTasks = append(waitTasks, histTaskChan)
 		go func() {
 			defer close(histTaskChan)
-			if historySConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+			if historySConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
 				cfg.RALsHistorySConns, internalHistorySChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect HistoryS, error: %s", err.Error()))
 				exitChan <- true
@@ -142,7 +142,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		waitTasks = append(waitTasks, pubsubTaskChan)
 		go func() {
 			defer close(pubsubTaskChan)
-			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+			if pubSubSConns, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
 				cfg.RALsPubSubSConns, internalPubSubSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to PubSubS: %s", err.Error()))
 				exitChan <- true
@@ -157,7 +157,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		waitTasks = append(waitTasks, aliasesTaskChan)
 		go func() {
 			defer close(aliasesTaskChan)
-			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+			if aliaseSCons, err := engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
 				cfg.RALsAliasSConns, internalAliaseSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect to AliaseS, error: %s", err.Error()))
 				exitChan <- true
@@ -173,7 +173,7 @@ func startRater(internalRaterChan chan rpcclient.RpcClientConnection, cacheDoneC
 		waitTasks = append(waitTasks, usersTaskChan)
 		go func() {
 			defer close(usersTaskChan)
-			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, utils.GOB,
+			if usersConns, err = engine.NewRPCPool(rpcclient.POOL_FIRST, cfg.ConnectAttempts, cfg.Reconnects, cfg.ConnectTimeout, cfg.ReplyTimeout, utils.GOB,
 				cfg.RALsUserSConns, internalUserSChan, cfg.InternalTtl); err != nil {
 				utils.Logger.Crit(fmt.Sprintf("<RALs> Could not connect UserS, error: %s", err.Error()))
 				exitChan <- true

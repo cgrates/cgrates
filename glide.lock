@@ -1,16 +1,8 @@
-hash: 3140edeb6e77689465bafe5508a04afb78246b5f126488aa6db99f4984c4bbed
-updated: 2016-05-15T20:52:24.065638286+02:00
+hash: 4f75ceccd2b55c66bbd6da3d533b44f543f4eadc5008178449ff15aad5dacf1b
+updated: 2016-05-26T17:58:38.555038328+03:00
 imports:
-- name: camlistore.org
-  version: 86f480aa69fd4ae3e904b61f4ad33b1bc9c92a19
-  subpackages:
-  - pkg/googlestorage
-  - pkg/blob
-  - pkg/constants
 - name: github.com/cenk/hub
   version: b864404b5f990410d56858a1b0a6fac23a85443f
-- name: github.com/cenk/rpc2
-  version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
 - name: github.com/cenkalti/rpc2
   version: 7ab76d2e88c77ca1a715756036d8264b2886acd2
 - name: github.com/cgrates/fsock
@@ -20,27 +12,27 @@ imports:
 - name: github.com/cgrates/osipsdagram
   version: 3d6beed663452471dec3ca194137a30d379d9e8f
 - name: github.com/cgrates/rpcclient
-  version: e307424118247fe71aee908429555bec60c48573
+  version: 1d54b34b6a5531e1124728b489c44ec6a8ac231e
 - name: github.com/ChrisTrenkamp/goxpath
   version: 4aad8d0161aae7d17df4755d2c1e86cd1fcaaab6
   subpackages:
+  - tree
+  - tree/xmltree
   - internal/execxp
   - internal/parser
-  - tree
-  - xtypes
-  - tree/xmltree
+  - tree/xmltree/xmlbuilder
+  - tree/xmltree/xmlele
   - internal/lexer
   - internal/parser/findutil
   - internal/parser/intfns
   - internal/parser/pathexpr
+  - literals/numlit
+  - literals/strlit
   - xconst
   - xfn
   - xsort
-  - tree/xmltree/xmlbuilder
-  - tree/xmltree/xmlele
   - tree/xmltree/xmlnode
-- name: github.com/denisenkom/go-mssqldb
-  version: 2a223b1644106bc7ca456c12cde55a80185813ef
+  - literals/boollit
 - name: github.com/DisposaBoy/JsonConfigReader
   version: 33a99fdf1d5ee1f79b5077e9c06f955ad356d5f4
 - name: github.com/fiorix/go-diameter
@@ -55,19 +47,6 @@ imports:
   - diam/sm/smpeer
 - name: github.com/go-sql-driver/mysql
   version: 7ebe0a500653eeb1859664bed5e48dec1e164e73
-- name: github.com/golang/glog
-  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
-- name: github.com/golang/protobuf
-  version: 7cc19b78d562895b13596ddce7aafb59dd789318
-  subpackages:
-  - proto
-  - proto/testdata
-  - ptypes/any
-  - ptypes/duration
-  - ptypes/empty
-  - ptypes/timestamp
-  - ptypes/wrappers
-  - ptypes/struct
 - name: github.com/gorhill/cronexpr
   version: f0984319b44273e83de132089ae42b1810f4933b
 - name: github.com/jinzhu/gorm
@@ -79,49 +58,28 @@ imports:
 - name: github.com/lib/pq
   version: ee1442bda7bd1b6a84e913bdb421cb1874ec629d
   subpackages:
-  - hstore
   - oid
-- name: github.com/mattn/go-sqlite3
-  version: 38ee283dabf11c9cbdb968eebd79b1fa7acbabe6
 - name: github.com/mediocregopher/radix.v2
   version: 74e50e64194d2d2f4836212451c28b127f9d7fa1
   subpackages:
   - pool
   - redis
+- name: github.com/mitchellh/mapstructure
+  version: d2dd0262208475919e1a362f675cfc0e7c10e905
 - name: github.com/peterh/liner
   version: 0e4af131b90a9786839c8b1b01717be263e8555a
 - name: github.com/ugorji/go
   version: a396ed22fc049df733440d90efe17475e3929ccb
   subpackages:
   - codec
-- name: go4.org
-  version: 03efcb870d84809319ea509714dd6d19a1498483
-  subpackages:
-  - syncutil/singleflight
-  - readerutil
-- name: golang.org/x/crypto
-  version: b6789ab629056511030d652d851e7dc10c9e9c9e
-  subpackages:
-  - ssh/terminal
-  - md4
 - name: golang.org/x/net
   version: ef00b378c73f107bf44d5c9b69875255ce89b79a
   subpackages:
   - websocket
   - context
+  - html/charset
+  - html
   - html/atom
-  - http2/hpack
-  - internal/iana
-  - ipv4
-  - ipv6
-  - webdav/internal/xml
-- name: golang.org/x/oauth2
-  version: e86e2718db89775a4604abc10a5d3a5672e7336e
-  subpackages:
-  - google
-  - internal
-  - jws
-  - jwt
 - name: golang.org/x/sys
   version: 33267e036fd93fcd26ea95b7bdaf2d8306cb743c
   subpackages:
@@ -144,72 +102,6 @@ imports:
   - internal/utf8internal
   - runes
   - internal/tag
-- name: google.golang.org/api
-  version: 4300f6b0c8a7f09e521dd0af2cee27e28846e037
-  subpackages:
-  - compute/v1
-  - storage/v1
-  - gensupport
-  - googleapi
-  - googleapi/internal/uritemplates
-  - bigquery/v2
-  - container/v1
-  - logging/v1beta3
-  - pubsub/v1
-- name: google.golang.org/appengine
-  version: e234e71924d4aa52444bc76f2f831f13fa1eca60
-  subpackages:
-  - urlfetch
-  - internal
-  - internal/urlfetch
-  - internal/app_identity
-  - internal/modules
-  - user
-  - datastore
-  - internal/base
-  - internal/blobstore
-  - internal/capability
-  - log
-  - internal/channel
-  - internal/datastore
-  - taskqueue
-  - internal/image
-  - internal/log
-  - internal/remote_api
-- name: google.golang.org/cloud
-  version: ed0cb07e5fc4f6936e6e9d523568808f93228351
-  subpackages:
-  - compute/metadata
-  - internal
-  - bigtable/internal/cluster_service_proto
-  - bigtable/internal/data_proto
-  - bigtable/internal/service_proto
-  - bigtable/internal/table_data_proto
-  - bigtable/internal/table_service_proto
-  - bigtable/internal/rpc_status_proto
-  - bigtable/internal/cbtrc
-  - datastore/internal/proto
-  - datastore/internal/type_proto
-  - pubsub
-  - storage
-- name: google.golang.org/grpc
-  version: 4c4ed377c72e199edd16a87011f13a56fd519119
-  subpackages:
-  - credentials
-  - credentials/oauth
-  - codes
-  - grpclog
-  - internal
-  - metadata
-  - naming
-  - transport
-  - benchmark/grpc_testing
-  - benchmark/stats
-  - examples/helloworld/helloworld
-  - examples/route_guide/routeguide
-  - health/grpc_health_v1
-  - interop/grpc_testing
-  - stress/grpc_testing
 - name: gopkg.in/fsnotify.v1
   version: 30411dbcefb7a1da7e84f75530ad3abe4011b4f8
 - name: gopkg.in/mgo.v2
@@ -218,6 +110,4 @@ imports:
   - bson
   - internal/sasl
   - internal/scram
-- name: gopkg.in/tomb.v2
-  version: 14b3d72120e8d10ea6e6b7f87f7175734b1faab8
 devImports: []

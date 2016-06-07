@@ -32,7 +32,7 @@ func (self *ApierV1) GetLcr(lcrReq engine.LcrRequest, lcrReply *engine.LcrReply)
 		return err
 	}
 	var lcrQried engine.LCRCost
-	if err := self.Responder.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd, Paginator: lcrReq.Paginator}, &lcrQried); err != nil {
+	if err := self.Responder.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd, LCRFilter: lcrReq.LCRFilter, Paginator: lcrReq.Paginator}, &lcrQried); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if lcrQried.Entry == nil {
@@ -65,7 +65,7 @@ func (self *ApierV1) GetLcrSuppliers(lcrReq engine.LcrRequest, suppliers *string
 		return err
 	}
 	var lcrQried engine.LCRCost
-	if err := self.Responder.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd, Paginator: lcrReq.Paginator}, &lcrQried); err != nil {
+	if err := self.Responder.GetLCR(&engine.AttrGetLcr{CallDescriptor: cd, LCRFilter: lcrReq.LCRFilter, Paginator: lcrReq.Paginator}, &lcrQried); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	if lcrQried.HasErrors() {

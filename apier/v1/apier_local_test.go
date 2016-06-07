@@ -1274,7 +1274,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(time.Duration(2**waitRater) * time.Millisecond)
+	time.Sleep(time.Duration(3**waitRater) * time.Millisecond)
 }
 
 func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
@@ -1297,7 +1297,7 @@ func TestApierResetDataAfterLoadFromFolder(t *testing.T) {
 		if rcvStats.Destinations != 5 ||
 			rcvStats.RatingPlans != 5 ||
 			rcvStats.RatingProfiles != 5 ||
-			rcvStats.Actions != 11 ||
+			rcvStats.Actions != 13 ||
 			rcvStats.DerivedChargers != 3 {
 			t.Errorf("Calling ApierV1.GetCacheStats received: %+v", rcvStats)
 		}

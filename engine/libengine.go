@@ -27,11 +27,11 @@ import (
 	"github.com/cgrates/rpcclient"
 )
 
-func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, codec string,
+func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, connectTimeout, replyTimeout time.Duration, codec string,
 	rpcConnCfgs []*config.HaPoolConfig, internalConnChan chan rpcclient.RpcClientConnection, ttl time.Duration) (*rpcclient.RpcClientPool, error) {
 	var rpcClient *rpcclient.RpcClient
 	var err error
-	rpcPool := rpcclient.NewRpcClientPool(dispatchStrategy)
+	rpcPool := rpcclient.NewRpcClientPool(dispatchStrategy, replyTimeout)
 	atLestOneConnected := false // If one connected we don't longer return errors
 	for _, rpcConnCfg := range rpcConnCfgs {
 		if rpcConnCfg.Address == utils.MetaInternal {
@@ -42,13 +42,10 @@ func NewRPCPool(dispatchStrategy string, connAttempts, reconnects int, codec str
 			case <-time.After(ttl):
 				return nil, errors.New("TTL triggered")
 			}
-			rpcClient, err = rpcclient.NewRpcClient("", "", 0, 0, rpcclient.INTERNAL_RPC, internalConn)
+			rpcClient, err = rpcclient.NewRpcClient("", "", connAttempts, reconnects, connectTimeout, replyTimeout, rpcclient.INTERNAL_RPC, internalConn)
 		} else {
-			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, connAttempts, reconnects, codec, nil)
+			rpcClient, err = rpcclient.NewRpcClient("tcp", rpcConnCfg.Address, connAttempts, reconnects, connectTimeout, replyTimeout, codec, nil)
 		}
-		//if err != nil { // Commented so we pass the last error instead of first
-		//	break
-		//}
 		if err == nil {
 			atLestOneConnected = true
 		}

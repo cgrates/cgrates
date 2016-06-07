@@ -12,3 +12,5 @@ TOPUP_NEG,*topup,,,,*voice,*out,,GERMANY;!GERMANY_MOBILE,*zero1m,,*unlimited,,10
 RPC,*cgr_rpc,"{""Address"": ""localhost:2013"",""Transport"":""*gob"",""Method"":""ApierV2.SetAccount"",""Attempts"":1,""Async"" :false,""Params"":{""Account"":""rpc"",""Tenant"":""cgrates.org""}}",,,,,,,,,,,,,,,
 DID,*debit,,,,*monetary,*out,,*any,,,*unlimited,*any,"{""Method"":""*incremental"",""Params"":{""Units"":1, ""Interval"":""month"",""Increment"":""day""}}",10.0,,,10.0
 DID,*cdrlog,"{""action"":""^DID"",""prev_balance"":""BalanceValue""}",,,*monetary,*out,,*any,,,*unlimited,,,10.0,,,10.0
+RPC_DEST,*cgr_rpc,"{""Address"": ""localhost:2013"",""Transport"":""*gob"",""Method"":""ApierV2.SetDestination"",""Attempts"":1,""Async"" :false,""Params"":{""Id"":""<<.Account.GetID>>"",""Prefixes"":[""1"",""2"",""3""]}}",,,,,,,,,,,,,,,
+RPC_CDRSTATS,*cgr_rpc,"{""Address"": ""localhost:2013"",""Transport"":""*gob"",""Method"":""CDRStatsV1.AddQueue"",""Attempts"":1,""Async"" :false,""Params"":{""Id"":""qtest""}}",,,,,,,,,,,,,,,

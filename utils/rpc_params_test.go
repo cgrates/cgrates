@@ -1,6 +1,9 @@
 package utils
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 type RpcStruct struct{}
 
@@ -32,7 +35,7 @@ func TestRPCObjectPointer(t *testing.T) {
 		t.Errorf("error getting rpcobject: %v (%+v)", rpcParamsMap, x)
 	}
 	a := x.InParam
-	if v, err := FromMapStringInterfaceValue(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, a); err != nil || v.(Attr).Name != "a" || v.(Attr).Surname != "b" || v.(Attr).Age != 10.2 {
+	if v, err := FromMapStringInterfaceValue(map[string]interface{}{"Name": "a", "Surname": "b", "Age": 10.2}, reflect.ValueOf(a)); err != nil || v.(Attr).Name != "a" || v.(Attr).Surname != "b" || v.(Attr).Age != 10.2 {
 		t.Errorf("error converting to struct: %+v (%v)", v, err)
 	}
 	//TODO: make pointer in arguments usable

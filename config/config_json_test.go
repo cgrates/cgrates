@@ -43,6 +43,7 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Rounding_decimals:    utils.IntPointer(5),
 		Dbdata_encoding:      utils.StringPointer("msgpack"),
 		Tpexport_dir:         utils.StringPointer("/var/log/cgrates/tpe"),
+		Httpposter_attempts:  utils.IntPointer(3),
 		Http_failed_dir:      utils.StringPointer("/var/log/cgrates/http_failed"),
 		Default_request_type: utils.StringPointer(utils.META_RATED),
 		Default_category:     utils.StringPointer("call"),
@@ -50,8 +51,11 @@ func TestDfGeneralJsonCfg(t *testing.T) {
 		Default_timezone:     utils.StringPointer("Local"),
 		Connect_attempts:     utils.IntPointer(3),
 		Reconnects:           utils.IntPointer(-1),
+		Connect_timeout:      utils.StringPointer("1s"),
+		Reply_timeout:        utils.StringPointer("2s"),
 		Response_cache_ttl:   utils.StringPointer("0s"),
-		Internal_ttl:         utils.StringPointer("2m")}
+		Internal_ttl:         utils.StringPointer("2m"),
+		Locking_timeout:      utils.StringPointer("5s")}
 	if gCfg, err := dfCgrJsonCfg.GeneralJsonCfg(); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCfg, gCfg) {

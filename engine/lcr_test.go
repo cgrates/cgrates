@@ -204,7 +204,7 @@ func TestLcrGet(t *testing.T) {
 		Account:     "rif",
 		Subject:     "rif",
 	}
-	lcr, err := cd.GetLCR(nil, nil)
+	lcr, err := cd.GetLCR(nil, nil, nil)
 	if err != nil || lcr == nil {
 		t.Errorf("Bad lcr: %+v, %v", lcr, err)
 	}
@@ -222,7 +222,7 @@ func TestLcrGetPrefix(t *testing.T) {
 		Account:     "rif",
 		Subject:     "rifus",
 	}
-	lcr, err := cd.GetLCR(nil, nil)
+	lcr, err := cd.GetLCR(nil, nil, nil)
 	if err != nil || lcr == nil {
 		t.Errorf("Bad lcr: %+v, %v", lcr, err)
 	}

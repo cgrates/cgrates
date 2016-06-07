@@ -35,3 +35,4 @@ import:
   subpackages:
   - bson
 - package: github.com/ChrisTrenkamp/goxpath
+- package: github.com/mitchellh/mapstructure

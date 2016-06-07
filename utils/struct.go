@@ -19,6 +19,7 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -194,6 +195,7 @@ func FromMapStringInterface(m map[string]interface{}, in interface{}) error {
 	return nil
 }
 
+// initial intent was to use it with *cgr_rpc but does not handle slice and structure fields
 func FromMapStringInterfaceValue(m map[string]interface{}, v reflect.Value) (interface{}, error) {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -204,10 +206,15 @@ func FromMapStringInterfaceValue(m map[string]interface{}, v reflect.Value) (int
 			if !field.IsValid() || !field.CanSet() {
 				continue
 			}
-			structFieldType := field.Type()
 			val := reflect.ValueOf(fieldValue)
+			structFieldType := field.Type()
+			if structFieldType.Kind() == reflect.Ptr {
+				field.Set(reflect.New(field.Type().Elem()))
+				field = field.Elem()
+			}
+			structFieldType = field.Type()
 			if structFieldType != val.Type() {
-				return nil, errors.New("Provided value type didn't match obj field type")
+				return nil, fmt.Errorf("provided value type didn't match obj field type: %v vs %v (%v vs %v)", structFieldType, val.Type(), structFieldType.Kind(), val.Type().Kind())
 			}
 			field.Set(val)
 		}

@@ -241,6 +241,45 @@ func TestTpExecuteActionCgrRpc(t *testing.T) {
 	}
 }
 
+func TestTpExecuteActionCgrRpcAcc(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var reply string
+	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
+		Tenant:    "cgrates.org",
+		Account:   "1016",
+		ActionsId: "RPC_DEST",
+	}, &reply); err != nil {
+		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ExecuteAction got reply: %s", reply)
+	}
+	var dests []*engine.Destination
+	attrs := &v2.AttrGetDestinations{DestinationIDs: []string{"1016"}}
+	if err := tpRPC.Call("ApierV2.GetDestinations", attrs, &dests); err != nil {
+		t.Error("Got error on ApierV2.GetDestinations: ", err.Error())
+	}
+}
+
+func TestTpExecuteActionCgrRpcCdrStats(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	var reply string
+	if err := tpRPC.Call("ApierV2.ExecuteAction", utils.AttrExecuteAction{
+		ActionsId: "RPC_CDRSTATS",
+	}, &reply); err != nil {
+		t.Error("Got error on ApierV2.ExecuteAction: ", err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Calling ExecuteAction got reply: %s", reply)
+	}
+	var queue engine.StatsQueue
+	if err := tpRPC.Call("CDRStatsV1.GetQueue", "qtest", &queue); err != nil {
+		t.Error("Got error on CDRStatsV1.GetQueue: ", err.Error())
+	}
+}
+
 func TestTpCreateExecuteActionMatch(t *testing.T) {
 	if !*testIntegration {
 		return

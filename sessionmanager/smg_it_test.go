@@ -130,7 +130,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 90 {
@@ -160,7 +160,7 @@ func TestSMGVoiceMonetaryRefund(t *testing.T) {
 		utils.USAGE:       "1m",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 8.8
@@ -191,7 +191,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 90 {
@@ -221,7 +221,7 @@ func TestSMGVoiceVoiceRefund(t *testing.T) {
 		utils.USAGE:       "1m",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 150.0
@@ -259,7 +259,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.USAGE:       "1m30s",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 90 {
@@ -291,7 +291,7 @@ func TestSMGVoiceMixedRefund(t *testing.T) {
 		utils.USAGE:       "1m",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eVoiceVal = 90.0
@@ -334,7 +334,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.USAGE:       "2m",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -360,7 +360,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "1m30s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -386,7 +386,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "2m30s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -412,7 +412,7 @@ func TestSMGVoiceLastUsed(t *testing.T) {
 		utils.USAGE:       "1m",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 7.59
@@ -451,7 +451,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.USAGE:       "2m",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -477,7 +477,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "30s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -503,7 +503,7 @@ func TestSMGVoiceLastUsedEnd(t *testing.T) {
 		utils.LastUsed:    "0s",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 6.590000
@@ -542,7 +542,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.USAGE:       "2m",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -568,7 +568,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "13s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -594,7 +594,7 @@ func TestSMGVoiceLastUsedNotFixed(t *testing.T) {
 		utils.LastUsed:    "0s",
 	}
 	var rpl string
-	if err = smgRPC.Call("SMGenericV1.SessionEnd", smgEv, &rpl); err != nil || rpl != utils.OK {
+	if err = smgRPC.Call("SMGenericV1.TerminateSession", smgEv, &rpl); err != nil || rpl != utils.OK {
 		t.Error(err)
 	}
 	eAcntVal = 5.590000
@@ -633,7 +633,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		utils.USAGE:       "2m",
 	}
 	var maxUsage float64
-	if err := smgRPC.Call("SMGenericV1.SessionStart", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -667,7 +667,7 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 		utils.USAGE:       "2m",
 		utils.LastUsed:    "30s",
 	}
-	if err := smgRPC.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage); err != nil {
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
 		t.Error(err)
 	}
 	if maxUsage != 120 {
@@ -707,4 +707,120 @@ func TestSMGVoiceSessionTTL(t *testing.T) {
 			t.Errorf("Unexpected CDR Cost received, cdr: %v %+v ", cdrs[0].Cost, cdrs[0])
 		}
 	}
+}
+
+func TestSMGVoiceSessionTTLWithRelocate(t *testing.T) {
+	if !*testIntegration {
+		return
+	}
+	attrSetBalance := utils.AttrSetBalance{Tenant: "cgrates.org", Account: "TestTTLWithRelocate", BalanceType: utils.VOICE, BalanceID: utils.StringPointer("TestTTLWithRelocate"),
+		Value: utils.Float64Pointer(300), RatingSubject: utils.StringPointer("*zero50ms")}
+	var reply string
+	if err := smgRPC.Call("ApierV2.SetBalance", attrSetBalance, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Received: %s", reply)
+	}
+	var acnt *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: attrSetBalance.Tenant, Account: attrSetBalance.Account}
+	eAcntVal := 300.0
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+	smgEv := SMGenericEvent{
+		utils.EVENT_NAME:  "TEST_EVENT_SESSION_TTL_RELOCATE",
+		utils.TOR:         utils.VOICE,
+		utils.ACCID:       "12361",
+		utils.DIRECTION:   utils.OUT,
+		utils.ACCOUNT:     "TestTTLWithRelocate",
+		utils.SUBJECT:     "TestTTLWithRelocate",
+		utils.DESTINATION: "1009",
+		utils.CATEGORY:    "call",
+		utils.TENANT:      "cgrates.org",
+		utils.REQTYPE:     utils.META_PREPAID,
+		utils.SETUP_TIME:  "2016-01-05 18:30:49",
+		utils.ANSWER_TIME: "2016-01-05 18:31:05",
+		utils.USAGE:       "2m",
+	}
+	var maxUsage float64
+	if err := smgRPC.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage); err != nil {
+		t.Error(err)
+	}
+	if maxUsage != 120 {
+		t.Error("Bad max usage: ", maxUsage)
+	}
+	eAcntVal = 180.0
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+	var aSessions []*ActiveSession
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer(smgEv.GetUUID())}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	} else if aSessions[0].Usage != time.Duration(120)*time.Second {
+		t.Errorf("Expecting 2m, received usage: %v", aSessions[0].Usage)
+	}
+	smgEv = SMGenericEvent{
+		utils.EVENT_NAME:      smgEv[utils.EVENT_NAME],
+		utils.TOR:             smgEv[utils.TOR],
+		utils.InitialOriginID: smgEv[utils.ACCID],
+		utils.ACCID:           "12362",
+		utils.DIRECTION:       smgEv[utils.DIRECTION],
+		utils.ACCOUNT:         smgEv[utils.ACCOUNT],
+		utils.SUBJECT:         smgEv[utils.SUBJECT],
+		utils.DESTINATION:     smgEv[utils.DESTINATION],
+		utils.CATEGORY:        smgEv[utils.CATEGORY],
+		utils.TENANT:          smgEv[utils.TENANT],
+		utils.REQTYPE:         smgEv[utils.REQTYPE],
+		utils.USAGE:           "2m",
+		utils.LastUsed:        "30s",
+	}
+	if err := smgRPC.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage); err != nil {
+		t.Error(err)
+	}
+	if maxUsage != 120 {
+		t.Error("Bad max usage: ", maxUsage)
+	}
+	eAcntVal = 150.0
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer(smgEv.GetUUID())}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 1 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	} else if aSessions[0].Usage != time.Duration(150)*time.Second {
+		t.Errorf("Expecting 2m30s, received usage: %v", aSessions[0].Usage)
+	}
+	time.Sleep(100 * time.Millisecond)
+	eAcntVal = 149.95
+	if err := smgRPC.Call("ApierV2.GetAccount", attrs, &acnt); err != nil {
+		t.Error(err)
+	} else if acnt.BalanceMap[utils.VOICE].GetTotalValue() != eAcntVal {
+		t.Errorf("Expecting: %f, received: %f", eAcntVal, acnt.BalanceMap[utils.VOICE].GetTotalValue())
+	}
+	if err := smgRPC.Call("SMGenericV1.ActiveSessions", utils.AttrSMGGetActiveSessions{RunID: utils.StringPointer(utils.META_DEFAULT), OriginID: utils.StringPointer(smgEv.GetUUID())}, &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 0 {
+		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
+	}
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{RunIDs: []string{utils.META_DEFAULT}, DestinationPrefixes: []string{smgEv.GetDestination(utils.META_DEFAULT)}}
+	if err := smgRPC.Call("ApierV2.GetCdrs", req, &cdrs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if len(cdrs) != 1 {
+		t.Error("Unexpected number of CDRs returned: ", len(cdrs))
+	} else {
+		if cdrs[0].Usage != "150.05" {
+			t.Errorf("Unexpected CDR Usage received, cdr: %v %+v ", cdrs[0].Usage, cdrs[0])
+		}
+	}
+
 }
