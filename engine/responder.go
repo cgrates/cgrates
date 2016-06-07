@@ -42,6 +42,7 @@ type SessionRun struct {
 
 type AttrGetLcr struct {
 	*CallDescriptor
+	*LCRFilter
 	*utils.Paginator
 }
 
@@ -542,7 +543,7 @@ func (rs *Responder) GetLCR(attrs *AttrGetLcr, reply *LCRCost) error {
 		rs.getCache().Cache(cacheKey, &CacheItem{Err: err})
 		return err
 	}
-	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.Stats, attrs.Paginator)
+	lcrCost, err := attrs.CallDescriptor.GetLCR(rs.Stats, attrs.LCRFilter, attrs.Paginator)
 	if err != nil {
 		rs.getCache().Cache(cacheKey, &CacheItem{Err: err})
 		return err

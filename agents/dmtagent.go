@@ -130,13 +130,13 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 	} else { // Find out maxUsage over APIs
 		switch ccr.CCRequestType {
 		case 1:
-			err = self.smg.Call("SMGenericV1.SessionStart", smgEv, &maxUsage)
+			err = self.smg.Call("SMGenericV1.InitiateSession", smgEv, &maxUsage)
 		case 2:
-			err = self.smg.Call("SMGenericV1.SessionUpdate", smgEv, &maxUsage)
+			err = self.smg.Call("SMGenericV1.UpdateSession", smgEv, &maxUsage)
 		case 3, 4: // Handle them together since we generate CDR for them
 			var rpl string
 			if ccr.CCRequestType == 3 {
-				err = self.smg.Call("SMGenericV1.SessionEnd", smgEv, &rpl)
+				err = self.smg.Call("SMGenericV1.TerminateSession", smgEv, &rpl)
 			} else if ccr.CCRequestType == 4 {
 				err = self.smg.Call("SMGenericV1.ChargeEvent", smgEv, &maxUsage)
 				if maxUsage == 0 {
@@ -144,7 +144,7 @@ func (self DiameterAgent) processCCR(ccr *CCR, reqProcessor *config.DARequestPro
 				}
 			}
 			if self.cgrCfg.DiameterAgentCfg().CreateCDR {
-				if errCdr := self.smg.Call("SMGenericV1.ProcessCdr", smgEv, &rpl); errCdr != nil {
+				if errCdr := self.smg.Call("SMGenericV1.ProcessCDR", smgEv, &rpl); errCdr != nil {
 					err = errCdr
 				}
 			}

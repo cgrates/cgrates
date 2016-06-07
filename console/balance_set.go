@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +35,7 @@ func init() {
 type CmdSetBalance struct {
 	name      string
 	rpcMethod string
-	rpcParams *v1.AttrSetBalance
+	rpcParams *utils.AttrSetBalance
 	*CommandExecuter
 }
 
@@ -50,7 +49,7 @@ func (self *CmdSetBalance) RpcMethod() string {
 
 func (self *CmdSetBalance) RpcParams(reset bool) interface{} {
 	if reset || self.rpcParams == nil {
-		self.rpcParams = &v1.AttrSetBalance{BalanceType: utils.MONETARY}
+		self.rpcParams = &utils.AttrSetBalance{BalanceType: utils.MONETARY}
 	}
 	return self.rpcParams
 }
